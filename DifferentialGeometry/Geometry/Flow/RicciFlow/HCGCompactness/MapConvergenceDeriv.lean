@@ -269,6 +269,32 @@ theorem MapCInfConvOnCompacts.congr {U : Set E} {Φ Φ' : ℕ → E → F} {Φin
   rw [hval]
   exact hk0 k hk r hr x hx
 
+/-- **Eventual locality of `C^∞`-on-compacts convergence.**  Replacing the
+sequence maps by maps that agree on the open convergence set from some index
+onward preserves the same limit.  This is the tail-stable form needed when a
+finite slot is eventually live or eventually dead. -/
+theorem MapCInfConvOnCompacts.congr_eventually
+    {U : Set E} {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
+    (h : MapCInfConvOnCompacts U Φ Φinf) (hU : IsOpen U)
+    (hΦ : ∀ᶠ k in Filter.atTop, Set.EqOn (Φ' k) (Φ k) U)
+    (hΦinf : Set.EqOn Φ'inf Φinf U) :
+    MapCInfConvOnCompacts U Φ' Φ'inf := by
+  intro K hK hKU p ε hε
+  obtain ⟨k0, hk0⟩ := h K hK hKU p ε hε
+  obtain ⟨N, hN⟩ := eventually_atTop.mp hΦ
+  refine ⟨max k0 N, fun k hk r hr x hx => ?_⟩
+  have hk0k : k0 ≤ k := (Nat.le_max_left k0 N).trans hk
+  have hNk : N ≤ k := (Nat.le_max_right k0 N).trans hk
+  have hxU : x ∈ U := hKU hx
+  have heq : (fun y => Φ' k y - Φ'inf y) =ᶠ[nhds x]
+      (fun y => Φ k y - Φinf y) := by
+    filter_upwards [hU.mem_nhds hxU] with y hy
+    rw [hN k hNk hy, hΦinf hy]
+  have hval : mapDerivNorm r (Φ' k) Φ'inf x = mapDerivNorm r (Φ k) Φinf x := by
+    simp only [mapDerivNorm]
+    rw [(Filter.EventuallyEq.iteratedFDeriv ℝ heq r).eq_of_nhds]
+  rw [hval]
+  exact hk0 k hk0k r hr x hx
+
 end HCGCompactness
 end DifferentialGeometry
-

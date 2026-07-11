@@ -216,6 +216,73 @@ theorem exists_central_geodesic
   · exact intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm q u
   · rw [arcLength_radial (I := I) g hEnorm q u 0 L, hu_unit, Real.sqrt_one]; ring
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Near a fixed point `pt`, the half squared distance to `pt` is
+manifold-differentiable.  The proof uses the fixed normal chart at `pt`, where
+the function agrees locally with the smooth quadratic form
+`v ↦ (1 / 2) * g_pt(v, v)`. -/
+theorem exists_halfSqDist_md
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (pt : M) :
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∃ ρ : ℝ, 0 < ρ ∧ ∀ {q : M},
+      q ∈ (NormalCoordinates.normalChartAt (I := I) g pt).source →
+      Real.sqrt
+          (g.inner pt
+            (NormalCoordinates.normalChartAt (I := I) g pt q)
+            (NormalCoordinates.normalChartAt (I := I) g pt q)) < ρ →
+      MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q := by
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  obtain ⟨ρd, hρd, hdist⟩ := exists_dist_eq_sqrt (I := I) g hEnorm pt
+  obtain ⟨ρe, hρe, hexp⟩ := exists_expMapIntrinsic_normalChart (I := I) g hEnorm pt
+  refine ⟨min ρd ρe, lt_min hρd hρe, ?_⟩
+  intro q hqsrc hsmall
+  let ψ := NormalCoordinates.normalChartAt (I := I) g pt
+  let B : E →L[ℝ] E →L[ℝ] ℝ := g.inner pt
+  have hψ : ContMDiffAt I 𝓘(ℝ, E) 1 ψ q :=
+    ((NormalCoordinates.normalChartAt_contMDiffOn (I := I) g pt) q hqsrc).contMDiffAt
+      ((NormalCoordinates.normalChartAt (I := I) g pt).open_source.mem_nhds hqsrc)
+  have hquad : ContMDiffAt I 𝓘(ℝ, ℝ) 1
+      (fun y : M ↦ (1 / 2 : ℝ) * g.inner pt (ψ y) (ψ y)) q := by
+    have hquadB : ContMDiffAt I 𝓘(ℝ, ℝ) 1
+        (fun y : M ↦ (1 / 2 : ℝ) * B (ψ y) (ψ y)) q :=
+      contMDiffAt_const.mul
+        (((contMDiffAt_const (c := B)).clm_apply hψ).clm_apply hψ)
+    simpa only [B] using hquadB
+  have hrad : ContinuousAt
+      (fun y : M ↦ Real.sqrt (g.inner pt (ψ y) (ψ y))) q :=
+    (continuous_sqrt_gInner_self (I := I) g pt).continuousAt.comp hψ.continuousAt
+  have hsmall_ev : ∀ᶠ y in nhds q,
+      Real.sqrt (g.inner pt (ψ y) (ψ y)) < min ρd ρe :=
+    hrad (isOpen_Iio.mem_nhds hsmall)
+  have hsrc_ev : ∀ᶠ y in nhds q, y ∈ ψ.source :=
+    ψ.open_source.mem_nhds hqsrc
+  have heq : CenterOfMass.halfSqDist pt =ᶠ[nhds q]
+      fun y : M ↦ (1 / 2 : ℝ) * g.inner pt (ψ y) (ψ y) := by
+    filter_upwards [hsrc_ev, hsmall_ev] with y hysrc hysmall
+    have hsd : Real.sqrt (g.inner pt (ψ y) (ψ y)) < ρd :=
+      lt_of_lt_of_le hysmall (min_le_left _ _)
+    have hse : Real.sqrt (g.inner pt (ψ y) (ψ y)) < ρe :=
+      lt_of_lt_of_le hysmall (min_le_right _ _)
+    have hexpy : expMapIntrinsic (I := I) g hEnorm pt
+        (show TangentSpace I pt from ψ y) = y :=
+      hexp hysrc hse
+    have hdisty : dist pt y = Real.sqrt (g.inner pt (ψ y) (ψ y)) := by
+      calc
+        dist pt y = dist pt (expMapIntrinsic (I := I) g hEnorm pt
+            (show TangentSpace I pt from ψ y)) :=
+          congrArg (fun z : M ↦ dist pt z) hexpy.symm
+        _ = Real.sqrt (g.inner pt (ψ y) (ψ y)) := hdist hsd
+    unfold CenterOfMass.halfSqDist
+    rw [dist_comm y pt, hdisty,
+      Real.sq_sqrt (gInner_self_nonneg (I := I) g pt (ψ y))]
+  exact (hquad.congr_of_eventuallyEq heq).mdifferentiableAt one_ne_zero
+
 end Radial
 
 end Riemannian

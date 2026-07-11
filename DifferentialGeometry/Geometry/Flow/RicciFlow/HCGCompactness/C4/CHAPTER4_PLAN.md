@@ -23,14 +23,38 @@ former all-order `cmChartDerivLe` endpoint was deleted: only
 unstated and 0%.  Older occurrences of those two deleted theorem names below
 describe historical planning only; they are not live APIs or proved gates.
 
+**Current B/C producer state (2026-07-10):** the parallel metric-origin and
+transition branches have been joined on one common refinement.  Intrinsic
+finite-hat atoms, support/coverage, normalized weights, and their common
+`C^infty` subsequential limit are packaged by
+`StepCAtomPackage.existsAtomWeightLim` and are checked.  The pinned IFT branch,
+ambient root-extension gluing/agreement (`existsRootExtension` /
+`existsCmExtension`), and the generic conditional center-root producer
+`centerReadout_zero` are also checked.  Its concrete finite-hat instantiation
+still requires the common branch/containment facts and the reverse-chart and
+named-radius smallness needed to instantiate the checked pointwise
+differentiability/agreement producers.
+`exists_diagInvDom_inf` and `exists_readoutDom_inf` now expose one fixed open
+off-diagonal inverse-exp/readout domain carrying all orders simultaneously,
+using the existing Route-A `diagExpInv` branch.  `exists_readoutEBall` extracts
+a positive finite radius for each fixed base, and `centerPairs_lt_le` closes the
+local cage-containment ledger.  The next design gate is sequence-uniform: the
+current `NormalCoordMetricBoundInput.radius` is only pointwise positive, so the
+records do not imply a positive branch-radius infimum compatible with the
+global `SigmaScaleField`.  Dedicated Step-B/B1 machinery is about 63%; the
+`StepB1RawInput` producer and textbook B1 theorem remain 0%.
+
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
 ONLY where the book itself cites an external theorem (`lbl384`, the Rauch comparison
 in `lbl387`, the Hessian comparison `lbl413`) — with one declared exception: the
 "`D` large enough" **scale-choice inputs** (`Item3RadiusInput`, `Item3GpScaleInput`,
 `SigmaScaleField`), which are book-internal choices deferred to the D6 assembly,
-where each must be DISCHARGED from the bundle (`normalBounds` uniform radius +
-choosing `D`); they may not survive into the final endpoint. Everything the book
-proves, we prove. Build via `& .\scripts\lake-locked.ps1 build +<Module>`; no
+where each must be DISCHARGED rather than survive to the endpoint.
+**2026-07-10 correction:** the current `normalBounds` record
+does not encode that uniform radius floor, so this discharge needs a new
+quantitative producer or a redesigned fixed-index diagonal route; it is not yet
+derivable from the bundle. Everything the book proves, we prove. Build via
+`& .\scripts\lake-locked.ps1 build +<Module>`; no
 `sorry`/admissions; `#print axioms`-clean.
 
 Legend: `[x]` done & verified · `[~]` honest-input (book-external) · `[ ]` todo.
@@ -264,14 +288,19 @@ the convergence-spine ruling above (B-loc `exists_cInf_subseq_on` + `isometry_se
 `lbl395` (normal-coord metric bounds) is honest-input (book cites [H6] Cor 4.12); the
 Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candidate for it.
 
-- [ ] B1 `lbl397` approx-iso on a large ball ⟸ A14, S6/A0', B0', F1 · B2 `lbl399` ·
-      B3 `lbl402` · B4 `lbl403` · B5 `lbl404` · B6 `lbl405` (`F_{kℓ,r}` is (ε,p)-pre-approx). ⟸ F1–F6.
+- [ ] B1 `lbl397` approx-iso on a large ball: conditional assemblies
+      `stepB1_of_raw` and `stepB1_of_bounds` are checked; the concrete
+      `StepB1RawInput` producer is 0%, and the textbook B1 theorem is 0%.
+      Remaining B2–B6 production threads the common metric/transition
+      refinement, concrete center-of-mass domain, and all-order quantitative
+      bounds. ⟸ A14, S6/A0', B0', F1–F6.
 
 ## §6 Step C — nonlinear averages (`L2638–end`)
 
 - [~] C1 `lbl429` center of mass — `StepCCenterOfMass.centerOfMass` + `expInv_eqn_local`
-      (conditional on `StrictDistInput`) · [~] C2 `lbl430`(i) at `C¹` — COMPLETE 2026-07-04
-      (**C2' all-`p` upgrade OPEN** — see the 2026-07-05 item below) · [~] C3 `lbl434`
+      (conditional on `StrictDistInput`) · [~] C2 `lbl430` regularity at every finite
+      order — COMPLETE; only the arbitrary-order quantitative derivative bounds remain 0%
+      (see the 2026-07-05 item below) · [~] C3 `lbl434`
       averaging maps — `stepCJoin` (0-sorry, honest scale inputs) · [~] C4 `lbl436`
       average-of-→id-maps →id — the `stepCJoin` endpoint shape (averaged concrete maps
       → id on `hatSourceBall`). ⟸ B6.
@@ -303,18 +332,12 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
       (coercive-tightened, GREEN) + `hatCageImg'` (GREEN, `⊆ ball 0 (σ γ)` under strict `4λ/√c < σ γ`;
       the strict scale kills the open/closed gap) + `hUx_of_sigma` (GREEN) + `SigmaScaleField` (the ONE
       sibling `lbl383` field folding `4λ/√c < σ ∧ σ ≤ expMapC2Radius`, `.expRadiusGp` derives `hR`).
-      **B1 (`lbl397`) SKELETON 2026-07-04, STATEMENT CORRECTED 2026-07-05:**
-      `C4/StepB1ApproxIso.lean` — `stepB1_approxIso` STATEMENT (∃ k₀, ∀ k,ℓ≥k₀,
-      ∃ **partial** diffeo `Phi : PartialDiffeomorph I I Mₖ Mₗ ∞` with
-      `closedBall Oₖ r ⊆ Phi.source`, `Phi Oₖ=Oₗ`, ∧ `Nonempty (BookApproxIsoPartialData`
-      on the ball, onto its image`)`), typechecks, `sorry` body + docstring mapping each
-      obligation to its producer (`centerOfMass_hasStrictFDerivAt`, `stepCJoin`,
-      `comp_cov_le`/`comp_cov_accum`, lbl394 limits).
-      ⚠ The 2026-07-04 skeleton demanded a GLOBAL diffeo `Mₖ≃ₘMₗ` — mathematically wrong
-      (book L1515: `F_{kℓ;r} : B(Oₖ,r) → F(B) ⊆ Mₗ` is ball-onto-image; sequence members
-      need not be diffeomorphic, e.g. sphere/ℝⁿ mixtures satisfy all Thm 3.9 hypotheses).
-      Fixed via the new partial carrier `ApproxIsometryDefs.BookApproxIsoPartialData`
-      (+ `PreApproxIsoDataOn`, K-localized smoothness and pullback pinning).
+      **B1 (`lbl397`) honest boundary, repaired 2026-07-09:** the false P-only
+      `stepB1_approxIso` skeleton was deleted.  `StepB1RawInput` records the raw
+      comparison-map producer data, while `stepB1_of_raw` and
+      `stepB1_of_bounds` are checked conditional assemblies.  The concrete
+      producer and the textbook B1 theorem remain 0%; the partial-diffeomorph
+      carrier and localized approximate-isometry conclusion are settled.
       See `StepCProducers.md` / `StepCSmoothness.md`.
       **C2' (`lbl430` all-order) — REGULARITY HALF DONE 2026-07-05 (parallel session,
       lbl430(ii)):** `centerOfMass_contDiffAt` (`StepCSmoothness.lean:900`) — the center
@@ -330,9 +353,9 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
 **Execution plan: `STEPD_PLAN.md` (2026-07-05, STEPB_PLAN granularity).**  Summary:
 
 - [ ] D1 `lbl406` directed system (`exists_directedApproxSystem` + the partial-data
-      composition brick `partialData_comp`) ⟸ B1 (`stepB1_approxIso`), F6, F2.
-- [ ] D2 `lbl407` limiting metrics on balls (diagonal + `Ψ_j` isometry-in-the-limit)
-      ⟸ **the `lbl404` composition-convergence engine (shared gate with lbl399-`C∞`)**.
+      composition brick `partialData_comp`) ⟸ the explicit `StepB1RawInput` producer, F6, F2.
+- [ ] D2 `lbl407` limiting metrics on balls (diagonal + `Ψ_j` isometry-in-the-limit).
+      The former `lbl404` composition-convergence gate is already checked.
 - [ ] D3 `M_∞` smooth structure + metric transport (`DirectLimitManifold.lean`:
       charted/IsManifold/metrizable + `g∞` with `incl* g∞ = g_{k,∞}`) ⟸ F9–F13 (done).
       **GATE-FREE — start now; largest new infrastructure, riskiest brick = D3d.**
@@ -342,27 +365,40 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
 - [ ] **D6 ASSEMBLY: discharge `MetricCompactnessInputs.metricCompactness`**
       (the CONDITIONAL endpoint — ruling 2026-07-05) from D1–D5, including the
       scale-input discharges (`Item3RadiusInput`/`Item3GpScaleInput`/`SigmaScaleField`
-      from `normalBounds` + choice of `D`).
+      after supplying the missing uniform-radius/quantitative inverse producer,
+      or after proving a complete fixed-index diagonal replacement).
 
 ---
 
-## Critical path (updated 2026-07-05)
+## Critical path (updated 2026-07-10)
 
-**DONE:** Step A (metric core + item 3, modulo declared inputs); F-track F1/F2/F3/F5/F6
-green, F7/F8 done (F8 needs only the honest-input `IsometryDerivBounds`), F4 carries one
-mechanical assembly-`sorry`; `lbl394` (both halves); C1/C3/C4-shape + C2-at-`C¹`;
-the conditional endpoint `MetricCompactnessInputs.metricCompactness` is STATED (sorry =
-the A→D assembly).  **LIVE frontier, three parallel lanes:**
+**DONE:** Step A (metric core + item 3, modulo declared inputs); F-track about 95%
+(F4 closed; F2-book wrapper remains); `lbl394` (both halves);
+C1/C3/C4-shape plus C2 regularity at every finite order; and Step D's D2--D5
+machinery, including the common-limit convergence/completeness package.  The
+conditional endpoint `MetricCompactnessInputs.metricCompactness` is STATED
+(sorry = the A→D assembly).  **LIVE frontier, two lanes followed by one merge:**
 
-1. **B/C lane:** the `lbl404`/lbl399-`C∞` composition-convergence engine (Faà-di-Bruno,
-   `COMPCONV_HANDOFF.md`) → B2–B6 → C2' (all-`p` center-of-mass regularity) → B1 assembly
-   (`stepB1_approxIso`, partial-diffeo shape).
-2. **D3 lane (GATE-FREE, start now):** smooth structure + metric transport on the direct
-   limit (`STEPD_PLAN.md` D3a–D3e) — independent of lane 1.
-3. **After both:** D1→D2 → D4→D5 → **D6 = discharge the conditional endpoint**, including
-   the scale-input discharges.
+1. **B/C lane:** the parallel origin-metric/transition extraction, common
+   refinement, atom/weight package, pinned implicit-center branch, and
+   gluing/agreement are checked; the generic conditional center-root producer
+   and the common all-order `diagExpInv`/readout domain are also checked.  A
+   pointwise finite branch radius and the local cage-containment inequalities
+   are checked as well.  Resolve the sequence-uniform branch-scale design,
+   then continue Route A with concrete branch/configuration containment,
+   instantiate the checked pointwise intrinsic/realized-exp and fixed-target
+   `halfSqDist` differentiability producers, prove the Hessian/Neumann producer,
+   and assemble `StepB1RawInput`.  Finite-order center
+   regularity and the Faà-di-Bruno composition engine are checked;
+   arbitrary-order quantitative bounds remain separate.
+2. **D6 lane:** Step-D machinery is about 97%; `tailAmbientConv`,
+   `tailLimitComplete`, and original-sequence `tailMemberMaps` are checked.  Its
+   current 3/3 stop is a basepoint-insensitive maps/convergence congruence (or
+   equivalent explicit-maps generalization), not a return to D1--D5.
+3. **After both:** assemble the B/C raw producer and D6 convergence package,
+   discharge the scale inputs, and prove the conditional endpoint.
 
-Remaining non-B/C/D todo: F2-book, F4-assembly.  The unconditional `metricCompactness`
+Remaining non-B/C/D todo: F2-book.  The unconditional `metricCompactness`
 stays `sorry` (external citations; out of Chapter 4 scope by the 2026-07-05 ruling).
 
 ### 2026-06-22 — `lbl394` DONE (both halves); B1 scoped (intertwines with C)
@@ -379,15 +415,27 @@ USES Step C's averaging (`lbl434`). So B1 and C are NOT cleanly sequential; the 
 `B1→…→B6 → C` ordering is a labeling artifact. Actual structure:
 `lbl394 (J,J̄ limits, done) → lbl398/lbl399 (local maps F^α_{kℓ,β}=J̄∘J → id) → [C averaging] → lbl397`.
 
-**Precise next brick:** lbl399's `C⁰` core is DONE (`StepBApproxIso.comp_tendsto_id_on`:
-`A_ℓ∘B_k → id` uniformly on compacts). The open frontier is the **`C⁰→C∞` upgrade = a
-Faà-di-Bruno composition-convergence lemma** for `MapCInfConvOnCompacts`: from `A_ℓ→A_∞`,
-`B_k→B_∞` in `C∞`-on-compacts, conclude `A_ℓ∘B_k → A_∞∘B_∞` in `C∞`-on-compacts (push the
-two-parameter uniform-on-compacts convergence through `∇ʳ(A∘B)`'s chain-rule polynomial, moving
-eval point `B_k x` corralled as in the `C⁰` proof). Mathlib has static Faà-di-Bruno, no
-convergence version. This single reusable lemma (belongs in the `MapConvergence` engine,
-Analysis-promotable) unblocks BOTH lbl399-`C∞` AND lbl404. It is the recommended next focused
-brick for the B-track.
+**Precise next brick:** resolve the sequence-uniform branch-scale producer.
+The fixed-phase-ball forward theorem, common domains
+`exists_diagInvDom_inf` / `exists_readoutDom_inf`, pointwise numerical radius
+`exists_readoutEBall`, and local cage-containment bridge
+`centerPairs_lt_le` are checked.  They give `δ_{k,α} > 0`, not
+`inf_{k,α} δ_{k,α} > 0`.  The current `NormalCoordMetricBoundInput` cannot prove
+the latter because only `metricC` is uniform; its `radius` has no uniform floor.
+If the global `SigmaScaleField` route is retained, add the missing uniform
+normal-coordinate radius plus a quantitative `chartedDiagExp`
+derivative-deviation/`ApproximatesLinearOn` producer, and refactor the private
+IFT branch to use explicit source/target sets.  The alternative is a fully
+specified fixed-index local-radius diagonal/eventual construction; finite
+minima at one index alone do not reach `StepB1RawInput`.  Constructing a second
+sigma-box inverse would add a uniqueness proof, and a bare `branchRadius` input
+would only rename the gap.  After this scale step, the next concrete bricks are
+branch and configuration containment, reverse-chart source/smallness for the checked
+`exists_halfSqDist_md` producer, `expDiffeoRadius` smallness for the checked
+`diagInv_eq_normal_lt` producer, and the Hessian/Neumann producer.  Atom/weight
+production and pinned gluing/agreement are no longer frontiers;
+`centerReadout_zero` remains the checked conditional consumer of these missing
+geometric facts rather than an already-instantiated finite-hat equation.
 
 **Off the critical path (reusable analysis, do NOT re-couple to Thm 3.9):** the
 Jacobi/Grönwall nonsingularity tower (`CovariantGronwall`/`ExpNonsingular`/`InnerExpansion`
@@ -409,7 +457,9 @@ Honest-input boundary (total, restructured 2026-07-05 — see
   comparison scale `r₁` — the uncapped form was over-strong/unsatisfiable**).
 - **Construction-stage, DISCHARGED at D6 (may not survive to the endpoint):**
   `Item3RadiusInput` / `Item3GpScaleInput` / `SigmaScaleField` (the "`D` large enough"
-  choices; each follows from `normalBounds`' uniform radius + choosing `D`),
+  choices; the intended uniform radius is **not encoded by the current
+  `normalBounds` record**, so their discharge awaits the quantitative producer
+  above or a proved local-radius redesign),
   `CmHessianInput` / `StrictDistInput` (per-configuration `lbl413`/`lbl416`
   consequences at book scale).
 - **Bundle-v2, gated on the B-loc bridge:** F8 `lbl375`/[H6] §5

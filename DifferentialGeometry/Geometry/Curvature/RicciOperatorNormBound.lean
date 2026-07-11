@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.DimensionThree.RicciControlsRm
 import DifferentialGeometry.Geometry.Curvature.QuadraticFormBound
+import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
+import DifferentialGeometry.Tensor.RSTensor.FiberMetric.Tensor0SMetricContinuity
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -225,5 +227,85 @@ theorem tensor02_quadForm_abs_le_normSq0S
           * Real.sqrt (normSq0S (I := I) g x 2 T)) * g.inner x v v := hRay
     _ = (Module.finrank Real (TangentSpace I x) : Real)
           * Real.sqrt (normSq0S (I := I) g x 2 T) * g.inner x v v := by ring
+
+/-- The squared norm of the canonical lowered Riemann tensor of a fixed smooth
+metric is uniformly bounded on a compact manifold. -/
+theorem exists_rm04_bound [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M) :
+    ∃ K : Real, 0 ≤ K ∧ ∀ x : M,
+      normSq0S (I := I) g x 4 (metricRm04 (I := I) (M := M) g x) ≤ K := by
+  let f : M → Real := fun x =>
+    normSq0S (I := I) g x 4 (metricRm04 (I := I) (M := M) g x)
+  have hf : Continuous f :=
+    Tensor0SBundle.normSq0S_cont (I := I) g (metricRm04 (I := I) (M := M) g)
+  have hcompact : IsCompact (Set.range f) := by
+    rw [← Set.image_univ]
+    exact isCompact_univ.image hf
+  obtain ⟨K, hK⟩ := hcompact.bddAbove
+  refine ⟨max K 0, le_max_right _ _, fun x => ?_⟩
+  exact (hK (Set.mem_range_self x)).trans (le_max_left _ _)
+
+/-- On a compact manifold, the Ricci quadratic form of a fixed smooth metric
+has a global operator bound depending only on the metric. -/
+theorem exists_ricci_bound
+    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)]
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    [BoundarylessManifold I M]
+    (g : SmoothRiemannianMetric I M) :
+    ∃ C : Real, 0 ≤ C ∧ ∀ (x : M) (v : TangentSpace I x),
+      |ricciTensor (I := I) g x v v| ≤ C * g.inner x v v := by
+  classical
+  obtain ⟨K, hK_nonneg, hK⟩ := exists_rm04_bound (I := I) (M := M) g
+  let C : Real := (Module.finrank Real E : Real) ^ 2 * Real.sqrt K
+  have hC_nonneg : 0 ≤ C :=
+    mul_nonneg (sq_nonneg _) (Real.sqrt_nonneg _)
+  refine ⟨C, hC_nonneg, fun x v => ?_⟩
+  obtain ⟨basis, hON⟩ := exists_gOrthonormalBasis (I := I) g x
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+      (identityInvMetric (Idx := Fin (Module.finrank Real (TangentSpace I x)))) := by
+    have h := metricInverseInBasis_of_orthonormal (I := I) g basis hON
+    intro i j
+    simpa [identityInvMetric, diagonalInvMetric] using h i j
+  let D := metricCurvData (I := I) (M := M) g
+  have hLower :
+      Rm04LowersRm13At (I := I) g x
+        (metricRm13 (I := I) (M := M) g x)
+        (metricRm04 (I := I) (M := M) g x) :=
+    rm04LowersRm13At_of_realizes
+      (I := I) g (metricCov (I := I) (M := M) g)
+      (metricRm13 (I := I) (M := M) g)
+      (metricRm04 (I := I) (M := M) g)
+      D.h_rm13 D.h_rm04 x
+  have htrace : ∀ i j,
+      metricRicciAt (I := I) (M := M) g x
+          (vec2 (I := I) (basis i) (basis j)) =
+        ∑ a, metricRm04At (I := I) (M := M) g x
+          (vec4 (I := I) (basis a) (basis i) (basis j) (basis a)) := by
+    intro i j
+    simpa using
+      (ricci_diag_eq_sum_rm04_diag_of_orthonormal
+        (I := I) (M := M) g basis
+        (metricRicci (I := I) (M := M) g)
+        (metricRm13 (I := I) (M := M) g)
+        (metricRm04 (I := I) (M := M) g)
+        D.h_ricci13 hLower hON i j)
+  have hunit : ∀ u : TangentSpace I x, g.inner x u u = 1 →
+      |metricRicciAt (I := I) (M := M) g x (vec2 (I := I) u u)| ≤ C := by
+    intro u hu
+    have hraw := ricci_unitQuad_le_of_trace (I := I) g basis hON hinv
+      (metricRicciAt (I := I) (M := M) g x)
+      (metricRm04At (I := I) (M := M) g x) htrace u hu
+    calc
+      _ ≤ (Module.finrank Real (TangentSpace I x) : Real) ^ 2 *
+          Real.sqrt (normSq0S (I := I) g x 4
+            (metricRm04At (I := I) (M := M) g x)) := hraw
+      _ ≤ (Module.finrank Real (TangentSpace I x) : Real) ^ 2 *
+          Real.sqrt K := by
+        exact mul_le_mul_of_nonneg_left (Real.sqrt_le_sqrt (hK x)) (sq_nonneg _)
+      _ = C := by rfl
+  have hall := tensor02_quadForm_abs_le_of_unit_bound
+    (I := I) g (metricRicciAt (I := I) (M := M) g x) hunit v
+  rw [metricRicciAt_apply_eq_ricciTensor (I := I) g x v v] at hall
+  exact hall
 
 end DifferentialGeometry.Integral.Connection

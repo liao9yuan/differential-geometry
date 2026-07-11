@@ -6,6 +6,11 @@ Quot.sound]`.
 
 ## What landed
 
+- `MapCInfConvOnCompacts.congr_eventually`: the tail-stable locality bridge;
+  eventual equality on an open convergence set preserves full
+  `C^∞`-on-compacts convergence.  This is the canonical analytic producer for
+  finite slots whose live/dead status stabilizes only eventually.
+
 This is the **Gap A producer (1)** the covariant-tower bridge `a ≥ 1` needs (see
 `MetricPreconvDiag.md`, "Gap B remaining"): the analytic derivative-closure of the
 Euclidean `C^∞`-on-compacts convergence notion.

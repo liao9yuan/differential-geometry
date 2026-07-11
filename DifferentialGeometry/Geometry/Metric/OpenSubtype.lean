@@ -196,4 +196,120 @@ theorem SmoothRiemannianMetric.restrictOpen_inner
       { U.instHasGroupoid (contDiffGroupoid ∞ I) with }
     (g.restrictOpen (I := I) U).inner x v w = g.inner (x : M) v w := rfl
 
+omit [IsManifold I ∞ M] [FiniteDimensional Real E] in
+/-- The manifold derivative of the inclusion between two nested open subtypes is the identity on
+the common model tangent fiber. -/
+@[simp] theorem mfderiv_opens_incl {U V : TopologicalSpace.Opens M} (hVU : V ≤ U) (x : V) :
+    mfderiv I I (TopologicalSpace.Opens.inclusion hVU : V → U) x =
+      ContinuousLinearMap.id Real E := by
+  have hinc : MDifferentiableAt I I (TopologicalSpace.Opens.inclusion hVU : V → U) x :=
+    ((contMDiff_inclusion hVU).contMDiffAt).mdifferentiableAt
+      (by decide : (∞ : WithTop ℕ∞) ≠ 0)
+  have hval : MDifferentiableAt I I (Subtype.val : U → M)
+      (TopologicalSpace.Opens.inclusion hVU x) :=
+    ((contMDiff_subtype_val (I := I) (U := U)).contMDiffAt).mdifferentiableAt
+      (by decide : (∞ : WithTop ℕ∞) ≠ 0)
+  have hcomp := mfderiv_comp x hval hinc
+  change mfderiv I I (Subtype.val : V → M) x =
+    (mfderiv I I (Subtype.val : U → M) (TopologicalSpace.Opens.inclusion hVU x)).comp
+      (mfderiv I I (TopologicalSpace.Opens.inclusion hVU : V → U) x) at hcomp
+  rw [mfderiv_subtype_val (I := I) V x,
+    mfderiv_subtype_val (I := I) U (TopologicalSpace.Opens.inclusion hVU x)] at hcomp
+  simpa using hcomp.symm
+
+/-- Restrict a metric on an open subtype `U` to a smaller ambient open subtype `V`, without
+introducing a nested subtype carrier. -/
+noncomputable def SmoothRiemannianMetric.restrictOpenOfSubset
+    {U V : TopologicalSpace.Opens M} (g : SmoothRiemannianMetric I U) (hVU : V ≤ U)
+    [SigmaCompactSpace V] [T2Space V] : SmoothRiemannianMetric I V where
+  inner x := g.inner (TopologicalSpace.Opens.inclusion hVU x)
+  symm x v w := g.symm (TopologicalSpace.Opens.inclusion hVU x) v w
+  pos x v hv := g.pos (TopologicalSpace.Opens.inclusion hVU x) v hv
+  isVonNBounded x := by
+    simpa using g.isVonNBounded (TopologicalSpace.Opens.inclusion hVU x)
+  contMDiff := by
+    let incl : V → U := TopologicalSpace.Opens.inclusion hVU
+    apply cotangentCov_clmSection_smooth_aux
+      (V₂ := fun x : V => TangentSpace I x →L[Real] Real)
+      (φ := fun x : V => g.inner (incl x))
+    intro Y
+    apply cotangentCov_clmSection_smooth_aux
+      (V₂ := fun _ : V => Real)
+      (φ := fun x : V => g.inner (incl x) (Y x))
+    intro W
+    have hinclTan : ContMDiff I.tangent I.tangent ∞ (tangentMap I I incl) :=
+      (contMDiff_inclusion hVU).contMDiff_tangentMap (le_refl _)
+    have hY :
+        ContMDiff I (I.prod 𝓘(Real, E)) ∞
+          (fun x : V => TotalSpace.mk' E (incl x) ((mfderiv I I incl x) (Y x))) := by
+      simpa only [Function.comp_apply, tangentMap] using hinclTan.comp Y.contMDiff
+    have hW :
+        ContMDiff I (I.prod 𝓘(Real, E)) ∞
+          (fun x : V => TotalSpace.mk' E (incl x) ((mfderiv I I incl x) (W x))) := by
+      simpa only [Function.comp_apply, tangentMap] using hinclTan.comp W.contMDiff
+    have hg :
+        ContMDiff I (I.prod 𝓘(Real, E →L[Real] E →L[Real] Real)) ∞
+          (fun x : V => TotalSpace.mk' (E →L[Real] E →L[Real] Real)
+            (E := fun b : U => TangentSpace I b →L[Real] TangentSpace I b →L[Real] Real)
+            (incl x) (g.inner (incl x))) := by
+      exact g.contMDiff.comp (contMDiff_inclusion hVU)
+    have htotal :
+        ContMDiff I (I.prod 𝓘(Real, Real)) ∞
+          (fun x : V => TotalSpace.mk' Real
+            (E := Bundle.Trivial U Real) (incl x)
+            (g.inner (incl x) ((mfderiv I I incl x) (Y x))
+              ((mfderiv I I incl x) (W x)))) :=
+      ContMDiff.clm_bundle_apply₂
+        (E₁ := fun b : U => TangentSpace I b)
+        (E₂ := fun b : U => TangentSpace I b)
+        (E₃ := fun _ : U => Real)
+        (b := incl) (ψ := fun x : V => g.inner (incl x))
+        (v := fun x : V => (mfderiv I I incl x) (Y x))
+        (w := fun x : V => (mfderiv I I incl x) (W x)) hg hY hW
+    have hscalar : ContMDiff I 𝓘(Real, Real) ∞
+        (fun x : V => g.inner (incl x) (Y x) (W x)) := by
+      have hscalar' : ContMDiff I 𝓘(Real, Real) ∞
+          (fun x : V => g.inner (incl x) ((mfderiv I I incl x) (Y x))
+            ((mfderiv I I incl x) (W x))) := by
+        intro x
+        have hat := htotal x
+        rw [contMDiffAt_totalSpace] at hat
+        convert hat.2 using 1
+      simpa [incl] using hscalar'
+    intro x
+    rw [contMDiffAt_section]
+    refine hscalar.contMDiffAt.congr_of_eventuallyEq ?_
+    filter_upwards with y
+    rfl
+
+/-- Evaluation of the flat restriction of an open-subtype metric. -/
+@[simp] theorem SmoothRiemannianMetric.restrictSubset_inner
+    {U V : TopologicalSpace.Opens M} (g : SmoothRiemannianMetric I U) (hVU : V ≤ U)
+    [SigmaCompactSpace V] [T2Space V] (x : V) (v w : TangentSpace I x) :
+    (g.restrictOpenOfSubset (I := I) hVU).inner x v w =
+      g.inner (TopologicalSpace.Opens.inclusion hVU x) v w := rfl
+
+omit [FiniteDimensional Real E] in
+private theorem metric_eq_inner
+    {g g' : SmoothRiemannianMetric I M}
+    (h : ∀ (x : M) (v w : TangentSpace I x), g.inner x v w = g'.inner x v w) :
+    g = g' := by
+  obtain ⟨i₁, s₁, p₁, b₁, c₁⟩ := g
+  obtain ⟨i₂, s₂, p₂, b₂, c₂⟩ := g'
+  have hi : i₁ = i₂ :=
+    funext fun x => ContinuousLinearMap.ext fun v => ContinuousLinearMap.ext fun w => h x v w
+  subst hi
+  rfl
+
+/-- Restricting an ambient metric to `U` and then flatly to `V ≤ U` agrees with direct
+restriction to `V`. -/
+@[simp] theorem SmoothRiemannianMetric.restrictOpen_flat
+    (g : SmoothRiemannianMetric I M) {U V : TopologicalSpace.Opens M} (hVU : V ≤ U)
+    [SigmaCompactSpace U] [T2Space U] [SigmaCompactSpace V] [T2Space V] :
+    (g.restrictOpen (I := I) U).restrictOpenOfSubset (I := I) hVU =
+      g.restrictOpen (I := I) V := by
+  apply metric_eq_inner
+  intro x v w
+  rfl
+
 end DifferentialGeometry

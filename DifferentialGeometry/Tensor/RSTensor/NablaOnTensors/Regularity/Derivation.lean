@@ -941,17 +941,6 @@ theorem nablaRSFun_eval_moving_raw {r s : ℕ}
             (fun x => X x) (Set.range I))
           (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
           Tm (Set.range I) y₀ (βm y₀)) slots := by
-    let eRS := trivializationAt (TensorRSModel r s 𝕜 E)
-      (fun x => TensorRSSpace r s I x) x₀
-    let F₀ : TensorRSSpace r s I x₀ :=
-      nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        r s cov X T x₀
-    let MRS : TensorRSModel r s 𝕜 E :=
-      covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
-        (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
-          (fun x => X x) (Set.range I))
-        (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
-        Tm (Set.range I) y₀
     have hβcenter :
         (trivializationAt (Tensor0SModel r 𝕜 E)
           (fun x => Tensor0SSpace r I x) x₀).symmL 𝕜 x₀ (βm y₀) =
@@ -968,36 +957,40 @@ theorem nablaRSFun_eval_moving_raw {r s : ℕ}
       rw [hcoord]
       exact eβ.symmL_continuousLinearMapAt (R := 𝕜)
         (FiberBundle.mem_baseSet_trivializationAt' x₀) (β x₀)
-    have hcoordEval :
-        ((eRS ⟨x₀, F₀⟩).2 (βm y₀)) slots =
-          F₀ (β x₀) (fun a : Fin s => V a x₀) := by
-      have h := TensorRSSpace.trivializationAt_apply
-        (𝕜 := 𝕜) (I := I) (x₀ := x₀) (x := x₀) r s
-        (FiberBundle.mem_baseSet_trivializationAt' x₀) F₀ (βm y₀) slots
-      rw [hβcenter, hslots_center] at h
-      exact h
+    let F : (p : M) -> TensorRSSpace (𝕜 := 𝕜) (E := E) (H := H)
+        (I := I) (M := M) r s p := fun p =>
+      nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s cov X T p
     have hmodel :
-        (eRS ⟨x₀, F₀⟩).2 = MRS := by
-      unfold F₀ MRS nablaRSFun TensorLieDeriv.mcovariantDeriv_tensorRSFromConnection
+        tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+            r s x₀ F y₀ =
+          covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
+            (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
+              (fun x => X x) (Set.range I))
+            (connectionEndomorphismInChart
+              (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+            Tm (Set.range I) y₀ := by
+      unfold tensorRSModelInChart
+      dsimp only [y₀]
+      rw [extChartAt_to_inv]
+      dsimp only [F]
+      unfold nablaRSFun TensorLieDeriv.mcovariantDeriv_tensorRSFromConnection
         TensorLieDeriv.mcovariantDeriv_tensorRSWithinFromConnection
-        TensorLieDeriv.mcovariantDeriv_tensorRSWithin
-      change (eRS ⟨x₀, eRS.symm x₀
-        (covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
+      rw [TensorLieDeriv.modelAt_mcovRS]
+      simp only [Tm, Set.preimage_univ, Set.univ_inter]
+    calc
+      (nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
+        r s cov X T x₀) (β x₀) (fun a : Fin s => V a x₀) =
+          (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H)
+            (I := I) (M := M) r s x₀ F y₀ (βm y₀)) slots := by
+            rw [tensorRSModelInChart_apply_modelSlots_center,
+              hβcenter, hslots_center]
+      _ = (covariantDeriv_tensorRSModelWithin (𝕜 := 𝕜) (E := E) r s
           (VectorField.mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm
             (fun x => X x) (Set.range I))
-          (connectionEndomorphismInChart (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
-          (tensorRSModelInChart (𝕜 := 𝕜) (E := E) (H := H) (I := I)
-            (M := M) r s x₀ (fun x => T x))
-          ((extChartAt I x₀).symm ⁻¹' Set.univ ∩ Set.range I)
-          (extChartAt I x₀ x₀))⟩).2 = MRS
-      rw [eRS.apply_mk_symm
-        (mem_baseSet_trivializationAt (TensorRSModel r s 𝕜 E)
-          (fun x => TensorRSSpace r s I x) x₀)]
-      simp [MRS, Tm, y₀]
-    calc
-      F₀ (β x₀) (fun a : Fin s => V a x₀)
-          = ((eRS ⟨x₀, F₀⟩).2 (βm y₀)) slots := hcoordEval.symm
-      _ = (MRS (βm y₀)) slots := by rw [hmodel]
+          (connectionEndomorphismInChart
+            (𝕜 := 𝕜) (I := I) cov (fun x => X x) x₀)
+          Tm (Set.range I) y₀ (βm y₀)) slots := by rw [hmodel]
   have hinput :
       (Tm y₀
         (covariantDeriv_tensor0SModelWithin (𝕜 := 𝕜) (E := E) r

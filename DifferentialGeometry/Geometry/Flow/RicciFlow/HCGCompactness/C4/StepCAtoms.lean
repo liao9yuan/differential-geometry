@@ -129,6 +129,41 @@ theorem seqAtom_some (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         (hd.lambda_pos hD (L.rInf (gamma : Nat))) := by
   simp [seqAtom, hc]
 
+/-- Every ordered-net atom is globally smooth when the fixed hat scale stays
+inside the intrinsic normal radius.  A dead slot is the zero function; a live
+slot is the globally smooth quadratic normal bump. -/
+theorem seqAtom_contMDiff (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    (hgp : Item3GpScaleInput (I := I) hd D P L) (gamma : Fin (pb.A r)) :
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    ContMDiff I (modelWithCornersSelf Real Real) ∞
+      (seqAtom hd hD P L pb r k gamma) := by
+  letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+  letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  cases hc : seqCenter hd D P (L.φ k) (gamma : Nat) with
+  | none =>
+      rw [seqAtom_none hd hD P L pb r k gamma hc]
+      exact contMDiff_const
+  | some c =>
+      rw [seqAtom_some hd hD P L pb r k gamma hc]
+      simpa only [stepCAtom] using
+        quadNormal_contMDiff (X.obj (L.φ k)).metric c
+          (stepCBump (L.lamInf (gamma : Nat))
+            (hd.lambda_pos hD (L.rInf (gamma : Nat))))
+          ((stepCBump_out_lt (L.lamInf (gamma : Nat))
+              (hd.lambda_pos hD (L.rInf (gamma : Nat)))).trans
+            (hgp k (gamma : Nat) c hc))
+
 /-- Every sequence atom takes values in `[0, 1]`. -/
 theorem seqAtom_Icc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))

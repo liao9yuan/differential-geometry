@@ -78,3 +78,18 @@ was removed in favor of the direct consumer theorem.
 
 Verification passed.  The endpoint `metricCompactness` `sorry` remains
 unchanged.
+
+## 2026-07-10 uniform branch-radius audit
+
+The bundled `normalBounds` field does not currently entail the uniform radius
+used in older D6 plan prose.  Its constants are uniform, but
+`NormalCoordMetricBoundInput.radius` has only pointwise positivity and may tend
+to zero with the member index.  Consequently `Item3RadiusInput`,
+`Item3GpScaleInput`, and a globally `k`-independent `SigmaScaleField` cannot be
+discharged from the present bundle merely by choosing `D` large.
+
+No endpoint assumption was added.  The honest next choice is either to produce
+a sequence-uniform quantitative normal-coordinate inverse-exp radius from the
+book's bounded-geometry hypotheses, or to redesign the B/C construction around
+fixed-index local radii together with an explicit diagonal/eventual argument.
+The conditional endpoint remains 0% proved.

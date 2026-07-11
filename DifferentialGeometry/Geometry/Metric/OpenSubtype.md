@@ -29,3 +29,18 @@ combining:
   the `SourceDomainMetricData` inner-product fields.
 
 Verification: passed for this file.
+
+## 2026-07-10: flat nested restriction
+
+Added `mfderiv_opens_incl` and
+`SmoothRiemannianMetric.restrictOpenOfSubset` for restricting a metric on an
+open carrier `U` to a smaller ambient open carrier `V ≤ U` without introducing
+the nested subtype `↥(Subtype.val ⁻¹' V)`.  The evaluation theorem
+`restrictSubset_inner` identifies its inner product with the one on `U` at the
+open inclusion.
+
+`restrictOpen_flat` proves that restricting an ambient metric first to `U` and
+then flatly to `V` agrees with direct restriction to `V`.  Focused verification
+and the explicitly named module refresh passed without warnings.  These are the
+metric-level producers for restricting Step D's large-stage limit metrics and
+sequence metrics to the same shrunk tail carriers.

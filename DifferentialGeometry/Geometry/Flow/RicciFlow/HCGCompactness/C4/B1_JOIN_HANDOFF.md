@@ -1,131 +1,142 @@
-# B1 JOIN (C3 producer join → C2 smoothness → lbl397 assembly) — GPT kickoff prompt
+# B1 join — live handoff (2026-07-10)
 
-> **Live correction, 2026-07-09.**  The task list below is historical: `StepCProducers.stepCJoin`,
-> `StepB1ApproxIso.StepB1RawInput` / `stepB1_of_raw`, and the conditional all-order B1 carriers now
-> exist.  Resume from `StepB1Producers.md` and `PROJECT_MAP.md`.  The current producer frontier is
-> constructing `StepB1RawInput` from the concrete finite-hat/POU data and uniform bounds.  The
-> former radial `hderiv` blocker is closed by `mfderiv_exp_radial`, `radialEnorm_normal`, and
-> `normLowerOfSepExp`.
->
-> **Further live correction, 2026-07-09.**  `seqCenter_edist_ge` and
-> `seqChartNorm_ge` now carry the concrete good-covering separation through to
-> the normal-coordinate norm bound.  The next blocker is an interface mismatch:
-> `stepCJoin` takes a bundled arbitrary `SmoothPartitionOfUnity`, whereas the
-> book's basepoint/convergence proofs use the explicit chart weights
-> `normWeights (bumpNum ...)`.  Choose and implement a single bridge between
-> those representations before attempting `StepB1RawInput` assembly.
+Work in `E:\testdifferential-geometry`, branch `short-time-existence`.  Read
+`AGENTS.md`, `important_lesson.md`, `lessons.md`, `PROJECT_MAP.md`, and the
+same-name notes before editing.  Use `scripts/lake-locked.ps1`; claim Lean files,
+prefer focused checks, and do not force-release stale locks.
 
-**Supersedes `STEPC_B1_HANDOFF.md` (its task (A) and most of (B)/(D) landed).
-Paste everything below the line into the new session. Self-contained.**
+## Honest status
 
----
+- Textbook B1 theorem: 0%.
+- Concrete `StepB1RawInput` producer: 0%.
+- Checked conditional assemblies: `stepB1_of_raw`, `stepB1_of_bounds`.
+- Dedicated Step-B1 machinery: about 63%.
+- Chapter 4 machinery: about 67%.
+- Whole HCG compactness machinery: about 47%.
+- Conditional/final compactness endpoints: 0%.
 
-Work in `E:\testdifferential-geometry` (Lean 4 / Mathlib, branch `short-time-existence`).
-All Lake ops go through `scripts/lake-locked.ps1` (`claim` before editing, `check`/`build`,
-`release` after; never call `lake` directly; `status` first — several sessions are active, and
-there may be stale locks from dead pids: confirm the pid is dead before `release -Force`).
-Read `CLAUDE.md` first. NEVER push. Same-name `.md` notes for findings. Report = math conclusion
-+ where stuck, in prose; honest % of the whole project (~20–25%; one lemma is a small fraction).
-Trust `lake build` over `lake env lean` for SUCCESS claims (cached false-greens exist; axiom
-probes are also suppressed under `lake env lean`).
+Do not report a checked wrapper or local green module as completion of B1.
 
-**Read these live notes end-to-end before coding** (they are the ground truth of what exists):
-`…/C4/StepCCenterOfMass.md` (all implementation updates), `…/C4/StepCAveraging.md`,
-`Comparison/HalfSqDistGrad.md`, `…/C4/StepBApproxIso.md`, `…/C4/CHAPTER4_PLAN.md`.
+## What is now checked
 
-## Current state (verified, all 0-sorry — do NOT rebuild)
+- `GoodCoveringSeq.inner_cover`: eventual `3 * lamInf` cover inside the existing
+  `4 * lamInf` hats.
+- `StepCAtoms`: intrinsic quadratic atoms, inner-one and hat-support facts,
+  eventual `WeightDataOn`, canonical zero slot, and basepoint delta weights.
+- `StepCAtomConv`: quadratic readout calculus, live/dead sequence atom limits,
+  normalized-weight `C^infty` convergence, finite live-slot origin-metric
+  extraction, and dead-slot zero overwrite.
+- `StepCAtomJoin.existsLiveJoint`: one strict subsequence carries the live-slot
+  origin metrics and the one-sided transition family, with eventual geometry
+  and a common finite tail.
+- `StepCAtomPackage.existsAtomWeightLim`: genuine dead-slot zero limits, smooth
+  atom and normalized base-killed weight families, and Pi-valued `C^infty`
+  convergence; exact-one is derived from the intrinsic cover.
+- `MapCInfConvOnCompacts.congr_eventually`: tail locality for stabilized slots.
+- `StepCCmDomain`: the actual center on an admissible set, the analytic
+  `cmExt_contDiffOn` interface, the compact pinned-root gluing theorem, subtype
+  center continuity, injectivity-based agreement, and the generic conditional
+  `centerReadout_zero` producer.  The latter has not yet been instantiated on
+  the finite-hat configuration family.
+- `exists_diagInvDom` / `exists_readoutDom`: real finite-order open branch
+  domains with off-diagonal smoothness and pointwise inverse/projection facts.
+- `exists_diagInvDom_inf` / `exists_readoutDom_inf`: one common all-order open
+  branch/readout domain for the existing `diagExpInv`.
+- `exists_readoutEBall`: a finite positive branch radius for each fixed
+  `(M, g, p)`.  `centerPairs_lt_of`, `centerPairs_lt_le`, and `centerPairs_lt`
+  close the local center/point containment ledger, including the cage-facing
+  sufficient bound `R + 2 * r < δ` with `R = 4 * lambda` available later.
+- `exists_halfSqDist_md`: fixed-target local differentiability of
+  `halfSqDist`; `expDiffeoRadius`, `expDiffeo_mem_of_lt`, and
+  `diagInv_eq_normal_lt`: pointwise intrinsic/realized branch identification
+  below a named radius.  Their finite-hat source/smallness hypotheses are not
+  yet instantiated.
 
-- **lbl394** (local metric + transition limits): `StepBLocalMetrics.exists_metricLimit_normalCoord`,
-  `StepBTransition.exists_transitionLimit_normalTransition` (+ `contDiffOn_normalTransition`,
-  `StepBInputs.normalChartAt_contMDiffAt_infty` — the `C∞` chart inverse).
-- **lbl399 at `C∞`**: `StepBApproxIso.comp_cInf_id_on` on the Faà-di-Bruno engine
-  `…/HCGCompactness/MapConvergenceComp.lean` (two-parameter `A_ℓ∘B_k → id` in `C∞` on compacts).
-- **Hopf–Rinow properness**: `Comparison/HopfRinowProper.lean`; `exists_proper_realization` closed.
-- **lbl411 one-summand gradient**: `Comparison/HalfSqDistGradMain.grad_halfSqDist`
-  (`grad(½d(·,pt)²) q = -exp_q⁻¹ pt` under source/smallness/non-self hypotheses; the moving-base
-  inverse-exponential `diagExpInv` chain is done). Supporting: `HalfSqDistGrad.lean`, `HalfSqDistGradVar.lean`.
-- **C1 + wrapper**: `…/C4/StepCInputs.lean` (`StrictDistInput` = the lbl413 Hessian honest input),
-  `…/C4/StepCCenterOfMass.lean` (`CenterInput`, `centerOfMass` def, `.mem/.min/.unique/.dist_le`,
-  `.expInv_eqn` and `.expInv_eqn_local` — the book equation `Σ μᵢ exp_cm⁻¹ qᵢ = 0` with an
-  `∃ ρ` bridge that discharges the gradient hypotheses from source/smallness/differentiability).
-- **Averaging analytic layer**: `…/C4/StepCAveraging.lean` (`centerAverage`, `centerAverageOn`,
-  `activeFill`, the `→id` uniform machinery `unif_tendsto*`/`unif_two_index*`/`unif_two_id_fill`,
-  and the data-packaged `centerAverage.unifTwoIdDataOn`).
-- **POU/cage layer**: `…/C4/StepCAveragePOU.lean` (chart-level `→id` convergence facts
-  `chartSymmIdConv`/`chartPtsConv`, the `hatSourceBall`/`hatSourceCage` compact-source geometry from
-  `InjRadiusDecayInput`, and `NetLimitData` routing `hatPOU_active_data` into `unifTwoIdDataOn`).
+## Next tasks, in order
 
-## The remaining gap to lbl397 (B1), in the notes' own words
+1. Resolve the branch-scale design gate.  The checked radius is pointwise in
+   `(M, g, p)`, while `NormalCoordMetricBoundInput.radius` has no uniform lower
+   bound over `k` and live centers.  If the selected global-sigma route is
+   retained, first produce a uniform normal-coordinate radius floor and a
+   quantitative `chartedDiagExp` derivative-deviation/`ApproximatesLinearOn`
+   theorem, then construct the existing inverse branch from its explicit
+   source/target sets.  Do not add a naked `branchRadius` field to
+   `SigmaScaleField`.
+2. Alternatively, justify a redesigned fixed-index local-radius route with an
+   explicit diagonal/eventual argument strong enough for `StepB1RawInput`;
+   taking finite minima at each fixed index alone is insufficient.
+3. Once one of those scale routes is proved, use `centerPairs_lt_le` to thread
+   finite-hat configuration containment through the branch domain and
+   `centerOfMass.eqnRadius`.  Instantiate the checked fixed-target
+   `exists_halfSqDist_md` producer by proving reverse-chart source/smallness,
+   and put the inverse branch below the checked `expDiffeoRadius` so
+   `diagInv_eq_normal_lt` supplies intrinsic/realized agreement.  Then use
+   `centerReadout_zero` to discharge `hzero`.
+4. Supply the book-scale Hessian/Neumann input, instantiate
+   `existsCmExtension`, upgrade the ambient root with `cmExt_contDiffOn`, and
+   compose it with the verified atom/weight/target limits.
+5. Use the resulting C-track estimates, local diffeomorphism/injectivity, and
+   basepoint delta identity to construct `StepB1RawInput`.
 
-`StepCAveraging.md`: "This is still not the full C3 partition-of-unity construction. The next
-producer layer must combine the finite POU weights with concrete local forward/inverse maps from
-the Step-A/Step-B geometry on the covered source set, prove the pointwise active-map radius facts
-and strict-convexity hypotheses for the filled family there, pass `NetLimitData.hatPOU_active_data`
-directly to `centerAverage.unifTwoIdDataOn`, and prove the active local-map convergence on the
-regions selected by the bundled support bridge."
+## Current mathematical frontier
 
-Plus: **C2 (lbl430, smooth dependence of `cm`)** is not started as a Lean endpoint, and
-**`…/C4/StepB1ApproxIso.lean` (lbl397) does not exist**.
+Pinned-map extraction, compact gluing, subtype continuity, and agreement are
+now implemented and verified.  `centerReadout_zero` is a checked conditional
+producer for the selected center's root equation, but its finite-hat
+instantiation still depends on the named geometric hypotheses above.
 
-## Tasks, in order
+The qualitative all-order inverse/readout issue and the local containment
+ledger are closed by `exists_diagInvDom_inf`, `exists_readoutDom_inf`,
+`exists_readoutEBall`, and `centerPairs_lt_le`.  The precise failure is now
+sequence-uniform: the pointwise radii may tend to zero with `k`.
+`NormalCoordMetricBoundInput.metricC` is uniform, but its `radius` carries only
+`radius_pos`; hence the current records do not imply a positive infimum or
+containment in the target of the qualitative `diagExpIFT`.  Fixed-index finite
+minima are legitimate, but need a new diagonal/eventual construction if they
+are to replace the selected global `SigmaScaleField` route.  A second inverse
+branch would also require an equality proof with the existing `diagExpInv`.
+`halfSqDist` differentiability and
+intrinsic/realized-exp agreement now have checked pointwise producers
+(`exists_halfSqDist_md` and `diagInv_eq_normal_lt`); their concrete finite-hat
+source/smallness hypotheses are still configuration-containment obligations,
+not consequences of bare branch membership.  The book-scale
+Hessian/Neumann producer remains independent and honest;
+`CmHessianBoundInput.toInv` is only a projection from it.
 
-**(1) C3 producer join** (new `…/C4/StepCProducers.lean` or extend `StepCAveragePOU.lean`):
-instantiate the abstract averaging with the CONCRETE local maps. The local maps are the book's
-`F_{kℓ}^α = H̄_ℓ^α ∘ (H̄_k^α)⁻¹` — in this codebase, compositions of `expMapDiffeo`/`normalChartAt`
-across two manifolds of the sequence (the same shape as `StepBInputs.normalTransition`, but
-`M_k → M_ℓ`; check `StepBTransition`/`GoodCovering*` for the existing cross-manifold map producers
-before defining a new one). Obligations, all on the covered source set:
-- the active local maps and the target point land in the chosen small ball (radius facts — from
-  `hatSourceBall`/`hatCage*` + the Step-A cover radii);
-- source/smallness/differentiability for every active summand (what `expInv_eqn_local` and
-  `grad_halfSqDist` consume — differentiability comes from `normalChartAt_contMDiffAt_infty`-side
-  smoothness of `halfSqDist`, already available in the `HalfSqDistGrad*` layer);
-- `StrictDistInput` supplied for the filled finite family (it is the lbl413 honest input — thread
-  it, do not prove it);
-- active local-map `→id` convergence on the selected regions: this is EXACTLY lbl399 =
-  `comp_cInf_id_on` (`C∞`) / the `C⁰` corollaries — wire it in (note `StepCAveraging.lean` does not
-  yet import `MapConvergenceComp`; add the import at the consumer, not by editing the engine).
-Acceptance: a theorem `averaged map → id uniformly (two-index) on the covered compact source`,
-i.e. `NetLimitData.hatPOU_active_data → centerAverage.unifTwoIdDataOn` fully discharged for the
-concrete maps. Targeted build green, axiom-print `[propext, Classical.choice, Quot.sound]`.
+## Forbidden routes
 
-**(2) C2 = lbl430, smooth dependence of `cm`** (extend `Comparison/CenterOfMass.lean` +
-`C4/StepCCenterOfMass.lean`): IFT on the gradient equation `Σ μᵢ exp_q⁻¹ qᵢ = 0`.
-Ingredients: `grad_halfSqDist` (done), the nondegenerate-Hessian input (extend `StrictDistInput`
-with the Hessian-lower-bound field if the IFT needs the quantitative form — still lbl413, still
-honest), and the manifold IFT pattern used in `StepBInputs.normalChartAt_contMDiffAt_infty`
-(pointwise Banach IFT via `(fderiv …).IsInvertible`; that file documents the `TangentSpace` defeq
-trap — read its `.md`). Book: chapter4.tex around `lbl430` (L2709+). Acceptance: `cm` is `C^p` in
-(weights, points) on the relevant domain, stated `U`-relative.
-This brick is the riskiest; if the manifold-IFT plumbing for the implicit function (not inverse
-function) is missing, STOP and report the smallest missing lemma (likely a product-manifold
-implicit-function wrapper) rather than building a broad framework.
+- Do not resurrect the false P-only `stepB1_approxIso` statement.
+- Do not require `CenterInput` on the whole configuration vector space.
+- Do not require `CenterInput` on an ambient open neighborhood of a sparse or
+  delta weight; the nonnegative simplex has boundary there.
+- Do not run metric/transition extraction over dead fallback centers.
+- Do not require live-slot geometry at every index; stabilization only supplies
+  the genuine centres eventually.
+- Do not request reverse transitions or cocycles from the fixed-source Step-C
+  atom join; those belong to the atlas-transition lane.
+- Do not add consumer-side assumptions that merely rename `hsm`, `hinv`, or
+  `hzero` as a polished endpoint.
+- Do not glue roots with a partition of unity; it does not preserve the root
+  equation.  Use the pinned-map injectivity neighborhood.
+- Do not replace the intrinsic atoms by the old fixed-psi `bumpNumConv` route.
+- Do not infer a uniform branch radius from uniform `metricC`; the radius field
+  itself is only pointwise positive.
+- Do not add a consumer-side `branchRadius` assumption that simply renames the
+  missing quantitative geometry/ODE producer.
 
-**(3) lbl397 = B1 assembly** (new `…/C4/StepB1ApproxIso.lean`): `F_{kℓ;r} := centerAverageOn …`
-is a diffeomorphism onto its image and an `(ε,p)`-approximate isometry on `B(O_k,r)` for
-`k,ℓ ≥ k₀(r,ε,p)`. Consumes (1)+(2), the `→id` convergence, `IsApproxIsometryOn`/
-`BookApproxIsometryData` (`ApproxIsometryDefs.lean`), the composition bounds F5/F6
-(`ApproxIsometryCompHigher.comp_cov_le`/`comp_cov_accum`), and lbl394. Follow the book's proof
-(chapter4.tex L1622–1881) literally; state it against the Step-A cover data
-(`GoodCoveringSeq`/`StepAInputs`). Acceptance: the lbl397 statement as one Lean theorem with only
-the documented honest inputs; update `CHAPTER4_PLAN.md` B1 checkbox.
+## Acceptance criteria for the next brick
 
-**(4)** After (3): update the same-name `.md`s + `CHAPTER4_PLAN.md` critical path. The next
-consumer is Step D (D1/D2 gluing on the direct-limit; `DirectLimit.lean` F9–F13 are done).
-
-## Constraints / coordination
-
-- Off-limits (other sessions own or settled): the variation/`HalfSqDistGrad*`/`diagExp*` layer
-  (consume its public theorems only); Ch3 P-track (`RicBound*`, `MetricPreconv*`,
-  `PointedConvergence`, `AllTimes*`, `FlowLimit*`, `SolutionPullback`); settled Step-B files
-  (`StepBInputs`, `StepBLocalMetrics`, `StepBTransition`, `StepBApproxIso`, `MapConvergenceComp` —
-  import, don't edit); the sphere/space-form files (`RoundShape`, `ConstCurvature`,
-  `PullbackNaturality*` — a live parallel session).
-- Honest-input discipline: lbl413 (`StrictDistInput`, extendable with a Hessian field) and the
-  existing Step-A inputs (`InjRadiusDecayInput`, `ExpInverseDerivBoundInput`, `lbl395`) are the
-  ONLY honest inputs. Everything else is proved. No new `sorry`.
-- Naming: ≤20 letters, conclusion-first (`CLAUDE.md` rules); new reusable lemmas go in the lowest
-  suitable layer (general Riemannian → `Comparison/`; HCG-specific → `C4/`).
-- Stop conditions: three genuinely different failed routes on one theorem, a missing-API wall
-  (report the smallest bridge lemma), or a statement that contradicts the book — then report per
-  `CLAUDE.md` (theorem, goal, error, routes tried, suspected obstruction, GPT-consult prompt).
+- Reuse the checked fixed open inverse-exp/readout branch and local containment
+  APIs; do not return to order-dependent neighborhoods.
+- Either construct a genuinely sequence-uniform quantitative branch radius
+  from strengthened producer data, or give a complete fixed-index
+  diagonal/eventual replacement for the global-sigma design.  A pointwise
+  positive radius or a finite minimum at one index does not meet this criterion.
+- Then prove the concrete finite-hat configurations land in that domain and below
+  `centerOfMass.eqnRadius`; prove the reverse fixed-target normal-chart facts
+  needed by `exists_halfSqDist_md` and the `expDiffeoRadius` smallness needed by
+  `diagInv_eq_normal_lt`, so `centerReadout_zero` discharges the root equation
+  without a renamed consumer assumption.
+- Keep the independent Hessian/Neumann producer visible if it is not discharged
+  in the same brick, and update the same-name note plus `PROJECT_MAP.md` with
+  theorem completion separated from machinery progress.

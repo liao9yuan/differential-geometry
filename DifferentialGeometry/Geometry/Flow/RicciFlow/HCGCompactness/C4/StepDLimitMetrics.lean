@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDDirec
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepDLimit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ComponentConvAssembly
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricDerivNormFlat
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconvWindowAll
 import DifferentialGeometry.Geometry.Topology.DirectLimitManifold
 import DifferentialGeometry.Geometry.Topology.SigmaCompactOpen
@@ -56,6 +57,152 @@ omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
 theorem tailBall_nonempty (b : ∀ j, M j) (j₀ n : ℕ) :
     Nonempty (tailBallOpen b j₀ n) :=
   ⟨⟨b (j₀ + n), Metric.mem_ball_self (by positivity)⟩⟩
+
+omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
+/-- The shrunk radius-`2^n` tail stage is contained in the large radius-`2^(j₀+n)` stage used
+to construct the stage-limit metric. -/
+theorem tailBall_le_large (b : ∀ j, M j) (j₀ n : ℕ) :
+    tailBallOpen b j₀ n ≤ ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) := by
+  intro x hx
+  change x ∈ Metric.ball (b (j₀ + n)) ((2 : ℝ) ^ n) at hx
+  change x ∈ Metric.ball (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))
+  rw [Metric.mem_ball] at hx ⊢
+  exact hx.trans_le (pow_le_pow_right₀ (by norm_num : (1 : ℝ) ≤ 2) (by omega))
+
+/-- Restrict a large-stage limit metric to the flat shrunk tail stage. -/
+noncomputable def tailMetric
+    (b : ∀ j, M j) (j₀ : ℕ)
+    (gInf : ∀ n, SmoothRiemannianMetric I
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)))
+    (n : ℕ) : SmoothRiemannianMetric I (tailBallOpen b j₀ n) := by
+  letI : SigmaCompactSpace (tailBallOpen b j₀ n) :=
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+  exact (gInf n).restrictOpenOfSubset (I := I) (tailBall_le_large b j₀ n)
+
+/-- Radius of the compact inner core used to measure escape from the `n`th tail stage. -/
+def coreRadius (n : ℕ) : ℝ := (2 : ℝ) ^ n / 2
+
+/-- The ambient center, regarded as a point of the shrunk tail stage. -/
+def tailCenter (b : ∀ j, M j) (j₀ n : ℕ) : tailBallOpen b j₀ n :=
+  ⟨b (j₀ + n), Metric.mem_ball_self (by positivity)⟩
+
+/-- The compact closed half-ball inside a shrunk tail stage. -/
+def tailCore (b : ∀ j, M j) (j₀ n : ℕ) : Set (tailBallOpen b j₀ n) :=
+  {x | dist (b (j₀ + n)) (x : M (j₀ + n)) ≤ coreRadius n}
+
+/-- Image of the compact inner core in a smooth direct limit. -/
+def limitCore (b : ∀ j, M j) (j₀ : ℕ)
+    [∀ n, Nonempty (tailBallOpen b j₀ n)]
+    (S : SmoothSeqSystem I (fun n => tailBallOpen b j₀ n)) (n : ℕ) :
+    Set S.toSeqSystem.Lim :=
+  S.toSeqSystem.incl n '' tailCore b j₀ n
+
+omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
+/-- The ambient closed half-ball lies in the open shrunk tail stage. -/
+theorem core_subset_tail (b : ∀ j, M j) (j₀ n : ℕ) :
+    Metric.closedBall (b (j₀ + n)) (coreRadius n) ⊆
+      (tailBallOpen b j₀ n : Set (M (j₀ + n))) := by
+  intro x hx
+  change dist x (b (j₀ + n)) < (2 : ℝ) ^ n
+  have hpow : (0 : ℝ) < (2 : ℝ) ^ n := by positivity
+  have hx' : dist x (b (j₀ + n)) ≤ coreRadius n := by
+    simpa only [Metric.mem_closedBall, dist_comm] using hx
+  dsimp only [coreRadius] at hx'
+  nlinarith
+
+omit [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
+/-- Compactness of the inner tail core comes from ambient properness, not properness of the open
+stage metric. -/
+theorem tailCore_compact (b : ∀ j, M j) (j₀ n : ℕ)
+    [ProperSpace (M (j₀ + n))] : IsCompact (tailCore b j₀ n) := by
+  rw [Subtype.isCompact_iff]
+  have hval : Subtype.val '' tailCore b j₀ n =
+      Metric.closedBall (b (j₀ + n)) (coreRadius n) := by
+    ext y
+    constructor
+    · rintro ⟨x, hx, rfl⟩
+      simpa only [tailCore, Set.mem_setOf_eq, Metric.mem_closedBall, dist_comm] using hx
+    · intro hy
+      refine ⟨⟨y, core_subset_tail b j₀ n hy⟩, ?_, rfl⟩
+      simpa only [tailCore, Set.mem_setOf_eq, Metric.mem_closedBall, dist_comm] using hy
+  rw [hval]
+  exact isCompact_closedBall _ _
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E]
+  [∀ j, SigmaCompactSpace (M j)] in
+/-- The image of an inner core is closed in the Hausdorff smooth direct limit. -/
+theorem limitCore_closed (b : ∀ j, M j) (j₀ n : ℕ)
+    [ProperSpace (M (j₀ + n))]
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m)) :
+    IsClosed (limitCore b j₀ S n) := by
+  exact ((tailCore_compact b j₀ n).image
+    (S.toSeqSystem.continuous_incl n)).isClosed
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E]
+  [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
+/-- A stage point strictly inside the half-radius core maps to an interior point of its limit
+image. -/
+theorem incl_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
+    {x : tailBallOpen b j₀ n}
+    (hx : dist (b (j₀ + n)) (x : M (j₀ + n)) < coreRadius n) :
+    S.toSeqSystem.incl n x ∈ interior (limitCore b j₀ S n) := by
+  let W : Set (tailBallOpen b j₀ n) :=
+    (Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ⁻¹'
+      Metric.ball (b (j₀ + n)) (coreRadius n)
+  have hWopen : IsOpen W := Metric.isOpen_ball.preimage continuous_subtype_val
+  have hxW : x ∈ W := by
+    simpa only [W, Set.mem_preimage, Metric.mem_ball, dist_comm] using hx
+  have hWsub : S.toSeqSystem.incl n '' W ⊆ limitCore b j₀ S n := by
+    rintro _ ⟨y, hy, rfl⟩
+    refine ⟨y, ?_, rfl⟩
+    have hy' : dist (b (j₀ + n)) (y : M (j₀ + n)) < coreRadius n := by
+      simpa only [W, Set.mem_preimage, Metric.mem_ball, dist_comm] using hy
+    exact hy'.le
+  apply mem_interior_iff_mem_nhds.mpr
+  exact Filter.mem_of_superset
+    ((S.toSeqSystem.incl_isOpenMap n) W hWopen |>.mem_nhds
+      (Set.mem_image_of_mem _ hxW)) hWsub
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E]
+  [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)] in
+/-- The image of the ambient center lies in the interior of every compact half-radius core. -/
+theorem center_mem_coreInt (b : ∀ j, M j) (j₀ n : ℕ)
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m)) :
+    S.toSeqSystem.incl n (tailCenter b j₀ n) ∈ interior (limitCore b j₀ S n) := by
+  apply incl_mem_coreInt b j₀ n S
+  simp only [tailCenter, dist_self, coreRadius]
+  positivity
+
+omit [FiniteDimensional ℝ E] [CompleteSpace E]
+  [∀ j, SigmaCompactSpace (M j)] in
+/-- Every frontier point of a compact half-radius core has an ambient representative at exactly
+the core radius. -/
+theorem frontier_core_radius (b : ∀ j, M j) (j₀ n : ℕ)
+    [ProperSpace (M (j₀ + n))]
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
+    {q : S.toSeqSystem.Lim} (hq : q ∈ frontier (limitCore b j₀ S n)) :
+    ∃ x : tailBallOpen b j₀ n,
+      S.toSeqSystem.incl n x = q ∧
+        dist (b (j₀ + n)) (x : M (j₀ + n)) = coreRadius n := by
+  have hclosed := limitCore_closed b j₀ n S
+  have hqK : q ∈ limitCore b j₀ S n := by
+    rw [← hclosed.closure_eq]
+    exact frontier_subset_closure hq
+  have hnotInt : q ∉ interior (limitCore b j₀ S n) :=
+    (mem_frontier_iff_notMem_interior hqK).mp hq
+  obtain ⟨x, hx, hxeq⟩ := hqK
+  refine ⟨x, hxeq, le_antisymm hx ?_⟩
+  by_contra hnot
+  have hlt : dist (b (j₀ + n)) (x : M (j₀ + n)) < coreRadius n :=
+    lt_of_not_ge hnot
+  have hint := incl_mem_coreInt b j₀ n S hlt
+  exact hnotInt (hxeq ▸ hint)
 
 /-- Restrict the adjacent partial comparison map to two prescribed open-ball stages. -/
 def ballStep
@@ -455,6 +602,43 @@ variable [∀ j, IsManifold I ((∞ : WithTop ℕ∞) + 1) (M j)]
 variable [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
 variable [∀ j, IsRiemannianManifold I (M j)]
 variable [NeZero (Module.finrank ℝ E)]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+set_option linter.unusedSectionVars false in
+include I in
+/-- A positive-radius tail ball is preconnected for the ambient Riemannian distance. -/
+theorem tailBall_preconn (b : ∀ j, M j) (j₀ n : ℕ) :
+    PreconnectedSpace (tailBallOpen b j₀ n) := by
+  have hR : 0 < (2 : ℝ) ^ n := by positivity
+  have hpath : IsPathConnected
+      (Metric.ball (b (j₀ + n)) ((2 : ℝ) ^ n) : Set (M (j₀ + n))) := by
+    refine ⟨b (j₀ + n), Metric.mem_ball_self hR, ?_⟩
+    intro y hy
+    have hy' : Manifold.riemannianEDist I (b (j₀ + n)) y <
+        ENNReal.ofReal ((2 : ℝ) ^ n) := by
+      rw [← IsRiemannianManifold.out (I := I) (b (j₀ + n)) y, edist_dist,
+        ENNReal.ofReal_lt_ofReal_iff hR]
+      simpa only [Metric.mem_ball, dist_comm] using hy
+    obtain ⟨γ, hγ0, hγ1, hγC, hγlen⟩ :=
+      Manifold.exists_lt_of_riemannianEDist_lt hy'
+    refine JoinedIn.ofLine hγC.continuousOn hγ0 hγ1 ?_
+    rintro _ ⟨t, ht, rfl⟩
+    rw [Metric.mem_ball, ← ENNReal.ofReal_lt_ofReal_iff hR, ← edist_dist,
+      edist_comm, IsRiemannianManifold.out (I := I) (b (j₀ + n)) (γ t)]
+    calc
+      Manifold.riemannianEDist I (b (j₀ + n)) (γ t) ≤
+          Manifold.pathELength I γ 0 t := by
+        exact Manifold.riemannianEDist_le_pathELength
+          (hγC.mono (Set.Icc_subset_Icc le_rfl ht.2)) hγ0 rfl ht.1
+      _ ≤ Manifold.pathELength I γ 0 1 :=
+        Manifold.pathELength_mono le_rfl ht.2
+      _ < ENNReal.ofReal ((2 : ℝ) ^ n) := hγlen
+  letI : PathConnectedSpace (tailBallOpen b j₀ n) := by
+    exact (isPathConnected_iff_pathConnectedSpace
+      (F := (tailBallOpen b j₀ n : Set (M (j₀ + n))))).mp
+        (by simpa only [tailBallOpen] using hpath)
+  infer_instance
 
 omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)]
@@ -1437,6 +1621,122 @@ noncomputable def tailBallSystem
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- Every adjacent transition of the shrunk tail system carries the ambient center to the next
+ambient center. -/
+theorem tailSystem_center
+    (b : ∀ j, M j)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (hbase : ∀ j, (Ψ j : M j → M (j + 1)) (b j) = b (j + 1))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (x : M j) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner x v v)))
+    (j₀ : ℕ)
+    (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+      (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+      (g (j₀ + n)) (g ((j₀ + n) + k)))
+    (n : ℕ) :
+    letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+    (tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀).toSeqSystem.F
+        (Nat.le_succ n) (tailCenter b j₀ n) = tailCenter b j₀ (n + 1) := by
+  letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+  let hU := fun m => tailBall_source (I := I) b Ψ g j₀ m (D₀ m)
+  let hmap : ∀ m,
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + m) 1 :
+        M (j₀ + m) → M (j₀ + (m + 1))) ''
+          (tailBallOpen b j₀ m : Set (M (j₀ + m))) ⊆
+        (tailBallOpen b j₀ (m + 1) : Set (M (j₀ + (m + 1)))) := fun m => by
+    simpa only [tailBallOpen, Nat.add_assoc] using
+      tailBall_image (I := I) b Ψ hbase g hnorm j₀ m (D₀ m 1)
+  have hF :
+      (tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀).toSeqSystem.F
+          (Nat.le_succ n) =
+        PartialDiffeomorph.opensMap
+          (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n) := by
+    unfold tailBallSystem
+    apply SmoothSeqSystem.ofSucc_F_succ
+  rw [hF]
+  apply Subtype.ext
+  change (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
+    M (j₀ + n) → M ((j₀ + n) + 1)) (b (j₀ + n)) = b (j₀ + (n + 1))
+  simpa only [Nat.add_assoc] using
+    chainComp_base (I := I) (Mf := M) Ψ b hbase (j₀ + n) 1
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Transporting the stage-zero center through the shrunk tail system gives the center at every
+later stage. -/
+theorem tailCenter_map
+    (b : ∀ j, M j)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (hbase : ∀ j, (Ψ j : M j → M (j + 1)) (b j) = b (j + 1))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (x : M j) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner x v v)))
+    (j₀ : ℕ)
+    (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+      (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+      (g (j₀ + n)) (g ((j₀ + n) + k)))
+    (n : ℕ) :
+    letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+    (tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀).toSeqSystem.F
+        (Nat.zero_le n) (tailCenter b j₀ 0) = tailCenter b j₀ n := by
+  letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+  let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+  induction n with
+  | zero =>
+      exact S.toSeqSystem.map_self 0 (tailCenter b j₀ 0)
+  | succ n ih =>
+      calc
+        S.toSeqSystem.F (Nat.zero_le (n + 1)) (tailCenter b j₀ 0) =
+            S.toSeqSystem.F ((Nat.zero_le n).trans (Nat.le_succ n))
+              (tailCenter b j₀ 0) :=
+          S.toSeqSystem.F_apply_irrel _ _ _
+        _ = S.toSeqSystem.F (Nat.le_succ n)
+              (S.toSeqSystem.F (Nat.zero_le n) (tailCenter b j₀ 0)) :=
+          (S.toSeqSystem.map_map (Nat.zero_le n) (Nat.le_succ n)
+            (tailCenter b j₀ 0)).symm
+        _ = S.toSeqSystem.F (Nat.le_succ n) (tailCenter b j₀ n) := by rw [ih]
+        _ = tailCenter b j₀ (n + 1) :=
+          tailSystem_center (I := I) b Ψ hbase g hnorm j₀ D₀ n
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- All shrunk-stage centers represent the same point of the direct limit. -/
+theorem tailCenter_incl
+    (b : ∀ j, M j)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (hbase : ∀ j, (Ψ j : M j → M (j + 1)) (b j) = b (j + 1))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (x : M j) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner x v v)))
+    (j₀ : ℕ)
+    (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+      (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+      (g (j₀ + n)) (g ((j₀ + n) + k)))
+    (n : ℕ) :
+    letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+    let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+    S.toSeqSystem.incl n (tailCenter b j₀ n) =
+      S.toSeqSystem.incl 0 (tailCenter b j₀ 0) := by
+  letI : ∀ m, Nonempty (tailBallOpen b j₀ m) := fun m => tailBall_nonempty b j₀ m
+  let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+  induction n with
+  | zero => rfl
+  | succ n ih =>
+      calc
+        S.toSeqSystem.incl (n + 1) (tailCenter b j₀ (n + 1)) =
+            S.toSeqSystem.incl (n + 1)
+              (S.toSeqSystem.F (Nat.le_succ n) (tailCenter b j₀ n)) := by
+          rw [tailSystem_center (I := I) b Ψ hbase g hnorm j₀ D₀ n]
+        _ = S.toSeqSystem.incl n (tailCenter b j₀ n) :=
+          S.toSeqSystem.incl_comp (Nat.le_succ n) (tailCenter b j₀ n)
+        _ = S.toSeqSystem.incl 0 (tailCenter b j₀ 0) := ih
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- In a proper ambient sequence, every shrunk-stage transition has relatively compact image
 in the next shrunk stage. -/
 theorem tailSystem_compact
@@ -1511,6 +1811,96 @@ theorem tailSystem_compact
     change ((Φ : M (j₀ + n) → M ((j₀ + n) + 1)) x ∈
       (Φ : M (j₀ + n) → M ((j₀ + n) + 1)) '' C)
     exact ⟨x, Metric.mem_closedBall.mpr (Metric.mem_ball.mp x.property).le, rfl⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The cocycle of the large-stage limit metrics restricts to the shrunk tail system. -/
+theorem tailMetricCocycle
+    (b : ∀ j, M j)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (hbase : ∀ j, (Ψ j : M j → M (j + 1)) (b j) = b (j + 1))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (x : M j) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner x v v)))
+    (j₀ : ℕ)
+    (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+      (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+      (g (j₀ + n)) (g ((j₀ + n) + k)))
+    (hU : ∀ n k,
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source)
+    (hmap : ∀ n,
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
+        M (j₀ + n) → M (j₀ + (n + 1))) ''
+          (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :
+          Set (M (j₀ + (n + 1)))))
+    (gInf : ∀ n, SmoothRiemannianMetric I
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)))
+    (hstep : ∀ n,
+      let F : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) →
+          ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :=
+        PartialDiffeomorph.opensMap
+          (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n)
+      ∀ (x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n))
+        (v w : TangentSpace I x),
+        (gInf n).inner x v w =
+          (gInf (n + 1)).inner (F x)
+            (mfderiv I I F x v) (mfderiv I I F x w)) :
+    letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+    (tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀).MetricCocycle
+      (tailMetric (I := I) b j₀ gInf) := by
+  classical
+  let U : ∀ n, Opens (M (j₀ + n)) :=
+    fun n => ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)
+  let V : ∀ n, Opens (M (j₀ + n)) := tailBallOpen b j₀
+  letI : ∀ n, Nonempty (V n) := fun n => tailBall_nonempty b j₀ n
+  letI : ∀ n, SigmaCompactSpace (V n) := fun n =>
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I (V n).isOpen)
+  let hV := fun n => tailBall_source (I := I) b Ψ g j₀ n (D₀ n)
+  let hmapV : ∀ n,
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
+        M (j₀ + n) → M (j₀ + (n + 1))) '' (V n : Set (M (j₀ + n))) ⊆
+          (V (n + 1) : Set (M (j₀ + (n + 1)))) := fun n => by
+    simpa only [V, tailBallOpen, Nat.add_assoc] using
+      tailBall_image (I := I) b Ψ hbase g hnorm j₀ n (D₀ n 1)
+  let gTail : ∀ n, SmoothRiemannianMetric I (V n) :=
+    tailMetric (I := I) b j₀ gInf
+  have hstepV : ∀ n,
+      let F : V n → V (n + 1) := PartialDiffeomorph.opensMap
+        (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hV n 1) (hmapV n)
+      ∀ (x : V n) (v w : TangentSpace I x),
+        (gTail n).inner x v w =
+          (gTail (n + 1)).inner (F x)
+            (mfderiv I I F x v) (mfderiv I I F x w) := by
+    intro n
+    dsimp only
+    let Fbig : U n → U (n + 1) := PartialDiffeomorph.opensMap
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n)
+    let Fsmall : V n → V (n + 1) := PartialDiffeomorph.opensMap
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hV n 1) (hmapV n)
+    let inc : V n → U n := Opens.inclusion (tailBall_le_large b j₀ n)
+    let incNext : V (n + 1) → U (n + 1) :=
+      Opens.inclusion (tailBall_le_large b j₀ (n + 1))
+    intro x v w
+    have hbig := hstep n (inc x) v w
+    have hpoint : Fbig (inc x) = incNext (Fsmall x) := by
+      apply Subtype.ext
+      rfl
+    have hderiv (u : TangentSpace I x) :
+        mfderiv I I Fbig (inc x) u = mfderiv I I Fsmall x u := by
+      dsimp only [Fbig, Fsmall]
+      rw [PartialDiffeomorph.opensMap_mfderiv,
+        PartialDiffeomorph.opensMap_mfderiv]
+    change (gInf n).inner (inc x) v w =
+      (gInf (n + 1)).inner (incNext (Fsmall x))
+        (mfderiv I I Fsmall x v) (mfderiv I I Fsmall x w)
+    rw [← hpoint, ← hderiv v, ← hderiv w]
+    exact hbig
+  change (chainBallSystem (I := I) j₀ V Ψ hV hmapV).MetricCocycle gTail
+  exact chainMetricCocycle (I := I) j₀ V Ψ hV hmapV gTail hstepV
 
 omit [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)]
   [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
@@ -1678,7 +2068,7 @@ theorem exists_chain_data
         Nonempty (BookApproxIsoPartialData (I := I)
           (Metric.closedBall (b j) ((2 : ℝ) ^ j)) δ p
           (chainComp (I := I) (Mf := M) Ψ j l) (g j) (g (j + l)))) :
-    ∃ j₀ : ℕ, ∀ j : ℕ, j₀ ≤ j →
+    ∃ j₀ : ℕ, 1 ≤ j₀ ∧ ∀ j : ℕ, j₀ ≤ j →
       ∃ _D0 : ∀ k, BookApproxIsoPartialData (I := I)
           (Metric.closedBall (b j) ((2 : ℝ) ^ j)) (1 / 2) 0
           (chainComp (I := I) (Mf := M) Ψ j k) (g j) (g (j + k)),
@@ -1689,13 +2079,14 @@ theorem exists_chain_data
             (g (j + a)) (g ((j + a) + c))) := by
   classical
   let hzero := hdata (1 / 2) (by norm_num) (by norm_num) 0
-  let j₀ := Classical.choose hzero
-  have hj₀ := Classical.choose_spec hzero
-  refine ⟨j₀, fun j hj => ?_⟩
+  let jbase := Classical.choose hzero
+  have hjbase := Classical.choose_spec hzero
+  let j₀ := max 1 jbase
+  refine ⟨j₀, le_max_left _ _, fun j hj => ?_⟩
   let D0 : ∀ k, BookApproxIsoPartialData (I := I)
       (Metric.closedBall (b j) ((2 : ℝ) ^ j)) (1 / 2) 0
       (chainComp (I := I) (Mf := M) Ψ j k) (g j) (g (j + k)) :=
-    fun k => Classical.choice (hj₀ j hj k)
+    fun k => Classical.choice (hjbase j (le_trans (le_max_right 1 jbase) hj) k)
   refine ⟨D0, fun p => ?_⟩
   let hp := hdata (1 / 2) (by norm_num) (by norm_num) p
   let jp := Classical.choose hp
@@ -1723,10 +2114,14 @@ theorem exists_limits_diag
         Nonempty (BookApproxIsoPartialData (I := I)
           (Metric.closedBall (b j) ((2 : ℝ) ^ j)) δ p
           (chainComp (I := I) (Mf := M) Ψ j l) (g j) (g (j + l)))) :
-    ∃ j₀ : ℕ,
+    ∃ j₀ : ℕ, 1 ≤ j₀ ∧
       let U : ∀ n, Opens (M (j₀ + n)) :=
         fun n => ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)
-      ∃ hU : ∀ n k, (U n : Set (M (j₀ + n))) ⊆
+      ∃ _D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+          (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+          (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+          (g (j₀ + n)) (g ((j₀ + n) + k)),
+        ∃ hU : ∀ n k, (U n : Set (M (j₀ + n))) ⊆
           (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source,
         (∀ n,
             (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
@@ -1742,7 +2137,7 @@ theorem exists_limits_diag
                   (φ k - (j₀ + n)))
                 (gInf n) ((g (j₀ + n)).restrictOpen (I := I) (U n)) := by
   classical
-  obtain ⟨j₀, hpacks⟩ := exists_chain_data (I := I) b Ψ g hdata
+  obtain ⟨j₀, hj₀, hpacks⟩ := exists_chain_data (I := I) b Ψ g hdata
   let U : ∀ n, Opens (M (j₀ + n)) :=
     fun n => ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)
   have hpacks' : ∀ n,
@@ -1833,7 +2228,7 @@ theorem exists_limits_diag
     letI : SigmaCompactSpace (U n) := isSigmaCompact_iff_sigmaCompactSpace.mp
       (Geometry.isSigmaCompact_of_isOpen I (U n).isOpen)
     (hPφ n).choose
-  refine ⟨j₀, hU, hmap, φ, hφ, gInf, fun n => ?_⟩
+  refine ⟨j₀, hj₀, D0, hU, hmap, φ, hφ, gInf, fun n => ?_⟩
   letI : SigmaCompactSpace (U n) := isSigmaCompact_iff_sigmaCompactSpace.mp
     (Geometry.isSigmaCompact_of_isOpen I (U n).isOpen)
   exact (hPφ n).choose_spec
@@ -1855,10 +2250,14 @@ theorem exists_limits_close
         Nonempty (BookApproxIsoPartialData (I := I)
           (Metric.closedBall (b j) ((2 : ℝ) ^ j)) δ p
           (chainComp (I := I) (Mf := M) Ψ j l) (g j) (g (j + l)))) :
-    ∃ j₀ : ℕ,
+    ∃ j₀ : ℕ, 1 ≤ j₀ ∧
       let U : ∀ n, Opens (M (j₀ + n)) :=
         fun n => ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)
-      ∃ hU : ∀ n k, (U n : Set (M (j₀ + n))) ⊆
+      ∃ _D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+          (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+          (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+          (g (j₀ + n)) (g ((j₀ + n) + k)),
+        ∃ hU : ∀ n k, (U n : Set (M (j₀ + n))) ⊆
           (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source,
         ∃ hmap : ∀ n,
             (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
@@ -1889,13 +2288,13 @@ theorem exists_limits_close
                   (gInf (n + 1)).inner (F x)
                     (mfderiv I I F x v) (mfderiv I I F x w) := by
   classical
-  obtain ⟨j₀, hU, hmap, φ, hφ, gInf, hconv⟩ :=
+  obtain ⟨j₀, hj₀, D₀, hU, hmap, φ, hφ, gInf, hconv⟩ :=
     exists_limits_diag (I := I) b Ψ hbase g hnorm hdata
   let U : ∀ n, Opens (M (j₀ + n)) :=
     fun n => ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)
-  refine ⟨j₀, ?_⟩
+  refine ⟨j₀, hj₀, ?_⟩
   dsimp only
-  refine ⟨hU, hmap, φ, hφ, gInf, hconv, ?_, ?_⟩
+  refine ⟨D₀, hU, hmap, φ, hφ, gInf, hconv, ?_, ?_⟩
   · intro ε hε p
     obtain ⟨δ, hδ0, hδ1, hδdim, hδbudget⟩ := exists_refDelta (E := E) p hε
     obtain ⟨jδ, hjδ⟩ := hdata δ hδ0 hδ1 p
@@ -1971,6 +2370,619 @@ theorem exists_limits_close
     exact tendsto_nhds_unique hleft' hright
 
 set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+  [∀ j, IsRiemannianManifold I (M j)] [NeZero (Module.finrank ℝ E)] in
+/-- The order-zero part of `lbl407` eventually bounds every shrunk tail metric below by half of
+the corresponding ambient member metric. -/
+theorem half_ambient_le_tail
+    (b : ∀ j, M j) (j₀ : ℕ)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hU : ∀ n k,
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source)
+    (gInf : ∀ n, SmoothRiemannianMetric I
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)))
+    (hclose : ∀ ε : ℝ, 0 < ε → ∀ p : ℕ, ∃ n₀ : ℕ,
+      ∀ n : ℕ, n₀ ≤ n →
+        letI : SigmaCompactSpace
+            (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) :=
+          isSigmaCompact_iff_sigmaCompactSpace.mp
+            (Geometry.isSigmaCompact_of_isOpen I
+              (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)).isOpen)
+        ∀ l q : ℕ, q ≤ p →
+          ∀ x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n),
+            metricDerivNorm (I := I) q
+              (chainPullbackSeq (I := I) Ψ g
+                (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) (hU n) l)
+              (gInf n) (gInf n) x ≤ ε) :
+    ∃ n₀ : ℕ, ∀ n : ℕ, n₀ ≤ n →
+      ∀ (x : tailBallOpen b j₀ n) (v : TangentSpace I x),
+        (1 / 2 : ℝ) * (g (j₀ + n)).inner (x : M (j₀ + n)) v v ≤
+          (tailMetric (I := I) b j₀ gInf n).inner x v v := by
+  let U : ∀ n, Opens (M (j₀ + n)) :=
+    fun n => ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)
+  let d : ℝ := Module.finrank ℝ E
+  let ε₀ : ℝ := 1 / (d + 1)
+  have hd₀ : 0 ≤ d := by
+    dsimp only [d]
+    positivity
+  have hden : 0 < d + 1 := by linarith
+  have hε₀ : 0 < ε₀ := by
+    dsimp only [ε₀]
+    positivity
+  have hdε : d * ε₀ ≤ 1 := by
+    calc
+      d * ε₀ = d / (d + 1) := by
+        dsimp only [ε₀]
+        ring
+      _ ≤ 1 := (div_le_one hden).2 (by linarith)
+  obtain ⟨n₀, hn₀⟩ := hclose ε₀ hε₀ 0
+  refine ⟨n₀, fun n hn x v => ?_⟩
+  letI : SigmaCompactSpace (U n) := isSigmaCompact_iff_sigmaCompactSpace.mp
+    (Geometry.isSigmaCompact_of_isOpen I (U n).isOpen)
+  let inc : tailBallOpen b j₀ n → U n := Opens.inclusion (tailBall_le_large b j₀ n)
+  have hnorm₀ := hn₀ n hn 0 0 (by omega) (inc x)
+  rw [chainPullback_zero (I := I) Ψ g (U n) (hU n)] at hnorm₀
+  have hquad := metricQuadFormDiff_le_metricDerivNorm (I := I)
+    ((g (j₀ + n)).restrictOpen (I := I) (U n)) (gInf n) (gInf n) (inc x) v
+  have hcoef :
+      (Module.finrank ℝ (TangentSpace I (inc x)) : ℝ) *
+          metricDerivNorm (I := I) 0
+            ((g (j₀ + n)).restrictOpen (I := I) (U n)) (gInf n) (gInf n) (inc x) ≤ 1 := by
+    change d * metricDerivNorm (I := I) 0
+      ((g (j₀ + n)).restrictOpen (I := I) (U n)) (gInf n) (gInf n) (inc x) ≤ 1
+    exact (mul_le_mul_of_nonneg_left hnorm₀ hd₀).trans hdε
+  have hinner₀ : 0 ≤ (gInf n).inner (inc x) v v :=
+    metricInner_nonneg (I := I) (gInf n) (inc x) v
+  have hscaled :
+      (Module.finrank ℝ (TangentSpace I (inc x)) : ℝ) *
+          metricDerivNorm (I := I) 0
+            ((g (j₀ + n)).restrictOpen (I := I) (U n)) (gInf n) (gInf n) (inc x) *
+            (gInf n).inner (inc x) v v ≤ (gInf n).inner (inc x) v v := by
+    calc
+      _ ≤ 1 * (gInf n).inner (inc x) v v :=
+        mul_le_mul_of_nonneg_right hcoef hinner₀
+      _ = (gInf n).inner (inc x) v v := one_mul _
+  have hbound := hquad.trans hscaled
+  have hbound' :
+      |(g (j₀ + n)).inner (x : M (j₀ + n)) v v -
+          (tailMetric (I := I) b j₀ gInf n).inner x v v| ≤
+        (tailMetric (I := I) b j₀ gInf n).inner x v v := by
+    simpa only [SmoothRiemannianMetric.restrictOpen_inner,
+      SmoothRiemannianMetric.restrictSubset_inner] using hbound
+  rw [abs_le] at hbound'
+  nlinarith [hbound'.2]
+
+set_option linter.unusedSectionVars false in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
+  [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)] in
+/-- A half-metric lower bound makes the open-subtype inclusion at most two-Lipschitz on tangent
+extended norms. -/
+theorem enorm_val_le_two
+    (b : ∀ j, M j) (j₀ n : ℕ)
+    (gAmb : SmoothRiemannianMetric I (M (j₀ + n)))
+    (gTail : SmoothRiemannianMetric I (tailBallOpen b j₀ n))
+    (hAmbNorm : ∀ (y : M (j₀ + n)) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (gAmb.inner y w w)))
+    (x : tailBallOpen b j₀ n) (v : TangentSpace I x)
+    (hlow : (1 / 2 : ℝ) * gAmb.inner (x : M (j₀ + n)) v v ≤
+      gTail.inner x v v) :
+    letI : RiemannianBundle (fun y : tailBallOpen b j₀ n => TangentSpace I y) :=
+      ⟨gTail.toRiemannianMetric⟩
+    ‖mfderiv I I (Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) x v‖ₑ ≤
+      2 * ‖v‖ₑ := by
+  letI : RiemannianBundle (fun y : tailBallOpen b j₀ n => TangentSpace I y) :=
+    ⟨gTail.toRiemannianMetric⟩
+  have hquad : gAmb.inner (x : M (j₀ + n)) v v ≤ 2 * gTail.inner x v v := by
+    nlinarith
+  have hsqrt2 : Real.sqrt (2 : ℝ) ≤ 2 := by
+    nlinarith [Real.sq_sqrt (by norm_num : (0 : ℝ) ≤ 2), Real.sqrt_nonneg 2]
+  calc
+    ‖mfderiv I I (Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) x v‖ₑ =
+        ENNReal.ofReal (Real.sqrt (gAmb.inner (x : M (j₀ + n))
+          (mfderiv I I (Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) x v)
+          (mfderiv I I (Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) x v))) :=
+      hAmbNorm _ _
+    _ = ENNReal.ofReal (Real.sqrt (gAmb.inner (x : M (j₀ + n)) v v)) := by
+      rw [mfderiv_subtype_val_apply]
+    _ ≤ ENNReal.ofReal (Real.sqrt (2 * gTail.inner x v v)) :=
+      ENNReal.ofReal_le_ofReal (Real.sqrt_le_sqrt hquad)
+    _ = ENNReal.ofReal (Real.sqrt 2) *
+        ENNReal.ofReal (Real.sqrt (gTail.inner x v v)) := by
+      rw [Real.sqrt_mul (by norm_num : (0 : ℝ) ≤ 2),
+        ENNReal.ofReal_mul (Real.sqrt_nonneg 2)]
+    _ = ENNReal.ofReal (Real.sqrt 2) * ‖v‖ₑ := by
+      rw [DifferentialGeometry.Geometry.Riemannian.tensor0SBundle_enorm_eq_riemannianBundle_enorm
+        gTail x v]
+    _ ≤ 2 * ‖v‖ₑ := mul_le_mul_left
+      (by simpa using ENNReal.ofReal_le_ofReal hsqrt2) _
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [CompleteSpace E] [∀ j, SigmaCompactSpace (M j)] [∀ j, T2Space (M j)]
+  [I.Boundaryless] [∀ j, IsRiemannianManifold I (M j)] in
+/-- Under a half-metric lower bound, forgetting the open-subtype carrier multiplies every `C¹`
+path length by at most two. -/
+theorem pathELength_val_le
+    (b : ∀ j, M j) (j₀ n : ℕ)
+    (gAmb : SmoothRiemannianMetric I (M (j₀ + n)))
+    (gTail : SmoothRiemannianMetric I (tailBallOpen b j₀ n))
+    (hAmbNorm : ∀ (y : M (j₀ + n)) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (gAmb.inner y w w)))
+    (hlow : ∀ (x : tailBallOpen b j₀ n) (v : TangentSpace I x),
+      (1 / 2 : ℝ) * gAmb.inner (x : M (j₀ + n)) v v ≤ gTail.inner x v v)
+    {γ : ℝ → tailBallOpen b j₀ n} {t₀ t₁ : ℝ}
+    (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc t₀ t₁)) :
+    letI : RiemannianBundle (fun y : tailBallOpen b j₀ n => TangentSpace I y) :=
+      ⟨gTail.toRiemannianMetric⟩
+    Manifold.pathELength I ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ γ) t₀ t₁ ≤
+      2 * Manifold.pathELength I γ t₀ t₁ := by
+  letI : RiemannianBundle (fun y : tailBallOpen b j₀ n => TangentSpace I y) :=
+    ⟨gTail.toRiemannianMetric⟩
+  rw [Manifold.pathELength_eq_lintegral_mfderiv_Ioo,
+    Manifold.pathELength_eq_lintegral_mfderiv_Ioo,
+    ← MeasureTheory.lintegral_const_mul' (2 : ENNReal) _ (by norm_num)]
+  refine MeasureTheory.lintegral_mono_ae
+    (Filter.eventually_of_mem
+      (MeasureTheory.self_mem_ae_restrict measurableSet_Ioo) ?_)
+  intro t ht
+  have hγt : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t :=
+    ((hγ.mdifferentiableOn one_ne_zero) t ⟨ht.1.le, ht.2.le⟩).mdifferentiableAt
+      (Icc_mem_nhds ht.1 ht.2)
+  have hval : MDifferentiableAt I I
+      (Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) (γ t) :=
+    (contMDiff_subtype_val (I := I) (U := tailBallOpen b j₀ n)
+      (n := (∞ : WithTop ℕ∞))).mdifferentiableAt (by simp)
+  have hcomp : mfderiv 𝓘(ℝ, ℝ) I
+      ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ γ) t =
+      (mfderiv I I (Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) (γ t)).comp
+        (mfderiv 𝓘(ℝ, ℝ) I γ t) := mfderiv_comp t hval hγt
+  rw [hcomp]
+  exact enorm_val_le_two b j₀ n gAmb gTail hAmbNorm (γ t)
+    (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (hlow _ _)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
+/-- A `C¹` limit path from the center to the complement of the `n`th compact core has length at
+least `2^n / 4`. -/
+theorem path_escape_core
+    (b : ∀ j, M j) (j₀ n : ℕ)
+    [ProperSpace (M (j₀ + n))]
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    [∀ m, SigmaCompactSpace (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
+    (gTail : ∀ m, SmoothRiemannianMetric I (tailBallOpen b j₀ m))
+    (hgTail : S.MetricCocycle gTail)
+    (gAmb : SmoothRiemannianMetric I (M (j₀ + n)))
+    (hAmbNorm : ∀ (y : M (j₀ + n)) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (gAmb.inner y w w)))
+    (hlow : ∀ (x : tailBallOpen b j₀ n) (v : TangentSpace I x),
+      (1 / 2 : ℝ) * gAmb.inner (x : M (j₀ + n)) v v ≤ (gTail n).inner x v v)
+    {γ : ℝ → S.toSeqSystem.Lim}
+    (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 1))
+    (hγ0 : γ 0 = S.toSeqSystem.incl n (tailCenter b j₀ n))
+    (hγ1 : γ 1 ∉ limitCore b j₀ S n) :
+    letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+      ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+    ENNReal.ofReal ((2 : ℝ) ^ n / 4) ≤ Manifold.pathELength I γ 0 1 := by
+  letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+  letI : RiemannianBundle
+      (fun x : tailBallOpen b j₀ n => TangentSpace I x) :=
+    ⟨(gTail n).toRiemannianMetric⟩
+  have hstart : γ 0 ∈ interior (limitCore b j₀ S n) := by
+    rw [hγ0]
+    exact center_mem_coreInt b j₀ n S
+  obtain ⟨t, ht, hstay, hfront⟩ := exists_first_exit
+    (limitCore_closed b j₀ n S) hγ.continuousOn hstart hγ1
+  obtain ⟨x, hxinc, hxrad⟩ := frontier_core_radius b j₀ n S hfront
+  have hγpre : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc 0 t) :=
+    hγ.mono (Set.Icc_subset_Icc le_rfl ht.2)
+  have hrange : ∀ s ∈ Set.Icc (0 : ℝ) t,
+      γ s ∈ Set.range (S.toSeqSystem.incl n) := by
+    intro s hs
+    have hsK := hstay s hs
+    obtain ⟨y, _, hyeq⟩ := hsK
+    exact ⟨y, hyeq⟩
+  let δ : ℝ → tailBallOpen b j₀ n :=
+    Function.invFun (S.toSeqSystem.incl n) ∘ γ
+  have hδ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 δ (Set.Icc 0 t) := by
+    intro s hs
+    exact ContMDiffAt.comp_contMDiffWithinAt s
+      ((S.contMDiffAt_invIncl n (hrange s hs)).of_le
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞))
+      (hγpre s hs)
+  have hvalδ : ContMDiffOn 𝓘(ℝ, ℝ) I 1
+      ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ δ) (Set.Icc 0 t) :=
+    ((contMDiff_subtype_val (I := I) (U := tailBallOpen b j₀ n)
+      (n := (∞ : WithTop ℕ∞))).of_le
+        (by decide : (1 : WithTop ℕ∞) ≤ ∞)).comp_contMDiffOn hδ
+  have hδ0 : δ 0 = tailCenter b j₀ n := by
+    change Function.invFun (S.toSeqSystem.incl n) (γ 0) = tailCenter b j₀ n
+    rw [hγ0]
+    exact Function.leftInverse_invFun (S.toSeqSystem.incl_injective n) _
+  have hδt : δ t = x := by
+    change Function.invFun (S.toSeqSystem.incl n) (γ t) = x
+    rw [← hxinc]
+    exact Function.leftInverse_invFun (S.toSeqSystem.incl_injective n) _
+  have hval0 :
+      ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ δ) 0 = b (j₀ + n) := by
+    change (δ 0 : M (j₀ + n)) = b (j₀ + n)
+    rw [hδ0]
+    rfl
+  have hvalt :
+      ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ δ) t =
+        (x : M (j₀ + n)) := by
+    change (δ t : M (j₀ + n)) = (x : M (j₀ + n))
+    rw [hδt]
+  have hamb : Manifold.riemannianEDist I (b (j₀ + n)) (x : M (j₀ + n)) ≤
+      Manifold.pathELength I
+        ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ δ) 0 t :=
+    Manifold.riemannianEDist_le_pathELength hvalδ hval0 hvalt ht.1.le
+  have hradius : ENNReal.ofReal (coreRadius n) ≤
+      Manifold.pathELength I
+        ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ δ) 0 t := by
+    calc
+      ENNReal.ofReal (coreRadius n) = edist (b (j₀ + n)) (x : M (j₀ + n)) := by
+        rw [edist_dist, hxrad]
+      _ = Manifold.riemannianEDist I (b (j₀ + n)) (x : M (j₀ + n)) :=
+        IsRiemannianManifold.out (I := I) _ _
+      _ ≤ _ := hamb
+  have hvalLe := pathELength_val_le b j₀ n gAmb (gTail n) hAmbNorm hlow hδ
+  have hpull : Manifold.pathELength I δ 0 t = Manifold.pathELength I γ 0 t := by
+    simpa only [δ] using pathELength_invIncl S gTail hgTail n hγpre hrange
+  have hprefix : Manifold.pathELength I γ 0 t ≤ Manifold.pathELength I γ 0 1 :=
+    Manifold.pathELength_mono le_rfl ht.2
+  have hRle : ENNReal.ofReal (coreRadius n) ≤
+      2 * Manifold.pathELength I γ 0 1 := by
+    calc
+      ENNReal.ofReal (coreRadius n) ≤
+          Manifold.pathELength I
+            ((Subtype.val : tailBallOpen b j₀ n → M (j₀ + n)) ∘ δ) 0 t := hradius
+      _ ≤ 2 * Manifold.pathELength I δ 0 t := hvalLe
+      _ = 2 * Manifold.pathELength I γ 0 t := by rw [hpull]
+      _ ≤ 2 * Manifold.pathELength I γ 0 1 := by
+        simpa only [mul_comm] using mul_le_mul_left hprefix (2 : ENNReal)
+  have hsplit : (2 : ENNReal) * ENNReal.ofReal ((2 : ℝ) ^ n / 4) =
+      ENNReal.ofReal (coreRadius n) := by
+    calc
+      (2 : ENNReal) * ENNReal.ofReal ((2 : ℝ) ^ n / 4) =
+          ENNReal.ofReal (2 : ℝ) * ENNReal.ofReal ((2 : ℝ) ^ n / 4) := by norm_num
+      _ = ENNReal.ofReal ((2 : ℝ) * ((2 : ℝ) ^ n / 4)) := by
+        rw [ENNReal.ofReal_mul (by norm_num : (0 : ℝ) ≤ 2)]
+      _ = ENNReal.ofReal (coreRadius n) := by
+        congr 1
+        simp only [coreRadius]
+        ring
+  apply (ENNReal.mul_le_mul_iff_right (a := (2 : ENNReal))
+    (by norm_num) ENNReal.ofNat_ne_top).mp
+  rw [hsplit]
+  exact hRle
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
+/-- Every point at limit distance less than `2^n / 4` from the `n`th center lies in the compact
+half-radius core. -/
+theorem mem_core_of_edist
+    (b : ∀ j, M j) (j₀ n : ℕ)
+    [ProperSpace (M (j₀ + n))]
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    [∀ m, SigmaCompactSpace (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
+    (gTail : ∀ m, SmoothRiemannianMetric I (tailBallOpen b j₀ m))
+    (hgTail : S.MetricCocycle gTail)
+    (gAmb : SmoothRiemannianMetric I (M (j₀ + n)))
+    (hAmbNorm : ∀ (y : M (j₀ + n)) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (gAmb.inner y w w)))
+    (hlow : ∀ (x : tailBallOpen b j₀ n) (v : TangentSpace I x),
+      (1 / 2 : ℝ) * gAmb.inner (x : M (j₀ + n)) v v ≤ (gTail n).inner x v v)
+    {q : S.toSeqSystem.Lim}
+    (hq :
+      letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+        ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+      Manifold.riemannianEDist I
+        (S.toSeqSystem.incl n (tailCenter b j₀ n)) q <
+          ENNReal.ofReal ((2 : ℝ) ^ n / 4)) :
+    q ∈ limitCore b j₀ S n := by
+  letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+  by_contra hqK
+  obtain ⟨γ, hγ0, hγ1, hγC, hγlen⟩ :=
+    Manifold.exists_lt_of_riemannianEDist_lt hq
+  have hγout : γ 1 ∉ limitCore b j₀ S n := by
+    rw [hγ1]
+    exact hqK
+  have hesc := path_escape_core b j₀ n S gTail hgTail gAmb hAmbNorm hlow
+    hγC hγ0 hγout
+  exact (not_lt_of_ge hesc) hγlen
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
+/-- Every finite limit ball about the common tail center lies in one shrunk-stage range. -/
+theorem baseRange_exhausts
+    [∀ j, ProperSpace (M j)]
+    (b : ∀ j, M j) (j₀ : ℕ)
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    [∀ m, SigmaCompactSpace (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
+    (gTail : ∀ m, SmoothRiemannianMetric I (tailBallOpen b j₀ m))
+    (hgTail : S.MetricCocycle gTail)
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (y : M j) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner y w w)))
+    (O : S.toSeqSystem.Lim)
+    (hcenter : ∀ n, S.toSeqSystem.incl n (tailCenter b j₀ n) = O)
+    (hlow : ∃ n₀, ∀ n, n₀ ≤ n →
+      ∀ (x : tailBallOpen b j₀ n) (v : TangentSpace I x),
+        (1 / 2 : ℝ) * (g (j₀ + n)).inner (x : M (j₀ + n)) v v ≤
+          (gTail n).inner x v v)
+    (r : ENNReal) (hr : r ≠ ⊤) :
+    letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+      ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+    ∃ n, ∀ q : S.toSeqSystem.Lim,
+      Manifold.riemannianEDist I O q ≤ r → q ∈ Set.range (S.toSeqSystem.incl n) := by
+  letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+  obtain ⟨n₀, hn₀⟩ := hlow
+  have hevPow : ∀ᶠ n : ℕ in Filter.atTop,
+      4 * r.toReal < (2 : ℝ) ^ n :=
+    (tendsto_pow_atTop_atTop_of_one_lt (r := (2 : ℝ)) (by norm_num)).eventually
+      (Filter.eventually_gt_atTop (4 * r.toReal))
+  obtain ⟨n, hn, hpow⟩ :=
+    ((Filter.eventually_ge_atTop n₀).and hevPow).exists
+  have hreal : r.toReal < (2 : ℝ) ^ n / 4 := by
+    nlinarith
+  have hcost : r < ENNReal.ofReal ((2 : ℝ) ^ n / 4) := by
+    rw [← ENNReal.ofReal_toReal hr]
+    exact (ENNReal.ofReal_lt_ofReal_iff (by positivity)).2 hreal
+  refine ⟨n, fun q hq => ?_⟩
+  have hqcost : Manifold.riemannianEDist I
+      (S.toSeqSystem.incl n (tailCenter b j₀ n)) q <
+        ENNReal.ofReal ((2 : ℝ) ^ n / 4) := by
+    rw [hcenter n]
+    exact hq.trans_lt hcost
+  have hcore := mem_core_of_edist b j₀ n S gTail hgTail (g (j₀ + n))
+    (hnorm (j₀ + n)) (hn₀ n hn) hqcost
+  obtain ⟨x, _, hx⟩ := hcore
+  exact ⟨x, hx⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+omit [∀ j, SigmaCompactSpace (M j)] [I.Boundaryless] in
+/-- Basepoint exhaustion and finite basepoint distance imply finite-ball exhaustion around every
+center. -/
+theorem finiteRange_exhausts
+    [∀ j, ProperSpace (M j)]
+    (b : ∀ j, M j) (j₀ : ℕ)
+    [∀ m, Nonempty (tailBallOpen b j₀ m)]
+    [∀ m, SigmaCompactSpace (tailBallOpen b j₀ m)]
+    (S : SmoothSeqSystem I (fun m => tailBallOpen b j₀ m))
+    (gTail : ∀ m, SmoothRiemannianMetric I (tailBallOpen b j₀ m))
+    (hgTail : S.MetricCocycle gTail)
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (y : M j) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner y w w)))
+    (O : S.toSeqSystem.Lim)
+    (hcenter : ∀ n, S.toSeqSystem.incl n (tailCenter b j₀ n) = O)
+    (hlow : ∃ n₀, ∀ n, n₀ ≤ n →
+      ∀ (x : tailBallOpen b j₀ n) (v : TangentSpace I x),
+        (1 / 2 : ℝ) * (g (j₀ + n)).inner (x : M (j₀ + n)) v v ≤
+          (gTail n).inner x v v)
+    (hfinite :
+      letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+        ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+      ∀ z : S.toSeqSystem.Lim, Manifold.riemannianEDist I O z ≠ ⊤)
+    (z : S.toSeqSystem.Lim) (r : ENNReal) (hr : r ≠ ⊤) :
+    letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+      ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+    ∃ n, ∀ q : S.toSeqSystem.Lim,
+      Manifold.riemannianEDist I z q ≤ r → q ∈ Set.range (S.toSeqSystem.incl n) := by
+  letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+  have hR : Manifold.riemannianEDist I O z + r ≠ ⊤ :=
+    ENNReal.add_ne_top.mpr ⟨hfinite z, hr⟩
+  obtain ⟨n, hn⟩ := baseRange_exhausts b j₀ S gTail hgTail g hnorm O hcenter hlow
+    (Manifold.riemannianEDist I O z + r) hR
+  refine ⟨n, fun q hq => hn q ?_⟩
+  exact (Manifold.riemannianEDist_triangle (I := I) (x := O) (y := z) (z := q)).trans
+    (add_le_add le_rfl hq)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The shrunk tail system exhausts every finite Riemannian ball in its limit. -/
+theorem tailRangeExhausts
+    [∀ j, ProperSpace (M j)]
+    (b : ∀ j, M j)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (hbase : ∀ j, (Ψ j : M j → M (j + 1)) (b j) = b (j + 1))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (x : M j) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner x v v)))
+    (j₀ : ℕ)
+    (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+      (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+      (g (j₀ + n)) (g ((j₀ + n) + k)))
+    (hU : ∀ n k,
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source)
+    (hmap : ∀ n,
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
+        M (j₀ + n) → M (j₀ + (n + 1))) ''
+          (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :
+          Set (M (j₀ + (n + 1)))))
+    (gInf : ∀ n, SmoothRiemannianMetric I
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)))
+    (hstep : ∀ n,
+      let F : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) →
+          ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :=
+        PartialDiffeomorph.opensMap
+          (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n)
+      ∀ (x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n))
+        (v w : TangentSpace I x),
+        (gInf n).inner x v w =
+          (gInf (n + 1)).inner (F x)
+            (mfderiv I I F x v) (mfderiv I I F x w))
+    (hclose : ∀ ε : ℝ, 0 < ε → ∀ p : ℕ, ∃ n₀ : ℕ,
+      ∀ n : ℕ, n₀ ≤ n →
+        letI : SigmaCompactSpace
+            (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) :=
+          isSigmaCompact_iff_sigmaCompactSpace.mp
+            (Geometry.isSigmaCompact_of_isOpen I
+              (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)).isOpen)
+        ∀ l q : ℕ, q ≤ p →
+          ∀ x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n),
+            metricDerivNorm (I := I) q
+              (chainPullbackSeq (I := I) Ψ g
+                (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) (hU n) l)
+              (gInf n) (gInf n) x ≤ ε) :
+    letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+    letI : ∀ n, SigmaCompactSpace (tailBallOpen b j₀ n) := fun n =>
+      isSigmaCompact_iff_sigmaCompactSpace.mp
+        (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+    let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+    let gTail := tailMetric (I := I) b j₀ gInf
+    let hgTail : S.MetricCocycle gTail :=
+      tailMetricCocycle (I := I) b Ψ hbase g hnorm j₀ D₀ hU hmap gInf hstep
+    ∀ (z : S.toSeqSystem.Lim) (r : ENNReal), r ≠ ⊤ →
+      letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+        ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+      ∃ n, ∀ q : S.toSeqSystem.Lim,
+        Manifold.riemannianEDist I z q ≤ r →
+          q ∈ Set.range (S.toSeqSystem.incl n) := by
+  letI : ∀ n, PreconnectedSpace (tailBallOpen b j₀ n) := fun n =>
+    tailBall_preconn (I := I) b j₀ n
+  letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+  letI : ∀ n, SigmaCompactSpace (tailBallOpen b j₀ n) := fun n =>
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+  let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+  let gTail := tailMetric (I := I) b j₀ gInf
+  let hgTail : S.MetricCocycle gTail :=
+    tailMetricCocycle (I := I) b Ψ hbase g hnorm j₀ D₀ hU hmap gInf hstep
+  let O : S.toSeqSystem.Lim := S.toSeqSystem.incl 0 (tailCenter b j₀ 0)
+  letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+  letI : ConnectedSpace S.toSeqSystem.Lim := inferInstance
+  letI : IsContinuousRiemannianBundle E
+      (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+    ⟨⟨(S.limitMetric gTail hgTail).inner,
+      (S.limitMetric gTail hgTail).contMDiff.continuous,
+      by intro x v w; rfl⟩⟩
+  have hcenter : ∀ n, S.toSeqSystem.incl n (tailCenter b j₀ n) = O := by
+    intro n
+    exact tailCenter_incl (I := I) b Ψ hbase g hnorm j₀ D₀ n
+  have hlow : ∃ n₀, ∀ n, n₀ ≤ n →
+      ∀ (x : tailBallOpen b j₀ n) (v : TangentSpace I x),
+        (1 / 2 : ℝ) * (g (j₀ + n)).inner (x : M (j₀ + n)) v v ≤
+          (gTail n).inner x v v := by
+    simpa only [gTail] using
+      half_ambient_le_tail (I := I) b j₀ Ψ g hU gInf hclose
+  have hfinite : ∀ z : S.toSeqSystem.Lim,
+      Manifold.riemannianEDist I O z ≠ ⊤ := by
+    intro z
+    exact Geometry.Riemannian.Exponential.riemannianEDist_ne_top (I := I) O z
+  dsimp only
+  intro z r hr
+  exact finiteRange_exhausts (I := I) (b := b) (j₀ := j₀) (S := S)
+    (gTail := gTail) (hgTail := hgTail) (g := g) (hnorm := hnorm) (O := O)
+    (hcenter := hcenter) (hlow := hlow) (hfinite := hfinite) (z := z) (r := r) hr
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The shrunk tail system has a complete direct-limit metric. -/
+theorem tailLimitComplete
+    [∀ j, ProperSpace (M j)]
+    (b : ∀ j, M j)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (hbase : ∀ j, (Ψ j : M j → M (j + 1)) (b j) = b (j + 1))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (x : M j) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner x v v)))
+    (j₀ : ℕ) (hj₀ : 1 ≤ j₀)
+    (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+      (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+      (g (j₀ + n)) (g ((j₀ + n) + k)))
+    (hU : ∀ n k,
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source)
+    (hmap : ∀ n,
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
+        M (j₀ + n) → M (j₀ + (n + 1))) ''
+          (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :
+          Set (M (j₀ + (n + 1)))))
+    (gInf : ∀ n, SmoothRiemannianMetric I
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)))
+    (hstep : ∀ n,
+      let F : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) →
+          ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :=
+        PartialDiffeomorph.opensMap
+          (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n)
+      ∀ (x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n))
+        (v w : TangentSpace I x),
+        (gInf n).inner x v w =
+          (gInf (n + 1)).inner (F x)
+            (mfderiv I I F x v) (mfderiv I I F x w))
+    (hclose : ∀ ε : ℝ, 0 < ε → ∀ p : ℕ, ∃ n₀ : ℕ,
+      ∀ n : ℕ, n₀ ≤ n →
+        letI : SigmaCompactSpace
+            (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) :=
+          isSigmaCompact_iff_sigmaCompactSpace.mp
+            (Geometry.isSigmaCompact_of_isOpen I
+              (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)).isOpen)
+        ∀ l q : ℕ, q ≤ p →
+          ∀ x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n),
+            metricDerivNorm (I := I) q
+              (chainPullbackSeq (I := I) Ψ g
+                (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) (hU n) l)
+              (gInf n) (gInf n) x ≤ ε) :
+    letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+    letI : ∀ n, SigmaCompactSpace (tailBallOpen b j₀ n) := fun n =>
+      isSigmaCompact_iff_sigmaCompactSpace.mp
+        (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+    let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+    let gTail := tailMetric (I := I) b j₀ gInf
+    let hgTail : S.MetricCocycle gTail :=
+      tailMetricCocycle (I := I) b Ψ hbase g hnorm j₀ D₀ hU hmap gInf hstep
+    MetricComplete (I := I)
+      (limitPointedCoc S (tailCenter b j₀ 0) gTail hgTail) := by
+  letI : ∀ n, PreconnectedSpace (tailBallOpen b j₀ n) := fun n =>
+    tailBall_preconn (I := I) b j₀ n
+  letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+  letI : ∀ n, SigmaCompactSpace (tailBallOpen b j₀ n) := fun n =>
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+  let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+  let gTail := tailMetric (I := I) b j₀ gInf
+  let hgTail : S.MetricCocycle gTail :=
+    tailMetricCocycle (I := I) b Ψ hbase g hnorm j₀ D₀ hU hmap gInf hstep
+  dsimp only
+  have hexh : ∀ (z : S.toSeqSystem.Lim) (r : ENNReal), r ≠ ⊤ →
+      letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
+        ⟨(S.limitMetric gTail hgTail).toRiemannianMetric⟩
+      ∃ n, ∀ q : S.toSeqSystem.Lim,
+        Manifold.riemannianEDist I z q ≤ r →
+          q ∈ Set.range (S.toSeqSystem.incl n) := by
+    simpa only [S, gTail, hgTail] using
+      tailRangeExhausts (I := I) b Ψ hbase g hnorm j₀ D₀ hU hmap gInf hstep hclose
+  have hcompact : ∀ n, ∃ K : Set (tailBallOpen b j₀ (n + 1)), IsCompact K ∧
+      Set.range (S.toSeqSystem.F (Nat.le_succ n)) ⊆ K := by
+    simpa only [S] using
+      tailSystem_compact (I := I) b Ψ hbase g hnorm j₀ hj₀ D₀
+  have hcover : HasCompactBallCover S gTail hgTail :=
+    compactCover_of_step S gTail hgTail hexh hcompact
+  exact limitComplete_cover S (tailCenter b j₀ 0) gTail hgTail hcover
+
+set_option linter.unusedSectionVars false in
 omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
   [∀ j, IsRiemannianManifold I (M j)]
   [NeZero (Module.finrank ℝ E)] in
@@ -2011,6 +3023,81 @@ theorem tail_derivSup_lt
       (chainPullbackSeq (I := I) Ψ g (U n) (hU n) l)
       (gInf n) (gInf n) (ε / 2) (by linarith)
       (fun q hqp x _ => hn₀ n hn l q hqp x)) (by linarith)
+
+set_option linter.unusedSectionVars false in
+omit [∀ j, RiemannianBundle (fun x : M j => TangentSpace I x)]
+  [∀ j, IsRiemannianManifold I (M j)] in
+/-- The large-stage `lbl407` estimate restricts to compact-open convergence on the shrunk tail
+stages.  Only the stage sequence (`l = 0`) is needed for ambient Cheeger--Gromov convergence. -/
+theorem tailFlatSup_lt
+    (b : ∀ j, M j) (j₀ : ℕ)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hU : ∀ n k,
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source)
+    (gInf : ∀ n, SmoothRiemannianMetric I
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)))
+    (hclose : ∀ ε : ℝ, 0 < ε → ∀ p : ℕ, ∃ n₀ : ℕ,
+      ∀ n : ℕ, n₀ ≤ n →
+        letI : SigmaCompactSpace
+            (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) :=
+          isSigmaCompact_iff_sigmaCompactSpace.mp
+            (Geometry.isSigmaCompact_of_isOpen I
+              (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)).isOpen)
+        ∀ l q : ℕ, q ≤ p →
+          ∀ x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n),
+            metricDerivNorm (I := I) q
+              (chainPullbackSeq (I := I) Ψ g
+                (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) (hU n) l)
+              (gInf n) (gInf n) x ≤ ε) :
+    ∀ ε : ℝ, 0 < ε → ∀ p : ℕ, ∃ n₀ : ℕ,
+      ∀ n : ℕ, n₀ ≤ n →
+        letI : SigmaCompactSpace
+            (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) :=
+          isSigmaCompact_iff_sigmaCompactSpace.mp
+            (Geometry.isSigmaCompact_of_isOpen I
+              (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)).isOpen)
+        letI : SigmaCompactSpace (tailBallOpen b j₀ n) :=
+          isSigmaCompact_iff_sigmaCompactSpace.mp
+            (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+        ∀ K : Set (tailBallOpen b j₀ n), IsCompact K →
+          metricDerivNormSupOn (I := I) K p
+            ((g (j₀ + n)).restrictOpen (I := I) (tailBallOpen b j₀ n))
+            (tailMetric (I := I) b j₀ gInf n)
+            (tailMetric (I := I) b j₀ gInf n) < ε := by
+  intro ε hε p
+  obtain ⟨n₀, hn₀⟩ := hclose (ε / 2) (by linarith) p
+  refine ⟨n₀, fun n hn => ?_⟩
+  let U := ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)
+  let V := tailBallOpen b j₀ n
+  letI : SigmaCompactSpace U := isSigmaCompact_iff_sigmaCompactSpace.mp
+    (Geometry.isSigmaCompact_of_isOpen I U.isOpen)
+  letI : SigmaCompactSpace V := isSigmaCompact_iff_sigmaCompactSpace.mp
+    (Geometry.isSigmaCompact_of_isOpen I V.isOpen)
+  intro K _hK
+  refine lt_of_le_of_lt
+    (metricDerivNormSupOn_le_of_forall (I := I) K p
+      ((g (j₀ + n)).restrictOpen (I := I) V)
+      (tailMetric (I := I) b j₀ gInf n)
+      (tailMetric (I := I) b j₀ gInf n) (ε / 2) (by linarith) ?_) (by linarith)
+  intro q hqp x _hxK
+  let inc : V → U := Opens.inclusion (tailBall_le_large b j₀ n)
+  have hbig := hn₀ n hn 0 q hqp (inc x)
+  rw [chainPullback_zero (I := I) Ψ g U (hU n)] at hbig
+  calc
+    metricDerivNorm (I := I) q
+        ((g (j₀ + n)).restrictOpen (I := I) V)
+        (tailMetric (I := I) b j₀ gInf n)
+        (tailMetric (I := I) b j₀ gInf n) x =
+      metricDerivNorm (I := I) q
+        ((g (j₀ + n)).restrictOpen (I := I) U)
+        (gInf n) (gInf n) (inc x) := by
+          simpa only [U, V, inc, tailMetric,
+            SmoothRiemannianMetric.restrictOpen_flat] using
+            metricDerivNorm_flat (I := I) (tailBall_le_large b j₀ n)
+              ((g (j₀ + n)).restrictOpen (I := I) U) (gInf n) (gInf n) q x
+    _ ≤ ε / 2 := hbig
 
 set_option maxHeartbeats 800000 in
 set_option linter.unusedSectionVars false in
@@ -2314,6 +3401,82 @@ def chainAmbientConv
   refine ⟨n₀, fun n hn K hK => ?_⟩
   rw [← chainPullback_zero (I := I) Ψ g (U n) (hU n)]
   exact hn₀ n hn 0 K hK
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+set_option linter.unusedSectionVars false in
+/-- The shrunk tail sequence converges to the same direct-limit metric used by
+`tailLimitComplete`, with comparison maps landing in the original ambient manifolds. -/
+def tailAmbientConv
+    (b : ∀ j, M j)
+    (Ψ : ∀ j, PartialDiffeomorph I I (M j) (M (j + 1)) (∞ : WithTop ℕ∞))
+    (hbase : ∀ j, (Ψ j : M j → M (j + 1)) (b j) = b (j + 1))
+    (g : ∀ j, SmoothRiemannianMetric I (M j))
+    (hnorm : ∀ j (x : M j) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt ((g j).inner x v v)))
+    (j₀ : ℕ)
+    (D₀ : ∀ n k, BookApproxIsoPartialData (I := I)
+      (Metric.closedBall (b (j₀ + n)) ((2 : ℝ) ^ (j₀ + n))) (1 / 2) 0
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k)
+      (g (j₀ + n)) (g ((j₀ + n) + k)))
+    (hU : ∀ n k,
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (chainComp (I := I) (Mf := M) Ψ (j₀ + n) k).source)
+    (hmap : ∀ n,
+      (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1 :
+        M (j₀ + n) → M (j₀ + (n + 1))) ''
+          (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) : Set (M (j₀ + n))) ⊆
+        (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :
+          Set (M (j₀ + (n + 1)))))
+    (gInf : ∀ n, SmoothRiemannianMetric I
+      (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)))
+    (hstep : ∀ n,
+      let F : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n) →
+          ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + (n + 1)) :=
+        PartialDiffeomorph.opensMap
+          (chainComp (I := I) (Mf := M) Ψ (j₀ + n) 1) (hU n 1) (hmap n)
+      ∀ (x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n))
+        (v w : TangentSpace I x),
+        (gInf n).inner x v w =
+          (gInf (n + 1)).inner (F x)
+            (mfderiv I I F x v) (mfderiv I I F x w))
+    (hclose : ∀ ε : ℝ, 0 < ε → ∀ p : ℕ, ∃ n₀ : ℕ,
+      ∀ n : ℕ, n₀ ≤ n →
+        letI : SigmaCompactSpace
+            (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) :=
+          isSigmaCompact_iff_sigmaCompactSpace.mp
+            (Geometry.isSigmaCompact_of_isOpen I
+              (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)).isOpen)
+        ∀ l q : ℕ, q ≤ p →
+          ∀ x : ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n),
+            metricDerivNorm (I := I) q
+              (chainPullbackSeq (I := I) Ψ g
+                (ballOpen b (fun s => (2 : ℝ) ^ s) (j₀ + n)) (hU n) l)
+              (gInf n) (gInf n) x ≤ ε) :
+    letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+    letI : ∀ n, SigmaCompactSpace (tailBallOpen b j₀ n) := fun n =>
+      isSigmaCompact_iff_sigmaCompactSpace.mp
+        (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+    let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+    let gTail := tailMetric (I := I) b j₀ gInf
+    let hgTail : S.MetricCocycle gTail :=
+      tailMetricCocycle (I := I) b Ψ hbase g hnorm j₀ D₀ hU hmap gInf hstep
+    PointedRiemannianCGConverges (I := I)
+      (chainAmbientSeq (I := I) j₀ (tailBallOpen b j₀) S (tailCenter b j₀ 0) g)
+      (limitPointedCoc S (tailCenter b j₀ 0) gTail hgTail) id
+      (chainAmbientMaps (I := I) j₀ (tailBallOpen b j₀) S
+        (tailCenter b j₀ 0) g gTail hgTail) := by
+  letI : ∀ n, Nonempty (tailBallOpen b j₀ n) := fun n => tailBall_nonempty b j₀ n
+  letI : ∀ n, SigmaCompactSpace (tailBallOpen b j₀ n) := fun n =>
+    isSigmaCompact_iff_sigmaCompactSpace.mp
+      (Geometry.isSigmaCompact_of_isOpen I (tailBallOpen b j₀ n).isOpen)
+  let S := tailBallSystem (I := I) b Ψ hbase g hnorm j₀ D₀
+  let gTail := tailMetric (I := I) b j₀ gInf
+  let hgTail : S.MetricCocycle gTail :=
+    tailMetricCocycle (I := I) b Ψ hbase g hnorm j₀ D₀ hU hmap gInf hstep
+  apply ambientCGConverges (I := I) j₀ (tailBallOpen b j₀) S
+    (tailCenter b j₀ 0) g gTail hgTail
+  exact tailFlatSup_lt (I := I) b j₀ Ψ g hU gInf hclose
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

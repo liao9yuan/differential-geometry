@@ -488,3 +488,18 @@ rightFun = param projection), the parameter → center map
 
 This session delivered the IFT CONSUMER half (verified). The concrete producer (steps 1–3),
 with step 1 the long pole, is the remaining lbl430 work.
+
+## Implementation update (2026-07-10, named center-equation radius)
+
+- Added `centerOfMass.eqnRadius` and `eqnRadius_pos`, a canonical positive
+  choice of the radius formerly returned only existentially by
+  `expInv_eqn_local`.
+- `grad_eq_of_lt` exposes the corresponding one-summand gradient identity, and
+  `expInv_eqn_of_lt` proves the selected center's inverse-exponential sum is zero
+  from differentiability, moving normal-source membership, and the named
+  smallness inequality.
+- Downstream code can now state concrete configuration containment against a
+  named radius instead of assuming the center equation under a new name.
+- Focused verification and the targeted module build passed. The remaining
+  work is to place the finite-hat configurations inside this radius; the root
+  equation itself is no longer opaque.

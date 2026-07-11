@@ -170,3 +170,23 @@ extended-norm shape consumed by the Step-B separation estimate.
 
 Verification passed for the focused file check and targeted module refresh.  This closes the
 former TangentSpace-instance/API blocker; it does not by itself produce `StepB1RawInput`.
+
+## 2026-07-10: uniform-radius audit
+
+`NormalCoordMetricBoundInput` honestly records uniform derivative constants
+`metricC`, but its normal-coordinate `radius k x` is only pointwise positive.
+There is no field giving a positive lower bound over `k` and the live centers,
+nor a compatibility relation with `decay` or `expMapC2Radius`.  In particular,
+the record remains satisfiable after shrinking the radius by a factor tending
+to zero with `k`; it therefore cannot justify the plan's former phrase
+"`normalBounds` uniform radius".
+
+This is an input/producer gap, not a local Lean proof failure.  The checked
+pointwise branch theorem `StepCSmoothness.exists_readoutEBall` and its local
+containment lemmas produce a radius for each fixed `(M, g, p)`, but do not
+upgrade it to a sequence-uniform radius.  If the current global
+`SigmaScaleField` design is retained, the smallest honest repair is a
+live-center uniform radius floor plus a quantitative normal-coordinate
+`chartedDiagExp` derivative-deviation/`ApproximatesLinearOn` producer.  The
+existing qualitative `diagExpIFT` is chosen in arbitrary extended charts, so
+its target radius cannot be read off from the present normal-coordinate bounds.

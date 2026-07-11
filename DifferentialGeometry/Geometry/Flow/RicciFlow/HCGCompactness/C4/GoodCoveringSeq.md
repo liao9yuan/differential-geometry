@@ -39,3 +39,16 @@ The factor-`3` cover leaves a strict collar inside the existing factor-`4`
 hats.  This avoids strengthening the stable Step-C interfaces to factor `5`
 and is the geometric room needed for special bump numerators.  Focused
 verification and the targeted module refresh passed.
+
+## 2026-07-10 Live-Center Injectivity Floor
+
+- Added `seqCenter_mu_hasInj`: a live ordered-net center in slot `alpha` has
+  injectivity radius at least `mu (2 * lambda D 0 * alpha)`, uniformly in the
+  sequence index.
+- The proof combines the checked `lbl389` radius window, the realized-distance
+  bridge, and `mu_hasInj_of_le`; it does not add a new radius assumption.
+
+This is the correct fixed-slot injectivity half of the Route-A scale producer.
+It is not yet the moving inverse-exponential branch scale, and it does not
+resolve the current over-quantification over dead slots.  Focused verification
+passed.

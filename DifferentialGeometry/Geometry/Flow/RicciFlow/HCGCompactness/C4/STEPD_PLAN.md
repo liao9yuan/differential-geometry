@@ -16,7 +16,7 @@ seems to need one, stop and report (it means an upstream producer is misshapen).
 
 ---
 
-## Current execution structure (2026-07-09)
+## Current execution structure (2026-07-10)
 
 This section is the active running source of truth.  The older D1--D6 sections
 and chronological codas below are kept for proof-route detail, but this current
@@ -27,23 +27,21 @@ Overall accounting, by endpoint:
 
 - `MetricCompactnessInputs.metricCompactness`: theorem body still 0% complete;
   the endpoint is still a `sorry`.
-- Step D assembly / D6: 0%; no final assembly theorem has been stated and
-  proved.
-- Step D machinery: about 88%.  D3 and ambient-target D4 are implemented;
-  D1b's local recursion body is closed modulo its explicit B/C producer.  D2a
-  fixed-stage limits, D2b's common diagonal/`lbl407` estimate, D2c's adjacent
-  metric cocycle, and D2d's full cocycle are checked on the large stages.  D5
-  has a corrected abstract compact-cover consumer, but the concrete
-  metric-exhaustion producer is not proved.  Shrunk tail geometry and compact
-  successor containment are checked; tail metric transport, metric exhaustion,
-  D6, and final reindex bookkeeping remain.
+- Conditional Step-D assembly `compactness_of_b1`: 100% stated and proved from
+  the honest `StepB1RawInput` package.  It constructs the strict subsequence,
+  common limit, completeness, original-member maps, and convergence.
+- Step-D consumer machinery: 100%.  D1's conditional recursion, D2's common
+  diagonal and metric cocycle, D3's smooth metric direct limit, D4 convergence,
+  D5 completeness, and D6 reindex/field assembly are checked.  The former D6
+  maps-indexed convergence blocker is closed by `repoint`, `unrepoint`, and
+  `ofSubseq`; do not restart it.
 - D1b conditional consumer `directed_of_b1`: body is 100% checked.  The F4/F5
   uniform constant chain is proved and checked downstream.  The false P-only
   `stepB1_approxIso` was removed; `directed_of_b1` now exposes the missing B/C
   mathematics as `StepB1RawInput`.  The textbook D1b theorem from the endpoint
   hypotheses remains 0%.
 
-Active lanes to finish Step D:
+Active dependency lanes for the endpoint (Step-D consumer itself is complete):
 
 1. **Lane 1: D1 axiom-clean composition frontier.**
    Do not restart the `StepDDirected.lean` `hacc` recursion.  It is closed.
@@ -74,8 +72,9 @@ Active lanes to finish Step D:
    pullback cocycle for adjacent limit metrics.  The D6 audit additionally
    requires shrunk stages of radius `2^n`: their source/image control, closed
    ball containment, smooth system, and compact successor containment are
-   checked.  Restricting or rebuilding the large-stage limit metrics on this
-   shrunk system is deliberately gated on the D5 metric-exhaustion proof.
+   checked.  `tailMetric` now restricts the already-constructed large-stage
+   limits to those shrunk stages, and `tailMetricCocycle` proves their full
+   compatibility without rerunning D2.
 
 3. **Lane 3: D4b/c convergence to the limit — complete.**
    D4a (`limitCGMaps`) is done.  `limitCGConverges` and `chainCGConverges`
@@ -84,37 +83,36 @@ Active lanes to finish Step D:
    same result to the original ambient members with target `U k`; the zero-tail
    identity is `chainPullback_zero`.
 
-4. **Lane 4: D5 concrete completeness producer.**
+4. **Lane 4: D5 concrete completeness producer — complete.**
    The old per-stage-properness input is false for open stages.  The corrected
    `HasCompactBallCover` / `limitComplete_cover` consumer is checked, as is
-   `tailSystem_compact`.  The remaining producer must prove that finite
-   limit-metric balls lie in a stage range.  The next feasibility target is a
-   quantitative lower bound on the limit distance from the basepoint to the
-   complement of the `n`th shrunk stage, using `lbl407` metric comparison and
-   the radius `2^n`.
+   `tailSystem_compact`; the compact-cover API now correctly quantifies only
+   finite `ENNReal` radii.  `half_ambient_le_tail` uses `lbl407` only at order
+   zero.  Compact half-radius cores and their closed limit images are checked,
+   and `exists_first_exit` supplies the generic first-exit point.  The next
+   `incl_mem_coreInt`, `frontier_core_radius`, `pathELength_val_le`,
+   `path_escape_core`, `mem_core_of_edist`, and `tailRangeExhausts` now prove
+   that every finite Riemannian ball around any limit point lies in one shrunk
+   stage range.  `tailLimitComplete` now performs the checked assembly
+   `tailSystem_compact -> compactCover_of_step -> limitComplete_cover`; concrete
+   D5 is complete.
 
-5. **Lane 5: D6 final assembly.**
-   Compose the Step A subsequence, D1 directed system, and D2 diagonal
-   subsequence; assemble the limit, maps, convergence, and completeness fields;
-   discharge the remaining construction-scale inputs (`Item3RadiusInput`,
-   `Item3GpScaleInput`, `SigmaScaleField`) from the uniform normal-radius data;
-   replace the `MetricCompactnessInputs.metricCompactness` `sorry`.
+5. **Lane 5: D6 final assembly -- complete.**
+   `tailAmbientConv` and `tailLimitComplete` use the same `S`, `gTail`, and
+   `hgTail`; `tailMemberConv` transfers the convergence to the original sequence
+   through `repoint`, `unrepoint`, and `ofSubseq`; and
+   `compactness_of_b1` assembles every `MetricCompactnessConclusion` field.
 
-Current stop status: the restarted feasibility audit reached **3/3 genuine
-route errors**, so work stops here under the user's explicit rule.  The errors
-are: (1) open-stage properness is false; (2) the large radius `2^(j0+n)` stages
-leave no compact-nesting margin; (3) relative compactness of successor images
-alone does not imply completeness of their union.  Current next target on a
-fresh recount: **Lane 4, a distance-to-stage-boundary lemma implying metric
-exhaustion**.  Do not resume D6 wiring or rerun the diagonal D2 construction
-until that gate is proved.
-Lane 1's F4
-branch is complete.  Its remaining B1 branch is a genuine C-track input-design
-task, not a local D1 proof: `StepB1RawInput` cannot be produced from `X + P`
-without the POU/target-convergence/center/local-diffeomorphism/bounds
-bundle.  Continue Step D on the independent D2 lane while that producer bundle
-is designed.  The older ordinary `compDataFwd`/`compDataRev` wrappers remain
-separate non-D1b warnings in `PullbackField.lean`.
+Current execution status: the historical D6 recount remains recorded as 3/3,
+but its API blocker is resolved and is no longer an active stop condition.
+`D6_PRO_PROMPT.md` is retained only as history.  The sole dependency preventing
+the working endpoint from consuming the checked Step-D theorem is upstream:
+the B/C lane has not yet produced `StepB1RawInput` from the endpoint's concrete
+atom/weight/center data.  Resume from `B1_JOIN_HANDOFF.md`; the next selected
+brick is the fixed all-order inverse-exp/readout domain, followed by finite-hat
+containment and the honest Hessian/Neumann producer.  Use `B1_PRO_PROMPT.md` for
+consultation.  Do not edit D1--D6 again unless that producer exposes a genuine
+interface mismatch.
 
 ---
 
@@ -1638,3 +1636,83 @@ else is assembly against existing engines.
   ledger route.  The remaining D1b axiom-clean blockers are the B/C-track
   `stepB1_approxIso` producer bundle and the inherited F5 uniform producer
   behind `comp_cov_le_unif` / `Lemma45F4`.
+
+- 2026-07-09 (D6 wiring pass): **D5's last explicit connectivity input has a
+  concrete producer; D6 now exports its fixed-order data, but current-tree
+  verification is blocked upstream.**  `tailBall_preconn` proves positive-radius
+  Riemannian balls preconnected by a near-minimizing path that stays inside the
+  ball.  The proof shape passed an isolated Mathlib check.  `tailRangeExhausts`
+  and `tailLimitComplete` no longer accept an external
+  `PreconnectedSpace (tailBallOpen ...)` instance.
+
+  The D2 diagonal output was also aligned with D5: `exists_chain_data` now
+  chooses `j₀ >= 1`, and `exists_limits_diag` / `exists_limits_close` return
+  both that bound and the already-constructed fixed-order family `D₀`.  This
+  removes the need to restart the diagonal construction or reselect incompatible
+  data during D6.
+
+  Current verification did not reach `StepDLimitMetrics.lean`.  Rebuilding its
+  stale dependency closure stops in
+  `Tensor/RSTensor/NablaOnTensors/Regularity/Derivation.lean` at
+  `nablaRSFun_eval_moving_raw`: elaboration times out at `whnf` even with a
+  one-million-heartbeat diagnostic budget, and later unknown-constant errors are
+  cascading consequences.  This is an upstream performance/verification wall,
+  not a Step-D proof-route error.  Fresh route count remains **0/3**.
+
+  Honest accounting: final D6 theorem remains unstated/unproved, hence **0%**;
+  dedicated D6 wiring is about **15%**; whole Step-D machinery remains about
+  **96%**.  Once the upstream artifact is restored, first recheck
+  `StepDLimitMetrics.lean`, then prove the single next bridge: pointwise
+  `metricDerivNorm` invariance for the flat
+  `SmoothRiemannianMetric.restrictOpenOfSubset`.  That bridge lets the large-ball
+  `lbl407` convergence restrict to the same shrunk system whose limit is proved
+  complete; only then assemble the ambient CG maps and convergence.
+
+- 2026-07-10 (D6 common-limit convergence): **the flat restriction gate and
+  shrunk-tail ambient convergence are checked.**  `metricDerivNorm_flat` is
+  module-checked, `tailFlatSup_lt` restricts the `l = 0` `lbl407` estimate to
+  compact subsets of `tailBallOpen`, and `tailAmbientConv` supplies ambient-target
+  Cheeger--Gromov convergence to exactly the same `limitPointedCoc` used by
+  `tailLimitComplete`.  Focused `StepDLimitMetrics.lean` verification passed
+  without warnings or new `sorry`.  Fresh route count remains **0/3**.
+
+  Honest accounting: final D6 theorem is still unstated/unproved, hence **0%**;
+  dedicated D6 wiring is about **30%**; whole Step-D machinery is about **97%**.
+  Next target: inspect `MetricCompactnessInputs.metricCompactness` live fields,
+  then compose the Step A and D2 subsequences/reindexing into the common
+  convergence/completeness package.  Do not restart D1--D5.
+
+- 2026-07-10 (D6 original-sequence alignment, route recount 3/3):
+  `tailCenter_map` and `tailMemberMaps` are focused-check green.  The latter
+  directly targets `X` at `n ↦ σ (j₀ + n)`, so maps and basepoints are no longer
+  the frontier.  Three genuinely different Lean routes for reusing convergence
+  failed: equality of the dependent pointed sequences; equality of maps records
+  indexed by different sequences; and rebuilding `ofRestrictPullback` from a
+  partial-map equality, where `MetricTargetDomain Φ k` and `MetricSourceData Φ k`
+  still require full-record transport.  The failed convergence theorem was
+  removed; no new `sorry` remains.  Requested stop condition: **3/3**.
+
+  Smallest next design task: add one canonical basepoint-insensitive
+  convergence/generalized-explicit-maps API, then consume `tailFlatSup_lt` with
+  `tailMemberMaps`.  Final D6 theorem and conditional endpoint remain **0%**;
+  dedicated D6 machinery is about **40%**; whole Step-D machinery remains about
+  **97%**.
+
+- 2026-07-10 (D6 resolution and conditional Step-D completion): the previous
+  maps-indexed convergence blocker is closed by a three-part reusable API.
+  `PointedRiemannianSeq.repoint` represents the transported-center tail;
+  `PointedRiemannianCGConverges.unrepoint` removes the basepoint-only change;
+  and `PointedRiemannianCGConverges.ofSubseq` returns to the original sequence
+  index.  `tailMemberConv` consumes that chain.  `alignedProper` transports
+  properness through the topology-aligned metric, and `compactness_of_b1`
+  constructs the complete `MetricCompactnessConclusion`.  Focused checks and
+  the targeted refreshes of the reusable producer modules passed.  Its axiom
+  audit contains only `propext`, `Classical.choice`, and `Quot.sound`.
+
+  Honest accounting: `compactness_of_b1` is **100% proved** and dedicated D6 /
+  Step-D consumer machinery is **100%**.  The working theorem
+  `MetricCompactnessInputs.metricCompactness` remains **0% proved** because its
+  body is still `sorry`; the textbook theorem from endpoint inputs remains 0%
+  until the B/C lane constructs `StepB1RawInput`.  Next target:
+  `B1_JOIN_HANDOFF.md` Route A, beginning with one fixed all-order
+  `diagExpInv`/readout domain.  The consultation prompt is `B1_PRO_PROMPT.md`.

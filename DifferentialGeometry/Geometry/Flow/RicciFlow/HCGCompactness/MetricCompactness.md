@@ -30,3 +30,13 @@ diffeomorphism with the ambient differential of the stored comparison map. The p
 the two equal ambient composites and removes the source/target subtype inclusions. Focused
 verification and the targeted module build passed; the expected unconditional endpoint `sorry` is
 unchanged.
+
+2026-07-10 D6 repointing update: added `PointedRiemannianCGMaps.unrepoint`,
+`MetricSourceData.unrepoint`, `MetricCGConvergenceData.unrepoint`, and
+`PointedRiemannianCGConverges.unrepoint`.  These transport a checked convergence
+package from a sequence whose members differ only by stored basepoints back to
+the original sequence, given the pointwise basepoint equalities.  The metric,
+source, and target-domain data are preserved by field-wise rewrapping, so no
+record equality or `HEq` transport is needed.  Focused verification and the
+targeted module refresh passed; the existing unconditional endpoint `sorry` is
+unchanged.

@@ -45,6 +45,17 @@ structure PointedRiemannianManifold
   basepoint : M
   metric : SmoothRiemannianMetric I M
 
+namespace PointedRiemannianManifold
+
+variable {I : ModelWithCorners Real E H}
+
+/-- Replace only the distinguished point of a pointed Riemannian manifold. -/
+def repoint (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : X.M) :
+    PointedRiemannianManifold.{u, uE, uH} (I := I) :=
+  { X with basepoint := x }
+
+end PointedRiemannianManifold
+
 /-- A sequence of pointed Riemannian manifold candidates. -/
 structure PointedRiemannianSeq (I : ModelWithCorners Real E H) where
   obj : Nat -> PointedRiemannianManifold.{u, uE, uH} (I := I)
@@ -62,6 +73,12 @@ def basepoint (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) (i : Nat) :
 def subseq (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) (f : Nat -> Nat) :
     PointedRiemannianSeq.{u, uE, uH} (I := I) where
   obj := fun i => X.obj (f i)
+
+/-- Replace only the distinguished point of every member of a pointed sequence. -/
+def repoint (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
+    (b : forall i : Nat, (X.obj i).M) :
+    PointedRiemannianSeq.{u, uE, uH} (I := I) where
+  obj i := (X.obj i).repoint (b i)
 
 end PointedRiemannianSeq
 

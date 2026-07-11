@@ -155,3 +155,15 @@ so the inputs were relocated to `StepAInputs.lean`.
 **Resolution pending user decision (asked 2026-06-08):** recommended = relocate the 3 clean Step A
 input structures into a new building file `StepAInputs.lean`, import that from `GoodCovering`, and
 flag the broken S6 part of `GeometricInputs` separately (do NOT redesign S6 now).
+
+## 2026-07-10, bounded-distance injectivity floor
+
+Added `mu_hasInj_of_le`: if a point has supplied basepoint distance at most
+`R`, the existing canonical decay scale `mu R` is a positive injectivity-radius
+lower bound, uniformly in the sequence index.  This reuses `mu` rather than
+introducing a parallel radius definition.  It discharges the injectivity half
+of a fixed-radius Step-C scale.  Verification passed.
+
+It does not by itself choose one global `D` for every outer radius; that needs
+the moving inverse-exponential branch scale to dominate a fixed multiple of
+`mu(distance)` (or a correctly localized/eventual live-slot redesign).

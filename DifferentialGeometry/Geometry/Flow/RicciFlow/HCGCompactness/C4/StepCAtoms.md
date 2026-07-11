@@ -12,6 +12,8 @@ Delivered:
 - `stepCAtom`, the intrinsic `quadNormal` specialization;
 - `seqAtom`, which is zero for a dead ordered-net slot and the centered atom for
   a live slot;
+- `seqAtom_contMDiff`, proving the whole ordered-net atom family globally
+  smooth by separating the zero and quadratic-normal cases;
 - `seqAtom_Icc` / `seqAtom_nonneg`;
 - `seqAtom_one`, proving that a live atom is one on its strict `3 * lam` inner
   ball;
@@ -40,6 +42,6 @@ The producer-based refactor and the eventual/basepoint additions passed focused
 verification without local warnings; the earlier targeted module build passed.
 This atom/pointwise-weight sub-brick is complete.  The `StepB1RawInput` producer
 and the textbook B1 theorem remain unstated/unproved (0%); their dedicated
-machinery is now roughly 53%.
-Step-B machinery remains about 53%, Chapter-4 machinery about 60%, and the whole
-HCG compactness machinery about 44%; final compactness endpoints remain 0%.
+machinery is now roughly 58%.
+Step-B/B1 machinery is about 58%, Chapter-4 machinery about 64%, and the whole
+HCG compactness machinery about 45%; final compactness endpoints remain 0%.

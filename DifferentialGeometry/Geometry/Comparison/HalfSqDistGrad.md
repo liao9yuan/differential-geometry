@@ -277,5 +277,26 @@ For each tangent direction `w` at `q`:
 - Brick 1 (central geodesic velocity = normalChartAt, unit-speed, arcLength=L): geometry-heavy;
   needs intrinsic↔chart exp reconciliation + geodesic ODE velocity. Likely the hardest brick.
 - arcLength (Variation) ↔ pathELength (Manifold) ↔ riemannianEDist bridge for step 3.
-- Smoothness sub-frontier A (`halfSqDist` ContMDiffAt near diagonal) is LEFT as the `hdiff`
-  hypothesis here; producing it from `diagExpInv` + uniform `dist=√(g v v)` is a separate task.
+- The reusable smoothness sub-frontier is resolved below by the fixed-target
+  producer `exists_halfSqDist_md`.  Removing the `hdiff` hypothesis from the
+  current `q`-based `halfSqDist_flat` interface still requires reverse-chart
+  source/smallness, which belongs to the concrete configuration-domain work.
+
+## 2026-07-10 — fixed-target differentiability producer
+
+- Added `exists_halfSqDist_md`, verified by focused checking and a targeted
+  module build.  For fixed `pt`, it supplies a positive radius on which
+  `halfSqDist pt` is manifold-differentiable at every `q` in the fixed normal
+  chart of `pt` with sufficiently small normal coordinate.
+- The proof avoids the unavailable moving-base radius lower bound: by distance
+  symmetry it works in the fixed chart at `pt`, where `halfSqDist pt` agrees
+  locally with the smooth quadratic form
+  `(1 / 2) * g.inner pt (normalChartAt g pt q) (normalChartAt g pt q)`.
+- This completes the reusable local differentiability producer.  It does not
+  yet discharge the `hdiff` argument of `halfSqDist_flat`, whose current input
+  is phrased with the opposite, `q`-based chart.  The concrete Step-C
+  application must still prove the reverse-chart source and smallness facts
+  for each finite-hat center/atom pair.
+- Honest accounting: `exists_halfSqDist_md` itself is complete; the concrete
+  finite-hat differentiability instantiation remains unstated and therefore
+  0% complete.

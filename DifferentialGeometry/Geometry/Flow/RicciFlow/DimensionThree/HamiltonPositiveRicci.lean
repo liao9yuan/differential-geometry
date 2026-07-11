@@ -9,7 +9,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ScalarFiniteTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximalTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.ScaleTransfer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicciFlowConvergence
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergenceGlobal
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeExistence
@@ -2299,6 +2299,46 @@ theorem ham3_r0_window
   · linarith
   · exact hsright
 
+/-- The selected metric scaling eventually makes any fixed original
+noncollapsing scale `rho` contain a fixed rescaled radius `r`. -/
+theorem ham3_radius_event
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+      0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (r rho : Real) (hr : 0 < r) (hrho : 0 < rho) :
+    exists N : Nat, forall i : Nat, N <= i ->
+      r <= Real.sqrt (ham3BlowupScale (I := I) P Q i) * rho := by
+  rcases hsel with ⟨hscale, _htime, htimeMem, hprod, _hbase, _hscalarMax⟩
+  let C : Real := (r / rho) ^ 2
+  rcases hprod (C * omega) with ⟨N, hN⟩
+  refine ⟨N, ?_⟩
+  intro i hi
+  have hprod_i :
+      C * omega <= ham3BlowupScale (I := I) P Q i * Q.time i := hN i hi
+  have htime_i := htimeMem i
+  rw [hD] at htime_i
+  have hprod_lt :
+      ham3BlowupScale (I := I) P Q i * Q.time i <
+        ham3BlowupScale (I := I) P Q i * omega :=
+    mul_lt_mul_of_pos_left htime_i.2 (hscale i)
+  have hscale_lower : C < ham3BlowupScale (I := I) P Q i := by
+    exact lt_of_mul_lt_mul_right (lt_of_le_of_lt hprod_i hprod_lt) h0omega.le
+  have hsqrt :
+      Real.sqrt C <= Real.sqrt (ham3BlowupScale (I := I) P Q i) :=
+    Real.sqrt_le_sqrt (le_of_lt hscale_lower)
+  have hquot_nonneg : 0 <= r / rho := (div_pos hr hrho).le
+  have hsqrt' :
+      r / rho <= Real.sqrt (ham3BlowupScale (I := I) P Q i) := by
+    simpa only [C, Real.sqrt_sq hquot_nonneg] using hsqrt
+  have hmul := mul_le_mul_of_nonneg_right hsqrt' hrho.le
+  calc
+    r = (r / rho) * rho := (div_mul_cancel₀ r (ne_of_gt hrho)).symm
+    _ <= Real.sqrt (ham3BlowupScale (I := I) P Q i) * rho := hmul
+
 /-- The exact `100 = r0⁻²` curvature estimate becomes scale-one curvature
 control on the actual parabolically rescaled `r0` balls. -/
 theorem ham3_rm_control
@@ -2379,6 +2419,38 @@ theorem ham3_rm_control
       _ = 1 := by
         field_simp [ne_of_gt hscale]
         norm_num [ham3_r0]
+
+/-- A genuine no-local-collapsing statement on the original flow supplies the
+fixed-radius noncollapse input for the selected Hamilton rescalings. -/
+theorem ham3_noncollapse_of
+    {omega : Real} (h0omega : 0 < omega)
+    {g0 : SmoothRiemannianMetric I M}
+    (P : Ham3FlowPackage (I := I) (M := M) g0)
+    (hD : P.D = DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen
+      0 omega h0omega)
+    (Q : Ham3BlowupData M)
+    (hsel : Ham3PointSel (I := I) P Q)
+    (hrm : Ham3RmControl (I := I) P Q hsel ham3_r0)
+    {rho : Real} (hnlc : Perelman.NoLocalCollapsing P.S rho) :
+    exists kappa : Real,
+      Ham3Noncollapse (I := I) P Q hsel kappa ham3_r0 := by
+  rcases hnlc with ⟨kappa, hkappa, hbelow⟩
+  rcases hrm with ⟨hr, Nrm, hRm⟩
+  rcases ham3_radius_event (I := I) h0omega P hD Q hsel
+      ham3_r0 rho hr hbelow.1 with ⟨Nscale, hscale⟩
+  refine ⟨kappa, hkappa, hr, Nat.max Nrm Nscale, ?_⟩
+  intro i hi
+  have hiRm : Nrm <= i := le_trans (Nat.le_max_left Nrm Nscale) hi
+  have hiScale : Nscale <= i := le_trans (Nat.le_max_right Nrm Nscale) hi
+  let B := ham3RescaledBall (I := I) P Q hsel i ham3_r0 hr
+  have hRm_i : B.IsRmControlled := hRm i hiRm
+  have hbelow_i := Perelman.para_noncollapse (I := I) P.S (Q.time i)
+    (ham3BlowupScale (I := I) P Q i) (hsel.1 i) (hsel.2.2.1 i)
+    kappa rho hbelow
+  have hkappa_i : B.IsKappaNoncollapsed kappa :=
+    hbelow_i.2 (ham3RescaledZero (I := I) P Q hsel i) B
+      (hscale i hiScale) hRm_i
+  exact ⟨hRm_i, hkappa_i⟩
 
 /-- Black box 11.8-style input: Perelman's no-local-collapsing theorem gives a
 uniform volume lower bound at the fixed radius `r0`. -/

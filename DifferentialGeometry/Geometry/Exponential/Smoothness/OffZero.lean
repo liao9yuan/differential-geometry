@@ -1312,18 +1312,18 @@ private lemma exists_phaseBall_orbit_in_inner_ball {x₀ : E}
     have hmem : ((z, s) : (E × E) × ℝ) ∈ U ×ˢ V := ⟨hz_U, hs_V⟩
     exact h_subset hmem
 
-/-- **Chart-coordinate exponential, jointly in (chart-position, velocity).**
-For a fixed chart center `α` and finite regularity order `n ≥ 1`, the
+/-- **Chart-coordinate exponential, jointly `C^infty` in chart position and velocity.**
+For a fixed chart center `α`, the
 chart-coordinate exponential map
 `(x, v) ↦ (Φ((x, v), t')).1` — the first component (the chart position of
 the geodesic at the fixed time `t'`) of the combined chart-phase flow —
-is jointly `ContDiffOn ℝ n` on a basic phase-ball
+is jointly `ContDiffOn ℝ ∞` on a single basic phase-ball
 `ball ((x₀, 0)) ρ`, where `x₀ := extChartAt I α α`. Here both the
 chart-position `x` and the velocity `v` vary jointly.
 
 This is the **single-chart joint smoothness in basepoint AND launch
 vector**, in chart coordinates. The flow `Φ` is the one produced by
-`Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_nat`, and is
+`Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_inf`, and is
 the genuine geodesic flow of the chart-coordinate phase-space vector
 field `chartPhaseVF g α`: it satisfies the chart-phase ODE
 `HasDerivAt (Φ((x, v), ·)) (chartPhaseVF g α (Φ((x, v), s))) s` on
@@ -1336,11 +1336,11 @@ exactly `(Φ((x, v), t')).1`; this is the analytic content S5 lifts to the
 manifold statement once the chart-independence of geodesics (the
 moving-chart geodesic equation) supplies the basepoint-`≠`-`α`
 identification of `Φ`'s base orbit with `maximalGeodesic g q`. -/
-theorem exists_chartExp_jointContDiffOn_nat
-    (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ) (hn : 1 ≤ n) :
+theorem exists_chartExp_jointContDiffOn_infty
+    (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ),
       0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧
-      ContDiffOn ℝ (n : ℕ∞)
+      ContDiffOn ℝ ∞
         (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
         (Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ∧
       (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
@@ -1353,7 +1353,7 @@ theorem exists_chartExp_jointContDiffOn_nat
         ∀ s ∈ Set.Icc (-T) T,
         Φ ((z, s) : (E × E) × ℝ) ∈
           (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) ∧
-      ContDiffOn ℝ (n : ℕ∞) Φ
+      ContDiffOn ℝ ∞ Φ
         ((Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
   classical
   set x₀ : E := extChartAt I α α with hx₀_def
@@ -1366,13 +1366,12 @@ theorem exists_chartExp_jointContDiffOn_nat
       (I := I) α hx₀_target
   obtain ⟨b, r, ε, ρ_V, T_V, Φ, hr, hε, hρ_V_pos, hT_V_pos, hb_sub, hΦ_ILF,
     hΦ_cd_V, hΦ_init0⟩ :=
-    Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_nat
-      (I := I) (g := g) (α := α) (x₀ := x₀) (v₀ := (0 : E)) n hn hx₀_interior
+    Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined_inf
+      (I := I) (g := g) (α := α) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
   have hΦ_cd_V1 : ContDiffOn ℝ 1 Φ
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ_V) ×ˢ Set.Ioo (-T_V) T_V) := by
-    apply hΦ_cd_V.of_le
-    have h1le : (1 : ℕ∞) ≤ (n : ℕ∞) := by exact_mod_cast hn
-    exact_mod_cast h1le
+    exact hΦ_cd_V.of_le
+      (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   obtain ⟨ρ₀, T₀, hρ₀_pos, hT₀_pos, hρ₀_le_V, hT₀_lt_V, h_orbit_in⟩ :=
     exists_phaseBall_orbit_in_inner_ball
       (x₀ := x₀)
@@ -1396,7 +1395,7 @@ theorem exists_chartExp_jointContDiffOn_nat
   have hT_pos : 0 < T := lt_min hT₀_pos (by linarith)
   have hT_le_T₀ : T ≤ T₀ := min_le_left _ _
   have hT_lt_T_V : T < T_V := lt_of_le_of_lt hT_le_T₀ hT₀_lt_V
-  have hΦ_cd : ContDiffOn ℝ (n : ℕ∞) Φ
+  have hΦ_cd : ContDiffOn ℝ ∞ Φ
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
     apply hΦ_cd_V.mono
     intro w hw
@@ -1409,12 +1408,15 @@ theorem exists_chartExp_jointContDiffOn_nat
   have ht'_pos : 0 < t' := by rw [ht'_def]; exact half_pos hT_pos
   have ht'_lt_T : t' < T := by rw [ht'_def]; exact half_lt_self hT_pos
   have ht'_in_Ioo : t' ∈ Set.Ioo (-T) T := ⟨by linarith, ht'_lt_T⟩
-  have hjoint : ContDiffOn ℝ (n : ℕ∞)
+  have hjoint : ContDiffOn ℝ ∞
       (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
-      (Metric.ball ((x₀, (0 : E)) : E × E) ρ) :=
-    contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
+      (Metric.ball ((x₀, (0 : E)) : E × E) ρ) := by
+    rw [contDiffOn_infty]
+    intro n
+    exact contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
       (Φ := Φ) (z₀ := ((x₀, (0 : E)) : E × E)) (ρ := ρ) (T := T) (t' := t') n
-      ht'_in_Ioo hΦ_cd
+      ht'_in_Ioo
+      (hΦ_cd.of_le (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)))
   have hΦ_init_z : ∀ z ∈ Metric.ball ((x₀, (0 : E)) : E × E) ρ,
       Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z := by
     intro z hz
@@ -1496,6 +1498,35 @@ theorem exists_chartExp_jointContDiffOn_nat
     exact hb_sub h_in_outer
   exact ⟨Φ, ρ, T, t', hρ_pos, hT_pos, ht'_in_Ioo, ht'_pos,
     hjoint, hΦ_init_z, hΦ_phase_z, hΦ_target_z, hΦ_cd⟩
+
+/-- The finite-order projection of
+`exists_chartExp_jointContDiffOn_infty`.  The phase ball and flow are therefore
+independent of the requested finite order. -/
+theorem exists_chartExp_jointContDiffOn_nat
+    (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ) (_hn : 1 ≤ n) :
+    ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ),
+      0 < ρ ∧ 0 < T ∧ t' ∈ Set.Ioo (-T) T ∧ 0 < t' ∧
+      ContDiffOn ℝ (n : ℕ∞)
+        (fun z : E × E => (Φ ((z, t') : (E × E) × ℝ)).1)
+        (Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
+        Φ ((z, (0 : ℝ)) : (E × E) × ℝ) = z) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
+        ∀ s ∈ Set.Ioo (-T) T,
+        HasDerivAt (fun s' : ℝ => Φ ((z, s') : (E × E) × ℝ))
+          (chartPhaseVF (I := I) g α (Φ ((z, s) : (E × E) × ℝ))) s) ∧
+      (∀ z ∈ Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ,
+        ∀ s ∈ Set.Icc (-T) T,
+        Φ ((z, s) : (E × E) × ℝ) ∈
+          (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) ∧
+      ContDiffOn ℝ (n : ℕ∞) Φ
+        ((Metric.ball ((extChartAt I α α, (0 : E)) : E × E) ρ) ×ˢ Set.Ioo (-T) T) := by
+  obtain ⟨Φ, ρ, T, t', hρ, hT, ht', ht'pos, hjoint, hinit, hphase, htarget, hΦ⟩ :=
+    exists_chartExp_jointContDiffOn_infty (I := I) g α
+  have hn_inf : ((n : ℕ∞) : WithTop ℕ∞) ≤ ((⊤ : ℕ∞) : WithTop ℕ∞) := by
+    exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤)
+  exact ⟨Φ, ρ, T, t', hρ, hT, ht', ht'pos, hjoint.of_le hn_inf,
+    hinit, hphase, htarget, hΦ.of_le hn_inf⟩
 
 end JointBasepointVector
 

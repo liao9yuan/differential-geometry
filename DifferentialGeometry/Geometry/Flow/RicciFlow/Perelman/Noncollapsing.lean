@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Defs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Analysis.Integration.Measure.RealizedMetricForMeasure
-import Mathlib.Geometry.Manifold.Riemannian.PathELength
+import DifferentialGeometry.Geometry.Metric.DistanceScaling
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -54,9 +54,8 @@ variable {time : DifferentialGeometry.Integral.Connection.RealTimeInterval.FlowT
 /-- The open ball with `B`'s center and radius, measured using the time-`t`
 metric. -/
 def setAt (B : FlowMetricBall S time) (t : Real) : Set M :=
-  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
-    ⟨(S.base.metric t).toRiemannianMetric⟩
-  {x : M | Manifold.riemannianEDist I B.center x < ENNReal.ofReal B.radius}
+  {x : M | DifferentialGeometry.riemannianEDistOf
+    (I := I) (S.base.metric t) B.center x < ENNReal.ofReal B.radius}
 
 /-- The flow metric ball at its distinguished time. -/
 def set (B : FlowMetricBall S time) : Set M :=

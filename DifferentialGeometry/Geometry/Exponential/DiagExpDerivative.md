@@ -137,3 +137,36 @@ order-1 proof; the ONLY changes are the ContDiffAt order on the inner symm and t
 - Import graph checked FIRST (planner instruction): the C∞/order-`n` forward `chartedDiagExp` facts
   (`chartedDiagExp_contDiffAt` already stated at general `n`) are NOT downstream of DiagExpDerivative
   (no Step-B LocalDiffeomorphism↔OffZero cycle), so the bump is IN-PLACE, no downstream-file needed.
+
+## 2026-07-10 — finite-order off-diagonal branch domain
+
+- Added `exists_diagInvDom`. For every finite `n ≥ 1` it exposes an open
+  neighborhood of `(p,p)` on which the fixed, totalized `diagExpInv` branch is
+  genuinely `C^n`, is a right inverse of `diagExp`, projects to the moving base,
+  and satisfies the intrinsic exponential identity pointwise.
+- This closes the former API problem that all IFT branch data were private: an
+  off-diagonal consumer can now ask for membership in a real branch domain.
+- The domain may depend on `n`. Mathlib's `ContMDiffAt ∞` convention gives
+  order-dependent neighborhoods, so this does not claim one common open
+  `C^∞` region.
+- Focused verification and the targeted module build passed. The next analytic
+  frontier is a common `C^∞` branch domain, requiring either a fixed-box `∞`
+  geodesic-flow theorem or a deliberate Step-C scale shrink.
+
+## 2026-07-10 — one common C-infinity branch domain
+
+- Added the private fixed-neighborhood producers `exists_chartDiagInf` and
+  `exists_chartInvInf`.  On the rescaled preimage of the fixed chart-flow ball,
+  `chartedDiagExp` agrees with the explicit map `z ↦ (z.1, G (R z))`, hence is
+  genuinely `C^∞` on one open set.
+- The inverse proof keeps the existing `diagExpIFT` branch.  Continuity of
+  `fderiv` and openness of the continuous-linear-equivalence locus provide a
+  smaller source on which every derivative is invertible; no second inverse or
+  branch-uniqueness theorem is introduced.
+- Added public `exists_diagInvDom_inf`: one open neighborhood of `(p,p)` carries
+  `ContMDiffOn ∞` for `diagExpInv`, its right-inverse identity, base projection,
+  and intrinsic exponential identity.
+- Focused verification and the targeted module build passed.  The common
+  all-order inverse domain is no longer a frontier; the next Step-C issue is
+  uniform finite-hat/configuration containment in this domain and in the named
+  realized-exponential radii.

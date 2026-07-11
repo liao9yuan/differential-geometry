@@ -28,12 +28,13 @@ Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
 Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
-                    → Step B (local metrics/transitions, ~1/2)
+                    → Step B (local metrics/transitions/B1 machinery, ~63%;
+                      origin-metric and transition branches run in parallel,
+                      then merge on one further subsequence)
                     → Step C (center-of-mass averaging, ~3/4)
-                    → Step D (direct limit + assembly; ENDPOINT 0% — D2/D3/D4
-                      ambient convergence is checked; D5 metric exhaustion,
-                      shrunk-stage metric transport, D6 assembly, and the B1
-                      raw producer remain open)
+                    → Step D (direct limit + assembly; endpoint from concrete
+                      inputs 0%, but `compactness_of_b1` and all Step-D consumer
+                      machinery are proved; only the upstream B1 raw producer remains)
                     + F-track engines (F1–F13, ~95%)
 ```
 
@@ -41,7 +42,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 
 | Endpoint | Where | Status |
 |---|---|---|
-| **Conditional Thm 3.9** `MetricCompactnessInputs.metricCompactness` | `C4/MetricCompactnessInputs.lean` | STATED 2026-07-05; `sorry` = the honest A→D assembly.  **The Ch4 target.** |
+| **Conditional Thm 3.9** `MetricCompactnessInputs.metricCompactness` | `C4/MetricCompactnessInputs.lean` | STATED 2026-07-05; still 0% proved.  `compactness_of_b1` now proves its full Step-D conclusion from `StepB1RawInput`; the remaining `sorry` is the concrete B/C producer and endpoint wiring.  **The Ch4 target.** |
 | Unconditional Thm 3.9 `metricCompactness` | `MetricCompactness.lean` | `sorry` = conditional endpoint + externally cited theorems (CGT, Bishop–Gromov, [H6]) + connectedness; out of Ch4 scope by the 2026-07-05 ruling. |
 | Conditional Thm 3.10 `solutionComp_cond` / `compactnessSol_cond` | `C4/SolutionCompactnessInputs.lean` + `HamiltonCompactness.lean` | checked consumer from conditional Thm 3.9 plus concrete `FlowUpgradeData`; it does not prove the upstream 3.9 frontier or unconditional Thm 3.10 |
 | Lemma 3.11 | capstone `covOrderBound_of_soln` chain | DONE sorry-free (hShi hypothesis) |
@@ -51,7 +52,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | Lane | Entry plan | State |
 |---|---|---|
 | Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/STEPB_PLAN.md` + `C4/B1_JOIN_HANDOFF.md` + `C4/COMPCONV_HANDOFF.md` | active |
-| Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` | active; D2/D3/D4 ambient convergence and shrunk-tail compact containment checked; D5 metric exhaustion, tail metric transport, and D6 open; recount stopped at 3/3 |
+| Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` | conditional consumer complete: D6 convergence transport and `compactness_of_b1` are checked.  Do not restart D1--D6; resume at the upstream `StepB1RawInput` producer in `B1_JOIN_HANDOFF.md`. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldEndgame.md` | producer hypotheses remain active; canonical conditional wrappers are checked |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
 | Space-form / quotient curvature | memory note `spaceform-hardroute-build` + same-name `.md`s | parallel, unrelated to 3.9/3.10 |
@@ -72,12 +73,12 @@ book-faithful; **FIXED** = the pre-audit statement was wrong and was corrected t
 | `PackingBound` | `lbl387` | **TRUE** | per-radius count `A(r)`; no uniformity trap. |
 | `VolumeComparisonInput` (A0') | Bishop–Gromov | **FIXED** | Uncapped-in-`r` multiplicity was **FALSE** (hyperbolic members: `r`-separated counts in `m·r`-balls grow like `e^{(n−1)(m−½)√C₀·r}`).  Now capped at containing scale `m * r ≤ r0`; consumers (`net_multiplicity`, `inter_count`) thread the needed Step-A ratio times `λ[0]` into the cap. |
 | `RealizesEdist` | — | plumbing | provable at instantiation from `ProperMetricOn`; not external math. |
-| `NormalCoordMetricBoundInput` | `lbl395` = [H6] Cor 4.12 | **TRUE** | per-center radius (positivity: `expMapC2Radius_pos`), `k`/center-uniform constants are genuine (Jacobi-ODE analysis depends only on curvature bounds; `∂g(0)=0`, `∂²g(0)~Rm`). |
+| `NormalCoordMetricBoundInput` | `lbl395` = [H6] Cor 4.12 | **TRUE pointwise; uniform floor not encoded** | `metricC` is `k`/center-uniform, but `radius k x` has only pointwise positivity and may tend to zero.  The record therefore does not by itself supply the uniform radius formerly attributed to `normalBounds`; a live-center radius floor and quantitative Jacobi/ODE bridge are still missing. |
 | `ExpInverseDerivBoundInput` (S6) | `lbl418` | **FIXED** | Uncapped chart-overlap quantification was **over-strong** (no scale control; junk-`z` outside the exp source not excluded; `d(exp_x)` grows exponentially in negatively curved members).  Now: `r₁` cap + exp-source guard + image-in-`r₁`-ball guard — exactly the book's `r₁ ≤ min{inj/4, c/√C₀}` regime.  Consumer `exists_transitionLimit_normalTransition` min-strengthened. |
 | `IsometryDerivBounds` (F8) | `lbl375` → [H6] §5 | **TRUE** (as hypothesis) | abstract per-map-sequence Prop; the polynomial recursion is the cited external content.  Bundle-v2 field shape gated on the B-loc brick. |
-| `Item3RadiusInput` | `lbl391/392` ("D large") | satisfiable | pointwise-satisfiable today (`expMapC2Radius_pos`); the real content is uniformity = `lbl395`; **must be discharged at D6**, not carried to the endpoint. |
-| `Item3GpScaleInput` | `lbl383/427` | satisfiable modulo `lbl395`-uniformity | same family; D6 discharge (choose `D` large against the uniform radius). |
-| `SigmaScaleField` | `lbl383` family | satisfiable modulo `lbl395`-uniformity | `k`-independent `σ` needs `inf_k` radius > 0 = the same uniformity; D6 discharge. |
+| `Item3RadiusInput` | `lbl391/392` ("D large") | pointwise satisfiable; D6 producer missing | `expMapC2Radius_pos` gives pointwise positivity, but the current endpoint bundle does not imply the uniform lower bound needed to discharge the field by one choice of `D`. |
+| `Item3GpScaleInput` | `lbl383/427` | uniform producer missing | same family; choosing one `D` requires a radius floor not present in the current `normalBounds` record. |
+| `SigmaScaleField` | `lbl383` family | selected global route needs new producer | `k`-independent `σ` needs a positive radius infimum.  Fixed-index finite minima are valid locally, but replacing the global field requires an explicit diagonal/eventual redesign of the B/C producer. |
 | `CmHessianInput` | `lbl413`-adjacent | **TRUE** at book scale | below the convexity radius `∂_z(exp⁻¹) ≈ −id`, Neumann-series invertibility; per-configuration honest input. |
 | `StrictDistInput` | `lbl416/417` | **TRUE** at book scale | strict convexity of `½d²` below `min{inj/3, π/(6√K)}`. |
 | endpoint `hconn` | book convention | added 2026-07-05 | connectedness is genuinely needed by the Hopf–Rinow proper realization (disconnected ⇒ emetric `⊤`); the book's manifolds are connected by convention. |
@@ -99,10 +100,10 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-09)
+## 6. Honest progress (updated 2026-07-10)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
-  Step B ~1/2 (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
+  Step-B/B1 machinery ~63% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
   sorry-free/axiom-clean 2026-07-05** — `exists_diffeo_of_injOn` construction +
   `BookApproxIsoPartialData` forward/reverse transport via `PreApproxIsoDataOn.congr`;
   **2026-07-09 statement repair:** the false P-only `stepB1_approxIso` and its `sorry`
@@ -130,21 +131,28 @@ its docstring BEFORE consumers are built against it.
   **2026-07-09 radial-separation closure:** `mfderiv_exp_radial` + `radialEnorm_normal` close the
   former velocity-`hderiv` API gap, and `normLowerOfSepExp` now derives the coordinate norm lower
   bound directly from named-exp-ball containment and Riemannian separation.  This improves the
-  producer machinery but does not change the rounded totals: the `StepB1RawInput` producer and
-  textbook B1 theorem remain 0%; Step-B machinery remains about 50%.
+  producer machinery but does not change theorem completion: the `StepB1RawInput` producer and
+  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 63%.
   **Later 2026-07-09:** `seqCenter_zero` / `seqCenter_edist_ge` and
   `seqChartNorm_ge` connect the actual ordered-net centers to that coordinate
   lower bound.  The former POU representation mismatch is now resolved:
   `centerAverage.WeightDataOn`, `normWeights_data` / `bumpWeights_data`,
   `NetLimitData.unifHatCageData`, and `stepCJoinDataFixed` give a checked
   explicit-weight route through the current radius-`4 * lamInf` hat endpoint,
-  while the bundled POU entrypoints remain available.  `bumpNum_sum_one`
-  reduces the book-cutoff denominator bound to ordinary inner-ball coverage
-  plus the concrete fact that the cutoff's non-one locus lies in the base
-  inner ball.  The remaining producer work is the intrinsic quadratic
-  chart-bump family and these two support/coverage facts; the literal MSM135
-  radius-`5 * lamInf` support instantiation is still distinct.  The rounded
-  progress totals remain unchanged.
+  while the bundled POU entrypoints remain available.  The intrinsic quadratic
+  atoms, strict-inner-one and hat-support facts, eventual `WeightDataOn`,
+  canonical basepoint delta weights, live/dead slot stabilization, and full
+  `C^infty` atom/normalized-weight convergence are now checked in
+  `StepCAtoms.lean` / `StepCAtomConv.lean`.  Origin metrics are extracted only
+  on the finite `LiveSlot` subtype.  `StepCAtomJoin.existsLiveJoint` implements
+  the fixed-source common refinement with eventual live geometry, a common
+  finite tail, and one Pi-valued forward-transition extraction; it does not
+  consume irrelevant reverse/cocycle data.  The shared
+  `Regularity/Derivation.lean` wall was repaired by the checked
+  `modelAt_mcovRS` projection, and the entire join chain now verifies.
+  `StepCAtomPackage.existsAtomWeightLim` packages the common-subsequence atom
+  and normalized-weight limits; its implementation is checked.  The literal
+  MSM135 radius-`5 * lamInf` support instantiation remains distinct.
   **(b) `lbl403` CLOSED 2026-07-07 (both halves, sorry-free/axiom-clean)**:
   manifold forward IFT `Geometry/Coordinates/LocalDiffeoIFT.lean` incl. the **`n = ∞`
   version** (`contMDiffOn_isLocalDiffeomorphOn_infty`, inverse-uniqueness upgrade of the
@@ -160,11 +168,39 @@ its docstring BEFORE consumers are built against it.
   `mapCInfConv_prodMk`/`_pi`/`_const` + `congr` + the diagonal identities
   `centerOfMass_diag`/`chartCm_diag`/`diagEventuallyEqId`) needs NO quantitative
   derivative-difference bounds.**  Also `centerOfMass_delta` (δ-weights pin the center —
-  the (d)-basepoint cm-core).  Remaining `lbl404`/B1 work = INSTANTIATION only: (i) POU
-  weights (convergence φ_k→φ_∞ + basepoint concentration `δ_{α0}`, `StepCAveragePOU`
-  lane); (ii) targets per-slot convergence (instantiate `comp_cInf_id_on` on the concrete
-  transitions; C⁰ base = `stepCJoin`); (iii) `Φ_cm` `ContDiffOn ∞` + `CenterInput` family
-  (C2 chain; quantitative variant awaits the honest all-order lbl430 bounds); the
+  the (d)-basepoint cm-core).  POU convergence and the basepoint `δ_{α0}` producer are
+  now present.  The live-slot origin-metric/transition refinements and
+  atom/weight limits are joined and packaged.  Remaining `lbl404`/B1 work =
+  INSTANTIATION plus the genuine analytic producers: (i) targets per-slot
+  convergence (instantiate `comp_cInf_id_on` on the concrete
+  transitions; C⁰ base = `stepCJoin`); (ii) a sequence-uniform quantitative
+  branch scale for `Φ_cm` (if the global-sigma design is retained) and its
+  concrete finite-hat instantiation.
+  `StepCCmDomain.lean` records the actual
+  center on the admissible simplex and the separate `cmExt_contDiffOn` analytic interface;
+  sparse/delta weights admit no ambient open `CenterInput` neighborhood.  The
+  pinned local branch and ambient gluing/agreement are now checked via
+  `existsPinnedLocal`, `existsRootExtension`, and `existsCmExtension`; the
+  generic conditional center-root theorem is checked as `centerReadout_zero`.
+  Its finite-hat instantiation is not yet complete: it still needs
+  moving and reverse normal-source/smallness and fixed-chart containment.
+  Pointwise producers are now checked: `exists_halfSqDist_md` supplies
+  fixed-target differentiability, while `expDiffeoRadius` and
+  `diagInv_eq_normal_lt` supply intrinsic/realized-exp identification below a
+  named radius.  Their finite-hat hypotheses have not yet been instantiated.
+  `DiagExpDerivative.exists_diagInvDom_inf` and
+  `StepCSmoothness.exists_readoutDom_inf` now expose one fixed open
+  inverse-exp/readout domain carrying all orders, built from Route A's checked
+  joint forward producer and the existing `diagExpInv` branch.
+  `exists_readoutEBall` extracts a finite positive radius per fixed base, while
+  `centerPairs_lt_le` proves the local cage ledger `4 * lambda + 2 * r < δ` is
+  sufficient for all readout pairs.  The missing scale is not local
+  containment but uniformity over `k`: the present `normalBounds.radius` has no
+  positive floor.  The remaining analytic/geometric producers are that
+  uniform quantitative inverse-exp bridge (or a complete fixed-index diagonal
+  redesign), reverse-chart and named-radius facts, and Hessian/Neumann
+  invertibility.
+  The quantitative variant awaits the honest all-order lbl430 bounds; the
   `StepB1RawInput` producer must thread `stepCJoin`'s honest inputs.  B2–B6 open); Step C ~3/4
   (C1/C3/C4-shape done conditionally; C2
   regularity at `C^n` for every finite `n` DONE 2026-07-05 — `lbl430`(ii),
@@ -243,14 +279,17 @@ its docstring BEFORE consumers are built against it.
    `exists_chain_limit`/`exists_chain_data` produce its stagewise C-infinity limits from the
    eventual D1 package.  The live D2 frontier is the common diagonal, `lbl407`, and the cocycle.
   **HONEST SEPARATION (per CLAUDE.md rule):** conditional D1b consumer body = **100% checked**;
-  producing `StepB1RawInput` and proving the textbook D1b theorem remain **0%**.  The Step D
-  ASSEMBLY endpoint (D6 discharging `metricCompactness`) is **0%** — not yet stated/proved.
-   Step D **machinery estimate ≈ 88%** (NOT endpoint completion); remaining machinery:
-   the B/C producer bundle for D1 axiom-clean status, the D5 metric-exhaustion
-   producer, shrunk-stage metric transport, and D6 reindex/assembly.
+  producing `StepB1RawInput` and proving the textbook D1b theorem remain **0%**.
+  The conditional Step-D theorem `compactness_of_b1` is **100% proved** from
+  that package, and Step-D consumer machinery is **100%**: `repoint` /
+  `unrepoint` / `ofSubseq` close the original-sequence convergence transport,
+  while `alignedProper` and `compactness_of_b1` complete D6 field assembly.
+  The working endpoint `MetricCompactnessInputs.metricCompactness` remains
+  **0% proved** because its body is still `sorry`; it now waits only on the
+  concrete B/C producer and one-line consumption of the checked Step-D theorem.
   F-track ~95% (F4 is closed; F2-book wrapper remains).
-   Ch4 **machinery** overall ≈ **58–59%**;
-  Ch4 endpoint theorems (metricCompactness / Step-D assembly) still **0%**.
+   Ch4 **machinery** overall ≈ **67%**;
+  the conditional compactness endpoint and textbook B1 theorem remain **0%**.
 - Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
 - Ch3: Lemma 3.11 done (hShi hypothesis).  The canonical conditional assembly
   `solutionComp_cond` → `compactnessSol_cond` is checked from conditional Thm 3.9
@@ -264,6 +303,25 @@ its docstring BEFORE consumers are built against it.
   machinery includes the proved `ham3_rm_control` theorem and is about 40%, while
   `ham3_noncollapse`, no-local-collapsing, and the
   Cheeger-Gromov-Taylor `flowInj_of_vol` producer theorems remain 0%.
+  The W-entropy producer lane has now checked conjugate-heat total-mass
+  conservation, time reversal, the interval-local classical-solution
+  interface, conditional nonnegativity, a time-operator lift, the abstract
+  two-scale nonautonomous fixed-point engine, and local moving-volume first
+  variation.  Moving-metric conjugate-heat existence remains theorem-level 0%
+  and is still the A1 blocker; its dedicated machinery is about 25%.  The next
+  mathematical producer is the support-independent fixed-`gT` `H2 -> L2`
+  estimate for `Delta_(g_s) - Delta_(gT)`.  The former upstream elaboration
+  wall in `nablaRSFun_eval_moving_raw` was repaired and focused-checked on
+  2026-07-10; downstream object refresh remains to be completed.  The canonical constant-metric volume and
+  distance laws are checked (`Analysis/Integration/Measure/Scaling.lean` and
+  `Geometry/Metric/DistanceScaling.lean`).  `Perelman/ScaleTransfer.lean` now
+  proves two-way transfer of the genuine ball, curvature, kappa, below-scale,
+  and `NoLocalCollapsing` predicates.  Hamilton's `ham3_radius_event` and
+  `ham3_noncollapse_of` complete the downstream implication from an
+  original-flow `NoLocalCollapsing` producer to fixed-radius
+  `Ham3Noncollapse`.  That scale-transfer sublane is 100%, but
+  `ham3_noncollapse` remains theorem-level 0% because the analytic original-flow
+  producer is still missing; endpoint percentages are unchanged.
   **2026-07-09 CGH/3.10 repair:** `Ham3CGHLimitData` now retains the real source,
   original-index composition, `SmoothCGHConverges` maps, source-to-original
   diffeomorphisms, and limit-slice completeness.  The forgetful adapter and
@@ -285,17 +343,24 @@ its docstring BEFORE consumers are built against it.
   maximal-time interval.  Transfers are bound to the actual CGH witness rather
   than quantified over arbitrary limits.  This contract refactor is checked
   infrastructure, not completion of either producer.
-- **Whole HCG project — conservative MACHINERY estimate ≈ 45%** (this is infrastructure coverage,
+- **Whole HCG project — conservative MACHINERY estimate ≈ 47%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
-  the Step-D assembly, unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved** — each
-  still carries a `sorry` or is unstated.  The
-  `directed_of_b1` consumer is checked only from explicit `StepB1RawInput`; do not read that
-  conditional assembly or the machinery % as theorem completion.
+  unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved.**  The separate
+  conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes
+  explicit `StepB1RawInput`; do not read that consumer or the machinery % as
+  completion of the endpoint theorem.
   The riskiest open items (D3d metric transport RESOLVED 2026-07-07; D1a-(ii) naturality wall
   DISSOLVED 2026-07-07 — was a third walls-overcount, the restrictOpen/pullback stack pre-existed):
-  the arbitrary-order quantitative center-of-mass derivative theorem
-  (`lbl430` bounds half), the B1 raw producer, and the D5 metric-exhaustion /
-  shrunk-stage metric / D6 assembly chain.
+  a sequence-uniform quantitative inverse-exp/readout branch scale (for the
+  selected global-sigma route), concrete Step-C instantiation of the checked
+  local containment ledger, reverse-chart and named-radius
+  smallness needed to instantiate the checked agreement/differentiability
+  producers, Hessian/Neumann invertibility,
+  the arbitrary-order quantitative center-of-mass derivative theorem (`lbl430`
+  bounds half), and the B1 raw producer.
+  The metric/transition join, atom/weight package, pinned center gluing, generic
+  conditional root producer, D5 metric exhaustion, and flat nested-open
+  convergence are no longer on this list.
 
 ## 7. Real sorries in this tree (audited 2026-07-09)
 

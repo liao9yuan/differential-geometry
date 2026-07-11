@@ -159,6 +159,45 @@ theorem source_subset
   letI : TopologicalSpace L.M := L.topology
   exact Φ.source_exhausts.subset K hK
 
+/-- Reuse comparison maps after restoring the original distinguished points of
+a sequence whose terms were changed only by `PointedRiemannianSeq.repoint`. -/
+def unrepoint
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : forall i : Nat, (X.obj i).M)
+    {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedRiemannianCGMaps (I := I) (X.repoint b) L subseq)
+    (hbase : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : TopologicalSpace (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).topology
+      letI : ChartedSpace H (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).charted
+      Φ.partialDiffeomorph k L.basepoint = (X.obj (subseq k)).basepoint) :
+    PointedRiemannianCGMaps (I := I) X L subseq where
+  partialDiffeomorph := Φ.partialDiffeomorph
+  source_exhausts := Φ.source_exhausts
+  base_mem := Φ.base_mem
+  basepoint_map := hbase
+
+@[simp] theorem unrepoint_source
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : forall i : Nat, (X.obj i).M)
+    {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedRiemannianCGMaps (I := I) (X.repoint b) L subseq)
+    (hbase : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : TopologicalSpace (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).topology
+      letI : ChartedSpace H (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).charted
+      Φ.partialDiffeomorph k L.basepoint = (X.obj (subseq k)).basepoint)
+    (k : Nat) :
+    (Φ.unrepoint b hbase).source k = Φ.source k := rfl
+
 end PointedRiemannianCGMaps
 
 /-- The source of the `k`th Riemannian comparison map as a bundled open subset
@@ -743,6 +782,36 @@ structure MetricSourceData
 
 namespace MetricSourceData
 
+/-- Metric source data is unchanged when only the sequence basepoints and the
+corresponding `basepoint_map` proof are replaced. -/
+def unrepoint
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : forall i : Nat, (X.obj i).M)
+    {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat -> Nat}
+    {Φ : PointedRiemannianCGMaps (I := I) (X.repoint b) L subseq}
+    (hbase : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : TopologicalSpace (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).topology
+      letI : ChartedSpace H (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).charted
+      Φ.partialDiffeomorph k L.basepoint = (X.obj (subseq k)).basepoint)
+    (k : Nat) (D : MetricSourceData (I := I) Φ k) :
+    MetricSourceData (I := I) (Φ.unrepoint b hbase) k where
+  topology := D.topology
+  charted := D.charted
+  t2 := D.t2
+  smooth := D.smooth
+  sigmaCompact := D.sigmaCompact
+  limitMetric := D.limitMetric
+  pullbackMetric := D.pullbackMetric
+  referenceMetric := D.referenceMetric
+  compact_preimage := D.compact_preimage
+  limit_inner := D.limit_inner
+  pullback_inner := D.pullback_inner
+
 /-- Build metric source-domain data from the canonical open-subtype
 topology/charted/manifold structures, leaving only sigma-compactness, the three
 metrics, and the two restriction/pullback formulas as inputs. -/
@@ -1066,6 +1135,25 @@ noncomputable def derivNormSupOn
     (metricSourceCompactSet (I := I) Φ k K) p
     D.pullbackMetric D.limitMetric D.referenceMetric
 
+@[simp] theorem unrepoint_supOn
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : forall i : Nat, (X.obj i).M)
+    {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat -> Nat}
+    {Φ : PointedRiemannianCGMaps (I := I) (X.repoint b) L subseq}
+    (hbase : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : TopologicalSpace (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).topology
+      letI : ChartedSpace H (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).charted
+      Φ.partialDiffeomorph k L.basepoint = (X.obj (subseq k)).basepoint)
+    (k : Nat) (D : MetricSourceData (I := I) Φ k)
+    (K : Set L.M) (p : Nat) :
+    (D.unrepoint b hbase k).derivNormSupOn (I := I) K p =
+      D.derivNormSupOn (I := I) K p := rfl
+
 end MetricSourceData
 
 /-- Concrete `C^p` convergence on compact subsets of the metric limit source
@@ -1097,6 +1185,31 @@ structure MetricCGConvergenceData
       forall p : Nat, MetricSourceCPConvOn (I := I) Φ domain K hK p
 
 namespace MetricCGConvergenceData
+
+/-- Metric Cheeger--Gromov convergence is invariant under changing only the
+basepoints of the sequence terms, provided the comparison maps hit the restored
+basepoints. -/
+def unrepoint
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : forall i : Nat, (X.obj i).M)
+    {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat -> Nat}
+    {Φ : PointedRiemannianCGMaps (I := I) (X.repoint b) L subseq}
+    (hbase : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : TopologicalSpace (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).topology
+      letI : ChartedSpace H (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).charted
+      Φ.partialDiffeomorph k L.basepoint = (X.obj (subseq k)).basepoint)
+    (Cd : MetricCGConvergenceData (I := I) Φ) :
+    MetricCGConvergenceData (I := I) (Φ.unrepoint b hbase) where
+  domain k := (Cd.domain k).unrepoint b hbase k
+  converges := by
+    intro K hK p ε hε
+    simpa only [PointedRiemannianCGMaps.unrepoint_source,
+      MetricSourceData.unrepoint_supOn] using Cd.converges K hK p ε hε
 
 /-- Constructor for metric Cheeger--Gromov convergence data from raw
 source-domain seminorm convergence.  The source-exhaustion condition in
@@ -1172,6 +1285,26 @@ structure PointedRiemannianCGConverges
   metrics : MetricCGConvergenceData (I := I) Φ
 
 namespace PointedRiemannianCGConverges
+
+/-- Pointed metric convergence after restoring the original sequence
+basepoints. -/
+def unrepoint
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (b : forall i : Nat, (X.obj i).M)
+    {L : PointedRiemannianManifold.{u, uE, uH} (I := I)}
+    {subseq : Nat -> Nat}
+    {Φ : PointedRiemannianCGMaps (I := I) (X.repoint b) L subseq}
+    (hbase : forall k : Nat,
+      letI : TopologicalSpace L.M := L.topology
+      letI : ChartedSpace H L.M := L.charted
+      letI : TopologicalSpace (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).topology
+      letI : ChartedSpace H (X.obj (subseq k)).M :=
+        (X.obj (subseq k)).charted
+      Φ.partialDiffeomorph k L.basepoint = (X.obj (subseq k)).basepoint)
+    (C : PointedRiemannianCGConverges (I := I) (X.repoint b) L subseq Φ) :
+    PointedRiemannianCGConverges (I := I) X L subseq (Φ.unrepoint b hbase) where
+  metrics := C.metrics.unrepoint b hbase
 
 /-- Build pointed Riemannian Cheeger--Gromov convergence from comparison maps,
 source-domain metric data, and raw seminorm convergence. -/

@@ -332,6 +332,58 @@ section StepD5
 
 open Bundle
 
+/-- A continuous path starting in the interior of a closed set and ending outside it has a first
+exit time.  The path remains in the closed set through that time and meets its frontier there. -/
+theorem exists_first_exit
+    {X : Type*} [TopologicalSpace X] {K : Set X} (hK : IsClosed K)
+    {γ : ℝ → X} (hγ : ContinuousOn γ (Set.Icc 0 1))
+    (h0 : γ 0 ∈ interior K) (h1 : γ 1 ∉ K) :
+    ∃ t : ℝ, t ∈ Set.Ioc 0 1 ∧
+      (∀ s ∈ Set.Icc 0 t, γ s ∈ K) ∧ γ t ∈ frontier K := by
+  let T := Set.Icc (0 : ℝ) 1
+  letI : CompactSpace T := isCompact_iff_compactSpace.mp isCompact_Icc
+  let γT : T → X := fun t => γ t
+  let B : Set T := γT ⁻¹' (interior K)ᶜ
+  have hγT : Continuous γT := hγ.restrict
+  have hBclosed : IsClosed B := by
+    exact isOpen_interior.isClosed_compl.preimage hγT
+  have honeB : (⟨1, by simp [T]⟩ : T) ∈ B := by
+    change γ 1 ∉ interior K
+    exact fun h => h1 (interior_subset h)
+  have hBne : B.Nonempty := ⟨⟨1, by simp [T]⟩, honeB⟩
+  obtain ⟨t, htB, htmin⟩ :=
+    hBclosed.isCompact.exists_isMinOn hBne continuous_subtype_val.continuousOn
+  have htNot : γ (t : ℝ) ∉ interior K := by
+    simpa only [B, γT, Set.mem_preimage, Set.mem_compl_iff] using htB
+  have htne : (t : ℝ) ≠ 0 := by
+    intro ht
+    apply htNot
+    simpa only [ht] using h0
+  have htpos : (0 : ℝ) < t := lt_of_le_of_ne t.property.1 (Ne.symm htne)
+  have hbefore : ∀ s ∈ Set.Ico (0 : ℝ) t, γ s ∈ interior K := by
+    intro s hs
+    by_contra hsNot
+    let sT : T := ⟨s, hs.1, (le_of_lt hs.2).trans t.property.2⟩
+    have hsB : sT ∈ B := by
+      change γ s ∉ interior K
+      exact hsNot
+    exact (not_le_of_gt hs.2) (htmin hsB)
+  have htClosure : (t : ℝ) ∈ closure (Set.Ico (0 : ℝ) t) := by
+    rw [closure_Ico (Ne.symm htne)]
+    exact ⟨htpos.le, le_rfl⟩
+  have hcont : ContinuousWithinAt γ (Set.Ico (0 : ℝ) t) t :=
+    (hγ t t.property).mono fun s hs => ⟨hs.1, (le_of_lt hs.2).trans t.property.2⟩
+  have htKclosure : γ t ∈ closure K :=
+    hcont.mem_closure htClosure fun s hs => interior_subset (hbefore s hs)
+  have htK : γ t ∈ K := by simpa only [hK.closure_eq] using htKclosure
+  refine ⟨t, ⟨htpos, t.property.2⟩, ?_, ?_⟩
+  · intro s hs
+    by_cases hst : s = t
+    · simpa only [hst] using htK
+    · exact interior_subset (hbefore s ⟨hs.1, lt_of_le_of_ne hs.2 hst⟩)
+  · rw [frontier, hK.closure_eq]
+    exact ⟨htK, htNot⟩
+
 
 variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [CompleteSpace E]
@@ -605,6 +657,7 @@ a compact stage cover for every finite limit ball. -/
 theorem compactCover_of_step (S : SmoothSeqSystem I A)
     (g : ∀ k, SmoothRiemannianMetric I (A k)) (hg : S.MetricCocycle g)
     (hexh : ∀ (z : S.toSeqSystem.Lim) (r : ENNReal),
+      r ≠ ⊤ →
       letI : RiemannianBundle (fun z : S.toSeqSystem.Lim => TangentSpace I z) :=
         ⟨(S.limitMetric g hg).toRiemannianMetric⟩
       ∃ k, ∀ w : S.toSeqSystem.Lim,
@@ -612,8 +665,8 @@ theorem compactCover_of_step (S : SmoothSeqSystem I A)
     (hstep : ∀ k, ∃ K : Set (A (k + 1)), IsCompact K ∧
       Set.range (S.toSeqSystem.F (Nat.le_succ k)) ⊆ K) :
     HasCompactBallCover S g hg := by
-  intro z r _hr
-  obtain ⟨k, hk⟩ := hexh z r
+  intro z r hr
+  obtain ⟨k, hk⟩ := hexh z r hr
   obtain ⟨K, hK, hFK⟩ := hstep k
   refine ⟨k + 1, K, hK, fun w hw => ?_⟩
   obtain ⟨a, rfl⟩ := hk w hw

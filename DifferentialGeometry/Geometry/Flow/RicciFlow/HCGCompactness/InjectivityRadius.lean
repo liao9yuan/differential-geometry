@@ -76,6 +76,15 @@ theorem hasInjRadiusAt_of_le_injRadius
     HasInjRadiusAt (I := I) X x rho :=
   ⟨hpos, h⟩
 
+/-- A smaller positive radius inherits an injectivity-radius lower bound. -/
+theorem HasInjRadiusAt.mono
+    {X : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : X.M}
+    {rho rho' : Real} (h : HasInjRadiusAt (I := I) X x rho)
+    (hpos : 0 < rho') (hle : rho' <= rho) :
+    HasInjRadiusAt (I := I) X x rho' := by
+  rw [hasInjRadiusAt_iff] at h ⊢
+  exact ⟨hpos, (ENNReal.ofReal_le_ofReal hle).trans h.2⟩
+
 /-- Uniform injectivity-radius lower bound at the basepoints of a pointed
 metric sequence. -/
 structure BaseInjBound

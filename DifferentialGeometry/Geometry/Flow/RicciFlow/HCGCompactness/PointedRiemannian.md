@@ -33,3 +33,14 @@ sequence completeness after Step A/D diagonal subsequences.  This is endpoint
 input threading only; it does not prove the conditional Theorem 3.9 endpoint.
 
 Verification passed.
+
+## 2026-07-10
+
+Added `PointedRiemannianManifold.repoint` and
+`PointedRiemannianSeq.repoint`.  They change only the stored basepoint while
+preserving the carrier, topology, smooth structure, metric, and bundle data
+definitionally.  This is the D6-facing representation for comparison-map
+sequences whose transported centers agree propositionally with the original
+member basepoints.
+
+Focused verification and the targeted module refresh passed.

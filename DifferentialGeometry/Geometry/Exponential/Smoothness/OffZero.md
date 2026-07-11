@@ -112,3 +112,18 @@ directly — the bundle/`inCoordinates` machinery is required.
 
 The forward theorem (the hard, foundational piece) is done; this remaining brick is pure
 geometry/bundle wiring with all tools in hand.  Recommended as the next focused session.
+
+## 2026-07-10 — joint basepoint/vector `C^infty` on one phase ball
+
+- Added `exists_chartExp_jointContDiffOn_infty`: the chart-coordinate
+  exponential is jointly `C^infty` in chart position and launch vector on one
+  fixed phase ball.
+- The proof reuses the existing fixed-box chart flow
+  `exists_chartPhase_contDiffOn_isLocalFlow_combined_inf`; no new ODE theorem
+  or order-dependent shrinking is introduced.
+- Refactored `exists_chartExp_jointContDiffOn_nat` into a short finite-order
+  projection of the new theorem, removing the duplicated long construction.
+- Focused verification and the targeted module build passed.
+- This is the first Route-A producer for a common all-order moving-base branch.
+  The next downstream theorem is `exists_diagInvDom_inf` for the existing
+  `diagExpIFT`/`diagExpInv`, followed by the readout-domain projection.

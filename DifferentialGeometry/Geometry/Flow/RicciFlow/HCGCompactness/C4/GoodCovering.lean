@@ -64,6 +64,17 @@ theorem mu_antitone (hd : InjRadiusDecayInput (I := I) X) : Antitone hd.mu := by
     Real.exp_le_exp.mpr (by nlinarith [mul_le_mul_of_nonneg_left h hd.C_nonneg])
   exact mul_le_mul_of_nonneg_left hexp hK
 
+/-- On every fixed basepoint-distance sublevel, `mu R` is a positive
+injectivity-radius lower bound independent of the sequence index. -/
+theorem mu_hasInj_of_le (hd : InjRadiusDecayInput (I := I) X)
+    {k : Nat} {x : (X.obj k).M} {R : Real}
+    (hx : hd.dist k x (X.obj k).basepoint <= R) :
+    HasInjRadiusAt (I := I) (X.obj k) x (hd.mu R) := by
+  have hdecay : HasInjRadiusAt (I := I) (X.obj k) x
+      (hd.mu (hd.dist k x (X.obj k).basepoint)) := by
+    simpa [mu] using hd.decay k x
+  exact HasInjRadiusAt.mono (I := I) hdecay (hd.mu_pos R) (hd.mu_antitone hx)
+
 theorem lambda_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (r : Real) : 0 < hd.lambda D r :=
   div_pos (hd.mu_pos r) hD

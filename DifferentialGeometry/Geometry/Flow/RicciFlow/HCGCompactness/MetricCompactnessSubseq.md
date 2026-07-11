@@ -62,3 +62,16 @@ temporary `#print axioms` in a targeted build, then removed and rebuilt green).
 This is the mechanical re-index sub-item of Brick 5 only. Brick 5 itself
 (global `gInf`, `gInf 0 = mc.limit.metric` identification, the `conv` field)
 remains OPEN and still needs Bricks 3–4 outputs.
+
+## 2026-07-10 D6 original-sequence reindexing
+
+Added the non-monotone reindexing family
+`PointedRiemannianCGMaps.ofSubseq`, `MetricSourceData.ofSubseq`,
+`MetricCGConvergenceData.ofSubseq`, and
+`PointedRiemannianCGConverges.ofSubseq`.  Unlike `compSubseq`, this API starts
+with convergence for `X.subseq f` at identity and reinterprets it as convergence
+for `X` at `f`; no monotonicity of `f` is needed because the source and target
+members are definitionally the same.  D6 combines this with `unrepoint` after
+the transported-center equality.
+
+Focused verification and the targeted module refresh passed.

@@ -21,7 +21,7 @@ foundational layer required.
 | 1 | `ham3_short_isSolution` | short-time existence: raw DeTurck data → `IsSolutionOn` bridge | M (active lane) | finish the ShortTime lane (see §1) |
 | 2 | `ham3_flow_exists_normalized` | maximal continuation with finite-time curvature blow-up | M (active lane) | reduce to `extends_of_rmBounded` (#3) + `restart_short_time` glue (already built) |
 | 3 | `extends_of_rmBounded` (`MaximalTime.lean`) | bounded `Rm` on `[0,T)` ⟹ extension past `T` | M | Shi-track: BBS all-`k` bricks are largely built; remaining = tower wiring + DeTurck/global-PDE handoff (`ExtendShiInputs.md`, `bbs-allk-route-status` memory) |
-| 4 | **`ham3_noncollapse`** | **Perelman no-local-collapsing** at the blow-up scale | **L; endpoint 0%** | actual `FlowMetricBall` data and `ham3_rm_control` are checked; §2 is the remaining producer |
+| 4 | **`ham3_noncollapse`** | **Perelman no-local-collapsing** at the blow-up scale | **L; endpoint 0%** | actual balls, two-way scale transfer, `ham3_rm_control`, and `ham3_noncollapse_of` are checked; only the original-flow analytic producer remains |
 | 5 | `ham3_cgh_limit` | Hamilton–CGH compactness of the rescaled flows | M/L; **endpoint 0%**, whole-HCG machinery ≈45% | = the HCG compactness project (`../HCGCompactness/PROJECT_MAP.md`); keep machinery and endpoint accounting separate |
 | 6 | `limit_to_orig` | compact limit globalizes the CGH maps and transfers the constant-curvature metric back | **CLOSED, theorem 100%** | Bonnet--Myers + `PointedConvergenceGlobal` + metric pullback; §3 |
 | 7 | `ham3_space_box` | closed 3-manifold with a constant-positive-sectional metric is a spherical space form (Killing–Hopf + quotient) | M/L | space-form lane (active; `spaceform-hardroute-build` memory) |
@@ -64,12 +64,23 @@ curvature control near the singular time ⟹ κ-noncollapsed at comparable scale
   `riemannianVolumeMeasure` (`Invariance.lean:423`), divergence theorem
   (closed + boundary + Green), integration by parts, L² layer, `VolumeVariation`,
   `JacobiFormula` — the whole `Analysis/Integration` tree is **0-sorry**.
+  `Analysis/Integration/Measure/Scaling.lean` now also proves the canonical
+  constant-scaling law `dμ_(c g) = sqrt(c)^n dμ_g`, including its setwise form.
   (The HCG honest-input notes say "Mathlib has no Riemannian volume" — true of
   Mathlib, no longer of this project.)
+* **The parabolic scale-transfer lane is complete**:
+  `Geometry/Metric/DistanceScaling.lean` proves metric-distance and ball-carrier
+  scaling; `Perelman/ScaleTransfer.lean` proves two-way carrier, volume,
+  curvature-control, kappa, below-scale, and `NoLocalCollapsing` transfer.
+  `ham3_radius_event` and `ham3_noncollapse_of` then check the exact downstream
+  implication from original-flow `NoLocalCollapsing` to `Ham3Noncollapse`.
 * **The W-entropy layer is started**: `Entropy/Defs.lean` has `wFunctional`
   (over a supplied measure), scale/diffeomorphism invariance, first-variation
   interfaces; `Entropy/FirstVariation.lean` + `Entropy/F/` (9 files, incl.
   `Formula510Core`, `Final`) are building the F-functional variation formulas.
+  `Entropy/ConjugateHeat.lean` now proves local and interval total-mass
+  conservation for any smooth solution of `∂ₜu = -Δu + Ru`; construction of
+  such a positive solution for the moving metric remains the A1 frontier.
 * Maximum principles: `MaximumPrinciple/ScalarWeak.lean`, `TensorWeak/`.
 
 ### Route decision
@@ -168,3 +179,21 @@ existence)**.  Honest estimate for `ham3_main` fully sorry-free:
   `Ham3SourceRealizes` ties the CGH source metrics and basepoints to the actual
   selected rescalings.  The refactor and public umbrella are checked; both
   producer theorems remain 0%.
+- 2026-07-09/10 W-route: `conj_heat_mass_deriv`, `conj_heat_mass_eq`, time
+  reversal, `IsHeatPotOn`, `heat_pot_nonneg`, `TimeSobolev.timeOp`, the abstract
+  `nonaut_strong_exists`, and the interval-local volume variation
+  `first_var_local` are checked supporting bricks.  A1 existence remains 0%;
+  dedicated analytic no-local-collapsing machinery is about 25%, while
+  `ham3_noncollapse` itself remains 0%.  The next mathematical producer is the
+  support-independent fixed-`gT` `H2 -> L2` estimate for the actual
+  `Delta_(g_s) - Delta_(gT)` action.  A separate build-performance blocker in
+  `nablaRSFun_eval_moving_raw` currently prevents refreshing the focused-checked
+  scalar Laplacian bridge; both consult frontiers are recorded in the relevant
+  same-name notes.
+- 2026-07-09 scale transfer complete: `volume_scaleMetric`,
+  `volume_scale_apply`, `edistOf_scale`, and `edistBall_scale` are checked.
+  `ScaleTransfer.lean` proves two-way invariance of the real ball predicates and
+  transports `NoLocalCollapsing`; `ham3_noncollapse_of` checks the final
+  downstream Hamilton adapter.  This sublane is 100%.  The theorem
+  `ham3_noncollapse` stays 0% because original-flow analytic no-local-collapsing
+  remains unproved.

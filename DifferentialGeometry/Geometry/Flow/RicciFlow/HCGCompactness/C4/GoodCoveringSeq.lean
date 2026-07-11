@@ -99,6 +99,25 @@ theorem seqRadius_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 <
   exact OrderedNet.netRadius_mem (X.obj k).basepoint (hd.lambda_continuous D)
     (hd.lambda_antitone hD) (fun s => hd.lambda_pos hD s) (P k).hint α
 
+/-- A live `alpha`-th ordered-net center has a sequence-uniform injectivity
+radius floor at the explicit `lbl389` distance bound. -/
+theorem seqCenter_mu_hasInj (hd : InjRadiusDecayInput (I := I) X)
+    {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (hre : hd.RealizesEdist) (k α : Nat) {c : (X.obj k).M}
+    (hc : seqCenter hd D P k α = some c) :
+    HasInjRadiusAt (I := I) (X.obj k) c
+      (hd.mu (2 * hd.lambda D 0 * (α : Real))) := by
+  letI : MetricSpace (X.obj k).M := (P k).ms
+  haveI : ProperSpace (X.obj k).M := (P k).proper
+  apply hd.mu_hasInj_of_le
+  rw [← ProperMetricOn.dist_eq hd hre P k]
+  have hr : seqRadius hd D P k α = dist c (X.obj k).basepoint := by
+    unfold seqRadius
+    exact OrderedNet.netRadius_of_center _ _ _ α hc
+  rw [← hr]
+  exact (seqRadius_mem hd hD P k α).2
+
 /-- Output of the `lbl389` → `lbl390` diagonalization: one strictly monotone
 subsequence `φ` along which every net radius converges (`r_{φ k}^α → rInf α`) and every
 aliveness Boolean stabilizes (the limit net-size profile `alive`). -/

@@ -149,3 +149,87 @@ balls must lie in a stage range. The next mathematically viable target is a quan
 distance-to-stage-boundary lemma using the `gInf` versus ambient-metric lower bound and the radii
 `2^n`; only after that gate should the existing large-stage metrics be restricted or rebuilt on
 the shrunk tail system. Do not restart the diagonal D2 construction before this gate is settled.
+
+## 2026-07-09: D5 metric exhaustion complete
+
+The consultant's feasibility route is now implemented through the concrete exhaustion producer.
+The large-stage metrics are restricted to the shrunk stages by `tailMetric`, and
+`tailMetricCocycle` transports the existing cocycle without rerunning D2. The order-zero
+`half_ambient_le_tail` comparison uses `lbl407` only at `p = q = l = 0`.
+
+Compact half-radius cores are supplied by `tailCore`; `incl_mem_coreInt` and
+`frontier_core_radius` identify their interior and frontier. The generic `exists_first_exit`
+lemma in `StepDLimit.lean`, the factor-two `pathELength_val_le` estimate, and
+`path_escape_core` give escape cost `2^n / 4`. `mem_core_of_edist`,
+`baseRange_exhausts`, `finiteRange_exhausts`, and `tailRangeExhausts` then prove that every
+finite Riemannian ball about any limit point lies in a shrunk-stage range.
+
+Focused verification passed with no new `sorry`. Two unavoidable section-variable linter
+warnings remain because Lean rejects omitting the elaboration-time `IsManifold (infinity + 1)`
+instance even though the generated theorem does not retain it. Fresh route-error count: 0/3.
+
+`tailLimitComplete` now combines `tailRangeExhausts`, `tailSystem_compact`,
+`compactCover_of_step`, and `limitComplete_cover`. It is the concrete D5 completeness theorem,
+not another conditional consumer.
+
+Overall accounting: concrete D5 completeness theorem: 100%; its dedicated machinery: 100%.
+Step D assembly/D6: 0%. Whole Step D machinery: about 96%. Next target: D6 reindex and endpoint
+assembly, including threading the D1 fixed-order data and the D2 common diagonal into the shrunk
+tail output consumed by `tailLimitComplete`.
+
+## 2026-07-09: connectivity producer and D6 data alignment
+
+The only non-geometric input still exposed by `tailLimitComplete` was stage
+preconnectedness.  `tailBall_preconn` now derives it from the Riemannian metric:
+for a point in a positive-radius ball, choose a path shorter than the radius and
+use distance bounded by every prefix length to keep the path in the ball.  An
+isolated Mathlib check of this argument passed.  `tailRangeExhausts` and
+`tailLimitComplete` now install these instances internally.
+
+For D6, `exists_chain_data` now chooses a positive start index, while
+`exists_limits_diag` and `exists_limits_close` expose `1 <= j₀` and the
+fixed-order `D₀` family already selected internally.  This is the exact input
+shape consumed by `tailLimitComplete`; no second diagonal or incompatible choice
+is needed.
+
+Integrated verification is currently blocked before this file is elaborated.
+The upstream module
+`Tensor/RSTensor/NablaOnTensors/Regularity/Derivation.lean` times out while
+elaborating `nablaRSFun_eval_moving_raw` at `whnf`; increasing the diagnostic
+heartbeat budget to one million did not pass.  The later unknown-constant error
+is a cascade from that failed declaration.  This is a performance/verification
+blocker, not a mathematical Step-D route failure.  Fresh route count remains
+0/3.
+
+Final D6 theorem: 0%, because it is still unstated and unproved.  Dedicated D6
+machinery: about 15%.  Whole Step-D machinery: about 96%.  After upstream
+verification is restored, the next target is the flat nested-open restriction
+lemma for `metricDerivNorm`; it will transport `lbl407` from the large stages to
+`tailMetric`, allowing ambient CG convergence and D5 completeness to use the
+same direct-limit object.
+
+## 2026-07-10: shrunk-tail ambient convergence checked
+
+The upstream artifact is restored.  `metricDerivNorm_flat` now transports the
+pointwise derivative norm through the flat nested-open restriction used by
+`tailMetric`.  `tailFlatSup_lt` consumes this bridge and the `l = 0` case of
+`lbl407` to prove compact-supremum convergence on every shrunk tail stage.
+
+`tailAmbientConv` feeds that estimate to `ambientCGConverges`.  Its limit is
+definitionally the same `tailBallSystem` / `tailMetric` / `tailMetricCocycle`
+object used by `tailLimitComplete`; D6 no longer needs to identify two separately
+constructed limits.  Focused verification passed without warnings and no new
+`sorry` was introduced.  The two existential data binders that do not occur in
+later result types were renamed `_D₀`, removing the prior local linter warnings
+without changing the returned tuple.
+
+Fresh route-error count remains 0/3.  Final D6 theorem: 0% because it is still
+unstated and unproved.  Dedicated D6 wiring: about 30%.  Whole Step-D machinery:
+about 97%.  Next target: inspect the live
+`MetricCompactnessInputs.metricCompactness` fields, then compose the Step A and
+D2 subsequences/reindexing with this common convergence/completeness output.
+
+`tailCenter_map` is also checked: transporting the stage-zero center through
+the shrunk system gives the stored center at every stage.  This is consumed by
+`StepDAssembly.tailMemberMaps`; the remaining alignment blocker is convergence
+data indexed by the full maps record, documented in `StepDAssembly.md`.

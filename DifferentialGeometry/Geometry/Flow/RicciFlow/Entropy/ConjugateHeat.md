@@ -1,0 +1,78 @@
+# Conjugate heat
+
+## State — 2026-07-09
+
+The first conjugate-heat producer is checked:
+
+- `conj_heat_mass_deriv` proves that a smooth solution of
+  `∂ₜu = -Δu + Ru` has zero derivative of its total mass against the
+  moving Ricci-flow volume measure.
+- `conj_heat_mass_eq` upgrades the local derivative formula to conservation of
+  total mass on a closed time interval.
+- `reverseFamily`, `reverseHeat`, `conj_heat_forward`, and
+  `conj_heat_backward` give the checked two-way time-reversal bridge with the
+  correct reaction sign.
+- `IsConjHeatOn` specializes the interval-local `IsHeatPotOn` predicate to the
+  forward problem for the reversed metric, and `heat_pot_to_conj` recovers the
+  original backward equation at reflected regular times.
+- `Geometry/Operator/LaplacianBridge.lean` now contains the focused-checked
+  source bridge from the realized scalar equation to divergence-form
+  `Delta_g` for the canonical Levi-Civita connection.  Its targeted refresh is
+  blocked by the documented upstream `nablaRSFun_eval_moving_raw` performance
+  wall, so no downstream theorem claims this bridge yet.
+- `conj_heat_mass_one` propagates unit terminal mass to every earlier time.
+
+The proof is geometric rather than a predicate wrapper.  Ricci-flow volume
+variation changes the derivative into `∫(∂ₜu - Ru) dμ`; the conjugate heat
+equation leaves `-∫Δu dμ`, and the closed-manifold Green identity makes this
+zero.
+
+## Remaining frontier
+
+`MaximumPrinciple/HeatPotential.lean` now proves `heat_pot_nonneg`: every
+classical heat-potential solution with potential bounded above and nonnegative
+initial data stays nonnegative on the full closed interval.  This is a genuine
+conditional positivity theorem; it does not assume a positivity wrapper.
+
+The next genuine producer is existence of a smooth solution of the backward
+conjugate heat equation for a time-dependent Ricci-flow metric, with prescribed
+terminal density.  `IsHeatPotOn` now records the correct interval-local classical
+solution interface, and `TimeSobolev.timeOp` lifts bounded measurable operator
+families to the time-`L²` spaces.  `nonaut_strong_exists` supplies the abstract
+two-scale contraction theorem for a bounded order-two plus order-one
+perturbation.  The fixed-metric heat-semigroup APIs still do not construct the
+geometric non-autonomous evolution.  The current smallest analytic frontier is
+a frozen-metric Sobolev operator estimate for
+`laplacian(g(T-s)) - laplacian(g(T))`.
+
+Normalization and nonnegativity are now checked conditionally on a classical
+solution; existence remains separate.  Later entropy
+steps are coupling to the `W` first-variation formula and square completion.
+The separate parabolic-rescaling bridge is now complete:
+`Analysis/Integration/Measure/Scaling.lean`, `Metric/DistanceScaling.lean`, and
+`Perelman/ScaleTransfer.lean` transport the genuine ball, volume, curvature,
+and kappa predicates.  `ham3_noncollapse_of` also checks the downstream
+original-flow-to-Hamilton adapter.  Thus the remaining frontier is entirely
+upstream of scale transfer: produce original-flow `NoLocalCollapsing` by the
+analytic W-route.
+
+## Honest progress
+
+- time-reversal, classical-solution interface, and mass normalization: 100%.
+- conjugate-heat existence theorem: not proved (0%); its dedicated analytic
+  machinery is about 25%.
+- Perelman no-local-collapsing theorem and `ham3_noncollapse`: not proved (0%).
+  Existing W/F variation plus the conjugate-heat bricks amount to roughly 20%
+  of the dedicated analytic producer machinery.
+- Hamilton-side rescaled-ball/curvature realization remains about 40%; this is
+  separate from the unproved Perelman theorem.
+- The dedicated geometric scale-transfer sublane is complete (100%).
+- Whole HCG compactness machinery remains about 45%, with its endpoint theorems
+  still 0%; this entropy brick does not change that percentage.
+
+The conjugate-heat file passed focused verification before the final theorem
+naming cleanup.  The cleanup is source-local, but the current recheck cannot
+start because `NablaOnTensors/Regularity/Derivation.olean` was removed by the
+failed upstream rebuild.  No downstream theorem was added on the basis of an
+unbuilt Laplacian bridge; the exact performance blocker is recorded in
+`NablaOnTensors/Regularity/Derivation.md`.

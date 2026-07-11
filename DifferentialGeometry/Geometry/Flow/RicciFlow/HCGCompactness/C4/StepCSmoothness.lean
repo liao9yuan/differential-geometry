@@ -253,6 +253,117 @@ theorem implicitSol_hasStrictFDerivAt
     have hle : φ.leftFun zp = φ.leftFun φ.pt := hGzp.trans hz₀.symm
     exact congrArg Prod.fst (hzp.mp hle).symm
 
+/-- The pinned map `(z, params) ↦ (G z params, params)` has an invertible strict
+derivative whenever the `z`-partial derivative of `G` is invertible.  The
+inverse block map is `(a, b) ↦ (L⁻¹ (a - ∂ₚG b), b)`. -/
+theorem existsPinnedDeriv
+    {ι : Type} [Fintype ι]
+    (G : E → ((ι → ℝ) × (ι → E)) → E) (z₀ : E)
+    (params₀ : (ι → ℝ) × (ι → E)) {n : WithTop ℕ∞} (hn : n ≠ 0)
+    (hjoint : ContDiffAt ℝ n
+      (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) (z₀, params₀))
+    (hinv : ∃ L : E ≃L[ℝ] E,
+      HasFDerivAt (fun z : E => G z params₀) (L : E →L[ℝ] E) z₀) :
+    ∃ Deq : (E × ((ι → ℝ) × (ι → E))) ≃L[ℝ]
+        (E × ((ι → ℝ) × (ι → E))),
+      HasStrictFDerivAt
+        (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2))
+        (Deq : (E × ((ι → ℝ) × (ι → E))) →L[ℝ]
+          (E × ((ι → ℝ) × (ι → E)))) (z₀, params₀) := by
+  classical
+  obtain ⟨L, hL⟩ := hinv
+  have hjoint_strict : HasStrictFDerivAt
+      (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2)
+      (fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) (z₀, params₀))
+      (z₀, params₀) := hjoint.hasStrictFDerivAt hn
+  set D := fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2)
+    (z₀, params₀)
+  have hjoint_hd : HasFDerivAt
+      (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) D (z₀, params₀) :=
+    hjoint_strict.hasFDerivAt
+  have hk : HasFDerivAt (fun z : E => (z, params₀))
+      (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E))) z₀ :=
+    (hasFDerivAt_id z₀).prodMk (hasFDerivAt_const params₀ z₀)
+  have hDL : D.comp (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E))) =
+      (L : E →L[ℝ] E) := by
+    have h1 : HasFDerivAt
+        ((fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) ∘
+          (fun z : E => (z, params₀)))
+        (D.comp (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E)))) z₀ :=
+      hjoint_hd.comp z₀ hk
+    exact h1.unique hL
+  have hDv : ∀ v : E, D (v, (0 : (ι → ℝ) × (ι → E))) = L v := by
+    intro v
+    have h := DFunLike.congr_fun hDL v
+    simpa [ContinuousLinearMap.inl_apply] using h
+  have hDsplit : ∀ (v : E) (u : (ι → ℝ) × (ι → E)),
+      D (v, u) = L v + D ((0 : E), u) := by
+    intro v u
+    have hsum : ((v, u) : E × ((ι → ℝ) × (ι → E))) =
+        (v, (0 : (ι → ℝ) × (ι → E))) + ((0 : E), u) := by
+      ext <;> simp
+    rw [hsum, map_add, hDv]
+  let Deq : (E × ((ι → ℝ) × (ι → E))) ≃L[ℝ]
+      (E × ((ι → ℝ) × (ι → E))) :=
+    ContinuousLinearEquiv.equivOfInverse
+      (D.prod (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E))))
+      (((L.symm : E →L[ℝ] E).comp
+          (ContinuousLinearMap.fst ℝ E ((ι → ℝ) × (ι → E)) -
+            (D.comp (ContinuousLinearMap.inr ℝ E ((ι → ℝ) × (ι → E)))).comp
+              (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E))))).prod
+        (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E))))
+      (by
+        rintro ⟨v, u⟩
+        have hk2 : D (v, u) - D ((0 : E), u) = L v := by
+          rw [hDsplit v u]
+          abel
+        simp only [ContinuousLinearMap.prod_apply, ContinuousLinearMap.comp_apply,
+          ContinuousLinearMap.sub_apply, ContinuousLinearMap.coe_fst',
+          ContinuousLinearMap.coe_snd', ContinuousLinearMap.inr_apply,
+          ContinuousLinearEquiv.coe_coe, Prod.mk.injEq, and_true]
+        rw [hk2]
+        exact L.symm_apply_apply v)
+      (by
+        rintro ⟨a, b⟩
+        simp only [ContinuousLinearMap.prod_apply, ContinuousLinearMap.comp_apply,
+          ContinuousLinearMap.sub_apply, ContinuousLinearMap.coe_fst',
+          ContinuousLinearMap.coe_snd', ContinuousLinearMap.inr_apply,
+          ContinuousLinearEquiv.coe_coe, Prod.mk.injEq, and_true]
+        rw [hDsplit (L.symm (a - D ((0 : E), b))) b, L.apply_symm_apply]
+        abel)
+  have hΦ_hd : HasFDerivAt
+      (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2))
+      (Deq : (E × ((ι → ℝ) × (ι → E))) →L[ℝ]
+        (E × ((ι → ℝ) × (ι → E)))) (z₀, params₀) := by
+    change HasFDerivAt
+      (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2))
+      (D.prod (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E)))) (z₀, params₀)
+    exact hjoint_hd.prodMk hasFDerivAt_snd
+  have hΦcd : ContDiffAt ℝ n
+      (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2)) (z₀, params₀) :=
+    hjoint.prodMk contDiffAt_snd
+  exact ⟨Deq, hΦcd.hasStrictFDerivAt' hΦ_hd hn⟩
+
+/-- The pinned map is an open partial homeomorphism on a neighborhood of every
+point where the joint equation is differentiable and its `z`-block is
+invertible. -/
+theorem existsPinnedLocal
+    {ι : Type} [Fintype ι]
+    (G : E → ((ι → ℝ) × (ι → E)) → E) (z₀ : E)
+    (params₀ : (ι → ℝ) × (ι → E)) {n : WithTop ℕ∞} (hn : n ≠ 0)
+    (hjoint : ContDiffAt ℝ n
+      (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) (z₀, params₀))
+    (hinv : ∃ L : E ≃L[ℝ] E,
+      HasFDerivAt (fun z : E => G z params₀) (L : E →L[ℝ] E) z₀) :
+    ∃ e : OpenPartialHomeomorph
+        (E × ((ι → ℝ) × (ι → E))) (E × ((ι → ℝ) × (ι → E))),
+      (z₀, params₀) ∈ e.source ∧
+        (e : (E × ((ι → ℝ) × (ι → E))) →
+          (E × ((ι → ℝ) × (ι → E)))) =
+          fun w => (G w.1 w.2, w.2) := by
+  obtain ⟨Deq, hΦ⟩ := existsPinnedDeriv G z₀ params₀ hn hjoint hinv
+  exact ⟨hΦ.toOpenPartialHomeomorph _, hΦ.mem_toOpenPartialHomeomorph_source, rfl⟩
+
 /-- **C2 endpoint at order `n` (`lbl430`(ii)) — the implicit solution is `C^n`.**  The order-`n`
 companion of `implicitSol_hasStrictFDerivAt`, via the *pinned* map `Φ(z, params) := (G z params,
 params)`.  Its Fréchet derivative is block-triangular `[[∂_zG, ∂_pG], [0, id]]`, invertible iff the
@@ -275,67 +386,11 @@ theorem implicitSol_contDiffAt
         (∀ᶠ zp in nhds (z₀, params₀),
           G zp.1 zp.2 = 0 → zp.1 = f zp.2) := by
   classical
-  obtain ⟨L, hL⟩ := hinv
   have hn0 : ((n : ℕ∞) : WithTop ℕ∞) ≠ 0 := by exact_mod_cast (show n ≠ 0 by omega)
-  -- Joint derivative `D` (the fderiv) and its invertible `z`-block `= L`.
-  have hjoint_strict : HasStrictFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2)
-      (fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) (z₀, params₀)) (z₀, params₀) :=
-    hjoint.hasStrictFDerivAt hn0
-  set D := fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) (z₀, params₀) with hDdef
-  have hjoint_hd : HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) D (z₀, params₀) :=
-    hjoint_strict.hasFDerivAt
-  have hk : HasFDerivAt (fun z : E => (z, params₀))
-      (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E))) z₀ :=
-    (hasFDerivAt_id z₀).prodMk (hasFDerivAt_const params₀ z₀)
-  have hDL : D.comp (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E))) = (L : E →L[ℝ] E) := by
-    have h1 : HasFDerivAt ((fun w : E × ((ι → ℝ) × (ι → E)) => G w.1 w.2) ∘
-          (fun z : E => (z, params₀)))
-        (D.comp (ContinuousLinearMap.inl ℝ E ((ι → ℝ) × (ι → E)))) z₀ := hjoint_hd.comp z₀ hk
-    exact h1.unique hL
-  have hDv : ∀ v : E, D (v, (0 : (ι → ℝ) × (ι → E))) = L v := by
-    intro v
-    have h := DFunLike.congr_fun hDL v
-    simpa [ContinuousLinearMap.inl_apply] using h
-  have hDsplit : ∀ (v : E) (u : (ι → ℝ) × (ι → E)),
-      D (v, u) = L v + D ((0 : E), u) := by
-    intro v u
-    have hsum : ((v, u) : E × ((ι → ℝ) × (ι → E)))
-        = (v, (0 : (ι → ℝ) × (ι → E))) + ((0 : E), u) := by ext <;> simp
-    rw [hsum, map_add, hDv]
-  -- The block-triangular derivative of `Φ` is a linear equiv with explicit inverse.
-  obtain ⟨Deq, hDeq⟩ : ∃ Deq : (E × ((ι → ℝ) × (ι → E))) ≃L[ℝ] (E × ((ι → ℝ) × (ι → E))),
-      (Deq : (E × ((ι → ℝ) × (ι → E))) →L[ℝ] (E × ((ι → ℝ) × (ι → E))))
-        = D.prod (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E))) := by
-    refine ⟨ContinuousLinearEquiv.equivOfInverse
-      (D.prod (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E))))
-      (((L.symm : E →L[ℝ] E).comp
-          (ContinuousLinearMap.fst ℝ E ((ι → ℝ) × (ι → E)) -
-            (D.comp (ContinuousLinearMap.inr ℝ E ((ι → ℝ) × (ι → E)))).comp
-              (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E))))).prod
-        (ContinuousLinearMap.snd ℝ E ((ι → ℝ) × (ι → E))))
-      ?_ ?_, rfl⟩
-    · rintro ⟨v, u⟩
-      have hk2 : D (v, u) - D ((0 : E), u) = L v := by rw [hDsplit v u]; abel
-      simp only [ContinuousLinearMap.prod_apply, ContinuousLinearMap.comp_apply,
-        ContinuousLinearMap.sub_apply, ContinuousLinearMap.coe_fst',
-        ContinuousLinearMap.coe_snd', ContinuousLinearMap.inr_apply,
-        ContinuousLinearEquiv.coe_coe, Prod.mk.injEq, and_true]
-      rw [hk2]; exact L.symm_apply_apply v
-    · rintro ⟨a, b⟩
-      simp only [ContinuousLinearMap.prod_apply, ContinuousLinearMap.comp_apply,
-        ContinuousLinearMap.sub_apply, ContinuousLinearMap.coe_fst',
-        ContinuousLinearMap.coe_snd', ContinuousLinearMap.inr_apply,
-        ContinuousLinearEquiv.coe_coe, Prod.mk.injEq, and_true]
-      rw [hDsplit (L.symm (a - D ((0 : E), b))) b, L.apply_symm_apply]; abel
-  -- `Φ` and its `C^n`/strict differentiability with derivative `Deq`.
-  have hΦ_hd : HasFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2))
-      (Deq : (E × ((ι → ℝ) × (ι → E))) →L[ℝ] (E × ((ι → ℝ) × (ι → E)))) (z₀, params₀) := by
-    rw [hDeq]; exact hjoint_hd.prodMk hasFDerivAt_snd
+  obtain ⟨Deq, hΦstrict⟩ := existsPinnedDeriv G z₀ params₀ hn0 hjoint hinv
+  have hΦ_hd := hΦstrict.hasFDerivAt
   have hΦcd : ContDiffAt ℝ (n : ℕ∞) (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2))
       (z₀, params₀) := hjoint.prodMk contDiffAt_snd
-  have hΦstrict : HasStrictFDerivAt (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2))
-      (Deq : (E × ((ι → ℝ) × (ι → E))) →L[ℝ] (E × ((ι → ℝ) × (ι → E)))) (z₀, params₀) :=
-    hΦcd.hasStrictFDerivAt' hΦ_hd hn0
   set invF := hΦstrict.localInverse
     (fun w : E × ((ι → ℝ) × (ι → E)) => (G w.1 w.2, w.2)) Deq (z₀, params₀) with hinvF
   -- `invF` is `C^n` at `(0, params₀)` (type-ascribe the beta/projection-clean form, then `hz₀`).
@@ -441,6 +496,56 @@ theorem normalChart_eq_diagExpInv_snd
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- Package the pointwise base projection and inverse-exponential fiber
+identification into an equality in the tangent bundle. -/
+theorem diagExpInv_eq_normal
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p y q : M)
+    (hproj : (diagExpInv (I := I) g hEnorm p (y, q)).proj = y)
+    (hsrc : (diagExpInv (I := I) g hEnorm p (y, q)).snd ∈
+      (NormalCoordinates.expMapDiffeo (I := I) g y).source)
+    (hexp : NormalCoordinates.expMapDiffeo (I := I) g y
+        (show TangentSpace I y from
+          (diagExpInv (I := I) g hEnorm p (y, q)).snd) = q) :
+    diagExpInv (I := I) g hEnorm p (y, q) =
+      (⟨y, (show TangentSpace I y from
+        NormalCoordinates.normalChartAt (I := I) g y q)⟩ : TangentBundle I M) := by
+  refine TotalSpace.ext hproj ?_
+  exact heq_of_eq
+    (normalChart_eq_diagExpInv_snd (I := I) g hEnorm p y q hsrc hexp).symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Identify the moving inverse-exponential branch with the moving normal
+chart under the intrinsic branch identities and the named realized-exponential
+smallness condition. -/
+theorem diagInv_eq_normal_lt
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p y q : M)
+    (hproj : (diagExpInv (I := I) g hEnorm p (y, q)).proj = y)
+    (hintr : expMapIntrinsic (I := I) g hEnorm y
+      (diagExpInv (I := I) g hEnorm p (y, q)).snd = q)
+    (hsmall : Real.sqrt
+      (g.inner y
+        (diagExpInv (I := I) g hEnorm p (y, q)).snd
+        (diagExpInv (I := I) g hEnorm p (y, q)).snd) <
+      expDiffeoRadius (I := I) g hEnorm y) :
+    diagExpInv (I := I) g hEnorm p (y, q) =
+      (⟨y, (show TangentSpace I y from
+        NormalCoordinates.normalChartAt (I := I) g y q)⟩ : TangentBundle I M) := by
+  have hsrc := expDiffeo_mem_of_lt (I := I) g hEnorm y hsmall
+  have hcompat := expDiffeo_eq_intr (I := I) g hEnorm y hsmall
+  exact diagExpInv_eq_normal (I := I) g hEnorm p y q
+    hproj hsrc (hcompat.trans hintr)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Step-2 crux (readout smoothness).**  The trivialization-at-`p` fiber *readout* of the
 moving-base inverse exponential — `(y, q) ↦ (trivializationAt E (TangentSpace I) p (diagExpInv g
 hEnorm p (y, q))).2 : E` — is jointly `C¹` at the diagonal `(p, p)`.  This is `contMDiffAt_totalSpace`
@@ -483,6 +588,277 @@ theorem diagExpReadout_contMDiffAt_order
     rw [diagExpInv_center]
   rw [hproj] at h
   exact h.2
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Read an off-diagonal `C^n` tangent-bundle inverse branch in the fixed
+trivialization at `p`.  This is the generic adapter used by controlled branch
+domains; unlike `diagExpReadout_contMDiffAt_order`, the base point need not be
+`(p,p)`. -/
+theorem diagReadout_of_md
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (yq : M × M) (n : ℕ)
+    (hsm : ContMDiffAt (I.prod I) I.tangent (n : ℕ∞)
+      (diagExpInv (I := I) g hEnorm p) yq)
+    (hbase : (diagExpInv (I := I) g hEnorm p yq).proj ∈
+      (trivializationAt E (TangentSpace I) p).baseSet) :
+    ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
+      (fun w : M × M =>
+        (trivializationAt E (TangentSpace I) p
+          (diagExpInv (I := I) g hEnorm p w)).2) yq := by
+  exact (((trivializationAt E (TangentSpace I) p).contMDiffAt_iff
+    ((trivializationAt E (TangentSpace I) p).mem_source.2 hbase)).mp hsm).2
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- An explicit finite-order off-diagonal readout domain.  It is an open
+neighborhood of `(p,p)` on which the readout is `C^n` and the fixed inverse
+branch has the pointwise right-inverse, projection, and intrinsic exponential
+identities. -/
+theorem exists_readoutDom
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (n : ℕ) (hn : 1 ≤ n) :
+    ∃ U : Set (M × M), IsOpen U ∧ (p, p) ∈ U ∧
+      ∀ y ∈ U,
+        ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
+          (fun w : M × M =>
+            (trivializationAt E (TangentSpace I) p
+              (diagExpInv (I := I) g hEnorm p w)).2) y ∧
+        diagExp (I := I) g hEnorm (diagExpInv (I := I) g hEnorm p y) = y ∧
+        (diagExpInv (I := I) g hEnorm p y).proj = y.1 ∧
+        expMapIntrinsic (I := I) g hEnorm y.1
+          (diagExpInv (I := I) g hEnorm p y).snd = y.2 := by
+  obtain ⟨U, hUopen, hpU, hU⟩ := exists_diagInvDom (I := I) g hEnorm p n hn
+  let e := trivializationAt E (TangentSpace I) p
+  let V := U ∩ Prod.fst ⁻¹' e.baseSet
+  have hVopen : IsOpen V := hUopen.inter (e.open_baseSet.preimage continuous_fst)
+  have hpV : (p, p) ∈ V :=
+    ⟨hpU, mem_baseSet_trivializationAt E (TangentSpace I) p⟩
+  refine ⟨V, hVopen, hpV, ?_⟩
+  intro y hy
+  have hbranch := hU y hy.1
+  have hbase : (diagExpInv (I := I) g hEnorm p y).proj ∈ e.baseSet := by
+    rw [hbranch.2.2.1]
+    exact hy.2
+  exact ⟨diagReadout_of_md (I := I) g hEnorm p y n hbranch.1 hbase,
+    hbranch.2⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A single `C^∞` off-diagonal readout domain. It is the fixed
+trivialization-at-`p` restriction of `exists_diagInvDom_inf`, and retains all
+branch identities needed to identify the readout with moving normal
+coordinates. -/
+theorem exists_readoutDom_inf
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    ∃ U : Set (M × M), IsOpen U ∧ (p, p) ∈ U ∧
+      ContMDiffOn (I.prod I) 𝓘(ℝ, E) ∞
+        (fun y : M × M =>
+          (trivializationAt E (TangentSpace I) p
+            (diagExpInv (I := I) g hEnorm p y)).2) U ∧
+      ∀ y ∈ U,
+        diagExp (I := I) g hEnorm (diagExpInv (I := I) g hEnorm p y) = y ∧
+        (diagExpInv (I := I) g hEnorm p y).proj = y.1 ∧
+        expMapIntrinsic (I := I) g hEnorm y.1
+          (diagExpInv (I := I) g hEnorm p y).snd = y.2 := by
+  obtain ⟨U, hUopen, hpU, hUsmooth, hU⟩ :=
+    exists_diagInvDom_inf (I := I) g hEnorm p
+  let e := trivializationAt E (TangentSpace I) p
+  let V := U ∩ Prod.fst ⁻¹' e.baseSet
+  have hVopen : IsOpen V := hUopen.inter (e.open_baseSet.preimage continuous_fst)
+  have hpV : (p, p) ∈ V :=
+    ⟨hpU, mem_baseSet_trivializationAt E (TangentSpace I) p⟩
+  have hVsmooth : ContMDiffOn (I.prod I) 𝓘(ℝ, E) ∞
+      (fun y : M × M =>
+        (trivializationAt E (TangentSpace I) p
+          (diagExpInv (I := I) g hEnorm p y)).2) V := by
+    intro y hy
+    have hbranchAt : ContMDiffAt (I.prod I) I.tangent ∞
+        (diagExpInv (I := I) g hEnorm p) y :=
+      (hUsmooth y hy.1).contMDiffAt (hUopen.mem_nhds hy.1)
+    have hbase : (diagExpInv (I := I) g hEnorm p y).proj ∈ e.baseSet := by
+      rw [(hU y hy.1).2.1]
+      exact hy.2
+    have hreadAt : ContMDiffAt (I.prod I) 𝓘(ℝ, E) ∞
+        (fun w : M × M =>
+          (trivializationAt E (TangentSpace I) p
+            (diagExpInv (I := I) g hEnorm p w)).2) y :=
+      (((trivializationAt E (TangentSpace I) p).contMDiffAt_iff
+        ((trivializationAt E (TangentSpace I) p).mem_source.2 hbase)).mp hbranchAt).2
+    exact hreadAt.contMDiffWithinAt
+  refine ⟨V, hVopen, hpV, hVsmooth, ?_⟩
+  intro y hy
+  exact hU y hy.1
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Riemannian extended-ball form of the common `C^∞` readout branch. It
+extracts a positive finite radius without choosing a separate proper metric;
+the domain is written explicitly using `riemannianEDist`, so it is stable under
+later metric realizations. -/
+theorem exists_readoutEBall
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    ∃ δ : ℝ≥0∞, 0 < δ ∧ δ < ⊤ ∧
+      ContMDiffOn (I.prod I) 𝓘(ℝ, E) ∞
+        (fun y : M × M =>
+          (trivializationAt E (TangentSpace I) p
+            (diagExpInv (I := I) g hEnorm p y)).2)
+        {y : M × M |
+          max (riemannianEDist I y.1 p) (riemannianEDist I y.2 p) < δ} ∧
+      ∀ y : M × M,
+        max (riemannianEDist I y.1 p) (riemannianEDist I y.2 p) < δ →
+        diagExp (I := I) g hEnorm (diagExpInv (I := I) g hEnorm p y) = y ∧
+        (diagExpInv (I := I) g hEnorm p y).proj = y.1 ∧
+        expMapIntrinsic (I := I) g hEnorm y.1
+          (diagExpInv (I := I) g hEnorm p y).snd = y.2 := by
+  obtain ⟨U, hUopen, hpU, hUsmooth, hU⟩ :=
+    exists_readoutDom_inf (I := I) g hEnorm p
+  have hextract : ∃ δ : ℝ≥0∞, 0 < δ ∧ δ < ⊤ ∧
+      {y : M × M |
+        max (riemannianEDist I y.1 p) (riemannianEDist I y.2 p) < δ} ⊆ U := by
+    haveI : LocallyCompactSpace M :=
+      Manifold.locallyCompact_of_finiteDimensional (M := M) I
+    haveI : RegularSpace M := inferInstance
+    letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
+    obtain ⟨ε, hεpos, hεball⟩ := EMetric.isOpen_iff.mp hUopen (p, p) hpU
+    let δ : ℝ≥0∞ := min ε 1
+    have hδpos : 0 < δ := lt_min hεpos (by norm_num)
+    have hδtop : δ < (⊤ : ℝ≥0∞) :=
+      lt_of_le_of_lt (min_le_right ε 1) (by simp)
+    have hball : Metric.eball (p, p) δ ⊆ U :=
+      (Metric.eball_subset_eball (min_le_left ε 1)).trans hεball
+    refine ⟨δ, hδpos, hδtop, ?_⟩
+    intro y hy
+    apply hball
+    rw [Metric.mem_eball, Prod.edist_eq]
+    exact hy
+  obtain ⟨δ, hδpos, hδtop, hball⟩ := hextract
+  refine ⟨δ, hδpos, hδtop, hUsmooth.mono hball, ?_⟩
+  intro y hy
+  exact hU y (hball hy)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Every center/point pair lies in a Riemannian extended product ball around
+an auxiliary cage center `q` once the radius dominates
+`dist p q + 2 * r`.  This separates the elementary triangle-inequality ledger
+from the later finite-hat estimate `dist p q ≤ 4 * lambda`. -/
+theorem centerPairs_lt_of
+    (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
+    (μ : ι → ℝ) (pts : ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ)
+    (h : CenterInput (I := I) g μ pts join p r) (q : M) {δ : ℝ≥0∞}
+    (hδ :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ENNReal.ofReal (dist p q + 2 * r) < δ) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    ∀ i : ι,
+      max
+        (riemannianEDist I (centerOfMass (I := I) g μ pts join p r h) q)
+        (riemannianEDist I (pts i) q) < δ := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  have hriem (x y : M) :
+      riemannianEDist I x y = ENNReal.ofReal (dist x y) := by
+    rw [HopfRinow.riemMetric_dist_eq (I := I) x y]
+    exact (ENNReal.ofReal_toReal (riemannianEDist_ne_top (I := I) x y)).symm
+  have hcm :
+      dist (centerOfMass (I := I) g μ pts join p r h) p ≤ 2 * r := by
+    simpa [Metric.mem_closedBall, dist_comm] using
+      (centerOfMass.mem (I := I) (g := g) (μ := μ) (pts := pts)
+        (join := join) (p := p) (r := r) h)
+  intro i
+  apply max_lt
+  · rw [hriem]
+    apply lt_of_le_of_lt (ENNReal.ofReal_le_ofReal ?_) hδ
+    calc
+      dist (centerOfMass (I := I) g μ pts join p r h) q
+          ≤ dist (centerOfMass (I := I) g μ pts join p r h) p + dist p q :=
+        dist_triangle _ _ _
+      _ ≤ 2 * r + dist p q := add_le_add_left hcm _
+      _ = dist p q + 2 * r := add_comm _ _
+  · rw [hriem]
+    apply lt_of_le_of_lt (ENNReal.ofReal_le_ofReal ?_) hδ
+    calc
+      dist (pts i) q ≤ dist (pts i) p + dist p q := dist_triangle _ _ _
+      _ ≤ r + dist p q := by
+        apply add_le_add_left
+        simpa [dist_comm] using (h.pts_mem i).le
+      _ ≤ 2 * r + dist p q := by linarith [h.r_pos]
+      _ = dist p q + 2 * r := add_comm _ _
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Caged form of `centerPairs_lt_of`: a real upper bound `R` for the distance
+from the center-input base to the readout base may be used in place of the
+exact distance.  The finite-hat consumer will take `R = 4 * lambda`. -/
+theorem centerPairs_lt_le
+    (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
+    (μ : ι → ℝ) (pts : ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ)
+    (h : CenterInput (I := I) g μ pts join p r) (q : M) (R : ℝ) {δ : ℝ≥0∞}
+    (hpq :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      dist p q ≤ R)
+    (hδ : ENNReal.ofReal (R + 2 * r) < δ) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    ∀ i : ι,
+      max
+        (riemannianEDist I (centerOfMass (I := I) g μ pts join p r h) q)
+        (riemannianEDist I (pts i) q) < δ := by
+  apply centerPairs_lt_of (I := I) g μ pts join p r h q
+  exact lt_of_le_of_lt (ENNReal.ofReal_le_ofReal (add_le_add_left hpq _)) hδ
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Every center/point pair lies in a Riemannian extended product ball once its
+radius dominates the standard `2 * r` center-of-mass bound.  This is the local
+configuration-containment bridge for `exists_readoutEBall`; it deliberately
+makes no claim that the branch radius is uniform over a sequence. -/
+theorem centerPairs_lt
+    (g : SmoothRiemannianMetric I M) {ι : Type} [Fintype ι]
+    (μ : ι → ℝ) (pts : ι → M) (join : M → M → ℝ → M) (p : M) (r : ℝ)
+    (h : CenterInput (I := I) g μ pts join p r) {δ : ℝ≥0∞}
+    (hδ : ENNReal.ofReal (2 * r) < δ) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    ∀ i : ι,
+      max
+        (riemannianEDist I (centerOfMass (I := I) g μ pts join p r h) p)
+        (riemannianEDist I (pts i) p) < δ := by
+  simpa using
+    (centerPairs_lt_of (I := I) g μ pts join p r h p (by simpa using hδ))
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -988,4 +1364,3 @@ end DiagExpIdentification
 
 end HCGCompactness
 end DifferentialGeometry
-

@@ -374,6 +374,134 @@ theorem expInv_eqn_local
     exact grad_half_self (I := I) (g := g) q hdiffSelf
   · exact hgradρ (hsrc i) hself (hsmall i hself) (hdiffSummands i)
 
+/-- A canonical positive radius on which the one-summand squared-distance
+gradient is the negative inverse exponential at the selected center.  This is
+the chosen-radius companion to `expInv_eqn_local`, intended for downstream
+configuration predicates that must name the admissible radius. -/
+noncomputable def eqnRadius : ℝ :=
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
+  letI : CompleteSpace M := h.complete
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  Classical.choose (grad_halfSqDist (I := I) g h.enorm
+    (centerOfMass (I := I) g μ pts join p r h))
+
+/-- The canonical center-equation radius is positive. -/
+theorem eqnRadius_pos : 0 < eqnRadius (I := I) h := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
+  haveI : CompleteSpace M := h.complete
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact (Classical.choose_spec (grad_halfSqDist (I := I) g h.enorm
+    (centerOfMass (I := I) g μ pts join p r h))).1
+
+/-- Inside `eqnRadius`, a differentiable non-self squared-distance summand has
+gradient equal to the negative normal-chart inverse exponential. -/
+theorem grad_eq_of_lt {pt : M}
+    (hsrc : pt ∈ (NormalCoordinates.normalChartAt (I := I) g
+      (centerOfMass (I := I) g μ pts join p r h)).source)
+    (hne : pt ≠ centerOfMass (I := I) g μ pts join p r h)
+    (hsmall : Real.sqrt
+      (g.inner (centerOfMass (I := I) g μ pts join p r h)
+        (NormalCoordinates.normalChartAt (I := I) g
+          (centerOfMass (I := I) g μ pts join p r h) pt : E)
+        (NormalCoordinates.normalChartAt (I := I) g
+          (centerOfMass (I := I) g μ pts join p r h) pt : E)) <
+      eqnRadius (I := I) h)
+    (hdiff :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt)
+        (centerOfMass (I := I) g μ pts join p r h)) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    gradientFun (I := I) g (CenterOfMass.halfSqDist pt)
+      (centerOfMass (I := I) g μ pts join p r h) =
+      -(show TangentSpace I (centerOfMass (I := I) g μ pts join p r h) from
+        NormalCoordinates.normalChartAt (I := I) g
+          (centerOfMass (I := I) g μ pts join p r h) pt) := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
+  haveI : CompleteSpace M := h.complete
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  exact (Classical.choose_spec (grad_halfSqDist (I := I) g h.enorm
+    (centerOfMass (I := I) g μ pts join p r h))).2 hsrc hne hsmall hdiff
+
+/-- The selected center satisfies the inverse-exponential equation whenever
+every non-self summand lies inside the canonical center-equation radius. -/
+theorem expInv_eqn_of_lt
+    (hdiffSummands :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist (pts i))
+        (centerOfMass (I := I) g μ pts join p r h))
+    (hsrc :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, pts i ∈ (NormalCoordinates.normalChartAt (I := I) g
+        (centerOfMass (I := I) g μ pts join p r h)).source)
+    (hsmall :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, pts i ≠ centerOfMass (I := I) g μ pts join p r h →
+        Real.sqrt
+          (g.inner (centerOfMass (I := I) g μ pts join p r h)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerOfMass (I := I) g μ pts join p r h) (pts i) : E)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerOfMass (I := I) g μ pts join p r h) (pts i) : E)) <
+          eqnRadius (I := I) h) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∑ i : ι, μ i •
+      (show TangentSpace I (centerOfMass (I := I) g μ pts join p r h) from
+        NormalCoordinates.normalChartAt (I := I) g
+          (centerOfMass (I := I) g μ pts join p r h) (pts i)) = 0 := by
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  refine expInv_eqn h (centerEnergy_diff (I := I) (g := g) hdiffSummands)
+    hdiffSummands ?_
+  intro i
+  by_cases hself : pts i = centerOfMass (I := I) g μ pts join p r h
+  · rw [hself]
+    have hdiffSelf :
+        MDifferentiableAt I 𝓘(ℝ, ℝ)
+          (CenterOfMass.halfSqDist (centerOfMass (I := I) g μ pts join p r h))
+          (centerOfMass (I := I) g μ pts join p r h) := by
+      simpa [hself] using hdiffSummands i
+    exact grad_half_self (I := I) (g := g) _ hdiffSelf
+  · exact grad_eq_of_lt h (hsrc i) hself (hsmall i hself) (hdiffSummands i)
+
 end centerOfMass
 
 /-- **Continuity of the center of mass in its parameters** (the `hc_cont` producer for `lbl430`(i)).

@@ -13,3 +13,8 @@ Verification: passed.
 2026-07-01 Step-C closure update: added `BaseInjBound.subseq`, the
 subsequence projection for the basepoint injectivity-radius lower bound.  This
 is data-valued, so it is a `def`, not a theorem.  Verification passed.
+
+2026-07-10 quantitative-radius update: added `HasInjRadiusAt.mono`, the
+canonical restriction lemma from a known radius to any smaller positive
+radius.  This is the low-level bridge used by bounded-distance uniform floors.
+Verification passed.

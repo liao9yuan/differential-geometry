@@ -8,6 +8,10 @@ The current Hamilton file has five theorem-shaped `sorry`s:
 
 - `ham3_rm_control` is proved: it realizes the old rescaled curvature estimate
   on genuine `FlowMetricBall`s, using the checked parabolic norm-scaling route;
+- `ham3_radius_event` and `ham3_noncollapse_of` are proved: finite maximal time
+  turns `R_i t_i -> infinity` into eventual fixed-radius scale inclusion, and a
+  genuine original-flow `NoLocalCollapsing` producer now implies the exact
+  `Ham3Noncollapse` conclusion;
 - `Ham3SourceRealizes` now requires common-time carrier inclusion, the selected
   basepoint map, and equality with the pullback of the actual
   `ham3RescaledSol` metric; both Ricci and pinching transfer predicates consume
@@ -17,7 +21,8 @@ The current Hamilton file has five theorem-shaped `sorry`s:
 - `ham3_noncollapse` and `ham3_cgh_limit` now expose the finite maximal-time
   interval (`h0omega`, `hD`) instead of silently discarding it;
 - `ham3_noncollapse` and `ham3_cgh_limit` remain genuine producer endpoints at
-  **0%**;
+  **0%**; the former's remaining missing input is now precisely the analytic
+  original-flow `NoLocalCollapsing` producer;
 - `PointedRiemannianManifold.compact_of_ricci`, the eventual global comparison
   maps, and `limit_to_orig` are checked; `limit_to_orig` is **100%** as a
   theorem and has no `sorry`;
@@ -1434,9 +1439,17 @@ The Hamilton-side noncollapse package now uses the canonical geometric API in
 The abstract `Ham3BallPair`, its arbitrary real-valued volume fields, and the
 `unitVolLower`/`unitNested` projection wrappers were deleted.  The focused file
 check passed.  The new `ham3_rm_control` theorem is checked and realizes the
-parabolic curvature bound on these actual balls.  The theorem `ham3_noncollapse` itself is still a genuine
-Perelman producer frontier and remains 0%; its dedicated geometric data path is
-about 40%.  The broader Hamilton Section 12 endpoint remains 0%.
+parabolic curvature bound on these actual balls.
+
+The full scale bridge is now checked in `Perelman/ScaleTransfer.lean`:
+distance-defined ball carriers, volume, curvature control, kappa lower bounds,
+and below-scale/nonlocal predicates transfer both ways.  The checked
+`ham3_radius_event` derives the needed eventual scale inclusion, and
+`ham3_noncollapse_of` proves the exact Hamilton conclusion from a canonical
+`NoLocalCollapsing P.S rho` input.  Thus this downstream adapter is 100%; the
+theorem `ham3_noncollapse` itself remains 0% because the analytic Perelman
+producer is still absent.  Its W-route machinery is about 10%, and the broader
+Hamilton Section 12 endpoint remains 0%.
 
 ## 2026-07-09 CGH retention and `limit_to_orig` repair
 

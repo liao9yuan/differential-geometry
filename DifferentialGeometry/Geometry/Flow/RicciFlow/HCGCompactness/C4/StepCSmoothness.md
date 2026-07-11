@@ -314,3 +314,76 @@ LESSON (`HasFDerivAt.comp` for `fun p => G (f p) p`): Lean mis-guesses the inner
 `Prod.mk (f params₀)` (it fits the point); fully pin `(𝕜:=ℝ)(E:=)(F:=)(G:=)(f:=)(g:=)` AND take the
 `have hcomp := …` result **unascribed** (an ascription-coercion leaves a `Module ?m E` metavar that
 stucks every consumer of `hcomp`), then `hcomp.unique hconst` with `hconst` in the matching `∘` form.
+
+## 2026-07-10 — pinned branch extraction and off-diagonal readout domains
+
+- Factored the pinned-map derivative into `existsPinnedDeriv` and exposed its
+  local inverse as `existsPinnedLocal`. `implicitSol_contDiffAt` now reuses this
+  producer instead of duplicating the block-triangular algebra.
+- Added `diagExpInv_eq_normal`, packaging the base projection and fiber
+  identification into the exact tangent-bundle equality consumed by
+  `readout_sum_eq_zero_iff`.
+- Added `diagReadout_of_md`, the arbitrary-point trivialization adapter, and
+  `exists_readoutDom`, an open finite-order neighborhood of `(p,p)` carrying
+  readout `C^n` regularity plus the right-inverse/projection/intrinsic-exp facts.
+- Focused verification passed; targeted `StepCSmoothness` and downstream
+  `StepCCmDomain` builds passed. The pre-existing unused-`Fintype` warning on
+  `implicitSol_hasStrictFDerivAt` remains unrelated.
+- Honest stop condition: `exists_readoutDom` is order-dependent. A fixed open
+  configuration region carrying every finite order still needs a common
+  `C^∞` branch theorem. Diagonal recentering and the pointwise
+  `normalChartAt` choice both reduce to that same missing moving-base API.
+
+## 2026-07-10 — pointwise realized/intrinsic branch identification
+
+- Added `diagInv_eq_normal_lt`.  It derives the tangent-bundle equality between
+  `diagExpInv` and the moving normal chart from three honest lower facts: the
+  branch projection, the intrinsic exponential identity, and smallness below
+  `expDiffeoRadius`.
+- This consumes the new pointwise producers `expDiffeo_mem_of_lt` and
+  `expDiffeo_eq_intr`; callers no longer need to assume a full realized
+  exponential equality as one opaque hypothesis.
+- Focused verification passed and the targeted module object was refreshed.
+- Limitation: the theorem is pointwise.  Producing its smallness hypothesis
+  uniformly on the finite-hat configuration family remains part of the common
+  branch/configuration-containment frontier.
+
+## 2026-07-10 — common all-order readout domain
+
+- Added `exists_readoutDom_inf`, the fixed-trivialization restriction of
+  `DiagExpDerivative.exists_diagInvDom_inf`.  One open neighborhood of `(p,p)`
+  now carries joint `ContMDiffOn ∞` readout regularity and the right-inverse,
+  projection, and intrinsic exponential identities.
+- The proof uses the existing `diagExpInv` and `trivializationAt`; it does not
+  create a sigma-box inverse or a second branch.
+- Focused verification passed.  Together with the targeted upstream build, the
+  common all-order inverse/readout-domain API is complete.
+- Remaining limitation is geometric containment: the concrete finite-hat
+  configurations must be placed in this open domain, below
+  `centerOfMass.eqnRadius`, and below the moving `expDiffeoRadius` required by
+  `diagInv_eq_normal_lt`.
+
+## 2026-07-10 — numerical branch radius and local containment
+
+- Added `exists_readoutEBall`.  For each fixed `(M, g, p)` it extracts one
+  finite positive Riemannian extended radius `δ` on which the readout is jointly
+  `C^∞` and all inverse/projection/intrinsic-exp branch identities hold.
+- Added `centerPairs_lt_of`, `centerPairs_lt_le`, and `centerPairs_lt`.  They
+  convert the standard center-of-mass bounds into membership of that product
+  eball.  The cage-facing form says that `dist p q ≤ R` and
+  `ENNReal.ofReal (R + 2 * r) < δ` suffice; the finite-hat consumer can take
+  `R = 4 * lambda`.
+- Focused verification and the targeted module build passed.  These lemmas close the local triangle-inequality
+  and topology bookkeeping; they do not claim that the extracted `δ` has a
+  positive lower bound over the sequence index.
+- Exact remaining branch-scale gap: `NormalCoordMetricBoundInput.metricC` is
+  uniform, but its `radius` has only pointwise `radius_pos`.  The current input
+  can therefore shrink with `k` and cannot imply the uniform branch radius
+  needed by the selected global `SigmaScaleField` route.  A fixed-index finite
+  minimum is valid but does not by itself discharge the eventual all-`k`
+  `StepB1RawInput` producer.
+- If the global-sigma route is retained, the next genuine producer is a
+  quantitative normal-coordinate `chartedDiagExp` approximation (for example
+  `ApproximatesLinearOn` with constants uniform on live centers), followed by an
+  explicitly controlled inverse branch.  Adding a bare consumer-side
+  `branchRadius` field would only rename this missing geometry.
