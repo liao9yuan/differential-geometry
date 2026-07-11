@@ -38,6 +38,7 @@ def tensorTrivProjPushedNormSq
         (S ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))‖ ^ 2
     else 0
 
+@[simp]
 lemma tensorTrivProjPushedNormSq_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)
@@ -50,6 +51,7 @@ lemma tensorTrivProjPushedNormSq_apply_of_mem
   unfold tensorTrivProjPushedNormSq
   simp [hy]
 
+@[simp]
 lemma tensorTrivProjPushedNormSq_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b)

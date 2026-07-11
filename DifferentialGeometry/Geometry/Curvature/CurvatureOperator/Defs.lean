@@ -683,12 +683,14 @@ noncomputable def smoothExtensionFiber (x : M) (u : V x) :
   fun b => ((ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := F) (V := V) x u).choose : Cₛ^(⊤ : ℕ∞)⟮I; F, V⟯) b
 
+@[simp]
 lemma smoothExtensionTangent_eq (x : M) (v : TangentSpace I x) :
     smoothExtensionTangent (I := I) x v x = v := by
   classical
   exact (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x v).choose_spec
 
+@[simp]
 lemma smoothExtensionFiber_eq (x : M) (u : V x) :
     smoothExtensionFiber (I := I) (F := F) (V := V) x u x = u := by
   classical

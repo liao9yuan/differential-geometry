@@ -539,6 +539,7 @@ theorem heatSemigroup_isSelfAdjoint (g : SmoothRiemannianMetric I M)
     exact h_inner_hsum'.tsum_eq.symm
   rw [h_lhs, h_rhs]
 
+@[simp]
 theorem heatSemigroup_zero (g : SmoothRiemannianMetric I M) :
     heatSemigroup (I := I) (M := M) g 0 = ContinuousLinearMap.id ℝ _ := by
   apply ContinuousLinearMap.ext

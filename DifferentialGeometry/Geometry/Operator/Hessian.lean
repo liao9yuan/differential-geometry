@@ -341,6 +341,7 @@ def hessFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
       intro j _
       ring)
 
+@[simp]
 lemma hessFun_apply (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v w : TangentSpace I x) :
     hessFun (I := I) g f x v w =

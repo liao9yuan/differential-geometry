@@ -68,10 +68,10 @@ def euclForm (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E] :
 
 @[simp] lemma euclForm_apply (v w : E) : euclForm E v w = inner ℝ v w := rfl
 
-def tangentTrivializationContinuousLinearMapAt (x₀ x : M) : E →L[ℝ] E :=
+private def tangentTrivializationContinuousLinearMapAt (x₀ x : M) : E →L[ℝ] E :=
   ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E)
 
-def localFiber (x₀ x : M) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
+private def localFiber (x₀ x : M) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (((euclForm E).bilinearComp (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x)) :
     E →L[ℝ] E →L[ℝ] ℝ)
 
@@ -98,7 +98,7 @@ lemma localFiber_pos (x₀ : M) {x : M}
       ℝ x hx).map_ne_zero_iff.mpr hv
   positivity
 
-lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
+private lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (φ : TangentSpace I x →L[ℝ] ℝ) :
     (trivializationAt (E →L[ℝ] ℝ) (fun y => TangentSpace I y →L[ℝ] ℝ) x₀).continuousLinearMapAt
@@ -134,7 +134,7 @@ lemma inCoordinates_localFiber (x₀ : M) {x : M}
   rw [show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v) = v from e₁.continuousLinearMapAt_symmL hx v,
       show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w) = w from e₁.continuousLinearMapAt_symmL hx w]
 
-lemma coord_localFiber (x₀ : M) {x : M}
+private lemma coord_localFiber (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
         (fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x₀
@@ -168,7 +168,7 @@ lemma localFiber_contMDiffOn (x₀ : M) :
   intro x hx
   exact coord_localFiber x₀ hx
 
-def posDefForms (x : M) : Set (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
+private def posDefForms (x : M) : Set (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
   {φ | (∀ v w, φ v w = φ w v) ∧ (∀ v, v ≠ 0 → 0 < φ v v)}
 
 lemma convex_posDefForms (x : M) : Convex ℝ (posDefForms (I := I) x) := by

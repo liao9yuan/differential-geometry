@@ -76,7 +76,7 @@ open scoped Classical in
       else 0) := rfl
 
 open scoped Classical in
-noncomputable def galerkinCoordEmbedLM
+private noncomputable def galerkinCoordEmbedLM
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
     EuclideanSpace ℝ {i // i ∈ S} →ₗ[ℝ] tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) where
@@ -138,7 +138,7 @@ omit [BoundarylessManifold I M] in
     (v : tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) (j : {i // i ∈ S}) :
     (galerkinCoordRestrict (I := I) (M := M) g₀ a S v) j = v.coeff j.1 := rfl
 
-noncomputable def galerkinCoordDiagLM
+private noncomputable def galerkinCoordDiagLM
     (g₀ : SmoothRiemannianMetric I M)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) :
     EuclideanSpace ℝ {i // i ∈ S} →ₗ[ℝ] EuclideanSpace ℝ {i // i ∈ S} where
@@ -1262,7 +1262,7 @@ set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 
-theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
+private theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
@@ -1358,7 +1358,7 @@ set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 
-theorem deTurckGalerkinForcingSymm_seed_mass
+private theorem deTurckGalerkinForcingSymm_seed_mass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ Cseed : ℕ → ℝ, (∀ k, 0 ≤ Cseed k) ∧
@@ -1387,7 +1387,7 @@ set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 
-theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
+private theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {T : ℝ}
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :

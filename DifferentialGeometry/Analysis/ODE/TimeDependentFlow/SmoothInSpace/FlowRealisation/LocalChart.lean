@@ -21,10 +21,10 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
-def precompMap (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α : M) (z : E) : E :=
+private def precompMap (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α : M) (z : E) : E :=
   extChartAt I α ((Φ_fam t : M → M) ((extChartAt I α).symm z))
 
-def Φ_euclLocal (ΦE : E × ℝ → E) (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α : M)
+private def Φ_euclLocal (ΦE : E × ℝ → E) (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α : M)
     (z : E) (s : ℝ) : E :=
   ΦE (precompMap (I := I) Φ_fam t α z, s)
 

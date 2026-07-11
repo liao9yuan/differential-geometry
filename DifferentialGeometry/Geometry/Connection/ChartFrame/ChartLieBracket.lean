@@ -14,7 +14,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
+private lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
     {x : M} (V : Π y : M, TangentSpace I y) {y : E}
     (hy : y ∈ (extChartAt I x).target) :
     VectorField.mpullbackWithin 𝓘(ℝ, E) I (extChartAt I x).symm V (range I) y =
@@ -46,7 +46,7 @@ lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
         (𝕜 := ℝ) (I := I) (x₀ := x) (x := φ.symm y) hsymm_chart]
   rfl
 
-lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
+private lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
     {x : M} (V : Π y : M, TangentSpace I y)
     (hxint : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E)) :
     VectorField.mpullbackWithin 𝓘(ℝ, E) I (extChartAt I x).symm V (range I) =ᶠ[𝓝 (extChartAt I x x)]
@@ -293,7 +293,7 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
     trivFromE_trivToE (I := I) α hx_base _
   rw [← hround, hkey]
 
-lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
+private lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
     (x : M) (f : M → ℝ) (Y : Π b : M, TangentSpace I b)
     (hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
     (hf : ContMDiffAt I 𝓘(ℝ) 2 f x) :

@@ -43,6 +43,7 @@ noncomputable def concreteConn
 
     exact ContMDiff.clm_bundle_apply (b := id) hcov_global hX_smooth
 
+@[simp]
 theorem concreteConn_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]

@@ -23,7 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 variable {g : SmoothRiemannianMetric I M}
 
-lemma lambda_mul_tensorSobolevWeight
+private lemma lambda_mul_tensorSobolevWeight
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) (σ : ℝ) :
     TensorEigenIdx.lambda (I := I) (M := M) i *
         tensorSobolevWeight (I := I) (M := M) i σ =
@@ -59,7 +59,7 @@ lemma galerkinEnergy_continuousOn
   refine continuousOn_finset_sum s (fun i hi => ?_)
   exact continuousOn_const.mul ((hu i hi).pow 2)
 
-lemma galerkinEnergy_hasDerivWithinAt
+private lemma galerkinEnergy_hasDerivWithinAt
     (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
     (du : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) {t : ℝ}
@@ -77,7 +77,7 @@ lemma galerkinEnergy_hasDerivWithinAt
   have := hsq.const_mul (tensorSobolevWeight (I := I) (M := M) i σ)
   simpa [pow_one] using this
 
-theorem galerkinEnergy_deriv_identity
+private theorem galerkinEnergy_deriv_identity
     (s : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (u : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
     (F : ℝ → TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) (t : ℝ) :

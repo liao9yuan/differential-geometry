@@ -28,11 +28,6 @@ variable (F₂ : Type*) [NormedAddCommGroup F₂] [NormedSpace 𝕜 F₂] [Finit
 
 omit [FiniteDimensional 𝕜 F₂] in
 
-lemma finrank_continuousLinearMap' :
-    Module.finrank 𝕜 (F₁ →L[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ := by
-  have e : (F₁ →L[𝕜] F₂) ≃ₗ[𝕜] (F₁ →ₗ[𝕜] F₂) := LinearMap.toContinuousLinearMap.symm
-  rw [e.finrank_eq, Module.finrank_linearMap 𝕜 𝕜]
-
 noncomputable def tensorHomEquiv : (F₁ ⊗[𝕜] F₂) ≃ₗ[𝕜] ((Module.Dual 𝕜 F₁) →ₗ[𝕜] F₂) := by
   let f : Module.Dual 𝕜 (Module.Dual 𝕜 F₁) ≃ₗ[𝕜] F₁ := (Module.evalEquiv 𝕜 F₁).symm
   have h₀ : (Module.Dual 𝕜 (Module.Dual 𝕜 F₁)) ⊗[𝕜] F₂ ≃ₗ[𝕜] (F₁ ⊗[𝕜] F₂) :=

@@ -95,7 +95,7 @@ lemma exists_globalSmooth_chartBasisVec_ext
   change (χ : M → ℝ) y • chartBasisVecFiber (I := I) x j y = chartBasisVecFiber (I := I) x j y
   rw [hχ_one_y, one_smul]
 
-lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
+private lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (b i m : Fin (Module.finrank ℝ E)) :
     ContDiffAt ℝ ∞ (chartChristoffel (I := I) g x b i m) (extChartAt I x x) := by
@@ -315,7 +315,7 @@ lemma LeviCivita_chartBasisVec_secondCovDeriv [I.Boundaryless]
           refine Finset.sum_congr rfl (fun m _ => ?_)
           rw [mul_comm]
 
-lemma fderiv_chartE_section_repr_eq_zero_of_eventuallyEq [I.Boundaryless]
+private lemma fderiv_chartE_section_repr_eq_zero_of_eventuallyEq [I.Boundaryless]
     (x : M) (j : Fin (Module.finrank ℝ E))
     {X : Π b : M, TangentSpace I b} {U : Set M}
     (hU_open : IsOpen U) (hxU : x ∈ U)

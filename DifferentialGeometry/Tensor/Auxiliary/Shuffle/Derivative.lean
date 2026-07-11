@@ -28,10 +28,6 @@ noncomputable def derivShuffleLeftFwd
   let π := (Fin.cycleRange k)⁻¹ * Equiv.Perm.decomposeFin.symm ((0 : Fin (m + n + 1)), σ_fin)
   finSuccSumEquiv.symm.permCongr π
 
-def derivShuffleLeftIdx
-    (_k : Fin (m + n + 1)) (_σ : Equiv.Perm (Fin m ⊕ Fin n)) :
-    Fin (m + 1) := 0
-
 theorem derivShuffleLeftFwd_sign
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     Equiv.Perm.sign (derivShuffleLeftFwd k σ) =

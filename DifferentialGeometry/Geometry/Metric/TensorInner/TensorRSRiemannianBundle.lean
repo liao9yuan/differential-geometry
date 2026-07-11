@@ -256,7 +256,7 @@ theorem tensorRSRiemannianInnerCLM_smul_right
   rw [h]
   rfl
 
-lemma innerModelRS_quadratic_continuous
+private lemma innerModelRS_quadratic_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Continuous (fun T : TensorRSModel r s ℝ E =>
       tensorInnerPointwise (I := I) (M := M) g r s b T T) := by

@@ -64,11 +64,6 @@ lemma partialDerivWithin_congr_of_eqOn_of_mem {u v : E → ℝ}
       partialDerivWithin (E := E) s i v y :=
   partialDerivWithin_congr huv (huv hy)
 
-lemma partialDerivWithin_eq_fderivWithin_basis
-    (s : Set E) (i : Fin (Module.finrank ℝ E)) (u : E → ℝ) (y : E) :
-    partialDerivWithin (E := E) s i u y =
-      fderivWithin ℝ u s y ((chartModelBasis E) i) := rfl
-
 end ComparisonWithFDeriv
 
 section Smoothness

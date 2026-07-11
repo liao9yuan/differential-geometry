@@ -249,6 +249,7 @@ def inclH (n : ℕ) [NeZero n] :
   fun x => ⟨inclEuclidean n x, by
     rw [inclEuclidean_zero_coord]⟩
 
+@[simp]
 theorem inclH_val (n : ℕ) [NeZero n] (x : EuclideanSpace ℝ (Fin (n - 1))) :
     (inclH n x).val = inclEuclidean n x := rfl
 

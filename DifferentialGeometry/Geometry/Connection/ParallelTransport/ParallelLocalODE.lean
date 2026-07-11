@@ -123,7 +123,7 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
   exact htmax_max ht
 
 
-theorem parallel_picard_lindelof_data
+private theorem parallel_picard_lindelof_data
     (_α : M) (_γ : ℝ → M)
     (_uPrime : ℝ → E) {_a _b : ℝ} :
     True := trivial

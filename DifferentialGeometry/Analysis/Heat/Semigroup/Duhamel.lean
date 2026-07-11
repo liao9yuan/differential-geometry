@@ -356,6 +356,7 @@ noncomputable def mildSolution
   heatSemigroup (I := I) (M := M) g t u_0 +
     ∫ s in (0 : ℝ)..t, heatSemigroup (I := I) (M := M) g (t - s) (f s)
 
+@[simp]
 theorem mildSolution_zero
     (g : SmoothRiemannianMetric I M)
     (u_0 : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))

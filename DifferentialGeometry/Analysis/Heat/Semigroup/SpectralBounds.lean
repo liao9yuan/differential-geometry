@@ -393,6 +393,7 @@ noncomputable def heatPower
     exact norm_heatPowerTerm_sum_le (I := I) (M := M) g k ht u
   · exact 0
 
+@[simp]
 theorem heatPower_zero (g : SmoothRiemannianMetric I M) (t : ℝ) :
     heatPower (I := I) (M := M) g 0 t = heatSemigroup (I := I) (M := M) g t := by
   unfold heatPower

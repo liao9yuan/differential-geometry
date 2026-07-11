@@ -85,7 +85,7 @@ theorem tensor0SRiemannianInner_smul_right
   rw [h]
   rfl
 
-lemma innerModel_diagonal_continuous
+private lemma innerModel_diagonal_continuous
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Continuous (fun T : Tensor0SModel s ℝ E =>
       covariantTensorInnerPointwise (I := I) (M := M) s g b T T) := by

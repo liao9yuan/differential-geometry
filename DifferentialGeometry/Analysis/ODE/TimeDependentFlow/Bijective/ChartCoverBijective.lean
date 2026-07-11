@@ -14,7 +14,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-theorem chart_pullback_to_manifold_eq_via_chart_coord_inv
+private theorem chart_pullback_to_manifold_eq_via_chart_coord_inv
     (α : M) (cflow : ℝ → E) (t : ℝ) (x q : M)
     (hx_source : x ∈ (chartAt H α).source)
     (hq_repr : q = (chartAt H α).symm (I.symm (cflow t)))
@@ -23,7 +23,7 @@ theorem chart_pullback_to_manifold_eq_via_chart_coord_inv
   rw [hq_repr, hChartCoord_eq, I.left_inv]
   exact (chartAt H α).left_inv hx_source
 
-theorem chart_cover_flow_bijective_single_chart_short_time
+private theorem chart_cover_flow_bijective_single_chart_short_time
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hperNeg : ChartLocalPicardData (fun t x => -(X t x)) α)
     (Ψ : ℝ → M → M) (Φtx : M) (t : ℝ)

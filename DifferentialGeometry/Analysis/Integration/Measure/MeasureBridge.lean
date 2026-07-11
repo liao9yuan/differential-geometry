@@ -42,6 +42,7 @@ def chartPushedRaw (α : M) (u : M → ℝ) :
 
 variable {I}
 
+@[simp]
 lemma chartPushedRaw_apply_of_mem (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -50,6 +51,7 @@ lemma chartPushedRaw_apply_of_mem (α : M) (u : M → ℝ)
   classical
   unfold chartPushedRaw; simp [hy]
 
+@[simp]
 lemma chartPushedRaw_apply_of_notMem (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :

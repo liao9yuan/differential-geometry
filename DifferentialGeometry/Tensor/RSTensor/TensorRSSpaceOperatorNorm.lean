@@ -14,11 +14,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
 variable {r s : ℕ}
 
+@[simp]
 theorem tensor0SSpace_continuousLinearEquiv_norm_apply (s : ℕ) (b : M)
     (T : Tensor0SSpace s I b) :
     ‖tensor0SSpace_continuousLinearEquiv (𝕜 := 𝕜) (E := E) (I := I) (M := M) s b T‖
       = ‖T‖ := rfl
 
+@[simp]
 theorem tensor0SSpace_continuousLinearEquiv_symm_norm_apply (s : ℕ) (b : M)
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
     ‖(tensor0SSpace_continuousLinearEquiv (𝕜 := 𝕜) (E := E) (I := I)

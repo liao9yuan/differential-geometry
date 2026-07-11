@@ -164,6 +164,7 @@ noncomputable def linearODESolution
     else
       fun _ => Z₀ x
 
+@[simp]
 theorem linearODESolution_init
     (A : F → ℝ → (G →L[ℝ] G)) (a b h₀ : ℝ) (Z₀ : F → G) (x : F) :
     linearODESolution A a b h₀ Z₀ x h₀ = Z₀ x := by

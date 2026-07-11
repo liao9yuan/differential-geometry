@@ -684,6 +684,7 @@ noncomputable def variationalW_clm
         hMv_bd hPv_bd hQv_bd le_rfl v t h_t_Icc
       simpa using h)
 
+@[simp]
 theorem variationalW_clm_apply
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} (hab_lt : a < b')
     {h₀ : ℝ} (h₀_mem : h₀ ∈ Set.Ioo a b')

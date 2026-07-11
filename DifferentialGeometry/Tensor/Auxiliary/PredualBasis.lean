@@ -17,6 +17,7 @@ noncomputable def Module.Basis.cDualBasis [FiniteDimensional 𝕜 E] [CompleteSp
     Module.Basis (Fin d) 𝕜 (E →L[𝕜] 𝕜) :=
   B.dualBasis.map LinearMap.toContinuousLinearMap
 
+@[simp]
 theorem Module.Basis.cDualBasis_apply_self [FiniteDimensional 𝕜 E] [CompleteSpace 𝕜]
     (B : Module.Basis (Fin d) 𝕜 E) (i j : Fin d) :
     B.cDualBasis i (B j) = if i = j then (1 : 𝕜) else 0 := by
