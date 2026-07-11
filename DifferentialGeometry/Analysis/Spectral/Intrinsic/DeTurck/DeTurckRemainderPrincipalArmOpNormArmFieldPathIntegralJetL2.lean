@@ -217,7 +217,7 @@ theorem armField_pathIntegral_jetL2_perOrder_le
     (hSI : Set.uIcc (0 : ℝ) 1 ⊆ DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ'))
     (hSopen : IsOpen (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedSmallSet (δ := δ) (δ' := δ')))
     (hjoint : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r Φ (δ := δ) (δ' := δ'))
-    (i : ℕ) {B : ℝ} (hB : 0 ≤ B)
+    (i : ℕ) {B : ℝ} (_hB : 0 ≤ B)
     (hΦjet : ∀ s ∈ Set.Icc (0 : ℝ) 1,
       ‖iteratedCovGrad (I := I) g₀ r 2 i (Φ s)‖ ^ 2 ≤ B ^ 2) :
     ‖iteratedCovGrad (I := I) g₀ r 2 i

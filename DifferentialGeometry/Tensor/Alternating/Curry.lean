@@ -337,8 +337,8 @@ theorem lift_comp_domCoprod_eq_uncurrySum
   simp only [AlternatingMap.domCoprod.summand_mk'', uncurrySum.summand_mk'',
     MultilinearMap.smul_apply, MultilinearMap.domDomCongr_apply, MultilinearMap.domCoprod_apply,
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    ContinuousMultilinearMap.uncurrySum_apply, TensorProduct.smul_tmul', hφ,
-    Function.comp_def, f.map_smul_of_tower, ContinuousLinearMap.smul_apply]
+    ContinuousMultilinearMap.uncurrySum_apply, 
+    Function.comp_def]
   simp only [ContinuousMultilinearMap.flipMultilinear_apply,
     coe_toContinuousMultilinearMap, ContinuousMultilinearMap.flipAlternating_apply,
     ContinuousLinearMap.compContinuousAlternatingMap₂_apply]

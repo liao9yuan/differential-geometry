@@ -331,8 +331,7 @@ private lemma covDerivLowerOrderTerm02_center_eq
     ⟨⟨![]⟩, fun f => by funext j; exact absurd j.2 (by simp)⟩
   rw [Fintype.sum_prod_type]
   rw [Finset.sum_eq_single (![] : Fin 0 → Fin (Module.finrank ℝ E))]
-  ·
-    simp only [covDerivLowerOrderCoeff_def]
+  · simp only [covDerivLowerOrderCoeff_def]
     simp only [Finset.univ_eq_empty, Finset.sum_empty, if_true, mul_one, zero_sub]
     have hout : ∀ J' : Fin 2 → Fin (Module.finrank ℝ E),
         (∑ l : Fin 2, outputSlotCoeff (I := I) (M := M) g₀ 2 x m l ![p, q] J'
@@ -563,8 +562,7 @@ private lemma covDerivLowerOrderTerm03_center_eq
           ((if b = a0 then (1 : ℝ) else 0) * (if c = a1 then (1 : ℝ) else 0)))]
     congr 1
     congr 1
-    ·
-      rw [← Finset.sum_neg_distrib]
+    · rw [← Finset.sum_neg_distrib]
       refine Finset.sum_congr rfl (fun a0 _ => ?_)
       rw [Finset.sum_eq_single c]
       · rw [Finset.sum_eq_single d]
@@ -575,8 +573,7 @@ private lemma covDerivLowerOrderTerm03_center_eq
         refine Finset.sum_eq_zero (fun a2 _ => ?_)
         rw [if_neg (show ¬ c = a1 from fun h => ha1 h.symm), zero_mul]; ring
       · intro h; exact absurd (Finset.mem_univ c) h
-    ·
-      rw [← Finset.sum_neg_distrib]
+    · rw [← Finset.sum_neg_distrib]
       rw [Finset.sum_eq_single b]
       · refine Finset.sum_congr rfl (fun a1 _ => ?_)
         rw [Finset.sum_eq_single d]
@@ -588,8 +585,7 @@ private lemma covDerivLowerOrderTerm03_center_eq
         refine Finset.sum_eq_zero (fun a2 _ => ?_)
         rw [if_neg (show ¬ b = a0 from fun h => ha0 h.symm), zero_mul]; ring
       · intro h; exact absurd (Finset.mem_univ b) h
-    ·
-      rw [← Finset.sum_neg_distrib]
+    · rw [← Finset.sum_neg_distrib]
       rw [Finset.sum_eq_single b]
       · rw [Finset.sum_eq_single c]
         · refine Finset.sum_congr rfl (fun a2 _ => ?_)

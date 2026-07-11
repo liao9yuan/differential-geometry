@@ -103,3 +103,7 @@ theorem connDiff_koszul_metricDiff (g₁ g₀ : SmoothRiemannianMetric I M)
       metricDiffCovDeriv_eq_metricCovDeriv (I := I) g₁ g₀ hX hZ,
       metricDiffCovDeriv_eq_metricCovDeriv (I := I) g₁ g₀ hX hY]
   exact connDiff_koszul (I := I) g₁ g₀ hX hY hZ
+
+end Connection
+end Integral
+end DifferentialGeometry

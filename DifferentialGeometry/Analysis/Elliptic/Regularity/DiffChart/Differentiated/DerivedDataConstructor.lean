@@ -207,7 +207,7 @@ private lemma base_u_chart_ae_zero_off_K_α
 
 
 private lemma locallyIntegrableOn_of_memLp_two_global
-    (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
+    (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α))) :
     LocallyIntegrableOn f
@@ -249,7 +249,7 @@ private lemma locallyIntegrableOn_of_memLp_two_global
 
 
 private lemma locallyIntegrableOn_of_locally_memLp_two
-    (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
+    (α : M) {f : EuclN → ℝ}
     (hf : ∀ K' : Set EuclN, IsCompact K' →
       K' ⊆ chartTargetEuclid (I := I) (M := M) α →
       MemLp f 2 ((volume : Measure EuclN).restrict K')) :
@@ -284,7 +284,7 @@ private lemma locallyIntegrableOn_of_locally_memLp_two
 
 
 private lemma memLp_top_of_continuousOn_on_compact
-    (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
+    (α : M) {f : EuclN → ℝ}
     (hf_contOn : ContinuousOn f (chartTargetEuclid (I := I) (M := M) α))
     {K : Set EuclN} (hK_compact : IsCompact K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -338,7 +338,7 @@ lemma base_weak_partial_ae_zero_off_K_α
   have hw_li : LocallyIntegrableOn (D.weak_partial i)
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)
       (volume : Measure EuclN) :=
-    locallyIntegrableOn_of_locally_memLp_two (g := g) (α := α) (f := D.weak_partial i)
+    locallyIntegrableOn_of_locally_memLp_two (α := α) (f := D.weak_partial i)
       (fun K' hK' hK'_in => D.weak_partial_locally_memLp i K' hK' hK'_in)
   have hf_ae := base_u_chart_ae_zero_off_K_α (I := I) (M := M) g α hu_h
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
@@ -385,7 +385,7 @@ private lemma chartPushed_first_weak_partial_ae_zero_off_K_α
   have h_chosen_memLp :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
       h_w1p i
-  have hw_li := locallyIntegrableOn_of_memLp_two_global (g := g) (α := α)
+  have hw_li := locallyIntegrableOn_of_memLp_two_global (α := α)
     h_chosen_memLp
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := i) h_isWeak hw_li h_pushed_zero
@@ -430,7 +430,7 @@ private lemma chosenSecondPartialChartPushedU_ae_zero_off_K_α
   have h_chosen_second_memLp :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
       h_g_i_memW1p j
-  have hw_li := locallyIntegrableOn_of_memLp_two_global (g := g) (α := α)
+  have hw_li := locallyIntegrableOn_of_memLp_two_global (α := α)
     h_chosen_second_memLp
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
     hΩ_open hU_open hU_sub (i := j) h_isWeak hw_li h_g_i_ae_zero
@@ -477,7 +477,7 @@ lemma base_f_chart_ae_zero_off_K_α
     K_α_meas (I := I) (M := M) α
   have h_fc_li : LocallyIntegrableOn D.f_chart U
       (volume : Measure EuclN) :=
-    locallyIntegrableOn_of_locally_memLp_two (g := g) (α := α) (f := D.f_chart)
+    locallyIntegrableOn_of_locally_memLp_two (α := α) (f := D.f_chart)
       (fun K' hK' hK'_in => base_f_chart_locally_memLp (I := I) (M := M) g α
         hu_h hK' hK'_in)
   have h_density_contOn : ContinuousOn (densityOnEuclid (I := I) g α) Ω :=
@@ -497,7 +497,7 @@ lemma base_f_chart_ae_zero_off_K_α
       hu_h hB_compact hB_subset_Ω
     have hB_meas : MeasurableSet B := hB_compact.isClosed.measurableSet
     have h_density_memLp_top := memLp_top_of_continuousOn_on_compact
-      (g := g) (α := α) h_density_contOn hB_compact hB_subset_Ω
+      (α := α) h_density_contOn hB_compact hB_subset_Ω
     have h_prod_memLp : MemLp (fun y => densityOnEuclid (I := I) g α y *
         D.f_chart y) 2 ((volume : Measure EuclN).restrict B) :=
       MemLp.mul' (p := ∞) (q := 2) (r := 2) h_fchart_K_memLp h_density_memLp_top
@@ -652,7 +652,7 @@ private lemma chosenFChartDeriv_ae_zero_off_K_α
     unfold chosenFChartDeriv
     exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
       h_memW1p l
-  have hw_li := locallyIntegrableOn_of_memLp_two_global (g := g) (α := α) h_global
+  have hw_li := locallyIntegrableOn_of_memLp_two_global (α := α) h_global
   have h_base_fc_ae := base_f_chart_ae_zero_off_K_α (I := I) (M := M) g α
     (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)
   exact weakPartial_ae_zero_on_open_of_ae_zero_on_open
@@ -958,7 +958,7 @@ theorem derived_variational_identity_holds
       intro K' hK' hK'_in
       have h_fc_K := h_chosenFC_memLp K' hK' hK'_in
       have h_density_memLp_top := memLp_top_of_continuousOn_on_compact
-        (g := g) (α := α) (densityOnEuclid_continuousOn (I := I) g α) hK' hK'_in
+        (α := α) (densityOnEuclid_continuousOn (I := I) g α) hK' hK'_in
       exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_fc_K h_density_memLp_top
     have h_partials_int : Integrable (fun y => (∑ i, ∑ j,
           (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
@@ -989,7 +989,7 @@ theorem derived_variational_identity_holds
             (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single j (1 : ℝ))).contDiff
           exact (h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)).continuousOn
         have h_coef_memLp_top := memLp_top_of_continuousOn_on_compact
-          (g := g) (α := α) h_coef_contOn hK' hK'_in
+          (α := α) h_coef_contOn hK' hK'_in
         exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_wp_K h_coef_memLp_top
       have h_inner : ∀ i, Integrable (fun y => ∑ j, (fderiv ℝ
             (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)
@@ -1012,7 +1012,7 @@ theorem derived_variational_identity_holds
         have h_cspu_K := chosenSecondPartialChartPushedU_locally_memLp
           (I := I) (M := M) g α hu_h i j hK' hK'_in
         have h_coef_memLp_top := memLp_top_of_continuousOn_on_compact
-          (g := g) (α := α)
+          (α := α)
           (weightedInvGramDerivOnEuclid_continuousOn (I := I) g α i j l)
           hK' hK'_in
         exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_cspu_K h_coef_memLp_top
@@ -1039,7 +1039,7 @@ theorem derived_variational_identity_holds
           h_weighted.smul_measure hc_ne_top
         exact h_smul.mono_measure h_le
       have h_coef_memLp_top := memLp_top_of_continuousOn_on_compact
-        (g := g) (α := α)
+        (α := α)
         (densityDerivOnEuclid_continuousOn (I := I) g α l) hK' hK'_in
       exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_uc_K h_coef_memLp_top
     have h_B_int : Integrable (fun y => densityDerivOnEuclid (I := I) g α l y *
@@ -1050,7 +1050,7 @@ theorem derived_variational_identity_holds
         (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)
         hK' hK'_in
       have h_coef_memLp_top := memLp_top_of_continuousOn_on_compact
-        (g := g) (α := α)
+        (α := α)
         (densityDerivOnEuclid_continuousOn (I := I) g α l) hK' hK'_in
       exact MemLp.mul' (p := ∞) (q := 2) (r := 2) h_fc_K h_coef_memLp_top
     have h_step1 : Integrable (fun y =>

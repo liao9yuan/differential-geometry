@@ -32,7 +32,7 @@ variable [I.Boundaryless] [CompleteSpace E]
 
 
 lemma exists_uniform_orbit_in_inner_ball
-    (g : SmoothRiemannianMetric I M) (p : M)
+    (p : M)
     {x₀ : E} (_hx₀_def : x₀ = extChartAt I p p)
     {b : ContDiffBump ((x₀, (0 : E)) : E × E)}
     {ρ_V4 T_V4 : ℝ} (hρ_V4_pos : 0 < ρ_V4) (hT_V4_pos : 0 < T_V4)
@@ -165,7 +165,7 @@ theorem exists_chartFlow_uniform_orbit
     Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined
       (I := I) (g := g) (α := p) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
   obtain ⟨ρ, T, hρ_pos, hT_pos, _hρ_le_V4, _hT_lt_V4, h_orbit_in⟩ :=
-    exists_uniform_orbit_in_inner_ball (I := I) (g := g) (p := p)
+    exists_uniform_orbit_in_inner_ball (I := I) (p := p)
       (x₀ := x₀) hx₀_def
       (b := b) (ρ_V4 := ρ_V4) (T_V4 := T_V4) hρ_V4_pos hT_V4_pos
       (Φ := Φ) hΦ_cd hΦ_init0

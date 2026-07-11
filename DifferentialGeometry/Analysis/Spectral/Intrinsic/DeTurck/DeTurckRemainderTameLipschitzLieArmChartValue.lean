@@ -1111,11 +1111,11 @@ private def lieArm_F4mul (A B : E →L[ℝ] E →L[ℝ] ℝ) :
             { toFun := fun c' => LinearMap.toContinuousLinearMap
                 { toFun := fun v' => A c c' * B v v'
                   map_add' := fun v₁ v₂ => by
-                    simp [LinearMap.toContinuousLinearMap, map_add,
-                      ContinuousLinearMap.add_apply, mul_add]
+                    simp [map_add,
+                      mul_add]
                   map_smul' := fun r v' => by
-                    simp [LinearMap.toContinuousLinearMap, map_smul,
-                      ContinuousLinearMap.smul_apply, smul_eq_mul]
+                    simp [map_smul,
+                      smul_eq_mul]
                     ring }
               map_add' := fun c₁ c₂ => by
                 ext v'
@@ -7280,7 +7280,7 @@ private lemma lc0_O0_center (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
         (lc0Pd (I := I) x F) (lc0DDg (I := I) g₁ x) (lc0DGa (I := I) g₀ x)
         (lc0DGa (I := I) g₁ x) (lc0DGa (I := I) g_bg x) (lc0DGb (I := I) g₁ x) i j := by
   simp only [M0Abstract.O0F, M0Abstract.wcF, M0Abstract.d0F, M0Abstract.dvfbF,
-    M0Abstract.chrCorrF, lc0Ig, lc0Cg, lc0Ev, lc0Pd, lc0Dg, lc0DDg, lc0Dig, lc0Ga,
+    M0Abstract.chrCorrF, lc0Ig, lc0Cg, lc0Ev, lc0Dg, lc0Dig, lc0Ga,
     lc0DGa, lc0Gb, lc0DGb]
   simp only [PDE.DeTurck.DeTurckLinearization.order0PartRaw]
   refine congrArg₂ (fun t₁ t₂ : ℝ => t₁ + t₂)
@@ -7607,8 +7607,8 @@ private lemma lc0_committed (hδ_lt : δ < 1)
         (lc0DGb (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x) i j := by
   refine (lieCorr0_committed_value (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' g_bg s x i j).trans ?_
   simp only [M0Abstract.V0F, M0Abstract.covAF, M0Abstract.covWF, M0Abstract.dvfbF,
-    M0Abstract.vfbF, lc0Ig, lc0Cg, lc0Ev, lc0Pd, lc0Dg, lc0Dig, lc0Ga, lc0DGa, lc0Gb,
-    lc0DGb, lc0DDg]
+    M0Abstract.vfbF, lc0Ig, lc0Cg, lc0Ev, lc0Dig, lc0Ga, lc0DGa, 
+]
   refine congrArg₂ (fun t₁ t₂ : ℝ => t₁ + t₂) (congrArg Neg.neg
     (Finset.sum_congr rfl (fun m _ => Finset.sum_congr rfl (fun ml _ => ?_))))
     (congrArg₂ (fun t₁ t₂ : ℝ => t₁ + t₂)
@@ -7681,7 +7681,7 @@ private lemma lc0_d1r (hδ_lt : δ < 1)
         (lc0DGa (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x) (lc0DGa (I := I) g_bg x)
         (lc0DGb (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x) i j := by
   simp only [M0Abstract.D1RF, M0Abstract.vfbF, M0Abstract.r3B, lc0Ig, lc0Cg, lc0Ev,
-    lc0Pd, lc0Dg, lc0Dig, lc0Ga, lc0DGa, lc0Gb, lc0DGb, lc0DDg]
+    lc0Ga]
   refine congrArg₂ (fun t₁ t₂ : ℝ => t₁ + t₂)
     (congrArg₂ (fun t₁ t₂ : ℝ => t₁ + t₂)
       (congrArg₂ (fun t₁ t₂ : ℝ => t₁ + t₂) ?_

@@ -940,7 +940,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 open DifferentialGeometry.Integral.Measure in
 theorem exists_deTurckPrincipalCometricCoeff_realize_coeffJetEnvelope_le
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ _g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
@@ -1282,7 +1282,7 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_coeffJetEnvelope_le
   refine ⟨fun i => 4 * KdevF i + 6 * cB i,
     fun i => by have := hKdevF_nn i; have := hcB_nn i; linarith, ?_⟩
   intro T₀ hTsymm hball i
-  show ‖iteratedCovGrad (I := I) g₀ 4 2 i
+  change ‖iteratedCovGrad (I := I) g₀ 4 2 i
       (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T₀
           (0 : SmoothCcTensor g₀ 0 2)
           (lt_of_le_of_lt hδ_le (by norm_num : (1 : ℝ) / 3 < 1)) (hδ_fibre T₀ hball)
@@ -2739,7 +2739,7 @@ private theorem iteratedCovGrad_comp_l2_sq_eq_rs
 
 theorem exists_coeffAction_iteratedCovGrad_l2_coeffJetEnvelope_dataJetWindow_le_of_lowOrder
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
     ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
       ∀ (m : ℕ), m ≤ 1 →
@@ -3444,8 +3444,8 @@ theorem exists_smoothCcToTensorHs_deTurckSmoothRemainderDiff_sub_principalCometr
 set_option maxHeartbeats 1000000 in
 theorem exists_smoothCcToTensorHs_coeffAction_fibreSmallCoeff_opNorm_le_zero
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
-    (εC : ℝ) (hεC_nn : 0 ≤ εC) (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (_hR₀ : 0 ≤ R₀)
+    (εC : ℝ) (hεC_nn : 0 ≤ εC) (Kc : ℕ → ℝ) (_hKc_nn : ∀ i, 0 ≤ Kc i) :
     ∃ Cop : ℝ, 0 ≤ Cop ∧
       ∀ (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
@@ -3854,7 +3854,7 @@ private lemma riemannianFiberNormSq_le_of_ccTensorBilinSymm_gFibreOpBound [Nonem
         rw [map_smul, smul_eq_mul]
       rw [hexp, hS_def]
       refine Finset.sum_congr rfl (fun b _ => ?_)
-      show c b * c b = (c b) ^ 2
+      change c b * c b = (c b) ^ 2
       ring
     have hgiu : ∀ i : Fin n, g₀.inner x (e i) u = c i := by
       intro i
@@ -3888,7 +3888,7 @@ private lemma coeffAction_arm0_oneMinusConnLapIter_l2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i)
-    (εa : ℝ) (hεa_nn : 0 ≤ εa) (Λa : ℝ) (hΛa_nn : 0 ≤ Λa) :
+    (εa : ℝ) (hεa_nn : 0 ≤ εa) (Λa : ℝ) (_hΛa_nn : 0 ≤ Λa) :
     ∃ Kop : ℕ → ℝ, (∀ p, 0 ≤ Kop p) ∧
       ∀ (C₀ : SmoothCcTensor g₀ (2 + 0) 2) (T₀ : SmoothCcTensor g₀ 0 2) (B : ℝ),
         0 ≤ B →
@@ -4342,7 +4342,7 @@ theorem exists_deTurckSmoothRemainderDiff_eq_principalCometricArm_add_smallThird
       (0 ≤ δ → εwrap ≤ 32 * deTurckArmFibreConst (Module.finrank ℝ E) ^ 3 * (δ / (1 - δ))) ∧
     ∃ Cthird Ctame : ℕ → ℝ, (∀ k, 0 ≤ Cthird k) ∧ (∀ k, 0 ≤ Ctame k) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v)
         (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
         ∃ third tame : SmoothCcTensor g₀ 0 2,

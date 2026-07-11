@@ -392,7 +392,7 @@ private theorem exists_unified_chartFlow_data_two
       ((Metric.ball ((x₀, (0 : E)) : E × E) ρ_V4) ×ˢ Set.Ioo (-T_V4) T_V4) :=
     hΦ_cd_V4_two.of_le (by norm_num)
   obtain ⟨ρ₀, T₀, hρ₀_pos, hT₀_pos, hρ₀_le_V4, hT₀_lt_V4, h_orbit_in⟩ :=
-    exists_uniform_orbit_in_inner_ball (I := I) (g := g) (p := p)
+    exists_uniform_orbit_in_inner_ball (I := I) (p := p)
       (x₀ := x₀) hx₀_def
       (b := b) (ρ_V4 := ρ_V4) (T_V4 := T_V4) hρ_V4_pos hT_V4_pos
       (Φ := Φ) hΦ_cd_V4 hΦ_init0
@@ -694,7 +694,7 @@ private theorem exists_unified_chartFlow_data_nat
     have h1le : (1 : ℕ∞) ≤ (n : ℕ∞) := by exact_mod_cast hn
     exact_mod_cast h1le
   obtain ⟨ρ₀, T₀, hρ₀_pos, hT₀_pos, hρ₀_le_V4, hT₀_lt_V4, h_orbit_in⟩ :=
-    exists_uniform_orbit_in_inner_ball (I := I) (g := g) (p := p)
+    exists_uniform_orbit_in_inner_ball (I := I) (p := p)
       (x₀ := x₀) hx₀_def
       (b := b) (ρ_V4 := ρ_V4) (T_V4 := T_V4) hρ_V4_pos hT_V4_pos
       (Φ := Φ) hΦ_cd_V4 hΦ_init0

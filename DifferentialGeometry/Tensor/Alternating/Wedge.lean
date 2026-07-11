@@ -42,7 +42,6 @@ noncomputable def covectorWedge (α : M →L[𝕜] 𝕜) (β : M [⋀^Fin n]→L
     M [⋀^Fin (n + 1)]→L[𝕜] 𝕜 :=
   uncurryFin (α.smulRight β)
 
-@[inherit_doc]
 notation:70 α " ∧₁ " β => covectorWedge α β
 
 theorem wedge_product_def {g : M [⋀^Fin m]→L[𝕜] N} {h : M [⋀^Fin n]→L[𝕜] N'}

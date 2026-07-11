@@ -139,7 +139,7 @@ theorem restrictComplement_sumCongr_mem
       (Sum.map τ_l τ_r
         (Sum.map (finSuccEquiv' 0).symm id
           (Sum.inl (some a))))) = some (Sum.inl a')
-  simp only [Sum.map_inl, id_eq]
+  simp only [Sum.map_inl]
   rw [show (finSuccEquiv' (0 : Fin (m + 1))).symm (some a) = Fin.succAbove 0 a from
     (finSuccEquiv'_succAbove 0 a ▸ (finSuccEquiv' 0).symm_apply_apply _).symm,
     ha']; rfl
@@ -308,7 +308,7 @@ theorem shuffleLeftBwd_wd
   · simp only [shuffleLeftBwd, Equiv.permCongr_apply, Equiv.sumCongr_apply, Sum.map_inl,
       Equiv.optionCongr_apply, liftPermSucc]
     simp only [finSuccSumOptionEquiv, ShuffleSplit.optionSumEquiv,
-      Sum.map_inl, Equiv.symm_trans_apply]
+      Equiv.symm_trans_apply]
     rcases h : (finSuccEquiv' (0 : Fin (m + 1))) a with _ | a' <;> simp [h]
   · simp [shuffleLeftBwd, Equiv.permCongr_apply, Equiv.sumCongr_apply,
       Equiv.optionCongr_apply, finSuccSumOptionEquiv, ShuffleSplit.optionSumEquiv]
@@ -779,7 +779,7 @@ theorem shuffleRightBwd_wd
       have h1 : (finSuccEquiv' (0 : Fin (n + 1))) b'.succ = some b' :=
         finSuccEquiv'_above (Fin.zero_le _)
       rw [h1]
-      simp [Equiv.optionCongr_apply]
+      simp
 
 theorem restrictComplementRight_shuffleRightBwd
     (σ' : Equiv.Perm (Fin (m + 1) ⊕ Fin n)) :

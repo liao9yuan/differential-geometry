@@ -1415,7 +1415,7 @@ private lemma nf_p1B {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   have h1 : p1B ig dig ga1 ga0 dga1 dga0 f i j =
       -((∑ b0, ∑ b1, ∑ b2, dig i b1 b2 * ga1 b1 b2 b0 * f b0 j) - (∑ b0, ∑ b1, ∑ b2, dig i b1 b2 * ga0 b1 b2 b0 * f b0 j) + ((∑ b0, ∑ b1, ∑ b2, ig b1 b2 * dga1 i b1 b2 b0 * f b0 j) - (∑ b0, ∑ b1, ∑ b2, ig b1 b2 * dga0 i b1 b2 b0 * f b0 j)) + ((∑ b0, ∑ b3, ∑ b4, ∑ b5, ga0 i b3 b0 * (ig b4 b5 * ga1 b4 b5 b3) * f b0 j) - (∑ b0, ∑ b3, ∑ b4, ∑ b5, ga0 i b3 b0 * (ig b4 b5 * ga0 b4 b5 b3) * f b0 j))) + (-((∑ b6, ∑ b7, ∑ b8, dig j b7 b8 * ga1 b7 b8 b6 * f i b6) - (∑ b6, ∑ b7, ∑ b8, dig j b7 b8 * ga0 b7 b8 b6 * f i b6) + ((∑ b6, ∑ b7, ∑ b8, ig b7 b8 * dga1 j b7 b8 b6 * f i b6) - (∑ b6, ∑ b7, ∑ b8, ig b7 b8 * dga0 j b7 b8 b6 * f i b6)) + ((∑ b6, ∑ b9, ∑ b10, ∑ b11, ga0 j b9 b6 * (ig b10 b11 * ga1 b10 b11 b9) * f i b6) - (∑ b6, ∑ b9, ∑ b10, ∑ b11, ga0 j b9 b6 * (ig b10 b11 * ga0 b10 b11 b9) * f i b6)))) := by
     simp only [p1B]
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h2 : -((∑ b0, ∑ b1, ∑ b2, dig i b1 b2 * ga1 b1 b2 b0 * f b0 j) - (∑ b0, ∑ b1, ∑ b2, dig i b1 b2 * ga0 b1 b2 b0 * f b0 j) + ((∑ b0, ∑ b1, ∑ b2, ig b1 b2 * dga1 i b1 b2 b0 * f b0 j) - (∑ b0, ∑ b1, ∑ b2, ig b1 b2 * dga0 i b1 b2 b0 * f b0 j)) + ((∑ b0, ∑ b3, ∑ b4, ∑ b5, ga0 i b3 b0 * (ig b4 b5 * ga1 b4 b5 b3) * f b0 j) - (∑ b0, ∑ b3, ∑ b4, ∑ b5, ga0 i b3 b0 * (ig b4 b5 * ga0 b4 b5 b3) * f b0 j))) + (-((∑ b6, ∑ b7, ∑ b8, dig j b7 b8 * ga1 b7 b8 b6 * f i b6) - (∑ b6, ∑ b7, ∑ b8, dig j b7 b8 * ga0 b7 b8 b6 * f i b6) + ((∑ b6, ∑ b7, ∑ b8, ig b7 b8 * dga1 j b7 b8 b6 * f i b6) - (∑ b6, ∑ b7, ∑ b8, ig b7 b8 * dga0 j b7 b8 b6 * f i b6)) + ((∑ b6, ∑ b9, ∑ b10, ∑ b11, ga0 j b9 b6 * (ig b10 b11 * ga1 b10 b11 b9) * f i b6) - (∑ b6, ∑ b9, ∑ b10, ∑ b11, ga0 j b9 b6 * (ig b10 b11 * ga0 b10 b11 b9) * f i b6)))) =
       (∑ a, ∑ b, ∑ c, dga0 i a b c * f j c * ig a b)
@@ -1596,7 +1596,7 @@ private lemma nf_p2B {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   have h1 : p2B ig ga1 ga0 f i j =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga1 b2 b3 b0 * (ga1 i j b1 * f b0 b1))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga0 b2 b3 b0 * (ga1 i j b1 * f b0 b1))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga1 b2 b3 b0 * (ga0 i j b1 * f b0 b1))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga0 b2 b3 b0 * (ga0 i j b1 * f b0 b1)))) := by
     simp only [p2B]
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_sub, sub_mul, Finset.sum_sub_distrib]
     try ring
   have h2 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga1 b2 b3 b0 * (ga1 i j b1 * f b0 b1))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga0 b2 b3 b0 * (ga1 i j b1 * f b0 b1))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga1 b2 b3 b0 * (ga0 i j b1 * f b0 b1))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, (2 : ℝ) * (ig b2 b3 * ga0 b2 b3 b0 * (ga0 i j b1 * f b0 b1)))) =
       ((2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, f a b * ga0 i j a * ga0 c d b * ig c d))
@@ -1819,7 +1819,7 @@ private lemma nf_p3h {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   have h1 : p3HalfB ig cg ga1 ga0 gbg f i j =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 j))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 j))))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 i b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 j))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 i b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 j)))))) := by
     simp only [p3HalfB]
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_sub, sub_mul, Finset.sum_sub_distrib]
     try ring
   have h2 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 j))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 j))))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 i b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 j))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 i b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 j)))))) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * f b c * ga0 i d b * ga1 e r a * ig c e * ig d r))
@@ -2122,7 +2122,7 @@ private lemma nf_p4B {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   have h1 : p4B ig ga1 ga0 gbg f i j =
       -((∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * ga1 b2 b3 b0 * (ga1 b0 i b1 * f b1 j)) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * gbg b2 b3 b0 * (ga1 b0 i b1 * f b1 j)) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * ga1 b2 b3 b0 * (ga0 b0 i b1 * f b1 j)) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * gbg b2 b3 b0 * (ga0 b0 i b1 * f b1 j)))) + (-((∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * ga1 b6 b7 b4 * (ga1 b4 j b5 * f i b5)) - (∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * gbg b6 b7 b4 * (ga1 b4 j b5 * f i b5)) - ((∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * ga1 b6 b7 b4 * (ga0 b4 j b5 * f i b5)) - (∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * gbg b6 b7 b4 * (ga0 b4 j b5 * f i b5))))) := by
     simp only [p4B]
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.sum_mul, mul_sub, sub_mul, Finset.sum_sub_distrib]
     try ring
   have h2 : -((∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * ga1 b2 b3 b0 * (ga1 b0 i b1 * f b1 j)) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * gbg b2 b3 b0 * (ga1 b0 i b1 * f b1 j)) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * ga1 b2 b3 b0 * (ga0 b0 i b1 * f b1 j)) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ig b2 b3 * gbg b2 b3 b0 * (ga0 b0 i b1 * f b1 j)))) + (-((∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * ga1 b6 b7 b4 * (ga1 b4 j b5 * f i b5)) - (∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * gbg b6 b7 b4 * (ga1 b4 j b5 * f i b5)) - ((∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * ga1 b6 b7 b4 * (ga0 b4 j b5 * f i b5)) - (∑ b4, ∑ b5, ∑ b6, ∑ b7, ig b6 b7 * gbg b6 b7 b4 * (ga0 b4 j b5 * f i b5))))) =
       (∑ a, ∑ b, ∑ c, ∑ d, f i a * ga0 j b a * ga1 c d b * ig c d)
@@ -2349,7 +2349,7 @@ private lemma nf_p3hswap {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   have h1 : p3HalfB ig cg ga1 ga0 gbg f j i =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 j b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 i))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 j b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 i))))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 j b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 i))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 j b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 i)))))) := by
     simp only [p3HalfB]
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_sub, sub_mul, Finset.sum_sub_distrib]
     try ring
   have h2 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 j b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 i))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 j b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 i))))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 j b1 b4 * (f b4 b3 * (ga1 b0 b2 b5 * cg b5 i))))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga0 j b1 b4 * (f b4 b3 * (gbg b0 b2 b5 * cg b5 i)))))) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * f b c * ga0 j d b * ga1 e r a * ig c e * ig d r))
@@ -4802,7 +4802,7 @@ private lemma nf_V0 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
   have h1 : V0F ig cg f dg dig ga0 ga1 gbg gb f3 ddg dga0 dga1 dgbg dgb i j =
       -((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b1 * (ig b2 b3 * (dga1 i b2 b0 b4 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b1 * (ig b2 b3 * (dgbg i b2 b0 b4 * cg b4 j * f b1 b3))) + ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b5 b4 * ga1 b2 b0 b5 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b5 b4 * gbg b2 b0 b5 * cg b4 j * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b6, ig b0 b1 * (ig b2 b3 * (ga1 i b0 b6 * ga1 b2 b6 b4 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b6, ig b0 b1 * (ig b2 b3 * (ga1 i b0 b6 * gbg b2 b6 b4 * cg b4 j * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b7, ig b0 b1 * (ig b2 b3 * (ga1 i b2 b7 * ga1 b7 b0 b4 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b7, ig b0 b1 * (ig b2 b3 * (ga1 i b2 b7 * gbg b7 b0 b4 * cg b4 j * f b1 b3)))) + ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ig b0 b1 * (ig b2 b3 * (dga1 j b2 b0 b8 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ig b0 b1 * (ig b2 b3 * (dgbg j b2 b0 b8 * cg b8 i * f b1 b3))) + ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b9, ig b0 b1 * (ig b2 b3 * (ga1 j b9 b8 * ga1 b2 b0 b9 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b9, ig b0 b1 * (ig b2 b3 * (ga1 j b9 b8 * gbg b2 b0 b9 * cg b8 i * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b10, ig b0 b1 * (ig b2 b3 * (ga1 j b0 b10 * ga1 b2 b10 b8 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b10, ig b0 b1 * (ig b2 b3 * (ga1 j b0 b10 * gbg b2 b10 b8 * cg b8 i * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b11, ig b0 b1 * (ig b2 b3 * (ga1 j b2 b11 * ga1 b11 b0 b8 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b11, ig b0 b1 * (ig b2 b3 * (ga1 j b2 b11 * gbg b11 b0 b8 * cg b8 i * f b1 b3)))))) + ((∑ b12, ∑ b13, ∑ b14, dig i b13 b14 * ga1 b13 b14 b12 * f b12 j) - (∑ b12, ∑ b13, ∑ b14, dig i b13 b14 * gbg b13 b14 b12 * f b12 j) + ((∑ b12, ∑ b13, ∑ b14, ig b13 b14 * dga1 i b13 b14 b12 * f b12 j) - (∑ b12, ∑ b13, ∑ b14, ig b13 b14 * dgbg i b13 b14 b12 * f b12 j)) + ((∑ b12, ∑ b15, ∑ b16, ∑ b17, ga1 i b15 b12 * (ig b16 b17 * ga1 b16 b17 b15) * f b12 j) - (∑ b12, ∑ b15, ∑ b16, ∑ b17, ga1 i b15 b12 * (ig b16 b17 * gbg b16 b17 b15) * f b12 j)) + ((∑ b18, ∑ b19, ∑ b20, dig j b19 b20 * ga1 b19 b20 b18 * f i b18) - (∑ b18, ∑ b19, ∑ b20, dig j b19 b20 * gbg b19 b20 b18 * f i b18) + ((∑ b18, ∑ b19, ∑ b20, ig b19 b20 * dga1 j b19 b20 b18 * f i b18) - (∑ b18, ∑ b19, ∑ b20, ig b19 b20 * dgbg j b19 b20 b18 * f i b18)) + ((∑ b18, ∑ b21, ∑ b22, ∑ b23, ga1 j b21 b18 * (ig b22 b23 * ga1 b22 b23 b21) * f i b18) - (∑ b18, ∑ b21, ∑ b22, ∑ b23, ga1 j b21 b18 * (ig b22 b23 * gbg b22 b23 b21) * f i b18)))) := by
     simp only [V0F, covAF, covWF, dvfbF, vfbF]
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h2 : -((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b1 * (ig b2 b3 * (dga1 i b2 b0 b4 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b1 * (ig b2 b3 * (dgbg i b2 b0 b4 * cg b4 j * f b1 b3))) + ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b5 b4 * ga1 b2 b0 b5 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b1 * (ig b2 b3 * (ga1 i b5 b4 * gbg b2 b0 b5 * cg b4 j * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b6, ig b0 b1 * (ig b2 b3 * (ga1 i b0 b6 * ga1 b2 b6 b4 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b6, ig b0 b1 * (ig b2 b3 * (ga1 i b0 b6 * gbg b2 b6 b4 * cg b4 j * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b7, ig b0 b1 * (ig b2 b3 * (ga1 i b2 b7 * ga1 b7 b0 b4 * cg b4 j * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b7, ig b0 b1 * (ig b2 b3 * (ga1 i b2 b7 * gbg b7 b0 b4 * cg b4 j * f b1 b3)))) + ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ig b0 b1 * (ig b2 b3 * (dga1 j b2 b0 b8 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ig b0 b1 * (ig b2 b3 * (dgbg j b2 b0 b8 * cg b8 i * f b1 b3))) + ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b9, ig b0 b1 * (ig b2 b3 * (ga1 j b9 b8 * ga1 b2 b0 b9 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b9, ig b0 b1 * (ig b2 b3 * (ga1 j b9 b8 * gbg b2 b0 b9 * cg b8 i * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b10, ig b0 b1 * (ig b2 b3 * (ga1 j b0 b10 * ga1 b2 b10 b8 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b10, ig b0 b1 * (ig b2 b3 * (ga1 j b0 b10 * gbg b2 b10 b8 * cg b8 i * f b1 b3)))) - ((∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b11, ig b0 b1 * (ig b2 b3 * (ga1 j b2 b11 * ga1 b11 b0 b8 * cg b8 i * f b1 b3))) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b8, ∑ b11, ig b0 b1 * (ig b2 b3 * (ga1 j b2 b11 * gbg b11 b0 b8 * cg b8 i * f b1 b3)))))) + ((∑ b12, ∑ b13, ∑ b14, dig i b13 b14 * ga1 b13 b14 b12 * f b12 j) - (∑ b12, ∑ b13, ∑ b14, dig i b13 b14 * gbg b13 b14 b12 * f b12 j) + ((∑ b12, ∑ b13, ∑ b14, ig b13 b14 * dga1 i b13 b14 b12 * f b12 j) - (∑ b12, ∑ b13, ∑ b14, ig b13 b14 * dgbg i b13 b14 b12 * f b12 j)) + ((∑ b12, ∑ b15, ∑ b16, ∑ b17, ga1 i b15 b12 * (ig b16 b17 * ga1 b16 b17 b15) * f b12 j) - (∑ b12, ∑ b15, ∑ b16, ∑ b17, ga1 i b15 b12 * (ig b16 b17 * gbg b16 b17 b15) * f b12 j)) + ((∑ b18, ∑ b19, ∑ b20, dig j b19 b20 * ga1 b19 b20 b18 * f i b18) - (∑ b18, ∑ b19, ∑ b20, dig j b19 b20 * gbg b19 b20 b18 * f i b18) + ((∑ b18, ∑ b19, ∑ b20, ig b19 b20 * dga1 j b19 b20 b18 * f i b18) - (∑ b18, ∑ b19, ∑ b20, ig b19 b20 * dgbg j b19 b20 b18 * f i b18)) + ((∑ b18, ∑ b21, ∑ b22, ∑ b23, ga1 j b21 b18 * (ig b22 b23 * ga1 b22 b23 b21) * f i b18) - (∑ b18, ∑ b21, ∑ b22, ∑ b23, ga1 j b21 b18 * (ig b22 b23 * gbg b22 b23 b21) * f i b18)))) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, cg i a * dga1 j b c a * f d e * ig b d * ig c e))
@@ -8044,7 +8044,7 @@ private lemma rz1 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige j a b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * (-(∑ l, ∑ p, ig a l * ig p b * dg j l p)) * f b c * gb d e r * ig c r * ig d e) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg i b0 * (ig b0 b6 * ig b7 b1 * dg j b6 b7) * f b1 b2 * gb b3 b4 b5 * ig b2 b5 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_neg, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg i b0 * (ig b0 b6 * ig b7 b1 * dg j b6 b7) * f b1 b2 * gb b3 b4 b5 * ig b2 b5 * ig b3 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j i a * f b c * gb d e r * ig a b * ig c r * ig d e)) := by
@@ -8155,7 +8155,7 @@ private lemma rz2 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e c e a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, cg i a * dig j b c * f b d * ((1 / 2 : ℝ) * (∑ l, ig a l * gb c e l)) * ig d e) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, cg i b0 * dig j b1 b2 * f b1 b3 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b2 b4 b5)) * ig b3 b4 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, cg i b0 * dig j b1 b2 * f b1 b3 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b2 b4 b5)) * ig b3 b4 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, dig j a b * f a c * gb b d i * ig c d)) := by
@@ -8235,7 +8235,7 @@ private lemma rz3 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige j b c]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, cg i a * (-(∑ l, ∑ p, ig b l * ig p c * dg j l p)) * f b d * gbg c e a * ig d e) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * (ig b1 b5 * ig b6 b2 * dg j b5 b6) * f b1 b3 * gbg b2 b4 b0 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_neg, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * (ig b1 b5 * ig b6 b2 * dg j b5 b6) * f b1 b3 * gbg b2 b4 b0 * ig b3 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * dg j b c * f d e * gbg r s a * ig b d * ig c r * ig e s)) := by
@@ -8349,7 +8349,7 @@ private lemma rz4 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e j d a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb j d l)) * ga1 e r d * ig b e * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb j b3 b6)) * ga1 b4 b5 b3 * ig b1 b4 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb j b3 b6)) * ga1 b4 b5 b3 * ig b1 b4 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * ga1 c d e * gb j e i * ig a c * ig b d)) := by
@@ -8461,7 +8461,7 @@ private lemma rz5 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e j d a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb j d l)) * gbg e r d * ig b e * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb j b3 b6)) * gbg b4 b5 b3 * ig b1 b4 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb j b3 b6)) * gbg b4 b5 b3 * ig b1 b4 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * gb j c i * gbg d e c * ig a d * ig b e)) := by
@@ -8536,7 +8536,7 @@ private lemma rz6 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e j d b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig b l * gb j d l)) * ga1 e r a * ig c e * ig d r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb j b3 b6)) * ga1 b4 b5 b0 * ig b2 b4 * ig b3 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb j b3 b6)) * ga1 b4 b5 b0 * ig b2 b4 * ig b3 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * ga1 d e a * gb j r s * ig b d * ig c s * ig e r)) := by
@@ -8609,7 +8609,7 @@ private lemma rz7 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e j d b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig b l * gb j d l)) * gbg e r a * ig c e * ig d r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb j b3 b6)) * gbg b4 b5 b0 * ig b2 b4 * ig b3 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb j b3 b6)) * gbg b4 b5 b0 * ig b2 b4 * ig b3 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * gb j d e * gbg r s a * ig b e * ig c r * ig d s)) := by
@@ -8685,7 +8685,7 @@ private lemma rz8 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e j d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig e l * gb j d l)) * ga1 e r a * ig b d * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb j b3 b6)) * ga1 b4 b5 b0 * ig b1 b3 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb j b3 b6)) * ga1 b4 b5 b0 * ig b1 b3 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * ga1 d e a * gb j r s * ig b d * ig c r * ig e s)) := by
@@ -8760,7 +8760,7 @@ private lemma rz9 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e j d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig e l * gb j d l)) * gbg e r a * ig b d * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb j b3 b6)) * gbg b4 b5 b0 * ig b1 b3 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb j b3 b6)) * gbg b4 b5 b0 * ig b1 b3 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * gb j d e * gbg r s a * ig b d * ig c r * ig e s)) := by
@@ -8879,7 +8879,7 @@ private lemma rz10 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e d e a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb d e l)) * gb j r s * ig b d * ig c r * ig e s) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb j b5 b6 * ig b1 b3 * ig b2 b5 * ig b4 b6 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb j b5 b6 * ig b1 b3 * ig b2 b5 * ig b4 b6 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * gb j c d * gb e r i * ig a c * ig b e * ig d r)) := by
@@ -8998,7 +8998,7 @@ private lemma rz11 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e d e a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb d e l)) * gb j r s * ig b d * ig c s * ig e r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb j b5 b6 * ig b1 b3 * ig b2 b6 * ig b4 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg i b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb j b5 b6 * ig b1 b3 * ig b2 b6 * ig b4 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * gb j c d * gb e r i * ig a d * ig b e * ig c r)) := by
@@ -9149,7 +9149,7 @@ private lemma rz12 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe j d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * (dg j e d + dg d e j - dg e j d) * gbg r s a * ig b d * ig c r * ig e s) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg j b4 b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b3 b4 j * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b4 j b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg j b4 b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b3 b4 j * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b4 j b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * dg j b c * f d e * gbg r s a * ig b d * ig c r * ig e s)
@@ -9303,7 +9303,7 @@ private lemma rz13 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe j d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * f b c * (dg j e d + dg d e j - dg e j d) * gbg r s a * ig b e * ig c r * ig d s) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg j b4 b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b3 b4 j * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b4 j b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg j b4 b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b3 b4 j * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg i b0 * f b1 b2 * dg b4 j b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg i a * dg j b c * f d e * gbg r s a * ig b d * ig c r * ig e s)
@@ -9423,7 +9423,7 @@ private lemma rz14 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige i a b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * (-(∑ l, ∑ p, ig a l * ig p b * dg i l p)) * f b c * gb d e r * ig c r * ig d e) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg j b0 * (ig b0 b6 * ig b7 b1 * dg i b6 b7) * f b1 b2 * gb b3 b4 b5 * ig b2 b5 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_neg, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg j b0 * (ig b0 b6 * ig b7 b1 * dg i b6 b7) * f b1 b2 * gb b3 b4 b5 * ig b2 b5 * ig b3 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * f b c * gb d e r * ig a b * ig c r * ig d e)) := by
@@ -9534,7 +9534,7 @@ private lemma rz15 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e c e a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, cg j a * dig i b c * f b d * ((1 / 2 : ℝ) * (∑ l, ig a l * gb c e l)) * ig d e) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, cg j b0 * dig i b1 b2 * f b1 b3 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b2 b4 b5)) * ig b3 b4 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, cg j b0 * dig i b1 b2 * f b1 b3 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b2 b4 b5)) * ig b3 b4 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, dig i a b * f a c * gb b d j * ig c d)) := by
@@ -9614,7 +9614,7 @@ private lemma rz16 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige i b c]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, cg j a * (-(∑ l, ∑ p, ig b l * ig p c * dg i l p)) * f b d * gbg c e a * ig d e) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * (ig b1 b5 * ig b6 b2 * dg i b5 b6) * f b1 b3 * gbg b2 b4 b0 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_neg, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * (ig b1 b5 * ig b6 b2 * dg i b5 b6) * f b1 b3 * gbg b2 b4 b0 * ig b3 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * dg i b c * f d e * gbg r s a * ig b d * ig c r * ig e s)) := by
@@ -9728,7 +9728,7 @@ private lemma rz17 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i d a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb i d l)) * ga1 e r d * ig b e * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb i b3 b6)) * ga1 b4 b5 b3 * ig b1 b4 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb i b3 b6)) * ga1 b4 b5 b3 * ig b1 b4 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * ga1 c d e * gb i e j * ig a c * ig b d)) := by
@@ -9840,7 +9840,7 @@ private lemma rz18 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i d a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb i d l)) * gbg e r d * ig b e * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb i b3 b6)) * gbg b4 b5 b3 * ig b1 b4 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b6 * gb i b3 b6)) * gbg b4 b5 b3 * ig b1 b4 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * gb i c j * gbg d e c * ig a d * ig b e)) := by
@@ -9915,7 +9915,7 @@ private lemma rz19 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i d b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig b l * gb i d l)) * ga1 e r a * ig c e * ig d r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb i b3 b6)) * ga1 b4 b5 b0 * ig b2 b4 * ig b3 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb i b3 b6)) * ga1 b4 b5 b0 * ig b2 b4 * ig b3 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * ga1 d e a * gb i r s * ig b d * ig c s * ig e r)) := by
@@ -9988,7 +9988,7 @@ private lemma rz20 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i d b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig b l * gb i d l)) * gbg e r a * ig c e * ig d r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb i b3 b6)) * gbg b4 b5 b0 * ig b2 b4 * ig b3 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b1 b6 * gb i b3 b6)) * gbg b4 b5 b0 * ig b2 b4 * ig b3 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * gb i d e * gbg r s a * ig b e * ig c r * ig d s)) := by
@@ -10064,7 +10064,7 @@ private lemma rz21 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig e l * gb i d l)) * ga1 e r a * ig b d * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb i b3 b6)) * ga1 b4 b5 b0 * ig b1 b3 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb i b3 b6)) * ga1 b4 b5 b0 * ig b1 b3 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * ga1 d e a * gb i r s * ig b d * ig c r * ig e s)) := by
@@ -10139,7 +10139,7 @@ private lemma rz22 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig e l * gb i d l)) * gbg e r a * ig b d * ig c r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb i b3 b6)) * gbg b4 b5 b0 * ig b1 b3 * ig b2 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b4 b6 * gb i b3 b6)) * gbg b4 b5 b0 * ig b1 b3 * ig b2 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * gb i d e * gbg r s a * ig b d * ig c r * ig e s)) := by
@@ -10258,7 +10258,7 @@ private lemma rz23 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e d e a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb d e l)) * gb i r s * ig b d * ig c r * ig e s) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb i b5 b6 * ig b1 b3 * ig b2 b5 * ig b4 b6 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb i b5 b6 * ig b1 b3 * ig b2 b5 * ig b4 b6 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * gb i c d * gb e r j * ig a c * ig b e * ig d r)) := by
@@ -10377,7 +10377,7 @@ private lemma rz24 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e d e a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb d e l)) * gb i r s * ig b d * ig c s * ig e r) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb i b5 b6 * ig b1 b3 * ig b2 b6 * ig b4 b5 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, ∑ b7, cg j b0 * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b7 * gb b3 b4 b7)) * gb i b5 b6 * ig b1 b3 * ig b2 b6 * ig b4 b5 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * gb i c d * gb e r j * ig a d * ig b e * ig c r)) := by
@@ -10528,7 +10528,7 @@ private lemma rz25 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * (dg i e d + dg d e i - dg e i d) * gbg r s a * ig b d * ig c r * ig e s) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg i b4 b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b3 b4 i * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b4 i b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg i b4 b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b3 b4 i * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b4 i b3 * gbg b5 b6 b0 * ig b1 b3 * ig b2 b5 * ig b4 b6) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * dg i b c * f d e * gbg r s a * ig b d * ig c r * ig e s)
@@ -10682,7 +10682,7 @@ private lemma rz26 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * f b c * (dg i e d + dg d e i - dg e i d) * gbg r s a * ig b e * ig c r * ig d s) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg i b4 b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b3 b4 i * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b4 i b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg i b4 b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b3 b4 i * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ∑ b6, cg j b0 * f b1 b2 * dg b4 i b3 * gbg b5 b6 b0 * ig b1 b4 * ig b2 b5 * ig b3 b6) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, ∑ s, cg j a * dg i b c * f d e * gbg r s a * ig b d * ig c r * ig e s)
@@ -10839,7 +10839,7 @@ private lemma rz27 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe d e r]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * f b c * (dg d r e + dg e r d - dg r d e) * ig a b * ig c r * ig d e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b1 * ig b2 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b1 * ig b2 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) =
       ((2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * dg b c d * f e r * ig a e * ig b c * ig d r))
@@ -10995,7 +10995,7 @@ private lemma rz28 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe d e r]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j i a * f b c * (dg d r e + dg e r d - dg r d e) * ig a b * ig c r * ig d e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b1 * ig b2 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b1 * ig b2 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) =
       ((2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j i a * dg b c d * f e r * ig a e * ig b c * ig d r))
@@ -11067,7 +11067,7 @@ private lemma rz29 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e d e a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, dg a i j * f b c * ((1 / 2 : ℝ) * (∑ l, ig a l * gb d e l)) * ig b d * ig c e) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b3 b4 b5)) * ig b1 b3 * ig b2 b4 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b3 b4 b5)) * ig b1 b3 * ig b2 b4 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a i j * f b c * gb d e r * ig a r * ig b d * ig c e)) := by
@@ -11222,7 +11222,7 @@ private lemma rz30 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe d e r]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a i j * f b c * (dg d r e + dg e r d - dg r d e) * ig a b * ig c r * ig d e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b3 b5 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b4 b5 b3 * ig b0 b1 * ig b2 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b5 b3 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b3 b5 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b4 b5 b3 * ig b0 b1 * ig b2 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b5 b3 b4 * ig b0 b1 * ig b2 b5 * ig b3 b4) =
       ((2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a i j * dg b c d * f e r * ig a e * ig b c * ig d r))
@@ -11381,7 +11381,7 @@ private lemma rz31 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe d e r]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a i j * f b c * (dg d r e + dg e r d - dg r d e) * ig a r * ig b d * ig c e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b3 b5 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b4 b5 b3 * ig b0 b5 * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b5 b3 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b3 b5 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b4 b5 b3 * ig b0 b5 * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i j * f b1 b2 * dg b5 b3 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a i j * dg b c d * f e r * ig a b * ig c e * ig d r))
@@ -11491,7 +11491,7 @@ private lemma rz32 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdga1e i a b c]
   have h2 : (∑ a, ∑ b, ∑ c, (1 / 2 : ℝ) * (∑ l, (dig i c l * gb a b l + ig c l * dgb i a b l)) * f j c * ig a b) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (dig i b2 b3 * gb b0 b1 b3) * f j b2 * ig b0 b1) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (ig b2 b3 * dgb i b0 b1 b3) * f j b2 * ig b0 b1) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, Finset.sum_add_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (dig i b2 b3 * gb b0 b1 b3) * f j b2 * ig b0 b1) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (ig b2 b3 * dgb i b0 b1 b3) * f j b2 * ig b0 b1) =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, dgb i a b c * f j d * ig a b * ig c d))
@@ -11601,7 +11601,7 @@ private lemma rz33 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdga1e j a b c]
   have h2 : (∑ a, ∑ b, ∑ c, (1 / 2 : ℝ) * (∑ l, (dig j c l * gb a b l + ig c l * dgb j a b l)) * f i c * ig a b) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (dig j b2 b3 * gb b0 b1 b3) * f i b2 * ig b0 b1) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (ig b2 b3 * dgb j b0 b1 b3) * f i b2 * ig b0 b1) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, Finset.sum_add_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (dig j b2 b3 * gb b0 b1 b3) * f i b2 * ig b0 b1) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, (1 / 2 : ℝ) * (ig b2 b3 * dgb j b0 b1 b3) * f i b2 * ig b0 b1) =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, dgb j a b c * f i d * ig a b * ig c d))
@@ -11681,7 +11681,7 @@ private lemma rz34 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige i a b]
   have h2 : (∑ a, ∑ b, ∑ c, (-(∑ l, ∑ p, ig a l * ig p b * dg i l p)) * f j c * ga0 a b c) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b3 * ig b4 b1 * dg i b3 b4 * f j b2 * ga0 b0 b1 b2) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.sum_mul, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b3 * ig b4 b1 * dg i b3 b4 * f j b2 * ga0 b0 b1 b2) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, dg i a b * f j c * ga0 d e c * ig a d * ig b e)) := by
@@ -11752,7 +11752,7 @@ private lemma rz35 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e a b c]
   have h2 : (∑ a, ∑ b, ∑ c, dig i a b * f j c * ((1 / 2 : ℝ) * (∑ l, ig c l * gb a b l))) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, dig i b0 b1 * f j b2 * ((1 / 2 : ℝ) * (ig b2 b3 * gb b0 b1 b3)) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, dig i b0 b1 * f j b2 * ((1 / 2 : ℝ) * (ig b2 b3 * gb b0 b1 b3)) =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, dig i a b * f j c * gb a b d * ig c d)) := by
@@ -11832,7 +11832,7 @@ private lemma rz36 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige i a b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, (-(∑ l, ∑ p, ig a l * ig p b * dg i l p)) * f a c * gb b d j * ig c d) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b4 * ig b5 b1 * dg i b4 b5 * f b0 b2 * gb b1 b3 j * ig b2 b3) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.sum_mul, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b4 * ig b5 b1 * dg i b4 b5 * f b0 b2 * gb b1 b3 j * ig b2 b3) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * f c d * gb e r j * ig a c * ig b e * ig d r)) := by
@@ -11983,7 +11983,7 @@ private lemma rz37 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe e r j]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * f c d * (dg e j r + dg r j e - dg j e r) * ig a c * ig b e * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i b0 b1 * f b2 b3 * dg b4 j b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i b0 b1 * f b2 b3 * dg b5 j b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i b0 b1 * f b2 b3 * dg j b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i b0 b1 * f b2 b3 * dg b4 j b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i b0 b1 * f b2 b3 * dg b5 j b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i b0 b1 * f b2 b3 * dg j b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * dg j c d * f e r * ig a c * ig b e * ig d r))
@@ -12064,7 +12064,7 @@ private lemma rz38 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige j a b]
   have h2 : (∑ a, ∑ b, ∑ c, (-(∑ l, ∑ p, ig a l * ig p b * dg j l p)) * f i c * ga0 a b c) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b3 * ig b4 b1 * dg j b3 b4 * f i b2 * ga0 b0 b1 b2) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.sum_mul, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ig b0 b3 * ig b4 b1 * dg j b3 b4 * f i b2 * ga0 b0 b1 b2) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, dg j a b * f i c * ga0 d e c * ig a d * ig b e)) := by
@@ -12135,7 +12135,7 @@ private lemma rz39 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e a b c]
   have h2 : (∑ a, ∑ b, ∑ c, dig j a b * f i c * ((1 / 2 : ℝ) * (∑ l, ig c l * gb a b l))) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, dig j b0 b1 * f i b2 * ((1 / 2 : ℝ) * (ig b2 b3 * gb b0 b1 b3)) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, dig j b0 b1 * f i b2 * ((1 / 2 : ℝ) * (ig b2 b3 * gb b0 b1 b3)) =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, dig j a b * f i c * gb a b d * ig c d)) := by
@@ -12215,7 +12215,7 @@ private lemma rz40 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hdige j a b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, (-(∑ l, ∑ p, ig a l * ig p b * dg j l p)) * f a c * gb b d i * ig c d) =
       -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b4 * ig b5 b1 * dg j b4 b5 * f b0 b2 * gb b1 b3 i * ig b2 b3) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.sum_mul, neg_mul, Finset.sum_neg_distrib]
     try ring
   have h3 : -(∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, ig b0 b4 * ig b5 b1 * dg j b4 b5 * f b0 b2 * gb b1 b3 i * ig b2 b3) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j a b * f c d * gb e r i * ig a c * ig b e * ig d r)) := by
@@ -12371,7 +12371,7 @@ private lemma rz41 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe e r i]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j a b * f c d * (dg e i r + dg r i e - dg i e r) * ig a c * ig b e * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j b0 b1 * f b2 b3 * dg b4 i b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j b0 b1 * f b2 b3 * dg b5 i b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j b0 b1 * f b2 b3 * dg i b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j b0 b1 * f b2 b3 * dg b4 i b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j b0 b1 * f b2 b3 * dg b5 i b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j b0 b1 * f b2 b3 * dg i b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * dg j c d * f e r * ig a c * ig b e * ig d r))
@@ -12446,7 +12446,7 @@ private lemma rz42 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e j d b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, f i a * ga0 b c a * ((1 / 2 : ℝ) * (∑ l, ig b l * gb j d l)) * ig c d) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * ((1 / 2 : ℝ) * (ig b1 b4 * gb j b3 b4)) * ig b2 b3 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * ((1 / 2 : ℝ) * (ig b1 b4 * gb j b3 b4)) * ig b2 b3 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f i a * ga0 b c a * gb j d e * ig b d * ig c e)) := by
@@ -12599,7 +12599,7 @@ private lemma rz43 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe j d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f i a * ga0 b c a * (dg j e d + dg d e j - dg e j d) * ig b d * ig c e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * dg j b4 b3 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * dg b3 b4 j * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * dg b4 j b3 * ig b1 b3 * ig b2 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * dg j b4 b3 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * dg b3 b4 j * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f i b0 * ga0 b1 b2 b0 * dg b4 j b3 * ig b1 b3 * ig b2 b4) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, dg j a b * f i c * ga0 d e c * ig a d * ig b e) := by
@@ -12672,7 +12672,7 @@ private lemma rz44 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i d b]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, f j a * ga0 b c a * ((1 / 2 : ℝ) * (∑ l, ig b l * gb i d l)) * ig c d) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * ((1 / 2 : ℝ) * (ig b1 b4 * gb i b3 b4)) * ig b2 b3 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * ((1 / 2 : ℝ) * (ig b1 b4 * gb i b3 b4)) * ig b2 b3 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f j a * ga0 b c a * gb i d e * ig b d * ig c e)) := by
@@ -12825,7 +12825,7 @@ private lemma rz45 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f j a * ga0 b c a * (dg i e d + dg d e i - dg e i d) * ig b d * ig c e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * dg i b4 b3 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * dg b3 b4 i * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * dg b4 i b3 * ig b1 b3 * ig b2 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * dg i b4 b3 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * dg b3 b4 i * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f j b0 * ga0 b1 b2 b0 * dg b4 i b3 * ig b1 b3 * ig b2 b4) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, dg i a b * f j c * ga0 d e c * ig a d * ig b e) := by
@@ -12898,7 +12898,7 @@ private lemma rz46 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e i j a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, f a b * ((1 / 2 : ℝ) * (∑ l, ig a l * gb i j l)) * ga1 c d b * ig c d) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * ((1 / 2 : ℝ) * (ig b0 b4 * gb i j b4)) * ga1 b2 b3 b1 * ig b2 b3 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * ((1 / 2 : ℝ) * (ig b0 b4 * gb i j b4)) * ga1 b2 b3 b1 * ig b2 b3 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * ga1 c d a * gb i j e * ig b e * ig c d)) := by
@@ -12973,7 +12973,7 @@ private lemma rz47 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e c d a]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * ((1 / 2 : ℝ) * (∑ l, ig a l * gb c d l)) * gb i j e * ig b e * ig c d) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b2 b3 b5)) * gb i j b4 * ig b1 b4 * ig b2 b3 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * ((1 / 2 : ℝ) * (ig b0 b5 * gb b2 b3 b5)) * gb i j b4 * ig b1 b4 * ig b2 b3 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * gb i j c * gb d e r * ig a c * ig b r * ig d e)) := by
@@ -13046,7 +13046,7 @@ private lemma rz48 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e c d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * ((1 / 2 : ℝ) * (∑ l, ig e l * gb c d l)) * gb i e j * ig a c * ig b d) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * ((1 / 2 : ℝ) * (ig b4 b5 * gb b2 b3 b5)) * gb i b4 j * ig b0 b2 * ig b1 b3 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * ((1 / 2 : ℝ) * (ig b4 b5 * gb b2 b3 b5)) * gb i b4 j * ig b0 b2 * ig b1 b3 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * gb i c j * gb d e r * ig a d * ig b e * ig c r)) := by
@@ -13119,7 +13119,7 @@ private lemma rz49 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hga1e c d e]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * ((1 / 2 : ℝ) * (∑ l, ig e l * gb c d l)) * gb j e i * ig a c * ig b d) =
       ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * ((1 / 2 : ℝ) * (ig b4 b5 * gb b2 b3 b5)) * gb j b4 i * ig b0 b2 * ig b1 b3 := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul]
     try ring
   have h3 : ∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * ((1 / 2 : ℝ) * (ig b4 b5 * gb b2 b3 b5)) * gb j b4 i * ig b0 b2 * ig b1 b3 =
       ((1 / 2 : ℝ) * (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * gb j c i * gb d e r * ig a d * ig b e * ig c r)) := by
@@ -13260,7 +13260,7 @@ private lemma rz50 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i j c]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * (dg i c j + dg j c i - dg c i j) * gb d e r * ig a c * ig b r * ig d e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i b2 j * gb b3 b4 b5 * ig b0 b2 * ig b1 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j b2 i * gb b3 b4 b5 * ig b0 b2 * ig b1 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 i j * gb b3 b4 b5 * ig b0 b2 * ig b1 b5 * ig b3 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i b2 j * gb b3 b4 b5 * ig b0 b2 * ig b1 b5 * ig b3 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j b2 i * gb b3 b4 b5 * ig b0 b2 * ig b1 b5 * ig b3 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 i j * gb b3 b4 b5 * ig b0 b2 * ig b1 b5 * ig b3 b4) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * f b c * gb d e r * ig a b * ig c r * ig d e)
@@ -13401,7 +13401,7 @@ private lemma rz51 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i c j]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * (dg i j c + dg c j i - dg j i c) * gb d e r * ig a d * ig b e * ig c r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i j b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 j i * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j i b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i j b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 j i * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j i b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * f b c * gb d e r * ig a r * ig b d * ig c e)
@@ -13561,7 +13561,7 @@ private lemma rz52 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe d e r]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * f b c * (dg d r e + dg e r d - dg r d e) * ig a r * ig b d * ig c e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b5 * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b5 * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg i j b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * dg b c d * f e r * ig a b * ig c e * ig d r))
@@ -13720,7 +13720,7 @@ private lemma rz53 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe d e r]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j i a * f b c * (dg d r e + dg e r d - dg r d e) * ig a r * ig b d * ig c e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b5 * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b3 b5 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b4 b5 b3 * ig b0 b5 * ig b1 b3 * ig b2 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg j i b0 * f b1 b2 * dg b5 b3 b4 * ig b0 b5 * ig b1 b3 * ig b2 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j i a * dg b c d * f e r * ig a b * ig c e * ig d r))
@@ -13860,7 +13860,7 @@ private lemma rz54 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i c j]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * (dg i j c + dg c j i - dg j i c) * gbg d e c * ig a d * ig b e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg i j b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg b2 j i * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg j i b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg i j b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg b2 j i * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg j i b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, dg i j a * f b c * gbg d e a * ig b d * ig c e)
@@ -14013,7 +14013,7 @@ private lemma rz55 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i c d]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * (dg i d c + dg c d i - dg d i c) * gb e r j * ig a c * ig b e * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i b3 b2 * gb b4 b5 j * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 i * gb b4 b5 j * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 i b2 * gb b4 b5 j * ig b0 b2 * ig b1 b4 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i b3 b2 * gb b4 b5 j * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 i * gb b4 b5 j * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 i b2 * gb b4 b5 j * ig b0 b2 * ig b1 b4 * ig b3 b5) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * f c d * gb e r j * ig a c * ig b e * ig d r)
@@ -14168,7 +14168,7 @@ private lemma rz56 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe e r j]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a i b * f c d * (dg e j r + dg r j e - dg j e r) * ig a c * ig b e * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b4 j b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b5 j b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg j b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b4 j b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b5 j b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg j b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j a b * dg c i d * f e r * ig a d * ig b e * ig c r))
@@ -14323,7 +14323,7 @@ private lemma rz57 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe e r j]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a i b * f c d * (dg e j r + dg r j e - dg j e r) * ig a e * ig b c * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b4 j b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b5 j b4 * ig b0 b4 * ig b1 b2 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg j b4 b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b4 j b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg b5 j b4 * ig b0 b4 * ig b1 b2 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 i b1 * f b2 b3 * dg j b4 b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j a b * dg c i d * f e r * ig a c * ig b e * ig d r))
@@ -14477,7 +14477,7 @@ private lemma rz58 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe i c d]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * (dg i d c + dg c d i - dg d i c) * gb e r j * ig a d * ig b e * ig c r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i b3 b2 * gb b4 b5 j * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 i * gb b4 b5 j * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 i b2 * gb b4 b5 j * ig b0 b3 * ig b1 b4 * ig b2 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i b3 b2 * gb b4 b5 j * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 i * gb b4 b5 j * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 i b2 * gb b4 b5 j * ig b0 b3 * ig b1 b4 * ig b2 b5) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * f c d * gb e r j * ig a c * ig b e * ig d r)
@@ -14617,7 +14617,7 @@ private lemma rz59 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe j c i]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * (dg j i c + dg c i j - dg i j c) * gb d e r * ig a d * ig b e * ig c r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j i b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 i j * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i j b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j i b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 i j * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg i j b2 * gb b3 b4 b5 * ig b0 b3 * ig b1 b4 * ig b2 b5) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i j a * f b c * gb d e r * ig a r * ig b d * ig c e))
@@ -14757,7 +14757,7 @@ private lemma rz60 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe j c i]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, f a b * (dg j i c + dg c i j - dg i j c) * gbg d e c * ig a d * ig b e) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg j i b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg b2 i j * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg i j b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg j i b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg b2 i j * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, f b0 b1 * dg i j b2 * gbg b3 b4 b2 * ig b0 b3 * ig b1 b4) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, dg i j a * f b c * gbg d e a * ig b d * ig c e))
@@ -14910,7 +14910,7 @@ private lemma rz61 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe j c d]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * (dg j d c + dg c d j - dg d j c) * gb e r i * ig a c * ig b e * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j b3 b2 * gb b4 b5 i * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 j * gb b4 b5 i * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 j b2 * gb b4 b5 i * ig b0 b2 * ig b1 b4 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j b3 b2 * gb b4 b5 i * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 j * gb b4 b5 i * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 j b2 * gb b4 b5 i * ig b0 b2 * ig b1 b4 * ig b3 b5) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j a b * f c d * gb e r i * ig a c * ig b e * ig d r)
@@ -15075,7 +15075,7 @@ private lemma rz62 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe e r i]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a j b * f c d * (dg e i r + dg r i e - dg i e r) * ig a c * ig b e * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b4 i b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b5 i b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg i b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b4 i b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b5 i b4 * ig b0 b2 * ig b1 b4 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg i b4 b5 * ig b0 b2 * ig b1 b4 * ig b3 b5) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * dg c j d * f e r * ig a d * ig b e * ig c r))
@@ -15240,7 +15240,7 @@ private lemma rz63 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe e r i]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg a j b * f c d * (dg e i r + dg r i e - dg i e r) * ig a e * ig b c * ig d r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b4 i b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b5 i b4 * ig b0 b4 * ig b1 b2 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg i b4 b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b4 i b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg b5 i b4 * ig b0 b4 * ig b1 b2 * ig b3 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, dg b0 j b1 * f b2 b3 * dg i b4 b5 * ig b0 b4 * ig b1 b2 * ig b3 b5) =
       (-(∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg i a b * dg c j d * f e r * ig a c * ig b e * ig d r))
@@ -15394,7 +15394,7 @@ private lemma rz64 {n : ℕ} (ig cg f : Fin n → Fin n → ℝ)
     rw [hgbe j c d]
   have h2 : (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, f a b * (dg j d c + dg c d j - dg d j c) * gb e r i * ig a d * ig b e * ig c r) =
       (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j b3 b2 * gb b4 b5 i * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 j * gb b4 b5 i * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 j b2 * gb b4 b5 i * ig b0 b3 * ig b1 b4 * ig b2 b5) := by
-    simp (config := { maxSteps := 10000000 }) only [Finset.mul_sum, Finset.sum_mul, mul_add, add_mul, mul_sub, sub_mul, mul_neg, neg_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib, Finset.sum_neg_distrib]
+    simp (config := { maxSteps := 10000000 }) only [mul_add, add_mul, mul_sub, sub_mul, Finset.sum_add_distrib, Finset.sum_sub_distrib]
     try ring
   have h3 : (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg j b3 b2 * gb b4 b5 i * ig b0 b3 * ig b1 b4 * ig b2 b5) + (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b2 b3 j * gb b4 b5 i * ig b0 b3 * ig b1 b4 * ig b2 b5) - (∑ b0, ∑ b1, ∑ b2, ∑ b3, ∑ b4, ∑ b5, f b0 b1 * dg b3 j b2 * gb b4 b5 i * ig b0 b3 * ig b1 b4 * ig b2 b5) =
       (∑ a, ∑ b, ∑ c, ∑ d, ∑ e, ∑ r, dg j a b * f c d * gb e r i * ig a c * ig b e * ig d r)

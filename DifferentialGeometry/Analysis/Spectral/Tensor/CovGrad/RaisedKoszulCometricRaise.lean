@@ -118,9 +118,9 @@ lemma koszulCovecCc_unitModel (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcT
     simp only [koszulCovecCc, unitModel, SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add,
       SmoothCcTensor.toSection_sub, ContMDiffSection.coe_smul, ContMDiffSection.coe_add,
       ContMDiffSection.coe_sub, Pi.smul_apply, Pi.add_apply, Pi.sub_apply,
-      ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply, ContinuousLinearMap.sub_apply,
-      Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_add, Tensor0SSpace.toModel_sub,
-      smul_eq_mul]
+      
+      
+]
     rfl
   rw [hlin, hperm, hperm, hperm]
   have e1 : (fun i => (![c, a, b] : Fin 3 → TangentSpace I x) ((Equiv.swap (0 : Fin 3) 2) i)) =

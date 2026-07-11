@@ -123,7 +123,7 @@ lemma Δ_g_sub
     have h_smul := h_const.mul hh
     refine h_smul.congr ?_
     intro y
-    simp [neg_one_mul]
+    simp
   have h_sub_eq_add_neg : (fun y : M => f y - h y) = (fun y : M => f y + -h y) := by
     funext y; ring
   rw [Δ_g_congr_funext (I := I) g hsub (hf.add hneg) h_sub_eq_add_neg x]

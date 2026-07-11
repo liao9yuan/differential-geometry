@@ -1108,8 +1108,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
     have : (Rjt t).toFun x = Tensor0SBundle.TensorRSSpace.toModel ((Rjt t).toSection x) := rfl
     rw [this, hRjtSection t ht x, Tensor0SBundle.TensorRSSpace.toModel_ofModel]
   refine ⟨Rjt, ?_, ?_⟩
-  ·
-    intro i t ht
+  · intro i t ht
     haveI : IsFiniteMeasure
         (DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure (I := I) (M := M) g₀) :=
       DifferentialGeometry.Integral.Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
@@ -1169,8 +1168,7 @@ private theorem deTurckRHSReconSection_timeJet_jointSmooth_section
       simp only []
       rw [hfiberJet x, hRjtToFun t ht x]
     rw [hRHS_eq, ← hcoeffInt (Rjt t)]
-  ·
-    refine hJet.congr ?_
+  · refine hJet.congr ?_
     intro p hp
     obtain ⟨_, ht⟩ := hp
     rw [hRjtSection p.2 ht p.1]

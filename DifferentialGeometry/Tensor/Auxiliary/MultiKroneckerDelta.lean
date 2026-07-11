@@ -44,7 +44,7 @@ theorem multiKroneckerDelta_eq_zero
   · by_cases hJ : Function.Injective J
     · have ⟨i, hi⟩ : ∃ i, ∀ j, I i ≠ J j := by
         by_contra hall
-        push_neg at hall
+        push Not at hall
         choose f hf using hall
         have hf_inj : Function.Injective f :=
           fun a b hab => hI (by rw [hf a, hf b, hab])

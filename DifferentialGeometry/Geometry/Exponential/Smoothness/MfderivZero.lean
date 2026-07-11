@@ -270,7 +270,7 @@ private theorem exists_combined_chartFlow_data
     Geodesic.exists_chartPhase_contDiffOn_isLocalFlow_combined
       (I := I) (g := g) (α := p) (x₀ := x₀) (v₀ := (0 : E)) hx₀_interior
   obtain ⟨ρ₁, T₁, hρ₁_pos, hT₁_pos, hρ₁_le_ρ_V4, hT₁_lt_T_V4, h_orbit_in⟩ :=
-    exists_uniform_orbit_in_inner_ball (I := I) (g := g) (p := p)
+    exists_uniform_orbit_in_inner_ball (I := I) (p := p)
       (x₀ := x₀) hx₀_def
       (b := b) (ρ_V4 := ρ_V4) (T_V4 := T_V4) hρ_V4_pos hT_V4_pos
       (Φ := Φ) hΦ_cd_V4 hΦ_init0

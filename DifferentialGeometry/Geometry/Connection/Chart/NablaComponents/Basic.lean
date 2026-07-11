@@ -63,7 +63,7 @@ theorem connCoeff_eq_christoffelAlong_coord
   classical
   let e := coordinateTrivializationAt (I := I) x₀
   have hx_base : x₀ ∈ e.baseSet := by
-    simp [e, coordinateTrivializationAt, coordinateFrameAt_mem (I := I) x₀]
+    simp [e, coordinateTrivializationAt]
   have hconst :
       MDiffAt
         (T% (tangentConstInChart (𝕜 := Real) (I := I) x₀
@@ -102,14 +102,14 @@ theorem connCoeff_eq_christoffelAlong_coord
             (by simpa [coordinateFrameSet, coordinateTrivializationAt] using hx) := by
       ext a
       rw [IsLocalFrameOn.toBasisAt_coe]
-      simp [coordinateFrameAt_isLocalFrame_one, coordinateFrameAt,
-        coordinateFrameSet, coordinateTrivializationAt]
+      simp [coordinateFrameAt,
+        coordinateTrivializationAt]
     unfold IsLocalFrameOn.coeff
     rw [dif_pos (coordinateFrameAt_mem (I := I) x₀)]
     rw [hbasis (coordinateFrameAt_mem (I := I) x₀)]
     simp [Bundle.Trivialization.basisAt]
     rw [Bundle.Trivialization.linearMapAt_apply]
-    simp [coordinateFrameAt_mem, coordinateFrameSet, coordinateTrivializationAt]
+    simp [coordinateTrivializationAt]
   rw [hcoeff]
 
 def coordDeriv0SAt {s : ℕ}

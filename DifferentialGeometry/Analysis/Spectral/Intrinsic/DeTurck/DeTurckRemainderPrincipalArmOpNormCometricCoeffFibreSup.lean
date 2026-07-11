@@ -369,7 +369,7 @@ private lemma riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (g₀ g
     (hδb : metricCauchySchwarzBound (I := I) (M := M) g₀ hb δb)
     (hδab_nn : 0 ≤ δab)
     (hδab : metricCauchySchwarzBound (I := I) (M := M) g₀ (fun y => ha y - hb y) δab)
-    (hδa_nn : 0 ≤ δa)
+    (_hδa_nn : 0 ≤ δa)
     (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         ((deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ ga
@@ -704,7 +704,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoeff_fibreSup_le
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →

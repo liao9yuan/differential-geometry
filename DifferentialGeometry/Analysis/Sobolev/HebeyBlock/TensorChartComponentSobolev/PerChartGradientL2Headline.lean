@@ -348,7 +348,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
     rw [hTinner_def]
     exact DifferentialGeometry.Analysis.Laplacian.metric_inner_self_nonneg
       (I := I) (M := M) g b _
-  show eLpNorm TinnerSqrt 2 μ ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)
+  change eLpNorm TinnerSqrt 2 μ ≤ ENNReal.ofReal C * (‖S‖₊ : ℝ≥0∞)
   set rawZ : M → ℝ := fun b : M =>
       scalarOnE (I := I) α
         (tensorChartComponentRaw (I := I) (M := M)
@@ -419,7 +419,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
           (Finset.sum_nonneg (fun _ _ => sq_nonneg _))
       have h_Bρ_sq_nn : 0 ≤ B * (ρ b) ^ 2 := mul_nonneg hB_nn (sq_nonneg _)
       have h_rawInd_eq : rawInd b = rawZ b := by
-        show (tsupport ρ).indicator rawZ b = rawZ b
+        change (tsupport ρ).indicator rawZ b = rawZ b
         exact Set.indicator_of_mem hb _
       have h_TchrFib_step : B * (ρ b) ^ 2 * TchrFib b ≤
           B * (ρ b) ^ 2 * (C_bridge * TchrSumK b) :=
@@ -450,7 +450,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
         exact (Real.sqrt_eq_zero h_nn).mp h_sqrt_zero
       rw [h_Tinner_zero]
       have h_rawInd_zero : rawInd b = 0 := by
-        show (tsupport ρ).indicator rawZ b = 0
+        change (tsupport ρ).indicator rawZ b = 0
         exact Set.indicator_of_notMem hb _
       have h_ρ_zero : ρ b = 0 := by
         by_contra hne
@@ -547,7 +547,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       by_cases hb : b ∈ tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
       · have h1 : rawInd b = rawZ b := by
-          show (tsupport _).indicator rawZ b = rawZ b
+          change (tsupport _).indicator rawZ b = rawZ b
           exact Set.indicator_of_mem hb _
         have h2 :
             (tsupport (fun x : M =>
@@ -559,7 +559,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
           Set.indicator_of_mem hb _
         rw [h1, h2, sq_abs]
       · have h1 : rawInd b = 0 := by
-          show (tsupport _).indicator rawZ b = 0
+          change (tsupport _).indicator rawZ b = 0
           exact Set.indicator_of_notMem hb _
         have h2 :
             (tsupport (fun x : M =>
@@ -687,7 +687,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
             ENNReal.ofReal ((rawInd b) ^ 2) := by
           rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _),
             sq_abs]
-        show ENNReal.ofReal (A * (rawInd b) ^ 2) =
+        change ENNReal.ofReal (A * (rawInd b) ^ 2) =
           ENNReal.ofReal A * (‖rawInd b‖ₑ : ℝ≥0∞) ^ 2
         rw [h_enn_sq, ENNReal.ofReal_mul hA_nn]
       have h_int_eq :
@@ -757,7 +757,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
             ENNReal.ofReal ((h2 b) ^ 2) := by
           rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _),
             sq_abs]
-        show ENNReal.ofReal (B * (ρ b) ^ 2 * Tcov b) =
+        change ENNReal.ofReal (B * (ρ b) ^ 2 * Tcov b) =
           ENNReal.ofReal B * (‖h2 b‖ₑ : ℝ≥0∞) ^ 2
         rw [h_enn_sq, show B * (ρ b) ^ 2 * Tcov b = B * ((ρ b) ^ 2 * Tcov b)
           from by ring, h_rho_Tcov, ENNReal.ofReal_mul hB_nn]
@@ -822,13 +822,13 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
       have hC₃'_eq : C₃' = C₃ := by rw [hC₃'_def, hC₃_def]
       have h_secSq_eq : ∀ b : M, ‖S.toCcTensor.toSection b‖ ^ 2 = TIP b := by
         intro b
-        show ‖S.toCcTensor.toSection b‖ ^ 2 =
+        change ‖S.toCcTensor.toSection b‖ ^ 2 =
           tensorInnerPointwise (I := I) (M := M) g r s b
             (S.toCcTensor.toFun b) (S.toCcTensor.toFun b)
         have h_inner : (⟪S.toCcTensor.toSection b, S.toCcTensor.toSection b⟫_ℝ : ℝ) =
             tensorInnerPointwise (I := I) (M := M) g r s b
               (S.toCcTensor.toFun b) (S.toCcTensor.toFun b) := by
-          show tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b
+          change tensorRSRiemannianInnerCLM (I := I) (M := M) g r s b
               (S.toCcTensor.toSection b) (S.toCcTensor.toSection b) = _
           rw [tensorRSRiemannianInnerCLM_apply]
           rfl
