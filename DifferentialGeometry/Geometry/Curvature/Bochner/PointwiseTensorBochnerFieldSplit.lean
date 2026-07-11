@@ -55,7 +55,7 @@ lemma tensor0S_curry_pointwiseTensorCurv_eq_genuine_add_obstruction
   rw [covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual_gen
     (I := I) (M := M) g s S x w]
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-        Tensor3rdCurv (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
+        tensorThirdOrderCurvatureDefect (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
           (fun y : M => S.toSection y) x)
         (unitZeroSec (I := I) (M := M) x) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from

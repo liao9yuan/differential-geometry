@@ -134,9 +134,9 @@ private lemma tensorInnerPointwise_0s_sum_smul_left
     {ι : Type*} (A : Finset ι) (a : ι → ℝ)
     (ψ : ι → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x (∑ i ∈ A, a i • ψ i) T =
+    covariantTensorInnerPointwise (I := I) (M := M) s g x (∑ i ∈ A, a i • ψ i) T =
       ∑ i ∈ A, a i *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x (ψ i) T := by
+        covariantTensorInnerPointwise (I := I) (M := M) s g x (ψ i) T := by
   classical
   induction A using Finset.induction with
   | empty => simp [tensorInnerPointwise_0s_zero_left]
@@ -149,9 +149,9 @@ private lemma tensorInnerPointwise_0s_sum_smul_right
     {ι : Type*} (A : Finset ι) (a : ι → ℝ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
     (ψ : ι → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x S (∑ i ∈ A, a i • ψ i) =
+    covariantTensorInnerPointwise (I := I) (M := M) s g x S (∑ i ∈ A, a i • ψ i) =
       ∑ i ∈ A, a i *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x S (ψ i) := by
+        covariantTensorInnerPointwise (I := I) (M := M) s g x S (ψ i) := by
   classical
   induction A using Finset.induction with
   | empty => simp [tensorInnerPointwise_0s_zero_right]
@@ -163,11 +163,11 @@ private lemma tensorInnerPointwise_0s_bisum
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι) (c d : ι → ℝ)
     (ψ φ : ι → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         (∑ a ∈ A, c a • ψ a) (∑ b ∈ A, d b • φ b) =
       ∑ a ∈ A, ∑ b ∈ A,
         (c a * d b) *
-          tensorInnerPointwise_0s (I := I) (M := M) s g x (ψ a) (φ b) := by
+          covariantTensorInnerPointwise (I := I) (M := M) s g x (ψ a) (φ b) := by
   classical
   rw [tensorInnerPointwise_0s_sum_smul_left]
   refine Finset.sum_congr rfl (fun a _ => ?_)
@@ -191,9 +191,9 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
     (horth : ∀ a b, g.inner x (frame a) (frame b) = if a = b then 1 else 0)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x S T =
+    covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x S T =
       ∑ a : Fin (Module.finrank ℝ E),
-        tensorInnerPointwise_0s (I := I) (M := M) s g x
+        covariantTensorInnerPointwise (I := I) (M := M) s g x
           (S.curryLeft (frame a)) (T.curryLeft (frame a)) := by
   classical
   rw [tensorInnerPointwise_0s_succ]
@@ -217,14 +217,14 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
     exact curryLeft_sum_smul (E := E) P Finset.univ _ _
   have hstep : ∀ i j : Fin (Module.finrank ℝ E),
       (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
-          tensorInnerPointwise_0s (I := I) (M := M) s g x
+          covariantTensorInnerPointwise (I := I) (M := M) s g x
             (S.curryLeft ((chartModelBasis E) i))
             (T.curryLeft ((chartModelBasis E) j)) =
         ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           (mixedGram (I := I) (M := M) g x frame i a *
               (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
               mixedGram (I := I) (M := M) g x frame j b) *
-            tensorInnerPointwise_0s (I := I) (M := M) s g x
+            covariantTensorInnerPointwise (I := I) (M := M) s g x
               (S.curryLeft (frame a)) (T.curryLeft (frame b)) := by
     intro i j
     rw [hcurry_exp S i, hcurry_exp T j]
@@ -239,14 +239,14 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
     ring
   rw [show (∑ i, ∑ j,
         (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
-          tensorInnerPointwise_0s (I := I) (M := M) s g x
+          covariantTensorInnerPointwise (I := I) (M := M) s g x
             (S.curryLeft ((chartModelBasis E) i))
             (T.curryLeft ((chartModelBasis E) j))) =
       ∑ i, ∑ j, ∑ a, ∑ b,
         (mixedGram (I := I) (M := M) g x frame i a *
             (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
             mixedGram (I := I) (M := M) g x frame j b) *
-          tensorInnerPointwise_0s (I := I) (M := M) s g x
+          covariantTensorInnerPointwise (I := I) (M := M) s g x
             (S.curryLeft (frame a)) (T.curryLeft (frame b))
     from by
       refine Finset.sum_congr rfl ?_
@@ -259,7 +259,7 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
     (mixedGram (I := I) (M := M) g x frame i a *
         (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
         mixedGram (I := I) (M := M) g x frame j b) *
-      tensorInnerPointwise_0s (I := I) (M := M) s g x
+      covariantTensorInnerPointwise (I := I) (M := M) s g x
         (S.curryLeft (frame a)) (T.curryLeft (frame b)) with hF_def
   have hreindex :
       ∑ i, ∑ j, ∑ a, ∑ b, F i j a b =
@@ -277,19 +277,19 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
         ((mixedGram (I := I) (M := M) g x frame)ᵀ *
             ((gramMatrixAt (I := I) (M := M) g x)⁻¹ *
               mixedGram (I := I) (M := M) g x frame)) a b *
-          tensorInnerPointwise_0s (I := I) (M := M) s g x
+          covariantTensorInnerPointwise (I := I) (M := M) s g x
             (S.curryLeft (frame a)) (T.curryLeft (frame b)) := by
     intro a b
     rw [Matrix.mul_apply]
     rw [show (∑ i, (mixedGram (I := I) (M := M) g x frame)ᵀ a i *
           ((gramMatrixAt (I := I) (M := M) g x)⁻¹ *
             mixedGram (I := I) (M := M) g x frame) i b) *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x
+        covariantTensorInnerPointwise (I := I) (M := M) s g x
           (S.curryLeft (frame a)) (T.curryLeft (frame b))
       = ∑ i, ((mixedGram (I := I) (M := M) g x frame)ᵀ a i *
           ((gramMatrixAt (I := I) (M := M) g x)⁻¹ *
             mixedGram (I := I) (M := M) g x frame) i b) *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x
+        covariantTensorInnerPointwise (I := I) (M := M) s g x
           (S.curryLeft (frame a)) (T.curryLeft (frame b))
       from by rw [Finset.sum_mul]]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -297,12 +297,12 @@ private lemma tensorInnerPointwise_0s_succ_orthoFrame
     rw [show ((mixedGram (I := I) (M := M) g x frame)ᵀ a i *
           ∑ j, (gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
             mixedGram (I := I) (M := M) g x frame j b) *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x
+        covariantTensorInnerPointwise (I := I) (M := M) s g x
           (S.curryLeft (frame a)) (T.curryLeft (frame b))
       = ∑ j, ((mixedGram (I := I) (M := M) g x frame)ᵀ a i *
           ((gramMatrixAt (I := I) (M := M) g x)⁻¹ i j *
             mixedGram (I := I) (M := M) g x frame j b)) *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x
+        covariantTensorInnerPointwise (I := I) (M := M) s g x
           (S.curryLeft (frame a)) (T.curryLeft (frame b))
       from by rw [Finset.mul_sum, Finset.sum_mul]]
     refine Finset.sum_congr rfl (fun j _ => ?_)
@@ -323,7 +323,7 @@ theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
     (horth : ∀ a b, g.inner x (frame a) (frame b) = if a = b then 1 else 0)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin N => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) N g x S T =
+    covariantTensorInnerPointwise (I := I) (M := M) N g x S T =
       ∑ φ : Fin N → Fin (Module.finrank ℝ E),
         S (fun k => frame (φ k)) * T (fun k => frame (φ k)) := by
   classical
@@ -340,7 +340,7 @@ theorem tensorInnerPointwise_0s_eq_diag_sum_orthoFrame
   | succ s ih =>
       rw [tensorInnerPointwise_0s_succ_orthoFrame (I := I) (M := M) g x s frame horth S T]
       have hstep : ∀ a : Fin (Module.finrank ℝ E),
-          tensorInnerPointwise_0s (I := I) (M := M) s g x
+          covariantTensorInnerPointwise (I := I) (M := M) s g x
               (S.curryLeft (frame a)) (T.curryLeft (frame a)) =
             ∑ ψ : Fin s → Fin (Module.finrank ℝ E),
               S (fun k => frame ((Fin.cons a ψ : Fin (s + 1) → Fin (Module.finrank ℝ E)) k)) *
@@ -454,7 +454,7 @@ theorem riemannianFiberNormSq_eq_tensorInnerPointwise
   set Tm := TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
     (r := r) (s := s) (x := x) T with hTm_def
   rw [show tensorInnerPointwise (I := I) (M := M) g r s x Tm Tm =
-      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (lowerAllUpperIndices (I := I) (M := M) g r s x Tm)
         (lowerAllUpperIndices (I := I) (M := M) g r s x Tm) from rfl]
   rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (r + s)
@@ -508,7 +508,7 @@ theorem tensorInnerPointwise_eq_sum_componentS_mul
   set Bm := TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
     (r := r) (s := s) (x := x) B with hBm_def
   rw [show tensorInnerPointwise (I := I) (M := M) g r s x Am Bm =
-      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (lowerAllUpperIndices (I := I) (M := M) g r s x Am)
         (lowerAllUpperIndices (I := I) (M := M) g r s x Bm) from rfl]
   rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (r + s)

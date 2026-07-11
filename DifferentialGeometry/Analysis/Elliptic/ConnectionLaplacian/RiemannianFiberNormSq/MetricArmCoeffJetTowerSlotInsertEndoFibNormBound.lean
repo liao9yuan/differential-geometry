@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (gFibreOpBound ccTensorBilinSymm)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -85,7 +85,7 @@ lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul
   obtain ⟨n, e, bse, hn, hbse, horth, hpars, hrepr_v, hsum⟩ :=
     tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
   have hnE : n = Module.finrank ℝ E := by rw [hn]; rfl
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
     (show TensorRSSpace 2 2 I x from
       TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ)) e bse hnE hbse horth]
   have hcompsq : ∀ (K J : Fin 2 → Fin n),
@@ -272,7 +272,7 @@ private lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul_general
   obtain ⟨n, e, bse, hn, hbse, horth, hpars, hrepr_v, hsum⟩ :=
     tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
   have hnE : n = Module.finrank ℝ E := by rw [hn]; rfl
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ s s x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ s s x
     (show TensorRSSpace s s I x from
       TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) e bse hnE hbse horth]
   rw [Finset.sum_comm]

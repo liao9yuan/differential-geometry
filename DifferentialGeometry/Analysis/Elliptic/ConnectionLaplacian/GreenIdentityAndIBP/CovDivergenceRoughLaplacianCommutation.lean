@@ -40,11 +40,11 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 theorem covGrad_appCc_cometricDoubleTrace_eq (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
     (W : SmoothCcTensor g₀ 0 (p + 2)) :
     covGrad (I := I) (M := M) g₀ 0 p
-        (appCc (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W) =
-      appCc (I := I) (M := M) g₀ (p + 2 + 1) (p + 1)
+        (operatorFieldApply (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W) =
+      operatorFieldApply (I := I) (M := M) g₀ (p + 2 + 1) (p + 1)
         (slotExtend (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p))
         (covGrad (I := I) (M := M) g₀ 0 (p + 2) W) := by
-  rw [covGrad_appCc_eq (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W]
+  rw [covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W]
   rw [cometricDoubleTraceField_covGrad_eq_zero (I := I) g₀ p]
   rw [appCc_zero_left (I := I) (M := M) g₀ (p + 2) (p + 1) W]
   rw [zero_add]
@@ -53,14 +53,14 @@ theorem covGrad_covGrad_appCc_cometricDoubleTrace_eq (g₀ : SmoothRiemannianMet
     (W : SmoothCcTensor g₀ 0 (p + 2)) :
     covGrad (I := I) (M := M) g₀ 0 (p + 1)
         (covGrad (I := I) (M := M) g₀ 0 p
-          (appCc (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W)) =
-      appCc (I := I) (M := M) g₀ (p + 2 + 1 + 1) (p + 1 + 1)
+          (operatorFieldApply (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W)) =
+      operatorFieldApply (I := I) (M := M) g₀ (p + 2 + 1 + 1) (p + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (p + 2 + 1) (p + 1)
           (slotExtend (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p)))
         (covGrad (I := I) (M := M) g₀ 0 (p + 2 + 1)
           (covGrad (I := I) (M := M) g₀ 0 (p + 2) W)) := by
   rw [covGrad_appCc_cometricDoubleTrace_eq (I := I) (M := M) g₀ p W]
-  rw [covGrad_appCc_eq (I := I) (M := M) g₀ (p + 2 + 1) (p + 1)
+  rw [covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ (p + 2 + 1) (p + 1)
     (slotExtend (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p))
     (covGrad (I := I) (M := M) g₀ 0 (p + 2) W)]
   rw [covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (I := I) (M := M) g₀ (p + 2) p
@@ -82,7 +82,7 @@ private lemma unitModel_appCc_cometricDoubleTrace_eq_dualTrace
     (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (W : SmoothCcTensor g₀ 0 (p + 2))
     (x : M) (v : Fin p → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ p
-        (appCc (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W) x v =
       ∑ k : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ (p + 2) W x
           (Fin.cons (cometricLmodel (I := I) g₀ x
@@ -161,7 +161,7 @@ lemma unitModel_rawConnLap_eq_frame_sum_gen
 theorem rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace_of_rank
     (g₀ : SmoothRiemannianMetric I M) (t : ℕ) (W : SmoothCcTensor g₀ 0 t) :
     rawTensorConnLapSmooth (I := I) g₀ 0 t W =
-      appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
+      operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
         (iteratedCovGrad (I := I) g₀ 0 t 2 W) := by
   classical
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
@@ -188,10 +188,10 @@ private lemma vecTail_cons_eq {α : Type*} {n : ℕ} (a : α) (w : Fin n → α)
   funext j
   simp [Matrix.vecTail, Fin.cons_succ]
 
-theorem covDivergence_eq_appCc_cometricDoubleTrace
+theorem covDivergence_eq_cometricDoubleTrace_apply_covGrad
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g₀ 0 (s + 1)) :
     covDivergence (I := I) (M := M) g₀ s V =
-      appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+      operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
         (covGrad (I := I) (M := M) g₀ 0 (s + 1) V) := by
   classical
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
@@ -215,7 +215,7 @@ theorem covDivergence_eq_appCc_cometricDoubleTrace
   rw [unitModel_eq_toModel_unitEval_gen]
   have hsec : (covDivergence (I := I) (M := M) g₀ s V).toSection x =
       ∑ i : Fin (Module.finrank ℝ E),
-        codiffPsi (I := I) (M := M) g₀ s V x
+        covDivergenceBilinear (I := I) (M := M) g₀ s V x
           (smoothOrthoFrame (I := I) g₀ x i x) (smoothOrthoFrame (I := I) g₀ x i x) := by
     rw [covDivergence_toSection_apply]
     rfl
@@ -225,7 +225,7 @@ theorem covDivergence_eq_appCc_cometricDoubleTrace
         (unitZeroSec (I := I) (M := M) x) =
       ∑ i : Fin (Module.finrank ℝ E),
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-          codiffPsi (I := I) (M := M) g₀ s V x
+          covDivergenceBilinear (I := I) (M := M) g₀ s V x
             (smoothOrthoFrame (I := I) g₀ x i x) (smoothOrthoFrame (I := I) g₀ x i x))
           (unitZeroSec (I := I) (M := M) x) from by
     rw [hsec, ContinuousLinearMap.sum_apply]]
@@ -391,7 +391,7 @@ private lemma unitModel_appCc_slotExtend_slotExtend_cometric
     (g₀ : SmoothRiemannianMetric I M) (t : ℕ) (U : SmoothCcTensor g₀ 0 (t + 4))
     (x : M) (a b : E) (v : Fin t → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ (t + 2)
-        (appCc (I := I) (M := M) g₀ (t + 4) (t + 2)
+        (operatorFieldApply (I := I) (M := M) g₀ (t + 4) (t + 2)
           (slotExtend (I := I) (M := M) g₀ (t + 2 + 1) (t + 1)
             (slotExtend (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)))
           U) x
@@ -428,30 +428,30 @@ private lemma unitModel_appCc_slotExtend_slotExtend_cometric
 theorem iteratedCovGrad_two_appCc_cometricDoubleTrace_eq
     (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (W : SmoothCcTensor g₀ 0 (p + 2)) :
     iteratedCovGrad (I := I) g₀ 0 p 2
-        (appCc (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W) =
-      appCc (I := I) (M := M) g₀ (p + 2 + 1 + 1) (p + 1 + 1)
+        (operatorFieldApply (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p) W) =
+      operatorFieldApply (I := I) (M := M) g₀ (p + 2 + 1 + 1) (p + 1 + 1)
         (slotExtend (I := I) (M := M) g₀ (p + 2 + 1) (p + 1)
           (slotExtend (I := I) (M := M) g₀ (p + 2) p (cometricDoubleTraceField (I := I) g₀ p)))
         (iteratedCovGrad (I := I) g₀ 0 (p + 2) 2 W) :=
   covGrad_covGrad_appCc_cometricDoubleTrace_eq (I := I) (M := M) g₀ p W
 
-theorem rawConnLap_appCc_cometricDoubleTrace_comm
+theorem rawTensorConnLapSmooth_cometricDoubleTrace_apply_comm
     (g₀ : SmoothRiemannianMetric I M) (t : ℕ) (W : SmoothCcTensor g₀ 0 (t + 2)) :
     rawTensorConnLapSmooth (I := I) g₀ 0 t
-        (appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t) W) =
-      appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
+        (operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t) W) =
+      operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
         (rawTensorConnLapSmooth (I := I) g₀ 0 (t + 2) W) := by
   classical
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   rw [unitModel_rawConnLap_eq_frame_sum_gen (I := I) g₀ t
-    (appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t) W) x v]
+    (operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t) W) x v]
   rw [unitModel_appCc_cometricDoubleTrace_eq_dualTrace (I := I) g₀ t
     (rawTensorConnLapSmooth (I := I) g₀ 0 (t + 2) W) x v]
   have hlhs : ∀ i : Fin (Module.finrank ℝ E),
       unitModel (I := I) (M := M) g₀ (t + 2)
           (iteratedCovGrad (I := I) g₀ 0 t 2
-            (appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t) W)) x
+            (operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t) W)) x
           (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x))
             (Fin.cons ((smoothOrthoFrame (I := I) g₀ x i x : TangentSpace I x)) v)) =
         ∑ k : Fin (Module.finrank ℝ E),
@@ -496,8 +496,8 @@ theorem rawConnLap_appCc_cometricDoubleTrace_comm
 
 private theorem appCc_sub_right_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (A B : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s Φ (A - B) =
-      appCc (I := I) (M := M) g r s Φ A - appCc (I := I) (M := M) g r s Φ B := by
+    operatorFieldApply (I := I) (M := M) g r s Φ (A - B) =
+      operatorFieldApply (I := I) (M := M) g r s Φ A - operatorFieldApply (I := I) (M := M) g r s Φ B := by
   have hAB : A - B = A + (-1 : ℝ) • B := by
     rw [neg_one_smul]
     exact sub_eq_add_neg A B
@@ -510,20 +510,20 @@ theorem rawConnLap_covDivergence_commutator_eq_appCc_pointwiseTensorCurv
     rawTensorConnLapSmooth (I := I) g₀ 0 s (covDivergence (I := I) (M := M) g₀ s Z) -
         covDivergence (I := I) (M := M) g₀ s
           (rawTensorConnLapSmooth (I := I) g₀ 0 (s + 1) Z) =
-      appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+      operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
         (pointwiseTensorCurv (I := I) (M := M) g₀ (s + 1) Z) := by
   have h1 : rawTensorConnLapSmooth (I := I) g₀ 0 s (covDivergence (I := I) (M := M) g₀ s Z) =
-      appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+      operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
         (rawTensorConnLapSmooth (I := I) g₀ 0 (s + 2) (covGrad (I := I) (M := M) g₀ 0 (s + 1) Z)) := by
-    rw [covDivergence_eq_appCc_cometricDoubleTrace (I := I) (M := M) g₀ s Z]
-    exact rawConnLap_appCc_cometricDoubleTrace_comm (I := I) (M := M) g₀ s
+    rw [covDivergence_eq_cometricDoubleTrace_apply_covGrad (I := I) (M := M) g₀ s Z]
+    exact rawTensorConnLapSmooth_cometricDoubleTrace_apply_comm (I := I) (M := M) g₀ s
       (covGrad (I := I) (M := M) g₀ 0 (s + 1) Z)
   have h2 : covDivergence (I := I) (M := M) g₀ s
       (rawTensorConnLapSmooth (I := I) g₀ 0 (s + 1) Z) =
-      appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+      operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
         (covGrad (I := I) (M := M) g₀ 0 (s + 1)
           (rawTensorConnLapSmooth (I := I) g₀ 0 (s + 1) Z)) :=
-    covDivergence_eq_appCc_cometricDoubleTrace (I := I) (M := M) g₀ s
+    covDivergence_eq_cometricDoubleTrace_apply_covGrad (I := I) (M := M) g₀ s
       (rawTensorConnLapSmooth (I := I) g₀ 0 (s + 1) Z)
   rw [h1, h2]
   rw [← appCc_sub_right_cc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)]
@@ -542,7 +542,7 @@ private theorem norm_iteratedCovGrad_comp_cc (g : SmoothRiemannianMetric I M) (s
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g 0
         (s + (j + i)) (iteratedCovGrad (I := I) g 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g 0 s j i S x
   have ha : (0 : ℝ) ≤
       ‖iteratedCovGrad (I := I) g 0 (s + j) i (iteratedCovGrad (I := I) g 0 s j S)‖ :=
     norm_nonneg _
@@ -560,7 +560,7 @@ theorem exists_iteratedCovGrad_covDivergence_l2_le
     exists_appCc_iteratedCovGrad_l2_window_bound (I := I) (M := M) g₀ (s + 2) s
       (cometricDoubleTraceField (I := I) g₀ s)
   refine ⟨cc, hcc_nn, fun p V => ?_⟩
-  rw [covDivergence_eq_appCc_cometricDoubleTrace (I := I) (M := M) g₀ s V]
+  rw [covDivergence_eq_cometricDoubleTrace_apply_covGrad (I := I) (M := M) g₀ s V]
   refine le_trans (hcc (covGrad (I := I) (M := M) g₀ 0 (s + 1) V) p) ?_
   refine mul_le_mul_of_nonneg_left ?_ (hcc_nn p)
   have hterm : ∀ i ∈ Finset.range (p + 1),

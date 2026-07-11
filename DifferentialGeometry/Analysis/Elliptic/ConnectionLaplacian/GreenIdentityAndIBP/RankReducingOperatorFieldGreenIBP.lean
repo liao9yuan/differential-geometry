@@ -31,21 +31,21 @@ theorem tensorL2Inner_covGrad_appCcRS_eq_add (g : SmoothRiemannianMetric I M) (a
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (T : SmoothCcTensor g a (c + 1)) :
     tensorL2Inner (I := I) (M := M) g a (c + 1)
         (covGrad (I := I) (M := M) g a c
-          (appCcRS (I := I) (M := M) g a b c Φ W)).toFun T.toFun =
+          (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W)).toFun T.toFun =
       tensorL2Inner (I := I) (M := M) g a (c + 1)
-          (appCcRS (I := I) (M := M) g a b (c + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g a b (c + 1)
             (covGrad (I := I) (M := M) g b c Φ) W).toFun T.toFun +
         tensorL2Inner (I := I) (M := M) g a (c + 1)
-          (appCcRS (I := I) (M := M) g a (b + 1) (c + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1)
             (slotExtend (I := I) (M := M) g b c Φ)
             (covGrad (I := I) (M := M) g a b W)).toFun T.toFun := by
   classical
   set A1 : SmoothCcTensor g a (c + 1) :=
-    appCcRS (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W with hA1
+    ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W with hA1
   set A2 : SmoothCcTensor g a (c + 1) :=
-    appCcRS (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
+    ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
       (covGrad (I := I) (M := M) g a b W) with hA2
-  have hB : covGrad (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W) = A1 + A2 :=
+  have hB : covGrad (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) = A1 + A2 :=
     covGrad_appCcRS_eq (I := I) (M := M) g a b c Φ W
   have hstep := congrArg
     (fun Z : SmoothCcTensor g a (c + 1) =>
@@ -60,14 +60,14 @@ theorem tensorL2Inner_covGrad_appCcRS_eq_add (g : SmoothRiemannianMetric I M) (a
 theorem tensorL2Inner_appCcRS_covGrad_covGrad_eq_neg (g : SmoothRiemannianMetric I M)
     (a c : ℕ) (Φ : SmoothCcTensor g c c) (S : SmoothCcTensor g a c) :
     tensorL2Inner (I := I) (M := M) g a (c + 1)
-        (appCcRS (I := I) (M := M) g a c (c + 1)
+        (ccOperatorFieldComp (I := I) (M := M) g a c (c + 1)
           (covGrad (I := I) (M := M) g c c Φ) S).toFun
         (covGrad (I := I) (M := M) g a c S).toFun =
       - tensorL2Inner (I := I) (M := M) g a c
           (rawTensorConnLapSmooth (I := I) g a c
-            (appCcRS (I := I) (M := M) g a c c Φ S)).toFun S.toFun -
+            (ccOperatorFieldComp (I := I) (M := M) g a c c Φ S)).toFun S.toFun -
         tensorL2Inner (I := I) (M := M) g a (c + 1)
-          (appCcRS (I := I) (M := M) g a (c + 1) (c + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g a (c + 1) (c + 1)
             (slotExtend (I := I) (M := M) g c c Φ)
             (covGrad (I := I) (M := M) g a c S)).toFun
           (covGrad (I := I) (M := M) g a c S).toFun := by
@@ -75,7 +75,7 @@ theorem tensorL2Inner_appCcRS_covGrad_covGrad_eq_neg (g : SmoothRiemannianMetric
   have hsplit := tensorL2Inner_covGrad_appCcRS_eq_add (I := I) (M := M) g a c c Φ S
     (covGrad (I := I) (M := M) g a c S)
   have hgreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
-    (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a c c Φ S) S
+    (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a c c Φ S) S
   rw [hgreen] at hsplit
   linarith [hsplit]
 
@@ -83,22 +83,22 @@ theorem tensorL2Inner_appCcRS_slotExtend_input_covGrad_eq (g : SmoothRiemannianM
     (a b c : ℕ) (Φ : SmoothCcTensor g b c) (X : SmoothCcTensor g a b)
     (V : SmoothCcTensor g a c) :
     tensorL2Inner (I := I) (M := M) g a (c + 1)
-        (appCcRS (I := I) (M := M) g a (b + 1) (c + 1)
+        (ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1)
           (slotExtend (I := I) (M := M) g b c Φ)
           (covGrad (I := I) (M := M) g a b X)).toFun
         (covGrad (I := I) (M := M) g a c V).toFun =
       - tensorL2Inner (I := I) (M := M) g a c
           (rawTensorConnLapSmooth (I := I) g a c
-            (appCcRS (I := I) (M := M) g a b c Φ X)).toFun V.toFun -
+            (ccOperatorFieldComp (I := I) (M := M) g a b c Φ X)).toFun V.toFun -
         tensorL2Inner (I := I) (M := M) g a (c + 1)
-          (appCcRS (I := I) (M := M) g a b (c + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g a b (c + 1)
             (covGrad (I := I) (M := M) g b c Φ) X).toFun
           (covGrad (I := I) (M := M) g a c V).toFun := by
   classical
   have hsplit := tensorL2Inner_covGrad_appCcRS_eq_add (I := I) (M := M) g a b c Φ X
     (covGrad (I := I) (M := M) g a c V)
   have hgreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
-    (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ X) V
+    (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ X) V
   rw [hgreen] at hsplit
   linarith [hsplit]
 
@@ -107,29 +107,29 @@ theorem tensorL2Inner_rawConnLap_appCcRS_eq_neg_covGrad_split (g : SmoothRiemann
     (W : SmoothCcTensor g a b) :
     tensorL2Inner (I := I) (M := M) g a c
         (rawTensorConnLapSmooth (I := I) g a c A).toFun
-        (appCcRS (I := I) (M := M) g a b c Φ W).toFun =
+        (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toFun =
       - tensorL2Inner (I := I) (M := M) g a (c + 1)
           (covGrad (I := I) (M := M) g a c A).toFun
-          (appCcRS (I := I) (M := M) g a (b + 1) (c + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1)
             (slotExtend (I := I) (M := M) g b c Φ)
             (covGrad (I := I) (M := M) g a b W)).toFun -
         tensorL2Inner (I := I) (M := M) g a (c + 1)
           (covGrad (I := I) (M := M) g a c A).toFun
-          (appCcRS (I := I) (M := M) g a b (c + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g a b (c + 1)
             (covGrad (I := I) (M := M) g b c Φ) W).toFun := by
   classical
   have hgreen := tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
-    (I := I) (M := M) g a c A (appCcRS (I := I) (M := M) g a b c Φ W)
+    (I := I) (M := M) g a c A (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W)
   have hsplit := tensorL2Inner_covGrad_appCcRS_eq_add (I := I) (M := M) g a b c Φ W
     (covGrad (I := I) (M := M) g a c A)
   have hsymm0 := tensorL2Inner_symm (I := I) (M := M) g a (c + 1)
     (covGrad (I := I) (M := M) g a c A).toFun
-    (covGrad (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W)).toFun
+    (covGrad (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W)).toFun
   have hsymm1 := tensorL2Inner_symm (I := I) (M := M) g a (c + 1)
-    (appCcRS (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W).toFun
+    (ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W).toFun
     (covGrad (I := I) (M := M) g a c A).toFun
   have hsymm2 := tensorL2Inner_symm (I := I) (M := M) g a (c + 1)
-    (appCcRS (I := I) (M := M) g a (b + 1) (c + 1)
+    (ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1)
       (slotExtend (I := I) (M := M) g b c Φ)
       (covGrad (I := I) (M := M) g a b W)).toFun
     (covGrad (I := I) (M := M) g a c A).toFun

@@ -43,7 +43,7 @@ private lemma section_norm_eq_toFun_norm
     (S : SmoothCcTensor g r s) (b : M) :
     ‖S.toSection b‖ = ‖S.toFun b‖ := rfl
 
-private lemma pouTsupport_subset_chartAt_source_secNorm (α : M) :
+private lemma tsupport_chartAtlasPOU_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source := by
@@ -53,7 +53,7 @@ private lemma pouTsupport_subset_chartAt_source_secNorm (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hb_base
   exact hb_base
 
-private theorem pouTsupport_subset_chartAt_source_chrCorr (α : M) :
+private theorem tsupport_chartAtlasPOU_subset_chartAt_source_of_isSubordinate (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
@@ -124,7 +124,7 @@ private lemma norm_basis_le_chartModelBasisVecSup
 private lemma christoffelCorrection_summand_opNorm_le
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) (Y : E)
     (i j k : Fin (Module.finrank ℝ E))
-    (C_J : ℝ) (hCJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J)
+    (C_J : ℝ) (hCJ : ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤ C_J)
     (hCJ_nn : 0 ≤ C_J)
     (C_Γ : ℝ) (hCΓ : |chartChristoffel (I := I) g α i j k (extChartAt I α b)| ≤ C_Γ)
     (hCΓ_nn : 0 ≤ C_Γ) :
@@ -146,7 +146,7 @@ private lemma christoffelCorrection_summand_opNorm_le
         ‖L_i‖ * ‖trivToE (I := I) α b‖ :=
     ContinuousLinearMap.opNorm_comp_le L_i (trivToE (I := I) α b)
   have h_triv_eq_chartJ :
-      ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+      ‖trivToE (I := I) α b‖ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := rfl
   rw [h_triv_eq_chartJ] at hcomp_le
   have h_scalar_norm :
       ‖((chartModelBasis E).repr Y j * Γijk) • (chartModelBasis E) k‖ =
@@ -195,7 +195,7 @@ private lemma christoffelCorrection_summand_opNorm_le
   have h_Li_le : ‖L_i‖ ≤ chartModelBasisCoordSup E :=
     norm_coord_le_chartModelBasisCoordSup (E := E) i
   have h_Li_nn : 0 ≤ ‖L_i‖ := norm_nonneg _
-  have h_J_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ := norm_nonneg _
+  have h_J_nn : 0 ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := norm_nonneg _
   have h_coord_nn : 0 ≤ chartModelBasisCoordSup E := chartModelBasisCoordSup_nonneg
   have h_vec_nn : 0 ≤ chartModelBasisVecSup E := chartModelBasisVecSup_nonneg
   set A : ℝ := ‖L_i.comp (trivToE (I := I) α b)‖
@@ -206,11 +206,11 @@ private lemma christoffelCorrection_summand_opNorm_le
     exact abs_nonneg _
   have hA_le : A ≤ chartModelBasisCoordSup E * C_J := by
     refine hcomp_le.trans ?_
-    have h_first : ‖L_i‖ * ‖chartJ (I := I) (M := M) α b‖ ≤
-        chartModelBasisCoordSup E * ‖chartJ (I := I) (M := M) α b‖ :=
+    have h_first : ‖L_i‖ * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤
+        chartModelBasisCoordSup E * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ :=
       mul_le_mul_of_nonneg_right h_Li_le h_J_nn
     have h_second :
-        chartModelBasisCoordSup E * ‖chartJ (I := I) (M := M) α b‖ ≤
+        chartModelBasisCoordSup E * ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤
           chartModelBasisCoordSup E * C_J :=
       mul_le_mul_of_nonneg_left hCJ h_coord_nn
     linarith
@@ -297,8 +297,8 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
     (g : SmoothRiemannianMetric I M) (α b : M)
     (j : Fin (Module.finrank ℝ E))
     (C_J C_Jinv C_χ : ℝ)
-    (hCJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
-    (hCJinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
+    (hCJ : ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
+    (hCJinv : ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
     (hCχ : ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖)
     (hCχ_nn : 0 ≤ C_χ) :
     ‖chartLeviCivitaParallelCLM (I := I) g α b (chartBasisVecFiber (I := I) α j)‖ ≤
@@ -315,15 +315,15 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
           ‖christoffelCorrection (I := I) g α b Y‖ :=
     ContinuousLinearMap.opNorm_comp_le _ _
   have h_χ_le : ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖ := hCχ Y
-  have h_trivFromE_norm : ‖trivFromE (I := I) α b‖ = ‖chartJinv (I := I) (M := M) α b‖ :=
+  have h_trivFromE_norm : ‖trivFromE (I := I) α b‖ = ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ :=
     rfl
   have h_trivFromE_le : ‖trivFromE (I := I) α b‖ ≤ C_Jinv := by
     rw [h_trivFromE_norm]; exact hCJinv
   have h_trivFromE_nn : 0 ≤ ‖trivFromE (I := I) α b‖ := norm_nonneg _
   have h_X_eq : (chartBasisVecFiber (I := I) α j b : TangentSpace I b) =
       trivFromE (I := I) α b ((chartModelBasis E) j) := rfl
-  have h_Y_le : ‖Y‖ ≤ ‖chartJ (I := I) (M := M) α b‖ *
-      (‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
+  have h_Y_le : ‖Y‖ ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
+      (‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
     rw [hY_def, h_X_eq]
     have h1 :
         ‖trivToE (I := I) α b (trivFromE (I := I) α b ((chartModelBasis E) j))‖ ≤
@@ -334,9 +334,9 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
         ‖trivFromE (I := I) α b ((chartModelBasis E) j)‖ ≤
           ‖trivFromE (I := I) α b‖ * ‖(chartModelBasis E) j‖ :=
       (trivFromE (I := I) α b).le_opNorm _
-    have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+    have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := rfl
     have h_triv_Jinv : ‖trivFromE (I := I) α b‖ =
-        ‖chartJinv (I := I) (M := M) α b‖ := rfl
+        ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ := rfl
     have h_J_nn : 0 ≤ ‖trivToE (I := I) α b‖ := norm_nonneg _
     calc ‖trivToE (I := I) α b (trivFromE (I := I) α b ((chartModelBasis E) j))‖
         ≤ ‖trivToE (I := I) α b‖ *
@@ -344,25 +344,25 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVecFiber_opNorm_le_factors
       _ ≤ ‖trivToE (I := I) α b‖ *
             (‖trivFromE (I := I) α b‖ * ‖(chartModelBasis E) j‖) :=
             mul_le_mul_of_nonneg_left h2 h_J_nn
-      _ = ‖chartJ (I := I) (M := M) α b‖ *
-            (‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
+      _ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
+            (‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖) := by
             rw [h_triv_J, h_triv_Jinv]
   have hej_nn : 0 ≤ ‖(chartModelBasis E) j‖ := norm_nonneg _
-  have h_J_nn : 0 ≤ ‖chartJ (I := I) (M := M) α b‖ := norm_nonneg _
-  have h_Jinv_nn : 0 ≤ ‖chartJinv (I := I) (M := M) α b‖ := norm_nonneg _
+  have h_J_nn : 0 ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := norm_nonneg _
+  have h_Jinv_nn : 0 ≤ ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ := norm_nonneg _
   have h_Y_le' : ‖Y‖ ≤ C_J * (C_Jinv * ‖(chartModelBasis E) j‖) := by
     refine h_Y_le.trans ?_
     have h_inner_le :
-        ‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ ≤
+        ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ ≤
           C_Jinv * ‖(chartModelBasis E) j‖ :=
       mul_le_mul_of_nonneg_right hCJinv hej_nn
     have h_inner_nn :
-        0 ≤ ‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ :=
+        0 ≤ ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖ :=
       mul_nonneg h_Jinv_nn hej_nn
     calc
-      ‖chartJ (I := I) (M := M) α b‖ *
-          (‖chartJinv (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖)
-          ≤ ‖chartJ (I := I) (M := M) α b‖ *
+      ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
+          (‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ * ‖(chartModelBasis E) j‖)
+          ≤ ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ *
               (C_Jinv * ‖(chartModelBasis E) j‖) :=
             mul_le_mul_of_nonneg_left h_inner_le h_J_nn
       _ ≤ C_J * (C_Jinv * ‖(chartModelBasis E) j‖) := by
@@ -423,7 +423,7 @@ theorem chartLeviCivitaParallelCLM_chartBasisVec_opNorm_isBounded_on_pouTsupport
     DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unconditional
       (I := I) (M := M) g α
   obtain ⟨C_Jinv, hCJinv_nn, hCJinv_bound⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartJinv_opNorm_isBounded_on_compact_unconditional
+    DifferentialGeometry.PDE.RicciFlow.HebeyBlock.chartTrivInv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   set C_e : ℝ := chartModelBasisVecSup' E with hCe_def
   have hCe_nn : 0 ≤ C_e := chartModelBasisVecSup'_nonneg

@@ -275,7 +275,7 @@ lemma mem_expDomain_of_norm_lt_radius
       (NormalCoordinates.expMapDiffeo (I := I) g p).toPartialEquiv.injOn
     exact hx0 (hinj hsrc h0src (by rw [hΦx, hΦ0]))
 
-private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
+private lemma metric_coercive_at_point (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ c : ℝ, 0 < c ∧ ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x := by
   classical
   haveI : ProperSpace E := FiniteDimensional.proper_rclike (K := ℝ) (E := E)
@@ -320,41 +320,41 @@ private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
     calc c * ‖x‖ ^ 2 = ‖x‖ ^ 2 * c := by ring
       _ ≤ ‖x‖ ^ 2 * B u u := mul_le_mul_of_nonneg_left hcu hsq_nn
 
-def gpCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
-  Classical.choose (gp_coercive (I := I) g p)
+def metricCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
+  Classical.choose (metric_coercive_at_point (I := I) g p)
 
-lemma gpCoerciveConst_pos (g : SmoothRiemannianMetric I M) (p : M) :
-    0 < gpCoerciveConst (I := I) g p :=
-  (Classical.choose_spec (gp_coercive (I := I) g p)).1
+lemma metricCoerciveConst_pos (g : SmoothRiemannianMetric I M) (p : M) :
+    0 < metricCoerciveConst (I := I) g p :=
+  (Classical.choose_spec (metric_coercive_at_point (I := I) g p)).1
 
-lemma gpCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
-    gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
-  (Classical.choose_spec (gp_coercive (I := I) g p)).2 x
+lemma metricCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
+    metricCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
+  (Classical.choose_spec (metric_coercive_at_point (I := I) g p)).2 x
 
-def expRadiusGp (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
-  Real.sqrt (gpCoerciveConst (I := I) g p) * expMapC2Radius (I := I) g p
+def metricCoerciveExpRadius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
+  Real.sqrt (metricCoerciveConst (I := I) g p) * expMapC2Radius (I := I) g p
 
 lemma expRadiusGp_pos (g : SmoothRiemannianMetric I M) (p : M) :
-    0 < expRadiusGp (I := I) g p := by
-  rw [expRadiusGp]
-  exact mul_pos (Real.sqrt_pos.mpr (gpCoerciveConst_pos (I := I) g p))
+    0 < metricCoerciveExpRadius (I := I) g p := by
+  rw [metricCoerciveExpRadius]
+  exact mul_pos (Real.sqrt_pos.mpr (metricCoerciveConst_pos (I := I) g p))
     (expMapC2Radius_pos (I := I) g p)
 
 lemma norm_lt_expMapC2Radius_of_sqrt_inner_lt
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
-    (hx : Real.sqrt (g.inner p x x) < expRadiusGp (I := I) g p) :
+    (hx : Real.sqrt (g.inner p x x) < metricCoerciveExpRadius (I := I) g p) :
     ‖x‖ < expMapC2Radius (I := I) g p := by
-  have hc_pos : 0 < gpCoerciveConst (I := I) g p := gpCoerciveConst_pos (I := I) g p
-  have hsq : g.inner p x x < (expRadiusGp (I := I) g p) ^ 2 :=
+  have hc_pos : 0 < metricCoerciveConst (I := I) g p := metricCoerciveConst_pos (I := I) g p
+  have hsq : g.inner p x x < (metricCoerciveExpRadius (I := I) g p) ^ 2 :=
     Real.lt_sq_of_sqrt_lt hx
-  have hR : (expRadiusGp (I := I) g p) ^ 2
-      = gpCoerciveConst (I := I) g p * (expMapC2Radius (I := I) g p) ^ 2 := by
-    rw [expRadiusGp, mul_pow, Real.sq_sqrt hc_pos.le]
+  have hR : (metricCoerciveExpRadius (I := I) g p) ^ 2
+      = metricCoerciveConst (I := I) g p * (expMapC2Radius (I := I) g p) ^ 2 := by
+    rw [metricCoerciveExpRadius, mul_pow, Real.sq_sqrt hc_pos.le]
   rw [hR] at hsq
-  have hcoerc : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
-    gpCoerciveConst_le (I := I) g p x
-  have hlt : gpCoerciveConst (I := I) g p * ‖x‖ ^ 2
-      < gpCoerciveConst (I := I) g p * (expMapC2Radius (I := I) g p) ^ 2 :=
+  have hcoerc : metricCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
+    metricCoerciveConst_le (I := I) g p x
+  have hlt : metricCoerciveConst (I := I) g p * ‖x‖ ^ 2
+      < metricCoerciveConst (I := I) g p * (expMapC2Radius (I := I) g p) ^ 2 :=
     lt_of_le_of_lt hcoerc hsq
   have hsq_lt : ‖x‖ ^ 2 < (expMapC2Radius (I := I) g p) ^ 2 :=
     lt_of_mul_lt_mul_left hlt hc_pos.le

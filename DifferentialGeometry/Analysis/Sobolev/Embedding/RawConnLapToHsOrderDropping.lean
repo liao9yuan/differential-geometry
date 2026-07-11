@@ -416,7 +416,7 @@ private lemma invGramCoeffPull_at_b
   unfold invGramCoeffPull
   rw [(toEuclidean (E := E)).symm_apply_apply, (extChartAt I α).left_inv hb_src]
 
-private noncomputable def naiveSCD_GlobalCorr
+private noncomputable def naiveSecondCovDerivGlobalCorr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
@@ -428,7 +428,7 @@ private noncomputable def naiveSCD_GlobalCorr
     (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
       (I := I) (M := M) g r s α Idx Jdx k l) I' J' m
 
-private noncomputable def naiveSCD_GlobalCorr0
+private noncomputable def naiveSecondCovDerivGlobalCorr0
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
@@ -440,7 +440,7 @@ private noncomputable def naiveSCD_GlobalCorr0
       (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
         (I := I) (M := M) g r s α Idx Jdx k l)) I' J'
 
-private lemma naiveSCD_GlobalCorr_contDiffOn
+private lemma naiveSecondCovDerivGlobalCorr_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
@@ -448,21 +448,21 @@ private lemma naiveSCD_GlobalCorr_contDiffOn
     (I' : Fin r → Fin (Module.finrank ℝ E))
     (J' : Fin s → Fin (Module.finrank ℝ E))
     (m : Fin (Module.finrank ℝ E)) :
-    ContDiffOn ℝ ∞ (naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m)
+    ContDiffOn ℝ ∞ (naiveSecondCovDerivGlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (Classical.choose_spec
       (Classical.choose_spec
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).1 I' J' m
 
-private lemma naiveSCD_GlobalCorr0_contDiffOn
+private lemma naiveSecondCovDerivGlobalCorr0_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (k l : Fin (Module.finrank ℝ E))
     (I' : Fin r → Fin (Module.finrank ℝ E))
     (J' : Fin s → Fin (Module.finrank ℝ E)) :
-    ContDiffOn ℝ ∞ (naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J')
+    ContDiffOn ℝ ∞ (naiveSecondCovDerivGlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J')
       (chartTargetEuclid (I := I) (M := M) α) :=
   (Classical.choose_spec
       (Classical.choose_spec
@@ -494,7 +494,7 @@ theorem rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_good
                   (∑ I' : Fin r → Fin (Module.finrank ℝ E),
                     ∑ J' : Fin s → Fin (Module.finrank ℝ E),
                     ∑ m,
-                    naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m
+                    naiveSecondCovDerivGlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m
                         ((toEuclidean (E := E)) ((extChartAt I α) b)) *
                       euclidPartial (E := E) m
                         (chartPushedRaw I α
@@ -502,7 +502,7 @@ theorem rawTensorConnLap_chartα_raw_eq_invGram_naiveSecondCovDeriv_proj_on_good
                         ((toEuclidean (E := E)) ((extChartAt I α) b))) +
                   (∑ I' : Fin r → Fin (Module.finrank ℝ E),
                     ∑ J' : Fin s → Fin (Module.finrank ℝ E),
-                    naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J'
+                    naiveSecondCovDerivGlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J'
                         ((toEuclidean (E := E)) ((extChartAt I α) b)) *
                       chartPushedRaw I α
                         (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
@@ -656,11 +656,11 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet
   refine ⟨invGramCoeffPull (I := I) (M := M) g α,
           fun I' J' m y =>
             (∑ k, ∑ l, invGramCoeffPull (I := I) (M := M) g α k l y *
-                naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m y) +
+                naiveSecondCovDerivGlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m y) +
               A_1 I' J' m y,
           fun I' J' y =>
             (∑ k, ∑ l, invGramCoeffPull (I := I) (M := M) g α k l y *
-                naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J' y) +
+                naiveSecondCovDerivGlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J' y) +
               A_0 I' J' y,
           fun k l => invGramCoeffPull_contDiffOn (I := I) (M := M) g α k l, ?_, ?_, ?_⟩
   · intro I' J' m
@@ -668,13 +668,13 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet
     refine ContDiffOn.sum (fun k _ => ?_)
     refine ContDiffOn.sum (fun l _ => ?_)
     exact (invGramCoeffPull_contDiffOn (I := I) (M := M) g α k l).mul
-      (naiveSCD_GlobalCorr_contDiffOn (I := I) (M := M) g r s α Idx Jdx k l I' J' m)
+      (naiveSecondCovDerivGlobalCorr_contDiffOn (I := I) (M := M) g r s α Idx Jdx k l I' J' m)
   · intro I' J'
     refine ContDiffOn.add ?_ (hA0cd I' J')
     refine ContDiffOn.sum (fun k _ => ?_)
     refine ContDiffOn.sum (fun l _ => ?_)
     exact (invGramCoeffPull_contDiffOn (I := I) (M := M) g α k l).mul
-      (naiveSCD_GlobalCorr0_contDiffOn (I := I) (M := M) g r s α Idx Jdx k l I' J')
+      (naiveSecondCovDerivGlobalCorr0_contDiffOn (I := I) (M := M) g r s α Idx Jdx k l I' J')
   · intro T₀ b hb
     set y : EuclN := (toEuclidean (E := E)) ((extChartAt I α) b) with hy_def
     set P : (Fin r → Fin (Module.finrank ℝ E)) →
@@ -706,13 +706,13 @@ theorem rawTensorConnLap_chartα_raw_eq_T₀_linear_formula_on_goodSet
              (Fin s → Fin (Module.finrank ℝ E)) →
              Fin (Module.finrank ℝ E) → ℝ :=
       fun k l I' J' m =>
-        naiveSCD_GlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m y
+        naiveSecondCovDerivGlobalCorr (I := I) (M := M) g r s α Idx Jdx k l I' J' m y
       with hGC_def
     set GC0 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
               (Fin r → Fin (Module.finrank ℝ E)) →
               (Fin s → Fin (Module.finrank ℝ E)) → ℝ :=
       fun k l I' J' =>
-        naiveSCD_GlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J' y
+        naiveSecondCovDerivGlobalCorr0 (I := I) (M := M) g r s α Idx Jdx k l I' J' y
       with hGC0_def
     set A1 : (Fin r → Fin (Module.finrank ℝ E)) →
              (Fin s → Fin (Module.finrank ℝ E)) →

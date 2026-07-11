@@ -114,7 +114,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_uniform
     exact h0.restrict _
   have h_atom_le : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (a : Fin (Module.finrank ℝ E)),
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α) ≤
@@ -123,7 +123,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_uniform
     intro i a
     rw [diffNumeratorAggregate]
     refine le_trans (Finset.single_le_sum (f := fun a =>
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α))
@@ -206,7 +206,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_uniform
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have h_atom_le : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
       (a : Fin (Module.finrank ℝ E)),
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l))) Ω ≤
         diffNumeratorAggregate (I := I) (M := M)
@@ -214,7 +214,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_uniform
     intro i a
     rw [diffNumeratorAggregate, ← hΩ_def]
     refine le_trans (Finset.single_le_sum (f := fun a =>
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l))) Ω)
       (fun k _ => zero_le _) (Finset.mem_univ a)) ?_
@@ -309,7 +309,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_uniform
       chartTargetEuclid (I := I) (M := M) α :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have h_atom_le : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ m (Fin.init l))
           (chartTargetEuclid (I := I) (M := M) α) ≤
@@ -395,7 +395,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_uniform
   have hK_in : chartPouKernel (I := I) (M := M) α ⊆ Ω :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have h_atom_le : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-      wkpNorm (d := Module.finrank ℝ E) 1 2 (fChartEffPrev i) Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 1 2 (fChartEffPrev i) Ω ≤
         diffNumeratorAggregate (I := I) (M := M)
           g r s i α P₀ m l (fChartEffPrev i) := by
     intro i

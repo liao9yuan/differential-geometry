@@ -45,15 +45,15 @@ def diffNumeratorAggregate
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
     (fChartEffPrev : EuclN → ℝ) : ℝ≥0∞ :=
   (∑ a : Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α))
-    + wkpNorm (d := Module.finrank ℝ E) 2 2
+    + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α)
-    + wkpNorm (d := Module.finrank ℝ E) 1 2 fChartEffPrev
+    + iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 1 2 fChartEffPrev
         (chartTargetEuclid (I := I) (M := M) α)
     + eLpNorm fChartEffPrev 2
         ((volume : Measure EuclN).restrict
@@ -72,7 +72,7 @@ lemma eLpNorm_iteratedPartial_succ_le
         g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l))) 2
       ((volume : Measure EuclN).restrict
         (chartPouKernel (I := I) (M := M) α))
-      ≤ wkpNorm (d := Module.finrank ℝ E) 2 2
+      ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α) := by
@@ -100,7 +100,7 @@ lemma eLpNorm_iteratedPartial_le :
         g r s i α P₀ m (Fin.init l)) 2
       ((volume : Measure EuclN).restrict
         (chartPouKernel (I := I) (M := M) α))
-      ≤ wkpNorm (d := Module.finrank ℝ E) 2 2
+      ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ m (Fin.init l))
           (chartTargetEuclid (I := I) (M := M) α) := by
@@ -131,7 +131,7 @@ lemma eLpNorm_chosenWeakPartial_iteratedPartial_succ_le
         (chartTargetEuclid (I := I) (M := M) α)) 2
       ((volume : Measure EuclN).restrict
         (chartPouKernel (I := I) (M := M) α))
-      ≤ wkpNorm (d := Module.finrank ℝ E) 2 2
+      ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α) := by

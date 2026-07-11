@@ -293,7 +293,7 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_collapsed
     (f := fun α : M =>
       ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) 0 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
             (tensorChartComp (I := I) (M := M) g r s
               (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α))]

@@ -43,9 +43,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def arm0AAField (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+def gInvDiffQuadResidualFieldRealizedFam (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
   connDiffBiContrCoeffField (I := I) (M := M)
     (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀
@@ -98,14 +98,14 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem rfns_connDiffBiContrFib_self_le_of_lt_one
+theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (P : SmoothCcTensor g₀ 0 2)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
       (x : M),
       letI : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
         Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
@@ -130,7 +130,7 @@ theorem rfns_connDiffBiContrFib_self_le_of_lt_one
   have hsofnn : ∀ aa : Fin (Module.finrank ℝ E),
       g₀.inner x (smoothOrthoFrame (I := I) g₀ x aa x) (smoothOrthoFrame (I := I) g₀ x aa x) = 1 := by
     intro aa; rw [smoothOrthoFrame_orthonormal_at_center]; simp
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
     (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x))
     e bse hnE hbse horth]
   have heach : ∀ (K J : Fin 2 → Fin n),
@@ -256,24 +256,24 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_arm0AAField_realizedFam_rfns_ballUniform
+theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-              ((arm0AAField (I := I) g₀ T T' hδ hδ' s).toSection x) ≤ Λ := by
+              ((gInvDiffQuadResidualFieldRealizedFam (I := I) g₀ T T' hδ hδ' s).toSection x) ≤ Λ := by
   classical
   obtain ⟨C, hC0, hbnd⟩ :=
-    rfns_connDiffBiContrFib_self_le_of_lt_one (I := I) (M := M) g₀
+    riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one (I := I) (M := M) g₀
       (le_max_right δ₀ 0) (max_lt hδ₀ (by norm_num))
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
@@ -301,7 +301,7 @@ theorem exists_arm0AAField_realizedFam_rfns_ballUniform
     have h2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
     have hδ₀_le : δ₀ ≤ m := le_max_left _ _
     nlinarith [h1, h2, hδ₀_le]
-  have hδs : gFibreOpBound (I := I) (M := M) g₀
+  have hδs : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)) m := by
     intro y v w
     refine le_trans (hδs_raw y v w) ?_
@@ -311,7 +311,7 @@ theorem exists_arm0AAField_realizedFam_rfns_ballUniform
     nlinarith [hle', hprod]
   have hmain := hbnd (realizedFam (I := I) g₀ T T' hδ hδ' s)
     (convexPerturbation (I := I) g₀ T T' s) htie (le_of_eq hm_def.symm) hm0 hδs x
-  rw [show (arm0AAField (I := I) g₀ T T' hδ hδ' s).toSection x =
+  rw [show (gInvDiffQuadResidualFieldRealizedFam (I := I) g₀ T T' hδ hδ' s).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (connDiffBiContrFib (I := I)
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀
@@ -334,48 +334,48 @@ theorem exists_arm0AAField_realizedFam_rfns_ballUniform
       (show (1 : ℕ) ∈ Finset.range 3 from Finset.mem_range.mpr (by norm_num))) hCsob_sum
   gcongr
 
-def bgRKernelBilin (g₀ : SmoothRiemannianMetric I M) (x : M)
+def backgroundRiemannKernelBilin (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (D : Tensor0SSpace 2 I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (ContinuousLinearMap.compL ℝ (TangentSpace I x) (TangentSpace I x) ℝ
       (((bilinFormToModel (TangentSpace I x)).symm (Tensor0SSpace.toModel D)).flip p)).comp
     (riemannOp (LeviCivita (I := I) g₀) x p)
 
-@[simp] theorem bgRKernelBilin_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
+@[simp] theorem backgroundRiemannKernelBilin_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v0 v1 : TangentSpace I x) :
-    bgRKernelBilin (I := I) g₀ x p D v0 v1 =
+    backgroundRiemannKernelBilin (I := I) g₀ x p D v0 v1 =
       Tensor0SSpace.toModel D
         ![riemannOp (LeviCivita (I := I) g₀) x p v0 v1, p] := by
-  rw [bgRKernelBilin, ContinuousLinearMap.comp_apply, ContinuousLinearMap.compL_apply,
+  rw [backgroundRiemannKernelBilin, ContinuousLinearMap.comp_apply, ContinuousLinearMap.compL_apply,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.flip_apply]
   exact bilinFormToModel_symm_apply (TangentSpace I x) (Tensor0SSpace.toModel D)
     (riemannOp (LeviCivita (I := I) g₀) x p v0 v1) p
 
-theorem bgRKernelBilin_add_right (g₀ : SmoothRiemannianMetric I M) (x : M)
+theorem backgroundRiemannKernelBilin_add_right (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (D D' : Tensor0SSpace 2 I x) :
-    bgRKernelBilin (I := I) g₀ x p (D + D') =
-      bgRKernelBilin (I := I) g₀ x p D + bgRKernelBilin (I := I) g₀ x p D' := by
+    backgroundRiemannKernelBilin (I := I) g₀ x p (D + D') =
+      backgroundRiemannKernelBilin (I := I) g₀ x p D + backgroundRiemannKernelBilin (I := I) g₀ x p D' := by
   apply ContinuousLinearMap.ext; intro v0
   apply ContinuousLinearMap.ext; intro v1
-  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply, bgRKernelBilin_apply,
-    bgRKernelBilin_apply, bgRKernelBilin_apply, Tensor0SSpace.toModel_add,
+  rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.add_apply, backgroundRiemannKernelBilin_apply,
+    backgroundRiemannKernelBilin_apply, backgroundRiemannKernelBilin_apply, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
-theorem bgRKernelBilin_smul_right (g₀ : SmoothRiemannianMetric I M) (x : M)
+theorem backgroundRiemannKernelBilin_smul_right (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (c : ℝ) (D : Tensor0SSpace 2 I x) :
-    bgRKernelBilin (I := I) g₀ x p (c • D) = c • bgRKernelBilin (I := I) g₀ x p D := by
+    backgroundRiemannKernelBilin (I := I) g₀ x p (c • D) = c • backgroundRiemannKernelBilin (I := I) g₀ x p D := by
   apply ContinuousLinearMap.ext; intro v0
   apply ContinuousLinearMap.ext; intro v1
-  rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, bgRKernelBilin_apply,
-    bgRKernelBilin_apply, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
+  rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, backgroundRiemannKernelBilin_apply,
+    backgroundRiemannKernelBilin_apply, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
     smul_eq_mul]
 
-def bgRSummandFib (g₀ : SmoothRiemannianMetric I M) (x : M) (p : TangentSpace I x) :
+def backgroundRiemannSummandFib (g₀ : SmoothRiemannianMetric I M) (x : M) (p : TangentSpace I x) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
   LinearMap.toContinuousLinearMap
     { toFun := fun D => Tensor0SSpace.ofModel (I := I) (x := x)
-        (bilinFormToModel E (bgRKernelBilin (I := I) g₀ x p D))
+        (bilinFormToModel E (backgroundRiemannKernelBilin (I := I) g₀ x p D))
       map_add' := fun D D' => by
         apply Tensor0SSpace.toModel_injective
         apply ContinuousMultilinearMap.ext
@@ -384,7 +384,7 @@ def bgRSummandFib (g₀ : SmoothRiemannianMetric I M) (x : M) (p : TangentSpace 
         rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
           Tensor0SSpace.toModel_ofModel, Tensor0SSpace.toModel_ofModel,
           Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply, bilinFormToModel_apply,
-          bilinFormToModel_apply, bgRKernelBilin_add_right]
+          bilinFormToModel_apply, backgroundRiemannKernelBilin_add_right]
         rfl
       map_smul' := fun c D => by
         apply Tensor0SSpace.toModel_injective
@@ -393,52 +393,52 @@ def bgRSummandFib (g₀ : SmoothRiemannianMetric I M) (x : M) (p : TangentSpace 
         beta_reduce
         rw [RingHom.id_apply, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
           Tensor0SSpace.toModel_ofModel, Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply,
-          bilinFormToModel_apply, bgRKernelBilin_smul_right]
+          bilinFormToModel_apply, backgroundRiemannKernelBilin_smul_right]
         rfl }
 
-@[simp] theorem bgRSummandFib_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
+@[simp] theorem backgroundRiemannSummandFib_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
-    Tensor0SSpace.toModel (bgRSummandFib (I := I) g₀ x p D) v =
+    Tensor0SSpace.toModel (backgroundRiemannSummandFib (I := I) g₀ x p D) v =
       Tensor0SSpace.toModel D
         ![riemannOp (LeviCivita (I := I) g₀) x p (v 0) (v 1), p] := by
-  rw [bgRSummandFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
+  rw [backgroundRiemannSummandFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
     Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply]
-  exact bgRKernelBilin_apply (I := I) g₀ x p D (v 0) (v 1)
+  exact backgroundRiemannKernelBilin_apply (I := I) g₀ x p D (v 0) (v 1)
 
-def bgRBiContrFibFixedFrame (g₀ : SmoothRiemannianMetric I M)
+def backgroundRiemannBiContrFibFixedFrame (g₀ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
-  ∑ c : Fin (Module.finrank ℝ E), bgRSummandFib (I := I) g₀ x (B c x)
+  ∑ c : Fin (Module.finrank ℝ E), backgroundRiemannSummandFib (I := I) g₀ x (B c x)
 
-theorem bgRBiContrFibFixedFrame_toModel (g₀ : SmoothRiemannianMetric I M)
+theorem backgroundRiemannBiContrFibFixedFrame_toModel (g₀ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
-    Tensor0SSpace.toModel (bgRBiContrFibFixedFrame (I := I) g₀ B x D) v =
+    Tensor0SSpace.toModel (backgroundRiemannBiContrFibFixedFrame (I := I) g₀ B x D) v =
       ∑ c : Fin (Module.finrank ℝ E),
         Tensor0SSpace.toModel D
           ![riemannOp (LeviCivita (I := I) g₀) x (B c x) (v 0) (v 1), B c x] := by
   classical
-  rw [bgRBiContrFibFixedFrame, ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply,
+  rw [backgroundRiemannBiContrFibFixedFrame, ContinuousLinearMap.sum_apply, ← Tensor0SSpace.toModelL_apply,
     map_sum, ContinuousMultilinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun c _ => ?_)
-  rw [Tensor0SSpace.toModelL_apply, bgRSummandFib_toModel]
+  rw [Tensor0SSpace.toModelL_apply, backgroundRiemannSummandFib_toModel]
 
-theorem bgRKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric I M)
+theorem backgroundRiemannKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric I M)
     {p : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
     (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
-        x (bgRKernelBilin (I := I) g₀ x (p x) (Y x))) := by
+        x (backgroundRiemannKernelBilin (I := I) g₀ x (p x) (Y x))) := by
   classical
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
-    (φ := fun x : M => bgRKernelBilin (I := I) g₀ x (p x) (Y x))
+    (φ := fun x : M => backgroundRiemannKernelBilin (I := I) g₀ x (p x) (Y x))
   intro V0
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun _ : M => ℝ)
-    (φ := fun x : M => bgRKernelBilin (I := I) g₀ x (p x) (Y x) (V0 x))
+    (φ := fun x : M => backgroundRiemannKernelBilin (I := I) g₀ x (p x) (Y x) (V0 x))
   intro W
   have hRsec : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b : M => riemannSec (LeviCivita (I := I) g₀) p V0 W b)) :=
@@ -463,37 +463,37 @@ theorem bgRKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric I M)
   rw [contMDiffAt_section]
   refine (hscalar.contMDiffAt).congr_of_eventuallyEq ?_
   filter_upwards with y
-  change bgRKernelBilin (I := I) g₀ y (p y) (Y y) (V0 y) (W y) =
+  change backgroundRiemannKernelBilin (I := I) g₀ y (p y) (Y y) (V0 y) (W y) =
     (trivializationAt ℝ (Bundle.Trivial M ℝ) x ⟨y, _⟩).2
-  rw [bgRKernelBilin_apply,
+  rw [backgroundRiemannKernelBilin_apply,
     riemannOp_apply_smooth (cov := LeviCivita (I := I) g₀) hp V0.contMDiff W.contMDiff]
   rfl
 
-theorem bgRBiContrFibFixedFrame_apply_section_contMDiff (g₀ : SmoothRiemannianMetric I M)
+theorem backgroundRiemannBiContrFibFixedFrame_apply_section_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i)))
     (Y : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun x : M => Tensor0SSpace 2 I x⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SSpace 2 I z) x
-        (bgRBiContrFibFixedFrame (I := I) g₀ B x (Y x))) := by
+        (backgroundRiemannBiContrFibFixedFrame (I := I) g₀ B x (Y x))) := by
   classical
   have hsummand : ∀ c : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
           (E := fun z : M => Tensor0SSpace 2 I z) x
-          (bgRSummandFib (I := I) g₀ x (B c x) (Y x))) := by
+          (backgroundRiemannSummandFib (I := I) g₀ x (B c x) (Y x))) := by
     intro c
     have hbilin := contMDiff_bilinSection_of_homSection (I := I)
-      (fun x => bgRKernelBilin (I := I) g₀ x (B c x) (Y x))
-      (bgRKernelBilin_homSection_contMDiff (I := I) g₀ (hB c) Y)
+      (fun x => backgroundRiemannKernelBilin (I := I) g₀ x (B c x) (Y x))
+      (backgroundRiemannKernelBilin_homSection_contMDiff (I := I) g₀ (hB c) Y)
     refine hbilin.congr ?_
     intro x
     rfl
   set S : Fin (Module.finrank ℝ E) →
       Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
     fun c =>
-      { toFun := fun x : M => bgRSummandFib (I := I) g₀ x (B c x) (Y x)
+      { toFun := fun x : M => backgroundRiemannSummandFib (I := I) g₀ x (B c x) (Y x)
         contMDiff_toFun := hsummand c } with hS_def
   set Stot : Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
     ∑ c : Fin (Module.finrank ℝ E), S c with hStot_def
@@ -502,7 +502,7 @@ theorem bgRBiContrFibFixedFrame_apply_section_contMDiff (g₀ : SmoothRiemannian
   intro x
   refine congrArg (TotalSpace.mk' (Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SSpace 2 I z) x) ?_
-  rw [bgRBiContrFibFixedFrame, hStot_def]
+  rw [backgroundRiemannBiContrFibFixedFrame, hStot_def]
   have hcoe : ((∑ c : Fin (Module.finrank ℝ E), S c :
       Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
         Π z : M, Tensor0SSpace 2 I z) =
@@ -517,22 +517,22 @@ theorem bgRBiContrFibFixedFrame_apply_section_contMDiff (g₀ : SmoothRiemannian
   rw [hsum, ContinuousLinearMap.sum_apply]
   rfl
 
-theorem bgRBiContrFibFixedFrame_contMDiff (g₀ : SmoothRiemannianMetric I M)
+theorem backgroundRiemannBiContrFibFixedFrame_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (hB : ∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (B i))) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
         (E := fun z : M => TensorRSSpace 2 2 I z) x
-        (TensorRSSpace.ofCLM (bgRBiContrFibFixedFrame (I := I) g₀ B x))) := by
+        (TensorRSSpace.ofCLM (backgroundRiemannBiContrFibFixedFrame (I := I) g₀ B x))) := by
   classical
   apply contMDiff_clm_section_of_pointwise (I := I)
     (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun z : M => Tensor0SSpace 2 I z)
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun z : M => Tensor0SSpace 2 I z)
-    (φ := fun x : M => bgRBiContrFibFixedFrame (I := I) g₀ B x)
+    (φ := fun x : M => backgroundRiemannBiContrFibFixedFrame (I := I) g₀ B x)
   intro Y
-  exact bgRBiContrFibFixedFrame_apply_section_contMDiff (I := I) g₀ B hB Y
+  exact backgroundRiemannBiContrFibFixedFrame_apply_section_contMDiff (I := I) g₀ B hB Y
 
-def bgRTraceKernel (g₀ : SmoothRiemannianMetric I M) (x : M)
+def backgroundRiemannTraceKernel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v0 v1 : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -554,83 +554,83 @@ def bgRTraceKernel (g₀ : SmoothRiemannianMetric I M) (x : M)
             ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
         rw [hr, map_smul, RingHom.id_apply] }
 
-theorem bgRTraceKernel_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
+theorem backgroundRiemannTraceKernel_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v0 v1 p q : TangentSpace I x) :
-    bgRTraceKernel (I := I) g₀ x D v0 v1 p q =
+    backgroundRiemannTraceKernel (I := I) g₀ x D v0 v1 p q =
       Tensor0SSpace.toModel D
         ![riemannOp (LeviCivita (I := I) g₀) x p v0 v1, q] := by
-  rw [bgRTraceKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
+  rw [backgroundRiemannTraceKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
   exact bilinFormToModel_symm_apply (TangentSpace I x) (Tensor0SSpace.toModel D)
     (riemannOp (LeviCivita (I := I) g₀) x p v0 v1) q
 
-def bgRBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
+def backgroundRiemannBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
-  bgRBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x) x
+  backgroundRiemannBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x) x
 
-theorem bgRBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M) (x₀ : M)
+theorem backgroundRiemannBiContrFib_eq_fixedFrame_on_nbhd (g₀ g₁ : SmoothRiemannianMetric I M) (x₀ : M)
     {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
-    bgRBiContrFib (I := I) g₀ g₁ y =
-      bgRBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x₀) y := by
+    backgroundRiemannBiContrFib (I := I) g₀ g₁ y =
+      backgroundRiemannBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x₀) y := by
   classical
   apply ContinuousLinearMap.ext
   intro D
   apply Tensor0SSpace.toModel_injective
   apply ContinuousMultilinearMap.ext
   intro v
-  rw [bgRBiContrFib, bgRBiContrFibFixedFrame_toModel, bgRBiContrFibFixedFrame_toModel]
+  rw [backgroundRiemannBiContrFib, backgroundRiemannBiContrFibFixedFrame_toModel, backgroundRiemannBiContrFibFixedFrame_toModel]
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ c : Fin (Module.finrank ℝ E),
         Tensor0SSpace.toModel D
           ![riemannOp (LeviCivita (I := I) g₀) y (Bf c) (v 0) (v 1), Bf c] =
       ∑ c : Fin (Module.finrank ℝ E),
-        bgRTraceKernel (I := I) g₀ y D (v 0) (v 1) (Bf c) (Bf c) := by
+        backgroundRiemannTraceKernel (I := I) g₀ y D (v 0) (v 1) (Bf c) (Bf c) := by
     intro Bf
     refine Finset.sum_congr rfl (fun c _ => ?_)
-    rw [bgRTraceKernel_apply]
+    rw [backgroundRiemannTraceKernel_apply]
   rw [hrewrite (fun c => smoothOrthoFrame (I := I) g₁ y c y),
     hrewrite (fun c => smoothOrthoFrame (I := I) g₁ x₀ c y)]
   rw [orthonormal_basis_bilin_trace (I := I) (M := M) g₁ (x := y)
-      (bgRTraceKernel (I := I) g₀ y D (v 0) (v 1))
+      (backgroundRiemannTraceKernel (I := I) g₀ y D (v 0) (v 1))
       (fun c => smoothOrthoFrame (I := I) g₁ y c y)
       (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j),
     orthonormal_basis_bilin_trace (I := I) (M := M) g₁ (x := y)
-      (bgRTraceKernel (I := I) g₀ y D (v 0) (v 1))
+      (backgroundRiemannTraceKernel (I := I) g₀ y D (v 0) (v 1))
       (fun c => smoothOrthoFrame (I := I) g₁ x₀ c y)
       (fun i j => smoothOrthoFrame_orthonormal (I := I) g₁ x₀ hy i j)]
 
-theorem bgRBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
+theorem backgroundRiemannBiContrFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
         (E := fun z : M => TensorRSSpace 2 2 I z) x
-        (TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x))) := by
+        (TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x))) := by
   classical
   intro x₀
   have h_fixed : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
         (E := fun z : M => TensorRSSpace 2 2 I z) x
-        (TensorRSSpace.ofCLM (bgRBiContrFibFixedFrame (I := I) g₀
+        (TensorRSSpace.ofCLM (backgroundRiemannBiContrFibFixedFrame (I := I) g₀
           (smoothOrthoFrame (I := I) g₁ x₀) x))) x₀ :=
-    bgRBiContrFibFixedFrame_contMDiff (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x₀)
+    backgroundRiemannBiContrFibFixedFrame_contMDiff (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x₀)
       (fun i => smoothOrthoFrame_smooth (I := I) g₁ x₀ i) x₀
   refine h_fixed.congr_of_eventuallyEq ?_
   filter_upwards [smoothOrthoFrameNbhd_mem_nhds (I := I) (M := M) x₀] with y hy
   exact congrArg (TotalSpace.mk' (TensorRSModel 2 2 ℝ E)
     (E := fun z : M => TensorRSSpace 2 2 I z) y)
     (congrArg TensorRSSpace.ofCLM
-      (bgRBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₀ g₁ x₀ hy))
+      (backgroundRiemannBiContrFib_eq_fixedFrame_on_nbhd (I := I) g₀ g₁ x₀ hy))
 
-def ricciArmOrder0BgRCommCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
+def ricciArmOrder0BackgroundCurvatureCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
     { toFun := fun x : M =>
-        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x))
-      contMDiff_toFun := bgRBiContrFib_contMDiff (I := I) g₀ g₁ }
+        (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x))
+      contMDiff_toFun := backgroundRiemannBiContrFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-@[simp] theorem ricciArmOrder0BgRCommCoeffField_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
+@[simp] theorem ricciArmOrder0BackgroundCurvatureCoeffField_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) :
-    (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁).toSection x =
-      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x)) :=
+    (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁).toSection x =
+      (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) :=
   rfl
 
 private lemma fiberNormSqComponent_bgRBiContrFib
@@ -639,7 +639,7 @@ private lemma fiberNormSqComponent_bgRBiContrFib
     (K J : Fin 2 → Fin n) :
     fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
         (show TensorRSSpace 2 2 I x from
-          TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x)) n e K J =
+          TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) n e K J =
       ∑ c : Fin (Module.finrank ℝ E),
         g₀.inner x (e (K 0))
             (riemannOp (LeviCivita (I := I) g₀) x
@@ -648,16 +648,16 @@ private lemma fiberNormSqComponent_bgRBiContrFib
   classical
   have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
       (show TensorRSSpace 2 2 I x from
-        TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x)) n e K J =
+        TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) n e K J =
       Tensor0SSpace.toModel
-        ((bgRBiContrFib (I := I) g₀ g₁ x)
+        ((backgroundRiemannBiContrFib (I := I) g₀ g₁ x)
           (coframeS (I := I) (M := M) g₀ x 2 e K))
         (fun i => (e (J i) : E)) := by
     unfold fiberNormSqComponent coframeS; rfl
   rw [hcomp]
-  rw [show (bgRBiContrFib (I := I) g₀ g₁ x) =
-      bgRBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x) x from rfl]
-  rw [bgRBiContrFibFixedFrame_toModel]
+  rw [show (backgroundRiemannBiContrFib (I := I) g₀ g₁ x) =
+      backgroundRiemannBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x) x from rfl]
+  rw [backgroundRiemannBiContrFibFixedFrame_toModel]
   refine Finset.sum_congr rfl (fun c _ => ?_)
   have hcf : (coframeS (I := I) (M := M) g₀ x 2 e K).toModel
         ![riemannOp (LeviCivita (I := I) g₀) x (smoothOrthoFrame (I := I) g₁ x c x)
@@ -683,18 +683,18 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem rfns_bgRBiContrFib_le
+theorem riemannianFiberNormSq_backgroundRiemannBiContrFib_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (P : SmoothCcTensor g₀ 0 2)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
       (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           (show TensorRSSpace 2 2 I x from
-            TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x)) ≤ C := by
+            TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) ≤ C := by
   classical
   obtain ⟨Kbase, hKbase0, hKbase⟩ :=
     exists_uniform_riemannOp_LeviCivita_gNorm_bound (I := I) (M := M) g₀
@@ -731,13 +731,13 @@ theorem rfns_bgRBiContrFib_le
         mul_le_mul_of_nonneg_right (by linarith) hff_nn
       nlinarith [hmono, hkey]
     rw [le_div_iff₀ h1mδ₀]; exact hkey₀
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
-    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x))
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
+    (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x))
     e bse hnE hbse horth]
   have heach : ∀ (K J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
         (show TensorRSSpace 2 2 I x from
-          TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x)) n e K J) ^ 2 ≤
+          TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) n e K J) ^ 2 ≤
         ((Module.finrank ℝ E : ℝ) * Bt) ^ 2 := by
     intro K J
     rw [fiberNormSqComponent_bgRBiContrFib (I := I) g₀ g₁ x e K J]
@@ -790,7 +790,7 @@ theorem rfns_bgRBiContrFib_le
   calc ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
         (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
           (show TensorRSSpace 2 2 I x from
-            TensorRSSpace.ofCLM (bgRBiContrFib (I := I) g₀ g₁ x)) n e K J) ^ 2
+            TensorRSSpace.ofCLM (backgroundRiemannBiContrFib (I := I) g₀ g₁ x)) n e K J) ^ 2
       ≤ ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n, ((Module.finrank ℝ E : ℝ) * Bt) ^ 2 :=
         Finset.sum_le_sum (fun K _ => Finset.sum_le_sum (fun J _ => heach K J))
     _ = (Fintype.card (Fin 2 → Fin n) : ℝ) * (Fintype.card (Fin 2 → Fin n) : ℝ) *
@@ -809,25 +809,25 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform
+theorem exists_ricciArmOrder0BackgroundCurvatureCoeffField_realizedFam_riemannianFiberNormSq_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-              ((ricciArmOrder0BgRCommCoeffField (I := I) g₀
+              ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λ := by
   classical
   obtain ⟨C, hC0, hbnd⟩ :=
-    rfns_bgRBiContrFib_le (I := I) (M := M) g₀
+    riemannianFiberNormSq_backgroundRiemannBiContrFib_le (I := I) (M := M) g₀
       (le_max_right δ₀ 0) (max_lt hδ₀ (by norm_num))
   refine ⟨C, hC0, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
@@ -851,7 +851,7 @@ theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform
     have h2 : s * δ ≤ s * δ₀ := mul_le_mul_of_nonneg_left hδ_le hs0
     have hδ₀_le : δ₀ ≤ m := le_max_left _ _
     nlinarith [h1, h2, hδ₀_le]
-  have hδs : gFibreOpBound (I := I) (M := M) g₀
+  have hδs : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)) m := by
     intro y v w
     refine le_trans (hδs_raw y v w) ?_
@@ -861,7 +861,7 @@ theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform
     nlinarith [hle', hprod]
   have hmain := hbnd (realizedFam (I := I) g₀ T T' hδ hδ' s)
     (convexPerturbation (I := I) g₀ T T' s) htie (le_of_eq hm_def.symm) hm0 hδs x
-  rw [ricciArmOrder0BgRCommCoeffField_toSection]
+  rw [ricciArmOrder0BackgroundCurvatureCoeffField_toSection]
   exact hmain
 
 end TensorSpectral

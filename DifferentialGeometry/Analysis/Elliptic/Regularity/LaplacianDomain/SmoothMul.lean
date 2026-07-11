@@ -66,7 +66,7 @@ noncomputable def phiMulU_h
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     H1Compl (I := I) (M := M) g :=
   resolvent (I := I) (M := M) g
-    (fHLeibniz (I := I) (M := M) g α u_h hu_h)
+    (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h)
 
 theorem phiMulU_h_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -75,7 +75,7 @@ theorem phiMulU_h_mem_laplacianDomain
       laplacianDomain (I := I) (M := M) g := by
   unfold phiMulU_h
   rw [laplacianDomain_mem_iff]
-  exact ⟨fHLeibniz (I := I) (M := M) g α u_h hu_h, rfl⟩
+  exact ⟨leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h, rfl⟩
 
 theorem laplacianDomain_preimage_phiMulU_h
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -83,7 +83,7 @@ theorem laplacianDomain_preimage_phiMulU_h
     laplacianDomain.preimage (I := I) (M := M) g
         ⟨phiMulU_h (I := I) (M := M) g α hu_h,
           phiMulU_h_mem_laplacianDomain (I := I) (M := M) g α hu_h⟩ =
-      fHLeibniz (I := I) (M := M) g α u_h hu_h := by
+      leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h := by
   unfold phiMulU_h
   apply resolvent_injective (I := I) (M := M) g
   rw [resolvent_laplacianDomain_preimage_eq]
@@ -96,7 +96,7 @@ theorem phiMulU_h_smoothToH1Compl
         (pouScalar (I := I) (M := M) α v) := by
   unfold phiMulU_h
   have h_lp_eq :
-      fHLeibniz (I := I) (M := M) g α
+      leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) =
       smoothToLp (I := I) (M := M) g

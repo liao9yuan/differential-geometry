@@ -59,15 +59,15 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
 
-private lemma appCc_appCcRS_slotSwapField_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
+private lemma coeffOpApply_slotSwapField_eq_apply_of_symm (g₀ : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 2 2) (T : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v) :
-    appCc (I := I) (M := M) g₀ 2 2
-        (appCcRS (I := I) (M := M) g₀ 2 2 2 D (ccSlotSwapField (I := I) (M := M) g₀)) T =
-      appCc (I := I) (M := M) g₀ 2 2 D T := by
+      smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v) :
+    operatorFieldApply (I := I) (M := M) g₀ 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g₀)) T =
+      operatorFieldApply (I := I) (M := M) g₀ 2 2 D T := by
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
-  have hswapfix : slotSwapFib (I := I) (M := M) x
+  have hswapfix : inputSlotSwapFib (I := I) (M := M) x
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from T.toSection x)
         (unitTensor (I := I) (M := M) x)) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from T.toSection x)
@@ -93,11 +93,11 @@ private lemma appCc_appCcRS_slotSwapField_eq_of_symm (g₀ : SmoothRiemannianMet
       unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T x (v 0) (v 1)]
     exact hTsymm x (v 1) (v 0)
   rw [show unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 2 2
-        (appCcRS (I := I) (M := M) g₀ 2 2 2 D (ccSlotSwapField (I := I) (M := M) g₀)) T) x =
+      (operatorFieldApply (I := I) (M := M) g₀ 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g₀)) T) x =
     Tensor0SSpace.toModel
       ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from D.toSection x)
-        (slotSwapFib (I := I) (M := M) x
+        (inputSlotSwapFib (I := I) (M := M) x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from T.toSection x)
             (unitTensor (I := I) (M := M) x)))) from rfl]
   rw [hswapfix]
@@ -114,22 +114,22 @@ theorem exists_riemannPalatini_refold_identity_data
       IsFramePairPartner qA qB ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+          smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         ∃ C0ra : ℝ → SmoothCcTensor g₀ 2 2,
           linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0ra (δ := δ) (δ' := δ) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1,
-            appCc (I := I) (M := M) g₀ 2 2
+            operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s))
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
-              appCc (I := I) (M := M) g₀ 2 2 (C0ra s)
+              operatorFieldApply (I := I) (M := M) g₀ 2 2 (C0ra s)
                   (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
-                appCc (I := I) (M := M) g₀ 4 2
+                operatorFieldApply (I := I) (M := M) g₀ 4 2
                   ((2 : ℝ) • riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ
                     qA qB s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
@@ -142,23 +142,23 @@ theorem exists_riemannPalatini_refold_identity_data
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2)) := by
   classical
   obtain ⟨ΛQ, hΛQ_nn, hcapQ⟩ :=
-    exists_ricciArmOrder0AACommCoeffField_realizedFam_rfns_ballUniform (I := I) (M := M)
+    exists_ricciArmOrder0AACommCoeffField_realizedFam_fiberNormSq_ballUniform (I := I) (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨ΛB, hΛB_nn, hcapB⟩ :=
-    exists_ricciArmOrder0BgRCommCoeffField_realizedFam_rfns_ballUniform (I := I) (M := M)
+    exists_ricciArmOrder0BackgroundCurvatureCoeffField_realizedFam_riemannianFiberNormSq_ballUniform (I := I) (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨ΛS, hΛS_nn, hcapS⟩ :=
-    exists_ricciArmSharpGradKoszulResidualField_realizedFam_rfns_ballUniform (I := I) (M := M)
+    exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberNormSq_uniformBound (I := I) (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨ΛF, hΛF_nn, hcapF⟩ :=
-    exists_ricciArmRicciFoldRemainderField_realizedFam_rfns_ballUniform (I := I) (M := M)
+    exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq_uniformBound (I := I) (M := M)
       g₀ a ha_super hR hδ₀
   obtain ⟨KRm, hKRm_nn, hKRm⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 2
       (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)
   obtain ⟨KB0, hKB0_nn, hKB0⟩ :=
     exists_bound_riemannianFiberNormSq_smoothCcTensor (I := I) (M := M) g₀ 2 2
-      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+      (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
   obtain ⟨KQw, hKQw_nn, hwinQ⟩ :=
     exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow (I := I) (M := M)
       g₀ a ha_super hR hδ₀
@@ -205,9 +205,9 @@ theorem exists_riemannPalatini_refold_identity_data
       + (2 : ℝ) •
         (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          + ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
               + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
               - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
@@ -226,7 +226,7 @@ theorem exists_riemannPalatini_refold_identity_data
                 (ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint (I := I) (M := M)
                   g₀ T hδ hδZ)
                 (threeArmHjoint_const_local (I := I) (M := M) g₀
-                  (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)))
+                  (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)))
               (threeArmHjoint_const_smul_local (I := I) (M := M) g₀ (1 / 2 : ℝ) _
                 (ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
                   (I := I) (M := M) g₀ T hδ hδZ)))
@@ -245,11 +245,11 @@ theorem exists_riemannPalatini_refold_identity_data
       rw [← hcP]
       exact realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
     have hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-        ccTensorBilin (I := I) g₀ (s • T) x v w =
-          ccTensorBilin (I := I) g₀ (s • T) x w v := by
+        smoothCcTensorBilinForm (I := I) g₀ (s • T) x v w =
+          smoothCcTensorBilinForm (I := I) g₀ (s • T) x w v := by
       intro x v w
       rw [ccTensorBilin_smul_local, ccTensorBilin_smul_local, hTsymm x v w]
-    have hsymmT : symmS (I := I) (M := M) g₀ T = T :=
+    have hsymmT : ccTensor02Symm (I := I) (M := M) g₀ T = T :=
       symmS_eq_self_of_symm (I := I) (M := M) g₀ T hTsymm
     beta_reduce
     simp only [iteratedCovGrad_zero]
@@ -259,7 +259,7 @@ theorem exists_riemannPalatini_refold_identity_data
         (fun k => Equiv.swap (0 : Fin 4) 1 *
           (![Equiv.swap (0 : Fin 4) 2, Equiv.swap (1 : Fin 4) 3,
             Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3, 1] k)) s =
-        (2 * s : ℝ) • curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+        (2 * s : ℝ) • curvatureActionKernelCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)
           (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
@@ -270,39 +270,39 @@ theorem exists_riemannPalatini_refold_identity_data
       rfl
     rw [hfam, appCc_add_left, appCc_smul_left, appCc_smul_left]
     suffices hfold : (1 / 2 : ℝ) •
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)) T
-          - appCc (I := I) (M := M) g₀ 2 2
+          - operatorFieldApply (I := I) (M := M) g₀ 2 2
               (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) T) =
-        appCc (I := I) (M := M) g₀ 2 2
+        operatorFieldApply (I := I) (M := M) g₀ 2 2
             (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-              + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+              + ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                     (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-                  - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+                  - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
                   + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                       (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
                   - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
                       (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))) T
-          + appCc (I := I) (M := M) g₀ 4 2
-              (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+          + operatorFieldApply (I := I) (M := M) g₀ 4 2
+              (curvatureActionKernelCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
                 (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
                 (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
                 (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
                 (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (s • T)) by
-      have h2 : appCc (I := I) (M := M) g₀ 2 2
+      have h2 : operatorFieldApply (I := I) (M := M) g₀ 2 2
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)) T
-          - appCc (I := I) (M := M) g₀ 2 2
+          - operatorFieldApply (I := I) (M := M) g₀ 2 2
               (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) T =
           (2 : ℝ) • ((1 / 2 : ℝ) •
-            (appCc (I := I) (M := M) g₀ 2 2
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s)) T
-              - appCc (I := I) (M := M) g₀ 2 2
+              - operatorFieldApply (I := I) (M := M) g₀ 2 2
                   (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) T)) := by
         rw [smul_smul, show (2 : ℝ) * (1 / 2) = 1 by norm_num, one_smul]
       rw [hfold, iteratedCovGrad_smul_real, appCc_smul_right, smul_add, smul_smul] at h2
@@ -313,7 +313,7 @@ theorem exists_riemannPalatini_refold_identity_data
       ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_add_refoldKernelSecondGradient
         (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T) htie hPsymm T
     rw [appCc_add_left, appCc_sub_left, appCc_add_left,
-      appCc_appCcRS_slotSwapField_eq_of_symm (I := I) (M := M) g₀ _ T hTsymm] at hprim
+      coeffOpApply_slotSwapField_eq_apply_of_symm (I := I) (M := M) g₀ _ T hTsymm] at hprim
     rw [appCc_add_left, appCc_sub_left, appCc_add_left]
     exact hprim
   · intro s hs x
@@ -334,9 +334,9 @@ theorem exists_riemannPalatini_refold_identity_data
       ((ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀).toSection x)
       ((2 : ℝ) • ((ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+        + ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-            - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+            - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
             + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
             - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
@@ -344,9 +344,9 @@ theorem exists_riemannPalatini_refold_identity_data
     have hsm : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
         ((2 : ℝ) • ((ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          + ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
               + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
               - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
@@ -354,9 +354,9 @@ theorem exists_riemannPalatini_refold_identity_data
         4 * riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           ((ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          + ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
               + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
               - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
@@ -366,9 +366,9 @@ theorem exists_riemannPalatini_refold_identity_data
     have hX : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
         ((ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          + ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
               + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
               - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
@@ -376,18 +376,18 @@ theorem exists_riemannPalatini_refold_identity_data
         2 * ΛQ + 2 * (2 * (2 * (2 * ΛB + 2 * KB0) + 2 * ΛS) + 2 * ΛF) := by
       rw [show ((ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-          + ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          + ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
+              - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
               + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)
               - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T))).toSection x) =
           (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
-          + ((((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+          + ((((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
-              - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+              - (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x)
               + (1 / 2 : ℝ) • (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
             - (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
@@ -398,31 +398,31 @@ theorem exists_riemannPalatini_refold_identity_data
       have h1 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x
         ((ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x)
-        (((((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+        (((((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
-            - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+            - (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x)
             + (1 / 2 : ℝ) • (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
           - (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x))
       have h2 := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 2 2 x
-        ((((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+        ((((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
-            - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+            - (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x)
             + (1 / 2 : ℝ) • (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x))
         ((ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
       have h3 := riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 2 2 x
-        (((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+        (((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x
-          - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x))
+          - (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x))
         ((1 / 2 : ℝ) • (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x)
       have h4 := riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 2 2 x
-        ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+        ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x)
-        ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+        ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x)
       have h5 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           ((1 / 2 : ℝ) • (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)).toSection x) =
@@ -451,9 +451,9 @@ theorem exists_riemannPalatini_refold_identity_data
       (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)) with hjq_def
     set jd := iteratedCovGrad (I := I) g₀ 2 2 i
-      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀
+      (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀) with hjd_def
+        - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀) with hjd_def
     set js := iteratedCovGrad (I := I) g₀ 2 2 i
       (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s) (s • T)) with hjs_def
@@ -490,11 +490,11 @@ theorem exists_riemannPalatini_refold_identity_data
 
 set_option linter.unusedVariables false in
 
-theorem riemannPalatiniRefoldC2Family_rfns_le
+theorem riemannPalatiniRefoldC2Family_riemannianFiberNormSq_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_half : δ ≤ 1 / 2)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4))
     (hq : IsFramePairPartner qA qB) :
@@ -528,7 +528,7 @@ theorem riemannPalatiniRefoldC2Family_rfns_le
             (convexPerturbation (I := I) g₀ T 0 s) y v w :=
     fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
   obtain ⟨hs0, hs1⟩ := hs
-  have hδP : gFibreOpBound (I := I) (M := M) g₀
+  have hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
     intro y v w
     have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
@@ -538,50 +538,50 @@ theorem riemannPalatiniRefoldC2Family_rfns_le
     rwa [heq] at hraw
   have hmono_cap : ∀ σp : Equiv.Perm (Fin 4),
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-          ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ s)
             (ccTensorUnitValueSection (I := I) (M := M) g₀
-              (symmS (I := I) (M := M) g₀ T))
+              (ccTensor02Symm (I := I) (M := M) g₀ T))
             (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-              (symmS (I := I) (M := M) g₀ T)) σp).toSection x) ≤
+              (ccTensor02Symm (I := I) (M := M) g₀ T)) σp).toSection x) ≤
         (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) ^ 2 := by
     intro σp
     rw [curvatureRefoldMonomialCoeffField_toSection]
-    exact rfns_curvatureRefoldMonomialBiContrFib_le (I := I) (M := M) g₀
+    exact riemannianFiberNormSq_curvatureRefoldMonomialBiContrFib_le (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
       (convexPerturbation (I := I) g₀ T 0 s) htie hδ_lt hδP
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       hδ0 (toModel_unitValue_symmS_abs_le (I := I) (M := M) g₀ T hδ) σp x
   rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ
     qA qB hq s]
   rw [smul_smul, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     riemannianFiberNormSq_smul (I := I) (M := M) g₀ 4 2 x]
-  rw [curvatureRefoldKernelCoeffField, SmoothCcTensor.toSection_smul,
+  rw [curvatureActionKernelCoeffField, SmoothCcTensor.toSection_smul,
     SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
     ContMDiffSection.coe_smul, Pi.smul_apply, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContMDiffSection.coe_sub, Pi.sub_apply, ContMDiffSection.coe_add, Pi.add_apply,
     riemannianFiberNormSq_smul (I := I) (M := M) g₀ 4 2 x]
   have hB := riemannianFiberNormSq_addsub4_le (I := I) (M := M) g₀ 4 2 x
-    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+    ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 0)).toSection x)
-    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 0)).toSection x)
+    ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 1)).toSection x)
-    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 1)).toSection x)
+    ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 2)).toSection x)
-    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 2)).toSection x)
+    ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 3)).toSection x)
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 3)).toSection x)
   have hc0 := hmono_cap (qA 0)
   have hc1 := hmono_cap (qA 1)
   have hc2 := hmono_cap (qA 2)
@@ -608,26 +608,26 @@ theorem riemannPalatiniRefoldC2Family_rfns_le
   rw [hmax]
   have hs2 : s ^ 2 ≤ 1 := by nlinarith [hs0, hs1]
   have hsum_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 2 x
-    ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+    ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 0)).toSection x
-    + (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 0)).toSection x
+    + (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 1)).toSection x
-    - (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 1)).toSection x
+    - (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 2)).toSection x
-    - (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 2)).toSection x
+    - (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 3)).toSection x)
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 3)).toSection x)
   nlinarith [hB, hc0, hc1, hc2, hc3, hs2, hsum_nn, hstep, hs0, hs1,
     sq_nonneg (fC * (δ / (1 - δ) ^ 2)),
     mul_nonneg (mul_nonneg hδ0 hδ0) (sq_nonneg (fC * (δ / (1 - δ) ^ 2)))]
@@ -642,8 +642,8 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_half : δ ≤ 1 / 2)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
@@ -675,39 +675,39 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     linarith, ?_⟩
   intro T δ hδ_le hδ_half hδ hδZ hball
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
-  refine ⟨riemannPalatiniRefoldC2Family_rfns_le (I := I) (M := M) g₀ T hδ_lt hδ_half hδ hδZ
+  refine ⟨riemannPalatiniRefoldC2Family_riemannianFiberNormSq_le (I := I) (M := M) g₀ T hδ_lt hδ_half hδ hδZ
     qA qB hq, ?_⟩
   intro i s hs
   obtain ⟨hs0, hs1⟩ := hs
   rw [riemannPalatiniRefoldC2Family_eq_symmS_kernel (I := I) (M := M) g₀ T hδ hδZ
     qA qB hq s]
-  rw [curvatureRefoldKernelCoeffField, iteratedCovGrad_smul_real,
+  rw [curvatureActionKernelCoeffField, iteratedCovGrad_smul_real,
     iteratedCovGrad_smul_real, iteratedCovGrad_smul_real,
     iteratedCovGrad_sub, iteratedCovGrad_sub, iteratedCovGrad_add]
   set G0 := iteratedCovGrad (I := I) g₀ 4 2 i
-    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+    (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 0)) with hG0_def
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 0)) with hG0_def
   set G1 := iteratedCovGrad (I := I) g₀ 4 2 i
-    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+    (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 1)) with hG1_def
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 1)) with hG1_def
   set G2 := iteratedCovGrad (I := I) g₀ 4 2 i
-    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+    (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 2)) with hG2_def
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 2)) with hG2_def
   set G3 := iteratedCovGrad (I := I) g₀ 4 2 i
-    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+    (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-      (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
       (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T)) (qA 3)) with hG3_def
+        (ccTensor02Symm (I := I) (M := M) g₀ T)) (qA 3)) with hG3_def
   have hcol : (2 : ℝ) • s • (1 / 2 : ℝ) • (G0 + G1 - G2 - G3) =
       s • (G0 + G1 - G2 - G3) := by
     rw [smul_smul, smul_smul]
@@ -769,8 +769,8 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
@@ -806,7 +806,7 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
         ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
           (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
             (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
-            ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+            ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
               (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
               (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) σp).toSection p.1))
@@ -820,12 +820,12 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
           (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
             (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
             (ε i • ((1 / 2 : ℝ) •
-              ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+              ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
                 (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
                 (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
                 (q i)).toSection p.1
-              + (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+              + (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
                 (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
                 (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
@@ -875,7 +875,7 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
               (convexPerturbation (I := I) g₀ T 0 s) y v w :=
       fun y v w => realizedFam_inner_of_mem (I := I) g₀ T 0 hδ hδZ hs_mem y v w
     obtain ⟨hs0, hs1⟩ := hs
-    have hδP : gFibreOpBound (I := I) (M := M) g₀
+    have hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
       intro y v w
       have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
@@ -885,40 +885,40 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
       rwa [heq] at hraw
     have hmono_cap : ∀ σp : Equiv.Perm (Fin 4),
         riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-            ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+            ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)
               (ccTensorUnitValueSection (I := I) (M := M) g₀
-                (symmS (I := I) (M := M) g₀ T))
+                (ccTensor02Symm (I := I) (M := M) g₀ T))
               (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-                (symmS (I := I) (M := M) g₀ T)) σp).toSection x) ≤
+                (ccTensor02Symm (I := I) (M := M) g₀ T)) σp).toSection x) ≤
           (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) ^ 2 := by
       intro σp
       rw [curvatureRefoldMonomialCoeffField_toSection]
-      exact rfns_curvatureRefoldMonomialBiContrFib_le (I := I) (M := M) g₀
+      exact riemannianFiberNormSq_curvatureRefoldMonomialBiContrFib_le (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
         (convexPerturbation (I := I) g₀ T 0 s) htie hδ_lt hδP
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         hδ0 (toModel_unitValue_symmS_abs_le (I := I) (M := M) g₀ T hδ) σp x
     have hterm_le : ∀ (c : ℝ), |c| ≤ 1 → ∀ σp : Equiv.Perm (Fin 4),
         riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-            (c • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+            (c • ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)
               (ccTensorUnitValueSection (I := I) (M := M) g₀
-                (symmS (I := I) (M := M) g₀ T))
+                (ccTensor02Symm (I := I) (M := M) g₀ T))
               (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-                (symmS (I := I) (M := M) g₀ T)) σp).toSection x)) ≤
+                (ccTensor02Symm (I := I) (M := M) g₀ T)) σp).toSection x)) ≤
           (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) ^ 2 := by
       intro c hc σp
       rw [riemannianFiberNormSq_smul (I := I) (M := M) g₀ 4 2 x]
       have h1 := hmono_cap σp
       have hc2 : c ^ 2 ≤ 1 := by nlinarith [abs_nonneg c, sq_abs c, hc]
       have h0 := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 2 x
-        ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)
           (ccTensorUnitValueSection (I := I) (M := M) g₀
-            (symmS (I := I) (M := M) g₀ T))
+            (ccTensor02Symm (I := I) (M := M) g₀ T))
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-            (symmS (I := I) (M := M) g₀ T)) σp).toSection x)
+            (ccTensor02Symm (I := I) (M := M) g₀ T)) σp).toSection x)
       nlinarith [h1, hc2, h0, sq_nonneg c]
     rw [deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (I := I) (M := M) g₀ T hδ hδZ q ε s]
     rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
@@ -930,21 +930,21 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     have hr1 := hterm_le (ε 1) (hε 1) (q 1)
     have hr2 := hterm_le (ε 2) (hε 2) (q 2)
     have h3 := riemannianFiberNormSq_add3_le (I := I) (M := M) g₀ 4 2 x
-      (ε 0 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (ε 0 • ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 0)).toSection x))
-      (ε 1 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 0)).toSection x))
+      (ε 1 • ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 1)).toSection x))
-      (ε 2 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 1)).toSection x))
+      (ε 2 • ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 2)).toSection x))
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 2)).toSection x))
     have hs2 : s ^ 2 ≤ 1 := by nlinarith [hs0, hs1]
     have hmax : max (3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2)) 0 =
         3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2) :=
@@ -952,21 +952,21 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
         (deTurckArmFibreConst_nonneg _)) (div_nonneg hδ0 (sq_nonneg _)))
     rw [hmax]
     have hsum_nn := riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 2 x
-      (ε 0 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (ε 0 • ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 0)).toSection x)
-      + ε 1 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 0)).toSection x)
+      + ε 1 • ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 1)).toSection x)
-      + ε 2 • ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 1)).toSection x)
+      + ε 2 • ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 2)).toSection x))
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 2)).toSection x))
     nlinarith [hr0, hr1, hr2, h3, hs2, hsum_nn,
       sq_nonneg (deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ) ^ 2))]
   · intro i s hs
@@ -980,23 +980,23 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     have hG2 := hK2 T hδ_le hδ hδZ hball i s hs
     obtain ⟨hs0, hs1⟩ := hs
     set G0 := iteratedCovGrad (I := I) g₀ 4 2 i
-      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 0)) with hG0_def
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 0)) with hG0_def
     set G1 := iteratedCovGrad (I := I) g₀ 4 2 i
-      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 1)) with hG1_def
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 1)) with hG1_def
     set G2 := iteratedCovGrad (I := I) g₀ 4 2 i
-      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) (q 2)) with hG2_def
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) (q 2)) with hG2_def
     have hnorm1 : ‖s • (ε 0 • G0 + ε 1 • G1 + ε 2 • G2)‖ ≤ ‖G0‖ + ‖G1‖ + ‖G2‖ := by
       have hsm : ∀ (c : ℝ), |c| ≤ 1 → ∀ (G : SmoothCcTensor g₀ 4 (2 + i)),
           ‖c • G‖ ≤ ‖G‖ := by
@@ -1034,23 +1034,23 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+          smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         ∃ (C0da : ℝ → SmoothCcTensor g₀ 2 2) (C2da : ℝ → SmoothCcTensor g₀ 4 2),
           linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2 C0da (δ := δ) (δ' := δ) ∧
           linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 C2da (δ := δ) (δ' := δ) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1,
-            appCc (I := I) (M := M) g₀ 2 2
+            operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (deTurckLieCovDerivArmField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ s) g_bg)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 T) =
-              appCc (I := I) (M := M) g₀ 2 2 (C0da s)
+              operatorFieldApply (I := I) (M := M) g₀ 2 2 (C0da s)
                   (iteratedCovGrad (I := I) g₀ 0 2 0 T) +
-                appCc (I := I) (M := M) g₀ 4 2 (C2da s)
+                operatorFieldApply (I := I) (M := M) g₀ 4 2 (C2da s)
                   (iteratedCovGrad (I := I) g₀ 0 2 2 T)) ∧
           (∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x ((C0da s).toSection x) ≤
@@ -1123,7 +1123,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_g
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
@@ -1176,8 +1176,8 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
@@ -1206,7 +1206,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
   have habs : |s| ≤ 1 := by
     rw [abs_of_nonneg hs0]
     exact hs1
-  have hδP : gFibreOpBound (I := I) (M := M) g₀
+  have hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
     intro y v w
     have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
@@ -1244,8 +1244,8 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
@@ -1314,8 +1314,8 @@ set_option linter.unusedVariables false in
 theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

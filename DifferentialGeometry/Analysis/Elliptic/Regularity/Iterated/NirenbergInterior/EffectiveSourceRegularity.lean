@@ -68,11 +68,11 @@ structure CanonicalIteratedDataBundle
   directions_eq : data.directions = dirsOf dirs_seq m
 
   fChartEff_memW1p :
-    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 data.fChartEff
+    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 data.diffChartForcing
       (chartTargetEuclid (I := I) (M := M) α)
 
   fChartEff_ae_zero_off_K :
-    data.fChartEff =ᵐ[(volume : Measure EuclN).restrict
+    data.diffChartForcing =ᵐ[(volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \
         chartImagePOUTsupport (I := I) (M := M) α)]
       (fun _ : EuclN => (0 : ℝ))
@@ -124,7 +124,7 @@ def step
     (h_next_fChartEff_memW1p :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
         (fChartEffStep (I := I) (M := M) g α u_h m B_m.data.directions
-          B_m.data.fChartEff (dirs_seq m))
+          B_m.data.diffChartForcing (dirs_seq m))
         (chartTargetEuclid (I := I) (M := M) α)) :
     CanonicalIteratedDataBundle (I := I) (M := M) g α u_h dirs_seq (m + 1) where
   data := iteratedDiffChartBilinearData_step (I := I) (M := M) g α
@@ -137,7 +137,7 @@ def step
   fChartEff_memW1p := h_next_fChartEff_memW1p
   fChartEff_ae_zero_off_K := by
     change fChartEffStep (I := I) (M := M) g α u_h m B_m.data.directions
-        B_m.data.fChartEff (dirs_seq m) =ᵐ[
+        B_m.data.diffChartForcing (dirs_seq m) =ᵐ[
       (volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \
           chartImagePOUTsupport (I := I) (M := M) α)]
@@ -171,11 +171,11 @@ def FChartEffStepW1pHyp
   ∀ m < M_max,
     ∀ (D_m : IteratedDiffChartBilinearData (I := I) (M := M) g α u_h m),
     D_m.directions = dirsOf dirs_seq m →
-    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D_m.fChartEff
+    DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 D_m.diffChartForcing
       (chartTargetEuclid (I := I) (M := M) α) →
     DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
       (fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
-        D_m.fChartEff (dirs_seq m))
+        D_m.diffChartForcing (dirs_seq m))
       (chartTargetEuclid (I := I) (M := M) α)
 
 def canonicalBundle
@@ -275,7 +275,7 @@ theorem fChartEff_at_level_ae_zero_off_K_alpha
       FChartEffStepW1pHyp (I := I) (M := M) g α u_h dirs_seq m) :
     (iteratedDiffChartBilinearData_canonical (I := I) (M := M) g α
         dirs_seq hu_h h_base_f_chart_memW1p h_base_f_chart_ae_zero m
-        h_chart_H_seq h_step_propagator).fChartEff =ᵐ[
+        h_chart_H_seq h_step_propagator).diffChartForcing =ᵐ[
       (volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α \
           chartImagePOUTsupport (I := I) (M := M) α)]
@@ -291,10 +291,10 @@ def FChartEffStepMemWkpHyp
     ∀ (D_m : IteratedDiffChartBilinearData (I := I) (M := M) g α u_h m),
     D_m.directions = dirsOf dirs_seq m →
     MemWkp (d := Module.finrank ℝ E) ((K + (M_max - 1 - m)) + 1) 2
-      D_m.fChartEff (chartTargetEuclid (I := I) (M := M) α) →
+      D_m.diffChartForcing (chartTargetEuclid (I := I) (M := M) α) →
     MemWkp (d := Module.finrank ℝ E) (K + (M_max - 1 - m)) 2
       (fChartEffStep (I := I) (M := M) g α u_h m D_m.directions
-        D_m.fChartEff (dirs_seq m))
+        D_m.diffChartForcing (dirs_seq m))
       (chartTargetEuclid (I := I) (M := M) α)
 
 private structure CanonicalBundleWithMemWkp
@@ -304,7 +304,7 @@ private structure CanonicalBundleWithMemWkp
     CanonicalIteratedDataBundle (I := I) (M := M) g α u_h dirs_seq m where
 
   fChartEff_memWkp :
-    MemWkp (d := Module.finrank ℝ E) (K + (M_max - m)) 2 data.fChartEff
+    MemWkp (d := Module.finrank ℝ E) (K + (M_max - m)) 2 data.diffChartForcing
       (chartTargetEuclid (I := I) (M := M) α)
 
 namespace CanonicalBundleWithMemWkp
@@ -370,12 +370,12 @@ private def step
     (h_step_W1p :
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2
         (fChartEffStep (I := I) (M := M) g α u_h m B_m.data.directions
-          B_m.data.fChartEff (dirs_seq m))
+          B_m.data.diffChartForcing (dirs_seq m))
         (chartTargetEuclid (I := I) (M := M) α))
     (h_step_memWkp :
       MemWkp (d := Module.finrank ℝ E) (K + (M_max - (m + 1))) 2
         (fChartEffStep (I := I) (M := M) g α u_h m B_m.data.directions
-          B_m.data.fChartEff (dirs_seq m))
+          B_m.data.diffChartForcing (dirs_seq m))
         (chartTargetEuclid (I := I) (M := M) α)) :
     CanonicalBundleWithMemWkp (I := I) (M := M) g α u_h dirs_seq
       M_max K (m + 1) :=
@@ -439,7 +439,7 @@ private def canonicalBundleWithMemWkp_aux
       have h_Bm_memWkp := B_m.fChartEff_memWkp
       have h_Bm_memWkp' :
           MemWkp (d := Module.finrank ℝ E) ((K + (M_max - 1 - m)) + 1) 2
-            B_m.data.fChartEff
+            B_m.data.diffChartForcing
             (chartTargetEuclid (I := I) (M := M) α) := by
         rw [← h_idx_eq_2]; exact h_Bm_memWkp
       have h_step_memWkp_m :=
@@ -521,7 +521,7 @@ theorem fChartEff_at_level_memWkp_K
       (iteratedDiffChartBilinearData_canonicalMemWkp (I := I) (M := M) g α
         dirs_seq m K hu_h h_base_f_chart_memW1p h_base_f_chart_ae_zero
         h_base_f_chart_memWkp h_chart_H_seq h_step_propagator
-        h_step_memWkp).fChartEff
+        h_step_memWkp).diffChartForcing
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   have h_mem := (canonicalBundleWithMemWkp_aux (I := I) (M := M) g α dirs_seq

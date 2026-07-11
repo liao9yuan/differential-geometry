@@ -182,7 +182,7 @@ private lemma enorm_convolution_sub_le_lintegral
 
 omit [NeZero d] in
 
-theorem lintegral_rpow_convolution_sub_le_supTrans
+theorem lintegral_rpow_convolution_sub_le_translationAverage
     {pr : ℝ} (hpr_ge_one : 1 ≤ pr)
     {η : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -289,7 +289,7 @@ theorem lintegral_rpow_convolution_sub_le_supTrans
 
 omit [NeZero d] in
 
-theorem eLpNorm_convolution_sub_le_supTrans_meas
+theorem eLpNorm_convolution_sub_le_of_ae_translation_bound
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {η : E → ℝ}
     (hη_cont : Continuous η) (hη_compact : HasCompactSupport η)
@@ -332,7 +332,7 @@ theorem eLpNorm_convolution_sub_le_supTrans_meas
     rw [hp_eq, eLpNorm_eq_lintegral_rpow_enorm_toReal hp0_pr hp_top_pr]
     simp [hpr_toReal]
   rw [hLHS_eq]
-  have hcore := lintegral_rpow_convolution_sub_le_supTrans hpr_ge_one
+  have hcore := lintegral_rpow_convolution_sub_le_translationAverage hpr_ge_one
       hη_cont hη_compact hη_nonneg hη_int_eq_one hu_meas hu_loc
   have hT_pow : ∀ᵐ s ∂(volume : Measure E),
       η s ≠ 0 →
@@ -845,7 +845,7 @@ theorem tendsto_subseq_of_uniform_translation_in_Lp
       have habs : εFn k = |εFn k| := (abs_of_pos (hε_pos k)).symm
       rw [habs]
       exact hd
-    refine eLpNorm_convolution_sub_le_supTrans_meas
+    refine eLpNorm_convolution_sub_le_of_ae_translation_bound
       hp_one hp_top (hη_cont k) (hη_compact k) (hη_nonneg k) (hη_int_eq_one k)
       (hv_meas n) (hv_loc n) ?_
     filter_upwards with s hs

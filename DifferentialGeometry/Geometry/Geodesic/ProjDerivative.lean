@@ -281,7 +281,7 @@ lemma extChartAt_tangent_apply_snd_tangentCoordChange
   rw [hsnd, hCLM_eq_fiber]
   exact chartFiberCoord_eq_tangentCoordChange (I := I) (α := q.proj) (p := p) hp
 
-def secondaryTrivSndForm (α : M) (p : TangentBundle I M) (z : E × E) : E :=
+def secondaryTrivFiberComponentMap (α : M) (p : TangentBundle I M) (z : E × E) : E :=
   tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2
 
 lemma snd_continuousLinearMapAt_secondaryTriv
@@ -290,7 +290,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
     (w : E × E) :
     ((trivializationAt (E × E) (TangentSpace I.tangent)
         (⟨α, (0 : E)⟩ : TangentBundle I M)).continuousLinearMapAt ℝ p w).2 =
-      (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent)
+      (fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent)
         ((extChartAt I.tangent p) p)) w := by
   classical
   set e := trivializationAt (E × E) (TangentSpace I.tangent)
@@ -343,7 +343,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
     exact Filter.image_mem_map hU_nhds
   have hpoint : ∀ {q : TangentBundle I M}, q ∈ U →
       ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M)) q).2 =
-        secondaryTrivSndForm (I := I) α p ((extChartAt I.tangent p) q) := by
+        secondaryTrivFiberComponentMap (I := I) α p ((extChartAt I.tangent p) q) := by
     intro q hqU
     have hq_src : q ∈ (extChartAt I.tangent p).source := hqU.1
     have hq_proj_src_α : q.proj ∈ (chartAt H α).source := hqU.2
@@ -369,7 +369,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
       rw [hz1]; exact (extChartAt I p.proj).left_inv hq_proj_ext_src
     have hq_proj_ext_src_α : q.proj ∈ (extChartAt I α).source := by
       rw [extChartAt_source]; exact hq_proj_src_α
-    unfold secondaryTrivSndForm
+    unfold secondaryTrivFiberComponentMap
     rw [hsymm_z1, hz2]
     have hq_proj_ext_src_self : q.proj ∈ (extChartAt I q.proj).source :=
       mem_extChartAt_source (I := I) q.proj
@@ -378,7 +378,7 @@ lemma snd_continuousLinearMapAt_secondaryTriv
       ⟨⟨hq_proj_ext_src_self, hq_proj_ext_src⟩, hq_proj_ext_src_α⟩]
     exact hLHS.symm
   have hsnd_Ψ_eq :
-      (secondaryTrivSndForm (I := I) α p) =ᶠ[𝓝[range I.tangent] basepoint]
+      (secondaryTrivFiberComponentMap (I := I) α p) =ᶠ[𝓝[range I.tangent] basepoint]
         (fun z : E × E => (Ψ z).2) := by
     rw [Filter.eventuallyEq_iff_exists_mem]
     refine ⟨(extChartAt I.tangent p) '' U, hVnhds, ?_⟩
@@ -386,31 +386,31 @@ lemma snd_continuousLinearMapAt_secondaryTriv
     have hq_src : q ∈ (extChartAt I.tangent p).source := hqU.1
     have hsymm : (extChartAt I.tangent p).symm z = q := by
       rw [← hqEq]; exact (extChartAt I.tangent p).left_inv hq_src
-    change secondaryTrivSndForm (I := I) α p z =
+    change secondaryTrivFiberComponentMap (I := I) α p z =
       ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M))
         ((extChartAt I.tangent p).symm z)).2
     rw [hsymm, ← hqEq]
     exact (hpoint hqU).symm
   have hsnd_basepoint :
-      (secondaryTrivSndForm (I := I) α p) basepoint =
+      (secondaryTrivFiberComponentMap (I := I) α p) basepoint =
         (fun z : E × E => (Ψ z).2) basepoint := by
     have hsymmp : (extChartAt I.tangent p).symm basepoint = p := by
       rw [hbase_def]
       exact (extChartAt I.tangent p).left_inv
         (mem_extChartAt_source (I := I.tangent) p)
-    change secondaryTrivSndForm (I := I) α p basepoint =
+    change secondaryTrivFiberComponentMap (I := I) α p basepoint =
       ((extChartAt I.tangent (⟨α, (0 : E)⟩ : TangentBundle I M))
         ((extChartAt I.tangent p).symm basepoint)).2
     rw [hsymmp, hbase_def]
     exact (hpoint hU_mem).symm
   have hform_hasD :
-      HasFDerivWithinAt (secondaryTrivSndForm (I := I) α p)
+      HasFDerivWithinAt (secondaryTrivFiberComponentMap (I := I) α p)
         ((ContinuousLinearMap.snd ℝ E E).comp
           (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p))
         (range I.tangent) basepoint :=
     hΨ_snd.congr_of_eventuallyEq hsnd_Ψ_eq hsnd_basepoint
   have hfderivWithin_eq :
-      fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) basepoint =
+      fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) basepoint =
         (ContinuousLinearMap.snd ℝ E E).comp
           (tangentCoordChange I.tangent p (⟨α, (0 : E)⟩ : TangentBundle I M) p) :=
     hform_hasD.fderivWithin (ModelWithCorners.uniqueDiffWithinAt_image I.tangent)

@@ -87,7 +87,7 @@ theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -104,7 +104,7 @@ theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
   have hδ₁_nn : 0 ≤ δ₁ := le_max_right _ _
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ (by norm_num)
   obtain ⟨Ckos, hCkos_nn, hKos⟩ :=
-    rfns_raisedKoszul_le_of_lt_one (I := I) (M := M) g₀ hδ₁_nn hδ₁_lt
+    riemannianFiberNormSq_raisedKoszul_le_of_lt_one (I := I) (M := M) g₀ hδ₁_nn hδ₁_lt
   refine ⟨Ckos ^ 2 * B ^ 2 * ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ₁)) ^ 2),
     by positivity, ?_⟩
   intro g₁ P δ hδ_le hδ htie x henv
@@ -114,7 +114,7 @@ theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
     rw [hδ'_def]
     exact (max_le_max hδ_le (le_refl 0)).trans (le_of_eq (max_eq_left hδ₁_nn))
   have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le_δ₁ hδ₁_lt
-  have hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ' :=
+  have hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ' :=
     gFibreOpBound_mono_local (I := I) g₀ _ (le_max_left _ _) hδ
   have hcoeff₁ : 0 < 1 - δ₁ := by linarith
   have hcoeff' : 0 < 1 - δ' := by linarith
@@ -177,15 +177,15 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_rfns_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope
+theorem exists_riemannianFiberNormSq_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
     (hB : 0 ≤ B) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
         (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
@@ -212,7 +212,7 @@ theorem exists_rfns_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope
         ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w := by
     intro y v w
     rw [hg₁, realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hs_mem y v w]
-  have hδs_raw : gFibreOpBound (I := I) (M := M) g₀
+  have hδs_raw : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
       (|1 - s| * δ' + |s| * δ) :=
     convexPerturbation_gFibreOpBound_abs (I := I) g₀ T T' hδ hδ' s
@@ -226,7 +226,7 @@ theorem exists_rfns_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope
       mul_le_mul_of_nonneg_left hδ_le hs0
     have hδ₀_le : δ₀ ≤ δ₁ := le_max_left _ _
     nlinarith [h1, h2, hδ₀_le]
-  have hδs : gFibreOpBound (I := I) (M := M) g₀
+  have hδs : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)) δ₁ := by
     intro y v w
     refine le_trans (hδs_raw y v w) ?_
@@ -247,9 +247,9 @@ theorem exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope
     ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
         (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
@@ -261,7 +261,7 @@ theorem exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope
                 (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λarm1 := by
   classical
   obtain ⟨Λarm1, hΛarm1_nn, hΛarm1⟩ :=
-    exists_rfns_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
+    exists_riemannianFiberNormSq_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
   refine ⟨Λarm1, hΛarm1_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
   rw [ricciArmOrder1KoszulCoeff_toSection]
@@ -277,9 +277,9 @@ theorem exists_arm1Koszul_realizedFam_rfns_ballUniform
     ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
@@ -307,9 +307,9 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope
     ∃ Λcurv : ℝ, 0 ≤ Λcurv ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
         (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
@@ -324,10 +324,10 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope
                 (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λcurv := by
   classical
   obtain ⟨Λ1, hΛ1_nn, hΛ1⟩ :=
-    DifferentialGeometry.Geometry.Curvature.exists_rfns_riemannBiContrFib_realizedFam_le_of_jetEnvelope
+    DifferentialGeometry.Geometry.Curvature.exists_riemannBiContrFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
       (I := I) (M := M) g₀ hδ₀ B hB
   obtain ⟨Λ2, hΛ2_nn, hΛ2⟩ :=
-    DifferentialGeometry.Geometry.Curvature.exists_rfns_ricciArmOrder0CurvCoeffFib_realizedFam_le_of_jetEnvelope
+    DifferentialGeometry.Geometry.Curvature.exists_ricciArmOrder0CurvCoeffFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
       (I := I) (M := M) g₀ hδ₀ B hB
   refine ⟨max Λ1 Λ2, le_trans hΛ1_nn (le_max_left _ _), ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
@@ -347,9 +347,9 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
     ∃ Λcurv : ℝ, 0 ≤ Λcurv ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
@@ -374,7 +374,7 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
 noncomputable def corrFieldChristoffelBound (g₀ : SmoothRiemannianMetric I M)
     (a : ℕ) (R δ₀ : ℝ) : ℝ :=
   if h : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 then
-    Classical.choose (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
+    Classical.choose (exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
         (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2)
       + (Real.sqrt (Classical.choose
             (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
@@ -392,7 +392,7 @@ theorem corrFieldChristoffelBound_nonneg (g₀ : SmoothRiemannianMetric I M)
   split
   next h =>
     have hΛ := (Classical.choose_spec
-      (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
+      (exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
         (I := I) (M := M) g₀ a h.1 h.2.1 h.2.2)).1
     have h1 : (0 : ℝ) ≤ Real.sqrt (Classical.choose
         (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
@@ -435,9 +435,9 @@ theorem exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform
     ∃ Λcom : ℝ, 0 ≤ Λcom ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
@@ -465,7 +465,7 @@ theorem exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform
       g₁.inner y v w = g₀.inner y v w + hpert y v w := by
     intro y v w
     rw [hg₁, realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hs_mem y v w]
-  have hδs_raw : gFibreOpBound (I := I) (M := M) g₀ hpert (|1 - s| * δ' + |s| * δ) :=
+  have hδs_raw : metricCauchySchwarzBound (I := I) (M := M) g₀ hpert (|1 - s| * δ' + |s| * δ) :=
     convexPerturbation_gFibreOpBound_abs (I := I) g₀ T T' hδ hδ' s
   obtain ⟨hs0, hs1⟩ := hs
   have habs_eq : |1 - s| * δ' + |s| * δ = (1 - s) * δ' + s * δ := by
@@ -477,7 +477,7 @@ theorem exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform
       mul_le_mul_of_nonneg_left hδ_le hs0
     have hδ₀_le : δ₀ ≤ δ₁ := le_max_left _ _
     nlinarith [h1, h2, hδ₀_le]
-  have hδs : gFibreOpBound (I := I) (M := M) g₀ hpert δ₁ := by
+  have hδs : metricCauchySchwarzBound (I := I) (M := M) g₀ hpert δ₁ := by
     refine gFibreOpBound_mono_local (I := I) g₀ hpert ?_ hδs_raw
     rw [habs_eq]; exact hsmall_le
   have hbP := riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le

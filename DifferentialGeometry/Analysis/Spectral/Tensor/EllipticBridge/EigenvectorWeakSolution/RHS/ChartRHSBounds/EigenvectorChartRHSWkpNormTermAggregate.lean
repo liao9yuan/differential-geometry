@@ -49,7 +49,7 @@ section Unconditional
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
-def PouRegularity
+def eigenvectorResolventChartWkpRegularity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ) : Prop :=
   ∀ (β : M) (Q : TensorCompIdx (E := E) r s),
@@ -137,7 +137,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 lemma rhsTerm1_memWkp
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (rhsTerm1 (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -146,7 +146,7 @@ lemma rhsTerm1_memWkp
     g r s i α P₀ K h_pou
 
 lemma rhsTerm2_memWkp
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (rhsTerm2 (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -155,7 +155,7 @@ lemma rhsTerm2_memWkp
     g r s i α P₀ K h_pou
 
 lemma rhsTerm3_memWkp
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (rhsTerm3 (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -164,7 +164,7 @@ lemma rhsTerm3_memWkp
     g r s i α P₀ K h_pou
 
 lemma rhsTerm4_memWkp
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (rhsTerm4 (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -173,7 +173,7 @@ lemma rhsTerm4_memWkp
     g r s i α P₀ K h_pou
 
 lemma rhsTerm5_memWkp
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (rhsTerm5 (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -182,7 +182,7 @@ lemma rhsTerm5_memWkp
     g r s i α P₀ K h_pou
 
 lemma rhsTerm6_memWkp
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (rhsTerm6 (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -191,7 +191,7 @@ lemma rhsTerm6_memWkp
     g r s i α P₀ K h_pou
 
 lemma rhsTerm7_memWkp
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (rhsTerm7 (I := I) (M := M) g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -207,9 +207,9 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-def resInclNorm (N : ℕ) (β : M)
+def resolventH1ComplChartWkpNorm (N : ℕ) (β : M)
     (Q : TensorCompIdx (E := E) r s) : ℝ≥0∞ :=
-  wkpNorm (d := Module.finrank ℝ E) N 2
+  iteratedWeakSobolevNorm (d := Module.finrank ℝ E) N 2
     (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -217,7 +217,7 @@ def resInclNorm (N : ℕ) (β : M)
     (chartTargetEuclid (I := I) (M := M) β)
 
 def aggrUchart : ℝ≥0∞ :=
-  wkpNorm (d := Module.finrank ℝ E) K 2
+  iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
     (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
         (tensorResolventEigenbasisVec (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -228,20 +228,20 @@ def aggrUchart : ℝ≥0∞ :=
 def aggrCrossLeft : ℝ≥0∞ :=
   ∑ β ∈ transportChartCenters (I := I) (M := M) α,
     ((∑ Q : TensorCompIdx (E := E) r s,
-        resInclNorm (I := I) (M := M) g r s i (K + 1) β Q)
+        resolventH1ComplChartWkpNorm (I := I) (M := M) g r s i (K + 1) β Q)
       + ∑ β' ∈ transportChartCenters (I := I) (M := M) β,
           ∑ Q : TensorCompIdx (E := E) r s,
-            resInclNorm (I := I) (M := M) g r s i (K + 1) β' Q)
+            resolventH1ComplChartWkpNorm (I := I) (M := M) g r s i (K + 1) β' Q)
 
 def aggrCrossRight : ℝ≥0∞ :=
   ∑ β ∈ transportChartCenters (I := I) (M := M) α,
     ∑ Q : TensorCompIdx (E := E) r s,
-      resInclNorm (I := I) (M := M) g r s i K β Q
+      resolventH1ComplChartWkpNorm (I := I) (M := M) g r s i K β Q
 
 def aggrPartial : ℝ≥0∞ :=
   ∑ P : TensorCompIdx (E := E) r s,
     ∑ k : Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((partialLpLimit (I := I) (M := M)
             g r s i α P k :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -249,7 +249,7 @@ def aggrPartial : ℝ≥0∞ :=
 
 def aggrComponent : ℝ≥0∞ :=
   ∑ p : TensorCompIdx (E := E) r s,
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => ((componentLpLimit (I := I) (M := M)
           g r s i α p :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -257,7 +257,7 @@ def aggrComponent : ℝ≥0∞ :=
 
 def aggrCrossRightLimit : ℝ≥0∞ :=
   ∑ P : TensorCompIdx (E := E) r s,
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => ((crossRightLimitComponent (I := I) (M := M)
           g r s i α P :
         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -266,7 +266,7 @@ def aggrCrossRightLimit : ℝ≥0∞ :=
 def aggrCutoffPartial : ℝ≥0∞ :=
   ∑ P : TensorCompIdx (E := E) r s,
     ∑ l : Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ((cutoffPartialLpLimit (I := I) (M := M)
             g r s i α P l :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) y)
@@ -342,7 +342,7 @@ lemma aggrCutoffPartial_le :
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.2.2
 
 lemma crossRightGradCoeffDivLimit_memWkp_local
-    (h_pou : PouRegularity (I := I) (M := M) g r s i K) :
+    (h_pou : eigenvectorResolventChartWkpRegularity (I := I) (M := M) g r s i K) :
     MemWkp (d := Module.finrank ℝ E) K 2
       (crossRightGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀)

@@ -32,17 +32,17 @@ private lemma arm1NormSq_eq_integral (g : SmoothRiemannianMetric I M) (r s : ℕ
     tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r s C]
 
 set_option linter.unusedVariables false in
-private lemma rfns_iteratedCovGrad_cometricCastG0_gridWindow_le
+private lemma riemannianFiberNormSq_iteratedCovGrad_cometricCastG0_gridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Kw : ℕ → ℝ, (∀ l, 0 ≤ Kw l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         (l : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + l) x
-            ((iteratedCovGrad (I := I) g₀ 3 1 l (cometricCastG0 (I := I) g₀ g₁)).toSection x) ≤
+            ((iteratedCovGrad (I := I) g₀ 3 1 l (cometricDoubleTraceCastG0 (I := I) g₀ g₁)).toSection x) ≤
           Kw l * Combinatorics.boundedFactorGridWindow
             (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
               ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x)) l (l + 1) := by
@@ -57,21 +57,21 @@ private lemma rfns_iteratedCovGrad_cometricCastG0_gridWindow_le
       (iteratedCovGrad (I := I) g₀ 3 1 i Φ)
   choose SΦ hSΦ_nn hSΦ using hSΦ_ex
   obtain ⟨C, hC_nn, hC⟩ :=
-    rfns_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_slotInsertEndoCc_zero_gInvDiffRaisedEndoField_diagonalProductGrid_le
       (I := I) (M := M) g₀ hδ₀
   set fr : ℝ := (Module.finrank ℝ E : ℝ) with hfr_def
   refine ⟨fun l => 2 * SΦ l +
-      2 * (appCcGdiag (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
+      2 * (diagonalGridGrowthFactor (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
         (fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C q)), ?_, ?_⟩
   · intro l
     have h1 : 0 ≤ SΦ l := hSΦ_nn l
     have h2 : 0 ≤ ∑ i' ∈ Finset.range (l + 1), SΦ i' := Finset.sum_nonneg (fun i' _ => hSΦ_nn i')
     have h3 : 0 ≤ ∑ q ∈ Finset.range (l + 1), C q := Finset.sum_nonneg (fun q _ => hC_nn q)
-    have h4 : 0 ≤ appCcGdiag (E := E) l := appCcGdiag_nonneg (E := E) l
+    have h4 : 0 ≤ diagonalGridGrowthFactor (E := E) l := appCcGdiag_nonneg (E := E) l
     positivity
   · intro g₁ P δ hδ_le hδ0 hδ htie l x
     set W : SmoothCcTensor g₀ 3 3 :=
-      slotInsertEndoCc (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁)
+      endoSlotZeroCcTensor (I := I) (M := M) g₀ 2 (gInvDiffRaisedEndoField (I := I) g₀ g₁)
       with hW_def
     set bP : ℕ → ℝ := fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
       ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x) with hbP_def
@@ -99,28 +99,28 @@ private lemma rfns_iteratedCovGrad_cometricCastG0_gridWindow_le
             ((iteratedCovGrad (I := I) g₀ 3 3 q W).toSection x)
           ≤ fr ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + q) x
               ((iteratedCovGrad (I := I) g₀ 1 1 q
-                (slotInsertEndoCc (I := I) (M := M) g₀ 0
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ 0
                   (gInvDiffRaisedEndoField (I := I) g₀ g₁))).toSection x) := h1
         _ ≤ fr ^ 2 * (C q * Combinatorics.boundedFactorGrid bP l q) :=
             mul_le_mul_of_nonneg_left h2 (sq_nonneg fr)
         _ = fr ^ 2 * C q * Combinatorics.boundedFactorGrid bP l q := by ring
-    have hid : cometricCastG0 (I := I) g₀ g₁ = Φ + appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W := by
+    have hid : cometricDoubleTraceCastG0 (I := I) g₀ g₁ = Φ + ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 1 Φ W := by
       rw [hΦ_def, hW_def]
       exact cometricCastG0_eq_doubleTrace_add_appCcRS (I := I) g₀ g₁
-    rw [hid, iteratedCovGrad_add (I := I) g₀ 3 1 l Φ (appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W)]
+    rw [hid, iteratedCovGrad_add (I := I) g₀ 3 1 l Φ (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 1 Φ W)]
     rw [show ((iteratedCovGrad (I := I) g₀ 3 1 l Φ +
-          iteratedCovGrad (I := I) g₀ 3 1 l (appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x) =
+          iteratedCovGrad (I := I) g₀ 3 1 l (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x) =
         (iteratedCovGrad (I := I) g₀ 3 1 l Φ).toSection x +
-          (iteratedCovGrad (I := I) g₀ 3 1 l (appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x
+          (iteratedCovGrad (I := I) g₀ 3 1 l (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x
         from by rw [SmoothCcTensor.toSection_add]; rfl]
     refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g₀ 3 (1 + l) x _ _) ?_
     have hA : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + l) x
         ((iteratedCovGrad (I := I) g₀ 3 1 l Φ).toSection x) ≤ SΦ l := hSΦ l x
     have hB : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + l) x
-        ((iteratedCovGrad (I := I) g₀ 3 1 l (appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x) ≤
-        (appCcGdiag (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
+        ((iteratedCovGrad (I := I) g₀ 3 1 l (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x) ≤
+        (diagonalGridGrowthFactor (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
           (fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C q)) * BFGW := by
-      refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+      refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
         (I := I) (M := M) g₀ l 3 3 1 Φ W x) ?_
       rw [mul_assoc, mul_assoc]
       refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) l)
@@ -165,39 +165,39 @@ private lemma rfns_iteratedCovGrad_cometricCastG0_gridWindow_le
         _ = (∑ i' ∈ Finset.range (l + 1), SΦ i') *
               ((fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C q) * BFGW) := by
             rw [Finset.sum_mul]
-    have hKw_pos_part : 0 ≤ appCcGdiag (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
+    have hKw_pos_part : 0 ≤ diagonalGridGrowthFactor (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
         (fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C q) := by
       have h2 : 0 ≤ ∑ i' ∈ Finset.range (l + 1), SΦ i' :=
         Finset.sum_nonneg (fun i' _ => hSΦ_nn i')
       have h3 : 0 ≤ ∑ q ∈ Finset.range (l + 1), C q := Finset.sum_nonneg (fun q _ => hC_nn q)
-      have h4 : 0 ≤ appCcGdiag (E := E) l := appCcGdiag_nonneg (E := E) l
+      have h4 : 0 ≤ diagonalGridGrowthFactor (E := E) l := appCcGdiag_nonneg (E := E) l
       positivity
     have hSΦl_le : SΦ l ≤ SΦ l * BFGW := le_mul_of_one_le_right (hSΦ_nn l) hBFGW_one
     calc 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + l) x
             ((iteratedCovGrad (I := I) g₀ 3 1 l Φ).toSection x) +
           2 * riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + l) x
             ((iteratedCovGrad (I := I) g₀ 3 1 l
-              (appCcRS (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x)
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 3 3 1 Φ W)).toSection x)
         ≤ 2 * SΦ l +
-            2 * ((appCcGdiag (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
+            2 * ((diagonalGridGrowthFactor (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
               (fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C q)) * BFGW) :=
           add_le_add (by linarith [hA]) (by linarith [hB])
       _ ≤ 2 * (SΦ l * BFGW) +
-            2 * ((appCcGdiag (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
+            2 * ((diagonalGridGrowthFactor (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
               (fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C q)) * BFGW) := by
           have := hSΦl_le; linarith
       _ = (2 * SΦ l +
-            2 * (appCcGdiag (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
+            2 * (diagonalGridGrowthFactor (E := E) l * (∑ i' ∈ Finset.range (l + 1), SΦ i') *
               (fr ^ 2 * ∑ q ∈ Finset.range (l + 1), C q))) * BFGW := by ring
 
-private lemma rfns_appCcRS_coeffLower_general_le (g : SmoothRiemannianMetric I M)
+private lemma riemannianFiberNormSq_appCcRS_coeffLower_general_le (g : SmoothRiemannianMetric I M)
     (p a b : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g p a) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g p (b + i) x
         ((∑ k ∈ Finset.range i,
-          appCcRS (I := I) (M := M) g p (a + (k + 1)) (b + i)
+          ccOperatorFieldComp (I := I) (M := M) g p (a + (k + 1)) (b + i)
             (appCcLeibnizPsi (I := I) (M := M) g a b Φ i (k + 1))
             (iteratedCovGrad (I := I) g p a (k + 1) W)).toSection x) ≤
-      (i : ℝ) * appCcGdiag (E := E) i *
+      (i : ℝ) * diagonalGridGrowthFactor (E := E) i *
         ∑ k ∈ Finset.range i,
           riemannianFiberNormSq (I := I) (M := M) g a (b + (i - (k + 1))) x
               ((iteratedCovGrad (I := I) g a b (i - (k + 1)) Φ).toSection x) *
@@ -206,7 +206,7 @@ private lemma rfns_appCcRS_coeffLower_general_le (g : SmoothRiemannianMetric I M
   rw [SmoothCcTensor.toSection_sum_apply]
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g p (b + i) x
     (Finset.range i) (fun k =>
-      (appCcRS (I := I) (M := M) g p (a + (k + 1)) (b + i)
+      (ccOperatorFieldComp (I := I) (M := M) g p (a + (k + 1)) (b + i)
         (appCcLeibnizPsi (I := I) (M := M) g a b Φ i (k + 1))
         (iteratedCovGrad (I := I) g p a (k + 1) W)).toSection x)) ?_
   rw [Finset.card_range, mul_assoc]
@@ -232,16 +232,16 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
     ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧ ∃ Kleak : ℝ, 0 ≤ Kleak ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ),
           ‖iteratedCovGrad (I := I) g₀ 3 2 i
                 (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) -
-              appCcRS (I := I) (M := M) g₀ 3 1 (2 + i)
+              ccOperatorFieldComp (I := I) (M := M) g₀ 3 1 (2 + i)
                 (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
-                (cometricCastG0 (I := I) g₀ g₁)‖ ^ 2 ≤
+                (cometricDoubleTraceCastG0 (I := I) g₀ g₁)‖ ^ 2 ≤
             Kc i * (1 + ∑ j ∈ Finset.range (i + 1),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) +
               Kleak * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P‖ ^ 2 := by
@@ -249,45 +249,45 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
   obtain ⟨Kw, hKw_nn, hKwbound⟩ :=
-    rfns_iteratedCovGrad_cometricCastG0_gridWindow_le (I := I) (M := M) g₀ hδ₀
+    riemannianFiberNormSq_iteratedCovGrad_cometricCastG0_gridWindow_le (I := I) (M := M) g₀ hδ₀
   obtain ⟨Kflat, hKflat_nn, hKflat⟩ :=
     boundedFactorGridWindow_integral_ballUniform_flat_allOrders (I := I) (M := M) g₀ a ha_super hR
-  refine ⟨fun i => (i : ℝ) * appCcGdiag (E := E) i *
+  refine ⟨fun i => (i : ℝ) * diagonalGridGrowthFactor (E := E) i *
       (∑ k ∈ Finset.range i, 10 * Kw (k + 1)) * Kflat (i - 1), ?_, 0, le_refl 0, ?_⟩
   · intro i
     have h1 : 0 ≤ ∑ k ∈ Finset.range i, 10 * Kw (k + 1) :=
       Finset.sum_nonneg (fun k _ => by have := hKw_nn (k + 1); linarith)
-    have h2 : 0 ≤ appCcGdiag (E := E) i := appCcGdiag_nonneg (E := E) i
+    have h2 : 0 ≤ diagonalGridGrowthFactor (E := E) i := appCcGdiag_nonneg (E := E) i
     have h3 : 0 ≤ Kflat (i - 1) := hKflat_nn (i - 1)
     positivity
   · intro g₁ P δ hδ_le hδ htie hPball i
     have hdiff : iteratedCovGrad (I := I) g₀ 3 2 i (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) -
-          appCcRS (I := I) (M := M) g₀ 3 1 (2 + i)
+          ccOperatorFieldComp (I := I) (M := M) g₀ 3 1 (2 + i)
             (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
-            (cometricCastG0 (I := I) g₀ g₁) =
+            (cometricDoubleTraceCastG0 (I := I) g₀ g₁) =
           ∑ k ∈ Finset.range i,
-            appCcRS (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
+            ccOperatorFieldComp (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
               (appCcLeibnizPsi (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) i (k + 1))
-              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricCastG0 (I := I) g₀ g₁)) := by
+              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricDoubleTraceCastG0 (I := I) g₀ g₁)) := by
       have hsum : iteratedCovGrad (I := I) g₀ 3 2 i
             (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) =
           (∑ k ∈ Finset.range i,
-            appCcRS (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
+            ccOperatorFieldComp (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
               (appCcLeibnizPsi (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) i (k + 1))
-              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricCastG0 (I := I) g₀ g₁))) +
-            appCcRS (I := I) (M := M) g₀ 3 1 (2 + i)
+              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricDoubleTraceCastG0 (I := I) g₀ g₁))) +
+            ccOperatorFieldComp (I := I) (M := M) g₀ 3 1 (2 + i)
               (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
-              (cometricCastG0 (I := I) g₀ g₁) := by
-        rw [ricciArmOrder1KoszulCoeff_eq_appCcRS (I := I) g₀ g₁,
+              (cometricDoubleTraceCastG0 (I := I) g₀ g₁) := by
+        rw [ricciArmOrder1KoszulCoeff_eq_raisedKoszul_contract_cometricDoubleTraceCastG0 (I := I) g₀ g₁,
           iteratedCovGrad_appCcRS_eq (I := I) (M := M) g₀ 3 1 2 (raisedKoszul (I := I) g₀ g₁)
-            (cometricCastG0 (I := I) g₀ g₁) i,
+            (cometricDoubleTraceCastG0 (I := I) g₀ g₁) i,
           Finset.sum_range_succ' (fun k =>
-            appCcRS (I := I) (M := M) g₀ 3 (1 + k) (2 + i)
+            ccOperatorFieldComp (I := I) (M := M) g₀ 3 (1 + k) (2 + i)
               (appCcLeibnizPsi (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) i k)
-              (iteratedCovGrad (I := I) g₀ 3 1 k (cometricCastG0 (I := I) g₀ g₁))) i]
+              (iteratedCovGrad (I := I) g₀ 3 1 k (cometricDoubleTraceCastG0 (I := I) g₀ g₁))) i]
         congr 1
         rw [appCcLeibnizPsi_zero_right_eq (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) i,
-          iteratedCovGrad_zero (I := I) g₀ 3 1 (cometricCastG0 (I := I) g₀ g₁)]
+          iteratedCovGrad_zero (I := I) g₀ 3 1 (cometricDoubleTraceCastG0 (I := I) g₀ g₁)]
       rw [hsum]; abel
     rw [hdiff]
     by_cases hMne : Nonempty M
@@ -311,21 +311,21 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
             mul_neg_of_neg_of_pos hδc' hsqrt_pos
           exact mul_neg_of_neg_of_pos h1 hsqrt_pos
         linarith [le_trans habs_nn hbound]
-      set C : ℝ := (i : ℝ) * appCcGdiag (E := E) i * (∑ k ∈ Finset.range i, 10 * Kw (k + 1))
+      set C : ℝ := (i : ℝ) * diagonalGridGrowthFactor (E := E) i * (∑ k ∈ Finset.range i, 10 * Kw (k + 1))
         with hC_def
       have hC_nn : 0 ≤ C := by
         rw [hC_def]
         have h1 : 0 ≤ ∑ k ∈ Finset.range i, 10 * Kw (k + 1) :=
           Finset.sum_nonneg (fun k _ => by have := hKw_nn (k + 1); linarith)
-        have h2 : 0 ≤ appCcGdiag (E := E) i := appCcGdiag_nonneg (E := E) i
+        have h2 : 0 ≤ diagonalGridGrowthFactor (E := E) i := appCcGdiag_nonneg (E := E) i
         positivity
       have hpt : ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + i) x
               ((∑ k ∈ Finset.range i,
-                appCcRS (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
+                ccOperatorFieldComp (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
                   (appCcLeibnizPsi (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) i (k + 1))
                   (iteratedCovGrad (I := I) g₀ 3 1 (k + 1)
-                    (cometricCastG0 (I := I) g₀ g₁))).toSection x) ≤
+                    (cometricDoubleTraceCastG0 (I := I) g₀ g₁))).toSection x) ≤
             C * Combinatorics.boundedFactorGridWindow
               (fun l => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x)) i (i + 2) := by
@@ -334,15 +334,15 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
           ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) with hbP_def
         have hbP_nn : ∀ l, 0 ≤ bP l :=
           fun l => riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x _
-        refine le_trans (rfns_appCcRS_coeffLower_general_le (I := I) (M := M) g₀ 3 1 2
-          (raisedKoszul (I := I) g₀ g₁) (cometricCastG0 (I := I) g₀ g₁) i x) ?_
+        refine le_trans (riemannianFiberNormSq_appCcRS_coeffLower_general_le (I := I) (M := M) g₀ 3 1 2
+          (raisedKoszul (I := I) g₀ g₁) (cometricDoubleTraceCastG0 (I := I) g₀ g₁) i x) ?_
         have hsumcell : (∑ k ∈ Finset.range i,
               riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + (i - (k + 1))) x
                   ((iteratedCovGrad (I := I) g₀ 1 2 (i - (k + 1))
                     (raisedKoszul (I := I) g₀ g₁)).toSection x) *
                 riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + (k + 1)) x
                   ((iteratedCovGrad (I := I) g₀ 3 1 (k + 1)
-                    (cometricCastG0 (I := I) g₀ g₁)).toSection x)) ≤
+                    (cometricDoubleTraceCastG0 (I := I) g₀ g₁)).toSection x)) ≤
             (∑ k ∈ Finset.range i, 10 * Kw (k + 1)) *
               Combinatorics.boundedFactorGridWindow bP i (i + 2) := by
           rw [Finset.sum_mul]
@@ -370,7 +370,7 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
                     (raisedKoszul (I := I) g₀ g₁)).toSection x) *
                 riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + (k + 1)) x
                   ((iteratedCovGrad (I := I) g₀ 3 1 (k + 1)
-                    (cometricCastG0 (I := I) g₀ g₁)).toSection x)
+                    (cometricDoubleTraceCastG0 (I := I) g₀ g₁)).toSection x)
               ≤ (10 * bP (i - k)) *
                   (Kw (k + 1) * Combinatorics.boundedFactorGridWindow bP (k + 1) (k + 2)) := by
                 refine mul_le_mul hRK hCG
@@ -381,19 +381,19 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
             _ ≤ 10 * Kw (k + 1) * Combinatorics.boundedFactorGridWindow bP i (i + 2) := by
                 refine mul_le_mul_of_nonneg_left hcomb ?_
                 have := hKw_nn (k + 1); positivity
-        calc (i : ℝ) * appCcGdiag (E := E) i *
+        calc (i : ℝ) * diagonalGridGrowthFactor (E := E) i *
               ∑ k ∈ Finset.range i,
                 riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + (i - (k + 1))) x
                     ((iteratedCovGrad (I := I) g₀ 1 2 (i - (k + 1))
                       (raisedKoszul (I := I) g₀ g₁)).toSection x) *
                   riemannianFiberNormSq (I := I) (M := M) g₀ 3 (1 + (k + 1)) x
                     ((iteratedCovGrad (I := I) g₀ 3 1 (k + 1)
-                      (cometricCastG0 (I := I) g₀ g₁)).toSection x)
-            ≤ (i : ℝ) * appCcGdiag (E := E) i *
+                      (cometricDoubleTraceCastG0 (I := I) g₀ g₁)).toSection x)
+            ≤ (i : ℝ) * diagonalGridGrowthFactor (E := E) i *
                 ((∑ k ∈ Finset.range i, 10 * Kw (k + 1)) *
                   Combinatorics.boundedFactorGridWindow bP i (i + 2)) := by
               refine mul_le_mul_of_nonneg_left hsumcell ?_
-              have h2 : 0 ≤ appCcGdiag (E := E) i := appCcGdiag_nonneg (E := E) i
+              have h2 : 0 ≤ diagonalGridGrowthFactor (E := E) i := appCcGdiag_nonneg (E := E) i
               positivity
           _ = C * Combinatorics.boundedFactorGridWindow bP i (i + 2) := by rw [hC_def]; ring
       rcases i with _ | j
@@ -401,7 +401,7 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
           not_false_eq_true, zero_pow]
         have h1 : 0 ≤ ∑ k ∈ Finset.range 0, 10 * Kw (k + 1) :=
           Finset.sum_nonneg (fun k _ => by have := hKw_nn (k + 1); linarith)
-        have h2 : 0 ≤ appCcGdiag (E := E) 0 := appCcGdiag_nonneg (E := E) 0
+        have h2 : 0 ≤ diagonalGridGrowthFactor (E := E) 0 := appCcGdiag_nonneg (E := E) 0
         have h3 : 0 ≤ Kflat (0 - 1) := hKflat_nn (0 - 1)
         have hsumnn : 0 ≤ ∑ j ∈ Finset.range 1, ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 :=
           Finset.sum_nonneg (fun j _ => sq_nonneg _)
@@ -415,9 +415,9 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
         have hkey := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M)
           g₀ 3 (2 + (j + 1))
           (∑ k ∈ Finset.range (j + 1),
-            appCcRS (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + (j + 1))
+            ccOperatorFieldComp (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + (j + 1))
               (appCcLeibnizPsi (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) (j + 1) (k + 1))
-              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricCastG0 (I := I) g₀ g₁)))
+              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricDoubleTraceCastG0 (I := I) g₀ g₁)))
           _ hint hpt
         refine le_trans hkey ?_
         rw [MeasureTheory.integral_const_mul]
@@ -435,15 +435,15 @@ theorem ricciArmOrder1KoszulCoeff_topSeparatedResidual_jetL2_flat_leak_allOrders
         ring
     · haveI : IsEmpty M := not_nonempty_iff.mp hMne
       have hz : ‖∑ k ∈ Finset.range i,
-            appCcRS (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
+            ccOperatorFieldComp (I := I) (M := M) g₀ 3 (1 + (k + 1)) (2 + i)
               (appCcLeibnizPsi (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) i (k + 1))
-              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricCastG0 (I := I) g₀ g₁))‖ = 0 := by
+              (iteratedCovGrad (I := I) g₀ 3 1 (k + 1) (cometricDoubleTraceCastG0 (I := I) g₀ g₁))‖ = 0 := by
         rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
           MeasureTheory.integral_of_isEmpty, Real.sqrt_zero]
       rw [hz, zero_pow (by norm_num : (2 : ℕ) ≠ 0)]
       have h1 : 0 ≤ ∑ k ∈ Finset.range i, 10 * Kw (k + 1) :=
         Finset.sum_nonneg (fun k _ => by have := hKw_nn (k + 1); linarith)
-      have h2 : 0 ≤ appCcGdiag (E := E) i := appCcGdiag_nonneg (E := E) i
+      have h2 : 0 ≤ diagonalGridGrowthFactor (E := E) i := appCcGdiag_nonneg (E := E) i
       have h3 : 0 ≤ Kflat (i - 1) := hKflat_nn (i - 1)
       have hsumnn : 0 ≤ ∑ j ∈ Finset.range (i + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2 :=
         Finset.sum_nonneg (fun j _ => sq_nonneg _)
@@ -457,7 +457,7 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic_allOrders
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧ ∃ Kleak : ℝ, 0 ≤ Kleak ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
@@ -487,15 +487,15 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic_allOrders
   obtain ⟨hBsup, _⟩ := hBfeed g₁ P hδ_le hδ htie hPball
   have hheadpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 3 (2 + i) x
-          ((appCcRS (I := I) (M := M) g₀ 3 1 (2 + i)
+          ((ccOperatorFieldComp (I := I) (M := M) g₀ 3 1 (2 + i)
             (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
-            (cometricCastG0 (I := I) g₀ g₁)).toSection x) ≤
+            (cometricDoubleTraceCastG0 (I := I) g₀ g₁)).toSection x) ≤
         10 * ΛB ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 1)) x
           ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P).toSection x) := by
     intro x
     rw [appCcRS_toSection (I := I) (M := M) g₀ 3 1 (2 + i)
       (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
-      (cometricCastG0 (I := I) g₀ g₁) x]
+      (cometricDoubleTraceCastG0 (I := I) g₀ g₁) x]
     refine le_trans (riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g₀ 3 1
       (2 + i) x _ _) ?_
     have h1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
@@ -504,11 +504,11 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic_allOrders
           ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P).toSection x) :=
       rfns_iteratedCovGrad_raisedKoszul_pointwise_le (I := I) (M := M) g₀ g₁ P htie i x
     have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
-        ((cometricCastG0 (I := I) g₀ g₁).toSection x) ≤ ΛB ^ 2 := hBsup x
+        ((cometricDoubleTraceCastG0 (I := I) g₀ g₁).toSection x) ≤ ΛB ^ 2 := hBsup x
     calc riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
           ((iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁)).toSection x) *
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
-          ((cometricCastG0 (I := I) g₀ g₁).toSection x)
+          ((cometricDoubleTraceCastG0 (I := I) g₀ g₁).toSection x)
         ≤ (10 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 1)) x
             ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P).toSection x)) * ΛB ^ 2 := by
           refine mul_le_mul h1 h2
@@ -518,9 +518,9 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic_allOrders
           positivity
       _ = 10 * ΛB ^ 2 * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 1)) x
             ((iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P).toSection x) := by ring
-  refine ⟨appCcRS (I := I) (M := M) g₀ 3 1 (2 + i)
+  refine ⟨ccOperatorFieldComp (I := I) (M := M) g₀ 3 1 (2 + i)
       (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
-      (cometricCastG0 (I := I) g₀ g₁), hheadpt, ?_, ?_⟩
+      (cometricDoubleTraceCastG0 (I := I) g₀ g₁), hheadpt, ?_, ?_⟩
   · have hF_int : MeasureTheory.Integrable
         (fun x => 10 * ΛB ^ 2 *
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (i + 1)) x
@@ -530,9 +530,9 @@ theorem ricciArmOrder1KoszulCoeff_perOrder_l2_topSeparated_generic_allOrders
         (iteratedCovGrad (I := I) g₀ 0 2 (i + 1) P)).const_mul _
     have key := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M)
       g₀ 3 (2 + i)
-      (appCcRS (I := I) (M := M) g₀ 3 1 (2 + i)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 3 1 (2 + i)
         (iteratedCovGrad (I := I) g₀ 1 2 i (raisedKoszul (I := I) g₀ g₁))
-        (cometricCastG0 (I := I) g₀ g₁))
+        (cometricDoubleTraceCastG0 (I := I) g₀ g₁))
       _ hF_int hheadpt
     refine le_trans key ?_
     rw [MeasureTheory.integral_const_mul]

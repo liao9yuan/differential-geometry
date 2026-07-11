@@ -78,7 +78,7 @@ theorem riemannianFiberNormSq_three_le_of_slot0_bound
     _ = (n : ℝ) * B := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
-private noncomputable def rfnsBudget
+private noncomputable def secondCovGradEnergyBudget
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) : ℝ :=
   riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T₀.toSection x) +
     riemannianFiberNormSq (I := I) (M := M) g 0 3 x
@@ -90,8 +90,8 @@ private noncomputable def rfnsBudget
 set_option linter.unusedSectionVars false in
 private lemma rfnsBudget_nonneg
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
-    0 ≤ rfnsBudget (I := I) (M := M) g T₀ x := by
-  unfold rfnsBudget
+    0 ≤ secondCovGradEnergyBudget (I := I) (M := M) g T₀ x := by
+  unfold secondCovGradEnergyBudget
   have h1 := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 2 x (T₀.toSection x)
   have h2 := riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 3 x
     ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x)
@@ -117,7 +117,7 @@ theorem covGradRoughLapCurv_hpt_of_slot0_budget
           riemannianFiberNormSq (I := I) (M := M) g 0 2 x
               (slot0Curry (I := I) (M := M) g x 2 e K₀
                 ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x) a) ≤
-            D₀ ^ 2 * rfnsBudget (I := I) (M := M) g T₀ x) :
+            D₀ ^ 2 * secondCovGradEnergyBudget (I := I) (M := M) g T₀ x) :
     ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 3 x
           ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x) ≤
@@ -133,15 +133,15 @@ theorem covGradRoughLapCurv_hpt_of_slot0_budget
   obtain ⟨n, e, K₀, hn, hsplit, hper⟩ := hbudget x
   have hle : riemannianFiberNormSq (I := I) (M := M) g 0 3 x
       ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x) ≤
-        (n : ℝ) * (D₀ ^ 2 * rfnsBudget (I := I) (M := M) g T₀ x) :=
+        (n : ℝ) * (D₀ ^ 2 * secondCovGradEnergyBudget (I := I) (M := M) g T₀ x) :=
     riemannianFiberNormSq_three_le_of_slot0_bound (I := I) (M := M) g T₀ x e K₀ hsplit
-      (D₀ ^ 2 * rfnsBudget (I := I) (M := M) g T₀ x) hper
+      (D₀ ^ 2 * secondCovGradEnergyBudget (I := I) (M := M) g T₀ x) hper
   have hn_E : (n : ℝ) = (Module.finrank ℝ E : ℝ) := by
     rw [hn]; norm_cast
   have hsq : (Real.sqrt (Module.finrank ℝ E) * D₀) ^ 2 =
       (Module.finrank ℝ E : ℝ) * D₀ ^ 2 := by
     rw [mul_pow, Real.sq_sqrt (by positivity)]
-  have hbud_eq : rfnsBudget (I := I) (M := M) g T₀ x =
+  have hbud_eq : secondCovGradEnergyBudget (I := I) (M := M) g T₀ x =
       (riemannianFiberNormSq (I := I) (M := M) g 0 2 x (T₀.toSection x) +
         riemannianFiberNormSq (I := I) (M := M) g 0 3 x
           ((covGrad (I := I) (M := M) g 0 2 T₀).toSection x) +
@@ -152,8 +152,8 @@ theorem covGradRoughLapCurv_hpt_of_slot0_budget
   calc
     riemannianFiberNormSq (I := I) (M := M) g 0 3 x
         ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x)
-        ≤ (n : ℝ) * (D₀ ^ 2 * rfnsBudget (I := I) (M := M) g T₀ x) := hle
-    _ = (Module.finrank ℝ E : ℝ) * D₀ ^ 2 * rfnsBudget (I := I) (M := M) g T₀ x := by
+        ≤ (n : ℝ) * (D₀ ^ 2 * secondCovGradEnergyBudget (I := I) (M := M) g T₀ x) := hle
+    _ = (Module.finrank ℝ E : ℝ) * D₀ ^ 2 * secondCovGradEnergyBudget (I := I) (M := M) g T₀ x := by
         rw [hn_E]; ring
 
 end Connection

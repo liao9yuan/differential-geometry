@@ -46,7 +46,7 @@ private def eigenvectorIteratedChartBilinearH1ComplData
   u_chart :=
     eigenvectorChartIteratedPartial (I := I) (M := M)
       g r s i α P₀ m D_m.directions
-  f_chart := D_m.fChartEff
+  f_chart := D_m.diffChartForcing
   weak_partial := fun j =>
     chosenWeakPartial' (d := Module.finrank ℝ E) 2 j
       (eigenvectorChartIteratedPartial (I := I) (M := M)

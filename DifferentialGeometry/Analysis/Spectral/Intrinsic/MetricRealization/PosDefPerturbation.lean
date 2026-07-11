@@ -26,7 +26,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-def gFibreOpBound
+def metricCauchySchwarzBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (δ : ℝ) : Prop :=
@@ -58,7 +58,7 @@ theorem perturbedInner_symm
 private lemma abs_h_diag_le
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) :
     |h x v v| ≤ δ * g.inner x v v := by
   have hnn : 0 ≤ g.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g x v
@@ -73,7 +73,7 @@ private lemma abs_h_diag_le
 theorem perturbedInner_self_lower_bound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) :
     (1 - δ) * g.inner x v v ≤ perturbedInner g h x v v := by
   have hdiag := abs_h_diag_le (I := I) (M := M) g h hδ x v
@@ -82,10 +82,10 @@ theorem perturbedInner_self_lower_bound
   rw [perturbedInner_apply]
   nlinarith [hge]
 
-theorem perturbedInner_pos_of_gOpBound
+theorem perturbedInner_pos_of_metricCauchySchwarzBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
     0 < perturbedInner g h x v v := by
   have hg_pos : 0 < g.inner x v v := g.pos x v hv
@@ -146,7 +146,7 @@ private lemma gSublevel_isVonNBounded
 theorem perturbedInner_isVonNBounded
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ)
     (x : M) :
     Bornology.IsVonNBounded ℝ
       {v : TangentSpace I x | perturbedInner g h x v v < 1} := by
@@ -251,11 +251,11 @@ noncomputable def perturbedMetric
         (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
         b (h b)))
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ) :
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ) :
     SmoothRiemannianMetric I M where
   inner x := perturbedInner g h x
   symm x v w := perturbedInner_symm (I := I) (M := M) g h hsymm x v w
-  pos x v hv := perturbedInner_pos_of_gOpBound (I := I) (M := M) g h hδ_lt hδ x v hv
+  pos x v hv := perturbedInner_pos_of_metricCauchySchwarzBound (I := I) (M := M) g h hδ_lt hδ x v hv
   isVonNBounded x := perturbedInner_isVonNBounded (I := I) (M := M) g h hδ_lt hδ x
   contMDiff := perturbedInner_contMDiff (I := I) (M := M) g h hsmooth
 
@@ -269,7 +269,7 @@ noncomputable def perturbedMetric
         (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
         b (h b)))
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ : gFibreOpBound g h δ) (x : M) :
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ : metricCauchySchwarzBound g h δ) (x : M) :
     (perturbedMetric g h hsymm hsmooth hδ_lt hδ).inner x = perturbedInner g h x :=
   rfl
 
@@ -285,7 +285,7 @@ theorem exists_posDef_perturbation_radius
             (E →L[ℝ] E →L[ℝ] ℝ)
             (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
             b (h b))) →
-        ∀ δ' : ℝ, δ' < δ → gFibreOpBound g h δ' →
+        ∀ δ' : ℝ, δ' < δ → metricCauchySchwarzBound g h δ' →
           ∃ g' : SmoothRiemannianMetric I M,
             ∀ (x : M) (v w : TangentSpace I x),
               g'.inner x v w = g.inner x v w + h x v w := by

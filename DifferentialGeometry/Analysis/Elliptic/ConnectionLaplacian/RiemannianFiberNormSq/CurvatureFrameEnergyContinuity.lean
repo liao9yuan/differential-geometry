@@ -170,7 +170,7 @@ theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound
           riemannianFiberNormSq (I := I) (M := M) g 0 t x
             (riemannOp (tensorCov (I := I) g 0 t) x (e i) (e j)
               (dualTensorFrameS (I := I) (M := M) g x t e J)) ≤ K :=
-  exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound' (I := I) (M := M) g t
+  exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound_of_leviCivitaGNormBound (I := I) (M := M) g t
 
 theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_const
     (g : SmoothRiemannianMetric I M) (t : ℕ) :

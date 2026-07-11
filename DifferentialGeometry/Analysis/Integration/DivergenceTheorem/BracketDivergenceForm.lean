@@ -56,12 +56,12 @@ theorem loweredCovDerivAlongVF_firstSlot_eq_lower_covApply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W' Z : SmoothCcTensor g r s)
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
-    tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (Tensor0SSpace.toModel
           (loweredCovDerivAlongVF (I := I) (M := M) g r s W'.toSection V x))
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s Z.toSection x)) =
-      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (lowerAllUpperIndices (I := I) (M := M) g r s x
           (TensorRSSpace.toModel
             (covApply (tensorCov (I := I) g r s) (fun y : M => V y)
@@ -74,16 +74,16 @@ theorem loweredCovDerivAlongVF_firstSlot_eq_lower_covApply
   rw [loweredCovDerivAlongVF_apply, hbridge]
   rfl
 
-theorem loweredCovDeriv_bracketChannel_combined_isDivergence
+theorem loweredCovDeriv_leibniz_combined_integral_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W' Z : SmoothCcTensor g r s)
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
-    ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g r s W'.toSection V x))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s Z.toSection x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s W'.toSection x))
             (Tensor0SSpace.toModel
@@ -103,12 +103,12 @@ theorem loweredCovDeriv_bracketChannel_combined_eq_divergence_smoothSmul
           (tensorInnerScalar (I := I) (M := M) g r s W'.toSection Z.toSection)
           (tensorInnerScalar_contMDiff (I := I) (M := M) g r s W'.toSection Z.toSection)
           V) x =
-      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (loweredCovDerivAlongVF (I := I) (M := M) g r s W'.toSection V x))
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s Z.toSection x))
-        + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+        + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s W'.toSection x))
           (Tensor0SSpace.toModel
@@ -137,7 +137,7 @@ theorem divergence_g_finset_sum
     rw [divergence_g_add (I := I) (M := M) g (V a) (∑ i ∈ t, V i) x]
     rw [ih]
 
-theorem frameSummed_bracketCovDeriv_combined_eq_divergence
+theorem frameSummed_covDerivAlongVF_leibniz_combined_eq_divergence
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {ι : Type*} [Fintype ι]
     (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (W : ι → SmoothCcTensor g r s) (Z : SmoothCcTensor g r s) (x : M) :
@@ -146,12 +146,12 @@ theorem frameSummed_bracketCovDeriv_combined_eq_divergence
           (tensorInnerScalar (I := I) (M := M) g r s (W i).toSection Z.toSection)
           (tensorInnerScalar_contMDiff (I := I) (M := M) g r s (W i).toSection Z.toSection)
           (V i)) x =
-      ∑ i, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      ∑ i, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g r s (W i).toSection (V i) x))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s Z.toSection x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s (W i).toSection x))
               (Tensor0SSpace.toModel
@@ -168,12 +168,12 @@ theorem integral_frameSummed_bracketCovDeriv_combined_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {ι : Type*} [Fintype ι]
     (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (W : ι → SmoothCcTensor g r s) (Z : SmoothCcTensor g r s) :
-    ∑ i, ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    ∑ i, ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g r s (W i).toSection (V i) x))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s Z.toSection x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s (W i).toSection x))
               (Tensor0SSpace.toModel

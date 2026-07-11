@@ -534,7 +534,7 @@ theorem riemannianFiberNormSq_riemannOp_tensorCov_dualTensorFrameS_le
           push_cast
           ring
 
-theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound'
+theorem exists_uniform_riemannOp_tensorCovS_dualFrameEnergy_single_term_bound_of_leviCivitaGNormBound
     (g : SmoothRiemannianMetric I M) (t : ℕ) :
     ∃ K : ℝ, 0 ≤ K ∧
       ∀ (x : M) {n : ℕ} (e : Fin n → TangentSpace I x),

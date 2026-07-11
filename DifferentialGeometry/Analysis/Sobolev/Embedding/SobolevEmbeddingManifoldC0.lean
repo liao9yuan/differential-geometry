@@ -133,7 +133,7 @@ private lemma euclN_coord_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
     show ‖v‖ = Real.sqrt (‖v‖ ^ 2) from (Real.sqrt_sq hv_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sq
 
-private theorem cmm_norm_le_sum_single
+private theorem continuousMultilinearMap_norm_le_sum_abs_basis_apply
     {j : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin j => EuclN) ℝ) :
     ‖f‖ ≤ ∑ β : Fin j → Fin (Module.finrank ℝ E),
@@ -200,7 +200,7 @@ private theorem cmm_norm_le_sum_single
       (∏ i : Fin j, ‖m i‖) * Mb := by rw [← Finset.mul_sum]
   rw [h_factor]; exact le_of_eq (mul_comm _ _)
 
-private theorem cmm_norm_sq_le_card_mul_sum_basisFun
+private theorem continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun_sq
     {j : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin j => EuclN) ℝ) :
     ‖f‖ ^ 2 ≤
@@ -209,7 +209,7 @@ private theorem cmm_norm_sq_le_card_mul_sum_basisFun
           |f (fun i => EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ (β i))| ^ 2 := by
   classical
   simp only [EuclideanSpace.basisFun_apply]
-  have h1 := cmm_norm_le_sum_single (E := E) f
+  have h1 := continuousMultilinearMap_norm_le_sum_abs_basis_apply (E := E) f
   have h1' : ‖f‖ ^ 2 ≤
       (∑ β : Fin j → Fin (Module.finrank ℝ E),
         |f (fun i => EuclideanSpace.single (β i) (1 : ℝ))|) ^ 2 := by
@@ -456,7 +456,7 @@ theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := hρ_lb z hz
     have hρz_pos : 0 < (chartAtlasPOU I M α : M → ℝ)
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)) := lt_of_lt_of_le hc_pos hρz
-    have h_hs := cmm_norm_sq_le_card_mul_sum_basisFun (E := E)
+    have h_hs := continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun_sq (E := E)
       (iteratedFDeriv ℝ j f z)
     have h_weight :
         (∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),

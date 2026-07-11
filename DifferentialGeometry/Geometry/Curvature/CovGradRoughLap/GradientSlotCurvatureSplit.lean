@@ -208,7 +208,7 @@ private lemma curv_inner_left_reduce
     (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
     (hbse_orth : ∀ a b, g.inner x (bse a) (bse b) = if a = b then 1 else 0)
     (hbse_exp : ∀ v : TangentSpace I x, v = ∑ c, g.inner x (bse c) v • bse c) :
-    tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x
+    covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x
         (Tensor0SSpace.toModel
           (riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
             (fun b => X b) (fun b => W b) T x))
@@ -314,12 +314,12 @@ theorem tensor0SCov_riemannSec_metric_skew_section
       (fun b => TotalSpace.mk' (Tensor0SModel (s + 1) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 1) I z) b (U b)))
     (x : M) :
-    tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x
+    covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x
         (Tensor0SSpace.toModel
           (riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
             (fun b => X b) (fun b => W b) T x))
         (Tensor0SSpace.toModel (U x))
-      + tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x
+      + covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x
         (Tensor0SSpace.toModel (T x))
         (Tensor0SSpace.toModel
           (riemannSec (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g))
@@ -405,11 +405,11 @@ omit [CompactSpace M] in
 theorem tensor0SCov_riemannOp_metric_skew
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (v w : TangentSpace I x) (T U : Tensor0SSpace (s + 1) I x) :
-    tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x
+    covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x
         (Tensor0SSpace.toModel
           (riemannOp (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)) x v w T))
         (Tensor0SSpace.toModel U)
-      + tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x
+      + covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x
         (Tensor0SSpace.toModel T)
         (Tensor0SSpace.toModel
           (riemannOp (tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)) x v w U)) =
@@ -462,7 +462,7 @@ theorem tensor0SCov_riemannOp_metric_skew
 theorem gradSlotCurv_pairing_covGrad_eq_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
-    tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x
+    covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x
         (Tensor0SSpace.toModel (gradSlotCurv (I := I) (M := M) g s S X W x))
         (Tensor0SSpace.toModel (unitGradFieldGen (I := I) (M := M) g s S x)) = 0 := by
   classical

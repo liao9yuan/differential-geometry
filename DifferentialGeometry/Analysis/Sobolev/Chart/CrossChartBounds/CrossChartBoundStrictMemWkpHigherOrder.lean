@@ -38,14 +38,14 @@ theorem cross_chart_bound_strict_strong_memWkp_k
             (chartTargetEuclid (I := I) (M := M) α) →
         tsupport v ⊆
           (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α →
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
             (chartPullback I α v))
           (chartTargetEuclid (I := I) (M := M) γ) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p v
             (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -170,7 +170,7 @@ theorem cross_chart_bound_strict_strong_memWkp_k
     rintro _ ⟨x, rfl⟩
     refine ⟨(DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).nonneg γ x,
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).le_one γ x⟩
-  set ργE : EuclN → ℝ := etaEuclid (I := I) (M := M) γ ρ_γ_M with hργE_def
+  set ργE : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) γ ρ_γ_M with hργE_def
   have hργE_smooth : ContDiff ℝ (⊤ : ℕ∞) ργE :=
     contDiff_etaEuclid (I := I) (M := M) γ ρ_γ_M hρ_γ_M_smooth hρ_γ_M_cpt
       hρ_γ_M_supp_in_chart
@@ -281,9 +281,9 @@ theorem cross_chart_bound_strict_strong_memWkp_k
   have hχ_loc_mem_Ωαγ : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) k p χ_loc Ω_αγ := hχ_loc_pair_target_Ωαγ.1
   have hχ_loc_norm_target_eq_Ωαγ :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p χ_loc Ωα_target =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p χ_loc Ω_αγ := hχ_loc_pair_target_Ωαγ.2
   set ψ_total : EuclN → ℝ := fun y => η_combined y * χ_loc (Φ.toFun y) with hψ_total_def
   have hψ_total_supp_in_η_combined : tsupport ψ_total ⊆ tsupport η_combined := by
@@ -494,61 +494,61 @@ theorem cross_chart_bound_strict_strong_memWkp_k
       (d := Module.finrank ℝ E) k hp_one hΩγα_open hη_combined_smooth h_bound
       h_χ_loc_comp_mem
   have h_bridge_γ :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p ψ_total Ωγ_target ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p ψ_total Ω_γα :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_le_of_tsupport_subset_mem_small_general
       (d := Module.finrank ℝ E) k hp_one hΩγ_target_open hΩγα_open
       hΩγα_subset_target hψ_total_mem_Ωγα hψ_total_supp_Ωγα
   refine h_bridge_γ.trans ?_
-  have h_leib_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_leib_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p ψ_total Ω_γα ≤
       ENNReal.ofReal K_leib *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (fun y => χ_loc (Φ.toFun y)) Ω_γα :=
     hK_leib_bound h_χ_loc_comp_mem
   refine h_leib_step.trans ?_
   have h_chain_step :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p (fun y => χ_loc (Φ.toFun y)) Ω_γα ≤
       ENNReal.ofReal K_chain *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p χ_loc Ω_αγ :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.SmoothDiffeoBoundedAtOrder.wkpNorm_comp_le
       hp_one hp_top hΩγα_open hΩαγ_open Φ k (le_refl k)
       hχ_loc_mem_Ωαγ hχ_loc_cpt hχ_loc_supp_in_Ωαγ
   have h_chain_step_target :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p (fun y => χ_loc (Φ.toFun y)) Ω_γα ≤
       ENNReal.ofReal K_chain *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p χ_loc Ωα_target := by
     refine h_chain_step.trans ?_
     rw [hχ_loc_norm_target_eq_Ωαγ]
-  have h_leib_α_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_leib_α_step : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p χ_loc Ωα_target ≤
       ENNReal.ofReal K_leib_α *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p v Ωα_target := by
     have h_eq : χ_loc = (fun y => η_α_loc y * v y) := rfl
     rw [h_eq]
     exact hK_leib_α_bound hv_mem
-  have h_chain_combined : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_chain_combined : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p (fun y => χ_loc (Φ.toFun y)) Ω_γα ≤
       ENNReal.ofReal K_chain *
         (ENNReal.ofReal K_leib_α *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p v Ωα_target) := by
     refine h_chain_step_target.trans ?_
     exact mul_le_mul_of_nonneg_left h_leib_α_step (zero_le _)
   refine (mul_le_mul_of_nonneg_left h_chain_combined (zero_le _)).trans ?_
   have h_K_eq : ENNReal.ofReal K_leib *
       (ENNReal.ofReal K_chain * (ENNReal.ofReal K_leib_α *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p v Ωα_target)) =
       ENNReal.ofReal K *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p v Ωα_target := by
     rw [hK_def]
     rw [ENNReal.ofReal_mul (mul_pos hK_leib_pos hK_chain_pos).le]

@@ -56,10 +56,10 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform cmm_two_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local symmS symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform continuousBilinearMap_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local ccTensor02Symm symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
 open DifferentialGeometry.PDE.DeTurck (deTurckVF)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_rfns_le symmAbsorbedCoeff_jet_le)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_riemannianFiberNormSq_le symmAbsorbedCoeff_jet_le)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -100,7 +100,7 @@ theorem deTurckPhiMetTotal_background_appCc_eq_zero_of_slot01Symm
     (hWsymm : ∀ (x : M) (u₀ u₁ u₂ u₃ : TangentSpace I x),
       unitModel (I := I) (M := M) g₀ 4 W x ![u₀, u₁, u₂, u₃] =
         unitModel (I := I) (M := M) g₀ 4 W x ![u₁, u₀, u₂, u₃]) :
-    appCc (I := I) (M := M) g₀ 4 2
+    operatorFieldApply (I := I) (M := M) g₀ 4 2
         (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀
           - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
               (I := I) (M := M) g₀ g₀) W = 0 := by
@@ -115,10 +115,10 @@ theorem deTurckPhiMetTotal_background_appCc_eq_zero_of_slot01Symm
     ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.sub_apply,
     ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply]
   have hLie :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff_appCc_eq
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff_apply_eq
       (I := I) g₀ g₀ g_bg W x v
   have hTHraw :=
-    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.traceHessianCoeff_appCc_eq
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.traceHessianCoeff_apply_eq
       (I := I) (M := M) g₀ g₀ W x v
   have hRACraw :=
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeff_appCc_eq_combinedTrace
@@ -127,7 +127,7 @@ theorem deTurckPhiMetTotal_background_appCc_eq_zero_of_slot01Symm
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure_appCc_eq_roughLaplacian
       (I := I) (M := M) g₀ g₀ W x v
   have hTH : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2 (traceHessianCoeff (I := I) (M := M) g₀ g₀) W) x v =
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2 (traceHessianCoeff (I := I) (M := M) g₀ g₀) W) x v =
       ∑ k : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ 4 W x
           ![v 0, v 1,
@@ -141,7 +141,7 @@ theorem deTurckPhiMetTotal_background_appCc_eq_zero_of_slot01Symm
     exact congrArg (fun t : Fin 4 → E => unitModel (I := I) (M := M) g₀ 4 W x t)
       (by funext i; fin_cases i <;> rfl)
   have hRAC : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) W) x v =
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) W) x v =
       (1 / 2 : ℝ) *
         ((∑ k : Fin (Module.finrank ℝ E),
             unitModel (I := I) (M := M) g₀ 4 W x
@@ -213,10 +213,10 @@ theorem deTurckPhiMetTotal_background_appCc_eq_zero_of_slot01Symm
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-private lemma deTurckPhiMetTotal_realizedFam_eq_lieSubLich
+private lemma deTurckPhiMetTotal_realizedFam_eq_lieArm2PrincipalCoeff_sub_twoLichnerowicz
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) :
     deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg (realizedFam (I := I) g₀ T T' hδ hδ' s) =
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff
@@ -311,8 +311,8 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 theorem deTurckPhiMetTotal_realizedFam_jointSmooth
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
       (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
         (realizedFam (I := I) g₀ T T' hδ hδ' s)) (δ := δ) (δ' := δ') := by
@@ -340,7 +340,7 @@ theorem deTurckPhiMetTotal_realizedFam_jointSmooth
   beta_reduce
   refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1 t) ?_
-  rw [deTurckPhiMetTotal_realizedFam_eq_lieSubLich (I := I) (M := M) g₀ g_bg T T' hδ hδ' p.2,
+  rw [deTurckPhiMetTotal_realizedFam_eq_lieArm2PrincipalCoeff_sub_twoLichnerowicz (I := I) (M := M) g₀ g_bg T T' hδ hδ' p.2,
     SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
@@ -350,9 +350,9 @@ set_option backward.isDefEq.respectTransparency false in
 def deTurckPhiTotPathIntegral (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     SmoothCcTensor g₀ 4 2 :=
   pathIntegralCoeffField (I := I) (M := M) g₀ 4 2
     (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
@@ -366,8 +366,8 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 lemma ccTensorBilin_sub_fw (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) g₀ (T - T') x v w =
-      ccTensorBilin (I := I) g₀ T x v w - ccTensorBilin (I := I) g₀ T' x v w := by
+    smoothCcTensorBilinForm (I := I) g₀ (T - T') x v w =
+      smoothCcTensorBilinForm (I := I) g₀ T x v w - smoothCcTensorBilinForm (I := I) g₀ T' x v w := by
   rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ (T - T') x v w,
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T x v w,
     ← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ T' x v w,
@@ -386,8 +386,8 @@ set_option backward.isDefEq.respectTransparency false in
 private lemma symmS_eq_self_of_symm_fw (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ S x u w = ccTensorBilin (I := I) g₀ S x w u) :
-    symmS (I := I) (M := M) g₀ S = S := by
+      smoothCcTensorBilinForm (I := I) g₀ S x u w = smoothCcTensorBilinForm (I := I) g₀ S x w u) :
+    ccTensor02Symm (I := I) (M := M) g₀ S = S := by
   have hswap : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S = S := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
     rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection_unitModel]
@@ -409,7 +409,7 @@ private lemma symmS_eq_self_of_symm_fw (g₀ : SmoothRiemannianMetric I M)
     rw [hveta]
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
-  rw [symmS, hswap, ← two_smul ℝ S, smul_smul,
+  rw [ccTensor02Symm, hswap, ← two_smul ℝ S, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 set_option maxHeartbeats 1600000 in
@@ -440,14 +440,14 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 lemma deTurckPhiMetTotal_realizedFam_eq_neg_two_smul_fw
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) :
     deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg (realizedFam (I := I) g₀ T T' hδ hδ' s) =
       (-2 : ℝ) • linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s
         + deTurckLieArm2PrincipalCoeff (I := I) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg := by
-  rw [deTurckPhiMetTotal_realizedFam_eq_lieSubLich (I := I) (M := M) g₀ g_bg T T' hδ hδ' s]
+  rw [deTurckPhiMetTotal_realizedFam_eq_lieArm2PrincipalCoeff_sub_twoLichnerowicz (I := I) (M := M) g₀ g_bg T T' hδ hδ' s]
   rw [show (-2 : ℝ) • linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s =
       -(linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s
         + linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s) from by
@@ -460,29 +460,29 @@ set_option backward.isDefEq.respectTransparency false in
 theorem linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (hSsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ (T - T') x v w = ccTensorBilin (I := I) g₀ (T - T') x w v)
+      smoothCcTensorBilinForm (I := I) g₀ (T - T') x v w = smoothCcTensorBilinForm (I := I) g₀ (T - T') x w v)
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
     linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (deTurckLieCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-              + lieCorr0Field (I := I) (M := M) g₀
+              + deTurckLieRemainderField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-          + appCc (I := I) (M := M) g₀ 3 2
+          + operatorFieldApply (I := I) (M := M) g₀ 3 2
             (deTurckLieArm1Coeff (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-          + appCc (I := I) (M := M) g₀ 4 2
+          + operatorFieldApply (I := I) (M := M) g₀ 4 2
             (deTurckLieArm2PrincipalCoeff (I := I) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
-  have hSsymmS : symmS (I := I) (M := M) g₀ (T - T') = T - T' :=
+  have hSsymmS : ccTensor02Symm (I := I) (M := M) g₀ (T - T') = T - T' :=
     symmS_eq_self_of_symm_fw (I := I) (M := M) g₀ (T - T') hSsymm
   rw [linearizedDeTurckLieAt_eq_deriv_chartSum_on_Ioo (I := I) g₀ g_bg T T'
     hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) hs]
@@ -493,17 +493,17 @@ theorem linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw
         DeTurckCoefficients.chartLieDeTurckComp (I := I)
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)) s =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (deTurckLieCoeffField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-              + lieCorr0Field (I := I) (M := M) g₀
+              + deTurckLieRemainderField (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-          + appCc (I := I) (M := M) g₀ 3 2
+          + operatorFieldApply (I := I) (M := M) g₀ 3 2
             (deTurckLieArm1Coeff (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-          + appCc (I := I) (M := M) g₀ 4 2
+          + operatorFieldApply (I := I) (M := M) g₀ 4 2
             (deTurckLieArm2PrincipalCoeff (I := I) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x
@@ -516,17 +516,17 @@ theorem linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw
     rw [hSsymmS] at h
     exact h
   set Wbase : SmoothCcTensor g₀ 0 2 :=
-    appCc (I := I) (M := M) g₀ 2 2
+    operatorFieldApply (I := I) (M := M) g₀ 2 2
         (deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-          + lieCorr0Field (I := I) (M := M) g₀
+          + deTurckLieRemainderField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
         (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-      + appCc (I := I) (M := M) g₀ 3 2
+      + operatorFieldApply (I := I) (M := M) g₀ 3 2
         (deTurckLieArm1Coeff (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
         (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-      + appCc (I := I) (M := M) g₀ 4 2
+      + operatorFieldApply (I := I) (M := M) g₀ 4 2
         (deTurckLieArm2PrincipalCoeff (I := I) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
         (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) with hWbase
@@ -560,21 +560,21 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
     ∃ ΛC Γ : ℝ, 0 ≤ ΛC ∧ 0 ≤ Γ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
         (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+          smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
         (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v),
+          smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∃ (C₀ : SmoothCcTensor g₀ 2 2) (C₁ : SmoothCcTensor g₀ 3 2),
           (deTurckRHSArmG0 (I := I) g₀ g_bg T (lt_of_le_of_lt hδ_le hδ₀) hδ -
               deTurckRHSArmG0 (I := I) g₀ g_bg T' (lt_of_le_of_lt hδ'_le hδ₀) hδ') =
-            (appCc (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
-              appCc (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
-              appCc (I := I) (M := M) g₀ 4 2
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 C₀ (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) +
+              operatorFieldApply (I := I) (M := M) g₀ 3 2 C₁ (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) +
+              operatorFieldApply (I := I) (M := M) g₀ 4 2
                 (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
                   (lt_of_le_of_lt hδ_le hδ₀) hδ (lt_of_le_of_lt hδ'_le hδ₀) hδ')
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) ∧
@@ -614,7 +614,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
   have hδ_lt : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
   have hδ'_lt : δ' < 1 := lt_of_le_of_lt hδ'_le hδ₀
   have hSsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ (T - T') x v w = ccTensorBilin (I := I) g₀ (T - T') x w v := by
+      smoothCcTensorBilinForm (I := I) g₀ (T - T') x v w = smoothCcTensorBilinForm (I := I) g₀ (T - T') x w v := by
     intro x v w
     rw [ccTensorBilin_sub_fw (I := I) (M := M) g₀ T T' x v w,
       ccTensorBilin_sub_fw (I := I) (M := M) g₀ T T' x w v, hTsymm x v w, hT'symm x v w]
@@ -626,7 +626,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
     (-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s
       + (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-        + lieCorr0Field (I := I) (M := M) g₀
+        + deTurckLieRemainderField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) with hΨ₀def
   set Ψ₁ : ℝ → SmoothCcTensor g₀ 3 2 := fun s =>
     (-2 : ℝ) • linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s
@@ -639,7 +639,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
     rw [hΨ₀def]
     exact threeArmHjoint_neg_two_smul_add_fw (I := I) (M := M) g₀ 2 _ _
       (linearizedRicci_arm0Field_jointSmooth (I := I) g₀ T T' hδ hδ')
-      (lieCorr0Phi0b_jointSmooth (I := I) g₀ T T' hδ hδ' g_bg)
+      (deTurckLieCoeffField_add_deTurckLieRemainderField_realizedFam_jointSmooth (I := I) g₀ T T' hδ hδ' g_bg)
   have hj1 : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3 Ψ₁ (δ := δ) (δ' := δ') := by
     rw [hΨ₁def]
     exact threeArmHjoint_neg_two_smul_add_fw (I := I) (M := M) g₀ 3 _ _
@@ -732,11 +732,11 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
     have hintegrand : ∀ᵐ s ∂MeasureTheory.volume, s ∈ Set.uIoc (0 : ℝ) 1 →
         (-2 : ℝ) * linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s
           + linearizedDeTurckLieAt (I := I) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
-        unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+        unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
-          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+          + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
             (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
-          + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+          + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
       rw [MeasureTheory.ae_iff]
       have hnull : MeasureTheory.volume ({1} : Set ℝ) = 0 := by simp
@@ -750,13 +750,13 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
       refine hsneq ?_
       have hRid : linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
           unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 2 2
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-              + appCc (I := I) (M := M) g₀ 3 2
+              + operatorFieldApply (I := I) (M := M) g₀ 3 2
                 (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
                 (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-              + appCc (I := I) (M := M) g₀ 4 2
+              + operatorFieldApply (I := I) (M := M) g₀ 4 2
                 (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
         obtain ⟨_, _, _, hident, _, _⟩ :=
@@ -766,63 +766,63 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
       have hLid := linearizedDeTurckLieAt_eq_threeArm_plain_of_symm_fw (I := I) (M := M)
         g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ' hSsymm hsIoo x v
       have hRid' : linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
-          unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+          unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
-            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+            + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2
               (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
-            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+            + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2
               (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
         rw [hRid, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
       have hLid' : linearizedDeTurckLieAt (I := I) g₀ g_bg T T'
             hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
-          unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+          unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (deTurckLieCoeffField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-                + lieCorr0Field (I := I) (M := M) g₀
+                + deTurckLieRemainderField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
-            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+            + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2
               (deTurckLieArm1Coeff (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
-            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+            + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2
               (deTurckLieArm2PrincipalCoeff (I := I) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
         rw [hLid, unitModel_add2_apply_tame, unitModel_add2_apply_tame]
-      have e0 : unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+      have e0 : unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
             (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v =
-          (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+          (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v
-            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 2 2
+            + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (deTurckLieCoeffField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-                + lieCorr0Field (I := I) (M := M) g₀
+                + deTurckLieRemainderField (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v := by
         simp only [hΨ₀def]
         rw [appCc_add_left, unitModel_add2_apply_tame, unitModel_appCc_smul_left_apply_tame]
-      have e1 : unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+      have e1 : unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
             (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v =
-          (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+          (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2
               (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v
-            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 3 2
+            + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 3 2
               (deTurckLieArm1Coeff (I := I) (M := M) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v := by
         simp only [hΨ₁def]
         rw [appCc_add_left, unitModel_add2_apply_tame, unitModel_appCc_smul_left_apply_tame]
-      have e2 : unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+      have e2 : unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
             (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v =
-          (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+          (-2 : ℝ) * unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2
               (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v
-            + unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2
+            + unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2
               (deTurckLieArm2PrincipalCoeff (I := I) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
@@ -834,17 +834,17 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
       ring
     rw [intervalIntegral.integral_congr_ae hintegrand]
     have hI0 : IntervalIntegrable (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (Ψ₀ s)
           (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))) x v) MeasureTheory.volume 0 1 :=
       threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 2 Ψ₀
         (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T')) hSI hc0 x v
     have hI1 : IntervalIntegrable (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
+        (operatorFieldApply (I := I) (M := M) g₀ 3 2 (Ψ₁ s)
           (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))) x v) MeasureTheory.volume 0 1 :=
       threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 3 Ψ₁
         (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T')) hSI hc1 x v
     have hI2 : IntervalIntegrable (fun s : ℝ => unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (Ψ₂ s)
           (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) MeasureTheory.volume 0 1 :=
       threeArm_unitModel_appCc_intervalIntegrable_tame (I := I) g₀ 4 Ψ₂
         (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T')) hSI hc2 x v
@@ -872,7 +872,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
         ((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' t)
         (deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg
-          + lieCorr0Field (I := I) (M := M) g₀
+          + deTurckLieRemainderField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg) x
       have hsm : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           (((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' t).toSection x) =
@@ -889,7 +889,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
       have haddL := lc0b_rfns_toSection_add_le (I := I) (M := M) g₀ 2 2
         (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg)
-        (lieCorr0Field (I := I) (M := M) g₀
+        (deTurckLieRemainderField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' t) g_bg) x
       have hL0 := hL0r T T' hδ_le hδ hδ'_le hδ' hTball hT'ball t ht x
       have hLc := hLcr T T' hδ_le hδ hδ'_le hδ' hTball hT'ball t ht x
@@ -946,7 +946,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
         ((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)
         (deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg
-          + lieCorr0Field (I := I) (M := M) g₀
+          + deTurckLieRemainderField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
       have hsc : (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i
           ((-2 : ℝ) • linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ' s)‖ ^ 2) =
@@ -961,7 +961,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
       have htowL := jetTowerSum_add_le (I := I) g₀ 2 2 (a + 1)
         (deTurckLieCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
-        (lieCorr0Field (I := I) (M := M) g₀
+        (deTurckLieRemainderField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)
       have hLsum : (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i
           (deTurckLieCoeffField (I := I) (M := M) g₀
@@ -971,7 +971,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
           hP0j T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
             (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs
       have hcsum : (∑ i ∈ Finset.range (a + 1), ‖iteratedCovGrad (I := I) g₀ 2 2 i
-          (lieCorr0Field (I := I) (M := M) g₀
+          (deTurckLieRemainderField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg)‖ ^ 2) ≤
           ∑ i ∈ Finset.range (a + 1), PL i :=
         Finset.sum_le_sum fun i hi =>
@@ -981,7 +981,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
           4 * (∑ i ∈ Finset.range (a + 1), P0 i) + 4 * (∑ i ∈ Finset.range (a + 1), PL i) := by
         rw [Finset.sum_add_distrib, Finset.mul_sum, Finset.mul_sum]
       linarith
-    have htower := armField_pathIntegral_jetL2_tower_le (I := I) g₀ 2 a Ψ₀ hSI hSopen hj0
+    have htower := pathIntegralCoeffField_jetL2_tower_le (I := I) g₀ 2 a Ψ₀ hSI hSopen hj0
       (Real.sqrt_nonneg _) hjet
     rw [← hC₀def] at htower
     refine le_trans htower (pow_le_pow_left₀ (Real.sqrt_nonneg _) (le_max_left _ _) 2)
@@ -1017,7 +1017,7 @@ theorem deTurckRHSArmDiff_threeArm_canonicalTop_coeffC0_jetL2_ballUniform_of_sym
           hP1j T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i
             (Nat.lt_succ_iff.mp (Finset.mem_range.mp hi)) s hs
       linarith
-    have htower := armField_pathIntegral_jetL2_tower_le (I := I) g₀ 3 a Ψ₁ hSI hSopen hj1
+    have htower := pathIntegralCoeffField_jetL2_tower_le (I := I) g₀ 3 a Ψ₁ hSI hSopen hj1
       (Real.sqrt_nonneg _) hjet
     rw [← hC₁def] at htower
     refine le_trans htower (pow_le_pow_left₀ (Real.sqrt_nonneg _) (le_max_right _ _) 2)
@@ -1032,11 +1032,11 @@ theorem exists_iteratedCovGradTwo_gradSlotAntisym_curvatureCoeff
         iteratedCovGrad (I := I) g₀ 0 2 2 S
             - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.domDomCongrSection (I := I)
                 g₀ (Equiv.swap (0 : Fin 4) 1) (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
-          appCcRS (I := I) (M := M) g₀ 0 2 4 C S := by
+          ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 C S := by
   classical
   refine ⟨⟨⟨fun y : M =>
       (show Tensor0SBundle.TensorRSSpace 2 4 I y from
-        TensorRSSpace.ofCLM (slotFreeCurvOpFib (I := I) (M := M) g₀ 2 y)),
+        TensorRSSpace.ofCLM (curvatureOperatorOnTensorFib (I := I) (M := M) g₀ 2 y)),
       slotFreeCurvOpFib_contMDiff (I := I) (M := M) g₀ 2⟩,
     HasCompactSupport.of_compactSpace _⟩, ?_⟩
   intro S
@@ -1162,8 +1162,8 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem appCc_appCcRS_assoc_fw (g₀ : SmoothRiemannianMetric I M)
     (Φ : SmoothCcTensor g₀ 4 2) (C : SmoothCcTensor g₀ 2 4) (S : SmoothCcTensor g₀ 0 2) :
-    appCc (I := I) (M := M) g₀ 4 2 Φ (appCcRS (I := I) (M := M) g₀ 0 2 4 C S) =
-      appCc (I := I) (M := M) g₀ 2 2 (appCcRS (I := I) (M := M) g₀ 2 4 2 Φ C) S := by
+    operatorFieldApply (I := I) (M := M) g₀ 4 2 Φ (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 C S) =
+      operatorFieldApply (I := I) (M := M) g₀ 2 2 (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 Φ C) S := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -1175,12 +1175,12 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 private theorem appCc_smul_left_fw (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (c : ℝ)
     (Φ : SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r) :
-    appCc (I := I) (M := M) g₀ r s (c • Φ) W = c • appCc (I := I) (M := M) g₀ r s Φ W := by
+    operatorFieldApply (I := I) (M := M) g₀ r s (c • Φ) W = c • operatorFieldApply (I := I) (M := M) g₀ r s Φ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((c • appCc (I := I) (M := M) g₀ r s Φ W).toSection x) =
-      c • (appCc (I := I) (M := M) g₀ r s Φ W).toSection x from by
+  rw [show ((c • operatorFieldApply (I := I) (M := M) g₀ r s Φ W).toSection x) =
+      c • (operatorFieldApply (I := I) (M := M) g₀ r s Φ W).toSection x from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [appCc_toSection, appCc_toSection]
   rw [show ((c • Φ).toSection x : Tensor0SBundle.TensorRSSpace r s I x) = c • Φ.toSection x from by
@@ -1195,17 +1195,17 @@ theorem exists_deTurckPhiMetTotal_background_curvatureFold_of_symm
     ∃ K₀ : SmoothCcTensor g₀ 2 2,
       ∀ (S : SmoothCcTensor g₀ 0 2),
         (∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ S x v w = ccTensorBilin (I := I) g₀ S x w v) →
-        appCc (I := I) (M := M) g₀ 4 2
+          smoothCcTensorBilinForm (I := I) g₀ S x v w = smoothCcTensorBilinForm (I := I) g₀ S x w v) →
+        operatorFieldApply (I := I) (M := M) g₀ 4 2
             (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀
               - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
                   (I := I) (M := M) g₀ g₀)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
-          appCc (I := I) (M := M) g₀ 2 2 K₀ (iteratedCovGrad (I := I) g₀ 0 2 0 S) := by
+          operatorFieldApply (I := I) (M := M) g₀ 2 2 K₀ (iteratedCovGrad (I := I) g₀ 0 2 0 S) := by
   classical
   obtain ⟨C24, hC24⟩ :=
     exists_iteratedCovGradTwo_gradSlotAntisym_curvatureCoeff (I := I) (M := M) g₀
-  refine ⟨(1/2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2
+  refine ⟨(1/2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2
     (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀
       - DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmPrincipalCoeffPure
           (I := I) (M := M) g₀ g₀) C24, ?_⟩
@@ -1243,31 +1243,31 @@ theorem exists_deTurckPhiMetTotal_background_curvatureFold_of_symm
       ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
       hv u₀ u₁, hv u₁ u₀]
     exact add_comm _ _
-  have hkill : appCc (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W + Wsw)) = 0 := by
+  have hkill : operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W + Wsw)) = 0 := by
     rw [appCc_smul_right, hΦd_def,
       deTurckPhiMetTotal_background_appCc_eq_zero_of_slot01Symm (I := I) (M := M) g₀ g_bg
         (W + Wsw) hsym, smul_zero]
-  calc appCc (I := I) (M := M) g₀ 4 2 Φd W
-      = appCc (I := I) (M := M) g₀ 4 2 Φd
+  calc operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd W
+      = operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd
           ((1/2 : ℝ) • (W + Wsw) + (1/2 : ℝ) • (W - Wsw)) := by rw [← hsplit]
-    _ = appCc (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W + Wsw))
-        + appCc (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W - Wsw)) :=
+    _ = operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W + Wsw))
+        + operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W - Wsw)) :=
       appCc_add_right (I := I) (M := M) g₀ 4 2 Φd _ _
-    _ = appCc (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W - Wsw)) := by
+    _ = operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd ((1/2 : ℝ) • (W - Wsw)) := by
       rw [hkill, zero_add]
-    _ = (1/2 : ℝ) • appCc (I := I) (M := M) g₀ 4 2 Φd (W - Wsw) :=
+    _ = (1/2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd (W - Wsw) :=
       appCc_smul_right (I := I) (M := M) g₀ 4 2 (1/2 : ℝ) Φd _
-    _ = (1/2 : ℝ) • appCc (I := I) (M := M) g₀ 4 2 Φd
-        (appCcRS (I := I) (M := M) g₀ 0 2 4 C24 S) := by
+    _ = (1/2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 4 2 Φd
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 2 4 C24 S) := by
       rw [hW_def, hWsw_def, hW_def, hC24 S]
-    _ = (1/2 : ℝ) • appCc (I := I) (M := M) g₀ 2 2
-        (appCcRS (I := I) (M := M) g₀ 2 4 2 Φd C24) S := by
+    _ = (1/2 : ℝ) • operatorFieldApply (I := I) (M := M) g₀ 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 Φd C24) S := by
       rw [appCc_appCcRS_assoc_fw (I := I) (M := M) g₀ Φd C24 S]
-    _ = appCc (I := I) (M := M) g₀ 2 2
-        ((1/2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2 Φd C24) S := by
+    _ = operatorFieldApply (I := I) (M := M) g₀ 2 2
+        ((1/2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 Φd C24) S := by
       rw [appCc_smul_left_fw (I := I) (M := M) g₀ 2 2 (1/2 : ℝ) _ S]
-    _ = appCc (I := I) (M := M) g₀ 2 2
-        ((1/2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 4 2 Φd C24)
+    _ = operatorFieldApply (I := I) (M := M) g₀ 2 2
+        ((1/2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 4 2 Φd C24)
         (iteratedCovGrad (I := I) g₀ 0 2 0 S) := by
       rw [iteratedCovGrad_zero]
 
@@ -1276,7 +1276,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (reindexCoeffGen rei
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-private theorem thp_perm_comp_fw (σ : Equiv.Perm (Fin 4)) (j : Fin 4) :
+private theorem traceHessianSlotPerm_inv_mul_apply_eq (σ : Equiv.Perm (Fin 4)) (j : Fin 4) :
     traceHessianSlotPerm ((traceHessianSlotPerm⁻¹ * σ) j) = σ j := by
   rw [Equiv.Perm.mul_apply, Equiv.Perm.inv_def, Equiv.apply_symm_apply]
 
@@ -1370,7 +1370,7 @@ theorem normSq_icg_reindex_eq_fw (g₀ : SmoothRiemannianMetric I M)
   rw [lc0b_normSq_eq_integral (I := I) (M := M) g₀ 4 (2 + i),
     lc0b_normSq_eq_integral (I := I) (M := M) g₀ 4 (2 + i)]
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
-  exact rfns_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 4 2 R ρ i x
+  exact riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 4 2 R ρ i x
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1378,8 +1378,8 @@ set_option backward.isDefEq.respectTransparency false in
 theorem gFibreOpBound_mono_fw (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     {δ δ' : ℝ} (hle : δ ≤ δ')
-    (hb : gFibreOpBound (I := I) (M := M) g₀ h δ) :
-    gFibreOpBound (I := I) (M := M) g₀ h δ' := by
+    (hb : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) :
+    metricCauchySchwarzBound (I := I) (M := M) g₀ h δ' := by
   intro y a b
   refine le_trans (hb y a b) ?_
   have hnn : 0 ≤ Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) :=
@@ -1395,9 +1395,9 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 theorem gFibreOpBound_min_fw (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ₁ δ₂ : ℝ} (h₁ : gFibreOpBound (I := I) (M := M) g₀ h δ₁)
-    (h₂ : gFibreOpBound (I := I) (M := M) g₀ h δ₂) :
-    gFibreOpBound (I := I) (M := M) g₀ h (min δ₁ δ₂) := by
+    {δ₁ δ₂ : ℝ} (h₁ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ₁)
+    (h₂ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ₂) :
+    metricCauchySchwarzBound (I := I) (M := M) g₀ h (min δ₁ δ₂) := by
   intro x v w
   rcases le_total δ₁ δ₂ with hle | hle
   · rw [min_eq_left hle]
@@ -1429,10 +1429,10 @@ theorem deTurckPhiMetTotal_eq_reindex_decomp_fw
   rw [hPhi,
     lieTrace_eq_reindex_fw (I := I) (M := M) g₀ g deTurckLieArm2DivSlotPermA
       (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermA)
-      (thp_perm_comp_fw deTurckLieArm2DivSlotPermA),
+      (traceHessianSlotPerm_inv_mul_apply_eq deTurckLieArm2DivSlotPermA),
     lieTrace_eq_reindex_fw (I := I) (M := M) g₀ g deTurckLieArm2DivSlotPermAT
       (traceHessianSlotPerm⁻¹ * deTurckLieArm2DivSlotPermAT)
-      (thp_perm_comp_fw deTurckLieArm2DivSlotPermAT)]
+      (traceHessianSlotPerm_inv_mul_apply_eq deTurckLieArm2DivSlotPermAT)]
   abel
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral

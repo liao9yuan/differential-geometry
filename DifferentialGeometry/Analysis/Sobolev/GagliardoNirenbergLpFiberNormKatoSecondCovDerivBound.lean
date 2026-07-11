@@ -130,12 +130,12 @@ private theorem secondCovDeriv_frame_diag_fiberNormSq_sum_le_rs
           (Integral.Connection.fiberNormSqComponent (I := I) (M := M) g x r (m + 1 + 1) T2 n e K
             (Fin.cons i (Fin.cons i J))) ^ 2 := by
     intro i
-    rw [rfns_rs_eq_sum_fiberNormSqComponent_sq_of_orthoFrame (I := I) (M := M) g r m x _ e hn_def
+    rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r m x _ e hn_def
       horth]
     refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
     rw [hcomp i K J]
 
-  rw [rfns_rs_eq_sum_fiberNormSqComponent_sq_of_orthoFrame (I := I) (M := M) g r (m + 1 + 1) x T2 e
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r (m + 1 + 1) x T2 e
     hn_def horth]
   rw [Finset.sum_congr rfl (fun i _ => hdiag_term i)]
 
@@ -336,7 +336,7 @@ private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner_rs
           (Tensor0SBundle.TensorRSSpace.toModel (Q.toSection y))) x v from rfl]
   rw [Integral.Connection.tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (I := I) (M := M) g r p Q.toSection Q.toSection x v]
-  have hbridge : Integral.L2.tensorInnerPointwise_0s (I := I) (M := M) (r + p) g x
+  have hbridge : Integral.L2.covariantTensorInnerPointwise (I := I) (M := M) (r + p) g x
         (Tensor0SBundle.Tensor0SSpace.toModel
           (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g r p Q.toSection x v))
         (Tensor0SBundle.Tensor0SSpace.toModel

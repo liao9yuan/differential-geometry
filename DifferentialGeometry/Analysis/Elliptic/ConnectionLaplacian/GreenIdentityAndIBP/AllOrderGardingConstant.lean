@@ -74,7 +74,7 @@ private theorem norm_iteratedCovGrad_comp
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g
         (s + (j + i)) (iteratedCovGrad g 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g 0 s j i S x
   have h1 : 0 ≤ ‖iteratedCovGrad g 0 (s + j) i (iteratedCovGrad g 0 s j S)‖ := norm_nonneg _
   have h2 : 0 ≤ ‖iteratedCovGrad g 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
@@ -109,10 +109,10 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s + a) x _
 
   set AR : SmoothCcTensor g 0 (s + 1) :=
-    appFullSec (I := I) (M := M) g 0 (s + 1) (s + 1) H_R (covGrad (I := I) (M := M) g 0 s S)
+    homTensorRSFieldApply (I := I) (M := M) g 0 (s + 1) (s + 1) H_R (covGrad (I := I) (M := M) g 0 s S)
     with hAR_def
   set AdR : SmoothCcTensor g 0 (s + 1) :=
-    appFullSec (I := I) (M := M) g 0 s (s + 1) H_dR S with hAdR_def
+    homTensorRSFieldApply (I := I) (M := M) g 0 s (s + 1) H_dR S with hAdR_def
 
   have hgradsplit :
       iteratedCovGrad g 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g s S) =

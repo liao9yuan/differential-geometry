@@ -25,14 +25,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 theorem Euclidean.wkpNorm_zero_le_wkpNorm
     {d : ℕ} {k : ℕ} {p : ℝ≥0∞} {u : EuclideanSpace ℝ (Fin d) → ℝ} {Ω : Set (EuclideanSpace ℝ (Fin d))} :
     eLpNorm u p (MeasureTheory.volume.restrict Ω) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p u Ω := by
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p u Ω := by
   classical
   let innerSum : ℕ → ℝ≥0∞ := fun j =>
     ∑ α : Fin j → Fin d,
       eLpNorm
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
           (d := d) p j α u Ω) p (MeasureTheory.volume.restrict Ω)
-  have hWkp : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p u Ω =
+  have hWkp : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p u Ω =
       ∑ j ∈ Finset.range (k + 1), innerSum j :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_eq_sum k p u Ω
   have h_inner0 : innerSum 0 = eLpNorm u p (MeasureTheory.volume.restrict Ω) := by
@@ -72,19 +72,19 @@ theorem eLpNorm_chartPushed_p_le_wkpNorm_one
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           p
           (MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α))
-        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) :=
     Euclidean.wkpNorm_zero_le_wkpNorm
-  have h_le_tsum : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_le_tsum : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ∑' β : M,
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u)
@@ -436,7 +436,7 @@ theorem lpChartSum_le_wkpNormChart
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           p
           (MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α))
-        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        ≤ DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -450,7 +450,7 @@ theorem lpChartSum_le_wkpNormChart
           p
           (MeasureTheory.volume.restrict (chartTargetEuclid (I := I) (M := M) α)))
         ≤ ∑' α : M,
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 p
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)

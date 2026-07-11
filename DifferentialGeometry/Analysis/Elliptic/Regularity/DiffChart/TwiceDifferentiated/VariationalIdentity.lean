@@ -83,7 +83,7 @@ theorem twice_differentiated_variational_identity_holds
         ∂(volume : Measure EuclN)) =
     ∫ y in chartTargetEuclid (I := I) (M := M) α,
       densityOnEuclid (I := I) g α y *
-        fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+        effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
       ∂(volume : Measure EuclN) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -953,7 +953,7 @@ theorem twice_differentiated_variational_identity_holds
       ∂(volume : Measure EuclN) with hI_lhs2_def
   set I_rhs_target : ℝ :=
     ∫ y in Ω, densityOnEuclid (I := I) g α y *
-      fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+      effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
       ∂(volume : Measure EuclN) with hI_rhs_def
   set X1 : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ := fun i j =>
     ∫ y in Ω,
@@ -1153,7 +1153,7 @@ theorem twice_differentiated_variational_identity_holds
         (fderiv ℝ ψ y) (EuclideanSpace.single l₂ 1) ∂(volume : Measure EuclN))
       = -(N_E1 + N_E2) := h_E
   set I_num : ℝ := ∫ y in Ω,
-    fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+    effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
     ∂(volume : Measure EuclN) with hI_num_def
   have h_psi_cont : Continuous ψ := hψ_smooth.continuous
   have h_psi_supp : tsupport ψ ⊆ K := le_refl _
@@ -1293,10 +1293,10 @@ theorem twice_differentiated_variational_identity_holds
       (- N_D1) + (- N_D2) + N_E1 + N_E2 := by
     classical
     change (∫ y in Ω,
-        fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN)) = _
     have h_integrand_eq : ∀ y : EuclN,
-        fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y =
+        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y =
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ j : Fin (Module.finrank ℝ E),
             (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l₂) y)
@@ -1345,7 +1345,7 @@ theorem twice_differentiated_variational_identity_holds
         densityDerivOnEuclid (I := I) g α l₁ y *
           chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y * ψ y := by
       intro y
-      unfold fChartEffTwiceNumerator
+      unfold effectiveSourceChartSecondOrderNumerator
       simp only [add_mul, sub_mul, Finset.sum_mul]
       ring
     rw [setIntegral_congr_fun hΩ_open.measurableSet (fun y _ => h_integrand_eq y)]
@@ -1642,14 +1642,14 @@ theorem twice_differentiated_variational_identity_holds
     integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
       (I := I) (M := M) g α hu_h l₁ l₂ h_chosenFChartDeriv_memW1p ψ
   rw [show I_num = ∫ y in chartTargetEuclid (I := I) (M := M) α,
-        fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN) from rfl] at h_I_num_decomp
   change I_lhs1_target + I_lhs2_target = I_rhs_target
   rw [hSum_α1_sub1_final, h_sumγ_sub1, h_sumγ_sub2, h_α1_sub2_to_lhs1] at h_once
   change I_lhs1_target + I_lhs2_target =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
-          fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+          effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN)
   rw [← h_I_num_eq_rhs]
   rw [h_I_num_decomp]

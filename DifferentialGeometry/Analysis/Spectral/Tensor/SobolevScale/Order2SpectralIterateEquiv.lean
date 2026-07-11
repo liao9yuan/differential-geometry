@@ -31,21 +31,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-def order2IterateNspec (g : SmoothRiemannianMetric I M)
+def order2ConnLapIterateL2Sum (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) : ℝ :=
   ∑ j ∈ Finset.range (2 + 1),
     ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)‖
 
 theorem order2IterateNspec_nonneg (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
-    0 ≤ order2IterateNspec (I := I) (M := M) g T :=
+    0 ≤ order2ConnLapIterateL2Sum (I := I) (M := M) g T :=
   Finset.sum_nonneg (fun _ _ => norm_nonneg _)
 
 theorem exists_order2IterateNspec_le_tensorPouSobolevHsNorm
     (g : SmoothRiemannianMetric I M) :
     ∃ C₁ : ℝ, 0 ≤ C₁ ∧
       ∀ T : SmoothCcTensor g 0 2,
-        order2IterateNspec (I := I) (M := M) g T ≤
+        order2ConnLapIterateL2Sum (I := I) (M := M) g T ≤
           C₁ * (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal := by
   classical
 
@@ -104,7 +104,7 @@ theorem exists_order2IterateNspec_le_tensorPouSobolevHsNorm
     Finset.sum_nonneg (fun j _ => hCj_nn j), fun T => ?_⟩
   set N2 : ℝ := (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal with hN2_def
   have hN2_nn : 0 ≤ N2 := ENNReal.toReal_nonneg
-  calc order2IterateNspec (I := I) (M := M) g T
+  calc order2ConnLapIterateL2Sum (I := I) (M := M) g T
       = ∑ j ∈ Finset.range (2 + 1),
           ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)‖ := rfl
     _ ≤ ∑ j ∈ Finset.range (2 + 1), Cj j * N2 := by
@@ -118,7 +118,7 @@ theorem exists_tensorPouSobolevHsNorm_le_order2IterateNspec
     ∃ C₂ : ℝ, 0 ≤ C₂ ∧
       ∀ T : SmoothCcTensor g 0 2,
         (tensorPouSobolevHsNorm (I := I) (M := M) g 2 T).toReal ≤
-          C₂ * order2IterateNspec (I := I) (M := M) g T := by
+          C₂ * order2ConnLapIterateL2Sum (I := I) (M := M) g T := by
   obtain ⟨C₂, hC₂_nn, hC₂⟩ :=
     DifferentialGeometry.Integral.Connection.exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter
       (I := I) (M := M) g 2 2
@@ -127,7 +127,7 @@ theorem exists_tensorPouSobolevHsNorm_le_order2IterateNspec
 theorem exists_Order2NormEquivOnSmooth (g : SmoothRiemannianMetric I M) :
     ∃ C₁ C₂ : ℝ, 0 ≤ C₁ ∧ 0 ≤ C₂ ∧
       Order2NormEquivOnSmooth (I := I) (M := M) g 0 2
-        (order2IterateNspec (I := I) (M := M) g) C₁ C₂ := by
+        (order2ConnLapIterateL2Sum (I := I) (M := M) g) C₁ C₂ := by
   obtain ⟨C₁, hC₁_nn, hC₁⟩ :=
     exists_order2IterateNspec_le_tensorPouSobolevHsNorm (I := I) (M := M) g
   obtain ⟨C₂, hC₂_nn, hC₂⟩ :=

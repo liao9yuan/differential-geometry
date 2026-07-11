@@ -31,7 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-def slotFeedFib (s : ℕ) (x : M) (p : TangentSpace I x) :
+def tensorLeadingSlotEvalCLM (s : ℕ) (x : M) (p : TangentSpace I x) :
     Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace s I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace (s + 1) I x) := inferInstance
   LinearMap.toContinuousLinearMap
@@ -46,27 +46,27 @@ def slotFeedFib (s : ℕ) (x : M) (p : TangentSpace I x) :
 set_option linter.unusedSectionVars false in
 @[simp] lemma slotFeedFib_apply (s : ℕ) (x : M) (p : TangentSpace I x)
     (G : Tensor0SSpace (s + 1) I x) :
-    slotFeedFib (I := I) (M := M) s x p G =
+    tensorLeadingSlotEvalCLM (I := I) (M := M) s x p G =
       (tensor0S_curry (𝕜 := ℝ) (I := I) (M := M) s x) G p := rfl
 
 set_option linter.unusedSectionVars false in
 lemma slotFeedFib_toModel (s : ℕ) (x : M) (p : TangentSpace I x)
     (G : Tensor0SSpace (s + 1) I x) (v : Fin s → E) :
-    Tensor0SSpace.toModel (slotFeedFib (I := I) (M := M) s x p G) v =
+    Tensor0SSpace.toModel (tensorLeadingSlotEvalCLM (I := I) (M := M) s x p G) v =
       Tensor0SSpace.toModel G (Fin.cons (p : E) v) :=
   TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M) (T := G) (v0 := p) (vs := v)
 
-def leadingPairFeedFib (s : ℕ) (x : M) (p q : TangentSpace I x) :
+def tensorLeadingPairSlotEvalCLM (s : ℕ) (x : M) (p q : TangentSpace I x) :
     Tensor0SSpace (s + 2) I x →L[ℝ] Tensor0SSpace s I x :=
-  (slotFeedFib (I := I) (M := M) s x q).comp
-    (slotFeedFib (I := I) (M := M) (s + 1) x p)
+  (tensorLeadingSlotEvalCLM (I := I) (M := M) s x q).comp
+    (tensorLeadingSlotEvalCLM (I := I) (M := M) (s + 1) x p)
 
 set_option linter.unusedSectionVars false in
 lemma leadingPairFeedFib_toModel (s : ℕ) (x : M) (p q : TangentSpace I x)
     (G : Tensor0SSpace (s + 2) I x) (v : Fin s → E) :
-    Tensor0SSpace.toModel (leadingPairFeedFib (I := I) (M := M) s x p q G) v =
+    Tensor0SSpace.toModel (tensorLeadingPairSlotEvalCLM (I := I) (M := M) s x p q G) v =
       Tensor0SSpace.toModel G (Fin.cons (p : E) (Fin.cons (q : E) v)) := by
-  rw [leadingPairFeedFib, ContinuousLinearMap.comp_apply, slotFeedFib_toModel,
+  rw [tensorLeadingPairSlotEvalCLM, ContinuousLinearMap.comp_apply, slotFeedFib_toModel,
     slotFeedFib_toModel]
 
 set_option linter.unusedSectionVars false in
@@ -100,7 +100,7 @@ private lemma domDomCongr4_smul (σ : Equiv.Perm (Fin 4)) (c : ℝ)
   ext m
   simp [ContinuousMultilinearMap.domDomCongr_apply]
 
-def slotPerm4Fib (x : M) (σ : Equiv.Perm (Fin 4)) :
+def tensorRank4PermuteCLM (x : M) (σ : Equiv.Perm (Fin 4)) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 4 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 4 I x) := inferInstance
   LinearMap.toContinuousLinearMap
@@ -114,13 +114,13 @@ def slotPerm4Fib (x : M) (σ : Equiv.Perm (Fin 4)) :
 
 set_option linter.unusedSectionVars false in
 @[simp] lemma slotPerm4Fib_apply (x : M) (σ : Equiv.Perm (Fin 4)) (G : Tensor0SSpace 4 I x) :
-    slotPerm4Fib (I := I) (M := M) x σ G =
+    tensorRank4PermuteCLM (I := I) (M := M) x σ G =
       Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
         (ContinuousMultilinearMap.domDomCongr σ (Tensor0SSpace.toModel (𝕜 := ℝ) G)) := rfl
 
 set_option linter.unusedSectionVars false in
 lemma slotPerm4Fib_toModel (x : M) (σ : Equiv.Perm (Fin 4)) (G : Tensor0SSpace 4 I x) :
-    Tensor0SSpace.toModel (slotPerm4Fib (I := I) (M := M) x σ G) =
+    Tensor0SSpace.toModel (tensorRank4PermuteCLM (I := I) (M := M) x σ G) =
       ContinuousMultilinearMap.domDomCongr σ (Tensor0SSpace.toModel (𝕜 := ℝ) G) := by
   rw [slotPerm4Fib_apply, Tensor0SSpace.toModel_ofModel]
 
@@ -129,12 +129,12 @@ theorem slotPerm4Fib_apply_section_contMDiff (σ : Equiv.Perm (Fin 4))
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
         (E := fun z : M => Tensor0SSpace 4 I z) x
-        (slotPerm4Fib (I := I) (M := M) x σ (Y x))) := by
+        (tensorRank4PermuteCLM (I := I) (M := M) x σ (Y x))) := by
   classical
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 4
   have heq : (fun x : M => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
       (E := fun z : M => Tensor0SSpace 4 I z) x
-      (slotPerm4Fib (I := I) (M := M) x σ (Y x))) =
+      (tensorRank4PermuteCLM (I := I) (M := M) x σ (Y x))) =
       (fun x : M => TotalSpace.mk' (Tensor0SModel 4 ℝ E)
         (E := fun z : M => Tensor0SSpace 4 I z) x
         ((Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
@@ -168,22 +168,22 @@ theorem slotPerm4Fib_apply_section_contMDiff (σ : Equiv.Perm (Fin 4))
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-def curvatureRefoldMonomialFib (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
+def curvatureActionMonomialCLM (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
-  tw • ((leadingPairFeedFib (I := I) (M := M) 2 x p q).comp
-    (slotPerm4Fib (I := I) (M := M) x σ))
+  tw • ((tensorLeadingPairSlotEvalCLM (I := I) (M := M) 2 x p q).comp
+    (tensorRank4PermuteCLM (I := I) (M := M) x σ))
 
 lemma curvatureRefoldMonomialFib_apply (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) (G : Tensor0SSpace 4 I x) :
-    curvatureRefoldMonomialFib (I := I) (M := M) x tw σ p q G =
-      tw • (leadingPairFeedFib (I := I) (M := M) 2 x p q)
-        (slotPerm4Fib (I := I) (M := M) x σ G) := rfl
+    curvatureActionMonomialCLM (I := I) (M := M) x tw σ p q G =
+      tw • (tensorLeadingPairSlotEvalCLM (I := I) (M := M) 2 x p q)
+        (tensorRank4PermuteCLM (I := I) (M := M) x σ G) := rfl
 
 set_option linter.unusedSectionVars false in
 lemma curvatureRefoldMonomialFib_toModel (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) (G : Tensor0SSpace 4 I x) (v : Fin 2 → E) :
-    Tensor0SSpace.toModel (curvatureRefoldMonomialFib (I := I) (M := M) x tw σ p q G) v =
+    Tensor0SSpace.toModel (curvatureActionMonomialCLM (I := I) (M := M) x tw σ p q G) v =
       tw * Tensor0SSpace.toModel G
         (fun i => (Fin.cons (p : E) (Fin.cons (q : E) v) : Fin 4 → E) (σ i)) := by
   rw [curvatureRefoldMonomialFib_apply, Tensor0SSpace.toModel_smul,
@@ -192,22 +192,22 @@ lemma curvatureRefoldMonomialFib_toModel (x : M) (tw : ℝ) (σ : Equiv.Perm (Fi
 
 @[simp] lemma curvatureRefoldMonomialFib_zero_weight (x : M) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) :
-    curvatureRefoldMonomialFib (I := I) (M := M) x 0 σ p q = 0 := by
-  rw [curvatureRefoldMonomialFib, zero_smul]
+    curvatureActionMonomialCLM (I := I) (M := M) x 0 σ p q = 0 := by
+  rw [curvatureActionMonomialCLM, zero_smul]
 
-def curvatureRefoldKernelFib (x : M) (tw : ℝ)
+def curvatureActionKernelCLM (x : M) (tw : ℝ)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (p q : TangentSpace I x) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
   (1 / 2 : ℝ) •
-    (curvatureRefoldMonomialFib (I := I) (M := M) x tw σ₁ p q
-      + curvatureRefoldMonomialFib (I := I) (M := M) x tw σ₂ p q
-      - curvatureRefoldMonomialFib (I := I) (M := M) x tw σ₃ p q
-      - curvatureRefoldMonomialFib (I := I) (M := M) x tw σ₄ p q)
+    (curvatureActionMonomialCLM (I := I) (M := M) x tw σ₁ p q
+      + curvatureActionMonomialCLM (I := I) (M := M) x tw σ₂ p q
+      - curvatureActionMonomialCLM (I := I) (M := M) x tw σ₃ p q
+      - curvatureActionMonomialCLM (I := I) (M := M) x tw σ₄ p q)
 
 @[simp] lemma curvatureRefoldKernelFib_zero_weight (x : M)
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (p q : TangentSpace I x) :
-    curvatureRefoldKernelFib (I := I) (M := M) x 0 σ₁ σ₂ σ₃ σ₄ p q = 0 := by
-  rw [curvatureRefoldKernelFib, curvatureRefoldMonomialFib_zero_weight,
+    curvatureActionKernelCLM (I := I) (M := M) x 0 σ₁ σ₂ σ₃ σ₄ p q = 0 := by
+  rw [curvatureActionKernelCLM, curvatureRefoldMonomialFib_zero_weight,
     curvatureRefoldMonomialFib_zero_weight, curvatureRefoldMonomialFib_zero_weight,
     curvatureRefoldMonomialFib_zero_weight]
   simp
@@ -354,12 +354,12 @@ private lemma pairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 
     TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
       (T := G) (v0 := p) (vs := Fin.cons (q : E) v)]
 
-def curvatureRefoldMonomialFibFixedFrame (W : Π b : M, Tensor0SSpace 2 I b)
+def curvatureActionMonomialFrameTrace (W : Π b : M, Tensor0SSpace 2 I b)
     (σ : Equiv.Perm (Fin 4))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
-    curvatureRefoldMonomialFib (I := I) (M := M) x
+    curvatureActionMonomialCLM (I := I) (M := M) x
       (Tensor0SSpace.toModel (𝕜 := ℝ) (W x) ![(B a x : E), (B b x : E)]) σ (B a x) (B b x)
 
 set_option linter.unusedSectionVars false in
@@ -368,14 +368,14 @@ theorem curvatureRefoldMonomialFibFixedFrame_toModel (W : Π b : M, Tensor0SSpac
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (G : Tensor0SSpace 4 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel
-        (curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ B x G) v =
+        (curvatureActionMonomialFrameTrace (I := I) (M := M) W σ B x G) v =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         Tensor0SSpace.toModel (𝕜 := ℝ) (W x) ![(B a x : E), (B b x : E)] *
           Tensor0SSpace.toModel (𝕜 := ℝ) G
             (fun i => (Fin.cons ((B a x : E)) (Fin.cons ((B b x : E)) v) : Fin 4 → E)
               (σ i)) := by
   classical
-  rw [curvatureRefoldMonomialFibFixedFrame, ContinuousLinearMap.sum_apply,
+  rw [curvatureActionMonomialFrameTrace, ContinuousLinearMap.sum_apply,
     ← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [ContinuousLinearMap.sum_apply, Tensor0SSpace.toModelL_apply,
@@ -395,18 +395,18 @@ theorem curvatureRefoldMonomialFibFixedFrame_apply_section_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SSpace 2 I z) x
-        (curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ B x (Y x))) := by
+        (curvatureActionMonomialFrameTrace (I := I) (M := M) W σ B x (Y x))) := by
   classical
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 4
   set Yσ : Cₛ^∞⟮I; Tensor0SModel 4 ℝ E, fun z : M => Tensor0SSpace 4 I z⟯ :=
-    { toFun := fun x : M => slotPerm4Fib (I := I) (M := M) x σ (Y x)
+    { toFun := fun x : M => tensorRank4PermuteCLM (I := I) (M := M) x σ (Y x)
       contMDiff_toFun := slotPerm4Fib_apply_section_contMDiff (I := I) (M := M) σ Y }
     with hYσ_def
   have hsummand : ∀ a b : Fin (Module.finrank ℝ E),
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
           (E := fun z : M => Tensor0SSpace 2 I z) x
-          (curvatureRefoldMonomialFib (I := I) (M := M) x
+          (curvatureActionMonomialCLM (I := I) (M := M) x
             (Tensor0SSpace.toModel (𝕜 := ℝ) (W x) ![(B a x : E), (B b x : E)]) σ
             (B a x) (B b x) (Y x))) := by
     intro a b
@@ -455,7 +455,7 @@ theorem curvatureRefoldMonomialFibFixedFrame_apply_section_contMDiff
   set S : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯ :=
     fun a b =>
-      { toFun := fun x : M => curvatureRefoldMonomialFib (I := I) (M := M) x
+      { toFun := fun x : M => curvatureActionMonomialCLM (I := I) (M := M) x
           (Tensor0SSpace.toModel (𝕜 := ℝ) (W x) ![(B a x : E), (B b x : E)]) σ
           (B a x) (B b x) (Y x)
         contMDiff_toFun := hsummand a b } with hS_def
@@ -466,7 +466,7 @@ theorem curvatureRefoldMonomialFibFixedFrame_apply_section_contMDiff
   intro x
   refine congrArg (TotalSpace.mk' (Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SSpace 2 I z) x) ?_
-  rw [curvatureRefoldMonomialFibFixedFrame, hStot_def]
+  rw [curvatureActionMonomialFrameTrace, hStot_def]
   have hcoeOuter : ((∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), S a b :
       Cₛ^∞⟮I; Tensor0SModel 2 ℝ E, fun z : M => Tensor0SSpace 2 I z⟯) :
         Π z : M, Tensor0SSpace 2 I z) =
@@ -497,18 +497,18 @@ theorem curvatureRefoldMonomialFibFixedFrame_apply_section_contMDiff
   rw [ContinuousLinearMap.sum_apply]
   rfl
 
-def curvatureRefoldMonomialBiContrFib (g₁ : SmoothRiemannianMetric I M)
+def curvatureActionMonomialTrace (g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b) (σ : Equiv.Perm (Fin 4)) (x : M) :
     Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x :=
-  curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ
+  curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
     (smoothOrthoFrame (I := I) g₁ x) x
 
 theorem curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd
     (g₁ : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)
     (σ : Equiv.Perm (Fin 4)) (x₀ : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x₀) :
-    curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ y =
-      curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ
+    curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ y =
+      curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
         (smoothOrthoFrame (I := I) g₁ x₀) y := by
   classical
   apply ContinuousLinearMap.ext
@@ -516,7 +516,7 @@ theorem curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd
   apply Tensor0SSpace.toModel_injective
   apply ContinuousMultilinearMap.ext
   intro v
-  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialFibFixedFrame_toModel,
+  rw [curvatureActionMonomialTrace, curvatureRefoldMonomialFibFixedFrame_toModel,
     curvatureRefoldMonomialFibFixedFrame_toModel]
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -527,7 +527,7 @@ theorem curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         pairFeedScalarCLM (I := I) (M := M) 0 y (W y) ![] (Bf a) (Bf b) *
           pairFeedScalarCLM (I := I) (M := M) 2 y
-            (slotPerm4Fib (I := I) (M := M) y σ G) v (Bf a) (Bf b) := by
+            (tensorRank4PermuteCLM (I := I) (M := M) y σ G) v (Bf a) (Bf b) := by
     intro Bf
     refine Finset.sum_congr rfl (fun a _ => ?_)
     refine Finset.sum_congr rfl (fun b _ => ?_)
@@ -538,7 +538,7 @@ theorem curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd
     hrewrite (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)]
   exact double_frame_bilin_trace_indep (I := I) g₁ y
     (pairFeedScalarCLM (I := I) (M := M) 0 y (W y) ![])
-    (pairFeedScalarCLM (I := I) (M := M) 2 y (slotPerm4Fib (I := I) (M := M) y σ G) v)
+    (pairFeedScalarCLM (I := I) (M := M) 2 y (tensorRank4PermuteCLM (I := I) (M := M) y σ G) v)
     (fun a => smoothOrthoFrame (I := I) g₁ y a y)
     (fun a => smoothOrthoFrame (I := I) g₁ x₀ a y)
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g₁ y i j)
@@ -553,24 +553,24 @@ theorem curvatureRefoldMonomialBiContrFib_contMDiff (g₁ : SmoothRiemannianMetr
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 4 2 ℝ E)
         (E := fun z : M => TensorRSSpace 4 2 I z) x
-        (TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+        (TensorRSSpace.ofCLM (curvatureActionMonomialTrace (I := I) (M := M)
           g₁ W σ x))) := by
   classical
   intro x₀
   have h_fixed : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel 4 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 4 2 ℝ E)
         (E := fun z : M => TensorRSSpace 4 2 I z) x
-        (TensorRSSpace.ofCLM (curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ
+        (TensorRSSpace.ofCLM (curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
           (smoothOrthoFrame (I := I) g₁ x₀) x))) x₀ := by
     have h_glob : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 4 2 ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (TensorRSModel 4 2 ℝ E)
           (E := fun z : M => TensorRSSpace 4 2 I z) x
-          (TensorRSSpace.ofCLM (curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ
+          (TensorRSSpace.ofCLM (curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
             (smoothOrthoFrame (I := I) g₁ x₀) x))) := by
       apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
         (F₁ := Tensor0SModel 4 ℝ E) (V₁ := fun z : M => Tensor0SSpace 4 I z)
         (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun z : M => Tensor0SSpace 2 I z)
-        (φ := fun x : M => curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ
+        (φ := fun x : M => curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
           (smoothOrthoFrame (I := I) g₁ x₀) x)
       intro Y
       exact curvatureRefoldMonomialFibFixedFrame_apply_section_contMDiff (I := I) (M := M)
@@ -585,7 +585,7 @@ theorem curvatureRefoldMonomialBiContrFib_contMDiff (g₁ : SmoothRiemannianMetr
       (curvatureRefoldMonomialBiContrFib_eq_fixedFrame_on_nbhd (I := I) (M := M)
         g₁ W σ x₀ hy))
 
-def curvatureRefoldMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
+def curvatureActionMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -594,7 +594,7 @@ def curvatureRefoldMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
   toSection :=
     { toFun := fun x : M =>
         (show TensorRSSpace 4 2 I x from
-          TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+          TensorRSSpace.ofCLM (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
       contMDiff_toFun := curvatureRefoldMonomialBiContrFib_contMDiff (I := I) (M := M)
         g₁ W hW σ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
@@ -606,17 +606,17 @@ set_option linter.unusedSectionVars false in
       (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SSpace 2 I z) b (W b)))
     (σ : Equiv.Perm (Fin 4)) (x : M) :
-    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ).toSection x =
+    (curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ).toSection x =
       (show TensorRSSpace 4 2 I x from
-        TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+        TensorRSSpace.ofCLM (curvatureActionMonomialTrace (I := I) (M := M)
           g₁ W σ x)) := rfl
 
 lemma curvatureRefoldMonomialBiContrFib_zero_weight (g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b) (σ : Equiv.Perm (Fin 4)) {x : M}
     (hx : W x = 0) :
-    curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x = 0 := by
+    curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x = 0 := by
   classical
-  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialFibFixedFrame]
+  rw [curvatureActionMonomialTrace, curvatureActionMonomialFrameTrace]
   refine Finset.sum_eq_zero (fun a _ => Finset.sum_eq_zero (fun b _ => ?_))
   rw [hx]
   rw [show Tensor0SSpace.toModel (𝕜 := ℝ) (0 : Tensor0SSpace 2 I x)
@@ -624,17 +624,17 @@ lemma curvatureRefoldMonomialBiContrFib_zero_weight (g₁ : SmoothRiemannianMetr
       0 from by rw [Tensor0SSpace.toModel_zero]; rfl]
   exact curvatureRefoldMonomialFib_zero_weight (I := I) (M := M) x σ _ _
 
-def curvatureRefoldKernelCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
+def curvatureActionKernelCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SSpace 2 I z) b (W b)))
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) : SmoothCcTensor g₀ 4 2 :=
   (1 / 2 : ℝ) •
-    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₁
-      + curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₂
-      - curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₃
-      - curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₄)
+    (curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₁
+      + curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₂
+      - curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₃
+      - curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₄)
 
 set_option linter.unusedSectionVars false in
 
@@ -645,29 +645,29 @@ theorem curvatureRefoldKernelCoeffField_toSection_eq_kernelFib_sum
         (E := fun z : M => Tensor0SSpace 2 I z) b (W b)))
     (σ₁ σ₂ σ₃ σ₄ : Equiv.Perm (Fin 4)) (x : M) :
     (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (curvatureRefoldKernelCoeffField (I := I) (M := M)
+        (curvatureActionKernelCoeffField (I := I) (M := M)
           g₀ g₁ W hW σ₁ σ₂ σ₃ σ₄).toSection x) =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
-        curvatureRefoldKernelFib (I := I) (M := M) x
+        curvatureActionKernelCLM (I := I) (M := M) x
           (Tensor0SSpace.toModel (𝕜 := ℝ) (W x)
             ![(smoothOrthoFrame (I := I) g₁ x a x : E),
               (smoothOrthoFrame (I := I) g₁ x b x : E)])
           σ₁ σ₂ σ₃ σ₄
           (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x) := by
   classical
-  rw [curvatureRefoldKernelCoeffField, SmoothCcTensor.toSection_smul,
+  rw [curvatureActionKernelCoeffField, SmoothCcTensor.toSection_smul,
     SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
     ContMDiffSection.coe_smul, Pi.smul_apply, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContMDiffSection.coe_sub, Pi.sub_apply, ContMDiffSection.coe_add, Pi.add_apply]
   set F : Equiv.Perm (Fin 4) → Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       (Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x) :=
-    fun σ a b => curvatureRefoldMonomialFib (I := I) (M := M) x
+    fun σ a b => curvatureActionMonomialCLM (I := I) (M := M) x
       (Tensor0SSpace.toModel (𝕜 := ℝ) (W x)
         ![(smoothOrthoFrame (I := I) g₁ x a x : E),
           (smoothOrthoFrame (I := I) g₁ x b x : E)]) σ
       (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x) with hF_def
   have hfib : ∀ σ : Equiv.Perm (Fin 4),
-      ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ).toSection x :
+      ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ).toSection x :
         TensorRSSpace 4 2 I x) =
       TensorRSSpace.ofCLM (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         F σ a b) := fun σ => rfl
@@ -678,14 +678,14 @@ theorem curvatureRefoldKernelCoeffField_toSection_eq_kernelFib_sum
         - (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), F σ₃ a b)
         - (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E), F σ₄ a b)) =
     ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
-      curvatureRefoldKernelFib (I := I) (M := M) x
+      curvatureActionKernelCLM (I := I) (M := M) x
         (Tensor0SSpace.toModel (𝕜 := ℝ) (W x)
           ![(smoothOrthoFrame (I := I) g₁ x a x : E),
             (smoothOrthoFrame (I := I) g₁ x b x : E)])
         σ₁ σ₂ σ₃ σ₄
         (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
   have hker : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
-      curvatureRefoldKernelFib (I := I) (M := M) x
+      curvatureActionKernelCLM (I := I) (M := M) x
         (Tensor0SSpace.toModel (𝕜 := ℝ) (W x)
           ![(smoothOrthoFrame (I := I) g₁ x a x : E),
             (smoothOrthoFrame (I := I) g₁ x b x : E)])

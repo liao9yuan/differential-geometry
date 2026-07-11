@@ -196,7 +196,7 @@ theorem covGradRoughLapCurv_curry_eq_of_slot0Matching
           (covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x)
           (unitZeroSec (I := I) (M := M) x)) w =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
-        Tensor3rdCurv (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
+        tensorThirdOrderCurvatureDefect (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
           (fun y : M => T₀.toSection y) x)
         (unitZeroSec (I := I) (M := M) x) -
       covGradRoughLapMovingFrameResidual (I := I) (M := M) g T₀ x w := by

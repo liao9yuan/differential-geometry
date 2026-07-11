@@ -68,16 +68,16 @@ def euclForm (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E] :
 
 @[simp] lemma euclForm_apply (v w : E) : euclForm E v w = inner ℝ v w := rfl
 
-def trivCLM (x₀ x : M) : E →L[ℝ] E :=
+def tangentTrivializationContinuousLinearMapAt (x₀ x : M) : E →L[ℝ] E :=
   ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E)
 
 def localFiber (x₀ x : M) : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-  (((euclForm E).bilinearComp (trivCLM (I := I) x₀ x) (trivCLM (I := I) x₀ x)) :
+  (((euclForm E).bilinearComp (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x)) :
     E →L[ℝ] E →L[ℝ] ℝ)
 
 lemma localFiber_apply (x₀ x : M) (v w : TangentSpace I x) :
     localFiber (I := I) x₀ x v w =
-      inner ℝ (trivCLM (I := I) x₀ x v) (trivCLM (I := I) x₀ x w) := rfl
+      inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x v) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x w) := rfl
 
 lemma localFiber_symm (x₀ x : M) (v w : TangentSpace I x) :
     localFiber (I := I) x₀ x v w = localFiber (I := I) x₀ x w v := by
@@ -88,7 +88,7 @@ lemma localFiber_pos (x₀ : M) {x : M}
     (v : TangentSpace I x) (hv : v ≠ 0) :
     0 < localFiber (I := I) x₀ x v v := by
   rw [localFiber_apply, real_inner_self_eq_norm_sq]
-  have hAv : trivCLM (I := I) x₀ x v ≠ 0 := by
+  have hAv : tangentTrivializationContinuousLinearMapAt (I := I) x₀ x v ≠ 0 := by
     change ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E) v ≠ 0
     rw [show ((trivializationAt E (TangentSpace I) x₀).continuousLinearMapAt ℝ x : E →L[ℝ] E) v
           = (trivializationAt E (TangentSpace I) x₀).continuousLinearEquivAt ℝ x hx v from
@@ -129,10 +129,10 @@ lemma inCoordinates_localFiber (x₀ : M) {x : M}
   simp only [ContinuousLinearMap.coe_comp', Function.comp_apply]
   rw [oneForm_continuousLinearMapAt x₀ hx]
   simp only [ContinuousLinearMap.comp_apply]
-  change inner ℝ (trivCLM (I := I) x₀ x (e₁.symmL ℝ x v))
-      (trivCLM (I := I) x₀ x (e₁.symmL ℝ x w)) = inner ℝ v w
-  rw [show trivCLM (I := I) x₀ x (e₁.symmL ℝ x v) = v from e₁.continuousLinearMapAt_symmL hx v,
-      show trivCLM (I := I) x₀ x (e₁.symmL ℝ x w) = w from e₁.continuousLinearMapAt_symmL hx w]
+  change inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v))
+      (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w)) = inner ℝ v w
+  rw [show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v) = v from e₁.continuousLinearMapAt_symmL hx v,
+      show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w) = w from e₁.continuousLinearMapAt_symmL hx w]
 
 lemma coord_localFiber (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :

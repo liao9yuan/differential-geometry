@@ -254,7 +254,7 @@ def recentredCarrier (hT : 0 < T) (hT1 : T ≤ 1)
   TimeSobolev.timeH1.mk (0 : tensorHs (I := I) (M := M) g r s a)
     (maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv
 
-def recentredHi (hT : 0 < T) (hT1 : T ≤ 1)
+def recentredHiL2 (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 2)) T :=
@@ -294,14 +294,14 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
     ∀ᵐ t ∂(timeMeasure T),
       tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
           (show a ≤ a + 2 by linarith)
-          (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t) =
+          (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce t) =
         (recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).toFun t := by
   haveI : Countable (TensorEigenIdx (I := I) (M := M) g r s) :=
     MaximalRegularity.countable_tensorEigenIdx (I := I) (M := M)
       (g := g) (r := r) (s := s) h_compact
   have hper : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       ∀ᵐ t ∂(timeMeasure T),
-        (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
+        (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
           ((recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce).toFun t).coeff i := by
     intro i
     have hsub := Lp.coeFn_sub
@@ -313,10 +313,10 @@ theorem recentred_link (hT : 0 < T) (hT1 : T ≤ 1)
       (h_compact := h_compact) (a := a) hT hT1 u₀ gforce i
     filter_upwards [hsub, hconst, hstruct,
       ae_restrict_mem (μ := volume) measurableSet_Icc] with t htsub htconst htstruct htmem
-    have hlhs : (recentredHi (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
+    have hlhs : (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce t).coeff i =
         (maxRegDuhamelSolField (I := I) (M := M) a hT hT1 u₀ gforce t).coeff i -
           u₀.coeff i := by
-      rw [recentredHi, htsub, Pi.sub_apply, htconst]
+      rw [recentredHiL2, htsub, Pi.sub_apply, htconst]
       simp only [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff]
     rw [hlhs, htstruct,
       recentredCarrier_toFun_coeff (I := I) (M := M) hT hT1 u₀ gforce i htmem]
@@ -333,7 +333,7 @@ def maxRegRecentredCrossScaleField (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     CrossScaleField (I := I) (M := M) g r s a T where
-  hiL2 := recentredHi (I := I) (M := M) hT hT1 u₀ gforce
+  hiL2 := recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce
   lo := recentredCarrier (I := I) (M := M) hT hT1 u₀ gforce
   link := recentred_link (I := I) (M := M) (h_compact := h_compact) hT hT1 u₀ gforce
 
@@ -573,7 +573,7 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
     ‖(maxRegRecentredCrossScaleField (I := I) (M := M)
         (h_compact := h_compact) hT hT1 u₀ gforce).repr t‖ ^ 2 ≤
       Real.sqrt T *
-          ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 +
+          ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 +
         (Real.sqrt T)⁻¹ *
           ‖(maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv‖ ^ 2 := by
   set u := maxRegRecentredCrossScaleField (I := I) (M := M)
@@ -625,7 +625,7 @@ theorem recentred_repr_normSq_le (hT : 0 < T) (hT1 : T ≤ 1)
   rw [MeasureTheory.integral_add (hhi_sq.const_mul (Real.sqrt T))
       (hlo_sq.const_mul (Real.sqrt T)⁻¹),
     MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul]
-  have hhi_norm : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 =
+  have hhi_norm : ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 =
       ∫ s in Set.Icc (0 : ℝ) T, ‖u.hiL2 s‖ ^ 2 :=
     TimeSobolev.norm_sq_eq_integral _
   have hlo_norm : ‖(maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv‖ ^ 2 =
@@ -637,9 +637,9 @@ theorem recentredHi_norm_le (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
-    ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
+    ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
       2 * Real.sqrt T * ‖u₀‖ + (1 + T) * ‖gforce‖ := by
-  rw [recentredHi, maxRegDuhamelSolField]
+  rw [recentredHiL2, maxRegDuhamelSolField]
   refine le_trans (norm_sub_le _ _) ?_
   refine le_trans (add_le_add (norm_add_le _ _) (le_refl _)) ?_
   have hhom := maxRegHomogeneousSolField_norm_le (I := I) (M := M)
@@ -685,7 +685,7 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
     (h_compact := h_compact) hT hT1 u₀ gforce
   have hderiv := recentredCarrier_deriv_norm_le (I := I) (M := M)
     (h_compact := h_compact) hT hT1 u₀ gforce
-  have hhi' : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
+  have hhi' : ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ≤
       2 * Real.sqrt T * (‖u₀‖ + C) := by
     refine le_trans hhi ?_
     have h1 : (1 + T) * ‖gforce‖ ≤ 2 * (Real.sqrt T * C) := by
@@ -697,10 +697,10 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
       Real.sqrt T * (‖u₀‖ + 2 * C) := by
     refine le_trans hderiv ?_
     nlinarith [hgforce, Real.sqrt_nonneg T, norm_nonneg u₀, hC]
-  have hhi_sq : ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
+  have hhi_sq : ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
       (2 * Real.sqrt T * (‖u₀‖ + C)) ^ 2 := by
     have hnn : 0 ≤ 2 * Real.sqrt T * (‖u₀‖ + C) := by positivity
-    nlinarith [hhi', norm_nonneg (recentredHi (I := I) (M := M) hT hT1 u₀ gforce), hnn]
+    nlinarith [hhi', norm_nonneg (recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce), hnn]
   have hderiv_sq : ‖(maxRegDuhamelMap (I := I) (M := M) a hT hT1 u₀ gforce).deriv‖ ^ 2 ≤
       (Real.sqrt T * (‖u₀‖ + 2 * C)) ^ 2 := by
     have hnn : 0 ≤ Real.sqrt T * (‖u₀‖ + 2 * C) := by positivity
@@ -709,7 +709,7 @@ theorem recentred_repr_normSq_le_of_smallForcing (hT : 0 < T) (hT1 : T ≤ 1)
   refine le_trans henergy ?_
   have hssq : Real.sqrt T ^ 2 = T := Real.sq_sqrt hT.le
   have hbound1 : Real.sqrt T *
-        ‖recentredHi (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
+        ‖recentredHiL2 (I := I) (M := M) hT hT1 u₀ gforce‖ ^ 2 ≤
       Real.sqrt T * (4 * T * (‖u₀‖ + C) ^ 2) := by
     refine mul_le_mul_of_nonneg_left (le_trans hhi_sq (le_of_eq ?_)) hsqrtT_pos.le
     rw [mul_pow, mul_pow, hssq]; ring

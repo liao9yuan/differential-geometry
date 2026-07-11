@@ -49,10 +49,10 @@ structure eigenvectorIteratedTensorChartBilinearData
 
   directions : Fin m → Fin (Module.finrank ℝ E)
 
-  fChartEff : EuclN → ℝ
+  diffChartForcing : EuclN → ℝ
 
   fChartEff_memLp_weighted :
-    MemLp fChartEff 2
+    MemLp diffChartForcing 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
 
@@ -73,7 +73,7 @@ structure eigenvectorIteratedTensorChartBilinearData
             g r s i α P₀ m directions y * ψ y
         ∂(volume : Measure EuclN)) =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
-        densityOnEuclid (I := I) g α y * fChartEff y * ψ y
+        densityOnEuclid (I := I) g α y * diffChartForcing y * ψ y
         ∂(volume : Measure EuclN)
 
 namespace eigenvectorIteratedTensorChartBilinearData
@@ -83,9 +83,9 @@ def mk_from_hypotheses
     {i : TensorEigenIdx (I := I) (M := M) g r s}
     {α : M} {P₀ : TensorCompIdx (E := E) r s} {m : ℕ}
     (directions : Fin m → Fin (Module.finrank ℝ E))
-    (fChartEff : EuclN → ℝ)
+    (diffChartForcing : EuclN → ℝ)
     (fChartEff_memLp_weighted :
-      MemLp fChartEff 2
+      MemLp diffChartForcing 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)))
     (m_diff_variational_identity :
@@ -105,12 +105,12 @@ def mk_from_hypotheses
               g r s i α P₀ m directions y * ψ y
           ∂(volume : Measure EuclN)) =
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
-          densityOnEuclid (I := I) g α y * fChartEff y * ψ y
+          densityOnEuclid (I := I) g α y * diffChartForcing y * ψ y
           ∂(volume : Measure EuclN)) :
     eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
       g r s i α P₀ m :=
   { directions := directions
-    fChartEff := fChartEff
+    diffChartForcing := diffChartForcing
     fChartEff_memLp_weighted := fChartEff_memLp_weighted
     m_diff_variational_identity := m_diff_variational_identity }
 
@@ -508,7 +508,7 @@ def ofBase
     eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
       g r s i α P₀ 0 where
   directions := Fin.elim0
-  fChartEff := eigenvectorChartRHS (I := I) (M := M) g r s i α P₀
+  diffChartForcing := eigenvectorChartRHS (I := I) (M := M) g r s i α P₀
   fChartEff_memLp_weighted :=
     eigenvectorChartRHS_memLp_weighted (I := I) (M := M)
       g r s i α P₀

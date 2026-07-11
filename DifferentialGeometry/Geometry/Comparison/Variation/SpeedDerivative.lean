@@ -43,7 +43,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-theorem S1_moving_foot_metric_compatibility
+theorem speedSq_hasDerivAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hf : IsSmoothVariation (I := I) f) :
     HasDerivAt (fun s : ℝ => speedSq (I := I) g f s t)
@@ -304,7 +304,7 @@ lemma speedSq_contDiff
   rw [← contMDiff_iff_contDiff, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcm
 
-theorem S2_diff_under_interval_integral
+theorem speedIntegral_hasDerivAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (_hf : IsSmoothVariation (I := I) f) (_hL : 0 < L)
     (_hUnit : ∀ t ∈ Set.Icc (0 : ℝ) L, speedSq (I := I) g f 0 t = 1) :
@@ -332,7 +332,7 @@ theorem S2_diff_under_interval_integral
   have hΦcont : Continuous G := hΦ.continuous
   have hD : ∀ t : ℝ, HasDerivAt (fun s : ℝ => Φ s t) (D t) 0 := by
     intro t
-    have := S1_moving_foot_metric_compatibility (I := I) g f t _hf
+    have := speedSq_hasDerivAt (I := I) g f t _hf
     simpa only [hΦdef, hDdef] using this
   have hΦdiff : ∀ p : ℝ × ℝ, DifferentiableAt ℝ G p :=
     fun p => (hΦ.differentiable (by simp)).differentiableAt

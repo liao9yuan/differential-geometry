@@ -31,7 +31,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.Chart
 
-private def GlobalCorr_eu
+private def secondCovDerivChartGlobalGradCorrectionCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -48,7 +48,7 @@ private def GlobalCorr_eu
       covDerivLowerOrderCoeff (I := I) (M := M) g r s α l Idx I' Jdx J' y
      else 0)
 
-private def GlobalCorr0_eu
+private def secondCovDerivChartGlobalValueCorrectionCoeff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (k l : Fin (Module.finrank ℝ E))
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -72,10 +72,10 @@ private lemma GlobalCorr_eu_contDiffOn
     (J' : Fin s → Fin (Module.finrank ℝ E))
     (m : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
-      (GlobalCorr_eu (I := I) (M := M) g r s α k l Idx Jdx I' J' m)
+      (secondCovDerivChartGlobalGradCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx I' J' m)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  unfold GlobalCorr_eu
+  unfold secondCovDerivChartGlobalGradCorrectionCoeff
   have h1 : ContDiffOn ℝ ∞
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
         if m = l then
@@ -110,10 +110,10 @@ private lemma GlobalCorr0_eu_contDiffOn
     (I' : Fin r → Fin (Module.finrank ℝ E))
     (J' : Fin s → Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
-      (GlobalCorr0_eu (I := I) (M := M) g r s α k l Idx Jdx I' J')
+      (secondCovDerivChartGlobalValueCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx I' J')
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  unfold GlobalCorr0_eu
+  unfold secondCovDerivChartGlobalValueCorrectionCoeff
   have h1 : ContDiffOn ℝ ∞
       (secondCovDerivLO_valueCoeff (I := I) (M := M) g r s α k l Idx I' Jdx J')
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -479,8 +479,8 @@ theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
                 (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')
                 ((toEuclidean (E := E)) ((extChartAt I α) b))) := by
   classical
-  refine ⟨GlobalCorr_eu (I := I) (M := M) g r s α k l Idx Jdx,
-          GlobalCorr0_eu (I := I) (M := M) g r s α k l Idx Jdx,
+  refine ⟨secondCovDerivChartGlobalGradCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx,
+          secondCovDerivChartGlobalValueCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx,
           ?_, ?_, ?_⟩
   · intro I' J' m
     exact GlobalCorr_eu_contDiffOn (I := I) (M := M) g r s α k l Idx Jdx I' J' m
@@ -684,7 +684,7 @@ theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
     have hMSum : ∀ (I' : Fin r → Fin (Module.finrank ℝ E))
                   (J' : Fin s → Fin (Module.finrank ℝ E)),
         (∑ m : Fin (Module.finrank ℝ E),
-          GlobalCorr_eu (I := I) (M := M) g r s α k l Idx Jdx I' J' m y *
+          secondCovDerivChartGlobalGradCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx I' J' m y *
             euclidPartial (E := E) m
               (chartPushedRaw I α
                 (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y) =
@@ -698,7 +698,7 @@ theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
                 (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y := by
       intro I' J'
       have hunfold : ∀ m,
-          GlobalCorr_eu (I := I) (M := M) g r s α k l Idx Jdx I' J' m y *
+          secondCovDerivChartGlobalGradCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx I' J' m y *
             euclidPartial (E := E) m
               (chartPushedRaw I α
                 (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y =
@@ -715,7 +715,7 @@ theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
               (chartPushedRaw I α
                 (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y := by
         intro m
-        unfold GlobalCorr_eu
+        unfold secondCovDerivChartGlobalGradCorrectionCoeff
         ring
       rw [Finset.sum_congr rfl (fun m _ => hunfold m)]
       rw [Finset.sum_add_distrib]
@@ -760,7 +760,7 @@ theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
         (∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ J' : Fin s → Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-          GlobalCorr_eu (I := I) (M := M) g r s α k l Idx Jdx I' J' m y *
+          secondCovDerivChartGlobalGradCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx I' J' m y *
             euclidPartial (E := E) m
               (chartPushedRaw I α
                 (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J')) y) =
@@ -806,7 +806,7 @@ theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
     have hGC0_total :
         (∑ I' : Fin r → Fin (Module.finrank ℝ E),
           ∑ J' : Fin s → Fin (Module.finrank ℝ E),
-          GlobalCorr0_eu (I := I) (M := M) g r s α k l Idx Jdx I' J' y *
+          secondCovDerivChartGlobalValueCorrectionCoeff (I := I) (M := M) g r s α k l Idx Jdx I' J' y *
             chartPushedRaw I α
               (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α I' J') y) =
         ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -820,7 +820,7 @@ theorem secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
               (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α q.1 q.2) y := by
       rw [← Finset.sum_product']
       refine Finset.sum_congr rfl (fun q _ => ?_)
-      unfold GlobalCorr0_eu
+      unfold secondCovDerivChartGlobalValueCorrectionCoeff
       rfl
     rw [hGC0_total]
     have hGC0_split :

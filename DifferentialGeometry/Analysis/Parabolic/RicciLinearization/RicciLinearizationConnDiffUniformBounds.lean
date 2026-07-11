@@ -55,14 +55,14 @@ set_option linter.unusedVariables false in
 set_option maxRecDepth 16000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
+private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDiffFib_of_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δc : ℝ} (hδc_le : δc ≤ max δ₀ 0)
-        (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δc)
+        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δc)
         (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle
@@ -71,10 +71,10 @@ private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
             ‖(iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x‖)) ≤ B →
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
             (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-              linearizedRicciConnDiffOrder0Fib (I := I) g₀ g₁ x) ≤ C ∧
+              linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) ≤ C ∧
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
             (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-              linearizedRicciConnDiffOrder1Fib (I := I) g₀ g₁ x) ≤ C := by
+              linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) ≤ C := by
   classical
   set δm : ℝ := max δ₀ 0 with hδm_def
   have hδm_nn : 0 ≤ δm := le_max_right _ _
@@ -99,7 +99,7 @@ private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
   intro g₁ P htie δc hδc_le hbound x henv
   letI instT3 : Bundle.RiemannianBundle (fun b : M => Tensor0SBundle.TensorRSSpace 0 3 I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
-  have hboundm : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δm := by
+  have hboundm : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δm := by
     intro y v w'
     refine le_trans (hbound y v w') ?_
     have hnnw : 0 ≤ Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w' w') :=
@@ -153,7 +153,7 @@ private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
           (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e b)))
           (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x (e b)))) ≤ q := by
     intro b
-    have h := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le (I := I) (M := M) g₀ g₁
+    have h := norm_inverseMetricSharpFib_g0Flat_le (I := I) (M := M) g₀ g₁
       (fun y => ccTensorBilinSymm (I := I) g₀ P y) htie hδm_lt hδm_nn hboundm x (e b)
     have h1b : g₀.inner x (e b) (e b) = 1 := by rw [horth b b]; simp
     rw [h1b, Real.sqrt_one, mul_one] at h
@@ -224,20 +224,20 @@ private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
   have hCAB : C₀ * G ≤ C₀ * B := mul_le_mul_of_nonneg_left hG_le hC₀0
   have hO1 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
       (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-        linearizedRicciConnDiffOrder1Fib (I := I) g₀ g₁ x) ≤ nn ^ 3 * nn ^ 2 * Mc1 ^ 2 := by
-    rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 3 2 x
+        linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) ≤ nn ^ 3 * nn ^ 2 * Mc1 ^ 2 := by
+    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 3 2 x
       (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-        linearizedRicciConnDiffOrder1Fib (I := I) g₀ g₁ x) e bse rfl hbse horth]
+        linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) e bse rfl hbse horth]
     have hcompb : ∀ (K : Fin 3 → Fin (Module.finrank ℝ E))
         (J : Fin 2 → Fin (Module.finrank ℝ E)),
         (fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
           (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-            linearizedRicciConnDiffOrder1Fib (I := I) g₀ g₁ x)
+            linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x)
           (Module.finrank ℝ E) e K J) ^ 2 ≤ Mc1 ^ 2 := by
       intro K J
       have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
           (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-            linearizedRicciConnDiffOrder1Fib (I := I) g₀ g₁ x)
+            linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x)
           (Module.finrank ℝ E) e K J =
           Tensor0SBundle.Tensor0SSpace.toModel
             (ricciCometricFourTraceCLM (I := I) g₁ x
@@ -267,7 +267,7 @@ private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
     calc (∑ K : Fin 3 → Fin (Module.finrank ℝ E), ∑ J : Fin 2 → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x 3 2
             (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-              linearizedRicciConnDiffOrder1Fib (I := I) g₀ g₁ x)
+              linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x)
             (Module.finrank ℝ E) e K J) ^ 2)
         ≤ ∑ _K : Fin 3 → Fin (Module.finrank ℝ E), ∑ _J : Fin 2 → Fin (Module.finrank ℝ E),
             Mc1 ^ 2 :=
@@ -280,20 +280,20 @@ private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
           ring
   have hO0 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-        linearizedRicciConnDiffOrder0Fib (I := I) g₀ g₁ x) ≤ nn ^ 2 * nn ^ 2 * Mc0 ^ 2 := by
-    rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
+        linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) ≤ nn ^ 2 * nn ^ 2 * Mc0 ^ 2 := by
+    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-        linearizedRicciConnDiffOrder0Fib (I := I) g₀ g₁ x) e bse rfl hbse horth]
+        linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x) e bse rfl hbse horth]
     have hcompb : ∀ (K : Fin 2 → Fin (Module.finrank ℝ E))
         (J : Fin 2 → Fin (Module.finrank ℝ E)),
         (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
           (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-            linearizedRicciConnDiffOrder0Fib (I := I) g₀ g₁ x)
+            linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x)
           (Module.finrank ℝ E) e K J) ^ 2 ≤ Mc0 ^ 2 := by
       intro K J
       have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
           (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-            linearizedRicciConnDiffOrder0Fib (I := I) g₀ g₁ x)
+            linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x)
           (Module.finrank ℝ E) e K J =
           Tensor0SBundle.Tensor0SSpace.toModel
             (ricciCometricFourTraceCLM (I := I) g₁ x
@@ -326,7 +326,7 @@ private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
     calc (∑ K : Fin 2 → Fin (Module.finrank ℝ E), ∑ J : Fin 2 → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
             (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-              linearizedRicciConnDiffOrder0Fib (I := I) g₀ g₁ x)
+              linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀ g₁ x)
             (Module.finrank ℝ E) e K J) ^ 2)
         ≤ ∑ _K : Fin 2 → Fin (Module.finrank ℝ E), ∑ _J : Fin 2 → Fin (Module.finrank ℝ E),
             Mc0 ^ 2 :=
@@ -343,16 +343,16 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
+theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
@@ -366,7 +366,7 @@ theorem exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
   obtain ⟨C, hC0, hcore⟩ :=
-    exists_rfns_connDiffOrderFib_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ (Csob * R)
+    exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDiffFib_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ (Csob * R)
       (by positivity)
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x
@@ -397,7 +397,7 @@ theorem exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
         ((linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s).toSection x) =
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-            linearizedRicciConnDiffOrder0Fib (I := I) g₀
+            linearizedRicciConnDiffOrder0CometricTracedCLM (I := I) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) x) := rfl
     rw [h0]
     exact Real.sqrt_le_sqrt hmain.1
@@ -405,7 +405,7 @@ theorem exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
         ((linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s).toSection x) =
         riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
           (show Tensor0SBundle.TensorRSSpace 3 2 I x from
-            linearizedRicciConnDiffOrder1Fib (I := I) g₀
+            linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀
               (realizedFam (I := I) g₀ T T' hδ hδ' s) x) := rfl
     rw [h1]
     exact Real.sqrt_le_sqrt hmain.2

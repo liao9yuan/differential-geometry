@@ -203,7 +203,7 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := r) (x := b) α') :
             Tensor0SModel r ℝ E) =
       α'.compContinuousLinearMap
-        (fun _ : Fin r => chartJinv (I := I) (M := M) α b) := by
+        (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b) := by
     have := triv_continuousLinearMapAt_eq_compContinuousLinearMap
       (I := I) (M := M) (s := r) (b₀ := α) (b := b) hb_r
       (T := show Bundle.continuousMultilinearMap ℝ r E (TangentSpace I) b from α')
@@ -211,14 +211,14 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
   rw [h_er]
   set Tβ : Tensor0SModel s ℝ E :=
     v (α'.compContinuousLinearMap
-        (fun _ : Fin r => chartJinv (I := I) (M := M) α b)) with hTβ_def
+        (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)) with hTβ_def
   have h_es :
       (Tensor0SBundle.Tensor0SSpace.toModel
         (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
         ((es.symmL ℝ b) (show Tensor0SSpace s I b from Tβ)) :
             Tensor0SModel s ℝ E) =
       Tβ.compContinuousLinearMap
-        (fun _ : Fin s => chartJ (I := I) (M := M) α b) := by
+        (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b) := by
     have :=
       Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
         (𝕜 := ℝ) (B := M) (F := E) (E := (TangentSpace I : M → Type _))
@@ -239,7 +239,7 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
         (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
         ((es.symmL ℝ b) (show Tensor0SSpace s I b from Tβ)) =
         Tβ.compContinuousLinearMap
-          (fun _ : Fin s => chartJ (I := I) (M := M) α b) := h_es
+          (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b) := h_es
   change Tensor0SBundle.Tensor0SSpace.toModel
       (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
       ((es.symmL ℝ b) Tβ) = chartRSTwist (I := I) (M := M) α b r s v α'

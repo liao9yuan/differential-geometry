@@ -70,7 +70,7 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
     rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 s x S]
     rw [show tensorInnerPointwise (I := I) (M := M) g 0 s x
           (TensorRSSpace.toModel S) (TensorRSSpace.toModel S) =
-        tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+        covariantTensorInnerPointwise (I := I) (M := M) (0 + s) g x
           (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel S))
           (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel S)) from rfl]
     rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (0 + s)
@@ -397,7 +397,7 @@ lemma riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame
     riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x T =
       ∑ a : Fin n,
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
-          (tensor0SAsRS (I := I) (M := M) x
+          (tensor0SToTensorRS (I := I) (M := M) x
             (tensor0S_curry (I := I) (M := M) s x
               ((T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x)
                 (unitZeroSec (I := I) (M := M) x)) (e a))) := by
@@ -416,7 +416,7 @@ lemma riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame
   rw [riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame (I := I) (M := M) g s x e K₀
     hreprS hreprSucc T]
   refine Finset.sum_congr rfl (fun a _ => ?_)
-  rw [slot0Curry_eq_tensor0SAsRS_curry_unitZeroSec (I := I) (M := M) g x s e K₀ T a]
+  rw [slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec (I := I) (M := M) g x s e K₀ T a]
 
 end Connection
 end Integral

@@ -30,7 +30,7 @@ theorem rawVariationalIdentityFlat_iff_flat_value
     (t : ℝ) (x : M) (v : TangentSpace I x) (T' P' : E →L[ℝ] E)
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
     RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P'
-      ↔ HasDerivAt (fun s : ℝ => chartCloseDop (I := I) Φ_fam (Φ_fam t x) x s v)
+      ↔ HasDerivAt (fun s : ℝ => flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x s v)
           (T' (mfderiv I I (Φ_fam t : M → M) x v) + P' v) t := by
   unfold RawVariationalIdentityFlat
   exact (Filter.EventuallyEq.hasDerivAt_iff
@@ -46,7 +46,7 @@ theorem rawVariationalIdentityFlat_of_orbitODE_factors
     RawVariationalIdentityFlat (I := I) Φ_fam t x v T' P' := by
   have hDchart := chartCloseDop_hasDerivAt_clm_comp (I := I) Φ_fam (Φ_fam t x) x t hT hP
   have hEvalv :
-      HasDerivAt (fun s : ℝ => chartCloseDop (I := I) Φ_fam (Φ_fam t x) x s v)
+      HasDerivAt (fun s : ℝ => flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x s v)
         ((T'.comp (chartCloseFderiv (I := I) Φ_fam (Φ_fam t x) x t)
             + (chartCloseTriv (I := I) Φ_fam (Φ_fam t x) x t).comp P') v) t := by
     have := (ContinuousLinearMap.apply ℝ E v).hasFDerivAt.comp_hasDerivAt t hDchart

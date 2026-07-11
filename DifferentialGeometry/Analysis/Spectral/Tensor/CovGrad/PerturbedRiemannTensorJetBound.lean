@@ -68,7 +68,7 @@ private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
 set_option linter.unusedSectionVars false in
-private theorem rfns_le_of_Ksum_sq_le_local
+private theorem riemannianFiberNormSq_le_of_componentSq_sum_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     (C : ℝ)
     (hKsum : ∀ (e : Fin (Module.finrank ℝ E) → TangentSpace I x),
@@ -82,7 +82,7 @@ private theorem rfns_le_of_Ksum_sq_le_local
       ≤ ((Module.finrank ℝ E : ℝ) ^ r) * C ^ 2 := by
   classical
   obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis_local (I := I) (M := M) g₀ x
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse horth]
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse horth]
   calc (∑ K : Fin r → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x r s S (Module.finrank ℝ E) e K J) ^ 2)
       ≤ ∑ _K : Fin r → Fin (Module.finrank ℝ E), C ^ 2 :=
@@ -102,7 +102,7 @@ theorem exists_riemannBiContrFib_perturbed_rfns_le_of_jetEnvelope
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -120,7 +120,7 @@ theorem exists_riemannBiContrFib_perturbed_rfns_le_of_jetEnvelope
       (I := I) (M := M) g₀ hδ₀ B hB
   refine ⟨((Module.finrank ℝ E : ℝ) ^ 2) * C ^ 2, by positivity, ?_⟩
   intro g₁ P δ hδ_le hδ htie x henv
-  exact rfns_le_of_Ksum_sq_le_local (I := I) (M := M) g₀ 2 2 x
+  exact riemannianFiberNormSq_le_of_componentSq_sum_le (I := I) (M := M) g₀ 2 2 x
     (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (riemannBiContrFib (I := I) g₁ x)) C
     (fun e horth K => hC g₁ P hδ_le hδ htie x henv e horth K)
 
@@ -134,7 +134,7 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_rfns_le_of_jetEnvelope
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -152,7 +152,7 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_rfns_le_of_jetEnvelope
       (I := I) (M := M) g₀ hδ₀ B hB
   refine ⟨((Module.finrank ℝ E : ℝ) ^ 2) * C ^ 2, by positivity, ?_⟩
   intro g₁ P δ hδ_le hδ htie x henv
-  exact rfns_le_of_Ksum_sq_le_local (I := I) (M := M) g₀ 2 2 x
+  exact riemannianFiberNormSq_le_of_componentSq_sum_le (I := I) (M := M) g₀ 2 2 x
     (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (ricciArmOrder0CurvCoeffFib (I := I) g₁ x)) C
     (fun e horth K => hC g₁ P hδ_le hδ htie x henv e horth K)
 

@@ -37,7 +37,7 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
     (ha_eq : a = 4 * Module.finrank ℝ E + 10)
     (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a:ℝ)+2) → tensorHs (I := I) (M := M) g₀ 0 2 (a:ℝ))
     (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ), SmoothCcTensor g₀ 0 2)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ), SmoothCcTensor g₀ 0 2)
     (H0 : ∀ (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x), F g x v w = F g x w v)
     (H1 : IsStrictlyParabolicMetricRHS (I := I) F g₀)
     {L : ℝ≥0} (hLipN : LipschitzWith L Nfun)
@@ -52,7 +52,7 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
                       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖)
     (H3 : IsSmoothQuasilinearMetricRHS (I := I) F)
     (hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ) (x : M) (v w : TangentSpace I x),
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ) (x : M) (v w : TangentSpace I x),
       ccTensorBilinSymm (I := I) g₀ (Nsec S hδ_lt hδ + rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w
         = F (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδ) x v w)
     (hForce : ∀ {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
@@ -92,7 +92,7 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
             (∀ {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
                 (hT₁_le_d2F : T₁ ≤ d₂F)
                 (Ffam : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-                (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+                (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
                   (ccTensorBilinSymm (I := I) g₀ (Ffam t)) δ)
                 (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
                   SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Ffam t) =
@@ -143,7 +143,7 @@ theorem quasilinear_strictlyParabolic_2ndOrder_shortTimeExistence
             (∀ {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
                 (hT₁_le_d2F : T₁ ≤ d₂F)
                 (Ffam : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-                (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+                (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
                   (ccTensorBilinSymm (I := I) g₀ (Ffam t)) δ)
                 (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
                   SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Ffam t) =

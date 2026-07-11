@@ -50,10 +50,10 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform cmm_two_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local symmS symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform continuousBilinearMap_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local ccTensor02Symm symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
 open DifferentialGeometry.PDE.DeTurck (deTurckVF)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_rfns_le symmAbsorbedCoeff_jet_le)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_riemannianFiberNormSq_le symmAbsorbedCoeff_jet_le)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -115,10 +115,10 @@ private theorem pointwiseTensorCurv_iteratedCovGrad_fiberNormSq_jet_le
   have hFULL_nn : 0 ≤ FULL := Finset.sum_nonneg (fun a _ => hrfnsS_nn a)
 
   set AR : SmoothCcTensor g₀ 0 (s + 1) :=
-    appFullSec (I := I) (M := M) g₀ 0 (s + 1) (s + 1) H_R (covGrad (I := I) (M := M) g₀ 0 s S)
+    homTensorRSFieldApply (I := I) (M := M) g₀ 0 (s + 1) (s + 1) H_R (covGrad (I := I) (M := M) g₀ 0 s S)
     with hAR_def
   set AdR : SmoothCcTensor g₀ 0 (s + 1) :=
-    appFullSec (I := I) (M := M) g₀ 0 s (s + 1) H_dR S with hAdR_def
+    homTensorRSFieldApply (I := I) (M := M) g₀ 0 s (s + 1) H_dR S with hAdR_def
   have hgradsplit :
       iteratedCovGrad (I := I) g₀ 0 (s + 1) p (pointwiseTensorCurv (I := I) (M := M) g₀ s S) =
         iteratedCovGrad (I := I) g₀ 0 (s + 1) p AR + iteratedCovGrad (I := I) g₀ 0 (s + 1) p AdR := by
@@ -144,7 +144,7 @@ private theorem pointwiseTensorCurv_iteratedCovGrad_fiberNormSq_jet_le
     rw [hAR_def, hcov1]
     refine h.trans_eq ?_
     refine congrArg (ccR p * ·) (Finset.sum_congr rfl (fun i _ => ?_))
-    have hcomp := rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s 1 i S x
+    have hcomp := riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s 1 i S x
 
     have harg : rfnsS (1 + i) = rfnsS (i + 1) := by rw [Nat.add_comm 1 i]
     rw [← harg, hrfnsS_def]
@@ -300,7 +300,7 @@ private theorem iteratedRoughLapGrad_commutator_fiberNormSq_jet_le_aux
               ((iteratedCovGrad (I := I) g₀ 0 s (m + a) S).toSection x) := by
         intro a
         rw [hgradm]
-        exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s m a S x
+        exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s m a S x
       rw [Finset.sum_congr rfl (fun a _ => hreindex a)] at hKb
 
       refine hKb.trans ?_
@@ -333,7 +333,7 @@ private theorem iteratedRoughLapGrad_commutator_fiberNormSq_jet_le_aux
         rw [hfullSum, show m + (p + 1) + 1 = m + 1 + p + 1 from by omega]
       rw [hsum_eq] at hCmb
 
-      have h := rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 (s + m) 1 p comm_m x
+      have h := riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 (s + m) 1 p comm_m x
       rw [iteratedCovGrad_succ (I := I) (M := M) g₀ 0 (s + m) 0 comm_m,
         iteratedCovGrad_zero] at h
 
@@ -406,7 +406,7 @@ private theorem rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet
             ((iteratedCovGrad (I := I) g₀ 0 (2 + a) 2 (iteratedCovGrad (I := I) g₀ 0 2 a W)).toSection x) =
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (a + 2)) x
             ((iteratedCovGrad (I := I) g₀ 0 2 (a + 2) W).toSection x) :=
-      rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 a 2 W x
+      riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 a 2 W x
     rw [hreindex]
     refine mul_le_mul_of_nonneg_left ?_ hCpost_nn
     rw [hScol_def]
@@ -451,10 +451,10 @@ private lemma norm_iteratedFDerivWithin_rawCompOnE_le_iteratedFDeriv_rawPullR
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
     ‖iteratedFDerivWithin ℝ m
-        (DeTurckCoefficients.rawCompOnE (I := I) (M := M) g S α Jdx)
+        (DeTurckCoefficients.tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
         (interior (extChartAt I α).target) y‖ ≤
       ‖((toEuclidean (E := E)) : E →L[ℝ] EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))‖ ^ m *
-        ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 S α
+        ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α
             (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx) ((toEuclidean (E := E)) y)‖ := by
   classical
   set e : E ≃L[ℝ] EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) := toEuclidean (E := E) with he_def
@@ -463,8 +463,8 @@ private lemma norm_iteratedFDerivWithin_rawCompOnE_le_iteratedFDeriv_rawPullR
   have hUD : UniqueDiffOn ℝ O := hO_open.uniqueDiffOn
 
   have hcompose :
-      DeTurckCoefficients.rawCompOnE (I := I) (M := M) g S α Jdx =
-        rawPullR (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx ∘ ⇑e := by
+      DeTurckCoefficients.tensorChartComponentOnModel (I := I) (M := M) g S α Jdx =
+        tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx ∘ ⇑e := by
     have hpull := rawPullR_eq_rawCompOnE_comp (I := I) (M := M) g S α Jdx
     funext z
     have := congrArg (fun f => f (e z)) hpull
@@ -480,16 +480,16 @@ private lemma norm_iteratedFDerivWithin_rawCompOnE_le_iteratedFDeriv_rawPullR
     · rintro ⟨w, hw, hwz⟩; rwa [e.injective hwz] at hw
 
   have hcomp := e.iteratedFDerivWithin_comp_right
-    (f := rawPullR (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
+    (f := tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
     himg_open.uniqueDiffOn (x := y) hey_mem m
   rw [← hOeq] at hcomp
   rw [hcomp]
 
   have hplain : iteratedFDerivWithin ℝ m
-      (rawPullR (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
+      (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx)
       (e '' O) (e y) =
       iteratedFDeriv ℝ m
-        (rawPullR (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx) (e y) :=
+        (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx) (e y) :=
     iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) m himg_open hey_mem
   rw [hplain]
 
@@ -523,7 +523,7 @@ private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
       ∀ (D : SmoothCcTensor g 0 2)
         {z : EuclideanSpace ℝ (Fin n)},
         z ∈ DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartPouKernel (I := I) (M := M) α →
-        zeroContentR (I := I) (M := M) g 0 (2 + i)
+        tensorComponentAbsSum (I := I) (M := M) g 0 (2 + i)
           (iteratedCovGrad (I := I) g 0 2 i D) α z ≤
           Ci * Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g 0 (2 + i)
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
@@ -563,7 +563,7 @@ private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
   have hyK' : y ∈ DifferentialGeometry.Analysis.Sobolev.Chart.chartImagePOUTsupport
       (I := I) (M := M) α := hyK
   have h_zc : ∀ i ∈ Finset.range (N + 1),
-      zeroContentR (I := I) (M := M) g 0 (2 + i)
+      tensorComponentAbsSum (I := I) (M := M) g 0 (2 + i)
         (iteratedCovGrad (I := I) g 0 2 i D) α y ≤ Cfibmax * Fib i := by
     intro i hi
     have hiN : i < N + 1 := Finset.mem_range.mp hi
@@ -574,11 +574,11 @@ private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
       (Finset.le_sup' Cfib (Finset.mem_range.mpr hiN)) (Real.sqrt_nonneg _)
   have h_each : ∀ q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
       (∑ m ∈ Finset.range (N + 1),
-        ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖) ≤
+        ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖) ≤
       (Cpeel * (((N : ℝ) + 1) * Cfibmax)) * FibSum := by
     intro q'
     have h_per : ∀ m ∈ Finset.range (N + 1),
-        ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖ ≤
+        ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖ ≤
           Cpeel * (Cfibmax * FibSum) := by
       intro m hm
       have hmN : m ≤ N := Nat.lt_succ_iff.mp (Finset.mem_range.mp hm)
@@ -587,10 +587,10 @@ private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
         DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_zero (I := I) g 0 2 D
       rw [h0eq] at hpeel
       have hreindex : (∑ i ∈ Finset.range (m + 1),
-            zeroContentR (I := I) (M := M) g 0 (2 + (0 + i))
+            tensorComponentAbsSum (I := I) (M := M) g 0 (2 + (0 + i))
               (iteratedCovGrad (I := I) g 0 2 (0 + i) D) α y) =
           ∑ i ∈ Finset.range (m + 1),
-            zeroContentR (I := I) (M := M) g 0 (2 + i)
+            tensorComponentAbsSum (I := I) (M := M) g 0 (2 + i)
               (iteratedCovGrad (I := I) g 0 2 i D) α y := by
         refine Finset.sum_congr rfl (fun i _ => ?_)
         congr 1 <;> rw [Nat.zero_add]
@@ -598,7 +598,7 @@ private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
       refine hpeel.trans ?_
       refine mul_le_mul_of_nonneg_left ?_ hCpeel_nn
       calc (∑ i ∈ Finset.range (m + 1),
-            zeroContentR (I := I) (M := M) g 0 (2 + i)
+            tensorComponentAbsSum (I := I) (M := M) g 0 (2 + i)
               (iteratedCovGrad (I := I) g 0 2 i D) α y)
           ≤ ∑ i ∈ Finset.range (m + 1), Cfibmax * Fib i :=
             Finset.sum_le_sum (fun i hi => h_zc i
@@ -617,7 +617,7 @@ private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
   calc bareChartJetContent (I := I) (M := M) g 0 2 D α N y
       = ∑ q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
           ∑ m ∈ Finset.range (N + 1),
-            ‖iteratedFDeriv ℝ m (rawPullR (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖ := rfl
+            ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g 0 2 D α q'.1 q'.2) y‖ := rfl
     _ ≤ ∑ _q' : (Fin 0 → Fin n) × (Fin 2 → Fin n),
           (Cpeel * (((N : ℝ) + 1) * Cfibmax)) * FibSum :=
         Finset.sum_le_sum (fun q' _ => h_each q')
@@ -663,9 +663,9 @@ private lemma deTurckRHSArm_toSection_eq
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ((deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
         deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ') +
       rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T')).toSection =
@@ -692,9 +692,9 @@ private lemma tensorChartComponentRaw_deTurckRHSArm_eq_chartDeTurckRicciRHS_diff
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (α : M) {b : M}
     (hb : b ∈ DifferentialGeometry.Integral.Connection.chartLeviCivitaGoodSet (I := I) α)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -756,7 +756,7 @@ private lemma tensorChartComponentRaw_deTurckRHSArm_eq_chartDeTurckRicciRHS_diff
 private theorem ccTensorBilinSymm_symmS_app
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (x : M) (v w : TangentSpace I x) :
-    ccTensorBilinSymm (I := I) g₀ (symmS (I := I) g₀ T) x v w =
+    ccTensorBilinSymm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) x v w =
       ccTensorBilinSymm (I := I) g₀ T x v w := by
   rw [ccTensorBilinSymm_apply, ccTensorBilin_symmS, ccTensorBilin_symmS,
     ccTensorBilinSymm_symm (I := I) g₀ T x w v, ccTensorBilinSymm_apply]
@@ -764,9 +764,9 @@ private theorem ccTensorBilinSymm_symmS_app
 
 theorem gFibreOpBound_ccTensorBilinSymm_symmS
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
-    gFibreOpBound (I := I) (M := M) g₀
-      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) g₀ T)) δ := by
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T)) δ := by
   intro x v w
   rw [ccTensorBilinSymm_symmS_app (I := I) g₀ T x v w]
   exact hδ x v w
@@ -774,18 +774,18 @@ theorem gFibreOpBound_ccTensorBilinSymm_symmS
 theorem ccTensorBilin_symmS_symm
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) g₀ (symmS (I := I) g₀ T) x v w =
-      ccTensorBilin (I := I) g₀ (symmS (I := I) g₀ T) x w v := by
+    smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) x v w =
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) x w v := by
   rw [ccTensorBilin_symmS, ccTensorBilin_symmS, ccTensorBilinSymm_symm]
 
 theorem tensorSectionRealizeMetric_symmS_eq
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ₁ : ℝ} (hδ₁_lt : δ₁ < 1)
-    (hδ₁ : gFibreOpBound (I := I) (M := M) g₀
-      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) g₀ T)) δ₁) :
-    tensorSectionRealizeMetric (I := I) g₀ (symmS (I := I) g₀ T) hδ₁_lt hδ₁ =
+    (hδ₁ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T)) δ₁) :
+    tensorSectionRealizeMetric (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) hδ₁_lt hδ₁ =
       tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ := by
   refine DifferentialGeometry.PDE.DeTurck.RicciLinearization.riemannianMetric_eq_of_inner
     _ _ (fun b u z => ?_)
@@ -825,12 +825,12 @@ private theorem tensorL2Norm_iteratedCovGrad_domDomCongrSection_eq
 
 theorem tensorL2Norm_iteratedCovGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
-    ‖iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) g₀ T)‖ ≤
+    ‖iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) g₀ T)‖ ≤
       ‖iteratedCovGrad (I := I) g₀ 0 2 k T‖ := by
   classical
   set Tsw : SmoothCcTensor g₀ 0 2 :=
     domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T with hTsw_def
-  have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) g₀ T) =
+  have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) g₀ T) =
       (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k T +
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k Tsw := by
     rw [hTsw_def]; exact iteratedCovGrad_symmS_eq (I := I) g₀ T k
@@ -846,7 +846,7 @@ theorem tensorL2Norm_iteratedCovGrad_symmS_le
 def deTurckRHSArmG0 (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
     SmoothCcTensor g₀ 0 2 where
   toSection :=
     (deTurckRHSSection (I := I) g_bg
@@ -858,15 +858,15 @@ def deTurckRHSArmG0 (g₀ g_bg : SmoothRiemannianMetric I M)
 theorem deTurckRHSArmG0_symmS_eq
     (g₀ g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ₁ : ℝ} (hδ₁_lt : δ₁ < 1)
-    (hδ₁ : gFibreOpBound (I := I) (M := M) g₀
-      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) g₀ T)) δ₁) :
-    deTurckRHSArmG0 (I := I) g₀ g_bg (symmS (I := I) g₀ T) hδ₁_lt hδ₁ =
+    (hδ₁ : metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T)) δ₁) :
+    deTurckRHSArmG0 (I := I) g₀ g_bg (ccTensor02Symm (I := I) g₀ T) hδ₁_lt hδ₁ =
       deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ := by
   refine SmoothCcTensor.ext ?_
   show (deTurckRHSSection (I := I) g_bg
-      (tensorSectionRealizeMetric (I := I) g₀ (symmS (I := I) g₀ T) hδ₁_lt hδ₁)).toSection =
+      (tensorSectionRealizeMetric (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) hδ₁_lt hδ₁)).toSection =
     (deTurckRHSSection (I := I) g_bg
       (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection
   rw [tensorSectionRealizeMetric_symmS_eq (I := I) g₀ T hδ_lt hδ hδ₁_lt hδ₁]
@@ -875,7 +875,7 @@ private theorem deTurckSmoothRemainder_eq_arm_sub_connLap
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
     deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ =
       deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
         rawTensorConnLapSmooth (I := I) g₀ 0 2 T :=
@@ -885,9 +885,9 @@ theorem deTurckSmoothRemainderDiff_eq_armDiff_sub_connLapDiff
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     deTurckSmoothRemainder (I := I) g₀ g_bg T hδ_lt hδ -
         deTurckSmoothRemainder (I := I) g₀ g_bg T' hδ'_lt hδ' =
       (deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ -
@@ -1058,7 +1058,7 @@ theorem deTurckArmDiff_supercritical_pointwise_jet_le
   have h4k_le : 4 * k ≤ a + 2 := by rw [hk_def]; omega
 
   obtain ⟨Cc, hCc_pos, hCc⟩ :=
-    iteratedCovGrad_toSobolev_embedding_C2_unconditional (I := I) (M := M) g₀ k hk_super
+    iteratedCovGrad_toSobolev_embedding_C2_singleNorm (I := I) (M := M) g₀ k hk_super
   obtain ⟨Ch, hCh_nn, hCh⟩ :=
     exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum (I := I) (M := M) g₀ 0 2 (2 * k)
   refine ⟨Real.sqrt (3 * Cc ^ 2 * Ch ^ 2 * ((4 * k + 1 : ℕ) : ℝ)), Real.sqrt_nonneg _,

@@ -53,7 +53,7 @@ theorem g0_polarized_parseval
 
 set_option linter.unusedSectionVars false in
 
-theorem multilinear_slot0_pairing_le
+theorem multilinear_firstSlot_pairing_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) {s : ℕ}
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
     (hadj : ∀ a b : TangentSpace I x, g₀.inner x (Λ a) b = g₀.inner x a (Λ b))
@@ -245,7 +245,7 @@ theorem tensorInnerPointwise_slotΛ_le
   rw [hsplit (fun J => Wm (fun k => e (J k)) * Wm (Function.update (fun k => e (J k)) 0 (Λ (e (J 0))))),
     hsplit (fun J => Wm (fun k => e (J k)) ^ 2), Finset.mul_sum]
   refine Finset.sum_le_sum (fun J' _ => ?_)
-  have hpertail := multilinear_slot0_pairing_le (I := I) (M := M) g₀ x Λ hadj hbound e horth Wm J'
+  have hpertail := multilinear_firstSlot_pairing_le (I := I) (M := M) g₀ x Λ hadj hbound e horth Wm J'
   have hLHSeq : (∑ a : Fin (Module.finrank ℝ E),
         Wm (fun k => e ((Fin.cons a J' : Fin (s+1) → Fin (Module.finrank ℝ E)) k)) *
           Wm (Function.update (fun k => e ((Fin.cons a J' : Fin (s+1) → Fin (Module.finrank ℝ E)) k)) 0
@@ -283,7 +283,7 @@ theorem tensorInnerPointwise_slotΛ_le
 
 def gInvDiffSlotApplied (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (W : TensorRSSpace 0 (s+1) I x) : TensorRSSpace 0 (s+1) I x :=
-  TensorRSSpace.ofCLM ((slotInsertEndoFib (s+1) 0 x (gInvDiffRaisedEndo (I := I) g₀ g₁ x)).comp
+  TensorRSSpace.ofCLM ((slotInsertEndoFib (s+1) 0 x (metricComparisonDiffEndo (I := I) g₀ g₁ x)).comp
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s+1) I x from W))
 
 set_option linter.unusedSectionVars false in
@@ -292,7 +292,7 @@ theorem tensorInnerPointwise_gInvDiffSlot_le
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ)
     (s : ℕ) (x : M) (W : TensorRSSpace 0 (s+1) I x) :
     tensorInnerPointwise g₀ 0 (s+1) x
         (TensorRSSpace.toModel W)
@@ -300,7 +300,7 @@ theorem tensorInnerPointwise_gInvDiffSlot_le
       ≤ (δ / (1 - δ)) * tensorInnerPointwise g₀ 0 (s+1) x
           (TensorRSSpace.toModel W) (TensorRSSpace.toModel W) := by
   obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis_E (I := I) (M := M) g₀ x
-  exact tensorInnerPointwise_slotΛ_le g₀ s x (gInvDiffRaisedEndo (I := I) g₀ g₁ x)
+  exact tensorInnerPointwise_slotΛ_le g₀ s x (metricComparisonDiffEndo (I := I) g₀ g₁ x)
     (gInvDiffRaisedEndo_g0_self_adjoint (I := I) g₀ g₁ x)
     (fun v => gInvDiffRaisedEndo_inner_self_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v)
     W e bse hbse horth
@@ -331,7 +331,7 @@ theorem tensorL2Inner_gInvDiffSlot_le
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : gFibreOpBound (I := I) g₀ h δ)
+    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ)
     (s : ℕ) (W : ∀ x, TensorRSSpace 0 (s+1) I x)
     (hWS_int : Integrable
       (fun x => tensorInnerPointwise (I := I) (M := M) g₀ 0 (s+1) x

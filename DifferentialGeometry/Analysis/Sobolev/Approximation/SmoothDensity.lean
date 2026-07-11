@@ -212,7 +212,7 @@ theorem exists_smooth_strong_support_approx
       ContDiff ℝ (⊤ : ℕ∞) χ ∧
       HasCompactSupport χ ∧
       tsupport χ ⊆ chartTargetEuclid (I := I) (M := M) α ∧
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p
         (fun y =>
           chartPushed (I := I) (M := M)
@@ -275,17 +275,17 @@ theorem exists_smooth_strong_support_approx
     have h_eq := hf_eq_forig_on_target y hy
     change f_orig y - χ y = f y - χ y
     rw [h_eq]
-  have h_norm_eq : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_norm_eq : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p
       (fun y => f_orig y - χ y) (chartTargetEuclid (I := I) (M := M) α) =
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p
       (fun y => f y - χ y) (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
       (d := Module.finrank ℝ E) hp_one
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       h_diff_eq
-  change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  change DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p
       (fun y => f_orig y - χ y) (chartTargetEuclid (I := I) (M := M) α) ≤
     ENNReal.ofReal ε_per

@@ -262,17 +262,17 @@ theorem chartLocal_continuous_inner_of_smooth_sections
       (fun b : M => (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
           (T b)).compContinuousLinearMap
-          (fun _ : Fin s => chartJinv (I := I) (M := M) α b))
+          (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b))
       (trivializationAt E (TangentSpace I) α).baseSet)
     (hSα : ContinuousOn
       (fun b : M => (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
           (S b)).compContinuousLinearMap
-          (fun _ : Fin s => chartJinv (I := I) (M := M) α b))
+          (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b))
       (trivializationAt E (TangentSpace I) α).baseSet) :
     ContinuousOn
       (fun b : M =>
-        tensorInnerPointwise_0s (I := I) (M := M) s g b
+        covariantTensorInnerPointwise (I := I) (M := M) s g b
           (Tensor0SBundle.Tensor0SSpace.toModel
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) (T b))
           (Tensor0SBundle.Tensor0SSpace.toModel
@@ -280,7 +280,7 @@ theorem chartLocal_continuous_inner_of_smooth_sections
       (trivializationAt E (TangentSpace I) α).baseSet := by
 
   have hbridge : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
-      tensorInnerPointwise_0s (I := I) (M := M) s g b
+      covariantTensorInnerPointwise (I := I) (M := M) s g b
         (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) (T b))
         (Tensor0SBundle.Tensor0SSpace.toModel
@@ -289,11 +289,11 @@ theorem chartLocal_continuous_inner_of_smooth_sections
         ((Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
           (T b)).compContinuousLinearMap
-          (fun _ : Fin s => chartJinv (I := I) (M := M) α b))
+          (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b))
         ((Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
           (S b)).compContinuousLinearMap
-          (fun _ : Fin s => chartJinv (I := I) (M := M) α b)) := by
+          (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b)) := by
     intro b hb
     exact tensorInnerPointwise_0s_bridge_identity (I := I) (M := M) g α s hb _ _
   refine ContinuousOn.congr ?_ hbridge
@@ -307,16 +307,16 @@ theorem _root_.Tensor0SBundle.continuous_inner_of_smooth_sections
       (fun b : M => (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
           (T b)).compContinuousLinearMap
-          (fun _ : Fin s => chartJinv (I := I) (M := M) α b))
+          (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b))
       (trivializationAt E (TangentSpace I) α).baseSet)
     (hS_charts : ∀ α : M, ContinuousOn
       (fun b : M => (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
           (S b)).compContinuousLinearMap
-          (fun _ : Fin s => chartJinv (I := I) (M := M) α b))
+          (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b))
       (trivializationAt E (TangentSpace I) α).baseSet) :
     Continuous (fun b : M =>
-      tensorInnerPointwise_0s (I := I) (M := M) s g b
+      covariantTensorInnerPointwise (I := I) (M := M) s g b
         (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) (T b))
         (Tensor0SBundle.Tensor0SSpace.toModel

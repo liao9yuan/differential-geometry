@@ -90,7 +90,7 @@ theorem unitModel_appFullSec_swap_eq_domDomCongr
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (t + 2) I x from T) D)
           (Fin.cons b (Fin.cons a m)))
     (U : SmoothCcTensor g 0 (t + 2)) (y : M) :
-    unitModel (I := I) (M := M) g (t + 2) (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) y =
+    unitModel (I := I) (M := M) g (t + 2) (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) y =
       ContinuousMultilinearMap.domDomCongr
         (Equiv.swap (0 : Fin (t + 2)) (1 : Fin (t + 2)))
         (unitModel (I := I) (M := M) g (t + 2) U y) := by
@@ -105,15 +105,15 @@ theorem unitModel_appFullSec_swap_eq_domDomCongr
 
 private lemma appFullSec_add_right_cc (g : SmoothRiemannianMetric I M) (a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) 0 a c I) (A B : SmoothCcTensor g 0 a) :
-    appFullSec (I := I) (M := M) g 0 a c Q (A + B) =
-      appFullSec (I := I) (M := M) g 0 a c Q A + appFullSec (I := I) (M := M) g 0 a c Q B := by
+    homTensorRSFieldApply (I := I) (M := M) g 0 a c Q (A + B) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 a c Q A + homTensorRSFieldApply (I := I) (M := M) g 0 a c Q B := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appFullSec (I := I) (M := M) g 0 a c Q A +
-      appFullSec (I := I) (M := M) g 0 a c Q B).toSection x) =
-    (appFullSec (I := I) (M := M) g 0 a c Q A).toSection x +
-      (appFullSec (I := I) (M := M) g 0 a c Q B).toSection x from rfl]
+  rw [show ((homTensorRSFieldApply (I := I) (M := M) g 0 a c Q A +
+      homTensorRSFieldApply (I := I) (M := M) g 0 a c Q B).toSection x) =
+    (homTensorRSFieldApply (I := I) (M := M) g 0 a c Q A).toSection x +
+      (homTensorRSFieldApply (I := I) (M := M) g 0 a c Q B).toSection x from rfl]
   rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
   rw [show ((A + B).toSection x : TensorRSSpace 0 a I x) = A.toSection x + B.toSection x from rfl]
   exact map_add _ _ _
@@ -130,26 +130,26 @@ theorem appFullSec_swap_norm_eq (g : SmoothRiemannianMetric I M) (t : ℕ)
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (t + 2) I x from T) D)
           (Fin.cons b (Fin.cons a m)))
     (U : SmoothCcTensor g 0 (t + 2)) :
-    ‖appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U‖ = ‖U‖ := by
+    ‖homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U‖ = ‖U‖ := by
   classical
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (t + 2) x
-          ((appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U).toSection x) =
+          ((homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U).toSection x) =
         riemannianFiberNormSq (I := I) (M := M) g 0 (t + 2) x (U.toSection x) := by
     intro x
     have h := riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr
       (I := I) (M := M) g (t + 2) (Equiv.swap (0 : Fin (t + 2)) (1 : Fin (t + 2))) U
-      (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U)
+      (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U)
       (fun y => unitModel_appFullSec_swap_eq_domDomCongr (I := I) (M := M) g t F hF U y)
       0 x
     simpa only [iteratedCovGrad_zero] using h
-  have hsq : ‖appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U‖ ^ 2 = ‖U‖ ^ 2 := by
+  have hsq : ‖homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U‖ ^ 2 = ‖U‖ ^ 2 := by
     rw [SmoothCcTensor.norm_def (I := I) (M := M), SmoothCcTensor.norm_def (I := I) (M := M),
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g 0 (t + 2)
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U),
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U),
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g 0 (t + 2) U]
     exact integral_congr_ae (Filter.Eventually.of_forall hpt)
-  have h1 : (0 : ℝ) ≤ ‖appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U‖ := norm_nonneg _
+  have h1 : (0 : ℝ) ≤ ‖homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U‖ := norm_nonneg _
   have h2 : (0 : ℝ) ≤ ‖U‖ := norm_nonneg _
   rw [← Real.sqrt_sq h1, ← Real.sqrt_sq h2, hsq]
 
@@ -165,11 +165,11 @@ theorem appFullSec_swap_involutive (g : SmoothRiemannianMetric I M) (t : ℕ)
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (t + 2) I x from T) D)
           (Fin.cons b (Fin.cons a m)))
     (U : SmoothCcTensor g 0 (t + 2)) :
-    appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) = U := by
+    homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) = U := by
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
   rw [unitModel_appFullSec_swap_eq_domDomCongr (I := I) (M := M) g t F hF
-    (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) x]
+    (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) x]
   rw [unitModel_appFullSec_swap_eq_domDomCongr (I := I) (M := M) g t F hF U x]
   refine ContinuousMultilinearMap.ext (fun w => ?_)
   rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
@@ -190,25 +190,25 @@ theorem appFullSec_swap_l2Inner_hop (g : SmoothRiemannianMetric I M) (t : ℕ)
           (Fin.cons b (Fin.cons a m)))
     (A B : SmoothCcTensor g 0 (t + 2)) :
     tensorL2Inner (I := I) (M := M) g 0 (t + 2)
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A).toFun B.toFun =
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A).toFun B.toFun =
       tensorL2Inner (I := I) (M := M) g 0 (t + 2)
-        A.toFun (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toFun := by
+        A.toFun (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toFun := by
   have hinner1 := SmoothCcTensor.inner_def (I := I) (M := M)
-    (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A) B
+    (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A) B
   have hinner2 := SmoothCcTensor.inner_def (I := I) (M := M)
-    A (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B)
+    A (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B)
   rw [← hinner1, ← hinner2]
   rw [real_inner_eq_norm_add_mul_self_sub_norm_mul_self_sub_norm_mul_self_div_two,
     real_inner_eq_norm_add_mul_self_sub_norm_mul_self_sub_norm_mul_self_div_two]
-  have hsum : appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A + B =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F
-        (A + appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B) := by
+  have hsum : homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A + B =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F
+        (A + homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B) := by
     rw [appFullSec_add_right_cc (I := I) (M := M) g (t + 2) (t + 2) F A
-      (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B)]
+      (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B)]
     rw [appFullSec_swap_involutive (I := I) (M := M) g t F hF B]
   rw [hsum]
   rw [appFullSec_swap_norm_eq (I := I) (M := M) g t F hF
-    (A + appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B)]
+    (A + homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B)]
   rw [appFullSec_swap_norm_eq (I := I) (M := M) g t F hF A]
   rw [appFullSec_swap_norm_eq (I := I) (M := M) g t F hF B]
 
@@ -255,29 +255,29 @@ theorem appFullSec_swap_rawConnLap_comm (g : SmoothRiemannianMetric I M) (t : �
           (Fin.cons b (Fin.cons a m)))
     (U : SmoothCcTensor g 0 (t + 2)) :
     rawTensorConnLapSmooth (I := I) g 0 (t + 2)
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F
         (rawTensorConnLapSmooth (I := I) g 0 (t + 2) U) := by
   classical
   set tau : Equiv.Perm (Fin (t + 2)) := Equiv.swap (0 : Fin (t + 2)) (1 : Fin (t + 2)) with htau
   set tau1 : Equiv.Perm (Fin (t + 3)) := Equiv.Perm.decomposeFin.symm (0, tau) with htau1
   set tau2 : Equiv.Perm (Fin (t + 4)) := Equiv.Perm.decomposeFin.symm (0, tau1) with htau2
   have h0 : ∀ y : M, unitModel (I := I) (M := M) g (t + 2)
-      (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) y =
+      (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) y =
       ContinuousMultilinearMap.domDomCongr tau (unitModel (I := I) (M := M) g (t + 2) U y) :=
     fun y => unitModel_appFullSec_swap_eq_domDomCongr (I := I) (M := M) g t F hF U y
   have h1 : ∀ y : M, unitModel (I := I) (M := M) g (t + 3)
       (covGrad (I := I) (M := M) g 0 (t + 2)
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U)) y =
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U)) y =
       ContinuousMultilinearMap.domDomCongr tau1
         (unitModel (I := I) (M := M) g (t + 3)
           (covGrad (I := I) (M := M) g 0 (t + 2) U) y) :=
     fun y => unitModel_covGrad_of_unitModel_domDomCongr (I := I) (M := M) g (t + 2) tau
-      U (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) h0 y
+      U (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) h0 y
   have h2 : ∀ y : M, unitModel (I := I) (M := M) g (t + 4)
       (covGrad (I := I) (M := M) g 0 (t + 3)
         (covGrad (I := I) (M := M) g 0 (t + 2)
-          (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U))) y =
+          (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U))) y =
       ContinuousMultilinearMap.domDomCongr tau2
         (unitModel (I := I) (M := M) g (t + 4)
           (covGrad (I := I) (M := M) g 0 (t + 3)
@@ -285,11 +285,11 @@ theorem appFullSec_swap_rawConnLap_comm (g : SmoothRiemannianMetric I M) (t : �
     fun y => unitModel_covGrad_of_unitModel_domDomCongr (I := I) (M := M) g (t + 3) tau1
       (covGrad (I := I) (M := M) g 0 (t + 2) U)
       (covGrad (I := I) (M := M) g 0 (t + 2)
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U)) h1 y
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U)) h1 y
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   rw [unitModel_rawConnLap_eq_frame_sum_gen (I := I) g (t + 2)
-    (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) x v]
+    (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) x v]
   rw [unitModel_appFullSec_swap_eq_domDomCongr (I := I) (M := M) g t F hF
     (rawTensorConnLapSmooth (I := I) g 0 (t + 2) U) x]
   rw [ContinuousMultilinearMap.domDomCongr_apply]
@@ -314,18 +314,18 @@ theorem unitModel_appCc_slotInsertEndoCc_cons
     (U : SmoothCcTensor g 0 (s' + 1)) (x : M) (a : TangentSpace I x)
     (rest : Fin s' → TangentSpace I x) :
     unitModel (I := I) (M := M) g (s' + 1)
-        (appCc (I := I) (M := M) g (s' + 1) (s' + 1)
-          (slotInsertEndoCc (I := I) (M := M) g s' Λ) U) x
+        (operatorFieldApply (I := I) (M := M) g (s' + 1) (s' + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ) U) x
         (Fin.cons ((a : TangentSpace I x) : E) (fun j => (rest j : E))) =
       unitModel (I := I) (M := M) g (s' + 1) U x
         (Fin.cons ((Λ x a : TangentSpace I x) : E) (fun j => (rest j : E))) := by
   rw [unitModel, appCc_toSection]
   rw [show ((show Tensor0SSpace (s' + 1) I x →L[ℝ] Tensor0SSpace (s' + 1) I x from
-        (slotInsertEndoCc (I := I) (M := M) g s' Λ).toSection x).comp
+        (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ).toSection x).comp
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s' + 1) I x from
           U.toSection x)) (unitTensor (I := I) (M := M) x) =
       (show Tensor0SSpace (s' + 1) I x →L[ℝ] Tensor0SSpace (s' + 1) I x from
-        (slotInsertEndoCc (I := I) (M := M) g s' Λ).toSection x)
+        (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ).toSection x)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s' + 1) I x from
           U.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
   rw [slotInsertEndoCc_toSection (I := I) (M := M) g s' Λ x]
@@ -347,9 +347,9 @@ theorem unitModel_appCc_slotExtend_slotInsertEndoCc_cons
     (U : SmoothCcTensor g 0 (s' + 2)) (x : M) (a b : TangentSpace I x)
     (m : Fin s' → TangentSpace I x) :
     unitModel (I := I) (M := M) g (s' + 2)
-        (appCc (I := I) (M := M) g (s' + 2) (s' + 2)
+        (operatorFieldApply (I := I) (M := M) g (s' + 2) (s' + 2)
           (slotExtend (I := I) (M := M) g (s' + 1) (s' + 1)
-            (slotInsertEndoCc (I := I) (M := M) g s' Λ)) U) x
+            (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ)) U) x
         (Fin.cons ((a : TangentSpace I x) : E)
           (Fin.cons ((b : TangentSpace I x) : E) (fun j => (m j : E)))) =
       unitModel (I := I) (M := M) g (s' + 2) U x
@@ -358,12 +358,12 @@ theorem unitModel_appCc_slotExtend_slotInsertEndoCc_cons
   rw [unitModel, appCc_toSection]
   rw [show ((show Tensor0SSpace (s' + 2) I x →L[ℝ] Tensor0SSpace (s' + 2) I x from
         (slotExtend (I := I) (M := M) g (s' + 1) (s' + 1)
-          (slotInsertEndoCc (I := I) (M := M) g s' Λ)).toSection x).comp
+          (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ)).toSection x).comp
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s' + 2) I x from
           U.toSection x)) (unitTensor (I := I) (M := M) x) =
       (show Tensor0SSpace (s' + 2) I x →L[ℝ] Tensor0SSpace (s' + 2) I x from
         (slotExtend (I := I) (M := M) g (s' + 1) (s' + 1)
-          (slotInsertEndoCc (I := I) (M := M) g s' Λ)).toSection x)
+          (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ)).toSection x)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s' + 2) I x from
           U.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
   rw [slotExtend_toSection]
@@ -371,7 +371,7 @@ theorem unitModel_appCc_slotExtend_slotInsertEndoCc_cons
     ((a : TangentSpace I x) : E)
     (Fin.cons ((b : TangentSpace I x) : E) (fun j => (m j : E)))]
   rw [show (show Tensor0SSpace (s' + 1) I x →L[ℝ] Tensor0SSpace (s' + 1) I x from
-      (slotInsertEndoCc (I := I) (M := M) g s' Λ).toSection x) =
+      (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ).toSection x) =
       slotInsertEndoFib (I := I) (M := M) (s' + 1) 0 x (Λ x) from
     slotInsertEndoCc_toSection (I := I) (M := M) g s' Λ x]
   rw [slotInsertEndoFib_apply_eval (I := I) (M := M) (s' + 1) 0 x (Λ x)]
@@ -401,23 +401,23 @@ theorem appCc_slotExtend_slotInsert_appFullSec_swap_conj
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s' + 2) I x from T) D)
           (Fin.cons b (Fin.cons a m)))
     (U : SmoothCcTensor g 0 (s' + 2)) :
-    appCc (I := I) (M := M) g (s' + 2) (s' + 2)
+    operatorFieldApply (I := I) (M := M) g (s' + 2) (s' + 2)
         (slotExtend (I := I) (M := M) g (s' + 1) (s' + 1)
-          (slotInsertEndoCc (I := I) (M := M) g s' Λ))
-        (appFullSec (I := I) (M := M) g 0 (s' + 2) (s' + 2) F U) =
-      appFullSec (I := I) (M := M) g 0 (s' + 2) (s' + 2) F
-        (appCc (I := I) (M := M) g (s' + 2) (s' + 2)
-          (slotInsertEndoCc (I := I) (M := M) g (s' + 1) Λ) U) := by
+          (endoSlotZeroCcTensor (I := I) (M := M) g s' Λ))
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (s' + 2) (s' + 2) F U) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (s' + 2) (s' + 2) F
+        (operatorFieldApply (I := I) (M := M) g (s' + 2) (s' + 2)
+          (endoSlotZeroCcTensor (I := I) (M := M) g (s' + 1) Λ) U) := by
   refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g (fun x => ?_)
   refine ContinuousMultilinearMap.ext (fun w => ?_)
   rw [show w = Fin.cons (w 0) (Matrix.vecTail w) from (Fin.cons_self_tail w).symm]
   rw [show (Matrix.vecTail w) = Fin.cons (Matrix.vecTail w 0) (Matrix.vecTail (Matrix.vecTail w))
     from (Fin.cons_self_tail (Matrix.vecTail w)).symm]
   rw [unitModel_appCc_slotExtend_slotInsertEndoCc_cons (I := I) (M := M) g s' Λ
-    (appFullSec (I := I) (M := M) g 0 (s' + 2) (s' + 2) F U) x
+    (homTensorRSFieldApply (I := I) (M := M) g 0 (s' + 2) (s' + 2) F U) x
     (w 0) (Matrix.vecTail w 0) (Matrix.vecTail (Matrix.vecTail w))]
   rw [show unitModel (I := I) (M := M) g (s' + 2)
-      (appFullSec (I := I) (M := M) g 0 (s' + 2) (s' + 2) F U) x
+      (homTensorRSFieldApply (I := I) (M := M) g 0 (s' + 2) (s' + 2) F U) x
       (Fin.cons ((w 0 : TangentSpace I x) : E)
         (Fin.cons ((Λ x (Matrix.vecTail w 0) : TangentSpace I x) : E)
           (fun j => ((Matrix.vecTail (Matrix.vecTail w) j : TangentSpace I x) : E)))) =
@@ -431,8 +431,8 @@ theorem appCc_slotExtend_slotInsert_appFullSec_swap_conj
         ((Λ x (Matrix.vecTail w 0) : TangentSpace I x) : E)
         (fun j => ((Matrix.vecTail (Matrix.vecTail w) j : TangentSpace I x) : E))]]
   rw [unitModel_appFullSec_swap_eq_domDomCongr (I := I) (M := M) g s' F hF
-    (appCc (I := I) (M := M) g (s' + 2) (s' + 2)
-      (slotInsertEndoCc (I := I) (M := M) g (s' + 1) Λ) U) x,
+    (operatorFieldApply (I := I) (M := M) g (s' + 2) (s' + 2)
+      (endoSlotZeroCcTensor (I := I) (M := M) g (s' + 1) Λ) U) x,
     ContinuousMultilinearMap.domDomCongr_apply,
     cons_cons_comp_swap01 ((w 0 : TangentSpace I x) : E)
       ((Matrix.vecTail w 0 : TangentSpace I x) : E)

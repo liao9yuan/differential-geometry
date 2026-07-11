@@ -42,7 +42,7 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
-private lemma reading_fiberNormSqComponent_eq_rs
+private lemma fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : Tensor0SBundle.TensorRSSpace r (s + 1) I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -68,7 +68,7 @@ private lemma reading_fiberNormSqComponent_eq_rs
 
 set_option maxHeartbeats 1600000 in
 
-theorem rfns_rs_eq_sum_fiberNormSqComponent_sq_of_orthoFrame
+theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : Tensor0SBundle.TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
     (horth : ∀ a b : Fin n, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0) :
@@ -117,7 +117,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
   set T : Tensor0SBundle.TensorRSSpace r (s + 1) I x :=
     Tensor0SBundle.covGradBundleEquiv (I := I) (M := M) r s x Φ with hT_def
 
-  rw [rfns_rs_eq_sum_fiberNormSqComponent_sq_of_orthoFrame (I := I) (M := M) g r (s + 1) x T e hn
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r (s + 1) x T e hn
     horth]
 
   have hΦeq : ∀ a : Fin n,
@@ -132,9 +132,9 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
             n e K (Fin.cons a J)) ^ 2 := by
     intro a
     rw [hΦeq a]
-    rw [rfns_rs_eq_sum_fiberNormSqComponent_sq_of_orthoFrame (I := I) (M := M) g r s x _ e hn horth]
+    rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame (I := I) (M := M) g r s x _ e hn horth]
     refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
-    rw [reading_fiberNormSqComponent_eq_rs (I := I) (M := M) g r s x T e K J a]
+    rw [fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons (I := I) (M := M) g r s x T e K J a]
   rw [Finset.sum_congr rfl (fun a _ => hper a)]
 
   have hcons_bij : Function.Bijective

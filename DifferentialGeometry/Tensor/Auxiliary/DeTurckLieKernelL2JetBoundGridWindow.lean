@@ -29,9 +29,9 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-  (dLaBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
+  (connDiffCovDerivBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
     deTurckLieFib deTurckLieCoeffField deTurckLieCoeffField_toSection
-    deTurckLieCovDerivA connDiff_pairing_mdiffAt dLaCovKernel dLaCovKernel_apply_extend)
+    deTurckConnDiffCovDeriv connDiff_pairing_mdiffAt connDiffCovDerivOp dLaCovKernel_apply_extend)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -49,7 +49,7 @@ open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg metric_in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (covGrad connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one dLaBiContrFibFixedFrame_toModel)
 open DifferentialGeometry.Geometry.Curvature
-  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt)
+  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt)
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
@@ -63,28 +63,28 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-def dLaGridWin (b : ℕ → ℝ) (m : ℕ) : ℝ :=
+def antidiagonalTupleGridPartialSum (b : ℕ → ℝ) (m : ℕ) : ℝ :=
   ∑ k ∈ Finset.range m, Combinatorics.antidiagonalTupleGrid b k
 
 lemma dLaGridWin_nonneg (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m : ℕ) :
-    0 ≤ dLaGridWin b m :=
+    0 ≤ antidiagonalTupleGridPartialSum b m :=
   Finset.sum_nonneg fun k _ => Combinatorics.antidiagonalTupleGrid_nonneg b hb k
 
 private lemma dLaGridWin_mono (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {m m' : ℕ} (h : m ≤ m') :
-    dLaGridWin b m ≤ dLaGridWin b m' :=
+    antidiagonalTupleGridPartialSum b m ≤ antidiagonalTupleGridPartialSum b m' :=
   Finset.sum_le_sum_of_subset_of_nonneg (Finset.range_subset_range.mpr h)
     (fun k _ _ => Combinatorics.antidiagonalTupleGrid_nonneg b hb k)
 
 lemma one_le_dLaGridWin (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {m : ℕ} (hm : 1 ≤ m) :
-    1 ≤ dLaGridWin b m := by
+    1 ≤ antidiagonalTupleGridPartialSum b m := by
   have h1 : Combinatorics.antidiagonalTupleGrid b 0 = 1 :=
     Combinatorics.antidiagonalTupleGrid_zero b
-  calc (1 : ℝ) = dLaGridWin b 1 := by
-        rw [dLaGridWin, Finset.sum_range_one, h1]
-    _ ≤ dLaGridWin b m := dLaGridWin_mono b hb hm
+  calc (1 : ℝ) = antidiagonalTupleGridPartialSum b 1 := by
+        rw [antidiagonalTupleGridPartialSum, Finset.sum_range_one, h1]
+    _ ≤ antidiagonalTupleGridPartialSum b m := dLaGridWin_mono b hb hm
 
 lemma grid_le_dLaGridWin (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {k m : ℕ} (h : k < m) :
-    Combinatorics.antidiagonalTupleGrid b k ≤ dLaGridWin b m :=
+    Combinatorics.antidiagonalTupleGrid b k ≤ antidiagonalTupleGridPartialSum b m :=
   Finset.single_le_sum
     (f := fun k' => Combinatorics.antidiagonalTupleGrid b k')
     (fun k' _ => Combinatorics.antidiagonalTupleGrid_nonneg b hb k')
@@ -109,10 +109,10 @@ lemma single_le_grid_dla (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j : ℕ) (hj
     (fun n _ => Finset.sum_nonneg fun e _ => Finset.prod_nonneg fun m _ => hb _)
     (Finset.mem_range.mpr (by omega : (1 : ℕ) < j + 1))
 
-private def dLaTGridCount (j : ℕ) : ℝ :=
+private def antidiagonalTupleTotalCount (j : ℕ) : ℝ :=
   ∑ n ∈ Finset.range (j + 1), ((Finset.Nat.antidiagonalTuple n j).card : ℝ)
 
-private lemma dLaTGridCount_nonneg (j : ℕ) : 0 ≤ dLaTGridCount j :=
+private lemma dLaTGridCount_nonneg (j : ℕ) : 0 ≤ antidiagonalTupleTotalCount j :=
   Finset.sum_nonneg (fun _ _ => Nat.cast_nonneg _)
 
 private lemma prodTerm_le_antidiagonalTupleGrid_dla (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
@@ -132,7 +132,7 @@ private lemma prodTerm_le_antidiagonalTupleGrid_dla (b : ℕ → ℝ) (hb : ∀ 
 
 private lemma antidiagonalTupleGrid_mul_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (j k : ℕ) :
     Combinatorics.antidiagonalTupleGrid b j * Combinatorics.antidiagonalTupleGrid b k ≤
-      (dLaTGridCount j * dLaTGridCount k) * Combinatorics.antidiagonalTupleGrid b (j + k) := by
+      (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) * Combinatorics.antidiagonalTupleGrid b (j + k) := by
   classical
   have hpair : ∀ n ∈ Finset.range (j + 1), ∀ e ∈ Finset.Nat.antidiagonalTuple n j,
       ∀ n' ∈ Finset.range (k + 1), ∀ e' ∈ Finset.Nat.antidiagonalTuple n' k,
@@ -166,7 +166,7 @@ private lemma antidiagonalTupleGrid_mul_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 
         rw [Combinatorics.antidiagonalTupleGrid, Finset.sum_mul]
         exact Finset.sum_congr rfl (fun n _ => by rw [Finset.sum_mul])
     _ ≤ ∑ n ∈ Finset.range (j + 1), ∑ e ∈ Finset.Nat.antidiagonalTuple n j,
-          (dLaTGridCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) := by
+          (antidiagonalTupleTotalCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) := by
         refine Finset.sum_le_sum (fun n hn => Finset.sum_le_sum (fun e he => ?_))
         calc (∏ m : Fin n, b (e m)) * Combinatorics.antidiagonalTupleGrid b k
             = ∑ n' ∈ Finset.range (k + 1), ∑ e' ∈ Finset.Nat.antidiagonalTuple n' k,
@@ -177,45 +177,45 @@ private lemma antidiagonalTupleGrid_mul_le_dla (b : ℕ → ℝ) (hb : ∀ j, 0 
                 Combinatorics.antidiagonalTupleGrid b (j + k) := by
               refine Finset.sum_le_sum (fun n' hn' => Finset.sum_le_sum (fun e' he' => ?_))
               exact hpair n hn e he n' hn' e' he'
-          _ = dLaTGridCount k * Combinatorics.antidiagonalTupleGrid b (j + k) := by
-              rw [dLaTGridCount, Finset.sum_mul]
+          _ = antidiagonalTupleTotalCount k * Combinatorics.antidiagonalTupleGrid b (j + k) := by
+              rw [antidiagonalTupleTotalCount, Finset.sum_mul]
               exact Finset.sum_congr rfl (fun n' _ => by
                 rw [Finset.sum_const, nsmul_eq_mul])
     _ = ∑ n ∈ Finset.range (j + 1), ((Finset.Nat.antidiagonalTuple n j).card : ℝ) *
-          (dLaTGridCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) := by
+          (antidiagonalTupleTotalCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) := by
         exact Finset.sum_congr rfl (fun n _ => by rw [Finset.sum_const, nsmul_eq_mul])
-    _ = (dLaTGridCount j * dLaTGridCount k) * Combinatorics.antidiagonalTupleGrid b (j + k) := by
-        rw [show (dLaTGridCount j * dLaTGridCount k) *
+    _ = (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) * Combinatorics.antidiagonalTupleGrid b (j + k) := by
+        rw [show (antidiagonalTupleTotalCount j * antidiagonalTupleTotalCount k) *
             Combinatorics.antidiagonalTupleGrid b (j + k) =
-            dLaTGridCount j *
-              (dLaTGridCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) from by
+            antidiagonalTupleTotalCount j *
+              (antidiagonalTupleTotalCount k * Combinatorics.antidiagonalTupleGrid b (j + k)) from by
           ring]
-        rw [show dLaTGridCount j = ∑ n ∈ Finset.range (j + 1),
+        rw [show antidiagonalTupleTotalCount j = ∑ n ∈ Finset.range (j + 1),
             ((Finset.Nat.antidiagonalTuple n j).card : ℝ) from rfl]
         rw [Finset.sum_mul]
 
-def dLaPairCount (m1 m2 : ℕ) : ℝ :=
-  ∑ k1 ∈ Finset.range m1, ∑ k2 ∈ Finset.range m2, dLaTGridCount k1 * dLaTGridCount k2
+def antidiagonalTuplePairCount (m1 m2 : ℕ) : ℝ :=
+  ∑ k1 ∈ Finset.range m1, ∑ k2 ∈ Finset.range m2, antidiagonalTupleTotalCount k1 * antidiagonalTupleTotalCount k2
 
-lemma dLaPairCount_nonneg (m1 m2 : ℕ) : 0 ≤ dLaPairCount m1 m2 :=
+lemma dLaPairCount_nonneg (m1 m2 : ℕ) : 0 ≤ antidiagonalTuplePairCount m1 m2 :=
   Finset.sum_nonneg fun k1 _ => Finset.sum_nonneg fun k2 _ =>
     mul_nonneg (dLaTGridCount_nonneg k1) (dLaTGridCount_nonneg k2)
 
 lemma dLaGridWin_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m1 m2 m3 : ℕ)
     (h3 : m1 + m2 ≤ m3 + 1) :
-    dLaGridWin b m1 * dLaGridWin b m2 ≤ dLaPairCount m1 m2 * dLaGridWin b m3 := by
+    antidiagonalTupleGridPartialSum b m1 * antidiagonalTupleGridPartialSum b m2 ≤ antidiagonalTuplePairCount m1 m2 * antidiagonalTupleGridPartialSum b m3 := by
   classical
   have hG_nn : ∀ k, 0 ≤ Combinatorics.antidiagonalTupleGrid b k :=
     fun k => Combinatorics.antidiagonalTupleGrid_nonneg b hb k
-  rw [dLaGridWin, dLaGridWin, Finset.sum_mul]
-  rw [dLaPairCount, Finset.sum_mul]
+  rw [antidiagonalTupleGridPartialSum, antidiagonalTupleGridPartialSum, Finset.sum_mul]
+  rw [antidiagonalTuplePairCount, Finset.sum_mul]
   refine Finset.sum_le_sum fun k1 hk1 => ?_
   calc Combinatorics.antidiagonalTupleGrid b k1 *
         ∑ k ∈ Finset.range m2, Combinatorics.antidiagonalTupleGrid b k
       = ∑ k2 ∈ Finset.range m2, Combinatorics.antidiagonalTupleGrid b k1 *
           Combinatorics.antidiagonalTupleGrid b k2 := by rw [Finset.mul_sum]
-    _ ≤ ∑ k2 ∈ Finset.range m2, (dLaTGridCount k1 * dLaTGridCount k2) *
-          dLaGridWin b m3 := by
+    _ ≤ ∑ k2 ∈ Finset.range m2, (antidiagonalTupleTotalCount k1 * antidiagonalTupleTotalCount k2) *
+          antidiagonalTupleGridPartialSum b m3 := by
         refine Finset.sum_le_sum fun k2 hk2 => ?_
         refine le_trans (antidiagonalTupleGrid_mul_le_dla b hb k1 k2) ?_
         refine mul_le_mul_of_nonneg_left ?_
@@ -223,8 +223,8 @@ lemma dLaGridWin_mul_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (m1 m2 m3 : �
         refine grid_le_dLaGridWin b hb ?_
         rw [Finset.mem_range] at hk1 hk2
         omega
-    _ = (∑ k2 ∈ Finset.range m2, dLaTGridCount k1 * dLaTGridCount k2) *
-          dLaGridWin b m3 := by
+    _ = (∑ k2 ∈ Finset.range m2, antidiagonalTupleTotalCount k1 * antidiagonalTupleTotalCount k2) *
+          antidiagonalTupleGridPartialSum b m3 := by
         rw [Finset.sum_mul]
 
 end DLaGridBrick

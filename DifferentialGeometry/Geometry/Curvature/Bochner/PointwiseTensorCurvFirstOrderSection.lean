@@ -77,35 +77,35 @@ private lemma smoothOrthoFrame_parsevalExpand
   · intro h; exact absurd (Finset.mem_univ a) h
 
 private lemma tensor0SAsRS_add_loc {t : ℕ} (x : M) (C D : Tensor0SSpace t I x) :
-    tensor0SAsRS (I := I) (M := M) x (C + D) =
-      tensor0SAsRS (I := I) (M := M) x C + tensor0SAsRS (I := I) (M := M) x D := by
+    tensor0SToTensorRS (I := I) (M := M) x (C + D) =
+      tensor0SToTensorRS (I := I) (M := M) x C + tensor0SToTensorRS (I := I) (M := M) x D := by
   apply tensorRSSpace_ext (𝕜 := ℝ) 0 t x
   intro τ
   rw [tensor0SAsRS_apply (I := I) (M := M) x (C + D) τ]
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
-        tensor0SAsRS (I := I) (M := M) x C + tensor0SAsRS (I := I) (M := M) x D) τ =
+        tensor0SToTensorRS (I := I) (M := M) x C + tensor0SToTensorRS (I := I) (M := M) x D) τ =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
-        tensor0SAsRS (I := I) (M := M) x C) τ +
+        tensor0SToTensorRS (I := I) (M := M) x C) τ +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
-          tensor0SAsRS (I := I) (M := M) x D) τ from by
+          tensor0SToTensorRS (I := I) (M := M) x D) τ from by
     rw [ContinuousLinearMap.add_apply]]
   rw [tensor0SAsRS_apply (I := I) (M := M) x C τ, tensor0SAsRS_apply (I := I) (M := M) x D τ,
     smul_add]
 
 private lemma tensor0SAsRS_smul_loc {t : ℕ} (x : M) (c : ℝ) (C : Tensor0SSpace t I x) :
-    tensor0SAsRS (I := I) (M := M) x (c • C) =
-      c • tensor0SAsRS (I := I) (M := M) x C := by
+    tensor0SToTensorRS (I := I) (M := M) x (c • C) =
+      c • tensor0SToTensorRS (I := I) (M := M) x C := by
   apply tensorRSSpace_ext (𝕜 := ℝ) 0 t x
   intro τ
   rw [tensor0SAsRS_apply (I := I) (M := M) x (c • C) τ]
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
-        c • tensor0SAsRS (I := I) (M := M) x C) τ =
+        c • tensor0SToTensorRS (I := I) (M := M) x C) τ =
       c • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
-        tensor0SAsRS (I := I) (M := M) x C) τ from by
+        tensor0SToTensorRS (I := I) (M := M) x C) τ from by
     rw [ContinuousLinearMap.smul_apply]]
   rw [tensor0SAsRS_apply (I := I) (M := M) x C τ, smul_comm]
 
-noncomputable def slot0SliceFib (x : M) (s : ℕ)
+noncomputable def tensorSlotZeroEvalFib (x : M) (s : ℕ)
     (v : TangentSpace I x) :
     TensorRSSpace 0 (s + 1) I x →L[ℝ] TensorRSSpace 0 s I x :=
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 (s + 1) I x) :=
@@ -114,7 +114,7 @@ noncomputable def slot0SliceFib (x : M) (s : ℕ)
     inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x))
   LinearMap.toContinuousLinearMap
     { toFun := fun Wx =>
-        tensor0SAsRS (I := I) (M := M) x
+        tensor0SToTensorRS (I := I) (M := M) x
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
             ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Wx)
               (unitZeroSec (I := I) (M := M) x)) v)
@@ -148,8 +148,8 @@ set_option linter.unusedSectionVars false in
 
 lemma slot0SliceFib_apply (x : M) (s : ℕ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
-    slot0SliceFib (I := I) (M := M) x s v Wx =
-      tensor0SAsRS (I := I) (M := M) x
+    tensorSlotZeroEvalFib (I := I) (M := M) x s v Wx =
+      tensor0SToTensorRS (I := I) (M := M) x
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Wx)
             (unitZeroSec (I := I) (M := M) x)) v) := by
@@ -157,12 +157,12 @@ lemma slot0SliceFib_apply (x : M) (s : ℕ) (v : TangentSpace I x)
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x))
   haveI : T2Space (TensorRSSpace 0 (s + 1) I x) :=
     inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x))
-  rw [slot0SliceFib, LinearMap.coe_toContinuousLinearMap']
+  rw [tensorSlotZeroEvalFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
 lemma slot0SliceFib_eq_covGradBundleEquiv_symm (x : M) (s : ℕ) (v : TangentSpace I x)
     (T : TensorRSSpace 0 (s + 1) I x) :
-    slot0SliceFib (I := I) (M := M) x s v T =
+    tensorSlotZeroEvalFib (I := I) (M := M) x s v T =
       (show TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x from
         (covGradBundleEquiv (I := I) (M := M) 0 s x).symm T) v := by
   classical
@@ -190,10 +190,10 @@ lemma slot0SliceFib_eq_covGradBundleEquiv_symm (x : M) (s : ℕ) (v : TangentSpa
 
 lemma slot0SliceFib_covGrad_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (x : M) (v : TangentSpace I x) :
-    slot0SliceFib (I := I) (M := M) x s v ((covGrad (I := I) (M := M) g 0 s S).toSection x) =
+    tensorSlotZeroEvalFib (I := I) (M := M) x s v ((covGrad (I := I) (M := M) g 0 s S).toSection x) =
       (tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x v := by
   rw [slot0SliceFib_apply]
-  rw [curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S x v]
+  rw [curry_covGrad_unit_eval_general (I := I) (M := M) g s S x v]
   exact tensor0SAsRS_unit_recover (I := I) (M := M) s x
     ((tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x v)
 
@@ -201,8 +201,8 @@ set_option linter.unusedSectionVars false in
 
 lemma slot0SliceFib_dir_add (x : M) (s : ℕ) (v v' : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
-    slot0SliceFib (I := I) (M := M) x s (v + v') Wx =
-      slot0SliceFib (I := I) (M := M) x s v Wx + slot0SliceFib (I := I) (M := M) x s v' Wx := by
+    tensorSlotZeroEvalFib (I := I) (M := M) x s (v + v') Wx =
+      tensorSlotZeroEvalFib (I := I) (M := M) x s v Wx + tensorSlotZeroEvalFib (I := I) (M := M) x s v' Wx := by
   rw [slot0SliceFib_apply, slot0SliceFib_apply, slot0SliceFib_apply]
   rw [map_add (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Wx)
@@ -213,23 +213,23 @@ set_option linter.unusedSectionVars false in
 
 lemma slot0SliceFib_dir_smul (x : M) (s : ℕ) (c : ℝ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
-    slot0SliceFib (I := I) (M := M) x s (c • v) Wx =
-      c • slot0SliceFib (I := I) (M := M) x s v Wx := by
+    tensorSlotZeroEvalFib (I := I) (M := M) x s (c • v) Wx =
+      c • tensorSlotZeroEvalFib (I := I) (M := M) x s v Wx := by
   rw [slot0SliceFib_apply, slot0SliceFib_apply]
   rw [map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from Wx)
       (unitZeroSec (I := I) (M := M) x)))]
   rw [tensor0SAsRS_smul_loc (I := I) (M := M) x]
 
-noncomputable def gradArmDirLM
+noncomputable def curvatureGradContractionDirLM
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) (Wx : TensorRSSpace 0 (s + 1) I x) :
     TangentSpace I x →ₗ[ℝ] TensorRSSpace 0 s I x where
   toFun w := ∑ i : Fin (Module.finrank ℝ E),
     ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) w
-        (slot0SliceFib (I := I) (M := M) x s (B i x) Wx) -
-      slot0SliceFib (I := I) (M := M) x s
+        (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) Wx) -
+      tensorSlotZeroEvalFib (I := I) (M := M) x s
         (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx)
   map_add' w w' := by
     rw [← Finset.sum_add_distrib]
@@ -252,49 +252,49 @@ noncomputable def gradArmDirLM
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) (Wx : TensorRSSpace 0 (s + 1) I x) (w : TangentSpace I x) :
-    gradArmDirLM (I := I) (M := M) g s B x Wx w =
+    curvatureGradContractionDirLM (I := I) (M := M) g s B x Wx w =
       ∑ i : Fin (Module.finrank ℝ E),
         ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) w
-            (slot0SliceFib (I := I) (M := M) x s (B i x) Wx) -
-          slot0SliceFib (I := I) (M := M) x s
+            (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) Wx) -
+          tensorSlotZeroEvalFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx) := rfl
 
-noncomputable def gradArmDirCLM
+noncomputable def curvatureGradContractionDirCLM
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) (Wx : TensorRSSpace 0 (s + 1) I x) :
     TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x :=
   haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
-  LinearMap.toContinuousLinearMap (gradArmDirLM (I := I) (M := M) g s B x Wx)
+  LinearMap.toContinuousLinearMap (curvatureGradContractionDirLM (I := I) (M := M) g s B x Wx)
 
 @[simp] lemma gradArmDirCLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) (Wx : TensorRSSpace 0 (s + 1) I x) (w : TangentSpace I x) :
-    gradArmDirCLM (I := I) (M := M) g s B x Wx w =
+    curvatureGradContractionDirCLM (I := I) (M := M) g s B x Wx w =
       ∑ i : Fin (Module.finrank ℝ E),
         ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) w
-            (slot0SliceFib (I := I) (M := M) x s (B i x) Wx) -
-          slot0SliceFib (I := I) (M := M) x s
+            (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) Wx) -
+          tensorSlotZeroEvalFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx) := by
-  rw [gradArmDirCLM, LinearMap.coe_toContinuousLinearMap']
+  rw [curvatureGradContractionDirCLM, LinearMap.coe_toContinuousLinearMap']
   rfl
 
 lemma gradArmDirCLM_value_add
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) (W₁ W₂ : TensorRSSpace 0 (s + 1) I x) :
-    gradArmDirCLM (I := I) (M := M) g s B x (W₁ + W₂) =
-      gradArmDirCLM (I := I) (M := M) g s B x W₁ + gradArmDirCLM (I := I) (M := M) g s B x W₂ := by
+    curvatureGradContractionDirCLM (I := I) (M := M) g s B x (W₁ + W₂) =
+      curvatureGradContractionDirCLM (I := I) (M := M) g s B x W₁ + curvatureGradContractionDirCLM (I := I) (M := M) g s B x W₂ := by
   apply ContinuousLinearMap.ext
   intro w
   rw [ContinuousLinearMap.add_apply, gradArmDirCLM_apply, gradArmDirCLM_apply, gradArmDirCLM_apply,
     ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  rw [map_add (slot0SliceFib (I := I) (M := M) x s (B i x)) W₁ W₂,
+  rw [map_add (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x)) W₁ W₂,
     map_add (riemannOp (tensorCov (I := I) g 0 s) x (B i x) w), smul_add,
-    map_add (slot0SliceFib (I := I) (M := M) x s
+    map_add (tensorSlotZeroEvalFib (I := I) (M := M) x s
       (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x))) W₁ W₂]
   abel
 
@@ -302,19 +302,19 @@ lemma gradArmDirCLM_value_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) (c : ℝ) (W : TensorRSSpace 0 (s + 1) I x) :
-    gradArmDirCLM (I := I) (M := M) g s B x (c • W) =
-      c • gradArmDirCLM (I := I) (M := M) g s B x W := by
+    curvatureGradContractionDirCLM (I := I) (M := M) g s B x (c • W) =
+      c • curvatureGradContractionDirCLM (I := I) (M := M) g s B x W := by
   apply ContinuousLinearMap.ext
   intro w
   rw [ContinuousLinearMap.smul_apply, gradArmDirCLM_apply, gradArmDirCLM_apply, Finset.smul_sum]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  rw [map_smul (slot0SliceFib (I := I) (M := M) x s (B i x)) c W,
+  rw [map_smul (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x)) c W,
     map_smul (riemannOp (tensorCov (I := I) g 0 s) x (B i x) w),
-    map_smul (slot0SliceFib (I := I) (M := M) x s
+    map_smul (tensorSlotZeroEvalFib (I := I) (M := M) x s
       (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x))) c W]
   rw [smul_sub, smul_comm (2 : ℝ) c]
 
-noncomputable def gradArmFib
+noncomputable def curvatureGradContractionFib
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) :
@@ -326,7 +326,7 @@ noncomputable def gradArmFib
   LinearMap.toContinuousLinearMap
     { toFun := fun Wx =>
         covGradBundleEquiv (I := I) (M := M) 0 s x
-          (gradArmDirCLM (I := I) (M := M) g s B x Wx)
+          (curvatureGradContractionDirCLM (I := I) (M := M) g s B x Wx)
       map_add' := fun W₁ W₂ => by
         rw [gradArmDirCLM_value_add (I := I) (M := M) g s B x W₁ W₂, map_add]
       map_smul' := fun c W => by
@@ -339,23 +339,23 @@ lemma gradArmFib_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
     (x : M) (Wx : TensorRSSpace 0 (s + 1) I x) :
-    gradArmFib (I := I) (M := M) g s B x Wx =
+    curvatureGradContractionFib (I := I) (M := M) g s B x Wx =
       covGradBundleEquiv (I := I) (M := M) 0 s x
-        (gradArmDirCLM (I := I) (M := M) g s B x Wx) := by
+        (curvatureGradContractionDirCLM (I := I) (M := M) g s B x Wx) := by
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 (s + 1) I x) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x))
   haveI : T2Space (TensorRSSpace 0 (s + 1) I x) :=
     inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x))
-  rw [gradArmFib, LinearMap.coe_toContinuousLinearMap']
+  rw [curvatureGradContractionFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
 lemma gradArmFib_covGrad_slice_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (a : Fin (Module.finrank ℝ E)) :
-    tensor0SAsRS (I := I) (M := M) x
+    tensor0SToTensorRS (I := I) (M := M) x
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-            gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x
+            curvatureGradContractionFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x
               ((covGrad (I := I) (M := M) g 0 s S).toSection x))
             (unitZeroSec (I := I) (M := M) x))
           (smoothOrthoFrame (I := I) g x a x)) =
@@ -375,9 +375,9 @@ lemma gradArmFib_covGrad_slice_eq
 
   rw [gradArmFib_apply (I := I) (M := M) g s B x Wx]
   rw [tensor0S_curry_covGradBundleEquiv_unit_genVal (I := I) (M := M) s x
-    (gradArmDirCLM (I := I) (M := M) g s B x Wx) (B a x)]
+    (curvatureGradContractionDirCLM (I := I) (M := M) g s B x Wx) (B a x)]
   rw [tensor0SAsRS_unit_recover (I := I) (M := M) s x
-    (gradArmDirCLM (I := I) (M := M) g s B x Wx (B a x))]
+    (curvatureGradContractionDirCLM (I := I) (M := M) g s B x Wx (B a x))]
   rw [gradArmDirCLM_apply (I := I) (M := M) g s B x Wx (B a x)]
 
   rw [Finset.sum_sub_distrib, Finset.smul_sum]
@@ -408,11 +408,11 @@ lemma slot0SliceFib_section_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) b
-        (slot0SliceFib (I := I) (M := M) b s (V b) (Y b))) := by
+        (tensorSlotZeroEvalFib (I := I) (M := M) b s (V b) (Y b))) := by
 
   have heq : (fun b : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
       (E := fun z : M => TensorRSSpace 0 s I z) b
-      (slot0SliceFib (I := I) (M := M) b s (V b) (Y b))) =
+      (tensorSlotZeroEvalFib (I := I) (M := M) b s (V b) (Y b))) =
       (fun b : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) b
         ((show TangentSpace I b →L[ℝ] TensorRSSpace 0 s I b from
@@ -441,23 +441,23 @@ lemma gradArmDirCLM_homSection_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel 0 s ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel 0 s ℝ E)
         (E := fun z : M => TangentSpace I z →L[ℝ] TensorRSSpace 0 s I z) x
-        (gradArmDirCLM (I := I) (M := M) g s B x (Y x))) := by
+        (curvatureGradContractionDirCLM (I := I) (M := M) g s B x (Y x))) := by
   classical
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (F₁ := E) (V₁ := fun z : M => TangentSpace I z)
     (F₂ := TensorRSModel 0 s ℝ E) (V₂ := fun z : M => TensorRSSpace 0 s I z)
-    (φ := fun x => gradArmDirCLM (I := I) (M := M) g s B x (Y x))
+    (φ := fun x => curvatureGradContractionDirCLM (I := I) (M := M) g s B x (Y x))
   intro Z
 
   have hval : (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
       (E := fun z : M => TensorRSSpace 0 s I z) x
-      (gradArmDirCLM (I := I) (M := M) g s B x (Y x) (Z x))) =
+      (curvatureGradContractionDirCLM (I := I) (M := M) g s B x (Y x) (Z x))) =
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) x
         (∑ i : Fin (Module.finrank ℝ E),
           ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) (Z x)
-              (slot0SliceFib (I := I) (M := M) x s (B i x) (Y x)) -
-            slot0SliceFib (I := I) (M := M) x s
+              (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) (Y x)) -
+            tensorSlotZeroEvalFib (I := I) (M := M) x s
               (riemannOp (LeviCivita (I := I) g) x (B i x) (Z x) (B i x)) (Y x)))) := by
     funext x
     rw [gradArmDirCLM_apply]
@@ -469,22 +469,22 @@ lemma gradArmDirCLM_homSection_contMDiff
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) x
         ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) (Z x)
-          (slot0SliceFib (I := I) (M := M) x s (B i x) (Y x)))) := by
+          (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) (Y x)))) := by
     have hslice := slot0SliceFib_section_contMDiff (I := I) (M := M) g s hY (hB i)
     have hRsec : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
         (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
           (E := fun z : M => TensorRSSpace 0 s I z) x
           (riemannSec (tensorCov (I := I) g 0 s) (B i) Z
-            (fun y : M => slot0SliceFib (I := I) (M := M) y s (B i y) (Y y)) x)) :=
+            (fun y : M => tensorSlotZeroEvalFib (I := I) (M := M) y s (B i y) (Y y)) x)) :=
       riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) (hB i) Z.contMDiff hslice
     have hpt : (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) x
         ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) (Z x)
-          (slot0SliceFib (I := I) (M := M) x s (B i x) (Y x)))) =
+          (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) (Y x)))) =
         (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
           (E := fun z : M => TensorRSSpace 0 s I z) x
           ((2 : ℝ) • riemannSec (tensorCov (I := I) g 0 s) (B i) Z
-            (fun y : M => slot0SliceFib (I := I) (M := M) y s (B i y) (Y y)) x)) := by
+            (fun y : M => tensorSlotZeroEvalFib (I := I) (M := M) y s (B i y) (Y y)) x)) := by
       funext x
       rw [riemannOp_apply_smooth (cov := tensorCov (I := I) g 0 s) (hB i) Z.contMDiff hslice]
     rw [hpt]
@@ -493,7 +493,7 @@ lemma gradArmDirCLM_homSection_contMDiff
   have hC5arm : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) x
-        (slot0SliceFib (I := I) (M := M) x s
+        (tensorSlotZeroEvalFib (I := I) (M := M) x s
           (riemannOp (LeviCivita (I := I) g) x (B i x) (Z x) (B i x)) (Y x))) := by
 
     have hdir : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -519,14 +519,14 @@ lemma gradArmFib_frozen_section_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (s + 1) I z) x
-        (gradArmFib (I := I) (M := M) g s B x (Y x))) := by
+        (curvatureGradContractionFib (I := I) (M := M) g s B x (Y x))) := by
   have heq : (fun x : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
       (E := fun z : M => TensorRSSpace 0 (s + 1) I z) x
-      (gradArmFib (I := I) (M := M) g s B x (Y x))) =
+      (curvatureGradContractionFib (I := I) (M := M) g s B x (Y x))) =
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (s + 1) I z) x
         (covGradBundleEquiv (I := I) (M := M) 0 s x
-          (gradArmDirCLM (I := I) (M := M) g s B x (Y x)))) := by
+          (curvatureGradContractionDirCLM (I := I) (M := M) g s B x (Y x)))) := by
     funext x
     rw [gradArmFib_apply (I := I) (M := M) g s B x (Y x)]
   rw [heq]
@@ -561,7 +561,7 @@ lemma frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised
   rw [ContinuousLinearMap.neg_apply, inner_ricEndoRaisedFib (I := I) (M := M) g x v ζ,
     ricciTensor_eq_orthonormal_trace (I := I) g x v ζ e horth]
 
-private noncomputable def rArmBilin
+private noncomputable def curvatureGradContractionBilin
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (w : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) (m : Fin s → E) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -591,7 +591,7 @@ private noncomputable def rArmBilin
 
   let sliceDirCLM : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x :=
     LinearMap.toContinuousLinearMap
-      { toFun := fun b => slot0SliceFib (I := I) (M := M) x s b Wx
+      { toFun := fun b => tensorSlotZeroEvalFib (I := I) (M := M) x s b Wx
         map_add' := fun b b' => slot0SliceFib_dir_add (I := I) (M := M) x s b b' Wx
         map_smul' := fun c b => slot0SliceFib_dir_smul (I := I) (M := M) x s c b Wx }
   LinearMap.toContinuousLinearMap
@@ -611,13 +611,13 @@ private noncomputable def rArmBilin
 @[simp] private lemma rArmBilin_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (w : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) (m : Fin s → E) (a b : TangentSpace I x) :
-    rArmBilin (I := I) (M := M) g s x w Wx m a b =
+    curvatureGradContractionBilin (I := I) (M := M) g s x w Wx m a b =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           riemannOp (tensorCov (I := I) g 0 s) x a w
-            (slot0SliceFib (I := I) (M := M) x s b Wx))
+            (tensorSlotZeroEvalFib (I := I) (M := M) x s b Wx))
           (unitZeroSec (I := I) (M := M) x)) m := by
-  rw [rArmBilin]
+  rw [curvatureGradContractionBilin]
   simp only [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk,
     ContinuousLinearMap.comp_apply]
 
@@ -629,26 +629,26 @@ private lemma gradArmDirCLM_summand_toModel
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           (2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) w
-              (slot0SliceFib (I := I) (M := M) x s (B i x) Wx) -
-            slot0SliceFib (I := I) (M := M) x s
+              (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) Wx) -
+            tensorSlotZeroEvalFib (I := I) (M := M) x s
               (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx)
           (unitZeroSec (I := I) (M := M) x)) m =
-      (2 : ℝ) * rArmBilin (I := I) (M := M) g s x w Wx m (B i x) (B i x) -
+      (2 : ℝ) * curvatureGradContractionBilin (I := I) (M := M) g s x w Wx m (B i x) (B i x) -
         Tensor0SSpace.toModel
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-            slot0SliceFib (I := I) (M := M) x s
+            tensorSlotZeroEvalFib (I := I) (M := M) x s
               (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx)
             (unitZeroSec (I := I) (M := M) x)) m := by
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         (2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (B i x) w
-            (slot0SliceFib (I := I) (M := M) x s (B i x) Wx) -
-          slot0SliceFib (I := I) (M := M) x s
+            (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) Wx) -
+          tensorSlotZeroEvalFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx) =
       (2 : ℝ) • (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           riemannOp (tensorCov (I := I) g 0 s) x (B i x) w
-            (slot0SliceFib (I := I) (M := M) x s (B i x) Wx)) -
+            (tensorSlotZeroEvalFib (I := I) (M := M) x s (B i x) Wx)) -
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-          slot0SliceFib (I := I) (M := M) x s
+          tensorSlotZeroEvalFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (B i x) w (B i x)) Wx) from rfl]
   rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.smul_apply,
     Tensor0SSpace.toModel_sub, Tensor0SSpace.toModel_smul,
@@ -694,8 +694,8 @@ lemma gradArmDirCLM_frame_independent
     (hCorth : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner x (C i x) (C j x) = if i = j then (1 : ℝ) else 0)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
-    gradArmDirCLM (I := I) (M := M) g s B x Wx =
-      gradArmDirCLM (I := I) (M := M) g s C x Wx := by
+    curvatureGradContractionDirCLM (I := I) (M := M) g s B x Wx =
+      curvatureGradContractionDirCLM (I := I) (M := M) g s C x Wx := by
   classical
   apply ContinuousLinearMap.ext
   intro w
@@ -711,24 +711,24 @@ lemma gradArmDirCLM_frame_independent
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
             ∑ i : Fin (Module.finrank ℝ E),
               ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (F i x) w
-                  (slot0SliceFib (I := I) (M := M) x s (F i x) Wx) -
-                slot0SliceFib (I := I) (M := M) x s
+                  (tensorSlotZeroEvalFib (I := I) (M := M) x s (F i x) Wx) -
+                tensorSlotZeroEvalFib (I := I) (M := M) x s
                   (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx)) D) m =
         tensor00Scalar (I := I) (M := M) x D *
           ∑ i : Fin (Module.finrank ℝ E),
             Tensor0SSpace.toModel
               ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
                 (2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (F i x) w
-                    (slot0SliceFib (I := I) (M := M) x s (F i x) Wx) -
-                  slot0SliceFib (I := I) (M := M) x s
+                    (tensorSlotZeroEvalFib (I := I) (M := M) x s (F i x) Wx) -
+                  tensorSlotZeroEvalFib (I := I) (M := M) x s
                     (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx)
                 (unitZeroSec (I := I) (M := M) x)) m := by
     intro F
     set T : TensorRSSpace 0 s I x :=
       ∑ i : Fin (Module.finrank ℝ E),
         ((2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (F i x) w
-            (slot0SliceFib (I := I) (M := M) x s (F i x) Wx) -
-          slot0SliceFib (I := I) (M := M) x s
+            (tensorSlotZeroEvalFib (I := I) (M := M) x s (F i x) Wx) -
+          tensorSlotZeroEvalFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx) with hT
     have hstep : Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T) D) m =
@@ -744,8 +744,8 @@ lemma gradArmDirCLM_frame_independent
     congr 1
     exact toModel_unit_finsum (I := I) (M := M) s x Finset.univ
       (fun i => (2 : ℝ) • riemannOp (tensorCov (I := I) g 0 s) x (F i x) w
-            (slot0SliceFib (I := I) (M := M) x s (F i x) Wx) -
-          slot0SliceFib (I := I) (M := M) x s
+            (tensorSlotZeroEvalFib (I := I) (M := M) x s (F i x) Wx) -
+          tensorSlotZeroEvalFib (I := I) (M := M) x s
             (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx) m
   rw [hredD B, hredD C]
   congr 1
@@ -758,38 +758,38 @@ lemma gradArmDirCLM_frame_independent
   congr 1
   · rw [← Finset.mul_sum, ← Finset.mul_sum]
     congr 1
-    rw [orthonormal_basis_bilin_trace (I := I) g x (rArmBilin (I := I) (M := M) g s x w Wx m)
+    rw [orthonormal_basis_bilin_trace (I := I) g x (curvatureGradContractionBilin (I := I) (M := M) g s x w Wx m)
         (fun i => B i x) hBorth,
-      orthonormal_basis_bilin_trace (I := I) g x (rArmBilin (I := I) (M := M) g s x w Wx m)
+      orthonormal_basis_bilin_trace (I := I) g x (curvatureGradContractionBilin (I := I) (M := M) g s x w Wx m)
         (fun i => C i x) hCorth]
   · have hsliceSum : ∀ F : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
         (∑ i : Fin (Module.finrank ℝ E),
             Tensor0SSpace.toModel ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-              slot0SliceFib (I := I) (M := M) x s
+              tensorSlotZeroEvalFib (I := I) (M := M) x s
                 (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx)
               (unitZeroSec (I := I) (M := M) x)) m) =
           Tensor0SSpace.toModel ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-            slot0SliceFib (I := I) (M := M) x s
+            tensorSlotZeroEvalFib (I := I) (M := M) x s
               (∑ i : Fin (Module.finrank ℝ E),
                 riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx)
             (unitZeroSec (I := I) (M := M) x)) m := by
       intro F
 
       let sliceLM : TangentSpace I x →ₗ[ℝ] TensorRSSpace 0 s I x :=
-        { toFun := fun v => slot0SliceFib (I := I) (M := M) x s v Wx
+        { toFun := fun v => tensorSlotZeroEvalFib (I := I) (M := M) x s v Wx
           map_add' := fun v v' => slot0SliceFib_dir_add (I := I) (M := M) x s v v' Wx
           map_smul' := fun c v => slot0SliceFib_dir_smul (I := I) (M := M) x s c v Wx }
-      have hdir : slot0SliceFib (I := I) (M := M) x s
+      have hdir : tensorSlotZeroEvalFib (I := I) (M := M) x s
             (∑ i : Fin (Module.finrank ℝ E),
               riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx =
           ∑ i : Fin (Module.finrank ℝ E),
-            slot0SliceFib (I := I) (M := M) x s
+            tensorSlotZeroEvalFib (I := I) (M := M) x s
               (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx :=
         map_sum sliceLM (fun i => riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x))
           Finset.univ
       rw [hdir]
       exact (toModel_unit_finsum (I := I) (M := M) s x Finset.univ
-        (fun i => slot0SliceFib (I := I) (M := M) x s
+        (fun i => tensorSlotZeroEvalFib (I := I) (M := M) x s
           (riemannOp (LeviCivita (I := I) g) x (F i x) w (F i x)) Wx) m).symm
     rw [hsliceSum B, hsliceSum C]
     rw [frameSum_riemannOp_LeviCivita_eq_neg_ricEndoRaised (I := I) (M := M) g x
@@ -806,14 +806,14 @@ lemma gradArmFib_moving_section_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (s + 1) I z) x
-        (gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (Y x))) := by
+        (curvatureGradContractionFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (Y x))) := by
   classical
   intro x₀
 
   have hfrozen : ContMDiffAt I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)
         (E := fun z : M => TensorRSSpace 0 (s + 1) I z) x
-        (gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x₀) x (Y x))) x₀ :=
+        (curvatureGradContractionFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x₀) x (Y x))) x₀ :=
     gradArmFib_frozen_section_contMDiff (I := I) (M := M) g s
       (fun i => smoothOrthoFrame_smooth (I := I) g x₀ i) hY x₀
   refine hfrozen.congr_of_eventuallyEq ?_
@@ -827,34 +827,34 @@ lemma gradArmFib_moving_section_contMDiff
       (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g y i j)
       (fun i j => smoothOrthoFrame_orthonormal (I := I) g x₀ hy i j) (Y y)]
 
-noncomputable def gradArmSection
+noncomputable def curvatureGradContractionSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 (s + 1)) :
     SmoothCcTensor g 0 (s + 1) where
   toSection :=
     { toFun := fun x : M =>
-        gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (W.toSection x)
+        curvatureGradContractionFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (W.toSection x)
       contMDiff_toFun :=
         gradArmFib_moving_section_contMDiff (I := I) (M := M) g s W.toSection.contMDiff_toFun }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 @[simp] lemma gradArmSection_toSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 (s + 1)) (x : M) :
-    (gradArmSection (I := I) (M := M) g s W).toSection x =
-      gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (W.toSection x) := rfl
+    (curvatureGradContractionSection (I := I) (M := M) g s W).toSection x =
+      curvatureGradContractionFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x (W.toSection x) := rfl
 
-noncomputable def diffArmSection
+noncomputable def curvatureCommutatorRemainderSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=
   pointwiseTensorCurv (I := I) (M := M) g s S -
-    gradArmSection (I := I) (M := M) g s (covGrad (I := I) (M := M) g 0 s S)
+    curvatureGradContractionSection (I := I) (M := M) g s (covGrad (I := I) (M := M) g 0 s S)
 
 lemma diffArmSection_slice_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (a : Fin (Module.finrank ℝ E)) :
-    tensor0SAsRS (I := I) (M := M) x
+    tensor0SToTensorRS (I := I) (M := M) x
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-            (diffArmSection (I := I) (M := M) g s S).toSection x)
+            (curvatureCommutatorRemainderSection (I := I) (M := M) g s S).toSection x)
             (unitZeroSec (I := I) (M := M) x))
           (smoothOrthoFrame (I := I) g x a x)) =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -864,21 +864,21 @@ lemma diffArmSection_slice_eq
   classical
 
   have hsub : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-        (diffArmSection (I := I) (M := M) g s S).toSection x) =
+        (curvatureCommutatorRemainderSection (I := I) (M := M) g s S).toSection x) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         (pointwiseTensorCurv (I := I) (M := M) g s S).toSection x) -
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-          (gradArmSection (I := I) (M := M) g s
+          (curvatureGradContractionSection (I := I) (M := M) g s
             (covGrad (I := I) (M := M) g 0 s S)).toSection x) := by
-    rw [diffArmSection, SmoothCcTensor.toSection_sub]; rfl
+    rw [curvatureCommutatorRemainderSection, SmoothCcTensor.toSection_sub]; rfl
   rw [hsub, ContinuousLinearMap.sub_apply, map_sub, ContinuousLinearMap.sub_apply,
     tensor0SAsRS_sub' (I := I) (M := M) s x]
 
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-        (gradArmSection (I := I) (M := M) g s
+        (curvatureGradContractionSection (I := I) (M := M) g s
           (covGrad (I := I) (M := M) g 0 s S)).toSection x) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-        gradArmFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x
+        curvatureGradContractionFib (I := I) (M := M) g s (smoothOrthoFrame (I := I) g x) x
           ((covGrad (I := I) (M := M) g 0 s S).toSection x)) from rfl]
   rw [slot0_read_curv_eq_frameFree (I := I) (M := M) g s S
     (smoothOrthoFrame_smooth (I := I) g x a) x]
@@ -890,10 +890,10 @@ lemma diffArmSection_slice_toModel_value_local
     (a : Fin (Module.finrank ℝ E)) (m : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-          tensor0SAsRS (I := I) (M := M) x
+          tensor0SToTensorRS (I := I) (M := M) x
             (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
               ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-                (diffArmSection (I := I) (M := M) g s S).toSection x)
+                (curvatureCommutatorRemainderSection (I := I) (M := M) g s S).toSection x)
                 (unitZeroSec (I := I) (M := M) x))
               (smoothOrthoFrame (I := I) g x a x)))
           (unitZeroSec (I := I) (M := M) x)) m =
@@ -915,10 +915,10 @@ lemma diffArmSection_slice_toModel_value_local
   set A : Π b : M, Tensor0SSpace s I b := unitEvalSection (I := I) (M := M) g s S with hA
 
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-        tensor0SAsRS (I := I) (M := M) x
+        tensor0SToTensorRS (I := I) (M := M) x
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
             ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-              (diffArmSection (I := I) (M := M) g s S).toSection x)
+              (curvatureCommutatorRemainderSection (I := I) (M := M) g s S).toSection x)
               (unitZeroSec (I := I) (M := M) x))
             (smoothOrthoFrame (I := I) g x a x))) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
@@ -961,8 +961,8 @@ set_option maxHeartbeats 6400000 in
 lemma diffArmSection_value_local
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S₁ S₂ : SmoothCcTensor g 0 s) (x : M)
     (hx : S₁.toSection x = S₂.toSection x) :
-    (diffArmSection (I := I) (M := M) g s S₁).toSection x =
-      (diffArmSection (I := I) (M := M) g s S₂).toSection x := by
+    (curvatureCommutatorRemainderSection (I := I) (M := M) g s S₁).toSection x =
+      (curvatureCommutatorRemainderSection (I := I) (M := M) g s S₂).toSection x := by
   classical
 
   apply tensorRSSpace_ext (𝕜 := ℝ) 0 (s + 1) x
@@ -1001,15 +1001,15 @@ lemma diffArmSection_value_local
       Tensor0SSpace.toModel
           (tensor0S_curry (I := I) (M := M) s x
             ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-              (diffArmSection (I := I) (M := M) g s S).toSection x)
+              (curvatureCommutatorRemainderSection (I := I) (M := M) g s S).toSection x)
               (unitZeroSec (I := I) (M := M) x))
             (smoothOrthoFrame (I := I) g x a x)) m =
         Tensor0SSpace.toModel
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-            tensor0SAsRS (I := I) (M := M) x
+            tensor0SToTensorRS (I := I) (M := M) x
               (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
                 ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-                  (diffArmSection (I := I) (M := M) g s S).toSection x)
+                  (curvatureCommutatorRemainderSection (I := I) (M := M) g s S).toSection x)
                   (unitZeroSec (I := I) (M := M) x))
                 (smoothOrthoFrame (I := I) g x a x)))
             (unitZeroSec (I := I) (M := M) x)) m := by
@@ -1025,9 +1025,9 @@ lemma diffArmSection_value_local
 
 lemma gradArmSection_toSection_add
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W₁ W₂ : SmoothCcTensor g 0 (s + 1)) (x : M) :
-    (gradArmSection (I := I) (M := M) g s (W₁ + W₂)).toSection x =
-      (gradArmSection (I := I) (M := M) g s W₁).toSection x +
-        (gradArmSection (I := I) (M := M) g s W₂).toSection x := by
+    (curvatureGradContractionSection (I := I) (M := M) g s (W₁ + W₂)).toSection x =
+      (curvatureGradContractionSection (I := I) (M := M) g s W₁).toSection x +
+        (curvatureGradContractionSection (I := I) (M := M) g s W₂).toSection x := by
   rw [gradArmSection_toSection, gradArmSection_toSection, gradArmSection_toSection]
   rw [show (W₁ + W₂).toSection x = W₁.toSection x + W₂.toSection x from by
     rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]]
@@ -1035,8 +1035,8 @@ lemma gradArmSection_toSection_add
 
 lemma gradArmSection_toSection_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ) (W : SmoothCcTensor g 0 (s + 1)) (x : M) :
-    (gradArmSection (I := I) (M := M) g s (c • W)).toSection x =
-      c • (gradArmSection (I := I) (M := M) g s W).toSection x := by
+    (curvatureGradContractionSection (I := I) (M := M) g s (c • W)).toSection x =
+      c • (curvatureGradContractionSection (I := I) (M := M) g s W).toSection x := by
   rw [gradArmSection_toSection, gradArmSection_toSection]
   rw [show (c • W).toSection x = c • W.toSection x from by
     rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]]
@@ -1045,17 +1045,17 @@ lemma gradArmSection_toSection_smul
 lemma gradArmSection_value_local
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W₁ W₂ : SmoothCcTensor g 0 (s + 1)) (x : M)
     (hx : W₁.toSection x = W₂.toSection x) :
-    (gradArmSection (I := I) (M := M) g s W₁).toSection x =
-      (gradArmSection (I := I) (M := M) g s W₂).toSection x := by
+    (curvatureGradContractionSection (I := I) (M := M) g s W₁).toSection x =
+      (curvatureGradContractionSection (I := I) (M := M) g s W₂).toSection x := by
   rw [gradArmSection_toSection, gradArmSection_toSection, hx]
 
 theorem exists_gradArmSection_appFullSec (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ H_R : HomTensorRSField (E := E) (M := M) 0 (s + 1) (s + 1) I,
       ∀ W : SmoothCcTensor g 0 (s + 1),
-        gradArmSection (I := I) (M := M) g s W =
-          appFullSec (I := I) (M := M) g 0 (s + 1) (s + 1) H_R W :=
+        curvatureGradContractionSection (I := I) (M := M) g s W =
+          homTensorRSFieldApply (I := I) (M := M) g 0 (s + 1) (s + 1) H_R W :=
   exists_value_local_appFullSec (I := I) (M := M) g 0 (s + 1) (s + 1)
-    (fun W => gradArmSection (I := I) (M := M) g s W)
+    (fun W => curvatureGradContractionSection (I := I) (M := M) g s W)
     (fun W₁ W₂ x => gradArmSection_toSection_add (I := I) (M := M) g s W₁ W₂ x)
     (fun c W x => gradArmSection_toSection_smul (I := I) (M := M) g s c W x)
     (fun W₁ W₂ x hW => gradArmSection_value_local (I := I) (M := M) g s W₁ W₂ x hW)
@@ -1160,10 +1160,10 @@ lemma pointwiseTensorCurv_toSection_smul
 
 lemma diffArmSection_toSection_add
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S₁ S₂ : SmoothCcTensor g 0 s) (x : M) :
-    (diffArmSection (I := I) (M := M) g s (S₁ + S₂)).toSection x =
-      (diffArmSection (I := I) (M := M) g s S₁).toSection x +
-        (diffArmSection (I := I) (M := M) g s S₂).toSection x := by
-  rw [diffArmSection, diffArmSection, diffArmSection]
+    (curvatureCommutatorRemainderSection (I := I) (M := M) g s (S₁ + S₂)).toSection x =
+      (curvatureCommutatorRemainderSection (I := I) (M := M) g s S₁).toSection x +
+        (curvatureCommutatorRemainderSection (I := I) (M := M) g s S₂).toSection x := by
+  rw [curvatureCommutatorRemainderSection, curvatureCommutatorRemainderSection, curvatureCommutatorRemainderSection]
   rw [SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub,
     ContMDiffSection.coe_sub, ContMDiffSection.coe_sub, ContMDiffSection.coe_sub,
     Pi.sub_apply, Pi.sub_apply, Pi.sub_apply]
@@ -1175,9 +1175,9 @@ lemma diffArmSection_toSection_add
 
 lemma diffArmSection_toSection_smul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ) (S : SmoothCcTensor g 0 s) (x : M) :
-    (diffArmSection (I := I) (M := M) g s (c • S)).toSection x =
-      c • (diffArmSection (I := I) (M := M) g s S).toSection x := by
-  rw [diffArmSection, diffArmSection]
+    (curvatureCommutatorRemainderSection (I := I) (M := M) g s (c • S)).toSection x =
+      c • (curvatureCommutatorRemainderSection (I := I) (M := M) g s S).toSection x := by
+  rw [curvatureCommutatorRemainderSection, curvatureCommutatorRemainderSection]
   rw [SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub,
     ContMDiffSection.coe_sub, ContMDiffSection.coe_sub, Pi.sub_apply, Pi.sub_apply]
   rw [pointwiseTensorCurv_toSection_smul (I := I) (M := M) g s c S]
@@ -1189,10 +1189,10 @@ lemma diffArmSection_toSection_smul
 theorem exists_diffArmSection_appFullSec (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ H_dR : HomTensorRSField (E := E) (M := M) 0 s (s + 1) I,
       ∀ S : SmoothCcTensor g 0 s,
-        diffArmSection (I := I) (M := M) g s S =
-          appFullSec (I := I) (M := M) g 0 s (s + 1) H_dR S :=
+        curvatureCommutatorRemainderSection (I := I) (M := M) g s S =
+          homTensorRSFieldApply (I := I) (M := M) g 0 s (s + 1) H_dR S :=
   exists_value_local_appFullSec (I := I) (M := M) g 0 s (s + 1)
-    (fun S => diffArmSection (I := I) (M := M) g s S)
+    (fun S => curvatureCommutatorRemainderSection (I := I) (M := M) g s S)
     (fun S₁ S₂ x => diffArmSection_toSection_add (I := I) (M := M) g s S₁ S₂ x)
     (fun c S x => diffArmSection_toSection_smul (I := I) (M := M) g s c S x)
     (fun S₁ S₂ x hS => diffArmSection_value_local (I := I) (M := M) g s S₁ S₂ x hS)
@@ -1203,17 +1203,17 @@ theorem exists_pointwiseTensorCurv_firstOrder_homField_section
       (H_dR : HomTensorRSField (E := E) (M := M) 0 s (s + 1) I),
       ∀ S : SmoothCcTensor g 0 s,
         pointwiseTensorCurv (I := I) (M := M) g s S =
-          appFullSec (I := I) (M := M) g 0 (s + 1) (s + 1) H_R
+          homTensorRSFieldApply (I := I) (M := M) g 0 (s + 1) (s + 1) H_R
             (covGrad (I := I) (M := M) g 0 s S) +
-          appFullSec (I := I) (M := M) g 0 s (s + 1) H_dR S := by
+          homTensorRSFieldApply (I := I) (M := M) g 0 s (s + 1) H_dR S := by
   obtain ⟨H_R, hH_R⟩ := exists_gradArmSection_appFullSec (I := I) (M := M) (E := E) g s
   obtain ⟨H_dR, hH_dR⟩ := exists_diffArmSection_appFullSec (I := I) (M := M) (E := E) g s
   refine ⟨H_R, H_dR, fun S => ?_⟩
 
   have hdecomp : pointwiseTensorCurv (I := I) (M := M) g s S =
-      gradArmSection (I := I) (M := M) g s (covGrad (I := I) (M := M) g 0 s S) +
-        diffArmSection (I := I) (M := M) g s S := by
-    rw [diffArmSection]
+      curvatureGradContractionSection (I := I) (M := M) g s (covGrad (I := I) (M := M) g 0 s S) +
+        curvatureCommutatorRemainderSection (I := I) (M := M) g s S := by
+    rw [curvatureCommutatorRemainderSection]
     abel
   rw [hdecomp, hH_R (covGrad (I := I) (M := M) g 0 s S), hH_dR S]
 

@@ -68,7 +68,7 @@ private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
         ENNReal.ofReal ε)
     (α : M) :
     ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (fun y => chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -97,14 +97,14 @@ private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
   rw [h_chartPushed_eq]
   unfold wkpNormChart at h_le
   have h_summand_le_tsum :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
           (fun x => wkpChartFun (f m) x - wkpChartFun (f n) x))
         (chartTargetEuclid (I := I) (M := M) α) ≤
       ∑' α' : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α'
@@ -130,7 +130,7 @@ private theorem exists_chart_limit
         (chartTargetEuclid (I := I) (M := M) α) ∧
       Tendsto
         (fun n =>
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (fun y => chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -164,7 +164,7 @@ private theorem chartPushed_tendstoInMeasure
       (chartTargetEuclid (I := I) (M := M) α))
     (h_v : Tendsto
       (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (fun y => chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -228,7 +228,7 @@ private theorem exists_subseq_chartPushed_ae_tendsto
       (chartTargetEuclid (I := I) (M := M) α))
     (h_v : Tendsto
       (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (fun y => chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α

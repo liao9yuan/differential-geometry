@@ -63,7 +63,7 @@ theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMet
   unfold tensorTrivProj
   rw [DifferentialGeometry.Tensor.tensorRS_trivAt_continuousLinearMapAt_apply_eq_self_on_locality
         (I := I) (M := M) 0 s x (b := x) rfl (mem_chart_source H x)
-        (W.toSection x) (dualCovariantCMM (E := E) 0 ![])]
+        (W.toSection x) (dualCoordinateProductMultilinearMap (E := E) 0 ![])]
   unfold unitModel
   congr 2
 

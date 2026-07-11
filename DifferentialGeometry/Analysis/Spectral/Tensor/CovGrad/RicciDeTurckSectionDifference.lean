@@ -58,7 +58,7 @@ theorem connDiffQuad_telescope (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x
           (PDE.DeTurck.connDiff (I := I) g₁ g₁' x p q) r
         + PDE.DeTurck.connDiff (I := I) g₁ g₁' x
             (PDE.DeTurck.connDiff (I := I) g₁' g₀ x p q) r := by
-  rw [csArm_split (I := I) g₀ g₁ g₁' x
+  rw [connDiff_bilinear_diff_split (I := I) g₀ g₁ g₁' x
         (PDE.DeTurck.connDiff (I := I) g₁ g₀ x p q)
         (PDE.DeTurck.connDiff (I := I) g₁' g₀ x p q) r]
   rw [connDiff_endpoint_cocycle (I := I) g₀ g₁ g₁' x p q]
@@ -419,7 +419,7 @@ set_option linter.unusedSectionVars false in
 theorem connDiffBiContrCoeff_appCc_eq (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (connDiffBiContrCoeff (I := I) (M := M) gj g₀ g₁ g₁') W)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (connDiffBiContrCoeff (I := I) (M := M) gj g₀ g₁ g₁') W)
         x v =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         g₀.inner x

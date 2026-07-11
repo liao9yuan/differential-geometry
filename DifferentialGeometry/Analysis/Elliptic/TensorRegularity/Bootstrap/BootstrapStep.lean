@@ -310,7 +310,7 @@ theorem smooth_cc_h2_loc_memWkp_two
       ∀ {u f : EE → ℝ}, B.IsSmoothWeakSolution u f →
         HasCompactSupport u → ContDiff ℝ (⊤ : ℕ∞) f → HasCompactSupport f →
       MemWkp (d := d) 2 2 u Ω'' ∧
-        wkpNorm (d := d) 2 2 u Ω'' ≤
+        iteratedWeakSobolevNorm (d := d) 2 2 u Ω'' ≤
           ENNReal.ofReal
             (C * Real.sqrt
               ((∫ x, ∑ j : Fin d,
@@ -640,7 +640,7 @@ theorem smooth_cc_h2_loc_memWkp_two
     have h_le_rpow := le_rpow_half_of_sq_le h_sq_le
     rwa [rpow_half_ofReal_eq_ofReal_sqrt (by positivity)] at h_le_rpow
   have h_wkp_le :
-      wkpNorm (d := d) 2 2 u Ω'' ≤
+      iteratedWeakSobolevNorm (d := d) 2 2 u Ω'' ≤
         ∑ j ∈ Finset.range 3, ∑ _β : Fin j → Fin d,
           ENNReal.ofReal (Real.sqrt (C₀ * D)) := by
     rw [wkpNorm_eq_sum]

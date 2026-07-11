@@ -125,7 +125,7 @@ theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s 
     Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ (r + 1) (s + 1)
         (Integral.Connection.slotExtend (I := I) (M := M) g₀ r s Φ) x v =
       (show Tensor0SBundle.Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I x from
-        Integral.Connection.slotExtendFib (I := I) (M := M) g₀ r s x
+        Integral.Connection.slotExtendPointwise (I := I) (M := M) g₀ r s x
           (show Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x from
             Analysis.Parabolic.TensorSpectral.tensorCovDerivAt (I := I) (M := M) g₀ r s Φ x v)) := by
   apply ContinuousLinearMap.ext
@@ -154,7 +154,7 @@ theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMe
   classical
 
   have hslotZero : ∀ (y : M),
-      Integral.Connection.slotExtendFib (I := I) (M := M) g₀ r s y
+      Integral.Connection.slotExtendPointwise (I := I) (M := M) g₀ r s y
           (0 : Tensor0SBundle.Tensor0SSpace r I y →L[ℝ] Tensor0SBundle.Tensor0SSpace s I y) =
         (0 : Tensor0SBundle.Tensor0SSpace (r + 1) I y →L[ℝ] Tensor0SBundle.Tensor0SSpace (s + 1) I y) := by
     intro y

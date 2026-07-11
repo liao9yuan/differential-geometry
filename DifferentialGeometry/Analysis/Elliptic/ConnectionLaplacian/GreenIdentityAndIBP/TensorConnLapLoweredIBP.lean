@@ -186,12 +186,12 @@ theorem integral_tensorInner_covDeriv_combined_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
-    ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g r s W V x))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s S x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s W x))
             (Tensor0SSpace.toModel
@@ -208,26 +208,26 @@ theorem integral_tensorInner_covDeriv_split_eq
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (hWcov_int : Integrable
-      (fun x : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      (fun x : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (Tensor0SSpace.toModel
           (loweredCovDerivAlongVF (I := I) (M := M) g r s W V x))
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s S x)))
       (riemannianVolumeMeasure (I := I) (M := M) g))
     (hScov_int : Integrable
-      (fun x : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      (fun x : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s W x))
         (Tensor0SSpace.toModel
           (loweredCovDerivAlongVF (I := I) (M := M) g r s S V x)))
       (riemannianVolumeMeasure (I := I) (M := M) g)) :
-    ∫ x, tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    ∫ x, covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s W x))
           (Tensor0SSpace.toModel
             (loweredCovDerivAlongVF (I := I) (M := M) g r s S V x))
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-      -∫ x, tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      -∫ x, covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g r s W V x))
             (Tensor0SSpace.toModel

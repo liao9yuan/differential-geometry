@@ -111,7 +111,7 @@ theorem hasEndpointContinuation_of_complete
   have hγ_mdiff_on : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Ioo aL b) :=
     hγ_smooth.mdifferentiableOn (by norm_num)
   obtain ⟨y, hy_metric⟩ :=
-    gc_position_limit (I := I) (γ := γ) (a := aL) (b := b) (c := c)
+    curve_exists_limit_of_bounded_speed (I := I) (γ := γ) (a := aL) (b := b) (c := c)
       haLb hc_nonneg hγ_smooth hSpeedBound
   have hy_mfld : Tendsto γ (𝓝[<] b) (𝓝 y) :=
     tendsto_nhds_of_tendsto_metric_nhds (I := I) (l := 𝓝[<] b) (f := γ) (p := y)

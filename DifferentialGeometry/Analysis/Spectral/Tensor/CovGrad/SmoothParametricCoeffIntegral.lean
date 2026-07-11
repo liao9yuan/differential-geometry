@@ -323,10 +323,10 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
     (hcont : ∀ x : M, ContinuousOn (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) S)
     (x : M) (v : Fin s' → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ s'
-        (appCc (I := I) (M := M) g₀ r s'
+        (operatorFieldApply (I := I) (M := M) g₀ r s'
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ∫ t in (0 : ℝ)..1,
-        unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v := by
+        unitModel (I := I) (M := M) g₀ s' (operatorFieldApply (I := I) (M := M) g₀ r s' (Φ t) W) x v := by
 
   set u : Tensor0SSpace r I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
@@ -336,14 +336,14 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
     ((hcont x).mono hSI).intervalIntegrable
 
   have key : ∀ Ψ : SmoothCcTensor g₀ r s',
-      unitModel (I := I) (M := M) g₀ s' (appCc (I := I) (M := M) g₀ r s' Ψ W) x v =
+      unitModel (I := I) (M := M) g₀ s' (operatorFieldApply (I := I) (M := M) g₀ r s' Ψ W) x v =
         ((TensorRSSpace.toModel (Ψ.toSection x)) (Tensor0SSpace.toModel u)) v := by
     intro Ψ
     rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
       toModel_tensorRS_apply (I := I) r s' x (Ψ.toSection x) u]
 
   rw [show unitModel (I := I) (M := M) g₀ s'
-        (appCc (I := I) (M := M) g₀ r s'
+        (operatorFieldApply (I := I) (M := M) g₀ r s'
           (pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint) W) x v =
       ((TensorRSSpace.toModel
             ((pathIntegralCoeffField (I := I) (M := M) g₀ r s' Φ S hS hSI hjoint).toSection x))
@@ -362,7 +362,7 @@ theorem pathIntegralCoeffField_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r s
     (hcontApp.mono hSI).intervalIntegrable
 
   rw [show (fun t : ℝ => unitModel (I := I) (M := M) g₀ s'
-          (appCc (I := I) (M := M) g₀ r s' (Φ t) W) x v) =
+          (operatorFieldApply (I := I) (M := M) g₀ r s' (Φ t) W) x v) =
         (fun t : ℝ => ((TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) v) from
     funext (fun t => key (Φ t))]
 

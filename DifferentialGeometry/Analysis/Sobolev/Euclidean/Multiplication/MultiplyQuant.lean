@@ -154,7 +154,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
     {C : ℝ} (hC_nonneg : 0 ≤ C)
     (hη_bound : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C) :
     ∃ K : ℝ, 0 < K ∧ ∀ {u : EuclideanSpace ℝ (Fin d) → ℝ} (_hu : MemWkp k p u Ω),
-      wkpNorm k p (fun x => η x * u x) Ω ≤ ENNReal.ofReal K * wkpNorm k p u Ω := by
+      iteratedWeakSobolevNorm k p (fun x => η x * u x) Ω ≤ ENNReal.ofReal K * iteratedWeakSobolevNorm k p u Ω := by
   match k, hk with
   | 0, _ =>
     have h0 : ∀ x ∈ Ω, ‖η x‖ ≤ C := by
@@ -212,12 +212,12 @@ theorem wkpNorm_smul_smooth_bounded_le_one
           ≤ OC * Bu i + OC * Au := fun i =>
       eLpNorm_chosenWeakPartial'_smul_smooth_bounded_le (d := d) hp_one hΩ_open
         hη_smooth h_eta0 h_eta1 hv_W1p i
-    have hLHS_unfold : wkpNorm (d := d) 1 p (fun x => η x * v x) Ω =
+    have hLHS_unfold : iteratedWeakSobolevNorm (d := d) 1 p (fun x => η x * v x) Ω =
         eLpNorm (fun x => η x * v x) p (volume.restrict Ω) +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (iterWeakPartial (d := d) p 1 α (fun x => η x * v x) Ω) p
             (volume.restrict Ω) := by
-      unfold wkpNorm
+      unfold iteratedWeakSobolevNorm
       rw [show (1 : ℕ) + 1 = 1 + 1 from rfl]
       rw [Finset.sum_range_succ, Finset.sum_range_one]
       have h0_unique : ∀ α : Fin 0 → Fin d, α = (fun i : Fin 0 => i.elim0) :=
@@ -230,11 +230,11 @@ theorem wkpNorm_smul_smooth_bounded_le_one
               eLpNorm (iterWeakPartial (d := d) p 0 α (fun x => η x * v x) Ω) p
                 (volume.restrict Ω))]
       simp [iterWeakPartial_zero]
-    have hRHS_unfold : wkpNorm (d := d) 1 p v Ω =
+    have hRHS_unfold : iteratedWeakSobolevNorm (d := d) 1 p v Ω =
         Au +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (iterWeakPartial (d := d) p 1 α v Ω) p (volume.restrict Ω) := by
-      unfold wkpNorm
+      unfold iteratedWeakSobolevNorm
       rw [show (1 : ℕ) + 1 = 1 + 1 from rfl]
       rw [Finset.sum_range_succ, Finset.sum_range_one]
       have h0_unique : ∀ α : Fin 0 → Fin d, α = (fun i : Fin 0 => i.elim0) :=
@@ -254,7 +254,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
         iterWeakPartial (d := d) p 1 α v Ω =
           chosenWeakPartial' (d := d) p (α 0) v Ω := by
       intro α; rw [iterWeakPartial_succ]; rfl
-    have hLHS_unfold' : wkpNorm (d := d) 1 p (fun x => η x * v x) Ω =
+    have hLHS_unfold' : iteratedWeakSobolevNorm (d := d) 1 p (fun x => η x * v x) Ω =
         eLpNorm (fun x => η x * v x) p (volume.restrict Ω) +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (chosenWeakPartial' (d := d) p (α 0) (fun x => η x * v x) Ω) p
@@ -263,7 +263,7 @@ theorem wkpNorm_smul_smooth_bounded_le_one
       refine congrArg (eLpNorm (fun x => η x * v x) p (volume.restrict Ω) + ·) ?_
       refine Finset.sum_congr rfl (fun α _ => ?_)
       rw [hIter1_eta_v α]
-    have hRHS_unfold' : wkpNorm (d := d) 1 p v Ω =
+    have hRHS_unfold' : iteratedWeakSobolevNorm (d := d) 1 p v Ω =
         Au +
         ∑ α : Fin 1 → Fin d,
           eLpNorm (chosenWeakPartial' (d := d) p (α 0) v Ω) p (volume.restrict Ω) := by

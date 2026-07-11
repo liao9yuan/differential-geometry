@@ -160,7 +160,7 @@ private lemma fChartResidual_aeEq_chartPushedRaw_diff
           smoothMulLp (I := I) (M := M) g ρα
             (laplacianDomain.preimage (I := I) (M := M) g ⟨u_h, hu_dom⟩) := by
     have h_def : fHLeibnizResidualLp (I := I) (M := M) g α u_h =
-        fHLeibnizGeneralResidualCLM (I := I) (M := M) g ρα u_h := by
+        leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g ρα u_h := by
       rw [h_clm_eq]; rfl
     rw [h_def]
     exact h_lp_id

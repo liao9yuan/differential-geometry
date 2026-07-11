@@ -44,7 +44,7 @@ private lemma integral_const_indicator_eq
 
 set_option linter.unusedVariables false in
 
-theorem cross_1_bound
+theorem translated_coeff_cutoff_deriv_diffQuot_cross_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
@@ -90,7 +90,7 @@ theorem cross_1_bound
   intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
-    cross_1_pointwise_bound (d := d) B hu hη hη_range h_fderiv_eta
+    translated_coeff_cutoff_gradient_pointwise_bound (d := d) B hu hη hη_range h_fderiv_eta
       hΛ i j k h_thick_in_Ω' hε'_pos x
   set S : ℝ := ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
         translate k h (fun y : E => B.a y i j) x * (η x) *
@@ -323,7 +323,7 @@ theorem cross_1_bound
 
 set_option linter.unusedVariables false in
 
-theorem cross_2_bound
+theorem coeff_diffQuot_cutoff_sq_gradient_cross_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
@@ -368,7 +368,7 @@ theorem cross_2_bound
   intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
-    cross_2_pointwise_bound (d := d) B hu hη hη_range i j k hM_nn h_M
+    diffQuot_coeff_cutoff_squared_pointwise_bound (d := d) B hu hη hη_range i j k hM_nn h_M
       h_thick_in_Ω' hε'_pos x
   set S : ℝ := ∑ i : Fin d, ∑ j : Fin d, ∫ x,
         diffQuot k h (fun y : E => B.a y i j) x * (η x)^2 *
@@ -836,7 +836,7 @@ theorem cross_2_bound
 
 set_option linter.unusedVariables false in
 
-theorem cross_3_bound
+theorem coeff_diffQuot_cutoff_deriv_cross_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
@@ -879,7 +879,7 @@ theorem cross_3_bound
   intro u hu h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
-    cross_3_pointwise_bound (d := d) B (u := u) hη_range h_fderiv_eta i j k hM_nn h_M
+    diffQuot_coeff_cutoff_gradient_pointwise_bound (d := d) B (u := u) hη_range h_fderiv_eta i j k hM_nn h_M
       h_thick_in_Ω' x
   set S : ℝ := ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
         diffQuot k h (fun y : E => B.a y i j) x * (η x) *
@@ -1222,7 +1222,7 @@ theorem cross_3_bound
 
 set_option maxHeartbeats 800000 in
 
-private theorem v_test_sq_int_le
+private theorem nirenbergTestFunction_sq_integral_le
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
@@ -1502,7 +1502,7 @@ theorem c_term_bound
         rw [h_v_test_zero_outside_Ω' x hx]; ring
       exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
     rw [h_v_test_sq_eq]
-  have h_v_test_bound := v_test_sq_int_le (d := d) hu hη hη_supp hη_range h_fderiv_eta k hh
+  have h_v_test_bound := nirenbergTestFunction_sq_integral_le (d := d) hu hη hη_supp hη_range h_fderiv_eta k hh
   have h_cu_sq_bound : ∀ x ∈ Ω', (B.c x * u x)^2 ≤ Mc^2 * (u x)^2 := by
     intro x hx
     have h_x_in_clΩ' : x ∈ closure Ω' := subset_closure hx
@@ -1792,7 +1792,7 @@ theorem f_term_bound
         rw [h_v_test_zero_outside_Ω' x hx]; ring
       exact (setIntegral_eq_integral_of_forall_compl_eq_zero h_eq_zero).symm
     rw [h_v_test_sq_eq]
-  have h_v_test_bound := v_test_sq_int_le (d := d) hu hη hη_supp hη_range h_fderiv_eta k hh
+  have h_v_test_bound := nirenbergTestFunction_sq_integral_le (d := d) hu hη hη_supp hη_range h_fderiv_eta k hh
   have h_v_sq_le_8N_2I :
       ∫ x in Ω', (v_test x)^2 ∂(volume : Measure E) ≤
         8 * N^2 *
@@ -1956,11 +1956,11 @@ theorem nirenberg_master_inequality_after_young
   set ε_eff : ℝ := B.lam / 8 with hε_eff_def
   have hε_eff_pos : 0 < ε_eff := by
     rw [hε_eff_def]; exact div_pos B.hlam_pos (by norm_num)
-  obtain ⟨C1, hC1_nn, hC1⟩ := cross_1_bound (d := d) B hη hη_supp hη_range hN
+  obtain ⟨C1, hC1_nn, hC1⟩ := translated_coeff_cutoff_deriv_diffQuot_cross_bound (d := d) B hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hh_supp_in_Ω' k ε_eff hε_eff_pos
-  obtain ⟨C2, hC2_nn, hC2⟩ := cross_2_bound (d := d) B hη hη_supp hη_range
+  obtain ⟨C2, hC2_nn, hC2⟩ := coeff_diffQuot_cutoff_sq_gradient_cross_bound (d := d) B hη hη_supp hη_range
     hΩ' hΩ'_closure hΩ'_compact hh_supp_in_Ω' k ε_eff hε_eff_pos
-  obtain ⟨C3, hC3_nn, hC3⟩ := cross_3_bound (d := d) B hη hη_supp hη_range hN
+  obtain ⟨C3, hC3_nn, hC3⟩ := coeff_diffQuot_cutoff_deriv_cross_bound (d := d) B hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hh_supp_in_Ω' k
   obtain ⟨Cc, hCc_nn, hCc⟩ := c_term_bound (d := d) B hη hη_supp hη_range hN
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k ε_eff hε_eff_pos

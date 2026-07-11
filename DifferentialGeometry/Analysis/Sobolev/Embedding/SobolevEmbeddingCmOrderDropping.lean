@@ -1386,7 +1386,7 @@ theorem iteratedCovGradSobolevNorm_le_baseSpectral
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-theorem iteratedCovGrad_toSobolev_embedding_Cm_unconditional
+theorem iteratedCovGrad_toSobolev_embedding_Cm_singleNorm
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m) :
     ∃ C : ℝ, 0 < C ∧
@@ -1434,7 +1434,7 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_unconditional
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-theorem iteratedCovGrad_toSobolev_embedding_C2_unconditional
+theorem iteratedCovGrad_toSobolev_embedding_C2_singleNorm
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4) :
     ∃ C : ℝ, 0 < C ∧
@@ -1445,7 +1445,7 @@ theorem iteratedCovGrad_toSobolev_embedding_C2_unconditional
             ‖(iteratedCovGrad g 0 2 j T).toSection x‖)) ≤
           C * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖ := by
   have h_super' : 2 * k > Module.finrank ℝ E + 2 * 2 := by omega
-  exact iteratedCovGrad_toSobolev_embedding_Cm_unconditional (I := I) (M := M)
+  exact iteratedCovGrad_toSobolev_embedding_Cm_singleNorm (I := I) (M := M)
     g 0 2 k 2 h_super'
 
 end AnalyticCore

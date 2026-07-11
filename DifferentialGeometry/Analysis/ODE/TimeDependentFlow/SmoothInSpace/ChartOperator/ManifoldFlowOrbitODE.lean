@@ -25,7 +25,7 @@ def chartCloseFderiv (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ
 
 lemma chartCloseDop_eq_comp
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ) :
-    chartCloseDop (I := I) Φ_fam α x s
+    flowOrbitChartTrivDerivOp (I := I) Φ_fam α x s
       = (chartCloseTriv (I := I) Φ_fam α x s).comp
           (chartCloseFderiv (I := I) Φ_fam α x s) :=
   rfl
@@ -49,13 +49,13 @@ theorem chartCloseDop_hasDerivAt_clm_comp
     {T' P' : E →L[ℝ] E}
     (hT : HasDerivAt (chartCloseTriv (I := I) Φ_fam α x) T' t)
     (hP : HasDerivAt (chartCloseFderiv (I := I) Φ_fam α x) P' t) :
-    HasDerivAt (chartCloseDop (I := I) Φ_fam α x)
+    HasDerivAt (flowOrbitChartTrivDerivOp (I := I) Φ_fam α x)
       (T'.comp (chartCloseFderiv (I := I) Φ_fam α x t)
         + (chartCloseTriv (I := I) Φ_fam α x t).comp P') t := by
   have hcomp : (fun s : ℝ =>
         (chartCloseTriv (I := I) Φ_fam α x s).comp
           (chartCloseFderiv (I := I) Φ_fam α x s))
-      = chartCloseDop (I := I) Φ_fam α x := by
+      = flowOrbitChartTrivDerivOp (I := I) Φ_fam α x := by
     funext s
     exact (chartCloseDop_eq_comp (I := I) Φ_fam α x s).symm
   have := hT.clm_comp hP
@@ -73,7 +73,7 @@ theorem chartCloseDop_deriv_basepoint_apply
   rw [chartCloseTriv_basepoint (I := I) Φ_fam t x (P' v)]
   have hPv : chartCloseFderiv (I := I) Φ_fam (Φ_fam t x) x t v
       = mfderiv I I (Φ_fam t : M → M) x v := by
-    have hdop : chartCloseDop (I := I) Φ_fam (Φ_fam t x) x t v
+    have hdop : flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x t v
         = chartCloseFderiv (I := I) Φ_fam (Φ_fam t x) x t v := by
       rw [chartCloseDop_apply]
       exact chartCloseTriv_basepoint (I := I) Φ_fam t x

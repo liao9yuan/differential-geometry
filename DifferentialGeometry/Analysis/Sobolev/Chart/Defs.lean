@@ -43,7 +43,7 @@ def wkpNormChart [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (_g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (k : ℕ) (p : ℝ≥0∞) (u : M → ℝ) : ℝ≥0∞ :=
   ∑' α : M,
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E)
       k p
       (chartPushed (I := I) (M := M)
@@ -56,7 +56,7 @@ theorem wkpNormChart_eq_tsum
     (k : ℕ) (p : ℝ≥0∞) (u : M → ℝ) :
     wkpNormChart (I := I) (M := M) g k p u =
       ∑' α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E)
           k p
           (chartPushed (I := I) (M := M)
@@ -113,7 +113,7 @@ theorem wkpNormChart_zero_fun
     wkpNormChart (I := I) (M := M) g k p (fun _ : M => (0 : ℝ)) = 0 := by
   unfold wkpNormChart
   have hpt : ∀ α : M,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -387,7 +387,7 @@ theorem wkpNormChart_lt_top_of_memWkpChart
   classical
   unfold wkpNormChart
   set f : M → ℝ≥0∞ := fun α =>
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -418,7 +418,7 @@ theorem wkpNormChart_lt_top_of_memWkpChart
       unfold chartPushed
       rw [hρ_empty]
       ring
-    change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    change DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)

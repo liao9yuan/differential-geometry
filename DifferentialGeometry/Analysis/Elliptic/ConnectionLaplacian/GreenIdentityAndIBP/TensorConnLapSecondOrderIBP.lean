@@ -164,13 +164,13 @@ theorem integral_secondOrder_combined_eq_zero
     (g : SmoothRiemannianMetric I M)
     (T v : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
-    ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+    ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g 0 2
                 (covDerivAlongVFSection (I := I) (M := M) g T B) B x))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 2 v x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 2
                 (covDerivAlongVFSection (I := I) (M := M) g T B) x))

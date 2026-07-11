@@ -28,9 +28,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 theorem chartGramOnE_realize_delta_irrel
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ')
     (α : M) (a b : Fin (Module.finrank ℝ E)) :
     chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ) α a b =
       chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ'_lt hδ') α a b := by
@@ -42,9 +42,9 @@ theorem chartGramOnE_realize_delta_irrel
 theorem chartGramOnE_realize_sub_eqOn_symm_rawComponent
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
     (α : M) (a b : Fin (Module.finrank ℝ E)) :
     Set.EqOn
       (fun y : E => chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)
@@ -65,7 +65,7 @@ theorem chartGramOnE_realize_sub_eqOn_symm_rawComponent
     g_bg T T' hδ_lt hδ hδ'_lt hδ' α a b y hp_src
   simpa using hkey
 
-def rawCompOnE (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
+def tensorChartComponentOnModel (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] Jdx ((extChartAt I α).symm y)
 
@@ -73,7 +73,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart in
 
 lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
-    ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g S α Jdx)
+    ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
       (interior (extChartAt I α).target) := by
   have h := chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M) g 0 2 S α
     (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx
@@ -93,30 +93,30 @@ lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hmem,
     (toEuclidean (E := E)).symm_apply_apply Y]
 
-def bareChartJetContentOnE (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
+def chartComponentJetSeminormSum (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (N : ℕ) (y : E) : ℝ :=
   ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E),
     ∑ m ∈ Finset.range (N + 1),
-      ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g S α Jdx)
+      ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
         (interior (extChartAt I α).target) y‖
 
 lemma bareChartJetContentOnE_nonneg (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (α : M) (N : ℕ) (y : E) :
-    0 ≤ bareChartJetContentOnE (I := I) (M := M) g S α N y :=
+    0 ≤ chartComponentJetSeminormSum (I := I) (M := M) g S α N y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
 
 theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
     (α : M) (N : ℕ) {y : E} (hy : y ∈ interior (extChartAt I α).target) :
     chartGramJetDiffSeminormSum (I := I) (M := M) N
         (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)
         (tensorSectionRealizeMetric (I := I) g_bg T' hδ'_lt hδ') α
         (interior (extChartAt I α).target) y ≤
-      ((Module.finrank ℝ E) : ℝ) * bareChartJetContentOnE (I := I) (M := M) g_bg (T - T') α N y := by
+      ((Module.finrank ℝ E) : ℝ) * chartComponentJetSeminormSum (I := I) (M := M) g_bg (T - T') α N y := by
   classical
   set s : Set E := interior (extChartAt I α).target with hs_def
   have hs_open : IsOpen s := isOpen_interior
@@ -129,8 +129,8 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
         s y ≤
       ∑ m ∈ Finset.range (N + 1),
         ((1 / 2 : ℝ) *
-          (‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
-            ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖)) := by
+          (‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
+            ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖)) := by
     intro a b
     refine Finset.sum_le_sum (fun m _ => ?_)
 
@@ -146,20 +146,20 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
             tensorChartComponentRaw (I := I) (M := M) g_bg 0 2 (T - T') α ![] ![b, a]
               ((extChartAt I α).symm y)))
         (fun y : E => (1 / 2 : ℝ) *
-          (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b] y +
-            rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a] y)) s := by
+          (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] y +
+            tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] y)) s := by
       intro z _; rfl
     rw [iteratedFDerivWithin_congr (𝕜 := ℝ) hfun_eq hy m]
 
-    have hcd_ab : ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b]) s :=
+    have hcd_ab : ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s :=
       rawCompOnE_contDiffOn (I := I) (M := M) g_bg (T - T') α ![a, b]
-    have hcd_ba : ContDiffOn ℝ ∞ (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s :=
+    have hcd_ba : ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s :=
       rawCompOnE_contDiffOn (I := I) (M := M) g_bg (T - T') α ![b, a]
     have hreshape : (fun y : E => (1 / 2 : ℝ) *
-          (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b] y +
-            rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a] y)) =
-        (1 / 2 : ℝ) • (fun y : E => rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b] y +
-            rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a] y) := by
+          (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] y +
+            tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] y)) =
+        (1 / 2 : ℝ) • (fun y : E => tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] y +
+            tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] y) := by
       funext z; rw [Pi.smul_apply, smul_eq_mul]
     rw [hreshape,
       iteratedFDerivWithin_const_smul_apply
@@ -169,10 +169,10 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
     rw [Real.norm_eq_abs, show |(1 / 2 : ℝ)| = 1 / 2 from by norm_num]
     refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
     have hadd_reshape :
-        (fun x : E => rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b] x +
-            rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a] x) =
-          rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b] +
-            rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a] := rfl
+        (fun x : E => tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] x +
+            tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] x) =
+          tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b] +
+            tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a] := rfl
     rw [hadd_reshape,
       iteratedFDerivWithin_add_apply (hcd_ab.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top))
         (hcd_ba.contDiffWithinAt hy |>.of_le (by exact_mod_cast le_top)) hs_open.uniqueDiffOn hy]
@@ -183,7 +183,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
 
   set col : (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ := fun Jdx =>
     ∑ m ∈ Finset.range (N + 1),
-      ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α Jdx) s y‖
+      ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α Jdx) s y‖
     with hcol_def
   have hcol_nn : ∀ Jdx, 0 ≤ col Jdx := fun Jdx =>
     Finset.sum_nonneg fun m _ => norm_nonneg _
@@ -191,15 +191,15 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
   have hLHS_eq : (∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         ∑ m ∈ Finset.range (N + 1),
           ((1 / 2 : ℝ) *
-            (‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
-              ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖))) =
+            (‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ +
+              ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖))) =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (1 / 2 : ℝ) * (col ![a, b] + col ![b, a]) := by
     refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
     have hcab : col ![a, b] = ∑ m ∈ Finset.range (N + 1),
-        ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ := rfl
+        ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![a, b]) s y‖ := rfl
     have hcba : col ![b, a] = ∑ m ∈ Finset.range (N + 1),
-        ‖iteratedFDerivWithin ℝ m (rawCompOnE (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖ := rfl
+        ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g_bg (T - T') α ![b, a]) s y‖ := rfl
     rw [hcab, hcba, mul_add, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun m _ => ?_)
     ring
@@ -240,7 +240,7 @@ theorem chartGramJetDiffSeminormSum_realize_le_bareChartJetContentOnE
     rw [← Finset.mul_sum]
     ring
   rw [hcollapse]
-  have hbare_eq : bareChartJetContentOnE (I := I) (M := M) g_bg (T - T') α N y =
+  have hbare_eq : chartComponentJetSeminormSum (I := I) (M := M) g_bg (T - T') α N y =
       ∑ Jdx : Fin 2 → Fin (Module.finrank ℝ E), col Jdx := rfl
   rw [hbare_eq]
   have hn1 : (1 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := by

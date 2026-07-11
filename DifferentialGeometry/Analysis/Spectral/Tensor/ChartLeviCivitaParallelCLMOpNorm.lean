@@ -36,8 +36,8 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
     (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b')
     (C_J C_Jinv C_χ : ℝ)
-    (hCJ : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
-    (hCJinv : ‖chartJinv (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
+    (hCJ : ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤ C_J) (_hCJ_nn : 0 ≤ C_J)
+    (hCJinv : ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ ≤ C_Jinv) (hCJinv_nn : 0 ≤ C_Jinv)
     (hCχ : ∀ Y : E, ‖christoffelCorrection (I := I) g α b Y‖ ≤ C_χ * ‖Y‖)
     (hCχ_nn : 0 ≤ C_χ) :
     ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ ≤
@@ -52,7 +52,7 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
           ‖christoffelCorrection (I := I) g α b Y‖ :=
     ContinuousLinearMap.opNorm_comp_le _ _
   have h_trivFromE_norm :
-      ‖trivFromE (I := I) α b‖ = ‖chartJinv (I := I) (M := M) α b‖ := rfl
+      ‖trivFromE (I := I) α b‖ = ‖chartTrivializationLinearMapSymm (I := I) (M := M) α b‖ := rfl
   have h_trivFromE_le : ‖trivFromE (I := I) α b‖ ≤ C_Jinv := by
     rw [h_trivFromE_norm]; exact hCJinv
   have h_trivFromE_nn : 0 ≤ ‖trivFromE (I := I) α b‖ := norm_nonneg _
@@ -60,7 +60,7 @@ private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
       ‖Y‖ ≤ ‖trivToE (I := I) α b‖ * ‖X b‖ := by
     rw [hY_def]
     exact (trivToE (I := I) α b).le_opNorm (X b)
-  have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+  have h_triv_J : ‖trivToE (I := I) α b‖ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := rfl
   have h_Xb_nn : 0 ≤ ‖X b‖ := norm_nonneg _
   have h_Y_le : ‖Y‖ ≤ C_J * ‖X b‖ := by
     refine h_Y_le_triv.trans ?_

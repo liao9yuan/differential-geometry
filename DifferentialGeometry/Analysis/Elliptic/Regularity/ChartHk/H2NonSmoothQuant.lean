@@ -34,7 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-theorem chart_loc_of_data_quantitative
+theorem exists_weak_second_partial_bound_by_geometric_constant
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -76,7 +76,7 @@ theorem chart_loc_of_data_quantitative
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   refine ⟨C_geom, hC_geom_nn, fun D i k => ?_⟩
   obtain ⟨g_ik, hg_ik_memLp, hg_ik_partial, hg_ik_norm⟩ :=
-    chart_loc_of_uniform_bound (I := I) (M := M) (g := g) (α := α)
+    exists_weak_second_partial_of_uniform_diffQuot_bound (I := I) (M := M) (g := g) (α := α)
       D hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       (M_bound := fun i k => C_geom i k * Real.sqrt (
         (∑ l : Fin (Module.finrank ℝ E),

@@ -49,17 +49,17 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 def riemannPalatiniRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4)) (s : ℝ) : SmoothCcTensor g₀ 4 2 :=
   s • ((1 / 2 : ℝ) •
-    (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+    (curvatureActionKernelCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
         (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
         (qA 0) (qA 1) (qA 2) (qA 3)
-      + curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+      + curvatureActionKernelCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
         (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
@@ -69,8 +69,8 @@ set_option linter.unusedSectionVars false in
 
 @[simp] lemma riemannPalatiniRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4)) :
     riemannPalatiniRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ qA qB 0 = 0 := by
@@ -92,7 +92,7 @@ def deTurckLieCovDerivArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   toSection :=
     { toFun := fun x : M =>
         (show TensorRSSpace 2 2 I x from
-          TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x))
+          TensorRSSpace.ofCLM (connDiffCovDerivBiContrFib (I := I) g₁ g_bg x))
       contMDiff_toFun := dLaBiContrFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
@@ -101,7 +101,7 @@ set_option linter.unusedSectionVars false in
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
       (show TensorRSSpace 2 2 I x from
-        TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x)) := rfl
+        TensorRSSpace.ofCLM (connDiffCovDerivBiContrFib (I := I) g₁ g_bg x)) := rfl
 
 def deTurckLieEndoArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
@@ -137,15 +137,15 @@ set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_rfns_ballUniform_sq
+theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_riemannianFiberNormSq_ballUniform_sq
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         ∀ s ∈ Set.Icc (0 : ℝ) 1, ∀ x : M,
@@ -154,7 +154,7 @@ theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_rfns_ballUniform_sq
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)).toSection x) ≤ Λ ^ 2 := by
   classical
   obtain ⟨CD, hCD_nn, hCD⟩ :=
-    rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le
+    riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_diagonalProductGrid_le
       (I := I) (M := M) g₀ (max_lt hδ₀ one_pos)
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
@@ -191,7 +191,7 @@ theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_rfns_ballUniform_sq
     have hδ₀_le : δ₀ ≤ m := le_max_left _ _
     have heq : (1 - s) * δ + s * δ = δ := by ring
     linarith
-  have hδP : gFibreOpBound (I := I) (M := M) g₀
+  have hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) m := by
     intro y v w
     refine le_trans (hδs_raw y v w) ?_
@@ -581,7 +581,7 @@ private lemma curvatureRefoldMonomialBiContrFib_toModel_chartα
     (hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (G : Tensor0SSpace 4 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel
-        (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g W σp x G) v =
+        (curvatureActionMonomialTrace (I := I) (M := M) g W σp x G) v =
       ∑ m, ∑ n, chartInvGramMatrix (I := I) g α x m n *
         (∑ k, ∑ l, chartInvGramMatrix (I := I) g α x k l *
           (Tensor0SSpace.toModel (𝕜 := ℝ) (W x)
@@ -596,8 +596,8 @@ private lemma curvatureRefoldMonomialBiContrFib_toModel_chartα
       g.inner x (smoothOrthoFrame (I := I) g x i x) (smoothOrthoFrame (I := I) g x j x) =
         if i = j then (1 : ℝ) else 0 := fun i j =>
     smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
-  rw [show curvatureRefoldMonomialBiContrFib (I := I) (M := M) g W σp x =
-      curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σp
+  rw [show curvatureActionMonomialTrace (I := I) (M := M) g W σp x =
+      curvatureActionMonomialFrameTrace (I := I) (M := M) W σp
         (smoothOrthoFrame (I := I) g x) x from rfl,
     curvatureRefoldMonomialFibFixedFrame_toModel]
   have hsummand : ∀ a b : Fin (Module.finrank ℝ E),
@@ -609,7 +609,7 @@ private lemma curvatureRefoldMonomialBiContrFib_toModel_chartα
       pairFeedScalarCLM (I := I) (M := M) 0 x (W x) ![]
           (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x b x) *
         pairFeedScalarCLM (I := I) (M := M) 2 x
-          (slotPerm4Fib (I := I) (M := M) x σp G) v
+          (tensorRank4PermuteCLM (I := I) (M := M) x σp G) v
           (smoothOrthoFrame (I := I) g x a x) (smoothOrthoFrame (I := I) g x b x) := by
     intro a b
     rw [pairFeedScalarCLM_apply, pairFeedScalarCLM_apply, slotPerm4Fib_toModel,
@@ -618,7 +618,7 @@ private lemma curvatureRefoldMonomialBiContrFib_toModel_chartα
   rw [Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => hsummand a b))]
   rw [double_frame_bilin_trace_chartα (I := I) g α hxbase
     (pairFeedScalarCLM (I := I) (M := M) 0 x (W x) ![])
-    (pairFeedScalarCLM (I := I) (M := M) 2 x (slotPerm4Fib (I := I) (M := M) x σp G) v)
+    (pairFeedScalarCLM (I := I) (M := M) 2 x (tensorRank4PermuteCLM (I := I) (M := M) x σp G) v)
     (fun a => smoothOrthoFrame (I := I) g x a x) hBf_on]
   refine Finset.sum_congr rfl (fun m _ => ?_)
   refine Finset.sum_congr rfl (fun n _ => ?_)
@@ -633,8 +633,8 @@ private lemma curvatureRefoldMonomialBiContrFib_toModel_chartα
 private lemma curvatureRefoldMonomialBiContrFibAppY_chartCoord_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -645,7 +645,7 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_chartCoord_jointContMDiffOn
     (α : M) (σc : Fin 2 → Fin (Module.finrank ℝ E)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
       (fun p : M × ℝ => Tensor0SSpace.toModel
-        (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+        (curvatureActionMonomialTrace (I := I) (M := M)
           (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) W σp p.1 (Y p.1))
         ![(chartBasisVecFiber (I := I) α (σc 0) p.1 : E),
           (chartBasisVecFiber (I := I) α (σc 1) p.1 : E)])
@@ -750,8 +750,8 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_chartCoord_jointContMDiffOn
 private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -762,7 +762,7 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SSpace 2 I z) p.1
-        (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+        (curvatureActionMonomialTrace (I := I) (M := M)
           (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) W σp p.1 (Y p.1)))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) := by
   classical
@@ -786,7 +786,7 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
   have hcoordEach : ∀ σc : Fin 2 → Fin (Module.finrank ℝ E),
       ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
         (fun p : M × ℝ => Bcmm.repr
-          (e ⟨p.1, curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+          (e ⟨p.1, curvatureActionMonomialTrace (I := I) (M := M)
             (gfam p.2) W σp p.1 (Y p.1)⟩).2 σc)
         ((Set.univ : Set M) ×ˢ S) p₀ := by
     intro σc
@@ -794,27 +794,27 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
       (I := I) (M := M) g₀ T hδ hδZ W hW σp Y α σc
     have hscalAt := (hscal p₀ ⟨hαsrc, hp₀.2⟩).mono_of_mem_nhdsWithin hnhd
     have hreadout : ∀ {q : M × ℝ}, q.1 ∈ e.baseSet →
-        Bcmm.repr (e ⟨q.1, curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+        Bcmm.repr (e ⟨q.1, curvatureActionMonomialTrace (I := I) (M := M)
             (gfam q.2) W σp q.1 (Y q.1)⟩).2 σc =
-          Tensor0SSpace.toModel (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+          Tensor0SSpace.toModel (curvatureActionMonomialTrace (I := I) (M := M)
               (gfam q.2) W σp q.1 (Y q.1))
             ![(chartBasisVecFiber (I := I) α (σc 0) q.1 : E),
               (chartBasisVecFiber (I := I) α (σc 1) q.1 : E)] := by
       intro q hqbase
       rw [continuousMultilinearMap_basis_repr]
-      have hcoe : (e ⟨q.1, curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+      have hcoe : (e ⟨q.1, curvatureActionMonomialTrace (I := I) (M := M)
           (gfam q.2) W σp q.1 (Y q.1)⟩).2 =
-          (e.linearMapAt ℝ q.1) (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+          (e.linearMapAt ℝ q.1) (curvatureActionMonomialTrace (I := I) (M := M)
             (gfam q.2) W σp q.1 (Y q.1)) :=
         (congrFun (Trivialization.coe_linearMapAt_of_mem (R := ℝ) (e := e) hqbase) _).symm
       rw [hcoe]
       have happly := TensorMultilinear.tensor0SBundle_linearMapAt_apply_of_mem (I := I) α q.1
         hqbase
-        (curvatureRefoldMonomialBiContrFib (I := I) (M := M) (gfam q.2) W σp q.1 (Y q.1))
+        (curvatureActionMonomialTrace (I := I) (M := M) (gfam q.2) W σp q.1 (Y q.1))
         (fun j => (chartModelBasis E) (σc j))
       rw [tensor0SSpace_continuousLinearEquiv_symm_apply] at happly
       rw [happly]
-      change Tensor0SSpace.toModel (curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+      change Tensor0SSpace.toModel (curvatureActionMonomialTrace (I := I) (M := M)
           (gfam q.2) W σp q.1 (Y q.1))
           (fun j => (trivializationAt E (TangentSpace I) α).symmL ℝ q.1
             ((chartModelBasis E) (σc j))) = _
@@ -831,17 +831,17 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
   have hcoordVec : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ))
       𝓘(ℝ, (Fin 2 → Fin (Module.finrank ℝ E)) → ℝ) ∞
       (fun p : M × ℝ => fun σc : Fin 2 → Fin (Module.finrank ℝ E) =>
-        Bcmm.repr (e ⟨p.1, curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+        Bcmm.repr (e ⟨p.1, curvatureActionMonomialTrace (I := I) (M := M)
           (gfam p.2) W σp p.1 (Y p.1)⟩).2 σc)
       ((Set.univ : Set M) ×ˢ S) p₀ :=
     contMDiffWithinAt_pi_space.mpr (fun σc => hcoordEach σc)
   have hfinal : ContMDiffWithinAt (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, Tensor0SModel 2 ℝ E) ∞
-      (fun p : M × ℝ => (e ⟨p.1, curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+      (fun p : M × ℝ => (e ⟨p.1, curvatureActionMonomialTrace (I := I) (M := M)
         (gfam p.2) W σp p.1 (Y p.1)⟩).2)
       ((Set.univ : Set M) ×ˢ S) p₀ := by
     have hequiv := (Bcmm.equivFun.symm.toContinuousLinearEquiv.toContinuousLinearMap.contMDiffAt
       (x := Bcmm.equivFun
-        (e ⟨p₀.1, curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+        (e ⟨p₀.1, curvatureActionMonomialTrace (I := I) (M := M)
           (gfam p₀.2) W σp p₀.1 (Y p₀.1)⟩).2)).comp_contMDiffWithinAt
       p₀ hcoordVec
     refine hequiv.congr_of_eventuallyEq ?_ ?_
@@ -853,8 +853,8 @@ private lemma curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
 theorem curvatureRefoldMonomialCoeffField_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -864,13 +864,13 @@ theorem curvatureRefoldMonomialCoeffField_realizedFam_jointContMDiffOn
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
-        ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) W hW σp).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) := by
-  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 4 ℝ E) (V₁ := fun x : M => Tensor0SSpace 4 I x)
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
-    (φ := fun p : M × ℝ => curvatureRefoldMonomialBiContrFib (I := I) (M := M)
+    (φ := fun p : M × ℝ => curvatureActionMonomialTrace (I := I) (M := M)
       (realizedFam (I := I) g₀ T 0 hδ hδZ p.2) W σp p.1)
     (S := realizedSmallSet (δ := δ) (δ' := δ))
     (fun Y => curvatureRefoldMonomialBiContrFibAppY_realizedFam_jointContMDiffOn
@@ -886,8 +886,8 @@ set_option linter.unusedVariables false in
 theorem riemannPalatiniRefoldC2Family_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (qA qB : Fin 4 → Equiv.Perm (Fin 4)) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
@@ -898,7 +898,7 @@ theorem riemannPalatiniRefoldC2Family_threeArmHjoint
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
         (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
           (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
-          ((curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+          ((curvatureActionMonomialCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
             (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
             (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) σp).toSection p.1))
@@ -911,7 +911,7 @@ theorem riemannPalatiniRefoldC2Family_threeArmHjoint
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
         (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
           (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1
-          ((curvatureRefoldKernelCoeffField (I := I) (M := M) g₀
+          ((curvatureActionKernelCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T 0 hδ hδZ p.2)
             (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
             (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
@@ -929,7 +929,7 @@ theorem riemannPalatiniRefoldC2Family_threeArmHjoint
     refine hhalf.congr (fun p _ => ?_)
     refine congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 4 2 ℝ E)
       (E := fun z : M => Tensor0SBundle.TensorRSSpace 4 2 I z) p.1 t) ?_
-    rw [curvatureRefoldKernelCoeffField, SmoothCcTensor.toSection_smul,
+    rw [curvatureActionKernelCoeffField, SmoothCcTensor.toSection_smul,
       SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_sub,
       SmoothCcTensor.toSection_add, ContMDiffSection.coe_smul, Pi.smul_apply,
       ContMDiffSection.coe_sub, Pi.sub_apply, ContMDiffSection.coe_sub, Pi.sub_apply,

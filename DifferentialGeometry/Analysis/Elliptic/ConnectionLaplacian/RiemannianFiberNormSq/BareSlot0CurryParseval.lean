@@ -23,7 +23,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-noncomputable def tensor0SAsRS {s : ℕ} (x : M) (C : Tensor0SSpace s I x) :
+noncomputable def tensor0SToTensorRS {s : ℕ} (x : M) (C : Tensor0SSpace s I x) :
     TensorRSSpace 0 s I x :=
   (tensor00Scalar (I := I) (M := M) x).smulRight C
 
@@ -31,7 +31,7 @@ set_option linter.unusedSectionVars false in
 
 lemma tensor0SAsRS_apply {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
     (τ : Tensor0SSpace 0 I x) :
-    (tensor0SAsRS (I := I) (M := M) x C :
+    (tensor0SToTensorRS (I := I) (M := M) x C :
         Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) τ =
       tensor00Scalar (I := I) (M := M) x τ • C := by
   change ((tensor00Scalar (I := I) (M := M) x).smulRight C) τ = _
@@ -55,16 +55,16 @@ lemma coframeS_zero_eq_unitZeroSec
 
 set_option linter.unusedSectionVars false in
 
-lemma slot0Curry_eq_tensor0SAsRS_curry_unitZeroSec
+lemma slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
     (T : TensorRSSpace 0 (s + 1) I x) (a : Fin n) :
     slot0Curry (I := I) (M := M) g x s e K₀ T a =
-      tensor0SAsRS (I := I) (M := M) x
+      tensor0SToTensorRS (I := I) (M := M) x
         (tensor0S_curry (I := I) (M := M) s x
           ((T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x)
             (unitZeroSec (I := I) (M := M) x)) (e a)) := by
-  unfold slot0Curry tensor0SAsRS
+  unfold slot0Curry tensor0SToTensorRS
   rw [show ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
         (fun k => g.inner x (e (K₀ k))) : Tensor0SSpace 0 I x) =
       coframeS (I := I) (M := M) g x 0 e K₀ from rfl]
@@ -78,7 +78,7 @@ theorem riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x T =
         ∑ a : Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 s x
-            (tensor0SAsRS (I := I) (M := M) x
+            (tensor0SToTensorRS (I := I) (M := M) x
               (tensor0S_curry (I := I) (M := M) s x
                 ((T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x)
                   (unitZeroSec (I := I) (M := M) x)) (e a))) := by
@@ -88,7 +88,7 @@ theorem riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry
   refine ⟨n, e, hn, ?_⟩
   rw [hsplit]
   refine Finset.sum_congr rfl (fun a _ => ?_)
-  rw [slot0Curry_eq_tensor0SAsRS_curry_unitZeroSec (I := I) (M := M) g x s e K₀ T a]
+  rw [slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec (I := I) (M := M) g x s e K₀ T a]
 
 theorem riemannianFiberNormSq_three_eq_sum_bareSlot0Curry
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -98,7 +98,7 @@ theorem riemannianFiberNormSq_three_eq_sum_bareSlot0Curry
       riemannianFiberNormSq (I := I) (M := M) g 0 3 x T =
         ∑ a : Fin n,
           riemannianFiberNormSq (I := I) (M := M) g 0 2 x
-            (tensor0SAsRS (I := I) (M := M) x
+            (tensor0SToTensorRS (I := I) (M := M) x
               (tensor0S_curry (I := I) (M := M) 2 x
                 ((T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x)
                   (unitZeroSec (I := I) (M := M) x)) (e a))) :=

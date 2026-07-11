@@ -29,9 +29,9 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-  (dLaBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
+  (connDiffCovDerivBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
     deTurckLieFib deTurckLieCoeffField deTurckLieCoeffField_toSection
-    deTurckLieCovDerivA connDiff_pairing_mdiffAt dLaCovKernel dLaCovKernel_apply_extend)
+    deTurckConnDiffCovDeriv connDiff_pairing_mdiffAt connDiffCovDerivOp dLaCovKernel_apply_extend)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -41,21 +41,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def deTurckLieDLaCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+def deTurckLieConnDiffDerivCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
   toSection :=
     { toFun := fun x : M =>
         (show TensorRSSpace 2 2 I x from
-          TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x))
+          TensorRSSpace.ofCLM (connDiffCovDerivBiContrFib (I := I) g₁ g_bg x))
       contMDiff_toFun := dLaBiContrFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option linter.unusedSectionVars false in
 @[simp] theorem deTurckLieDLaCoeffField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
-    (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
+    (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
       (show TensorRSSpace 2 2 I x from
-        TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x)) := rfl
+        TensorRSSpace.ofCLM (connDiffCovDerivBiContrFib (I := I) g₁ g_bg x)) := rfl
 
 def deTurckLieDLbCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 where
@@ -76,7 +76,7 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedSectionVars false in
 theorem deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
-    deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg +
+    deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg +
         deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg =
       deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg := by
   apply SmoothCcTensor.ext
@@ -110,7 +110,7 @@ theorem deTurckLieCovDerivA_backgroundSplit
       (fun b => TotalSpace.mk' E (E := TangentSpace I) b (P b)) x)
     (hQ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b => TotalSpace.mk' E (E := TangentSpace I) b (Q b)) x) :
-    deTurckLieCovDerivA (I := I) g₁ g_bg X P Q x =
+    deTurckConnDiffCovDeriv (I := I) g₁ g_bg X P Q x =
       covDerivConnDiff (I := I) g₀ g₁ X Q P x
         - covDerivConnDiff (I := I) g₀ g_bg X Q P x
         + PDE.DeTurck.connDiff (I := I) g₁ g₀ x
@@ -247,7 +247,7 @@ theorem deTurckLieCovDerivA_backgroundSplit
 set_option linter.unusedSectionVars false in
 theorem dLaCovKernel_backgroundSplit (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 p q : TangentSpace I x) :
-    dLaCovKernel (I := I) g₁ g_bg x v0 p q =
+    connDiffCovDerivOp (I := I) g₁ g_bg x v0 p q =
       covDerivConnDiff (I := I) g₀ g₁
           (smoothExtensionTangent (I := I) x v0)
           (smoothExtensionTangent (I := I) x q)
@@ -279,7 +279,7 @@ open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg metric_in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (covGrad connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one dLaBiContrFibFixedFrame_toModel)
 open DifferentialGeometry.Geometry.Curvature
-  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt)
+  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt)
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
@@ -333,8 +333,8 @@ set_option linter.unusedSectionVars false in
 theorem gFibreOpBound_mono_of_le (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     {δ δ' : ℝ} (hle : δ ≤ δ')
-    (hb : gFibreOpBound (I := I) (M := M) g₀ h δ) :
-    gFibreOpBound (I := I) (M := M) g₀ h δ' := by
+    (hb : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) :
+    metricCauchySchwarzBound (I := I) (M := M) g₀ h δ' := by
   intro y a b
   refine le_trans (hb y a b) ?_
   have hnn : 0 ≤ Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) :=
@@ -351,7 +351,7 @@ private theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     {δs : ℝ} (hδs1 : δs ≤ 1)
-    (hb : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δs)
+    (hb : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δs)
     (x : M) (u w : TangentSpace I x) :
     |g₁.inner x u w| ≤
       2 * (Real.sqrt (g₀.inner x u u) * Real.sqrt (g₀.inner x w w)) := by
@@ -562,7 +562,7 @@ private theorem abs_tensor12_flat_eval_le_fibreNorm_mul_sqrt_local
   have hcompsq : (∑ p : (Fin 1 → Fin n) × (Fin 2 → Fin n), comp p ^ 2) =
       ‖(W : Tensor0SBundle.TensorRSSpace 1 2 I x)‖ ^ 2 := by
     rw [← riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 1 2 x W]
-    rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x W e bse hnE hbse horth]
+    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x W e bse hnE hbse horth]
     rw [Fintype.sum_prod_type]
   have hnorm_nn : 0 ≤ ‖(W : Tensor0SBundle.TensorRSSpace 1 2 I x)‖ := norm_nonneg _
   have habs_sq : (∑ p : (Fin 1 → Fin n) × (Fin 2 → Fin n), coef p * comp p) ^ 2 ≤
@@ -758,7 +758,7 @@ private theorem exists_fixed_covDerivConnDiff_sqrt_bound
   have hbridge := covGrad_connDiffSection_flat_eval_eq_inner_local (I := I) (M := M)
     g₀ g_bg x v w u
   rw [← hA_def, ← hW_def] at hbridge
-  have hprim := abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ x W A v u w
+  have hprim := abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ x W A v u w
   rw [hbridge] at hprim
   rw [abs_of_nonneg hAA_nn] at hprim
   have hAA_sq : g₀.inner x A A = NA ^ 2 := by rw [hNA_def, Real.sq_sqrt hAA_nn]
@@ -807,14 +807,14 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
-              ((deTurckLieDLaCoeffField (I := I) g₀
+              ((deTurckLieConnDiffDerivCoeffField (I := I) g₀
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg).toSection x) ≤ Λ := by
   classical
   set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
@@ -860,13 +860,13 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
     intro y v w
     rw [hg₁, hP_def]
     exact realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hs_mem y v w
-  have hδs_raw : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
+  have hδs_raw : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P)
       (|1 - s| * δ' + |s| * δ) := by
     rw [hP_def]
     exact convexPerturbation_gFibreOpBound_abs (I := I) g₀ T T' hδ hδ' s
   set δP : ℝ := max (|1 - s| * δ' + |s| * δ) 0 with hδP_def
   have hδP_nn : 0 ≤ δP := le_max_right _ _
-  have hδP_bound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δP :=
+  have hδP_bound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δP :=
     gFibreOpBound_mono_of_le (I := I) (M := M) g₀ _ (le_max_left _ _) hδs_raw
   have hδP_le : δP ≤ δ₁ := by
     refine max_le ?_ hδ₁_nn
@@ -983,9 +983,9 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
   have hkernel : ∀ (v0 : TangentSpace I x), g₀.inner x v0 v0 = 1 →
       ∀ a' b' : Fin (Module.finrank ℝ E),
       Real.sqrt (g₀.inner x
-        (dLaCovKernel (I := I) g₁ g_bg x v0 (smoothOrthoFrame (I := I) g₁ x a' x)
+        (connDiffCovDerivOp (I := I) g₁ g_bg x v0 (smoothOrthoFrame (I := I) g₁ x a' x)
           (smoothOrthoFrame (I := I) g₁ x b' x))
-        (dLaCovKernel (I := I) g₁ g_bg x v0 (smoothOrthoFrame (I := I) g₁ x a' x)
+        (connDiffCovDerivOp (I := I) g₁ g_bg x v0 (smoothOrthoFrame (I := I) g₁ x a' x)
           (smoothOrthoFrame (I := I) g₁ x b' x))) ≤ CK := by
     intro v0 hv0 a' b'
     set Ba : TangentSpace I x := smoothOrthoFrame (I := I) g₁ x a' x with hBa
@@ -1124,26 +1124,26 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
   have hunit_sqrt : ∀ i : Fin n, Real.sqrt (g₀.inner x (e i) (e i)) = 1 := by
     intro i
     rw [hunit i, Real.sqrt_one]
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
-    ((deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg).toSection x) e bse hnE hbse horth]
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x
+    ((deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg).toSection x) e bse hnE hbse horth]
   have heach : ∀ (K : Fin 2 → Fin n) (J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
-        ((deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J) ^ 2 ≤
+        ((deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J) ^ 2 ≤
       ((Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (4 * CK * (κ * κ)))) ^ 2 := by
     intro K J
     have hcomp_eq : fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
-        ((deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J =
+        ((deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J =
       Tensor0SSpace.toModel
-        ((dLaBiContrFib (I := I) g₁ g_bg x) (coframeS (I := I) (M := M) g₀ x 2 e K))
+        ((connDiffCovDerivBiContrFib (I := I) g₁ g_bg x) (coframeS (I := I) (M := M) g₀ x 2 e K))
         (fun i : Fin 2 => (e (J i) : E)) := rfl
     have hmodel : Tensor0SSpace.toModel
-        ((dLaBiContrFib (I := I) g₁ g_bg x) (coframeS (I := I) (M := M) g₀ x 2 e K))
+        ((connDiffCovDerivBiContrFib (I := I) g₁ g_bg x) (coframeS (I := I) (M := M) g₀ x 2 e K))
         (fun i : Fin 2 => (e (J i) : E)) =
       (-1 : ℝ) * ∑ a' : Fin (Module.finrank ℝ E), ∑ b' : Fin (Module.finrank ℝ E),
-        (g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+        (g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
             (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
             (e (J 1))
-          + g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+          + g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
             (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
             (e (J 0))) *
           Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 2 e K)
@@ -1152,10 +1152,10 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
       dLaBiContrFibFixedFrame_toModel (I := I) g₁ g_bg (smoothOrthoFrame (I := I) g₁ x) x
         (coframeS (I := I) (M := M) g₀ x 2 e K) (fun i : Fin 2 => (e (J i) : E))
     have hsingle : ∀ a' b' : Fin (Module.finrank ℝ E),
-        |(g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+        |(g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
             (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
             (e (J 1))
-          + g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+          + g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
             (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
             (e (J 0))) *
           Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 2 e K)
@@ -1163,7 +1163,7 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
               (smoothOrthoFrame (I := I) g₁ x b' x : E)]| ≤ 4 * CK * (κ * κ) := by
       intro a' b'
       rw [abs_mul]
-      have hK01 : |g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+      have hK01 : |g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
           (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
           (e (J 1))| ≤ 2 * CK := by
         refine le_trans (abs_g1_inner_le_two_sqrt (I := I) (M := M) g₀ g₁ P htie
@@ -1171,7 +1171,7 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
         rw [hunit_sqrt (J 1), mul_one]
         have h := hkernel (e (J 0)) (hunit (J 0)) a' b'
         linarith
-      have hK10 : |g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+      have hK10 : |g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
           (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
           (e (J 0))| ≤ 2 * CK := by
         refine le_trans (abs_g1_inner_le_two_sqrt (I := I) (M := M) g₀ g₁ P htie
@@ -1179,10 +1179,10 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
         rw [hunit_sqrt (J 0), mul_one]
         have h := hkernel (e (J 1)) (hunit (J 1)) a' b'
         linarith
-      have hfac1 : |g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+      have hfac1 : |g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
           (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
           (e (J 1))
-          + g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+          + g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
             (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
             (e (J 0))| ≤ 4 * CK := by
         refine le_trans (abs_add_le _ _) ?_
@@ -1201,10 +1201,10 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
           rw [hunit_sqrt (K 1), one_mul]
           exact hpinch b'
         exact mul_le_mul hcs1 hcs2 (abs_nonneg _) hκ_nn
-      calc |g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+      calc |g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
             (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
             (e (J 1))
-            + g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+            + g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
               (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
               (e (J 0))| *
           |Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 2 e K)
@@ -1215,24 +1215,24 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
             linarith [hCK_nn]
         _ = 4 * CK * (κ * κ) := by ring
     have habs_comp : |fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
-        ((deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J| ≤
+        ((deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J| ≤
         (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (4 * CK * (κ * κ))) := by
       rw [hcomp_eq, hmodel, neg_one_mul, abs_neg]
       calc |∑ a' : Fin (Module.finrank ℝ E), ∑ b' : Fin (Module.finrank ℝ E),
-            (g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+            (g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
                 (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
                 (e (J 1))
-              + g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+              + g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
                 (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
                 (e (J 0))) *
               Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 2 e K)
                 ![(smoothOrthoFrame (I := I) g₁ x a' x : E),
                   (smoothOrthoFrame (I := I) g₁ x b' x : E)]|
           ≤ ∑ a' : Fin (Module.finrank ℝ E), |∑ b' : Fin (Module.finrank ℝ E),
-            (g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+            (g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
                 (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
                 (e (J 1))
-              + g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+              + g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
                 (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
                 (e (J 0))) *
               Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 2 e K)
@@ -1240,10 +1240,10 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
                   (smoothOrthoFrame (I := I) g₁ x b' x : E)]| :=
             Finset.abs_sum_le_sum_abs _ _
         _ ≤ ∑ a' : Fin (Module.finrank ℝ E), ∑ b' : Fin (Module.finrank ℝ E),
-            |(g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 0))
+            |(g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 0))
                 (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
                 (e (J 1))
-              + g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x (e (J 1))
+              + g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (e (J 1))
                 (smoothOrthoFrame (I := I) g₁ x a' x) (smoothOrthoFrame (I := I) g₁ x b' x))
                 (e (J 0))) *
               Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 2 e K)
@@ -1259,7 +1259,7 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
     exact pow_le_pow_left₀ (abs_nonneg _) habs_comp 2
   calc ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
         (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2
-          ((deTurckLieDLaCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J) ^ 2
+          ((deTurckLieConnDiffDerivCoeffField (I := I) g₀ g₁ g_bg).toSection x) n e K J) ^ 2
       ≤ ∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
           ((Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (4 * CK * (κ * κ)))) ^ 2 :=
         Finset.sum_le_sum (fun K _ => Finset.sum_le_sum (fun J _ => heach K J))

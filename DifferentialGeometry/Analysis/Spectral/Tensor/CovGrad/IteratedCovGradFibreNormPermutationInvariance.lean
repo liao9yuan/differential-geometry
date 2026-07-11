@@ -65,7 +65,7 @@ theorem exists_iteratedCovGrad_rs_toModel_domDomCongr
       hτ x d v
 
 set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
+theorem riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)
     (hrel : ∀ (y : M) (d : Tensor0SSpace r I y),
@@ -83,7 +83,7 @@ theorem rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
   obtain ⟨τ, hτ⟩ :=
     exists_iteratedCovGrad_rs_toModel_domDomCongr (I := I) (M := M) g r s σ Φ Φ' hrel i
   have hsec : (iteratedCovGrad (I := I) g r s i Φ').toSection x =
-      rsDomDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x) := by
+      tensorRS_domDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x) := by
     apply ContinuousLinearMap.ext
     intro d
     apply Tensor0SSpace.toModel_injective
@@ -92,14 +92,14 @@ theorem rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr
           (iteratedCovGrad (I := I) g r s i Φ').toSection x) d) =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + i) I x from
-          rsDomDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x)) d)
+          tensorRS_domDomCongr τ ((iteratedCovGrad (I := I) g r s i Φ).toSection x)) d)
     rw [toModel_rsDomDomCongr_apply]
     exact hτ x d
   rw [hsec]
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g r (s + i) x τ _
 
 set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_reindexCoeffGen_eq
+theorem riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g r s) (σ' : Equiv.Perm (Fin r)) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + i) x

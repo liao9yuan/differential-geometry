@@ -30,9 +30,9 @@ private theorem tower_to_supercritical_quant
           ∃ q : ℝ, 1 ≤ q ∧ (d : ℝ) < q ∧
             ∃ C : ℝ, 0 ≤ C ∧
               MemWkp (d := d) (m + 1) (ENNReal.ofReal q) f Ω ∧
-              wkpNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
+              iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
                 ENNReal.ofReal C *
-                  wkpNorm (d := d) (m + 1 + s) (ENNReal.ofReal p) f Ω := by
+                  iteratedWeakSobolevNorm (d := d) (m + 1 + s) (ENNReal.ofReal p) f Ω := by
   intro s
   induction s with
   | zero =>
@@ -86,22 +86,22 @@ private theorem tower_to_supercritical_quant
           mul_nonneg hC'_nn (subcriticalConstant_nonneg _ _ _), h_mem_q, ?_⟩
         have h_idx : m + 1 + (s + 1) = (m + 1 + s) + 1 := by ring
         have h_step_norm :
-            wkpNorm (d := d) (m + 1 + s) (ENNReal.ofReal p_1) f Ω ≤
+            iteratedWeakSobolevNorm (d := d) (m + 1 + s) (ENNReal.ofReal p_1) f Ω ≤
               ENNReal.ofReal (subcriticalConstant (m + 1 + s) d p) *
-                wkpNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω := by
+                iteratedWeakSobolevNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω := by
           rw [hp_1_def]; exact h_norm_p1
         have h_chain :
-            wkpNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
+            iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
               ENNReal.ofReal C' *
                 (ENNReal.ofReal (subcriticalConstant (m + 1 + s) d p) *
-                  wkpNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) :=
+                  iteratedWeakSobolevNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) :=
           le_trans h_norm_q (mul_le_mul_of_nonneg_left h_step_norm (zero_le _))
         have h_rhs_eq :
             ENNReal.ofReal C' *
                 (ENNReal.ofReal (subcriticalConstant (m + 1 + s) d p) *
-                  wkpNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) =
+                  iteratedWeakSobolevNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) =
               ENNReal.ofReal (C' * subcriticalConstant (m + 1 + s) d p) *
-                wkpNorm (d := d) (m + 1 + (s + 1)) (ENNReal.ofReal p) f Ω := by
+                iteratedWeakSobolevNorm (d := d) (m + 1 + (s + 1)) (ENNReal.ofReal p) f Ω := by
           rw [ENNReal.ofReal_mul hC'_nn, h_idx]; ring
         rw [← h_rhs_eq]; exact h_chain
       · refine ⟨p, hp_one, hp_gt, 1, by norm_num,
@@ -119,9 +119,9 @@ private theorem tower_to_supercritical_quant_uniform
             ∀ {f : EuN → ℝ}, HasCompactSupport f → tsupport f ⊆ Ω →
               MemWkp (d := d) (m + 1 + s) (ENNReal.ofReal p) f Ω →
                 MemWkp (d := d) (m + 1) (ENNReal.ofReal q) f Ω ∧
-                  wkpNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
+                  iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
                     ENNReal.ofReal C *
-                      wkpNorm (d := d) (m + 1 + s) (ENNReal.ofReal p) f Ω := by
+                      iteratedWeakSobolevNorm (d := d) (m + 1 + s) (ENNReal.ofReal p) f Ω := by
   intro s
   induction s with
   | zero =>
@@ -175,22 +175,22 @@ private theorem tower_to_supercritical_quant_uniform
         refine ⟨h_mem_q, ?_⟩
         have h_idx : m + 1 + (s + 1) = (m + 1 + s) + 1 := by ring
         have h_step_norm :
-            wkpNorm (d := d) (m + 1 + s) (ENNReal.ofReal p_1) f Ω ≤
+            iteratedWeakSobolevNorm (d := d) (m + 1 + s) (ENNReal.ofReal p_1) f Ω ≤
               ENNReal.ofReal (subcriticalConstant (m + 1 + s) d p) *
-                wkpNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω := by
+                iteratedWeakSobolevNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω := by
           rw [hp_1_def]; exact h_norm_p1
         have h_chain :
-            wkpNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
+            iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal q) f Ω ≤
               ENNReal.ofReal C' *
                 (ENNReal.ofReal (subcriticalConstant (m + 1 + s) d p) *
-                  wkpNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) :=
+                  iteratedWeakSobolevNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) :=
           le_trans h_norm_q (mul_le_mul_of_nonneg_left h_step_norm (zero_le _))
         have h_rhs_eq :
             ENNReal.ofReal C' *
                 (ENNReal.ofReal (subcriticalConstant (m + 1 + s) d p) *
-                  wkpNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) =
+                  iteratedWeakSobolevNorm (d := d) ((m + 1 + s) + 1) (ENNReal.ofReal p) f Ω) =
               ENNReal.ofReal (C' * subcriticalConstant (m + 1 + s) d p) *
-                wkpNorm (d := d) (m + 1 + (s + 1)) (ENNReal.ofReal p) f Ω := by
+                iteratedWeakSobolevNorm (d := d) (m + 1 + (s + 1)) (ENNReal.ofReal p) f Ω := by
           rw [ENNReal.ofReal_mul hC'_nn, h_idx]; ring
         rw [← h_rhs_eq]; exact h_chain
       · refine ⟨p, hp_one, hp_gt, 1, by norm_num, ?_⟩
@@ -219,7 +219,7 @@ private theorem wkpNorm_le_sum_eLpNorm_iteratedFDeriv
     (k : ℕ) {ψ : EuN → ℝ}
     (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (hψ_cpt : HasCompactSupport ψ) (hψ_supp : tsupport ψ ⊆ Ω) :
-    wkpNorm (d := d) k p ψ Ω ≤
+    iteratedWeakSobolevNorm (d := d) k p ψ Ω ≤
       (d ^ k : ℕ) *
         ∑ j ∈ Finset.range (k + 1),
           eLpNorm (fun z => ‖iteratedFDeriv ℝ j ψ z‖) p (volume.restrict Ω) := by
@@ -444,23 +444,23 @@ theorem smooth_localBall_L2_pointwise_embedding
     (eLpNorm (fun z => ‖iteratedFDeriv ℝ j χf z‖) (ENNReal.ofReal q)
       (volume.restrict Ω)).toReal with hS_q_def
   have h_Sq_le :
-      S_q ≤ (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
+      S_q ≤ (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
     have h_bridge :=
       eLpNorm_iteratedFDeriv_le_wkpNorm (d := d) hΩ_open hq_enn_one
         1 hχf_smooth hχf_cpt hχf_supp
     rw [hS_q_def, show (0 + 2 : ℕ) = 1 + 1 by rfl,
       ← ENNReal.toReal_sum (fun j _ => hfin_χf _ j)]
     exact ENNReal.toReal_mono (wkpNorm_lt_top_of_memWkp hχf_mem_q).ne h_bridge
-  have h_wk1_finite : wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω ≠ ⊤ :=
+  have h_wk1_finite : iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω ≠ ⊤ :=
     (wkpNorm_lt_top_of_memWkp hχf_mem_q).ne
-  have h_wk2_finite : wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
+  have h_wk2_finite : iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
     (wkpNorm_lt_top_of_memWkp hχf_mem_p'_idx).ne
   have h_tower_real :
-      (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
-        C₁ * (wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal := by
+      (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
+        C₁ * (iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal := by
     have h_mul_finite :
         ENNReal.ofReal C₁ *
-            wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
+            iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
       ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_wk2_finite
     have := ENNReal.toReal_mono h_mul_finite h_tower_norm
     rwa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC₁_nn] at this
@@ -470,7 +470,7 @@ theorem smooth_localBall_L2_pointwise_embedding
   have hp'_enn_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p' := by
     rw [← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp'_one
   have h_revbridge :
-      (wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal ≤
+      (iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal ≤
         dpow * Wsum_p' := by
     have h := wkpNorm_le_sum_eLpNorm_iteratedFDeriv (d := d) hΩ_open hp'_enn_one
       (0 + 1 + s) hχf_smooth hχf_cpt hχf_supp
@@ -592,13 +592,13 @@ theorem smooth_localBall_L2_pointwise_embedding
       (Finset.sum_mul ..).symm]
     ring
   have h_wk_chain :
-      (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
+      (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
         C₁ * (dpow * (Vexp * (Cleib * Npairs) * T)) := by
     refine h_tower_real.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ hC₁_nn
     refine h_revbridge.trans ?_
     exact mul_le_mul_of_nonneg_left h_Wsum_le hdpow_nn
-  have h_morrey_chain : ‖χf x‖ ≤ C₂ * (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
+  have h_morrey_chain : ‖χf x‖ ≤ C₂ * (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
     have h0 : ‖iteratedFDeriv ℝ 0 χf x‖ = ‖χf x‖ := by rw [norm_iteratedFDeriv_zero]
     rw [← h0]
     refine h_morrey.trans ?_
@@ -610,7 +610,7 @@ theorem smooth_localBall_L2_pointwise_embedding
     exact Metric.self_subset_cthickening _ hx_cb
   have hχf_x : χf x = f x := by rw [hχf_def]; simp [hχ_x]
   calc ‖f x‖ = ‖χf x‖ := by rw [hχf_x]
-    _ ≤ C₂ * (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := h_morrey_chain
+    _ ≤ C₂ * (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := h_morrey_chain
     _ ≤ C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs) * T))) :=
         mul_le_mul_of_nonneg_left h_wk_chain hC₂_nn
     _ = C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs)))) * T := by ring
@@ -731,23 +731,23 @@ theorem smooth_localBall_L2_pointwise_embedding_supercritical
     (eLpNorm (fun z => ‖iteratedFDeriv ℝ j χf z‖) (ENNReal.ofReal q)
       (volume.restrict Ω)).toReal with hS_q_def
   have h_Sq_le :
-      S_q ≤ (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
+      S_q ≤ (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
     have h_bridge :=
       eLpNorm_iteratedFDeriv_le_wkpNorm (d := d) hΩ_open hq_enn_one
         1 hχf_smooth hχf_cpt hχf_supp
     rw [hS_q_def, show (0 + 2 : ℕ) = 1 + 1 by rfl,
       ← ENNReal.toReal_sum (fun j _ => hfin_χf _ j)]
     exact ENNReal.toReal_mono (wkpNorm_lt_top_of_memWkp hχf_mem_q).ne h_bridge
-  have h_wk1_finite : wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω ≠ ⊤ :=
+  have h_wk1_finite : iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω ≠ ⊤ :=
     (wkpNorm_lt_top_of_memWkp hχf_mem_q).ne
-  have h_wk2_finite : wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
+  have h_wk2_finite : iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
     (wkpNorm_lt_top_of_memWkp hχf_mem_p'_idx).ne
   have h_tower_real :
-      (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
-        C₁ * (wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal := by
+      (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
+        C₁ * (iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal := by
     have h_mul_finite :
         ENNReal.ofReal C₁ *
-            wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
+            iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω ≠ ⊤ :=
       ENNReal.mul_ne_top ENNReal.ofReal_ne_top h_wk2_finite
     have := ENNReal.toReal_mono h_mul_finite h_tower_norm
     rwa [ENNReal.toReal_mul, ENNReal.toReal_ofReal hC₁_nn] at this
@@ -757,7 +757,7 @@ theorem smooth_localBall_L2_pointwise_embedding_supercritical
   have hp'_enn_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p' := by
     rw [← ENNReal.ofReal_one]; exact ENNReal.ofReal_le_ofReal hp'_one
   have h_revbridge :
-      (wkpNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal ≤
+      (iteratedWeakSobolevNorm (d := d) (0 + 1 + s) (ENNReal.ofReal p') χf Ω).toReal ≤
         dpow * Wsum_p' := by
     have h := wkpNorm_le_sum_eLpNorm_iteratedFDeriv (d := d) hΩ_open hp'_enn_one
       (0 + 1 + s) hχf_smooth hχf_cpt hχf_supp
@@ -879,13 +879,13 @@ theorem smooth_localBall_L2_pointwise_embedding_supercritical
       (Finset.sum_mul ..).symm]
     ring
   have h_wk_chain :
-      (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
+      (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal ≤
         C₁ * (dpow * (Vexp * (Cleib * Npairs) * T)) := by
     refine h_tower_real.trans ?_
     refine mul_le_mul_of_nonneg_left ?_ hC₁_nn
     refine h_revbridge.trans ?_
     exact mul_le_mul_of_nonneg_left h_Wsum_le hdpow_nn
-  have h_morrey_chain : ‖χf x‖ ≤ C₂ * (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
+  have h_morrey_chain : ‖χf x‖ ≤ C₂ * (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := by
     have h0 : ‖iteratedFDeriv ℝ 0 χf x‖ = ‖χf x‖ := by rw [norm_iteratedFDeriv_zero]
     rw [← h0]
     refine h_morrey.trans ?_
@@ -897,7 +897,7 @@ theorem smooth_localBall_L2_pointwise_embedding_supercritical
     exact Metric.self_subset_cthickening _ hx_cb
   have hχf_x : χf x = f x := by rw [hχf_def]; simp [hχ_x]
   calc ‖f x‖ = ‖χf x‖ := by rw [hχf_x]
-    _ ≤ C₂ * (wkpNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := h_morrey_chain
+    _ ≤ C₂ * (iteratedWeakSobolevNorm (d := d) 1 (ENNReal.ofReal q) χf Ω).toReal := h_morrey_chain
     _ ≤ C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs) * T))) :=
         mul_le_mul_of_nonneg_left h_wk_chain hC₂_nn
     _ = C₂ * (C₁ * (dpow * (Vexp * (Cleib * Npairs)))) * T := by ring

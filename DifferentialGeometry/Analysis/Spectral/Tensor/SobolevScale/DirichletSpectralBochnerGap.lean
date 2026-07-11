@@ -331,7 +331,7 @@ private theorem norm_iteratedCovGrad_comp_local
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
         (s + (j + i)) (iteratedCovGrad (I := I) g₀ 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
   have h1 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i
       (iteratedCovGrad (I := I) g₀ 0 s j S)‖ := norm_nonneg _
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _

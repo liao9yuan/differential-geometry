@@ -160,7 +160,7 @@ set_option backward.isDefEq.respectTransparency false in
 lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
     slotInsertEndoFib (I := I) (M := M) (s + 1) j.succ x Λ =
-      slotExtendFib (I := I) (M := M) g s s x
+      slotExtendPointwise (I := I) (M := M) g s s x
         (slotInsertEndoFib (I := I) (M := M) s j x Λ) := by
   apply ContinuousLinearMap.ext
   intro A
@@ -257,14 +257,14 @@ theorem slotInsertEndoFib_contMDiff (g : SmoothRiemannianMetric I M) :
           intro x
           rw [show TensorRSSpace.ofCLM
                 (slotInsertEndoFib (I := I) (M := M) (s + 1) (Fin.succ j) x (φ x)) =
-              slotExtendFib (I := I) (M := M) g s s x
+              slotExtendPointwise (I := I) (M := M) g s s x
                 (slotInsertEndoFib (I := I) (M := M) s j x (φ x)) from
             slotInsertEndoFib_succ (I := I) (M := M) g s j x (φ x)]
           rfl
 
 set_option backward.isDefEq.respectTransparency false in
 
-def slotCurvSumFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+def curvatureTensorActionFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w : TangentSpace I x) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace s I x :=
   -(∑ k : Fin s, slotInsertEndoFib (I := I) (M := M) s k x
@@ -275,10 +275,10 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w : TangentSpace I x) (A : Tensor0SSpace s I x) (m : Fin s → E) :
-    Tensor0SSpace.toModel (slotCurvSumFib (I := I) (M := M) g s x u w A) m =
+    Tensor0SSpace.toModel (curvatureTensorActionFib (I := I) (M := M) g s x u w A) m =
       - ∑ k : Fin s, Tensor0SSpace.toModel A
           (Function.update m k (riemannOp (LeviCivita (I := I) g) x u w (m k))) := by
-  rw [slotCurvSumFib, ContinuousLinearMap.neg_apply, ContinuousLinearMap.sum_apply,
+  rw [curvatureTensorActionFib, ContinuousLinearMap.neg_apply, ContinuousLinearMap.sum_apply,
     Tensor0SSpace.toModel_neg, tensor0S_toModel_sum,
     ContinuousMultilinearMap.neg_apply, ContinuousMultilinearMap.sum_apply]
   congr 1
@@ -291,14 +291,14 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_add_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u u' w : TangentSpace I x) :
-    slotCurvSumFib (I := I) (M := M) g s x (u + u') w =
-      slotCurvSumFib (I := I) (M := M) g s x u w +
-        slotCurvSumFib (I := I) (M := M) g s x u' w := by
+    curvatureTensorActionFib (I := I) (M := M) g s x (u + u') w =
+      curvatureTensorActionFib (I := I) (M := M) g s x u w +
+        curvatureTensorActionFib (I := I) (M := M) g s x u' w := by
   have hR : riemannOp (LeviCivita (I := I) g) x (u + u') w =
       riemannOp (LeviCivita (I := I) g) x u w +
         riemannOp (LeviCivita (I := I) g) x u' w := by
     rw [map_add (riemannOp (LeviCivita (I := I) g) x), ContinuousLinearMap.add_apply]
-  rw [slotCurvSumFib, slotCurvSumFib, slotCurvSumFib, hR]
+  rw [curvatureTensorActionFib, curvatureTensorActionFib, curvatureTensorActionFib, hR]
   rw [Finset.sum_congr rfl fun k _ =>
     slotInsertEndoFib_add_left (I := I) (M := M) s k x
       (riemannOp (LeviCivita (I := I) g) x u w)
@@ -310,12 +310,12 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_smul_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
     (u w : TangentSpace I x) :
-    slotCurvSumFib (I := I) (M := M) g s x (c • u) w =
-      c • slotCurvSumFib (I := I) (M := M) g s x u w := by
+    curvatureTensorActionFib (I := I) (M := M) g s x (c • u) w =
+      c • curvatureTensorActionFib (I := I) (M := M) g s x u w := by
   have hR : riemannOp (LeviCivita (I := I) g) x (c • u) w =
       c • riemannOp (LeviCivita (I := I) g) x u w := by
     rw [map_smul (riemannOp (LeviCivita (I := I) g) x), ContinuousLinearMap.smul_apply]
-  rw [slotCurvSumFib, slotCurvSumFib, hR]
+  rw [curvatureTensorActionFib, curvatureTensorActionFib, hR]
   rw [Finset.sum_congr rfl fun k _ =>
     slotInsertEndoFib_smul_left (I := I) (M := M) s k x c
       (riemannOp (LeviCivita (I := I) g) x u w)]
@@ -326,14 +326,14 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_add_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (u w w' : TangentSpace I x) :
-    slotCurvSumFib (I := I) (M := M) g s x u (w + w') =
-      slotCurvSumFib (I := I) (M := M) g s x u w +
-        slotCurvSumFib (I := I) (M := M) g s x u w' := by
+    curvatureTensorActionFib (I := I) (M := M) g s x u (w + w') =
+      curvatureTensorActionFib (I := I) (M := M) g s x u w +
+        curvatureTensorActionFib (I := I) (M := M) g s x u w' := by
   have hR : riemannOp (LeviCivita (I := I) g) x u (w + w') =
       riemannOp (LeviCivita (I := I) g) x u w +
         riemannOp (LeviCivita (I := I) g) x u w' :=
     map_add (riemannOp (LeviCivita (I := I) g) x u) w w'
-  rw [slotCurvSumFib, slotCurvSumFib, slotCurvSumFib, hR]
+  rw [curvatureTensorActionFib, curvatureTensorActionFib, curvatureTensorActionFib, hR]
   rw [Finset.sum_congr rfl fun k _ =>
     slotInsertEndoFib_add_left (I := I) (M := M) s k x
       (riemannOp (LeviCivita (I := I) g) x u w)
@@ -345,12 +345,12 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_smul_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
     (u w : TangentSpace I x) :
-    slotCurvSumFib (I := I) (M := M) g s x u (c • w) =
-      c • slotCurvSumFib (I := I) (M := M) g s x u w := by
+    curvatureTensorActionFib (I := I) (M := M) g s x u (c • w) =
+      c • curvatureTensorActionFib (I := I) (M := M) g s x u w := by
   have hR : riemannOp (LeviCivita (I := I) g) x u (c • w) =
       c • riemannOp (LeviCivita (I := I) g) x u w :=
     map_smul (riemannOp (LeviCivita (I := I) g) x u) c w
-  rw [slotCurvSumFib, slotCurvSumFib, hR]
+  rw [curvatureTensorActionFib, curvatureTensorActionFib, hR]
   rw [Finset.sum_congr rfl fun k _ =>
     slotInsertEndoFib_smul_left (I := I) (M := M) s k x c
       (riemannOp (LeviCivita (I := I) g) x u w)]
@@ -364,7 +364,7 @@ def slotFreeCurvWCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   haveI : T2Space (TangentSpace I x) := inferInstanceAs (T2Space E)
   LinearMap.toContinuousLinearMap
-    { toFun := fun w => slotCurvSumFib (I := I) (M := M) g s x u w A
+    { toFun := fun w => curvatureTensorActionFib (I := I) (M := M) g s x u w A
       map_add' := fun w w' => by
         rw [slotCurvSumFib_add_right (I := I) (M := M) g s x u w w',
           ContinuousLinearMap.add_apply]
@@ -379,7 +379,7 @@ set_option backward.isDefEq.respectTransparency false in
 @[simp] lemma slotFreeCurvWCLM_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u w : TangentSpace I x) :
     slotFreeCurvWCLM (I := I) (M := M) g s x A u w =
-      slotCurvSumFib (I := I) (M := M) g s x u w A := by
+      curvatureTensorActionFib (I := I) (M := M) g s x u w A := by
   rw [slotFreeCurvWCLM, LinearMap.coe_toContinuousLinearMap']
   rfl
 
@@ -427,7 +427,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option backward.isDefEq.respectTransparency false in
 
-def slotFreeCurvOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
+def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     Tensor0SSpace s I x →L[ℝ] Tensor0SSpace (s + 2) I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace s I x) := inferInstance
   LinearMap.toContinuousLinearMap
@@ -446,7 +446,7 @@ def slotFreeCurvOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
             intro w
             rw [ContinuousLinearMap.add_apply, slotFreeCurvWCLM_apply, slotFreeCurvWCLM_apply,
               slotFreeCurvWCLM_apply,
-              map_add (slotCurvSumFib (I := I) (M := M) g s x u w)]
+              map_add (curvatureTensorActionFib (I := I) (M := M) g s x u w)]
           rw [ContinuousLinearMap.add_apply, slotFreeCurvUCLM_apply, slotFreeCurvUCLM_apply,
             slotFreeCurvUCLM_apply, hW,
             map_add ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm)]
@@ -461,7 +461,7 @@ def slotFreeCurvOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
             apply ContinuousLinearMap.ext
             intro w
             rw [ContinuousLinearMap.smul_apply, slotFreeCurvWCLM_apply, slotFreeCurvWCLM_apply,
-              map_smul (slotCurvSumFib (I := I) (M := M) g s x u w)]
+              map_smul (curvatureTensorActionFib (I := I) (M := M) g s x u w)]
           rw [ContinuousLinearMap.smul_apply, slotFreeCurvUCLM_apply, slotFreeCurvUCLM_apply,
             hW, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm)]
         rw [hU, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm)]
@@ -472,10 +472,10 @@ set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) :
-    slotFreeCurvOpFib (I := I) (M := M) g s x A =
+    curvatureOperatorOnTensorFib (I := I) (M := M) g s x A =
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm
         (slotFreeCurvUCLM (I := I) (M := M) g s x A) := by
-  rw [slotFreeCurvOpFib, LinearMap.coe_toContinuousLinearMap']
+  rw [curvatureOperatorOnTensorFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
 set_option linter.unusedSectionVars false in
@@ -483,14 +483,14 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma slotFreeCurvOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A : Tensor0SSpace s I x) (u w : TangentSpace I x) (m : Fin s → TangentSpace I x) :
-    Tensor0SSpace.toModel (slotFreeCurvOpFib (I := I) (M := M) g s x A)
+    Tensor0SSpace.toModel (curvatureOperatorOnTensorFib (I := I) (M := M) g s x A)
         (Fin.cons u (Fin.cons w m)) =
       - ∑ k : Fin s, Tensor0SSpace.toModel A
           (Function.update m k (riemannOp (LeviCivita (I := I) g) x u w (m k))) := by
   rw [← tensor0S_curry_apply_eval (I := I) (M := M) (n := s + 1)
-    (T := slotFreeCurvOpFib (I := I) (M := M) g s x A) (v0 := u) (vs := Fin.cons w m)]
+    (T := curvatureOperatorOnTensorFib (I := I) (M := M) g s x A) (v0 := u) (vs := Fin.cons w m)]
   have hcurry1 : tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x
-      (slotFreeCurvOpFib (I := I) (M := M) g s x A) =
+      (curvatureOperatorOnTensorFib (I := I) (M := M) g s x A) =
       slotFreeCurvUCLM (I := I) (M := M) g s x A := by
     rw [slotFreeCurvOpFib_apply, ContinuousLinearEquiv.apply_symm_apply]
   rw [hcurry1, slotFreeCurvUCLM_apply]
@@ -507,15 +507,15 @@ theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel s (s + 2) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel s (s + 2) ℝ E)
         (E := fun z : M => TensorRSSpace s (s + 2) I z) x
-        (TensorRSSpace.ofCLM (slotFreeCurvOpFib (I := I) (M := M) g s x))) := by
+        (TensorRSSpace.ofCLM (curvatureOperatorOnTensorFib (I := I) (M := M) g s x))) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (F₁ := Tensor0SModel s ℝ E) (V₁ := fun z : M => Tensor0SSpace s I z)
     (F₂ := Tensor0SModel (s + 2) ℝ E) (V₂ := fun z : M => Tensor0SSpace (s + 2) I z)
-    (φ := fun x => slotFreeCurvOpFib (I := I) (M := M) g s x)
+    (φ := fun x => curvatureOperatorOnTensorFib (I := I) (M := M) g s x)
   intro Y
   have heq : (fun x : M => TotalSpace.mk' (Tensor0SModel (s + 2) ℝ E)
       (E := fun z : M => Tensor0SSpace (s + 2) I z) x
-      (slotFreeCurvOpFib (I := I) (M := M) g s x (Y x))) =
+      (curvatureOperatorOnTensorFib (I := I) (M := M) g s x (Y x))) =
       (fun x : M => TotalSpace.mk' (Tensor0SModel (s + 2) ℝ E)
       (E := fun z : M => Tensor0SSpace (s + 2) I z) x
       ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm
@@ -587,7 +587,7 @@ theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
       rw [hcoe]
       have hval : slotFreeCurvWCLM (I := I) (M := M) g s x (Y x) (U x) (W x) =
           -(∑ k : Fin s, T k x) := by
-        rw [slotFreeCurvWCLM_apply, slotCurvSumFib, ContinuousLinearMap.neg_apply,
+        rw [slotFreeCurvWCLM_apply, curvatureTensorActionFib, ContinuousLinearMap.neg_apply,
           ContinuousLinearMap.sum_apply]
         rfl
       rw [hval]
@@ -598,14 +598,14 @@ theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
 
 set_option backward.isDefEq.respectTransparency false in
 
-def slotFreeCurvHomFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
+def curvatureOperatorOnTensorHomFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 (s + 2) I x :=
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 s I x) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x))
   haveI : T2Space (TensorRSSpace 0 s I x) :=
     inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x))
   LinearMap.toContinuousLinearMap
-    { toFun := fun T => (slotFreeCurvOpFib (I := I) (M := M) g s x).comp
+    { toFun := fun T => (curvatureOperatorOnTensorFib (I := I) (M := M) g s x).comp
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T)
       map_add' := fun T T' => by
         rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T + T') =
@@ -623,14 +623,14 @@ set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvHomFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 s I x) :
-    slotFreeCurvHomFib (I := I) (M := M) g s x T =
-      (slotFreeCurvOpFib (I := I) (M := M) g s x).comp
+    curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x T =
+      (curvatureOperatorOnTensorFib (I := I) (M := M) g s x).comp
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from T) := by
   haveI : FiniteDimensional ℝ (TensorRSSpace 0 s I x) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x))
   haveI : T2Space (TensorRSSpace 0 s I x) :=
     inferInstanceAs (T2Space (Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x))
-  rw [slotFreeCurvHomFib, LinearMap.coe_toContinuousLinearMap']
+  rw [curvatureOperatorOnTensorHomFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
 set_option linter.unusedSectionVars false in
@@ -640,17 +640,17 @@ theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) 
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E →L[ℝ] TensorRSModel 0 (s + 2) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E →L[ℝ] TensorRSModel 0 (s + 2) ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z →L[ℝ] TensorRSSpace 0 (s + 2) I z) x
-        (slotFreeCurvHomFib (I := I) (M := M) g s x)) := by
+        (curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x)) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (F₁ := TensorRSModel 0 s ℝ E) (V₁ := fun z : M => TensorRSSpace 0 s I z)
     (F₂ := TensorRSModel 0 (s + 2) ℝ E) (V₂ := fun z : M => TensorRSSpace 0 (s + 2) I z)
-    (φ := fun x => slotFreeCurvHomFib (I := I) (M := M) g s x)
+    (φ := fun x => curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x)
   intro Z
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun z : M => Tensor0SSpace 0 I z)
     (F₂ := Tensor0SModel (s + 2) ℝ E) (V₂ := fun z : M => Tensor0SSpace (s + 2) I z)
     (φ := fun x => (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 2) I x from
-      slotFreeCurvHomFib (I := I) (M := M) g s x (Z x)))
+      curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x (Z x)))
   intro ζ
   have hZζ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel s ℝ E)
@@ -660,24 +660,24 @@ theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) 
   have happ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s + 2) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel (s + 2) ℝ E)
         (E := fun z : M => Tensor0SSpace (s + 2) I z) x
-        (slotFreeCurvOpFib (I := I) (M := M) g s x
+        (curvatureOperatorOnTensorFib (I := I) (M := M) g s x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from Z x) (ζ x)))) :=
     ContMDiff.clm_bundle_apply (b := id)
       (slotFreeCurvOpFib_contMDiff (I := I) (M := M) g s) hZζ
   refine happ.congr ?_
   intro x
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 2) I x from
-      slotFreeCurvHomFib (I := I) (M := M) g s x (Z x)) (ζ x) =
-    slotFreeCurvOpFib (I := I) (M := M) g s x
+      curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x (Z x)) (ζ x) =
+    curvatureOperatorOnTensorFib (I := I) (M := M) g s x
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from Z x) (ζ x)) from by
     rw [slotFreeCurvHomFib_apply, ContinuousLinearMap.comp_apply]]
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
-def slotFreeCurvHomField (g : SmoothRiemannianMetric I M) (s : ℕ) :
+def curvatureOperatorOnTensorHomField (g : SmoothRiemannianMetric I M) (s : ℕ) :
     HomTensorRSField (E := E) (M := M) 0 s (s + 2) I where
-  toFun := fun x : M => slotFreeCurvHomFib (I := I) (M := M) g s x
+  toFun := fun x : M => curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x
   contMDiff_toFun := slotFreeCurvHomFib_contMDiff (I := I) (M := M) g s
 
 set_option linter.unusedSectionVars false in
@@ -685,8 +685,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvHomField_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
     (show TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 (s + 2) I x from
-        slotFreeCurvHomField (I := I) (M := M) g s x) =
-      slotFreeCurvHomFib (I := I) (M := M) g s x := rfl
+        curvatureOperatorOnTensorHomField (I := I) (M := M) g s x) =
+      curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x := rfl
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
@@ -696,27 +696,27 @@ theorem exists_slotFreeCurvOpField_baseSlot_eval (g : SmoothRiemannianMetric I M
       ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) (u w : TangentSpace I x)
         (m : Fin s → TangentSpace I x),
         Tensor0SSpace.toModel ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 2) I x from
-            (appFullSec (I := I) (M := M) g 0 s (s + 2) (Θ s) S).toSection x)
+            (homTensorRSFieldApply (I := I) (M := M) g 0 s (s + 2) (Θ s) S).toSection x)
             (unitZeroSec (I := I) (M := M) x))
           (Fin.cons u (Fin.cons w m)) =
         - ∑ k : Fin s, Tensor0SSpace.toModel
             ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
               S.toSection x) (unitZeroSec (I := I) (M := M) x))
           (Function.update m k (riemannOp (LeviCivita (I := I) g) x u w (m k))) := by
-  refine ⟨fun s => slotFreeCurvHomField (I := I) (M := M) g s, fun s S x u w m => ?_⟩
+  refine ⟨fun s => curvatureOperatorOnTensorHomField (I := I) (M := M) g s, fun s S x u w m => ?_⟩
   have hval : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 2) I x from
-      (appFullSec (I := I) (M := M) g 0 s (s + 2)
-        (slotFreeCurvHomField (I := I) (M := M) g s) S).toSection x)
+      (homTensorRSFieldApply (I := I) (M := M) g 0 s (s + 2)
+        (curvatureOperatorOnTensorHomField (I := I) (M := M) g s) S).toSection x)
       (unitZeroSec (I := I) (M := M) x) =
-      slotFreeCurvOpFib (I := I) (M := M) g s x
+      curvatureOperatorOnTensorFib (I := I) (M := M) g s x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from S.toSection x)
           (unitZeroSec (I := I) (M := M) x)) := by
-    rw [show (appFullSec (I := I) (M := M) g 0 s (s + 2)
-        (slotFreeCurvHomField (I := I) (M := M) g s) S).toSection x =
+    rw [show (homTensorRSFieldApply (I := I) (M := M) g 0 s (s + 2)
+        (curvatureOperatorOnTensorHomField (I := I) (M := M) g s) S).toSection x =
       (show TensorRSSpace 0 s I x →L[ℝ] TensorRSSpace 0 (s + 2) I x from
-        slotFreeCurvHomField (I := I) (M := M) g s x) (S.toSection x) from
+        curvatureOperatorOnTensorHomField (I := I) (M := M) g s x) (S.toSection x) from
       appFullSec_toSection (I := I) (M := M) g 0 s (s + 2)
-        (slotFreeCurvHomField (I := I) (M := M) g s) S x]
+        (curvatureOperatorOnTensorHomField (I := I) (M := M) g s) S x]
     rw [slotFreeCurvHomField_apply, slotFreeCurvHomFib_apply]
     rfl
   rw [hval, slotFreeCurvOpFib_apply_eval (I := I) (M := M) g s x _ u w m]

@@ -17,20 +17,20 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-def chartCloseDop (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ) : E →L[ℝ] E :=
+def flowOrbitChartTrivDerivOp (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ) : E →L[ℝ] E :=
   (trivFromE (I := I) α ((Φ_fam s : M → M) x)).comp
     (mfderiv I 𝓘(ℝ, E)
       (fun y => extChartAt I α ((Φ_fam s : M → M) y)) x)
 
 lemma chartCloseDop_apply
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ) (v : TangentSpace I x) :
-    chartCloseDop (I := I) Φ_fam α x s v
+    flowOrbitChartTrivDerivOp (I := I) Φ_fam α x s v
       = trivFromE (I := I) α ((Φ_fam s : M → M) x)
           (mfderiv I 𝓘(ℝ, E)
             (fun y => extChartAt I α ((Φ_fam s : M → M) y)) x v) := by
   rfl
 
-theorem hwitness_chartClose
+theorem mfderiv_flowOrbit_eventuallyEq_flowOrbitChartTrivDerivOp
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (v : TangentSpace I x) :
     (fun s : ℝ =>
         trivFromE (I := I) (Φ_fam t x) ((Φ_fam s : M → M) x)
@@ -38,7 +38,7 @@ theorem hwitness_chartClose
             (fun y => extChartAt I (Φ_fam t x) ((Φ_fam s : M → M) y)) x v))
       =ᶠ[𝓝 t] (fun s : ℝ =>
         (ContinuousLinearMap.id ℝ E)
-          (chartCloseDop (I := I) Φ_fam (Φ_fam t x) x s v)) := by
+          (flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x s v)) := by
   refine Filter.Eventually.of_forall (fun s => ?_)
   simp only [ContinuousLinearMap.id_apply]
   exact (chartCloseDop_apply (I := I) Φ_fam (Φ_fam t x) x s v).symm
@@ -50,7 +50,7 @@ theorem rawVariationalIdentity_of_manifoldFlowFamily_chartClose
     (t : ℝ) (x : M) (v : TangentSpace I x)
     {Dchart' : E →L[ℝ] E}
     (hcont : Continuous (fun s : ℝ => (Φ_fam s : M → M) x))
-    (hDchart : HasDerivAt (chartCloseDop (I := I) Φ_fam (Φ_fam t x) x) Dchart' t)
+    (hDchart : HasDerivAt (flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x) Dchart' t)
     (hRdiff : DifferentiableAt ℝ
       (chartRawRepr (I := I) (Φ_fam t x) (X : ∀ y : M, TangentSpace I y))
       (extChartAt I (Φ_fam t x) (Φ_fam t x)))
@@ -71,7 +71,7 @@ theorem rawVariationalIdentity_of_manifoldFlowFamily_chartClose
     RawVariationalIdentity (I := I) g X Φ_fam t x v :=
   rawVariationalIdentity_of_manifoldFlowFamily (I := I) g X Φ_fam t x v
     (ContinuousLinearMap.id ℝ E) v hcont hDchart
-    (hwitness_chartClose (I := I) Φ_fam t x v) hRdiff hCdiff hsplit
+    (mfderiv_flowOrbit_eventuallyEq_flowOrbitChartTrivDerivOp (I := I) Φ_fam t x v) hRdiff hCdiff hsplit
 
 end Close
 

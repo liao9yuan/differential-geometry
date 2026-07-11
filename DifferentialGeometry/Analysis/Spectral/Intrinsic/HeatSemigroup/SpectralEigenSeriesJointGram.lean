@@ -56,8 +56,8 @@ theorem ccTensorBilinSymm_add (g : SmoothRiemannianMetric I M)
       ccTensorBilinSymm (I := I) g S x v w + ccTensorBilinSymm (I := I) g T x v w := by
   rw [ccTensorBilinSymm_apply, ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
   have hbilin : ∀ (a b : TangentSpace I x),
-      ccTensorBilin (I := I) g (S + T) x a b =
-        ccTensorBilin (I := I) g S x a b + ccTensorBilin (I := I) g T x a b := by
+      smoothCcTensorBilinForm (I := I) g (S + T) x a b =
+        smoothCcTensorBilinForm (I := I) g S x a b + smoothCcTensorBilinForm (I := I) g T x a b := by
     intro a b
     rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
     show ccTensorModel (I := I) g (S + T) x ![a, b] =
@@ -135,7 +135,7 @@ private theorem ccTensorBilinSymm_finiteEigenCombo
       rw [Finset.sum_insert ha, Finset.sum_insert ha, ccTensorBilinSymm_add,
         ccTensorBilinSymm_smul, ih]
 
-def ccBilinSymmFibre (x : M) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
+def fibreSymmBilinForm (x : M) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) : ℝ :=
   (1 / 2 : ℝ) * (
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -145,18 +145,18 @@ def ccBilinSymmFibre (x : M) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
       (T (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![w, v])
 
-theorem ccTensorBilinSymm_eq_ccBilinSymmFibre (g : SmoothRiemannianMetric I M)
+theorem ccTensorBilinSymm_eq_fibreSymmBilinForm (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g S x v w =
-      ccBilinSymmFibre (I := I) x (S.toSection x) v w := by
+      fibreSymmBilinForm (I := I) x (S.toSection x) v w := by
   rw [ccTensorBilinSymm_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   rfl
 
-theorem ccBilinSymmFibre_add (x : M) (T₁ T₂ : Tensor0SBundle.TensorRSSpace 0 2 I x)
+theorem fibreSymmBilinForm_add (x : M) (T₁ T₂ : Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
-    ccBilinSymmFibre (I := I) x (T₁ + T₂) v w =
-      ccBilinSymmFibre (I := I) x T₁ v w + ccBilinSymmFibre (I := I) x T₂ v w := by
-  unfold ccBilinSymmFibre
+    fibreSymmBilinForm (I := I) x (T₁ + T₂) v w =
+      fibreSymmBilinForm (I := I) x T₁ v w + fibreSymmBilinForm (I := I) x T₂ v w := by
+  unfold fibreSymmBilinForm
   rw [show (T₁ + T₂) (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
       = T₁ (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -167,10 +167,10 @@ theorem ccBilinSymmFibre_add (x : M) (T₁ T₂ : Tensor0SBundle.TensorRSSpace 0
     ContinuousMultilinearMap.add_apply]
   ring
 
-theorem ccBilinSymmFibre_smul (x : M) (a : ℝ) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
+theorem fibreSymmBilinForm_smul (x : M) (a : ℝ) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
-    ccBilinSymmFibre (I := I) x (a • T) v w = a * ccBilinSymmFibre (I := I) x T v w := by
-  unfold ccBilinSymmFibre
+    fibreSymmBilinForm (I := I) x (a • T) v w = a * fibreSymmBilinForm (I := I) x T v w := by
+  unfold fibreSymmBilinForm
   rw [show (a • T) (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))
       = a • (T (ContinuousMultilinearMap.constOfIsEmpty ℝ
@@ -179,21 +179,21 @@ theorem ccBilinSymmFibre_smul (x : M) (a : ℝ) (T : Tensor0SBundle.TensorRSSpac
     ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
 
-theorem ccBilinSymmFibre_sum {ι : Type*} (s : Finset ι) (x : M)
+theorem fibreSymmBilinForm_sum {ι : Type*} (s : Finset ι) (x : M)
     (c : ι → ℝ) (T : ι → Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
-    ccBilinSymmFibre (I := I) x (∑ i ∈ s, c i • T i) v w =
-      ∑ i ∈ s, c i * ccBilinSymmFibre (I := I) x (T i) v w := by
+    fibreSymmBilinForm (I := I) x (∑ i ∈ s, c i • T i) v w =
+      ∑ i ∈ s, c i * fibreSymmBilinForm (I := I) x (T i) v w := by
   classical
   induction s using Finset.induction with
   | empty =>
       simp only [Finset.sum_empty]
       have h0 : (0 : Tensor0SBundle.TensorRSSpace 0 2 I x) =
           (0 : ℝ) • (0 : Tensor0SBundle.TensorRSSpace 0 2 I x) := by rw [zero_smul]
-      rw [h0, ccBilinSymmFibre_smul, zero_mul]
+      rw [h0, fibreSymmBilinForm_smul, zero_mul]
   | insert a t ha ih =>
-      rw [Finset.sum_insert ha, Finset.sum_insert ha, ccBilinSymmFibre_add,
-        ccBilinSymmFibre_smul, ih]
+      rw [Finset.sum_insert ha, Finset.sum_insert ha, fibreSymmBilinForm_add,
+        fibreSymmBilinForm_smul, ih]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (tensorChartComponentRaw) in
 
@@ -203,11 +203,11 @@ theorem ccTensorBilinSymm_eq_sum_chartBasis (g : SmoothRiemannianMetric I M)
     ccTensorBilinSymm (I := I) g S b v w =
       ∑ Q : CompIdx E 0 2,
         tensorChartComponentRaw (I := I) (M := M) g 0 2 S β Q.1 Q.2 b *
-          ccBilinSymmFibre (I := I) b
+          fibreSymmBilinForm (I := I) b
             (chartBasisFiberSection (I := I) (M := M) 0 2 β Q b) v w := by
-  rw [ccTensorBilinSymm_eq_ccBilinSymmFibre,
+  rw [ccTensorBilinSymm_eq_fibreSymmBilinForm,
     toSection_eq_sum_chartBasisFiberSection (I := I) (M := M) g 0 2 S β hb,
-    ccBilinSymmFibre_sum]
+    fibreSymmBilinForm_sum]
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
 open DifferentialGeometry.Analysis.Sobolev.Chart in
@@ -369,7 +369,7 @@ private theorem spectralPartialSum_ccTensorBilinSymm_tendsto
   have hrw : (fun n => ccTensorBilinSymm (I := I) g (F n) x v w) =
       fun n => ∑ Q : CompIdx E 0 2,
         tensorChartComponentRaw (I := I) (M := M) g 0 2 (F n) β Q.1 Q.2 x *
-          ccBilinSymmFibre (I := I) x
+          fibreSymmBilinForm (I := I) x
             (chartBasisFiberSection (I := I) (M := M) 0 2 β Q x) v w := by
     funext n
     exact ccTensorBilinSymm_eq_sum_chartBasis (I := I) (M := M) g (F n) β hx_src v w
@@ -638,7 +638,7 @@ private theorem realizedChartGramIncrement_alongChart_contMDiffOn
 theorem jointChartGramSmooth_of_spectralSmooth_timeSmooth
     (g : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (T_rep : ℝ → SmoothCcTensor g 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g
+    (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (T_rep t)) δ)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
@@ -702,7 +702,7 @@ def eigenRawIncrementMode
     (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) : ℝ × E → ℝ :=
   fun q : ℝ × E =>
-    φ i q.1 * rawCompOnE (I := I) (M := M) g
+    φ i q.1 * tensorChartComponentOnModel (I := I) (M := M) g
       (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx q.2
 
 lemma eigenRawIncrementMode_contDiffOn_ofOrder
@@ -717,7 +717,7 @@ lemma eigenRawIncrementMode_contDiffOn_ofOrder
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
   have hspace : ContDiffOn ℝ (kk : ℕ)
-      (fun q : ℝ × E => rawCompOnE (I := I) (M := M) g
+      (fun q : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
         (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx q.2)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     ((rawCompOnE_contDiffOn (I := I) (M := M) g
@@ -819,7 +819,7 @@ theorem eigenRawIncrementMode_iteratedFDerivWithin_summable_majorant_ofOrder
     have hcd_fst : ContDiffOn ℝ (kk : ℕ) (fun p : ℝ × E => φ i p.1) s :=
       ((hφ_smooth i).contDiffOn).comp contDiffOn_fst (Set.mapsTo_fst_prod)
     have hcd_snd : ContDiffOn ℝ (kk : ℕ)
-        (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+        (fun p : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
           (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s := by
       refine (((rawCompOnE_contDiffOn (I := I) (M := M) g
           (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx).of_le
@@ -827,13 +827,13 @@ theorem eigenRawIncrementMode_iteratedFDerivWithin_summable_majorant_ofOrder
       intro p hp; exact hB hp.2
     have heqmode : eigenRawIncrementMode (I := I) (M := M) g φ α Jdx i =
         (fun p : ℝ × E => φ i p.1) *
-          (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+          (fun p : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
             (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) := by
       funext p; rw [eigenRawIncrementMode]; rfl
     rw [heqmode]
     have hleib := norm_iteratedFDerivWithin_mul_le (𝕜 := ℝ)
       (f := fun p : ℝ × E => φ i p.1)
-      (g := fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+      (g := fun p : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
         (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2)
       hcd_fst hcd_snd hUD (x := q) hq (n := n) (by exact_mod_cast hn)
     refine le_trans hleib ?_
@@ -858,19 +858,19 @@ theorem eigenRawIncrementMode_iteratedFDerivWithin_summable_majorant_ofOrder
         refine Finset.single_le_sum (f := fun j => Real.sqrt (Cmf j i))
           (fun j _ => Real.sqrt_nonneg _) (Finset.mem_range.mpr (by omega)))
     have hsnd_bnd := norm_iteratedFDerivWithin_compSnd_le
-      (rawCompOnE (I := I) (M := M) g
+      (tensorChartComponentOnModel (I := I) (M := M) g
         (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx) isOpen_interior
       (rawCompOnE_contDiffOn (I := I) (M := M) g
         (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx) hB hUD (n - a) q hq
       (Csp * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ pSp)
       (fun jj hjj => hCsp jj (by omega) i q.2 hqB)
     have hgn_nn : (0:ℝ) ≤ ‖iteratedFDerivWithin ℝ (n - a)
-        (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+        (fun p : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
           (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖ := norm_nonneg _
     have hchoose_nn : (0:ℝ) ≤ (n.choose a : ℝ) := by positivity
     have hprod : ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
           ‖iteratedFDerivWithin ℝ (n - a)
-            (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+            (fun p : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
               (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖ ≤
         ((a.factorial : ℝ) * Cφa * (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
           (((n - a).factorial : ℝ) *
@@ -880,11 +880,11 @@ theorem eigenRawIncrementMode_iteratedFDerivWithin_summable_majorant_ofOrder
       positivity
     calc (n.choose a : ℝ) * ‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
             ‖iteratedFDerivWithin ℝ (n - a)
-              (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+              (fun p : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
                 (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖
         = (n.choose a : ℝ) * (‖iteratedFDerivWithin ℝ a (fun p : ℝ × E => φ i p.1) s q‖ *
             ‖iteratedFDerivWithin ℝ (n - a)
-              (fun p : ℝ × E => rawCompOnE (I := I) (M := M) g
+              (fun p : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g
                 (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx p.2) s q‖) := by ring
       _ ≤ (n.choose a : ℝ) *
             (((a.factorial : ℝ) * Cφa * (‖ContinuousLinearMap.fst ℝ ℝ E‖ + 1) ^ a) *
@@ -972,7 +972,7 @@ lemma exists_rawComponentRaw_eigen_pointwise_le_lambda_pow
   have h0 := hC 0 le_rfl i y (Set.mem_singleton y)
   rw [iteratedFDerivWithin_zero_eq_comp, Function.comp_apply,
     LinearIsometryEquiv.norm_map] at h0
-  have heq : rawCompOnE (I := I) (M := M) g
+  have heq : tensorChartComponentOnModel (I := I) (M := M) g
       (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx y =
       tensorChartComponentRaw (I := I) (M := M) g 0 2
         (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![] Jdx
@@ -1010,7 +1010,7 @@ lemma pdIter_rawCompOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (L : List E) :
     ContDiffOn ℝ ∞
-      (DifferentialGeometry.Analysis.pdIter L (rawCompOnE (I := I) (M := M) g S α Jdx))
+      (DifferentialGeometry.Analysis.iteratedDirDeriv L (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx))
       (interior (extChartAt I α).target) :=
   DifferentialGeometry.Analysis.pdIter_contDiffOn isOpen_interior
     (rawCompOnE_contDiffOn (I := I) (M := M) g S α Jdx) L
@@ -1023,7 +1023,7 @@ lemma exists_pdIter_rawCompOnE_eigen_jet_le_lambda_pow
     ∃ (C : ℝ) (p : ℕ), 0 ≤ C ∧
       ∀ (m' : ℕ), m' ≤ m → ∀ (i : TensorEigenIdx (I := I) (M := M) g 0 2), ∀ y ∈ B,
         ‖iteratedFDerivWithin ℝ m'
-            (DifferentialGeometry.Analysis.pdIter L (rawCompOnE (I := I) (M := M) g
+            (DifferentialGeometry.Analysis.iteratedDirDeriv L (tensorChartComponentOnModel (I := I) (M := M) g
               (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx))
             (interior (extChartAt I α).target) y‖ ≤
           C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p := by
@@ -1042,11 +1042,11 @@ lemma exists_pdIter_rawCompOnE_eigen_jet_le_lambda_pow
       (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx) L (hB hy) m'
   have h2 := hC (m' + L.length) (by omega) i y hy
   calc ‖iteratedFDerivWithin ℝ m'
-        (DifferentialGeometry.Analysis.pdIter L (rawCompOnE (I := I) (M := M) g
+        (DifferentialGeometry.Analysis.iteratedDirDeriv L (tensorChartComponentOnModel (I := I) (M := M) g
           (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx))
         (interior (extChartAt I α).target) y‖
       ≤ Cnorm * ‖iteratedFDerivWithin ℝ (m' + L.length)
-          (rawCompOnE (I := I) (M := M) g
+          (tensorChartComponentOnModel (I := I) (M := M) g
             (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx)
           (interior (extChartAt I α).target) y‖ := h1
     _ ≤ Cnorm * (C * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ p) :=
@@ -1266,14 +1266,14 @@ theorem eigenTimeSpatialProductMode_iteratedFDerivWithin_summable_majorant_ofOrd
 lemma chartGramOnE_realize_eq_add_half_rawCompOnE
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g S) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g S) δ)
     (α : M) (a b : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
     Integral.DivergenceTheorem.chartGramOnE (I := I)
         (tensorSectionRealizeMetric (I := I) g S hδ_lt hδ) α a b y =
       Integral.DivergenceTheorem.chartGramOnE (I := I) g α a b y +
-        (1 / 2 : ℝ) * (rawCompOnE (I := I) (M := M) g S α ![a, b] y +
-          rawCompOnE (I := I) (M := M) g S α ![b, a] y) := by
+        (1 / 2 : ℝ) * (tensorChartComponentOnModel (I := I) (M := M) g S α ![a, b] y +
+          tensorChartComponentOnModel (I := I) (M := M) g S α ![b, a] y) := by
   classical
   have hy_t : y ∈ (extChartAt I α).target := interior_subset hy
   have hp_src : (extChartAt I α).symm y ∈ (chartAt H α).source := by

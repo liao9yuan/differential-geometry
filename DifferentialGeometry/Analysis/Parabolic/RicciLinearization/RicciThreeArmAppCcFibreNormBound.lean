@@ -70,8 +70,8 @@ set_option linter.unusedSectionVars false in
 lemma gFibreOpBound_mono_local
     (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
-    {δ δ' : ℝ} (hle : δ ≤ δ') (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) :
-    gFibreOpBound (I := I) (M := M) g₀ h δ' := by
+    {δ δ' : ℝ} (hle : δ ≤ δ') (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) :
+    metricCauchySchwarzBound (I := I) (M := M) g₀ h δ' := by
   intro x v w
   refine le_trans (hδ x v w) ?_
   have hsv : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
@@ -116,7 +116,7 @@ private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
 set_option linter.unusedSectionVars false in
-private theorem rfns_le_of_Ksum_sq_le
+private theorem riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     (C : ℝ)
     (hKsum : ∀ (e : Fin (Module.finrank ℝ E) → TangentSpace I x),
@@ -130,7 +130,7 @@ private theorem rfns_le_of_Ksum_sq_le
       ≤ ((Module.finrank ℝ E : ℝ) ^ r) * C ^ 2 := by
   classical
   obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis_local (I := I) (M := M) g₀ x
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse horth]
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse rfl hbse horth]
   calc (∑ K : Fin r → Fin (Module.finrank ℝ E), ∑ J : Fin s → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x r s S (Module.finrank ℝ E) e K J) ^ 2)
       ≤ ∑ _K : Fin r → Fin (Module.finrank ℝ E), C ^ 2 :=
@@ -222,7 +222,7 @@ private lemma abs_g0_inner_invSharp_le (g₀ g₁ : SmoothRiemannianMetric I M)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) (x : M)
     (a b : TangentSpace I x)
     (hua : g₀.inner x a a ≤ 1) (hub : g₀.inner x b b ≤ 1) :
     |g₀.inner x a (inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x b))| ≤
@@ -231,7 +231,7 @@ private lemma abs_g0_inner_invSharp_le (g₀ g₁ : SmoothRiemannianMetric I M)
     inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x b) with hf
   have hcs := DifferentialGeometry.Analysis.Laplacian.abs_metric_inner_le_sqrt_metric_quadratic
     (I := I) (M := M) g₀ x a f
-  have hfbound := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le (I := I) g₀ g₁ h htie
+  have hfbound := norm_inverseMetricSharpFib_g0Flat_le (I := I) g₀ g₁ h htie
     hδ_lt hδ_nn hδ x b
   rw [← hf] at hfbound
   have hsa_nn : 0 ≤ Real.sqrt (g₀.inner x a a) := Real.sqrt_nonneg _
@@ -406,7 +406,7 @@ theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (horth : ∀ a b : Fin (Module.finrank ℝ E),
       g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
@@ -414,7 +414,7 @@ theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
     (∑ J : Fin 2 → Fin (Module.finrank ℝ E),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
-          TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+          TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
         (Module.finrank ℝ E) e K J) ^ 2)
       ≤ ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ))) ^ 2 := by
   classical
@@ -440,7 +440,7 @@ theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
   have hcomp : ∀ J : Fin 2 → Fin (Module.finrank ℝ E),
       fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
-          TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+          TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
         (Module.finrank ℝ E) e K J =
       (1 / 2 : ℝ) *
         (A * ((if K 1 = J 0 then (1 : ℝ) else 0) * (if K 2 = J 1 then (1 : ℝ) else 0))
@@ -449,14 +449,14 @@ theorem ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le
     intro J
     have hread : fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
-          TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+          TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
         (Module.finrank ℝ E) e K J =
         Tensor0SSpace.toModel
-          ((ricciArmPrincipalCoeffFib (I := I) g₁ x) (coframeS (I := I) (M := M) g₀ x 4 e K))
+          ((ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x) (coframeS (I := I) (M := M) g₀ x 4 e K))
           (fun k => e (J k)) := by
       unfold fiberNormSqComponent coframeS; rfl
     rw [hread, ricciArmPrincipalCoeffFib_toModel,
-      combinedTrace42Model_apply (E := E) (cometricLmodel (I := I) g₁ x) _ (fun k => e (J k))]
+      ricciPrincipalCoeffDoubleTraceModel_apply (E := E) (cometricLmodel (I := I) g₁ x) _ (fun k => e (J k))]
     have hev : ∀ (v : Fin 4 → E),
         Tensor0SBundle.Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 4 e K) v =
           ∏ i : Fin 4, g₀.inner x (e (K i)) (v i) :=
@@ -624,14 +624,14 @@ theorem riemannianFiberNormSq_ricciArmPrincipalCoeffFib_le
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from
-          TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+          TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
       ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 := by
-  have hbound := rfns_le_of_Ksum_sq_le (I := I) (M := M) g₀ 4 2 x
+  have hbound := riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le (I := I) (M := M) g₀ 4 2 x
     (show TensorRSSpace 4 2 I x from
-      TensorRSSpace.ofCLM (ricciArmPrincipalCoeffFib (I := I) g₁ x))
+      TensorRSSpace.ofCLM (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x))
     ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ)))
     (fun e horth K =>
       ricciArmPrincipalCoeffFib_fiberComponent_Ksum_sq_le (I := I) (M := M) g₀ g₁ h htie hδ_lt
@@ -646,7 +646,7 @@ theorem traceHessianFib_fiberComponent_Ksum_sq_le
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (horth : ∀ a b : Fin (Module.finrank ℝ E),
       g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
@@ -827,11 +827,11 @@ theorem riemannianFiberNormSq_traceHessianFib_le
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
       ≤ ((Module.finrank ℝ E : ℝ) ^ 3 * (1 / (1 - δ))) ^ 2 := by
-  have hbound := rfns_le_of_Ksum_sq_le (I := I) (M := M) g₀ 4 2 x
+  have hbound := riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le (I := I) (M := M) g₀ 4 2 x
     (show TensorRSSpace 4 2 I x from traceHessianFib (I := I) g₁ x)
     ((Module.finrank ℝ E : ℝ) * (1 / (1 - δ)))
     (fun e horth K =>
@@ -918,7 +918,7 @@ private lemma cometricDoubleTraceFib_fiberComponent_Ksum_sq_le
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (horth : ∀ a b : Fin (Module.finrank ℝ E),
       g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
@@ -978,11 +978,11 @@ lemma riemannianFiberNormSq_cometricDoubleTraceFib_le
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
     {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ h δ) (x : M) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ h δ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
         (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
       ≤ ((Module.finrank ℝ E : ℝ) ^ 3) * (1 / (1 - δ)) ^ 2 := by
-  exact rfns_le_of_Ksum_sq_le (I := I) (M := M) g₀ 3 1 x
+  exact riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le (I := I) (M := M) g₀ 3 1 x
     (show TensorRSSpace 3 1 I x from cometricDoubleTraceFib (I := I) g₁ 1 x)
     (1 / (1 - δ))
     (fun e horth K =>

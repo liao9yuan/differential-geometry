@@ -79,7 +79,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
     intro D; rw [hproj_def, ContinuousLinearMap.comp_apply]
 
   set Ψ : TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] TensorRSSpace r s I b :=
-    rawTensorConnLap_psi_bilinAt (I := I) g r s (fun z : M => T₀.toSection z) hT_total b
+    tensorHessianBilinAt (I := I) g r s (fun z : M => T₀.toSection z) hT_total b
     with hΨ_def
   set B : Fin (Module.finrank ℝ E) → TangentSpace I b :=
     fun i => smoothOrthoFrame (I := I) g b i b with hB_def
@@ -145,7 +145,7 @@ theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
                 (fun z : M => chartBasisVecFiber (I := I) α k z) b
                 (chartBasisVecFiber (I := I) α l b)))) := by
     intro k l
-    rw [hΨ_def, rawTensorConnLap_psi_bilinAt_apply (I := I) g r s
+    rw [hΨ_def, tensorHessianBilinAt_apply (I := I) g r s
       (fun z : M => T₀.toSection z) hT_total (hChartBasis_mdiff k) (hChartBasis_mdiff l)]
     rw [hproj_apply, map_sub, map_sub]
 

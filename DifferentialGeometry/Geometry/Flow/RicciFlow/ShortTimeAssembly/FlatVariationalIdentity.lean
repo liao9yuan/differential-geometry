@@ -39,7 +39,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem flatProducerJet_eq_neg_rawFderiv_add_movingTriv
+theorem flatVariationalIdentity_eq_rawFderiv_add_movingTrivCorrection
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (T' P' : E →L[ℝ] E)
@@ -181,7 +181,7 @@ theorem flat_value_jet_identity
           + movingTrivCorrection (I := I) (Φ_fam t x)
               (X : ∀ y : M, TangentSpace I y)
               (mfderiv I I (Φ_fam t : M → M) x v)) :=
-  flatProducerJet_eq_neg_rawFderiv_add_movingTriv (I := I) X Φ_fam t x v T' P'
+  flatVariationalIdentity_eq_rawFderiv_add_movingTrivCorrection (I := I) X Φ_fam t x v T' P'
     hflat hodejet hRdiff hCdiff
 
 end DifferentialGeometry.PDE.RicciFlow

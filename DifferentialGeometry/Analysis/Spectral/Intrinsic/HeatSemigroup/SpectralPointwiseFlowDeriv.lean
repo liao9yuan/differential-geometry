@@ -135,7 +135,7 @@ theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ)
         C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
           (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) := by
   obtain ⟨C, hC_pos, hC⟩ :=
-    ccTensorBilinSymm_gFibreOpBound_le_spectral_lossy (I := I) (M := M) g m h_lossy
+    ccTensorBilinSymm_metricCauchySchwarzBound_le_sobolevHsNorm_lossy_order (I := I) (M := M) g m h_lossy
   refine ⟨C, hC_pos, fun i => ?_⟩
   have hb := hC (eigenSmooth (I := I) (M := M) g i) x v w
   rw [norm_smoothCcToTensorHs_eigenSmooth (I := I) (M := M) g (m : ℝ) i] at hb
@@ -146,7 +146,7 @@ theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ)
     _ = C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
           (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) := by ring
 
-theorem ccTensorBilinSymm_finiteEigenCombo'
+theorem ccTensorBilinSymm_finiteEigenCombo_eq_sum_eigenBilinScalar
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -169,7 +169,7 @@ theorem ccTensorBilinSymm_finiteEigenCombo'
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
 open DifferentialGeometry.Analysis.Sobolev.Chart in
 
-theorem spectralPartialSum_ccTensorBilinSymm_tendsto'
+theorem spectralPartialSum_ccTensorBilinSymm_tendsto_of_representative
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hu : ∀ σ : ℝ, ∀ hσ : 0 ≤ σ,
       ∃ vH : tensorHs (I := I) (M := M) g 0 2 σ,
@@ -239,7 +239,7 @@ theorem spectralPartialSum_ccTensorBilinSymm_tendsto'
   have hrw : (fun n => ccTensorBilinSymm (I := I) g (F n) x v w) =
       fun n => ∑ Q : CompIdx E 0 2,
         tensorChartComponentRaw (I := I) (M := M) g 0 2 (F n) β Q.1 Q.2 x *
-          ccBilinSymmFibre (I := I) x
+          fibreSymmBilinForm (I := I) x
             (chartBasisFiberSection (I := I) (M := M) 0 2 β Q x) v w := by
     funext n
     exact ccTensorBilinSymm_eq_sum_chartBasis (I := I) (M := M) g (F n) β hx_src v w
@@ -271,7 +271,7 @@ theorem ccTensorBilinSymm_eigenSeries_eq
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2) u i *
             eigenBilinScalar (I := I) g x v w i := by
     intro n
-    rw [spectralPartialSum, ccTensorBilinSymm_finiteEigenCombo']
+    rw [spectralPartialSum, ccTensorBilinSymm_finiteEigenCombo_eq_sum_eigenBilinScalar]
   have htend_lhs : Filter.Tendsto
       (fun n => ∑ i ∈ eigenIdxFinset (I := I) (M := M) g n,
           tensorL2Coeff (I := I) (M := M)
@@ -279,7 +279,7 @@ theorem ccTensorBilinSymm_eigenSeries_eq
             eigenBilinScalar (I := I) g x v w i)
       Filter.atTop
       (𝓝 (ccTensorBilinSymm (I := I) g Trep x v w)) := by
-    have h := spectralPartialSum_ccTensorBilinSymm_tendsto'
+    have h := spectralPartialSum_ccTensorBilinSymm_tendsto_of_representative
       (I := I) (M := M) g u hu Trep hTrep x v w
     exact h.congr (fun n => hpartial n)
   have htend_tsum : Filter.Tendsto

@@ -161,7 +161,7 @@ theorem wkpNormHalfSpace_le_sqrt_card_mul_wkpNormL2HalfSpace
     {k : ℕ} {u : E → ℝ} {Ω : Set E}
     (hu : MemWkpHalfSpace (d := d) k 2 u Ω) :
     wkpNormHalfSpace (d := d) k 2 u Ω ≤
-      ENNReal.ofReal (Real.sqrt (wkpIndexCardL2 k d)) *
+      ENNReal.ofReal (Real.sqrt (multiIndexUpToOrderCard k d)) *
         wkpNormL2HalfSpace (d := d) k u Ω := by
   unfold wkpNormL2HalfSpace wkpNormHalfSpace
   exact wkpNorm_le_sqrt_card_mul_wkpNormL2 (d := d) hu

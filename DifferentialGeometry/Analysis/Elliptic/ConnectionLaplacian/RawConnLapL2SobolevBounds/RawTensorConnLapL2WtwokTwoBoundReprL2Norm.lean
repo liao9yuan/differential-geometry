@@ -181,7 +181,7 @@ theorem chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq
           ENNReal.ofReal K *
             ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
               ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-                (wkpNorm (d := Module.finrank ℝ E) 0 2
+                (iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
                   (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
                   (chartTargetEuclid (I := I) (M := M) α)) ^ 2 := by
   classical
@@ -352,7 +352,7 @@ theorem chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq
   have h_per_idx_jdx : ∀ Idx Jdx,
       ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
           rhsIntegrand Idx Jdx y ∂(volume : Measure EuclN) ≤
-        (wkpNorm (d := Module.finrank ℝ E) 0 2
+        (iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α)) ^ 2 := by
     intro Idx Jdx
@@ -387,7 +387,7 @@ theorem chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq
             ∂((volume : Measure EuclN).restrict
               (chartTargetEuclid (I := I) (M := M) α)) from rfl]
     rw [← h_sq_eLp]
-    rw [show wkpNorm (d := Module.finrank ℝ E) 0 2
+    rw [show iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
             (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α) =
           eLpNorm (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx) 2

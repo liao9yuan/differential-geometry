@@ -20,7 +20,7 @@ theorem levi_civita_pullback_conjugation
     LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ)
       = pullback_connection_construct g Φ := rfl
 
-theorem levi_civita_pullback_conjugation_finalize
+theorem levi_civita_pullback_conjugation_symm
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     pullback_connection_construct g Φ
       = LeviCivita (I := I) (Diffeomorph.pullbackMetric g Φ) := rfl

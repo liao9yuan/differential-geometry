@@ -664,7 +664,7 @@ theorem smoothOrthoFrame_orthonormal
   exact smoothOrthoFrame_orthonormal_of_chartFrameNorm (I := I) g α hb i j
     (chartFrameNorm_orthonormal (I := I) g α hb_base i j)
 
-theorem heart_of_bochner_smoothOrthoFrame_of_inner_form [I.Boundaryless]
+theorem bochner_identity_smoothOrthoFrame_of_inner_form [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (x : M)
@@ -680,7 +680,7 @@ theorem heart_of_bochner_smoothOrthoFrame_of_inner_form [I.Boundaryless]
         (fun b => gradFun (I := I) g f b) x =
       gradFun (I := I) g (Δ_g (I := I) g hf) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x) :=
-  heart_of_bochner_of_inner_form (I := I) g hf
+  localConnLap_vector_eq_bochnerFormula_of_inner_form (I := I) g hf
     (smoothOrthoFrame (I := I) g x) hSmooth x hInner
 
 theorem smoothOrthoFrame_orthonormal_at_center
@@ -1089,7 +1089,7 @@ theorem heart_of_bochner_smoothOrthoFrame [I.Boundaryless]
         (fun b => gradFun (I := I) g f b) x =
       gradFun (I := I) g (Δ_g (I := I) g hf) x +
         ricciSharp (I := I) g x (gradFun (I := I) g f x) :=
-  heart_of_bochner_smoothOrthoFrame_of_inner_form (I := I) g hf x
+  bochner_identity_smoothOrthoFrame_of_inner_form (I := I) g hf x
     (fun i => smoothOrthoFrame_smooth (I := I) g x i) hInner
 
 end Connection

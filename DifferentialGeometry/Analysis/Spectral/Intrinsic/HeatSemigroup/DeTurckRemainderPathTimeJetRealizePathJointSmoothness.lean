@@ -37,7 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 def deTurckRHSReconSection (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
     SmoothCcTensor g₀ 0 2 :=
   { toSection :=
       (deTurckRHSSection (I := I) g_bg
@@ -220,7 +220,7 @@ private theorem contMDiffWithinAt_section_apply_prod_full : ∀ (n : ℕ)
 theorem deTurckRHSField_realizePath_jointContMDiffOn
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ}
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+    (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
     (hJ : DifferentialGeometry.PDE.RicciFlow.JointChartGramSmooth (I := I) T
       (fun t : ℝ => tensorSectionRealizeMetric (I := I) g₀ (F t) hδ_lt (hδ t))) :
@@ -528,7 +528,7 @@ theorem loweredCompose_zero_basis_eval_jointContMDiffOn
 theorem deTurckRHSSection_realize_path_tensorInner_eigenSmooth_jointContMDiffOn
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : ∀ t : ℝ, gFibreOpBound (I := I) (M := M) g₀
+    (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))

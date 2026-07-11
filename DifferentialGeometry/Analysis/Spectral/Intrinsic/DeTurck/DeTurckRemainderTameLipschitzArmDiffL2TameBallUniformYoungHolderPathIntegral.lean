@@ -55,10 +55,10 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem (chartRiemannTensor extChartAt_target_subset_interior_of_boundaryless)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform cmm_two_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local symmS symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad unitModel smoothCcTensor_ext_of_unitModel unitTensor pathIntegralCoeffField pathIntegralCoeffField_appCc_eq pathIntegralCoeffField_toSection linearizedRicciThreeArmHjoint linearizedRicciThreeArmHcont linearizedRicciThreeArmHjoint_zero exists_linearizedRicci_threeArm_coeffFields ricciTensor_realize_sub_eq_threeArm_appCc linearizedRicciArm0Field linearizedRicciArm1Field linearizedRicciArm2FieldLichnerowicz linearizedRicciArm0BaseCoeff linearizedRicciArm0CorrField linearizedRicciArm1BaseCoeff linearizedRicciArm1CorrField ricciArmPrincipalCoeff traceHessianCoeff linearizedRicci_arm0Field_jointSmooth linearizedRicci_arm1Field_jointSmooth linearizedRicci_arm2FieldLichnerowicz_jointSmooth ricciArmOrder1KoszulCoeff exists_arm1Koszul_realizedFam_rfns_ballUniform continuousBilinearMap_basis_expand unitModel_basis_expand_two unitModel_eq_ccTensorBilin_local appCc_zero_left_local ccTensor02Symm symmS_sub ccTensorBilin_symmS iteratedCovGrad_symmS_eq domDomCongrSection riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection)
 open DifferentialGeometry.PDE.DeTurck (deTurckVF)
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (realizedSmallSet realizedSmallSet_isOpen Icc_subset_realizedSmallSet linearizedRicciAt ricciTensor_realized_sub_eq_integral_linearizedRicci linearizedRicciAt_eq_deriv_chartSum_on_Ioo realizedRicciChartSum jointContMDiff_toModel_continuous_slice hasDerivAt_realizedRicciChartSum_general realizedFam)
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_rfns_le symmAbsorbedCoeff_jet_le)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmAbsorbedCoeff symmAbsorbedCoeff_appCc_eq exists_iteratedCovGrad_unitModel_domDomCongrSection symmAbsorbedCoeff_riemannianFiberNormSq_le symmAbsorbedCoeff_jet_le)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -551,7 +551,7 @@ private theorem appCc_integrated_grid_twoArm_mixed
   rw [hc]
   ring
 
-theorem appCc_topOrder_l2_twoArm_mixed_ballUniform
+theorem ccTensorContract_topOrder_l2_twoArm_mixed_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (b₀ s₀ k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (Φ : SmoothCcTensor g₀ b₀ s₀) (W : SmoothCcTensor g₀ 0 b₀) (ΛΦ ΛW : ℝ),
@@ -559,7 +559,7 @@ theorem appCc_topOrder_l2_twoArm_mixed_ballUniform
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ b₀ s₀ x (Φ.toSection x) ≤ ΛΦ ^ 2) →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 b₀ x (W.toSection x) ≤ ΛW ^ 2) →
         ‖iteratedCovGrad (I := I) g₀ 0 s₀ k
-            (appCc (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
+            (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
           C * (ΛW ^ 2 * ∑ i ∈ Finset.range (k + 1),
                 ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2
               + ΛΦ ^ 2 * ∑ l ∈ Finset.range (k + 1),
@@ -575,12 +575,12 @@ theorem appCc_topOrder_l2_twoArm_mixed_ballUniform
   obtain ⟨Cgrid, hCgrid_nn, hCgrid⟩ :=
     appCc_integrated_grid_twoArm_mixed (I := I) g₀ b₀ s₀ b₀ k
 
-  set Gk : ℝ := appCcGdiag (E := E) k with hGk
+  set Gk : ℝ := diagonalGridGrowthFactor (E := E) k with hGk
   have hGk_nn : 0 ≤ Gk := appCcGdiag_nonneg (E := E) k
   refine ⟨Gk * Cgrid, by positivity, ?_⟩
   intro Φ W ΛΦ ΛW hΛΦ hΛW hΦsup hWsup
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
-  set P : SmoothCcTensor g₀ 0 s₀ := appCc (I := I) (M := M) g₀ b₀ s₀ Φ W with hP
+  set P : SmoothCcTensor g₀ 0 s₀ := operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W with hP
 
   have hLHS_eq : ‖iteratedCovGrad (I := I) g₀ 0 s₀ k P‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + k) x
@@ -605,7 +605,7 @@ theorem appCc_topOrder_l2_twoArm_mixed_ballUniform
         ((iteratedCovGrad (I := I) g₀ 0 s₀ k P).toSection x) ≤ Gk * grid x := by
     intro x
     rw [hGk, hgrid, hP]
-    exact appCc_iteratedCovGrad_diagonalProductGrid_le (I := I) g₀ b₀ s₀ Φ W k x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I) g₀ b₀ s₀ Φ W k x
 
   have hgrid_cont : Continuous grid := by
     rw [hgrid]
@@ -950,7 +950,7 @@ private theorem armField_iteratedCovGrad_pathIntegral_comm
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-theorem armField_pathIntegral_jetL2_tower_le
+theorem pathIntegralCoeffField_jetL2_tower_le
     (g₀ : SmoothRiemannianMetric I M) (r a : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
     (hSI : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ'))

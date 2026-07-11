@@ -34,7 +34,7 @@ def wkpNormChartGen [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (u : M → ℝ) : ℝ≥0∞ :=
   ∑' α : M,
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E)
       k p
       (chartPushed (I := I) (M := M) ρ α u)
@@ -124,7 +124,7 @@ theorem wkpNormChartGen_zero_fun
     wkpNormChartGen (I := I) (M := M) g k p ρ (fun _ : M => (0 : ℝ)) = 0 := by
   unfold wkpNormChartGen
   have hpt : ∀ α : M,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M) ρ α (fun _ : M => (0 : ℝ)))
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
@@ -287,7 +287,7 @@ theorem wkpNormChartGen_lt_top_of_memWkpChartGen
   classical
   unfold wkpNormChartGen
   set f : M → ℝ≥0∞ := fun α =>
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M) ρ α u)
       (chartTargetEuclid (I := I) (M := M) α) with hf_def
@@ -311,7 +311,7 @@ theorem wkpNormChartGen_lt_top_of_memWkpChartGen
       unfold chartPushed
       rw [hρ_empty]
       ring
-    change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    change DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M) ρ α u)
       (chartTargetEuclid (I := I) (M := M) α) = 0
@@ -420,7 +420,7 @@ def wkpNormChartFin
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (u : M → ℝ) : ℝ≥0∞ :=
   ∑ α ∈ (support_set_finite_of_compactSpace (I := I) (M := M) ρ).toFinset,
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E)
       k p
       (chartPushed (I := I) (M := M) ρ α u)
@@ -436,7 +436,7 @@ theorem wkpNormChartGen_eq_wkpNormChartFin
       wkpNormChartFin (I := I) (M := M) g k p ρ u := by
   classical
   let f : M → ℝ≥0∞ := fun α =>
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M) ρ α u)
       (chartTargetEuclid (I := I) (M := M) α)
@@ -460,7 +460,7 @@ theorem wkpNormChartGen_eq_wkpNormChartFin
       unfold chartPushed
       rw [hρ_empty]
       ring
-    change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    change DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M) ρ α u)
       (chartTargetEuclid (I := I) (M := M) α) = 0

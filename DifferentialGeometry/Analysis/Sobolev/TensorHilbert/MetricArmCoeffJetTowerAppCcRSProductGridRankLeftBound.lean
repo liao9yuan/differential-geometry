@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (gFibreOpBound ccTensorBilinSymm)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -42,7 +42,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-private lemma diagonalGrid_step_rankLeft_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ) (cΦ cW : ℕ → ℝ)
+private lemma diagonalGrid_leftFactor_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ) (cΦ cW : ℕ → ℝ)
     (hcΦ : ∀ i, 0 ≤ cΦ i) (hcW : ∀ l, 0 ≤ cW l) :
     (∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l) +
         n * ∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1) ≤
@@ -82,13 +82,13 @@ private lemma diagonalGrid_step_rankLeft_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ) (
     _ = (n + 1) * D := by ring
 
 set_option maxHeartbeats 6400000 in
-theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+theorem riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (g : SmoothRiemannianMetric I M) :
     ∀ (j p a b : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g p a) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g p (b + j) x
           ((iteratedCovGrad (I := I) g p b j
-            (appCcRS (I := I) (M := M) g p a b Φ W)).toSection x) ≤
-        appCcGdiag (E := E) j *
+            (ccOperatorFieldComp (I := I) (M := M) g p a b Φ W)).toSection x) ≤
+        diagonalGridGrowthFactor (E := E) j *
           ∑ i ∈ Finset.range (j + 1),
             riemannianFiberNormSq (I := I) (M := M) g a (b + i) x
                 ((iteratedCovGrad (I := I) g a b i Φ).toSection x) *
@@ -99,7 +99,7 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
   induction j with
   | zero =>
       intro p a b Φ W x
-      rw [iteratedCovGrad_zero, appCcGdiag, pow_zero, one_mul]
+      rw [iteratedCovGrad_zero, diagonalGridGrowthFactor, pow_zero, one_mul]
       rw [Finset.sum_range_one, Finset.sum_range_one, iteratedCovGrad_zero, iteratedCovGrad_zero]
       rw [appCcRS_toSection (I := I) (M := M) g p a b Φ W x]
       have h := riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g p a b x
@@ -110,15 +110,15 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
       intro p a b Φ W x
       classical
       rw [← rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g p b j
-        (appCcRS (I := I) (M := M) g p a b Φ W) x]
+        (ccOperatorFieldComp (I := I) (M := M) g p a b Φ W) x]
       rw [covGrad_appCcRS_eq (I := I) (M := M) g p a b Φ W]
       rw [iteratedCovGrad_add]
       refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g p ((b + 1) + j) x
         ((iteratedCovGrad (I := I) g p (b + 1) j
-          (appCcRS (I := I) (M := M) g p a (b + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g p a (b + 1)
             (covGrad (I := I) (M := M) g a b Φ) W)).toSection x)
         ((iteratedCovGrad (I := I) g p (b + 1) j
-          (appCcRS (I := I) (M := M) g p (a + 1) (b + 1)
+          (ccOperatorFieldComp (I := I) (M := M) g p (a + 1) (b + 1)
             (slotExtend (I := I) (M := M) g a b Φ)
             (covGrad (I := I) (M := M) g p a W))).toSection x)) ?_
       set cΦ : ℕ → ℝ := fun i => riemannianFiberNormSq (I := I) (M := M) g a (b + i) x
@@ -129,13 +129,13 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
         riemannianFiberNormSq_nonneg (I := I) (M := M) g a (b + i) x _
       have hcW_nn : ∀ l, 0 ≤ cW l := fun l =>
         riemannianFiberNormSq_nonneg (I := I) (M := M) g p (a + l) x _
-      have hGj_nn : (0 : ℝ) ≤ appCcGdiag (E := E) j := appCcGdiag_nonneg (E := E) j
+      have hGj_nn : (0 : ℝ) ≤ diagonalGridGrowthFactor (E := E) j := appCcGdiag_nonneg (E := E) j
       have hn_nn : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
       have hArmA : riemannianFiberNormSq (I := I) (M := M) g p ((b + 1) + j) x
             ((iteratedCovGrad (I := I) g p (b + 1) j
-              (appCcRS (I := I) (M := M) g p a (b + 1)
+              (ccOperatorFieldComp (I := I) (M := M) g p a (b + 1)
                 (covGrad (I := I) (M := M) g a b Φ) W)).toSection x) ≤
-          appCcGdiag (E := E) j *
+          diagonalGridGrowthFactor (E := E) j *
             ∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l := by
         refine le_trans (ih p a (b + 1) (covGrad (I := I) (M := M) g a b Φ) W x) ?_
         refine mul_le_mul_of_nonneg_left (le_of_eq (Finset.sum_congr rfl (fun i _ => ?_))) hGj_nn
@@ -144,10 +144,10 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
         rw [rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g a b i Φ x]
       have hArmB : riemannianFiberNormSq (I := I) (M := M) g p ((b + 1) + j) x
             ((iteratedCovGrad (I := I) g p (b + 1) j
-              (appCcRS (I := I) (M := M) g p (a + 1) (b + 1)
+              (ccOperatorFieldComp (I := I) (M := M) g p (a + 1) (b + 1)
                 (slotExtend (I := I) (M := M) g a b Φ)
                 (covGrad (I := I) (M := M) g p a W))).toSection x) ≤
-          appCcGdiag (E := E) j *
+          diagonalGridGrowthFactor (E := E) j *
             ((Module.finrank ℝ E : ℝ) *
               ∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)) := by
         refine le_trans (ih p (a + 1) (b + 1) (slotExtend (I := I) (M := M) g a b Φ)
@@ -184,7 +184,7 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
       refine le_trans (add_le_add
         (mul_le_mul_of_nonneg_left hArmA (by norm_num : (0:ℝ) ≤ 2))
         (mul_le_mul_of_nonneg_left hArmB (by norm_num : (0:ℝ) ≤ 2))) ?_
-      set Gj : ℝ := appCcGdiag (E := E) j with hGj_def
+      set Gj : ℝ := diagonalGridGrowthFactor (E := E) j with hGj_def
       set SA : ℝ := ∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l
         with hSA_def
       set SB : ℝ := ∑ i ∈ Finset.range (j + 1), cΦ i * ∑ l ∈ Finset.range (j + 1 - i), cW (l + 1)
@@ -193,9 +193,9 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
         cΦ i * ∑ l ∈ Finset.range (j + 1 + 1 - i), cW l with hDG_def
       have hstep : SA + (Module.finrank ℝ E : ℝ) * SB ≤ ((Module.finrank ℝ E : ℝ) + 1) * DG := by
         rw [hSA_def, hSB_def, hDG_def]
-        exact diagonalGrid_step_rankLeft_le (Module.finrank ℝ E : ℝ) hn_nn j cΦ cW hcΦ_nn hcW_nn
-      have hGdiag_succ : appCcGdiag (E := E) (j + 1) = (2 * ((Module.finrank ℝ E : ℝ) + 1)) * Gj := by
-        rw [hGj_def, appCcGdiag, appCcGdiag, pow_succ]; ring
+        exact diagonalGrid_leftFactor_step_le (Module.finrank ℝ E : ℝ) hn_nn j cΦ cW hcΦ_nn hcW_nn
+      have hGdiag_succ : diagonalGridGrowthFactor (E := E) (j + 1) = (2 * ((Module.finrank ℝ E : ℝ) + 1)) * Gj := by
+        rw [hGj_def, diagonalGridGrowthFactor, diagonalGridGrowthFactor, pow_succ]; ring
       rw [hGdiag_succ]
       have hGj_nn' : (0 : ℝ) ≤ Gj := hGj_nn
       nlinarith [mul_le_mul_of_nonneg_left hstep (by positivity : (0:ℝ) ≤ 2 * Gj), hGj_nn',

@@ -1030,7 +1030,7 @@ private lemma wkpNorm_chartPushed_le_const_mul_per_α
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ⊤) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ {u : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ u →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
             (I := I) (M := M)
@@ -1278,7 +1278,7 @@ theorem wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform
   intro u hu
   have h_def : wkpNormChart (I := I) (M := M) g 1 p u =
       ∑' α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
             (I := I) (M := M)
@@ -1287,7 +1287,7 @@ theorem wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform
             (I := I) (M := M) α) := rfl
   rw [h_def]
   have h_outside_zero : ∀ α : M, α ∉ S →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
           (I := I) (M := M)
@@ -1317,7 +1317,7 @@ theorem wkpNormChart_le_const_mul_intrinsicLpComponents_smooth_uniform
         (I := I) (M := M) α)
   rw [tsum_eq_sum (s := S) h_outside_zero]
   have h_per_α : ∀ α ∈ S,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
           (I := I) (M := M)

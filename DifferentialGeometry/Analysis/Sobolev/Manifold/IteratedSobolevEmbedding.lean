@@ -35,12 +35,12 @@ local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
 theorem wkpNorm_mono_order
     {j k : ℕ} (hjk : j ≤ k) {p : ℝ≥0∞} {f : EuN → ℝ} {Ω : Set EuN} :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := d) j p f Ω ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := d) k p f Ω := by
   classical
-  unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
   refine Finset.sum_le_sum_of_subset ?_
   intro i hi
   rw [Finset.mem_range] at hi
@@ -80,12 +80,12 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean in
 
 theorem wkpNorm_succ_eq
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) :
-    wkpNorm (d := d) (k + 1) p u Ω =
+    iteratedWeakSobolevNorm (d := d) (k + 1) p u Ω =
       eLpNorm u p (volume.restrict Ω) +
         ∑ i : Fin d,
-          wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω := by
+          iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   rw [Finset.sum_range_succ' (n := k + 1)
       (f := fun j =>
         ∑ α : Fin j → Fin d,
@@ -169,15 +169,15 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean in
 
 theorem wkpNorm_chosenWeakPartial_le_wkpNorm_succ
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) (i : Fin d) :
-    wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω ≤
-      wkpNorm (d := d) (k + 1) p u Ω := by
+    iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω ≤
+      iteratedWeakSobolevNorm (d := d) (k + 1) p u Ω := by
   classical
   rw [wkpNorm_succ_eq (d := d) k p u Ω]
-  have h_single : wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω ≤
-      ∑ i : Fin d, wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω :=
+  have h_single : iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω ≤
+      ∑ i : Fin d, iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω :=
     Finset.single_le_sum
       (f := fun i : Fin d =>
-        wkpNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω)
+        iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' p i u Ω) Ω)
       (s := (Finset.univ : Finset (Fin d)))
       (fun _ _ => zero_le _)
       (Finset.mem_univ i)
@@ -187,7 +187,7 @@ open DifferentialGeometry.Analysis.Sobolev.Euclidean in
 
 theorem eLpNorm_le_wkpNorm
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) :
-    eLpNorm u p (volume.restrict Ω) ≤ wkpNorm (d := d) k p u Ω := by
+    eLpNorm u p (volume.restrict Ω) ≤ iteratedWeakSobolevNorm (d := d) k p u Ω := by
   have h := wkpNorm_mono_order (d := d) (Nat.zero_le k) (p := p) (f := u) (Ω := Ω)
   rwa [wkpNorm_zero] at h
 
@@ -315,9 +315,9 @@ theorem MemWkp_subcritical_iterated
       HasCompactSupport f → tsupport f ⊆ Ω →
       MemWkp (d := d) (k + 1) (ENNReal.ofReal p) f Ω →
       MemWkp (d := d) k (ENNReal.ofReal (pOne d p)) f Ω ∧
-        wkpNorm (d := d) k (ENNReal.ofReal (pOne d p)) f Ω ≤
+        iteratedWeakSobolevNorm (d := d) k (ENNReal.ofReal (pOne d p)) f Ω ≤
           ENNReal.ofReal (subcriticalConstant k d p) *
-            wkpNorm (d := d) (k + 1) (ENNReal.ofReal p) f Ω := by
+            iteratedWeakSobolevNorm (d := d) (k + 1) (ENNReal.ofReal p) f Ω := by
   classical
   set p_enn : ℝ≥0∞ := ENNReal.ofReal p with hp_enn_def
   set p_1_enn : ℝ≥0∞ := ENNReal.ofReal (pOne d p) with hp_1_enn_def
@@ -334,7 +334,7 @@ theorem MemWkp_subcritical_iterated
       have h_subcritical :
           eLpNorm f p_1_enn (volume.restrict Ω) ≤
             ENNReal.ofReal (DeGiorgi.C_gns d p) * (d : ℝ≥0∞) *
-              wkpNorm (d := d) 1 p_enn f Ω := by
+              iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω := by
         have h := eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp (d := d)
           hp_one hp_dim hΩ_open (f := f) hf hf_compact hf_supp
         change eLpNorm f (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p)))
@@ -347,7 +347,7 @@ theorem MemWkp_subcritical_iterated
       have hf_aem : AEStronglyMeasurable f (volume.restrict Ω) := hf.memLp.aestronglyMeasurable
       have h_eLp_lt_top : eLpNorm f p_1_enn (volume.restrict Ω) < ⊤ := by
         refine lt_of_le_of_lt h_subcritical ?_
-        have h_wkp_lt_top : wkpNorm (d := d) 1 p_enn f Ω < ⊤ :=
+        have h_wkp_lt_top : iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω < ⊤ :=
           wkpNorm_lt_top_of_memWkp hf
         have h_first : (ENNReal.ofReal (DeGiorgi.C_gns d p) : ℝ≥0∞) ≠ ⊤ := ENNReal.ofReal_ne_top
         have h_d_top : (d : ℝ≥0∞) ≠ ⊤ := ENNReal.natCast_ne_top _
@@ -376,15 +376,15 @@ theorem MemWkp_subcritical_iterated
       have hf_W1p : DeGiorgi.MemW1p p_enn f Ω := hf.memW1p
       have h_base :
           MemWkp (d := d) 0 p_1_enn f Ω ∧
-            wkpNorm (d := d) 0 p_1_enn f Ω ≤
+            iteratedWeakSobolevNorm (d := d) 0 p_1_enn f Ω ≤
               ENNReal.ofReal (subcriticalConstant 0 d p) *
-                wkpNorm (d := d) 1 p_enn f Ω := by
+                iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω := by
         have hf1 : MemWkp (d := d) 1 p_enn f Ω :=
           MemWkp.le_of_le (Nat.succ_le_succ (Nat.zero_le _)) hf
         have h_subcritical :
             eLpNorm f p_1_enn (volume.restrict Ω) ≤
               ENNReal.ofReal (DeGiorgi.C_gns d p) * (d : ℝ≥0∞) *
-                wkpNorm (d := d) 1 p_enn f Ω := by
+                iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω := by
           have h := eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp (d := d)
             hp_one hp_dim hΩ_open (f := f) hf1 hf_compact hf_supp
           change eLpNorm f (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p)))
@@ -397,7 +397,7 @@ theorem MemWkp_subcritical_iterated
           hf.memLp.aestronglyMeasurable
         have h_eLp_lt_top : eLpNorm f p_1_enn (volume.restrict Ω) < ⊤ := by
           refine lt_of_le_of_lt h_subcritical ?_
-          have h_wkp_lt_top : wkpNorm (d := d) 1 p_enn f Ω < ⊤ :=
+          have h_wkp_lt_top : iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω < ⊤ :=
             wkpNorm_lt_top_of_memWkp hf1
           refine ENNReal.mul_lt_top ?_ h_wkp_lt_top
           exact ENNReal.mul_lt_top
@@ -451,21 +451,21 @@ theorem MemWkp_subcritical_iterated
         exact (MemWkp_congr_ae (d := d) hp_enn_one hΩ_open (hg_ae i)).mpr (hf_chosen_mem i)
       have h_ih_g : ∀ i,
           MemWkp (d := d) k p_1_enn (g i) Ω ∧
-            wkpNorm (d := d) k p_1_enn (g i) Ω ≤
+            iteratedWeakSobolevNorm (d := d) k p_1_enn (g i) Ω ≤
               ENNReal.ofReal (subcriticalConstant k d p) *
-                wkpNorm (d := d) (k + 1) p_enn (g i) Ω :=
+                iteratedWeakSobolevNorm (d := d) (k + 1) p_enn (g i) Ω :=
         fun i => ih (hg_compact i) (hg_supp_Ω i) (hg_mem_kplus1 i)
       have hf_chosen_mem_p1 : ∀ i,
           MemWkp (d := d) k p_1_enn (chosenWeakPartial' p_enn i f Ω) Ω := by
         intro i
         exact (MemWkp_congr_ae (d := d) hp_1_enn_one hΩ_open (hg_ae i)).mp (h_ih_g i).1
       have h_wkp_eq : ∀ i,
-          wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_enn i f Ω) Ω =
-            wkpNorm (d := d) k p_1_enn (g i) Ω := fun i =>
+          iteratedWeakSobolevNorm (d := d) k p_1_enn (chosenWeakPartial' p_enn i f Ω) Ω =
+            iteratedWeakSobolevNorm (d := d) k p_1_enn (g i) Ω := fun i =>
         (wkpNorm_congr_ae (d := d) hp_1_enn_one hΩ_open (hg_ae i)).symm
       have h_wkp_eq_p : ∀ i,
-          wkpNorm (d := d) (k + 1) p_enn (chosenWeakPartial' p_enn i f Ω) Ω =
-            wkpNorm (d := d) (k + 1) p_enn (g i) Ω := fun i =>
+          iteratedWeakSobolevNorm (d := d) (k + 1) p_enn (chosenWeakPartial' p_enn i f Ω) Ω =
+            iteratedWeakSobolevNorm (d := d) (k + 1) p_enn (g i) Ω := fun i =>
         (wkpNorm_congr_ae (d := d) hp_enn_one hΩ_open (hg_ae i)).symm
       have hf_W1p_p1 : DeGiorgi.MemW1p p_1_enn f Ω := by
         refine ⟨?_, ?_⟩
@@ -488,14 +488,14 @@ theorem MemWkp_subcritical_iterated
       have h_eLp_bound :
           eLpNorm f p_1_enn (volume.restrict Ω) ≤
             ENNReal.ofReal (subcriticalConstantBase d p) *
-              wkpNorm (d := d) 1 p_enn f Ω := by
+              iteratedWeakSobolevNorm (d := d) 1 p_enn f Ω := by
         have h := h_base.2
         rw [wkpNorm_zero, subcriticalConstant_zero] at h
         exact h
       have h_sum_term_bound : ∀ i,
-          wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω ≤
+          iteratedWeakSobolevNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω ≤
             ENNReal.ofReal (subcriticalConstant k d p) *
-              wkpNorm (d := d) (k + 1 + 1) p_enn f Ω := by
+              iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω := by
         intro i
         have h_cross : chosenWeakPartial' p_1_enn i f Ω
             =ᵐ[volume.restrict Ω] chosenWeakPartial' p_enn i f Ω :=
@@ -510,48 +510,48 @@ theorem MemWkp_subcritical_iterated
           (k + 1) p_enn f Ω i
       have h_sum_bound :
           ∑ i : Fin d,
-            wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω ≤
+            iteratedWeakSobolevNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω ≤
           ∑ _i : Fin d,
             ENNReal.ofReal (subcriticalConstant k d p) *
-              wkpNorm (d := d) (k + 1 + 1) p_enn f Ω :=
+              iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω :=
         Finset.sum_le_sum (fun i _ => h_sum_term_bound i)
       have h_sum_const :
           ∑ _i : Fin d,
             ENNReal.ofReal (subcriticalConstant k d p) *
-              wkpNorm (d := d) (k + 1 + 1) p_enn f Ω =
+              iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω =
             (d : ℝ≥0∞) *
               (ENNReal.ofReal (subcriticalConstant k d p) *
-                wkpNorm (d := d) (k + 1 + 1) p_enn f Ω) := by
+                iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω) := by
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin]
         rw [nsmul_eq_mul]
       have h_eLp_full : eLpNorm f p_1_enn (volume.restrict Ω) ≤
           ENNReal.ofReal (subcriticalConstantBase d p) *
-            wkpNorm (d := d) (k + 1 + 1) p_enn f Ω := by
+            iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω := by
         refine le_trans h_eLp_bound ?_
         gcongr
         exact wkpNorm_mono_order (d := d) (by omega : 1 ≤ k + 1 + 1)
           (p := p_enn) (f := f) (Ω := Ω)
       calc
         eLpNorm f p_1_enn (volume.restrict Ω) +
-            ∑ i : Fin d, wkpNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω
+            ∑ i : Fin d, iteratedWeakSobolevNorm (d := d) k p_1_enn (chosenWeakPartial' p_1_enn i f Ω) Ω
           ≤ ENNReal.ofReal (subcriticalConstantBase d p) *
-              wkpNorm (d := d) (k + 1 + 1) p_enn f Ω +
+              iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω +
               ∑ _i : Fin d,
                 ENNReal.ofReal (subcriticalConstant k d p) *
-                  wkpNorm (d := d) (k + 1 + 1) p_enn f Ω :=
+                  iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω :=
             add_le_add h_eLp_full h_sum_bound
         _ = ENNReal.ofReal (subcriticalConstantBase d p) *
-              wkpNorm (d := d) (k + 1 + 1) p_enn f Ω +
+              iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω +
               (d : ℝ≥0∞) *
                 (ENNReal.ofReal (subcriticalConstant k d p) *
-                  wkpNorm (d := d) (k + 1 + 1) p_enn f Ω) := by
+                  iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω) := by
               rw [h_sum_const]
         _ = (ENNReal.ofReal (subcriticalConstantBase d p) +
               (d : ℝ≥0∞) * ENNReal.ofReal (subcriticalConstant k d p)) *
-            wkpNorm (d := d) (k + 1 + 1) p_enn f Ω := by
+            iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω := by
               rw [add_mul, mul_assoc]
         _ = ENNReal.ofReal (subcriticalConstant (k + 1) d p) *
-            wkpNorm (d := d) (k + 1 + 1) p_enn f Ω := by
+            iteratedWeakSobolevNorm (d := d) (k + 1 + 1) p_enn f Ω := by
               rw [subcriticalConstant_succ]
               rw [ENNReal.ofReal_add (subcriticalConstantBase_nonneg d p)
                 (mul_nonneg (Nat.cast_nonneg _) (subcriticalConstant_nonneg k d p))]
@@ -566,10 +566,10 @@ theorem MemWkp_succ_subcritical_step
     (hf : MemWkp (d := d) (k + 1) (ENNReal.ofReal p) f Ω) :
     MemWkp (d := d) k (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p))) f Ω ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := d) k
+        iteratedWeakSobolevNorm (d := d) k
             (ENNReal.ofReal ((d : ℝ) * p / ((d : ℝ) - p))) f Ω ≤
           ENNReal.ofReal C *
-            wkpNorm (d := d) (k + 1) (ENNReal.ofReal p) f Ω := by
+            iteratedWeakSobolevNorm (d := d) (k + 1) (ENNReal.ofReal p) f Ω := by
   obtain ⟨h_mem, h_norm⟩ :=
     MemWkp_subcritical_iterated (d := d) k hp_one hp_dim hΩ_open
       hf_compact hf_supp hf
@@ -723,14 +723,14 @@ lemma memWkp_chartPushedRaw_pou_mul_of_memWkpChart
 private lemma wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {k : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p) (u : M → ℝ) (α : M) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E)
         k p
         (chartPushedRaw (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
             : C^∞⟮I, M; ℝ⟯) x * u x))
         (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E)
         k p
         (chartPushed (I := I) (M := M)
@@ -811,10 +811,10 @@ theorem wkpNormChart_succ_subcritical_step
   have h_step : ∀ α : M,
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp (d := d) k p_1_enn
         (f α) (chartTargetEuclid (I := I) (M := M) α) ∧
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p_1_enn
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p_1_enn
           (f α) (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal C *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) (k + 1) p_enn
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
             (f α) (chartTargetEuclid (I := I) (M := M) α) := by
     intro α
     have hp_dim_d : p < (d : ℝ) := by rw [hd_def]; exact hp_dim
@@ -834,18 +834,18 @@ theorem wkpNormChart_succ_subcritical_step
     · rw [hp_1_enn_def, ← h_pOne_eq, hC_def, hp_enn_def]
       exact h_norm'
   have h_norm_raw_eq_pushed_p_1 : ∀ α : M,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p_1_enn
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p_1_enn
           (f α) (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p_1_enn
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p_1_enn
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := fun α =>
     ChartTower.wkpNorm_chartPushedRaw_pou_mul_eq_chartPushed (I := I) (M := M) g
       (k := k) hp_1_enn_one u α
   have h_norm_raw_eq_pushed_p : ∀ α : M,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) (k + 1) p_enn
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
           (f α) (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) (k + 1) p_enn
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := fun α =>
@@ -871,12 +871,12 @@ theorem wkpNormChart_succ_subcritical_step
       (d := d) hp_1_enn_one hOpen h_ae).mp (h_step α).1
   have h_mem_chart : MemWkpChart (I := I) (M := M) g k p_1_enn u := h_mem_pushed
   have h_per_chart_norm : ∀ α : M,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) k p_1_enn
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) k p_1_enn
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal C *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) (k + 1) p_enn
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) := by
@@ -886,12 +886,12 @@ theorem wkpNormChart_succ_subcritical_step
   refine ⟨h_mem_chart, ?_⟩
   unfold wkpNormChart
   rw [show ENNReal.ofReal C * ∑' α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) (k + 1) p_enn
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) =
       ∑' α : M, ENNReal.ofReal C *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm (d := d) (k + 1) p_enn
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm (d := d) (k + 1) p_enn
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) from
@@ -1668,7 +1668,7 @@ theorem iterated_sobolev_embedding_chart_C0_unconditional
             from rfl] at hN_eq
           exact (ENNReal.toReal_eq_zero_iff _).mp hN_eq |>.resolve_right h_norm_p_lt.ne
         have h_per_chart_p_zero : ∀ α : M,
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k (ENNReal.ofReal p)
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -1676,13 +1676,13 @@ theorem iterated_sobolev_embedding_chart_C0_unconditional
           intro α
           have h_le := ENNReal.le_tsum α
               (f := fun β : M =>
-                DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+                DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                   (d := Module.finrank ℝ E) k (ENNReal.ofReal p)
                   (chartPushed (I := I) (M := M)
                     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u)
                   (chartTargetEuclid (I := I) (M := M) β))
           rw [show (∑' β : M,
-                DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+                DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                   (d := Module.finrank ℝ E) k (ENNReal.ofReal p)
                   (chartPushed (I := I) (M := M)
                     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u)
@@ -1719,7 +1719,7 @@ theorem iterated_sobolev_embedding_chart_C0_unconditional
           have h_aesm := (hu α).memLp.aestronglyMeasurable
           exact (MeasureTheory.eLpNorm_eq_zero_iff h_aesm hp_pos).mp h_eLp_zero
         have h_per_chart_p'_zero : ∀ α : M,
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k (ENNReal.ofReal p')
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -1866,7 +1866,7 @@ theorem iterated_sobolev_embedding_chart_C0_unconditional
             from rfl] at hN_eq
           exact (ENNReal.toReal_eq_zero_iff _).mp hN_eq |>.resolve_right h_norm_p1_lt.ne
         have h_per_chart_p1_zero : ∀ α : M,
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k' (ENNReal.ofReal p_1)
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -1874,13 +1874,13 @@ theorem iterated_sobolev_embedding_chart_C0_unconditional
           intro α
           have h_le := ENNReal.le_tsum α
               (f := fun β : M =>
-                DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+                DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                   (d := Module.finrank ℝ E) k' (ENNReal.ofReal p_1)
                   (chartPushed (I := I) (M := M)
                     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u)
                   (chartTargetEuclid (I := I) (M := M) β))
           rw [show (∑' β : M,
-                DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+                DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                   (d := Module.finrank ℝ E) k' (ENNReal.ofReal p_1)
                   (chartPushed (I := I) (M := M)
                     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u)
@@ -1917,7 +1917,7 @@ theorem iterated_sobolev_embedding_chart_C0_unconditional
           have h_aesm := (h_mem_p1' α).memLp.aestronglyMeasurable
           exact (MeasureTheory.eLpNorm_eq_zero_iff h_aesm hp1_pos).mp h_eLp_zero
         have h_per_chart_p'_zero : ∀ α : M,
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k' (ENNReal.ofReal p')
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)

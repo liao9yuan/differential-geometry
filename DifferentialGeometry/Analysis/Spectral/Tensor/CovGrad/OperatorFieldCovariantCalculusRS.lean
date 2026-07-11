@@ -69,7 +69,7 @@ theorem appCcRSFib_contMDiff (g : SmoothRiemannianMetric I M) (a b c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-def appCcRS (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+def ccOperatorFieldComp (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) : SmoothCcTensor g a c where
   toSection :=
     { toFun := fun x : M => appCcRSFib (I := I) (M := M) g a b c Φ W x
@@ -81,7 +81,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma appCcRS_toSection (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (x : M) :
-    (appCcRS (I := I) (M := M) g a b c Φ W).toSection x =
+    (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x =
       (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x).comp
         (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from W.toSection x) := rfl
 
@@ -90,7 +90,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcRS_zero_eq_appCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
-    appCcRS (I := I) (M := M) g 0 r s Φ W = appCc (I := I) (M := M) g r s Φ W := by
+    ccOperatorFieldComp (I := I) (M := M) g 0 r s Φ W = operatorFieldApply (I := I) (M := M) g r s Φ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -101,14 +101,14 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcRS_add_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W₁ W₂ : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c Φ (W₁ + W₂) =
-      appCcRS (I := I) (M := M) g a b c Φ W₁ + appCcRS (I := I) (M := M) g a b c Φ W₂ := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ + W₂) =
+      ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ + ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appCcRS (I := I) (M := M) g a b c Φ W₁ + appCcRS (I := I) (M := M) g a b c Φ W₂).toSection x) =
-      (appCcRS (I := I) (M := M) g a b c Φ W₁).toSection x +
-        (appCcRS (I := I) (M := M) g a b c Φ W₂).toSection x from rfl]
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ + ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂).toSection x) =
+      (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁).toSection x +
+        (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂).toSection x from rfl]
   rw [appCcRS_toSection, appCcRS_toSection, appCcRS_toSection]
   rw [show ((W₁ + W₂).toSection x : TensorRSSpace a b I x) = W₁.toSection x + W₂.toSection x from by
     rw [SmoothCcTensor.toSection_add]; rfl]
@@ -119,13 +119,13 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcRS_smul_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (k : ℝ) (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c Φ (k • W) =
-      k • appCcRS (I := I) (M := M) g a b c Φ W := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (k • W) =
+      k • ccOperatorFieldComp (I := I) (M := M) g a b c Φ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((k • appCcRS (I := I) (M := M) g a b c Φ W).toSection x) =
-      k • (appCcRS (I := I) (M := M) g a b c Φ W).toSection x from rfl]
+  rw [show ((k • ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x) =
+      k • (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x from rfl]
   rw [appCcRS_toSection, appCcRS_toSection]
   rw [show ((k • W).toSection x : TensorRSSpace a b I x) = k • W.toSection x from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
@@ -136,14 +136,14 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcRS_add_left (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c (Φ₁ + Φ₂) W =
-      appCcRS (I := I) (M := M) g a b c Φ₁ W + appCcRS (I := I) (M := M) g a b c Φ₂ W := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c (Φ₁ + Φ₂) W =
+      ccOperatorFieldComp (I := I) (M := M) g a b c Φ₁ W + ccOperatorFieldComp (I := I) (M := M) g a b c Φ₂ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appCcRS (I := I) (M := M) g a b c Φ₁ W + appCcRS (I := I) (M := M) g a b c Φ₂ W).toSection x) =
-      (appCcRS (I := I) (M := M) g a b c Φ₁ W).toSection x +
-        (appCcRS (I := I) (M := M) g a b c Φ₂ W).toSection x from rfl]
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ₁ W + ccOperatorFieldComp (I := I) (M := M) g a b c Φ₂ W).toSection x) =
+      (ccOperatorFieldComp (I := I) (M := M) g a b c Φ₁ W).toSection x +
+        (ccOperatorFieldComp (I := I) (M := M) g a b c Φ₂ W).toSection x from rfl]
   rw [appCcRS_toSection, appCcRS_toSection, appCcRS_toSection]
   rw [show ((Φ₁ + Φ₂).toSection x : TensorRSSpace b c I x) = Φ₁.toSection x + Φ₂.toSection x from by
     rw [SmoothCcTensor.toSection_add]; rfl]
@@ -154,12 +154,12 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcRS_zero_left (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (W : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W = 0 := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W = 0 := by
   have h := appCcRS_add_left (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) 0 W
   rw [add_zero] at h
-  have h2 : appCcRS (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W -
-      appCcRS (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W =
-      appCcRS (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W := by
+  have h2 : ccOperatorFieldComp (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W -
+      ccOperatorFieldComp (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W =
+      ccOperatorFieldComp (I := I) (M := M) g a b c (0 : SmoothCcTensor g b c) W := by
     nth_rewrite 1 [h]; abel
   rwa [sub_self] at h2
 
@@ -168,7 +168,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcRS_neg_left (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c (-Φ) W = -appCcRS (I := I) (M := M) g a b c Φ W := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c (-Φ) W = -ccOperatorFieldComp (I := I) (M := M) g a b c Φ W := by
   have h := appCcRS_add_left (I := I) (M := M) g a b c Φ (-Φ) W
   rw [add_neg_cancel, appCcRS_zero_left] at h
   exact (neg_eq_of_add_eq_zero_right h.symm).symm
@@ -178,8 +178,8 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcRS_sub_left (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c (Φ₁ - Φ₂) W =
-      appCcRS (I := I) (M := M) g a b c Φ₁ W - appCcRS (I := I) (M := M) g a b c Φ₂ W := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c (Φ₁ - Φ₂) W =
+      ccOperatorFieldComp (I := I) (M := M) g a b c Φ₁ W - ccOperatorFieldComp (I := I) (M := M) g a b c Φ₂ W := by
   rw [sub_eq_add_neg, appCcRS_add_left, appCcRS_neg_left, sub_eq_add_neg]
 
 set_option linter.unusedSectionVars false in
@@ -187,7 +187,7 @@ set_option backward.isDefEq.respectTransparency false in
 theorem tensorCovDerivAt_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (x : M) (v : E) :
     (show TensorRSSpace a c I x from
-        tensorCovDerivAt (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W) x v) =
+        tensorCovDerivAt (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) x v) =
       (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from
           tensorCovDerivAt (I := I) (M := M) g b c Φ x v).comp
           (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from W.toSection x) +
@@ -209,7 +209,7 @@ theorem tensorCovDerivAt_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : �
 
   have hLHS :
       (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from
-          tensorCovDerivAt (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W) x v) d =
+          tensorCovDerivAt (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) x v) d =
         (Tensor0SNabla.tensor0SCovariantDerivative I M c (LeviCivita (I := I) g)
             (fun y : M =>
               (show Tensor0SSpace b I y →L[ℝ] Tensor0SSpace c I y from Φ.toSection y) (Wd y)) x v) -
@@ -219,16 +219,16 @@ theorem tensorCovDerivAt_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : �
                 (fun y : M => dSec y) x v)) := by
     have hval : (fun y : M =>
           (show Tensor0SSpace a I y →L[ℝ] Tensor0SSpace c I y from
-            (appCcRS (I := I) (M := M) g a b c Φ W).toSection y) (dSec y)) =
+            (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection y) (dSec y)) =
         (fun y : M =>
           (show Tensor0SSpace b I y →L[ℝ] Tensor0SSpace c I y from Φ.toSection y) (Wd y)) := by
       funext y
       rw [appCcRS_toSection (I := I) (M := M) g a b c Φ W y]
       rfl
     rw [show d = dSec x from hdSec.symm,
-      tensorCovDerivAt_def (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W) x v,
+      tensorCovDerivAt_def (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) x v,
       tensorRSCovariantDerivative_apply (I := I) (M := M) a c (LeviCivita (I := I) g)
-        (appCcRS (I := I) (M := M) g a b c Φ W).toSection dSec x v, hval,
+        (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection dSec x v, hval,
       appCcRS_toSection (I := I) (M := M) g a b c Φ W x, ContinuousLinearMap.comp_apply]
 
   have hT1 :
@@ -291,18 +291,18 @@ set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 theorem covGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
-    covGrad (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W) =
-      appCcRS (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W +
-        appCcRS (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
+    covGrad (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) =
+      ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W +
+        ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
           (covGrad (I := I) (M := M) g a b W) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appCcRS (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W +
-        appCcRS (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W +
+        ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
           (covGrad (I := I) (M := M) g a b W)).toSection x) =
-      (appCcRS (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W).toSection x +
-        (appCcRS (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
+      (ccOperatorFieldComp (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W).toSection x +
+        (ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
           (covGrad (I := I) (M := M) g a b W)).toSection x from rfl]
   apply ContinuousLinearMap.ext
   intro d
@@ -312,7 +312,7 @@ theorem covGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
   beta_reduce
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
-  rw [covGrad_toSection_apply_eval (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W) x d v]
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) x d v]
 
   rw [appCcRS_toSection (I := I) (M := M) g a b (c + 1) (covGrad (I := I) (M := M) g b c Φ) W x,
     ContinuousLinearMap.comp_apply,
@@ -321,7 +321,7 @@ theorem covGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
 
   have hT2val : Tensor0SSpace.toModel
         ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace (c + 1) I x from
-          (appCcRS (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
+          (ccOperatorFieldComp (I := I) (M := M) g a (b + 1) (c + 1) (slotExtend (I := I) (M := M) g b c Φ)
             (covGrad (I := I) (M := M) g a b W)).toSection x) d) v =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x)
@@ -343,7 +343,7 @@ theorem covGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
   rw [hT2val]
 
   rw [show (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace c I x from
-        tensorCovDerivAt (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ W) x (v 0)) =
+        tensorCovDerivAt (I := I) (M := M) g a c (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) x (v 0)) =
       (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from
           tensorCovDerivAt (I := I) (M := M) g b c Φ x (v 0)).comp
           (show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from W.toSection x) +
@@ -356,7 +356,7 @@ theorem covGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
 
 set_option linter.unusedSectionVars false in
 
-private lemma exists_orthoFrameRS_repr_anyvalence
+private lemma exists_orthoFrame_repr_anyRank
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x)
       (bse : Module.Basis (Fin n) ℝ (TangentSpace I x)),
@@ -395,7 +395,7 @@ private lemma exists_orthoFrameRS_repr_anyvalence
 
 set_option linter.unusedSectionVars false in
 
-private lemma fiberNormSqComponent_compRS_eq
+private lemma fiberNormSqComponent_comp_anyRank_eq
     (g : SmoothRiemannianMetric I M) (a b c : ℕ) (x : M)
     (Φx : TensorRSSpace b c I x) (Wx : TensorRSSpace a b I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -462,7 +462,7 @@ theorem riemannianFiberNormSq_compRS_le_mul
         riemannianFiberNormSq (I := I) (M := M) g a b x Wx := by
   classical
   obtain ⟨n, e, bse, hbse, horth, hrepr⟩ :=
-    exists_orthoFrameRS_repr_anyvalence (I := I) (M := M) g x
+    exists_orthoFrame_repr_anyRank (I := I) (M := M) g x
 
   have hreprAC : ∀ S : TensorRSSpace a c I x,
       riemannianFiberNormSq (I := I) (M := M) g a c x S =
@@ -494,7 +494,7 @@ theorem riemannianFiberNormSq_compRS_le_mul
         ∑ P : Fin b → Fin n,
           fiberNormSqComponent (I := I) (M := M) g x a b Wx n e K P *
             fiberNormSqComponent (I := I) (M := M) g x b c Φx n e P J :=
-    fun K J => fiberNormSqComponent_compRS_eq (I := I) (M := M) g a b c x Φx Wx e bse hbse horth K J
+    fun K J => fiberNormSqComponent_comp_anyRank_eq (I := I) (M := M) g a b c x Φx Wx e bse hbse horth K J
   rw [Finset.sum_congr rfl (fun K (_ : K ∈ Finset.univ) =>
     Finset.sum_congr rfl (fun J (_ : J ∈ Finset.univ) => by rw [hcomp_eq K J]))]
 
@@ -527,7 +527,7 @@ theorem exists_uniform_riemannianFiberNormSq_appCcRS_le
     (g : SmoothRiemannianMetric I M) (a b c : ℕ) (Φ : SmoothCcTensor g b c) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (W : SmoothCcTensor g a b) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g a c x
-          ((appCcRS (I := I) (M := M) g a b c Φ W).toSection x) ≤
+          ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x) ≤
         C * riemannianFiberNormSq (I := I) (M := M) g a b x (W.toSection x) := by
   obtain ⟨K, hK_nn, hK⟩ := exists_bound_riemannianFiberNormSq_smoothCcTensor g b c Φ
   refine ⟨K, hK_nn, fun W x => ?_⟩
@@ -542,9 +542,9 @@ set_option linter.unusedSectionVars false in
 theorem appCcRS_castRankCc_db {a a' b b' : ℕ} (g : SmoothRiemannianMetric I M) (r : ℕ)
     (ha : a = a') (hb : b = b')
     (Φ : SmoothCcTensor g a b) (V : SmoothCcTensor g r a) :
-    castRankCc_db g r hb (appCcRS (I := I) (M := M) g r a b Φ V) =
-      appCcRS (I := I) (M := M) g r a' b' (castSrcCc g b' ha (castRankCc_db g a hb Φ))
-        (castRankCc_db g r ha V) := by
+    castCcTensorRank g r hb (ccOperatorFieldComp (I := I) (M := M) g r a b Φ V) =
+      ccOperatorFieldComp (I := I) (M := M) g r a' b' (castCcTensorSourceRank g b' ha (castCcTensorRank g a hb Φ))
+        (castCcTensorRank g r ha V) := by
   subst ha; subst hb; rfl
 
 def NormalFormRS (g : SmoothRiemannianMetric I M) (r : ℕ)
@@ -554,7 +554,7 @@ def NormalFormRS (g : SmoothRiemannianMetric I M) (r : ℕ)
     ∀ W : SmoothCcTensor g r rr,
       op p rr W =
         ∑ k ∈ Finset.range (p + 1),
-          appCcRS (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k) (iteratedCovGrad g r rr k W)
+          ccOperatorFieldComp (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k) (iteratedCovGrad g r rr k W)
 
 set_option linter.unusedSectionVars false in
 
@@ -562,11 +562,11 @@ theorem covGrad_normalFormRS_sum (g : SmoothRiemannianMetric I M) (r p rr : ℕ)
     (Ψ : (k : ℕ) → SmoothCcTensor g (rr + k) (rr + p)) (W : SmoothCcTensor g r rr) :
     covGrad (I := I) (M := M) g r (rr + p)
         (∑ k ∈ Finset.range (p + 1),
-          appCcRS (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k) (iteratedCovGrad g r rr k W)) =
+          ccOperatorFieldComp (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k) (iteratedCovGrad g r rr k W)) =
       ∑ k ∈ Finset.range (p + 1),
-        (appCcRS (I := I) (M := M) g r (rr + k) (rr + (p + 1))
+        (ccOperatorFieldComp (I := I) (M := M) g r (rr + k) (rr + (p + 1))
             (covGrad (I := I) (M := M) g (rr + k) (rr + p) (Ψ k)) (iteratedCovGrad g r rr k W) +
-          appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+          ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
             (slotExtend (I := I) (M := M) g (rr + k) (rr + p) (Ψ k))
             (iteratedCovGrad g r rr (k + 1) W)) := by
   rw [covGrad_finset_sum]
@@ -580,12 +580,12 @@ set_option linter.unusedSectionVars false in
 
 theorem castRankCc_appCcRS_iteratedCovGrad_covGrad (g : SmoothRiemannianMetric I M) (r p rr k : ℕ)
     (Ψ : SmoothCcTensor g ((rr + 1) + k) ((rr + 1) + p)) (W : SmoothCcTensor g r rr) :
-    castRankCc_db g r (by omega : (rr + 1) + p = rr + (p + 1))
-        (appCcRS (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + p) Ψ
+    castCcTensorRank g r (by omega : (rr + 1) + p = rr + (p + 1))
+        (ccOperatorFieldComp (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + p) Ψ
           (iteratedCovGrad g r (rr + 1) k (covGrad g r rr W))) =
-      appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
-        (castSrcCc g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-          (castRankCc_db g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) Ψ))
+      ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+        (castCcTensorSourceRank g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+          (castCcTensorRank g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) Ψ))
         (iteratedCovGrad g r rr (k + 1) W) := by
   rw [appCcRS_castRankCc_db g r (by omega : (rr + 1) + k = rr + (k + 1))
     (by omega : (rr + 1) + p = rr + (p + 1)) Ψ (iteratedCovGrad g r (rr + 1) k (covGrad g r rr W))]
@@ -602,7 +602,7 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
     (covGrad_op : ∀ (p rr : ℕ) (W : SmoothCcTensor g r rr),
       covGrad g r (rr + p) (op p rr W) =
         op (p + 1) rr W +
-          castRankCc_db g r (by omega : (rr + 1) + p = rr + (p + 1)) (op p (rr + 1) (covGrad g r rr W)))
+          castCcTensorRank g r (by omega : (rr + 1) + p = rr + (p + 1)) (op p (rr + 1) (covGrad g r rr W)))
     (p : ℕ) (hp : ∀ rr, NormalFormRS (I := I) (M := M) g r op p rr) (rr : ℕ) :
     NormalFormRS (I := I) (M := M) g r op (p + 1) rr := by
   classical
@@ -611,8 +611,8 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
 
   set Tk : (k : ℕ) → SmoothCcTensor g (rr + (k + 1)) (rr + (p + 1)) := fun k =>
     slotExtend (I := I) (M := M) g (rr + k) (rr + p) (Ψr k) -
-      castSrcCc g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-        (castRankCc_db g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) (Ψr1 k))
+      castCcTensorSourceRank g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+        (castCcTensorRank g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) (Ψr1 k))
     with hTk_def
 
   refine ⟨fun j => match j with
@@ -624,7 +624,7 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
 
   have hrec : op (p + 1) rr W =
       covGrad g r (rr + p) (op p rr W) -
-        castRankCc_db g r (by omega : (rr + 1) + p = rr + (p + 1))
+        castCcTensorRank g r (by omega : (rr + 1) + p = rr + (p + 1))
           (op p (rr + 1) (covGrad g r rr W)) := by
     rw [covGrad_op p rr W]; abel
   rw [hrec, hΨr W]
@@ -633,13 +633,13 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
 
   rw [hΨr1 (covGrad g r rr W), castRankCc_db_finset_sum]
   rw [show (∑ k ∈ Finset.range (p + 1),
-        castRankCc_db g r (by omega : (rr + 1) + p = rr + (p + 1))
-          (appCcRS (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + p) (Ψr1 k)
+        castCcTensorRank g r (by omega : (rr + 1) + p = rr + (p + 1))
+          (ccOperatorFieldComp (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + p) (Ψr1 k)
             (iteratedCovGrad g r (rr + 1) k (covGrad g r rr W)))) =
       ∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
-          (castSrcCc g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-            (castRankCc_db g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) (Ψr1 k)))
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+          (castCcTensorSourceRank g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+            (castCcTensorRank g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) (Ψr1 k)))
           (iteratedCovGrad g r rr (k + 1) W) from
     Finset.sum_congr rfl (fun k _ =>
       castRankCc_appCcRS_iteratedCovGrad_covGrad (I := I) (M := M) g r p rr k (Ψr1 k) W)]
@@ -647,7 +647,7 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
   rw [Finset.sum_add_distrib]
 
   rw [Finset.sum_range_succ' (fun j =>
-    appCcRS (I := I) (M := M) g r (rr + j) (rr + (p + 1))
+    ccOperatorFieldComp (I := I) (M := M) g r (rr + j) (rr + (p + 1))
       ((match j with
         | 0 => covGrad (I := I) (M := M) g (rr + 0) (rr + p) (Ψr 0)
         | (k + 1) =>
@@ -656,45 +656,45 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
       (iteratedCovGrad g r rr j W)) (p + 1)]
 
   rw [show (∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
           ((if k + 1 < p + 1 then covGrad (I := I) (M := M) g (rr + (k + 1)) (rr + p) (Ψr (k + 1))
             else 0) + Tk k)
           (iteratedCovGrad g r rr (k + 1) W)) =
       (∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
           (if k + 1 < p + 1 then covGrad (I := I) (M := M) g (rr + (k + 1)) (rr + p) (Ψr (k + 1))
             else 0)
           (iteratedCovGrad g r rr (k + 1) W)) +
       (∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1)) (Tk k)
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1)) (Tk k)
           (iteratedCovGrad g r rr (k + 1) W)) from by
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [appCcRS_add_left]]
 
   rw [show (∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1)) (Tk k)
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1)) (Tk k)
           (iteratedCovGrad g r rr (k + 1) W)) =
       (∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
           (slotExtend (I := I) (M := M) g (rr + k) (rr + p) (Ψr k))
           (iteratedCovGrad g r rr (k + 1) W)) -
       (∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
-          (castSrcCc g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-            (castRankCc_db g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) (Ψr1 k)))
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+          (castCcTensorSourceRank g (rr + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+            (castCcTensorRank g ((rr + 1) + k) (by omega : (rr + 1) + p = rr + (p + 1)) (Ψr1 k)))
           (iteratedCovGrad g r rr (k + 1) W)) from by
     rw [← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [hTk_def, appCcRS_sub_left]]
 
   rw [show (∑ k ∈ Finset.range (p + 1),
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
           (if k + 1 < p + 1 then covGrad (I := I) (M := M) g (rr + (k + 1)) (rr + p) (Ψr (k + 1))
             else 0)
           (iteratedCovGrad g r rr (k + 1) W)) =
       ∑ k ∈ Finset.range p,
-        appCcRS (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
+        ccOperatorFieldComp (I := I) (M := M) g r (rr + (k + 1)) (rr + (p + 1))
           (covGrad (I := I) (M := M) g (rr + (k + 1)) (rr + p) (Ψr (k + 1)))
           (iteratedCovGrad g r rr (k + 1) W) from by
     rw [Finset.sum_range_succ]
@@ -703,7 +703,7 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
     rw [if_pos (by simp only [Finset.mem_range] at hk; omega : k + 1 < p + 1)]]
 
   rw [Finset.sum_range_succ' (fun k =>
-    appCcRS (I := I) (M := M) g r (rr + k) (rr + (p + 1))
+    ccOperatorFieldComp (I := I) (M := M) g r (rr + k) (rr + (p + 1))
       (covGrad (I := I) (M := M) g (rr + k) (rr + p) (Ψr k)) (iteratedCovGrad g r rr k W)) p]
 
   abel
@@ -714,7 +714,7 @@ theorem normalForm_zeroRS (g : SmoothRiemannianMetric I M) (r : ℕ)
     (op : ∀ (p rr : ℕ), SmoothCcTensor g r rr → SmoothCcTensor g r (rr + p))
     (rr : ℕ) (Φ₀ : SmoothCcTensor g (rr + 0) (rr + 0))
     (hbase : ∀ W : SmoothCcTensor g r rr,
-      op 0 rr W = appCcRS (I := I) (M := M) g r (rr + 0) (rr + 0) Φ₀ W) :
+      op 0 rr W = ccOperatorFieldComp (I := I) (M := M) g r (rr + 0) (rr + 0) Φ₀ W) :
     NormalFormRS (I := I) (M := M) g r op 0 rr := by
   refine ⟨fun k => match k with | 0 => Φ₀ | (_ + 1) => 0, fun W => ?_⟩
   rw [hbase W, Finset.sum_range_one]
@@ -727,10 +727,10 @@ theorem normalForm_of_baseRS (g : SmoothRiemannianMetric I M) (r : ℕ)
     (covGrad_op : ∀ (p rr : ℕ) (W : SmoothCcTensor g r rr),
       covGrad g r (rr + p) (op p rr W) =
         op (p + 1) rr W +
-          castRankCc_db g r (by omega : (rr + 1) + p = rr + (p + 1)) (op p (rr + 1) (covGrad g r rr W)))
+          castCcTensorRank g r (by omega : (rr + 1) + p = rr + (p + 1)) (op p (rr + 1) (covGrad g r rr W)))
     (Φ₀ : ∀ rr : ℕ, SmoothCcTensor g (rr + 0) (rr + 0))
     (hbase : ∀ (rr : ℕ) (W : SmoothCcTensor g r rr),
-      op 0 rr W = appCcRS (I := I) (M := M) g r (rr + 0) (rr + 0) (Φ₀ rr) W)
+      op 0 rr W = ccOperatorFieldComp (I := I) (M := M) g r (rr + 0) (rr + 0) (Φ₀ rr) W)
     (p : ℕ) : ∀ rr : ℕ, NormalFormRS (I := I) (M := M) g r op p rr := by
   induction p with
   | zero => exact fun rr => normalForm_zeroRS (I := I) (M := M) g r op rr (Φ₀ rr) (hbase rr)
@@ -764,13 +764,13 @@ theorem exists_jet_bound_of_normalFormRS (g : SmoothRiemannianMetric I M) (r : �
 
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r (rr + p) x
     (Finset.range (p + 1))
-    (fun k => (appCcRS (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k)
+    (fun k => (ccOperatorFieldComp (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k)
       (iteratedCovGrad g r rr k W)).toSection x)) ?_
   rw [Finset.card_range]
 
   have hsummand : ∀ k ∈ Finset.range (p + 1),
       riemannianFiberNormSq (I := I) (M := M) g r (rr + p) x
-          ((appCcRS (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k)
+          ((ccOperatorFieldComp (I := I) (M := M) g r (rr + k) (rr + p) (Ψ k)
             (iteratedCovGrad g r rr k W)).toSection x) ≤ C k * a k := fun k _ => hC k _ x
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
 

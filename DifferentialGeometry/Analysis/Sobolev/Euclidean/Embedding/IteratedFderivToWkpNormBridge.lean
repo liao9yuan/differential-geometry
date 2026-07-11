@@ -20,7 +20,7 @@ theorem chartTarget_iteratedFDeriv_two_eLpNorm_le_wkpNorm_two
     (hu_compact : HasCompactSupport u) (hu_supp : tsupport u ⊆ Ω) :
     eLpNorm (fun y : EuclN => ‖iteratedFDeriv ℝ 2 u y‖) 2
         (volume.restrict Ω) ≤
-      wkpNorm (d := d) 2 2 u Ω := by
+      iteratedWeakSobolevNorm (d := d) 2 2 u Ω := by
   classical
   have hp_one : (1 : ℝ≥0∞) ≤ 2 := by
     exact_mod_cast (by norm_num : (1 : ℕ) ≤ 2)

@@ -82,7 +82,7 @@ lemma frame_trace_third_eq_swap_unit
             (smoothExtensionTangent (I := I) x w x))
           (unitZeroSec (I := I) (M := M) x) +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
-          Tensor3rdCurv (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
+          tensorThirdOrderCurvatureDefect (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) := by
   classical

@@ -37,10 +37,10 @@ noncomputable def chartRSTwistInv
     (α : M) (b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     TensorRSModel r s ℝ E :=
   (ContinuousMultilinearMap.compContinuousLinearMapL
-    (fun _ : Fin s => chartJinv (I := I) (M := M) α b)).comp <|
+    (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).comp <|
     T.comp
       ((ContinuousMultilinearMap.compContinuousLinearMapL
-        (fun _ : Fin r => chartJ (I := I) (M := M) α b)))
+        (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)))
 
 @[simp]
 lemma chartRSTwistInv_apply
@@ -48,8 +48,8 @@ lemma chartRSTwistInv_apply
     (α' : Tensor0SModel r ℝ E) :
     chartRSTwistInv (I := I) (M := M) α b r s T α' =
       (T (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b))).compContinuousLinearMap
-        (fun _ : Fin s => chartJinv (I := I) (M := M) α b) := by
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+        (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) := by
   rfl
 
 lemma chartRSTwistInv_chartRSTwist
@@ -68,8 +68,8 @@ lemma chartRSTwistInv_chartRSTwist
       ContinuousMultilinearMap.compContinuousLinearMap_apply]
   have hα' :
       (α'.compContinuousLinearMap
-          (fun _ : Fin r => chartJ (I := I) (M := M) α b)).compContinuousLinearMap
-        (fun _ : Fin r => chartJinv (I := I) (M := M) α b) = α' := by
+          (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)).compContinuousLinearMap
+        (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b) = α' := by
     refine ContinuousMultilinearMap.ext ?_
     intro v
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
@@ -94,8 +94,8 @@ lemma chartRSTwist_chartRSTwistInv
   rw [chartRSTwist_apply, chartRSTwistInv_apply]
   have hinner :
       (α'.compContinuousLinearMap
-          (fun _ : Fin r => chartJinv (I := I) (M := M) α b)).compContinuousLinearMap
-        (fun _ : Fin r => chartJ (I := I) (M := M) α b) = α' := by
+          (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+        (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b) = α' := by
     refine ContinuousMultilinearMap.ext ?_
     intro v
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
@@ -141,11 +141,11 @@ lemma chartRSTwist_ne_zero
     rw [chartRSTwistInv_apply]
     change ((0 : TensorRSModel r s ℝ E)
         (α'.compContinuousLinearMap
-          (fun _ : Fin r => chartJ (I := I) (M := M) α b))).compContinuousLinearMap
-        (fun _ : Fin s => chartJinv (I := I) (M := M) α b) = 0
+          (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))).compContinuousLinearMap
+        (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) = 0
     rw [show ((0 : TensorRSModel r s ℝ E)
           (α'.compContinuousLinearMap
-            (fun _ : Fin r => chartJ (I := I) (M := M) α b))) =
+            (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b))) =
             (0 : Tensor0SModel s ℝ E) from rfl]
     refine ContinuousMultilinearMap.ext ?_
     intro v

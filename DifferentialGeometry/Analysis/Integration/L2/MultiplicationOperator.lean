@@ -44,19 +44,19 @@ theorem norm_appFullRS_sq_eq_integral
       (fun x : M => TotalSpace.mk' (TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)
         (E := fun z : M => TensorRSSpace r s I z →L[ℝ] TensorRSSpace r s I z) x (Ψ x)))
     (W : SmoothCcTensor g r s) :
-    ‖appFullRS (I := I) (M := M) g r s s Ψ hΨ W‖ ^ 2 =
+    ‖homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g r s x (Ψ x (W.toSection x))
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   have hsec :
       (fun x => TensorRSSpace.toModel (𝕜 := ℝ) (E := E) (I := I) (M := M)
           (r := r) (s := s) (x := x)
-          ((appFullRS (I := I) (M := M) g r s s Ψ hΨ W).toSection x)) =
-        (appFullRS (I := I) (M := M) g r s s Ψ hΨ W).toFun := by
+          ((homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W).toSection x)) =
+        (homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W).toFun := by
     funext x
     rw [SmoothCcTensor.toFun_apply]
   rw [SmoothCcTensor.norm_def, ← hsec,
     tensorL2Norm_sq_eq_integral_riemannianFiberNormSq (I := I) (M := M) g r s
-      (fun x => (appFullRS (I := I) (M := M) g r s s Ψ hΨ W).toSection x)]
+      (fun x => (homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W).toSection x)]
   refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
   simp only [appFullRS_toSection (I := I) (M := M) g r s s Ψ hΨ W]
 
@@ -72,7 +72,7 @@ theorem integrable_riemannianFiberNormSq_appFullRS
       (fun x => riemannianFiberNormSq (I := I) (M := M) g r s x (Ψ x (W.toSection x)))
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
   have hmem := SmoothCcTensor.memL2_toFun (I := I) (M := M)
-    (g := g) (r := r) (s := s) (appFullRS (I := I) (M := M) g r s s Ψ hΨ W)
+    (g := g) (r := r) (s := s) (homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W)
   have hint := hmem.integrable_inner_self
   refine hint.congr (Filter.Eventually.of_forall (fun x => ?_))
   simp only [SmoothCcTensor.toFun_apply, appFullRS_toSection (I := I) (M := M) g r s s Ψ hΨ W x]
@@ -105,9 +105,9 @@ theorem norm_appFullRS_le_sqrt_mul
       riemannianFiberNormSq (I := I) (M := M) g r s x (Ψ x v) ≤
         C * riemannianFiberNormSq (I := I) (M := M) g r s x v)
     (W : SmoothCcTensor g r s) :
-    ‖appFullRS (I := I) (M := M) g r s s Ψ hΨ W‖ ≤ Real.sqrt C * ‖W‖ := by
+    ‖homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W‖ ≤ Real.sqrt C * ‖W‖ := by
   have hsq_int :
-      ‖appFullRS (I := I) (M := M) g r s s Ψ hΨ W‖ ^ 2 ≤ C * ‖W‖ ^ 2 := by
+      ‖homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W‖ ^ 2 ≤ C * ‖W‖ ^ 2 := by
     rw [norm_appFullRS_sq_eq_integral (I := I) (M := M) Ψ hΨ W]
     have hWsq :
         ‖W‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g r s x (W.toSection x)
@@ -146,7 +146,7 @@ def fibreFieldMulSmoothCLM
         C * riemannianFiberNormSq (I := I) (M := M) g r s x v) :
     SmoothCcTensor g r s →L[ℝ] SmoothCcTensor g r s :=
   LinearMap.mkContinuous
-    { toFun := fun W => appFullRS (I := I) (M := M) g r s s Ψ hΨ W
+    { toFun := fun W => homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W
       map_add' := fun W₁ W₂ => appFullRS_add_right (I := I) (M := M) g r s s Ψ hΨ W₁ W₂
       map_smul' := fun k W => appFullRS_smul_right (I := I) (M := M) g r s s k Ψ hΨ W }
     (Real.sqrt C)
@@ -165,7 +165,7 @@ set_option linter.unusedSectionVars false in
         C * riemannianFiberNormSq (I := I) (M := M) g r s x v)
     (W : SmoothCcTensor g r s) :
     fibreFieldMulSmoothCLM (I := I) (M := M) g r s Ψ hΨ hC hbound W =
-      appFullRS (I := I) (M := M) g r s s Ψ hΨ W := rfl
+      homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ W := rfl
 
 end SmoothSide
 
@@ -204,7 +204,7 @@ set_option linter.unusedSectionVars false in
     fibreFieldMulL2 (I := I) (M := M) g r s Ψ hΨ hC hbound
         ((SmoothCcTensor.toL2 (g := g) (r := r) (s := s)) S) =
       (SmoothCcTensor.toL2 (g := g) (r := r) (s := s))
-        (appFullRS (I := I) (M := M) g r s s Ψ hΨ S) := by
+        (homTensorRSApply (I := I) (M := M) g r s s Ψ hΨ S) := by
   rw [fibreFieldMulL2, SmoothCcTensor.mapL2_apply_toL2,
     fibreFieldMulSmoothCLM_apply (I := I) (M := M) g r s Ψ hΨ hC hbound S]
 

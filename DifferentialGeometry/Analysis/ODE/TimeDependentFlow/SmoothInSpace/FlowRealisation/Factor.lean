@@ -25,7 +25,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
-theorem heucl_factorODE_of_isLocalFlow
+theorem hasDerivAt_partialSpatialFderiv_of_isLocalFlow_at_chart
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiff ℝ ∞ (uncurry f))
@@ -125,7 +125,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-theorem hbridge_slot_of_basepoint_data
+theorem leviCivita_flowBasepoint_eq_chartFderiv_add_corrections
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (u : TangentSpace I x)
@@ -196,8 +196,8 @@ theorem variational_flow_flat_paired_residual_of_chart_realisation
         + metricTransportResidual (I := I) g X Φ_fam t x v w) t :=
   variational_flow_flat_paired_residual_hasDerivAt (I := I) g X Φ_fam t x v w
     T'v P'v T'w P'w hv_flat hw_flat hflatval_v hflatval_w
-    (hbridge_slot_of_basepoint_data (I := I) g X Φ_fam t x v hα hRdiff hCdiff)
-    (hbridge_slot_of_basepoint_data (I := I) g X Φ_fam t x w hα hRdiff hCdiff)
+    (leviCivita_flowBasepoint_eq_chartFderiv_add_corrections (I := I) g X Φ_fam t x v hα hRdiff hCdiff)
+    (leviCivita_flowBasepoint_eq_chartFderiv_add_corrections (I := I) g X Φ_fam t x w hα hRdiff hCdiff)
 
 end PairedResidualDischarge
 

@@ -43,8 +43,8 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 def velocitySecondCovGradCc (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : SmoothCcTensor g₀ 0 4 where
   toSection :=
     (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
@@ -85,8 +85,8 @@ set_option linter.unusedSectionVars false in
 
 lemma ccTensorBilin_sub_two (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (b : M) (p q : TangentSpace I b) :
-    ccTensorBilin (I := I) g₀ (T - T') b p q =
-      ccTensorBilin (I := I) g₀ T b p q - ccTensorBilin (I := I) g₀ T' b p q := by
+    smoothCcTensorBilinForm (I := I) g₀ (T - T') b p q =
+      smoothCcTensorBilinForm (I := I) g₀ T b p q - smoothCcTensorBilinForm (I := I) g₀ T' b p q := by
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   have hmulti : (ccTensorMultilinear (I := I) g₀ (T - T') b : Tensor0SBundle.Tensor0SSpace 2 I b) =
       (ccTensorMultilinear (I := I) g₀ T b : Tensor0SBundle.Tensor0SSpace 2 I b)
@@ -121,7 +121,7 @@ set_option linter.unusedSectionVars false in
 
 private lemma ccTensorBilin_smul_c (g : SmoothRiemannianMetric I M) (c : ℝ)
     (S : SmoothCcTensor g 0 2) (b : M) (p q : TangentSpace I b) :
-    ccTensorBilin (I := I) g (c • S) b p q = c * ccTensorBilin (I := I) g S b p q := by
+    smoothCcTensorBilinForm (I := I) g (c • S) b p q = c * smoothCcTensorBilinForm (I := I) g S b p q := by
   rw [ccTensorBilin_apply, ccTensorBilin_apply]
   have hmulti : (ccTensorMultilinear (I := I) g (c • S) b : Tensor0SBundle.Tensor0SSpace 2 I b) =
       c • (ccTensorMultilinear (I := I) g S b : Tensor0SBundle.Tensor0SSpace 2 I b) := by
@@ -157,9 +157,9 @@ set_option linter.unusedSectionVars false in
 private lemma koszulPair_eq_smul_dual_linearizedKoszul
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (Zf Yf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
     koszulCovGradCovec (I := I) (M := M)
@@ -198,7 +198,7 @@ private lemma unitEval_bilin_eq (g : SmoothRiemannianMetric I M)
     (show ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I y) ℝ from
         (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
           S.toSection y) (unitZeroSec (I := I) (M := M) y)) m =
-      ccTensorBilin (I := I) g S y (m 0) (m 1) := by
+      smoothCcTensorBilinForm (I := I) g S y (m 0) (m 1) := by
   have hm : m = ![m 0, m 1] := by
     funext i
     fin_cases i <;> rfl
@@ -214,8 +214,8 @@ set_option linter.unusedSectionVars false in
 
 private lemma velocity_unitEval_domDomCongr_swap
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (y : M) :
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s).toSection y)
@@ -232,7 +232,7 @@ private lemma velocity_unitEval_domDomCongr_swap
       (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s).toSection y)
         (unitZeroSec (I := I) (M := M) y)) (fun i => m ((Equiv.swap (0 : Fin 2) 1) i)) =
-      ccTensorBilin (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+      smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y (m 1) (m 0) := by
     rw [unitEval_bilin_eq (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y]
@@ -240,14 +240,14 @@ private lemma velocity_unitEval_domDomCongr_swap
   rw [unitEval_bilin_eq (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
     (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y]
   rw [hswapargs]
-  rw [show ccTensorBilin (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+  rw [show smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y (m 0) (m 1) =
-      ccTensorBilin (I := I) g₀
-        (symmS (I := I) (M := M) g₀ (T - T')) y (m 0) (m 1) from rfl]
-  rw [show ccTensorBilin (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+      smoothCcTensorBilinForm (I := I) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) y (m 0) (m 1) from rfl]
+  rw [show smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y (m 1) (m 0) =
-      ccTensorBilin (I := I) g₀
-        (symmS (I := I) (M := M) g₀ (T - T')) y (m 1) (m 0) from rfl]
+      smoothCcTensorBilinForm (I := I) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) y (m 1) (m 0) from rfl]
   rw [ccTensorBilin_symmS, ccTensorBilin_symmS,
     ccTensorBilinSymm_apply, ccTensorBilinSymm_apply]
   ring
@@ -323,9 +323,9 @@ set_option linter.unusedSectionVars false in
 private theorem cotangentCov_linearizedKoszul_eval
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
     ((cotangentCov (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))).toFun
@@ -383,7 +383,7 @@ private theorem cotangentCov_linearizedKoszul_eval
     have h0 : (0 : ℝ) - s < 0 := by linarith [hs.1]
     exact ne_of_lt h0
   have hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
+      smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
           (((0 : ℝ) - s) • realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) b u w =
         (realizedFam (I := I) g₀ T T' hδ hδ' 0).inner b u w -
           (realizedFam (I := I) g₀ T T' hδ hδ' s).inner b u w := by
@@ -428,8 +428,8 @@ set_option linter.unusedSectionVars false in
 
 private lemma velocity_covGrad_swap12
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (a b c : TangentSpace I x) :
     unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 3
         (covGrad (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2
@@ -475,8 +475,8 @@ set_option linter.unusedSectionVars false in
 
 private lemma velocity_covGrad_unitEval_domDomCongr_swap12
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (y : M) :
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I y from
         (covGrad (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2
@@ -515,8 +515,8 @@ set_option linter.unusedSectionVars false in
 
 private lemma velocity_secondCovGrad_swap23
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (a b c d : TangentSpace I x) :
     unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
         (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
@@ -575,9 +575,9 @@ set_option linter.unusedSectionVars false in
 private lemma lkc_eq_endpoint_flat
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (b : M) (u ζ : TangentSpace I b) :
     linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
@@ -617,9 +617,9 @@ set_option linter.unusedSectionVars false in
 private lemma lkc_basis_contMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (j : Fin (Module.finrank ℝ E)) :
@@ -672,12 +672,12 @@ private lemma lkc_basis_contMDiffOn
 
 set_option linter.unusedSectionVars false in
 
-private lemma sharpPsi_contMDiff
+private lemma metricSharp_linearizedKoszulCovec_contMDiff
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -697,9 +697,9 @@ set_option linter.unusedSectionVars false in
 private theorem covDerivLinearizedConn_inner_towers
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
     (realizedFam (I := I) g₀ T T' hδ hδ' s).inner x
@@ -735,7 +735,7 @@ private theorem covDerivLinearizedConn_inner_towers
       funext y
       rw [inverseMetricSharpFib_dualToCotangent]
     rw [hfun]
-    exact ((sharpPsi_contMDiff (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs Y Z x).mdifferentiableAt
+    exact ((metricSharp_linearizedKoszulCovec_contMDiff (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs Y Z x).mdifferentiableAt
       (by simp))
   have hpar := inverseMetricSharpField_covGrad_eq_zero
     (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
@@ -841,7 +841,7 @@ private def cmmSlotPairCLM (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q : E) 
 
 set_option linter.unusedSectionVars false in
 
-private lemma cmmSlotPairCLM_apply (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q om u : E) :
+private lemma tensorRank4OuterSlotBilinearCLM_apply (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q om u : E) :
     cmmSlotPairCLM (E := E) D p q om u = D ![u, p, q, om] := by
   change (D : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
       (Function.update ![(0 : E), p, q, om] 0 u) = D ![u, p, q, om]
@@ -965,7 +965,7 @@ private lemma slotPair_trace_basis_indep (g₁ : SmoothRiemannianMetric I M) (x 
         D ![(chartModelBasis E i : E), p, q,
           sharpCovCLM (I := I) (M := M) g₁ x ((chartModelBasis E).cDualBasis i)] from
     Finset.sum_congr rfl (fun i _ => by
-      rw [ContinuousLinearMap.comp_apply, cmmSlotPairCLM_apply])] at h
+      rw [ContinuousLinearMap.comp_apply, tensorRank4OuterSlotBilinearCLM_apply])] at h
   rw [show (∑ k : Fin (Module.finrank ℝ E),
       ((cmmSlotPairCLM (E := E) D p q).comp (sharpCovCLM (I := I) (M := M) g₁ x))
         ((Module.finBasis ℝ E).cDualBasis k) ((Module.finBasis ℝ E) k)) =
@@ -973,12 +973,12 @@ private lemma slotPair_trace_basis_indep (g₁ : SmoothRiemannianMetric I M) (x 
         D ![(Module.finBasis ℝ E k : E), p, q,
           sharpCovCLM (I := I) (M := M) g₁ x ((Module.finBasis ℝ E).cDualBasis k)] from
     Finset.sum_congr rfl (fun k _ => by
-      rw [ContinuousLinearMap.comp_apply, cmmSlotPairCLM_apply])] at h
+      rw [ContinuousLinearMap.comp_apply, tensorRank4OuterSlotBilinearCLM_apply])] at h
   exact h
 
 set_option linter.unusedSectionVars false in
 
-private lemma slotPair_trace_master (g₁ : SmoothRiemannianMetric I M) (x : M)
+private lemma slotPair_trace_swap (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (p q : E) :
     (∑ i : Fin (Module.finrank ℝ E),
         D ![(chartModelBasis E i : E), p, q,
@@ -996,7 +996,7 @@ private lemma slotPair_trace_master (g₁ : SmoothRiemannianMetric I M) (x : M)
         D ![(Module.finBasis ℝ E k : E), p, q,
           sharpCovCLM (I := I) (M := M) g₁ x ((Module.finBasis ℝ E).cDualBasis k)] from
     Finset.sum_congr rfl (fun k _ => by
-      rw [ContinuousLinearMap.flip_apply, cmmSlotPairCLM_apply])] at hswap
+      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply])] at hswap
   rw [show (∑ k : Fin (Module.finrank ℝ E),
       ((cmmSlotPairCLM (E := E) D p q).flip)
         (sharpCovCLM (I := I) (M := M) g₁ x ((Module.finBasis ℝ E).cDualBasis k))
@@ -1005,21 +1005,21 @@ private lemma slotPair_trace_master (g₁ : SmoothRiemannianMetric I M) (x : M)
         D ![sharpCovCLM (I := I) (M := M) g₁ x ((Module.finBasis ℝ E).cDualBasis k), p, q,
           (Module.finBasis ℝ E k : E)] from
     Finset.sum_congr rfl (fun k _ => by
-      rw [ContinuousLinearMap.flip_apply, cmmSlotPairCLM_apply])] at hswap
+      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply])] at hswap
   exact hswap
 
 set_option linter.unusedSectionVars false in
 
 private lemma appCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ Ψ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s (Φ - Ψ) W =
-      appCc (I := I) (M := M) g r s Φ W - appCc (I := I) (M := M) g r s Ψ W := by
+    operatorFieldApply (I := I) (M := M) g r s (Φ - Ψ) W =
+      operatorFieldApply (I := I) (M := M) g r s Φ W - operatorFieldApply (I := I) (M := M) g r s Ψ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appCc (I := I) (M := M) g r s Φ W - appCc (I := I) (M := M) g r s Ψ W).toSection x) =
-      (appCc (I := I) (M := M) g r s Φ W).toSection x -
-        (appCc (I := I) (M := M) g r s Ψ W).toSection x from by
+  rw [show ((operatorFieldApply (I := I) (M := M) g r s Φ W - operatorFieldApply (I := I) (M := M) g r s Ψ W).toSection x) =
+      (operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x -
+        (operatorFieldApply (I := I) (M := M) g r s Ψ W).toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [appCc_toSection, appCc_toSection, appCc_toSection]
   rw [show ((Φ - Ψ).toSection x : Tensor0SBundle.TensorRSSpace r s I x) =
@@ -1031,13 +1031,13 @@ set_option linter.unusedSectionVars false in
 
 private lemma appCc_smul_left' (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s (c • Φ) W =
-      c • appCc (I := I) (M := M) g r s Φ W := by
+    operatorFieldApply (I := I) (M := M) g r s (c • Φ) W =
+      c • operatorFieldApply (I := I) (M := M) g r s Φ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((c • appCc (I := I) (M := M) g r s Φ W).toSection x) =
-      c • (appCc (I := I) (M := M) g r s Φ W).toSection x from rfl]
+  rw [show ((c • operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x) =
+      c • (operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x from rfl]
   rw [appCc_toSection, appCc_toSection]
   rw [show ((c • Φ).toSection x : Tensor0SBundle.TensorRSSpace r s I x) = c • Φ.toSection x from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
@@ -1103,13 +1103,13 @@ private lemma finCons_cons_pair_eq {F : Type*} (a b : F) (v : Fin 2 → F) :
 theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
     linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
           (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s)) x v := by
   classical
@@ -1125,7 +1125,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
                 (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                   ((Module.finBasis ℝ E).cDualBasis k)) := fun k => rfl
   have hRHS : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2
         (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
         (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s)) x v =
       (1 / 2 : ℝ) *
@@ -1158,7 +1158,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
       ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
     rw [ricciArmPrincipalCoeff_appCc_eq_combinedTrace (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' s) (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x v]
-    rw [traceHessianCoeff_appCc_eq (I := I) (M := M) g₀
+    rw [traceHessianCoeff_apply_eq (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' s) (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x v]
     have hterm : ∀ k : Fin (Module.finrank ℝ E),
         (unitModel (I := I) (M := M) g₀ 4 (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x
@@ -1430,7 +1430,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 0, v 1, (Module.finBasis ℝ E) k] :=
-    slotPair_trace_master (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)
+    slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)
   have hTA2 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, v 1, v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
@@ -1439,7 +1439,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((Module.finBasis ℝ E).cDualBasis k), v 1, v 0, (Module.finBasis ℝ E) k] :=
-    slotPair_trace_master (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 1) (v 0)
+    slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 1) (v 0)
   have hTA3 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![(chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
@@ -1486,7 +1486,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
             ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)] from
       Finset.sum_congr rfl (fun i _ => hcan i)]
-    rw [slotPair_trace_master (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)]
+    rw [slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)]
     exact Finset.sum_congr rfl (fun k _ => hcan' k)
   have hTB2 : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
@@ -1534,7 +1534,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
             ![(chartModelBasis E) i, v 0, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i)] from
       Finset.sum_congr rfl (fun i _ => hcan i)]
-    rw [slotPair_trace_master (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)]
+    rw [slotPair_trace_swap (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x _ (v 0) (v 1)]
     exact Finset.sum_congr rfl (fun k _ => hcan' k)
   have hmid : (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
@@ -1575,7 +1575,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), v 1] := by
       intro i
-      rw [ContinuousLinearMap.flip_apply, cmmSlotPairCLM_apply, domDomCongr_1032_eval]
+      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply, domDomCongr_1032_eval]
     have hR : ∀ i : Fin (Module.finrank ℝ E),
         ((cmmSlotPairCLM (E := E)
           (ContinuousMultilinearMap.domDomCongr perm4_1032
@@ -1589,7 +1589,7 @@ theorem linearizedRicciAt_eq_lichnerowicz_velocitySecondCovGrad
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
                   ((chartModelBasis E).cDualBasis i), (chartModelBasis E) i, v 1] := by
       intro i
-      rw [ContinuousLinearMap.flip_apply, cmmSlotPairCLM_apply, domDomCongr_1032_eval]
+      rw [ContinuousLinearMap.flip_apply, tensorRank4OuterSlotBilinearCLM_apply, domDomCongr_1032_eval]
     calc (∑ i : Fin (Module.finrank ℝ E), unitModel (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 4
               (iteratedCovGrad (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2 2
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) x ![v 0, (chartModelBasis E) i, v 1, sharpCovCLM (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) x

@@ -50,7 +50,7 @@ section BalLadder
 
 variable (g₀ : SmoothRiemannianMetric I M)
 
-lemma bal_norm_icg_comp (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
+lemma norm_iteratedCovGrad_iteratedCovGrad_eq (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
     (Ψ : SmoothCcTensor g r s) :
     ‖iteratedCovGrad (I := I) g r (s + j) i (iteratedCovGrad (I := I) g r s j Ψ)‖ =
       ‖iteratedCovGrad (I := I) g r s (j + i) Ψ‖ := by
@@ -66,7 +66,7 @@ lemma bal_norm_icg_comp (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r
         (s + (j + i))]
     refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g r s j i Ψ x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g r s j i Ψ x
   nlinarith [hsq, hnn1, hnn2,
     sq_nonneg (‖iteratedCovGrad (I := I) g r (s + j) i
         (iteratedCovGrad (I := I) g r s j Ψ)‖ -
@@ -79,7 +79,7 @@ private lemma bal_icg_zero_tensor (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   rw [sub_self, sub_self] at h
   exact h
 
-lemma bal_jet_l2_of_pointwise_window (g : SmoothRiemannianMetric I M)
+lemma normSq_le_sum_normSq_of_pointwise_fiberNormSq_window (g : SmoothRiemannianMetric I M)
     {rz sz rw : ℕ} (Z : SmoothCcTensor g rz sz) (c : ℝ) (_hc : 0 ≤ c)
     (sw : ℕ → ℕ) (F : (i : ℕ) → SmoothCcTensor g rw (sw i)) (n : ℕ)
     (hpt : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g rz sz x (Z.toSection x) ≤
@@ -147,10 +147,10 @@ private lemma bal_ptcRS_jet_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   set Sj : ℝ := ∑ b ∈ Finset.range (j + 3), ‖iteratedCovGrad (I := I) g r s b S‖ with hSj_def
   have hSj_nn : 0 ≤ Sj := Finset.sum_nonneg (fun b _ => norm_nonneg _)
   have h₀ : ‖iteratedCovGrad (I := I) g r (s + 1) j
-      (appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S)‖ ≤ Real.sqrt (cc₀ j) * Sj := by
-    have hsq := bal_jet_l2_of_pointwise_window (I := I) (M := M) g
+      (homTensorRSFieldApply (I := I) (M := M) g r s (s + 1) Q₀ S)‖ ≤ Real.sqrt (cc₀ j) * Sj := by
+    have hsq := normSq_le_sum_normSq_of_pointwise_fiberNormSq_window (I := I) (M := M) g
       (iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S))
+        (homTensorRSFieldApply (I := I) (M := M) g r s (s + 1) Q₀ S))
       (cc₀ j) (hcc₀_nn j) (fun i => s + i)
       (fun i => iteratedCovGrad (I := I) g r s i S) (j + 1) (fun x => hcc₀ S j x)
     have hsum_le : ∑ i ∈ Finset.range (j + 1),
@@ -162,11 +162,11 @@ private lemma bal_ptcRS_jet_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     rw [mul_pow, Real.sq_sqrt (hcc₀_nn j)]
     exact le_trans hsq (mul_le_mul_of_nonneg_left hsum_le (hcc₀_nn j))
   have h₁ : ‖iteratedCovGrad (I := I) g r (s + 1) j
-      (appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+      (homTensorRSFieldApply (I := I) (M := M) g r (s + 1) (s + 1) Q₁
         (iteratedCovGrad (I := I) g r s 1 S))‖ ≤ Real.sqrt (cc₁ j) * Sj := by
-    have hsq := bal_jet_l2_of_pointwise_window (I := I) (M := M) g
+    have hsq := normSq_le_sum_normSq_of_pointwise_fiberNormSq_window (I := I) (M := M) g
       (iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+        (homTensorRSFieldApply (I := I) (M := M) g r (s + 1) (s + 1) Q₁
           (iteratedCovGrad (I := I) g r s 1 S)))
       (cc₁ j) (hcc₁_nn j) (fun i => s + (i + 1))
       (fun i => iteratedCovGrad (I := I) g r s (i + 1) S) (1 + j) (fun x => hcc₁ S j x)
@@ -178,11 +178,11 @@ private lemma bal_ptcRS_jet_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     rw [mul_pow, Real.sq_sqrt (hcc₁_nn j)]
     exact le_trans hsq (mul_le_mul_of_nonneg_left hsum_le (hcc₁_nn j))
   have h₂ : ‖iteratedCovGrad (I := I) g r (s + 1) j
-      (appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+      (homTensorRSFieldApply (I := I) (M := M) g r (s + 2) (s + 1) Q₂
         (iteratedCovGrad (I := I) g r s 2 S))‖ ≤ Real.sqrt (cc₂ j) * Sj := by
-    have hsq := bal_jet_l2_of_pointwise_window (I := I) (M := M) g
+    have hsq := normSq_le_sum_normSq_of_pointwise_fiberNormSq_window (I := I) (M := M) g
       (iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+        (homTensorRSFieldApply (I := I) (M := M) g r (s + 2) (s + 1) Q₂
           (iteratedCovGrad (I := I) g r s 2 S)))
       (cc₂ j) (hcc₂_nn j) (fun i => s + (i + 2))
       (fun i => iteratedCovGrad (I := I) g r s (i + 2) S) (1 + j) (fun x => hcc₂ S j x)
@@ -196,39 +196,39 @@ private lemma bal_ptcRS_jet_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   have htri : ‖iteratedCovGrad (I := I) g r (s + 1) j
       (pointwiseTensorCurvRS (I := I) (M := M) g r s S)‖ ≤
       ‖iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S)‖ +
+        (homTensorRSFieldApply (I := I) (M := M) g r s (s + 1) Q₀ S)‖ +
       ‖iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+        (homTensorRSFieldApply (I := I) (M := M) g r (s + 1) (s + 1) Q₁
           (covGrad (I := I) (M := M) g r s S))‖ +
       ‖iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+        (homTensorRSFieldApply (I := I) (M := M) g r (s + 2) (s + 1) Q₂
           (iteratedCovGrad (I := I) g r s 2 S))‖ := by
     rw [hQ S, iteratedCovGrad_add, iteratedCovGrad_add]
     refine le_trans (norm_add_le _ _) ?_
     have h := norm_add_le
       (iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S))
+        (homTensorRSFieldApply (I := I) (M := M) g r s (s + 1) Q₀ S))
       (iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+        (homTensorRSFieldApply (I := I) (M := M) g r (s + 1) (s + 1) Q₁
           (covGrad (I := I) (M := M) g r s S)))
     linarith
   have hcov1 : covGrad (I := I) (M := M) g r s S = iteratedCovGrad (I := I) g r s 1 S := rfl
   rw [hcov1] at htri
   refine le_trans htri ?_
   calc ‖iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r s (s + 1) Q₀ S)‖ +
+        (homTensorRSFieldApply (I := I) (M := M) g r s (s + 1) Q₀ S)‖ +
       ‖iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r (s + 1) (s + 1) Q₁
+        (homTensorRSFieldApply (I := I) (M := M) g r (s + 1) (s + 1) Q₁
           (iteratedCovGrad (I := I) g r s 1 S))‖ +
       ‖iteratedCovGrad (I := I) g r (s + 1) j
-        (appFullSec (I := I) (M := M) g r (s + 2) (s + 1) Q₂
+        (homTensorRSFieldApply (I := I) (M := M) g r (s + 2) (s + 1) Q₂
           (iteratedCovGrad (I := I) g r s 2 S))‖
       ≤ Real.sqrt (cc₀ j) * Sj + Real.sqrt (cc₁ j) * Sj + Real.sqrt (cc₂ j) * Sj :=
         add_le_add (add_le_add h₀ h₁) h₂
     _ = (Real.sqrt (cc₀ j) + Real.sqrt (cc₁ j) + Real.sqrt (cc₂ j)) * Sj := by ring
 
 set_option linter.unusedSectionVars false in
-lemma bal_icg_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
+lemma covGrad_eq_iteratedCovGrad_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) :
     covGrad (I := I) (M := M) g r s X = iteratedCovGrad (I := I) g r s 1 X := rfl
 
@@ -302,7 +302,7 @@ private lemma bal_comm_tower (g : SmoothRiemannianMetric I M) (r s : ℕ) (m : �
       refine mul_le_mul_of_nonneg_left ?_ (hKp_nn j)
       have hcomp : ∀ b, ‖iteratedCovGrad (I := I) g r (s + m) b Y‖ =
           ‖iteratedCovGrad (I := I) g r s (m + b) S‖ := fun b =>
-        bal_norm_icg_comp (I := I) (M := M) g r s m b S
+        norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g r s m b S
       calc ∑ b ∈ Finset.range (j + 3), ‖iteratedCovGrad (I := I) g r (s + m) b Y‖
           = ∑ b ∈ Finset.range (j + 3),
               ‖iteratedCovGrad (I := I) g r s (b + m) S‖ := by
@@ -319,8 +319,8 @@ private lemma bal_comm_tower (g : SmoothRiemannianMetric I M) (r s : ℕ) (m : �
       have hnc : ‖iteratedCovGrad (I := I) g r ((s + m) + 1) j
           (covGrad (I := I) (M := M) g r (s + m) Cm)‖ =
           ‖iteratedCovGrad (I := I) g r (s + m) (1 + j) Cm‖ := by
-        rw [bal_icg_one (I := I) (M := M) g r (s + m) Cm]
-        exact bal_norm_icg_comp (I := I) (M := M) g r (s + m) 1 j Cm
+        rw [covGrad_eq_iteratedCovGrad_one (I := I) (M := M) g r (s + m) Cm]
+        exact norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g r (s + m) 1 j Cm
       rw [hnc, show 1 + j = j + 1 from by omega]
       refine le_trans (hKm (j + 1) S) ?_
       refine mul_le_mul_of_nonneg_left ?_ (hKm_nn (j + 1))
@@ -440,7 +440,7 @@ private lemma bal_G2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   rw [expand]
   linarith [hsq, e1, e2, esplit]
 
-lemma bal_lap_jets (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ c : ℕ → ℝ, (∀ b, 0 ≤ c b) ∧
       ∀ (b : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s b (rawTensorConnLapSmooth (I := I) g r s S)‖ ≤
@@ -484,10 +484,10 @@ lemma bal_lap_jets (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     refine le_trans (hcG b (iteratedCovGrad (I := I) g r s b S)) ?_
     have h2 : ‖iteratedCovGrad (I := I) g r (s + b) 2 (iteratedCovGrad (I := I) g r s b S)‖ =
         ‖iteratedCovGrad (I := I) g r s (b + 2) S‖ :=
-      bal_norm_icg_comp (I := I) (M := M) g r s b 2 S
+      norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g r s b 2 S
     have h1 : ‖iteratedCovGrad (I := I) g r (s + b) 1 (iteratedCovGrad (I := I) g r s b S)‖ =
         ‖iteratedCovGrad (I := I) g r s (b + 1) S‖ :=
-      bal_norm_icg_comp (I := I) (M := M) g r s b 1 S
+      norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g r s b 1 S
     rw [h2, h1]
     have e2 : ‖iteratedCovGrad (I := I) g r s (b + 2) S‖ ≤ Sb := hsingle (b + 2) (by omega)
     have e1 : ‖iteratedCovGrad (I := I) g r s (b + 1) S‖ ≤ Sb := hsingle (b + 1) (by omega)
@@ -537,7 +537,7 @@ private lemma bal_iter_succ_inner (g : SmoothRiemannianMetric I M) (r s : ℕ) (
           (rawTensorConnLapSmooth (I := I) g r s S) := by
   rw [oneMinusConnLapSmoothIter_add (I := I) (M := M) g r s q 1 S,
     bal_iter_one (I := I) (M := M) g r s S,
-    bal_iter_sub (I := I) (M := M) g r s q]
+    oneMinusConnLapSmoothIter_sub (I := I) (M := M) g r s q]
 
 private lemma bal_sum_lap_jets (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (cL : ℕ → ℝ) (hcL_nn : ∀ b, 0 ≤ cL b)
@@ -565,13 +565,13 @@ private lemma bal_sum_lap_jets (g : SmoothRiemannianMetric I M) (r s : ℕ)
           ∑ b' ∈ Finset.range (K + 2), ‖iteratedCovGrad (I := I) g r s b' S‖ := by
         rw [Finset.sum_mul]
 
-lemma bal_iter_jets (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+lemma exists_iteratedCovGrad_connLapSmoothingIterate_window_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ c : ℕ → ℕ → ℝ, (∀ γ q, 0 ≤ c γ q) ∧
       ∀ (γ q : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s γ (oneMinusConnLapSmoothIter (I := I) g r s q S)‖ ≤
           c γ q * ∑ b ∈ Finset.range (γ + 2 * q + 1), ‖iteratedCovGrad (I := I) g r s b S‖ := by
   classical
-  obtain ⟨cL, hcL_nn, hcL⟩ := bal_lap_jets (I := I) (M := M) g r s
+  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I) (M := M) g r s
   have hmain : ∀ q : ℕ, ∃ c : ℕ → ℝ, (∀ γ, 0 ≤ c γ) ∧
       ∀ (γ : ℕ) (S : SmoothCcTensor g r s),
         ‖iteratedCovGrad (I := I) g r s γ (oneMinusConnLapSmoothIter (I := I) g r s q S)‖ ≤
@@ -693,10 +693,10 @@ private lemma bal_lap_jets_exact (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     refine le_trans (hcG b (iteratedCovGrad (I := I) g r s b S)) ?_
     have h2 : ‖iteratedCovGrad (I := I) g r (s + b) 2 (iteratedCovGrad (I := I) g r s b S)‖ =
         ‖iteratedCovGrad (I := I) g r s (b + 2) S‖ :=
-      bal_norm_icg_comp (I := I) (M := M) g r s b 2 S
+      norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g r s b 2 S
     have h1 : ‖iteratedCovGrad (I := I) g r (s + b) 1 (iteratedCovGrad (I := I) g r s b S)‖ =
         ‖iteratedCovGrad (I := I) g r s (b + 1) S‖ :=
-      bal_norm_icg_comp (I := I) (M := M) g r s b 1 S
+      norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g r s b 1 S
     rw [h2, h1]
     have e1 : ‖iteratedCovGrad (I := I) g r s (b + 1) S‖ ≤ Sb := hsingle (b + 1) (by omega)
     have e0 : ‖iteratedCovGrad (I := I) g r s b S‖ ≤ Sb := hsingle b (by omega)
@@ -730,7 +730,7 @@ lemma bal_Ccore (g : SmoothRiemannianMetric I M) (r s : ℕ) :
           ‖iteratedCovGrad (I := I) g r s (2 * p + 1) S‖ +
             c p * ∑ b ∈ Finset.range (2 * p + 1), ‖iteratedCovGrad (I := I) g r s b S‖ := by
   classical
-  obtain ⟨cL, hcL_nn, hcL⟩ := bal_lap_jets (I := I) (M := M) g r s
+  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I) (M := M) g r s
   obtain ⟨cE, hcE_nn, hcE⟩ := bal_lap_jets_exact (I := I) (M := M) g r s
   have hmain : ∀ p : ℕ, ∃ c : ℝ, 0 ≤ c ∧
       ∀ S : SmoothCcTensor g r s,
@@ -751,7 +751,7 @@ lemma bal_Ccore (g : SmoothRiemannianMetric I M) (r s : ℕ) :
         show ‖covGrad (I := I) (M := M) g r s S‖ ≤
           ‖iteratedCovGrad (I := I) g r s 1 S‖ +
             0 * ∑ b ∈ Finset.range 1, ‖iteratedCovGrad (I := I) g r s b S‖
-        rw [bal_icg_one (I := I) (M := M) g r s S]
+        rw [covGrad_eq_iteratedCovGrad_one (I := I) (M := M) g r s S]
         simp
     | succ p ih =>
       obtain ⟨cp, hcp_nn, hcp⟩ := ih

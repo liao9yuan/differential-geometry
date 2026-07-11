@@ -88,7 +88,7 @@ private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
       riemannianFiberNormSq (I := I) (M := M) g 2 2 x S := by
   classical
   obtain ⟨bse, hbse⟩ := orthoFrame_to_basis (I := I) (M := M) g x e horth
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g 2 2 x S e bse rfl hbse horth]
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g 2 2 x S e bse rfl hbse horth]
   refine Finset.single_le_sum
     (f := fun K' : Fin 2 → Fin (Module.finrank ℝ E) =>
       ∑ J : Fin 2 → Fin (Module.finrank ℝ E),
@@ -119,7 +119,7 @@ private theorem riemannianFiberNormSq_le_of_componentSlice_sq_sum_le
   subst hnE
   have horth' : ∀ a b : Fin (Module.finrank ℝ E),
       g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0 := horth
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x S e bse rfl hbse horth']
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 2 2 x S e bse rfl hbse horth']
   calc (∑ K : Fin 2 → Fin (Module.finrank ℝ E), ∑ J : Fin 2 → Fin (Module.finrank ℝ E),
           (fiberNormSqComponent (I := I) (M := M) g₀ x 2 2 S (Module.finrank ℝ E) e K J) ^ 2)
       ≤ ∑ _K : Fin 2 → Fin (Module.finrank ℝ E), C ^ 2 :=
@@ -193,7 +193,7 @@ theorem exists_riemannBiContrFib_perturbed_frameComponentSlice_sq_le_of_jetEnvel
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -475,7 +475,7 @@ theorem exists_riemannBiContrFib_perturbed_riemannianFiberNormSq_le_of_jetEnvelo
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -642,7 +642,7 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponentSlice_sq_le_of
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -740,7 +740,7 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_riemannianFiberNormSq_le_of_
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -774,7 +774,7 @@ theorem exists_riemannBiContrFib_perturbed_frameComponent_sum_sq_le_of_jetEnvelo
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -814,7 +814,7 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponent_sum_sq_le_of_
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)

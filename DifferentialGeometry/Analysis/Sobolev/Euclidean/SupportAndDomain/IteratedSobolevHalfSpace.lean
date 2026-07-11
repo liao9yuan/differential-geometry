@@ -304,12 +304,12 @@ theorem MemWkpHalfSpace_congr_ae_of_carrier [NeZero d]
   exact MemWkpHalfSpace_congr_ae (d := d) hp hΩ huv
 
 def wkpNormHalfSpace (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) : ℝ≥0∞ :=
-  wkpNorm (d := d) k p u (interiorHalfSpace Ω)
+  iteratedWeakSobolevNorm (d := d) k p u (interiorHalfSpace Ω)
 
 @[simp] lemma wkpNormHalfSpace_def
     (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
     wkpNormHalfSpace (d := d) k p u Ω =
-      wkpNorm (d := d) k p u (interiorHalfSpace Ω) := rfl
+      iteratedWeakSobolevNorm (d := d) k p u (interiorHalfSpace Ω) := rfl
 
 theorem wkpNormHalfSpace_zero
     (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :

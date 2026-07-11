@@ -57,7 +57,7 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s) {y : EuclN},
         y ∈ chartPouKernel (I := I) (M := M) α →
-        zeroContentR (I := I) (M := M) g r s S α y ≤
+        tensorComponentAbsSum (I := I) (M := M) g r s S α y ≤
           C * ‖S.toSection
             ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))‖ := by
   classical
@@ -101,14 +101,14 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
 
   have h_raw_eq : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-      rawPullR (I := I) (M := M) g r s S α Idx Jdx y =
+      tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx y =
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b := by
     intro Idx Jdx
-    rw [rawPullR, Function.comp_apply, Function.comp_apply, ← hb_def]
+    rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply, ← hb_def]
 
   have h_each : ∀ (q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E))),
-      |rawPullR (I := I) (M := M) g r s S α q.1 q.2 y| ≤
+      |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| ≤
         Real.sqrt Craw * ‖S.toSection b‖ := by
     intro q
     rw [h_raw_eq q.1 q.2]
@@ -122,10 +122,10 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     rw [Real.sqrt_sq_eq_abs] at hroot
     refine hroot.trans (le_of_eq ?_)
     rw [Real.sqrt_mul hCraw_nn, hfib_eq]
-  calc zeroContentR (I := I) (M := M) g r s S α y
+  calc tensorComponentAbsSum (I := I) (M := M) g r s S α y
       = ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
-          |rawPullR (I := I) (M := M) g r s S α q.1 q.2 y| := rfl
+          |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| := rfl
     _ ≤ ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
           Real.sqrt Craw * ‖S.toSection b‖ :=
@@ -166,7 +166,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
       ∃ Ci : ℝ, 0 ≤ Ci ∧
       ∀ (T : SmoothCcTensor g r (s + i)) {z : EuclN},
         z ∈ chartPouKernel (I := I) (M := M) α →
-        zeroContentR (I := I) (M := M) g r (s + i) T α z ≤
+        tensorComponentAbsSum (I := I) (M := M) g r (s + i) T α z ≤
           Ci * (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r (s + i) I b) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r (s + i)
             ‖T.toSection ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))‖) :=
@@ -237,7 +237,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
         rw [iteratedFDerivWithin_of_isOpen (𝕜 := ℝ) (f := raw) (j - l) hO_open hyT]
 
         have hraw_evEq : raw =ᶠ[nhds y]
-            rawPullR (I := I) (M := M) g r s D α P.1 P.2 := by
+            tensorComponentEuclideanChart (I := I) (M := M) g r s D α P.1 P.2 := by
           filter_upwards [hO_open.mem_nhds hyT] with z hz
           rw [hraw_def, chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]; rfl
         rw [(Filter.EventuallyEq.iteratedFDeriv ℝ hraw_evEq (j - l)).self_of_nhds]
@@ -248,10 +248,10 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
         rw [h0eq] at hpeel
 
         have hreindex : (∑ i ∈ Finset.range ((j - l) + 1),
-              zeroContentR (I := I) (M := M) g r (s + (0 + i))
+              tensorComponentAbsSum (I := I) (M := M) g r (s + (0 + i))
                 (iteratedCovGrad g r s (0 + i) D) α y) =
             ∑ i ∈ Finset.range ((j - l) + 1),
-              zeroContentR (I := I) (M := M) g r (s + i)
+              tensorComponentAbsSum (I := I) (M := M) g r (s + i)
                 (iteratedCovGrad g r s i D) α y := by
           refine Finset.sum_congr rfl (fun i _ => ?_)
           congr 1 <;> rw [Nat.zero_add]
@@ -262,7 +262,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
         refine mul_le_mul_of_nonneg_left ?_ hCpeel_nn
 
         have hstep : ∀ i ∈ Finset.range ((j - l) + 1),
-            zeroContentR (I := I) (M := M) g r (s + i)
+            tensorComponentAbsSum (I := I) (M := M) g r (s + i)
               (iteratedCovGrad g r s i D) α y ≤
               Cfibmax *
                 (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r (s + i) I b) :=
@@ -279,7 +279,7 @@ private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
           exact mul_le_mul_of_nonneg_right
             (Finset.le_sup' Cfib (Finset.mem_range.mpr (by omega))) (norm_nonneg _)
         calc (∑ i ∈ Finset.range ((j - l) + 1),
-              zeroContentR (I := I) (M := M) g r (s + i)
+              tensorComponentAbsSum (I := I) (M := M) g r (s + i)
                 (iteratedCovGrad g r s i D) α y)
             ≤ ∑ i ∈ Finset.range ((j - l) + 1),
                 Cfibmax *
@@ -375,7 +375,7 @@ theorem tensorChartComponent_allOrder_uniformCauchy
     exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum (I := I) (M := M) g r s α P j
 
   obtain ⟨Cemb, hCemb_pos, hCemb⟩ :=
-    DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_toSobolev_embedding_Cm_unconditional
+    DifferentialGeometry.PDE.RicciFlow.iteratedCovGrad_toSobolev_embedding_Cm_singleNorm
       (I := I) (M := M) g r s k j h_super
 
   have hF_cauchy_k := Metric.cauchySeq_iff.mp (hF_cauchy k)

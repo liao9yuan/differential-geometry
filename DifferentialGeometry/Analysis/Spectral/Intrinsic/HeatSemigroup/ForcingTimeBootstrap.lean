@@ -42,14 +42,14 @@ theorem deTurckForcing_smoothTimeCoordinateFieldSymm
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :
@@ -103,14 +103,14 @@ theorem deTurckForcing_smoothTimeCoordinateFamilySymm
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :

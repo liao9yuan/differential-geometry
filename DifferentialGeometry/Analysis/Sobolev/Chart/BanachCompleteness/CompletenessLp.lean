@@ -128,7 +128,7 @@ lemma eLpNorm_chartPushed_le_wkpNorm_chartPushed
     eLpNorm (chartPushed (I := I) (M := M) ρ α u) p
         ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
           (chartTargetEuclid (I := I) (M := M) α)) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M) ρ α u)
         (chartTargetEuclid (I := I) (M := M) α) :=

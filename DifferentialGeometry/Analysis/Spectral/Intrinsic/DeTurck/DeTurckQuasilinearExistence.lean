@@ -122,7 +122,7 @@ def deTurckLipConst (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
 theorem deTurckSobolevNHa2_lipschitzWith_lipConst (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     LipschitzWith (deTurckLipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super)
-      (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a) :=
+      (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a) :=
   (deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
 
 def deTurckTimeNemytskii (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -139,14 +139,14 @@ def deTurckLipConstSymm (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ 
 theorem deTurckSobolevNHa2Symm_lipschitzWith_lipConst (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     LipschitzWith (deTurckLipConstSymm (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super)
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a) :=
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a) :=
   (deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super).choose_spec
 
 theorem deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
     ∃ C₁ C₂ : ℝ≥0, ∀ (u u' : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)),
-      ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a u -
-          deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a u'‖ ≤
+      ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a u -
+          deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a u'‖ ≤
         (C₁ : ℝ) * max ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                           (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) u‖
                        ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
@@ -154,7 +154,7 @@ theorem deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (a : ℕ)
           * ‖u - u'‖ +
         (C₂ : ℝ) * ‖tensorHsInclusion (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖ :=
-  deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise_aux (I := I) (M := M) g₀ g_bg a ha_super
+  deTurckSobolevNonlinearitySymm_mixed_lipschitz_pointwise (I := I) (M := M) g₀ g_bg a ha_super
 
 theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :

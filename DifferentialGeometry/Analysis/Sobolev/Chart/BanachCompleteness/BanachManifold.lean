@@ -78,7 +78,7 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
         ENNReal.ofReal ε)
     (α : M) :
     ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (fun y => chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -107,14 +107,14 @@ theorem chartPushed_cauchy_of_wkpNormChart_cauchy
   rw [h_chartPushed_eq]
   unfold wkpNormChart at h_le
   have h_summand_le_tsum :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
           (fun x => wkpChartFun (f m) x - wkpChartFun (f n) x))
         (chartTargetEuclid (I := I) (M := M) α) ≤
       ∑' α' : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α'
@@ -140,7 +140,7 @@ theorem exists_chart_limit
         (chartTargetEuclid (I := I) (M := M) α) ∧
       Tendsto
         (fun n =>
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (fun y => chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -205,7 +205,7 @@ lemma chartLimit_tendsto
     (α : M) :
     Tendsto
       (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (fun y => chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α

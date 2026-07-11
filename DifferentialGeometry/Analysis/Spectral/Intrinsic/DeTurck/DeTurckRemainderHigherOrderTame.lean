@@ -509,7 +509,7 @@ private theorem appCc_integrated_grid_twoArm_mixed
   rw [hc]
   ring
 
-theorem appCc_topOrder_l2_twoArm_mixed_le
+theorem ccTensorContract_topOrder_l2_twoArm_mixed_le
     (g₀ : SmoothRiemannianMetric I M) (b₀ s₀ q : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (Φ : SmoothCcTensor g₀ b₀ s₀) (W : SmoothCcTensor g₀ 0 b₀) (ΛΦ ΛW : ℝ),
@@ -517,7 +517,7 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ b₀ s₀ x (Φ.toSection x) ≤ ΛΦ ^ 2) →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 0 b₀ x (W.toSection x) ≤ ΛW ^ 2) →
         ‖iteratedCovGrad (I := I) g₀ 0 s₀ q
-            (appCc (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
+            (operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W)‖ ^ 2 ≤
           C * (ΛW ^ 2 * ∑ i ∈ Finset.range (q + 1),
                 ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ^ 2
               + ΛΦ ^ 2 * ∑ l ∈ Finset.range (q + 1),
@@ -533,12 +533,12 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
   obtain ⟨Cgrid, hCgrid_nn, hCgrid⟩ :=
     appCc_integrated_grid_twoArm_mixed (I := I) g₀ b₀ s₀ b₀ q
 
-  set Gk : ℝ := appCcGdiag (E := E) q with hGk
+  set Gk : ℝ := diagonalGridGrowthFactor (E := E) q with hGk
   have hGk_nn : 0 ≤ Gk := appCcGdiag_nonneg (E := E) q
   refine ⟨Gk * Cgrid, by positivity, ?_⟩
   intro Φ W ΛΦ ΛW hΛΦ hΛW hΦsup hWsup
   set μ : Measure M := riemannianVolumeMeasure (I := I) (M := M) g₀ with hμ
-  set P : SmoothCcTensor g₀ 0 s₀ := appCc (I := I) (M := M) g₀ b₀ s₀ Φ W with hP
+  set P : SmoothCcTensor g₀ 0 s₀ := operatorFieldApply (I := I) (M := M) g₀ b₀ s₀ Φ W with hP
 
   have hLHS_eq : ‖iteratedCovGrad (I := I) g₀ 0 s₀ q P‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g₀ 0 (s₀ + q) x
@@ -563,7 +563,7 @@ theorem appCc_topOrder_l2_twoArm_mixed_le
         ((iteratedCovGrad (I := I) g₀ 0 s₀ q P).toSection x) ≤ Gk * grid x := by
     intro x
     rw [hGk, hgrid, hP]
-    exact appCc_iteratedCovGrad_diagonalProductGrid_le (I := I) g₀ b₀ s₀ Φ W q x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp_diagonalProductGrid_le (I := I) g₀ b₀ s₀ Φ W q x
 
   have hgrid_cont : Continuous grid := by
     rw [hgrid]
@@ -763,7 +763,7 @@ private theorem iteratedCovGrad_compWindow_l2_eq
       (iteratedCovGrad (I := I) g₀ 0 2 (m + l) W)
   rw [hbridgeL, hbridgeR]
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-  have hrw := rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l W x
+  have hrw := riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 2 m l W x
   simpa only [Nat.add_assoc] using hrw
 
 private theorem iteratedCovGrad_compWindow_jetSum_le

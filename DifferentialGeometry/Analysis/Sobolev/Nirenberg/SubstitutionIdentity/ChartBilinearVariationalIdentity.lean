@@ -97,7 +97,7 @@ private lemma chi_eq_one_on_cthickening
     Metric.self_subset_cthickening _ hx
   exact hχ_one x hx_inner
 
-private noncomputable def tF
+private noncomputable def vTestPartialSummand
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -110,7 +110,7 @@ private noncomputable def tF
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h D.u_chart z
 
-private noncomputable def tFE
+private noncomputable def vTestPartialSummandIndicator
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -135,8 +135,8 @@ private lemma tF_eq_tFE_on_tsupport
     (k : Fin (Module.finrank ℝ E)) {h : ℝ}
     (j : Fin (Module.finrank ℝ E))
     {z : EuclN} (hz : z ∈ tsupport η) :
-    tF (I := I) (M := M) D η k h j z =
-      tFE (I := I) (M := M) D η k h K_0 j z := by
+    vTestPartialSummand (I := I) (M := M) D η k h j z =
+      vTestPartialSummandIndicator (I := I) (M := M) D η k h K_0 j z := by
   classical
   have hz_K_0 : z ∈ K_0 := hη_supp_in_K_0 hz
   have hz_thick : z ∈ Metric.cthickening |h| K_0 :=
@@ -171,7 +171,7 @@ private lemma tF_eq_tFE_on_tsupport
       rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_apply_of_ne
         (d := Module.finrank ℝ E) k hh]
       rw [Set.indicator_of_mem hz_shift, Set.indicator_of_mem hz_thick]
-  unfold tF tFE
+  unfold vTestPartialSummand vTestPartialSummandIndicator
   rw [h_dq_wp, h_dq_u]
 
 private lemma tF_eq_zero_outside_tsupport
@@ -181,8 +181,8 @@ private lemma tF_eq_zero_outside_tsupport
     {η : EuclN → ℝ} (k : Fin (Module.finrank ℝ E)) (h : ℝ)
     (j : Fin (Module.finrank ℝ E))
     {z : EuclN} (hz : z ∉ tsupport η) :
-    tF (I := I) (M := M) D η k h j z = 0 := by
-  unfold tF
+    vTestPartialSummand (I := I) (M := M) D η k h j z = 0 := by
+  unfold vTestPartialSummand
   have hηz : η z = 0 := image_eq_zero_of_notMem_tsupport hz
   rw [show (η z)^2 = 0 from by rw [hηz]; ring, zero_mul]
   rw [show 2 * η z = 0 from by rw [hηz]; ring]
@@ -195,8 +195,8 @@ private lemma tFE_eq_zero_outside_tsupport
     {η : EuclN → ℝ} {h : ℝ} (k : Fin (Module.finrank ℝ E)) (K_0 : Set EuclN)
     (j : Fin (Module.finrank ℝ E))
     {z : EuclN} (hz : z ∉ tsupport η) :
-    tFE (I := I) (M := M) D η k h K_0 j z = 0 := by
-  unfold tFE
+    vTestPartialSummandIndicator (I := I) (M := M) D η k h K_0 j z = 0 := by
+  unfold vTestPartialSummandIndicator
   have hηz : η z = 0 := image_eq_zero_of_notMem_tsupport hz
   rw [show (η z)^2 = 0 from by rw [hηz]; ring, zero_mul]
   rw [show 2 * η z = 0 from by rw [hηz]; ring]
@@ -211,8 +211,8 @@ private lemma tF_eq_tFE
     (hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E)) {h : ℝ}
     (j : Fin (Module.finrank ℝ E)) :
-    tF (I := I) (M := M) D η k h j =
-      tFE (I := I) (M := M) D η k h K_0 j := by
+    vTestPartialSummand (I := I) (M := M) D η k h j =
+      vTestPartialSummandIndicator (I := I) (M := M) D η k h K_0 j := by
   funext z
   by_cases hz : z ∈ tsupport η
   · exact tF_eq_tFE_on_tsupport (I := I) (M := M) D
@@ -307,7 +307,7 @@ private lemma tFE_memLp_two
     (h_thick : Metric.cthickening |h| K_0 ⊆
       chartTargetEuclid (I := I) (M := M) α)
     (j : Fin (Module.finrank ℝ E)) :
-    MemLp (tFE (I := I) (M := M) D η k h K_0 j) 2
+    MemLp (vTestPartialSummandIndicator (I := I) (M := M) D η k h K_0 j) 2
       (volume : Measure EuclN) := by
   classical
   have hη_cont : Continuous η := hη.continuous
@@ -381,7 +381,7 @@ private lemma tFE_memLp_two
         ((Metric.cthickening |h| K_0).indicator (D.weak_partial j))) 2
       (volume : Measure EuclN) :=
     memLp_diffQuot_of_memLp_local hwp_ext_lp k hh
-  unfold tFE
+  unfold vTestPartialSummandIndicator
   have ht1_pt_bd : ∀ z, ‖(η z)^2 *
       DifferentialGeometry.Analysis.Sobolev.diffQuot
         (d := Module.finrank ℝ E) k h
@@ -480,7 +480,7 @@ private noncomputable def weakPartial_v_h
     (j : Fin (Module.finrank ℝ E)) : EuclN → ℝ :=
   DifferentialGeometry.Analysis.Sobolev.diffQuot
     (d := Module.finrank ℝ E) k (-h)
-    (tF (I := I) (M := M) D η k h j)
+    (vTestPartialSummand (I := I) (M := M) D η k h j)
 
 private lemma weakPartial_v_h_memLp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -1165,7 +1165,7 @@ private lemma integrable_bdd_bdd_L2_L2
   rw [h_eq]
   exact h_combine
 
-private lemma T1_ij_integrable_K_0
+private lemma translatedCoeff_cutoffSq_diffQuotPartial_diffQuotPartial_integrable_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -1197,7 +1197,7 @@ private lemma T1_ij_integrable_K_0
   exact integrable_bdd_bdd_L2_L2 hK_0_compact h_τw_cont hη_sq_cont
     hdq_wp_i_lp hdq_wp_j_lp
 
-private lemma T2_ij_integrable_K_0
+private lemma translatedCoeff_cutoffDeriv_diffQuotPartial_diffQuotUChart_integrable_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -1256,7 +1256,7 @@ private lemma T2_ij_integrable_K_0
   rw [← h_eq]
   exact h_int
 
-private lemma T3_ij_integrable_K_0
+private lemma diffQuotCoeff_cutoffSq_partial_diffQuotPartial_integrable_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -1288,7 +1288,7 @@ private lemma T3_ij_integrable_K_0
   exact integrable_bdd_bdd_L2_L2 hK_0_compact h_dqw_cont hη_sq_cont
     hwp_i_lp hdq_wp_j_lp
 
-private lemma T4_ij_integrable_K_0
+private lemma diffQuotCoeff_cutoffDeriv_partial_diffQuotUChart_integrable_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
@@ -1607,19 +1607,19 @@ private lemma principal_post_ibp_integral_eq_symbolic
       hη_supp_in_K_0 h_T_zero
   have hT1_ij_int : ∀ i j, Integrable (T1 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    T1_ij_integrable_K_0 (I := I) (M := M) D hK_0_compact hη k hh hh_le
+    translatedCoeff_cutoffSq_diffQuotPartial_diffQuotPartial_integrable_K_0 (I := I) (M := M) D hK_0_compact hη k hh hh_le
       h_thick i j
   have hT2_ij_int : ∀ i j, Integrable (T2 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    T2_ij_integrable_K_0 (I := I) (M := M) D hK_0_compact hη k hh hh_le
+    translatedCoeff_cutoffDeriv_diffQuotPartial_diffQuotUChart_integrable_K_0 (I := I) (M := M) D hK_0_compact hη k hh hh_le
       h_thick i j
   have hT3_ij_int : ∀ i j, Integrable (T3 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    T3_ij_integrable_K_0 (I := I) (M := M) D hK_0_compact hK_0_in hη k hh hh_le
+    diffQuotCoeff_cutoffSq_partial_diffQuotPartial_integrable_K_0 (I := I) (M := M) D hK_0_compact hK_0_in hη k hh hh_le
       h_thick i j
   have hT4_ij_int : ∀ i j, Integrable (T4 i j)
       ((volume : Measure EuclN).restrict K_0) := fun i j =>
-    T4_ij_integrable_K_0 (I := I) (M := M) D hK_0_compact hK_0_in hη k hh hh_le
+    diffQuotCoeff_cutoffDeriv_partial_diffQuotUChart_integrable_K_0 (I := I) (M := M) D hK_0_compact hK_0_in hη k hh hh_le
       h_thick i j
   have hT1_sum_int : Integrable (fun y => ∑ i, ∑ j, T1 i j y)
       ((volume : Measure EuclN).restrict K_0) := by

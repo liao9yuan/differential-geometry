@@ -39,7 +39,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def deTurckLieArm1PairPermCorr : Equiv.Perm (Fin 6) :=
+def deTurckLieArm1PairPermCorrection : Equiv.Perm (Fin 6) :=
   ⟨![4, 0, 2, 1, 3, 5], ![1, 3, 2, 4, 0, 5], by decide, by decide⟩
 
 def deTurckLieArm1PairPermOuterZero : Equiv.Perm (Fin 6) :=
@@ -80,7 +80,7 @@ noncomputable def deTurckLieArm1CoreFib (g₀ g₁ g_bg : SmoothRiemannianMetric
     Tensor0SBundle.Tensor0SSpace 3 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   deTurckLiePairTraceFib (I := I) g₁ deTurckLieArm1PairPermInnerTwo x
       (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)
-    - deTurckLiePairTraceFib (I := I) g₁ deTurckLieArm1PairPermCorr x
+    - deTurckLiePairTraceFib (I := I) g₁ deTurckLieArm1PairPermCorrection x
         (metricConnDiffLoweredFib (I := I) g₁ g₁ g_bg x)
     - (Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) 2 x
           ((PDE.DeTurck.deTurckVF (I := I) g₁ g₀ : Π b : M, TangentSpace I b) x)).comp
@@ -221,7 +221,7 @@ private theorem deTurckLieArm1CoreFib_apply_section_contMDiff
     (fun x => metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x)
     (metricConnDiffLoweredFib_contMDiff (I := I) g₁ g₁ g₀) Y
   have hB := deTurckLiePairTraceFib_apply_section_contMDiff (I := I) g₁
-    deTurckLieArm1PairPermCorr
+    deTurckLieArm1PairPermCorrection
     (fun x => metricConnDiffLoweredFib (I := I) g₁ g₁ g_bg x)
     (metricConnDiffLoweredFib_contMDiff (I := I) g₁ g₁ g_bg) Y
   have hpermY := domDomCongr_section_contMDiff_local (I := I) (d := 3)

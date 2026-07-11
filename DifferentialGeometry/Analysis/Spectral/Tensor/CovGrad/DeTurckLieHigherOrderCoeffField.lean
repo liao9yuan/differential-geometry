@@ -89,8 +89,8 @@ private theorem connDiffFib_comp_eq (g₀ g₁ : SmoothRiemannianMetric I M) (x 
 
 private theorem deTurckLieKoszulTrace_realizedFam_apply_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (σ : Equiv.Perm (Fin 3))
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 3 ℝ E) ∞
       (fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)) :
@@ -133,8 +133,8 @@ private theorem deTurckLieKoszulTrace_realizedFam_apply_jointContMDiffOn
 
 private theorem deTurckLiePairTrace_realizedFam_apply_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (σ : Equiv.Perm (Fin 6))
     (κfam : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace 3 I p.1)
     (hκ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
@@ -194,8 +194,8 @@ private theorem deTurckLiePairTrace_realizedFam_apply_jointContMDiffOn
 
 private theorem deTurckLieArm1CoreFib_realizedFam_apply_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M)
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 3 ℝ E) ∞
       (fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)) :
@@ -219,7 +219,7 @@ private theorem deTurckLieArm1CoreFib_realizedFam_apply_jointContMDiffOn
       (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g₀ p.1)
     hκA Y
   have hB := deTurckLiePairTrace_realizedFam_apply_jointContMDiffOn (I := I) g₀ T T' hδ hδ'
-    deTurckLieArm1PairPermCorr
+    deTurckLieArm1PairPermCorrection
     (fun p : M × ℝ => metricConnDiffLoweredFib (I := I)
       (realizedFam (I := I) g₀ T T' hδ hδ' p.2) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1)
     hκB Y
@@ -264,8 +264,8 @@ private theorem deTurckLieArm1CoreFib_realizedFam_apply_jointContMDiffOn
 
 private theorem deTurckLieArm1Fib_realizedFam_apply_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M)
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 3 ℝ E) ∞
       (fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)) :
@@ -311,8 +311,8 @@ private theorem deTurckLieArm1Fib_realizedFam_apply_jointContMDiffOn
 
 theorem deTurckLieArm1Coeff_realizedFam_jointContMDiff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 3 2 ℝ E)
@@ -321,7 +321,7 @@ theorem deTurckLieArm1Coeff_realizedFam_jointContMDiff (g₀ : SmoothRiemannianM
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
   classical
-  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel 3 ℝ E)
     (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 3 I x)
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
@@ -338,8 +338,8 @@ theorem deTurckLieArm1Coeff_realizedFam_jointContMDiff (g₀ : SmoothRiemannianM
 
 theorem deTurckLieArm1Coeff_realizedFam_jointSmooth (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
       (fun s => deTurckLieArm1Coeff (I := I) g₀
@@ -498,7 +498,7 @@ private theorem dLiePack0S_family_jointContMDiffOn {d : ℕ} {S : Set ℝ}
         ((dLiePack0S (I := I) g₀ (fun x : M => A (x, p.2)) (hslice p.2)).toSection p.1))
       ((Set.univ : Set M) ×ˢ S) := by
   classical
-  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel 0 ℝ E)
     (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 0 I x)
     (F₂ := Tensor0SBundle.Tensor0SModel d ℝ E)
@@ -1215,7 +1215,7 @@ private theorem dLieTheta_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
                       (Tensor0SBundle.Tensor0SSpace.toModel
                         (metricConnDiffLoweredFib (I := I) g₁ g₁ g₀ x))))))
         ![w0, w1, w2, w3] =
-      g₁.inner x (dLaCovKernel (I := I) g₁ g_bg x w0 w1 w2) w3 := by
+      g₁.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x w0 w1 w2) w3 := by
   classical
   set Af : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ⟨smoothExtensionTangent (I := I) x w1, smoothExtensionTangent_contMDiff (I := I) x w1⟩
@@ -1356,8 +1356,8 @@ private theorem dLieTheta_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
     rw [metricConnDiffLoweredFib_toModel]
     rfl
   rw [hc1, hc2, hc3, hk1, hk2, hk3]
-  have hker : dLaCovKernel (I := I) g₁ g_bg x w0 w1 w2 =
-      deTurckLieCovDerivA (I := I) g₁ g_bg (fun b => V0f b) (fun b => Af b)
+  have hker : connDiffCovDerivOp (I := I) g₁ g_bg x w0 w1 w2 =
+      deTurckConnDiffCovDeriv (I := I) g₁ g_bg (fun b => V0f b) (fun b => Af b)
         (fun b => Bf b) x := by
     have hV0m : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
         (fun b => TotalSpace.mk' E (E := TangentSpace I) b (V0f b)) x :=
@@ -1373,7 +1373,7 @@ private theorem dLieTheta_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
     beta_reduce at h3
     rw [hV0fx, hAfx, hBfx] at h3
     exact h3
-  rw [hker, deTurckLieCovDerivA]
+  rw [hker, deTurckConnDiffCovDeriv]
   rw [hV0fx]
   have hsplit : ∀ (Yf : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯),
       (LeviCivita (I := I) g₀).toFun (fun b => Yf b) x w0 =
@@ -1390,10 +1390,10 @@ private theorem dLieTheta_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   simp only [map_sub, ContinuousLinearMap.sub_apply]
   ring
 
-theorem dLieFlatFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
+theorem deTurckVectorFieldFlat_realizedFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 1 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 1 ℝ E)
@@ -1415,8 +1415,8 @@ theorem dLieFlatFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
 
 private theorem dLieWEndoA_apply_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
@@ -1443,7 +1443,7 @@ private theorem dLieWEndoA_apply_jointContMDiffOn (g₀ : SmoothRiemannianMetric
               Π b : M, TangentSpace I b) p.1))
       (hslice := fun s : ℝ => dLieFlatSection_contMDiff (I := I) g₀
         (PDE.DeTurck.deTurckVF (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg))
-      (dLieFlatFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ' g_bg)
+      (deTurckVectorFieldFlat_realizedFam_jointContMDiffOn (I := I) g₀ T T' hδ hδ' g_bg)
     exact hpack.congr (fun p _ => rfl)
   have hCovVal := dLieCovGradVal_jointContMDiffOn (I := I) (d := 1) g₀ F hF
   have hZjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
@@ -1532,8 +1532,8 @@ private theorem dLieWEndoA_apply_jointContMDiffOn (g₀ : SmoothRiemannianMetric
 
 private theorem dLieWEndoB_apply_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
@@ -1638,8 +1638,8 @@ private theorem dLieWEndoB_apply_jointContMDiffOn (g₀ : SmoothRiemannianMetric
 
 theorem deTurckLieWEndo_realizedFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (E →L[ℝ] E)
@@ -1647,7 +1647,7 @@ theorem deTurckLieWEndo_realizedFam_jointContMDiffOn (g₀ : SmoothRiemannianMet
         (deTurckLieWEndo (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
   classical
-  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
     (F₂ := E) (V₂ := fun x : M => TangentSpace I x)
     (φ := fun p : M × ℝ =>
@@ -1690,10 +1690,10 @@ theorem deTurckLieWEndo_realizedFam_jointContMDiffOn (g₀ : SmoothRiemannianMet
   rw [hcd]
   abel
 
-private theorem deTurckLieDLbFib_realizedFam_apply_jointContMDiffOn
+private theorem deTurckLieEndoDerivation_realizedFam_apply_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M)
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 2 ℝ E) ∞
       (fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)) :
@@ -1765,15 +1765,15 @@ private theorem dLieXiArgB (x : M) (a0 a1 a2 a3 : TangentSpace I x) :
 
 private theorem dLaBiContrFib_realizedFam_apply_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M)
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 2 ℝ E) ∞
       (fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1
-        (dLaBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1
+        (connDiffCovDerivBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1
           (Y p.1)))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
   classical
@@ -1854,7 +1854,7 @@ private theorem dLaBiContrFib_realizedFam_apply_jointContMDiffOn
   apply ContinuousMultilinearMap.ext
   intro v
   beta_reduce
-  rw [dLaBiContrFib, dLaBiContrFibFixedFrame_toModel,
+  rw [connDiffCovDerivBiContrFib, dLaBiContrFibFixedFrame_toModel,
     Tensor0SBundle.Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
     smul_eq_mul]
   simp only [dLieDiagTrace_toModel, Tensor0SBundle.Tensor0SSpace.toModel_ofModel,
@@ -1870,30 +1870,30 @@ private theorem dLaBiContrFib_realizedFam_apply_jointContMDiffOn
 
 theorem dLaBiContrFib_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace 2 2 I z) p.1
         (Tensor0SBundle.TensorRSSpace.ofCLM
-          (dLaBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1)))
+          (connDiffCovDerivBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1)))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
-  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (φ := fun p : M × ℝ =>
-      dLaBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1)
+      connDiffCovDerivBiContrFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg p.1)
     (S := realizedSmallSet (δ := δ) (δ' := δ'))
   intro Y
   exact dLaBiContrFib_realizedFam_apply_jointContMDiffOn (I := I) g₀ T T' hδ hδ' g_bg Y
 
 private theorem deTurckLieFib_realizedFam_apply_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M)
     (Y : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 2 ℝ E) ∞
       (fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)) :
@@ -1904,7 +1904,7 @@ private theorem deTurckLieFib_realizedFam_apply_jointContMDiffOn
           (Y p.1)))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
   have hA := dLaBiContrFib_realizedFam_apply_jointContMDiffOn (I := I) g₀ T T' hδ hδ' g_bg Y
-  have hB := deTurckLieDLbFib_realizedFam_apply_jointContMDiffOn (I := I) g₀ T T' hδ hδ' g_bg Y
+  have hB := deTurckLieEndoDerivation_realizedFam_apply_jointContMDiffOn (I := I) g₀ T T' hδ hδ' g_bg Y
   have hsum := jointTotalSpace0S_add_local (I := I) (d := 2)
     (S := realizedSmallSet (δ := δ) (δ' := δ')) _ _ hA hB
   refine hsum.congr (fun p hp => ?_)
@@ -1914,8 +1914,8 @@ private theorem deTurckLieFib_realizedFam_apply_jointContMDiffOn
 
 theorem deTurckLieCoeffField_realizedFam_jointContMDiff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 2 2 ℝ E)
@@ -1923,7 +1923,7 @@ theorem deTurckLieCoeffField_realizedFam_jointContMDiff (g₀ : SmoothRiemannian
         ((deTurckLieCoeffField (I := I) (M := M) g₀
             (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg).toSection p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
-  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace 2 I x)
     (F₂ := Tensor0SBundle.Tensor0SModel 2 ℝ E)
@@ -1941,8 +1941,8 @@ theorem deTurckLieCoeffField_realizedFam_jointContMDiff (g₀ : SmoothRiemannian
 
 theorem deTurckLieCoeffField_realizedFam_jointSmooth (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (fun s => deTurckLieCoeffField (I := I) (M := M) g₀

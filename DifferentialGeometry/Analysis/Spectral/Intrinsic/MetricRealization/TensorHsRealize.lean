@@ -56,14 +56,14 @@ def ccTensorModel (g : SmoothRiemannianMetric I M)
   Tensor0SSpace.toModel
     (ccTensorMultilinear (I := I) g T x : Tensor0SSpace 2 I x)
 
-def ccTensorBilin (g : SmoothRiemannianMetric I M)
+def smoothCcTensorBilinForm (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (bilinFormToModel E).symm (ccTensorModel (I := I) g T x)
 
 theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) g T x v w =
+    smoothCcTensorBilinForm (I := I) g T x v w =
       ccTensorModel (I := I) g T x ![v, w] :=
   bilinFormToModel_symm_apply E (ccTensorModel (I := I) g T x) v w
 
@@ -76,7 +76,7 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
     letI : Bundle.RiemannianBundle
         (fun b : M => Tensor0SBundle.TensorRSSpace 0 2 I b) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 2
-    |ccTensorBilin (I := I) g₀ T x v w| ≤
+    |smoothCcTensorBilinForm (I := I) g₀ T x v w| ≤
       ‖(T.toSection x : Tensor0SBundle.TensorRSSpace 0 2 I x)‖ *
         Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by
   classical
@@ -87,7 +87,7 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
   obtain ⟨n, e, _hn, horth, hpars, hexpand, hrfns⟩ :=
     tangent_frame_expansion (I := I) (M := M) g₀ x
   set B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-    ccTensorBilin (I := I) g₀ T x with hB_def
+    smoothCcTensorBilinForm (I := I) g₀ T x with hB_def
 
   set coef : Fin n × Fin n → ℝ :=
     fun p => g₀.inner x (e p.1) v * g₀.inner x (e p.2) w with hcoef_def
@@ -241,7 +241,7 @@ theorem ccTensorBilin_scalar_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
     (Y W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => ccTensorBilin (I := I) g T x (Y x) (W x)) := by
+      (fun x : M => smoothCcTensorBilinForm (I := I) g T x (Y x) (W x)) := by
   have h_eval : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun b : M =>
         Tensor0SSpace.toModel (ccTensorMultilinear (I := I) g T b)
@@ -270,38 +270,38 @@ theorem ccTensorBilin_contMDiff (g : SmoothRiemannianMetric I M)
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ)
-        b (ccTensorBilin (I := I) g T b)) := by
+        b (smoothCcTensorBilinForm (I := I) g T b)) := by
   classical
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
-    (φ := fun x : M => ccTensorBilin (I := I) g T x)
+    (φ := fun x : M => smoothCcTensorBilinForm (I := I) g T x)
   intro Y
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun _ : M => ℝ)
-    (φ := fun x : M => ccTensorBilin (I := I) g T x (Y x))
+    (φ := fun x : M => smoothCcTensorBilinForm (I := I) g T x (Y x))
   intro W
   have h_scalar := ccTensorBilin_scalar_contMDiff (I := I) g T Y W
   intro x
   rw [contMDiffAt_section]
   refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_
   filter_upwards with y
-  change ccTensorBilin (I := I) g T y (Y y) (W y) =
+  change smoothCcTensorBilinForm (I := I) g T y (Y y) (W y) =
     (trivializationAt ℝ (Bundle.Trivial M ℝ) x
-      ⟨y, ccTensorBilin (I := I) g T y (Y y) (W y)⟩).2
+      ⟨y, smoothCcTensorBilinForm (I := I) g T y (Y y) (W y)⟩).2
   rfl
 
 def ccTensorBilinSymm (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
-  (1 / 2 : ℝ) • (ccTensorBilin (I := I) g T x +
-    (ccTensorBilin (I := I) g T x).flip)
+  (1 / 2 : ℝ) • (smoothCcTensorBilinForm (I := I) g T x +
+    (smoothCcTensorBilinForm (I := I) g T x).flip)
 
 @[simp] theorem ccTensorBilinSymm_apply (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g T x v w =
       (1 / 2 : ℝ) *
-        (ccTensorBilin (I := I) g T x v w +
-          ccTensorBilin (I := I) g T x w v) := by
+        (smoothCcTensorBilinForm (I := I) g T x v w +
+          smoothCcTensorBilinForm (I := I) g T x w v) := by
   simp only [ccTensorBilinSymm, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.add_apply, ContinuousLinearMap.flip_apply, smul_eq_mul]
 
@@ -330,8 +330,8 @@ theorem ccTensorBilinSymm_contMDiff (g : SmoothRiemannianMetric I M)
       (fun x : M => ccTensorBilinSymm (I := I) g T x (Y x) (W x)) := by
     have h_eq : (fun x : M => ccTensorBilinSymm (I := I) g T x (Y x) (W x))
         = fun x : M => (1 / 2 : ℝ) *
-            (ccTensorBilin (I := I) g T x (Y x) (W x) +
-              ccTensorBilin (I := I) g T x (W x) (Y x)) := by
+            (smoothCcTensorBilinForm (I := I) g T x (Y x) (W x) +
+              smoothCcTensorBilinForm (I := I) g T x (W x) (Y x)) := by
       funext x; rw [ccTensorBilinSymm_apply]
     rw [h_eq]
     exact (contMDiff_const).mul
@@ -349,7 +349,7 @@ theorem ccTensorBilinSymm_contMDiff (g : SmoothRiemannianMetric I M)
 def tensorSectionRealizeMetric (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ) :
     SmoothRiemannianMetric I M :=
   perturbedMetric (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T)
     (ccTensorBilinSymm_symm (I := I) g T)
@@ -358,7 +358,7 @@ def tensorSectionRealizeMetric (g : SmoothRiemannianMetric I M)
 @[simp] theorem tensorSectionRealizeMetric_inner (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ)
     (x : M) (v w : TangentSpace I x) :
     (tensorSectionRealizeMetric (I := I) g T hδ_lt hδ).inner x v w =
       g.inner x v w + ccTensorBilinSymm (I := I) g T x v w := by
@@ -368,7 +368,7 @@ def tensorSectionRealizeMetric (g : SmoothRiemannianMetric I M)
 theorem exists_smooth_metric_of_smooth_tensor_small
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ') :
     ∃ g' : SmoothRiemannianMetric I M,
       ∀ (x : M) (v w : TangentSpace I x),
         g'.inner x v w =
@@ -406,8 +406,8 @@ theorem ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
 
 theorem gFibreOpBound_ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ) :
-    gFibreOpBound (I := I) (M := M) g
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g (ccTensorBilinSymm (I := I) g T) δ) :
+    metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (c • T)) (|c| * δ) := by
   intro x v w
   rw [ccTensorBilinSymm_smul, abs_mul]
@@ -419,7 +419,7 @@ theorem gFibreOpBound_ccTensorBilinSymm_smul (g : SmoothRiemannianMetric I M)
         mul_le_mul_of_nonneg_left hb (abs_nonneg c)
     _ = |c| * δ * Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by ring
 
-def tensorHsBilinSymm (g : SmoothRiemannianMetric I M) {σ : ℝ}
+def tensorHsBilinFormSymm (g : SmoothRiemannianMetric I M) {σ : ℝ}
     (u : tensorHs (I := I) (M := M) g 0 2 σ)
     (hu_fs : (Function.support u.coeff).Finite) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
@@ -432,12 +432,12 @@ theorem exists_smooth_metric_of_tensorHs_small
     (u : tensorHs (I := I) (M := M) g_bg 0 2 σ)
     (hu_fs : (Function.support u.coeff).Finite)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg
-      (tensorHsBilinSymm (I := I) g_bg u hu_fs) δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg
+      (tensorHsBilinFormSymm (I := I) g_bg u hu_fs) δ') :
     ∃ g' : SmoothRiemannianMetric I M,
       ∀ (x : M) (v w : TangentSpace I x),
         g'.inner x v w =
-          g_bg.inner x v w + tensorHsBilinSymm (I := I) g_bg u hu_fs x v w :=
+          g_bg.inner x v w + tensorHsBilinFormSymm (I := I) g_bg u hu_fs x v w :=
   exists_smooth_metric_of_smooth_tensor_small (I := I) g_bg
     (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
       (I := I) (M := M) u hu_fs) hδ'_lt hδ'
@@ -448,8 +448,8 @@ noncomputable def realizeMetricMap (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2)) :
     SmoothRiemannianMetric I M :=
   if h : ∃ (hu_fs : (Function.support u.coeff).Finite) (δ' : ℝ), δ' < 1 ∧
-      gFibreOpBound (I := I) (M := M) g_bg
-        (tensorHsBilinSymm (I := I) g_bg u hu_fs) δ' then
+      metricCauchySchwarzBound (I := I) (M := M) g_bg
+        (tensorHsBilinFormSymm (I := I) g_bg u hu_fs) δ' then
     tensorSectionRealizeMetric (I := I) g_bg
       (Analysis.Parabolic.TensorSpectral.tensorHsSmoothRepr
         (I := I) (M := M) u h.choose)
@@ -461,15 +461,15 @@ theorem realizeMetricMap_eq_of_small (g_bg : SmoothRiemannianMetric I M) (a : �
     (u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (hu_fs : (Function.support u.coeff).Finite)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg
-      (tensorHsBilinSymm (I := I) g_bg u hu_fs) δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg
+      (tensorHsBilinFormSymm (I := I) g_bg u hu_fs) δ')
     (x : M) (v w : TangentSpace I x) :
     (realizeMetricMap (I := I) g_bg a u).inner x v w =
-      g_bg.inner x v w + tensorHsBilinSymm (I := I) g_bg u hu_fs x v w := by
+      g_bg.inner x v w + tensorHsBilinFormSymm (I := I) g_bg u hu_fs x v w := by
   classical
   have hex : ∃ (hu_fs : (Function.support u.coeff).Finite) (δ' : ℝ), δ' < 1 ∧
-      gFibreOpBound (I := I) (M := M) g_bg
-        (tensorHsBilinSymm (I := I) g_bg u hu_fs) δ' :=
+      metricCauchySchwarzBound (I := I) (M := M) g_bg
+        (tensorHsBilinFormSymm (I := I) g_bg u hu_fs) δ' :=
     ⟨hu_fs, δ', hδ'_lt, hδ'⟩
   rw [realizeMetricMap, dif_pos hex]
   rw [tensorSectionRealizeMetric_inner]

@@ -51,7 +51,7 @@ theorem lie_deriv_metric_neg_eq_pushforward_variation_sum
   rw [h_A_value, h_B_value]
   rw [neg_lieDerivMetric_eq_neg_killing_sum (I := I) g X y p q]
 
-theorem lpush_eq_neg_lieDerivMetric_of_sum
+theorem pushforward_pairing_deriv_eq_neg_lieDerivMetric_of_sum
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (y : M) (p q : TangentSpace I y)
@@ -72,11 +72,11 @@ theorem cartan_cancellation_value_identity
         (X : ∀ x : M, TangentSpace I x) y q))
     (h_sum : Lpush = A' + B') :
     Lpush = -lieDerivMetric (I := I) g X y p q :=
-  lpush_eq_neg_lieDerivMetric_of_sum (I := I) g X y p q A' B' Lpush h_sum
+  pushforward_pairing_deriv_eq_neg_lieDerivMetric_of_sum (I := I) g X y p q A' B' Lpush h_sum
     (lie_deriv_metric_neg_eq_pushforward_variation_sum (I := I) g X y p q
       A' B' h_A_value h_B_value)
 
-theorem cartan_cancellation_derivative_witness
+theorem hasDerivAt_pushforward_pairing_eq_neg_lieDerivMetric
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

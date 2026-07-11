@@ -50,16 +50,16 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 def deTurckLieCovDerivRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) (s : ℝ) : SmoothCcTensor g₀ 4 2 :=
   s • ∑ i : Fin 3, ε i • ((1 / 2 : ℝ) •
-    (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+    (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
         (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) (q i)
-      + curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      + curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
         (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
@@ -69,8 +69,8 @@ set_option linter.unusedSectionVars false in
 
 @[simp] lemma deTurckLieCovDerivRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) :
     deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε 0 = 0 := by
@@ -100,11 +100,11 @@ set_option linter.unusedSectionVars false in
 theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
-    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+    curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
         (σ.trans (Equiv.swap (0 : Fin 4) 1)) =
-      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+      curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
@@ -117,7 +117,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
   refine ContinuousLinearMap.ext (fun G => ?_)
   refine Tensor0SSpace.toModel_injective ?_
   refine ContinuousMultilinearMap.ext (fun v => ?_)
-  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialBiContrFib,
+  rw [curvatureActionMonomialTrace, curvatureActionMonomialTrace,
     curvatureRefoldMonomialFibFixedFrame_toModel, curvatureRefoldMonomialFibFixedFrame_toModel]
   have hcons : ∀ (p q' : TangentSpace I x) (j : Fin 4),
       (Fin.cons (p : E) (Fin.cons (q' : E) v) : Fin 4 → E) ((Equiv.swap (0 : Fin 4) 1) j) =
@@ -176,13 +176,13 @@ set_option linter.unusedSectionVars false in
 theorem curvatureRefoldMonomialCoeffField_unitValue_add
     (g₀ g₁ : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
-    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+    curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀ (S + S'))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ (S + S')) σ =
-      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+      curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ
-        + curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        + curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S')
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S') σ := by
   classical
@@ -195,19 +195,19 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_add
   refine Tensor0SSpace.toModel_injective ?_
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   have hadd : (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
-      (TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+      (TensorRSSpace.ofCLM (curvatureActionMonomialTrace (I := I) (M := M) g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x)
-        + TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+        + TensorRSSpace.ofCLM (curvatureActionMonomialTrace (I := I) (M := M) g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S') σ x))) G =
-      curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+      curvatureActionMonomialTrace (I := I) (M := M) g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x G
-        + curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+        + curvatureActionMonomialTrace (I := I) (M := M) g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S') σ x G := rfl
   rw [hadd]
   simp only [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
     TensorRSSpace.ofCLM]
-  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialBiContrFib,
-    curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialFibFixedFrame_toModel,
+  rw [curvatureActionMonomialTrace, curvatureActionMonomialTrace,
+    curvatureActionMonomialTrace, curvatureRefoldMonomialFibFixedFrame_toModel,
     curvatureRefoldMonomialFibFixedFrame_toModel, curvatureRefoldMonomialFibFixedFrame_toModel]
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun a _ => ?_)
@@ -222,10 +222,10 @@ set_option linter.unusedSectionVars false in
 theorem curvatureRefoldMonomialCoeffField_unitValue_smul
     (g₀ g₁ : SmoothRiemannianMetric I M) (c : ℝ) (S : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
-    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+    curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀ (c • S))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ (c • S)) σ =
-      c • curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+      c • curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ := by
   classical
@@ -237,14 +237,14 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_smul
   refine Tensor0SSpace.toModel_injective ?_
   refine ContinuousMultilinearMap.ext (fun v => ?_)
   have hsmul : (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
-      (c • TensorRSSpace.ofCLM (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+      (c • TensorRSSpace.ofCLM (curvatureActionMonomialTrace (I := I) (M := M) g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x))) G =
-      c • curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁
+      c • curvatureActionMonomialTrace (I := I) (M := M) g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ x G := rfl
   rw [hsmul]
   simp only [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
     TensorRSSpace.ofCLM]
-  rw [curvatureRefoldMonomialBiContrFib, curvatureRefoldMonomialBiContrFib,
+  rw [curvatureActionMonomialTrace, curvatureActionMonomialTrace,
     curvatureRefoldMonomialFibFixedFrame_toModel, curvatureRefoldMonomialFibFixedFrame_toModel]
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl (fun a _ => ?_)
@@ -260,22 +260,22 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (σ : Equiv.Perm (Fin 4)) :
     (1 / 2 : ℝ) •
-      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+      (curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T) σ
-        + curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        + curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ T)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
           (σ.trans (Equiv.swap (0 : Fin 4) 1))) =
-      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+      curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) σ := by
-  rw [show curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) σ := by
+  rw [show curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) σ =
-      curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) σ =
+      curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀ ((1 / 2 : ℝ) •
           (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ ((1 / 2 : ℝ) •
@@ -289,17 +289,17 @@ set_option linter.unusedSectionVars false in
 
 theorem deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (q : Fin 3 → Equiv.Perm (Fin 4)) (ε : Fin 3 → ℝ) (s : ℝ) :
     deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε s =
       s • ∑ i : Fin 3, ε i •
-        curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        curvatureActionMonomialCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-          (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-            (symmS (I := I) (M := M) g₀ T)) (q i) := by
+            (ccTensor02Symm (I := I) (M := M) g₀ T)) (q i) := by
   rw [deTurckLieCovDerivRefoldC2Family]
   congr 1
   refine Finset.sum_congr rfl (fun i _ => ?_)

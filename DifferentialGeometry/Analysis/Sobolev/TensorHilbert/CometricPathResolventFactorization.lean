@@ -31,20 +31,20 @@ theorem sqrt_inner_gInvDiffRaisedEndo_sub_le
       ga.inner y v w = g₀.inner y v w + ha y v w)
     (htie_b : ∀ (y : M) (v w : TangentSpace I y),
       gb.inner y v w = g₀.inner y v w + hb y v w)
-    {δa δb δab : ℝ} (hδa_lt : δa < 1) (hδa : gFibreOpBound (I := I) g₀ ha δa)
-    (hδb_lt : δb < 1) (hδb_nn : 0 ≤ δb) (hδb : gFibreOpBound (I := I) g₀ hb δb)
+    {δa δb δab : ℝ} (hδa_lt : δa < 1) (hδa : metricCauchySchwarzBound (I := I) g₀ ha δa)
+    (hδb_lt : δb < 1) (hδb_nn : 0 ≤ δb) (hδb : metricCauchySchwarzBound (I := I) g₀ hb δb)
     (hδab_nn : 0 ≤ δab)
-    (hδab : gFibreOpBound (I := I) g₀ (fun y => ha y - hb y) δab)
+    (hδab : metricCauchySchwarzBound (I := I) g₀ (fun y => ha y - hb y) δab)
     (x : M) (v : TangentSpace I x) :
     Real.sqrt (g₀.inner x
-        (gInvDiffRaisedEndo (I := I) g₀ ga x v - gInvDiffRaisedEndo (I := I) g₀ gb x v)
-        (gInvDiffRaisedEndo (I := I) g₀ ga x v - gInvDiffRaisedEndo (I := I) g₀ gb x v)) ≤
+        (metricComparisonDiffEndo (I := I) g₀ ga x v - metricComparisonDiffEndo (I := I) g₀ gb x v)
+        (metricComparisonDiffEndo (I := I) g₀ ga x v - metricComparisonDiffEndo (I := I) g₀ gb x v)) ≤
       (δab / ((1 - δa) * (1 - δb))) * Real.sqrt (g₀.inner x v v) := by
   classical
   have hcoeff_a : 0 < 1 - δa := by linarith
   have hcoeff_b : 0 < 1 - δb := by linarith
-  set Da : TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ ga x v with hDa
-  set Db : TangentSpace I x := gInvDiffRaisedEndo (I := I) g₀ gb x v with hDb
+  set Da : TangentSpace I x := metricComparisonDiffEndo (I := I) g₀ ga x v with hDa
+  set Db : TangentSpace I x := metricComparisonDiffEndo (I := I) g₀ gb x v with hDb
   set z : TangentSpace I x := Da - Db with hz
   set N : ℝ := Real.sqrt (g₀.inner x z z) with hN
   set Nv : ℝ := Real.sqrt (g₀.inner x v v) with hNv
@@ -84,7 +84,7 @@ theorem sqrt_inner_gInvDiffRaisedEndo_sub_le
       rw [map_add (hb x) Db v, ContinuousLinearMap.add_apply]
     rw [hha, hhb]
     ring
-  have hraised : Db + v = gInvRaisedEndo (I := I) g₀ gb x v := by
+  have hraised : Db + v = metricComparisonEndo (I := I) g₀ gb x v := by
     rw [hDb, gInvRaisedEndo_eq_diff_add_id (I := I) g₀ gb x v]
   have hbound_rb : Real.sqrt (g₀.inner x (Db + v) (Db + v)) ≤ (1 / (1 - δb)) * Nv := by
     rw [hraised, hNv]

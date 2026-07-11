@@ -66,7 +66,7 @@ private lemma perChartCompConstant_bound
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i α (Idx, Jdx))
         (chartTargetEuclid (I := I) (M := M) α)
@@ -109,7 +109,7 @@ private lemma tensorChartComp_eigenvectorSmooth_wkpNorm_le
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s
           (eigenvectorSmooth (I := I) (M := M) g r s i) α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α)
@@ -132,12 +132,12 @@ private lemma tensorChartComp_eigenvectorSmooth_wkpNorm_le
     eigenvectorSmooth_tensorChartComp_aeEq_chartComponentFun
       (I := I) (M := M) g r s i α Idx Jdx
   have h_eq :
-      wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (tensorChartComp (I := I) (M := M) g r s
             (eigenvectorSmooth (I := I) (M := M) g r s i)
             α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) =
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
             g r s i α (Idx, Jdx))
           (chartTargetEuclid (I := I) (M := M) α) :=
@@ -154,7 +154,7 @@ private lemma chartTerm_eigenvectorSmooth_le
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (tensorChartComp (I := I) (M := M) g r s
               (eigenvectorSmooth (I := I) (M := M) g r s i)
               α Idx Jdx)
@@ -180,7 +180,7 @@ private lemma chartTerm_eigenvectorSmooth_le
       ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∀ _hIdx : Idx ∈ (Finset.univ : Finset (Fin r → Fin (Module.finrank ℝ E))),
         (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
               (tensorChartComp (I := I) (M := M) g r s
                 (eigenvectorSmooth (I := I) (M := M) g r s i)
                 α Idx Jdx)

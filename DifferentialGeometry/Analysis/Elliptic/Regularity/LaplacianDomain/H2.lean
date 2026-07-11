@@ -82,7 +82,7 @@ theorem chartH2_localBound_of_laplacianDomain
       hη_one_on_Ω'' hΩ''_open.measurableSet
   have hh₀ : (0 : ℝ) < 1 := by norm_num
   have h_h2 :=
-    chart_loc_of_uniform_bound
+    exists_weak_second_partial_of_uniform_diffQuot_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hh₀ h_room
       hM_nn h_uniform_bd

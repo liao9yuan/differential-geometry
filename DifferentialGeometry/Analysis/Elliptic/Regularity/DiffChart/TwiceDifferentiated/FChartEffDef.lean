@@ -49,7 +49,7 @@ noncomputable def fChartDeriv2
     (chosenFChartDeriv (I := I) (M := M) g α hu_h l₁)
     (chartTargetEuclid (I := I) (M := M) α)
 
-noncomputable def fChartEffTwiceNumerator
+noncomputable def effectiveSourceChartSecondOrderNumerator
     (g : SmoothRiemannianMetric I M) (α : M)
     (l₁ l₂ : Fin (Module.finrank ℝ E))
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -106,13 +106,13 @@ noncomputable def fChartEffTwiceNumerator
   + densityDerivOnEuclid (I := I) g α l₁ y *
       chosenFChartDeriv (I := I) (M := M) g α hu_h l₂ y
 
-noncomputable def fChartEffTwice
+noncomputable def effectiveSourceChartSecondOrder
     (g : SmoothRiemannianMetric I M) (α : M)
     (l₁ l₂ : Fin (Module.finrank ℝ E))
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
     EuclN → ℝ :=
   Set.indicator (chartImagePOUTsupport (I := I) (M := M) α)
-    (fun y => fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y /
+    (fun y => effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y /
       densityOnEuclid (I := I) g α y)
 
 theorem fChartEffTwice_def_unfold
@@ -120,9 +120,9 @@ theorem fChartEffTwice_def_unfold
     (l₁ l₂ : Fin (Module.finrank ℝ E))
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (y : EuclN) :
-    fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y =
+    effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y =
       Set.indicator (chartImagePOUTsupport (I := I) (M := M) α)
-        (fun z => fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h z /
+        (fun z => effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h z /
           densityOnEuclid (I := I) g α z) y := rfl
 
 theorem density_mul_fChartEffTwice_eq_indicator_numerator
@@ -132,9 +132,9 @@ theorem density_mul_fChartEffTwice_eq_indicator_numerator
     (y : EuclN)
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     densityOnEuclid (I := I) g α y *
-        fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y =
+        effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y =
       Set.indicator (chartImagePOUTsupport (I := I) (M := M) α)
-        (fun z => fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h z) y := by
+        (fun z => effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h z) y := by
   classical
   rw [fChartEffTwice_def_unfold]
   by_cases hy_K : y ∈ chartImagePOUTsupport (I := I) (M := M) α
@@ -148,9 +148,9 @@ theorem fChartEffTwice_supported_in_chartImagePOUTsupport
     {g : SmoothRiemannianMetric I M} {α : M}
     {l₁ l₂ : Fin (Module.finrank ℝ E)}
     {u_h : H1Compl g} {hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2} :
-    Function.support (fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h) ⊆
+    Function.support (effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h) ⊆
       chartImagePOUTsupport (I := I) (M := M) α := by
-  unfold fChartEffTwice
+  unfold effectiveSourceChartSecondOrder
   exact Set.support_indicator_subset
 
 private lemma exists_bound_continuousOn_compact
@@ -707,7 +707,7 @@ private lemma fChartEffTwiceNumerator_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (l₁ l₂ : Fin (Module.finrank ℝ E))
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
-    MemLp (fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h) 2
+    MemLp (effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
   have hA1 : MemLp (fun y => (∑ i : Fin (Module.finrank ℝ E),
@@ -800,7 +800,7 @@ private lemma fChartEffTwiceNumerator_memLp_vol_K
   have h_step10 := h_step9.sub hD2
   have h_step11 := h_step10.add hE1
   have h_step12 := h_step11.add hE2
-  unfold fChartEffTwiceNumerator
+  unfold effectiveSourceChartSecondOrderNumerator
   convert h_step12 using 2 with y
 
 private lemma one_div_densityOnEuclid_continuousOn
@@ -820,18 +820,18 @@ private lemma fChartEffTwiceNumerator_div_density_memLp_vol_K
     (g : SmoothRiemannianMetric I M) (α : M)
     (l₁ l₂ : Fin (Module.finrank ℝ E))
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
-    MemLp (fun y => fChartEffTwiceNumerator
+    MemLp (fun y => effectiveSourceChartSecondOrderNumerator
         (I := I) (M := M) g α l₁ l₂ hu_h y /
         densityOnEuclid (I := I) g α y) 2
       ((volume : Measure EuclN).restrict (Kα (I := I) (M := M) α)) := by
   classical
   have h_num := fChartEffTwiceNumerator_memLp_vol_K
     (I := I) (M := M) g α l₁ l₂ hu_h
-  have h_eq : (fun y => fChartEffTwiceNumerator
+  have h_eq : (fun y => effectiveSourceChartSecondOrderNumerator
       (I := I) (M := M) g α l₁ l₂ hu_h y /
       densityOnEuclid (I := I) g α y) =
       fun y => (1 / densityOnEuclid (I := I) g α y) *
-        fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y := by
+        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y := by
     funext y
     rw [one_div, mul_comm, ← div_eq_mul_inv]
   rw [h_eq]
@@ -842,16 +842,16 @@ theorem fChartEffTwice_memLp_two_weighted
     {g : SmoothRiemannianMetric I M} {α : M}
     {l₁ l₂ : Fin (Module.finrank ℝ E)}
     {u_h : H1Compl g} {hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2} :
-    MemLp (fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h) 2
+    MemLp (effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h) 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   classical
   set K : Set EuclN := Kα (I := I) (M := M) α with hK_def
   set f : EuclN → ℝ := fun y =>
-    fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y /
+    effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y /
       densityOnEuclid (I := I) g α y with hf_def
   have h_indicator_eq :
-      fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h = Set.indicator K f := by
+      effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h = Set.indicator K f := by
     rfl
   rw [h_indicator_eq]
   have h_chartTarget_meas : MeasurableSet

@@ -13,7 +13,7 @@ local notation "E" => EuclideanSpace ℝ (Fin d)
 
 omit [NeZero d] in
 
-private lemma bcfRestrict_values_in_compact
+private lemma restrict_mem_Icc_of_abs_le
     {K : Set E} {C : ℝ}
     {f : ℕ → E → ℝ}
     (hf_bdd : ∀ n, ∀ x, |f n x| ≤ C)
@@ -53,7 +53,7 @@ theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
     have h_range_compact : ∀ (g : K →ᵇ ℝ) (x : K),
         g ∈ Set.range f_bcf → g x ∈ Set.Icc (-C) C := by
       rintro g x ⟨n, rfl⟩
-      simpa [f_bcf] using bcfRestrict_values_in_compact hf_bdd n x
+      simpa [f_bcf] using restrict_mem_Icc_of_abs_le hf_bdd n x
     have h_Icc_compact : IsCompact (Set.Icc (-C) C : Set ℝ) := isCompact_Icc
     have h_lip_restrict : ∀ n, LipschitzWith ⟨L, hL_pos⟩ ((f n) ∘ ((↑) : K → E)) := by
       intro n

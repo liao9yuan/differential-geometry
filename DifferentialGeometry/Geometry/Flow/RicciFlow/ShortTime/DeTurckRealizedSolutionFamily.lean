@@ -59,7 +59,7 @@ theorem ccTensorBilinSymm_zero_apply (g : SmoothRiemannianMetric I M)
   ring
 
 theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
-    gFibreOpBound (I := I) (M := M) g
+    metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) 0 := by
   intro x v w
   rw [ccTensorBilinSymm_zero_apply]

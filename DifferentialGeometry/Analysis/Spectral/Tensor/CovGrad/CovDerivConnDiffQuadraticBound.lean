@@ -46,7 +46,7 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
     ∃ Cw : ℝ, 0 ≤ Cw ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -62,11 +62,11 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
   classical
   letI instW : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 1 3 I b) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 1 3
-  obtain ⟨Ck0, hCk00, hKos0⟩ := rfns_raisedKoszul_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+  obtain ⟨Ck0, hCk00, hKos0⟩ := riemannianFiberNormSq_raisedKoszul_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
   obtain ⟨Ck1, hCk10, hKos1⟩ :=
-    rfns_iteratedCovGrad_one_raisedKoszul_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+    riemannianFiberNormSq_iteratedCovGrad_one_raisedKoszul_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
   obtain ⟨Cs1, hCs10, hSharp1⟩ :=
-    rfns_iteratedCovGrad_one_sharpFlatEndoCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+    riemannianFiberNormSq_iteratedCovGrad_one_sharpFlatEndoCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
   set b0 : ℝ := Ck0 ^ 2 * B ^ 2 with hb0_def
   set b1 : ℝ := Ck1 ^ 2 * (1 + B) ^ 2 * (B ^ 2 + B ^ 2) with hb1_def
   set s0 : ℝ := (Module.finrank ℝ E : ℝ) ^ 2 * (1 / (1 - δ₀)) ^ 2 with hs0_def
@@ -83,7 +83,7 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
     by_cases hl : l = 0
     · rw [if_pos hl]; exact hs0_nn
     · rw [if_neg hl]; exact hs1_nn
-  refine ⟨Real.sqrt (appCcGdiag (E := E) 1 *
+  refine ⟨Real.sqrt (diagonalGridGrowthFactor (E := E) 1 *
       ∑ i ∈ Finset.range 2, Bf i * ∑ l ∈ Finset.range (2 - i), Sf l), Real.sqrt_nonneg _, ?_⟩
   intro g₁ P δ hδ_le hδ0 hδ htie x henv
   have hδlt1 : δ < 1 := lt_of_le_of_lt hδ_le hδ₀
@@ -140,7 +140,7 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
             (sharpFlatEndoCc (I := I) g₀ g₁)).toSection x) ≤ Sf l := by
     intro l hl
     interval_cases l
-    · have h := rfns_sharpFlatEndoCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
+    · have h := riemannianFiberNormSq_sharpFlatEndoCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀
         g₁ P htie hδ_le hδ0 hδ x
       simp only [hSf_def, reduceIte]
       rw [hs0_def]
@@ -155,7 +155,7 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
       rw [← hN1_def]
       have hN1sq : N1 ^ 2 ≤ B ^ 2 := pow_le_pow_left₀ hN1_nn hN1_le 2
       exact mul_le_mul_of_nonneg_left hN1sq (sq_nonneg Cs1)
-  have hjet := rfns_iteratedCovGrad_connDiffSection_le (I := I) (M := M) g₀ g₁ 1 x Bf Sf
+  have hjet := riemannianFiberNormSq_iteratedCovGrad_connDiffSection_le (I := I) (M := M) g₀ g₁ 1 x Bf Sf
     hKos hSharp hSf_nn
   have hiter1 : (iteratedCovGrad (I := I) g₀ 1 2 1 (connDiffSection (I := I) g₁ g₀)) =
       covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀) := by
@@ -163,7 +163,7 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
   rw [hiter1] at hjet
   have hWsq : riemannianFiberNormSq (I := I) (M := M) g₀ 1 3 x
       ((covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)).toSection x) ≤
-      appCcGdiag (E := E) 1 *
+      diagonalGridGrowthFactor (E := E) 1 *
         ∑ i ∈ Finset.range 2, Bf i * ∑ l ∈ Finset.range (2 - i), Sf l :=
     hjet
   rw [riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 1 3 x] at hWsq
@@ -238,7 +238,7 @@ theorem exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -271,7 +271,7 @@ theorem exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope
   set δ' : ℝ := max δ 0 with hδ'_def
   have hδ'_nn : 0 ≤ δ' := le_max_right _ _
   have hδ'_le : δ' ≤ max δ₀ 0 := max_le hδ_le hm0
-  have hδ'_bound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ' := by
+  have hδ'_bound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ' := by
     intro y a b
     refine le_trans (hδ y a b) ?_
     have hle : δ ≤ δ' := le_max_left _ _
@@ -311,7 +311,7 @@ theorem exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope
   have hNA_nn : 0 ≤ NA := Real.sqrt_nonneg _
   have hbridge := covGrad_connDiffSection_flat_eval_eq_inner (I := I) (M := M) g₀ g₁ x v w u
   rw [← hA_def, ← hW_def] at hbridge
-  have hprim := abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ x W A v u w
+  have hprim := abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ x W A v u w
   rw [hbridge] at hprim
   rw [abs_of_nonneg hAA_nn] at hprim
   have hAA_sq : g₀.inner x A A = NA ^ 2 := by rw [hNA_def, Real.sq_sqrt hAA_nn]

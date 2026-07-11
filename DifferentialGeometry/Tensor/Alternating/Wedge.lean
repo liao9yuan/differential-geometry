@@ -390,7 +390,7 @@ private theorem derivShuffleLeft_expanded_summand_eq
         (Quotient.mk'' σ) ((k.removeNth v) ∘ ⇑finSumFinEquiv)) =
       uncurryFinLeftExpandedSummand f g' h
         ((v ∘ ⇑Fin.finAddFlipAssoc) ∘ ⇑finSumFinEquiv)
-        (derivShuffleLeftFwdRanked k σ) (derivShuffleJ k σ) := by
+        (derivShuffleLeftFwdRanked k σ) (derivShuffleRank k σ) := by
   rw [uncurrySum_summand_eval]
   unfold uncurryFinLeftExpandedSummand
   rw [derivShuffleLeftFwdRanked_sign]
@@ -400,7 +400,7 @@ private theorem derivShuffleLeft_expanded_summand_eq
   have hleft :
       (fun i : Fin m =>
           ((v ∘ ⇑Fin.finAddFlipAssoc) ∘ ⇑finSumFinEquiv)
-            (derivShuffleLeftFwdRanked k σ (Sum.inl ((derivShuffleJ k σ).succAbove i)))) =
+            (derivShuffleLeftFwdRanked k σ (Sum.inl ((derivShuffleRank k σ).succAbove i)))) =
         fun i : Fin m => ((k.removeNth v) ∘ ⇑finSumFinEquiv) (σ (Sum.inl i)) := by
     funext i
     rw [derivShuffleLeftFwdRanked_inl_succAbove]
@@ -416,7 +416,7 @@ private theorem derivShuffleLeft_expanded_summand_eq
     simp [Function.comp_apply, Fin.removeNth_apply, permFinOfSum,
       Equiv.permCongr_apply]
   have hleft_remove :
-      (derivShuffleJ k σ).removeNth
+      (derivShuffleRank k σ).removeNth
           (fun i : Fin (m + 1) =>
             v (Fin.finAddFlipAssoc (finSumFinEquiv (derivShuffleLeftFwdRanked k σ (Sum.inl i))))) =
         fun i : Fin m => v (k.succAbove (finSumFinEquiv (σ (Sum.inl i)))) := by
@@ -437,26 +437,26 @@ private theorem derivShuffleLeft_expanded_summand_eq
   simp [map_zsmul, smul_smul, mul_assoc]
   congr 1
   rcases Nat.even_or_odd k.val with hq | hq <;>
-    rcases Nat.even_or_odd (derivShuffleJ k σ).val with hj | hj
+    rcases Nat.even_or_odd (derivShuffleRank k σ).val with hj | hj
   · have hqu : ((-1 : ℤˣ) ^ k.val) = 1 := hq.neg_one_pow
     have hqz : (-1 : ℤ) ^ k.val = 1 := hq.neg_one_pow
-    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = 1 := hj.neg_one_pow
-    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = 1 := hj.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleRank k σ).val) = 1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleRank k σ).val = 1 := hj.neg_one_pow
     simp [hqu, hqz, hju, hjz]
   · have hqu : ((-1 : ℤˣ) ^ k.val) = 1 := hq.neg_one_pow
     have hqz : (-1 : ℤ) ^ k.val = 1 := hq.neg_one_pow
-    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = -1 := hj.neg_one_pow
-    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = -1 := hj.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleRank k σ).val) = -1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleRank k σ).val = -1 := hj.neg_one_pow
     simp [hqu, hqz, hju, hjz]
   · have hqu : ((-1 : ℤˣ) ^ k.val) = -1 := hq.neg_one_pow
     have hqz : (-1 : ℤ) ^ k.val = -1 := hq.neg_one_pow
-    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = 1 := hj.neg_one_pow
-    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = 1 := hj.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleRank k σ).val) = 1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleRank k σ).val = 1 := hj.neg_one_pow
     simp [hqu, hqz, hju, hjz]
   · have hqu : ((-1 : ℤˣ) ^ k.val) = -1 := hq.neg_one_pow
     have hqz : (-1 : ℤ) ^ k.val = -1 := hq.neg_one_pow
-    have hju : ((-1 : ℤˣ) ^ (derivShuffleJ k σ).val) = -1 := hj.neg_one_pow
-    have hjz : (-1 : ℤ) ^ (derivShuffleJ k σ).val = -1 := hj.neg_one_pow
+    have hju : ((-1 : ℤˣ) ^ (derivShuffleRank k σ).val) = -1 := hj.neg_one_pow
+    have hjz : (-1 : ℤ) ^ (derivShuffleRank k σ).val = -1 := hj.neg_one_pow
     simp [hqu, hqz, hju, hjz]
 
 private theorem zero_wedge' (h : M [⋀^Fin n]→L[𝕜] 𝕜) :

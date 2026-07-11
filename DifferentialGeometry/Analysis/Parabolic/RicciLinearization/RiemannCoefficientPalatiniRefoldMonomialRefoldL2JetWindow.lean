@@ -80,22 +80,22 @@ set_option linter.unusedSectionVars false in
 
 lemma toModel_unitValue_symmS_abs_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (y : M) (v w : TangentSpace I y) :
     |Tensor0SSpace.toModel (𝕜 := ℝ)
         (ccTensorUnitValueSection (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T) y) ![(v : E), (w : E)]| ≤
+          (ccTensor02Symm (I := I) (M := M) g₀ T) y) ![(v : E), (w : E)]| ≤
       δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) := by
   have hval : Tensor0SSpace.toModel (𝕜 := ℝ)
       (ccTensorUnitValueSection (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T) y) ![(v : E), (w : E)] =
+        (ccTensor02Symm (I := I) (M := M) g₀ T) y) ![(v : E), (w : E)] =
       ccTensorBilinSymm (I := I) g₀ T y v w := by
     have h1 : ccTensorUnitValueSection (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T) y =
+        (ccTensor02Symm (I := I) (M := M) g₀ T) y =
         (1 / 2 : ℝ) • (ccTensorUnitValueSection (I := I) (M := M) g₀ T y +
           ccTensorUnitValueSection (I := I) (M := M) g₀
             (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) y) := by
-      rw [show symmS (I := I) (M := M) g₀ T = (1 / 2 : ℝ) •
+      rw [show ccTensor02Symm (I := I) (M := M) g₀ T = (1 / 2 : ℝ) •
           (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) from rfl]
       rw [ccTensorUnitValueSection_smul, ccTensorUnitValueSection_add]
     rw [h1, Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_add,
@@ -105,7 +105,7 @@ lemma toModel_unitValue_symmS_abs_le (g₀ : SmoothRiemannianMetric I M)
     have h2 : ∀ (p q' : TangentSpace I y),
         Tensor0SSpace.toModel (𝕜 := ℝ)
           (ccTensorUnitValueSection (I := I) (M := M) g₀ T y) ![(p : E), (q' : E)] =
-        ccTensorBilin (I := I) g₀ T y p q' := by
+        smoothCcTensorBilinForm (I := I) g₀ T y p q' := by
       intro p q'
       have hb : Tensor0SSpace.toModel (𝕜 := ℝ)
           (ccTensorUnitValueSection (I := I) (M := M) g₀ T y) =
@@ -116,36 +116,36 @@ lemma toModel_unitValue_symmS_abs_le (g₀ : SmoothRiemannianMetric I M)
   rw [hval]
   exact hδ y v w
 
-private def bdMonoPerm (σ : Equiv.Perm (Fin 4)) : Equiv.Perm (Fin 6) :=
+private def curvatureRefoldSlotPerm (σ : Equiv.Perm (Fin 4)) : Equiv.Perm (Fin 6) :=
   ((finSumFinEquiv (m := 4) (n := 2)).permCongr
-    (Equiv.sumCongr σ (Equiv.refl (Fin 2)))).trans bdSigmaE0
+    (Equiv.sumCongr σ (Equiv.refl (Fin 2)))).trans armPairTraceSlotPerm6
 
-private lemma bdMonoPerm_castAdd (σ : Equiv.Perm (Fin 4)) (j : Fin 4) :
-    bdMonoPerm σ (Fin.castAdd 2 j) = (![1, 3, 4, 5] : Fin 4 → Fin 6) (σ j) := by
+private lemma curvatureRefoldSlotPerm_castAdd (σ : Equiv.Perm (Fin 4)) (j : Fin 4) :
+    curvatureRefoldSlotPerm σ (Fin.castAdd 2 j) = (![1, 3, 4, 5] : Fin 4 → Fin 6) (σ j) := by
   have hpad : (finSumFinEquiv (m := 4) (n := 2)).permCongr
       (Equiv.sumCongr σ (Equiv.refl (Fin 2))) (Fin.castAdd 2 j) =
       Fin.castAdd 2 (σ j) := by
     rw [Equiv.permCongr_apply, finSumFinEquiv_symm_apply_castAdd]
     rfl
-  rw [bdMonoPerm, Equiv.trans_apply, hpad]
+  rw [curvatureRefoldSlotPerm, Equiv.trans_apply, hpad]
   exact (by decide : ∀ k : Fin 4,
-    bdSigmaE0 (Fin.castAdd 2 k) = (![1, 3, 4, 5] : Fin 4 → Fin 6) k) (σ j)
+    armPairTraceSlotPerm6 (Fin.castAdd 2 k) = (![1, 3, 4, 5] : Fin 4 → Fin 6) k) (σ j)
 
-private lemma bdMonoPerm_natAdd (σ : Equiv.Perm (Fin 4)) (k : Fin 2) :
-    bdMonoPerm σ (Fin.natAdd 4 k) = (![0, 2] : Fin 2 → Fin 6) k := by
+private lemma curvatureRefoldSlotPerm_natAdd (σ : Equiv.Perm (Fin 4)) (k : Fin 2) :
+    curvatureRefoldSlotPerm σ (Fin.natAdd 4 k) = (![0, 2] : Fin 2 → Fin 6) k := by
   have hpad : (finSumFinEquiv (m := 4) (n := 2)).permCongr
       (Equiv.sumCongr σ (Equiv.refl (Fin 2))) (Fin.natAdd 4 k) =
       Fin.natAdd 4 k := by
     rw [Equiv.permCongr_apply, finSumFinEquiv_symm_apply_natAdd]
     rfl
-  rw [bdMonoPerm, Equiv.trans_apply, hpad]
+  rw [curvatureRefoldSlotPerm, Equiv.trans_apply, hpad]
   exact (by decide : ∀ k' : Fin 2,
-    bdSigmaE0 (Fin.natAdd 4 k') = (![0, 2] : Fin 2 → Fin 6) k') k
+    armPairTraceSlotPerm6 (Fin.natAdd 4 k') = (![0, 2] : Fin 2 → Fin 6) k') k
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-private lemma bdSlotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
+private lemma slotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (G : Tensor0SSpace 4 I x)
     (u : Fin 6 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -301,13 +301,13 @@ private lemma bdSlotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
-private theorem bdMonoRefold_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M)
+private theorem curvatureRefoldMonomialCoeffField_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (σ : Equiv.Perm (Fin 4)) :
-    curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+    curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
         (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ =
-      appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+      ccOperatorFieldComp (I := I) (M := M) g₀ 4 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
           (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S)) := by
   classical
   apply SmoothCcTensor.ext
@@ -320,7 +320,7 @@ private theorem bdMonoRefold_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I 
   intro v
   set Y : Tensor0SSpace 6 I x :=
     (show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
-      (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
         (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S)).toSection x) G with hY_def
   have hYval : ∀ w : Fin 6 → TangentSpace I x,
       Tensor0SSpace.toModel Y w =
@@ -330,33 +330,33 @@ private theorem bdMonoRefold_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I 
     intro w
     rw [hY_def]
     rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
           (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S)).toSection x) G) =
         ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 6 I x from
-          rsDomDomCongr (bdMonoPerm σ)
+          tensorRS_domDomCongr (curvatureRefoldSlotPerm σ)
             ((slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x)) G) from by
       rw [rsDomDomCongrSection_toSection]]
-    rw [toModel_rsDomDomCongr_apply (I := I) (M := M) (bdMonoPerm σ)
+    rw [toModel_rsDomDomCongr_apply (I := I) (M := M) (curvatureRefoldSlotPerm σ)
       ((slotExtendIter (I := I) (M := M) g₀ 0 2 4 S).toSection x) G]
     rw [ContinuousMultilinearMap.domDomCongr_apply]
-    rw [bdSlotExtendIterFour_toModel (I := I) (M := M) g₀ S x G
-      (fun i => w (bdMonoPerm σ i))]
+    rw [slotExtendIterFour_toModel (I := I) (M := M) g₀ S x G
+      (fun i => w (curvatureRefoldSlotPerm σ i))]
     refine congrArg₂ (· * ·) ?_ ?_
     · refine congrArg _ ?_
       funext j
       fin_cases j
-      · exact congrArg w (bdMonoPerm_castAdd σ 0)
-      · exact congrArg w (bdMonoPerm_castAdd σ 1)
-      · exact congrArg w (bdMonoPerm_castAdd σ 2)
-      · exact congrArg w (bdMonoPerm_castAdd σ 3)
+      · exact congrArg w (curvatureRefoldSlotPerm_castAdd σ 0)
+      · exact congrArg w (curvatureRefoldSlotPerm_castAdd σ 1)
+      · exact congrArg w (curvatureRefoldSlotPerm_castAdd σ 2)
+      · exact congrArg w (curvatureRefoldSlotPerm_castAdd σ 3)
     · refine congrArg _ ?_
       funext k
       fin_cases k
-      · exact congrArg w (bdMonoPerm_natAdd σ 0)
-      · exact congrArg w (bdMonoPerm_natAdd σ 1)
+      · exact congrArg w (curvatureRefoldSlotPerm_natAdd σ 0)
+      · exact congrArg w (curvatureRefoldSlotPerm_natAdd σ 1)
   have hLHS : Tensor0SSpace.toModel
       ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ).toSection x) G) v =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -368,10 +368,10 @@ private theorem bdMonoRefold_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I 
               (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : E)) v) : Fin 4 → E)
               (σ i)) := by
     rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S)
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ S) σ).toSection x) G) =
-        curvatureRefoldMonomialFibFixedFrame (I := I) (M := M)
+        curvatureActionMonomialFrameTrace (I := I) (M := M)
           (ccTensorUnitValueSection (I := I) (M := M) g₀ S) σ
           (smoothOrthoFrame (I := I) g₁ x) x G from rfl]
     exact curvatureRefoldMonomialFibFixedFrame_toModel (I := I) (M := M)
@@ -379,8 +379,8 @@ private theorem bdMonoRefold_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I 
       (smoothOrthoFrame (I := I) g₁ x) x G v
   have hRHS : Tensor0SSpace.toModel
       ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 4 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
             (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S))).toSection x) G) v =
       ∑ b : Fin (Module.finrank ℝ E), ∑ a : Fin (Module.finrank ℝ E),
         Tensor0SSpace.toModel Y
@@ -390,8 +390,8 @@ private theorem bdMonoRefold_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I 
                 (Fin.cons ((smoothOrthoFrame (I := I) g₁ x b x : TangentSpace I x) : E)
                   (fun j => (v j : E)))))) := by
     rw [show ((show Tensor0SSpace 4 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 4 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
             (slotExtendIter (I := I) (M := M) g₀ 0 2 4 S))).toSection x) G) =
         cometricDoubleTraceFib (I := I) g₁ 2 x
           (cometricDoubleTraceFib (I := I) g₁ 4 x Y) from by
@@ -462,15 +462,15 @@ lemma bdSingle_b_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (q : ℕ) (hq
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric I M)
+private theorem curvatureRefoldMonomialCoeffField_pointwise_gridWindow (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (σ : Equiv.Perm (Fin 4)) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P S : SmoothCcTensor g₀ 0 2)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
         {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hboundP : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (hboundS : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
+        (hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hboundS : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ S) δ)
         (hPS : ∀ (l : ℕ) (x : M),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) ≤
@@ -479,11 +479,11 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 4 2 i
-              (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+              (curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
                 (ccTensorUnitValueSection (I := I) (M := M) g₀
-                  (symmS (I := I) (M := M) g₀ S))
+                  (ccTensor02Symm (I := I) (M := M) g₀ S))
                 (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-                  (symmS (I := I) (M := M) g₀ S)) σ)).toSection x) ≤
+                  (ccTensor02Symm (I := I) (M := M) g₀ S)) σ)).toSection x) ≤
           C i * Combinatorics.antidiagonalTupleGridWindow
             (fun l' => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
               ((iteratedCovGrad (I := I) g₀ 0 2 l' S).toSection x)) (i + 2) := by
@@ -499,7 +499,7 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
     split_ifs
     · positivity
     · norm_num
-  refine ⟨fun i => appCcGdiag (E := E) i * ∑ i' ∈ Finset.range (i + 1),
+  refine ⟨fun i => diagonalGridGrowthFactor (E := E) i * ∑ i' ∈ Finset.range (i + 1),
       CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
         (fr * (fr * (fr * (fr * CS l)))) *
           Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1),
@@ -524,82 +524,82 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
   have hWtower : ∀ l : ℕ,
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
         ((iteratedCovGrad (I := I) g₀ 4 6 l
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
             (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-              (symmS (I := I) (M := M) g₀ S)))).toSection x) ≤
+              (ccTensor02Symm (I := I) (M := M) g₀ S)))).toSection x) ≤
       (fr * (fr * (fr * (fr * CS l)))) *
         Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
     intro l
     have hperm : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
         ((iteratedCovGrad (I := I) g₀ 4 6 l
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
             (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-              (symmS (I := I) (M := M) g₀ S)))).toSection x) =
+              (ccTensor02Symm (I := I) (M := M) g₀ S)))).toSection x) =
         riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
           ((iteratedCovGrad (I := I) g₀ 4 6 l
             (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
-      rfns_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 4 6
-        (bdMonoPerm σ)
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 4 (symmS (I := I) (M := M) g₀ S))
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
-          (slotExtendIter (I := I) (M := M) g₀ 0 2 4 (symmS (I := I) (M := M) g₀ S)))
+              (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) :=
+      riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr (I := I) (M := M) g₀ 4 6
+        (curvatureRefoldSlotPerm σ)
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 4 (ccTensor02Symm (I := I) (M := M) g₀ S))
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
+          (slotExtendIter (I := I) (M := M) g₀ 0 2 4 (ccTensor02Symm (I := I) (M := M) g₀ S)))
         (fun y d => by
           rw [rsDomDomCongrSection_toSection, toModel_rsDomDomCongr_apply]) l x
     rw [hperm]
     have h4 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
         ((iteratedCovGrad (I := I) g₀ 4 6 l
           (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+            (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) ≤
         fr * riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + l) x
           ((iteratedCovGrad (I := I) g₀ 3 5 l
             (slotExtendIter (I := I) (M := M) g₀ 0 2 3
-              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
+              (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) :=
       rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 3 5
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 3 (symmS (I := I) (M := M) g₀ S)) l x
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 3 (ccTensor02Symm (I := I) (M := M) g₀ S)) l x
     have h3 : riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + l) x
         ((iteratedCovGrad (I := I) g₀ 3 5 l
           (slotExtendIter (I := I) (M := M) g₀ 0 2 3
-            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+            (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) ≤
         fr * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
           ((iteratedCovGrad (I := I) g₀ 2 4 l
             (slotExtendIter (I := I) (M := M) g₀ 0 2 2
-              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
+              (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) :=
       rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 2 4
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S)) l x
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ S)) l x
     have h2 : riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
         ((iteratedCovGrad (I := I) g₀ 2 4 l
           (slotExtendIter (I := I) (M := M) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+            (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) ≤
         fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + l) x
           ((iteratedCovGrad (I := I) g₀ 1 3 l
             (slotExtendIter (I := I) (M := M) g₀ 0 2 1
-              (symmS (I := I) (M := M) g₀ S))).toSection x) :=
+              (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) :=
       rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 1 3
-        (slotExtendIter (I := I) (M := M) g₀ 0 2 1 (symmS (I := I) (M := M) g₀ S)) l x
+        (slotExtendIter (I := I) (M := M) g₀ 0 2 1 (ccTensor02Symm (I := I) (M := M) g₀ S)) l x
     have h1 : riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + l) x
         ((iteratedCovGrad (I := I) g₀ 1 3 l
           (slotExtendIter (I := I) (M := M) g₀ 0 2 1
-            (symmS (I := I) (M := M) g₀ S))).toSection x) ≤
+            (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) ≤
         fr * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
           ((iteratedCovGrad (I := I) g₀ 0 2 l
-            (symmS (I := I) (M := M) g₀ S)).toSection x) :=
+            (ccTensor02Symm (I := I) (M := M) g₀ S)).toSection x) :=
       rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g₀ 0 2
-        (symmS (I := I) (M := M) g₀ S) l x
+        (ccTensor02Symm (I := I) (M := M) g₀ S) l x
     have hbase : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
         ((iteratedCovGrad (I := I) g₀ 0 2 l
-          (symmS (I := I) (M := M) g₀ S)).toSection x) ≤
+          (ccTensor02Symm (I := I) (M := M) g₀ S)).toSection x) ≤
         CS l * Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by
       rcases Nat.eq_zero_or_pos l with hl0 | hl1
       · subst hl0
-        have hzero := bdRfns_symmS_zero_le (I := I) (M := M) g₀ S hδ0 hboundS x
+        have hzero := riemannianFiberNormSq_symmS_le_of_gFibreOpBound (I := I) (M := M) g₀ S hδ0 hboundS x
         have hδsq : δ ^ 2 ≤ δ₀ ^ 2 := by nlinarith
         have hone : (1 : ℝ) ≤ Combinatorics.antidiagonalTupleGridWindow b (0 + 2) :=
           Combinatorics.one_le_antidiagonalTupleGridWindow b hb (by norm_num)
         have hCS0 : CS 0 = fr ^ 2 * δ₀ ^ 2 := by simp [hCS_def]
         have hstep : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + 0) x
             ((iteratedCovGrad (I := I) g₀ 0 2 0
-              (symmS (I := I) (M := M) g₀ S)).toSection x) ≤ fr ^ 2 * δ₀ ^ 2 := by
+              (ccTensor02Symm (I := I) (M := M) g₀ S)).toSection x) ≤ fr ^ 2 * δ₀ ^ 2 := by
           rw [iteratedCovGrad_zero]
           refine le_trans hzero ?_
           rw [hfr_def]
@@ -623,24 +623,24 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
     calc riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
           ((iteratedCovGrad (I := I) g₀ 4 6 l
             (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-              (symmS (I := I) (M := M) g₀ S))).toSection x)
+              (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x)
         ≤ fr * riemannianFiberNormSq (I := I) (M := M) g₀ 3 (5 + l) x
             ((iteratedCovGrad (I := I) g₀ 3 5 l
               (slotExtendIter (I := I) (M := M) g₀ 0 2 3
-                (symmS (I := I) (M := M) g₀ S))).toSection x) := h4
+                (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x) := h4
       _ ≤ fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 2 (4 + l) x
             ((iteratedCovGrad (I := I) g₀ 2 4 l
               (slotExtendIter (I := I) (M := M) g₀ 0 2 2
-                (symmS (I := I) (M := M) g₀ S))).toSection x)) :=
+                (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x)) :=
           mul_le_mul_of_nonneg_left h3 hfr_nn
       _ ≤ fr * (fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + l) x
             ((iteratedCovGrad (I := I) g₀ 1 3 l
               (slotExtendIter (I := I) (M := M) g₀ 0 2 1
-                (symmS (I := I) (M := M) g₀ S))).toSection x))) := by
+                (ccTensor02Symm (I := I) (M := M) g₀ S))).toSection x))) := by
           refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left h2 hfr_nn) hfr_nn
       _ ≤ fr * (fr * (fr * (fr * riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
             ((iteratedCovGrad (I := I) g₀ 0 2 l
-              (symmS (I := I) (M := M) g₀ S)).toSection x)))) := by
+              (ccTensor02Symm (I := I) (M := M) g₀ S)).toSection x)))) := by
           refine mul_le_mul_of_nonneg_left (mul_le_mul_of_nonneg_left
             (mul_le_mul_of_nonneg_left h1 hfr_nn) hfr_nn) hfr_nn
       _ ≤ fr * (fr * (fr * (fr * (CS l *
@@ -652,36 +652,36 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
             Combinatorics.antidiagonalTupleGridWindow b (l + 2) := by ring
   have hlift : riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
       ((iteratedCovGrad (I := I) g₀ 4 2 i
-        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀ g₁
+        (curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁
           (ccTensorUnitValueSection (I := I) (M := M) g₀
-            (symmS (I := I) (M := M) g₀ S))
+            (ccTensor02Symm (I := I) (M := M) g₀ S))
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-            (symmS (I := I) (M := M) g₀ S)) σ)).toSection x) =
+            (ccTensor02Symm (I := I) (M := M) g₀ S)) σ)).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ 4 (2 + i) x
         ((iteratedCovGrad (I := I) g₀ 4 2 i
-          (appCcRS (I := I) (M := M) g₀ 4 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 4 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
               (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-                (symmS (I := I) (M := M) g₀ S))))).toSection x) := by
-    rw [bdMonoRefold_eq_pairTrace (I := I) (M := M) g₀ g₁
-      (symmS (I := I) (M := M) g₀ S) σ]
+                (ccTensor02Symm (I := I) (M := M) g₀ S))))).toSection x) := by
+    rw [curvatureRefoldMonomialCoeffField_eq_pairTrace (I := I) (M := M) g₀ g₁
+      (ccTensor02Symm (I := I) (M := M) g₀ S) σ]
   rw [hlift]
-  refine le_trans (rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_rankLeft_le
+  refine le_trans (riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le
     (I := I) (M := M) g₀ i 4 6 2
-    (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-    (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+    (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+    (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
       (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-        (symmS (I := I) (M := M) g₀ S))) x) ?_
+        (ccTensor02Symm (I := I) (M := M) g₀ S))) x) ?_
   have hcell : ∀ i' ∈ Finset.range (i + 1),
       riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + i') x
           ((iteratedCovGrad (I := I) g₀ 6 2 i'
-            (bdPairTraceOp (I := I) (M := M) g₀ g₁)).toSection x) *
+            (armPairTraceOpCc (I := I) (M := M) g₀ g₁)).toSection x) *
         ∑ l ∈ Finset.range (i + 1 - i'),
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
             ((iteratedCovGrad (I := I) g₀ 4 6 l
-              (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
                 (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-                  (symmS (I := I) (M := M) g₀ S)))).toSection x) ≤
+                  (ccTensor02Symm (I := I) (M := M) g₀ S)))).toSection x) ≤
       (CP i' * ∑ l ∈ Finset.range (i + 1 - i'),
         (fr * (fr * (fr * (fr * CS l)))) *
           Combinatorics.antidiagonalTupleGridWindowMulConst i' (l + 1)) * W := by
@@ -689,7 +689,7 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
     rw [Finset.mem_range] at hi'
     have hA1 : riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + i') x
         ((iteratedCovGrad (I := I) g₀ 6 2 i'
-          (bdPairTraceOp (I := I) (M := M) g₀ g₁)).toSection x) ≤
+          (armPairTraceOpCc (I := I) (M := M) g₀ g₁)).toSection x) ≤
         CP i' * Combinatorics.antidiagonalTupleGridWindow b (i' + 1) := by
       refine le_trans (hCP g₁ P htie hδ_le hδ0 hboundP i' x) ?_
       exact mul_le_mul_of_nonneg_left
@@ -697,9 +697,9 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
     have hA2 : (∑ l ∈ Finset.range (i + 1 - i'),
         riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
           ((iteratedCovGrad (I := I) g₀ 4 6 l
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
               (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-                (symmS (I := I) (M := M) g₀ S)))).toSection x)) ≤
+                (ccTensor02Symm (I := I) (M := M) g₀ S)))).toSection x)) ≤
         ∑ l ∈ Finset.range (i + 1 - i'),
           (fr * (fr * (fr * (fr * CS l)))) *
             Combinatorics.antidiagonalTupleGridWindow b (l + 2) :=
@@ -707,9 +707,9 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
     have hsum_nn : (0 : ℝ) ≤ ∑ l ∈ Finset.range (i + 1 - i'),
         riemannianFiberNormSq (I := I) (M := M) g₀ 4 (6 + l) x
           ((iteratedCovGrad (I := I) g₀ 4 6 l
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (bdMonoPerm σ)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 4 6 (curvatureRefoldSlotPerm σ)
               (slotExtendIter (I := I) (M := M) g₀ 0 2 4
-                (symmS (I := I) (M := M) g₀ S)))).toSection x) :=
+                (ccTensor02Symm (I := I) (M := M) g₀ S)))).toSection x) :=
       Finset.sum_nonneg fun l _ =>
         riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 4 (6 + l) x _
     have hA1_rhs_nn : (0 : ℝ) ≤ CP i' *
@@ -765,7 +765,7 @@ private theorem bdMonoRefold_pointwise_gridWindow (g₀ : SmoothRiemannianMetric
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-private theorem bdL2_tameEnvelope_of_gridWindow42 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
+private theorem iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42 (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
     ∃ Kg : ℕ → ℝ, (∀ k, 0 ≤ Kg k) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
@@ -864,26 +864,26 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        (hδZ : gFibreOpBound (I := I) (M := M) g₀
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         ∀ i : ℕ, ∀ s ∈ Set.Icc (0 : ℝ) 1,
           ‖iteratedCovGrad (I := I) g₀ 4 2 i
-            (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+            (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
               (realizedFam (I := I) g₀ T 0 hδ hδZ s)
               (ccTensorUnitValueSection (I := I) (M := M) g₀
-                (symmS (I := I) (M := M) g₀ T))
+                (ccTensor02Symm (I := I) (M := M) g₀ T))
               (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-                (symmS (I := I) (M := M) g₀ T)) σ)‖ ^ 2 ≤
+                (ccTensor02Symm (I := I) (M := M) g₀ T)) σ)‖ ^ 2 ≤
             K i * (1 + ∑ j ∈ Finset.range (i + 2),
               ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2) := by
   classical
   set δ₁ : ℝ := max δ₀ 0 with hδ₁_def
   have hδ₁_lt : δ₁ < 1 := max_lt hδ₀ one_pos
-  obtain ⟨C, hC_nn, hpt⟩ := bdMonoRefold_pointwise_gridWindow (I := I) (M := M) g₀ hδ₁_lt σ
+  obtain ⟨C, hC_nn, hpt⟩ := curvatureRefoldMonomialCoeffField_pointwise_gridWindow (I := I) (M := M) g₀ hδ₁_lt σ
   obtain ⟨Kg, hKg_nn, hKg⟩ :=
-    bdL2_tameEnvelope_of_gridWindow42 (I := I) (M := M) g₀ a ha_super hR
+    iteratedCovGrad_normSq_tameEnvelope_of_gridWindow_rank42 (I := I) (M := M) g₀ a ha_super hR
   refine ⟨fun i => C i * ∑ k ∈ Finset.range (i + 2), Kg k,
     fun i => mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k), ?_⟩
   intro T δ hδ_le hδ hδZ hball i s hs
@@ -905,7 +905,7 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
     have habs : |s| ≤ 1 := by
       rw [abs_of_nonneg hs0]
       exact hs1
-    have hδP : gFibreOpBound (I := I) (M := M) g₀
+    have hδP : metricCauchySchwarzBound (I := I) (M := M) g₀
         (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T 0 s)) δ := by
       intro y v w
       have hraw := convexPerturbation_gFibreOpBound_abs (I := I) g₀ T 0 hδ hδZ s y v w
@@ -932,20 +932,20 @@ theorem exists_curvatureRefoldMonomialCoeffField_symmS_realizedFam_l2JetWindow
       nlinarith [riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (2 + l) x
         ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x)]
     exact hKg T hball i (C i) (hC_nn i)
-      (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+      (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-        (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+        (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-          (symmS (I := I) (M := M) g₀ T)) σ)
+          (ccTensor02Symm (I := I) (M := M) g₀ T)) σ)
       (fun x => hpt (realizedFam (I := I) g₀ T 0 hδ hδZ s)
         (convexPerturbation (I := I) g₀ T 0 s) T htie hδ_le' hδ0 hδP hδ hPS i x)
   · haveI hM' : IsEmpty M := not_nonempty_iff.mp hM
     have hz : ‖iteratedCovGrad (I := I) g₀ 4 2 i
-        (curvatureRefoldMonomialCoeffField (I := I) (M := M) g₀
+        (curvatureActionMonomialCoeffField (I := I) (M := M) g₀
           (realizedFam (I := I) g₀ T 0 hδ hδZ s)
-          (ccTensorUnitValueSection (I := I) (M := M) g₀ (symmS (I := I) (M := M) g₀ T))
+          (ccTensorUnitValueSection (I := I) (M := M) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T))
           (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀
-            (symmS (I := I) (M := M) g₀ T)) σ)‖ = 0 :=
+            (ccTensor02Symm (I := I) (M := M) g₀ T)) σ)‖ = 0 :=
       bdNorm_zero_of_isEmpty (I := I) (M := M) g₀ 4 (2 + i) _
     rw [hz]
     have hK_nn : 0 ≤ C i * ∑ k ∈ Finset.range (i + 2), Kg k :=

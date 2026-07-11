@@ -42,7 +42,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-noncomputable def symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
+noncomputable def ccTensor02Symm (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 2 :=
   (1 / 2 : ℝ) • (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)
 
@@ -60,7 +60,7 @@ set_option linter.unusedSectionVars false in
 
 private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
-    unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
+    unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
   rw [ccTensorBilin_apply (I := I) g₀ S b u w, ccTensorModel]
   rw [show ccTensorMultilinear (I := I) g₀ S b =
       (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from S.toSection b)
@@ -74,9 +74,9 @@ set_option linter.unusedSectionVars false in
 
 private lemma ccTensorBilin_domDomCongrSection_swap (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
-    ccTensorBilin (I := I) g₀
+    smoothCcTensorBilinForm (I := I) g₀
         (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) b u w =
-      ccTensorBilin (I := I) g₀ T b w u := by
+      smoothCcTensorBilinForm (I := I) g₀ T b w u := by
   rw [← unitModel_eq_ccTensorBilin (I := I) (M := M) g₀ _ b u w,
       ← unitModel_eq_ccTensorBilin (I := I) (M := M) g₀ T b w u]
   rw [domDomCongrSection_unitModel (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T b,
@@ -89,8 +89,8 @@ set_option linter.unusedSectionVars false in
 
 lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
-    ccTensorBilin (I := I) g₀ (S + T) b u w =
-      ccTensorBilin (I := I) g₀ S b u w + ccTensorBilin (I := I) g₀ T b u w := by
+    smoothCcTensorBilinForm (I := I) g₀ (S + T) b u w =
+      smoothCcTensorBilinForm (I := I) g₀ S b u w + smoothCcTensorBilinForm (I := I) g₀ T b u w := by
   rw [← unitModel_eq_ccTensorBilin (I := I) (M := M) g₀ (S + T) b u w,
       ← unitModel_eq_ccTensorBilin (I := I) (M := M) g₀ S b u w,
       ← unitModel_eq_ccTensorBilin (I := I) (M := M) g₀ T b u w]
@@ -100,8 +100,8 @@ set_option linter.unusedSectionVars false in
 
 lemma ccTensorBilin_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
-    ccTensorBilin (I := I) g₀ (c • S) b u w =
-      c * ccTensorBilin (I := I) g₀ S b u w := by
+    smoothCcTensorBilinForm (I := I) g₀ (c • S) b u w =
+      c * smoothCcTensorBilinForm (I := I) g₀ S b u w := by
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
@@ -109,9 +109,9 @@ set_option linter.unusedSectionVars false in
 
 theorem ccTensorBilin_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (b : M) (u w : TangentSpace I b) :
-    ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ T) b u w =
+    smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) b u w =
       ccTensorBilinSymm (I := I) g₀ T b u w := by
-  rw [symmS, ccTensorBilin_smul, ccTensorBilin_add,
+  rw [ccTensor02Symm, ccTensorBilin_smul, ccTensorBilin_add,
     ccTensorBilin_domDomCongrSection_swap (I := I) (M := M) g₀ T b u w,
     ccTensorBilinSymm_apply]
 
@@ -121,7 +121,7 @@ theorem symmS_hbil_of_realize (g₀ g₁ : SmoothRiemannianMetric I M) (T : Smoo
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
       g₁.inner b u w = g₀.inner b u w + ccTensorBilinSymm (I := I) g₀ T b u w)
     (b : M) (u w : TangentSpace I b) :
-    ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ T) b u w =
+    smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) b u w =
       g₁.inner b u w - g₀.inner b u w := by
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T b u w, hg₁ b u w]
   ring
@@ -175,32 +175,32 @@ lemma unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
 
 theorem symmS_add (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
-    symmS (I := I) (M := M) g₀ (T + T') =
-      symmS (I := I) (M := M) g₀ T + symmS (I := I) (M := M) g₀ T' := by
+    ccTensor02Symm (I := I) (M := M) g₀ (T + T') =
+      ccTensor02Symm (I := I) (M := M) g₀ T + ccTensor02Symm (I := I) (M := M) g₀ T' := by
   apply smoothCcTensor_ext_of_unitModel
   intro x
-  simp only [symmS, unitModel_smul, unitModel_add2, unitModel_domDomCongrSection_swap_add]
+  simp only [ccTensor02Symm, unitModel_smul, unitModel_add2, unitModel_domDomCongrSection_swap_add]
   module
 
 theorem symmS_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ) (T : SmoothCcTensor g₀ 0 2) :
-    symmS (I := I) (M := M) g₀ (c • T) = c • symmS (I := I) (M := M) g₀ T := by
+    ccTensor02Symm (I := I) (M := M) g₀ (c • T) = c • ccTensor02Symm (I := I) (M := M) g₀ T := by
   apply smoothCcTensor_ext_of_unitModel
   intro x
-  simp only [symmS, unitModel_smul, unitModel_add2, unitModel_domDomCongrSection_swap_smul]
+  simp only [ccTensor02Symm, unitModel_smul, unitModel_add2, unitModel_domDomCongrSection_swap_smul]
   module
 
 theorem symmS_neg (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) :
-    symmS (I := I) (M := M) g₀ (-T) = -symmS (I := I) (M := M) g₀ T := by
+    ccTensor02Symm (I := I) (M := M) g₀ (-T) = -ccTensor02Symm (I := I) (M := M) g₀ T := by
   have h := symmS_smul (I := I) (M := M) g₀ (-1 : ℝ) T
   rw [neg_one_smul, neg_one_smul] at h
   exact h
 
 theorem symmS_sub (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
-    symmS (I := I) (M := M) g₀ (T - T') =
-      symmS (I := I) (M := M) g₀ T - symmS (I := I) (M := M) g₀ T' := by
+    ccTensor02Symm (I := I) (M := M) g₀ (T - T') =
+      ccTensor02Symm (I := I) (M := M) g₀ T - ccTensor02Symm (I := I) (M := M) g₀ T' := by
   rw [sub_eq_add_neg, symmS_add, symmS_neg, sub_eq_add_neg]
 
-private def alignedPrincipalEndoCcross (g₀ gop gcov : SmoothRiemannianMetric I M)
+private def alignedPrincipalEndoCrossMetric (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : E →ₗ[ℝ] E where
   toFun := fun v => inverseMetricSharpFib (I := I) gop x
     (dualToCotangent (I := I)
@@ -239,7 +239,7 @@ private def alignedPrincipalEndoCcross (g₀ gop gcov : SmoothRiemannianMetric I
 
 @[simp] private lemma alignedPrincipalEndoCcross_apply (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
-    alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov Z Y x v =
+    alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x v =
       inverseMetricSharpFib (I := I) gop x
         (dualToCotangent (I := I)
           (((cotangentCov (LeviCivita (I := I) g₀)).toFun
@@ -257,7 +257,7 @@ private def g1PrincipalVecCcross (g₀ gop gcov : SmoothRiemannianMetric I M)
           (koszulCovGradCovec (I := I) (M := M) g₀ gcov Z Y b)) x v :
         TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))
 
-private def alignCorrVecCcross (g₀ gop gcov : SmoothRiemannianMetric I M)
+private def alignCorrVecCrossMetric (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     TangentSpace I x :=
   inverseMetricSharpFib (I := I) gop x
@@ -288,9 +288,9 @@ private lemma g1Principal_splitCcross
             (fun b => cotangentToCLM (I := I)
               (koszulCovGradCovec (I := I) (M := M) g₀ gcov Z Y b)) x v :
             TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))
-        + alignCorrVecCcross (I := I) (M := M) g₀ gop gcov Z Y x v := by
+        + alignCorrVecCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x v := by
   classical
-  rw [g1PrincipalVecCcross, alignCorrVecCcross]
+  rw [g1PrincipalVecCcross, alignCorrVecCrossMetric]
   rw [← map_add]
   congr 1
   rw [← dualToCotangent_addC]
@@ -333,9 +333,9 @@ private lemma g1Principal_splitCcross
 private lemma alignedPrincipalEndoCcross_inner_secondKoszul
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ S' b u w = gcov.inner b u w - g₀.inner b u w)
+      smoothCcTensorBilinForm (I := I) g₀ S' b u w = gcov.inner b u w - g₀.inner b u w)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v ζ : TangentSpace I x) :
-    gop.inner x (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov Z Y x v) ζ =
+    gop.inner x (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x v) ζ =
       (1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S') x
               ![v, Z x, Y x, ζ]
@@ -371,21 +371,21 @@ private lemma alignedPrincipalEndoCcross_inner_secondKoszul
 private lemma alignedPrincipalEndoCcross_trace_eq
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ S' b u w = gcov.inner b u w - g₀.inner b u w)
+      smoothCcTensorBilinForm (I := I) g₀ S' b u w = gcov.inner b u w - g₀.inner b u w)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
-    LinearMap.trace ℝ E (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov Z Y x) =
+    LinearMap.trace ℝ E (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x) =
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ gop)
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ gop)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S')) x ![Z x, Y x]
         + secondKoszulFrameRemainder (I := I) (M := M) g₀ gop S' Z Y x := by
   classical
-  rw [← traceViaCometric_c (I := I) (M := M) gop x
-    (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov Z Y x)]
+  rw [← trace_eq_cometricLmodel_pairing_sum (I := I) (M := M) gop x
+    (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x)]
   rw [covDerivConnDiff_tracedPrincipal_eq_appCc (I := I) (M := M) g₀ gop S' x ![Z x, Y x]]
   rw [secondKoszulFrameRemainder]
   rw [show (∑ k : Fin (Module.finrank ℝ E),
         gop.inner x
-          (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov Z Y x
+          (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x
             (cometricLmodel (I := I) gop x
               (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                 ((Module.finBasis ℝ E).cDualBasis k))))
@@ -448,9 +448,9 @@ def alignmentTraceRemainderCross (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr
-      (alignCorrVecCcross (I := I) (M := M) g₀ gop gcov Z Y x ((chartModelBasis E) i)) i
+      (alignCorrVecCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x ((chartModelBasis E) i)) i
 
-def palatiniTracedPrincipalRemainderCross (g₀ gop gcov : SmoothRiemannianMetric I M)
+def palatiniTracedPrincipalRemainderCrossMetric (g₀ gop gcov : SmoothRiemannianMetric I M)
     (S' : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   secondKoszulFrameRemainder (I := I) (M := M) g₀ gop S' Z Y x
     + alignmentTraceRemainderCross (I := I) (M := M) g₀ gop gcov Z Y x
@@ -460,7 +460,7 @@ set_option linter.unusedSectionVars false in
 theorem palatini_tracedPrincipal_cross_eq_combinedTrace
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ S' b u w = gcov.inner b u w - g₀.inner b u w)
+      smoothCcTensorBilinForm (I := I) g₀ S' b u w = gcov.inner b u w - g₀.inner b u w)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (∑ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
@@ -472,9 +472,9 @@ theorem palatini_tracedPrincipal_cross_eq_combinedTrace
                   ((chartModelBasis E) i) :
               TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ gop)
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ gop)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S')) x ![Z x, Y x]
-        + palatiniTracedPrincipalRemainderCross (I := I) (M := M) g₀ gop gcov S' Z Y x := by
+        + palatiniTracedPrincipalRemainderCrossMetric (I := I) (M := M) g₀ gop gcov S' Z Y x := by
   classical
   have hsumeq : (∑ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
@@ -487,10 +487,10 @@ theorem palatini_tracedPrincipal_cross_eq_combinedTrace
               TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
       ∑ i : Fin (Module.finrank ℝ E),
         ((chartModelBasis E).repr
-            (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov Z Y x
+            (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x
               ((chartModelBasis E) i)) i
           + (chartModelBasis E).repr
-              (alignCorrVecCcross (I := I) (M := M) g₀ gop gcov Z Y x
+              (alignCorrVecCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x
                 ((chartModelBasis E) i)) i) := by
     refine Finset.sum_congr rfl fun i _ => ?_
     have hsplit := g1Principal_splitCcross (I := I) (M := M) g₀ gop gcov Z Y x ((chartModelBasis E) i)
@@ -499,15 +499,15 @@ theorem palatini_tracedPrincipal_cross_eq_combinedTrace
     rw [map_add, Finsupp.add_apply]
     rw [← alignedPrincipalEndoCcross_apply]
   rw [hsumeq, Finset.sum_add_distrib]
-  rw [traceViaBasis_c (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov Z Y x)]
+  rw [trace_eq_basis_repr_sum (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x)]
   rw [alignedPrincipalEndoCcross_trace_eq (I := I) (M := M) g₀ gop gcov S' hbil Z Y x]
-  rw [palatiniTracedPrincipalRemainderCross, alignmentTraceRemainderCross]
+  rw [palatiniTracedPrincipalRemainderCrossMetric, alignmentTraceRemainderCross]
   ring
 
 def palatiniTracedPrincipalDiffRemainder (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x
-    - palatiniTracedPrincipalRemainderCross (I := I) (M := M) g₀ g₁ g₁' S' Z Y x
+    - palatiniTracedPrincipalRemainderCrossMetric (I := I) (M := M) g₀ g₁ g₁' S' Z Y x
 
 set_option linter.unusedSectionVars false in
 
@@ -537,39 +537,39 @@ theorem palatini_tracedPrincipalDiff_covector_eq_combinedTrace
                     ((chartModelBasis E) i) :
                 TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x ![Z x, Y x]
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x ![Z x, Y x]
         + palatiniTracedPrincipalDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
-            (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T') Z Y x := by
+            (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T') Z Y x := by
   classical
   have hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ T) b u w =
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) b u w =
         g₁.inner b u w - g₀.inner b u w :=
     symmS_hbil_of_realize (I := I) (M := M) g₀ g₁ T hg₁
   have hbil' : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ T') b u w =
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T') b u w =
         g₁'.inner b u w - g₀.inner b u w :=
     symmS_hbil_of_realize (I := I) (M := M) g₀ g₁' T' hg₁'
   rw [palatini_tracedPrincipal_eq_combinedTrace (I := I) (M := M) g₀ g₁
-        (symmS (I := I) (M := M) g₀ T) hbil Z Y x]
+        (ccTensor02Symm (I := I) (M := M) g₀ T) hbil Z Y x]
   rw [palatini_tracedPrincipal_cross_eq_combinedTrace (I := I) (M := M) g₀ g₁ g₁'
-        (symmS (I := I) (M := M) g₀ T') hbil' Z Y x]
+        (ccTensor02Symm (I := I) (M := M) g₀ T') hbil' Z Y x]
   rw [palatiniTracedPrincipalDiffRemainder]
   rw [symmS_sub (I := I) (M := M) g₀ T T']
   rw [iteratedCovGrad_sub (I := I) g₀ 0 2 2
-        (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')]
+        (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T')]
 
-  have happCc_sub : appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
-          - iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) =
-      appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
-          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T))
-        - appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) := by
-    rw [show (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
-          - iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) =
-        iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
-          + (-1 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T') from by
+  have happCc_sub : operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T)
+          - iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T')) =
+      operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T))
+        - operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T')) := by
+    rw [show (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T)
+          - iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T')) =
+        iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T)
+          + (-1 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T') from by
       rw [neg_one_smul]; abel]
     rw [appCc_add_right, appCc_smul_right, neg_one_smul]
     abel
@@ -591,14 +591,14 @@ def palatiniTracedPrincipalZRemainderCross (g₀ gop gcov : SmoothRiemannianMetr
     (S' : SmoothCcTensor g₀ 0 2) (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   (∑ i : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr
-      (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov
+      (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov
           (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
             smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
           W x (V x)
-        - alignedPrincipalEndoCZ (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i)
+        - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i)
   + (∑ i : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr
-      (alignCorrVecCcross (I := I) (M := M) g₀ gop gcov
+      (alignCorrVecCrossMetric (I := I) (M := M) g₀ gop gcov
           (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
             smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
           W x (V x)) i)
@@ -619,12 +619,12 @@ theorem palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace
                     smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W b)) x (V x) :
               TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ gop)
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ gop)
             (iteratedCovGrad (I := I) g₀ 0 2 2 S')) x ![V x, W x]
         + palatiniTracedPrincipalZRemainderCross (I := I) (M := M) g₀ gop gcov S' V W x := by
   classical
   rw [← alignedPrincipalEndoCZ_trace_eq (I := I) (M := M) g₀ gop S' V W x]
-  rw [← traceViaBasis_c (alignedPrincipalEndoCZ (I := I) (M := M) g₀ gop S' V W x)]
+  rw [← trace_eq_basis_repr_sum (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ gop S' V W x)]
   rw [palatiniTracedPrincipalZRemainderCross]
   have hsumeq : ∀ i : Fin (Module.finrank ℝ E),
       (chartModelBasis E).repr
@@ -637,14 +637,14 @@ theorem palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace
                     smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W b)) x (V x) :
               TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i =
         (chartModelBasis E).repr
-            (alignedPrincipalEndoCZ (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i
+            (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i
           + ((chartModelBasis E).repr
-              (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov
+              (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov
                   (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
                     smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W x (V x)
-                - alignedPrincipalEndoCZ (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i
+                - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i
             + (chartModelBasis E).repr
-                (alignCorrVecCcross (I := I) (M := M) g₀ gop gcov
+                (alignCorrVecCrossMetric (I := I) (M := M) g₀ gop gcov
                   (⟨smoothExtensionTangent (I := I) x ((chartModelBasis E) i),
                     smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W x (V x)) i) := by
     intro i
@@ -656,12 +656,12 @@ theorem palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace
     rw [hsplit]
     rw [map_add, Finsupp.add_apply, ← alignedPrincipalEndoCcross_apply]
     rw [show (chartModelBasis E).repr
-          (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov ei W x (V x)) i =
+          (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov ei W x (V x)) i =
         (chartModelBasis E).repr
-            (alignedPrincipalEndoCZ (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i
+            (alignedPrincipalEndoZSlot (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i
           + (chartModelBasis E).repr
-              (alignedPrincipalEndoCcross (I := I) (M := M) g₀ gop gcov ei W x (V x)
-                - alignedPrincipalEndoCZ (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i from by
+              (alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov ei W x (V x)
+                - alignedPrincipalEndoZSlot (I := I) (M := M) g₀ gop S' V W x ((chartModelBasis E) i)) i from by
       rw [map_sub, Finsupp.sub_apply]; ring]
     rw [add_assoc]
   rw [Finset.sum_congr rfl fun i _ => hsumeq i]
@@ -698,30 +698,30 @@ theorem palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
                       smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩) W b)) x (V x) :
                 TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i) =
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x ![V x, W x]
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x ![V x, W x]
         + palatiniTracedPrincipalZDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
-            (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T') V W x := by
+            (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T') V W x := by
   classical
   rw [palatini_tracedPrincipal_Zslot_eq_combinedTrace (I := I) (M := M) g₀ g₁
-        (symmS (I := I) (M := M) g₀ T) V W x]
+        (ccTensor02Symm (I := I) (M := M) g₀ T) V W x]
   rw [palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace (I := I) (M := M) g₀ g₁ g₁'
-        (symmS (I := I) (M := M) g₀ T') V W x]
+        (ccTensor02Symm (I := I) (M := M) g₀ T') V W x]
   rw [palatiniTracedPrincipalZDiffRemainder]
   rw [symmS_sub (I := I) (M := M) g₀ T T']
   rw [iteratedCovGrad_sub (I := I) g₀ 0 2 2
-        (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')]
-  have happCc_sub : appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
-          - iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) =
-      appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T))
-        - appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) := by
-    rw [show (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
-          - iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T')) =
-        iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T)
-          + (-1 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ T') from by
+        (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T')]
+  have happCc_sub : operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T)
+          - iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T')) =
+      operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T))
+        - operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T')) := by
+    rw [show (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T)
+          - iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T')) =
+        iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T)
+          + (-1 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ T') from by
       rw [neg_one_smul]; abel]
     rw [appCc_add_right, appCc_smul_right, neg_one_smul]
     abel
@@ -856,8 +856,8 @@ theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)
       ContinuousMultilinearMap.domDomCongr σ' (unitModel (I := I) (M := M) g₀ 4 W x))
     (x : M) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R σ') W) x =
-      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 R W') x := by
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R σ') W) x =
+      unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 R W') x := by
   rw [unitModel, unitModel, appCc_toSection, appCc_toSection,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [reindexCoeff_toSection]

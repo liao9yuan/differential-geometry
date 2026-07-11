@@ -74,7 +74,7 @@ theorem armJet_norm_comp (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ)
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq (I := I) (M := M) g₀
         (s + (j + i)) (iteratedCovGrad (I := I) g₀ 0 s (j + i) S)]
     refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
-    exact rfns_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
+    exact riemannianFiberNormSq_iteratedCovGrad_comp (I := I) (M := M) g₀ 0 s j i S x
   have ha : (0 : ℝ) ≤
       ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i (iteratedCovGrad (I := I) g₀ 0 s j S)‖ :=
     norm_nonneg _
@@ -90,12 +90,12 @@ private theorem armJet_norm_order_congr (g₀ : SmoothRiemannianMetric I M) (s :
 private theorem armJet_appCcRS_norm_le (g₀ : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ V : SmoothCcTensor g₀ 0 b,
-      ‖appCcRS (I := I) (M := M) g₀ 0 b c Φ V‖ ≤ C * ‖V‖ := by
+      ‖ccOperatorFieldComp (I := I) (M := M) g₀ 0 b c Φ V‖ ≤ C * ‖V‖ := by
   classical
   obtain ⟨Cop, hCop_nn, hCop⟩ :=
     exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g₀ 0 b c Φ
   refine ⟨Real.sqrt Cop, Real.sqrt_nonneg _, fun V => ?_⟩
-  set Z : SmoothCcTensor g₀ 0 c := appCcRS (I := I) (M := M) g₀ 0 b c Φ V with hZ_def
+  set Z : SmoothCcTensor g₀ 0 c := ccOperatorFieldComp (I := I) (M := M) g₀ 0 b c Φ V with hZ_def
   have hZn : ‖Z‖ = tensorL2Norm (I := I) (M := M) g₀ 0 c Z.toFun :=
     SmoothCcTensor.norm_def (I := I) (M := M) Z
   have hVn : ‖V‖ = tensorL2Norm (I := I) (M := M) g₀ 0 b V.toFun :=
@@ -139,7 +139,7 @@ private theorem armJet_appCcRS_norm_le (g₀ : SmoothRiemannianMetric I M) (b c 
 theorem armJet_iteratedCovGrad_appCc_le (g₀ : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) :
     ∃ Cf : ℕ → ℝ, (∀ q, 0 ≤ Cf q) ∧ ∀ (q : ℕ) (W : SmoothCcTensor g₀ 0 b),
-      ‖iteratedCovGrad (I := I) g₀ 0 c q (appCc (I := I) (M := M) g₀ b c Φ W)‖ ≤
+      ‖iteratedCovGrad (I := I) g₀ 0 c q (operatorFieldApply (I := I) (M := M) g₀ b c Φ W)‖ ≤
         Cf q * ∑ k ∈ Finset.range (q + 1), ‖iteratedCovGrad (I := I) g₀ 0 b k W‖ := by
   classical
   choose CC hCC_nn hCC using fun (q k : ℕ) =>
@@ -147,10 +147,10 @@ theorem armJet_iteratedCovGrad_appCc_le (g₀ : SmoothRiemannianMetric I M) (b c
       (appCcLeibnizPsi (I := I) (M := M) g₀ b c Φ q k)
   refine ⟨fun q => ∑ k ∈ Finset.range (q + 1), CC q k,
     fun q => Finset.sum_nonneg (fun k _ => hCC_nn q k), fun q W => ?_⟩
-  rw [iteratedCovGrad_appCc_eq (I := I) (M := M) g₀ b c Φ W q]
+  rw [iteratedCovGrad_operatorFieldApply_eq (I := I) (M := M) g₀ b c Φ W q]
   refine le_trans (norm_sum_le _ _) ?_
   have hterm : ∀ k ∈ Finset.range (q + 1),
-      ‖appCcRS (I := I) (M := M) g₀ 0 (b + k) (c + q)
+      ‖ccOperatorFieldComp (I := I) (M := M) g₀ 0 (b + k) (c + q)
           (appCcLeibnizPsi (I := I) (M := M) g₀ b c Φ q k)
           (iteratedCovGrad (I := I) g₀ 0 b k W)‖ ≤
         CC q k * ∑ j ∈ Finset.range (q + 1), ‖iteratedCovGrad (I := I) g₀ 0 b j W‖ := by

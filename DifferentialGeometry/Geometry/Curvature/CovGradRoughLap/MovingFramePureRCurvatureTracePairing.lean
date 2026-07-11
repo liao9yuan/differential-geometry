@@ -30,7 +30,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 theorem tensorL2Inner_GcurvSection_covGrad_eq_pureRGenuineDiffOp
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (GcurvSection (I := I) (M := M) g s S).toFun
+        (genuineCurvatureOnlySection (I := I) (M := M) g s S).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun =
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1)
@@ -42,10 +42,10 @@ theorem exists_GcurvSection_eq_appCc_curvatureOpField
     (g : SmoothRiemannianMetric I M) :
     ∃ Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0),
       ∀ (s : ℕ) (S : SmoothCcTensor g 0 s),
-        GcurvSection (I := I) (M := M) g s S =
-          appCc (I := I) (M := M) g ((s + 1) + 0) ((s + 1) + 0) (Φ₀ (s + 1))
+        genuineCurvatureOnlySection (I := I) (M := M) g s S =
+          operatorFieldApply (I := I) (M := M) g ((s + 1) + 0) ((s + 1) + 0) (Φ₀ (s + 1))
             (covGrad (I := I) (M := M) g 0 s S) := by
-  obtain ⟨Φ₀, hΦ₀⟩ := exists_pureRGenuineDiffOp_base_appCc (I := I) (M := M) g
+  obtain ⟨Φ₀, hΦ₀⟩ := exists_baseOperatorField_apply_eq_pureRGenuineDiffOp (I := I) (M := M) g
   refine ⟨Φ₀, fun s S => ?_⟩
   rw [← pureRGenuineDiffOp0_eq_GcurvSection (I := I) (M := M) g s S]
   exact hΦ₀ (s + 1) (covGrad (I := I) (M := M) g 0 s S)

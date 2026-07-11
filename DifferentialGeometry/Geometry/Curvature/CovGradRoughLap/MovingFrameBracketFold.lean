@@ -38,7 +38,7 @@ theorem movingFrameRemainderSection_eq_sub_add
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     movingFrameRemainderSection (I := I) (M := M) g s S =
       pointwiseTensorCurv (I := I) (M := M) g s S -
-        GcurvSection (I := I) (M := M) g s S -
+        genuineCurvatureOnlySection (I := I) (M := M) g s S -
         (genuineDiffCurvSection (I := I) (M := M) g s S +
           ricTraceSection (I := I) (M := M) g s S) := by
   rw [movingFrameRemainderSection]
@@ -48,13 +48,13 @@ theorem frameSummed_bracketIntegral_empty_eq_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (V : Fin 0 → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (W : Fin 0 → SmoothCcTensor g 0 (s + 1)) :
-    ∑ i, ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + 1)) g x
+    ∑ i, ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (0 + (s + 1)) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g 0 (s + 1) (W i).toSection (V i) x))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 (s + 1)
                 (covGrad (I := I) (M := M) g 0 s S).toSection x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + 1)) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (0 + (s + 1)) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 (s + 1) (W i).toSection x))
             (Tensor0SSpace.toModel

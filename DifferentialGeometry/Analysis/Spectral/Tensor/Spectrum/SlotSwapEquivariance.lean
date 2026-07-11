@@ -410,10 +410,10 @@ private lemma tensorL2Coeff_toL2_domDomCongrSection_swap (X : SmoothCcTensor g 0
       (eigenSmooth (I := I) (M := M) g i) X]
 
 private lemma toL2_symmS_eq (X : SmoothCcTensor g 0 2) :
-    SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X) =
+    SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X) =
       (1 / 2 : ℝ) • (SmoothCcTensor.toL2 X +
         SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) := by
-  simp only [symmS]
+  simp only [ccTensor02Symm]
   rw [map_smul, map_add]
 
 theorem tensorL2Coeff_toL2_symmS_eq_zero_of_notMem
@@ -426,7 +426,7 @@ theorem tensorL2Coeff_toL2_symmS_eq_zero_of_notMem
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2)
     (hi : i ∉ S) :
     tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-      (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i = 0 := by
+      (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i = 0 := by
   classical
   have hswap : tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
       (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)) i =
@@ -456,14 +456,14 @@ theorem sum_tensorSobolevWeight_mul_sq_tensorL2Coeff_toL2_symmS_le
       (SmoothCcTensor.toL2 X) k = 0) :
     ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-          (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i) ^ 2 ≤
+          (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i) ^ 2 ≤
       ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 X) i) ^ 2 := by
   classical
   have hd : ∀ i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2,
       tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-        (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i =
+        (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i =
       (1 / 2 : ℝ) *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
             (SmoothCcTensor.toL2 X) i +
@@ -693,7 +693,7 @@ theorem sum_tensorSobolevWeight_mul_sq_tensorL2Coeff_toL2_symmS_le
           rw [Finset.filter_true_of_mem hmemS]
   have hpt : ∀ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
       (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-        (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i) ^ 2 ≤
+        (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i) ^ 2 ≤
       tensorSobolevWeight (I := I) (M := M) i σ *
         ((1 / 2 : ℝ) * (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
             (SmoothCcTensor.toL2 X) i) ^ 2 +
@@ -710,7 +710,7 @@ theorem sum_tensorSobolevWeight_mul_sq_tensorL2Coeff_toL2_symmS_le
           (Equiv.swap (0 : Fin 2) 1) X)) i)]
   calc ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-          (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i) ^ 2
+          (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i) ^ 2
       ≤ ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i σ *
         ((1 / 2 : ℝ) * (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
             (SmoothCcTensor.toL2 X) i) ^ 2 +
@@ -866,7 +866,7 @@ private lemma block_tensorL2Coeff_sq_swap_le (X : SmoothCcTensor g 0 2)
 private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
     ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-          (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i) ^ 2 ≤
+          (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i) ^ 2 ≤
       ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 X) i) ^ 2 := by
@@ -882,8 +882,8 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
       (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X)).weighted_summable
   have hsummSymm : Summable (fun i => tensorSobolevWeight (I := I) (M := M) i σ *
       (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-        (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i) ^ 2) :=
-    (smoothCcToTensorHs (I := I) (M := M) g σ (symmS (I := I) (M := M) g X)).weighted_summable
+        (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i) ^ 2) :=
+    (smoothCcToTensorHs (I := I) (M := M) g σ (ccTensor02Symm (I := I) (M := M) g X)).weighted_summable
   have hswapLe : ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
         (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 (domDomCongrSection (I := I) g (Equiv.swap (0 : Fin 2) 1) X))
@@ -933,7 +933,7 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
                 (SmoothCcTensor.toL2 X) ⟨μ, c⟩) ^ 2 := by
             rw [Finset.mul_sum]; exact Finset.sum_congr rfl (fun c _ => by rw [hwc c])
   have hcoeff : ∀ i, tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-        (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i =
+        (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i =
       (1 / 2 : ℝ) * (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
           (SmoothCcTensor.toL2 X) i +
         tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
@@ -949,7 +949,7 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
     (hsummX.mul_left _).add (hsummSwap.mul_left _)
   calc ∑' i, tensorSobolevWeight (I := I) (M := M) i σ *
           (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
-            (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g X)) i) ^ 2
+            (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g X)) i) ^ 2
       ≤ ∑' i, ((1 / 2 : ℝ) * (tensorSobolevWeight (I := I) (M := M) i σ *
             (tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)
               (SmoothCcTensor.toL2 X) i) ^ 2) +
@@ -987,10 +987,10 @@ private lemma tsum_weighted_symmS_le (X : SmoothCcTensor g 0 2) (σ : ℝ) :
 
 theorem norm_smoothCcToTensorHs_symmS_le (g₀ : SmoothRiemannianMetric I M) (σ : ℝ)
     (X : SmoothCcTensor g₀ 0 2) :
-    ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ (symmS (I := I) (M := M) g₀ X)‖ ≤
+    ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ (ccTensor02Symm (I := I) (M := M) g₀ X)‖ ≤
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ σ X‖ := by
   rw [tensorHs.norm_eq_sqrt_tsum
-      (smoothCcToTensorHs (I := I) (M := M) g₀ σ (symmS (I := I) (M := M) g₀ X)),
+      (smoothCcToTensorHs (I := I) (M := M) g₀ σ (ccTensor02Symm (I := I) (M := M) g₀ X)),
     tensorHs.norm_eq_sqrt_tsum (smoothCcToTensorHs (I := I) (M := M) g₀ σ X)]
   apply Real.sqrt_le_sqrt
   simp only [smoothCcToTensorHs_coeff]

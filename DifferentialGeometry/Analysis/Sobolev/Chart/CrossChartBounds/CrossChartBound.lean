@@ -100,13 +100,13 @@ theorem cross_chart_bound_empty
             tsupport
               ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
                 : C^∞⟮I, M; ℝ⟯) : M → ℝ) →
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p
           (chartPushed (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
             (chartPullback I α χ))
           (chartTargetEuclid (I := I) (M := M) γ) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p χ
             (chartTargetEuclid (I := I) (M := M) α) := by
   classical

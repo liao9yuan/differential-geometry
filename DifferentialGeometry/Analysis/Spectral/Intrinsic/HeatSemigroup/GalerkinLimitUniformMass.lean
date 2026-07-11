@@ -68,20 +68,20 @@ private theorem continuousOn_galerkinForcingSymm
   by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g₀ N
   · have hfield := continuousOn_galerkinForcing_field (I := I) (M := M) g₀ a U N hUcont
     have hcoeff : ContinuousOn
-        (fun t => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (fun t => (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (finiteEigenComboHs (I := I) (M := M) g₀
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i)
         (Set.Icc (0 : ℝ) T) := by
       obtain ⟨K, hK⟩ := deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
       have hN_cont : ContinuousOn
-          (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2)))
           (Set.Icc (0 : ℝ) T) :=
         hK.continuous.comp_continuousOn hfield
       have hcoeff_cont : ContinuousOn
           (fun t => tensorHsCoeffL (I := I) (M := M) (a := (a : ℝ)) i
-            (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀
                 (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))))
           (Set.Icc (0 : ℝ) T) :=
@@ -172,7 +172,7 @@ private noncomputable def galerkinCoordFieldSymm
     EuclideanSpace ℝ {i // i ∈ S} → EuclideanSpace ℝ {i // i ∈ S} :=
   fun w => galerkinCoordDiag (I := I) (M := M) g₀ S w +
     galerkinCoordRestrict (I := I) (M := M) g₀ a S
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))
 
 private lemma galerkinCoordFieldSymm_apply
@@ -181,7 +181,7 @@ private lemma galerkinCoordFieldSymm_apply
     (w : EuclideanSpace ℝ {i // i ∈ S}) (j : {i // i ∈ S}) :
     (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S w) j =
       -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * w j +
-        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (galerkinCoordEmbed (I := I) (M := M) g₀ a S w)).coeff j.1 := by
   change (galerkinCoordDiag (I := I) (M := M) g₀ S w) j +
     (galerkinCoordRestrict (I := I) (M := M) g₀ a S _) j = _
@@ -203,7 +203,7 @@ private theorem galerkinCoordFieldSymm_lipschitzWith
       (‖galerkinCoordRestrict (I := I) (M := M) g₀ a S‖₊ * K₀ *
         ‖galerkinCoordEmbed (I := I) (M := M) g₀ a S‖₊)
       (fun w => galerkinCoordRestrict (I := I) (M := M) g₀ a S
-        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))) :=
     ((galerkinCoordRestrict (I := I) (M := M) g₀ a S).lipschitz.comp hK₀).comp
       (galerkinCoordEmbed (I := I) (M := M) g₀ a S).lipschitz
@@ -218,14 +218,14 @@ private theorem galerkinODE_solution_uniqueSymm
     (hVderiv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
       HasDerivWithinAt (fun r => V r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
-          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S (V t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t)
     (hV'cont : ∀ i ∈ S, ContinuousOn (fun t => V' t i) (Set.Icc (0 : ℝ) T))
     (hV'deriv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
       HasDerivWithinAt (fun r => V' r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V' t i +
-          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S (V' t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t)
     (hinit : ∀ i ∈ S, V 0 i = V' 0 i)
@@ -261,7 +261,7 @@ private theorem galerkinODE_solution_uniqueSymm
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
         HasDerivWithinAt (fun r => W r i)
           (-(TensorEigenIdx.lambda (I := I) (M := M) i) * W t i +
-            (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff i)
           (Set.Ici t) t) →
       ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -271,7 +271,7 @@ private theorem galerkinODE_solution_uniqueSymm
     have hpi : HasDerivWithinAt (fun s => (fun j : {i // i ∈ S} => W s j.1))
         (fun j : {i // i ∈ S} =>
           -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * W t j.1 +
-            (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff j.1)
         (Set.Ici t) t :=
       hasDerivWithinAt_pi.mpr (fun j => hWderiv t ht j.1 j.2)
@@ -281,7 +281,7 @@ private theorem galerkinODE_solution_uniqueSymm
     have hval : e.symm
         (fun j : {i // i ∈ S} =>
           -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * W t j.1 +
-            (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff j.1) =
         galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S (γ W t) := by
       apply e.injective
@@ -363,7 +363,7 @@ private theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncationSymm
       fun s => spatialEigenProj (I := I) (M := M) g₀ (a : ℝ) N (gforceN s) :=
     ContinuousLinearMap.coeFn_compLpL _ gforceN
   have hgco : ⇑gforceN =ᵐ[timeMeasure T]
-      (fun s => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (VN s)) :=
+      (fun s => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (VN s)) :=
     nemytskii_coeFn (I := I) (M := M) hLipC VN
   have hPNforcing : ⇑(timeModeCoeff (I := I) (M := M)
         (timeL2EigenProj (I := I) (M := M) g₀ (a : ℝ) T N gforceN) i) =ᵐ[timeMeasure T]
@@ -417,7 +417,7 @@ private theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncationSymm
 private noncomputable def deTurckForceShortTimeSymm (g₀ g_bg : SmoothRiemannianMetric I M)
     (a : ℕ) (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) : ℝ :=
   (quasilinear_maxreg_solution_of_nemytskii (I := I) (M := M) g₀ a
-    (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+    (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
     (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super)
     (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
@@ -429,10 +429,10 @@ private theorem deTurckForceShortTimeSymm_eq (g₀ g_bg : SmoothRiemannianMetric
       min 1 (min (1 / (64 * (((deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I)
               (M := M) (g₀ := g₀) (g_bg := g_bg) a ha_super).choose_spec.choose : ℝ) + 1) ^ 2))
         ((deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a ha_super /
-            (2 * (‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (2 * (‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ + 1))) ^ 2)) :=
   (quasilinear_maxreg_solution_of_nemytskii (I := I) (M := M) g₀ a
-    (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+    (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
     (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀) (g_bg := g_bg)
       a ha_super)
     (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
@@ -607,7 +607,7 @@ private theorem nemytskiiMixedForcingMapSymm_norm_le_ballRadius
   have hsingle := hmix.choose_spec.choose_spec
   have hρeq : ρ = 1 / (16 * ((C₁ : ℝ) + 1)) := rfl
   have hρpos : 0 < ρ := by rw [hρeq]; positivity
-  set M₀ : ℝ := ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+  set M₀ : ℝ := ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ with hM₀def
   have hM₀ : 0 ≤ M₀ := norm_nonneg _
   have hT_lo : T ≤ 1 / (64 * ((C₂ : ℝ) + 1) ^ 2) :=
@@ -765,7 +765,7 @@ private theorem galerkinForcing_norm_le_ballRadiusSymm
       (a := (a : ℝ)) hT hT1 yN i
   have hyN_mode : ∀ j, ⇑(timeModeCoeff (I := I) (M := M) yN j) =ᵐ[timeMeasure T]
       (fun s => if j ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
-        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (vN s)).coeff j else 0) := by
+        (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (vN s)).coeff j else 0) := by
     intro j
     have hco := timeModeCoeff_coeFn (I := I) (M := M)
       (timeL2EigenProj (I := I) (M := M) g₀ (a : ℝ) T N (nemytskii (I := I) (M := M) hLipC vN)) j
@@ -816,16 +816,16 @@ private theorem galerkinForcing_norm_le_ballRadiusSymm
   have hWderiv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
       HasDerivWithinAt (fun r => W r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * W t i +
-          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (W t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t := by
     intro t ht i hi
     set fForce : ℝ → ℝ := Set.IccExtend hT.le (fun p : ↑(Set.Icc (0 : ℝ) T) =>
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (finiteEigenComboHs (I := I) (M := M) g₀
           (eigenIdxFinset (I := I) (M := M) g₀ N) (W p.1) ((a : ℝ) + 2))).coeff i) with hfForce_def
-    have hg_cont : ContinuousOn (fun s => (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+    have hg_cont : ContinuousOn (fun s => (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (finiteEigenComboHs (I := I) (M := M) g₀
           (eigenIdxFinset (I := I) (M := M) g₀ N) (W s) ((a : ℝ) + 2))).coeff i)
         (Set.Icc (0 : ℝ) T) := by
@@ -834,7 +834,7 @@ private theorem galerkinForcing_norm_le_ballRadiusSymm
       rw [deTurckGalerkinForcingSymm_apply, if_pos hi]
     have hfForce_cont : Continuous fForce := Continuous.Icc_extend' hg_cont.restrict
     have hfForce_mem : ∀ {x : ℝ}, x ∈ Set.Icc (0 : ℝ) T →
-        fForce x = (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        fForce x = (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (finiteEigenComboHs (I := I) (M := M) g₀
             (eigenIdxFinset (I := I) (M := M) g₀ N) (W x) ((a : ℝ) + 2))).coeff i := by
       intro x hx
@@ -867,7 +867,7 @@ private theorem galerkinForcing_norm_le_ballRadiusSymm
     have hval_eq : fForce t - TensorEigenIdx.lambda (I := I) (M := M) i *
           perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) fForce t =
         -(TensorEigenIdx.lambda (I := I) (M := M) i) * W t i +
-          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (W t) ((a : ℝ) + 2))).coeff i := by
       rw [hfForce_mem htIcc, ← hWrep t htIcc]; ring
@@ -876,7 +876,7 @@ private theorem galerkinForcing_norm_le_ballRadiusSymm
   have hUderivN : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
       HasDerivWithinAt (fun r => U N r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * U N t i +
-          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t := by
@@ -931,7 +931,7 @@ private theorem galerkinForcing_tendsto_force_timeL2_ofProjFixedPointSymm
     (hTT₀ : T ≤ deTurckForceShortTimeSymm (I := I) (M := M) g₀ g_bg a ha_super)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a ha_super)
@@ -953,7 +953,7 @@ private theorem galerkinForcing_tendsto_force_timeL2_ofProjFixedPointSymm
   obtain ⟨N₀, hN₀⟩ := exists_mem_eigenIdxFinset (I := I) (M := M) g₀ i
   obtain ⟨K, hK⟩ := deTurckSobolevNHa2Symm_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
   have hcontField : ∀ N, ContinuousOn
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
           (U N t) ((a : ℝ) + 2))) (Set.Icc (0 : ℝ) T) :=
     fun N => hK.continuous.comp_continuousOn
@@ -1078,14 +1078,14 @@ theorem galerkinSol_tendsto_solField_perModeConvSymm
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega))
@@ -1152,14 +1152,14 @@ theorem deTurckGalerkin_solField_uniformSpatialMass_allOrderSymm
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a)
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a (by omega))).choose)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hforce : gforce =ᵐ[timeMeasure T]
-      (fun t => deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (fun t => deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega)) :

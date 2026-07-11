@@ -37,7 +37,7 @@ set_option linter.unusedSectionVars false in
 theorem chartGramMatrix_realize_apply
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
     (α x : M) (a b : Fin (Module.finrank ℝ E)) :
     chartGramMatrix (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ) α x a b =
       chartGramMatrix (I := I) g_bg α x a b +
@@ -50,8 +50,8 @@ theorem chartGramMatrix_realize_apply
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ)
     (α : M) (a b : Fin (Module.finrank ℝ E)) (y : E)
     (hp : (extChartAt I α).symm y ∈ (chartAt H α).source) :
     chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ) α a b y -
@@ -107,9 +107,9 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
         ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I p) ℝ)
           (fun k : Fin 2 =>
             chartBasisVecFiber (I := I) α ((![i, j] : Fin 2 → _) k) p) =
-        ccTensorBilin (I := I) g_bg T p
+        smoothCcTensorBilinForm (I := I) g_bg T p
             (chartBasisVecFiber (I := I) α i p) (chartBasisVecFiber (I := I) α j p) -
-          ccTensorBilin (I := I) g_bg T' p
+          smoothCcTensorBilinForm (I := I) g_bg T' p
             (chartBasisVecFiber (I := I) α i p) (chartBasisVecFiber (I := I) α j p) := by
     intro i j
     have hvecAB : (fun k : Fin 2 =>
@@ -134,9 +134,9 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
     (α : M) (a b : Fin (Module.finrank ℝ E)) (y : E)
     (hp : (extChartAt I α).symm y ∈ (chartAt H α).source) :
     chartGramOnE (I := I) (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ) α a b y -
@@ -187,9 +187,9 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
         ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I p) ℝ)
           (fun k : Fin 2 =>
             chartBasisVecFiber (I := I) α ((![i, j] : Fin 2 → _) k) p) =
-        ccTensorBilin (I := I) g_bg T p
+        smoothCcTensorBilinForm (I := I) g_bg T p
             (chartBasisVecFiber (I := I) α i p) (chartBasisVecFiber (I := I) α j p) -
-          ccTensorBilin (I := I) g_bg T' p
+          smoothCcTensorBilinForm (I := I) g_bg T' p
             (chartBasisVecFiber (I := I) α i p) (chartBasisVecFiber (I := I) α j p) := by
     intro i j
     have hvecAB : (fun k : Fin 2 =>

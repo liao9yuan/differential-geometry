@@ -102,7 +102,7 @@ lemma rfns_eq_sum_componentSq_of_horth_pt
   set bse := basisOfLinearIndependentOfCardEqFinrank he_li hcard with hbse_def
   have hbse : ∀ i : Fin n, bse i = e i := by
     intro i; rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
-  exact rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g r s x S e bse hn hbse horth
+  exact riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g r s x S e bse hn hbse horth
 
 set_option linter.unusedSectionVars false in
 lemma fiberNormSqComponent_zero_toModel_pt
@@ -121,39 +121,39 @@ lemma fiberNormSqComponent_zero_toModel_pt
 
 set_option linter.unusedSectionVars false in
 lemma rfns_symmS_zero_le_of_ball (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 : 0 ≤ δ)
-    (hbound : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x
-        ((symmS (I := I) (M := M) g₀ T).toSection x) ≤
+        ((ccTensor02Symm (I := I) (M := M) g₀ T).toSection x) ≤
       (Module.finrank ℝ E : ℝ) ^ 2 * δ ^ 2 := by
   classical
   obtain ⟨n, e, bse, hn, hbse, horth, _hpars, _hrepr, _hsum⟩ :=
     tangent_orthonormalBasis_witness (I := I) (M := M) g₀ x
   have hnE : n = Module.finrank ℝ E := by rw [hn]; rfl
   rw [rfns_eq_sum_componentSq_of_horth_pt (I := I) (M := M) g₀ 0 2 x
-    ((symmS (I := I) (M := M) g₀ T).toSection x) e hnE horth]
+    ((ccTensor02Symm (I := I) (M := M) g₀ T).toSection x) e hnE horth]
   have hcomp : ∀ (K : Fin 0 → Fin n) (J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
-        ((symmS (I := I) (M := M) g₀ T).toSection x) n e K J) ^ 2 ≤ δ ^ 2 := by
+        ((ccTensor02Symm (I := I) (M := M) g₀ T).toSection x) n e K J) ^ 2 ≤ δ ^ 2 := by
     intro K J
     have hval : fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
-        ((symmS (I := I) (M := M) g₀ T).toSection x) n e K J =
+        ((ccTensor02Symm (I := I) (M := M) g₀ T).toSection x) n e K J =
         ccTensorBilinSymm (I := I) g₀ T x (e (J 0)) (e (J 1)) := by
       rw [fiberNormSqComponent_zero_toModel_pt (I := I) (M := M) g₀ 2 x
-        (symmS (I := I) (M := M) g₀ T) e K J]
+        (ccTensor02Symm (I := I) (M := M) g₀ T) e K J]
       rw [show Tensor0SSpace.toModel
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
-            (symmS (I := I) (M := M) g₀ T).toSection x)
+            (ccTensor02Symm (I := I) (M := M) g₀ T).toSection x)
             (unitTensor (I := I) (M := M) x))
           (fun k => (show E from e (J k))) =
-          unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ T) x
+          unitModel (I := I) (M := M) g₀ 2 (ccTensor02Symm (I := I) (M := M) g₀ T) x
             ![e (J 0), e (J 1)] from by
         rw [unitModel]
         refine congrArg _ ?_
         funext k
         fin_cases k <;> rfl]
       rw [unitModel_eq_ccTensorBilin_pt (I := I) (M := M) g₀
-        (symmS (I := I) (M := M) g₀ T) x (e (J 0)) (e (J 1))]
+        (ccTensor02Symm (I := I) (M := M) g₀ T) x (e (J 0)) (e (J 1))]
       rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T x (e (J 0)) (e (J 1))]
     rw [hval]
     have habs := hbound x (e (J 0)) (e (J 1))
@@ -166,7 +166,7 @@ lemma rfns_symmS_zero_le_of_ball (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 
     nlinarith [habs, sq_abs (ccTensorBilinSymm (I := I) g₀ T x (e (J 0)) (e (J 1)))]
   calc (∑ K : Fin 0 → Fin n, ∑ J : Fin 2 → Fin n,
         (fiberNormSqComponent (I := I) (M := M) g₀ x 0 2
-          ((symmS (I := I) (M := M) g₀ T).toSection x) n e K J) ^ 2)
+          ((ccTensor02Symm (I := I) (M := M) g₀ T).toSection x) n e K J) ^ 2)
       ≤ ∑ K : Fin 0 → Fin n, ∑ J : Fin 2 → Fin n, δ ^ 2 :=
         Finset.sum_le_sum fun K _ => Finset.sum_le_sum fun J _ => hcomp K J
     _ = (Fintype.card (Fin 0 → Fin n) : ℝ) * ((Fintype.card (Fin 2 → Fin n) : ℝ) * δ ^ 2) := by
@@ -184,7 +184,7 @@ lemma rfns_symmS_zero_le_of_ball (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 
 set_option linter.unusedSectionVars false in
 lemma rfns_iteratedCovGrad_symmS_pointwise (T : SmoothCcTensor g₀ 0 2) (k : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
-        ((iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T)).toSection x) ≤
+        ((iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T)).toSection x) ≤
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
         ((iteratedCovGrad (I := I) g₀ 0 2 k T).toSection x) := by
   have hswap : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
@@ -198,7 +198,7 @@ lemma rfns_iteratedCovGrad_symmS_pointwise (T : SmoothCcTensor g₀ 0 2) (k : �
   set B := iteratedCovGrad (I := I) g₀ 0 2 k
     (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) with hB
   have htoSec : ((iteratedCovGrad (I := I) g₀ 0 2 k
-        (symmS (I := I) (M := M) g₀ T)).toSection x : TensorRSSpace 0 (2 + k) I x) =
+        (ccTensor02Symm (I := I) (M := M) g₀ T)).toSection x : TensorRSSpace 0 (2 + k) I x) =
       (1 / 2 : ℝ) • (A.toSection x) + (1 / 2 : ℝ) • (B.toSection x) := by
     rw [iteratedCovGrad_symmS_eq (I := I) (M := M) g₀ T k]
     rw [show (((1 / 2 : ℝ) • A + (1 / 2 : ℝ) • B).toSection x) =
@@ -250,9 +250,9 @@ lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (T : SmoothCcTensor g₀ 0 2)
     rw [riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g₀ σ W i x]
     rw [hW]
     rw [show symmSCovGrad3 (I := I) g₀ T =
-        covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T) from rfl]
+        covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T) from rfl]
     have hcomm := rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 0 2 i
-      (symmS (I := I) g₀ T) x
+      (ccTensor02Symm (I := I) g₀ T) x
     rw [hcomm]
     exact rfns_iteratedCovGrad_symmS_pointwise (I := I) (M := M) g₀ T (i + 1) x
   have hkos : koszulCovecCc (I := I) g₀ T = (1 / 2 : ℝ) • (DA + DB - DC) := by
@@ -312,7 +312,7 @@ lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (T : SmoothCcTensor g₀ 0 2)
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
 
 set_option linter.unusedSectionVars false in
-lemma rfns_sub_le_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+lemma riemannianFiberNormSq_sub_le_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (a - b) ≤
       2 * riemannianFiberNormSq (I := I) (M := M) g r s x a +

@@ -81,7 +81,7 @@ theorem toModel_slotExtend_two_apply (g₀ : SmoothRiemannianMetric I M) (b s : 
   rw [show (show Tensor0SSpace (b + 2) I x →L[ℝ] Tensor0SSpace (s + 2) I x from
         (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1)
           (slotExtend (I := I) (M := M) g₀ b s Φ)).toSection x) D =
-      slotExtendFib (I := I) (M := M) g₀ (b + 1) (s + 1) x
+      slotExtendPointwise (I := I) (M := M) g₀ (b + 1) (s + 1) x
         (show Tensor0SSpace (b + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (slotExtend (I := I) (M := M) g₀ b s Φ).toSection x) D from rfl]
   rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ (b + 1) (s + 1) x
@@ -90,7 +90,7 @@ theorem toModel_slotExtend_two_apply (g₀ : SmoothRiemannianMetric I M) (b s : 
   rw [show (show Tensor0SSpace (b + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         (slotExtend (I := I) (M := M) g₀ b s Φ).toSection x)
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (b + 1) x D a) =
-      slotExtendFib (I := I) (M := M) g₀ b s x
+      slotExtendPointwise (I := I) (M := M) g₀ b s x
         (show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (b + 1) x D a) from rfl]
   rw [slotExtendFib_apply_eval (I := I) (M := M) g₀ b s x
@@ -138,12 +138,12 @@ theorem cometricDoubleTraceFib_comp_slotExtend_two_eq (g₀ : SmoothRiemannianMe
 
 theorem cometricDoubleTrace_appCc_slotExtend_two_comm (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (V : SmoothCcTensor g₀ 0 (b + 2)) :
-    appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
-        (appCc (I := I) (M := M) g₀ (b + 2) (s + 2)
+    operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+        (operatorFieldApply (I := I) (M := M) g₀ (b + 2) (s + 2)
           (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1)
             (slotExtend (I := I) (M := M) g₀ b s Φ)) V) =
-      appCc (I := I) (M := M) g₀ b s Φ
-        (appCc (I := I) (M := M) g₀ (b + 2) b (cometricDoubleTraceField (I := I) g₀ b) V) := by
+      operatorFieldApply (I := I) (M := M) g₀ b s Φ
+        (operatorFieldApply (I := I) (M := M) g₀ (b + 2) b (cometricDoubleTraceField (I := I) g₀ b) V) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -153,69 +153,69 @@ theorem cometricDoubleTrace_appCc_slotExtend_two_comm (g₀ : SmoothRiemannianMe
 
 theorem rawTensorConnLap_appCc_comm_of_rank (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (W : SmoothCcTensor g₀ 0 b) :
-    rawTensorConnLapSmooth (I := I) g₀ 0 s (appCc (I := I) (M := M) g₀ b s Φ W) =
-      appCc (I := I) (M := M) g₀ b s Φ (rawTensorConnLapSmooth (I := I) g₀ 0 b W)
-      + appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
-          (appCc (I := I) (M := M) g₀ b (s + 2)
+    rawTensorConnLapSmooth (I := I) g₀ 0 s (operatorFieldApply (I := I) (M := M) g₀ b s Φ W) =
+      operatorFieldApply (I := I) (M := M) g₀ b s Φ (rawTensorConnLapSmooth (I := I) g₀ 0 b W)
+      + operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+          (operatorFieldApply (I := I) (M := M) g₀ b (s + 2)
             (covGrad (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ)) W)
-      + appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
-          (appCc (I := I) (M := M) g₀ (b + 1) (s + 2)
+      + operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+          (operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
             (slotExtend (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ))
             (covGrad (I := I) (M := M) g₀ 0 b W))
-      + appCc (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
-          (appCc (I := I) (M := M) g₀ (b + 1) (s + 2)
+      + operatorFieldApply (I := I) (M := M) g₀ (s + 2) s (cometricDoubleTraceField (I := I) g₀ s)
+          (operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
             (covGrad (I := I) (M := M) g₀ (b + 1) (s + 1)
               (slotExtend (I := I) (M := M) g₀ b s Φ))
             (covGrad (I := I) (M := M) g₀ 0 b W)) := by
   classical
   rw [rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace_of_rank (I := I) g₀ s
-    (appCc (I := I) (M := M) g₀ b s Φ W)]
-  have h1 : covGrad (I := I) (M := M) g₀ 0 s (appCc (I := I) (M := M) g₀ b s Φ W) =
-      appCc (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W +
-        appCc (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
+    (operatorFieldApply (I := I) (M := M) g₀ b s Φ W)]
+  have h1 : covGrad (I := I) (M := M) g₀ 0 s (operatorFieldApply (I := I) (M := M) g₀ b s Φ W) =
+      operatorFieldApply (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W +
+        operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
           (covGrad (I := I) (M := M) g₀ 0 b W) :=
-    covGrad_appCc_eq (I := I) (M := M) g₀ b s Φ W
+    covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ b s Φ W
   have hA : covGrad (I := I) (M := M) g₀ 0 (s + 1)
-        (appCc (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W) =
-      appCc (I := I) (M := M) g₀ b (s + 2)
+        (operatorFieldApply (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W) =
+      operatorFieldApply (I := I) (M := M) g₀ b (s + 2)
           (covGrad (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ)) W +
-        appCc (I := I) (M := M) g₀ (b + 1) (s + 2)
+        operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
           (slotExtend (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 b W) :=
-    covGrad_appCc_eq (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W
+    covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ) W
   have hB : covGrad (I := I) (M := M) g₀ 0 (s + 1)
-        (appCc (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
+        (operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
           (covGrad (I := I) (M := M) g₀ 0 b W)) =
-      appCc (I := I) (M := M) g₀ (b + 1) (s + 2)
+      operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
           (covGrad (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 b W) +
-        appCc (I := I) (M := M) g₀ (b + 2) (s + 2)
+        operatorFieldApply (I := I) (M := M) g₀ (b + 2) (s + 2)
           (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W)) :=
-    covGrad_appCc_eq (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
+    covGrad_operatorFieldApply_eq (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ)
       (covGrad (I := I) (M := M) g₀ 0 b W)
-  have hexp : iteratedCovGrad (I := I) g₀ 0 s 2 (appCc (I := I) (M := M) g₀ b s Φ W) =
-      appCc (I := I) (M := M) g₀ b (s + 2)
+  have hexp : iteratedCovGrad (I := I) g₀ 0 s 2 (operatorFieldApply (I := I) (M := M) g₀ b s Φ W) =
+      operatorFieldApply (I := I) (M := M) g₀ b (s + 2)
           (covGrad (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ)) W +
-        appCc (I := I) (M := M) g₀ (b + 1) (s + 2)
+        operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
           (slotExtend (I := I) (M := M) g₀ b (s + 1) (covGrad (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 b W) +
-        appCc (I := I) (M := M) g₀ (b + 1) (s + 2)
+        operatorFieldApply (I := I) (M := M) g₀ (b + 1) (s + 2)
           (covGrad (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 b W) +
-        appCc (I := I) (M := M) g₀ (b + 2) (s + 2)
+        operatorFieldApply (I := I) (M := M) g₀ (b + 2) (s + 2)
           (slotExtend (I := I) (M := M) g₀ (b + 1) (s + 1) (slotExtend (I := I) (M := M) g₀ b s Φ))
           (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W)) := by
-    have hxeq : iteratedCovGrad (I := I) g₀ 0 s 2 (appCc (I := I) (M := M) g₀ b s Φ W) =
+    have hxeq : iteratedCovGrad (I := I) g₀ 0 s 2 (operatorFieldApply (I := I) (M := M) g₀ b s Φ W) =
         covGrad (I := I) (M := M) g₀ 0 (s + 1)
-          (covGrad (I := I) (M := M) g₀ 0 s (appCc (I := I) (M := M) g₀ b s Φ W)) := rfl
+          (covGrad (I := I) (M := M) g₀ 0 s (operatorFieldApply (I := I) (M := M) g₀ b s Φ W)) := rfl
     rw [hxeq, h1, covGrad_add, hA, hB]
     abel
   rw [hexp]
   simp only [appCc_add_right]
   rw [cometricDoubleTrace_appCc_slotExtend_two_comm (I := I) g₀ b s Φ
     (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W))]
-  rw [show appCc (I := I) (M := M) g₀ (b + 2) b (cometricDoubleTraceField (I := I) g₀ b)
+  rw [show operatorFieldApply (I := I) (M := M) g₀ (b + 2) b (cometricDoubleTraceField (I := I) g₀ b)
         (covGrad (I := I) (M := M) g₀ 0 (b + 1) (covGrad (I := I) (M := M) g₀ 0 b W)) =
       rawTensorConnLapSmooth (I := I) g₀ 0 b W from by
     rw [rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace_of_rank (I := I) g₀ b W]
@@ -243,25 +243,25 @@ theorem rawConnLap_iteratedCovGrad_two_comm (g₀ : SmoothRiemannianMetric I M) 
 theorem rawConnLap_appCc_iteratedCovGrad_two_comm (g₀ : SmoothRiemannianMetric I M) (s t : ℕ)
     (C : SmoothCcTensor g₀ (s + 2) t) (S : SmoothCcTensor g₀ 0 s) :
     rawTensorConnLapSmooth (I := I) g₀ 0 t
-        (appCc (I := I) (M := M) g₀ (s + 2) t C (iteratedCovGrad (I := I) g₀ 0 s 2 S)) =
-      appCc (I := I) (M := M) g₀ (s + 2) t C
+        (operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C (iteratedCovGrad (I := I) g₀ 0 s 2 S)) =
+      operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C
           (iteratedCovGrad (I := I) g₀ 0 s 2 (rawTensorConnLapSmooth (I := I) g₀ 0 s S))
-      + appCc (I := I) (M := M) g₀ (s + 2) t C
+      + operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C
           (covGrad (I := I) (M := M) g₀ 0 (s + 1) (pointwiseTensorCurv (I := I) (M := M) g₀ s S))
-      + appCc (I := I) (M := M) g₀ (s + 2) t C
+      + operatorFieldApply (I := I) (M := M) g₀ (s + 2) t C
           (pointwiseTensorCurv (I := I) (M := M) g₀ (s + 1) (covGrad (I := I) (M := M) g₀ 0 s S))
-      + appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
-          (appCc (I := I) (M := M) g₀ (s + 2) (t + 2)
+      + operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
+          (operatorFieldApply (I := I) (M := M) g₀ (s + 2) (t + 2)
             (covGrad (I := I) (M := M) g₀ (s + 2) (t + 1)
               (covGrad (I := I) (M := M) g₀ (s + 2) t C))
             (iteratedCovGrad (I := I) g₀ 0 s 2 S))
-      + appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
-          (appCc (I := I) (M := M) g₀ (s + 2 + 1) (t + 2)
+      + operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
+          (operatorFieldApply (I := I) (M := M) g₀ (s + 2 + 1) (t + 2)
             (slotExtend (I := I) (M := M) g₀ (s + 2) (t + 1)
               (covGrad (I := I) (M := M) g₀ (s + 2) t C))
             (covGrad (I := I) (M := M) g₀ 0 (s + 2) (iteratedCovGrad (I := I) g₀ 0 s 2 S)))
-      + appCc (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
-          (appCc (I := I) (M := M) g₀ (s + 2 + 1) (t + 2)
+      + operatorFieldApply (I := I) (M := M) g₀ (t + 2) t (cometricDoubleTraceField (I := I) g₀ t)
+          (operatorFieldApply (I := I) (M := M) g₀ (s + 2 + 1) (t + 2)
             (covGrad (I := I) (M := M) g₀ (s + 2 + 1) (t + 1)
               (slotExtend (I := I) (M := M) g₀ (s + 2) t C))
             (covGrad (I := I) (M := M) g₀ 0 (s + 2) (iteratedCovGrad (I := I) g₀ 0 s 2 S))) := by

@@ -29,9 +29,9 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-  (dLaBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
+  (connDiffCovDerivBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
     deTurckLieFib deTurckLieCoeffField deTurckLieCoeffField_toSection
-    deTurckLieCovDerivA connDiff_pairing_mdiffAt dLaCovKernel dLaCovKernel_apply_extend)
+    deTurckConnDiffCovDeriv connDiff_pairing_mdiffAt connDiffCovDerivOp dLaCovKernel_apply_extend)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -49,7 +49,7 @@ open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg metric_in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (covGrad connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one dLaBiContrFibFixedFrame_toModel)
 open DifferentialGeometry.Geometry.Curvature
-  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt)
+  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt)
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
@@ -171,7 +171,7 @@ lemma slotExtendIter_two_toModel_dla (g₀ : SmoothRiemannianMetric I M)
   rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rfl
 
-def pureDTdla (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
+def cometricDoubleTraceSmoothCcTensor (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     SmoothCcTensor g₀ (s + 2) s where
   toSection :=
     { toFun := fun x : M =>
@@ -250,7 +250,7 @@ lemma toModel_cons_cons_sum_smul_dla (x : M) {n : ℕ}
   rw [← h1 (u c)]
 
 set_option linter.unusedSectionVars false in
-lemma orthoFrame_center_repr_dla (g : SmoothRiemannianMetric I M) (x : M)
+lemma smoothOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
       g.inner x (smoothOrthoFrame (I := I) g x i x) v • smoothOrthoFrame (I := I) g x i x := by

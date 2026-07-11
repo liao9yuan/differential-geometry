@@ -63,7 +63,7 @@ theorem endoApplySection_contMDiff
   exact ContMDiff.clm_bundle_apply (b := id) hΛsm Y.contMDiff
 
 set_option backward.isDefEq.respectTransparency false in
-def slotInsertEndoCc (g : SmoothRiemannianMetric I M) (s : ℕ)
+def endoSlotZeroCcTensor (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
     SmoothCcTensor g (s + 1) (s + 1) where
   toSection :=
@@ -78,7 +78,7 @@ set_option linter.unusedSectionVars false in
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) :
     (show Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-        (slotInsertEndoCc (I := I) (M := M) g s Λ).toSection x) =
+        (endoSlotZeroCcTensor (I := I) (M := M) g s Λ).toSection x) =
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Λ x) := rfl
 
 set_option linter.unusedSectionVars false in
@@ -103,7 +103,7 @@ private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
         ((show Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           tensorCovDerivAt (I := I) (M := M) g (s + 1) (s + 1)
-            (slotInsertEndoCc (I := I) (M := M) g s Λ) x v) D)) v0 =
+            (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) x v) D)) v0 =
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x D)
         (((endoCovariantDerivative (I := I) (M := M) g) Λ x v) v0) := by
   classical
@@ -112,7 +112,7 @@ private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (
     (n := (⊤ : ℕ∞)) x D
   obtain ⟨Y, hY⟩ := ContMDiffSection.exists_eq_at (I := I)
     (F := E) (V := fun y : M => TangentSpace I y) (n := (⊤ : ℕ∞)) x v0
-  set SIΛ := slotInsertEndoCc (I := I) (M := M) g s Λ with hSIΛ
+  set SIΛ := endoSlotZeroCcTensor (I := I) (M := M) g s Λ with hSIΛ
   have hlamY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y ((Λ y) (Y y))) :=
     endoApplySection_contMDiff (I := I) (M := M) Λ Y
@@ -182,7 +182,7 @@ theorem tensorCovDerivAt_slotInsertEndoCc_eq (g : SmoothRiemannianMetric I M) (s
     (x : M) (v : E) :
     (show Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
         tensorCovDerivAt (I := I) (M := M) g (s + 1) (s + 1)
-          (slotInsertEndoCc (I := I) (M := M) g s Λ) x v) =
+          (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) x v) =
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
         ((endoCovariantDerivative (I := I) (M := M) g) Λ x v) := by
   apply ContinuousLinearMap.ext
@@ -194,7 +194,7 @@ theorem tensorCovDerivAt_slotInsertEndoCc_eq (g : SmoothRiemannianMetric I M) (s
   rw [← tensor0S_curry_apply_eval (I := I) (M := M) (n := s)
     (T := (show Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
       tensorCovDerivAt (I := I) (M := M) g (s + 1) (s + 1)
-        (slotInsertEndoCc (I := I) (M := M) g s Λ) x v) D) (v0 := m 0) (vs := Matrix.vecTail m)]
+        (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) x v) D) (v0 := m 0) (vs := Matrix.vecTail m)]
   rw [core_slotInsert_curry_reading (I := I) (M := M) g s Λ x v D (m 0)]
   rw [tensor0S_curry_apply_eval]
   congr 1
@@ -207,17 +207,17 @@ theorem covGrad_slotInsertEndoCc_toSection_eq (g : SmoothRiemannianMetric I M) (
     Tensor0SSpace.toModel
         ((show Tensor0SSpace (s + 1) I x →L[ℝ] Tensor0SSpace (s + 1 + 1) I x from
           (covGrad (I := I) (M := M) g (s + 1) (s + 1)
-            (slotInsertEndoCc (I := I) (M := M) g s Λ)).toSection x) D) v =
+            (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)).toSection x) D) v =
       Tensor0SSpace.toModel
         ((slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x
             ((endoCovariantDerivative (I := I) (M := M) g) Λ x (v 0))) D)
         (Matrix.vecTail v) := by
   rw [covGrad_toSection_apply_eval (I := I) (M := M) g (s + 1) (s + 1)
-    (slotInsertEndoCc (I := I) (M := M) g s Λ) x D v]
+    (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) x D v]
   rw [tensorCovDerivAt_slotInsertEndoCc_eq (I := I) (M := M) g s Λ x (v 0)]
 
 set_option linter.unusedSectionVars false in
-def idHomTensorRSField (r a : ℕ) :
+def identityHomTensorRSField (r a : ℕ) :
     HomTensorRSField (E := E) (M := M) r a a I where
   toFun := fun x : M => (ContinuousLinearMap.id ℝ (TensorRSSpace r a I x) :
     HomTensorRSSpace r a a I x)
@@ -231,13 +231,13 @@ def idHomTensorRSField (r a : ℕ) :
 set_option linter.unusedSectionVars false in
 @[simp] lemma idHomTensorRSField_apply (r a : ℕ) (x : M) :
     (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r a I x from
-        idHomTensorRSField (E := E) (M := M) (I := I) r a x) =
+        identityHomTensorRSField (E := E) (M := M) (I := I) r a x) =
       ContinuousLinearMap.id ℝ (TensorRSSpace r a I x) := rfl
 
 set_option linter.unusedSectionVars false in
 lemma appFullSec_idHomTensorRSField (g : SmoothRiemannianMetric I M) (r a : ℕ)
     (W : SmoothCcTensor g r a) :
-    appFullSec (I := I) (M := M) g r a a (idHomTensorRSField (E := E) (M := M) (I := I) r a) W = W := by
+    homTensorRSFieldApply (I := I) (M := M) g r a a (identityHomTensorRSField (E := E) (M := M) (I := I) r a) W = W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -248,17 +248,17 @@ theorem iteratedCovGrad_slotInsertEndoCc_expansion (g : SmoothRiemannianMetric I
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (k : ℕ) :
     ∃ D : (i : ℕ) → HomTensorRSField (E := E) (M := M) (s + 1) (s + 1 + i) (s + 1 + k) I,
-      iteratedCovGrad g (s + 1) (s + 1) k (slotInsertEndoCc (I := I) (M := M) g s Λ) =
+      iteratedCovGrad g (s + 1) (s + 1) k (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) =
         ∑ i ∈ Finset.range (k + 1),
-          appFullSec (I := I) (M := M) g (s + 1) (s + 1 + i) (s + 1 + k) (D i)
-            (iteratedCovGrad g (s + 1) (s + 1) i (slotInsertEndoCc (I := I) (M := M) g s Λ)) := by
+          homTensorRSFieldApply (I := I) (M := M) g (s + 1) (s + 1 + i) (s + 1 + k) (D i)
+            (iteratedCovGrad g (s + 1) (s + 1) i (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)) := by
   obtain ⟨D, hD⟩ :=
     homFieldAction_iteratedCovGrad_expansion (I := I) (M := M) g (s + 1) (s + 1) (s + 1)
-      (idHomTensorRSField (E := E) (M := M) (I := I) (s + 1) (s + 1)) k
+      (identityHomTensorRSField (E := E) (M := M) (I := I) (s + 1) (s + 1)) k
   refine ⟨D, ?_⟩
-  have hbase := hD (slotInsertEndoCc (I := I) (M := M) g s Λ)
+  have hbase := hD (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)
   rw [appFullSec_idHomTensorRSField (I := I) (M := M) g (s + 1) (s + 1)
-    (slotInsertEndoCc (I := I) (M := M) g s Λ)] at hbase
+    (endoSlotZeroCcTensor (I := I) (M := M) g s Λ)] at hbase
   exact hbase
 
 end Connection

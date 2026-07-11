@@ -530,7 +530,7 @@ theorem exists_ricciArmOrder0RiemannCoeff (g₀ g₁ : SmoothRiemannianMetric I 
     ∃ R_Rm : SmoothCcTensor g₀ 2 2,
       ∀ (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x),
         unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 2 2 R_Rm W) x v =
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 R_Rm W) x v =
           2 * ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
             g₁.inner x
                 (riemannOp (LeviCivita (I := I) g₁) x (v 0)
@@ -583,7 +583,7 @@ set_option linter.unusedSectionVars false in
 theorem ricciArmOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W) x v =
       2 * ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         g₁.inner x
             (riemannOp (LeviCivita (I := I) g₁) x (v 0)
@@ -631,11 +631,11 @@ set_option linter.unusedSectionVars false in
 theorem symmAbsorbedPrincipalCoeffPure_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2 (symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀ g₁ S)
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (symmAbsorbedPrincipalCoeffPure (I := I) (M := M) g₀ g₁ S)
           (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)
-          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S))) x v := by
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 2 S
     (ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₁)
     (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
@@ -655,11 +655,11 @@ set_option linter.unusedSectionVars false in
 theorem symmAbsorbedOrder0CurvCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀ g₁ S)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (symmAbsorbedOrder0CurvCoeff (I := I) (M := M) g₀ g₁ S)
           (iteratedCovGrad (I := I) g₀ 0 2 0 S)) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)
-          (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ S))) x v := by
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 S
     (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁)
     (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
@@ -679,11 +679,11 @@ set_option linter.unusedSectionVars false in
 theorem symmAbsorbedOrder0RiemannCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ S)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (symmAbsorbedOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ S)
           (iteratedCovGrad (I := I) g₀ 0 2 0 S)) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
-          (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ S))) x v := by
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 0 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   exact symmAbsorbedCoeff_appCc_eq (I := I) (M := M) g₀ 0 S
     (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁)
     (Classical.choose (exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀

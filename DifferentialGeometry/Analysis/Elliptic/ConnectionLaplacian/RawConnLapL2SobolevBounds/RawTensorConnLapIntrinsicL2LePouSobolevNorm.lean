@@ -197,7 +197,7 @@ private lemma compNormSqOnM_measurable
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (j : ℕ) :
     Measurable (compNormSqOnM (I := I) (M := M) g r s T₀ α Idx Jdx j) :=
-  compDataIJ_chart_on_M_measurable (I := I) (M := M) g r s T₀ α Idx Jdx j
+  measurable_tensorChartComponentRaw_iteratedFDeriv_normSq (I := I) (M := M) g r s T₀ α Idx Jdx j
 
 private lemma compNormSqOnM_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T₀ : SmoothCcTensor g r s)

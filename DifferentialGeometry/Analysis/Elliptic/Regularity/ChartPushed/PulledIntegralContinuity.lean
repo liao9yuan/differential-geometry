@@ -488,7 +488,7 @@ lemma smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     smoothToLp (I := I) (M := M) g
         (pouScalar (I := I) (M := M) α v).oneSubLapClassical =
-      fHLeibniz (I := I) (M := M) g α
+      leibnizCompensatedSource (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g v)
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) := by
   classical
@@ -500,7 +500,7 @@ lemma smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
     MemLp.coeFn_toLp (pouScalar (I := I) (M := M) α v).oneSubLapClassical.memLp_two
   have h_rhs_aeeq : (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
-      ((fHLeibniz (I := I) (M := M) g α
+      ((leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)
           : Lp ℝ 2 _) : M → ℝ) :=
@@ -516,7 +516,7 @@ theorem chartPulledIntegralCLM_pouScalar_oneSubLap_eq_fHLeibniz_smooth
         (smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α v).oneSubLapClassical) =
       chartPulledIntegralCLM (I := I) (M := M) g α hθ_cont hθ_cs hθ_supp
-        (fHLeibniz (I := I) (M := M) g α
+        (leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)) := by
   rw [smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz (I := I) (M := M) g α v]
@@ -528,22 +528,22 @@ theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α)
     {v : ℕ → SmoothScalar g}
     (h_fHLeibniz_tendsto :
-      Tendsto (fun n => fHLeibniz (I := I) (M := M) g α
+      Tendsto (fun n => leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)))
-        atTop (𝓝 (fHLeibniz (I := I) (M := M) g α u_h hu_h))) :
+        atTop (𝓝 (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) :
     Tendsto (fun n => chartPulledIntegralCLM (I := I) (M := M) g α
         hθ_cont hθ_cs hθ_supp
         (smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical))
       atTop (𝓝 (chartPulledIntegralCLM (I := I) (M := M) g α
         hθ_cont hθ_cs hθ_supp
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) := by
   classical
   have h_eq_n : ∀ n,
       smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical =
-      fHLeibniz (I := I) (M := M) g α
+      leibnizCompensatedSource (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g (v n))
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)) :=
     fun n => smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz
@@ -554,7 +554,7 @@ theorem chartPulledIntegralCLM_RHS_tendsto_of_fHLeibniz_tendsto
         (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical)) =
     fun n => chartPulledIntegralCLM (I := I) (M := M) g α
       hθ_cont hθ_cs hθ_supp
-      (fHLeibniz (I := I) (M := M) g α
+      (leibnizCompensatedSource (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g (v n))
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n))) := by
     funext n
@@ -571,10 +571,10 @@ theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
     (hψ_supp : tsupport ψ ⊆ chartTargetEuclid (I := I) (M := M) α)
     {v : ℕ → SmoothScalar g}
     (h_fHLeibniz_tendsto :
-      Tendsto (fun n => fHLeibniz (I := I) (M := M) g α
+      Tendsto (fun n => leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)))
-        atTop (𝓝 (fHLeibniz (I := I) (M := M) g α u_h hu_h))) :
+        atTop (𝓝 (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) :
     Tendsto (fun n => ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           ((pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical.toFun)
@@ -612,7 +612,7 @@ theorem rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
           apply hy
           have hψ_y : ψ y = 0 := Function.notMem_support.mp hyψ
           rw [hψ_y, mul_zero])
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) := by
   classical
   set θ : EuclN → ℝ := fun y : EuclN => densityOnEuclid (I := I) g α y * ψ y with hθ_def
   have hθ_cont : Continuous θ := by
@@ -695,10 +695,10 @@ theorem laplacianDomain_variational_identity_general_partial
       Tendsto (fun n => smoothToH1Compl (I := I) (M := M) g (v n))
         atTop (𝓝 u_h))
     (h_fHLeibniz_tendsto :
-      Tendsto (fun n => fHLeibniz (I := I) (M := M) g α
+      Tendsto (fun n => leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)))
-        atTop (𝓝 (fHLeibniz (I := I) (M := M) g α u_h hu_h))) :
+        atTop (𝓝 (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) :
     Tendsto (fun n => ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
           ((pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical.toFun)
@@ -736,7 +736,7 @@ theorem laplacianDomain_variational_identity_general_partial
           apply hy
           have hψ_y : ψ y = 0 := Function.notMem_support.mp hyψ
           rw [hψ_y, mul_zero])
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) := by
   exact rhs_integral_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz
     (I := I) (M := M) g α u_h hu_h hψ hψ_cs hψ_supp h_fHLeibniz_tendsto
 

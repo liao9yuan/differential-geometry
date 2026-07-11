@@ -190,7 +190,7 @@ lemma two_abs_mul_le_eps_sq_add (a b ε : ℝ) (hε : 0 < ε) :
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
-theorem cross_1_pointwise_bound
+theorem translated_coeff_cutoff_gradient_pointwise_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -377,7 +377,7 @@ theorem cross_1_pointwise_bound
 
 set_option linter.unusedVariables false in
 
-theorem cross_2_pointwise_bound
+theorem diffQuot_coeff_cutoff_squared_pointwise_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -513,7 +513,7 @@ theorem cross_2_pointwise_bound
         ((fderiv ℝ u x) (EuclideanSpace.single i 1))^2 = 0 := by ring
     linarith
 
-theorem cross_3_pointwise_bound
+theorem diffQuot_coeff_cutoff_gradient_pointwise_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
     {η : E → ℝ}

@@ -31,7 +31,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
-def appFullRSFib (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+def homTensorRSApplyFib (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (W : SmoothCcTensor g r a) (x : M) :
     TensorRSSpace r c I x :=
@@ -49,19 +49,19 @@ theorem appFullRSFib_contMDiff (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r c ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel r c ℝ E)
         (E := fun z : M => TensorRSSpace r c I z) x
-        (appFullRSFib (I := I) (M := M) g r a c Ψ W x)) :=
+        (homTensorRSApplyFib (I := I) (M := M) g r a c Ψ W x)) :=
   ContMDiff.clm_bundle_apply (b := id) hΨ W.toSection.contMDiff
 
 set_option backward.isDefEq.respectTransparency false in
 
-def appFullRS (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+def homTensorRSApply (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
     (W : SmoothCcTensor g r a) : SmoothCcTensor g r c where
   toSection :=
-    { toFun := fun x : M => appFullRSFib (I := I) (M := M) g r a c Ψ W x
+    { toFun := fun x : M => homTensorRSApplyFib (I := I) (M := M) g r a c Ψ W x
       contMDiff_toFun := appFullRSFib_contMDiff (I := I) (M := M) g r a c Ψ hΨ W }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
@@ -74,7 +74,7 @@ set_option backward.isDefEq.respectTransparency false in
       (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
     (W : SmoothCcTensor g r a) (x : M) :
-    (appFullRS (I := I) (M := M) g r a c Ψ hΨ W).toSection x = Ψ x (W.toSection x) := rfl
+    (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W).toSection x = Ψ x (W.toSection x) := rfl
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
@@ -85,15 +85,15 @@ theorem appFullRS_add_right (g : SmoothRiemannianMetric I M) (r a c : ℕ)
       (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
     (W₁ W₂ : SmoothCcTensor g r a) :
-    appFullRS (I := I) (M := M) g r a c Ψ hΨ (W₁ + W₂) =
-      appFullRS (I := I) (M := M) g r a c Ψ hΨ W₁ + appFullRS (I := I) (M := M) g r a c Ψ hΨ W₂ := by
+    homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ (W₁ + W₂) =
+      homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W₁ + homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W₂ := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appFullRS (I := I) (M := M) g r a c Ψ hΨ W₁ +
-        appFullRS (I := I) (M := M) g r a c Ψ hΨ W₂).toSection x) =
-      (appFullRS (I := I) (M := M) g r a c Ψ hΨ W₁).toSection x +
-        (appFullRS (I := I) (M := M) g r a c Ψ hΨ W₂).toSection x from rfl]
+  rw [show ((homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W₁ +
+        homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W₂).toSection x) =
+      (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W₁).toSection x +
+        (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W₂).toSection x from rfl]
   rw [appFullRS_toSection, appFullRS_toSection, appFullRS_toSection]
   rw [show ((W₁ + W₂).toSection x : TensorRSSpace r a I x) = W₁.toSection x + W₂.toSection x from by
     rw [SmoothCcTensor.toSection_add]; rfl]
@@ -108,13 +108,13 @@ theorem appFullRS_smul_right (g : SmoothRiemannianMetric I M) (r a c : ℕ)
       (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
     (W : SmoothCcTensor g r a) :
-    appFullRS (I := I) (M := M) g r a c Ψ hΨ (k • W) =
-      k • appFullRS (I := I) (M := M) g r a c Ψ hΨ W := by
+    homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ (k • W) =
+      k • homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((k • appFullRS (I := I) (M := M) g r a c Ψ hΨ W).toSection x) =
-      k • (appFullRS (I := I) (M := M) g r a c Ψ hΨ W).toSection x from rfl]
+  rw [show ((k • homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W).toSection x) =
+      k • (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W).toSection x from rfl]
   rw [appFullRS_toSection, appFullRS_toSection]
   rw [show ((k • W).toSection x : TensorRSSpace r a I x) = k • W.toSection x from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
@@ -126,15 +126,15 @@ set_option backward.isDefEq.respectTransparency false in
 theorem appFullRSFib_add_left (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ₁ Ψ₂ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (W : SmoothCcTensor g r a) (x : M) :
-    appFullRSFib (I := I) (M := M) g r a c (fun y => Ψ₁ y + Ψ₂ y) W x =
-      appFullRSFib (I := I) (M := M) g r a c Ψ₁ W x +
-        appFullRSFib (I := I) (M := M) g r a c Ψ₂ W x := by
-  rw [appFullRSFib, appFullRSFib, appFullRSFib, ContinuousLinearMap.add_apply]
+    homTensorRSApplyFib (I := I) (M := M) g r a c (fun y => Ψ₁ y + Ψ₂ y) W x =
+      homTensorRSApplyFib (I := I) (M := M) g r a c Ψ₁ W x +
+        homTensorRSApplyFib (I := I) (M := M) g r a c Ψ₂ W x := by
+  rw [homTensorRSApplyFib, homTensorRSApplyFib, homTensorRSApplyFib, ContinuousLinearMap.add_apply]
 
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 
-noncomputable def slotExtendFullFib (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
+noncomputable def slotInsertHomTensorRSFib (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
     (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) :
     TensorRSSpace r (a + 1) I x →L[ℝ] TensorRSSpace r (c + 1) I x :=
   haveI : FiniteDimensional ℝ (TensorRSSpace r (a + 1) I x) :=
@@ -158,7 +158,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotExtendFullFib_apply (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
     (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (D : TensorRSSpace r (a + 1) I x) :
-    slotExtendFullFib (I := I) (M := M) g r a c x A D =
+    slotInsertHomTensorRSFib (I := I) (M := M) g r a c x A D =
       covGradBundleEquiv (I := I) (M := M) r c x
         (A.comp ((covGradBundleEquiv (I := I) (M := M) r a x).symm D)) :=
   rfl
@@ -171,7 +171,7 @@ lemma slotExtendFullFib_apply_eval (g : SmoothRiemannianMetric I M) (r a c : ℕ
     (Dlow : Tensor0SSpace r I x) (v0 : TangentSpace I x) (vs : Fin c → TangentSpace I x) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
-          slotExtendFullFib (I := I) (M := M) g r a c x A D) Dlow) (Fin.cons v0 vs) =
+          slotInsertHomTensorRSFib (I := I) (M := M) g r a c x A D) Dlow) (Fin.cons v0 vs) =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace c I x from
           A ((covGradBundleEquiv (I := I) (M := M) r a x).symm D v0)) Dlow) vs := by
@@ -194,11 +194,11 @@ theorem slotExtendFullFib_contMDiff (g : SmoothRiemannianMetric I M) (r a c : �
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r (a + 1) ℝ E →L[ℝ] TensorRSModel r (c + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel r (a + 1) ℝ E →L[ℝ] TensorRSModel r (c + 1) ℝ E)
         (E := fun z : M => TensorRSSpace r (a + 1) I z →L[ℝ] TensorRSSpace r (c + 1) I z) x
-        (slotExtendFullFib (I := I) (M := M) g r a c x (Ψ x))) := by
+        (slotInsertHomTensorRSFib (I := I) (M := M) g r a c x (Ψ x))) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (V₁ := fun z : M => TensorRSSpace r (a + 1) I z)
     (V₂ := fun z : M => TensorRSSpace r (c + 1) I z)
-    (φ := fun x => slotExtendFullFib (I := I) (M := M) g r a c x (Ψ x))
+    (φ := fun x => slotInsertHomTensorRSFib (I := I) (M := M) g r a c x (Ψ x))
   intro D
   have hG : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r c ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r c ℝ E)
@@ -258,7 +258,7 @@ theorem slotExtendFullFib_contMDiff (g : SmoothRiemannianMetric I M) (r a c : �
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
-def homTensorRSCovDirHom (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+def homTensorRSDirCovDeriv (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) (v : TangentSpace I x) :
     TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x :=
   homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x v
@@ -268,7 +268,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma homTensorRSCovDirHom_continuous (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) :
-    Continuous (fun v : TangentSpace I x => homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x v) :=
+    Continuous (fun v : TangentSpace I x => homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v) :=
   (homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x).continuous
 
 set_option linter.unusedSectionVars false in
@@ -276,10 +276,10 @@ set_option backward.isDefEq.respectTransparency false in
 
 lemma homTensorRSCovDirHom_add (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) (v v' : TangentSpace I x) :
-    homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x (v + v') =
-      homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x v +
-        homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x v' := by
-  rw [homTensorRSCovDirHom, homTensorRSCovDirHom, homTensorRSCovDirHom,
+    homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x (v + v') =
+      homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v +
+        homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v' := by
+  rw [homTensorRSDirCovDeriv, homTensorRSDirCovDeriv, homTensorRSDirCovDeriv,
     map_add (homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x)]
 
 set_option linter.unusedSectionVars false in
@@ -288,9 +288,9 @@ set_option backward.isDefEq.respectTransparency false in
 lemma homTensorRSCovDirHom_smul (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) (k : ℝ)
     (v : TangentSpace I x) :
-    homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x (k • v) =
-      k • homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x v := by
-  rw [homTensorRSCovDirHom, homTensorRSCovDirHom,
+    homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x (k • v) =
+      k • homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v := by
+  rw [homTensorRSDirCovDeriv, homTensorRSDirCovDeriv,
     map_smul (homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x)]
 
 set_option linter.unusedSectionVars false in
@@ -304,7 +304,7 @@ noncomputable def homTensorRSCovGradDirCLM (g : SmoothRiemannianMetric I M) (r a
   haveI : T2Space (TensorRSSpace r c I x) :=
     inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace c I x))
   LinearMap.toContinuousLinearMap
-    { toFun := fun v : TangentSpace I x => homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x v d
+    { toFun := fun v : TangentSpace I x => homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v d
       map_add' := fun v v' => by rw [homTensorRSCovDirHom_add, ContinuousLinearMap.add_apply]
       map_smul' := fun k v => by rw [homTensorRSCovDirHom_smul, ContinuousLinearMap.smul_apply]; rfl }
 
@@ -315,13 +315,13 @@ set_option backward.isDefEq.respectTransparency false in
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M)
     (d : TensorRSSpace r a I x) (v : TangentSpace I x) :
     homTensorRSCovGradDirCLM (I := I) (M := M) g r a c Ψ x d v =
-      homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x v d := by
+      homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v d := by
   rw [homTensorRSCovGradDirCLM, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 
-noncomputable def homTensorRSCovGradFieldFib (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+noncomputable def homTensorRSCovGradFib (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) :
     TensorRSSpace r a I x →L[ℝ] TensorRSSpace r (c + 1) I x :=
   haveI : FiniteDimensional ℝ (TensorRSSpace r a I x) :=
@@ -354,20 +354,20 @@ lemma homTensorRSCovGradFieldFib_apply_eval (g : SmoothRiemannianMetric I M) (r 
     (v0 : TangentSpace I x) (vs : Fin c → TangentSpace I x) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
-          homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x d) Dlow) (Fin.cons v0 vs) =
+          homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ x d) Dlow) (Fin.cons v0 vs) =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace c I x from
-          homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x v0 d) Dlow) vs := by
+          homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v0 d) Dlow) vs := by
   letI : FiniteDimensional ℝ (TensorRSSpace r a I x) :=
     inferInstanceAs (FiniteDimensional ℝ (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace a I x))
   letI : T2Space (TensorRSSpace r a I x) :=
     inferInstanceAs (T2Space (Tensor0SSpace r I x →L[ℝ] Tensor0SSpace a I x))
   have hval : (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
-        homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x d) =
+        homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ x d) =
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
         covGradBundleEquiv (I := I) (M := M) r c x
           (homTensorRSCovGradDirCLM (I := I) (M := M) g r a c Ψ x d)) := by
-    rw [homTensorRSCovGradFieldFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
+    rw [homTensorRSCovGradFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
       AddHom.coe_mk]
   rw [hval]
   rw [covGradBundleEquiv_apply_eval (I := I) (M := M) r c x
@@ -388,7 +388,7 @@ theorem homTensorRSCovGradField_contMDiff (g : SmoothRiemannianMetric I M) (r a 
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r (c + 1) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r (c + 1) ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r (c + 1) I z) x
-        (homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x)) := by
+        (homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ x)) := by
   have hgrad : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] HomTensorRSModel r a c ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] HomTensorRSModel r a c ℝ E)
         (E := fun z : M => TangentSpace I z →L[ℝ] HomTensorRSSpace r a c I z) x
@@ -408,7 +408,7 @@ theorem homTensorRSCovGradField_contMDiff (g : SmoothRiemannianMetric I M) (r a 
     exact (hres x (Set.mem_univ x)).contMDiffAt Filter.univ_mem
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (V₁ := fun z : M => TensorRSSpace r a I z) (V₂ := fun z : M => TensorRSSpace r (c + 1) I z)
-    (φ := fun x => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x)
+    (φ := fun x => homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ x)
   intro Z
   have hG : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r c ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] TensorRSModel r c ℝ E)
@@ -474,12 +474,12 @@ theorem tensorCovDerivAt_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : 
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
     (W : SmoothCcTensor g r a) (x : M) (v : E) :
     (show TensorRSSpace r c I x from
-        tensorCovDerivAt (I := I) (M := M) g r c (appFullRS (I := I) (M := M) g r a c Ψ hΨ W) x v) =
+        tensorCovDerivAt (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x v) =
       (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from
           homTensorRSCovariantDerivative I M r a c (LeviCivita (I := I) g) Ψ x v) (W.toSection x) +
         (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from Ψ x)
           (show TensorRSSpace r a I x from tensorCovDerivAt (I := I) (M := M) g r a W x v) := by
-  have hval : (fun y : M => (appFullRS (I := I) (M := M) g r a c Ψ hΨ W).toSection y) =
+  have hval : (fun y : M => (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W).toSection y) =
       (fun y : M => (show TensorRSSpace r a I y →L[ℝ] TensorRSSpace r c I y from Ψ y) (W.toSection y)) := by
     funext y; rw [appFullRS_toSection (I := I) (M := M) g r a c Ψ hΨ W y]
   have hΨ_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E))
@@ -495,7 +495,7 @@ theorem tensorCovDerivAt_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : 
   have hV_diff : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun y : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) y (Vsec y)) x :=
     Vsec.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
-  rw [tensorCovDerivAt_def (I := I) (M := M) g r c (appFullRS (I := I) (M := M) g r a c Ψ hΨ W) x v,
+  rw [tensorCovDerivAt_def (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x v,
     hval]
   rw [show v = (Vsec : Π z : M, TangentSpace I z) x from hVx.symm]
   have hprod := homTensorRSCovariantDerivative_apply_of_mdifferentiableAt I M r a c
@@ -525,29 +525,29 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
       (fun x : M => TotalSpace.mk' (TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x)))
     (W : SmoothCcTensor g r a) :
-    covGrad (I := I) (M := M) g r c (appFullRS (I := I) (M := M) g r a c Ψ hΨ W) =
-      appFullRS (I := I) (M := M) g r a (c + 1)
-          (fun x : M => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x)
+    covGrad (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) =
+      homTensorRSApply (I := I) (M := M) g r a (c + 1)
+          (fun x : M => homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ x)
           (homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c Ψ hΨ) W +
-        appFullRS (I := I) (M := M) g r (a + 1) (c + 1)
-          (fun x : M => slotExtendFullFib (I := I) (M := M) g r a c x (Ψ x))
+        homTensorRSApply (I := I) (M := M) g r (a + 1) (c + 1)
+          (fun x : M => slotInsertHomTensorRSFib (I := I) (M := M) g r a c x (Ψ x))
           (slotExtendFullFib_contMDiff (I := I) (M := M) g r a c Ψ hΨ)
           (covGrad (I := I) (M := M) g r a W) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appFullRS (I := I) (M := M) g r a (c + 1)
-        (fun x : M => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x)
+  rw [show ((homTensorRSApply (I := I) (M := M) g r a (c + 1)
+        (fun x : M => homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ x)
         (homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c Ψ hΨ) W +
-      appFullRS (I := I) (M := M) g r (a + 1) (c + 1)
-        (fun x : M => slotExtendFullFib (I := I) (M := M) g r a c x (Ψ x))
+      homTensorRSApply (I := I) (M := M) g r (a + 1) (c + 1)
+        (fun x : M => slotInsertHomTensorRSFib (I := I) (M := M) g r a c x (Ψ x))
         (slotExtendFullFib_contMDiff (I := I) (M := M) g r a c Ψ hΨ)
         (covGrad (I := I) (M := M) g r a W)).toSection x) =
-      (appFullRS (I := I) (M := M) g r a (c + 1)
-          (fun x : M => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ x)
+      (homTensorRSApply (I := I) (M := M) g r a (c + 1)
+          (fun x : M => homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ x)
           (homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c Ψ hΨ) W).toSection x +
-        (appFullRS (I := I) (M := M) g r (a + 1) (c + 1)
-          (fun x : M => slotExtendFullFib (I := I) (M := M) g r a c x (Ψ x))
+        (homTensorRSApply (I := I) (M := M) g r (a + 1) (c + 1)
+          (fun x : M => slotInsertHomTensorRSFib (I := I) (M := M) g r a c x (Ψ x))
           (slotExtendFullFib_contMDiff (I := I) (M := M) g r a c Ψ hΨ)
           (covGrad (I := I) (M := M) g r a W)).toSection x from rfl]
   apply ContinuousLinearMap.ext
@@ -558,20 +558,20 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
   beta_reduce
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
-  rw [covGrad_toSection_apply_eval (I := I) (M := M) g r c (appFullRS (I := I) (M := M) g r a c Ψ hΨ W) x
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g r c (homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W) x
     d v]
 
   have hT1val : Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
-          (appFullRS (I := I) (M := M) g r a (c + 1)
-            (fun y : M => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ y)
+          (homTensorRSApply (I := I) (M := M) g r a (c + 1)
+            (fun y : M => homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ y)
             (homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c Ψ hΨ) W).toSection x) d) v =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace c I x from
-          homTensorRSCovDirHom (I := I) (M := M) g r a c Ψ x (v 0) (W.toSection x)) d)
+          homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x (v 0) (W.toSection x)) d)
         (Matrix.vecTail v) := by
     rw [appFullRS_toSection (I := I) (M := M) g r a (c + 1)
-        (fun y : M => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c Ψ y)
+        (fun y : M => homTensorRSCovGradFib (I := I) (M := M) g r a c Ψ y)
         (homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c Ψ hΨ) W x]
     rw [show v = Fin.cons (v 0) (Matrix.vecTail v) from (Fin.cons_self_tail v).symm]
     rw [homTensorRSCovGradFieldFib_apply_eval (I := I) (M := M) g r a c Ψ x (W.toSection x) d (v 0)
@@ -583,8 +583,8 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
   have hT2val : Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (c + 1) I x from
-          (appFullRS (I := I) (M := M) g r (a + 1) (c + 1)
-            (fun y : M => slotExtendFullFib (I := I) (M := M) g r a c y (Ψ y))
+          (homTensorRSApply (I := I) (M := M) g r (a + 1) (c + 1)
+            (fun y : M => slotInsertHomTensorRSFib (I := I) (M := M) g r a c y (Ψ y))
             (slotExtendFullFib_contMDiff (I := I) (M := M) g r a c Ψ hΨ)
             (covGrad (I := I) (M := M) g r a W)).toSection x) d) v =
       Tensor0SSpace.toModel
@@ -594,7 +594,7 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
               tensorCovDerivAt (I := I) (M := M) g r a W x (v 0))) d)
         (Matrix.vecTail v) := by
     rw [appFullRS_toSection (I := I) (M := M) g r (a + 1) (c + 1)
-        (fun y : M => slotExtendFullFib (I := I) (M := M) g r a c y (Ψ y))
+        (fun y : M => slotInsertHomTensorRSFib (I := I) (M := M) g r a c y (Ψ y))
         (slotExtendFullFib_contMDiff (I := I) (M := M) g r a c Ψ hΨ)
         (covGrad (I := I) (M := M) g r a W) x]
     rw [show v = Fin.cons (v 0) (Matrix.vecTail v) from (Fin.cons_self_tail v).symm]
@@ -608,7 +608,7 @@ theorem covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
   rw [tensorCovDerivAt_appFullRS_eq (I := I) (M := M) g r a c Ψ hΨ W x (v 0)]
   rw [ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply,
-    homTensorRSCovDirHom]
+    homTensorRSDirCovDeriv]
 
 set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
@@ -652,7 +652,7 @@ theorem exists_uniform_riemannianFiberNormSq_appFullRS_le
         (E := fun z : M => TensorRSSpace r a I z →L[ℝ] TensorRSSpace r c I z) x (Ψ x))) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (W : SmoothCcTensor g r a) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g r c x
-          ((appFullRS (I := I) (M := M) g r a c Ψ hΨ W).toSection x) ≤
+          ((homTensorRSApply (I := I) (M := M) g r a c Ψ hΨ W).toSection x) ≤
         C * riemannianFiberNormSq (I := I) (M := M) g r a x (W.toSection x) := by
   obtain ⟨C, hC_nn, hC⟩ :=
     exists_uniform_riemannianFiberNormSq_homSection_clm_le (I := I) (M := M) g r a c Ψ hΨ
@@ -667,16 +667,16 @@ abbrev HomTensorRSField (r a c : ℕ) (I : ModelWithCorners ℝ E H)
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
-noncomputable def appFullSec (g : SmoothRiemannianMetric I M) (r a c : ℕ)
+noncomputable def homTensorRSFieldApply (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) : SmoothCcTensor g r c :=
-  appFullRS (I := I) (M := M) g r a c (fun x : M => Q x) Q.contMDiff W
+  homTensorRSApply (I := I) (M := M) g r a c (fun x : M => Q x) Q.contMDiff W
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma appFullSec_toSection (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) (x : M) :
-    (appFullSec (I := I) (M := M) g r a c Q W).toSection x =
+    (homTensorRSFieldApply (I := I) (M := M) g r a c Q W).toSection x =
       (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x from Q x) (W.toSection x) :=
   rfl
 
@@ -685,15 +685,15 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appFullSec_add_left (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Qa Qb : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) :
-    appFullSec (I := I) (M := M) g r a c (Qa + Qb) W =
-      appFullSec (I := I) (M := M) g r a c Qa W + appFullSec (I := I) (M := M) g r a c Qb W := by
+    homTensorRSFieldApply (I := I) (M := M) g r a c (Qa + Qb) W =
+      homTensorRSFieldApply (I := I) (M := M) g r a c Qa W + homTensorRSFieldApply (I := I) (M := M) g r a c Qb W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appFullSec (I := I) (M := M) g r a c Qa W +
-        appFullSec (I := I) (M := M) g r a c Qb W).toSection x) =
-      (appFullSec (I := I) (M := M) g r a c Qa W).toSection x +
-        (appFullSec (I := I) (M := M) g r a c Qb W).toSection x from rfl]
+  rw [show ((homTensorRSFieldApply (I := I) (M := M) g r a c Qa W +
+        homTensorRSFieldApply (I := I) (M := M) g r a c Qb W).toSection x) =
+      (homTensorRSFieldApply (I := I) (M := M) g r a c Qa W).toSection x +
+        (homTensorRSFieldApply (I := I) (M := M) g r a c Qb W).toSection x from rfl]
   rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
   rw [show ((Qa + Qb) x : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) =
       (Qa x : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) +
@@ -706,7 +706,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appFullSec_zero_left (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (W : SmoothCcTensor g r a) :
-    appFullSec (I := I) (M := M) g r a c (0 : HomTensorRSField (E := E) (M := M) r a c I) W = 0 := by
+    homTensorRSFieldApply (I := I) (M := M) g r a c (0 : HomTensorRSField (E := E) (M := M) r a c I) W = 0 := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -722,15 +722,15 @@ set_option backward.isDefEq.respectTransparency false in
 
 theorem appFullSec_sub_left (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Qa Qb : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) :
-    appFullSec (I := I) (M := M) g r a c (Qa - Qb) W =
-      appFullSec (I := I) (M := M) g r a c Qa W - appFullSec (I := I) (M := M) g r a c Qb W := by
+    homTensorRSFieldApply (I := I) (M := M) g r a c (Qa - Qb) W =
+      homTensorRSFieldApply (I := I) (M := M) g r a c Qa W - homTensorRSFieldApply (I := I) (M := M) g r a c Qb W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appFullSec (I := I) (M := M) g r a c Qa W -
-        appFullSec (I := I) (M := M) g r a c Qb W).toSection x) =
-      (appFullSec (I := I) (M := M) g r a c Qa W).toSection x -
-        (appFullSec (I := I) (M := M) g r a c Qb W).toSection x from by
+  rw [show ((homTensorRSFieldApply (I := I) (M := M) g r a c Qa W -
+        homTensorRSFieldApply (I := I) (M := M) g r a c Qb W).toSection x) =
+      (homTensorRSFieldApply (I := I) (M := M) g r a c Qa W).toSection x -
+        (homTensorRSFieldApply (I := I) (M := M) g r a c Qb W).toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
   rw [show ((Qa - Qb) x : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) =
@@ -744,7 +744,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 noncomputable def homTensorRSCovGradSec (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) : HomTensorRSField (E := E) (M := M) r a (c + 1) I where
-  toFun := fun x : M => homTensorRSCovGradFieldFib (I := I) (M := M) g r a c (fun y : M => Q y) x
+  toFun := fun x : M => homTensorRSCovGradFib (I := I) (M := M) g r a c (fun y : M => Q y) x
   contMDiff_toFun :=
     homTensorRSCovGradField_contMDiff (I := I) (M := M) g r a c (fun y : M => Q y) Q.contMDiff
 
@@ -755,7 +755,7 @@ set_option backward.isDefEq.respectTransparency false in
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (x : M) :
     (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r (c + 1) I x from
         homTensorRSCovGradSec (I := I) (M := M) g r a c Q x) =
-      homTensorRSCovGradFieldFib (I := I) (M := M) g r a c (fun y : M => Q y) x := rfl
+      homTensorRSCovGradFib (I := I) (M := M) g r a c (fun y : M => Q y) x := rfl
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
@@ -763,7 +763,7 @@ set_option backward.isDefEq.respectTransparency false in
 noncomputable def slotExtendFullSec (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) :
     HomTensorRSField (E := E) (M := M) r (a + 1) (c + 1) I where
-  toFun := fun x : M => slotExtendFullFib (I := I) (M := M) g r a c x (Q x)
+  toFun := fun x : M => slotInsertHomTensorRSFib (I := I) (M := M) g r a c x (Q x)
   contMDiff_toFun :=
     slotExtendFullFib_contMDiff (I := I) (M := M) g r a c (fun y : M => Q y) Q.contMDiff
 
@@ -774,29 +774,29 @@ set_option backward.isDefEq.respectTransparency false in
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (x : M) :
     (show TensorRSSpace r (a + 1) I x →L[ℝ] TensorRSSpace r (c + 1) I x from
         slotExtendFullSec (I := I) (M := M) g r a c Q x) =
-      slotExtendFullFib (I := I) (M := M) g r a c x (Q x) := rfl
+      slotInsertHomTensorRSFib (I := I) (M := M) g r a c x (Q x) := rfl
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem covGrad_appFullSec_eq (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) :
-    covGrad (I := I) (M := M) g r c (appFullSec (I := I) (M := M) g r a c Q W) =
-      appFullSec (I := I) (M := M) g r a (c + 1) (homTensorRSCovGradSec (I := I) (M := M) g r a c Q) W +
-        appFullSec (I := I) (M := M) g r (a + 1) (c + 1) (slotExtendFullSec (I := I) (M := M) g r a c Q)
+    covGrad (I := I) (M := M) g r c (homTensorRSFieldApply (I := I) (M := M) g r a c Q W) =
+      homTensorRSFieldApply (I := I) (M := M) g r a (c + 1) (homTensorRSCovGradSec (I := I) (M := M) g r a c Q) W +
+        homTensorRSFieldApply (I := I) (M := M) g r (a + 1) (c + 1) (slotExtendFullSec (I := I) (M := M) g r a c Q)
           (covGrad (I := I) (M := M) g r a W) :=
   covGrad_appFullRS_eq (I := I) (M := M) g r a c (fun x : M => Q x) Q.contMDiff W
 
 set_option linter.unusedSectionVars false in
 
-def castHomTgt {c c' : ℕ} (r a : ℕ) (h : c = c')
+def castHomTensorRSFieldTgt {c c' : ℕ} (r a : ℕ) (h : c = c')
     (Q : HomTensorRSField (E := E) (M := M) r a c I) :
     HomTensorRSField (E := E) (M := M) r a c' I :=
   h ▸ Q
 
 set_option linter.unusedSectionVars false in
 
-def castHomSrc {a a' : ℕ} (r c : ℕ) (h : a = a')
+def castHomTensorRSFieldSrc {a a' : ℕ} (r c : ℕ) (h : a = a')
     (Q : HomTensorRSField (E := E) (M := M) r a c I) :
     HomTensorRSField (E := E) (M := M) r a' c I :=
   h ▸ Q
@@ -807,9 +807,9 @@ set_option backward.isDefEq.respectTransparency false in
 theorem appFullSec_castRankCc_db {a a' c c' : ℕ} (g : SmoothRiemannianMetric I M) (r : ℕ)
     (ha : a = a') (hc : c = c')
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (V : SmoothCcTensor g r a) :
-    castRankCc_db g r hc (appFullSec (I := I) (M := M) g r a c Q V) =
-      appFullSec (I := I) (M := M) g r a' c' (castHomSrc (E := E) (M := M) r c' ha
-        (castHomTgt (E := E) (M := M) r a hc Q)) (castRankCc_db g r ha V) := by
+    castCcTensorRank g r hc (homTensorRSFieldApply (I := I) (M := M) g r a c Q V) =
+      homTensorRSFieldApply (I := I) (M := M) g r a' c' (castHomTensorRSFieldSrc (E := E) (M := M) r c' ha
+        (castHomTensorRSFieldTgt (E := E) (M := M) r a hc Q)) (castCcTensorRank g r ha V) := by
   subst ha; subst hc; rfl
 
 set_option linter.unusedSectionVars false in
@@ -821,7 +821,7 @@ def NormalFormFull (g : SmoothRiemannianMetric I M) (r d : ℕ)
     ∀ W : SmoothCcTensor g r rr,
       op p rr W =
         ∑ k ∈ Finset.range (p + 1),
-          appFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k) (iteratedCovGrad g r rr k W)
+          homTensorRSFieldApply (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k) (iteratedCovGrad g r rr k W)
 
 set_option linter.unusedSectionVars false in
 
@@ -829,7 +829,7 @@ theorem normalForm_zeroFull (g : SmoothRiemannianMetric I M) (r d : ℕ)
     (op : ∀ (p rr : ℕ), SmoothCcTensor g r rr → SmoothCcTensor g r (rr + d + p))
     (rr : ℕ) (Q₀ : HomTensorRSField (E := E) (M := M) r (rr + 0) (rr + d + 0) I)
     (hbase : ∀ W : SmoothCcTensor g r rr,
-      op 0 rr W = appFullSec (I := I) (M := M) g r (rr + 0) (rr + d + 0) Q₀ W) :
+      op 0 rr W = homTensorRSFieldApply (I := I) (M := M) g r (rr + 0) (rr + d + 0) Q₀ W) :
     NormalFormFull (E := E) (I := I) (M := M) g r d op 0 rr := by
   refine ⟨fun k => match k with | 0 => Q₀ | (_ + 1) => 0, fun W => ?_⟩
   rw [hbase W, Finset.sum_range_one]
@@ -842,12 +842,12 @@ theorem covGrad_normalFormFull_sum (g : SmoothRiemannianMetric I M) (r d p rr : 
     (W : SmoothCcTensor g r rr) :
     covGrad (I := I) (M := M) g r (rr + d + p)
         (∑ k ∈ Finset.range (p + 1),
-          appFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k) (iteratedCovGrad g r rr k W)) =
+          homTensorRSFieldApply (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k) (iteratedCovGrad g r rr k W)) =
       ∑ k ∈ Finset.range (p + 1),
-        (appFullSec (I := I) (M := M) g r (rr + k) (rr + d + (p + 1))
+        (homTensorRSFieldApply (I := I) (M := M) g r (rr + k) (rr + d + (p + 1))
             (homTensorRSCovGradSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k))
             (iteratedCovGrad g r rr k W) +
-          appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+          homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
             (slotExtendFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k))
             (iteratedCovGrad g r rr (k + 1) W)) := by
   rw [covGrad_finset_sum]
@@ -863,12 +863,12 @@ set_option linter.unusedSectionVars false in
 theorem castRankCc_appFullSec_iteratedCovGrad_covGrad (g : SmoothRiemannianMetric I M) (r d p rr k : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r ((rr + 1) + k) ((rr + 1) + d + p) I)
     (W : SmoothCcTensor g r rr) :
-    castRankCc_db g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
-        (appFullSec (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + d + p) Q
+    castCcTensorRank g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
+        (homTensorRSFieldApply (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + d + p) Q
           (iteratedCovGrad g r (rr + 1) k (covGrad g r rr W))) =
-      appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
-        (castHomSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-          (castHomTgt (E := E) (M := M) r ((rr + 1) + k)
+      homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+        (castHomTensorRSFieldSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+          (castHomTensorRSFieldTgt (E := E) (M := M) r ((rr + 1) + k)
             (by omega : (rr + 1) + d + p = rr + d + (p + 1)) Q))
         (iteratedCovGrad g r rr (k + 1) W) := by
   rw [appFullSec_castRankCc_db (E := E) g r (by omega : (rr + 1) + k = rr + (k + 1))
@@ -887,7 +887,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
     (covGrad_op : ∀ (p rr : ℕ) (W : SmoothCcTensor g r rr),
       covGrad g r (rr + d + p) (op p rr W) =
         op (p + 1) rr W +
-          castRankCc_db g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
+          castCcTensorRank g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
             (op p (rr + 1) (covGrad g r rr W)))
     (p : ℕ) (hp : ∀ rr, NormalFormFull (E := E) (I := I) (M := M) g r d op p rr) (rr : ℕ) :
     NormalFormFull (E := E) (I := I) (M := M) g r d op (p + 1) rr := by
@@ -897,8 +897,8 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
 
   set Tk : (k : ℕ) → HomTensorRSField (E := E) (M := M) r (rr + (k + 1)) (rr + d + (p + 1)) I := fun k =>
     slotExtendFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Qr k) -
-      castHomSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-        (castHomTgt (E := E) (M := M) r ((rr + 1) + k)
+      castHomTensorRSFieldSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+        (castHomTensorRSFieldTgt (E := E) (M := M) r ((rr + 1) + k)
           (by omega : (rr + 1) + d + p = rr + d + (p + 1)) (Qr1 k))
     with hTk_def
   refine ⟨fun j => match j with
@@ -911,7 +911,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
 
   have hrec : op (p + 1) rr W =
       covGrad g r (rr + d + p) (op p rr W) -
-        castRankCc_db g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
+        castCcTensorRank g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
           (op p (rr + 1) (covGrad g r rr W)) := by
     rw [covGrad_op p rr W]; abel
   rw [hrec, hQr W]
@@ -920,13 +920,13 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
 
   rw [hQr1 (covGrad g r rr W), castRankCc_db_finset_sum]
   rw [show (∑ k ∈ Finset.range (p + 1),
-        castRankCc_db g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
-          (appFullSec (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + d + p) (Qr1 k)
+        castCcTensorRank g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
+          (homTensorRSFieldApply (I := I) (M := M) g r ((rr + 1) + k) ((rr + 1) + d + p) (Qr1 k)
             (iteratedCovGrad g r (rr + 1) k (covGrad g r rr W)))) =
       ∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
-          (castHomSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-            (castHomTgt (E := E) (M := M) r ((rr + 1) + k)
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+          (castHomTensorRSFieldSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+            (castHomTensorRSFieldTgt (E := E) (M := M) r ((rr + 1) + k)
               (by omega : (rr + 1) + d + p = rr + d + (p + 1)) (Qr1 k)))
           (iteratedCovGrad g r rr (k + 1) W) from
     Finset.sum_congr rfl (fun k _ =>
@@ -935,7 +935,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
   rw [Finset.sum_add_distrib]
 
   rw [Finset.sum_range_succ' (fun j =>
-    appFullSec (I := I) (M := M) g r (rr + j) (rr + d + (p + 1))
+    homTensorRSFieldApply (I := I) (M := M) g r (rr + j) (rr + d + (p + 1))
       ((match j with
         | 0 => homTensorRSCovGradSec (I := I) (M := M) g r (rr + 0) (rr + d + p) (Qr 0)
         | (k + 1) =>
@@ -945,35 +945,35 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
       (iteratedCovGrad g r rr j W)) (p + 1)]
 
   rw [show (∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
           ((if h : k + 1 < p + 1 then
             homTensorRSCovGradSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + p) (Qr (k + 1))
             else 0) + Tk k)
           (iteratedCovGrad g r rr (k + 1) W)) =
       (∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
           (if h : k + 1 < p + 1 then
             homTensorRSCovGradSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + p) (Qr (k + 1))
             else 0)
           (iteratedCovGrad g r rr (k + 1) W)) +
       (∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1)) (Tk k)
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1)) (Tk k)
           (iteratedCovGrad g r rr (k + 1) W)) from by
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl (fun k _ => ?_)
     rw [appFullSec_add_left]]
 
   rw [show (∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1)) (Tk k)
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1)) (Tk k)
           (iteratedCovGrad g r rr (k + 1) W)) =
       (∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
           (slotExtendFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Qr k))
           (iteratedCovGrad g r rr (k + 1) W)) -
       (∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
-          (castHomSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
-            (castHomTgt (E := E) (M := M) r ((rr + 1) + k)
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+          (castHomTensorRSFieldSrc (E := E) (M := M) r (rr + d + (p + 1)) (by omega : (rr + 1) + k = rr + (k + 1))
+            (castHomTensorRSFieldTgt (E := E) (M := M) r ((rr + 1) + k)
               (by omega : (rr + 1) + d + p = rr + d + (p + 1)) (Qr1 k)))
           (iteratedCovGrad g r rr (k + 1) W)) from by
     rw [← Finset.sum_sub_distrib]
@@ -981,13 +981,13 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
     rw [hTk_def, appFullSec_sub_left]]
 
   rw [show (∑ k ∈ Finset.range (p + 1),
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
           (if h : k + 1 < p + 1 then
             homTensorRSCovGradSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + p) (Qr (k + 1))
             else 0)
           (iteratedCovGrad g r rr (k + 1) W)) =
       ∑ k ∈ Finset.range p,
-        appFullSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
+        homTensorRSFieldApply (I := I) (M := M) g r (rr + (k + 1)) (rr + d + (p + 1))
           (homTensorRSCovGradSec (I := I) (M := M) g r (rr + (k + 1)) (rr + d + p) (Qr (k + 1)))
           (iteratedCovGrad g r rr (k + 1) W) from by
     rw [Finset.sum_range_succ]
@@ -996,7 +996,7 @@ theorem normalFormFull_succ (g : SmoothRiemannianMetric I M) (r d : ℕ)
     rw [dif_pos (by simp only [Finset.mem_range] at hk; omega : k + 1 < p + 1)]]
 
   rw [Finset.sum_range_succ' (fun k =>
-    appFullSec (I := I) (M := M) g r (rr + k) (rr + d + (p + 1))
+    homTensorRSFieldApply (I := I) (M := M) g r (rr + k) (rr + d + (p + 1))
       (homTensorRSCovGradSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Qr k))
       (iteratedCovGrad g r rr k W)) p]
 
@@ -1009,11 +1009,11 @@ theorem normalFormFull_of_base (g : SmoothRiemannianMetric I M) (r d : ℕ)
     (covGrad_op : ∀ (p rr : ℕ) (W : SmoothCcTensor g r rr),
       covGrad g r (rr + d + p) (op p rr W) =
         op (p + 1) rr W +
-          castRankCc_db g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
+          castCcTensorRank g r (by omega : (rr + 1) + d + p = rr + d + (p + 1))
             (op p (rr + 1) (covGrad g r rr W)))
     (Q₀ : ∀ rr : ℕ, HomTensorRSField (E := E) (M := M) r (rr + 0) (rr + d + 0) I)
     (hbase : ∀ (rr : ℕ) (W : SmoothCcTensor g r rr),
-      op 0 rr W = appFullSec (I := I) (M := M) g r (rr + 0) (rr + d + 0) (Q₀ rr) W)
+      op 0 rr W = homTensorRSFieldApply (I := I) (M := M) g r (rr + 0) (rr + d + 0) (Q₀ rr) W)
     (p : ℕ) : ∀ rr : ℕ, NormalFormFull (E := E) (I := I) (M := M) g r d op p rr := by
   induction p with
   | zero => exact fun rr => normalForm_zeroFull (E := E) (I := I) (M := M) g r d op rr (Q₀ rr) (hbase rr)
@@ -1049,13 +1049,13 @@ theorem exists_jet_bound_of_normalFormFull (g : SmoothRiemannianMetric I M) (r d
 
   refine le_trans (riemannianFiberNormSq_sum_le_card_mul (I := I) (M := M) g r (rr + d + p) x
     (Finset.range (p + 1))
-    (fun k => (appFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k)
+    (fun k => (homTensorRSFieldApply (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k)
       (iteratedCovGrad g r rr k W)).toSection x)) ?_
   rw [Finset.card_range]
 
   have hsummand : ∀ k ∈ Finset.range (p + 1),
       riemannianFiberNormSq (I := I) (M := M) g r (rr + d + p) x
-          ((appFullSec (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k)
+          ((homTensorRSFieldApply (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k)
             (iteratedCovGrad g r rr k W)).toSection x) ≤ C k * a k := fun k _ => hC k _ x
   refine le_trans (mul_le_mul_of_nonneg_left (Finset.sum_le_sum hsummand) (by positivity)) ?_
 
@@ -1196,7 +1196,7 @@ theorem exists_value_local_appFullSec (g : SmoothRiemannianMetric I M) (r a c : 
     (hloc : ∀ (W₁ W₂ : SmoothCcTensor g r a) (x : M),
       W₁.toSection x = W₂.toSection x → (F W₁).toSection x = (F W₂).toSection x) :
     ∃ Θ : HomTensorRSField (E := E) (M := M) r a c I,
-      ∀ (W : SmoothCcTensor g r a), F W = appFullSec (I := I) (M := M) g r a c Θ W := by
+      ∀ (W : SmoothCcTensor g r a), F W = homTensorRSFieldApply (I := I) (M := M) g r a c Θ W := by
   refine ⟨{ toFun := fun x : M => valueLocalLinearHomFib (I := I) (M := M) g r a c F hadd hsmul hloc x
             contMDiff_toFun :=
               valueLocalLinearHomFib_contMDiff (I := I) (M := M) g r a c F hadd hsmul hloc }, fun W => ?_⟩

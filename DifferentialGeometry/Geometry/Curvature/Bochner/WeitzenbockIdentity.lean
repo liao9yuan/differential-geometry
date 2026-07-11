@@ -473,7 +473,7 @@ theorem abstractHessian_innerSelf_apply [I.Boundaryless]
   rw [hθ_x_LC]
   ring
 
-theorem hLeibniz_discharge [I.Boundaryless]
+theorem leibnizTraceIdentity_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     IsLeibnizTraceAt (I := I) g
@@ -604,7 +604,7 @@ theorem bochner_pointwise_abstract_hLeibniz_discharged [I.Boundaryless]
         frobeniusSq_grad_vector (I := I) g
           (fun b => gradFun (I := I) g f b) x :=
   bochner_pointwise_abstract (I := I) g hf x
-    (hLeibniz_discharge (I := I) g hf x) hInner
+    (leibnizTraceIdentity_holds (I := I) g hf x) hInner
 
 section HessianSkewVanishing
 
@@ -1095,7 +1095,7 @@ private lemma heart_per_summand_assembled [I.Boundaryless]
   rw [h_swap, h_riem, h_LCQW_B, h_Hess_BcovBW]
   ring
 
-theorem hInner_discharge [I.Boundaryless]
+theorem heartOfBochnerInner_holds [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     IsHeartOfBochnerInnerAt (I := I) g hf x := by
@@ -1408,7 +1408,7 @@ theorem hInner_discharge [I.Boundaryless]
   rw [hW_eq]
   ring
 
-theorem bochner_pointwise_abstract_unconditional [I.Boundaryless]
+theorem bochner_pointwise_abstract_of_smooth [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M) :
     (1 / 2 : ℝ) * Δ_g (I := I) g (normGradSq_contMDiff (I := I) g hf) x =
@@ -1419,8 +1419,8 @@ theorem bochner_pointwise_abstract_unconditional [I.Boundaryless]
         frobeniusSq_grad_vector (I := I) g
           (fun b => gradFun (I := I) g f b) x :=
   bochner_pointwise_abstract (I := I) g hf x
-    (hLeibniz_discharge (I := I) g hf x)
-    (hInner_discharge (I := I) g hf x)
+    (leibnizTraceIdentity_holds (I := I) g hf x)
+    (heartOfBochnerInner_holds (I := I) g hf x)
 
 end Connection
 end Integral

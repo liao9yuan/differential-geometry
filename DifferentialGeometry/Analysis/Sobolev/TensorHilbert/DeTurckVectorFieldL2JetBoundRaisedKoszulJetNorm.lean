@@ -69,7 +69,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_domDomCongr_eq
 
 private lemma raisedKoszul_norm_iteratedCovGrad_symmS_le
     (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2) (m : ℕ) :
-    ‖iteratedCovGrad (I := I) g₀ 0 2 m (symmS (I := I) g₀ P)‖ ≤
+    ‖iteratedCovGrad (I := I) g₀ 0 2 m (ccTensor02Symm (I := I) g₀ P)‖ ≤
       ‖iteratedCovGrad (I := I) g₀ 0 2 m P‖ := by
   rw [iteratedCovGrad_symmS_eq (I := I) g₀ P m]
   refine le_trans (norm_add_le _ _) ?_
@@ -96,7 +96,7 @@ private lemma raisedKoszul_norm_iteratedCovGrad_eq_koszul
       (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 3 n (koszulCovecCc (I := I) g₀ P)).toSection x)) :=
     funext fun x =>
-      rfns_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq (I := I) g₀ P n x
+      riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq (I := I) g₀ P n x
   rw [hpt]
 
 private lemma raisedKoszul_norm_iteratedCovGrad_koszul_le
@@ -112,18 +112,18 @@ private lemma raisedKoszul_norm_iteratedCovGrad_koszul_le
   have hkos : koszulCovecCc (I := I) g₀ P = (1 / 2 : ℝ) • (DA + DB - DC) := by
     rw [koszulCovecCc, hDA, hDB, hDC, hW]
   have hWeq : ‖iteratedCovGrad (I := I) g₀ 0 3 n W‖ =
-      ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) (symmS (I := I) g₀ P)‖ := by
+      ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) (ccTensor02Symm (I := I) g₀ P)‖ := by
     refine raisedKoszul_norm_eq_of_sq_eq (norm_nonneg _) (norm_nonneg _) ?_
     rw [SmoothCcTensor.norm_def, SmoothCcTensor.norm_def,
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs,
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs, hW, symmSCovGrad3_def]
     have hpt : (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
           ((iteratedCovGrad (I := I) g₀ 0 3 n
-            (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ P))).toSection x)) =
+            (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ P))).toSection x)) =
         (fun x => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + (n + 1)) x
-          ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) (symmS (I := I) g₀ P)).toSection x)) :=
+          ((iteratedCovGrad (I := I) g₀ 0 2 (n + 1) (ccTensor02Symm (I := I) g₀ P)).toSection x)) :=
       funext fun x =>
-        rfns_iteratedCovGrad_covGrad_comm_rs (I := I) g₀ 0 2 n (symmS (I := I) g₀ P) x
+        rfns_iteratedCovGrad_covGrad_comm_rs (I := I) g₀ 0 2 n (ccTensor02Symm (I := I) g₀ P) x
     rw [hpt]
   have hDAeq : ‖iteratedCovGrad (I := I) g₀ 0 3 n DA‖ =
       ‖iteratedCovGrad (I := I) g₀ 0 3 n W‖ := by
@@ -161,7 +161,7 @@ theorem raisedKoszul_order0sup_jetL2_succ_generic
     ∃ (Λ : ℝ) (F : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ F i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
@@ -171,7 +171,7 @@ theorem raisedKoszul_order0sup_jetL2_succ_generic
           ∑ n ∈ Finset.range (i + 1),
               ‖iteratedCovGrad (I := I) g₀ 1 2 n (raisedKoszul (I := I) g₀ g₁)‖ ^ 2 ≤ F i := by
   obtain ⟨C, hC_nn, hC⟩ :=
-    rfns_raisedKoszul_le_of_lt_one (I := I) g₀ (le_max_right δ₀ 0) (max_lt hδ₀ one_pos)
+    riemannianFiberNormSq_raisedKoszul_le_of_lt_one (I := I) g₀ (le_max_right δ₀ 0) (max_lt hδ₀ one_pos)
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     exists_Csob_convexPerturbation_pointwise_C2_le (I := I) g₀ a ha_super
   refine ⟨C * (Csob * R), fun i => ((i : ℝ) + 1) * ((3 / 2) * R) ^ 2,

@@ -45,8 +45,8 @@ private theorem wkpNorm_le_of_memWkp_precompact_uniform
       ∀ u : EuclideanSpace ℝ (Fin d) → ℝ,
         u =ᵐ[(volume : Measure (EuclideanSpace ℝ (Fin d))).restrict (Ω \ K)] 0 →
         MemWkp (d := d) k p u Ω' →
-        wkpNorm (d := d) k p u Ω ≤
-          ENNReal.ofReal K_prom * wkpNorm (d := d) k p u Ω' := by
+        iteratedWeakSobolevNorm (d := d) k p u Ω ≤
+          ENNReal.ofReal K_prom * iteratedWeakSobolevNorm (d := d) k p u Ω' := by
   classical
   have hΩ'Ω : Ω' ⊆ Ω := subset_closure.trans hΩ'_cl
   obtain ⟨δ, χ, hδ_pos, _hδ_sub, hχ_smooth, hχ_compact, _hχ_range,
@@ -95,13 +95,13 @@ private theorem wkpNorm_le_of_memWkp_precompact_uniform
       exact ⟨h_on_inter, h_on_diff⟩
     rwa [← h_split] at h_union
   calc
-    wkpNorm (d := d) k p u Ω
-        = wkpNorm (d := d) k p v Ω :=
+    iteratedWeakSobolevNorm (d := d) k p u Ω
+        = iteratedWeakSobolevNorm (d := d) k p v Ω :=
           (wkpNorm_congr_ae (d := d) hp hΩ_open hv_ae_eq_u).symm
-    _ = wkpNorm (d := d) k p v Ω' :=
+    _ = iteratedWeakSobolevNorm (d := d) k p v Ω' :=
           wkpNorm_extend_zero (d := d) hp hp_top hΩ'_open hΩ_open hΩ'Ω
             hv_memWkp_Ω' hv_tsupp hv_compact
-    _ ≤ ENNReal.ofReal K_prom * wkpNorm (d := d) k p u Ω' :=
+    _ ≤ ENNReal.ofReal K_prom * iteratedWeakSobolevNorm (d := d) k p u Ω' :=
           hK_prom_bound hu_precompact
 
 private lemma sqrt_energy_le_of_atoms_le
@@ -141,7 +141,7 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 2 2
             (eigenvectorTensorChartBilinearData (I := I) (M := M)
               g r s i α P₀).u_chart
@@ -700,12 +700,12 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
         have := Real.sqrt_nonneg ((n : ℝ) + 2)
         nlinarith [hC_geom_max_nn, this]))
   have h_interior_bound :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2 D.u_chart Ω''
         ≤ ENNReal.ofReal (Cint * (i.fst.val)⁻¹ * φnorm) := by
     rw [wkpNorm_succ_eq_eLpNorm_add_sum_partial 1 2 Ω'' D.u_chart]
     have h_per_i : ∀ i' : Fin (Module.finrank ℝ E),
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 2
             (chosenWeakPartial' 2 i' D.u_chart Ω'') Ω''
           ≤ Tsum + ∑ _k' : Fin (Module.finrank ℝ E), Tsum := by
@@ -788,18 +788,18 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le
     intro hy_V
     exact hy hy_V hy_V.2
   have h_global :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2 D.u_chart
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal K_prom *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 2 2 D.u_chart Ω'' :=
     hK_prom_bd D.u_chart h_ae_zero h_uChart_memWkp_two_Ω''
-  calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  calc DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2 D.u_chart
           (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal K_prom *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 2 2 D.u_chart Ω'' := h_global
     _ ≤ ENNReal.ofReal K_prom *
           ENNReal.ofReal (Cint * (i.fst.val)⁻¹ * φnorm) :=

@@ -25,7 +25,7 @@ theorem orbit_eq_of_augFlow_isLocalFlow
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     {R_aug : ℝ≥0} {tmin_a tmax_a : ℝ}
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
-    (haΦ : IsLocalFlow (augVF f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
+    (haΦ : IsLocalFlow (augmentedVectorField f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
       tmin_a tmax_a aΦ)
     {x : E} (hx_Φ : x ∈ closedBall x₀ (r : ℝ))
     (hx_a : (x, ContinuousLinearMap.id ℝ E) ∈ closedBall
@@ -122,14 +122,14 @@ theorem orbit_eq_of_augFlow_isLocalFlow
     refine ⟨?_, ht_S⟩
     have h_orbit_dw : HasDerivWithinAt
         (fun s => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩)
-        (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))
+        (augmentedVectorField f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))
         (Icc tmin_a tmax_a) t :=
       haΦ.hasDerivWithinAt _ hx_a t (Ioo_subset_Icc_self ht_int)
     have hIcc_a_nhds_t : Icc tmin_a tmax_a ∈ 𝓝 t :=
       Filter.mem_of_superset (isOpen_Ioo.mem_nhds ht_int) Ioo_subset_Icc_self
     have h_orbit_at : HasDerivAt
         (fun s => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩)
-        (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩)) t :=
+        (augmentedVectorField f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩)) t :=
       h_orbit_dw.hasDerivAt hIcc_a_nhds_t
     have h_fst_fd : HasFDerivAt
         (fun p : E × (E →L[ℝ] E) => p.1)
@@ -138,13 +138,13 @@ theorem orbit_eq_of_augFlow_isLocalFlow
       (ContinuousLinearMap.fst ℝ E (E →L[ℝ] E)).hasFDerivAt
     have h_comp : HasDerivAt α_a
         ((ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
-          (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))) t :=
+          (augmentedVectorField f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))) t :=
       h_fst_fd.comp_hasDerivAt t h_orbit_at
     have h_first_eq :
         (ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
-          (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))
+          (augmentedVectorField f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩))
         = f t (α_a t) := by
-      change (augVF f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩)).1
+      change (augmentedVectorField f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩)).1
         = f t (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩).1
       rfl
     rw [h_first_eq] at h_comp
@@ -200,7 +200,7 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {R_aug : ℝ≥0} {tmin_a tmax_a : ℝ}
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
-    (haΦ : IsLocalFlow (augVF f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
+    (haΦ : IsLocalFlow (augmentedVectorField f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
       tmin_a tmax_a aΦ)
     {x : E} (hx_Φ : x ∈ closedBall x₀ (r : ℝ))
     (hx_a : (x, ContinuousLinearMap.id ℝ E) ∈ closedBall
@@ -250,7 +250,7 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
     have h_in_Icc_a : s ∈ Icc tmin_a tmax_a := hT_sub_a (Ioo_subset_Icc_self hs)
     have h_orbit_dw : HasDerivWithinAt
         (fun u => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), u⟩)
-        (augVF f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩))
+        (augmentedVectorField f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩))
         (Icc tmin_a tmax_a) s :=
       haΦ.hasDerivWithinAt _ hx_a s h_in_Icc_a
     have h_nhds : Icc tmin_a tmax_a ∈ 𝓝 s :=
@@ -258,7 +258,7 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
         (fun u hu => hT_sub_a (Ioo_subset_Icc_self hu))
     have h_orbit_at : HasDerivAt
         (fun u => aΦ ⟨(x, ContinuousLinearMap.id ℝ E), u⟩)
-        (augVF f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩)) s :=
+        (augmentedVectorField f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩)) s :=
       h_orbit_dw.hasDerivAt h_nhds
     have h_fst_fd : HasFDerivAt
         (fun p : E × (E →L[ℝ] E) => p.1)
@@ -267,11 +267,11 @@ theorem orbit_eq_Icc_of_augFlow_isLocalFlow
       (ContinuousLinearMap.fst ℝ E (E →L[ℝ] E)).hasFDerivAt
     have h_comp : HasDerivAt α_a
         ((ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
-          (augVF f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩))) s :=
+          (augmentedVectorField f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩))) s :=
       h_fst_fd.comp_hasDerivAt s h_orbit_at
     have h_first_eq :
         (ContinuousLinearMap.fst ℝ E (E →L[ℝ] E))
-          (augVF f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩))
+          (augmentedVectorField f s (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), s⟩))
         = f s (α_a s) := rfl
     rw [h_first_eq] at h_comp
     exact h_comp
@@ -310,7 +310,7 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
     exists_isLocalFlow_augVF_of_C2 hf_C2 t₀ p₀
   have hf_succ : ContDiffOn ℝ ((1 : ℕ∞) + 1) (uncurry f) (Set.univ : Set (ℝ × E)) := by
     simpa using hf_C2
-  have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augVF f))
+  have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augmentedVectorField f))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     augVF_uncurry_contDiff (k := (1 : ℕ∞)) hf_succ
   set R_a_out : ℝ := (R_aug : ℝ) / 2 with hR_a_out_def
@@ -326,12 +326,12 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
     · exact closedBall_subset_closedBall (le_of_lt hR_a_out_lt)
     · exact Icc_subset_Icc (by linarith) (by linarith)
   have hpartial_a : ContDiffOn ℝ 0 (fun p : ℝ × (E × (E →L[ℝ] E)) =>
-      fderiv ℝ (augVF f p.1) p.2)
+      fderiv ℝ (augmentedVectorField f p.1) p.2)
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
-    contDiffOn_partial_fderiv_of_succ (f := augVF f) (k := (0 : ℕ∞))
+    contDiffOn_partial_fderiv_of_succ (f := augmentedVectorField f) (k := (0 : ℕ∞))
       (by simpa using h_augVF_C1)
   have hpartial_a_cont : ContinuousOn (fun p : ℝ × (E × (E →L[ℝ] E)) =>
-      fderiv ℝ (augVF f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
+      fderiv ℝ (augmentedVectorField f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     hpartial_a.continuousOn
   have haΦ_cont_full : ContinuousOn aΦ
       (closedBall p₀ (R_aug : ℝ) ×ˢ Icc (t₀ - ε_aug) (t₀ + ε_aug)) :=
@@ -350,19 +350,19 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
       (fun q : (E × (E →L[ℝ] E)) × ℝ => (q.2, aΦ q)) Slab :=
     ContinuousOn.prodMk continuous_snd.continuousOn haΦ_cont
   have h_fderiv_along_cont : ContinuousOn
-      (fun q : (E × (E →L[ℝ] E)) × ℝ => fderiv ℝ (augVF f q.2) (aΦ q))
+      (fun q : (E × (E →L[ℝ] E)) × ℝ => fderiv ℝ (augmentedVectorField f q.2) (aΦ q))
       Slab := by
     have hmaps : MapsTo (fun q : (E × (E →L[ℝ] E)) × ℝ => (q.2, aΦ q))
         Slab (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := fun _ _ => mem_univ _
     exact hpartial_a_cont.comp h_aΦ_pair_cont hmaps
   have h_norm_cont : ContinuousOn
-      (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖fderiv ℝ (augVF f q.2) (aΦ q)‖)
+      (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖fderiv ℝ (augmentedVectorField f q.2) (aΦ q)‖)
       Slab :=
     continuous_norm.comp_continuousOn h_fderiv_along_cont
   rcases hSlab_cpt.exists_isMaxOn hSlab_ne h_norm_cont with ⟨qmax, _, hqmax⟩
-  set M_aug_pre : ℝ := ‖fderiv ℝ (augVF f qmax.2) (aΦ qmax)‖ with hM_aug_pre_def
+  set M_aug_pre : ℝ := ‖fderiv ℝ (augmentedVectorField f qmax.2) (aΦ qmax)‖ with hM_aug_pre_def
   have hM_aug_pre_nn : 0 ≤ M_aug_pre := norm_nonneg _
-  have hM_aug_pre_bd : ∀ q ∈ Slab, ‖fderiv ℝ (augVF f q.2) (aΦ q)‖ ≤ M_aug_pre :=
+  have hM_aug_pre_bd : ∀ q ∈ Slab, ‖fderiv ℝ (augmentedVectorField f q.2) (aΦ q)‖ ≤ M_aug_pre :=
     fun q hq => hqmax hq
   set M_aug : ℝ := M_aug_pre + 1 with hM_aug_def
   have hM_aug_nn : 0 ≤ M_aug := by rw [hM_aug_def]; linarith
@@ -411,10 +411,10 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
     rw [hR_a_outN_eq, hR_a_out_def]; linarith
   have hA_bd_a : ∀ p ∈ closedBall p₀ (R_a_outN : ℝ),
       ∀ τ ∈ Icc (t₀ - T_a_out) (t₀ + T_a_out),
-        ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
+        ‖fderiv ℝ (augmentedVectorField f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
     intro p hp τ hτ
     have hq_in : ((p, τ) : (E × (E →L[ℝ] E)) × ℝ) ∈ Slab := ⟨hp, hτ⟩
-    have h_pre : ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug_pre :=
+    have h_pre : ‖fderiv ℝ (augmentedVectorField f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug_pre :=
       hM_aug_pre_bd _ hq_in
     linarith
   have hsub_a : Icc (t₀ - T_a_out) (t₀ + T_a_out) ⊆ Icc (t₀ - ε_aug) (t₀ + ε_aug) :=
@@ -422,7 +422,7 @@ theorem exists_contDiffOn_fromAugFlow_one_of_C2
   have h_aug_C1 : ContDiffOn ℝ 1 aΦ ((ball p₀ (R_aN : ℝ))
       ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)) := by
     have hk_aug : (1 : ℕ∞) ≤ 1 := le_refl _
-    refine contDiffOn_flow_of_isLocalFlow_of_contDiff (f := augVF f)
+    refine contDiffOn_flow_of_isLocalFlow_of_contDiff (f := augmentedVectorField f)
       (t₀ := t₀) (x₀ := p₀) (r := R_aug) (tmin := t₀ - ε_aug) (tmax := t₀ + ε_aug)
       (Φ := aΦ) haΦ hk_aug h_augVF_C1 hT_a_pos hT_a_lt_mid' hT_a_mid'_lt_out
       hM_aug_nn hMTmid' hsub_a (ρ_out := R_a_outN) (ρ_mid := R_a_midN) (ρ := R_aN)
@@ -493,7 +493,7 @@ theorem fderiv_Phi_eq_coprod_fromAugFlow_aux
     (hr_pos : (0 : ℝ) < (r : ℝ))
     {R_aug : ℝ≥0} {tmin_a tmax_a : ℝ}
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
-    (haΦ : IsLocalFlow (augVF f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
+    (haΦ : IsLocalFlow (augmentedVectorField f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
       tmin_a tmax_a aΦ)
     (ht₀_a_Ioo : t₀ ∈ Ioo tmin_a tmax_a)
     (hR_aug_pos : (0 : ℝ) < (R_aug : ℝ)) :
@@ -925,7 +925,7 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     exact hf_C2.of_le h_le
   have hf_succ : ContDiffOn ℝ ((1 : ℕ∞) + 1) (uncurry f) (Set.univ : Set (ℝ × E)) := by
     simpa using hf_C2
-  have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augVF f))
+  have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augmentedVectorField f))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     augVF_uncurry_contDiff (k := (1 : ℕ∞)) hf_succ
   have ht₀_minus_tmin : 0 < t₀ - tmin := by linarith [ht₀_Ioo.1]
@@ -976,12 +976,12 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     · exact closedBall_subset_closedBall (le_of_lt hR_aug_out_lt)
     · exact hsub_outer_aug
   have hpartial_a : ContDiffOn ℝ 0 (fun p : ℝ × (E × (E →L[ℝ] E)) =>
-      fderiv ℝ (augVF f p.1) p.2)
+      fderiv ℝ (augmentedVectorField f p.1) p.2)
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
-    contDiffOn_partial_fderiv_of_succ (f := augVF f) (k := (0 : ℕ∞))
+    contDiffOn_partial_fderiv_of_succ (f := augmentedVectorField f) (k := (0 : ℕ∞))
       (by simpa using h_augVF_C1)
   have hpartial_a_cont : ContinuousOn (fun p : ℝ × (E × (E →L[ℝ] E)) =>
-      fderiv ℝ (augVF f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
+      fderiv ℝ (augmentedVectorField f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     hpartial_a.continuousOn
   have haΦ_cont_full : ContinuousOn aΦ
       (closedBall p₀ (R_aug : ℝ) ×ˢ Icc (t₀ - ε_aug) (t₀ + ε_aug)) :=
@@ -992,20 +992,20 @@ theorem exists_isVariationalFlowProjection_one_of_C2
       (fun q : (E × (E →L[ℝ] E)) × ℝ => (q.2, aΦ q)) Slab_a_outer :=
     ContinuousOn.prodMk continuous_snd.continuousOn haΦ_cont
   have h_fderiv_along_cont : ContinuousOn
-      (fun q : (E × (E →L[ℝ] E)) × ℝ => fderiv ℝ (augVF f q.2) (aΦ q))
+      (fun q : (E × (E →L[ℝ] E)) × ℝ => fderiv ℝ (augmentedVectorField f q.2) (aΦ q))
       Slab_a_outer := by
     have hmaps : MapsTo (fun q : (E × (E →L[ℝ] E)) × ℝ => (q.2, aΦ q))
         Slab_a_outer (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := fun _ _ => mem_univ _
     exact hpartial_a_cont.comp h_aΦ_pair_cont hmaps
   have h_norm_cont_aug : ContinuousOn
-      (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖fderiv ℝ (augVF f q.2) (aΦ q)‖)
+      (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖fderiv ℝ (augmentedVectorField f q.2) (aΦ q)‖)
       Slab_a_outer :=
     continuous_norm.comp_continuousOn h_fderiv_along_cont
   rcases hSlab_a_outer_cpt.exists_isMaxOn hSlab_a_outer_ne h_norm_cont_aug
     with ⟨qmax_a, _, hqmax_a⟩
-  set M_aug_pre : ℝ := ‖fderiv ℝ (augVF f qmax_a.2) (aΦ qmax_a)‖ with hM_aug_pre_def
+  set M_aug_pre : ℝ := ‖fderiv ℝ (augmentedVectorField f qmax_a.2) (aΦ qmax_a)‖ with hM_aug_pre_def
   have hM_aug_pre_nn : 0 ≤ M_aug_pre := norm_nonneg _
-  have hM_aug_pre_bd : ∀ q ∈ Slab_a_outer, ‖fderiv ℝ (augVF f q.2) (aΦ q)‖ ≤ M_aug_pre :=
+  have hM_aug_pre_bd : ∀ q ∈ Slab_a_outer, ‖fderiv ℝ (augmentedVectorField f q.2) (aΦ q)‖ ≤ M_aug_pre :=
     fun q hq => hqmax_a hq
   set M_aug : ℝ := M_aug_pre + 1 with hM_aug_def
   have hM_aug_nn : 0 ≤ M_aug := by rw [hM_aug_def]; linarith
@@ -1167,18 +1167,18 @@ theorem exists_isVariationalFlowProjection_one_of_C2
     rw [hR_a_outN_eq, hR_aug_out_def]; linarith
   have hA_bd_a : ∀ p ∈ closedBall p₀ (R_a_outN : ℝ),
       ∀ τ ∈ Icc (t₀ - T_outer) (t₀ + T_outer),
-        ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
+        ‖fderiv ℝ (augmentedVectorField f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
     intro p hp τ hτ
     have hq_in : ((p, τ) : (E × (E →L[ℝ] E)) × ℝ) ∈ Slab_a_outer := by
       refine ⟨?_, hτ⟩
       rw [hR_a_outN_eq] at hp
       exact hp
-    have h_pre : ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug_pre := hM_aug_pre_bd _ hq_in
+    have h_pre : ‖fderiv ℝ (augmentedVectorField f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug_pre := hM_aug_pre_bd _ hq_in
     linarith
   have h_aug_C1 : ContDiffOn ℝ 1 aΦ ((ball p₀ (R_aN : ℝ))
       ×ˢ Ioo (t₀ - T_final) (t₀ + T_final)) := by
     have hk_aug : (1 : ℕ∞) ≤ 1 := le_refl _
-    refine contDiffOn_flow_of_isLocalFlow_of_contDiff (f := augVF f)
+    refine contDiffOn_flow_of_isLocalFlow_of_contDiff (f := augmentedVectorField f)
       (t₀ := t₀) (x₀ := p₀) (r := R_aug) (tmin := t₀ - ε_aug) (tmax := t₀ + ε_aug)
       (Φ := aΦ) haΦ hk_aug h_augVF_C1
       hT_final_pos hT_final_lt_a_mid hT_a_mid_lt_outer hM_aug_nn hMTa_mid hsub_outer_aug
@@ -1254,7 +1254,7 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     (hf_C : ContDiffOn ℝ ((n : ℕ∞) + 2) (uncurry f) (Set.univ : Set (ℝ × E)))
     {R_aug : ℝ≥0} {tmin_a tmax_a : ℝ}
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
-    (haΦ : IsLocalFlow (augVF f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
+    (haΦ : IsLocalFlow (augmentedVectorField f) t₀ (x₀, ContinuousLinearMap.id ℝ E) R_aug
       tmin_a tmax_a aΦ)
     (ht₀_a_Ioo : t₀ ∈ Ioo tmin_a tmax_a)
     (hR_aug_pos : (0 : ℝ) < (R_aug : ℝ))
@@ -1283,7 +1283,7 @@ theorem exists_isVariationalFlowProjection_succ_C_step
       rw [h2, ← add_assoc]
     rw [h_eq_wt]
     exact hf_C
-  have h_augVF_Cn_plus_1 : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry (augVF f))
+  have h_augVF_Cn_plus_1 : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry (augmentedVectorField f))
       (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     augVF_uncurry_contDiff (k := ((n : ℕ∞) + 1)) hf_Cn_plus_2_as_succ
   have ht₀_minus_tmin_a : 0 < t₀ - tmin_a := by linarith [ht₀_a_Ioo.1]
@@ -1346,31 +1346,31 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     · exact hsub_T_a_out_aug
   have haΦ_cont : ContinuousOn aΦ Slab_a := haΦ.continuousOn.mono hslab_a_sub_full
   have hpartial_a : ContDiffOn ℝ 0 (fun p : ℝ × (E × (E →L[ℝ] E)) =>
-      fderiv ℝ (augVF f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
-    have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augVF f))
+      fderiv ℝ (augmentedVectorField f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
+    have h_augVF_C1 : ContDiffOn ℝ 1 (uncurry (augmentedVectorField f))
         (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
       refine h_augVF_Cn_plus_1.of_le ?_
       have h1 : (1 : ℕ∞) ≤ (n : ℕ∞) + 1 := le_add_self
       exact_mod_cast h1
-    exact contDiffOn_partial_fderiv_of_succ (f := augVF f) (k := (0 : ℕ∞))
+    exact contDiffOn_partial_fderiv_of_succ (f := augmentedVectorField f) (k := (0 : ℕ∞))
       (by simpa using h_augVF_C1)
   have hpartial_a_cont : ContinuousOn (fun p : ℝ × (E × (E →L[ℝ] E)) =>
-      fderiv ℝ (augVF f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
+      fderiv ℝ (augmentedVectorField f p.1) p.2) (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
     hpartial_a.continuousOn
   have h_pair_cont_a : ContinuousOn (fun q : (E × (E →L[ℝ] E)) × ℝ => (q.2, aΦ q)) Slab_a :=
     ContinuousOn.prodMk continuous_snd.continuousOn haΦ_cont
   have h_fderiv_a_cont : ContinuousOn
-      (fun q : (E × (E →L[ℝ] E)) × ℝ => fderiv ℝ (augVF f q.2) (aΦ q)) Slab_a := by
+      (fun q : (E × (E →L[ℝ] E)) × ℝ => fderiv ℝ (augmentedVectorField f q.2) (aΦ q)) Slab_a := by
     have hmaps : MapsTo (fun q : (E × (E →L[ℝ] E)) × ℝ => (q.2, aΦ q))
         Slab_a (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := fun _ _ => mem_univ _
     exact hpartial_a_cont.comp h_pair_cont_a hmaps
   have h_norm_cont_a : ContinuousOn
-      (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖fderiv ℝ (augVF f q.2) (aΦ q)‖) Slab_a :=
+      (fun q : (E × (E →L[ℝ] E)) × ℝ => ‖fderiv ℝ (augmentedVectorField f q.2) (aΦ q)‖) Slab_a :=
     continuous_norm.comp_continuousOn h_fderiv_a_cont
   rcases hSlab_a_cpt.exists_isMaxOn hSlab_a_ne h_norm_cont_a with ⟨qmax, _, hqmax⟩
-  set M_aug_pre : ℝ := ‖fderiv ℝ (augVF f qmax.2) (aΦ qmax)‖ with hM_aug_pre_def
+  set M_aug_pre : ℝ := ‖fderiv ℝ (augmentedVectorField f qmax.2) (aΦ qmax)‖ with hM_aug_pre_def
   have hM_aug_pre_nn : 0 ≤ M_aug_pre := norm_nonneg _
-  have hM_aug_pre_bd : ∀ q ∈ Slab_a, ‖fderiv ℝ (augVF f q.2) (aΦ q)‖ ≤ M_aug_pre :=
+  have hM_aug_pre_bd : ∀ q ∈ Slab_a, ‖fderiv ℝ (augmentedVectorField f q.2) (aΦ q)‖ ≤ M_aug_pre :=
     fun q hq => hqmax hq
   set M_aug : ℝ := M_aug_pre + 1 with hM_aug_def
   have hM_aug_nn : 0 ≤ M_aug := by rw [hM_aug_def]; linarith
@@ -1403,12 +1403,12 @@ theorem exists_isVariationalFlowProjection_succ_C_step
     linarith
   have hA_bd_a : ∀ p ∈ closedBall p₀ (R_a_outN : ℝ),
       ∀ τ ∈ Icc (t₀ - T_a_out) (t₀ + T_a_out),
-        ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
+        ‖fderiv ℝ (augmentedVectorField f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug := by
     intro p hp τ hτ
     have hq_in : ((p, τ) : (E × (E →L[ℝ] E)) × ℝ) ∈ Slab_a := by
       refine ⟨?_, hτ⟩
       rw [hR_a_outN_eq] at hp; exact hp
-    have h_pre : ‖fderiv ℝ (augVF f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug_pre := hM_aug_pre_bd _ hq_in
+    have h_pre : ‖fderiv ℝ (augmentedVectorField f τ) (aΦ ⟨p, τ⟩)‖ ≤ M_aug_pre := hM_aug_pre_bd _ hq_in
     linarith
   have hR_aN_le_ρ_ih : (R_aN : ℝ) ≤ (ρ_ih : ℝ) := by rw [hR_aN_eq]; exact hR_a_le_ρ_ih
   have h_shrink_sub : (ball p₀ (R_aN : ℝ)) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)
@@ -1433,7 +1433,7 @@ theorem exists_isVariationalFlowProjection_succ_C_step
   have h_aug_Cn_plus_1 : ContDiffOn ℝ ((n + 1 : ℕ) : ℕ∞) aΦ
       ((ball p₀ (R_aN : ℝ)) ×ˢ Ioo (t₀ - T_a) (t₀ + T_a)) := by
     refine contDiffOn_flow_of_isVariationalFlowProjection_top
-      (f := augVF f) (t₀ := t₀) (x₀ := p₀) (r := R_aug) (tmin := tmin_a) (tmax := tmax_a)
+      (f := augmentedVectorField f) (t₀ := t₀) (x₀ := p₀) (r := R_aug) (tmin := tmin_a) (tmax := tmax_a)
       (Φ := aΦ) haΦ hT_a_pos hT_a_lt_mid hT_a_mid_lt_out hM_aug_nn hMTa_mid hsub_T_a_out_aug
       (ρ_out := R_a_outN) (ρ_mid := R_a_midN) (ρ := R_aN) hr'a_pos ?_ ?_ ?_ ?_ hA_bd_a
       (n + 1) hk_pos ?_ hY_ih_at_top
@@ -1820,21 +1820,21 @@ theorem exists_isVariationalFlowProjection_of_C
         rw [h_eq_wt]
         exact hf_Cn_plus_2
       have h_augVF_Cn_plus_1 :
-          ContDiffOn ℝ ((n : ℕ∞) + 1) (Function.uncurry (augVF f))
+          ContDiffOn ℝ ((n : ℕ∞) + 1) (Function.uncurry (augmentedVectorField f))
             (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) :=
         augVF_uncurry_contDiff (k := ((n : ℕ∞) + 1)) hf_Cn_plus_2_as_succ
-      have h_augVF_C1 : ContDiffOn ℝ 1 (Function.uncurry (augVF f))
+      have h_augVF_C1 : ContDiffOn ℝ 1 (Function.uncurry (augmentedVectorField f))
           (Set.univ : Set (ℝ × (E × (E →L[ℝ] E)))) := by
         refine h_augVF_Cn_plus_1.of_le ?_
         have h1 : (1 : ℕ∞) ≤ (n : ℕ∞) + 1 := le_add_self
         exact_mod_cast h1
       obtain ⟨R_aug, ε_aug, hR_aug_pos, hε_aug_pos, aΦ, haΦ⟩ :=
-        exists_isLocalFlow_of_contDiffOn_univ (augVF f) h_augVF_C1 t₀
+        exists_isLocalFlow_of_contDiffOn_univ (augmentedVectorField f) h_augVF_C1 t₀
           (x₀, ContinuousLinearMap.id ℝ E)
       have hR_aug_R : (0 : ℝ) < (R_aug : ℝ) := by exact_mod_cast hR_aug_pos
       have ht₀_a_Ioo : t₀ ∈ Set.Ioo (t₀ - ε_aug) (t₀ + ε_aug) :=
         ⟨by linarith, by linarith⟩
-      have hIH := IH (E × (E →L[ℝ] E)) (f := augVF f) (t₀ := t₀)
+      have hIH := IH (E × (E →L[ℝ] E)) (f := augmentedVectorField f) (t₀ := t₀)
         (x₀ := (x₀, ContinuousLinearMap.id ℝ E)) (r := R_aug)
         (tmin := t₀ - ε_aug) (tmax := t₀ + ε_aug) (Φ := aΦ)
         haΦ ht₀_a_Ioo hR_aug_R h_augVF_Cn_plus_1

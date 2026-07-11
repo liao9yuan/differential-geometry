@@ -21,7 +21,7 @@ theorem wkpNormHalfSpace_eq_wkpNorm_interiorHalfSpace
     (k : ℕ) (p : ℝ≥0∞) (u : EuN → ℝ) (Ω : Set EuN) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNormHalfSpace
       (d := n) k p u Ω =
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := n) k p u
       (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace Ω) :=
   rfl

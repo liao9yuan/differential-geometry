@@ -41,7 +41,7 @@ private lemma tensor0S_trivialization_continuousLinearMapAt_apply
     (trivializationAt (Tensor0SModel r ℝ E)
         (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt ℝ b T =
       (T : ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ).compContinuousLinearMap
-        (fun _ : Fin r => chartJinv (I := I) (M := M) α b) := by
+        (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b) := by
   have hbase : b ∈ (trivializationAt (Tensor0SModel r ℝ E)
       (fun y : M => Tensor0SSpace r I y) α).baseSet := by
     change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
@@ -64,7 +64,7 @@ private lemma tensor0S_trivialization_symmL_apply
     (trivializationAt (Tensor0SModel r ℝ E)
         (fun y : M => Tensor0SSpace r I y) α).symmL ℝ b V =
       V.compContinuousLinearMap
-        (fun _ : Fin r => chartJ (I := I) (M := M) α b) := by
+        (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b) := by
   have hbase : b ∈ (trivializationAt (Tensor0SModel r ℝ E)
       (fun y : M => Tensor0SSpace r I y) α).baseSet := by
     change b ∈ (trivializationAt E (TangentSpace I) α).baseSet
@@ -137,7 +137,7 @@ theorem tensorTrivProj_eq_chartRSTwistInv_toFun
   rw [tensor0S_trivialization_symmL_apply (I := I) (M := M) α r hb α']
   rw [tensor0S_trivialization_continuousLinearMapAt_apply (I := I) (M := M) α s hb
     ((S.toSection b) (α'.compContinuousLinearMap
-      (fun _ : Fin r => chartJ (I := I) (M := M) α b)))]
+      (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)))]
   rw [chartRSTwistInv_apply]
   rfl
 
@@ -155,8 +155,8 @@ theorem chartRSTwist_tensorTrivProj_eq_toFun
   rw [chartRSTwist_apply, chartRSTwistInv_apply]
   have hinner :
       (α'.compContinuousLinearMap
-          (fun _ : Fin r => chartJinv (I := I) (M := M) α b)).compContinuousLinearMap
-        (fun _ : Fin r => chartJ (I := I) (M := M) α b) = α' := by
+          (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)).compContinuousLinearMap
+        (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b) = α' := by
     refine ContinuousMultilinearMap.ext ?_
     intro v
     rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
@@ -228,7 +228,7 @@ theorem triv_continuousLinearMapAt_eq_chartRSTwistInv_toModel
   rw [tensor0S_trivialization_symmL_apply (I := I) (M := M) α r hb' α']
   rw [tensor0S_trivialization_continuousLinearMapAt_apply (I := I) (M := M) α s hb'
     (T (α'.compContinuousLinearMap
-      (fun _ : Fin r => chartJ (I := I) (M := M) α b)))]
+      (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)))]
   rw [chartRSTwistInv_apply]
   rfl
 

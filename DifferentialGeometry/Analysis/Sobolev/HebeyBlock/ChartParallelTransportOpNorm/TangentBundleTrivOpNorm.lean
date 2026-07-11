@@ -133,7 +133,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [FiniteDimensional ℝ E] in
-theorem chartJ_opNorm_isBounded_on_compact_unconditional
+theorem chartTriv_opNorm_isBounded_on_compact_unconditional
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) {K : Set M} (hK : IsCompact K)

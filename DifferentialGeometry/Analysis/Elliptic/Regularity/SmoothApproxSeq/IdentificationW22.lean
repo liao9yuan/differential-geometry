@@ -453,7 +453,7 @@ theorem smoothApproxSeqWkpThree_tendsto_h1Compl
 private lemma eLpNorm_le_wkpNorm_two_two
     (u : EuclN → ℝ) (Ω : Set EuclN) :
     eLpNorm u 2 ((volume : Measure EuclN).restrict Ω) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2 u Ω := by
   classical
   have h_iter_eq :
@@ -471,7 +471,7 @@ private lemma eLpNorm_le_wkpNorm_two_two
 private lemma eLpNorm_tendsto_zero_of_wkpNorm_two_two_tendsto_zero
     {u : ℕ → EuclN → ℝ} {F_lim : EuclN → ℝ} {Ω : Set EuclN}
     (h_tendsto : Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (fun y => u n y - F_lim y) Ω)
       atTop (𝓝 0)) :
@@ -482,7 +482,7 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_two_two_tendsto_zero
   classical
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le
     (g := fun _ => (0 : ℝ≥0∞)) (h := fun n =>
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (fun y => u n y - F_lim y) Ω)
     tendsto_const_nhds h_tendsto
@@ -622,7 +622,7 @@ theorem smoothApproxSeqWkpThree_smoothFChartResidual_limit_eq_fChartResidual_w22
         (d := Module.finrank ℝ E) 2 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) →
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (fun y =>
             smoothFChartResidual (I := I) (M := M) g α

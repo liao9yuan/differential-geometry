@@ -843,7 +843,7 @@ theorem laplacianDomain_variational_identity_clm_form
       (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
       (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
       (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h) := by
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) := by
   classical
   obtain ⟨v, h_v_tendsto⟩ :=
     exists_smooth_approx_seq (I := I) (M := M) g u_h
@@ -925,7 +925,7 @@ theorem laplacianDomain_variational_identity_clm_form
         (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
         (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
         (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-        (fHLeibniz (I := I) (M := M) g α
+        (leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n))) := by
     intro n
@@ -937,7 +937,7 @@ theorem laplacianDomain_variational_identity_clm_form
         (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
         (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
         (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-        (fHLeibniz (I := I) (M := M) g α
+        (leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n))))
       atTop
@@ -968,7 +968,7 @@ theorem laplacianDomain_variational_identity_clm_form
           (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
           (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
           (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-          (fHLeibniz (I := I) (M := M) g α
+          (leibnizCompensatedSource (I := I) (M := M) g α
             (smoothToH1Compl (I := I) (M := M) g (v n))
             (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)))) =
         (fun n =>
@@ -1001,7 +1001,7 @@ theorem laplacianDomain_variational_identity_clm_form
         (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
         (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
         (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h) =
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) =
       chartPulledIntegralCLM (I := I) (M := M) g α
           (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
           (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)

@@ -49,7 +49,7 @@ private theorem iteratedCovGrad_covGrad_comm_heq_db (g : SmoothRiemannianMetric 
 
 set_option linter.unusedSectionVars false in
 
-private theorem rfns_toSection_heq_congr_db (g : SmoothRiemannianMetric I M)
+private theorem riemannianFiberNormSq_toSection_heq_congr (g : SmoothRiemannianMetric I M)
     (r : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
     (hYZ : HEq Y Z) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r a x (Y.toSection x) =
@@ -62,19 +62,19 @@ private theorem rfns_iteratedCovGrad_covGrad_comm_db (g : SmoothRiemannianMetric
         ((iteratedCovGrad g r (s + 1) m (covGrad g r s W)).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g r (s + (m + 1)) x
         ((iteratedCovGrad g r s (m + 1) W).toSection x) :=
-  rfns_toSection_heq_congr_db g r (by omega : (s + 1) + m = s + (m + 1))
+  riemannianFiberNormSq_toSection_heq_congr g r (by omega : (s + 1) + m = s + (m + 1))
     (iteratedCovGrad_covGrad_comm_heq_db g r s m W) x
 
-def castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
+def castCcTensorRank (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
     (W : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
   h ▸ W
 
 set_option linter.unusedSectionVars false in
 
-theorem rfns_iteratedCovGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ)
+theorem riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank (g : SmoothRiemannianMetric I M) (r : ℕ)
     {a b : ℕ} (h : a = b) (W : SmoothCcTensor g r a) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (b + j) x
-        ((iteratedCovGrad g r b j (castRankCc_db g r h W)).toSection x) =
+        ((iteratedCovGrad g r b j (castCcTensorRank g r h W)).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g r (a + j) x
         ((iteratedCovGrad g r a j W).toSection x) := by
   subst h; rfl
@@ -136,7 +136,7 @@ structure DiffBilinOp (g : SmoothRiemannianMetric I M) where
   covGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
     covGrad g 0 (r + p) (op p r W) =
       op (p + 1) r W +
-        castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W))
+        castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W))
 
   kappa : ℕ → ℕ → ℝ
 
@@ -193,7 +193,7 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
       refine (riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (((r + p) + 1) + j) x
           ((iteratedCovGrad g 0 ((r + p) + 1) j (Φ.op (p + 1) r W)).toSection x)
           ((iteratedCovGrad g 0 ((r + p) + 1) j
-            (castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+            (castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
               (Φ.op p (r + 1) (covGrad g 0 r W)))).toSection x)).trans ?_
       set kA : ℝ := gridWindowSum Φ.kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum Φ.kappa p (r + 1) j with hkB_def
@@ -272,12 +272,12 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOp g) (j : ℕ) :
       refine le_trans ?_ hgoal
       have hb_eq : riemannianFiberNormSq (I := I) (M := M) g 0 (((r + p) + 1) + j) x
             ((iteratedCovGrad g 0 ((r + p) + 1) j
-              (castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+              (castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
                 (Φ.op p (r + 1) (covGrad g 0 r W)))).toSection x) =
           riemannianFiberNormSq (I := I) (M := M) g 0 (((r + 1) + p) + j) x
             ((iteratedCovGrad g 0 ((r + 1) + p) j
               (Φ.op p (r + 1) (covGrad g 0 r W))).toSection x) :=
-        rfns_iteratedCovGrad_castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+        riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
           (Φ.op p (r + 1) (covGrad g 0 r W)) j x
       rw [hb_eq]
       exact add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num))
@@ -303,7 +303,7 @@ theorem rfns_iteratedCovGrad_grid_at
     (hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       covGrad g 0 (r + p) (op p r W) =
         op (p + 1) r W +
-          castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W)))
+          castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W)))
     (kappa : ℕ → ℕ → ℝ) (kappa_nonneg : ∀ p r, 0 ≤ kappa p r) (x₀ : M)
     (hrfns_at : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x₀ ((op p r W).toSection x₀) ≤
@@ -350,7 +350,7 @@ theorem rfns_iteratedCovGrad_grid_at
       refine (riemannianFiberNormSq_add_le (I := I) (M := M) g 0 (((r + p) + 1) + j) x₀
           ((iteratedCovGrad g 0 ((r + p) + 1) j (op (p + 1) r W)).toSection x₀)
           ((iteratedCovGrad g 0 ((r + p) + 1) j
-            (castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+            (castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
               (op p (r + 1) (covGrad g 0 r W)))).toSection x₀)).trans ?_
       set kA : ℝ := gridWindowSum kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum kappa p (r + 1) j with hkB_def
@@ -425,12 +425,12 @@ theorem rfns_iteratedCovGrad_grid_at
       refine le_trans ?_ hgoal
       have hb_eq : riemannianFiberNormSq (I := I) (M := M) g 0 (((r + p) + 1) + j) x₀
             ((iteratedCovGrad g 0 ((r + p) + 1) j
-              (castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+              (castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
                 (op p (r + 1) (covGrad g 0 r W)))).toSection x₀) =
           riemannianFiberNormSq (I := I) (M := M) g 0 (((r + 1) + p) + j) x₀
             ((iteratedCovGrad g 0 ((r + 1) + p) j
               (op p (r + 1) (covGrad g 0 r W))).toSection x₀) :=
-        rfns_iteratedCovGrad_castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+        riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
           (op p (r + 1) (covGrad g 0 r W)) j x₀
       rw [hb_eq]
       exact add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num))
@@ -441,7 +441,7 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le_at
     (hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       covGrad g 0 (r + p) (op p r W) =
         op (p + 1) r W +
-          castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W)))
+          castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g 0 r W)))
     (kappa : ℕ → ℕ → ℝ) (kappa_nonneg : ∀ p r, 0 ≤ kappa p r) (x₀ : M)
     (hrfns_at : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       riemannianFiberNormSq (I := I) (M := M) g 0 (r + p) x₀ ((op p r W).toSection x₀) ≤

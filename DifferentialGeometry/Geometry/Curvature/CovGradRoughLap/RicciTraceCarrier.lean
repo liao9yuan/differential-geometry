@@ -251,7 +251,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 def ricTraceSection (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=
-  appCc (I := I) (M := M) g (s + 1) (s + 1)
+  operatorFieldApply (I := I) (M := M) g (s + 1) (s + 1)
     (ricSlotOpField (I := I) (M := M) g s) (covGrad (I := I) (M := M) g 0 s S)
 
 set_option linter.unusedSectionVars false in
@@ -289,7 +289,7 @@ theorem exists_ricTraceSection_fiberNormSq_bound
         (ricSlotOpField (I := I) (M := M) g s)
     refine ⟨C, hC_nn, fun S x => ?_⟩
     have h := hC (covGrad (I := I) (M := M) g 0 s S) x
-    rwa [show (appCc (I := I) (M := M) g (s + 1) (s + 1)
+    rwa [show (operatorFieldApply (I := I) (M := M) g (s + 1) (s + 1)
           (ricSlotOpField (I := I) (M := M) g s) (covGrad (I := I) (M := M) g 0 s S)) =
         ricTraceSection (I := I) (M := M) g s S from rfl] at h
   choose C hC_nn hC using hC

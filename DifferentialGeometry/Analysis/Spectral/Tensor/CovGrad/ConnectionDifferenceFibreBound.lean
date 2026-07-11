@@ -423,7 +423,7 @@ private def covGrad3Eval
     (P Q R : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) : ℝ :=
   Tensor0SSpace.toModel
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
-      (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x)
+      (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x)
       (unitZeroSec (I := I) (M := M) x))
     (Fin.cons (P x) (Fin.cons (Q x) ![R x]))
 
@@ -437,12 +437,12 @@ private lemma covGrad3Eval_eq_metricDiff
       metricDiffCovDeriv (I := I) g₁ g₀
         (fun b => P b) (fun b => Q b) (fun b => R b) x := by
   have hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ (symmS (I := I) g₀ T) b u w =
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) b u w =
         g₁.inner b u w - g₀.inner b u w :=
     symmS_hbil_of_realize (I := I) (M := M) g₀ g₁ T hg₁
   rw [covGrad3Eval,
     covGrad02_unitModel_eval_eq_metricDiffCovDeriv' (I := I) (M := M) g₀ g₁ g₀
-      (symmS (I := I) g₀ T) hbil P Q R x]
+      (ccTensor02Symm (I := I) g₀ T) hbil P Q R x]
   have hzero : metricDiffCovDeriv (I := I) g₀ g₀
       (fun b => P b) (fun b => Q b) (fun b => R b) x = 0 := by
     unfold metricDiffCovDeriv; rw [sub_self]
@@ -474,7 +474,7 @@ private lemma abs_covGrad3Eval_le
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
     |covGrad3Eval (I := I) (M := M) g₀ T P Q R x| ≤
-      ‖((covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x :
+      ‖((covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
           Tensor0SBundle.TensorRSSpace 0 3 I x)‖ *
         Real.sqrt (g₀.inner x (P x) (P x)) *
           Real.sqrt (g₀.inner x (Q x) (Q x)) *
@@ -483,7 +483,7 @@ private lemma abs_covGrad3Eval_le
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
   exact abs_tensor03_unit_eval_le_fibreNorm_mul_sqrt (I := I) (M := M) g₀ x
-    ((covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x)
+    ((covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x)
     (P x) (Q x) (R x)
 
 set_option linter.unusedSectionVars false in
@@ -494,7 +494,7 @@ private lemma norm_covGrad_symmS_le
     letI : Bundle.RiemannianBundle
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
-    ‖((covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x :
+    ‖((covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
         Tensor0SBundle.TensorRSSpace 0 3 I x)‖ ≤
       ‖((covGrad (I := I) (M := M) g₀ 0 2 T).toSection x :
           Tensor0SBundle.TensorRSSpace 0 3 I x)‖ := by
@@ -503,12 +503,12 @@ private lemma norm_covGrad_symmS_le
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
   set Tsw : SmoothCcTensor g₀ 0 2 :=
     domDomCongrSection (I := I) g₀ (Equiv.swap 0 1) T with hTsw_def
-  have hsymm : symmS (I := I) g₀ T = (1 / 2 : ℝ) • (T + Tsw) := rfl
-  have hcovGrad_eq : covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T) =
+  have hsymm : ccTensor02Symm (I := I) g₀ T = (1 / 2 : ℝ) • (T + Tsw) := rfl
+  have hcovGrad_eq : covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T) =
       (1 / 2 : ℝ) • (covGrad (I := I) (M := M) g₀ 0 2 T +
         covGrad (I := I) (M := M) g₀ 0 2 Tsw) := by
     rw [hsymm, covGrad_smul, covGrad_add]
-  have htoSec : ((covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x :
+  have htoSec : ((covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
         Tensor0SBundle.TensorRSSpace 0 3 I x) =
       (1 / 2 : ℝ) • ((covGrad (I := I) (M := M) g₀ 0 2 T).toSection x +
         (covGrad (I := I) (M := M) g₀ 0 2 Tsw).toSection x) := by
@@ -559,7 +559,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M) (v w : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -608,7 +608,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
   set Nv : ℝ := Real.sqrt (g₀.inner x v v) with hNv_def
   set Nw : ℝ := Real.sqrt (g₀.inner x w w) with hNw_def
   set Np : ℝ := Real.sqrt (g₀.inner x p p) with hNp_def
-  set Gnorm : ℝ := ‖((covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x :
+  set Gnorm : ℝ := ‖((covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hGnorm_def
   have hNv_nn : 0 ≤ Nv := Real.sqrt_nonneg _
   have hNw_nn : 0 ≤ Nw := Real.sqrt_nonneg _
@@ -668,7 +668,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
     nlinarith [htriple', hNp_sq, hNp_nn, hK_nn]
 
   have hneumann : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * Np := by
-    have hsfib := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le
+    have hsfib := norm_inverseMetricSharpFib_g0Flat_le
       (I := I) (M := M) g₀ g₁ (ccTensorBilinSymm (I := I) g₀ T) hg₁
       (by linarith : δ < 1) hδ0 hbound x p
     rw [← hNp_def] at hsfib
@@ -728,7 +728,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M) (v w : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -778,7 +778,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
   set Nv : ℝ := Real.sqrt (g₀.inner x v v) with hNv_def
   set Nw : ℝ := Real.sqrt (g₀.inner x w w) with hNw_def
   set Np : ℝ := Real.sqrt (g₀.inner x p p) with hNp_def
-  set Gnorm : ℝ := ‖((covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T)).toSection x :
+  set Gnorm : ℝ := ‖((covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x :
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hGnorm_def
   have hNv_nn : 0 ≤ Nv := Real.sqrt_nonneg _
   have hNw_nn : 0 ≤ Nw := Real.sqrt_nonneg _
@@ -832,7 +832,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
       mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hGnorm_nn) hNv_nn) hNw_nn
     nlinarith [htriple', hNp_sq, hNp_nn, hK_nn]
   have hneumann : Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * Np := by
-    have hsfib := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le
+    have hsfib := norm_inverseMetricSharpFib_g0Flat_le
       (I := I) (M := M) g₀ g₁ (ccTensorBilinSymm (I := I) g₀ T) hg₁
       (by linarith : δ < 1) hδ0 hbound x p
     rw [← hNp_def] at hsfib
@@ -921,7 +921,7 @@ theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
       {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -947,7 +947,7 @@ theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
       connDiffFib (I := I) g₁ g₀ x :=
     connDiffSection_toSection (I := I) g₁ g₀ x
   rw [hconnDiffSec]
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
     (connDiffFib (I := I) g₁ g₀ x) e bse hnE hbse horth]
   have heach : ∀ (K : Fin 1 → Fin n) (J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
@@ -1006,7 +1006,7 @@ theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad_of_lt_one
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -1033,7 +1033,7 @@ theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad_of_lt_one
       connDiffFib (I := I) g₁ g₀ x :=
     connDiffSection_toSection (I := I) g₁ g₀ x
   rw [hconnDiffSec]
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
     (connDiffFib (I := I) g₁ g₀ x) e bse hnE hbse horth]
   have heach : ∀ (K : Fin 1 → Fin n) (J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2

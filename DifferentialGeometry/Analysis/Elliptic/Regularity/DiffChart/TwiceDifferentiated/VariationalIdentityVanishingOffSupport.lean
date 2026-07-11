@@ -752,7 +752,7 @@ private lemma fChartEffTwiceNumerator_ae_zero_off_K_α
         (chartTargetEuclid (I := I) (M := M) α)) :
     ∀ᵐ y ∂((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)),
-      fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y = 0 := by
+      effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y = 0 := by
   classical
   have h_uc := base_u_chart_ae_zero_off_K_α (I := I) (M := M) g α
     (laplacianDomainPow_succ_subset_laplacianDomain (I := I) (M := M) g 1 hu_h)
@@ -814,7 +814,7 @@ private lemma fChartEffTwiceNumerator_ae_zero_off_K_α
   filter_upwards [h_uc, h_fc, h_wp_all, h_sec_all, h_third_l1_all, h_third_l2_all,
     h_fcDeriv l₁, h_fcDeriv l₂, h_fcDeriv2]
     with y hy_uc hy_fc hy_wp hy_sec hy_third1 hy_third2 hy_fcD1 hy_fcD2 hy_fcD12
-  unfold fChartEffTwiceNumerator
+  unfold effectiveSourceChartSecondOrderNumerator
   have h_A1_zero :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -883,11 +883,11 @@ lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
         (chartTargetEuclid (I := I) (M := M) α))
     (ψ : EuclN → ℝ) :
     ∫ y in chartTargetEuclid (I := I) (M := M) α,
-        fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN) =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
-          fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+          effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
         ∂(volume : Measure EuclN) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α
@@ -896,16 +896,16 @@ lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
   have hU_meas : MeasurableSet (Ω \ K_α (I := I) (M := M) α) :=
     hΩ_meas.diff (K_α_meas (I := I) (M := M) α)
   have h_ae_eq : (fun y : EuclN =>
-      fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y) =ᵐ[
+      effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y) =ᵐ[
       (volume : Measure EuclN).restrict Ω]
       (fun y : EuclN => densityOnEuclid (I := I) g α y *
-        fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y) := by
+        effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y) := by
     have h_numer_off := fChartEffTwiceNumerator_ae_zero_off_K_α
       (I := I) (M := M) g α hu_h l₁ l₂ h_chosenFChartDeriv_memW1p
     refine (ae_restrict_iff' hΩ_meas).mpr ?_
     have h_off_vol : ∀ᵐ y ∂(volume : Measure EuclN),
         y ∈ Ω \ K_α (I := I) (M := M) α →
-        fChartEffTwiceNumerator (I := I) (M := M) g α l₁ l₂ hu_h y = 0 := by
+        effectiveSourceChartSecondOrderNumerator (I := I) (M := M) g α l₁ l₂ hu_h y = 0 := by
       rw [← ae_restrict_iff' hU_meas]; exact h_numer_off
     filter_upwards [h_off_vol] with y hy hy_Ω
     by_cases hy_K : y ∈ K_α (I := I) (M := M) α
@@ -920,11 +920,11 @@ lemma integral_fChartEffTwiceNumerator_eq_integral_density_fChartEffTwice
       rw [hy hy_diff]
       have h_rhs_zero :
           densityOnEuclid (I := I) g α y *
-          fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y = 0 := by
+          effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y = 0 := by
         rw [show densityOnEuclid (I := I) g α y *
-            fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y =
+            effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y =
             (densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y) * ψ y from rfl]
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y) * ψ y from rfl]
         rw [h_pt]; ring
       linarith
   exact MeasureTheory.integral_congr_ae h_ae_eq

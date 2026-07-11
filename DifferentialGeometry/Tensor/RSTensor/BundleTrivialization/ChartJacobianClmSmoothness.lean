@@ -22,7 +22,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-theorem chartJinv_pre_clm_contMDiffAt
+theorem contMDiffAt_tangentTrivialization_coordChangeL_alpha_to_b0
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞
       (fun b : M =>
@@ -152,7 +152,7 @@ theorem chartJinv_pre_clm_contMDiffAt
   rw [hsrc_id, hmfderiv_eq, htarget_eq, ContinuousLinearMap.comp_id]
   rfl
 
-theorem chartJ_pre_clm_contMDiffAt
+theorem contMDiffAt_tangentTrivialization_coordChangeL_b0_to_alpha
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞
       (fun b : M =>

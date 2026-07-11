@@ -48,7 +48,7 @@ theorem chartJinv_wrapped_continuousAt
           (trivializationAt E (TangentSpace I) α).symmL ℝ b
             : E →L[ℝ] E))
       b₀ :=
-  (chartJinv_pre_clm_contMDiffAt (I := I) (M := M) α hb₀).continuousAt
+  (contMDiffAt_tangentTrivialization_coordChangeL_alpha_to_b0 (I := I) (M := M) α hb₀).continuousAt
 
 theorem chartJ_wrapped_continuousAt
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
@@ -58,14 +58,14 @@ theorem chartJ_wrapped_continuousAt
           (trivializationAt E (TangentSpace I) b₀).symmL ℝ b
             : E →L[ℝ] E))
       b₀ :=
-  (chartJ_pre_clm_contMDiffAt (I := I) (M := M) α hb₀).continuousAt
+  (contMDiffAt_tangentTrivialization_coordChangeL_b0_to_alpha (I := I) (M := M) α hb₀).continuousAt
 
 theorem chartJinv_wrapped_centre_eq
     (α : M) (b₀ : M) :
     ((trivializationAt E (TangentSpace I) b₀).continuousLinearMapAt ℝ b₀ ∘L
       (trivializationAt E (TangentSpace I) α).symmL ℝ b₀
         : E →L[ℝ] E) =
-    chartJinv (I := I) (M := M) α b₀ := by
+    chartTrivializationLinearMapSymm (I := I) (M := M) α b₀ := by
   rw [chartJ_self (I := I) (M := M) b₀]
   ext v
   rfl
@@ -75,7 +75,7 @@ theorem chartJ_wrapped_centre_eq
     ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b₀ ∘L
       (trivializationAt E (TangentSpace I) b₀).symmL ℝ b₀
         : E →L[ℝ] E) =
-    chartJ (I := I) (M := M) α b₀ := by
+    chartTrivializationLinearMap (I := I) (M := M) α b₀ := by
   rw [chartJinv_self (I := I) (M := M) b₀]
   ext v
   rfl

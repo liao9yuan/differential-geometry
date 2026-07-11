@@ -19,9 +19,9 @@ theorem eLpNorm_iterWeakPartial_le_wkpNorm
     {k : ℕ} (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E)
     (j₀ : ℕ) (hj₀ : j₀ ≤ k) (β₀ : Fin j₀ → Fin d) :
     eLpNorm (iterWeakPartial (d := d) p j₀ β₀ u Ω) p (volume.restrict Ω) ≤
-      wkpNorm (d := d) k p u Ω := by
+      iteratedWeakSobolevNorm (d := d) k p u Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   have h_inner :
       eLpNorm (iterWeakPartial (d := d) p j₀ β₀ u Ω) p (volume.restrict Ω) ≤
         ∑ β : Fin j₀ → Fin d,
@@ -54,7 +54,7 @@ theorem iterWeakPartial_cauchy_of_wkpNorm_cauchy
     (hu : ∀ n, MemWkp (d := d) k p (u n) Ω)
     {B : ℕ → ℝ≥0∞}
     (h_cau : ∀ N n m, N ≤ n → N ≤ m →
-      wkpNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
     {j : ℕ} (hj : j ≤ k) (β : Fin j → Fin d) :
     ∀ N n m, N ≤ n → N ≤ m →
       eLpNorm
@@ -99,7 +99,7 @@ theorem exists_eLpNorm_limit_iterWeakPartial
     (hu : ∀ n, MemWkp (d := d) k p (u n) Ω)
     {B : ℕ → ℝ≥0∞} (hB : ∑' i, B i ≠ ∞)
     (h_cau : ∀ N n m, N ≤ n → N ≤ m →
-      wkpNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u n x - u m x) Ω < B N)
     {j : ℕ} (hj : j ≤ k) (β : Fin j → Fin d) :
     ∃ (v : E → ℝ), MemLp v p (volume.restrict Ω) ∧
       atTop.Tendsto

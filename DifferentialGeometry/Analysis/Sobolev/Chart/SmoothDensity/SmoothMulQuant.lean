@@ -34,14 +34,14 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -91,12 +91,12 @@ theorem MemWkpChart_smooth_mul_per_chart_quant
       (I := I) (M := M) (α := α) (b := b) (φ := (φ : M → ℝ)) (u := u)
       hb_one_on_tsupp hy
   have h_norm_eq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x)) Ω =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (fun y : EuclN => Λ y *
             chartPushed (I := I) (M := M)
@@ -125,14 +125,14 @@ theorem wkpNormChart_smooth_mul_le
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal K *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -146,14 +146,14 @@ theorem wkpNormChart_smooth_mul_le
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
         (chartTargetEuclid (I := I) (M := M) α) →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal (Kα α) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -187,7 +187,7 @@ theorem wkpNormChart_smooth_mul_le
       rw [hS_empty]
       exact Finset.notMem_empty α
     have h_per_α_zero : ∀ α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -198,7 +198,7 @@ theorem wkpNormChart_smooth_mul_le
         (d := Module.finrank ℝ E) hp_one
         (chartTargetEuclid_isOpen (I := I) (M := M) α)
     have h_per_α_zero_φu : ∀ α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
@@ -233,21 +233,21 @@ theorem wkpNormChart_smooth_mul_le
   refine ENNReal.tsum_le_tsum ?_
   intro α
   by_cases hαS : α ∈ S
-  · calc DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  · calc DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => (φ : M → ℝ) x * u x))
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal (Kα α) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) :=
           hKα_bound α (hu α)
       _ ≤ ENNReal.ofReal K_max *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -276,7 +276,7 @@ theorem wkpNormChart_smooth_mul_le
       rw [h_zero_pou]
       ring
     rw [h_chartPushed_φu, h_chartPushed_u]
-    have h_zero_norm : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    have h_zero_norm : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p (fun _ : EuclN => (0 : ℝ))
         (chartTargetEuclid (I := I) (M := M) α) = 0 :=
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_zero_fun_zero

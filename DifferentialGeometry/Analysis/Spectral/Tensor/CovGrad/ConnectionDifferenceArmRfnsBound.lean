@@ -86,14 +86,14 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem rfns_sharpFlatEndoCc_le_of_lt_one
+theorem riemannianFiberNormSq_sharpFlatEndoCc_le_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1)
     (g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     (h : ∀ y v w, g₁.inner y v w =
       g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
     {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-    (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 1 x
         ((sharpFlatEndoCc (I := I) g₀ g₁).toSection x) ≤
@@ -107,7 +107,7 @@ theorem rfns_sharpFlatEndoCc_le_of_lt_one
   have hg₁ : ∀ (b : M) (u₁ u₂ : TangentSpace I b),
       g₁.inner b u₁ u₂ = g₀.inner b u₁ u₂ + ccTensorBilinSymm (I := I) g₀ T b u₁ u₂ :=
     fun b u₁ u₂ => h b u₁ u₂
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 1 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 1 x
     ((sharpFlatEndoCc (I := I) g₀ g₁).toSection x) e bse hnE hbse horth]
   have hinv_le : 1 / (1 - δ) ≤ 1 / (1 - δ₀) := by
     rw [div_le_div_iff₀ hcoeff hceil0]; linarith
@@ -123,7 +123,7 @@ theorem rfns_sharpFlatEndoCc_le_of_lt_one
     have hcs := metric_inner_cauchy_schwarz_sq (I := I) (M := M) g₀ x u (e (J 0))
     have hJJ : g₀.inner x (e (J 0)) (e (J 0)) = 1 := by rw [horth (J 0) (J 0)]; simp
     rw [hJJ, mul_one] at hcs
-    have hsfib := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le
+    have hsfib := norm_inverseMetricSharpFib_g0Flat_le
       (I := I) (M := M) g₀ g₁ (ccTensorBilinSymm (I := I) g₀ T) hg₁
       (by linarith : δ < 1) hδ0 hbound x (e (K 0))
     have hKK : g₀.inner x (e (K 0)) (e (K 0)) = 1 := by rw [horth (K 0) (K 0)]; simp
@@ -170,7 +170,7 @@ private lemma g1_self_upper_bound
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (h : ∀ y v w, g₁.inner y v w =
       g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-    {δ : ℝ} (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ : ℝ} (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) (v : TangentSpace I x) :
     g₁.inner x v v ≤ (1 + δ) * g₀.inner x v v := by
   have hgate := hbound x v v
@@ -193,7 +193,7 @@ theorem sqrt_inner_sharpFlatRaiseEndo_le
     (h : ∀ y v w, g₁.inner y v w =
       g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
     {δ : ℝ} (hδ_nn : 0 ≤ δ)
-    (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) (v : TangentSpace I x) :
     Real.sqrt (g₀.inner x (sharpFlatRaiseEndo (I := I) g₀ g₁ x v)
         (sharpFlatRaiseEndo (I := I) g₀ g₁ x v))
@@ -290,14 +290,14 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem rfns_raisedKoszul_le_of_lt_one
+theorem riemannianFiberNormSq_raisedKoszul_le_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -321,7 +321,7 @@ theorem rfns_raisedKoszul_le_of_lt_one
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
   have hG_nn : 0 ≤ G := norm_nonneg _
   have hδ_lt1 : δ < 1 := by linarith
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
     ((raisedKoszul (I := I) g₀ g₁).toSection x) e bse hnE hbse horth]
   have heach : ∀ (K : Fin 1 → Fin n) (J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
@@ -741,7 +741,7 @@ private lemma sqrt_g1_le_sqrt_g0_of_realize
     (h : ∀ y v w, g₁.inner y v w =
       g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
     {δ : ℝ}
-    (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) (a : TangentSpace I x) :
     Real.sqrt (g₁.inner x a a) ≤ Real.sqrt (1 + δ) * Real.sqrt (g₀.inner x a a) := by
   have hub := g1_self_upper_bound (I := I) g₀ g₁ T h hbound x a
@@ -784,7 +784,7 @@ private lemma sqrt_inner_endoCov_sharpFlatRaiseEndo_apply_le
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M) (v w : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -909,7 +909,7 @@ private lemma abs_unitModel4_iteratedCovGrad_symmS_le
         (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
     |unitModel (I := I) (M := M) g₀ 4
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![a, b, c, d]| ≤
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![a, b, c, d]| ≤
       ‖((iteratedCovGrad (I := I) g₀ 0 2 2 T).toSection x :
           Tensor0SBundle.TensorRSSpace 0 4 I x)‖ *
         Real.sqrt (g₀.inner x a a) * Real.sqrt (g₀.inner x b b) *
@@ -918,9 +918,9 @@ private lemma abs_unitModel4_iteratedCovGrad_symmS_le
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 4 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 4
   set W : Tensor0SBundle.TensorRSSpace 0 4 I x :=
-    (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)).toSection x with hW_def
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)).toSection x with hW_def
   have hunit : unitModel (I := I) (M := M) g₀ 4
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![a, b, c, d] =
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![a, b, c, d] =
       Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from W)
           (unitZeroSec (I := I) (M := M) x))
@@ -956,7 +956,7 @@ private lemma sqrt_g0_self_of_g1_inner_le
     (h : ∀ y v w, g₁.inner y v w =
       g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
     {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
-    (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) (u : TangentSpace I x) (K : ℝ) (hK : 0 ≤ K)
     (hbd : ∀ z : TangentSpace I x, g₁.inner x u z ≤ K * Real.sqrt (g₀.inner x z z)) :
     Real.sqrt (g₀.inner x u u) ≤ (1 / (1 - δ)) * K := by
@@ -990,7 +990,7 @@ private lemma sqrt_g0_self_of_g1_inner_le
   nlinarith [hfinal]
 
 set_option linter.unusedVariables false in
-private lemma covDerivConnDiff_scalar_assembly
+private lemma weighted_sum_le_of_sq_and_linear_bounds
     (G1 G2 Q NX NY NZ Nζ C₀ δ δ₀ R : ℝ)
     (hG1_nn : 0 ≤ G1) (hG2_nn : 0 ≤ G2) (hQ_nn : 0 ≤ Q)
     (hNX_nn : 0 ≤ NX) (hNY_nn : 0 ≤ NY) (hNZ_nn : 0 ≤ NZ) (hNζ_nn : 0 ≤ Nζ)
@@ -1048,7 +1048,7 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M) (v w : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -1063,7 +1063,7 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
     (h : ∀ y v w, g₁.inner y v w =
       g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
     {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-    (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {R : ℝ} (hR0 : 0 ≤ R)
@@ -1150,11 +1150,11 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
     (X x) ζ (Z x) (Y x)
   rw [← hG2_def, ← hNX_def, ← hNY_def, ← hNZ_def, ← hNζ_def] at hR41 hR42 hR43
   set R41 : ℝ := unitModel (I := I) (M := M) g₀ 4
-    (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, Z x, Y x, ζ] with hR41_def
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![X x, Z x, Y x, ζ] with hR41_def
   set R42 : ℝ := unitModel (I := I) (M := M) g₀ 4
-    (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, Y x, Z x, ζ] with hR42_def
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![X x, Y x, Z x, ζ] with hR42_def
   set R43 : ℝ := unitModel (I := I) (M := M) g₀ 4
-    (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ T)) x ![X x, ζ, Z x, Y x] with hR43_def
+    (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ T)) x ![X x, ζ, Z x, Y x] with hR43_def
   set cYZ : TangentSpace I x := PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (Z x) with hcYZ_def
   have hT2eq : inverseMetricSharpFib (I := I) g₁ x
         (koszulCovGradCovec (I := I) (M := M) g₀ g₁ X ζf x) =
@@ -1270,7 +1270,7 @@ private lemma g1_inner_covDerivConnDiff_le_pointwise
   have hfinal : (3 / 2 : ℝ) * G2 * NX * NY * NZ * Nζ +
         2 * (1 + δ) * C₀ ^ 2 * G1 ^ 2 * NX * NY * NZ * Nζ ≤ Kc * Nζ := by
     rw [hKc_def]
-    have hscalar := covDerivConnDiff_scalar_assembly G1 G2 Q NX NY NZ Nζ C₀ δ δ₀ R
+    have hscalar := weighted_sum_le_of_sq_and_linear_bounds G1 G2 Q NX NY NZ Nζ C₀ δ δ₀ R
       hG1_nn hG2_nn hQ_nn hNX_nn hNY_nn hNZ_nn hNζ_nn hC₀0 hR1_nn
       hG1sq_le hG2_le_R1Q hδ_le_δ₀ h1δ_nn
     calc (3 / 2 : ℝ) * G2 * NX * NY * NZ * Nζ +
@@ -1290,7 +1290,7 @@ private lemma sqrt_inner_covDerivConnDiff_le
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M)
       (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
       {R : ℝ} (hR0 : 0 ≤ R)
@@ -1382,7 +1382,7 @@ private lemma sqrt_inner_covDerivRaisedKoszulVec_le
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M)
       (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
       (hX : g₀.inner x (X x) (X x) = 1) (hY : g₀.inner x (Y x) (Y x) = 1)
@@ -1515,14 +1515,14 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem rfns_iteratedCovGrad_one_raisedKoszul_le_of_lt_one
+theorem riemannianFiberNormSq_iteratedCovGrad_one_raisedKoszul_le_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M) {R : ℝ} (hR0 : 0 ≤ R)
       (hjet :
         letI : Bundle.RiemannianBundle
@@ -1569,7 +1569,7 @@ theorem rfns_iteratedCovGrad_one_raisedKoszul_le_of_lt_one
       covGrad (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁) := by
     rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
   rw [hiter1]
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 3 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 3 x
     ((covGrad (I := I) (M := M) g₀ 1 2 (raisedKoszul (I := I) g₀ g₁)).toSection x)
     e bse hnE hbse horth]
   have hR1_nn : 0 ≤ 1 + R := by linarith
@@ -1682,7 +1682,7 @@ private lemma sqrt_inner_flatArmVec_le
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (kind : Bool) (x : M) (v0 w : TangentSpace I x)
       (hw : g₀.inner x w w = 1),
       letI : Bundle.RiemannianBundle
@@ -1715,7 +1715,7 @@ private lemma sqrt_inner_flatArmVec_le
   set s : TangentSpace I x :=
     inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x w) with hs_def
   have hs_sqrt : Real.sqrt (g₀.inner x s s) ≤ (1 / (1 - δ₀)) := by
-    have hsfib := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le
+    have hsfib := norm_inverseMetricSharpFib_g0Flat_le
       (I := I) g₀ g₁ (ccTensorBilinSymm (I := I) g₀ T) hg₁
       (by linarith : δ < 1) hδ0 hbound x w
     rw [hw, Real.sqrt_one, mul_one] at hsfib
@@ -1818,7 +1818,7 @@ private lemma sqrt_inner_flatArmVec_le
           have hstep : C₀ * G * Nv0 ≤ C₀ * G * (1 / (1 - δ₀)) * Nv0 := by
             nlinarith [mul_le_mul_of_nonneg_left hge1 (mul_nonneg hC₀0 hG_nn), hNv0_nn, hKnn]
           exact hNp_le0.trans hstep
-        have hsharp := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le (I := I) g₀ g₁
+        have hsharp := norm_inverseMetricSharpFib_g0Flat_le (I := I) g₀ g₁
           (ccTensorBilinSymm (I := I) g₀ T) hg₁
           (by linarith : δ < 1) hδ0 hbound x p
         rw [← hNpdef] at hsharp
@@ -1843,14 +1843,14 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem rfns_flatArmCc_le_of_lt_one
+theorem riemannianFiberNormSq_flatArmCc_le_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) (kind : Bool) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -1873,7 +1873,7 @@ theorem rfns_flatArmCc_le_of_lt_one
   set G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
   have hG_nn : 0 ≤ G := norm_nonneg _
-  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
+  rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 2 x
     ((flatArmCc (I := I) g₀ g₁ kind).toSection x) e bse hnE hbse horth]
   have heach : ∀ (K : Fin 1 → Fin n) (J : Fin 2 → Fin n),
       (fiberNormSqComponent (I := I) (M := M) g₀ x 1 2
@@ -1931,14 +1931,14 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem rfns_iteratedCovGrad_one_sharpFlatEndoCc_le_of_lt_one
+theorem riemannianFiberNormSq_iteratedCovGrad_one_sharpFlatEndoCc_le_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -1952,15 +1952,15 @@ theorem rfns_iteratedCovGrad_one_sharpFlatEndoCc_le_of_lt_one
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
     Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
   obtain ⟨Ctrue, hCtrue0, harmTrue⟩ :=
-    rfns_flatArmCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀ true
+    riemannianFiberNormSq_flatArmCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀ true
   obtain ⟨Cfalse, hCfalse0, harmFalse⟩ :=
-    rfns_flatArmCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀ false
+    riemannianFiberNormSq_flatArmCc_le_of_lt_one (I := I) (M := M) g₀ hδ₀0 hδ₀ false
   refine ⟨Real.sqrt (2 * Ctrue ^ 2 + 2 * Cfalse ^ 2), by positivity, ?_⟩
   intro g₁ T h δ hδ hδ0 hbound x
   set G : ℝ := ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
       Tensor0SBundle.TensorRSSpace 0 3 I x)‖ with hG_def
   have hG_nn : 0 ≤ G := norm_nonneg _
-  have harms := rfns_iteratedCovGrad_sharpFlatEndoCc_succ_le_arms (I := I) (M := M) g₀ g₁ 0 x
+  have harms := riemannianFiberNormSq_iteratedCovGrad_sharpFlatEndoCc_succ_le_arms (I := I) (M := M) g₀ g₁ 0 x
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at harms
   have hbtrue := harmTrue g₁ T h hδ hδ0 hbound x
   have hbfalse := harmFalse g₁ T h hδ hδ0 hbound x

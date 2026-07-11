@@ -70,7 +70,7 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
           g r s i β P k)
         (chartTargetEuclid (I := I) (M := M) β) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (covGradPouLeibnizCrossLimit (I := I) (M := M)
               g r s i β P k)
             (chartTargetEuclid (I := I) (M := M) β)
@@ -181,7 +181,7 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
     exact h_prod
   have h_transport_le : ∀ β' ∈ transportChartCenters (I := I) (M := M) β,
       ∀ Q : TensorCompIdx (E := E) r s,
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
               (tensorResolventEigenbasisVec (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -204,7 +204,7 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
   have h_double_le :
       (∑ β' ∈ transportChartCenters (I := I) (M := M) β,
         ∑ Q : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (tensorResolventEigenbasisVec (I := I) (M := M)
                   (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -243,7 +243,7 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
       rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity),
         ENNReal.ofReal_natCast, ENNReal.ofReal_natCast]]
     ring
-  have h_cutoff_le : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_cutoff_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
@@ -264,10 +264,10 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
         ((Fintype.card (TensorCompIdx (E := E) r s) : ℝ) *
           ‖(i.fst.val)⁻¹‖))),
     by positivity, ?_⟩
-  have h_unfold : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_unfold : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (covGradPouLeibnizCrossLimit (I := I) (M := M)
         g r s i β P k) Ω =
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y =>
           euclidPartial (E := E) k
               (chartPushedRaw I β
@@ -280,7 +280,7 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
     rfl
   rw [h_unfold]
   calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y =>
           euclidPartial (E := E) k
               (chartPushedRaw I β
@@ -291,7 +291,7 @@ lemma covGradPouLeibnizCrossLimit_memWkp_and_wkpNorm_le
                   g r s) i) β P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
         ≤ ENNReal.ofReal Kmul *
-            wkpNorm (d := Module.finrank ℝ E) K 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
                   (tensorResolventEigenbasisVec (I := I) (M := M)
                     (tensorResolventL2_isCompactOperator (I := I)
@@ -329,7 +329,7 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
     (k : Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (covGradPouLeibnizCrossLimit (I := I) (M := M)
               g r s i β P k)
             (chartTargetEuclid (I := I) (M := M) β)
@@ -447,7 +447,7 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
     exact h_prod
   have h_transport_le : ∀ β' ∈ transportChartCenters (I := I) (M := M) β,
       ∀ Q : TensorCompIdx (E := E) r s,
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
               (tensorResolventEigenbasisVec (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -467,7 +467,7 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
   have h_double_le :
       (∑ β' ∈ transportChartCenters (I := I) (M := M) β,
         ∑ Q : TensorCompIdx (E := E) r s,
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (tensorResolventEigenbasisVec (I := I) (M := M)
                   (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -506,7 +506,7 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
       rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_mul (by positivity),
         ENNReal.ofReal_natCast, ENNReal.ofReal_natCast]]
     ring
-  have h_cutoff_le : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_cutoff_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
@@ -524,10 +524,10 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
     refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
     rw [← h_double_const]
     exact h_double_le
-  have h_unfold : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_unfold : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (covGradPouLeibnizCrossLimit (I := I) (M := M)
         g r s i β P k) Ω =
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y =>
           euclidPartial (E := E) k
               (chartPushedRaw I β
@@ -540,7 +540,7 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
     rfl
   rw [h_unfold]
   calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y =>
           euclidPartial (E := E) k
               (chartPushedRaw I β
@@ -551,7 +551,7 @@ lemma covGradPouLeibnizCrossLimit_wkpNorm_le_uniform
                   g r s) i) β P :
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω
         ≤ ENNReal.ofReal Kmul *
-            wkpNorm (d := Module.finrank ℝ E) K 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => ((tensorL2ChartComponentCutoff (I := I) (M := M) g r s
                   (tensorResolventEigenbasisVec (I := I) (M := M)
                     (tensorResolventL2_isCompactOperator (I := I)

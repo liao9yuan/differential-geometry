@@ -307,7 +307,7 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
     (_h_conv_H1Compl : Tendsto (fun n => smoothToH1Compl (I := I) (M := M) g (v n))
       atTop (𝓝 u_h))
     (_h_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y => smoothFChartResidual (I := I) (M := M) g α (v m) y -
           smoothFChartResidual (I := I) (M := M) g α (v n) y)
@@ -316,7 +316,7 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_and_lim_eq
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) ∧
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (fun y => smoothFChartResidual (I := I) (M := M) g α (v n) y - F_lim y)
           (chartTargetEuclid (I := I) (M := M) α))
@@ -341,7 +341,7 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_identification
     (_hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (v : ℕ → SmoothScalar g)
     (h_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y => smoothFChartResidual (I := I) (M := M) g α (v m) y -
           smoothFChartResidual (I := I) (M := M) g α (v n) y)
@@ -350,7 +350,7 @@ theorem memW1p_fChartResidual_of_wkpNorm_cauchy_identification
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) →
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (fun y => smoothFChartResidual (I := I) (M := M) g α (v n) y - F_lim y)
           (chartTargetEuclid (I := I) (M := M) α))
@@ -391,7 +391,7 @@ noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_den
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (v : ℕ → SmoothScalar g)
     (h_cauchy : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (fun y => smoothFChartResidual (I := I) (M := M) g α (v m) y -
           smoothFChartResidual (I := I) (M := M) g α (v n) y)
@@ -400,7 +400,7 @@ noncomputable def diffChartBilinearH1ComplData_of_laplacianDomainPow_two_via_den
       DeGiorgi.MemW1p (d := Module.finrank ℝ E) 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) →
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (fun y => smoothFChartResidual (I := I) (M := M) g α (v n) y - F_lim y)
           (chartTargetEuclid (I := I) (M := M) α))

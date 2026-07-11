@@ -284,7 +284,7 @@ theorem modelDoubleTrace_apply (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1 ℝ
     ContinuousLinearMap.comp_apply]
   rfl
 
-noncomputable def ricciModelTrace42Fib (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
+noncomputable def ricciCometricDoubleTraceFib (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M) :
     Tensor0SBundle.Tensor0SSpace (4 + a) I x →L[ℝ] Tensor0SBundle.Tensor0SSpace (2 + a) I x :=
   (-2 : ℝ) •
     (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (2 + a) x).symm.toContinuousLinearMap.comp
@@ -294,9 +294,9 @@ noncomputable def ricciModelTrace42Fib (g₀ : SmoothRiemannianMetric I M) (a : 
 
 set_option linter.unusedSectionVars false in
 
-@[simp] theorem ricciModelTrace42Fib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
+@[simp] theorem ricciCometricDoubleTraceFib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (4 + a) I x) :
-    Tensor0SBundle.Tensor0SSpace.toModel (ricciModelTrace42Fib (I := I) g₀ a x D) =
+    Tensor0SBundle.Tensor0SSpace.toModel (ricciCometricDoubleTraceFib (I := I) g₀ a x D) =
       (-2 : ℝ) • modelDoubleTrace (E := E) (2 + a) (cometricLmodel (I := I) g₀ x)
         (modelRankCast (E := E) (by omega : (4 + a) = (2 + a) + 2)
           (Tensor0SBundle.Tensor0SSpace.toModel D)) := rfl
@@ -422,15 +422,15 @@ theorem contract_trace_unitZero_toModel (s : ℕ) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
-theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
+theorem ricciCometricDoubleTraceFib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.TensorRSModel (4 + a) (2 + a) ℝ E)
         (E := fun z : M => Tensor0SBundle.TensorRSSpace (4 + a) (2 + a) I z) x
-        (ricciModelTrace42Fib (I := I) g₀ a x)) := by
+        (ricciCometricDoubleTraceFib (I := I) g₀ a x)) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (F₁ := Tensor0SBundle.Tensor0SModel (4 + a) ℝ E) (V₁ := fun x : M => Tensor0SBundle.Tensor0SSpace (4 + a) I x)
     (F₂ := Tensor0SBundle.Tensor0SModel (2 + a) ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (2 + a) I x)
-    (φ := fun x => ricciModelTrace42Fib (I := I) g₀ a x)
+    (φ := fun x => ricciCometricDoubleTraceFib (I := I) g₀ a x)
   intro Y
 
   let Y' : ∀ x : M, Tensor0SBundle.Tensor0SSpace ((2 + a) + 2) I x :=
@@ -469,7 +469,7 @@ theorem ricciModelTrace42Fib_contMDiff (g₀ : SmoothRiemannianMetric I M) (a : 
   congr 1
   apply Tensor0SBundle.Tensor0SSpace.toModel_injective
   beta_reduce
-  rw [ricciModelTrace42Fib_toModel, Tensor0SBundle.Tensor0SSpace.toModel_smul]
+  rw [ricciCometricDoubleTraceFib_toModel, Tensor0SBundle.Tensor0SSpace.toModel_smul]
   congr 1
 
   rw [← model_contract_trace_raiseSlot0ModelL (E := E) (2 + a) (cometricLmodel (I := I) g₀ x)

@@ -20,7 +20,7 @@ noncomputable def variationalForcing
     (x : F) (v : F) (t : ℝ) : G :=
   (fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)
 
-noncomputable def variationalW
+noncomputable def variationalSolution
     (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G)
     (x : F) (v : F) : ℝ → G :=
   inhomogLinearODESolution A (fun y t => variationalForcing A a b' h₀ Z₀ y v t)
@@ -28,8 +28,8 @@ noncomputable def variationalW
 
 theorem variationalW_init
     (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G) (x : F) (v : F) :
-    variationalW A a b' h₀ Z₀ x v h₀ = (fderiv ℝ Z₀ x) v := by
-  unfold variationalW
+    variationalSolution A a b' h₀ Z₀ x v h₀ = (fderiv ℝ Z₀ x) v := by
+  unfold variationalSolution
   exact inhomogLinearODESolution_init _ _ _ _ _ _ _
 
 theorem variationalForcing_continuousOn
@@ -68,9 +68,9 @@ theorem variationalW_hasDerivAt
       (U ×ˢ Set.Ioo a b'))
     (hZ₀_cont : ContinuousOn Z₀ U)
     {x : F} (hx : x ∈ U) (v : F) {t : ℝ} (ht : t ∈ Set.Ioo a b') :
-    HasDerivAt (variationalW A a b' h₀ Z₀ x v ·)
+    HasDerivAt (variationalSolution A a b' h₀ Z₀ x v ·)
       ((fderiv ℝ (fun y => A y t) x) v (linearODESolution A a b' h₀ Z₀ x t)
-        + A x t (variationalW A a b' h₀ Z₀ x v t)) t := by
+        + A x t (variationalSolution A a b' h₀ Z₀ x v t)) t := by
   have hb_cont : ContinuousOn
       (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))
       (U ×ˢ Set.Ioo a b') :=
@@ -108,7 +108,7 @@ theorem variationalW_continuousOn
     (v : F)
     (hZ₀'_cont : ContinuousOn (fun x => (fderiv ℝ Z₀ x) v) U) :
     ContinuousOn
-      (Function.uncurry (fun x t => variationalW A a b' h₀ Z₀ x v t))
+      (Function.uncurry (fun x t => variationalSolution A a b' h₀ Z₀ x v t))
       (U ×ˢ Set.Ioo a b') := by
   have hb_cont : ContinuousOn
       (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))
@@ -167,11 +167,11 @@ theorem variationalW_add_in_v
       (U ×ˢ Set.Ioo a b'))
     (hZ₀_cont : ContinuousOn Z₀ U)
     {x : F} (hx : x ∈ U) (v₁ v₂ : F) {t : ℝ} (ht : t ∈ Set.Ioo a b') :
-    variationalW A a b' h₀ Z₀ x (v₁ + v₂) t =
-      variationalW A a b' h₀ Z₀ x v₁ t + variationalW A a b' h₀ Z₀ x v₂ t := by
-  set Z₁ : ℝ → G := fun s => variationalW A a b' h₀ Z₀ x (v₁ + v₂) s with hZ₁_def
+    variationalSolution A a b' h₀ Z₀ x (v₁ + v₂) t =
+      variationalSolution A a b' h₀ Z₀ x v₁ t + variationalSolution A a b' h₀ Z₀ x v₂ t := by
+  set Z₁ : ℝ → G := fun s => variationalSolution A a b' h₀ Z₀ x (v₁ + v₂) s with hZ₁_def
   set Z₂ : ℝ → G := fun s =>
-    variationalW A a b' h₀ Z₀ x v₁ s + variationalW A a b' h₀ Z₀ x v₂ s with hZ₂_def
+    variationalSolution A a b' h₀ Z₀ x v₁ s + variationalSolution A a b' h₀ Z₀ x v₂ s with hZ₂_def
   set b : F → ℝ → G := fun y s => variationalForcing A a b' h₀ Z₀ y (v₁ + v₂) s with hb_def
   have hZ₁_deriv : ∀ s ∈ Set.Ioo a b', HasDerivAt Z₁
       ((fderiv ℝ (fun y => A y s) x) (v₁ + v₂)
@@ -193,9 +193,9 @@ theorem variationalW_add_in_v
     have hsum := h1.add h2
     have h_eq :
         (fderiv ℝ (fun y => A y s) x) v₁ (linearODESolution A a b' h₀ Z₀ x s)
-            + A x s (variationalW A a b' h₀ Z₀ x v₁ s)
+            + A x s (variationalSolution A a b' h₀ Z₀ x v₁ s)
           + ((fderiv ℝ (fun y => A y s) x) v₂ (linearODESolution A a b' h₀ Z₀ x s)
-            + A x s (variationalW A a b' h₀ Z₀ x v₂ s))
+            + A x s (variationalSolution A a b' h₀ Z₀ x v₂ s))
         = (fderiv ℝ (fun y => A y s) x) (v₁ + v₂)
             (linearODESolution A a b' h₀ Z₀ x s)
           + A x s (Z₂ s) := by
@@ -206,13 +206,13 @@ theorem variationalW_add_in_v
       rw [hfderiv_add]
       change
         (fderiv ℝ (fun y => A y s) x) v₁ (linearODESolution A a b' h₀ Z₀ x s)
-            + A x s (variationalW A a b' h₀ Z₀ x v₁ s)
+            + A x s (variationalSolution A a b' h₀ Z₀ x v₁ s)
           + ((fderiv ℝ (fun y => A y s) x) v₂ (linearODESolution A a b' h₀ Z₀ x s)
-            + A x s (variationalW A a b' h₀ Z₀ x v₂ s))
+            + A x s (variationalSolution A a b' h₀ Z₀ x v₂ s))
         = ((fderiv ℝ (fun y => A y s) x) v₁ + (fderiv ℝ (fun y => A y s) x) v₂)
               (linearODESolution A a b' h₀ Z₀ x s)
-          + A x s (variationalW A a b' h₀ Z₀ x v₁ s
-              + variationalW A a b' h₀ Z₀ x v₂ s)
+          + A x s (variationalSolution A a b' h₀ Z₀ x v₁ s
+              + variationalSolution A a b' h₀ Z₀ x v₂ s)
       rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
       abel
     rw [← h_eq]
@@ -271,7 +271,7 @@ theorem variationalW_add_in_v
   have hZ₁_init : Z₁ h₀ = (fderiv ℝ Z₀ x) (v₁ + v₂) :=
     variationalW_init A a b' h₀ Z₀ x (v₁ + v₂)
   have hZ₂_init : Z₂ h₀ = (fderiv ℝ Z₀ x) v₁ + (fderiv ℝ Z₀ x) v₂ := by
-    change variationalW A a b' h₀ Z₀ x v₁ h₀ + variationalW A a b' h₀ Z₀ x v₂ h₀
+    change variationalSolution A a b' h₀ Z₀ x v₁ h₀ + variationalSolution A a b' h₀ Z₀ x v₂ h₀
       = (fderiv ℝ Z₀ x) v₁ + (fderiv ℝ Z₀ x) v₂
     rw [variationalW_init, variationalW_init]
   have hinit_eq : Z₁ h₀ = Z₂ h₀ := by
@@ -289,9 +289,9 @@ theorem variationalW_smul_in_v
       (U ×ˢ Set.Ioo a b'))
     (hZ₀_cont : ContinuousOn Z₀ U)
     {x : F} (hx : x ∈ U) (c : ℝ) (v : F) {t : ℝ} (ht : t ∈ Set.Ioo a b') :
-    variationalW A a b' h₀ Z₀ x (c • v) t = c • variationalW A a b' h₀ Z₀ x v t := by
-  set Z₁ : ℝ → G := fun s => variationalW A a b' h₀ Z₀ x (c • v) s with hZ₁_def
-  set Z₂ : ℝ → G := fun s => c • variationalW A a b' h₀ Z₀ x v s with hZ₂_def
+    variationalSolution A a b' h₀ Z₀ x (c • v) t = c • variationalSolution A a b' h₀ Z₀ x v t := by
+  set Z₁ : ℝ → G := fun s => variationalSolution A a b' h₀ Z₀ x (c • v) s with hZ₁_def
+  set Z₂ : ℝ → G := fun s => c • variationalSolution A a b' h₀ Z₀ x v s with hZ₂_def
   set Ax : ℝ → (G →L[ℝ] G) := fun s => A x s with hAx_def
   have hAx_cont : ContinuousOn Ax (Set.Ioo a b') := by
     intro s hs
@@ -330,12 +330,12 @@ theorem variationalW_smul_in_v
     intro s hs
     have h := variationalW_hasDerivAt hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont
       hx v hs
-    have hsmul : HasDerivAt (fun s' => c • variationalW A a b' h₀ Z₀ x v s')
+    have hsmul : HasDerivAt (fun s' => c • variationalSolution A a b' h₀ Z₀ x v s')
         (c • ((fderiv ℝ (fun y => A y s) x) v (linearODESolution A a b' h₀ Z₀ x s)
-          + A x s (variationalW A a b' h₀ Z₀ x v s))) s := h.const_smul c
+          + A x s (variationalSolution A a b' h₀ Z₀ x v s))) s := h.const_smul c
     have h_eq :
         c • ((fderiv ℝ (fun y => A y s) x) v (linearODESolution A a b' h₀ Z₀ x s)
-              + A x s (variationalW A a b' h₀ Z₀ x v s))
+              + A x s (variationalSolution A a b' h₀ Z₀ x v s))
         = Ax s (Z₂ s) + bs s := by
       have hL :
           (fderiv ℝ (fun y => A y s) x) (c • v)
@@ -343,8 +343,8 @@ theorem variationalW_smul_in_v
         ContinuousLinearMap.map_smul _ _ _
       change
         c • ((fderiv ℝ (fun y => A y s) x) v (linearODESolution A a b' h₀ Z₀ x s)
-              + A x s (variationalW A a b' h₀ Z₀ x v s))
-        = A x s (c • variationalW A a b' h₀ Z₀ x v s)
+              + A x s (variationalSolution A a b' h₀ Z₀ x v s))
+        = A x s (c • variationalSolution A a b' h₀ Z₀ x v s)
           + (fderiv ℝ (fun y => A y s) x) (c • v)
               (linearODESolution A a b' h₀ Z₀ x s)
       rw [hL, ContinuousLinearMap.smul_apply, ContinuousLinearMap.map_smul, smul_add]
@@ -354,7 +354,7 @@ theorem variationalW_smul_in_v
   have hZ₁_init : Z₁ h₀ = (fderiv ℝ Z₀ x) (c • v) :=
     variationalW_init A a b' h₀ Z₀ x (c • v)
   have hZ₂_init : Z₂ h₀ = c • (fderiv ℝ Z₀ x) v := by
-    change c • variationalW A a b' h₀ Z₀ x v h₀ = c • (fderiv ℝ Z₀ x) v
+    change c • variationalSolution A a b' h₀ Z₀ x v h₀ = c • (fderiv ℝ Z₀ x) v
     rw [variationalW_init]
   have hinit_eq : Z₁ h₀ = Z₂ h₀ := by
     rw [hZ₁_init, hZ₂_init, ContinuousLinearMap.map_smul]
@@ -371,10 +371,10 @@ theorem variationalW_linear_in_v
       (U ×ˢ Set.Ioo a b'))
     (hZ₀_cont : ContinuousOn Z₀ U)
     {x : F} (hx : x ∈ U) {t : ℝ} (ht : t ∈ Set.Ioo a b') :
-    (∀ v₁ v₂ : F, variationalW A a b' h₀ Z₀ x (v₁ + v₂) t =
-        variationalW A a b' h₀ Z₀ x v₁ t + variationalW A a b' h₀ Z₀ x v₂ t) ∧
-    (∀ (c : ℝ) (v : F), variationalW A a b' h₀ Z₀ x (c • v) t =
-        c • variationalW A a b' h₀ Z₀ x v t) :=
+    (∀ v₁ v₂ : F, variationalSolution A a b' h₀ Z₀ x (v₁ + v₂) t =
+        variationalSolution A a b' h₀ Z₀ x v₁ t + variationalSolution A a b' h₀ Z₀ x v₂ t) ∧
+    (∀ (c : ℝ) (v : F), variationalSolution A a b' h₀ Z₀ x (c • v) t =
+        c • variationalSolution A a b' h₀ Z₀ x v t) :=
   ⟨fun v₁ v₂ => variationalW_add_in_v hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx v₁ v₂ ht,
    fun c v => variationalW_smul_in_v hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx c v ht⟩
 
@@ -396,9 +396,9 @@ private theorem variationalW_norm_bound_on_Icc
     (hZ_bd : ∀ s ∈ Set.Icc α β, ‖linearODESolution A a b' h₀ Z₀ x s‖ ≤ Q)
     (hZ₀'_bd : ‖fderiv ℝ Z₀ x‖ ≤ R)
     (v : F) (t : ℝ) (ht : t ∈ Set.Icc α β) :
-    ‖variationalW A a b' h₀ Z₀ x v t‖
+    ‖variationalSolution A a b' h₀ Z₀ x v t‖
       ≤ gronwallBound R M (P * Q) (β - α) * ‖v‖ := by
-  set W : ℝ → G := variationalW A a b' h₀ Z₀ x v with hW_def
+  set W : ℝ → G := variationalSolution A a b' h₀ Z₀ x v with hW_def
   have hsub_open : Set.Icc α β ⊆ Set.Ioo a b' := fun s hs =>
     ⟨lt_of_lt_of_le hα_lt hs.1, lt_of_le_of_lt hs.2 hβ_lt⟩
   have hW_deriv : ∀ s ∈ Set.Icc α β,
@@ -592,7 +592,7 @@ noncomputable def variationalW_clm
     {x : F} (hx : x ∈ U) {t : ℝ} (ht : t ∈ Set.Ioo a b') :
     F →L[ℝ] G :=
   LinearMap.mkContinuousOfExistsBound
-    { toFun := fun v => variationalW A a b' h₀ Z₀ x v t
+    { toFun := fun v => variationalSolution A a b' h₀ Z₀ x v t
       map_add' := fun v₁ v₂ =>
         variationalW_add_in_v hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx v₁ v₂ ht
       map_smul' := fun c v => by
@@ -696,7 +696,7 @@ theorem variationalW_clm_apply
     (hZ₀_cont : ContinuousOn Z₀ U)
     {x : F} (hx : x ∈ U) {t : ℝ} (ht : t ∈ Set.Ioo a b') (v : F) :
     variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht v
-      = variationalW A a b' h₀ Z₀ x v t := rfl
+      = variationalSolution A a b' h₀ Z₀ x v t := rfl
 
 theorem linearODESolution_dist_le
     {A : F → ℝ → (G →L[ℝ] G)} {a b' h₀ : ℝ} {Z₀ : F → G}
@@ -1016,12 +1016,12 @@ theorem linearODESolution_hasFDerivAt_param
     rw [hsub_eq] at hres
     exact hres
   have hW_deriv : ∀ h : F, ∀ s ∈ Set.Ioo a b',
-      HasDerivAt (variationalW A a b' h₀ Z₀ x h ·)
+      HasDerivAt (variationalSolution A a b' h₀ Z₀ x h ·)
         ((fderiv ℝ (fun y => A y s) x) h (Z x s)
-          + A x s (variationalW A a b' h₀ Z₀ x h s)) s := fun h s hs =>
+          + A x s (variationalSolution A a b' h₀ Z₀ x h s)) s := fun h s hs =>
     variationalW_hasDerivAt hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx h hs
   have hW_init_eq : ∀ h : F,
-      variationalW A a b' h₀ Z₀ x h h₀ = (fderiv ℝ Z₀ x) h := fun h =>
+      variationalSolution A a b' h₀ Z₀ x h h₀ = (fderiv ℝ Z₀ x) h := fun h =>
     variationalW_init A a b' h₀ Z₀ x h
   have hZ_deriv : ∀ y ∈ U, ∀ s ∈ Set.Ioo a b',
       HasDerivAt (Z y ·) (A y s (Z y s)) s := fun y hy s hs =>
@@ -1164,7 +1164,7 @@ theorem linearODESolution_hasFDerivAt_param
   have hxh_ball : x + h ∈ Metric.closedBall x δ₀ := by
     rw [Metric.mem_closedBall, hdist_xh_x]; exact hh_le_δ₀
   have hxh_U : x + h ∈ U := hclosedBall_sub hxh_ball
-  set R : ℝ → G := fun s => Z (x + h) s - Z x s - variationalW A a b' h₀ Z₀ x h s
+  set R : ℝ → G := fun s => Z (x + h) s - Z x s - variationalSolution A a b' h₀ Z₀ x h s
     with hR_def
   set Force : ℝ → G := fun s =>
     (A (x + h) s - A x s - (fderiv ℝ (fun z => A z s) x) h) (Z (x + h) s)
@@ -1180,16 +1180,16 @@ theorem linearODESolution_hasFDerivAt_param
     have h_eq :
         A (x + h) s (Z (x + h) s) - A x s (Z x s)
             - ((fderiv ℝ (fun y => A y s) x) h (Z x s)
-              + A x s (variationalW A a b' h₀ Z₀ x h s))
+              + A x s (variationalSolution A a b' h₀ Z₀ x h s))
         = Rderiv s := by
       change _ = A x s (R s) + Force s
-      have hRs : R s = Z (x + h) s - Z x s - variationalW A a b' h₀ Z₀ x h s := rfl
+      have hRs : R s = Z (x + h) s - Z x s - variationalSolution A a b' h₀ Z₀ x h s := rfl
       have hForce_val : Force s
           = (A (x + h) s - A x s - (fderiv ℝ (fun z => A z s) x) h) (Z (x + h) s)
             + (fderiv ℝ (fun z => A z s) x) h (Z (x + h) s - Z x s) := rfl
       rw [hRs, hForce_val]
-      rw [show Z (x + h) s - Z x s - variationalW A a b' h₀ Z₀ x h s
-          = (Z (x + h) s - Z x s) + (-variationalW A a b' h₀ Z₀ x h s) by abel,
+      rw [show Z (x + h) s - Z x s - variationalSolution A a b' h₀ Z₀ x h s
+          = (Z (x + h) s - Z x s) + (-variationalSolution A a b' h₀ Z₀ x h s) by abel,
         ContinuousLinearMap.map_add, ContinuousLinearMap.map_sub,
         ContinuousLinearMap.map_neg]
       rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply,
@@ -1198,7 +1198,7 @@ theorem linearODESolution_hasFDerivAt_param
     rw [h_eq] at hRderiv
     exact hRderiv
   have hR_init : R h₀ = Z₀ (x + h) - Z₀ x - (fderiv ℝ Z₀ x) h := by
-    change Z (x + h) h₀ - Z x h₀ - variationalW A a b' h₀ Z₀ x h h₀ = _
+    change Z (x + h) h₀ - Z x h₀ - variationalSolution A a b' h₀ Z₀ x h h₀ = _
     rw [hZ_init_eq (x + h), hZ_init_eq x, hW_init_eq h]
   have hR_init_bd : ‖R h₀‖ ≤ c₁ * ‖h‖ := by
     rw [hR_init]; exact hδ_init_bd hh_lt_init
@@ -1370,7 +1370,7 @@ theorem linearODESolution_hasFDerivAt_param
       _ = c * ‖h‖ := by ring
   have h_clm_apply :
       (variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht) h
-        = variationalW A a b' h₀ Z₀ x h t :=
+        = variationalSolution A a b' h₀ Z₀ x h t :=
     variationalW_clm_apply hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht h
   change ‖linearODESolution A a b' h₀ Z₀ (x + h) t
         - linearODESolution A a b' h₀ Z₀ x t
@@ -1432,7 +1432,7 @@ private theorem variationalW_clm_continuousOn
           variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
         else 0
       else 0) v =
-      variationalW A a b' h₀ Z₀ p.1 v p.2 := by
+      variationalSolution A a b' h₀ Z₀ p.1 v p.2 := by
     intro ⟨x, t⟩ ⟨hxU, htI⟩
     change (if hx : x ∈ U then if ht : t ∈ Set.Ioo a b' then
             variationalW_clm hab_lt h₀_mem hU hA_cont hDA_cont hZ₀_cont hx ht
@@ -1874,7 +1874,7 @@ theorem linearODESolution_contDiffOn
         (ContinuousLinearMap.toSpanSingletonCLE (𝕜 := ℝ) (E := G)).contDiff.comp_contDiffOn
           h_AZ_n
       have h_varW_v_n : ∀ v : F, ContDiffOn ℝ (↑n : ℕ∞)
-          (fun p : F × ℝ => variationalW A a b' h₀ Z₀ p.1 v p.2) S := by
+          (fun p : F × ℝ => variationalSolution A a b' h₀ Z₀ p.1 v p.2) S := by
         intro v
         have h_forcing_n : ContDiffOn ℝ (↑n : ℕ∞)
             (Function.uncurry (fun x t => variationalForcing A a b' h₀ Z₀ x v t))

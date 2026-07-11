@@ -57,24 +57,24 @@ set_option linter.unusedSectionVars false in
 
 theorem iteratedCovGrad_symmS_eq (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
-    iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T) =
+    iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T) =
       (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k T +
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) := by
-  rw [symmS, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
+  rw [ccTensor02Symm, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s (c • Φ) W =
-      c • appCc (I := I) (M := M) g r s Φ W := by
+    operatorFieldApply (I := I) (M := M) g r s (c • Φ) W =
+      c • operatorFieldApply (I := I) (M := M) g r s Φ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((c • appCc (I := I) (M := M) g r s Φ W).toSection x) =
-      c • (appCc (I := I) (M := M) g r s Φ W).toSection x from rfl]
+  rw [show ((c • operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x) =
+      c • (operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x from rfl]
   rw [appCc_toSection, appCc_toSection]
   rw [show ((c • Φ).toSection x : TensorRSSpace r s I x) = c • Φ.toSection x from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
@@ -87,31 +87,31 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
     (R₂ : SmoothCcTensor g₀ 4 2) :
     ∃ R₂' : SmoothCcTensor g₀ 4 2, ∀ (x : M) (v : Fin 2 → TangentSpace I x),
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 R₂'
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂'
             (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v =
         unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 R₂
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S))) x v := by
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   classical
 
   obtain ⟨σ', hσ'⟩ := exists_iteratedCovGrad_unitModel_domDomCongrSection (I := I) (M := M) g₀
     (Equiv.swap (0 : Fin 2) 1) S 2
   refine ⟨(1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ', fun x v => ?_⟩
 
-  have hsymm : iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S) =
+  have hsymm : iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ S) =
       (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2 S +
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 2
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S) := by
-    rw [symmS, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
+    rw [ccTensor02Symm, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
 
   set uR : ℝ := unitModel (I := I) (M := M) g₀ 2
-    (appCc (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huR
+    (operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂ (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huR
   set uRein : ℝ := unitModel (I := I) (M := M) g₀ 2
-    (appCc (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R₂ σ')
+    (operatorFieldApply (I := I) (M := M) g₀ 4 2 (reindexCoeff (I := I) (M := M) g₀ R₂ σ')
       (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v with huRein
 
   have hLHS : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2
         ((1 / 2 : ℝ) • R₂ + (1 / 2 : ℝ) • reindexCoeff (I := I) (M := M) g₀ R₂ σ')
         (iteratedCovGrad (I := I) g₀ 0 2 2 S)) x v =
       (1 / 2 : ℝ) * uR + (1 / 2 : ℝ) * uRein := by
@@ -122,7 +122,7 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
     simp only [smul_eq_mul]
 
   have hSwap : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2 R₂
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂
         (iteratedCovGrad (I := I) g₀ 0 2 2
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S))) x v = uRein := by
     rw [huRein]
@@ -133,8 +133,8 @@ theorem symmAbsorbedPrincipalCoeff_appCc_eq
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S))
         hσ' x).symm) v
   have hRHS : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2 R₂
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ S))) x v =
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ S))) x v =
       (1 / 2 : ℝ) * uR + (1 / 2 : ℝ) * uRein := by
     rw [hsymm, appCc_add_right, appCc_smul_right, appCc_smul_right, unitModel_add2,
       unitModel_smul, unitModel_smul, ContinuousMultilinearMap.add_apply,
@@ -249,8 +249,8 @@ theorem reindexCoeffGen_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
       ContinuousMultilinearMap.domDomCongr σ' (unitModel (I := I) (M := M) g₀ r W x))
     (x : M) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ r 2 (reindexCoeffGen (I := I) (M := M) g₀ r 2 R σ') W) x =
-      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ r 2 R W') x := by
+        (operatorFieldApply (I := I) (M := M) g₀ r 2 (reindexCoeffGen (I := I) (M := M) g₀ r 2 R σ') W) x =
+      unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ r 2 R W') x := by
   rw [unitModel, unitModel, appCc_toSection, appCc_toSection,
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [reindexCoeffGen_toSection]
@@ -291,25 +291,25 @@ theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
           (iteratedCovGrad (I := I) g₀ 0 2 i S) x))
     (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ (2 + i) 2 (symmAbsorbedCoeff (I := I) (M := M) g₀ i R σ')
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + i) 2 (symmAbsorbedCoeff (I := I) (M := M) g₀ i R σ')
           (iteratedCovGrad (I := I) g₀ 0 2 i S)) x v =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ (2 + i) 2 R
-          (iteratedCovGrad (I := I) g₀ 0 2 i (symmS (I := I) (M := M) g₀ S))) x v := by
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + i) 2 R
+          (iteratedCovGrad (I := I) g₀ 0 2 i (ccTensor02Symm (I := I) (M := M) g₀ S))) x v := by
   classical
-  have hsymm : iteratedCovGrad (I := I) g₀ 0 2 i (symmS (I := I) (M := M) g₀ S) =
+  have hsymm : iteratedCovGrad (I := I) g₀ 0 2 i (ccTensor02Symm (I := I) (M := M) g₀ S) =
       (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 i S +
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 i
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S) := by
-    rw [symmS, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
+    rw [ccTensor02Symm, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
   set uR : ℝ := unitModel (I := I) (M := M) g₀ 2
-    (appCc (I := I) (M := M) g₀ (2 + i) 2 R (iteratedCovGrad (I := I) g₀ 0 2 i S)) x v with huR
+    (operatorFieldApply (I := I) (M := M) g₀ (2 + i) 2 R (iteratedCovGrad (I := I) g₀ 0 2 i S)) x v with huR
   set uRein : ℝ := unitModel (I := I) (M := M) g₀ 2
-    (appCc (I := I) (M := M) g₀ (2 + i) 2
+    (operatorFieldApply (I := I) (M := M) g₀ (2 + i) 2
       (reindexCoeffGen (I := I) (M := M) g₀ (2 + i) 2 R σ')
       (iteratedCovGrad (I := I) g₀ 0 2 i S)) x v with huRein
   have hLHS : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ (2 + i) 2
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + i) 2
         ((1 / 2 : ℝ) • R + (1 / 2 : ℝ) • reindexCoeffGen (I := I) (M := M) g₀ (2 + i) 2 R σ')
         (iteratedCovGrad (I := I) g₀ 0 2 i S)) x v =
       (1 / 2 : ℝ) * uR + (1 / 2 : ℝ) * uRein := by
@@ -319,7 +319,7 @@ theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     rw [huR, huRein]
     simp only [smul_eq_mul]
   have hSwap : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ (2 + i) 2 R
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + i) 2 R
         (iteratedCovGrad (I := I) g₀ 0 2 i
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S))) x v = uRein := by
     rw [huRein]
@@ -330,8 +330,8 @@ theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S))
         hσ' x).symm) v
   have hRHS : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ (2 + i) 2 R
-        (iteratedCovGrad (I := I) g₀ 0 2 i (symmS (I := I) (M := M) g₀ S))) x v =
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + i) 2 R
+        (iteratedCovGrad (I := I) g₀ 0 2 i (ccTensor02Symm (I := I) (M := M) g₀ S))) x v =
       (1 / 2 : ℝ) * uR + (1 / 2 : ℝ) * uRein := by
     rw [hsymm, appCc_add_right, appCc_smul_right, appCc_smul_right, unitModel_add2,
       unitModel_smul, unitModel_smul, ContinuousMultilinearMap.add_apply,
@@ -372,8 +372,8 @@ theorem inverseMetricSharpFib_sub_inner_g1_realize
   set u : TangentSpace I x := inverseMetricSharpFib (I := I) g₁' x α with hu
   rw [hg₁' x u w, hg₁ x u w]
   have hbsub : ∀ (a c : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ (T - T') x a c =
-        ccTensorBilin (I := I) g₀ T x a c - ccTensorBilin (I := I) g₀ T' x a c := by
+      smoothCcTensorBilinForm (I := I) g₀ (T - T') x a c =
+        smoothCcTensorBilinForm (I := I) g₀ T x a c - smoothCcTensorBilinForm (I := I) g₀ T' x a c := by
     intro a c
     rw [show T - T' = T + (-1 : ℝ) • T' from by rw [neg_one_smul]; abel,
       ccTensorBilin_add (I := I) (M := M) g₀ T ((-1 : ℝ) • T') x a c,
@@ -494,7 +494,7 @@ theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 
-theorem csArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
+theorem connDiff_bilinear_diff_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (a a' dir : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x a dir
         - PDE.DeTurck.connDiff (I := I) g₁' g₀ x a' dir =
@@ -672,25 +672,25 @@ theorem combinedLowerArm_extension_free
                     (smoothExtensionTangent (I := I) x (v 1)) x)
                   (smoothExtensionTangent (I := I) x (v 0) x)) i))
         + (palatiniTracedPrincipalDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
-              (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')
+              (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T')
               (⟨smoothExtensionTangent (I := I) x (v 0),
                 smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
               (⟨smoothExtensionTangent (I := I) x (v 1),
                 smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x
             - palatiniTracedPrincipalZDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
-                (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T')
+                (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T')
                 (⟨smoothExtensionTangent (I := I) x (v 0),
                   smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩)
                 (⟨smoothExtensionTangent (I := I) x (v 1),
                   smoothExtensionTangent_contMDiff (I := I) x (v 1)⟩) x)) =
         ricciTensor (I := I) g₁ x (v 0) (v 1) - ricciTensor (I := I) g₁' x (v 0) (v 1)
           - unitModel (I := I) (M := M) g₀ 2
-              (appCc (I := I) (M := M) g₀ 4 2 R₂'
+              (operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂'
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   classical
   obtain ⟨R₂', hR₂'⟩ := symmAbsorbedPrincipalCoeff_appCc_eq (I := I) (M := M) g₀ (T - T')
     (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
-      - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
+      - ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
   refine ⟨R₂', fun x v => ?_⟩
   set Zv : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
     ⟨smoothExtensionTangent (I := I) x (v 0), smoothExtensionTangent_contMDiff (I := I) x (v 0)⟩
@@ -979,20 +979,20 @@ theorem combinedLowerArm_extension_free
   have hR₂'v := hR₂' x v
   rw [hZvx, hYwx, hcons] at hPX hPZ
   have huXZ : unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
-          (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x v
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁)
+          (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v
       - unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x v =
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2 (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v =
         unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 4 2
+          (operatorFieldApply (I := I) (M := M) g₀ 4 2
             (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
-              - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
-            (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x v := by
+              - ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
+            (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v := by
     rw [show ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
-          - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁ =
+          - ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁ =
         ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
-          + (-1 : ℝ) • ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁ from by
+          + (-1 : ℝ) • ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁ from by
       rw [neg_one_smul]; abel]
     rw [appCc_add_left, appCc_smul_left, unitModel_add2, unitModel_smul,
       ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.smul_apply]
@@ -1041,12 +1041,12 @@ theorem combinedLowerArm_extension_free
                         (v 0) :
                   TangentSpace I x →L[ℝ] ℝ) : Module.Dual ℝ (TangentSpace I x)))) i)) =
         unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 4 2 R₂'
+            (operatorFieldApply (I := I) (M := M) g₀ 4 2 R₂'
               (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v
           + (palatiniTracedPrincipalDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
-                (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T') Zv Yw x
+                (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T') Zv Yw x
               - palatiniTracedPrincipalZDiffRemainder (I := I) (M := M) g₀ g₁ g₁'
-                  (symmS (I := I) (M := M) g₀ T) (symmS (I := I) (M := M) g₀ T') Zv Yw x) := by
+                  (ccTensor02Symm (I := I) (M := M) g₀ T) (ccTensor02Symm (I := I) (M := M) g₀ T') Zv Yw x) := by
     rw [hPX, hPZ, hR₂'v]
     linarith [huXZ]
   rw [hregroup]
@@ -1385,7 +1385,7 @@ theorem combinedLowerCoeff0_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
     (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁') W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁') W) x v =
       unitModel (I := I) (M := M) g₀ 2 W x
         (Function.update v 0 (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x (v 0))) := by
   rw [unitModel, appCc_toSection]
@@ -1424,9 +1424,9 @@ set_option linter.unusedSectionVars false in
 theorem order1CocycleLeg_flat_eq_explicit
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ S b u w = g₁.inner b u w - g₀.inner b u w)
+      smoothCcTensorBilinForm (I := I) g₀ S b u w = g₁.inner b u w - g₀.inner b u w)
     (hbil' : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ S' b u w = g₁'.inner b u w - g₀.inner b u w)
+      smoothCcTensorBilinForm (I := I) g₀ S' b u w = g₁'.inner b u w - g₀.inner b u w)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
     g₁'.inner x
         (inverseMetricSharpFib (I := I) g₁' x
@@ -1499,9 +1499,9 @@ theorem order1CocycleLeg_flat_eq_explicit
 noncomputable def ricciArmSubleadingCoeff (g₀ g₁ g₁' : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 :=
   (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
-      - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁)
+      - ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁)
     - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁'
-        - ricciArmPrincipalCoeffZ (I := I) (M := M) g₀ g₁')
+        - ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁')
 
 set_option linter.unusedSectionVars false in
 
@@ -1509,7 +1509,7 @@ theorem ricciArmSubleadingCoeff_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (ricciArmSubleadingCoeff (I := I) (M := M) g₀ g₁ g₁') W) x v =
       ((1 / 2 : ℝ) *
           ∑ k : Fin (Module.finrank ℝ E),
@@ -1575,9 +1575,9 @@ theorem ricciArmSubleadingCoeff_appCc_eq
                           ((Module.finBasis ℝ E).cDualBasis k)), v 1])) := by
   classical
   have hsub : ∀ (A B : SmoothCcTensor g₀ 4 2),
-      unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 (A - B) W) x v =
-        unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 A W) x v -
-          unitModel (I := I) (M := M) g₀ 2 (appCc (I := I) (M := M) g₀ 4 2 B W) x v := by
+      unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 (A - B) W) x v =
+        unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 A W) x v -
+          unitModel (I := I) (M := M) g₀ 2 (operatorFieldApply (I := I) (M := M) g₀ 4 2 B W) x v := by
     intro A B
     rw [show A - B = A + (-1 : ℝ) • B from by rw [neg_one_smul]; abel,
       appCc_add_left, appCc_smul_left, unitModel_add2, unitModel_smul,
@@ -1675,7 +1675,7 @@ theorem ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
     (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2 (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2 (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁) W) x v =
       unitModel (I := I) (M := M) g₀ 2 W x
           (Function.update v 0 (ricEndoRaisedFib (I := I) g₁ x (v 0))) +
         unitModel (I := I) (M := M) g₀ 2 W x

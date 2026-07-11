@@ -33,9 +33,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 theorem hasDerivAt_realizedFam_chartLieDeTurckComp (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
@@ -133,9 +133,9 @@ private lemma hasDerivAt_partialDeriv_comm_at'
 theorem hasDerivAt_realizedFam_chartDeTurckVFComp (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
@@ -205,9 +205,9 @@ theorem hasDerivAt_realizedFam_chartDeTurckVFComp (g₀ : SmoothRiemannianMetric
 theorem hasDerivAt_realizedFam_partial_chartDeTurckVFComp (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (x : M) (m k : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
@@ -245,9 +245,9 @@ theorem hasDerivAt_realizedFam_partial_chartDeTurckVFComp (g₀ : SmoothRiemanni
 def lieDeTurckChartSlope (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E))
     (s₀ : ℝ) (y : E) : ℝ :=
   lieDeTurckSlopeExprRaw (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) g_bg x
@@ -256,9 +256,9 @@ def lieDeTurckChartSlope (g₀ : SmoothRiemannianMetric I M)
 theorem hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) {s₀ : ℝ}
     (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ')) :
@@ -354,9 +354,9 @@ theorem hasDerivAt_realizedFam_chartLieDeTurckComp_chartSlope (g₀ : SmoothRiem
 theorem deriv_realizedFam_chartLieDeTurckComp_eq_chartSlope (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E)) {s₀ : ℝ}
     (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1) :
     deriv (fun s : ℝ =>
@@ -374,9 +374,9 @@ theorem deriv_realizedFam_chartLieDeTurckComp_eq_chartSlope (g₀ : SmoothRieman
 private lemma realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (p q : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) :
     DifferentiableAt ℝ (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x p q) y := by
@@ -396,9 +396,9 @@ private lemma realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemannianMetric
 private lemma partial_realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (m p q : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ interior (extChartAt I x).target) :
     DifferentiableAt ℝ
@@ -427,9 +427,9 @@ private lemma partial_realizedGramDeriv_differentiableAt' (g₀ : SmoothRiemanni
 theorem lieDeTurckChartSlope_eq_orderSplit (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E))
     (s₀ : ℝ) {y : E} (hy : y ∈ interior (extChartAt I x).target) :
     lieDeTurckChartSlope (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' g_bg x i j s₀ y =

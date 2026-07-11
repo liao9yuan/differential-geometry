@@ -430,7 +430,7 @@ private noncomputable def derived_f_chart
     (l : Fin (Module.finrank ℝ E))
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) : EuclN → ℝ :=
-  fChartEff (I := I) (M := M) g α l hu_h
+  diffChartForcing (I := I) (M := M) g α l hu_h
 
 private noncomputable def derived_weak_partial
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -506,7 +506,7 @@ private lemma derived_f_chart_memLp_weighted
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)) := by
   unfold derived_f_chart
-  exact fChartEff_memLp_two_weighted (I := I) (M := M)
+  exact diffChartForcing_memLp_two_weighted (I := I) (M := M)
     (g := g) (α := α) (l := l) (u_h := u_h) (hu_h := hu_h)
 
 private lemma derived_weak_partial_locally_memLp

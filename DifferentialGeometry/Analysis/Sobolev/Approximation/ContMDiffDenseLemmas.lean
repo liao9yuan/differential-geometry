@@ -168,7 +168,7 @@ theorem wkpNormChart_eq_finset_sum
     wkpNormChart (I := I) (M := M) g k p u =
       ∑ α ∈ DifferentialGeometry.Integral.Measure.chartAtlasPOU_finset
               (I := I) (M := M),
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -176,7 +176,7 @@ theorem wkpNormChart_eq_finset_sum
   classical
   unfold wkpNormChart
   set f : M → ℝ≥0∞ := fun α =>
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -197,7 +197,7 @@ theorem wkpNormChart_eq_finset_sum
       unfold chartPushed
       rw [hρ_zero]
       ring
-    change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    change DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)

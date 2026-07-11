@@ -259,7 +259,7 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le_rs
     intro i hik; rw [hc_def]; exact hlc u Λ₀ hΛ₀ hsup i hik
 
   have hpow : (c j) ^ k ≤ K ^ (k ^ 3) * (c 0) ^ (k - j) * (c k) ^ j :=
-    lp_hlp_real c hc_nn K hK1 j k hc_lc hj0 hjk
+    discrete_log_convex_power_interpolation c hc_nn K hK1 j k hc_lc hj0 hjk
 
   have hc0_eq : c 0 = Λ₀ * V := by
     simp only [hc_def, lpFiberJetLadder_rs, if_pos rfl]

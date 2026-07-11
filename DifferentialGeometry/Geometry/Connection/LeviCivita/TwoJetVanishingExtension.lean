@@ -965,7 +965,7 @@ private lemma christoffelCorrectionBilin_apply (g : SmoothRiemannianMetric I M) 
       chartChristoffel (I := I) g x₀ i j k (extChartAt I x₀ x₀)
   ring
 
-private def psiDGamma (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
+private def christoffelDerivQuadraticCorrection (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
     E →L[ℝ] E →L[ℝ] E :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
     ∑ k : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
@@ -977,7 +977,7 @@ private def psiDGamma (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
                   (extChartAt I x₀ x₀)) ((chartModelBasis E) k) • (chartModelBasis E) m)))
 
 private lemma psiDGamma_apply (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) (a b : E) :
-    psiDGamma (I := I) g x₀ V a b =
+    christoffelDerivQuadraticCorrection (I := I) g x₀ V a b =
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         ∑ k : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
           (((chartModelBasis E).repr a) k * ((chartModelBasis E).repr b) i *
@@ -986,7 +986,7 @@ private lemma psiDGamma_apply (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E
               ((fderiv ℝ (fun y : E => chartChristoffel (I := I) g x₀ i j m y)
                   (extChartAt I x₀ x₀)) ((chartModelBasis E) k) • (chartModelBasis E) m) := by
   classical
-  unfold psiDGamma
+  unfold christoffelDerivQuadraticCorrection
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
@@ -1005,7 +1005,7 @@ private lemma psiDGamma_apply (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E
       mul_smul, mul_smul]
   rfl
 
-private def psiGG (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
+private def christoffelSquaredQuadraticCorrection (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
     E →L[ℝ] E →L[ℝ] E :=
   ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
     ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
@@ -1018,7 +1018,7 @@ private def psiGG (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) :
               trivFromE (I := I) x₀ x₀ ((chartModelBasis E) m)))
 
 private lemma psiGG_apply (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) (a b : E) :
-    psiGG (I := I) g x₀ V a b =
+    christoffelSquaredQuadraticCorrection (I := I) g x₀ V a b =
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
@@ -1028,7 +1028,7 @@ private lemma psiGG_apply (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E) (a
                 chartChristoffel (I := I) g x₀ i j l (extChartAt I x₀ x₀)) •
               trivFromE (I := I) x₀ x₀ ((chartModelBasis E) m) := by
   classical
-  unfold psiGG
+  unfold christoffelSquaredQuadraticCorrection
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [ContinuousLinearMap.sum_apply, ContinuousLinearMap.sum_apply]
@@ -1293,7 +1293,7 @@ private lemma fderiv_innerReprPoly_jetCancel (g : SmoothRiemannianMetric I M) (x
 
 private lemma psiDGamma_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
     (u : TangentSpace I x₀) :
-    psiDGamma (I := I) g x₀ V u u =
+    christoffelDerivQuadraticCorrection (I := I) g x₀ V u u =
       trivFromE (I := I) x₀ x₀
         (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E), ∑ m : Fin (Module.finrank ℝ E),
@@ -1308,7 +1308,7 @@ private lemma psiDGamma_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
 
 private lemma psiGG_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
     (u : TangentSpace I x₀) :
-    psiGG (I := I) g x₀ V u u =
+    christoffelSquaredQuadraticCorrection (I := I) g x₀ V u u =
       trivFromE (I := I) x₀ x₀
         (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
           ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
@@ -1339,9 +1339,9 @@ private lemma exists_jetCancelQuadraticCoeff
   set Φ₁ : E →L[ℝ] E →L[ℝ] E :=
     (christoffelCorrectionBilin (I := I) g x₀).comp
       (-(christoffelCorrection (I := I) g x₀ x₀ V)) with hΦ₁
-  refine ⟨-(psiDGamma (I := I) g x₀ V) - psiGG (I := I) g x₀ V - (2 : ℝ) • Φ₁, fun u => ?_⟩
+  refine ⟨-(christoffelDerivQuadraticCorrection (I := I) g x₀ V) - christoffelSquaredQuadraticCorrection (I := I) g x₀ V - (2 : ℝ) • Φ₁, fun u => ?_⟩
   set Qbil : E →L[ℝ] E →L[ℝ] E :=
-    -(psiDGamma (I := I) g x₀ V) - psiGG (I := I) g x₀ V - (2 : ℝ) • Φ₁ with hQbil
+    -(christoffelDerivQuadraticCorrection (I := I) g x₀ V) - christoffelSquaredQuadraticCorrection (I := I) g x₀ V - (2 : ℝ) • Φ₁ with hQbil
   set P : E → E := jetCancelPoly (I := I) g x₀ v Qbil with hP
   set c := extChartAt I x₀ x₀ with hc
 

@@ -43,7 +43,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-noncomputable def dualCovariantCMM (r : ℕ)
+noncomputable def dualCoordinateProductMultilinearMap (r : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E)) :
     ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ :=
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin r) ℝ).compContinuousLinearMap
@@ -52,17 +52,17 @@ noncomputable def dualCovariantCMM (r : ℕ)
 
 @[simp] lemma dualCovariantCMM_apply (r : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E)) (v : Fin r → E) :
-    dualCovariantCMM (E := E) r Idx v =
+    dualCoordinateProductMultilinearMap (E := E) r Idx v =
       ∏ k : Fin r, ((chartModelBasis E).coord (Idx k)) (v k) := by
   classical
-  unfold dualCovariantCMM
+  unfold dualCoordinateProductMultilinearMap
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiAlgebra_apply]
   rfl
 
 lemma dualCovariantCMM_apply_basis_tuple (r : ℕ)
     (Idx Jdx : Fin r → Fin (Module.finrank ℝ E)) :
-    dualCovariantCMM (E := E) r Idx
+    dualCoordinateProductMultilinearMap (E := E) r Idx
         (fun k : Fin r => chartModelBasis E (Jdx k)) =
       if Idx = Jdx then (1 : ℝ) else 0 := by
   classical
@@ -100,14 +100,14 @@ noncomputable def tensorChartComponentProjection (r s : ℕ)
       (fun k : Fin s => chartModelBasis E (Jdx k))).comp
     (ContinuousLinearMap.apply ℝ
       (ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
-      (dualCovariantCMM (E := E) r Idx))
+      (dualCoordinateProductMultilinearMap (E := E) r Idx))
 
 @[simp] lemma tensorChartComponentProjection_apply (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E))
     (T : TensorRSModel r s ℝ E) :
     tensorChartComponentProjection (E := E) r s Idx Jdx T =
-      T (dualCovariantCMM (E := E) r Idx)
+      T (dualCoordinateProductMultilinearMap (E := E) r Idx)
         (fun k : Fin s => chartModelBasis E (Jdx k)) := rfl
 
 noncomputable def tensorChartBasisElement (r s : ℕ)
@@ -117,7 +117,7 @@ noncomputable def tensorChartBasisElement (r s : ℕ)
   ContinuousLinearMap.smulRight
     (ContinuousMultilinearMap.apply ℝ (fun _ : Fin r => E) ℝ
       (fun k : Fin r => chartModelBasis E (Idx k)))
-    (dualCovariantCMM (E := E) s Jdx)
+    (dualCoordinateProductMultilinearMap (E := E) s Jdx)
 
 @[simp] lemma tensorChartBasisElement_apply (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -125,7 +125,7 @@ noncomputable def tensorChartBasisElement (r s : ℕ)
     (w : ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ) :
     tensorChartBasisElement (E := E) r s Idx Jdx w =
       w (fun k : Fin r => chartModelBasis E (Idx k)) •
-        dualCovariantCMM (E := E) s Jdx := rfl
+        dualCoordinateProductMultilinearMap (E := E) s Jdx := rfl
 
 lemma tensorChartComponentProjection_basisElement (r s : ℕ)
     (Idx₁ Idx₂ : Fin r → Fin (Module.finrank ℝ E))
@@ -145,7 +145,7 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
     f = ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx := by
+            dualCoordinateProductMultilinearMap (E := E) s Jdx := by
   classical
   ext v
   have hexpand : ∀ k : Fin s,
@@ -195,21 +195,21 @@ private lemma cmm_eq_sum_basis_coeffs (s : ℕ)
   have h_rhs_eq :
       (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx) v =
+            dualCoordinateProductMultilinearMap (E := E) s Jdx) v =
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
           f (fun k : Fin s => chartModelBasis E (Jdx k)) *
             (∏ k : Fin s, ((chartModelBasis E).coord (Jdx k)) (v k)) := by
     classical
     rw [show (∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
             f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-              dualCovariantCMM (E := E) s Jdx) v =
+              dualCoordinateProductMultilinearMap (E := E) s Jdx) v =
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
             (f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-              dualCovariantCMM (E := E) s Jdx) v from
+              dualCoordinateProductMultilinearMap (E := E) s Jdx) v from
       ContinuousMultilinearMap.sum_apply
         (fun Jdx : Fin s → Fin (Module.finrank ℝ E) =>
           f (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx) v]
+            dualCoordinateProductMultilinearMap (E := E) s Jdx) v]
     refine Finset.sum_congr rfl ?_
     intro Jdx _
     rw [ContinuousMultilinearMap.smul_apply,
@@ -232,9 +232,9 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
   set c : (Fin r → Fin (Module.finrank ℝ E)) → ℝ := fun Idx =>
     w (fun k : Fin r => chartModelBasis E (Idx k)) with hc_def
   have hw' : w = ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-      c Idx • dualCovariantCMM (E := E) r Idx := hw
+      c Idx • dualCoordinateProductMultilinearMap (E := E) r Idx := hw
   have hT : T w = ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
-      c Idx • T (dualCovariantCMM (E := E) r Idx) := by
+      c Idx • T (dualCoordinateProductMultilinearMap (E := E) r Idx) := by
     conv_lhs => rw [hw']
     rw [map_sum]
     refine Finset.sum_congr rfl ?_
@@ -242,12 +242,12 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     rw [map_smul]
   rw [hT]
   have hT_inner : ∀ Idx : Fin r → Fin (Module.finrank ℝ E),
-      T (dualCovariantCMM (E := E) r Idx) =
+      T (dualCoordinateProductMultilinearMap (E := E) r Idx) =
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          T (dualCovariantCMM (E := E) r Idx)
+          T (dualCoordinateProductMultilinearMap (E := E) r Idx)
               (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx := fun Idx =>
-    cmm_eq_sum_basis_coeffs (E := E) s (T (dualCovariantCMM (E := E) r Idx))
+            dualCoordinateProductMultilinearMap (E := E) s Jdx := fun Idx =>
+    cmm_eq_sum_basis_coeffs (E := E) s (T (dualCoordinateProductMultilinearMap (E := E) r Idx))
   have hrhs :
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
@@ -272,9 +272,9 @@ theorem tensorRSModel_eq_sum_basis (r s : ℕ) (T : TensorRSModel r s ℝ E) :
           (tensorChartBasisElement (E := E) r s Idx Jdx w)) =
       c Idx •
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          T (dualCovariantCMM (E := E) r Idx)
+          T (dualCoordinateProductMultilinearMap (E := E) r Idx)
               (fun k : Fin s => chartModelBasis E (Jdx k)) •
-            dualCovariantCMM (E := E) s Jdx := by
+            dualCoordinateProductMultilinearMap (E := E) s Jdx := by
     intro Idx
     rw [Finset.smul_sum]
     refine Finset.sum_congr rfl ?_

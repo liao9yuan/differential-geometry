@@ -32,7 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-private lemma reading_fiberNormSqComponent_eq
+private lemma fiberNormSqComponent_covGradBundleEquivSymm_slice_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -54,7 +54,7 @@ private lemma reading_fiberNormSqComponent_eq
   congr 1
   exact (Fin.comp_cons e a J).symm
 
-private lemma rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis
+private lemma riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
     (bse : Module.Basis (Fin n) ℝ (TangentSpace I x))
@@ -68,7 +68,7 @@ private lemma rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
-theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
+theorem riemannianFiberNormSq_covGradBundleEquiv_symm_slice_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -105,9 +105,9 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
   have hbse : ∀ i : Fin (Module.finrank ℝ E), bse i = eC i := fun i => by
     rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   have hnd : Module.finrank ℝ E = Module.finrank ℝ E := rfl
-  rw [rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r s x _ eC bse hnd hbse
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r s x _ eC bse hnd hbse
     horthC]
-  rw [rfns_rs_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r (s + 1) x T eC bse hnd
+  rw [riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis (I := I) (M := M) g r (s + 1) x T eC bse hnd
     hbse horthC]
   have hBix : B i x = eC i := rfl
   rw [hBix]
@@ -119,7 +119,7 @@ theorem riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le_rs
         (fiberNormSqComponent (I := I) (M := M) g x r (s + 1) T
           (Module.finrank ℝ E) eC K (Fin.cons i J)) ^ 2 := by
     intro K J
-    rw [reading_fiberNormSqComponent_eq (I := I) (M := M) g r s x T eC K J i]
+    rw [fiberNormSqComponent_covGradBundleEquivSymm_slice_eq (I := I) (M := M) g r s x T eC K J i]
   rw [Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => hcomp K J))]
 
   refine Finset.sum_le_sum (fun K _ => ?_)

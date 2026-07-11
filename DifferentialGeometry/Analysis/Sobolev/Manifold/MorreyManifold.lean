@@ -870,7 +870,7 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
     (hf_compact : HasCompactSupport f) (hf_supp : tsupport f ⊆ Ω) :
     eLpNorm (fun z : EuclN => ‖fderiv ℝ f z‖) q (volume.restrict Ω) ≤
       ((Module.finrank ℝ E : ℕ) : ℝ≥0∞) *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q f Ω := by
   classical
   have h_grad_le := eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
@@ -895,7 +895,7 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
     Finset.sum_congr rfl (fun i _ => h_each_eq i)
   rw [h_step1]
   have hWkpEq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q f Ω =
         ∑ j ∈ Finset.range 2,
           ∑ β : Fin j → Fin (Module.finrank ℝ E),
@@ -952,7 +952,7 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
           eLpNorm
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial' q i f Ω)
             q (volume.restrict Ω)) ≤
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q f Ω := by
     rw [hWkpEq, Finset.sum_range_succ, Finset.sum_range_one, ← h_j1_term]
     refine le_add_of_nonneg_left ?_
@@ -961,9 +961,9 @@ private lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm
   have hd_pos : 0 < Module.finrank ℝ E := NeZero.pos _
   have hd_one_le : (1 : ℝ≥0∞) ≤ ((Module.finrank ℝ E : ℕ) : ℝ≥0∞) := by
     exact_mod_cast hd_pos
-  conv_lhs => rw [show DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  conv_lhs => rw [show DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := Module.finrank ℝ E) 1 q f Ω = 1 *
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 q f Ω from
     (one_mul _).symm]
   gcongr
@@ -977,7 +977,7 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_target_le_wkpNormChart
           : C^∞⟮I, M; ℝ⟯) x * u x)) z‖) q
       (volume.restrict (chartTargetEuclid (I := I) (M := M) α)) ≤
       ((Module.finrank ℝ E : ℕ) : ℝ≥0∞) *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q
           (chartSmoothExt (I := I) (M := M) α
             (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -1011,13 +1011,13 @@ private lemma eLpNorm_norm_fderiv_chartSmoothExt_target_le_wkpNormChart
 
 private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 q
         (chartSmoothExt (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
             : C^∞⟮I, M; ℝ⟯) x * u x))
         (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 q
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -1030,7 +1030,7 @@ private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target
 private lemma wkpNorm_chartPushed_target_le_wkpNormChart
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 q
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)

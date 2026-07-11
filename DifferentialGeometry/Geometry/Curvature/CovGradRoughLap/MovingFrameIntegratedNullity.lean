@@ -38,12 +38,12 @@ theorem integral_frameSummed_covDeriv_combined_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {ι : Type*} [Fintype ι]
     (V : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (W : ι → SmoothCcTensor g r s) (Z : SmoothCcTensor g r s) :
-    ∑ i, ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    ∑ i, ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g r s (W i).toSection (V i) x))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s Z.toSection x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s (W i).toSection x))
               (Tensor0SSpace.toModel
@@ -84,7 +84,7 @@ theorem movingFrameNullity_of_genuineCrossPairingValue
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     (Gcd : SmoothCcTensor g 0 (s + 1))
     (hval : tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-        (GcurvSection (I := I) (M := M) g s S + Gcd).toFun
+        (genuineCurvatureOnlySection (I := I) (M := M) g s S + Gcd).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun =
       tensorL2Norm (I := I) (M := M) g 0 s
           (rawTensorConnLapSmooth (I := I) g 0 s S).toFun ^ 2 -
@@ -93,18 +93,18 @@ theorem movingFrameNullity_of_genuineCrossPairingValue
             (covGrad (I := I) (M := M) g 0 s S)).toFun ^ 2) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)
         (pointwiseTensorCurv (I := I) (M := M) g s S -
-          GcurvSection (I := I) (M := M) g s S - Gcd).toFun
+          genuineCurvatureOnlySection (I := I) (M := M) g s S - Gcd).toFun
         (covGrad (I := I) (M := M) g 0 s S).toFun = 0 := by
   have hpair :
       tensorL2Inner (I := I) (M := M) g 0 (s + 1)
-          (GcurvSection (I := I) (M := M) g s S + Gcd).toFun
+          (genuineCurvatureOnlySection (I := I) (M := M) g s S + Gcd).toFun
           (covGrad (I := I) (M := M) g 0 s S).toFun =
         tensorL2Inner (I := I) (M := M) g 0 (s + 1)
           (pointwiseTensorCurv (I := I) (M := M) g s S).toFun
           (covGrad (I := I) (M := M) g 0 s S).toFun := by
     rw [hval, weitzenbock_curvature_crossPairing_value (I := I) (M := M) g s S]
   exact tensorL2Inner_movingFrameRemainder_eq_zero_of_bracketFreePairing
-    (I := I) (M := M) g s S (GcurvSection (I := I) (M := M) g s S) Gcd hpair
+    (I := I) (M := M) g s S (genuineCurvatureOnlySection (I := I) (M := M) g s S) Gcd hpair
 
 end Connection
 end Integral

@@ -31,7 +31,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open TensorRSNabla
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (gFibreOpBound ccTensorBilinSymm)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -46,7 +46,7 @@ set_option backward.isDefEq.respectTransparency false in
 def gInvDiffRaisedEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) where
-  toFun := fun x : M => gInvDiffRaisedEndo (I := I) g₀ g₁ x
+  toFun := fun x : M => metricComparisonDiffEndo (I := I) g₀ g₁ x
   contMDiff_toFun := gInvDiffRaisedEndo_contMDiff (I := I) g₀ g₁
 
 set_option backward.isDefEq.respectTransparency false in
@@ -90,7 +90,7 @@ theorem endoCov_gInvDiffRaisedField_apply
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     ((endoCovariantDerivative (I := I) (M := M) g₀)
         (gInvDiffRaisedEndoField (I := I) g₀ g₁) x v) (Y x) =
-      - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (gInvRaisedEndo (I := I) g₀ g₁ x (Y x)) v
+      - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (metricComparisonEndo (I := I) g₀ g₁ x (Y x)) v
       + inverseMetricSharpFib (I := I) g₁ x
           (dualToCotangent (I := I)
             (-(cotangentToCLM (I := I) (g0FlatCLM (I := I) g₀ x (Y x))).comp
@@ -121,7 +121,7 @@ theorem endoCov_gInvDiffRaisedField_apply
     ((inverseMetricSharpFib_g0FlatY_contMDiff (I := I) g₀ g₁ Y) x).mdifferentiableAt
       (by norm_num)
   have hΛapply : (gInvDiffRaisedEndoField (I := I) g₀ g₁ : Π y : M, _) =
-      fun y : M => gInvDiffRaisedEndo (I := I) g₀ g₁ y := rfl
+      fun y : M => metricComparisonDiffEndo (I := I) g₀ g₁ y := rfl
   have hLeibniz := endoCovariantDerivative_apply (I := I) (M := M) g₀
     (gInvDiffRaisedEndoField (I := I) g₀ g₁) Y x v
   rw [hLeibniz]
@@ -129,11 +129,11 @@ theorem endoCov_gInvDiffRaisedField_apply
       (inverseMetricSharpFib (I := I) g₁ y) (β y) - Y y := by
     intro y
     rw [hβdef]
-    change gInvDiffRaisedEndo (I := I) g₀ g₁ y (Y y) = _
+    change metricComparisonDiffEndo (I := I) g₀ g₁ y (Y y) = _
     rw [gInvDiffRaisedEndo_apply]
   have hΛx : (gInvDiffRaisedEndoField (I := I) g₀ g₁ x) gradY =
       (inverseMetricSharpFib (I := I) g₁ x) (g0FlatCLM (I := I) g₀ x gradY) - gradY := by
-    change gInvDiffRaisedEndo (I := I) g₀ g₁ x gradY = _
+    change metricComparisonDiffEndo (I := I) g₀ g₁ x gradY = _
     rw [gInvDiffRaisedEndo_apply]
   have hsplit : (LeviCivita (I := I) g₀) (fun y : M => (gInvDiffRaisedEndoField (I := I) g₀ g₁ y) (Y y)) x v =
       (LeviCivita (I := I) g₀).toFun (fun y : M => (inverseMetricSharpFib (I := I) g₁ y) (β y)) x v
@@ -174,7 +174,7 @@ theorem endoCov_gInvDiffRaisedField_apply
     rw [hflat]
   rw [hT1, hΛx]
   rw [show (inverseMetricSharpFib (I := I) g₁ x) (β x) =
-      gInvRaisedEndo (I := I) g₀ g₁ x (Y x) from by
+      metricComparisonEndo (I := I) g₀ g₁ x (Y x) from by
     rw [hβdef, gInvRaisedEndo_apply]]
   abel
 
@@ -230,7 +230,7 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
       (h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
       {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
-      (hbound : gFibreOpBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -264,7 +264,7 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
     ((endoCovariantDerivative (I := I) (M := M) g₀)
       (gInvDiffRaisedEndoField (I := I) g₀ g₁) x v) (Y x) with hEC_def
   set T2 : TangentSpace I x :=
-    - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (gInvRaisedEndo (I := I) g₀ g₁ x w) v
+    - PDE.DeTurck.connDiff (I := I) g₁ g₀ x (metricComparisonEndo (I := I) g₀ g₁ x w) v
     with hT2_def
   set T3 : TangentSpace I x :=
     inverseMetricSharpFib (I := I) g₁ x
@@ -280,24 +280,24 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
     (by linarith : δ < 1) hδ0 hbound x w
   rw [← hNw_def] at hgir
   have hT2_bound : Real.sqrt (g₀.inner x T2 T2) ≤ 2 * C₀ * G * Nv * Nw := by
-    have hraw := hpw g₁ T h hδ hδ0 hbound x (gInvRaisedEndo (I := I) g₀ g₁ x w) v
+    have hraw := hpw g₁ T h hδ hδ0 hbound x (metricComparisonEndo (I := I) g₀ g₁ x w) v
     rw [← hNv_def] at hraw
     have hT2_sq : g₀.inner x T2 T2 =
         g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
-            (gInvRaisedEndo (I := I) g₀ g₁ x w) v)
+            (metricComparisonEndo (I := I) g₀ g₁ x w) v)
           (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
-            (gInvRaisedEndo (I := I) g₀ g₁ x w) v) := by
+            (metricComparisonEndo (I := I) g₀ g₁ x w) v) := by
       simp only [hT2_def, map_neg, ContinuousLinearMap.neg_apply, neg_neg]
     rw [hT2_sq]
     refine hraw.trans ?_
-    have hgir' : Real.sqrt (g₀.inner x (gInvRaisedEndo (I := I) g₀ g₁ x w)
-        (gInvRaisedEndo (I := I) g₀ g₁ x w)) ≤ 2 * Nw := by
+    have hgir' : Real.sqrt (g₀.inner x (metricComparisonEndo (I := I) g₀ g₁ x w)
+        (metricComparisonEndo (I := I) g₀ g₁ x w)) ≤ 2 * Nw := by
       refine hgir.trans ?_
       exact mul_le_mul_of_nonneg_right hinv_le hNw_nn
     calc C₀ * ‖((iteratedCovGrad (I := I) g₀ 0 2 1 T).toSection x :
               Tensor0SBundle.TensorRSSpace 0 3 I x)‖ *
-            Real.sqrt (g₀.inner x (gInvRaisedEndo (I := I) g₀ g₁ x w)
-              (gInvRaisedEndo (I := I) g₀ g₁ x w)) * Nv
+            Real.sqrt (g₀.inner x (metricComparisonEndo (I := I) g₀ g₁ x w)
+              (metricComparisonEndo (I := I) g₀ g₁ x w)) * Nv
         ≤ C₀ * G * (2 * Nw) * Nv := by
           rw [← hG_def]
           gcongr
@@ -361,7 +361,7 @@ theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
         refine hpp_le.trans (hchain.trans ?_)
         nlinarith [hNw_nn, hNp_nn, mul_nonneg (mul_nonneg hC₀0 hG_nn) hNv_nn]
       nlinarith [hNp_sq, hNp_nn, hpp_le2, hKnn]
-    have hsharp := sqrt_inner_inverseMetricSharpFib_g0FlatCLM_le (I := I) g₀ g₁
+    have hsharp := norm_inverseMetricSharpFib_g0Flat_le (I := I) g₀ g₁
       (ccTensorBilinSymm (I := I) g₀ T) (fun y a b => h y a b)
       (by linarith : δ < 1) hδ0 hbound x p
     rw [← hNpdef] at hsharp

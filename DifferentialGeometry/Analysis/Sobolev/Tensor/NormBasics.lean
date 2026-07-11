@@ -37,7 +37,7 @@ theorem wtwokTwoNorm_lt_top
   set f : M → ℝ≥0∞ := fun α =>
     ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) with hf_def
   have hPOU_locFin : LocallyFinite
@@ -111,32 +111,32 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
   have hchart_zero :
       ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (tensorChartComp (I := I) (M := M) g r s T α Idx' Jdx')
             (chartTargetEuclid (I := I) (M := M) α) = 0 := by
     have hsumm : Summable
         (fun β : M =>
           ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
             ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
                 (tensorChartComp (I := I) (M := M) g r s T β Idx' Jdx')
                 (chartTargetEuclid (I := I) (M := M) β)) := ENNReal.summable
     have htsum0 :
         (∑' β : M,
           ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
             ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E),
-              wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
                 (tensorChartComp (I := I) (M := M) g r s T β Idx' Jdx')
                 (chartTargetEuclid (I := I) (M := M) β)) = 0 := by
       rw [← wtwokTwoNorm_eq_tsum (I := I) (M := M) g k T]; exact hnorm
     exact (ENNReal.tsum_eq_zero.mp htsum0) α
   have hwkp_zero :
-      wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
     have hJ :
         ∑ Jdx' : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx')
             (chartTargetEuclid (I := I) (M := M) α) = 0 :=
       (Finset.sum_eq_zero_iff.mp hchart_zero) Idx (Finset.mem_univ Idx)
@@ -150,7 +150,7 @@ theorem tensorChartComp_eqOn_zero_of_wtwokTwoNorm_zero
     tensorChartComp_continuous (I := I) (M := M) g r s T α Idx Jdx
   have heLp_zero : eLpNorm u 2 (volume.restrict Ω) = 0 := by
     have hsum :
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2 u Ω =
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2 u Ω =
           ∑ j ∈ Finset.range (2 * k + 1),
             ∑ a : Fin j → Fin (Module.finrank ℝ E),
               eLpNorm (iterWeakPartial (d := Module.finrank ℝ E) 2 j a u Ω) 2

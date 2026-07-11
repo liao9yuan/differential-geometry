@@ -27,9 +27,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 theorem tensorInnerPointwise_0s_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S₁ S₂ T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x (S₁ + S₂) T =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x S₁ T +
-        tensorInnerPointwise_0s (I := I) (M := M) s g x S₂ T := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x (S₁ + S₂) T =
+      covariantTensorInnerPointwise (I := I) (M := M) s g x S₁ T +
+        covariantTensorInnerPointwise (I := I) (M := M) s g x S₂ T := by
   induction s with
   | zero =>
       change (S₁ + S₂) _ * T _ = S₁ _ * T _ + S₂ _ * T _
@@ -57,9 +57,9 @@ theorem tensorInnerPointwise_0s_add_left
 theorem tensorInnerPointwise_0s_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T₁ T₂ : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x S (T₁ + T₂) =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x S T₁ +
-        tensorInnerPointwise_0s (I := I) (M := M) s g x S T₂ := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x S (T₁ + T₂) =
+      covariantTensorInnerPointwise (I := I) (M := M) s g x S T₁ +
+        covariantTensorInnerPointwise (I := I) (M := M) s g x S T₂ := by
   induction s with
   | zero =>
       change S _ * (T₁ + T₂) _ = S _ * T₁ _ + S _ * T₂ _
@@ -87,8 +87,8 @@ theorem tensorInnerPointwise_0s_add_right
 theorem tensorInnerPointwise_0s_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (c : ℝ) (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x (c • S) T =
-      c * tensorInnerPointwise_0s (I := I) (M := M) s g x S T := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x (c • S) T =
+      c * covariantTensorInnerPointwise (I := I) (M := M) s g x S T := by
   induction s with
   | zero =>
       change (c • S) _ * T _ = c * (S _ * T _)
@@ -114,8 +114,8 @@ theorem tensorInnerPointwise_0s_smul_left
 theorem tensorInnerPointwise_0s_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (c : ℝ) (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x S (c • T) =
-      c * tensorInnerPointwise_0s (I := I) (M := M) s g x S T := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x S (c • T) =
+      c * covariantTensorInnerPointwise (I := I) (M := M) s g x S T := by
   induction s with
   | zero =>
       change S _ * (c • T) _ = c * (S _ * T _)
@@ -141,8 +141,8 @@ theorem tensorInnerPointwise_0s_smul_right
 theorem tensorInnerPointwise_0s_symm
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x S T =
-      tensorInnerPointwise_0s (I := I) (M := M) s g x T S := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x S T =
+      covariantTensorInnerPointwise (I := I) (M := M) s g x T S := by
   induction s with
   | zero =>
       change S _ * T _ = T _ * S _
@@ -165,7 +165,7 @@ theorem tensorInnerPointwise_0s_symm
 theorem tensorInnerPointwise_0s_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x 0 T = 0 := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x 0 T = 0 := by
   have h := tensorInnerPointwise_0s_add_left (I := I) (M := M) g x s 0 0 T
   have h₀ : (0 : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) + 0 = 0 := add_zero _
   rw [h₀] at h
@@ -174,21 +174,21 @@ theorem tensorInnerPointwise_0s_zero_left
 theorem tensorInnerPointwise_0s_zero_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x S 0 = 0 := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x S 0 = 0 := by
   rw [tensorInnerPointwise_0s_symm]
   exact tensorInnerPointwise_0s_zero_left (I := I) (M := M) g x s S
 
 theorem tensorInnerPointwise_0s_zero_arity_nonneg
     (g : SmoothRiemannianMetric I M) (x : M)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
-    0 ≤ tensorInnerPointwise_0s (I := I) (M := M) 0 g x S S := by
+    0 ≤ covariantTensorInnerPointwise (I := I) (M := M) 0 g x S S := by
   change 0 ≤ S (fun i => Fin.elim0 i) * S (fun i => Fin.elim0 i)
   exact mul_self_nonneg _
 
 theorem tensorInnerPointwise_0s_zero_arity_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (x : M)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) 0 g x S S = 0 ↔ S = 0 := by
+    covariantTensorInnerPointwise (I := I) (M := M) 0 g x S S = 0 ↔ S = 0 := by
   change S (fun i => Fin.elim0 i) * S (fun i => Fin.elim0 i) = 0 ↔ S = 0
   constructor
   · intro h
@@ -211,10 +211,10 @@ private lemma tensorInnerPointwise_0s_sum_left
     (a : ι → ℝ)
     (ψ : ι → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         (∑ i ∈ A, a i • ψ i) T =
       ∑ i ∈ A, a i *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x (ψ i) T := by
+        covariantTensorInnerPointwise (I := I) (M := M) s g x (ψ i) T := by
   classical
   induction A using Finset.induction with
   | empty =>
@@ -231,10 +231,10 @@ private lemma tensorInnerPointwise_0s_sum_right
     (a : ι → ℝ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
     (ψ : ι → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         S (∑ i ∈ A, a i • ψ i) =
       ∑ i ∈ A, a i *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x S (ψ i) := by
+        covariantTensorInnerPointwise (I := I) (M := M) s g x S (ψ i) := by
   classical
   induction A using Finset.induction with
   | empty =>
@@ -252,11 +252,11 @@ private lemma tensorInnerPointwise_0s_sum_sum
     (a : ι₁ → ℝ) (b : ι₂ → ℝ)
     (φ : ι₁ → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ)
     (ψ : ι₂ → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x
+    covariantTensorInnerPointwise (I := I) (M := M) s g x
         (∑ i ∈ A, a i • φ i) (∑ j ∈ B, b j • ψ j) =
       ∑ i ∈ A, ∑ j ∈ B,
         a i * b j *
-          tensorInnerPointwise_0s (I := I) (M := M) s g x (φ i) (ψ j) := by
+          covariantTensorInnerPointwise (I := I) (M := M) s g x (φ i) (ψ j) := by
   rw [tensorInnerPointwise_0s_sum_left]
   refine Finset.sum_congr rfl ?_
   intro i _
@@ -268,7 +268,7 @@ private lemma tensorInnerPointwise_0s_sum_sum
 theorem tensorInnerPointwise_0s_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    0 ≤ tensorInnerPointwise_0s (I := I) (M := M) s g x S S := by
+    0 ≤ covariantTensorInnerPointwise (I := I) (M := M) s g x S S := by
   induction s with
   | zero => exact tensorInnerPointwise_0s_zero_arity_nonneg (I := I) (M := M) g x S
   | succ s ih =>
@@ -322,20 +322,20 @@ theorem tensorInnerPointwise_0s_nonneg
       have hrewrite :
           ∑ i : Fin n, ∑ j : Fin n,
               Ginv i j *
-                tensorInnerPointwise_0s (I := I) (M := M) s g x
+                covariantTensorInnerPointwise (I := I) (M := M) s g x
                   (Sfam i) (Sfam j)
             = ∑ k : Fin n, μ k *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x
+              covariantTensorInnerPointwise (I := I) (M := M) s g x
                 (∑ i : Fin n, U i k • Sfam i)
                 (∑ j : Fin n, U j k • Sfam j) := by
         have hbilin :
             ∀ k : Fin n,
-              tensorInnerPointwise_0s (I := I) (M := M) s g x
+              covariantTensorInnerPointwise (I := I) (M := M) s g x
                   (∑ i : Fin n, U i k • Sfam i)
                   (∑ j : Fin n, U j k • Sfam j)
                 = ∑ i : Fin n, ∑ j : Fin n,
                   U i k * U j k *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g x
+                    covariantTensorInnerPointwise (I := I) (M := M) s g x
                       (Sfam i) (Sfam j) :=
           fun k => by
             rw [tensorInnerPointwise_0s_sum_sum (g := g) (x := x) (s := s)
@@ -343,12 +343,12 @@ theorem tensorInnerPointwise_0s_nonneg
                   Sfam Sfam]
         have hRHS :
             ∑ k : Fin n, μ k *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x
+              covariantTensorInnerPointwise (I := I) (M := M) s g x
                 (∑ i : Fin n, U i k • Sfam i)
                 (∑ j : Fin n, U j k • Sfam j)
             = ∑ k : Fin n, ∑ i : Fin n, ∑ j : Fin n,
                 (μ k * (U i k * U j k)) *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j) := by
           refine Finset.sum_congr rfl ?_
           intro k _
@@ -363,12 +363,12 @@ theorem tensorInnerPointwise_0s_nonneg
         have hLHS :
             ∑ i : Fin n, ∑ j : Fin n,
                 Ginv i j *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j)
               = ∑ i : Fin n, ∑ j : Fin n,
                 ∑ k : Fin n,
                   (μ k * (U i k * U j k)) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g x
+                    covariantTensorInnerPointwise (I := I) (M := M) s g x
                       (Sfam i) (Sfam j) := by
           refine Finset.sum_congr rfl ?_
           intro i _
@@ -379,11 +379,11 @@ theorem tensorInnerPointwise_0s_nonneg
         have h_swap_inner :
             ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
                 (μ k * (U i k * U j k)) *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j)
               = ∑ i : Fin n, ∑ k : Fin n, ∑ j : Fin n,
                 (μ k * (U i k * U j k)) *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j) := by
           refine Finset.sum_congr rfl ?_
           intro i _
@@ -398,7 +398,7 @@ theorem tensorInnerPointwise_0s_nonneg
 theorem tensorInnerPointwise_0s_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g x S S = 0 ↔ S = 0 := by
+    covariantTensorInnerPointwise (I := I) (M := M) s g x S S = 0 ↔ S = 0 := by
   induction s with
   | zero =>
       exact tensorInnerPointwise_0s_zero_arity_eq_zero_iff
@@ -456,19 +456,19 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
       set W : Fin n → ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ :=
         fun k => ∑ i : Fin n, U i k • Sfam i with hW_def
       have hW_nonneg : ∀ k, 0 ≤
-          tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k) :=
+          covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k) :=
         fun k => tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s (W k)
       have hrewrite :
-          tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x S S
+          covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x S S
             = ∑ k : Fin n, μ k *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k) := by
+              covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k) := by
         rw [tensorInnerPointwise_0s_succ]
         have hbilin :
             ∀ k : Fin n,
-              tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k)
+              covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k)
                 = ∑ i : Fin n, ∑ j : Fin n,
                   U i k * U j k *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g x
+                    covariantTensorInnerPointwise (I := I) (M := M) s g x
                       (Sfam i) (Sfam j) := by
           intro k
           simp only [hW_def]
@@ -477,10 +477,10 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
                 Sfam Sfam]
         have hRHS :
             ∑ k : Fin n, μ k *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k)
+              covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k)
               = ∑ k : Fin n, ∑ i : Fin n, ∑ j : Fin n,
                 (μ k * (U i k * U j k)) *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j) := by
           refine Finset.sum_congr rfl ?_
           intro k _
@@ -495,12 +495,12 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
         have hLHS :
             ∑ i : Fin n, ∑ j : Fin n,
                 Ginv i j *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j)
               = ∑ i : Fin n, ∑ j : Fin n,
                 ∑ k : Fin n,
                   (μ k * (U i k * U j k)) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g x
+                    covariantTensorInnerPointwise (I := I) (M := M) s g x
                       (Sfam i) (Sfam j) := by
           refine Finset.sum_congr rfl ?_
           intro i _
@@ -509,17 +509,17 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
           rw [hGinv_entry i j, Finset.sum_mul]
         change ∑ i : Fin n, ∑ j : Fin n,
             Ginv i j *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x
+              covariantTensorInnerPointwise (I := I) (M := M) s g x
                 (Sfam i) (Sfam j) = _
         rw [hLHS]
         have h_swap_inner :
             ∑ i : Fin n, ∑ j : Fin n, ∑ k : Fin n,
                 (μ k * (U i k * U j k)) *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j)
               = ∑ i : Fin n, ∑ k : Fin n, ∑ j : Fin n,
                 (μ k * (U i k * U j k)) *
-                  tensorInnerPointwise_0s (I := I) (M := M) s g x
+                  covariantTensorInnerPointwise (I := I) (M := M) s g x
                     (Sfam i) (Sfam j) := by
           refine Finset.sum_congr rfl ?_
           intro i _
@@ -529,19 +529,19 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
       · rw [hrewrite] at h
         have hterm_nonneg : ∀ k ∈ Finset.univ,
             0 ≤ μ k *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k) :=
+              covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k) :=
           fun k _ => mul_nonneg (hμ_nonneg k) (hW_nonneg k)
         have hterm_zero : ∀ k ∈ Finset.univ,
             μ k *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k) = 0 :=
+              covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k) = 0 :=
           (Finset.sum_eq_zero_iff_of_nonneg hterm_nonneg).mp h
         have hWk_zero : ∀ k, W k = 0 := by
           intro k
           have hk : μ k *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k) = 0 :=
+              covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k) = 0 :=
             hterm_zero k (Finset.mem_univ k)
           have hinner_zero :
-              tensorInnerPointwise_0s (I := I) (M := M) s g x (W k) (W k) = 0 := by
+              covariantTensorInnerPointwise (I := I) (M := M) s g x (W k) (W k) = 0 := by
             rcases mul_eq_zero.mp hk with hμk | hinner
             · exact absurd hμk (ne_of_gt (hμ_pos k))
             · exact hinner
@@ -733,12 +733,12 @@ theorem tensorInnerPointwise_eq_zero_iff
 theorem tensorInnerPointwise_0s_sq_le_mul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
-    (tensorInnerPointwise_0s (I := I) (M := M) s g x S T) ^ 2 ≤
-      tensorInnerPointwise_0s (I := I) (M := M) s g x S S *
-        tensorInnerPointwise_0s (I := I) (M := M) s g x T T := by
-  set a := tensorInnerPointwise_0s (I := I) (M := M) s g x S S with ha_def
-  set b := tensorInnerPointwise_0s (I := I) (M := M) s g x S T with hb_def
-  set c := tensorInnerPointwise_0s (I := I) (M := M) s g x T T with hc_def
+    (covariantTensorInnerPointwise (I := I) (M := M) s g x S T) ^ 2 ≤
+      covariantTensorInnerPointwise (I := I) (M := M) s g x S S *
+        covariantTensorInnerPointwise (I := I) (M := M) s g x T T := by
+  set a := covariantTensorInnerPointwise (I := I) (M := M) s g x S S with ha_def
+  set b := covariantTensorInnerPointwise (I := I) (M := M) s g x S T with hb_def
+  set c := covariantTensorInnerPointwise (I := I) (M := M) s g x T T with hc_def
   have ha_nn : 0 ≤ a :=
     tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s S
   have hc_nn : 0 ≤ c :=
@@ -746,9 +746,9 @@ theorem tensorInnerPointwise_0s_sq_le_mul
   have hbilin_pair :
       ∀ u v : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ,
         ∀ p q : ℝ,
-          tensorInnerPointwise_0s (I := I) (M := M) s g x (p • u) (q • v) =
+          covariantTensorInnerPointwise (I := I) (M := M) s g x (p • u) (q • v) =
             (p * q) *
-              tensorInnerPointwise_0s (I := I) (M := M) s g x u v := by
+              covariantTensorInnerPointwise (I := I) (M := M) s g x u v := by
     intro u v p q
     rw [tensorInnerPointwise_0s_smul_left,
         tensorInnerPointwise_0s_smul_right]
@@ -756,22 +756,22 @@ theorem tensorInnerPointwise_0s_sq_le_mul
   have hquad : ∀ t : ℝ, 0 ≤ a + 2 * (t * b) + t ^ 2 * c := by
     intro t
     have h0 : 0 ≤
-        tensorInnerPointwise_0s (I := I) (M := M) s g x (S + t • T) (S + t • T) :=
+        covariantTensorInnerPointwise (I := I) (M := M) s g x (S + t • T) (S + t • T) :=
       tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x s _
     have hexpand :
-        tensorInnerPointwise_0s (I := I) (M := M) s g x (S + t • T) (S + t • T) =
+        covariantTensorInnerPointwise (I := I) (M := M) s g x (S + t • T) (S + t • T) =
           a + 2 * (t * b) + t ^ 2 * c := by
       have hT_smul_S :
-          tensorInnerPointwise_0s (I := I) (M := M) s g x (t • T) S = t * b := by
+          covariantTensorInnerPointwise (I := I) (M := M) s g x (t • T) S = t * b := by
         rw [tensorInnerPointwise_0s_smul_left]
         congr 1
         rw [hb_def]
         exact (tensorInnerPointwise_0s_symm (I := I) (M := M) g x s S T).symm
       have hS_smul_T :
-          tensorInnerPointwise_0s (I := I) (M := M) s g x S (t • T) = t * b := by
+          covariantTensorInnerPointwise (I := I) (M := M) s g x S (t • T) = t * b := by
         rw [tensorInnerPointwise_0s_smul_right]
       have hSmul_smul :
-          tensorInnerPointwise_0s (I := I) (M := M) s g x (t • T) (t • T) =
+          covariantTensorInnerPointwise (I := I) (M := M) s g x (t • T) (t • T) =
             t ^ 2 * c := by
         rw [hbilin_pair T T t t, hc_def]
         ring_nf

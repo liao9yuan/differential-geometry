@@ -30,13 +30,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-def wkpNormChartRaw
+def chartComponentRawSobolevNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (T : SmoothCcTensor g r s) : ℝ≥0∞ :=
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
     ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (chartPushedRaw (I := I) (M := M) α
             (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))
           (chartTargetEuclid (I := I) (M := M) α)
@@ -44,11 +44,11 @@ def wkpNormChartRaw
 theorem wkpNormChartRaw_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (T : SmoothCcTensor g r s) :
-    wkpNormChartRaw (I := I) (M := M) g r s k T =
+    chartComponentRawSobolevNorm (I := I) (M := M) g r s k T =
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
               (chartPushedRaw (I := I) (M := M) α
                 (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))
               (chartTargetEuclid (I := I) (M := M) α) := rfl
@@ -56,14 +56,14 @@ theorem wkpNormChartRaw_def
 theorem wkpNormChartRaw_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (T : SmoothCcTensor g r s) :
-    0 ≤ wkpNormChartRaw (I := I) (M := M) g r s k T :=
+    0 ≤ chartComponentRawSobolevNorm (I := I) (M := M) g r s k T :=
   zero_le _
 
 theorem wkpNormChartRaw_zero_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
-    wkpNormChartRaw (I := I) (M := M) g r s k (0 : SmoothCcTensor g r s) = 0 := by
+    chartComponentRawSobolevNorm (I := I) (M := M) g r s k (0 : SmoothCcTensor g r s) = 0 := by
   classical
-  unfold wkpNormChartRaw
+  unfold chartComponentRawSobolevNorm
   refine Finset.sum_eq_zero ?_
   intro α _
   refine Finset.sum_eq_zero ?_
@@ -185,7 +185,7 @@ theorem wkpNorm_tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
     {α : M} (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M))
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
   rw [tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
@@ -201,7 +201,7 @@ theorem wtwokTwoNorm_eq_finsum_chartAtlasPOU
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
               (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
@@ -246,13 +246,13 @@ theorem exists_per_chart_leibniz_multiplier_bound
       ∀ {u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ},
         MemWkp (d := Module.finrank ℝ E) (2 * k) 2 u
             (chartTargetEuclid (I := I) (M := M) α) →
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (fun y => chartSmoothExt (I := I) (M := M) α
               ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y *
               u y)
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal K *
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2 u
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2 u
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set η : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
@@ -287,11 +287,11 @@ theorem wkpNorm_tensorChartComp_le_const_mul_wkpNorm_chartPushedRaw_raw
             (chartPushedRaw (I := I) (M := M) α
               (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))
             (chartTargetEuclid (I := I) (M := M) α) →
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal K *
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
               (chartPushedRaw (I := I) (M := M) α
                 (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))
               (chartTargetEuclid (I := I) (M := M) α) := by

@@ -56,7 +56,7 @@ private theorem exists_smooth_strong_support_approx_k
       ContDiff ℝ (⊤ : ℕ∞) χ ∧
       HasCompactSupport χ ∧
       tsupport χ ⊆ chartTargetEuclid (I := I) (M := M) α ∧
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (fun y =>
           chartPushed (I := I) (M := M)
@@ -115,17 +115,17 @@ private theorem exists_smooth_strong_support_approx_k
     have h_eq := hf_eq_forig_on_target y hy
     change f_orig y - χ y = f y - χ y
     rw [h_eq]
-  have h_norm_eq : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have h_norm_eq : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (fun y => f_orig y - χ y) (chartTargetEuclid (I := I) (M := M) α) =
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (fun y => f y - χ y) (chartTargetEuclid (I := I) (M := M) α) :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
       (d := Module.finrank ℝ E) hp_one
       (chartTargetEuclid_isOpen (I := I) (M := M) α)
       h_diff_eq
-  change DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  change DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (fun y => f_orig y - χ y) (chartTargetEuclid (I := I) (M := M) α) ≤
     ENNReal.ofReal ε_per
@@ -146,7 +146,7 @@ private lemma tightenedChartPushed_memWkp_k
       (tightenedChartPushed (I := I) (M := M) α η_M u)
       (chartTargetEuclid (I := I) (M := M) α) := by
   classical
-  set ηE : EuclN → ℝ := etaEuclid (I := I) (M := M) α η_M with hηE_def
+  set ηE : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) α η_M with hηE_def
   have hηE_smooth : ContDiff ℝ (⊤ : ℕ∞) ηE :=
     contDiff_etaEuclid (I := I) (M := M) α η_M hη_M_smooth hη_M_cpt hη_M_supp_chart
   have hηE_cpt : HasCompactSupport ηE :=
@@ -167,11 +167,11 @@ private lemma wkpNorm_tightenedChartPushed_sub_eq_k
       ∀ x ∈ tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ), η_M x = 1)
     (u : M → ℝ) (χ : EuclN → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (fun y => tightenedChartPushed (I := I) (M := M) α η_M u y - χ y)
       (chartTargetEuclid (I := I) (M := M) α) =
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (fun y => chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y - χ y)
@@ -303,7 +303,7 @@ private theorem MemWkp_of_cross_chart_pushforward_k
       (d := Module.finrank ℝ E) hKEα_compact hUα_open hKEα_in_Uα
   have hη_α_loc_supp_Ωαγ : tsupport η_α_loc ⊆ Ω_αγ :=
     fun y hy => (hη_α_loc_supp hy).1
-  set ργE : EuclN → ℝ := etaEuclid (I := I) (M := M) γ ρ_γ_M with hργE_def
+  set ργE : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) γ ρ_γ_M with hργE_def
   have hργE_smooth : ContDiff ℝ (⊤ : ℕ∞) ργE :=
     contDiff_etaEuclid (I := I) (M := M) γ ρ_γ_M hρ_γ_M_smooth hρ_γ_M_cpt
       hρ_γ_M_supp_in_chart
@@ -606,14 +606,14 @@ theorem contMDiff_dense_in_WkpChart_k
             (chartTargetEuclid (I := I) (M := M) (α : M)) →
         tsupport v ⊆
           (fun x : M => (toEuclidean (E := E)) (extChartAt I (α : M) x)) '' K_α α →
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (γ : M)
             (chartPullback I (α : M) v))
           (chartTargetEuclid (I := I) (M := M) (γ : M)) ≤
           ENNReal.ofReal K *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) k p v
               (chartTargetEuclid (I := I) (M := M) (α : M)) := fun γ α =>
     cross_chart_bound_strict_strong_memWkp_k (I := I) (M := M) g k hp_one hp_top
@@ -627,14 +627,14 @@ theorem contMDiff_dense_in_WkpChart_k
           (chartTargetEuclid (I := I) (M := M) (α : M)) →
       tsupport v ⊆
         (fun x : M => (toEuclidean (E := E)) (extChartAt I (α : M) x)) '' K_α α →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (γ : M)
           (chartPullback I (α : M) v))
         (chartTargetEuclid (I := I) (M := M) (γ : M)) ≤
         ENNReal.ofReal (K_pair γ α) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p v
             (chartTargetEuclid (I := I) (M := M) (α : M)) := fun γ α =>
     (h_per_pair γ α).choose_spec.2
@@ -658,14 +658,14 @@ theorem contMDiff_dense_in_WkpChart_k
       ContDiff ℝ (⊤ : ℕ∞) χ ∧ HasCompactSupport χ ∧
       tsupport χ ⊆
         (fun x : M => (toEuclidean (E := E)) (extChartAt I (α : M) x)) '' K_α α ∧
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (fun y => chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (α : M) u y - χ y)
         (chartTargetEuclid (I := I) (M := M) (α : M)) ≤
         ENNReal.ofReal ε_per := by
     intro α
-    set ηE : EuclN → ℝ := etaEuclid (I := I) (M := M) (α : M) (η_M α) with hηE_def
+    set ηE : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) (α : M) (η_M α) with hηE_def
     have hηE_smooth : ContDiff ℝ (⊤ : ℕ∞) ηE :=
       contDiff_etaEuclid (I := I) (M := M) (α : M) (η_M α) (hη_smooth α)
         (hη_M_cpt α) (hη_M_supp_chart α)
@@ -749,9 +749,9 @@ theorem contMDiff_dense_in_WkpChart_k
       refine Filter.Eventually.of_forall ?_
       intro y hy; exact h_decomp y hy
     have h_norm_eq :
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (fun y => f y - χ y) Ωα =
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (fun y => ηE y * (f y - ψ y)) Ωα :=
       DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
         (d := Module.finrank ℝ E) hp_one hΩα_open h_diff_eq
@@ -769,16 +769,16 @@ theorem contMDiff_dense_in_WkpChart_k
       DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.sub
         (d := Module.finrank ℝ E) hp_one hΩα_open hf_mem hψ_mem
     have h_leib_bound :
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (fun y => ηE y * (f y - ψ y)) Ωα ≤
         ENNReal.ofReal K_leib *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p (fun y => f y - ψ y) Ωα :=
       hK_leib_bound hfψ_mem
     rw [h_norm_eq]
     refine h_leib_bound.trans ?_
     have h_step : ENNReal.ofReal K_leib *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p (fun y => f y - ψ y) Ωα ≤
         ENNReal.ofReal K_leib * ENNReal.ofReal ε_inner :=
       mul_le_mul_of_nonneg_left hψ_close (by simp : (0 : ℝ≥0∞) ≤ ENNReal.ofReal K_leib)
@@ -803,7 +803,7 @@ theorem contMDiff_dense_in_WkpChart_k
       (fun x : M => (toEuclidean (E := E)) (extChartAt I (α : M) x)) '' K_α α :=
     fun α => (h_chi α).choose_spec.2.2.1
   have hχ_close : ∀ α : S,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (fun y => chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) (α : M) u y -
@@ -834,7 +834,7 @@ theorem contMDiff_dense_in_WkpChart_k
   refine ⟨v, hv_smooth, ?_⟩
   rw [wkpNormChart_eq_finset_sum (I := I) (M := M) g k hp_one (fun x => u x - v x)]
   have h_per_gamma : ∀ (γ : M), (hγS : γ ∈ S) →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
@@ -906,7 +906,7 @@ theorem contMDiff_dense_in_WkpChart_k
             χ α y) x)
     rw [h_chartPushed_decomp]
     have h_per_alpha : ∀ α ∈ S.attach,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ
@@ -973,7 +973,7 @@ theorem contMDiff_dense_in_WkpChart_k
         exact h_tsupp_sub.trans (Set.union_subset hf_α_supp (hχ_supp α))
       have h_bd := hK_pair_bound ⟨γ, hγS⟩ α h_diff_mem h_diff_supp
       have h_diff_close :
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) k p
             (fun y => f_α y - χ α y)
             (chartTargetEuclid (I := I) (M := M) (α : M)) ≤
@@ -1059,7 +1059,7 @@ theorem contMDiff_dense_in_WkpChart_k
       simpa [h_eq] using h_mem_cross
     set Ωγ := chartTargetEuclid (I := I) (M := M) γ with hΩγ_def
     have hΩγ_open : IsOpen Ωγ := chartTargetEuclid_isOpen (I := I) (M := M) γ
-    have h_total_bound : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    have h_total_bound : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (fun y => ∑ α ∈ S.attach,
           chartPushed (I := I) (M := M)
@@ -1115,7 +1115,7 @@ theorem contMDiff_dense_in_WkpChart_k
           · exact ih
     exact h_total_bound
   let f : S → ENNReal := fun (γ : S) =>
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p
       (chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) γ.val

@@ -45,7 +45,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def connDiffAACommKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+def connDiffIteratedCommKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
@@ -66,12 +66,12 @@ def connDiffAACommKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
 set_option linter.unusedSectionVars false in
 @[simp] lemma connDiffAACommKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (p q v0 v1 : TangentSpace I x) :
-    connDiffAACommKernelBilin (I := I) g₀ g₁ x p q v0 v1 =
+    connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q v0 v1 =
       g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
           (PDE.DeTurck.connDiff (I := I) g₁ g₀ x q p) v0) v1
         - g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x
             (PDE.DeTurck.connDiff (I := I) g₁ g₀ x q v0) p) v1 := by
-  rw [connDiffAACommKernelBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
+  rw [connDiffIteratedCommKernelBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
     AddHom.coe_mk, ContinuousLinearMap.sub_apply]
 
 def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -83,7 +83,7 @@ def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         haveI : FiniteDimensional ℝ (TangentSpace I x) :=
           inferInstanceAs (FiniteDimensional ℝ E)
         LinearMap.toContinuousLinearMap
-          { toFun := fun q => connDiffAACommKernelBilin (I := I) g₀ g₁ x p q v0 v1
+          { toFun := fun q => connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q v0 v1
             map_add' := fun q q' => by
               rw [connDiffAACommKernelBilin_apply, connDiffAACommKernelBilin_apply,
                 connDiffAACommKernelBilin_apply]
@@ -119,7 +119,7 @@ set_option linter.unusedSectionVars false in
 @[simp] lemma frameConnDiffAACommKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (v0 v1 p q : TangentSpace I x) :
     frameConnDiffAACommKernel (I := I) g₀ g₁ x v0 v1 p q =
-      connDiffAACommKernelBilin (I := I) g₀ g₁ x p q v0 v1 := by
+      connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q v0 v1 := by
   rw [frameConnDiffAACommKernel, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
     AddHom.coe_mk, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
@@ -131,7 +131,7 @@ def connDiffAACommSummandFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     { toFun := fun D =>
         (Tensor0SSpace.toModel D ![(p : E), (q : E)]) •
           Tensor0SSpace.ofModel (I := I) (x := x)
-            (bilinFormToModel E (connDiffAACommKernelBilin (I := I) g₀ g₁ x p q))
+            (bilinFormToModel E (connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q))
       map_add' := fun D D' => by
         rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply, add_smul]
       map_smul' := fun c D => by
@@ -143,7 +143,7 @@ set_option linter.unusedSectionVars false in
     (x : M) (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (connDiffAACommSummandFib (I := I) g₀ g₁ x p q D) v =
       (Tensor0SSpace.toModel D ![(p : E), (q : E)]) *
-        connDiffAACommKernelBilin (I := I) g₀ g₁ x p q (v 0) (v 1) := by
+        connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q (v 0) (v 1) := by
   rw [connDiffAACommSummandFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
     AddHom.coe_mk, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
     Tensor0SSpace.toModel_ofModel, bilinFormToModel_apply, smul_eq_mul]
@@ -163,7 +163,7 @@ lemma connDiffAACommBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMe
         (connDiffAACommBiContrFibFixedFrame (I := I) g₀ g₁ B x D) v =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (Tensor0SSpace.toModel D ![(B a x : E), (B b x : E)]) *
-          connDiffAACommKernelBilin (I := I) g₀ g₁ x (B a x) (B b x) (v 0) (v 1) := by
+          connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x (B a x) (B b x) (v 0) (v 1) := by
   classical
   rw [connDiffAACommBiContrFibFixedFrame, ContinuousLinearMap.sum_apply,
     ← Tensor0SSpace.toModelL_apply, map_sum, ContinuousMultilinearMap.sum_apply]
@@ -181,15 +181,15 @@ theorem connDiffAACommKernelBilin_homSection_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
         (E := fun b : M => TangentSpace I b →L[ℝ] TangentSpace I b →L[ℝ] ℝ) x
-        (connDiffAACommKernelBilin (I := I) g₀ g₁ x (p x) (q x))) := by
+        (connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x (p x) (q x))) := by
   classical
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun x : M => TangentSpace I x →L[ℝ] ℝ)
-    (φ := fun x : M => connDiffAACommKernelBilin (I := I) g₀ g₁ x (p x) (q x))
+    (φ := fun x : M => connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x (p x) (q x))
   intro V0
   apply cotangentCov_clmSection_smooth_aux
     (V₂ := fun _ : M => ℝ)
-    (φ := fun x : M => connDiffAACommKernelBilin (I := I) g₀ g₁ x (p x) (q x) (V0 x))
+    (φ := fun x : M => connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x (p x) (q x) (V0 x))
   intro W
   have hAqp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (T% (fun b : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ b (q b) (p b))) :=
@@ -229,7 +229,7 @@ theorem connDiffAACommKernelBilin_homSection_contMDiff
   rw [contMDiffAt_section]
   refine (h_scalar.contMDiffAt).congr_of_eventuallyEq ?_
   filter_upwards with y
-  change connDiffAACommKernelBilin (I := I) g₀ g₁ y (p y) (q y) (V0 y) (W y) =
+  change connDiffIteratedCommKernelBilin (I := I) g₀ g₁ y (p y) (q y) (V0 y) (W y) =
     (trivializationAt ℝ (Bundle.Trivial M ℝ) x ⟨y, _⟩).2
   rw [connDiffAACommKernelBilin_apply]
   rfl
@@ -266,7 +266,7 @@ theorem connDiffAACommBiContrFibFixedFrame_apply_section_contMDiff
       funext i
       fin_cases i <;> rfl
     have hbilin := contMDiff_bilinSection_of_homSection (I := I)
-      (fun x => connDiffAACommKernelBilin (I := I) g₀ g₁ x (B a x) (B b x))
+      (fun x => connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x (B a x) (B b x))
       (connDiffAACommKernelBilin_homSection_contMDiff (I := I) g₀ g₁ (hB a) (hB b))
     have hsmul := ContMDiff.smul_section (f := fun x : M =>
         Tensor0SSpace.toModel (Y x) ![(B a x : E), (B b x : E)]) hscalar hbilin
@@ -353,7 +353,7 @@ lemma connDiffAACommBiContrFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) 
         (Tensor0SSpace.toModel D
           ![(smoothOrthoFrame (I := I) g₁ x a x : E),
             (smoothOrthoFrame (I := I) g₁ x b x : E)]) *
-          connDiffAACommKernelBilin (I := I) g₀ g₁ x
+          connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x
             (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
             (v 0) (v 1) := by
   rw [connDiffAACommBiContrFib, connDiffAACommBiContrFibFixedFrame_toModel]
@@ -375,7 +375,7 @@ theorem connDiffAACommBiContrFib_eq_fixedFrame_on_nbhd
   have hrewrite : ∀ (Bf : Fin (Module.finrank ℝ E) → TangentSpace I y),
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         (Tensor0SSpace.toModel D ![(Bf a : E), (Bf b : E)]) *
-          connDiffAACommKernelBilin (I := I) g₀ g₁ y (Bf a) (Bf b) (v 0) (v 1) =
+          connDiffIteratedCommKernelBilin (I := I) g₀ g₁ y (Bf a) (Bf b) (v 0) (v 1) =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         frameConnDiffAACommKernel (I := I) g₀ g₁ y (v 0) (v 1) (Bf a) (Bf b) *
           (bilinFormToModel (TangentSpace I y)).symm (Tensor0SSpace.toModel D) (Bf a) (Bf b) := by
@@ -451,7 +451,7 @@ theorem connDiffAACommBiContrFib_self (g₀ : SmoothRiemannianMetric I M) (x : M
       (Tensor0SSpace.toModel D
         ![(smoothOrthoFrame (I := I) g₀ x a x : E),
           (smoothOrthoFrame (I := I) g₀ x b x : E)]) *
-        connDiffAACommKernelBilin (I := I) g₀ g₀ x
+        connDiffIteratedCommKernelBilin (I := I) g₀ g₀ x
           (smoothOrthoFrame (I := I) g₀ x a x) (smoothOrthoFrame (I := I) g₀ x b x)
           (v 0) (v 1)) = 0 from
     Finset.sum_eq_zero (fun a _ => Finset.sum_eq_zero (fun b _ => by

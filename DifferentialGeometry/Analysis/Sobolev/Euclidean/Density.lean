@@ -1362,7 +1362,7 @@ theorem exists_eLpNorm_convolution_mollifierEps_sub_le
   intro δ hδ_pos hδ_le
   have hδ_lt : δ < δ₀ := by linarith
   set η : E → ℝ := mollifierEps (d := d) hδ_pos with hη_def
-  have h_FK := eLpNorm_convolution_sub_le_supTrans_meas
+  have h_FK := eLpNorm_convolution_sub_le_of_ae_translation_bound
     (η := η) (u := g) (T := ε) (p := p) hp_one hp_top
     (mollifierEps_continuous (d := d) hδ_pos)
     (mollifierEps_compactSupport (d := d) hδ_pos)
@@ -1476,7 +1476,7 @@ theorem MemWkp.exists_smooth_compactSupport_approx
     (ε : ℝ) (hε : 0 < ε) :
     ∃ φ : EuclideanSpace ℝ (Fin d) → ℝ,
       ContDiff ℝ (⊤ : ℕ∞) φ ∧ HasCompactSupport φ ∧ tsupport φ ⊆ Ω ∧
-      wkpNorm k p (fun x => u x - φ x) Ω ≤ ENNReal.ofReal ε := by
+      iteratedWeakSobolevNorm k p (fun x => u x - φ x) Ω ≤ ENNReal.ofReal ε := by
   classical
   set K : Set E := tsupport u with hK_def
   have hK_compact : IsCompact K := hu_compactSupport
@@ -1567,7 +1567,7 @@ theorem MemWkp.exists_smooth_compactSupport_approx
   refine ⟨φ, hφ_smooth, hφ_compact, hφ_supp, ?_⟩
   have huφ_W : MemWkp (d := d) k p (fun x => u x - φ x) Ω :=
     MemWkp.sub (d := d) hp_one hΩ_open hu hφ_W
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   refine (Finset.sum_le_sum (g := fun j =>
     ∑ _β : Fin j → Fin d, (ENNReal.ofReal εPer : ℝ≥0∞))
     (fun j hj => ?_)).trans ?_

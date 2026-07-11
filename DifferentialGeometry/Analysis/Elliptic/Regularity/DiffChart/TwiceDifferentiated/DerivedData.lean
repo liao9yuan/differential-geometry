@@ -491,7 +491,7 @@ private lemma chartPushedFirstPartial_memWkp_two_two
       (I := I) (M := M) g α hu_h
   exact h3.chosenWeakPartial_mem l₁
 
-theorem chosenThirdMixedPartialChartPushedU_eq_chosenWeakPartial_uChart_ae
+theorem chosenWeakPartial_chosenSecondPartialChartPushedU_eq_chosenThirdMixedPartialChartPushedU_ae
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -822,7 +822,7 @@ private noncomputable def twiceDerived_f_chart
     (l₁ l₂ : Fin (Module.finrank ℝ E))
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) : EuclN → ℝ :=
-  fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h
+  effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h
 
 private noncomputable def twiceDerived_weak_partial
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1015,7 +1015,7 @@ noncomputable def twiceDerivedChartBilinearH1ComplData
             ∂(volume : Measure EuclN)) =
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
-            fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+            effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
           ∂(volume : Measure EuclN)) :
     ChartBilinearH1ComplData (I := I) (M := M) g α where
   u_chart := twiceDerived_u_chart (I := I) (M := M) g α l₁ l₂ u_h
@@ -1040,7 +1040,7 @@ noncomputable def twiceDerivedChartBilinearH1ComplData
     have hK_meas : MeasurableSet (tsupport ψ) :=
       (isClosed_tsupport ψ).measurableSet
     have h_swap_ae := fun i =>
-      chosenThirdMixedPartialChartPushedU_eq_chosenWeakPartial_uChart_ae
+      chosenWeakPartial_chosenSecondPartialChartPushedU_eq_chosenThirdMixedPartialChartPushedU_ae
         (I := I) (M := M) g α hu_h i l₁ l₂
     set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
     have h_lhs_eq :

@@ -157,7 +157,7 @@ private lemma kscr_deTurckCoeff_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I
       ∑ k : Fin (Module.finrank ℝ E),
         (Tensor0SSpace.toModel w)
           (Fin.cons
-            ((gInvDiffRaisedEndo (I := I) g₀ g₁ x
+            ((metricComparisonDiffEndo (I := I) g₀ g₁ x
               (cometricLmodel (I := I) g₀ x
                 (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
                   ((Module.finBasis ℝ E).cDualBasis k))) : TangentSpace I x) : E)
@@ -182,7 +182,7 @@ private lemma kscr_deTurckCoeff_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I
     hcurry (cometricLmodel (I := I) g₀ x
         (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
           ((Module.finBasis ℝ E).cDualBasis k))),
-    hcurry (gInvDiffRaisedEndo (I := I) g₀ g₁ x
+    hcurry (metricComparisonDiffEndo (I := I) g₀ g₁ x
         (cometricLmodel (I := I) g₀ x
           (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
             ((Module.finBasis ℝ E).cDualBasis k))))]
@@ -201,7 +201,7 @@ private lemma kscr_deTurckCoeff_component_eq (g₀ g₁ : SmoothRiemannianMetric
     fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
           (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁).toSection x) n e K J =
-      g₀.inner x (e (K 0)) (gInvDiffRaisedEndo (I := I) g₀ g₁ x (e (K 1))) *
+      g₀.inner x (e (K 0)) (metricComparisonDiffEndo (I := I) g₀ g₁ x (e (K 1))) *
         ((if K 2 = J 0 then (1 : ℝ) else 0) * (if K 3 = J 1 then (1 : ℝ) else 0)) := by
   classical
   have hcomp : fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
@@ -219,7 +219,7 @@ private lemma kscr_deTurckCoeff_component_eq (g₀ g₁ : SmoothRiemannianMetric
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
         ((Module.finBasis ℝ E).cDualBasis k)) with hRk
   set Λ : TangentSpace I x →L[ℝ] TangentSpace I x :=
-    gInvDiffRaisedEndo (I := I) g₀ g₁ x with hΛ
+    metricComparisonDiffEndo (I := I) g₀ g₁ x with hΛ
   have hk : ∀ k : Fin (Module.finrank ℝ E),
       (Tensor0SSpace.toModel (coframeS (I := I) (M := M) g₀ x 4 e K))
           (Fin.cons ((Λ (Rk k) : TangentSpace I x) : E)
@@ -357,18 +357,18 @@ set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 
-private lemma kscr_rfns_pcc_deviation_le (g₀ ga gb : SmoothRiemannianMetric I M)
+private lemma riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (g₀ ga gb : SmoothRiemannianMetric I M)
     (ha hb : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (htie_a : ∀ (y : M) (v w : TangentSpace I y),
       ga.inner y v w = g₀.inner y v w + ha y v w)
     (htie_b : ∀ (y : M) (v w : TangentSpace I y),
       gb.inner y v w = g₀.inner y v w + hb y v w)
     {δa δb δab : ℝ} (hδa_lt : δa < 1)
-    (hδa : gFibreOpBound (I := I) (M := M) g₀ ha δa)
+    (hδa : metricCauchySchwarzBound (I := I) (M := M) g₀ ha δa)
     (hδb_lt : δb < 1) (hδb_nn : 0 ≤ δb)
-    (hδb : gFibreOpBound (I := I) (M := M) g₀ hb δb)
+    (hδb : metricCauchySchwarzBound (I := I) (M := M) g₀ hb δb)
     (hδab_nn : 0 ≤ δab)
-    (hδab : gFibreOpBound (I := I) (M := M) g₀ (fun y => ha y - hb y) δab)
+    (hδab : metricCauchySchwarzBound (I := I) (M := M) g₀ (fun y => ha y - hb y) δab)
     (hδa_nn : 0 ≤ δa)
     (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
@@ -377,7 +377,7 @@ private lemma kscr_rfns_pcc_deviation_le (g₀ ga gb : SmoothRiemannianMetric I 
       (Module.finrank ℝ E : ℝ) ^ 3 * (δab / ((1 - δa) * (1 - δb))) ^ 2 := by
   classical
   set Λ : TangentSpace I x →L[ℝ] TangentSpace I x :=
-    gInvDiffRaisedEndo (I := I) g₀ ga x - gInvDiffRaisedEndo (I := I) g₀ gb x with hΛ
+    metricComparisonDiffEndo (I := I) g₀ ga x - metricComparisonDiffEndo (I := I) g₀ gb x with hΛ
   obtain ⟨n, e, hn, horth, hpar, hrepr⟩ :=
     exists_orthonormal_frame_riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
   have hnE : (n : ℝ) = (Module.finrank ℝ E : ℝ) := by rw [hn]; rfl
@@ -436,8 +436,8 @@ private lemma kscr_rfns_pcc_deviation_le (g₀ ga gb : SmoothRiemannianMetric I 
     have hsqrt := DifferentialGeometry.Analysis.Sobolev.TensorHilbert.sqrt_inner_gInvDiffRaisedEndo_sub_le
       (I := I) (M := M) g₀ ga gb ha hb htie_a htie_b hδa_lt hδa hδb_lt hδb_nn hδb
       hδab_nn hδab x (e b)
-    have hΛb : Λ (e b) = gInvDiffRaisedEndo (I := I) g₀ ga x (e b)
-        - gInvDiffRaisedEndo (I := I) g₀ gb x (e b) := by
+    have hΛb : Λ (e b) = metricComparisonDiffEndo (I := I) g₀ ga x (e b)
+        - metricComparisonDiffEndo (I := I) g₀ gb x (e b) := by
       rw [hΛ, ContinuousLinearMap.sub_apply]
     rw [← hΛb, ← hr] at hsqrt
     have he1 : g₀.inner x (e b) (e b) = 1 := by rw [horth b b]; simp
@@ -474,14 +474,14 @@ set_option maxHeartbeats 1600000 in
 private lemma kscr_combinedTrace42Model_apply_symbolic
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
-    combinedTrace42Model (E := E) L D m =
+    ricciPrincipalCoeffDoubleTraceModel (E := E) L D m =
       (1 / 2 : ℝ) *
         (modelDoubleTrace (E := E) 2 L
-            (ContinuousMultilinearMap.domDomCongr koszulSlotPerm D) m
-          + modelDoubleTrace (E := E) 2 L (ContinuousMultilinearMap.domDomCongr koszulSlotPerm D)
+            (ContinuousMultilinearMap.domDomCongr koszulDoubleTraceSlotPerm D) m
+          + modelDoubleTrace (E := E) 2 L (ContinuousMultilinearMap.domDomCongr koszulDoubleTraceSlotPerm D)
               (fun j : Fin 2 => m ((Equiv.swap (0 : Fin 2) 1) j))
           - modelDoubleTrace (E := E) 2 L D m) := by
-  rw [combinedTrace42Model, ContinuousLinearMap.smul_apply,
+  rw [ricciPrincipalCoeffDoubleTraceModel, ContinuousLinearMap.smul_apply,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
 
@@ -495,10 +495,10 @@ private lemma kscr_ricciArmPrincipalCoeff_sub_add_self_eq_reindexSum
         + (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁
           - ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₀) =
       reindexCoeffGen (I := I) (M := M) g₀ 4 2
-          (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁) koszulSlotPerm
+          (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁) koszulDoubleTraceSlotPerm
         + reindexCoeffGen (I := I) (M := M) g₀ 4 2
             (rsDomDomCongrSection (I := I) (M := M) g₀ 4 2 (Equiv.swap (0 : Fin 2) 1)
-              (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)) koszulSlotPerm
+              (deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁)) koszulDoubleTraceSlotPerm
         - deTurckPrincipalCometricCoeff (I := I) (M := M) g₀ g₁ := by
   classical
   apply SmoothCcTensor.ext
@@ -549,7 +549,7 @@ private lemma kscr_traceHessianCoeff_sub_eq_reindex_pcc
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-theorem kscr_reindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M)
+theorem reindexCoeffGen_map_sub (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 4 2) (ρ : Equiv.Perm (Fin 4)) :
     reindexCoeffGen (I := I) (M := M) g₀ 4 2 (A - B) ρ =
       reindexCoeffGen (I := I) (M := M) g₀ 4 2 A ρ -
@@ -640,8 +640,8 @@ set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
 private lemma kscr_phiMet_realizedFam_eq_lieSubLich
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) :
     deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg (realizedFam (I := I) g₀ T T' hδ hδ' s) =
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff
@@ -664,10 +664,10 @@ private lemma kscr_phiMet_realizedFam_eq_lieSubLich
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-theorem kscr_phiMet_realizedFam_jointSmooth
+theorem deTurckPhiMetTotal_jointSmooth_along_realizedFam
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
       (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
         (realizedFam (I := I) g₀ T T' hδ hδ' s)) (δ := δ) (δ' := δ') := by
@@ -708,12 +708,12 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
     {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+      metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
     ∃ εCD : ℝ, 0 ≤ εCD ∧
       (0 ≤ δ → εCD ≤ 3 * deTurckArmFibreConst (Module.finrank ℝ E) * (δ / (1 - δ))) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2),
         (∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v) →
+          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v) →
         ∀ (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
         ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ (2 + 2) 2 x
@@ -777,7 +777,7 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
         (realizedFam (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) hδT hδZ s) with hΦ_def
     have hjoint : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ
         (δ := δ) (δ' := δ) :=
-      kscr_phiMet_realizedFam_jointSmooth (I := I) (M := M) g₀ g_bg T₀
+      deTurckPhiMetTotal_jointSmooth_along_realizedFam (I := I) (M := M) g₀ g_bg T₀
         (0 : SmoothCcTensor g₀ 0 2) hδT hδZ
     have hSIu : Set.uIcc (0 : ℝ) 1 ⊆ realizedSmallSet (δ := δ) (δ' := δ) := by
       rw [Set.uIcc_of_le zero_le_one]
@@ -884,7 +884,7 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
             t * ccTensorBilinSymm (I := I) g₀ T₀ y v w := by
         intro y v w
         rw [hcp, ccTensorBilinSymm_smul]
-      have hδa : gFibreOpBound (I := I) (M := M) g₀
+      have hδa : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀
             (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t)) (t * δ) := by
         intro y v w
@@ -896,7 +896,7 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
             ≤ t * (δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w)) :=
               mul_le_mul_of_nonneg_left hbase ht0
           _ = t * δ * Real.sqrt (g₀.inner y v v) * Real.sqrt (g₀.inner y w w) := by ring
-      have hδab : gFibreOpBound (I := I) (M := M) g₀
+      have hδab : metricCauchySchwarzBound (I := I) (M := M) g₀
           (fun y => ccTensorBilinSymm (I := I) g₀
               (convexPerturbation (I := I) g₀ T₀ (0 : SmoothCcTensor g₀ 0 2) t) y
             - ccTensorBilinSymm (I := I) g₀ T₀ y) ((1 - t) * δ) := by
@@ -940,7 +940,7 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
           (Module.finrank ℝ E : ℝ) ^ 3 *
             ((1 - t) * δ / ((1 - t * δ) * (1 - δ))) ^ 2 := by
         rw [hΔt_def, hΔ1_def]
-        exact kscr_rfns_pcc_deviation_le (I := I) (M := M) g₀ g_t g₁ _ _
+        exact riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (I := I) (M := M) g₀ g_t g₁ _ _
           htie_t htie_1 htδ_lt hδa hδ_lt hδ0 hδT
           (mul_nonneg (by linarith) hδ0) hδab htδ_nn x
       have hdev_sqrt : Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
@@ -960,10 +960,10 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
       set A2 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
         (reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt traceHessianSlotPerm) ρAT with hA2_def
       set R1 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2 Δt
-        koszulSlotPerm with hR1_def
+        koszulDoubleTraceSlotPerm with hR1_def
       set R2 : SmoothCcTensor g₀ 4 2 := reindexCoeffGen (I := I) (M := M) g₀ 4 2
         (rsDomDomCongrSection (I := I) (M := M) g₀ 4 2 (Equiv.swap (0 : Fin 2) 1) Δt)
-        koszulSlotPerm with hR2_def
+        koszulDoubleTraceSlotPerm with hR2_def
       clear_value A1 A2 R1 R2
       have hXX : (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t
             + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g_t)
@@ -1010,8 +1010,8 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
                 (traceHessianCoeff (I := I) (M := M) g₀ g_t
                   - traceHessianCoeff (I := I) (M := M) g₀ g₀) ρAT)
               - (R1 + R2 - Δt) - Δ1 := by
-              rw [kscr_reindexCoeffGen_sub (I := I) (M := M) g₀ _ _ ρA,
-                kscr_reindexCoeffGen_sub (I := I) (M := M) g₀ _ _ ρAT, hXX]
+              rw [reindexCoeffGen_map_sub (I := I) (M := M) g₀ _ _ ρA,
+                reindexCoeffGen_map_sub (I := I) (M := M) g₀ _ _ ρAT, hXX]
           _ = A1 + A2 - R1 - R2 + (Δt - Δ1) := by
               rw [h327, ← hΔt_def, hA1_def, hA2_def]
               abel
@@ -1066,11 +1066,11 @@ theorem exists_deTurckPhiTotPathIntegral_sub_background_sub_principalCometricCoe
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
         rw [hR1_def, reindexCoeffGen_toSection]
         exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannianFiberNormSq_reindexCoeffFibGen
-          (I := I) (M := M) g₀ 4 2 x koszulSlotPerm _
+          (I := I) (M := M) g₀ 4 2 x koszulDoubleTraceSlotPerm _
       have hexR2 : riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (R2.toSection x) =
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x (Δt.toSection x) := by
         have h20 := rfns_iteratedCovGrad_rsDomDomCongr_both_eq (I := I) (M := M) g₀ 4 2
-          koszulSlotPerm (Equiv.swap (0 : Fin 2) 1) Δt 0 x
+          koszulDoubleTraceSlotPerm (Equiv.swap (0 : Fin 2) 1) Δt 0 x
         rw [hR2_def]
         simpa [iteratedCovGrad_zero] using h20
       have htpn_piece : ∀ (W : SmoothCcTensor g₀ 4 2),

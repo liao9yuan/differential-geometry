@@ -125,7 +125,7 @@ theorem covGrad_diffCurvOp_eq (p r : ℕ) (W : SmoothCcTensor g 0 r) :
   rw [sub_add_cancel]
 
 theorem diffCurvOp_isOrderZeroCurvFactor :
-    IsOrderZeroCurvFactor (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) where
+    IsPointwiseLinearLocalOperator (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) where
   linear := by
     intro r c₁ c₂ W₁ W₂ x
     rw [show (diffCurvOp (I := I) (M := M) g hX hY 0 r (c₁ • W₁ + c₂ • W₂)).toSection x =
@@ -215,7 +215,7 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) (r : ℕ) (W : SmoothCcTensor g 0 r) :
     diffCurvOp (I := I) (M := M) g hX hY 0 r W =
-      appCc (I := I) (M := M) g r r (diffCurvPhi0 (I := I) (M := M) g hX hY r) W := by
+      operatorFieldApply (I := I) (M := M) g r r (diffCurvPhi0 (I := I) (M := M) g hX hY r) W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
@@ -304,14 +304,14 @@ theorem exists_proportional_diffCurvOp_highOrder :
   have hcovGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r),
       covGrad g 0 (r + p) (diffCurvOp (I := I) (M := M) g hX hY p r W) =
         diffCurvOp (I := I) (M := M) g hX hY (p + 1) r W +
-          castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+          castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
             (diffCurvOp (I := I) (M := M) g hX hY p (r + 1) (covGrad g 0 r W)) := by
     intro p r W
     rw [covGrad_diffCurvOp_eq (I := I) (M := M) g hX hY p r W]
     rfl
 
   have hNF : ∀ (p r : ℕ),
-      NormalForm (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) p r :=
+      IsIteratedCovGradNormalForm (I := I) (M := M) g (diffCurvOp (I := I) (M := M) g hX hY) p r :=
     fun p => normalForm_of_base (I := I) (M := M) g
       (diffCurvOp (I := I) (M := M) g hX hY) hcovGrad_op
       (fun r => diffCurvPhi0 (I := I) (M := M) g hX hY r)
@@ -431,7 +431,7 @@ variable {kappa : ℕ → ℕ → ℝ} (hkappa_nn : ∀ p r, 0 ≤ kappa p r)
 include hkappa_nn hkappa in
 set_option linter.unusedSectionVars false in
 
-theorem rfns_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
+theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 ((r + p) + j) x
           ((iteratedCovGrad g 0 (r + p) j
@@ -598,7 +598,7 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaG
                 ((iteratedCovGrad g 0 s q Z).toSection x) := by
   obtain ⟨kappa, hkappa_nn, hkappa⟩ := exists_proportional_diffCurvOp (I := I) (M := M) g hX hY
   refine ⟨kappa, hkappa_nn, fun Z j x => ?_⟩
-  have hgrid := rfns_iteratedCovGrad_diffCurvOp_grid (I := I) (M := M) g hX hY
+  have hgrid := riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (I := I) (M := M) g hX hY
     hkappa_nn hkappa j 0 s Z x
 
   rw [diffCurvOp_zero g hX hY s Z] at hgrid

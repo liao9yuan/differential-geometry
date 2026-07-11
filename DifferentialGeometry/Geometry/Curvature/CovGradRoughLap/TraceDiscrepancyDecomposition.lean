@@ -78,7 +78,7 @@ theorem covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual
           (unitZeroSec (I := I) (M := M) x)) w =
       covGradRoughLapTraceDiscrepancy (I := I) (M := M) g T₀ x w +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
-          Tensor3rdCurv (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
+          tensorThirdOrderCurvatureDefect (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) -
         covGradRoughLapMovingFrameResidual (I := I) (M := M) g T₀ x w := by
@@ -141,7 +141,7 @@ theorem covGradRoughLapCurv_curry_eq_discrepancy_add_curv_sub_residual_gen
           (unitZeroSec (I := I) (M := M) x)) w =
       covGradRoughLapTraceDiscrepancy_gen (I := I) (M := M) g s T₀ x w +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-          Tensor3rdCurv (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
+          tensorThirdOrderCurvatureDefect (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) -
         covGradRoughLapMovingFrameResidual_gen (I := I) (M := M) g s T₀ x w := by

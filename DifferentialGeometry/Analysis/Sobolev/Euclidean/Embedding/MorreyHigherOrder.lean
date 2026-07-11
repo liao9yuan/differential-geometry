@@ -512,7 +512,7 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
         ∀ x ∈ Metric.ball x₀ (R / 2),
           ∀ j ≤ m,
           ‖iteratedFDeriv ℝ j (fun y => f y - g y) x‖ ≤ C *
-            (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
+            (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
               (Metric.ball x₀ R)).toReal := by
   classical
   have hd_pos : (0 : ℝ) < d := Nat.cast_pos.mpr (NeZero.pos d)
@@ -577,9 +577,9 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_bound
   have hh_W : MemWkp (d := d) (m + 1) (ENNReal.ofReal p) h (Metric.ball x₀ R) :=
     MemWkp_of_smooth_compactSupport (d := d) hΩ_open hh_smooth hh_cpt
       hh_supp hpp_one (m + 1)
-  have hh_wkp_finite : wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) h
+  have hh_wkp_finite : iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) h
       (Metric.ball x₀ R) < ⊤ := wkpNorm_lt_top_of_memWkp hh_W
-  set N : ℝ := (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) h
+  set N : ℝ := (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) h
     (Metric.ball x₀ R)).toReal with hN_def
   have hN_nn : 0 ≤ N := ENNReal.toReal_nonneg
   have h_bridge :=
@@ -643,7 +643,7 @@ private theorem exists_smooth_approx_seq_of_memWkp
       (∀ n, ContDiff ℝ (⊤ : ℕ∞) (φ n)) ∧
       (∀ n, HasCompactSupport (φ n)) ∧
       (∀ n, tsupport (φ n) ⊆ Metric.ball x₀ R) ∧
-      (∀ n, wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+      (∀ n, iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
         (fun x => χ x * u x - φ n x) (Metric.ball x₀ R) ≤
           ENNReal.ofReal (1 / (n + 1 : ℝ))) := by
   classical
@@ -687,7 +687,7 @@ private theorem exists_smooth_approx_seq_of_memWkp
       ContDiff ℝ (⊤ : ℕ∞) φₙ ∧
       HasCompactSupport φₙ ∧
       tsupport φₙ ⊆ Metric.ball x₀ R ∧
-      wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+      iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
         (fun x => χ x * u x - φₙ x) (Metric.ball x₀ R) ≤
           ENNReal.ofReal (1 / (n + 1 : ℝ)) := by
     intro n
@@ -706,7 +706,7 @@ private theorem exists_smooth_approx_seq_of_memWkp
     (Classical.choose_spec (h_pick n)).2.1
   have hφ_supp : ∀ n, tsupport (φ n) ⊆ Metric.ball x₀ R := fun n =>
     (Classical.choose_spec (h_pick n)).2.2.1
-  have hφ_close : ∀ n, wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+  have hφ_close : ∀ n, iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
       (fun x => χ x * u x - φ n x) (Metric.ball x₀ R) ≤
         ENNReal.ofReal (1 / (n + 1 : ℝ)) := fun n =>
     (Classical.choose_spec (h_pick n)).2.2.2
@@ -799,7 +799,7 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
         tsupport g ⊆ Metric.ball x₀ R →
         ∀ x : E, ∀ j ≤ m,
           ‖iteratedFDeriv ℝ j (fun y => ψ y * (f y - g y)) x‖ ≤ C *
-            (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
+            (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
               (Metric.ball x₀ R)).toReal := by
   classical
   obtain ⟨C_inner, hC_inner_nn, hC_inner_bound⟩ :=
@@ -816,14 +816,14 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
     refine h_leibniz.trans ?_
     have h_each : ∀ i ∈ Finset.range (j + 1),
         ‖iteratedFDeriv ℝ i (fun y => f y - g y) x‖ ≤ C_inner *
-          (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
+          (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
             (Metric.ball x₀ R)).toReal := by
       intro i hi
       rw [Finset.mem_range] at hi
       have hi_le : i ≤ m := Nat.lt_succ_iff.mp (Nat.lt_of_lt_of_le hi (Nat.succ_le_succ hj))
       exact hC_inner_bound hf_smooth hf_cpt hf_supp hg_smooth hg_cpt hg_supp x hx_in_ball i hi_le
     set NormDiff : ℝ :=
-      (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
+      (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
         (Metric.ball x₀ R)).toReal with hNormDiff_def
     have hNormDiff_nn : 0 ≤ NormDiff := ENNReal.toReal_nonneg
     have h_sum_le : ∑ i ∈ Finset.range (j + 1),
@@ -861,7 +861,7 @@ private theorem smooth_compactSupport_pair_iteratedFDeriv_mul_bound
       have h_at_x := h_iter_eq.self_of_nhds
       rw [h_at_x, iteratedFDeriv_fun_zero, Pi.zero_apply]
     rw [h_iter_zero, norm_zero]
-    have hN_nn : 0 ≤ (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
+    have hN_nn : 0 ≤ (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => f y - g y)
       (Metric.ball x₀ R)).toReal := ENNReal.toReal_nonneg
     have hC_nn : 0 ≤ C_leibniz * ↑(m + 1) * C_inner := by positivity
     exact mul_nonneg hC_nn hN_nn
@@ -1149,7 +1149,7 @@ theorem morrey_iteratedFDeriv_representative
     MemWkp_of_smooth_compactSupport (d := d) hΩ_open (hφ_smooth n) (hφ_cpt n)
       (hφ_supp n) hpp_one (m + 1)
   have hφ_cauchy_wkp : ∀ ε > 0, ∃ N : ℕ, ∀ n n', N ≤ n → N ≤ n' →
-      wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+      iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
         (fun y => φ n y - φ n' y) (Metric.ball x₀ R) ≤ ENNReal.ofReal ε := by
     intro ε hε
     have hε_half_pos : 0 < ε / 2 := half_pos hε
@@ -1168,9 +1168,9 @@ theorem morrey_iteratedFDeriv_representative
       MemWkp.sub (d := d) hpp_one hΩ_open hv_W (hφ_W n')
     have h_triangle :=
       wkpNorm_add_le (d := d) hpp_one hΩ_open h_mem_minus h_mem_plus
-    have h_norm_neg : wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+    have h_norm_neg : iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
         (fun y => -(χ y * u y - φ n y)) (Metric.ball x₀ R) =
-        wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+        iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
           (fun y => χ y * u y - φ n y) (Metric.ball x₀ R) := by
       have h_smul_eq : (fun y => -(χ y * u y - φ n y)) =
           fun y => (-1 : ℝ) * (χ y * u y - φ n y) := by
@@ -1203,9 +1203,9 @@ theorem morrey_iteratedFDeriv_representative
     have h_n'_ennreal : ENNReal.ofReal (1 / (n' + 1 : ℝ)) ≤ ENNReal.ofReal (ε / 2) :=
       ENNReal.ofReal_le_ofReal h_n'_le
     have h_combined :
-        wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => χ y * u y - φ n y)
+        iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => χ y * u y - φ n y)
           (Metric.ball x₀ R) +
-        wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => χ y * u y - φ n' y)
+        iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => χ y * u y - φ n' y)
           (Metric.ball x₀ R) ≤
         ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) :=
       add_le_add (le_trans (hφ_close n) h_n_ennreal) (le_trans (hφ_close n') h_n'_ennreal)
@@ -1250,13 +1250,13 @@ theorem morrey_iteratedFDeriv_representative
         (hφ_smooth n') (hφ_cpt n') (hφ_supp n') x j hj
       have h_wkp_le := hN n n' hn hn'
       have h_wkp_to_real :
-          (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => φ n y - φ n' y)
+          (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p) (fun y => φ n y - φ n' y)
             (Metric.ball x₀ R)).toReal ≤ ε / Cpair := by
         have h_toReal_le := ENNReal.toReal_mono ENNReal.ofReal_ne_top h_wkp_le
         rw [ENNReal.toReal_ofReal hε_div.le] at h_toReal_le
         exact h_toReal_le
       calc ‖iteratedFDeriv ℝ j (fun y => ψ y * (φ n y - φ n' y)) x‖
-          ≤ Cpair * (wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+          ≤ Cpair * (iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
               (fun y => φ n y - φ n' y) (Metric.ball x₀ R)).toReal := h_pair
         _ ≤ Cpair * (ε / Cpair) :=
             mul_le_mul_of_nonneg_left h_wkp_to_real hCpair_nn
@@ -1289,9 +1289,9 @@ theorem morrey_iteratedFDeriv_representative
   have h_eLp_le_wkp : ∀ n,
       eLpNorm (fun y => χ y * u y - φ n y)
         (ENNReal.ofReal p) (volume.restrict (Metric.ball x₀ R)) ≤
-      wkpNorm (d := d) (m + 1) (ENNReal.ofReal p)
+      iteratedWeakSobolevNorm (d := d) (m + 1) (ENNReal.ofReal p)
         (fun y => χ y * u y - φ n y) (Metric.ball x₀ R) := fun n => by
-    unfold wkpNorm
+    unfold iteratedWeakSobolevNorm
     have h_term_eq :
         ∑ α : Fin 0 → Fin d,
           eLpNorm (iterWeakPartial (d := d) (ENNReal.ofReal p) 0 α

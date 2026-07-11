@@ -33,7 +33,7 @@ theorem MemWkpHalfSpace.exists_smooth_compactSupport_approx
     MemWkp.exists_smooth_compactSupport_approx (d := d)
       hΩ_open k p hp_one hp_top hu' hu_compactSupport hu_supp ε hε
   refine ⟨φ, hφ_smooth, hφ_compact, hφ_supp, ?_⟩
-  change wkpNorm (d := d) k p (fun x => u x - φ x) (interiorHalfSpace Ω) ≤
+  change iteratedWeakSobolevNorm (d := d) k p (fun x => u x - φ x) (interiorHalfSpace Ω) ≤
     ENNReal.ofReal ε
   exact hφ_norm
 

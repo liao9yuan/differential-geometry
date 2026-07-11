@@ -37,7 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 def deTurckRHSReanchor (g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g_bg 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ) :
     SmoothCcTensor g_bg 0 2 where
   toSection :=
     (deTurckRHSSection (I := I) g_bg
@@ -50,7 +50,7 @@ omit [BoundarylessManifold I M] in
 
 @[simp] theorem deTurckRHSReanchor_toSection (g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g_bg 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ) :
     (deTurckRHSReanchor (I := I) g_bg T hδ_lt hδ).toSection =
       (deTurckRHSSection (I := I) g_bg
         (tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ)).toSection := rfl

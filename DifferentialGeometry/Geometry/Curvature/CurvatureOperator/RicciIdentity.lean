@@ -467,7 +467,7 @@ theorem inner_cov_gradFun_symm_globally [I.Boundaryless]
   funext b
   exact inner_cov_gradFun_symm (I := I) g hf hX hY
 
-theorem heart_of_bochner_curvature_term [I.Boundaryless]
+theorem inner_riemannSec_gradFun_skew_symm [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {B w : Π b : M, TangentSpace I b} {x : M}
@@ -534,7 +534,7 @@ lemma localConnLap_vector_grad_inner_eq_hessian_diff [I.Boundaryless]
   rw [hu_def]
   rw [map_sub, ContinuousLinearMap.sub_apply]
 
-theorem heart_of_bochner_of_inner_form [I.Boundaryless]
+theorem localConnLap_vector_eq_bochnerFormula_of_inner_form [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)

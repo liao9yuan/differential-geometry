@@ -170,7 +170,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     {u : M → ℝ} (hu : MemWkpChart (I := I) (M := M) g (m + 1) 2 u) :
     ∀ ε > 0, ∃ N, ∀ a b, N ≤ a → N ≤ b →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
         (fun y =>
           DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
@@ -207,7 +207,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
   have h_ae_sub :=
     smoothFChartResidual_ae_sub (I := I) (M := M) g α va vb vdiff hvdiff_toFun
   have h_wkp_eq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
         (fun y =>
           DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
@@ -215,7 +215,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
           DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
             (I := I) (M := M) g α vb y)
         (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
         (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α vdiff)
@@ -233,7 +233,7 @@ theorem smoothApproxSeq_smoothFChartResidual_wkpNorm_cauchy_wkpM
     rw [hvdiff_toFun]
     exact smoothApproxSeqWkpM_wkpNormChart_diff_le (I := I) (M := M) g m hu a b
   have h_step :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
         (DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
           (I := I) (M := M) g α vdiff)
@@ -709,7 +709,7 @@ theorem smoothApproxSeqWkpM_tendsto_h1Compl
 private lemma eLpNorm_le_wkpNorm_m_two
     (m : ℕ) (u : EuclN → ℝ) (Ω : Set EuclN) :
     eLpNorm u 2 ((volume : Measure EuclN).restrict Ω) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2 u Ω := by
   classical
   have h_iter_eq :
@@ -727,7 +727,7 @@ private lemma eLpNorm_le_wkpNorm_m_two
 private lemma eLpNorm_tendsto_zero_of_wkpNorm_m_two_tendsto_zero
     (m : ℕ) {u : ℕ → EuclN → ℝ} {F_lim : EuclN → ℝ} {Ω : Set EuclN}
     (h_tendsto : Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) m 2
           (fun y => u n y - F_lim y) Ω)
       atTop (𝓝 0)) :
@@ -738,7 +738,7 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_m_two_tendsto_zero
   classical
   refine tendsto_of_tendsto_of_tendsto_of_le_of_le
     (g := fun _ => (0 : ℝ≥0∞)) (h := fun n =>
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) m 2
         (fun y => u n y - F_lim y) Ω)
     tendsto_const_nhds h_tendsto
@@ -892,7 +892,7 @@ theorem smoothApproxSeqWkpM_smoothFChartResidual_limit_eq_fChartResidual_wkpM
         (d := Module.finrank ℝ E) m 2 F_lim
         (chartTargetEuclid (I := I) (M := M) α) →
       Tendsto (fun n =>
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) m 2
           (fun y =>
             DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1ComplResidual.smoothFChartResidual
@@ -1043,7 +1043,7 @@ private lemma fHLeibniz_eq_piecePreimage_add_residual_general
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h_lapdom : u_h ∈ laplacianDomain (I := I) (M := M) g) :
-    fHLeibniz (I := I) (M := M) g α u_h hu_h_lapdom =
+    leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h_lapdom =
       smoothMulLpRhoPreimageGeneral (I := I) (M := M) g α hu_h_lapdom +
         fHLeibnizResidualLp (I := I) (M := M) g α u_h := by
   classical

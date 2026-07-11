@@ -263,12 +263,12 @@ set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-theorem rfns_curvatureRefoldMonomialBiContrFib_le
+theorem riemannianFiberNormSq_curvatureRefoldMonomialBiContrFib_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     {δ : ℝ} (hδ1 : δ < 1)
-    (hδP : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+    (hδP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
     (W : Π b : M, Tensor0SSpace 2 I b) {δW : ℝ} (hδW0 : 0 ≤ δW)
     (hW : ∀ (y : M) (v w : TangentSpace I y),
       |Tensor0SSpace.toModel (𝕜 := ℝ) (W y) ![(v : E), (w : E)]| ≤
@@ -277,7 +277,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
     riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x)) ≤
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x)) ≤
       (deTurckArmFibreConst (Module.finrank ℝ E) * (δW / (1 - δ) ^ 2)) ^ 2 := by
   classical
   have h1mδ : (0 : ℝ) < 1 - δ := by linarith
@@ -328,7 +328,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
       fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J =
         V (K (σ.symm 0)) (K (σ.symm 1)) *
           ((if K (σ.symm 2) = J 0 then (1 : ℝ) else 0) *
@@ -337,17 +337,17 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
     have hcomp_toModel : fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
         (Module.finrank ℝ E) e K J =
         Tensor0SSpace.toModel
-          ((curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x)
+          ((curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x)
             (coframeS (I := I) (M := M) g₀ x 4 e K))
           (fun i => (e (J i) : E)) := by
       unfold fiberNormSqComponent coframeS
       rfl
     rw [hcomp_toModel]
-    rw [show curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x =
-        curvatureRefoldMonomialFibFixedFrame (I := I) (M := M) W σ
+    rw [show curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x =
+        curvatureActionMonomialFrameTrace (I := I) (M := M) W σ
           (smoothOrthoFrame (I := I) g₁ x) x from rfl]
     rw [curvatureRefoldMonomialFibFixedFrame_toModel]
     have hterm : ∀ a b : Fin (Module.finrank ℝ E),
@@ -435,7 +435,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
         (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J) ^ 2 =
         (V (K (σ.symm 0)) (K (σ.symm 1))) ^ 2 := by
     intro K
@@ -443,7 +443,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
         (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J) ^ 2 =
         (V (K (σ.symm 0)) (K (σ.symm 1))) ^ 2 *
           ((if K (σ.symm 2) = J 0 then (1 : ℝ) else 0) *
@@ -530,19 +530,19 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
   have hrfns_eq := hrfns
     (show TensorRSSpace 4 2 I x from
       TensorRSSpace.ofCLM
-        (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+        (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
   rw [hrfns_eq]
   have hsummand : ∀ (K : Fin 4 → Fin (Module.finrank ℝ E))
       (J : Fin 2 → Fin (Module.finrank ℝ E)),
       fiberNormSqSummand (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
         (Module.finrank ℝ E) e K J =
       (fiberNormSqComponent (I := I) (M := M) g₀ x 4 2
         (show TensorRSSpace 4 2 I x from
           TensorRSSpace.ofCLM
-            (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+            (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
         (Module.finrank ℝ E) e K J) ^ 2 :=
     fun K J => fiberNormSqSummand_eq_component_sq (I := I) (M := M) g₀ x 4 2 _ _ e K J
   calc ∑ K : Fin 4 → Fin (Module.finrank ℝ E),
@@ -550,7 +550,7 @@ theorem rfns_curvatureRefoldMonomialBiContrFib_le
         fiberNormSqSummand (I := I) (M := M) g₀ x 4 2
           (show TensorRSSpace 4 2 I x from
             TensorRSSpace.ofCLM
-              (curvatureRefoldMonomialBiContrFib (I := I) (M := M) g₁ W σ x))
+              (curvatureActionMonomialTrace (I := I) (M := M) g₁ W σ x))
           (Module.finrank ℝ E) e K J
       = ∑ K : Fin 4 → Fin (Module.finrank ℝ E),
           (V (K (σ.symm 0)) (K (σ.symm 1))) ^ 2 := by

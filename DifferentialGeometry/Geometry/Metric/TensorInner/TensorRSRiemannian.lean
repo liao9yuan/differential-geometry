@@ -33,7 +33,7 @@ noncomputable def loweredCompose
     (T : TensorRSModel r s ℝ E) : Tensor0SModel (r + s) ℝ E :=
   (lowerAllUpperIndices (I := I) (M := M) g r s b T).compContinuousLinearMap
     (fun _ : Fin (r + s) =>
-      DifferentialGeometry.Tensor.Tensor0SRiemannian.chartJinv
+      DifferentialGeometry.Tensor.Tensor0SRiemannian.chartTrivializationLinearMapSymm
         (I := I) (M := M) α b)
 
 @[simp] lemma loweredCompose_apply
@@ -42,7 +42,7 @@ noncomputable def loweredCompose
     loweredCompose (I := I) (M := M) g r s α b T v =
       lowerAllUpperIndices (I := I) (M := M) g r s b T
         (fun i =>
-          DifferentialGeometry.Tensor.Tensor0SRiemannian.chartJinv
+          DifferentialGeometry.Tensor.Tensor0SRiemannian.chartTrivializationLinearMapSymm
             (I := I) (M := M) α b (v i)) := by
   unfold loweredCompose
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]

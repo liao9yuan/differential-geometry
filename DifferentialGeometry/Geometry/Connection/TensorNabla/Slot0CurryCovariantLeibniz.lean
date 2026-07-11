@@ -46,10 +46,10 @@ set_option linter.unusedSectionVars false in
 
 private lemma tensor0SAsRS_unit_eval (t : ℕ) (x : M) (C : Tensor0SSpace t I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
-        tensor0SAsRS (I := I) (M := M) x C)
+        tensor0SToTensorRS (I := I) (M := M) x C)
       (unitZeroSec (I := I) (M := M) x) = C := by
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
-        tensor0SAsRS (I := I) (M := M) x C)
+        tensor0SToTensorRS (I := I) (M := M) x C)
       (unitZeroSec (I := I) (M := M) x) =
       tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) • C from
     tensor0SAsRS_apply (I := I) (M := M) x C (unitZeroSec (I := I) (M := M) x)]
@@ -75,11 +75,11 @@ private lemma contMDiff_tensor0SAsRS_wrap (t : ℕ) {C : Π y : M, Tensor0SSpace
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 t ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 t ℝ E)
         (E := fun z : M => TensorRSSpace 0 t I z) y
-        (tensor0SAsRS (I := I) (M := M) y (C y))) := by
+        (tensor0SToTensorRS (I := I) (M := M) y (C y))) := by
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (F₁ := Tensor0SModel 0 ℝ E) (V₁ := fun z : M => Tensor0SSpace 0 I z)
     (F₂ := Tensor0SModel t ℝ E) (V₂ := fun z : M => Tensor0SSpace t I z)
-    (φ := fun y : M => tensor0SAsRS (I := I) (M := M) y (C y))
+    (φ := fun y : M => tensor0SToTensorRS (I := I) (M := M) y (C y))
   intro Y
   have hsmul := ContMDiff.smul_section (n := (∞ : WithTop ℕ∞))
     (contMDiff_tensor00Scalar_read (I := I) (M := M) Y) hC
@@ -120,7 +120,7 @@ private lemma contMDiff_slot0Read (g : SmoothRiemannianMetric I M) (s : ℕ)
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y
-        (tensor0SAsRS (I := I) (M := M) y
+        (tensor0SToTensorRS (I := I) (M := M) y
           ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
             ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
               Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y)))) := by
@@ -161,7 +161,7 @@ theorem tensor0S_curry_covApply_slot0_leibniz_fib
           (unitZeroSec (I := I) (M := M) x))) (X x) =
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         covApply (tensorCov (I := I) g 0 s) V
-          (fun y : M => tensor0SAsRS (I := I) (M := M) y
+          (fun y : M => tensor0SToTensorRS (I := I) (M := M) y
             ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
               ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
                 Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y))) x)
@@ -211,14 +211,14 @@ theorem tensor0S_curry_covApply_slot0_leibniz_fib
   have hρAt : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E))
       (fun y : M => TotalSpace.mk' (TensorRSModel 0 s ℝ E)
         (E := fun z : M => TensorRSSpace 0 s I z) y
-        (tensor0SAsRS (I := I) (M := M) y
+        (tensor0SToTensorRS (I := I) (M := M) y
           ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
             ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
               Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y)))) x :=
     (hρS x).mdifferentiableAt (by simp)
   have happ2 := tensorRSCovariantDerivative_apply_of_mdifferentiableAt (I := I) (M := M)
     0 s (LeviCivita (I := I) g)
-    (fun y : M => tensor0SAsRS (I := I) (M := M) y
+    (fun y : M => tensor0SToTensorRS (I := I) (M := M) y
       ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
         ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
           Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y)))
@@ -230,7 +230,7 @@ theorem tensor0S_curry_covApply_slot0_leibniz_fib
   rw [map_zero, sub_zero] at happ2
   have hsec : (fun y : M =>
       (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
-        tensor0SAsRS (I := I) (M := M) y
+        tensor0SToTensorRS (I := I) (M := M) y
           ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
             ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
               Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y)))
@@ -244,7 +244,7 @@ theorem tensor0S_curry_covApply_slot0_leibniz_fib
   rw [hsec] at happ2
   have hC2 : (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
       covApply (tensorCov (I := I) g 0 s) V
-        (fun y : M => tensor0SAsRS (I := I) (M := M) y
+        (fun y : M => tensor0SToTensorRS (I := I) (M := M) y
           ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
             ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
               Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y))) x)
@@ -277,7 +277,7 @@ theorem tensor0S_curry_covApply_slot0_leibniz
       Tensor0SSpace.toModel
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
           covApply (tensorCov (I := I) g 0 s) V
-            (fun y : M => tensor0SAsRS (I := I) (M := M) y
+            (fun y : M => tensor0SToTensorRS (I := I) (M := M) y
               ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
                 ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s + 1) I y from
                   Z.toSection y) (unitZeroSec (I := I) (M := M) y))) (X y))) x)

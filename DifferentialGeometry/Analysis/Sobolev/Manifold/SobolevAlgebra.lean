@@ -75,14 +75,14 @@ private lemma per_chart_mul_smooth_bound
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ∃ K_α : ℝ, 0 ≤ K_α ∧
       ∀ {v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ v →
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 p
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
               (fun x => u x * v x))
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal K_α *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 p
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
@@ -178,14 +178,14 @@ theorem mul_smooth_chart_bound_C1
     (I := I) (M := M) with hS_def
   have h_per_α : ∀ α ∈ S, ∃ K_α : ℝ, 0 ≤ K_α ∧
       ∀ {v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ v →
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
               (fun x => u x * v x))
             (chartTargetEuclid (I := I) (M := M) α) ≤
           ENNReal.ofReal K_α *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
@@ -203,14 +203,14 @@ theorem mul_smooth_chart_bound_C1
     rw [hKfun_eq_of_mem α hα]
     exact (Classical.choose_spec (h_per_α α hα)).1
   have hKfun_bound : ∀ α ∈ S, ∀ {v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ v →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => u x * v x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal (Kfun α) *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
@@ -233,14 +233,14 @@ theorem mul_smooth_chart_bound_C1
     exact Finset.single_le_sum (f := Kfun) (fun β hβ => hKfun_nn β hβ) hα
   have h_step1 : (∑ α ∈ S,
       ENNReal.ofReal (Kfun α) *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
           (chartTargetEuclid (I := I) (M := M) α))
       ≤ ∑ α ∈ S,
           ENNReal.ofReal sumK *
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
@@ -368,20 +368,20 @@ private lemma per_chart_bilinear_bound
       ∀ {u v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ u → ContMDiff I 𝓘(ℝ, ℝ) ∞ v →
         ∀ {uMax vMax : ℝ}, 0 ≤ uMax → 0 ≤ vMax →
           (∀ x : M, ‖u x‖ ≤ uMax) → (∀ x : M, ‖v x‖ ≤ vMax) →
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 p
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
                 (fun x => u x * v x))
               (chartTargetEuclid (I := I) (M := M) α) ≤
             ENNReal.ofReal vMax *
-              DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+              DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                 (d := Module.finrank ℝ E) 1 p
                 (chartPushed (I := I) (M := M)
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
                 (chartTargetEuclid (I := I) (M := M) α) +
             ENNReal.ofReal uMax *
-              DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+              DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                 (d := Module.finrank ℝ E) 1 p
                 (chartPushed (I := I) (M := M)
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
@@ -808,20 +808,20 @@ private lemma mul_smooth_chart_bound_explicit_form
       ∀ {u v : M → ℝ}, ContMDiff I 𝓘(ℝ, ℝ) ∞ u → ContMDiff I 𝓘(ℝ, ℝ) ∞ v →
         ∀ {uMax vMax : ℝ}, 0 ≤ uMax → 0 ≤ vMax →
           (∀ x : M, ‖u x‖ ≤ uMax) → (∀ x : M, ‖v x‖ ≤ vMax) →
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
               (chartPushed (I := I) (M := M)
                 (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
                 (fun x => u x * v x))
               (chartTargetEuclid (I := I) (M := M) α) ≤
             ENNReal.ofReal vMax *
-              DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+              DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                 (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
                 (chartPushed (I := I) (M := M)
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
                 (chartTargetEuclid (I := I) (M := M) α) +
             ENNReal.ofReal uMax *
-              DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+              DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
                 (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
                 (chartPushed (I := I) (M := M)
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
@@ -846,20 +846,20 @@ private lemma mul_smooth_chart_bound_explicit_form
       wkpNormChart_eq_finset_sum (I := I) (M := M) g 1 hp_enn_one u,
       wkpNormChart_eq_finset_sum (I := I) (M := M) g 1 hp_enn_one v]
   have hBfun_bound : ∀ α ∈ S,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α
             (fun x => u x * v x))
           (chartTargetEuclid (I := I) (M := M) α) ≤
         ENNReal.ofReal vMax *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α) +
         ENNReal.ofReal uMax *
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)
@@ -870,12 +870,12 @@ private lemma mul_smooth_chart_bound_explicit_form
     exact (Classical.choose_spec (h_per_α α hα)).2 hu hv huMax_nn hvMax_nn hu_bound hv_bound
   refine (Finset.sum_le_sum (fun α hα => hBfun_bound α hα)).trans ?_
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib]
-  set X : M → ℝ≥0∞ := fun α => DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  set X : M → ℝ≥0∞ := fun α => DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
     (chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
     (chartTargetEuclid (I := I) (M := M) α) with hX_def
-  set Y : M → ℝ≥0∞ := fun α => DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  set Y : M → ℝ≥0∞ := fun α => DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
     (chartPushed (I := I) (M := M)
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v)

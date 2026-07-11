@@ -68,7 +68,7 @@ lemma contMDiffAt_clm_of_pointwise_jointSource
   rw [hcompose]
   exact gCLM.contDiff.contMDiff.contMDiffAt.comp _ hEA
 
-theorem contMDiff_clm_section_of_pointwise_jointMR
+theorem contMDiff_clm_section_of_pointwise_joint_manifold_time
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
     {V₁ : M → Type*} [∀ x, AddCommGroup (V₁ x)] [∀ x, Module ℝ (V₁ x)]
     [TopologicalSpace (TotalSpace F₁ V₁)] [∀ x, TopologicalSpace (V₁ x)]
@@ -173,7 +173,7 @@ lemma contMDiffWithinAt_clm_of_pointwise_jointSource
   rw [hcompose]
   exact gCLM.contDiff.contMDiff.contMDiffAt.comp_contMDiffWithinAt _ hEA
 
-theorem contMDiffOn_clm_section_of_pointwise_jointMR
+theorem contMDiffOn_clm_section_of_pointwise_joint_manifold_time
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
     {V₁ : M → Type*} [∀ x, AddCommGroup (V₁ x)] [∀ x, Module ℝ (V₁ x)]
     [TopologicalSpace (TotalSpace F₁ V₁)] [∀ x, TopologicalSpace (V₁ x)]

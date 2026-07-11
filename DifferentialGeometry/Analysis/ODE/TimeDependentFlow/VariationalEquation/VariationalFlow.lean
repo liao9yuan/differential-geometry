@@ -138,7 +138,7 @@ theorem variational_flow_feeds_cartan_witness
       = -g.inner y dΦv ((LeviCivita (I := I) g)
           (X : ∀ x : M, TangentSpace I x) y dΦw) := by
     rw [hWraw, map_neg]
-  exact cartan_cancellation_derivative_witness (I := I) g X Φ_fam t x v w
+  exact hasDerivAt_pushforward_pairing_eq_neg_lieDerivMetric (I := I) g X Φ_fam t x v w
     (g.inner y Vraw dΦw + g.inner y dΦv Wraw)
     (g.inner y Vraw dΦw) (g.inner y dΦv Wraw)
     h_A h_B h_A_value h_B_value h_total rfl

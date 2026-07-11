@@ -54,11 +54,11 @@ private lemma wkpNorm_coef_mul_factor_le
     MemWkp (d := Module.finrank ℝ E) K 2
         (fun y => coef y * factor y) (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => coef y * factor y)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 factor
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -157,9 +157,9 @@ private lemma wkpNorm_coef_mul_factor_le
     (MemWkp_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
   refine ⟨h_memWkp, Kc, le_of_lt hKc_pos, ?_⟩
-  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) K 2
+  have h_norm_eq : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
       (fun y => coef y * factor y) Ω =
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => (χ y * coef y) * factor y) Ω :=
     (wkpNorm_congr_ae (d := Module.finrank ℝ E)
       (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).symm
@@ -178,12 +178,12 @@ lemma wkpNorm_indicatorFactor_mul_atom_le
         (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) coef y * G y)
         (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => Set.indicator (chartPouKernel (I := I) (M := M) α) coef y *
               G y)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 G
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 G
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -249,59 +249,59 @@ lemma wkpNorm_finsetSum_le_const_mul_atomSum
     (hF : ∀ j ∈ S, MemWkp (d := Module.finrank ℝ E) K 2 (F j)
       (chartTargetEuclid (I := I) (M := M) α))
     (h_bd : ∀ j ∈ S,
-      wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C *
-          wkpNorm (d := Module.finrank ℝ E) K 2 (atom (proj j))
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom (proj j))
             (chartTargetEuclid (I := I) (M := M) α)) :
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ∑ j ∈ S, F j y) (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal (C * S.card)
-        * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+        * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
             (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   have h_open : IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
     chartTargetEuclid_isOpen (I := I) (M := M) α
   have h_tri := wkpNorm_sum_le (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open S F hF
-  have h_step : ∑ j ∈ S, wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+  have h_step : ∑ j ∈ S, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ∑ _j ∈ S, ENNReal.ofReal C
-        * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+        * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
             (chartTargetEuclid (I := I) (M := M) α) := by
     refine Finset.sum_le_sum (fun j hj => ?_)
     refine (h_bd j hj).trans ?_
     refine mul_le_mul_of_nonneg_left ?_ (zero_le _)
     exact Finset.single_le_sum
-      (f := fun p => wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+      (f := fun p => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
         (chartTargetEuclid (I := I) (M := M) α))
       (fun p _ => zero_le _) (hproj j hj)
   have h_const : ∑ _j ∈ S, ENNReal.ofReal C
-        * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+        * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
             (chartTargetEuclid (I := I) (M := M) α)
       = (S.card : ℝ≥0∞) * (ENNReal.ofReal C
-        * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+        * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
             (chartTargetEuclid (I := I) (M := M) α)) := by
     rw [Finset.sum_const, nsmul_eq_mul]
   have h_cast : (S.card : ℝ≥0∞) * ENNReal.ofReal C
       = ENNReal.ofReal (C * S.card) := by
     rw [mul_comm C, ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast]
   calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (fun y => ∑ j ∈ S, F j y) (chartTargetEuclid (I := I) (M := M) α)
-        ≤ ∑ j ∈ S, wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+        ≤ ∑ j ∈ S, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
             (chartTargetEuclid (I := I) (M := M) α) := h_tri
     _ ≤ ∑ _j ∈ S, ENNReal.ofReal C
-          * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+          * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
               (chartTargetEuclid (I := I) (M := M) α) := h_step
     _ = (S.card : ℝ≥0∞) * (ENNReal.ofReal C
-          * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+          * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
               (chartTargetEuclid (I := I) (M := M) α)) := h_const
     _ = ((S.card : ℝ≥0∞) * ENNReal.ofReal C)
-          * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+          * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
               (chartTargetEuclid (I := I) (M := M) α) := by rw [mul_assoc]
     _ = ENNReal.ofReal (C * S.card)
-          * ∑ p ∈ T, wkpNorm (d := Module.finrank ℝ E) K 2 (atom p)
+          * ∑ p ∈ T, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom p)
               (chartTargetEuclid (I := I) (M := M) α) := by rw [h_cast]
 
 omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
@@ -410,16 +410,16 @@ lemma exists_uniform_const_of_finite_wkpNorm_bounds
     {α : M} {K : ℕ} {ι κ : Type*} [Finite ι]
     (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ) (proj : ι → κ)
     (h_data : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C *
-          wkpNorm (d := Module.finrank ℝ E) K 2 (atom (proj j))
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom (proj j))
             (chartTargetEuclid (I := I) (M := M) α)) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ j : ι,
-      wkpNorm (d := Module.finrank ℝ E) K 2 (F j)
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (F j)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C *
-          wkpNorm (d := Module.finrank ℝ E) K 2 (atom (proj j))
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (atom (proj j))
             (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   letI : Fintype ι := Fintype.ofFinite ι

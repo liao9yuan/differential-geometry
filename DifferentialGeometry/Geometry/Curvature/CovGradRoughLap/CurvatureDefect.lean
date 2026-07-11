@@ -125,7 +125,7 @@ theorem frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv
             (unitZeroSec (I := I) (M := M) x)) w -
         covGradRoughLapMovingFrameResidual (I := I) (M := M) g T₀ x w +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
-          Tensor3rdCurv (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
+          tensorThirdOrderCurvatureDefect (I := I) g 0 2 (smoothExtensionTangent (I := I) x w)
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) := by
   rw [frame_trace_third_eq_swap_unit (I := I) (M := M) g T₀ x w]
@@ -166,7 +166,7 @@ lemma covGrad_rawConnLap_unit_eval_curry_gen
         tensorCovDerivAt (I := I) (M := M) g 0 s
           (rawTensorConnLapSmooth g 0 s T₀) x w)
         (unitZeroSec (I := I) (M := M) x) :=
-  curry_covGrad_unit_eval_genVal (I := I) (M := M) g s
+  curry_covGrad_unit_eval_general (I := I) (M := M) g s
     (rawTensorConnLapSmooth g 0 s T₀) x w
 
 noncomputable def fixedFrameSwapTraceUnit_gen
@@ -245,7 +245,7 @@ lemma frame_trace_third_eq_swap_unit_gen
             (smoothExtensionTangent (I := I) x w x))
           (unitZeroSec (I := I) (M := M) x) +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-          Tensor3rdCurv (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
+          tensorThirdOrderCurvatureDefect (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) := by
   classical
@@ -280,7 +280,7 @@ theorem frame_trace_thirdW_eq_covGrad_rawConnLap_sub_residual_add_curv_gen
             (unitZeroSec (I := I) (M := M) x)) w -
         covGradRoughLapMovingFrameResidual_gen (I := I) (M := M) g s T₀ x w +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-          Tensor3rdCurv (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
+          tensorThirdOrderCurvatureDefect (I := I) g 0 s (smoothExtensionTangent (I := I) x w)
             (fun y : M => T₀.toSection y) x)
           (unitZeroSec (I := I) (M := M) x) := by
   rw [frame_trace_third_eq_swap_unit_gen (I := I) (M := M) g s T₀ x w]

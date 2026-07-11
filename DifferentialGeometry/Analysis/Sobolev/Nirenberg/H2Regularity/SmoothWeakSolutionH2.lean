@@ -77,7 +77,7 @@ theorem uniform_nirenberg_estimate
 
 omit [NeZero d] in
 
-private lemma contDiff_kdi_partial
+private lemma contDiff_secondPartialDeriv
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (i k : Fin d) :
     ContDiff ℝ (⊤ : ℕ∞) (fun y : E =>
       (fderiv ℝ
@@ -104,7 +104,7 @@ private lemma contDiff_kdi_partial
 
 omit [NeZero d] in
 
-private lemma weak_kdi_partial_of_smooth
+private lemma hasWeakPartialDeriv_partialDeriv_of_contDiff
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {Ω : Set E} (hΩ : IsOpen Ω)
     (i k : Fin d) :
@@ -255,8 +255,8 @@ theorem loc_smooth_solution
   have h_weak_partial :
       DeGiorgi.HasWeakPartialDeriv (d := d) k g
         (fun y : E => (fderiv ℝ u y) (EuclideanSpace.single i 1)) Ω'' :=
-    weak_kdi_partial_of_smooth (d := d) hu hΩ'' i k
-  have hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_kdi_partial (d := d) hu i k
+    hasWeakPartialDeriv_partialDeriv_of_contDiff (d := d) hu hΩ'' i k
+  have hg_smooth : ContDiff ℝ (⊤ : ℕ∞) g := contDiff_secondPartialDeriv (d := d) hu i k
   have hg_cont : Continuous g := hg_smooth.continuous
   have hg_memLp : MemLp g 2 (volume.restrict Ω'') :=
     memLp_two_continuous_compact_closure (d := d) hg_cont hΩ''
@@ -597,7 +597,7 @@ theorem loc_smooth_solution
       rw [hq_def]
       refine continuous_finset_sum Finset.univ ?_
       intro j _
-      exact (contDiff_kdi_partial (d := d) hu j k).continuous.pow 2
+      exact (contDiff_secondPartialDeriv (d := d) hu j k).continuous.pow 2
     have hq_meas : Measurable (fun x : E => ENNReal.ofReal (q x)) :=
       ENNReal.measurable_ofReal.comp hq_cont.measurable
     refine setLIntegral_mono_ae hq_meas.aemeasurable ?_

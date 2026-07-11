@@ -60,7 +60,7 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_eq_finset_sum
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) 0 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
               (tensorChartComp (I := I) (M := M) g r s
                 (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α) := by
@@ -73,7 +73,7 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_eq_finset_sum
     (f := fun α : M =>
       ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) 0 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
             (tensorChartComp (I := I) (M := M) g r s
               (rawTensorConnLapSmooth (I := I) g r s T) α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α))]
@@ -90,7 +90,7 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_eq_finset_sum
 
 private lemma wkpNorm_zero_eq_eLpNorm
     (u : EuclN → ℝ) (Ω : Set EuclN) :
-    wkpNorm (d := Module.finrank ℝ E) 0 2 u Ω =
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2 u Ω =
       eLpNorm u 2 ((volume : Measure EuclN).restrict Ω) :=
   wkpNorm_zero (d := Module.finrank ℝ E) 2 u Ω
 

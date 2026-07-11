@@ -26,7 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
+structure IsPointwiseLinearLocalOperator (g : SmoothRiemannianMetric I M)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)) : Prop where
 
   linear : ∀ (r : ℕ) (c₁ c₂ : ℝ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M),
@@ -38,10 +38,10 @@ structure IsOrderZeroCurvFactor (g : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 
-theorem op_zero_value_homogeneous
+theorem order_zero_apply_smul_of_pointwise_smul
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))
-    (hbase : IsOrderZeroCurvFactor (I := I) (M := M) g op)
+    (hbase : IsPointwiseLinearLocalOperator (I := I) (M := M) g op)
     (c : ℝ) (W₁ W₂ : SmoothCcTensor g 0 r) (x : M)
     (hval : W₂.toSection x = c • W₁.toSection x) :
     (op 0 r W₂).toSection x = c • (op 0 r W₁).toSection x := by

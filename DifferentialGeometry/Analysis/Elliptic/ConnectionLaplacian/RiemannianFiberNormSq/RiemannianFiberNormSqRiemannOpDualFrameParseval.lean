@@ -45,7 +45,7 @@ lemma tensor00Scalar_apply (x : M) (τ : Tensor0SSpace 0 I x)
   congr 1
   exact Subsingleton.elim _ _
 
-noncomputable def coframe2
+noncomputable def coframePair
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n) :
     Tensor0SSpace 2 I x :=
@@ -56,9 +56,9 @@ lemma coframe2_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n)
     (u : Fin 2 → TangentSpace I x) :
-    coframe2 (I := I) (M := M) g x e a b u =
+    coframePair (I := I) (M := M) g x e a b u =
       g.inner x (e a) (u 0) * g.inner x (e b) (u 1) := by
-  unfold coframe2
+  unfold coframePair
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiAlgebra_apply]
   rw [Fin.prod_univ_two]
@@ -69,7 +69,7 @@ noncomputable def dualTensorFrame
     {n : ℕ} (e : Fin n → TangentSpace I x) (a b : Fin n) :
     TensorRSSpace 0 2 I x :=
   (tensor00Scalar (I := I) (M := M) x).smulRight
-    (coframe2 (I := I) (M := M) g x e a b)
+    (coframePair (I := I) (M := M) g x e a b)
 
 lemma dualTensorFrame_apply
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -77,7 +77,7 @@ lemma dualTensorFrame_apply
     (τ : Tensor0SSpace 0 I x) :
     (dualTensorFrame (I := I) (M := M) g x e a b :
         Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) τ =
-      tensor00Scalar (I := I) (M := M) x τ • coframe2 (I := I) (M := M) g x e a b := by
+      tensor00Scalar (I := I) (M := M) x τ • coframePair (I := I) (M := M) g x e a b := by
   unfold dualTensorFrame
   rw [ContinuousLinearMap.smulRight_apply]
 
@@ -98,7 +98,7 @@ lemma fiberNormSqComponent_dualTensorFrame
         tensor00Scalar (I := I) (M := M) x
             ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
               (fun k => g.inner x (e (K k)))) •
-          coframe2 (I := I) (M := M) g x e a b from
+          coframePair (I := I) (M := M) g x e a b from
       dualTensorFrame_apply (I := I) (M := M) g x e a b _]
   have hscalar : tensor00Scalar (I := I) (M := M) x
       ((ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin 0) ℝ).compContinuousLinearMap
@@ -120,7 +120,7 @@ lemma tensor02_coframe_expansion
     (A : Tensor0SSpace 2 I x) :
     A = ∑ a : Fin n, ∑ b : Fin n,
       (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) •
-        coframe2 (I := I) (M := M) g x e a b := by
+        coframePair (I := I) (M := M) g x e a b := by
   classical
   apply tensor0SSpace_ext (𝕜 := ℝ) 2 x
   intro u
@@ -128,7 +128,7 @@ lemma tensor02_coframe_expansion
   let Rcmm : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ :=
     ∑ a : Fin n, ∑ b : Fin n,
       (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) •
-        coframe2 (I := I) (M := M) g x e a b
+        coframePair (I := I) (M := M) g x e a b
   suffices h : Acmm.toMultilinearMap = Rcmm.toMultilinearMap by
     exact congrArg
       (fun (T : MultilinearMap ℝ (fun _ : Fin 2 => TangentSpace I x) ℝ) => T u) h
@@ -141,10 +141,10 @@ lemma tensor02_coframe_expansion
   have hRHS_eval : Rcmm (fun i : Fin 2 => e (v i)) =
       ∑ a : Fin n, ∑ b : Fin n,
         (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) *
-          coframe2 (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i)) := by
+          coframePair (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i)) := by
     change (∑ a : Fin n, ∑ b : Fin n,
           (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) •
-            coframe2 (I := I) (M := M) g x e a b)
+            coframePair (I := I) (M := M) g x e a b)
         (fun i : Fin 2 => e (v i)) = _
     rw [ContinuousMultilinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun a _ => ?_)
@@ -154,14 +154,14 @@ lemma tensor02_coframe_expansion
   change Acmm (fun i : Fin 2 => e (v i)) = _
   rw [hRHS_eval]
   have hcoframe : ∀ a b : Fin n,
-      coframe2 (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i)) =
+      coframePair (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i)) =
         (if a = v 0 then (1 : ℝ) else 0) * (if b = v 1 then (1 : ℝ) else 0) := by
     intro a b
     rw [coframe2_apply (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i))]
     rw [horth a (v 0), horth b (v 1)]
   rw [show (∑ a : Fin n, ∑ b : Fin n,
         (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) *
-          coframe2 (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i))) =
+          coframePair (I := I) (M := M) g x e a b (fun i : Fin 2 => e (v i))) =
       ∑ a : Fin n, ∑ b : Fin n,
         (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) *
           ((if a = v 0 then (1 : ℝ) else 0) * (if b = v 1 then (1 : ℝ) else 0)) from by
@@ -277,7 +277,7 @@ lemma tensor_dualFrame_expansion
     (T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) ωK with hA_def
   have hA_expand : A = ∑ a : Fin n, ∑ b : Fin n,
       (A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k))) •
-        coframe2 (I := I) (M := M) g x e a b :=
+        coframePair (I := I) (M := M) g x e a b :=
     tensor02_coframe_expansion (I := I) (M := M) g x e bse hbse horth A
   have hAeval : ∀ a b : Fin n,
       A (fun k : Fin 2 => e ((![a, b] : Fin 2 → Fin n) k)) =
@@ -288,7 +288,7 @@ lemma tensor_dualFrame_expansion
   have hLHS' : (T : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) τ =
       ∑ a : Fin n, ∑ b : Fin n,
         (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b])) •
-          (c • coframe2 (I := I) (M := M) g x e a b) := by
+          (c • coframePair (I := I) (M := M) g x e a b) := by
     rw [hLHS, hA_expand, Finset.smul_sum]
     refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [Finset.smul_sum]
@@ -300,7 +300,7 @@ lemma tensor_dualFrame_expansion
             Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x) τ =
       ∑ a : Fin n, ∑ b : Fin n,
         (fiberNormSqComponent (I := I) (M := M) g x 0 2 T n e K₀ (![a, b])) •
-          (c • coframe2 (I := I) (M := M) g x e a b) := by
+          (c • coframePair (I := I) (M := M) g x e a b) := by
     rw [ContinuousLinearMap.sum_apply]
     refine Finset.sum_congr rfl (fun a _ => ?_)
     rw [ContinuousLinearMap.sum_apply]

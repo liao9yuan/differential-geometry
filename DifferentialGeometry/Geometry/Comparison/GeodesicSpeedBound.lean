@@ -98,7 +98,7 @@ theorem raw_mfderiv_eq_symmL_fderiv_at
     _ = ((trivializationAt E (TangentSpace I) α).symmL ℝ (γ s))
           ((fderiv ℝ ((extChartAt I α) ∘ γ) s : ℝ →L[ℝ] E) (1 : ℝ)) := by rw [hCC]
 
-theorem gc_constant_speed
+theorem geodesic_speed_constant
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (hγ_C1 : ContMDiff 𝓘(ℝ, ℝ) I 1 γ) :
     ∀ s t : ℝ,
@@ -336,7 +336,7 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-theorem gc_length_distance_bound
+theorem maximalGeodesic_edist_le_speed_mul_time
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {s t : ℝ}
     (_hs : s ∈ maximalGeodesicInterval (I := I) g p v)
@@ -392,7 +392,7 @@ variable [CompleteSpace M]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-theorem gc_escape_cauchy
+theorem maximalGeodesic_cauchySeq_of_tendsto_sup
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
@@ -432,7 +432,7 @@ theorem gc_escape_cauchy
   have h_bound :
       riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) := by
     have :=
-      gc_length_distance_bound (I := I) g p v (s := s) (t := t)
+      maximalGeodesic_edist_le_speed_mul_time (I := I) g p v (s := s) (t := t)
         hs_mem ht_mem hst (hγ_smooth.contMDiffOn) hSpeedBound
     simpa [hγ_def, hc_def] using this
   have h_edist_bound :
@@ -479,7 +479,7 @@ theorem gc_escape_cauchy
           exact h_cdelta_lt_real
     _ < ε := hδ₀_ofReal_lt
 
-theorem gc_velocity_limit
+theorem maximalGeodesic_limit_exists_tangent_speed_eq
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {T : ℝ} (_hT : IsLUB (maximalGeodesicInterval (I := I) g p v) T)
     {tₙ : ℕ → ℝ}
@@ -518,7 +518,7 @@ theorem gc_velocity_limit
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-theorem gc_length_distance_bound_curve
+theorem curve_edist_le_speed_mul_time
     {γ : ℝ → M} {s t c : ℝ}
     (hc_nonneg : 0 ≤ c) (hst : s ≤ t)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Icc s t))
@@ -556,7 +556,7 @@ theorem gc_length_distance_bound_curve
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-theorem gc_position_limit
+theorem curve_exists_limit_of_bounded_speed
     {γ : ℝ → M} {a b c : ℝ} (hab : a < b) (hc_nonneg : 0 ≤ c)
     (hγ_smooth : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ (Set.Ioo a b))
     (hSpeedBound : ∀ τ ∈ Set.Ioo a b,
@@ -607,7 +607,7 @@ theorem gc_position_limit
       hγ_smooth.mono hIcc_sub
     have h_bound :
         riemannianEDist I (γ s) (γ t) ≤ ENNReal.ofReal (c * (t - s)) :=
-      gc_length_distance_bound_curve (I := I) (γ := γ) (s := s) (t := t)
+      curve_edist_le_speed_mul_time (I := I) (γ := γ) (s := s) (t := t)
         (c := c) hc_nonneg hst hγ_Icc
         (fun τ hτ => hSpeedBound τ (hIcc_sub hτ))
     have h_edist_bound :

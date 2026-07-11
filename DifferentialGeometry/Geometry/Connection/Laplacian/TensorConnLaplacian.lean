@@ -1098,7 +1098,7 @@ private theorem rawTensorConnLap_psi_tensorialAt_right
     simp only [ContinuousLinearMap.map_add]
     abel
 
-noncomputable def rawTensorConnLap_psi_bilinAt
+noncomputable def tensorHessianBilinAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1125,7 +1125,7 @@ noncomputable def rawTensorConnLap_psi_bilinAt
     (fun X hX =>
       rawTensorConnLap_psi_tensorialAt_right g r s T hT_total y (X := X) hX)
 
-theorem rawTensorConnLap_psi_bilinAt_apply
+theorem tensorHessianBilinAt_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)
     (hT_total : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -1139,7 +1139,7 @@ theorem rawTensorConnLap_psi_bilinAt_apply
     (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun z : M => TotalSpace.mk' E
         (E := fun w : M => TangentSpace I w) z (Y z)) y) :
-    rawTensorConnLap_psi_bilinAt g r s T hT_total y (X y) (Y y) =
+    tensorHessianBilinAt g r s T hT_total y (X y) (Y y) =
       (TensorRSNabla.tensorRSCovariantDerivative I M r s
           (LeviCivita (I := I) g)).toFun
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
@@ -1148,7 +1148,7 @@ theorem rawTensorConnLap_psi_bilinAt_apply
           (LeviCivita (I := I) g)).toFun T y
         ((LeviCivita (I := I) g).toFun X y (Y y)) := by
   classical
-  unfold rawTensorConnLap_psi_bilinAt
+  unfold tensorHessianBilinAt
   exact TensorialAt.mkHom₂_apply _ _ hX hY
 
 theorem rawTensorConnLap_eq_frame_trace
@@ -1163,12 +1163,12 @@ theorem rawTensorConnLap_eq_frame_trace
       g.inner y (B i) (B j) = if i = j then (1 : ℝ) else 0) :
     rawTensorConnLap (I := I) g r s T y =
       ∑ i : Fin (Module.finrank ℝ E),
-        rawTensorConnLap_psi_bilinAt g r s T hT_total y (B i) (B i) := by
+        tensorHessianBilinAt g r s T hT_total y (B i) (B i) := by
   classical
   have h_LHS_via_smoothFrame :
       rawTensorConnLap (I := I) g r s T y =
         ∑ i : Fin (Module.finrank ℝ E),
-          rawTensorConnLap_psi_bilinAt g r s T hT_total y
+          tensorHessianBilinAt g r s T hT_total y
             (smoothOrthoFrame (I := I) g y i y)
             (smoothOrthoFrame (I := I) g y i y) := by
     rw [rawTensorConnLap_def]
@@ -1180,14 +1180,14 @@ theorem rawTensorConnLap_eq_frame_trace
           (smoothOrthoFrame (I := I) g y i z)) y :=
       (smoothOrthoFrame_smooth (I := I) g y i).contMDiffAt.mdifferentiableAt
         (by simp)
-    have happly := rawTensorConnLap_psi_bilinAt_apply (I := I) g r s T hT_total
+    have happly := tensorHessianBilinAt_apply (I := I) g r s T hT_total
       (X := smoothOrthoFrame (I := I) g y i)
       (Y := smoothOrthoFrame (I := I) g y i)
       hSmooth_at hSmooth_at
     exact happly.symm
   rw [h_LHS_via_smoothFrame]
   set Ψ : TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] TensorRSSpace r s I y :=
-    rawTensorConnLap_psi_bilinAt g r s T hT_total y with hΨ_def
+    tensorHessianBilinAt g r s T hT_total y with hΨ_def
   set C : Fin (Module.finrank ℝ E) → TangentSpace I y :=
     fun i => smoothOrthoFrame (I := I) g y i y with hC_def
   have hC_orthonormal :
@@ -1325,11 +1325,11 @@ theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
   have h_frame_trace :
       rawTensorConnLap (I := I) g r s T y =
         ∑ i : Fin (Module.finrank ℝ E),
-          rawTensorConnLap_psi_bilinAt g r s T hT_total y (B i y) (B i y) :=
+          tensorHessianBilinAt g r s T hT_total y (B i y) (B i y) :=
     rawTensorConnLap_eq_frame_trace (I := I) g r s T hT_total y
       (fun i => B i y) hB_orth
   have h_summand_eq : ∀ i : Fin (Module.finrank ℝ E),
-      rawTensorConnLap_psi_bilinAt g r s T hT_total y (B i y) (B i y) =
+      tensorHessianBilinAt g r s T hT_total y (B i y) (B i y) =
         (TensorRSNabla.tensorRSCovariantDerivative I M r s
               (LeviCivita (I := I) g)).toFun
             (covApply (TensorRSNabla.tensorRSCovariantDerivative I M r s
@@ -1343,7 +1343,7 @@ theorem rawTensorConnLap_eq_fixedFrame_of_orthonormal
         (fun z : M => TotalSpace.mk' E
           (E := fun w : M => TangentSpace I w) z (B i z)) y :=
       (hB_smooth i).contMDiffAt.mdifferentiableAt (by simp)
-    exact rawTensorConnLap_psi_bilinAt_apply (I := I) g r s T hT_total
+    exact tensorHessianBilinAt_apply (I := I) g r s T hT_total
       (X := B i) (Y := B i) hBi_mdiff hBi_mdiff
   rw [h_frame_trace]
   rw [Finset.sum_congr rfl (fun i _ => h_summand_eq i)]

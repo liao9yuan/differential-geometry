@@ -371,7 +371,7 @@ theorem bochner_pointwise_grad_normSq_of_boundaryless
               (gradFun (I := I) g f x) (gradFun (I := I) g f x) +
         2 * g.inner x (gradFun (I := I) g f x)
             (gradFun (I := I) g (Δ_g (I := I) g hf) x) := by
-  have h := bochner_pointwise_abstract_unconditional (I := I) g hf x
+  have h := bochner_pointwise_abstract_of_smooth (I := I) g hf x
   have hLHS_eq : Δ_g (I := I) g (normGradSq_contMDiff (I := I) g hf) x =
       Δ_g (I := I) g (normGradSqFun_contMDiff (I := I) g hf) x := rfl
   rw [hLHS_eq] at h

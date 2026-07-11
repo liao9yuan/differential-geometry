@@ -98,7 +98,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       ∀ (S : SmoothCcTensorH1 g r s)
         (Idx : Fin r → Fin (Module.finrank ℝ E))
         (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 2
             (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β
               (tensorChartComponentScalar (I := I) (M := M)
@@ -247,13 +247,13 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       g r s S.toCcTensor α Idx Jdx with hu_def
   have h_def : wkpNormChart (I := I) (M := M) g 1 2 u =
       ∑' β : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u)
           (chartTargetEuclid (I := I) (M := M) β) := rfl
   rw [h_def]
   have h_outside_zero : ∀ β : M, β ∉ finS →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u)
         (chartTargetEuclid (I := I) (M := M) β) = 0 := by
@@ -269,7 +269,7 @@ theorem tensorChartComponentScalar_wkpNormChart_le_const_mul_h1Norm
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) β u hρ_zero
   rw [tsum_eq_sum (s := finS) h_outside_zero]
   have h_per_β : ∀ β ∈ finS,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2
         (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β u)
         (chartTargetEuclid (I := I) (M := M) β) ≤

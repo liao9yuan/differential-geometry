@@ -440,7 +440,7 @@ theorem radial_riemannianEDist_eq_of_small
           = ENNReal.ofReal δ := by
   obtain ⟨ρ₀, hρ₀_pos, hagree⟩ :=
     exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm p
-  set ρ : ℝ := min ρ₀ (expRadiusGp (I := I) g p) with hρ_def
+  set ρ : ℝ := min ρ₀ (metricCoerciveExpRadius (I := I) g p) with hρ_def
   have hρ_pos : 0 < ρ := lt_min hρ₀_pos (expRadiusGp_pos (I := I) g p)
   refine ⟨ρ, hρ_pos, ?_⟩
   intro u hu δ hδ_nn hδ
@@ -449,13 +449,13 @@ theorem radial_riemannianEDist_eq_of_small
     rw [hvδ_def, sqrt_gInner_smul_self (I := I) g p hδ_nn u, hu, Real.sqrt_one, mul_one]
   have hvδ_lt_ρ₀ : Real.sqrt (g.inner p (vδ : E) (vδ : E)) < ρ₀ := by
     rw [hnorm_vδ]; exact lt_of_lt_of_le hδ (min_le_left _ _)
-  have hvδ_lt_gp : Real.sqrt (g.inner p (vδ : E) (vδ : E)) < expRadiusGp (I := I) g p := by
+  have hvδ_lt_gp : Real.sqrt (g.inner p (vδ : E) (vδ : E)) < metricCoerciveExpRadius (I := I) g p := by
     rw [hnorm_vδ]; exact lt_of_lt_of_le hδ (min_le_right _ _)
   have hagree_vδ : expMapIntrinsic (I := I) g hEnorm p vδ = expMap (I := I) g p vδ :=
     hagree hvδ_lt_ρ₀
   set vE : E := (vδ : E) with hvE_def
   have hvE_inner : g.inner p vE vE = g.inner p (vδ : E) (vδ : E) := rfl
-  have hvE_lt_gp : Real.sqrt (g.inner p vE vE) < expRadiusGp (I := I) g p := by
+  have hvE_lt_gp : Real.sqrt (g.inner p vE vE) < metricCoerciveExpRadius (I := I) g p := by
     rw [hvE_inner]; exact hvδ_lt_gp
   have hvδ_normE : ‖vE‖ < expMapC2Radius (I := I) g p :=
     norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g p hvE_lt_gp
@@ -759,7 +759,7 @@ theorem isGeodesic_contMDiff
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-theorem sphere_jump
+theorem exists_geodesicSphere_point_edist_eq_sub_delta
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M)
@@ -779,12 +779,12 @@ theorem sphere_jump
     exists_expMapIntrinsic_eq_expMap_radius (I := I) g hEnorm x
   obtain ⟨ρ₂, hρ₂_pos, hradial⟩ :=
     radial_riemannianEDist_eq_of_small (I := I) g hEnorm x
-  refine ⟨min ρ₀ (min ρ₂ (expRadiusGp (I := I) g x)),
+  refine ⟨min ρ₀ (min ρ₂ (metricCoerciveExpRadius (I := I) g x)),
     lt_min hρ₀_pos (lt_min hρ₂_pos (expRadiusGp_pos (I := I) g x)), ?_⟩
   intro δ hδ_pos hδ_R hδ_lt_ρ
   have hδ_lt_ρ₀ : δ < ρ₀ := lt_of_lt_of_le hδ_R (min_le_left _ _)
   have hδ_lt_ρ₂ : δ < ρ₂ := lt_of_lt_of_le hδ_R (le_trans (min_le_right _ _) (min_le_left _ _))
-  have hδ_lt_R : δ < expRadiusGp (I := I) g x :=
+  have hδ_lt_R : δ < metricCoerciveExpRadius (I := I) g x :=
     lt_of_lt_of_le hδ_R (le_trans (min_le_right _ _) (min_le_right _ _))
   set f : TangentSpace I x → M :=
     fun w => expMapIntrinsic (I := I) g hEnorm x (δ • w) with hf_def
@@ -820,7 +820,7 @@ theorem sphere_jump
   have hexp_contOn : ContinuousOn (fun w : TangentSpace I x => F (δ • (w : E))) sph := by
     intro w₀ hw₀
     have hball : Real.sqrt (g.inner x ((δ • w₀ : TangentSpace I x) : E)
-        ((δ • w₀ : TangentSpace I x) : E)) < expRadiusGp (I := I) g x := by
+        ((δ • w₀ : TangentSpace I x) : E)) < metricCoerciveExpRadius (I := I) g x := by
       rw [hsphnorm w₀ hw₀]; exact hδ_lt_R
     have hEucl := norm_lt_expMapC2Radius_of_sqrt_inner_lt (I := I) g x hball
     have hcd : ContMDiffAt 𝓘(ℝ, E) I 2 F ((δ • (w₀ : E)) : E) :=
@@ -885,7 +885,7 @@ theorem sphere_jump
       have : (riemannianEDist I x z).toReal = δ := hts_eq
       rw [← this, ENNReal.ofReal_toReal hz_fin]
     have hdxz_real : (riemannianEDist I x z).toReal = δ := hts_eq
-    have hz_lt_R : (riemannianEDist I x z).toReal < expRadiusGp (I := I) g x := by
+    have hz_lt_R : (riemannianEDist I x z).toReal < metricCoerciveExpRadius (I := I) g x := by
       rw [hdxz_real]; exact hδ_lt_R
     obtain ⟨vz, hvz_target, hvz_dom, hvz_norm, hz_eq⟩ :=
       metricBall_subset_normalBall (I := I) g x hEnorm hz_fin hz_lt_R
@@ -1670,7 +1670,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
       exact ENNReal.toReal_pos hpq_pos hr_ne_top
     have hpq_eq : riemannianEDist I p q = ENNReal.ofReal r := by
       rw [hr_def, ENNReal.ofReal_toReal hr_ne_top]
-    obtain ⟨Rp, hRp_pos, hbase⟩ := sphere_jump (I := I) g hEnorm p q hr_pos hpq_eq
+    obtain ⟨Rp, hRp_pos, hbase⟩ := exists_geodesicSphere_point_edist_eq_sub_delta (I := I) g hEnorm p q hr_pos hpq_eq
     set δ₀ : ℝ := min (Rp / 2) (r / 2) with hδ₀_def
     have hδ₀_pos : 0 < δ₀ := lt_min (by linarith) (by linarith)
     have hδ₀_Rp : δ₀ < Rp := lt_of_le_of_lt (min_le_left _ _) (by linarith)
@@ -1746,7 +1746,7 @@ theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
         rw [hsplit] at htri
         exact (ENNReal.add_le_add_iff_right ENNReal.ofReal_ne_top).mp htri
       have hpc_eq : riemannianEDist I p c = ENNReal.ofReal t₀ := le_antisymm hpc_le hpc_ge
-      obtain ⟨Rc, hRc_pos, hcjump⟩ := sphere_jump (I := I) g hEnorm c q hρc_pos hcq_eq
+      obtain ⟨Rc, hRc_pos, hcjump⟩ := exists_geodesicSphere_point_edist_eq_sub_delta (I := I) g hEnorm c q hρc_pos hcq_eq
       set δ' : ℝ := min (Rc / 2) (ρc / 2) with hδ'_def
       have hδ'_pos : 0 < δ' := lt_min (by linarith) (by linarith)
       have hδ'_Rc : δ' < Rc := lt_of_le_of_lt (min_le_left _ _) (by linarith)

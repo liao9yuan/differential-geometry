@@ -136,7 +136,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [FiniteDimensional ℝ E] in
-theorem chartJinv_opNorm_isBounded_on_compact_unconditional
+theorem chartTrivInv_opNorm_isBounded_on_compact_unconditional
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) {K : Set M} (hK : IsCompact K)
@@ -455,7 +455,7 @@ theorem christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional
   have hK_base : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α
   obtain ⟨C_J, hCJ_nn, hCJ_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact_unconditional
+    chartTriv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   obtain ⟨C_Γ, hCΓ_nn, hCΓ_bound⟩ :=
     chartChristoffel_bdd_on_pou_tsupport (I := I) (M := M) g α
@@ -588,10 +588,10 @@ theorem chartLeviCivitaParallelCLM_general_X_opNorm_isBounded_on_pouTsupport_unc
   have hK_base : K ⊆ (trivializationAt E (TangentSpace I) α).baseSet :=
     pouTsupport_subset_baseSet (I := I) (M := M) α
   obtain ⟨C_J, hCJ_nn, hCJ_bound⟩ :=
-    chartJ_opNorm_isBounded_on_compact_unconditional
+    chartTriv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   obtain ⟨C_Jinv, hCJinv_nn, hCJinv_bound⟩ :=
-    chartJinv_opNorm_isBounded_on_compact_unconditional
+    chartTrivInv_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g α hK_compact hK_base
   obtain ⟨C_χ, hCχ_nn, hCχ_bound⟩ :=
     christoffelCorrection_opNorm_isBounded_on_pouTsupport_unconditional

@@ -56,7 +56,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-private lemma a3_covDeriv_totalSpace_continuousOn
+private lemma chartTensorRSCovariantDerivative_totalSpace_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) (k : Fin (Module.finrank ℝ E)) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -104,7 +104,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-private lemma a3_fiber_cov_atom_aestronglyMeasurable
+private lemma chartTensorRSCovariantDerivative_pouWeightedNorm_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -169,8 +169,8 @@ private lemma a3_fiber_cov_atom_aestronglyMeasurable
                 (chartBasisVecFiber (I := I) α k) b⟫_ℝ : ℝ))
         (chartAt H α).source :=
       ContinuousOn.inner_bundle
-        (a3_covDeriv_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
-        (a3_covDeriv_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
+        (chartTensorRSCovariantDerivative_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
+        (chartTensorRSCovariantDerivative_totalSpace_continuousOn (I := I) (M := M) g r s α S k)
     refine h_inner.congr ?_
     intro b _
     exact (real_inner_self_eq_norm_sq _).symm
@@ -191,7 +191,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-private lemma a3_riem_bridge
+private lemma chartTensorRSSlotCorrection_norm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) (k : Fin (Module.finrank ℝ E)) (b : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -408,7 +408,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
             ∑ k : Fin (Module.finrank ℝ E), C_bridge * TchrPerK k b :=
           Finset.sum_le_sum (fun k _ => by
             rw [hTchrPerK_def, hC_bridge_def]
-            exact a3_riem_bridge (I := I) (M := M) g r s α S k b)
+            exact chartTensorRSSlotCorrection_norm_sq_le (I := I) (M := M) g r s α S k b)
         rwa [← Finset.mul_sum] at h1
       have h_Tcov_nn : 0 ≤ Tcov b := by
         rw [hTcov_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
@@ -600,7 +600,7 @@ theorem exists_eLpNorm_sqrt_g_inner_gradFun_tensorChartComponentScalar_le_const_
                       (fun b' => S.toCcTensor.toSection b')
                       (chartBasisVecFiber (I := I) α k) b‖ ^ 2))
           μ :=
-      a3_fiber_cov_atom_aestronglyMeasurable (I := I) (M := M) g r s α S
+      chartTensorRSCovariantDerivative_pouWeightedNorm_aestronglyMeasurable (I := I) (M := M) g r s α S
     have h_Tcov_nn_pt : ∀ b, 0 ≤ Tcov b := fun b => by
       rw [hTcov_def]; exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
     have h_rho_Tcov_sq_eq : ∀ b,

@@ -57,11 +57,11 @@ private lemma wkpNorm_offKernelSmoothCoef_mul_le
     MemWkp (d := Module.finrank ℝ E) K 2
         (fun y => coef y * factor y) (chartTargetEuclid (I := I) (M := M) α) ∧
       ∃ C : ℝ, 0 ≤ C ∧
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => coef y * factor y)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 factor
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor
               (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -138,10 +138,10 @@ private lemma exists_uniform_wkpNorm_bound
     {ι : Type*} [Finite ι] {K : ℕ}
     {Ω : Set EuclN} {f : ι → EuclN → ℝ} {a : ι → ℝ≥0∞}
     (h : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2 (f j) Ω ≤ ENNReal.ofReal C * a j) :
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (f j) Ω ≤ ENNReal.ofReal C * a j) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ j : ι,
-        wkpNorm (d := Module.finrank ℝ E) K 2 (f j) Ω ≤ ENNReal.ofReal C * a j := by
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (f j) Ω ≤ ENNReal.ofReal C * a j := by
   classical
   letI : Fintype ι := Fintype.ofFinite ι
   choose Cf hCf_nn hCf using h
@@ -169,11 +169,11 @@ private lemma wkpNorm_offKernelSmoothCoef_mul_le_uniform
       ∀ factor : EuclN → ℝ,
         MemWkp (d := Module.finrank ℝ E) K 2 factor
             (chartTargetEuclid (I := I) (M := M) α) →
-          wkpNorm (d := Module.finrank ℝ E) K 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
               (fun y => coef y * factor y)
               (chartTargetEuclid (I := I) (M := M) α)
             ≤ ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2 factor
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor
                 (chartTargetEuclid (I := I) (M := M) α) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α with hΩ_def
@@ -226,20 +226,20 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
             β Q : Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (crossRightGradCoeffDivLimit (I := I) (M := M)
             g r s i α P₀)
           (chartTargetEuclid (I := I) (M := M) α)
         ≤ ENNReal.ofReal C *
           ((∑ P : TensorCompIdx (E := E) r s,
-              wkpNorm (d := Module.finrank ℝ E) K 2
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                 ((crossRightLimitComponent (I := I) (M := M)
                     g r s i α P :
                     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
                 (chartTargetEuclid (I := I) (M := M) α))
             + (∑ P : TensorCompIdx (E := E) r s,
                 ∑ l : Fin (Module.finrank ℝ E),
-                  wkpNorm (d := Module.finrank ℝ E) K 2
+                  iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                     ((cutoffPartialLpLimit (I := I) (M := M)
                         g r s i α P l :
                         Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -262,11 +262,11 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hApart_def
   set Sumcomp : ℝ≥0∞ :=
     ∑ P : TensorCompIdx (E := E) r s,
-      wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω with hSumcomp_def
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω with hSumcomp_def
   set Sumpart : ℝ≥0∞ :=
     ∑ P : TensorCompIdx (E := E) r s,
       ∑ l : Fin (Module.finrank ℝ E),
-        wkpNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω with hSumpart_def
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω with hSumpart_def
   have hAcomp_memWkp : ∀ P : TensorCompIdx (E := E) r s,
       MemWkp (d := Module.finrank ℝ E) K 2 (Acomp P) Ω := by
     intro P
@@ -318,9 +318,9 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
   have hsummandComp_data : ∀ j : ι,
       MemWkp (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ∧
         ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
             ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp j.2.1) Ω := by
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Acomp j.2.1) Ω := by
     intro j
     rw [hsummandComp_eq j, hΩ_def]
     exact wkpNorm_offKernelSmoothCoef_mul_le (I := I) (M := M) α K
@@ -333,9 +333,9 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
   have hsummandPart_data : ∀ j : ι,
       MemWkp (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ∧
         ∃ C : ℝ, 0 ≤ C ∧
-          wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
             ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 j.1) Ω := by
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 j.1) Ω := by
     intro j
     rw [hsummandPart_eq j, hΩ_def]
     exact wkpNorm_offKernelSmoothCoef_mul_le (I := I) (M := M) α K
@@ -354,16 +354,16 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
   obtain ⟨Ccomp, hCcomp_nn, hCcomp⟩ :
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ j : ι,
-          wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
             ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp j.2.1) Ω :=
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Acomp j.2.1) Ω :=
     exists_uniform_wkpNorm_bound (fun j => (hsummandComp_data j).2)
   obtain ⟨Cpart, hCpart_nn, hCpart⟩ :
       ∃ C : ℝ, 0 ≤ C ∧
         ∀ j : ι,
-          wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
             ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 j.1) Ω :=
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 j.1) Ω :=
     exists_uniform_wkpNorm_bound (fun j => (hsummandPart_data j).2)
   have h_funcA : ∀ y : EuclN,
       (∑ l : Fin (Module.finrank ℝ E),
@@ -429,11 +429,11 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
       (Finset.univ : Finset ι) summandPart
       (fun j _ => hsummandPart_memWkp j)
   have h_triangle :
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (crossRightGradCoeffDivLimit (I := I) (M := M)
             g r s i α P₀) Ω
-        ≤ (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
-          + (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) := by
+        ≤ (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+          + (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) := by
     have h_split : crossRightGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀ =
         (fun y => (∑ j : ι, summandComp j y) + (∑ j : ι, summandPart j y)) := by
@@ -451,25 +451,25 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
         (Finset.univ : Finset ι) summandPart
         (fun j _ => hsummandPart_memWkp j)
   have h_groupA :
-      (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+      (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
         ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp := by
     have h_each : ∀ j : ι,
-        wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
           ENNReal.ofReal Ccomp * Sumcomp := by
       intro j
       refine (hCcomp j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Ccomp))
       rw [hSumcomp_def]
       exact Finset.single_le_sum
-        (f := fun P => wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω)
+        (f := fun P => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω)
         (fun P _ => zero_le _) (Finset.mem_univ j.2.1)
     refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
   have h_groupB :
-      (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω)
+      (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω)
         ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart := by
     have h_each : ∀ j : ι,
-        wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
           ENNReal.ofReal Cpart * Sumpart := by
       intro j
       refine (hCpart j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Cpart))
@@ -477,10 +477,10 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
       refine le_trans ?_
         (Finset.single_le_sum
           (f := fun P => ∑ l : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω)
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω)
           (fun P _ => zero_le _) (Finset.mem_univ j.2.1))
       exact Finset.single_le_sum
-        (f := fun l => wkpNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 l) Ω)
+        (f := fun l => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 l) Ω)
         (fun l _ => zero_le _) (Finset.mem_univ j.1)
     refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
@@ -498,11 +498,11 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le
           (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
     ENNReal.ofReal_le_ofReal (le_max_right _ _)
   calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (crossRightGradCoeffDivLimit (I := I) (M := M)
           g r s i α P₀) Ω
-        ≤ (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
-          + (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) :=
+        ≤ (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+          + (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) :=
         h_triangle
     _ ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp
           + ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart :=
@@ -539,20 +539,20 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
         (chartTargetEuclid (I := I) (M := M) β)) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (crossRightGradCoeffDivLimit (I := I) (M := M)
               g r s i α P₀)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
             ((∑ P : TensorCompIdx (E := E) r s,
-                wkpNorm (d := Module.finrank ℝ E) K 2
+                iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                   ((crossRightLimitComponent (I := I) (M := M)
                       g r s i α P :
                       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ)
                   (chartTargetEuclid (I := I) (M := M) α))
               + (∑ P : TensorCompIdx (E := E) r s,
                   ∑ l : Fin (Module.finrank ℝ E),
-                    wkpNorm (d := Module.finrank ℝ E) K 2
+                    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
                       ((cutoffPartialLpLimit (I := I) (M := M)
                           g r s i α P l :
                           Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -570,12 +570,12 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
       TensorCompIdx (E := E) r s with hι_def
   have hCcomp_data : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
       ∀ factor : EuclN → ℝ, MemWkp (d := Module.finrank ℝ E) K 2 factor Ω →
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => euclidPartial (E := E) j.1
                 (crossRightDivFactor (I := I) (M := M)
                   g r s α P₀ j.1 j.2.1 j.2.2) y * factor y) Ω
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 factor Ω := by
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor Ω := by
     intro j
     rw [hΩ_def]
     exact wkpNorm_offKernelSmoothCoef_mul_le_uniform (I := I) (M := M) α K
@@ -586,11 +586,11 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
         (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hy)
   have hCpart_data : ∀ j : ι, ∃ C : ℝ, 0 ≤ C ∧
       ∀ factor : EuclN → ℝ, MemWkp (d := Module.finrank ℝ E) K 2 factor Ω →
-        wkpNorm (d := Module.finrank ℝ E) K 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
             (fun y => crossRightDivFactor (I := I) (M := M)
                 g r s α P₀ j.1 j.2.1 j.2.2 y * factor y) Ω
           ≤ ENNReal.ofReal C *
-            wkpNorm (d := Module.finrank ℝ E) K 2 factor Ω := by
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 factor Ω := by
     intro j
     rw [hΩ_def]
     exact wkpNorm_offKernelSmoothCoef_mul_le_uniform (I := I) (M := M) α K
@@ -623,11 +623,11 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
       Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) : EuclN → ℝ) with hApart_def
   set Sumcomp : ℝ≥0∞ :=
     ∑ P : TensorCompIdx (E := E) r s,
-      wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω with hSumcomp_def
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω with hSumcomp_def
   set Sumpart : ℝ≥0∞ :=
     ∑ P : TensorCompIdx (E := E) r s,
       ∑ l : Fin (Module.finrank ℝ E),
-        wkpNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω with hSumpart_def
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω with hSumpart_def
   have hAcomp_memWkp : ∀ P : TensorCompIdx (E := E) r s,
       MemWkp (d := Module.finrank ℝ E) K 2 (Acomp P) Ω := by
     intro P
@@ -674,17 +674,17 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
         crossRightDivFactor_eq_zero_off_chartPouKernel
           (I := I) (M := M) g r s α P₀ j.1 j.2.1 j.2.2 hyK]
   have hCcomp : ∀ j : ι,
-      wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
         ENNReal.ofReal Ccomp *
-          wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp j.2.1) Ω := by
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Acomp j.2.1) Ω := by
     intro j
     rw [hsummandComp_eq j]
     refine (hCcompf j (Acomp j.2.1) (hAcomp_memWkp j.2.1)).trans ?_
     exact mul_le_mul_left (ENNReal.ofReal_le_ofReal (hCcompf_le j)) _
   have hCpart : ∀ j : ι,
-      wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
         ENNReal.ofReal Cpart *
-          wkpNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 j.1) Ω := by
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 j.1) Ω := by
     intro j
     rw [hsummandPart_eq j]
     refine (hCpartf j (Apart j.2.1 j.1) (hApart_memWkp j.2.1 j.1)).trans ?_
@@ -775,11 +775,11 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
       (Finset.univ : Finset ι) summandPart
       (fun j _ => hsummandPart_memWkp j)
   have h_triangle :
-      wkpNorm (d := Module.finrank ℝ E) K 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
           (crossRightGradCoeffDivLimit (I := I) (M := M)
             g r s i α P₀) Ω
-        ≤ (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
-          + (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) := by
+        ≤ (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+          + (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) := by
     have h_split : crossRightGradCoeffDivLimit (I := I) (M := M)
         g r s i α P₀ =
         (fun y => (∑ j : ι, summandComp j y) + (∑ j : ι, summandPart j y)) := by
@@ -797,25 +797,25 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
         (Finset.univ : Finset ι) summandPart
         (fun j _ => hsummandPart_memWkp j)
   have h_groupA :
-      (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+      (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
         ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp := by
     have h_each : ∀ j : ι,
-        wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω ≤
           ENNReal.ofReal Ccomp * Sumcomp := by
       intro j
       refine (hCcomp j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Ccomp))
       rw [hSumcomp_def]
       exact Finset.single_le_sum
-        (f := fun P => wkpNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω)
+        (f := fun P => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Acomp P) Ω)
         (fun P _ => zero_le _) (Finset.mem_univ j.2.1)
     refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
     rw [ENNReal.ofReal_mul (by positivity), ENNReal.ofReal_natCast, mul_assoc]
   have h_groupB :
-      (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω)
+      (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω)
         ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart := by
     have h_each : ∀ j : ι,
-        wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω ≤
           ENNReal.ofReal Cpart * Sumpart := by
       intro j
       refine (hCpart j).trans (mul_le_mul_right ?_ (ENNReal.ofReal Cpart))
@@ -823,10 +823,10 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
       refine le_trans ?_
         (Finset.single_le_sum
           (f := fun P => ∑ l : Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω)
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart P l) Ω)
           (fun P _ => zero_le _) (Finset.mem_univ j.2.1))
       exact Finset.single_le_sum
-        (f := fun l => wkpNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 l) Ω)
+        (f := fun l => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (Apart j.2.1 l) Ω)
         (fun l _ => zero_le _) (Finset.mem_univ j.1)
     refine le_trans (Finset.sum_le_sum (fun j _ => h_each j)) ?_
     rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
@@ -842,11 +842,11 @@ theorem wkpNorm_crossRightGradCoeffDivLimit_le_uniform
           (max ((Fintype.card ι : ℝ) * Ccomp) ((Fintype.card ι : ℝ) * Cpart)) :=
     ENNReal.ofReal_le_ofReal (le_max_right _ _)
   calc
-    wkpNorm (d := Module.finrank ℝ E) K 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2
         (crossRightGradCoeffDivLimit (I := I) (M := M)
           g r s i α P₀) Ω
-        ≤ (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
-          + (∑ j : ι, wkpNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) :=
+        ≤ (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandComp j) Ω)
+          + (∑ j : ι, iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K 2 (summandPart j) Ω) :=
         h_triangle
     _ ≤ ENNReal.ofReal ((Fintype.card ι : ℝ) * Ccomp) * Sumcomp
           + ENNReal.ofReal ((Fintype.card ι : ℝ) * Cpart) * Sumpart :=

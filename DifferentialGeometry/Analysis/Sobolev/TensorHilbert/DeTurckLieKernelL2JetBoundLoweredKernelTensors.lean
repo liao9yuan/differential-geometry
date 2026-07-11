@@ -29,9 +29,9 @@ open DifferentialGeometry
 open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
-  (dLaBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
+  (connDiffCovDerivBiContrFib dLaBiContrFib_contMDiff deTurckLieDLbFib deTurckLieDLbFib_contMDiff
     deTurckLieFib deTurckLieCoeffField deTurckLieCoeffField_toSection
-    deTurckLieCovDerivA connDiff_pairing_mdiffAt dLaCovKernel dLaCovKernel_apply_extend)
+    deTurckConnDiffCovDeriv connDiff_pairing_mdiffAt connDiffCovDerivOp dLaCovKernel_apply_extend)
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -49,7 +49,7 @@ open DifferentialGeometry.Analysis.Laplacian (metric_inner_self_nonneg metric_in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
   (covGrad connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one dLaBiContrFibFixedFrame_toModel)
 open DifferentialGeometry.Geometry.Curvature
-  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt)
+  (exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt)
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
@@ -115,11 +115,11 @@ lemma cotangentToDual_map_add_dla (x : M) (om : Tensor0SSpace 1 I x)
       cotangentToDualLinear (I := I) (x := x) om v from fun v => rfl]
   exact map_add _ a b
 
-private noncomputable def dLaCovKernelCLM (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
+private noncomputable def deTurckLieConnDiffDerivKernelCLM (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x :=
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   LinearMap.toContinuousLinearMap
-    { toFun := fun v0 => dLaCovKernel (I := I) g₁ g_bg x v0
+    { toFun := fun v0 => connDiffCovDerivOp (I := I) g₁ g_bg x v0
       map_add' := fun v0 v0' => by
         apply ContinuousLinearMap.ext
         intro p
@@ -138,16 +138,16 @@ private noncomputable def dLaCovKernelCLM (g₁ g_bg : SmoothRiemannianMetric I 
 set_option linter.unusedSectionVars false in
 private lemma dLaCovKernelCLM_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 p q : TangentSpace I x) :
-    dLaCovKernelCLM (I := I) (M := M) g₁ g_bg x v0 p q =
-      dLaCovKernel (I := I) g₁ g_bg x v0 p q := by
-  rw [dLaCovKernelCLM, LinearMap.coe_toContinuousLinearMap']
+    deTurckLieConnDiffDerivKernelCLM (I := I) (M := M) g₁ g_bg x v0 p q =
+      connDiffCovDerivOp (I := I) g₁ g_bg x v0 p q := by
+  rw [deTurckLieConnDiffDerivKernelCLM, LinearMap.coe_toContinuousLinearMap']
   rfl
 
 private noncomputable def dLaLoweredCovec (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 4 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 4 => TangentSpace I x) ℝ from
     { toFun := fun m =>
-        g₀.inner x (dLaCovKernelCLM (I := I) (M := M) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0)
+        g₀.inner x (deTurckLieConnDiffDerivKernelCLM (I := I) (M := M) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0)
       map_update_add' := by
         have h01 : (0 : Fin 4) ≠ 1 := by decide
         have h02 : (0 : Fin 4) ≠ 2 := by decide
@@ -186,8 +186,8 @@ private noncomputable def dLaLoweredCovec (g₀ g₁ g_bg : SmoothRiemannianMetr
             not_false_eq_true, map_smul, ContinuousLinearMap.smul_apply]
       cont := by
         have hK : Continuous (fun m : Fin 4 → TangentSpace I x =>
-            dLaCovKernelCLM (I := I) (M := M) g₁ g_bg x (m 1) (m 2) (m 3)) :=
-          (((dLaCovKernelCLM (I := I) (M := M) g₁ g_bg x).continuous.comp
+            deTurckLieConnDiffDerivKernelCLM (I := I) (M := M) g₁ g_bg x (m 1) (m 2) (m 3)) :=
+          (((deTurckLieConnDiffDerivKernelCLM (I := I) (M := M) g₁ g_bg x).continuous.comp
             (continuous_apply 1)).clm_apply (continuous_apply 2)).clm_apply (continuous_apply 3)
         exact ((g₀.inner x).continuous.comp hK).clm_apply (continuous_apply 0) }
     : Tensor0SSpace 4 I x)
@@ -196,8 +196,8 @@ set_option linter.unusedSectionVars false in
 @[simp] private lemma dLaLoweredCovec_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     dLaLoweredCovec (I := I) g₀ g₁ g_bg x m =
-      g₀.inner x (dLaCovKernel (I := I) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0) := by
-  change g₀.inner x (dLaCovKernelCLM (I := I) (M := M) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0) = _
+      g₀.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0) := by
+  change g₀.inner x (deTurckLieConnDiffDerivKernelCLM (I := I) (M := M) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0) = _
   rw [dLaCovKernelCLM_apply]
 
 set_option linter.unusedSectionVars false in
@@ -209,12 +209,12 @@ private lemma dLaLoweredScalar_global (g₀ g₁ g_bg : SmoothRiemannianMetric I
     (hq : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% q)) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x : M => g₀.inner x
-        (dLaCovKernel (I := I) g₁ g_bg x (V0 x) (p x) (q x)) (W x)) := by
+        (connDiffCovDerivOp (I := I) g₁ g_bg x (V0 x) (p x) (q x)) (W x)) := by
   classical
   have hAsec := deTurckLieCovDerivA_section_contMDiff (I := I) g₁ g_bg V0 p q hV0 hp hq
   have hcongr : (fun x : M => g₀.inner x
-        (dLaCovKernel (I := I) g₁ g_bg x (V0 x) (p x) (q x)) (W x)) =
-      (fun x : M => g₀.inner x (deTurckLieCovDerivA (I := I) g₁ g_bg V0 p q x) (W x)) := by
+        (connDiffCovDerivOp (I := I) g₁ g_bg x (V0 x) (p x) (q x)) (W x)) =
+      (fun x : M => g₀.inner x (deTurckConnDiffCovDeriv (I := I) g₁ g_bg V0 p q x) (W x)) := by
     funext x
     rw [dLaCovKernel_apply_field3 (I := I) g₁ g_bg x V0 p q
       (hV0.contMDiffAt.mdifferentiableAt (by simp))
@@ -222,14 +222,14 @@ private lemma dLaLoweredScalar_global (g₀ g₁ g_bg : SmoothRiemannianMetric I
       (hq.contMDiffAt.mdifferentiableAt (by simp))]
   rw [hcongr]
   exact contMDiff_g_inner_of_smooth_sections (I := I) g₀
-    ⟨fun b => deTurckLieCovDerivA (I := I) g₁ g_bg V0 p q b, hAsec⟩ ⟨fun b => W b, hW⟩
+    ⟨fun b => deTurckConnDiffCovDeriv (I := I) g₁ g_bg V0 p q b, hAsec⟩ ⟨fun b => W b, hW⟩
 
 set_option linter.unusedSectionVars false in
 private lemma dLaLoweredScalar_contMDiffAt (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (V0 V1 V2 V3 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x₀ : M) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun x : M =>
-        g₀.inner x (dLaCovKernel (I := I) g₁ g_bg x (V1 x) (V2 x) (V3 x)) (V0 x)) x₀ := by
+        g₀.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (V1 x) (V2 x) (V3 x)) (V0 x)) x₀ := by
   have hglob := dLaLoweredScalar_global (I := I) (M := M) g₀ g₁ g_bg
     (V0 := fun b => V1 b) (W := fun b => V0 b) (p := fun b => V2 b) (q := fun b => V3 b)
     V1.contMDiff V0.contMDiff V2.contMDiff V3.contMDiff
@@ -254,7 +254,7 @@ private theorem dLaLoweredCovec_section_contMDiff (g₀ g₁ g_bg : SmoothRieman
   obtain ⟨Y, hY⟩ := hframe.exists_contMDiffSection_eqOn_nhd e₁.open_baseSet he₁
   have hscalar : ContMDiffAt I 𝓘(ℝ, ℝ) ∞
       (fun x : M => g₀.inner x
-        (dLaCovKernel (I := I) g₁ g_bg x (Y (σ 1) x) (Y (σ 2) x) (Y (σ 3) x))
+        (connDiffCovDerivOp (I := I) g₁ g_bg x (Y (σ 1) x) (Y (σ 2) x) (Y (σ 3) x))
         (Y (σ 0) x)) x₀ :=
     dLaLoweredScalar_contMDiffAt (I := I) (M := M) g₀ g₁ g_bg
       (Y (σ 0)) (Y (σ 1)) (Y (σ 2)) (Y (σ 3)) x₀
@@ -302,7 +302,7 @@ set_option linter.unusedSectionVars false in
 lemma dLaLoweredCc_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (dLaLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x m =
-      g₀.inner x (dLaCovKernel (I := I) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0) := by
+      g₀.inner x (connDiffCovDerivOp (I := I) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0) := by
   rw [dLaLoweredCc_unitModel]
   exact dLaLoweredCovec_apply (I := I) (M := M) g₀ g₁ g_bg x m
 
@@ -320,7 +320,7 @@ private lemma dLaConnArmPt_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) 
 
 def dLaQuadCc (g₀ g_arm g_out : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 1 3 :=
-  appCcRS (I := I) (M := M) g₀ 1 2 3
+  ccOperatorFieldComp (I := I) (M := M) g₀ 1 2 3
     (armSlotEndoPassZeroCc (I := I) (M := M) g₀ (dLaConnArmPt (I := I) (M := M) g₀ g_arm))
     (connDiffSection (I := I) g_out g₀)
 
@@ -337,7 +337,7 @@ lemma dLaQuadCc_toModel (g₀ g_arm g_out : SmoothRiemannianMetric I M) (x : M)
   rw [show ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
         (dLaQuadCc (I := I) (M := M) g₀ g_arm g_out).toSection x) om) =
       ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from
-        (appCcRS (I := I) (M := M) g₀ 1 2 3
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 1 2 3
           (armSlotEndoPassZeroCc (I := I) (M := M) g₀
             (dLaConnArmPt (I := I) (M := M) g₀ g_arm))
           (connDiffSection (I := I) g_out g₀)).toSection x) om) from rfl]

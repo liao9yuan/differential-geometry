@@ -54,12 +54,12 @@ lemma tangentSectionAction_tensorInnerScalar
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     tangentSectionAction (I := I) V
         (tensorInnerScalar (I := I) (M := M) g r s W S) x =
-      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s S x))
-        + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+        + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s W x))
           (Tensor0SSpace.toModel
@@ -74,12 +74,12 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (hWS : ContMDiff I 𝓘(ℝ) ∞
       (tensorInnerScalar (I := I) (M := M) g r s W S)) :
-    ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s S x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s W x))
             (Tensor0SSpace.toModel
@@ -96,12 +96,12 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
   have hLeibniz : ∀ x : M,
       tangentSectionAction (I := I) V
           (tensorInnerScalar (I := I) (M := M) g r s W S) x =
-        tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+        covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s S x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g r s W x))
             (Tensor0SSpace.toModel
@@ -112,12 +112,12 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
       ∫ x, tangentSectionAction (I := I) V
             (tensorInnerScalar (I := I) (M := M) g r s W S) x
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-        ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+        ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
                 (Tensor0SSpace.toModel
                   (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
                 (Tensor0SSpace.toModel
                   (liftedTensorSection (I := I) (M := M) g r s S x))
-              + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+              + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
                 (Tensor0SSpace.toModel
                   (liftedTensorSection (I := I) (M := M) g r s W x))
                 (Tensor0SSpace.toModel
@@ -125,12 +125,12 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
     integral_congr_ae (Filter.Eventually.of_forall hLeibniz)
   have hsum :
-      ∫ x, (tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      ∫ x, (covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s S x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s W x))
               (Tensor0SSpace.toModel
@@ -147,24 +147,24 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
         (tensorInnerScalar (I := I) (M := M) g r s W S)) :=
     (tangentSectionAction_contMDiff (I := I) V hWS).continuous
   have hAB_int : Integrable
-      (fun x : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      (fun x : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s S x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s W x))
               (Tensor0SSpace.toModel
                 (loweredCovDerivAt (I := I) (M := M) g r s S x (V x))))
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
     have hcont : Continuous
-        (fun x : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+        (fun x : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s S x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g r s W x))
               (Tensor0SSpace.toModel
@@ -195,26 +195,26 @@ theorem integral_tensorInner_covDeriv_integrationByParts
     (hWS : ContMDiff I 𝓘(ℝ) ∞
       (tensorInnerScalar (I := I) (M := M) g r s W S))
     (hWcov_int : Integrable
-      (fun x : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      (fun x : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (Tensor0SSpace.toModel
           (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s S x)))
       (riemannianVolumeMeasure (I := I) (M := M) g))
     (hScov_int : Integrable
-      (fun x : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      (fun x : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s W x))
         (Tensor0SSpace.toModel
           (loweredCovDerivAt (I := I) (M := M) g r s S x (V x))))
       (riemannianVolumeMeasure (I := I) (M := M) g)) :
-    ∫ x, tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+    ∫ x, covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s W x))
           (Tensor0SSpace.toModel
             (loweredCovDerivAt (I := I) (M := M) g r s S x (V x)))
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-      -∫ x, tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      -∫ x, covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
             (Tensor0SSpace.toModel
@@ -238,12 +238,12 @@ theorem integral_tensorInner_covDeriv_integrationByParts
       (HasCompactSupport.of_compactSpace _)
   have hcombined := integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
     (I := I) (M := M) g r s W S V hWS
-  set A : M → ℝ := fun x => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+  set A : M → ℝ := fun x => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
     (Tensor0SSpace.toModel
       (loweredCovDerivAt (I := I) (M := M) g r s W x (V x)))
     (Tensor0SSpace.toModel
       (liftedTensorSection (I := I) (M := M) g r s S x)) with hA_def
-  set B : M → ℝ := fun x => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+  set B : M → ℝ := fun x => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
     (Tensor0SSpace.toModel
       (liftedTensorSection (I := I) (M := M) g r s W x))
     (Tensor0SSpace.toModel

@@ -44,45 +44,45 @@ open DifferentialGeometry.Integral.Measure (chartGramMatrix
 
 variable {n : ℕ}
 
-noncomputable def chartJ (α : M) (b : M) : E →L[ℝ] E :=
+noncomputable def chartTrivializationLinearMap (α : M) (b : M) : E →L[ℝ] E :=
   (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
 
-noncomputable def chartJinv (α : M) (b : M) : E →L[ℝ] E :=
+noncomputable def chartTrivializationLinearMapSymm (α : M) (b : M) : E →L[ℝ] E :=
   (trivializationAt E (TangentSpace I) α).symmL ℝ b
 
 lemma chartJinv_apply (α : M) (b : M) (v : E) :
-    chartJinv (I := I) (M := M) α b v =
+    chartTrivializationLinearMapSymm (I := I) (M := M) α b v =
       (trivializationAt E (TangentSpace I) α).symmL ℝ b v := rfl
 
 lemma chartJ_apply (α : M) (b : M) (v : E) :
-    chartJ (I := I) (M := M) α b v =
+    chartTrivializationLinearMap (I := I) (M := M) α b v =
       (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b v := rfl
 
 private lemma chartJinv_basis (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
-    chartJinv (I := I) (M := M) α b ((chartModelBasis E) i) =
+    chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i) =
       chartBasisVecFiber (I := I) α i b := by
-  unfold chartBasisVecFiber chartJinv
+  unfold chartBasisVecFiber chartTrivializationLinearMapSymm
   rfl
 
 lemma chartJ_chartJinv (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : E) :
-    chartJ (I := I) (M := M) α b
-        (chartJinv (I := I) (M := M) α b v) = v := by
-  unfold chartJ chartJinv
+    chartTrivializationLinearMap (I := I) (M := M) α b
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b v) = v := by
+  unfold chartTrivializationLinearMap chartTrivializationLinearMapSymm
   exact (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL hb v
 
 lemma chartJinv_chartJ (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : TangentSpace I b) :
-    chartJinv (I := I) (M := M) α b
-        (chartJ (I := I) (M := M) α b v) = v := by
-  unfold chartJ chartJinv
+    chartTrivializationLinearMapSymm (I := I) (M := M) α b
+        (chartTrivializationLinearMap (I := I) (M := M) α b v) = v := by
+  unfold chartTrivializationLinearMap chartTrivializationLinearMapSymm
   exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt hb v
 
 lemma chartJinv_chartJ_self (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : E) :
-    chartJinv (I := I) (M := M) α b
-        (chartJ (I := I) (M := M) α b v) = v :=
+    chartTrivializationLinearMapSymm (I := I) (M := M) α b
+        (chartTrivializationLinearMap (I := I) (M := M) α b v) = v :=
   chartJinv_chartJ (I := I) (M := M) α hb v
 
 lemma chartGramMatrix_eq_innerJinv
@@ -90,8 +90,8 @@ lemma chartGramMatrix_eq_innerJinv
     (i j : Fin (Module.finrank ℝ E)) :
     chartGramMatrix g α b i j =
       g.inner b
-        (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))
-        (chartJinv (I := I) (M := M) α b ((chartModelBasis E) j)) := by
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i))
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) j)) := by
   rw [chartGramMatrix_apply]
   rw [chartJinv_basis (I := I) (M := M), chartJinv_basis (I := I) (M := M)]
 
@@ -127,10 +127,10 @@ private lemma tensorInnerPointwise_0s_sum_left
     (g : SmoothRiemannianMetric I M) (b : M) (s : ℕ) {n : ℕ}
     (c : Fin n → ℝ) (S : Fin n → Tensor0SModel s ℝ E)
     (T : Tensor0SModel s ℝ E) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g b
+    covariantTensorInnerPointwise (I := I) (M := M) s g b
         (∑ k : Fin n, c k • S k) T =
       ∑ k : Fin n, c k *
-        tensorInnerPointwise_0s (I := I) (M := M) s g b (S k) T := by
+        covariantTensorInnerPointwise (I := I) (M := M) s g b (S k) T := by
   classical
   induction n with
   | zero =>
@@ -150,10 +150,10 @@ private lemma tensorInnerPointwise_0s_sum_right
     (g : SmoothRiemannianMetric I M) (b : M) (s : ℕ) {n : ℕ}
     (S : Tensor0SModel s ℝ E)
     (d : Fin n → ℝ) (T : Fin n → Tensor0SModel s ℝ E) :
-    tensorInnerPointwise_0s (I := I) (M := M) s g b S
+    covariantTensorInnerPointwise (I := I) (M := M) s g b S
         (∑ l : Fin n, d l • T l) =
       ∑ l : Fin n, d l *
-        tensorInnerPointwise_0s (I := I) (M := M) s g b S (T l) := by
+        covariantTensorInnerPointwise (I := I) (M := M) s g b S (T l) := by
   classical
   induction n with
   | zero =>
@@ -198,7 +198,7 @@ private lemma tensorInnerOnFrame_succ (s : ℕ)
 private lemma tensorInnerPointwise_0s_eq_tensorInnerOnFrame
     (g : SmoothRiemannianMetric I M) (b : M) :
     ∀ (s : ℕ) (T S : Tensor0SModel s ℝ E),
-      tensorInnerPointwise_0s (I := I) (M := M) s g b T S =
+      covariantTensorInnerPointwise (I := I) (M := M) s g b T S =
         tensorInnerOnFrame (E := E) s
           (fun i : Fin (Module.finrank ℝ E) => (chartModelBasis E) i)
           (gramMatrixAt (I := I) (M := M) g b)⁻¹ T S := by
@@ -268,9 +268,9 @@ private lemma chartJinv_compose_curry_chartBasis {s : ℕ} (α : M) (b : M)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ)
     (i : Fin (Module.finrank ℝ E)) :
     (T.compContinuousLinearMap (fun _ : Fin (s + 1) =>
-        chartJinv (I := I) (M := M) α b)).curryLeft ((chartModelBasis E) i) =
+        chartTrivializationLinearMapSymm (I := I) (M := M) α b)).curryLeft ((chartModelBasis E) i) =
       (T.curryLeft (chartBasisVecFiber (I := I) α i b)).compContinuousLinearMap
-        (fun _ : Fin s => chartJinv (I := I) (M := M) α b) := by
+        (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) := by
   rw [compContinuousLinearMap_curryLeft]
   rw [chartJinv_basis (I := I) (M := M)]
 
@@ -280,9 +280,9 @@ private theorem chartTensorInnerOnChartBasis_eq_chartTensorInnerPointwise_compos
       chartTensorInnerOnChartBasis (I := I) (M := M) s g α b T S =
         chartTensorInnerPointwise_0s (I := I) (M := M) s g α b
           (T.compContinuousLinearMap (fun _ : Fin s =>
-            chartJinv (I := I) (M := M) α b))
+            chartTrivializationLinearMapSymm (I := I) (M := M) α b))
           (S.compContinuousLinearMap (fun _ : Fin s =>
-            chartJinv (I := I) (M := M) α b)) := by
+            chartTrivializationLinearMapSymm (I := I) (M := M) α b)) := by
   intro s
   induction s with
   | zero =>
@@ -306,44 +306,44 @@ private theorem chartTensorInnerOnChartBasis_eq_chartTensorInnerPointwise_compos
       rw [ih (T.curryLeft (chartBasisVecFiber (I := I) α i b))
           (S.curryLeft (chartBasisVecFiber (I := I) α j b))]
 
-private noncomputable def chartJinvMatrix (α : M) (b : M) :
+private noncomputable def chartTrivializationMatrixInv (α : M) (b : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun a i =>
     ((chartModelBasis E).repr
-      (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))) a
+      (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i))) a
 
 @[simp] private lemma chartJinvMatrix_apply (α : M) (b : M)
     (a i : Fin (Module.finrank ℝ E)) :
-    chartJinvMatrix (I := I) (M := M) α b a i =
+    chartTrivializationMatrixInv (I := I) (M := M) α b a i =
       ((chartModelBasis E).repr
-        (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
 
 private lemma chartBasisVecFiber_eq_sum (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) α i b =
       ∑ a : Fin (Module.finrank ℝ E),
-        chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a := by
+        chartTrivializationMatrixInv (I := I) (M := M) α b a i • (chartModelBasis E) a := by
   rw [← chartJinv_basis (I := I) (M := M) α b i]
   exact ((chartModelBasis E).sum_repr
-    (chartJinv (I := I) (M := M) α b ((chartModelBasis E) i))).symm
+    (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i))).symm
 
-private noncomputable def chartJMatrix (α : M) (b : M) :
+private noncomputable def chartTrivializationMatrix (α : M) (b : M) :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun a i =>
     ((chartModelBasis E).repr
-      (chartJ (I := I) (M := M) α b ((chartModelBasis E) i))) a
+      (chartTrivializationLinearMap (I := I) (M := M) α b ((chartModelBasis E) i))) a
 
 @[simp] private lemma chartJMatrix_apply (α : M) (b : M)
     (a i : Fin (Module.finrank ℝ E)) :
-    chartJMatrix (I := I) (M := M) α b a i =
+    chartTrivializationMatrix (I := I) (M := M) α b a i =
       ((chartModelBasis E).repr
-        (chartJ (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
+        (chartTrivializationLinearMap (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
 
 private lemma chartJ_apply_repr (α : M) (b : M) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
-    ((chartModelBasis E).repr (chartJ (I := I) (M := M) α b v)) a =
+    ((chartModelBasis E).repr (chartTrivializationLinearMap (I := I) (M := M) α b v)) a =
       ∑ k : Fin (Module.finrank ℝ E),
-        chartJMatrix (I := I) (M := M) α b a k *
+        chartTrivializationMatrix (I := I) (M := M) α b a k *
           ((chartModelBasis E).repr v) k := by
 
   have hv : v = ∑ k : Fin (Module.finrank ℝ E),
@@ -360,9 +360,9 @@ private lemma chartJ_apply_repr (α : M) (b : M) (v : E)
 
 private lemma chartJinv_apply_repr (α : M) (b : M) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
-    ((chartModelBasis E).repr (chartJinv (I := I) (M := M) α b v)) a =
+    ((chartModelBasis E).repr (chartTrivializationLinearMapSymm (I := I) (M := M) α b v)) a =
       ∑ k : Fin (Module.finrank ℝ E),
-        chartJinvMatrix (I := I) (M := M) α b a k *
+        chartTrivializationMatrixInv (I := I) (M := M) α b a k *
           ((chartModelBasis E).repr v) k := by
   have hv : v = ∑ k : Fin (Module.finrank ℝ E),
       ((chartModelBasis E).repr v) k • (chartModelBasis E) k :=
@@ -379,38 +379,38 @@ private lemma chartJinv_apply_repr (α : M) (b : M) (v : E)
 private lemma chartGramMatrix_eq_matrix_form
     (g : SmoothRiemannianMetric I M) (α b : M) :
     chartGramMatrix g α b =
-      (chartJinvMatrix (I := I) (M := M) α b)ᵀ *
+      (chartTrivializationMatrixInv (I := I) (M := M) α b)ᵀ *
         gramMatrixAt (I := I) (M := M) g b *
-        chartJinvMatrix (I := I) (M := M) α b := by
+        chartTrivializationMatrixInv (I := I) (M := M) α b := by
   ext i j
 
   rw [chartGramMatrix_eq_innerJinv]
 
-  have hi : chartJinv (I := I) (M := M) α b ((chartModelBasis E) i) =
-      ∑ a, chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a := by
+  have hi : chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i) =
+      ∑ a, chartTrivializationMatrixInv (I := I) (M := M) α b a i • (chartModelBasis E) a := by
     rw [chartJinv_basis (I := I) (M := M) α b i]
     exact chartBasisVecFiber_eq_sum (I := I) (M := M) α b i
-  have hj : chartJinv (I := I) (M := M) α b ((chartModelBasis E) j) =
-      ∑ b', chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b' := by
+  have hj : chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) j) =
+      ∑ b', chartTrivializationMatrixInv (I := I) (M := M) α b b' j • (chartModelBasis E) b' := by
     rw [chartJinv_basis (I := I) (M := M) α b j]
     exact chartBasisVecFiber_eq_sum (I := I) (M := M) α b j
   rw [hi, hj]
 
   have hLHS_eq :
       (g.inner b (∑ a : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a))
+          chartTrivializationMatrixInv (I := I) (M := M) α b a i • (chartModelBasis E) a))
         (∑ b' : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
+          chartTrivializationMatrixInv (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
       ∑ a : Fin (Module.finrank ℝ E),
         ∑ b' : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b a i *
-            chartJinvMatrix (I := I) (M := M) α b b' j *
+          chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+            chartTrivializationMatrixInv (I := I) (M := M) α b b' j *
             g.inner b ((chartModelBasis E) a) ((chartModelBasis E) b') := by
 
     have hL : g.inner b (∑ a : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b a i • (chartModelBasis E) a) =
+          chartTrivializationMatrixInv (I := I) (M := M) α b a i • (chartModelBasis E) a) =
         ∑ a : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b a i •
+          chartTrivializationMatrixInv (I := I) (M := M) α b a i •
             g.inner b ((chartModelBasis E) a) := by
       rw [map_sum]
       refine Finset.sum_congr rfl ?_
@@ -423,9 +423,9 @@ private lemma chartGramMatrix_eq_matrix_form
 
     rw [show (g.inner b ((chartModelBasis E) a))
         (∑ b' : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
+          chartTrivializationMatrixInv (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
         ∑ b' : Fin (Module.finrank ℝ E),
-          chartJinvMatrix (I := I) (M := M) α b b' j *
+          chartTrivializationMatrixInv (I := I) (M := M) α b b' j *
             g.inner b ((chartModelBasis E) a) ((chartModelBasis E) b') from ?_]
     · rw [Finset.mul_sum]
       refine Finset.sum_congr rfl ?_
@@ -435,8 +435,8 @@ private lemma chartGramMatrix_eq_matrix_form
       refine Finset.sum_congr rfl ?_
       intro b' _
       rw [show ((g.inner b) ((chartModelBasis E) a))
-          (chartJinvMatrix (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
-          chartJinvMatrix (I := I) (M := M) α b b' j •
+          (chartTrivializationMatrixInv (I := I) (M := M) α b b' j • (chartModelBasis E) b') =
+          chartTrivializationMatrixInv (I := I) (M := M) α b b' j •
             ((g.inner b) ((chartModelBasis E) a)) ((chartModelBasis E) b') from ?_]
       · rw [smul_eq_mul]
       · exact ContinuousLinearMap.map_smul ((g.inner b) ((chartModelBasis E) a)) _ _
@@ -444,14 +444,14 @@ private lemma chartGramMatrix_eq_matrix_form
 
   rw [Matrix.mul_apply]
   rw [show ∑ b' : Fin (Module.finrank ℝ E),
-      ((chartJinvMatrix (I := I) (M := M) α b)ᵀ *
+      ((chartTrivializationMatrixInv (I := I) (M := M) α b)ᵀ *
           gramMatrixAt (I := I) (M := M) g b) i b' *
-        chartJinvMatrix (I := I) (M := M) α b b' j =
+        chartTrivializationMatrixInv (I := I) (M := M) α b b' j =
         ∑ b' : Fin (Module.finrank ℝ E),
           (∑ a : Fin (Module.finrank ℝ E),
-            chartJinvMatrix (I := I) (M := M) α b a i *
+            chartTrivializationMatrixInv (I := I) (M := M) α b a i *
               gramMatrixAt (I := I) (M := M) g b a b') *
-            chartJinvMatrix (I := I) (M := M) α b b' j from ?_]
+            chartTrivializationMatrixInv (I := I) (M := M) α b b' j from ?_]
   · simp only [Finset.sum_mul]
     rw [Finset.sum_comm]
     refine Finset.sum_congr rfl ?_
@@ -464,24 +464,24 @@ private lemma chartGramMatrix_eq_matrix_form
     intro b' _
     rw [Matrix.mul_apply]
 
-    refine congr_arg (· * chartJinvMatrix (I := I) (M := M) α b b' j) ?_
+    refine congr_arg (· * chartTrivializationMatrixInv (I := I) (M := M) α b b' j) ?_
     refine Finset.sum_congr rfl ?_
     intro a _
     rw [Matrix.transpose_apply]
 
 private lemma chartJinvMatrix_mul_chartJMatrix (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
-    chartJinvMatrix (I := I) (M := M) α b *
-        chartJMatrix (I := I) (M := M) α b = 1 := by
+    chartTrivializationMatrixInv (I := I) (M := M) α b *
+        chartTrivializationMatrix (I := I) (M := M) α b = 1 := by
   ext a c
   rw [Matrix.mul_apply]
 
-  have hsum_eq : ∑ k, chartJinvMatrix (I := I) (M := M) α b a k *
-      chartJMatrix (I := I) (M := M) α b k c =
-    ((chartModelBasis E).repr (chartJinv (I := I) (M := M) α b
-      (chartJ (I := I) (M := M) α b ((chartModelBasis E) c)))) a := by
+  have hsum_eq : ∑ k, chartTrivializationMatrixInv (I := I) (M := M) α b a k *
+      chartTrivializationMatrix (I := I) (M := M) α b k c =
+    ((chartModelBasis E).repr (chartTrivializationLinearMapSymm (I := I) (M := M) α b
+      (chartTrivializationLinearMap (I := I) (M := M) α b ((chartModelBasis E) c)))) a := by
     rw [chartJinv_apply_repr (I := I) (M := M) α b
-      (chartJ (I := I) (M := M) α b ((chartModelBasis E) c)) a]
+      (chartTrivializationLinearMap (I := I) (M := M) α b ((chartModelBasis E) c)) a]
     rfl
   rw [hsum_eq]
   rw [chartJinv_chartJ (I := I) (M := M) α hb]
@@ -497,17 +497,17 @@ private lemma chartJinvMatrix_mul_chartJMatrix (α : M) {b : M}
 
 private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
-    chartJMatrix (I := I) (M := M) α b *
-        chartJinvMatrix (I := I) (M := M) α b = 1 := by
+    chartTrivializationMatrix (I := I) (M := M) α b *
+        chartTrivializationMatrixInv (I := I) (M := M) α b = 1 := by
   ext a c
   rw [Matrix.mul_apply]
 
-  have hsum_eq : ∑ k, chartJMatrix (I := I) (M := M) α b a k *
-      chartJinvMatrix (I := I) (M := M) α b k c =
-    ((chartModelBasis E).repr (chartJ (I := I) (M := M) α b
-      (chartJinv (I := I) (M := M) α b ((chartModelBasis E) c)))) a := by
+  have hsum_eq : ∑ k, chartTrivializationMatrix (I := I) (M := M) α b a k *
+      chartTrivializationMatrixInv (I := I) (M := M) α b k c =
+    ((chartModelBasis E).repr (chartTrivializationLinearMap (I := I) (M := M) α b
+      (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) c)))) a := by
     rw [chartJ_apply_repr (I := I) (M := M) α b
-      (chartJinv (I := I) (M := M) α b ((chartModelBasis E) c)) a]
+      (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) c)) a]
     rfl
   rw [hsum_eq]
   rw [chartJ_chartJinv (I := I) (M := M) α hb]
@@ -523,8 +523,8 @@ private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
 
 private lemma chartJinvMatrix_inv (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
-    (chartJinvMatrix (I := I) (M := M) α b)⁻¹ =
-      chartJMatrix (I := I) (M := M) α b := by
+    (chartTrivializationMatrixInv (I := I) (M := M) α b)⁻¹ =
+      chartTrivializationMatrix (I := I) (M := M) α b := by
   apply Matrix.inv_eq_left_inv
   exact chartJMatrix_mul_chartJinvMatrix (I := I) (M := M) α hb
 
@@ -566,31 +566,31 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
     ∑ i : Fin (Module.finrank ℝ E),
       ∑ j : Fin (Module.finrank ℝ E),
         (chartGramMatrix g α b)⁻¹ i j *
-          (chartJinvMatrix (I := I) (M := M) α b a i *
-            chartJinvMatrix (I := I) (M := M) α b c j) =
+          (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+            chartTrivializationMatrixInv (I := I) (M := M) α b c j) =
       (gramMatrixAt (I := I) (M := M) g b)⁻¹ a c := by
 
   have hLHS_form :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
           (chartGramMatrix g α b)⁻¹ i j *
-            (chartJinvMatrix (I := I) (M := M) α b a i *
-              chartJinvMatrix (I := I) (M := M) α b c j)) =
-      (chartJinvMatrix (I := I) (M := M) α b *
+            (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+              chartTrivializationMatrixInv (I := I) (M := M) α b c j)) =
+      (chartTrivializationMatrixInv (I := I) (M := M) α b *
         (chartGramMatrix g α b)⁻¹ *
-        (chartJinvMatrix (I := I) (M := M) α b)ᵀ) a c := by
+        (chartTrivializationMatrixInv (I := I) (M := M) α b)ᵀ) a c := by
 
     rw [Matrix.mul_apply]
 
     rw [show ∑ j : Fin (Module.finrank ℝ E),
-        (chartJinvMatrix (I := I) (M := M) α b *
+        (chartTrivializationMatrixInv (I := I) (M := M) α b *
           (chartGramMatrix g α b)⁻¹) a j *
-          (chartJinvMatrix (I := I) (M := M) α b)ᵀ j c =
+          (chartTrivializationMatrixInv (I := I) (M := M) α b)ᵀ j c =
         ∑ j : Fin (Module.finrank ℝ E),
           (∑ i : Fin (Module.finrank ℝ E),
-            chartJinvMatrix (I := I) (M := M) α b a i *
+            chartTrivializationMatrixInv (I := I) (M := M) α b a i *
             (chartGramMatrix g α b)⁻¹ i j) *
-          chartJinvMatrix (I := I) (M := M) α b c j from ?_]
+          chartTrivializationMatrixInv (I := I) (M := M) α b c j from ?_]
     · simp only [Finset.sum_mul]
       rw [Finset.sum_comm]
       refine Finset.sum_congr rfl ?_
@@ -605,18 +605,18 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
 
   have hJinvMat_inv := chartJinvMatrix_inv (I := I) (M := M) α hb
 
-  have hrhs : (chartJinvMatrix (I := I) (M := M) α b *
+  have hrhs : (chartTrivializationMatrixInv (I := I) (M := M) α b *
       (chartGramMatrix g α b)⁻¹ *
-      (chartJinvMatrix (I := I) (M := M) α b)ᵀ) *
+      (chartTrivializationMatrixInv (I := I) (M := M) α b)ᵀ) *
       gramMatrixAt (I := I) (M := M) g b = 1 := by
 
     have hGramEq := chartGramMatrix_eq_matrix_form (I := I) (M := M) g α b
 
     have hJinvMatT_mul_G :
-        (chartJinvMatrix (I := I) (M := M) α b)ᵀ *
+        (chartTrivializationMatrixInv (I := I) (M := M) α b)ᵀ *
             gramMatrixAt (I := I) (M := M) g b =
           chartGramMatrix g α b *
-            (chartJinvMatrix (I := I) (M := M) α b)⁻¹ := by
+            (chartTrivializationMatrixInv (I := I) (M := M) α b)⁻¹ := by
 
       rw [hGramEq, hJinvMat_inv]
       rw [Matrix.mul_assoc, Matrix.mul_assoc]
@@ -631,9 +631,9 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
       hJinvMat_inv,
       chartJinvMatrix_mul_chartJMatrix (I := I) (M := M) α hb]
 
-  have hMain : chartJinvMatrix (I := I) (M := M) α b *
+  have hMain : chartTrivializationMatrixInv (I := I) (M := M) α b *
       (chartGramMatrix g α b)⁻¹ *
-      (chartJinvMatrix (I := I) (M := M) α b)ᵀ =
+      (chartTrivializationMatrixInv (I := I) (M := M) α b)ᵀ =
       (gramMatrixAt (I := I) (M := M) g b)⁻¹ := by
 
     exact (Matrix.inv_eq_left_inv hrhs).symm
@@ -644,7 +644,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
     ∀ (s : ℕ) {b : M},
       b ∈ (trivializationAt E (TangentSpace I) α).baseSet →
       ∀ (T S : Tensor0SModel s ℝ E),
-      tensorInnerPointwise_0s (I := I) (M := M) s g b T S =
+      covariantTensorInnerPointwise (I := I) (M := M) s g b T S =
         chartTensorInnerOnChartBasis (I := I) (M := M) s g α b T S := by
   intro s
   induction s with
@@ -665,7 +665,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               (chartGramMatrix g α b)⁻¹ i j *
-                tensorInnerPointwise_0s (I := I) (M := M) s g b
+                covariantTensorInnerPointwise (I := I) (M := M) s g b
                   (T.curryLeft (chartBasisVecFiber (I := I) α i b))
                   (S.curryLeft (chartBasisVecFiber (I := I) α j b)) := by
         refine Finset.sum_congr rfl ?_
@@ -678,7 +678,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
       have step2_T : ∀ i : Fin (Module.finrank ℝ E),
           T.curryLeft (chartBasisVecFiber (I := I) α i b) =
             ∑ a : Fin (Module.finrank ℝ E),
-              chartJinvMatrix (I := I) (M := M) α b a i •
+              chartTrivializationMatrixInv (I := I) (M := M) α b a i •
                 T.curryLeft ((chartModelBasis E) a) := by
         intro i
         rw [chartBasisVecFiber_eq_sum (I := I) (M := M) α b i]
@@ -686,21 +686,21 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
       have step2_S : ∀ j : Fin (Module.finrank ℝ E),
           S.curryLeft (chartBasisVecFiber (I := I) α j b) =
             ∑ b' : Fin (Module.finrank ℝ E),
-              chartJinvMatrix (I := I) (M := M) α b b' j •
+              chartTrivializationMatrixInv (I := I) (M := M) α b b' j •
                 S.curryLeft ((chartModelBasis E) b') := by
         intro j
         rw [chartBasisVecFiber_eq_sum (I := I) (M := M) α b j]
         exact curryLeft_sum (E := E) (s := s) S _ _
 
       have step3 : ∀ i j : Fin (Module.finrank ℝ E),
-          tensorInnerPointwise_0s (I := I) (M := M) s g b
+          covariantTensorInnerPointwise (I := I) (M := M) s g b
               (T.curryLeft (chartBasisVecFiber (I := I) α i b))
               (S.curryLeft (chartBasisVecFiber (I := I) α j b)) =
             ∑ a : Fin (Module.finrank ℝ E),
               ∑ b' : Fin (Module.finrank ℝ E),
-                chartJinvMatrix (I := I) (M := M) α b a i *
-                  chartJinvMatrix (I := I) (M := M) α b b' j *
-                tensorInnerPointwise_0s (I := I) (M := M) s g b
+                chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                  chartTrivializationMatrixInv (I := I) (M := M) α b b' j *
+                covariantTensorInnerPointwise (I := I) (M := M) s g b
                   (T.curryLeft ((chartModelBasis E) a))
                   (S.curryLeft ((chartModelBasis E) b')) := by
         intro i j
@@ -718,7 +718,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               (chartGramMatrix g α b)⁻¹ i j *
-                tensorInnerPointwise_0s (I := I) (M := M) s g b
+                covariantTensorInnerPointwise (I := I) (M := M) s g b
                   (T.curryLeft (chartBasisVecFiber (I := I) α i b))
                   (S.curryLeft (chartBasisVecFiber (I := I) α j b)) =
           ∑ i : Fin (Module.finrank ℝ E),
@@ -726,9 +726,9 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               ∑ a : Fin (Module.finrank ℝ E),
                 ∑ b' : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
@@ -751,18 +751,18 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               ∑ a : Fin (Module.finrank ℝ E),
                 ∑ b' : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) =
             ∑ a : Fin (Module.finrank ℝ E),
               ∑ b' : Fin (Module.finrank ℝ E),
                 ∑ j : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) := by
         intro i
@@ -778,9 +778,9 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               ∑ a : Fin (Module.finrank ℝ E),
                 ∑ b' : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) =
           ∑ i : Fin (Module.finrank ℝ E),
@@ -788,9 +788,9 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               ∑ b' : Fin (Module.finrank ℝ E),
                 ∑ j : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
@@ -802,9 +802,9 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               ∑ a : Fin (Module.finrank ℝ E),
                 ∑ b' : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) =
           ∑ a : Fin (Module.finrank ℝ E),
@@ -812,9 +812,9 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               ∑ i : Fin (Module.finrank ℝ E),
                 ∑ j : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) := by
         rw [step5_1]
@@ -831,9 +831,9 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               ∑ i : Fin (Module.finrank ℝ E),
                 ∑ j : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j) *
-                    tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j) *
+                    covariantTensorInnerPointwise (I := I) (M := M) s g b
                       (T.curryLeft ((chartModelBasis E) a))
                       (S.curryLeft ((chartModelBasis E) b')) =
           ∑ a : Fin (Module.finrank ℝ E),
@@ -841,9 +841,9 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               (∑ i : Fin (Module.finrank ℝ E),
                 ∑ j : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j)) *
-                tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j)) *
+                covariantTensorInnerPointwise (I := I) (M := M) s g b
                   (T.curryLeft ((chartModelBasis E) a))
                   (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
@@ -861,8 +861,8 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
           ∑ i : Fin (Module.finrank ℝ E),
             ∑ j : Fin (Module.finrank ℝ E),
               (chartGramMatrix g α b)⁻¹ i j *
-                (chartJinvMatrix (I := I) (M := M) α b a i *
-                  chartJinvMatrix (I := I) (M := M) α b c j) =
+                (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                  chartTrivializationMatrixInv (I := I) (M := M) α b c j) =
             (gramMatrixAt (I := I) (M := M) g b)⁻¹ a c := fun a c =>
         chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
           (I := I) (M := M) g α hb a c
@@ -872,15 +872,15 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
               (∑ i : Fin (Module.finrank ℝ E),
                 ∑ j : Fin (Module.finrank ℝ E),
                   (chartGramMatrix g α b)⁻¹ i j *
-                    (chartJinvMatrix (I := I) (M := M) α b a i *
-                      chartJinvMatrix (I := I) (M := M) α b b' j)) *
-                tensorInnerPointwise_0s (I := I) (M := M) s g b
+                    (chartTrivializationMatrixInv (I := I) (M := M) α b a i *
+                      chartTrivializationMatrixInv (I := I) (M := M) α b b' j)) *
+                covariantTensorInnerPointwise (I := I) (M := M) s g b
                   (T.curryLeft ((chartModelBasis E) a))
                   (S.curryLeft ((chartModelBasis E) b')) =
           ∑ a : Fin (Module.finrank ℝ E),
             ∑ b' : Fin (Module.finrank ℝ E),
               (gramMatrixAt (I := I) (M := M) g b)⁻¹ a b' *
-                tensorInnerPointwise_0s (I := I) (M := M) s g b
+                covariantTensorInnerPointwise (I := I) (M := M) s g b
                   (T.curryLeft ((chartModelBasis E) a))
                   (S.curryLeft ((chartModelBasis E) b')) := by
         refine Finset.sum_congr rfl ?_
@@ -897,12 +897,12 @@ theorem tensorInnerPointwise_0s_bridge_identity
     ∀ (s : ℕ) {b : M},
       b ∈ (trivializationAt E (TangentSpace I) α).baseSet →
       ∀ (T S : Tensor0SModel s ℝ E),
-      tensorInnerPointwise_0s (I := I) (M := M) s g b T S =
+      covariantTensorInnerPointwise (I := I) (M := M) s g b T S =
         chartTensorInnerPointwise_0s (I := I) (M := M) s g α b
           (T.compContinuousLinearMap (fun _ : Fin s =>
-            chartJinv (I := I) (M := M) α b))
+            chartTrivializationLinearMapSymm (I := I) (M := M) α b))
           (S.compContinuousLinearMap (fun _ : Fin s =>
-            chartJinv (I := I) (M := M) α b)) := by
+            chartTrivializationLinearMapSymm (I := I) (M := M) α b)) := by
   intro s b hb T S
   rw [tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
       (I := I) (M := M) g α s hb T S]

@@ -78,7 +78,7 @@ lemma tensorInnerPointwise_eq_liftedTensorSection_inner
     (y : M) :
     tensorInnerPointwise (I := I) (M := M) g r s y
         (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y)) =
-      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g y
+      covariantTensorInnerPointwise (I := I) (M := M) (r + s) g y
         (Tensor0SSpace.toModel (liftedTensorSection (I := I) (M := M) g r s W y))
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s S y)) := by
@@ -111,19 +111,19 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
     mfderiv I 𝓘(ℝ, ℝ)
         (fun y : M => tensorInnerPointwise (I := I) (M := M) g r s y
           (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))) x v =
-      tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (loweredCovDerivAt (I := I) (M := M) g r s W x v))
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s S x))
-        + tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+        + covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
           (Tensor0SSpace.toModel
             (liftedTensorSection (I := I) (M := M) g r s W x))
           (Tensor0SSpace.toModel
             (loweredCovDerivAt (I := I) (M := M) g r s S x v)) := by
   have hfun : (fun y : M => tensorInnerPointwise (I := I) (M := M) g r s y
         (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))) =
-      fun y : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g y
+      fun y : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g y
         (Tensor0SSpace.toModel (liftedTensorSection (I := I) (M := M) g r s W y))
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s S y)) := by
@@ -152,7 +152,7 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible'
         (liftedTensorSection (I := I) (M := M) g r s S) x) := by
   have hfun : (fun y : M => tensorInnerPointwise (I := I) (M := M) g r s y
         (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))) =
-      fun y : M => tensorInnerPointwise_0s (I := I) (M := M) (r + s) g y
+      fun y : M => covariantTensorInnerPointwise (I := I) (M := M) (r + s) g y
         (Tensor0SSpace.toModel (liftedTensorSection (I := I) (M := M) g r s W y))
         (Tensor0SSpace.toModel
           (liftedTensorSection (I := I) (M := M) g r s S y)) := by

@@ -98,7 +98,7 @@ theorem derivShuffleLeftFwd_wd (k : Fin (m + n + 1))
     simp +decide [ Fin.induction, Fin.addCases ];
     simp +decide [ Fin.induction.go ]
 
-noncomputable def derivShuffleJ (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
+noncomputable def derivShuffleRank (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     Fin (m + 1) :=
   ⟨(Finset.univ.filter (fun i : Fin m =>
     (permFinOfSum σ (Fin.castAdd n i)).val < k.val)).card, by
@@ -128,7 +128,7 @@ private theorem card_filter_comp_perm {n : ℕ} (e : Equiv.Perm (Fin n))
 theorem derivShuffleJ_wd (k : Fin (m + n + 1))
     (σ₁ σ₂ : Equiv.Perm (Fin m ⊕ Fin n))
     (h : QuotientGroup.leftRel (Equiv.Perm.sumCongrHom (Fin m) (Fin n)).range σ₁ σ₂) :
-    derivShuffleJ k σ₁ = derivShuffleJ k σ₂ := by
+    derivShuffleRank k σ₁ = derivShuffleRank k σ₂ := by
   rw [QuotientGroup.leftRel_apply] at h
   obtain ⟨⟨τ_l, τ_r⟩, hblock⟩ := h
 
@@ -136,7 +136,7 @@ theorem derivShuffleJ_wd (k : Fin (m + n + 1))
     change (Equiv.Perm.sumCongrHom _ _ (τ_l, τ_r) : Equiv.Perm _) = _; exact hblock
   have h_eq : σ₂ = σ₁ * Equiv.Perm.sumCongr τ_l τ_r := by rw [h_sc]; group
   subst h_eq
-  simp only [derivShuffleJ, Fin.mk.injEq]
+  simp only [derivShuffleRank, Fin.mk.injEq]
 
   change (Finset.univ.filter (fun i =>
     (permFinOfSum σ₁ (Fin.castAdd n i)).val < k.val)).card =
@@ -220,7 +220,7 @@ private noncomputable def derivShuffleFwd :
     Fin (m + n + 1) × Equiv.Perm.ModSumCongr (Fin m) (Fin n) →
     Equiv.Perm.ModSumCongr (Fin (m + 1)) (Fin n) × Fin (m + 1) :=
   fun p => Quotient.liftOn p.2
-    (fun σ => (Quotient.mk'' (derivShuffleLeftFwd p.1 σ), derivShuffleJ p.1 σ))
+    (fun σ => (Quotient.mk'' (derivShuffleLeftFwd p.1 σ), derivShuffleRank p.1 σ))
     (fun σ₁ σ₂ h => Prod.ext
       (Quotient.sound' (derivShuffleLeftFwd_wd p.1 σ₁ σ₂ h))
       (derivShuffleJ_wd p.1 σ₁ σ₂ h))
@@ -371,14 +371,14 @@ private theorem derivShuffleLeft_succ_position_injective
 
 private theorem derivShuffleJ_val_eq_rank_leftSet
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
-    (derivShuffleJ k σ).val =
+    (derivShuffleRank k σ).val =
       ((derivShuffleLeftSet k σ).filter fun x => x.val < k.val).card := by
   classical
   rw [derivShuffleLeftSet_eq]
   simp only [Finset.filter_insert, lt_self_iff_false, ↓reduceIte]
   rw [Finset.filter_image]
   rw [Finset.card_image_of_injective]
-  · unfold derivShuffleJ
+  · unfold derivShuffleRank
     change (Finset.univ.filter (fun i : Fin m =>
         (permFinOfSum σ (Fin.castAdd n i)).val < k.val)).card =
       (Finset.univ.filter (fun a : Fin m =>
@@ -434,7 +434,7 @@ private theorem derivShuffleFwd_injective :
   simp only [derivShuffleFwd, Quotient.liftOn_mk] at h
   have h_coset : Quotient.mk'' (derivShuffleLeftFwd k₁ σ₁) =
       Quotient.mk'' (derivShuffleLeftFwd k₂ σ₂) := congr_arg Prod.fst h
-  have h_j : derivShuffleJ k₁ σ₁ = derivShuffleJ k₂ σ₂ := congr_arg Prod.snd h
+  have h_j : derivShuffleRank k₁ σ₁ = derivShuffleRank k₂ σ₂ := congr_arg Prod.snd h
 
   have h_rel := Quotient.exact' h_coset
   have h_left_set :
@@ -547,14 +547,14 @@ noncomputable def derivShuffleEquivLeft :
 @[simp] theorem derivShuffleEquivLeft_apply_mk
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     derivShuffleEquivLeft (k, Quotient.mk'' σ) =
-      (Quotient.mk'' (derivShuffleLeftFwd k σ), derivShuffleJ k σ) :=
+      (Quotient.mk'' (derivShuffleLeftFwd k σ), derivShuffleRank k σ) :=
   rfl
 
 noncomputable def derivShuffleLeftFwdRanked
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     Equiv.Perm (Fin (m + 1) ⊕ Fin n) :=
   derivShuffleLeftFwd k σ *
-    Equiv.Perm.sumCongr (Fin.cycleRange (derivShuffleJ k σ)) 1
+    Equiv.Perm.sumCongr (Fin.cycleRange (derivShuffleRank k σ)) 1
 
 @[simp] theorem derivShuffleLeftFwdRanked_mk
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
@@ -563,15 +563,15 @@ noncomputable def derivShuffleLeftFwdRanked
       Quotient.mk'' (derivShuffleLeftFwd k σ) := by
   apply Quotient.sound'
   rw [QuotientGroup.leftRel_apply]
-  refine ⟨⟨(Fin.cycleRange (derivShuffleJ k σ))⁻¹, 1⟩, ?_⟩
-  change Equiv.Perm.sumCongr (Fin.cycleRange (derivShuffleJ k σ))⁻¹ 1 =
+  refine ⟨⟨(Fin.cycleRange (derivShuffleRank k σ))⁻¹, 1⟩, ?_⟩
+  change Equiv.Perm.sumCongr (Fin.cycleRange (derivShuffleRank k σ))⁻¹ 1 =
     (derivShuffleLeftFwdRanked k σ)⁻¹ * derivShuffleLeftFwd k σ
   simp [derivShuffleLeftFwdRanked]
 
 @[simp] theorem derivShuffleEquivLeft_apply_mk_ranked
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     derivShuffleEquivLeft (k, Quotient.mk'' σ) =
-      (Quotient.mk'' (derivShuffleLeftFwdRanked k σ), derivShuffleJ k σ) := by
+      (Quotient.mk'' (derivShuffleLeftFwdRanked k σ), derivShuffleRank k σ) := by
   rw [derivShuffleEquivLeft_apply_mk]
   simp
 
@@ -579,7 +579,7 @@ theorem derivShuffleLeftFwdRanked_sign
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
     Equiv.Perm.sign (derivShuffleLeftFwdRanked k σ) =
       (-1 : ℤˣ) ^ k.val * Equiv.Perm.sign σ *
-        (-1 : ℤˣ) ^ (derivShuffleJ k σ).val := by
+        (-1 : ℤˣ) ^ (derivShuffleRank k σ).val := by
   rw [derivShuffleLeftFwdRanked, Equiv.Perm.sign_mul, Equiv.Perm.sign_sumCongr,
     derivShuffleLeftFwd_sign, Fin.sign_cycleRange]
   simp [mul_assoc]
@@ -587,7 +587,7 @@ theorem derivShuffleLeftFwdRanked_sign
 
 theorem derivShuffleLeftFwdRanked_inl_j
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) :
-    derivShuffleLeftFwdRanked k σ (Sum.inl (derivShuffleJ k σ)) =
+    derivShuffleLeftFwdRanked k σ (Sum.inl (derivShuffleRank k σ)) =
       finSuccSumEquiv.symm k := by
   rw [derivShuffleLeftFwdRanked]
   simp only [Equiv.Perm.mul_apply, Equiv.Perm.sumCongr_apply, Sum.map_inl]
@@ -595,7 +595,7 @@ theorem derivShuffleLeftFwdRanked_inl_j
 
 theorem derivShuffleLeftFwdRanked_inl_succAbove
     (k : Fin (m + n + 1)) (σ : Equiv.Perm (Fin m ⊕ Fin n)) (a : Fin m) :
-    derivShuffleLeftFwdRanked k σ (Sum.inl ((derivShuffleJ k σ).succAbove a)) =
+    derivShuffleLeftFwdRanked k σ (Sum.inl ((derivShuffleRank k σ).succAbove a)) =
       finSuccSumEquiv.symm
         (k.succAbove (permFinOfSum σ (Fin.castAdd n a))) := by
   rw [derivShuffleLeftFwdRanked]

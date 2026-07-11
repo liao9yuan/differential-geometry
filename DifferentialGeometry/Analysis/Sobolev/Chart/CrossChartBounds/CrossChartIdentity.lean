@@ -105,7 +105,7 @@ theorem chartPushed_chartPullback_pointwise_identity
     refine ⟨?_, ?_⟩
     · exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).nonneg γ x
     · exact (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M).le_one γ x
-  set ργE : EuclN → ℝ := etaEuclid (I := I) (M := M) γ ρ_γ_M with hργE_def
+  set ργE : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) γ ρ_γ_M with hργE_def
   have hργE_smooth : ContDiff ℝ (⊤ : ℕ∞) ργE :=
     contDiff_etaEuclid (I := I) (M := M) γ ρ_γ_M hρ_γ_M_smooth hρ_γ_M_cpt
       hρ_γ_M_supp_in_chart

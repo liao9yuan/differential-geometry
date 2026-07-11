@@ -19,12 +19,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-private noncomputable def jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
+private noncomputable def basisDirectionLine (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
     ℝ → E := fun s => y₀ + s • (chartModelBasis E) l
 
 private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
     (s : ℝ) :
-    HasDerivAt (jacobiLine (E := E) y₀ l) ((chartModelBasis E) l) s := by
+    HasDerivAt (basisDirectionLine (E := E) y₀ l) ((chartModelBasis E) l) s := by
   have h₁ : HasDerivAt (fun s : ℝ => s • (chartModelBasis E) l)
       ((1 : ℝ) • (chartModelBasis E) l) s :=
     (hasDerivAt_id s).smul_const ((chartModelBasis E) l)
@@ -38,7 +38,7 @@ private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
   have hcoerce : (0 : E) + (chartModelBasis E) l = (chartModelBasis E) l := zero_add _
   rw [hcoerce] at h
   have hfun_eq : (fun s : ℝ => y₀ + s • (chartModelBasis E) l) =
-      jacobiLine (E := E) y₀ l := by
+      basisDirectionLine (E := E) y₀ l := by
     funext s; rfl
   have h' : HasDerivAt (fun s : ℝ => y₀ + s • (chartModelBasis E) l)
       ((chartModelBasis E) l) s := by
@@ -53,12 +53,12 @@ private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
 private lemma hasDerivAt_comp_jacobiLine
     {y₀ : E} {l : Fin (Module.finrank ℝ E)} {F : E → ℝ}
     (hF : DifferentiableAt ℝ F y₀) :
-    HasDerivAt (fun s : ℝ => F (jacobiLine (E := E) y₀ l s))
+    HasDerivAt (fun s : ℝ => F (basisDirectionLine (E := E) y₀ l s))
       (partialDeriv (E := E) l F y₀) 0 := by
-  have hy : (jacobiLine (E := E) y₀ l 0) = y₀ := by
-    unfold jacobiLine; rw [zero_smul, add_zero]
+  have hy : (basisDirectionLine (E := E) y₀ l 0) = y₀ := by
+    unfold basisDirectionLine; rw [zero_smul, add_zero]
   have hF' : HasFDerivAt F (fderiv ℝ F y₀) y₀ := hF.hasFDerivAt
-  have hF'' : HasFDerivAt F (fderiv ℝ F y₀) (jacobiLine (E := E) y₀ l 0) := by
+  have hF'' : HasFDerivAt F (fderiv ℝ F y₀) (basisDirectionLine (E := E) y₀ l 0) := by
     rw [hy]; exact hF'
   have hline := hasDerivAt_jacobiLine (E := E) y₀ l 0
   have := hF''.comp_hasDerivAt 0 hline
@@ -69,14 +69,14 @@ private noncomputable def gramJacobiFamily
     (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
     ℝ → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   fun s => Matrix.of fun i j =>
-    chartGramOnE (I := I) g α i j (jacobiLine (E := E) y₀ l s)
+    chartGramOnE (I := I) g α i j (basisDirectionLine (E := E) y₀ l s)
 
 private lemma gramJacobiFamily_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
     gramJacobiFamily (I := I) g α y₀ l 0 =
       Matrix.of fun i j => chartGramOnE (I := I) g α i j y₀ := by
-  unfold gramJacobiFamily jacobiLine
+  unfold gramJacobiFamily basisDirectionLine
   ext i j
   simp [zero_smul, add_zero]
 
@@ -144,10 +144,10 @@ private lemma partialDeriv_det_chartGramOnE
       0 (fun i j => by simpa [Matrix.of_apply] using hentries i j) hunit
   have hfun_eq : (fun s : ℝ => (Gf s).det) =
       fun s : ℝ => (chartGramMatrix (I := I) g α
-        ((extChartAt I α).symm (jacobiLine (E := E) y₀ l s))).det := by
+        ((extChartAt I α).symm (basisDirectionLine (E := E) y₀ l s))).det := by
     funext s
     have hmat_eq : Gf s = chartGramMatrix (I := I) g α
-        ((extChartAt I α).symm (jacobiLine (E := E) y₀ l s)) := by
+        ((extChartAt I α).symm (basisDirectionLine (E := E) y₀ l s)) := by
       rw [hGf]
       ext i j
       rfl
@@ -215,10 +215,10 @@ lemma partialDeriv_chartDensityOnE
         partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y₀))
       0 (fun i j => by simpa [Matrix.of_apply] using hentries i j) hpos
   have hfun_eq : (fun s : ℝ => Real.sqrt (Gf s).det) =
-      fun s : ℝ => chartDensityOnE (I := I) g α (jacobiLine (E := E) y₀ l s) := by
+      fun s : ℝ => chartDensityOnE (I := I) g α (basisDirectionLine (E := E) y₀ l s) := by
     funext s
     have hmat_eq : Gf s = chartGramMatrix (I := I) g α
-        ((extChartAt I α).symm (jacobiLine (E := E) y₀ l s)) := by
+        ((extChartAt I α).symm (basisDirectionLine (E := E) y₀ l s)) := by
       rw [hGf]
       ext i j
       rfl

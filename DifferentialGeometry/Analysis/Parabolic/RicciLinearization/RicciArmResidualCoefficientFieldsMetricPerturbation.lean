@@ -147,7 +147,7 @@ theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
 set_option linter.unusedSectionVars false in
 private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =
+    smoothCcTensorBilinForm (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =
       g.inner x v w := by
   have hround : ccTensorMultilinear (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x =
       metricCcTensorFib (I := I) g x := by

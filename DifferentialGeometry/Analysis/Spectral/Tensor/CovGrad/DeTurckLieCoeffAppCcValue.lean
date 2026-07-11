@@ -39,14 +39,14 @@ set_option linter.unusedSectionVars false in
 
 private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
-      appCc (I := I) (M := M) g r s Φ₁ W - appCc (I := I) (M := M) g r s Φ₂ W := by
+    operatorFieldApply (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
+      operatorFieldApply (I := I) (M := M) g r s Φ₁ W - operatorFieldApply (I := I) (M := M) g r s Φ₂ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appCc (I := I) (M := M) g r s Φ₁ W - appCc (I := I) (M := M) g r s Φ₂ W).toSection x) =
-      (appCc (I := I) (M := M) g r s Φ₁ W).toSection x -
-        (appCc (I := I) (M := M) g r s Φ₂ W).toSection x from rfl]
+  rw [show ((operatorFieldApply (I := I) (M := M) g r s Φ₁ W - operatorFieldApply (I := I) (M := M) g r s Φ₂ W).toSection x) =
+      (operatorFieldApply (I := I) (M := M) g r s Φ₁ W).toSection x -
+        (operatorFieldApply (I := I) (M := M) g r s Φ₂ W).toSection x from rfl]
   rw [appCc_toSection, appCc_toSection, appCc_toSection]
   rw [show ((Φ₁ - Φ₂).toSection x : TensorRSSpace r s I x) = Φ₁.toSection x - Φ₂.toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
@@ -76,11 +76,11 @@ private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 
-theorem deTurckLieTraceCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
+theorem deTurckLieTraceCoeff_apply_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (D : SmoothCcTensor g₀ 0 4) (x : M)
     (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ σ) D) x v =
       ∑ k : Fin (Module.finrank ℝ E),
         ContinuousMultilinearMap.domDomCongr σ (unitModel (I := I) (M := M) g₀ 4 D x)
@@ -111,10 +111,10 @@ theorem deTurckLieTraceCoeff_appCc_eq (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option linter.unusedSectionVars false in
 
-theorem deTurckLieArm2PrincipalCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+theorem deTurckLieArm2PrincipalCoeff_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 0 4) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (deTurckLieArm2PrincipalCoeff (I := I) g₀ g₁ g_bg) D) x v =
       ((∑ k : Fin (Module.finrank ℝ E),
           unitModel (I := I) (M := M) g₀ 4 D x
@@ -139,8 +139,8 @@ theorem deTurckLieArm2PrincipalCoeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannian
               (Module.finBasis ℝ E) k] := by
   rw [deTurckLieArm2PrincipalCoeff, appCc_sub_left_local, appCc_add_left,
     unitModel_sub2_apply_local, unitModel_add2_apply_local,
-    deTurckLieTraceCoeff_appCc_eq, deTurckLieTraceCoeff_appCc_eq,
-    traceHessianCoeff_appCc_eq]
+    deTurckLieTraceCoeff_apply_eq, deTurckLieTraceCoeff_apply_eq,
+    traceHessianCoeff_apply_eq]
   congr 1
   · congr 1
     · refine Finset.sum_congr rfl fun k _ => ?_
@@ -319,7 +319,7 @@ private lemma deTurckLieArm1CoreFib_toModel_eval (g₀ g₁ g_bg : SmoothRiemann
     · exact congrArg (fun t : Fin 3 → E => Tensor0SBundle.Tensor0SSpace.toModel D t)
         (by funext i; fin_cases i <;> rfl)
   have hB : Tensor0SBundle.Tensor0SSpace.toModel
-      (deTurckLiePairTraceFib (I := I) g₁ deTurckLieArm1PairPermCorr x
+      (deTurckLiePairTraceFib (I := I) g₁ deTurckLieArm1PairPermCorrection x
         (metricConnDiffLoweredFib (I := I) g₁ g₁ g_bg x) D) ![a, b] =
       ∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel D
@@ -535,10 +535,10 @@ private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric
 
 set_option linter.unusedSectionVars false in
 
-theorem deTurckLieArm1Coeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+theorem deTurckLieArm1Coeff_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 0 3) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 3 2
+        (operatorFieldApply (I := I) (M := M) g₀ 3 2
           (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg) D) x v =
       unitModel (I := I) (M := M) g₀ 3 D x
           ![(show E from
@@ -697,80 +697,80 @@ theorem deTurckLieArm1Coeff_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I 
 
 set_option linter.unusedSectionVars false in
 
-theorem deTurckLieCoeffField_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+theorem deTurckLieCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (deTurckLieCoeffField (I := I) (M := M) g₀ g₁ g_bg) W) x v =
       (- ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           unitModel (I := I) (M := M) g₀ 2 W x
               (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
                 else smoothOrthoFrame (I := I) g₁ x b x) *
             (g₁.inner x
-                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                (deTurckConnDiffCovDeriv (I := I) g₁ g_bg
                   (smoothExtensionTangent (I := I) x (v 0))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x)
                 (v 1)
               + g₁.inner x
-                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                (deTurckConnDiffCovDeriv (I := I) g₁ g_bg
                   (smoothExtensionTangent (I := I) x (v 1))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x)
                 (v 0)))
         + (unitModel (I := I) (M := M) g₀ 2 W x
               (fun j => if j = 0 then
-                deTurckLieCovDerivW (I := I) g₁ g_bg
+                deTurckVFCovDeriv (I := I) g₁ g_bg
                   (smoothExtensionTangent (I := I) x (v 0)) x
                 else v 1)
             + unitModel (I := I) (M := M) g₀ 2 W x
               (fun j => if j = 0 then v 0
-                else deTurckLieCovDerivW (I := I) g₁ g_bg
+                else deTurckVFCovDeriv (I := I) g₁ g_bg
                   (smoothExtensionTangent (I := I) x (v 1)) x)) :=
   ricciArmOrder0DeTurckLieCoeff_appCc_eq (I := I) (M := M) g₀ g₁ g_bg W x v
 
 set_option linter.unusedSectionVars false in
 
-theorem deTurckLieDLaCoeffField_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+theorem deTurckLieDLaCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
-          (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
+          (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg) W) x v =
       - ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
           unitModel (I := I) (M := M) g₀ 2 W x
               (fun j => if j = 0 then smoothOrthoFrame (I := I) g₁ x a x
                 else smoothOrthoFrame (I := I) g₁ x b x) *
             (g₁.inner x
-                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                (deTurckConnDiffCovDeriv (I := I) g₁ g_bg
                   (smoothExtensionTangent (I := I) x (v 0))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x)
                 (v 1)
               + g₁.inner x
-                (deTurckLieCovDerivA (I := I) g₁ g_bg
+                (deTurckConnDiffCovDeriv (I := I) g₁ g_bg
                   (smoothExtensionTangent (I := I) x (v 1))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x a x))
                   (smoothExtensionTangent (I := I) x (smoothOrthoFrame (I := I) g₁ x b x)) x)
                 (v 0)) := by
   rw [unitModel, appCc_toSection]
   rw [show ((show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
-        (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x).comp
+        (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x).comp
         (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
           W.toSection x)) (unitTensor (I := I) (M := M) x) =
       (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
-        (deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x)
+        (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x)
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
           W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
   rw [deTurckLieDLaCoeffField_toSection]
   rw [show (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
         (show Tensor0SBundle.TensorRSSpace 2 2 I x from
-          Tensor0SBundle.TensorRSSpace.ofCLM (dLaBiContrFib (I := I) g₁ g_bg x)))
+          Tensor0SBundle.TensorRSSpace.ofCLM (connDiffCovDerivBiContrFib (I := I) g₁ g_bg x)))
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
           W.toSection x) (unitTensor (I := I) (M := M) x)) =
-      dLaBiContrFib (I := I) g₁ g_bg x
+      connDiffCovDerivBiContrFib (I := I) g₁ g_bg x
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
           W.toSection x) (unitTensor (I := I) (M := M) x)) from rfl]
-  rw [dLaBiContrFib, dLaBiContrFibFixedFrame_toModel, neg_one_mul]
+  rw [connDiffCovDerivBiContrFib, dLaBiContrFibFixedFrame_toModel, neg_one_mul]
   refine congrArg (fun t => -t) ?_
   refine Finset.sum_congr rfl (fun a _ => ?_)
   refine Finset.sum_congr rfl (fun b _ => ?_)
@@ -783,19 +783,19 @@ theorem deTurckLieDLaCoeffField_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetri
 
 set_option linter.unusedSectionVars false in
 
-theorem deTurckLieDLbCoeffField_appCc_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
+theorem deTurckLieDLbCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg) W) x v =
       unitModel (I := I) (M := M) g₀ 2 W x
           (fun j => if j = 0 then
-            deTurckLieCovDerivW (I := I) g₁ g_bg
+            deTurckVFCovDeriv (I := I) g₁ g_bg
               (smoothExtensionTangent (I := I) x (v 0)) x
             else v 1)
         + unitModel (I := I) (M := M) g₀ 2 W x
           (fun j => if j = 0 then v 0
-            else deTurckLieCovDerivW (I := I) g₁ g_bg
+            else deTurckVFCovDeriv (I := I) g₁ g_bg
               (smoothExtensionTangent (I := I) x (v 1)) x) := by
   rw [unitModel, appCc_toSection]
   rw [show ((show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
@@ -974,7 +974,7 @@ set_option linter.unusedSectionVars false in
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
 theorem deTurckLieCovDerivW_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (i : Fin (Module.finrank ℝ E)) :
-    deTurckLieCovDerivW (I := I) g₁ g_bg
+    deTurckVFCovDeriv (I := I) g₁ g_bg
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) i)) x =
       ∑ p : Fin (Module.finrank ℝ E),
         (partialDeriv (E := E) i
@@ -992,7 +992,7 @@ theorem deTurckLieCovDerivW_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I 
       (fun b => TotalSpace.mk' E (E := TangentSpace I) b
         ((PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b)) x :=
     (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg).mdifferentiableAt
-  rw [deTurckLieCovDerivW, smoothExtensionTangent_eq]
+  rw [deTurckVFCovDeriv, smoothExtensionTangent_eq]
   exact leviCivita_toFun_chartBasis_eval_of_localComponents (I := I) g₁ x
     (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b)
     (fun p y => chartDeTurckVFComp (I := I) g₁ g_bg x p y)
@@ -1005,7 +1005,7 @@ set_option linter.unusedSectionVars false in
 
 theorem deTurckLieCovDerivA_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (i j k : Fin (Module.finrank ℝ E)) :
-    deTurckLieCovDerivA (I := I) g₁ g_bg
+    deTurckConnDiffCovDeriv (I := I) g₁ g_bg
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) j))
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) k)) x =
@@ -1051,11 +1051,11 @@ theorem deTurckLieCovDerivA_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I 
         (PDE.DeTurck.connDiff (I := I) g₁ g_bg b (chartBasisVecFiber (I := I) x j b)
           (chartBasisVecFiber (I := I) x k b))) x :=
     connDiff_pairing_mdiffAt (I := I) g₁ g_bg hYm hZm
-  have hswap : deTurckLieCovDerivA (I := I) g₁ g_bg
+  have hswap : deTurckConnDiffCovDeriv (I := I) g₁ g_bg
       (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
       (smoothExtensionTangent (I := I) x ((chartModelBasis E) j))
       (smoothExtensionTangent (I := I) x ((chartModelBasis E) k)) x =
-      deTurckLieCovDerivA (I := I) g₁ g_bg
+      deTurckConnDiffCovDeriv (I := I) g₁ g_bg
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
         (fun b => chartBasisVecFiber (I := I) x j b)
         (fun b => chartBasisVecFiber (I := I) x k b) x := by

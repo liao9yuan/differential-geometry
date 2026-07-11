@@ -36,17 +36,17 @@ private lemma wkpNorm_eta_target_le_split
     {u : EuclN → ℝ}
     (hu : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
             (d := Module.finrank ℝ E) 1 p u Ω) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p (fun x => η x * u x) Ω ≤
       ENNReal.ofReal C0 *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p u Ω +
       ((Module.finrank ℝ E : ℕ) : ℝ≥0∞) * ENNReal.ofReal C1 *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p u Ω := by
   classical
   letI : NeZero (1 : ℕ) := ⟨one_ne_zero⟩
-  have hLHS_unfold : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have hLHS_unfold : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p (fun x => η x * u x) Ω =
         eLpNorm (fun x => η x * u x) p (volume.restrict Ω) +
         ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),
@@ -54,7 +54,7 @@ private lemma wkpNorm_eta_target_le_split
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
               (d := Module.finrank ℝ E) p 1 α' (fun x => η x * u x) Ω) p
             (volume.restrict Ω) := by
-    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     rw [show (1 : ℕ) + 1 = 1 + 1 from rfl, Finset.sum_range_succ, Finset.sum_range_one]
     have h0_unique : ∀ α' : Fin 0 → Fin (Module.finrank ℝ E),
         α' = (fun i : Fin 0 => i.elim0) := fun α' => by funext i; exact i.elim0
@@ -68,7 +68,7 @@ private lemma wkpNorm_eta_target_le_split
                 (d := Module.finrank ℝ E) p 0 α' (fun x => η x * u x) Ω) p
               (volume.restrict Ω))]
     simp [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_zero]
-  have hRHS_unfold : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have hRHS_unfold : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p u Ω =
         eLpNorm u p (volume.restrict Ω) +
         ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),
@@ -76,7 +76,7 @@ private lemma wkpNorm_eta_target_le_split
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial
               (d := Module.finrank ℝ E) p 1 α' u Ω) p
             (volume.restrict Ω) := by
-    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     rw [show (1 : ℕ) + 1 = 1 + 1 from rfl, Finset.sum_range_succ, Finset.sum_range_one]
     have h0_unique : ∀ α' : Fin 0 → Fin (Module.finrank ℝ E),
         α' = (fun i : Fin 0 => i.elim0) := fun α' => by funext i; exact i.elim0
@@ -104,7 +104,7 @@ private lemma wkpNorm_eta_target_le_split
           (d := Module.finrank ℝ E) p (α' 0) u Ω := by
     intro α'
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.iterWeakPartial_succ]; rfl
-  have hLHS_unfold' : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have hLHS_unfold' : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p (fun x => η x * u x) Ω =
         eLpNorm (fun x => η x * u x) p (volume.restrict Ω) +
         ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),
@@ -116,7 +116,7 @@ private lemma wkpNorm_eta_target_le_split
     refine congrArg (eLpNorm (fun x => η x * u x) p (volume.restrict Ω) + ·) ?_
     refine Finset.sum_congr rfl (fun α' _ => ?_)
     rw [hIter1_eta_u α']
-  have hRHS_unfold' : DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  have hRHS_unfold' : DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 p u Ω =
         eLpNorm u p (volume.restrict Ω) +
         ∑ α' : Fin 1 → Fin (Module.finrank ℝ E),

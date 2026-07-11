@@ -38,17 +38,17 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def ccTensorTransfer (g' : SmoothRiemannianMetric I M) {g : SmoothRiemannianMetric I M}
+def ccTensorRetagMetric (g' : SmoothRiemannianMetric I M) {g : SmoothRiemannianMetric I M}
     (S : SmoothCcTensor g 0 2) : SmoothCcTensor g' 0 2 :=
   { toSection := S.toSection
     hasCompactSupport := S.hasCompactSupport }
 
 set_option linter.unusedSectionVars false in
-lemma ccTensorBilin_ccTensorTransfer (g' : SmoothRiemannianMetric I M)
+lemma ccTensorBilin_ccTensorRetagMetric (g' : SmoothRiemannianMetric I M)
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) (b : M)
     (u w : TangentSpace I b) :
-    ccTensorBilin (I := I) g' (ccTensorTransfer (I := I) g' S) b u w =
-      ccTensorBilin (I := I) g S b u w := rfl
+    smoothCcTensorBilinForm (I := I) g' (ccTensorRetagMetric (I := I) g' S) b u w =
+      smoothCcTensorBilinForm (I := I) g S b u w := rfl
 
 def linearizedKoszulCovec (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g' 0 2)
     (x : M) (u ζ : TangentSpace I x) : TangentSpace I x →ₗ[ℝ] ℝ :=
@@ -155,28 +155,28 @@ def covDerivLinearizedConn (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor
 variable (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
 
 def realizedVelocityCc
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s₀ : ℝ) : SmoothCcTensor (realizedFam (I := I) g₀ T T' hδ hδ' s₀) 0 2 :=
-  ccTensorTransfer (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
-    (symmS (I := I) (M := M) g₀ (T - T'))
+  ccTensorRetagMetric (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
+    (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))
 
 lemma realizedVelocityCc_bilin
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s₀ : ℝ) (b : M) (u w : TangentSpace I b) :
-    ccTensorBilin (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
+    smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b u w =
       (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ).inner b u w
         - (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ').inner b u w := by
-  have htrans : ccTensorBilin (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
+  have htrans : smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b u w =
-      ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ (T - T')) b u w := rfl
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) b u w := rfl
   have hsub : ∀ (p q : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ (T - T') b p q =
-        ccTensorBilin (I := I) g₀ T b p q - ccTensorBilin (I := I) g₀ T' b p q := by
+      smoothCcTensorBilinForm (I := I) g₀ (T - T') b p q =
+        smoothCcTensorBilinForm (I := I) g₀ T b p q - smoothCcTensorBilinForm (I := I) g₀ T' b p q := by
     intro p q
     rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
     have hmulti : (ccTensorMultilinear (I := I) g₀ (T - T') b : Tensor0SSpace 2 I b) =
@@ -204,9 +204,9 @@ lemma one_mem_realizedSmallSet {δ δ' : ℝ} (hδ_lt : δ < 1) :
 
 lemma realizedFam_inner_affine
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ s : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (b : M) (u w : TangentSpace I b) :
@@ -223,9 +223,9 @@ lemma realizedFam_inner_affine
 
 private lemma metricDiffCovDeriv_realizedFam_affine
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ s : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -284,9 +284,9 @@ private lemma metricDiffCovDeriv_realizedFam_affine
 
 private lemma connDiff_realizedFam_inner_koszul
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ s : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -298,7 +298,7 @@ private lemma connDiff_realizedFam_inner_koszul
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x (Y x) (X x) (Z x)) := by
   classical
   have hbil : ∀ (b : M) (u' w' : TangentSpace I b),
-      ccTensorBilin (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
+      smoothCcTensorBilinForm (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b u' w' =
         (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ).inner b u' w'
           - (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ').inner b u' w' :=
@@ -334,9 +334,9 @@ private lemma connDiff_realizedFam_inner_koszul
 
 theorem connDiff_realizedFam_eq_smul_sharp
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ s : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (b : M) (u ζ : TangentSpace I b) :
@@ -379,9 +379,9 @@ theorem connDiff_realizedFam_eq_smul_sharp
 
 private lemma linearizedKoszulCovec_eq_endpoint_flat
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1)
     (b : M) (u ζ : TangentSpace I b) :
     linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
@@ -418,9 +418,9 @@ private lemma linearizedKoszulCovec_eq_endpoint_flat
 
 private lemma linearizedKoszulCovec_basis_contMDiffOn
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (j : Fin (Module.finrank ℝ E)) :
@@ -471,9 +471,9 @@ private lemma linearizedKoszulCovec_basis_contMDiffOn
     contMDiffOn_const.mul hbase
   exact hcomb.congr heq
 
-private def sharpPsiField
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+private def linearizedKoszulSharpField
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s₀ s : ℝ) (Y Z : Π b : M, TangentSpace I b) : Π b : M, TangentSpace I b :=
   fun b =>
     metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) b
@@ -482,14 +482,14 @@ private def sharpPsiField
 
 private lemma sharpPsiField_contMDiff
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1) (s : ℝ)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-        (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b') b)) := by
+        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b') b)) := by
   apply metricSharp_contMDiff_total (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)
     (cv := fun b : M =>
       linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
@@ -500,14 +500,14 @@ private lemma sharpPsiField_contMDiff
 
 private lemma sharpPsiField_jointContMDiffOn
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
-        (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ p.2 (fun b' => Y b') (fun b' => Z b') p.1))
+        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ p.2 (fun b' => Y b') (fun b' => Z b') p.1))
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ')) := by
   have hinv : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -667,8 +667,8 @@ private lemma continuousAt_leviCivita_toFun_slice
   exact hRHS.congr (Filter.EventuallyEq.symm hkey)
 
 private lemma continuousOn_realizedFam_invGram_slice
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (i j : Fin (Module.finrank ℝ E)) :
     ContinuousOn
       (fun s : ℝ => chartInvGramMatrix (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x x i j)
@@ -682,8 +682,8 @@ private lemma continuousOn_realizedFam_invGram_slice
   exact hcomp.continuousOn
 
 private lemma metricSharp_realizedFam_eq_invGram_sum
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (α₀ : TangentSpace I x →ₗ[ℝ] ℝ) :
     metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x α₀ =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -699,8 +699,8 @@ private lemma metricSharp_realizedFam_eq_invGram_sum
   rfl
 
 private lemma tendsto_metricSharp_realizedFam_fixed
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (x : M) (α₀ : TangentSpace I x →ₗ[ℝ] ℝ) :
     Filter.Tendsto
@@ -728,8 +728,8 @@ private lemma tendsto_metricSharp_realizedFam_fixed
   exact hinv.mul tendsto_const_nhds
 
 private lemma tendsto_metricSharp_realizedFam_varying
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (x : M) {κ : ℝ → TangentSpace I x →ₗ[ℝ] ℝ}
     (hκ : ∀ j : Fin (Module.finrank ℝ E),
@@ -763,11 +763,11 @@ private lemma tendsto_metricSharp_realizedFam_varying
 variable (x : M) (v w : TangentSpace I x)
 
 private def covDerivSharp
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s₀ s : ℝ) (X Y Z : Π b : M, TangentSpace I b) : TangentSpace I x :=
   (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)).toFun
-      (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s Y Z) x (X x)
+      (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s Y Z) x (X x)
     - metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
         (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x (Z x)
@@ -778,8 +778,8 @@ private def covDerivSharp
           (covApply (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)) X Z x) (Y x))
 
 private def slopeCore
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s₀ s : ℝ) : ℝ :=
   ∑ i : Fin (Module.finrank ℝ E),
     (chartModelBasis E).repr
@@ -795,7 +795,7 @@ private def slopeCore
             metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
               (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
-                (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+                (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
                   (smoothExtensionTangent (I := I) x v)
                   (smoothExtensionTangent (I := I) x w) x)
                 (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))
@@ -803,16 +803,16 @@ private def slopeCore
             metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
               (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
                 (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
-                (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+                (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
                   (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
                   (smoothExtensionTangent (I := I) x w) x)
                 (smoothExtensionTangent (I := I) x v x))) i
 
 private lemma realizedRicciPathValue_eq_ricciTensor_realizedFam
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
     realizedRicciPathValue (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w s =
       ricciTensor (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x v w := by
@@ -833,9 +833,9 @@ private lemma realizedRicciPathValue_eq_ricciTensor_realizedFam
 
 private lemma covDerivConnDiff_realizedFam_eq_smul_covDerivSharp
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1)
     {s : ℝ} (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ'))
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -867,7 +867,7 @@ private lemma covDerivConnDiff_realizedFam_eq_smul_covDerivSharp
   have hdiffSec : diffSec (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀))
       (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
       (fun b => Y b) (fun b => Z b) =
-      (s - s₀) • sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+      (s - s₀) • linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
         (fun b => Y b) (fun b => Z b) := by
     funext b
     rw [Pi.smul_apply]
@@ -876,12 +876,12 @@ private lemma covDerivConnDiff_realizedFam_eq_smul_covDerivSharp
   rw [hdiffSec]
   have hσ : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun b : M => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) b
-        (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b') b)) x :=
+        (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b' => Y b') (fun b' => Z b') b)) x :=
     ((sharpPsiField_contMDiff (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs₀ s Y Z)
       x).mdifferentiableAt (by simp)
   have hsmul := (LeviCivita (I := I)
     (realizedFam (I := I) g₀ T T' hδ hδ' s₀)).isCovariantDerivativeOnUniv.smul_const
-    (σ := sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Y b) (fun b => Z b))
+    (σ := linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Y b) (fun b => Z b))
     (x := x) (s - s₀) hσ (Set.mem_univ x)
   rw [hsmul, ContinuousLinearMap.smul_apply]
   rw [connDiff_realizedFam_eq_smul_sharp (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
@@ -897,9 +897,9 @@ private lemma covDerivConnDiff_realizedFam_eq_smul_covDerivSharp
 
 private lemma pathValue_sub_eq_mul_slopeCore
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1)
     {s : ℝ} (hs : s ∈ Set.Icc (0 : ℝ) 1) :
     realizedRicciPathValue (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w s
@@ -961,7 +961,7 @@ private lemma pathValue_sub_eq_mul_slopeCore
         metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
-            (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+            (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
               (smoothExtensionTangent (I := I) x v)
               (smoothExtensionTangent (I := I) x w) x)
             (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x))) := by
@@ -969,7 +969,7 @@ private lemma pathValue_sub_eq_mul_slopeCore
         (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
         (smoothExtensionTangent (I := I) x v)
         (smoothExtensionTangent (I := I) x w) x =
-        (s - s₀) • sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+        (s - s₀) • linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
           (smoothExtensionTangent (I := I) x v)
           (smoothExtensionTangent (I := I) x w) x :=
       connDiff_realizedFam_eq_smul_sharp (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
@@ -979,7 +979,7 @@ private lemma pathValue_sub_eq_mul_slopeCore
     congr 1
     exact connDiff_realizedFam_eq_smul_sharp (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
       hs₀mem hsmem x
-      (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+      (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
         (smoothExtensionTangent (I := I) x v)
         (smoothExtensionTangent (I := I) x w) x)
       (smoothExtensionTangent (I := I) x ((chartModelBasis E) i) x)
@@ -994,7 +994,7 @@ private lemma pathValue_sub_eq_mul_slopeCore
         metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
           (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
-            (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+            (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
               (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
               (smoothExtensionTangent (I := I) x w) x)
             (smoothExtensionTangent (I := I) x v x))) := by
@@ -1002,7 +1002,7 @@ private lemma pathValue_sub_eq_mul_slopeCore
         (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
         (smoothExtensionTangent (I := I) x w) x =
-        (s - s₀) • sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+        (s - s₀) • linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
           (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
           (smoothExtensionTangent (I := I) x w) x :=
       connDiff_realizedFam_eq_smul_sharp (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
@@ -1012,7 +1012,7 @@ private lemma pathValue_sub_eq_mul_slopeCore
     congr 1
     exact connDiff_realizedFam_eq_smul_sharp (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ'
       hs₀mem hsmem x
-      (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+      (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
         (smoothExtensionTangent (I := I) x ((chartModelBasis E) i))
         (smoothExtensionTangent (I := I) x w) x)
       (smoothExtensionTangent (I := I) x v x)
@@ -1025,9 +1025,9 @@ private lemma pathValue_sub_eq_mul_slopeCore
 
 private lemma slopeCore_tendsto
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1) :
     Filter.Tendsto (slopeCore (I := I) g₀ T T' x v w hδ hδ' s₀) (𝓝 s₀)
       (𝓝 (slopeCore (I := I) g₀ T T' x v w hδ hδ' s₀ s₀)) := by
@@ -1043,14 +1043,14 @@ private lemma slopeCore_tendsto
   have hterm1 : ∀ (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (e : TangentSpace I x),
       Filter.Tendsto (fun s : ℝ =>
         (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)).toFun
-          (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Y b) (fun b => Z b)) x e)
+          (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Y b) (fun b => Z b)) x e)
         (𝓝 s₀)
         (𝓝 ((LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)).toFun
-          (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s₀ (fun b => Y b) (fun b => Z b)) x e)) := by
+          (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s₀ (fun b => Y b) (fun b => Z b)) x e)) := by
     intro Y Z e
     have hC := continuousAt_leviCivita_toFun_slice (I := I)
       (realizedFam (I := I) g₀ T T' hδ hδ' s₀) realizedSmallSet_isOpen hs₀mem
-      (fun p : M × ℝ => sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ p.2
+      (fun p : M × ℝ => linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ p.2
         (fun b => Y b) (fun b => Z b) p.1)
       (sharpPsiField_jointContMDiffOn (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' hs₀ Y Z)
       x e
@@ -1077,13 +1077,13 @@ private lemma slopeCore_tendsto
           metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
-              (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+              (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
                 (fun b => Yf b) (fun b => Zf b) x) e)) (𝓝 s₀)
         (𝓝 ((s₀ - s₀) •
           metricSharp (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x
             (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
               (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
-              (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s₀
+              (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s₀
                 (fun b => Yf b) (fun b => Zf b) x) e))) := by
     intro Yf Zf e
     refine Filter.Tendsto.smul ?_ ?_
@@ -1092,7 +1092,7 @@ private lemma slopeCore_tendsto
         (κ := fun s : ℝ =>
           linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
             (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x
-            (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s
+            (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s
               (fun b => Yf b) (fun b => Zf b) x) e) ?_
       intro j
       have hucont := continuous_linearizedKoszulCovec_fst (I := I)
@@ -1100,9 +1100,9 @@ private lemma slopeCore_tendsto
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x e
         (chartBasisVecFiber (I := I) x j x)
       have hΨ : Filter.Tendsto (fun s : ℝ =>
-          sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Yf b) (fun b => Zf b) x)
+          linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s (fun b => Yf b) (fun b => Zf b) x)
           (𝓝 s₀)
-          (𝓝 (sharpPsiField (I := I) g₀ T T' hδ hδ' s₀ s₀
+          (𝓝 (linearizedKoszulSharpField (I := I) g₀ T T' hδ hδ' s₀ s₀
             (fun b => Yf b) (fun b => Zf b) x)) :=
         hfixed (linearizedKoszulCovec (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀)
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) x (Zf x) (Yf x))
@@ -1122,8 +1122,8 @@ private lemma slopeCore_tendsto
   · exact hquad Bi Wf (smoothExtensionTangent (I := I) x v x)
 
 private lemma slopeCore_at_base
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s₀ : ℝ) :
     slopeCore (I := I) g₀ T T' x v w hδ hδ' s₀ s₀ =
       ∑ i : Fin (Module.finrank ℝ E),
@@ -1143,9 +1143,9 @@ private lemma slopeCore_at_base
 
 theorem linearizedRicciAt_eq_palatini_covDeriv
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s₀ : ℝ} (hs₀ : s₀ ∈ Set.Ioo (0 : ℝ) 1) :
     linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x v w s₀ =
       ∑ i : Fin (Module.finrank ℝ E),

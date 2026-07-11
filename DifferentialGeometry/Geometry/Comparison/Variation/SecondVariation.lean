@@ -186,7 +186,7 @@ theorem second_variation_of_arcLength_eq_indexForm
             (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
           (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
         exact (hf : ContMDiff _ _ _ _).comp hshift
-      have hS1 := S1_moving_foot_metric_compatibility (I := I) g fsh t hfsh_smooth
+      have hS1 := speedSq_hasDerivAt (I := I) g fsh t hfsh_smooth
       have hspeed_shift : ∀ a : ℝ, speedSq (I := I) g fsh a t
           = speedSq (I := I) g f (s + a) t := fun a => rfl
       have hS1' : HasDerivAt (fun a : ℝ => G ((s + a), t))
@@ -395,7 +395,7 @@ theorem second_variation_of_arcLength_eq_indexForm
     have hgs_eq : ∀ t : ℝ,
         g_s t = 2 * g.inner (γ t) (covDerivAlong (I := I) g γ Vsec t) (γ' t) := by
       intro t
-      have hS1 := S1_moving_foot_metric_compatibility (I := I) g f t hf
+      have hS1 := speedSq_hasDerivAt (I := I) g f t hf
       have hGslice : HasDerivAt (fun u : ℝ => G (u, t)) (g_s t) 0 := by
         have := Aux2.hasDerivAt_slice_fst (fun u v : ℝ => G (u, v)) 0 t
           ((hGcdiff.differentiable (by simp)).differentiableAt)
@@ -567,7 +567,7 @@ theorem second_variation_of_arcLength_eq_indexForm
               (fun q : ℝ × ℝ => (s + q.1, q.2)) :=
             (contMDiff_const.add contMDiff_fst).prodMk contMDiff_snd
           exact (hf : ContMDiff _ _ _ _).comp hshift
-        have hS1 := S1_moving_foot_metric_compatibility (I := I) g fsh t hfsh_smooth
+        have hS1 := speedSq_hasDerivAt (I := I) g fsh t hfsh_smooth
         have hspeed_shift : ∀ a : ℝ, speedSq (I := I) g fsh a t
             = speedSq (I := I) g f (s + a) t := fun a => rfl
         have hS1' : HasDerivAt (fun a : ℝ => G ((s + a), t))

@@ -174,7 +174,7 @@ lemma covGrad_covDeriv_leadingSlot_eq_abstractHess
     covDeriv_unit_eval_eq_genVal (I := I) (M := M) g (s + 1)
       (covGrad (I := I) (M := M) g 0 s S).toSection x (Y x)]
 
-  rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s
+  rw [curry_covDeriv_succ_eq_covDeriv_curriedSection_sub_connCorrection (I := I) (M := M) g s
     (unitGradFieldGen (I := I) (M := M) g s S) (Vfield := Y) (Y := Z) (x := x)
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
     ((hY x).mdifferentiableAt (by simp)) ((hZ x).mdifferentiableAt (by simp))]

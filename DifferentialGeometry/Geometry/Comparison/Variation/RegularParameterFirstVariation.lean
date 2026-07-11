@@ -284,7 +284,7 @@ theorem first_variation_of_arcLength_at_regular_parameter
         simpa using (hasDerivAt_id (0 : ℝ)).const_add s₀
       have hcomp := hslice0.comp 0 hshift
       simpa using hcomp
-    have hS1 := S1_moving_foot_metric_compatibility (I := I) g fsh t hfsh_smooth
+    have hS1 := speedSq_hasDerivAt (I := I) g fsh t hfsh_smooth
     have hspeed_shift : ∀ a : ℝ, speedSq (I := I) g fsh a t
         = speedSq (I := I) g f (s₀ + a) t := fun a => rfl
     have hS1' : HasDerivAt (fun a : ℝ => speedSq (I := I) g f (s₀ + a) t)

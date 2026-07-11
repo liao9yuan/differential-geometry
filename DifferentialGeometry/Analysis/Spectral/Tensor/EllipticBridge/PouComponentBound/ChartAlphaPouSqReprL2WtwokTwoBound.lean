@@ -47,14 +47,14 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     (T : SmoothCcTensor g r s) :
     (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          (wkpNorm (d := Module.finrank ℝ E) 0 2
+          (iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
               (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α)) ^ 2) ≤
       (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := by
   classical
   set w : M → (Fin r → Fin (Module.finrank ℝ E)) →
       (Fin s → Fin (Module.finrank ℝ E)) → ℝ≥0∞ :=
-    fun α' Idx Jdx => wkpNorm (d := Module.finrank ℝ E) 0 2
+    fun α' Idx Jdx => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
       (tensorChartComp (I := I) (M := M) g r s T α' Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α') with hw_def
   set S : M → ℝ≥0∞ := fun α' =>
@@ -93,15 +93,15 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
             ∑ Jdx : Fin s → Fin (Module.finrank ℝ E), w β Idx Jdx) =
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) (2 * 0) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * 0) 2
               (tensorChartComp (I := I) (M := M) g r s T β Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) β)
     refine Finset.sum_congr rfl (fun Idx _ => ?_)
     refine Finset.sum_congr rfl (fun Jdx _ => ?_)
-    change wkpNorm (d := Module.finrank ℝ E) 0 2
+    change iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
         (tensorChartComp (I := I) (M := M) g r s T β Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) β) =
-      wkpNorm (d := Module.finrank ℝ E) (2 * 0) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * 0) 2
         (tensorChartComp (I := I) (M := M) g r s T β Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) β)
     congr 1
@@ -114,7 +114,7 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     exact pow_le_pow_left' this 2
   calc (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            (wkpNorm (d := Module.finrank ℝ E) 0 2
+            (iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
                 (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
                 (chartTargetEuclid (I := I) (M := M) α)) ^ 2)
       = (∑ Idx : Fin r → Fin (Module.finrank ℝ E),

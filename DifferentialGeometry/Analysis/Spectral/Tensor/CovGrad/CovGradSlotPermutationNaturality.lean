@@ -660,7 +660,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr
     riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 (s + i) x
       ((iteratedCovGrad (I := I) (M := M) g 0 s i S).toSection x)]
 
-  change tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + i)) g x
+  change covariantTensorInnerPointwise (I := I) (M := M) (0 + (s + i)) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + i) I x from
@@ -669,7 +669,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr
           (TensorRSSpace.toModel
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + i) I x from
               (iteratedCovGrad (I := I) (M := M) g 0 s i S').toSection x))) =
-      tensorInnerPointwise_0s (I := I) (M := M) (0 + (s + i)) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (0 + (s + i)) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 (s + i) x
           (TensorRSSpace.toModel
             (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + i) I x from

@@ -49,14 +49,14 @@ theorem exists_appFullSec_iteratedCovGrad_l2_window_bound
     (Q : HomTensorRSField (E := E) (M := M) r m c I) :
     ∃ cc : ℕ → ℝ, (∀ k, 0 ≤ cc k) ∧
       ∀ (W : SmoothCcTensor g r m) (k : ℕ),
-        ‖iteratedCovGrad g r c k (appFullSec (I := I) (M := M) g r m c Q W)‖ ≤
+        ‖iteratedCovGrad g r c k (homTensorRSFieldApply (I := I) (M := M) g r m c Q W)‖ ≤
           cc k * ∑ i ∈ Finset.range (k + 1), ‖iteratedCovGrad g r m i W‖ := by
   classical
   obtain ⟨cp, hcp_nn, hcp⟩ :=
     exists_appFullSec_iteratedCovGrad_window_bound (I := I) (M := M) g r m c Q
   refine ⟨fun k => Real.sqrt (cp k), fun k => Real.sqrt_nonneg _, fun W k => ?_⟩
   set Z : SmoothCcTensor g r (c + k) :=
-    iteratedCovGrad g r c k (appFullSec (I := I) (M := M) g r m c Q W) with hZ_def
+    iteratedCovGrad g r c k (homTensorRSFieldApply (I := I) (M := M) g r m c Q W) with hZ_def
   have hZsq : ‖Z‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g r (c + k) x (Z.toSection x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -111,12 +111,12 @@ theorem exists_appFullSec_iteratedCovGrad_l2_window_bound
 theorem exists_appCcRS_l2_norm_le (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ V : SmoothCcTensor g 0 b,
-      ‖appCcRS (I := I) (M := M) g 0 b c Φ V‖ ≤ C * ‖V‖ := by
+      ‖ccOperatorFieldComp (I := I) (M := M) g 0 b c Φ V‖ ≤ C * ‖V‖ := by
   classical
   obtain ⟨Cop, hCop_nn, hCop⟩ :=
     exists_uniform_riemannianFiberNormSq_appCcRS_le (I := I) (M := M) g 0 b c Φ
   refine ⟨Real.sqrt Cop, Real.sqrt_nonneg _, fun V => ?_⟩
-  set Z : SmoothCcTensor g 0 c := appCcRS (I := I) (M := M) g 0 b c Φ V with hZ_def
+  set Z : SmoothCcTensor g 0 c := ccOperatorFieldComp (I := I) (M := M) g 0 b c Φ V with hZ_def
   have hZL2 : ‖Z‖ ^ 2 =
       ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 c x (Z.toSection x)
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -150,7 +150,7 @@ theorem exists_appCc_iteratedCovGrad_l2_window_bound (g : SmoothRiemannianMetric
     (b c : ℕ) (Φ : SmoothCcTensor g b c) :
     ∃ cc : ℕ → ℝ, (∀ k, 0 ≤ cc k) ∧
       ∀ (W : SmoothCcTensor g 0 b) (k : ℕ),
-        ‖iteratedCovGrad g 0 c k (appCc (I := I) (M := M) g b c Φ W)‖ ≤
+        ‖iteratedCovGrad g 0 c k (operatorFieldApply (I := I) (M := M) g b c Φ W)‖ ≤
           cc k * ∑ i ∈ Finset.range (k + 1), ‖iteratedCovGrad g 0 b i W‖ := by
   classical
   choose CC hCC_nn hCC using fun (k i : ℕ) =>
@@ -158,10 +158,10 @@ theorem exists_appCc_iteratedCovGrad_l2_window_bound (g : SmoothRiemannianMetric
       (appCcLeibnizPsi (I := I) (M := M) g b c Φ k i)
   refine ⟨fun k => ∑ i ∈ Finset.range (k + 1), CC k i,
     fun k => Finset.sum_nonneg (fun i _ => hCC_nn k i), fun W k => ?_⟩
-  rw [iteratedCovGrad_appCc_eq (I := I) (M := M) g b c Φ W k]
+  rw [iteratedCovGrad_operatorFieldApply_eq (I := I) (M := M) g b c Φ W k]
   refine le_trans (norm_sum_le _ _) ?_
   have hterm : ∀ i ∈ Finset.range (k + 1),
-      ‖appCcRS (I := I) (M := M) g 0 (b + i) (c + k)
+      ‖ccOperatorFieldComp (I := I) (M := M) g 0 (b + i) (c + k)
           (appCcLeibnizPsi (I := I) (M := M) g b c Φ k i)
           (iteratedCovGrad (I := I) g 0 b i W)‖ ≤
         CC k i * ∑ j ∈ Finset.range (k + 1), ‖iteratedCovGrad g 0 b j W‖ := by
@@ -178,7 +178,7 @@ theorem exists_appFullSec_norm_le (g : SmoothRiemannianMetric I M) (r m c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r m c I) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ W : SmoothCcTensor g r m,
-        ‖appFullSec (I := I) (M := M) g r m c Q W‖ ≤ C * ‖W‖ := by
+        ‖homTensorRSFieldApply (I := I) (M := M) g r m c Q W‖ ≤ C * ‖W‖ := by
   classical
   obtain ⟨cc, hcc_nn, hcc⟩ :=
     exists_appFullSec_iteratedCovGrad_l2_window_bound (I := I) (M := M) g r m c Q

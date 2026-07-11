@@ -54,20 +54,20 @@ private lemma slotConjFactor_self_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
     (hb : b ∈ (chartAt H α).source) (w : E) :
-    (chartJ (I := I) (M := M) α b).comp
+    (chartTrivializationLinearMap (I := I) (M := M) α b).comp
         ((chartLeviCivitaParallelCLM (I := I) g α b X).comp
-          (chartJinv (I := I) (M := M) α b)) w =
+          (chartTrivializationLinearMapSymm (I := I) (M := M) α b)) w =
       christoffelCorrection (I := I) g α b
         (trivToE (I := I) α b (X b))
         (trivFromE (I := I) α b w) := by
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   rw [ContinuousLinearMap.comp_apply]
-  change chartJ (I := I) (M := M) α b
+  change chartTrivializationLinearMap (I := I) (M := M) α b
       ((chartLeviCivitaParallelCLM (I := I) g α b X)
-        (chartJinv (I := I) (M := M) α b w)) = _
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b w)) = _
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X
-    (chartJinv (I := I) (M := M) α b w)]
+    (chartTrivializationLinearMapSymm (I := I) (M := M) α b w)]
   change trivToE (I := I) α b
       (trivFromE (I := I) α b
         (christoffelCorrection (I := I) g α b
@@ -81,10 +81,10 @@ private lemma slotConjFactor_basis_norm_le_on_pouTsupport
       ∀ {b : M}, b ∈ tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
         ∀ (k : Fin (Module.finrank ℝ E)),
-          ‖(chartJ (I := I) (M := M) α b).comp
+          ‖(chartTrivializationLinearMap (I := I) (M := M) α b).comp
               ((chartLeviCivitaParallelCLM (I := I) g α b
                   (chartBasisVecFiber (I := I) α k)).comp
-                (chartJinv (I := I) (M := M) α b))‖ ≤ C := by
+                (chartTrivializationLinearMapSymm (I := I) (M := M) α b))‖ ≤ C := by
   classical
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
     christoffelCorrection_norm_le_on_pouTsupport (I := I) (M := M) g α
@@ -115,10 +115,10 @@ private lemma slotConjFactor_basis_norm_le_on_pouTsupport
     rw [hCvec_def]
     exact Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ k)
   have hpt : ∀ w : E,
-      ‖(chartJ (I := I) (M := M) α b).comp
+      ‖(chartTrivializationLinearMap (I := I) (M := M) α b).comp
           ((chartLeviCivitaParallelCLM (I := I) g α b
               (chartBasisVecFiber (I := I) α k)).comp
-            (chartJinv (I := I) (M := M) α b)) w‖ ≤ Cχ * Cvec * ‖w‖ := by
+            (chartTrivializationLinearMapSymm (I := I) (M := M) α b)) w‖ ≤ Cχ * Cvec * ‖w‖ := by
     intro w
     rw [slotConjFactor_self_apply (I := I) (M := M) g α
       (chartBasisVecFiber (I := I) α k) hb_src w, hX_triv]

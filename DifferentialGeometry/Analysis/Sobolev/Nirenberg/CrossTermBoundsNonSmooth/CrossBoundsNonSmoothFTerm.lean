@@ -18,7 +18,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
-private lemma two_abs_mul_le_eps_sq_add_fterm (a b ε : ℝ) (hε : 0 < ε) :
+private lemma two_abs_mul_le_eps_mul_sq_add_inv_eps_mul_sq (a b ε : ℝ) (hε : 0 < ε) :
     2 * |a| * |b| ≤ ε * a^2 + (1/ε) * b^2 := by
   have hsqrt_pos : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
   have hsqrt_ne : Real.sqrt ε ≠ 0 := ne_of_gt hsqrt_pos
@@ -110,7 +110,7 @@ omit [NeZero d] in
 private lemma pointwise_young_f_v_test
     (f : E → ℝ) (v_test : E → ℝ) {ε : ℝ} (hε : 0 < ε) (x : E) :
     |f x * v_test x| ≤ (ε/2) * (v_test x)^2 + (1/(2*ε)) * (f x)^2 := by
-  have h_y := two_abs_mul_le_eps_sq_add_fterm (v_test x) (f x) ε hε
+  have h_y := two_abs_mul_le_eps_mul_sq_add_inv_eps_mul_sq (v_test x) (f x) ε hε
   have h_abs_eq : |f x * v_test x| = |v_test x| * |f x| := by
     rw [show (f x * v_test x) = v_test x * f x from by ring, abs_mul]
   rw [h_abs_eq]
@@ -125,7 +125,7 @@ omit [NeZero d] in
 private lemma pointwise_half_sum_f_v_test
     (f v_test : E → ℝ) (x : E) :
     |f x * v_test x| ≤ (1/2) * ((f x)^2 + (v_test x)^2) := by
-  have h_y := two_abs_mul_le_eps_sq_add_fterm (f x) (v_test x) 1 zero_lt_one
+  have h_y := two_abs_mul_le_eps_mul_sq_add_inv_eps_mul_sq (f x) (v_test x) 1 zero_lt_one
   simp only [one_mul, div_one] at h_y
   have h_abs : |f x * v_test x| = |f x| * |v_test x| := abs_mul _ _
   linarith

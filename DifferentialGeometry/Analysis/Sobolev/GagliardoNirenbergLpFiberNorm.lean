@@ -411,7 +411,7 @@ private theorem mfderiv_riemannianFiberNormSq_eq_two_mul_covDeriv_inner
   rw [Integral.Connection.tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (I := I) (M := M) g 0 p Q.toSection Q.toSection x v]
 
-  have hbridge : Integral.L2.tensorInnerPointwise_0s (I := I) (M := M) (0 + p) g x
+  have hbridge : Integral.L2.covariantTensorInnerPointwise (I := I) (M := M) (0 + p) g x
         (Tensor0SBundle.Tensor0SSpace.toModel
           (Integral.Connection.loweredCovDerivAt (I := I) (M := M) g 0 p Q.toSection x v))
         (Tensor0SBundle.Tensor0SSpace.toModel
@@ -868,8 +868,8 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq
     rw [hgreen, Integral.L2.tensorL2Inner, hLw]
 
   have hb_cont : Continuous b := hb_smooth.continuous
-  have ha_cont : Continuous a := continuous_rfns_section (I := I) (M := M) g 0 m w
-  have hc_cont : Continuous c := continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1) ggw
+  have ha_cont : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 m w
+  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1 + 1) ggw
   have hbε_cont : Continuous bε := hbε_smooth.continuous
   have hζ_cont : Continuous (ζ : M → ℝ) := by
     rw [hζ_apply]; exact hbε_cont.rpow_const (fun y => Or.inl (hbε_ne y))
@@ -1204,11 +1204,11 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1) x _
   have hc0 : ∀ x, 0 ≤ c x := fun x =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _
-  have hac : Continuous a := continuous_rfns_section (I := I) (M := M) g 0 m w
+  have hac : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 m w
   have hbc : Continuous b :=
-    continuous_rfns_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
   have hcc : Continuous c :=
-    continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1 + 1)
       (covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w))
 
   have hε_pos : ∀ n : ℕ, (0 : ℝ) < 1 / ((n : ℝ) + 1) := fun n => by positivity
@@ -1426,7 +1426,7 @@ private theorem weightedCovIBP_lpFiberJet_sup
     rw [hgreen, Integral.L2.tensorL2Inner, hLw]
 
   have hb_cont : Continuous b := hb_smooth.continuous
-  have hc_cont : Continuous c := continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1) ggw
+  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1 + 1) ggw
   have hζ_cont : Continuous (ζ : M → ℝ) := by
     simp only [hζ_apply]; exact hb_cont.pow (k - 1)
   have htcdpi_cont : Continuous (tensorCovDerivPointwiseInner (I := I) (M := M) g 0 m w v) :=
@@ -1630,11 +1630,11 @@ private theorem secondOrderInterp_lpFiberJet_fin
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1) x _
   have hc0 : ∀ x, 0 ≤ c x := fun x =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _
-  have hac : Continuous a := continuous_rfns_section (I := I) (M := M) g 0 m w
+  have hac : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 m w
   have hbc : Continuous b :=
-    continuous_rfns_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
   have hcc : Continuous c :=
-    continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1 + 1)
       (covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w))
   rcases lt_or_ge (i + 1) k with hreg | hreg
   · have hiR : (0 : ℝ) < (i : ℝ) := by exact_mod_cast hi1
@@ -1814,9 +1814,9 @@ private theorem secondOrderInterp_lpFiberJet_sup
   have hc0 : ∀ x, 0 ≤ c x := fun x =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (m + 1 + 1) x _
   have hbc : Continuous b :=
-    continuous_rfns_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w)
   have hcc : Continuous c :=
-    continuous_rfns_section (I := I) (M := M) g 0 (m + 1 + 1)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g 0 (m + 1 + 1)
       (covGrad (I := I) (M := M) g 0 (m + 1) (covGrad (I := I) (M := M) g 0 m w))
   set Ib : ℝ := ∫ x, b x ^ ((k : ℝ) / 1) ∂μ with hIb_def
   set Ic : ℝ := ∫ x, c x ^ ((k : ℝ) / 2) ∂μ with hIc_def
@@ -2122,7 +2122,7 @@ theorem exists_gagliardoNirenberg_iteratedCovGrad_lpFiberNorm_le
     intro i hik; rw [hc_def]; exact hlc u Λ₀ hΛ₀ hsup i hik
 
   have hpow : (c j) ^ k ≤ K ^ (k ^ 3) * (c 0) ^ (k - j) * (c k) ^ j :=
-    lp_hlp_real c hc_nn K hK1 j k hc_lc hj0 hjk
+    discrete_log_convex_power_interpolation c hc_nn K hK1 j k hc_lc hj0 hjk
 
   have hc0_eq : c 0 = Λ₀ * V := by
     simp only [hc_def, lpFiberJetLadder, if_pos rfl]

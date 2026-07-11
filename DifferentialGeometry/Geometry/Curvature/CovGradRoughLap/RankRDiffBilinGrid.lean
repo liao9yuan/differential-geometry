@@ -71,14 +71,14 @@ private lemma sum_range_shift_le_dbRS (n : ℕ) (f : ℕ → ℝ) (hf : ∀ i, 0
 
 end RankCastRS
 
-structure DiffBilinOpRS (g : SmoothRiemannianMetric I M) (c : ℕ) where
+structure RankRaisingDiffBilinOp (g : SmoothRiemannianMetric I M) (c : ℕ) where
 
   op : ∀ (p r : ℕ), SmoothCcTensor g c r → SmoothCcTensor g c (r + p)
 
   covGrad_op : ∀ (p r : ℕ) (W : SmoothCcTensor g c r),
     covGrad g c (r + p) (op p r W) =
       op (p + 1) r W +
-        castRankCc_db g c (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g c r W))
+        castCcTensorRank g c (by omega : (r + 1) + p = r + (p + 1)) (op p (r + 1) (covGrad g c r W))
 
   kappa : ℕ → ℕ → ℝ
 
@@ -90,11 +90,11 @@ structure DiffBilinOpRS (g : SmoothRiemannianMetric I M) (c : ℕ) where
         riemannianFiberNormSq (I := I) (M := M) g c (r + q) x
           ((iteratedCovGrad g c r q W).toSection x)
 
-namespace DiffBilinOpRS
+namespace RankRaisingDiffBilinOp
 
 variable {g : SmoothRiemannianMetric I M} {c : ℕ}
 
-theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOpRS g c) (j : ℕ) :
+theorem rfns_iteratedCovGrad_grid (Φ : RankRaisingDiffBilinOp g c) (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g c r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g c ((r + p) + j) x
           ((iteratedCovGrad g c (r + p) j (Φ.op p r W)).toSection x) ≤
@@ -135,7 +135,7 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOpRS g c) (j : ℕ) :
       refine (riemannianFiberNormSq_add_le (I := I) (M := M) g c (((r + p) + 1) + j) x
           ((iteratedCovGrad g c ((r + p) + 1) j (Φ.op (p + 1) r W)).toSection x)
           ((iteratedCovGrad g c ((r + p) + 1) j
-            (castRankCc_db g c (by omega : (r + 1) + p = r + (p + 1))
+            (castCcTensorRank g c (by omega : (r + 1) + p = r + (p + 1))
               (Φ.op p (r + 1) (covGrad g c r W)))).toSection x)).trans ?_
       set kA : ℝ := gridWindowSum Φ.kappa (p + 1) r j with hkA_def
       set kB : ℝ := gridWindowSum Φ.kappa p (r + 1) j with hkB_def
@@ -210,18 +210,18 @@ theorem rfns_iteratedCovGrad_grid (Φ : DiffBilinOpRS g c) (j : ℕ) :
       refine le_trans ?_ hgoal
       have hb_eq : riemannianFiberNormSq (I := I) (M := M) g c (((r + p) + 1) + j) x
             ((iteratedCovGrad g c ((r + p) + 1) j
-              (castRankCc_db g c (by omega : (r + 1) + p = r + (p + 1))
+              (castCcTensorRank g c (by omega : (r + 1) + p = r + (p + 1))
                 (Φ.op p (r + 1) (covGrad g c r W)))).toSection x) =
           riemannianFiberNormSq (I := I) (M := M) g c (((r + 1) + p) + j) x
             ((iteratedCovGrad g c ((r + 1) + p) j
               (Φ.op p (r + 1) (covGrad g c r W))).toSection x) :=
-        rfns_iteratedCovGrad_castRankCc_db g c (by omega : (r + 1) + p = r + (p + 1))
+        riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank g c (by omega : (r + 1) + p = r + (p + 1))
           (Φ.op p (r + 1) (covGrad g c r W)) j x
       rw [hb_eq]
       exact add_le_add (mul_le_mul_of_nonneg_left hA (by norm_num))
         (mul_le_mul_of_nonneg_left hB (by norm_num))
 
-theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : DiffBilinOpRS g c) :
+theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : RankRaisingDiffBilinOp g c) :
     ∃ C : ℕ → ℕ → ℝ, (∀ r j, 0 ≤ C r j) ∧
       ∀ (r : ℕ) (W : SmoothCcTensor g c r) (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g c (r + j) x
@@ -235,7 +235,7 @@ theorem exists_rfns_iteratedCovGrad_singleSum_le (Φ : DiffBilinOpRS g c) :
   have hgrid := Φ.rfns_iteratedCovGrad_grid j 0 r W x
   simpa only [Nat.add_zero, Nat.zero_add] using hgrid
 
-end DiffBilinOpRS
+end RankRaisingDiffBilinOp
 
 end Connection
 end Integral

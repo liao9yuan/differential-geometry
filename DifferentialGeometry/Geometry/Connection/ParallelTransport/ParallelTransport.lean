@@ -385,7 +385,7 @@ theorem parallelTransport_preserves_inner_product [I.Boundaryless]
       (fun τ hτ => (hderiv τ hτ).deriv) hx hd.ht₀
   exact hconst t ht
 
-theorem trivCoord_comp_symmL_eq_chartTransitionAt [I.Boundaryless]
+theorem trivialization_coordinateChange_eq_chartTransitionAt [I.Boundaryless]
     (α β : M) {b : M}
     (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
     (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ b
@@ -554,7 +554,7 @@ theorem exists_piece_parallel_section [I.Boundaryless]
     obtain ⟨hsα, hsβ⟩ := hs
     rw [chartRepAt_apply, hV_def]
     simp only
-    rw [trivCoord_comp_symmL_eq_chartTransitionAt (I := I) α (γ t) hsα hsβ (Y s)]
+    rw [trivialization_coordinateChange_eq_chartTransitionAt (I := I) α (γ t) hsα hsβ (Y s)]
     rw [AlongCurve.chartCurve_def]
   refine ⟨V, ?_, ?_, ?_⟩
   · rw [hV_def]

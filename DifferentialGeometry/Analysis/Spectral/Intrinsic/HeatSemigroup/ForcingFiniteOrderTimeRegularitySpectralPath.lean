@@ -256,7 +256,7 @@ private theorem spectralPathFO_rawCompOnE_euclidean_contDiffOn_local
               (iteratedDeriv j (φ i) t) ^ 2 ≤ B i)
     (α : M) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ (kk : ℕ)
-      (fun q : ℝ × E => rawCompOnE (I := I) (M := M) g (T_rep q.1) α Jdx q.2)
+      (fun q : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g (T_rep q.1) α Jdx q.2)
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) := by
   classical
   set Ω : Set E := interior (extChartAt I α).target with hΩ_def
@@ -359,7 +359,7 @@ private theorem spectralPathFO_rawChartComponent_jointContMDiffOn_local
         tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep p.2) α ![] Jdx p.1)
       ((chartAt H α).source ×ˢ Set.Icc (0 : ℝ) T) := by
   set G : ℝ × E → ℝ :=
-    fun q : ℝ × E => rawCompOnE (I := I) (M := M) g (T_rep q.1) α Jdx q.2 with hG_def
+    fun q : ℝ × E => tensorChartComponentOnModel (I := I) (M := M) g (T_rep q.1) α Jdx q.2 with hG_def
   have hGEuclid : ContDiffOn ℝ (kk : ℕ) G
       (Set.Icc (0 : ℝ) T ×ˢ interior (extChartAt I α).target) :=
     spectralPathFO_rawCompOnE_euclidean_contDiffOn_local (I := I) (M := M)
@@ -385,7 +385,7 @@ private theorem spectralPathFO_rawChartComponent_jointContMDiffOn_local
     rintro ⟨x, t⟩ ⟨hx, _⟩
     have hx' : x ∈ (extChartAt I α).source := by rw [extChartAt_source (I := I)]; exact hx
     simp only [Function.comp, hG_def, hf_def]
-    have hraw : rawCompOnE (I := I) (M := M) g (T_rep t) α Jdx (extChartAt I α x) =
+    have hraw : tensorChartComponentOnModel (I := I) (M := M) g (T_rep t) α Jdx (extChartAt I α x) =
         tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep t) α ![] Jdx
           ((extChartAt I α).symm (extChartAt I α x)) := rfl
     rw [hraw, (extChartAt I α).left_inv hx']

@@ -54,7 +54,7 @@ set_option linter.unusedSectionVars false in
 theorem covDerivArmField_eq_dLaCoeffField
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g_bg =
-      deTurckLieDLaCoeffField (I := I) (M := M) g₀ g₁ g_bg := by
+      deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg := by
   apply SmoothCcTensor.ext
   refine ContMDiffSection.ext (fun x => ?_)
   rfl
@@ -109,8 +109,8 @@ set_option linter.unusedSectionVars false in
 
 theorem covDerivArmField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (g_bg : SmoothRiemannianMetric I M) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
@@ -125,8 +125,8 @@ set_option linter.unusedSectionVars false in
 
 theorem endoArmField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ)
     (g_bg : SmoothRiemannianMetric I M) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
@@ -207,31 +207,31 @@ lemma bdRfns_iCG_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (j : ℕ)
 set_option linter.unusedSectionVars false in
 private lemma bdAppCcRS_sub_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W₁ W₂ : SmoothCcTensor g a b) :
-    appCcRS (I := I) (M := M) g a b c Φ (W₁ - W₂) =
-      appCcRS (I := I) (M := M) g a b c Φ W₁ - appCcRS (I := I) (M := M) g a b c Φ W₂ := by
+    ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ - W₂) =
+      ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ - ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂ := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
   apply ContinuousLinearMap.ext
   intro D
-  rw [show ((appCcRS (I := I) (M := M) g a b c Φ W₁ -
-        appCcRS (I := I) (M := M) g a b c Φ W₂).toSection x) =
-      (appCcRS (I := I) (M := M) g a b c Φ W₁).toSection x -
-        (appCcRS (I := I) (M := M) g a b c Φ W₂).toSection x from by
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁ -
+        ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂).toSection x) =
+      (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁).toSection x -
+        (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂).toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_apply]
-  rw [show ((appCcRS (I := I) (M := M) g a b c Φ (W₁ - W₂)).toSection x) D =
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ (W₁ - W₂)).toSection x) D =
       ((show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x)
         ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from (W₁ - W₂).toSection x) D))
       from by
     rw [appCcRS_toSection]
     rfl]
-  rw [show ((appCcRS (I := I) (M := M) g a b c Φ W₁).toSection x) D =
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₁).toSection x) D =
       ((show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x)
         ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from W₁.toSection x) D)) from by
     rw [appCcRS_toSection]
     rfl]
-  rw [show ((appCcRS (I := I) (M := M) g a b c Φ W₂).toSection x) D =
+  rw [show ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ W₂).toSection x) D =
       ((show Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x from Φ.toSection x)
         ((show Tensor0SSpace a I x →L[ℝ] Tensor0SSpace b I x from W₂.toSection x) D)) from by
     rw [appCcRS_toSection]
@@ -263,11 +263,11 @@ def bdXiFix (g₀ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 3 :
   connDiffLoweredCc (I := I) g₀ g₀ - connDiffLoweredCc (I := I) g₀ g_bg
 
 private def bdOmegaGen (g₀ g₁ gc : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 1 :=
-  appCcRS (I := I) (M := M) g₀ 0 3 1 (cometricCastG0 (I := I) g₀ g₁)
+  ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 1 (cometricDoubleTraceCastG0 (I := I) g₀ g₁)
     (connDiffLoweredCc (I := I) g₀ g₁ - connDiffLoweredCc (I := I) g₀ gc)
 
 def bdOmega (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 1 :=
-  appCcRS (I := I) (M := M) g₀ 0 3 1 (cometricCastG0 (I := I) g₀ g₁)
+  ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 1 (cometricDoubleTraceCastG0 (I := I) g₀ g₁)
     (bdXiFix (I := I) (M := M) g₀ g_bg)
 
 set_option linter.unusedSectionVars false in
@@ -440,7 +440,7 @@ def bdCA (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 1 2 :=
       (connDiffLoweredCc (I := I) g₀ g₁))
 
 def bdAlphaB (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 :=
-  appCcRS (I := I) (M := M) g₀ 0 1 2 (bdCA (I := I) (M := M) g₀ g₁)
+  ccOperatorFieldComp (I := I) (M := M) g₀ 0 1 2 (bdCA (I := I) (M := M) g₀ g₁)
     (bdOmega (I := I) (M := M) g₀ g₁ g_bg)
 
 def bdAlpha (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 :=

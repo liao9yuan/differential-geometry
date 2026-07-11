@@ -59,7 +59,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 set_option linter.unusedSectionVars false in
 lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W =
+    operatorFieldApply (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W =
       (0 : SmoothCcTensor g 0 s) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -115,7 +115,7 @@ theorem exists_Csob_sub_pointwise_jet3_le
   have hk_super : 2 * k > Module.finrank ℝ E + 4 := by rw [hk_def]; omega
   have h4k_le : 4 * k ≤ a + 2 := by rw [hk_def]; omega
   obtain ⟨Cc, hCc_pos, hCc⟩ :=
-    iteratedCovGrad_toSobolev_embedding_C2_unconditional (I := I) (M := M) g₀ k hk_super
+    iteratedCovGrad_toSobolev_embedding_C2_singleNorm (I := I) (M := M) g₀ k hk_super
   obtain ⟨Ch, hCh_nn, hCh⟩ :=
     exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum (I := I) (M := M) g₀ 0 2 (2 * k)
   refine ⟨Cc * Ch * ((4 * k + 1 : ℕ) : ℝ) * 2, by positivity, ?_⟩
@@ -172,7 +172,7 @@ theorem ricciArmOrder1KoszulCoeff_appCc_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
     (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 3 2 (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 3 2 (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁) W) x v =
       ∑ k : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel
             ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
@@ -223,8 +223,8 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (C0 : ℝ → SmoothCcTensor g₀ 2 2) (C1 : ℝ → SmoothCcTensor g₀ 3 2) : Prop :=
   linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (fun s => linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + C0 s)
@@ -258,21 +258,21 @@ def corrFieldDataSpec (g₀ : SmoothRiemannianMetric I M)
               (‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ^ 2 +
                 ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ^ 2)))) ∧
   ((∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v) →
+      smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v) →
     (∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v) →
+      smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v) →
     ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
       ∀ (x : M) (v : Fin 2 → TangentSpace I x)
         (hδ_lt : δ < 1) (hδ'_lt : δ' < 1),
         linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
           unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 2 2
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s + C0 s)
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-              + appCc (I := I) (M := M) g₀ 3 2
+              + operatorFieldApply (I := I) (M := M) g₀ 3 2
                 (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s + C1 s)
                 (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-              + appCc (I := I) (M := M) g₀ 4 2
+              + operatorFieldApply (I := I) (M := M) g₀ 4 2
                 (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v) ∧
   (∀ s : ℝ, C0 s =
@@ -286,8 +286,8 @@ attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
     ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         ∃ (C0 : ℝ → SmoothCcTensor g₀ 2 2) (C1 : ℝ → SmoothCcTensor g₀ 3 2),
           corrFieldDataSpec (I := I) (M := M) g₀ T T' hδ hδ' C0 C1 := by
   classical
@@ -308,7 +308,7 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
           - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s))
       (δ := δ) (δ' := δ')
     rw [hfun]
-    exact linearizedRicciConnDiffOrder0Coeff_threeArmHjoint (I := I) g₀ T T' hδ hδ'
+    exact linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet (I := I) g₀ T T' hδ hδ'
   · have hfun : (fun s => linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s +
         (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
           - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s)) =
@@ -321,13 +321,13 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
           - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s))
       (δ := δ) (δ' := δ')
     rw [hfun]
-    exact linearizedRicciConnDiffOrder1Coeff_threeArmHjoint (I := I) g₀ T T' hδ hδ'
+    exact linearizedRicciConnDiffOrder1Coeff_jointContMDiffOn_smallPerturbationSet (I := I) g₀ T T' hδ hδ'
   · intro a ha_super R hR δ₀ hδ₀ hδ_le hδ'_le hTball hT'ball
     constructor
     · intro s hs x
       have hcond : 2 * Module.finrank ℝ E + 10 ≤ a ∧ (0 : ℝ) ≤ R ∧ δ₀ < 1 := ⟨ha_super, hR, hδ₀⟩
       have hbnd : corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ =
-          Classical.choose (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
+          Classical.choose (exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
               (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)
             + (Real.sqrt (Classical.choose
                   (exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
@@ -340,7 +340,7 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
         unfold corrFieldChristoffelBound
         rw [dif_pos hcond]
       have hconn := (Classical.choose_spec
-          (exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
+          (exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
             (I := I) (M := M) g₀ a hcond.1 hcond.2.1 hcond.2.2)).2
           T T' hδ_le hδ hδ'_le hδ' hTball hT'ball s hs x
       have hcurv := (Classical.choose_spec
@@ -490,52 +490,52 @@ theorem exists_corrFieldChristoffelConst (g₀ : SmoothRiemannianMetric I M) :
 
 theorem exists_arm0_arm1_corrField_data (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∃ (C0 : ℝ → SmoothCcTensor g₀ 2 2) (C1 : ℝ → SmoothCcTensor g₀ 3 2),
       corrFieldDataSpec (I := I) (M := M) g₀ T T' hδ hδ' C0 C1 :=
   exists_corrFieldChristoffelConst (I := I) (M := M) g₀ T T' hδ hδ'
 
 noncomputable def linearizedRicciArm0CorrField (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ℝ → SmoothCcTensor g₀ 2 2 :=
   (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose
 
 noncomputable def linearizedRicciArm1CorrField (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ℝ → SmoothCcTensor g₀ 3 2 :=
   (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose
 
 def linearizedRicciArm0Field (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : SmoothCcTensor g₀ 2 2 :=
   linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
     + linearizedRicciArm0CorrField (I := I) g₀ T T' hδ hδ' s
 
 def linearizedRicciArm1Field (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : SmoothCcTensor g₀ 3 2 :=
   linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s
     + linearizedRicciArm1CorrField (I := I) g₀ T T' hδ hδ' s
 
 theorem linearizedRicci_arm0Field_jointSmooth (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (linearizedRicciArm0Field (I := I) g₀ T T' hδ hδ') (δ := δ) (δ' := δ') :=
   (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec.1
 
 theorem linearizedRicci_arm1Field_jointSmooth (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
       (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ') (δ := δ) (δ' := δ') :=
   (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec.2.1
@@ -551,9 +551,9 @@ theorem ricciArmBaseFields_lichnerowicz_uniform_rfns_ballUniform
     ∃ ΛC : ℝ, 0 ≤ ΛC ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
@@ -648,9 +648,9 @@ theorem exists_arm1Base_realizedFam_rfns_ballUniform
     ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
@@ -680,9 +680,9 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
     ∃ Λcorr : ℝ, 0 ≤ Λcorr ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,
@@ -774,9 +774,9 @@ theorem ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
     ∃ ΛC : ℝ, 0 ≤ ΛC ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
         ∀ (s : ℝ), s ∈ Set.Icc (0 : ℝ) 1 → ∀ x : M,

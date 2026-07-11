@@ -635,7 +635,7 @@ private lemma diffCurv_arith_core
         gcongr
     _ = CR ^ 2 * (N ^ 6 * G ^ 4) * U := by ring
 
-private lemma gNorm_W_le_chartConstants
+private lemma nablaBaseSlotCurv_frameSum_normSq_le_chartConstants_mul_normSq_u
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (hx_good : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -909,7 +909,7 @@ theorem exists_continuous_nablaCurvSec_frameSum_gNorm_envelope
     rw [if_pos rfl] at this
     simpa using this
 
-  have hpt := gNorm_W_le_chartConstants (I := I) g α hx_base hx_good
+  have hpt := nablaBaseSlotCurv_frameSum_normSq_le_chartConstants_mul_normSq_u (I := I) g α hx_base hx_good
     (CR := CR α) (CG := CG α) (cg := cg α) (hCR0 α) (hCG0 α) (hcg0 α)
     (fun p q r s l => hCRbound α x hx_tsupport p q r s l)
     (fun ξ => hCGbound α x hx_tsupport ξ)

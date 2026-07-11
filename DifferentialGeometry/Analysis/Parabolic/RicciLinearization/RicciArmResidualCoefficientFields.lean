@@ -81,12 +81,12 @@ private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemanni
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v) :
+      smoothCcTensorBilinForm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x w v) :
     P = metricDifferenceCcTensor (I := I) (M := M) g₀ g₁ := by
-  have hsymm : symmS (I := I) (M := M) g₀ P = P :=
+  have hsymm : ccTensor02Symm (I := I) (M := M) g₀ P = P :=
     foldSymmS_eq_self (I := I) (M := M) g₀ P hPsymm
   have hmd : metricDifferenceCcTensor (I := I) (M := M) g₀ g₁ =
-      symmS (I := I) (M := M) g₀ P := by
+      ccTensor02Symm (I := I) (M := M) g₀ P := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
     refine ContinuousMultilinearMap.ext (fun m => ?_)
     rw [show metricDifferenceCcTensor (I := I) (M := M) g₀ g₁ =
@@ -97,13 +97,13 @@ private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemanni
     rw [ContinuousMultilinearMap.sub_apply]
     rw [foldMetricCcTensor_unitModel_apply (I := I) (M := M) g₀ g₁ x m,
       foldMetricCcTensor_unitModel_apply (I := I) (M := M) g₀ g₀ x m]
-    rw [show unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ P) x m =
-        unitModel (I := I) (M := M) g₀ 2 (symmS (I := I) (M := M) g₀ P) x ![m 0, m 1] from by
+    rw [show unitModel (I := I) (M := M) g₀ 2 (ccTensor02Symm (I := I) (M := M) g₀ P) x m =
+        unitModel (I := I) (M := M) g₀ 2 (ccTensor02Symm (I := I) (M := M) g₀ P) x ![m 0, m 1] from by
       refine congrArg _ ?_
       funext k
       fin_cases k <;> rfl]
     rw [unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀
-      (symmS (I := I) (M := M) g₀ P) x (m 0) (m 1)]
+      (ccTensor02Symm (I := I) (M := M) g₀ P) x (m 0) (m 1)]
     rw [ccTensorBilin_symmS (I := I) (M := M) g₀ P x (m 0) (m 1)]
     rw [htie x (m 0) (m 1)]
     ring
@@ -112,7 +112,7 @@ private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemanni
 private theorem foldCcTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
     (C D : SmoothCcTensor g₀ 2 2)
     (h : ∀ W : SmoothCcTensor g₀ 0 2,
-      appCc (I := I) (M := M) g₀ 2 2 C W = appCc (I := I) (M := M) g₀ 2 2 D W) : C = D := by
+      operatorFieldApply (I := I) (M := M) g₀ 2 2 C W = operatorFieldApply (I := I) (M := M) g₀ 2 2 D W) : C = D := by
   classical
   refine SmoothCcTensor.ext ?_
   refine ContMDiffSection.ext (fun x => ?_)
@@ -127,8 +127,8 @@ private theorem foldCcTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
   set W₀ : SmoothCcTensor g₀ 0 2 :=
     { toSection := σW
       hasCompactSupport := HasCompactSupport.of_compactSpace _ } with hW₀_def
-  have h1 : (appCc (I := I) (M := M) g₀ 2 2 C W₀).toSection x =
-      (appCc (I := I) (M := M) g₀ 2 2 D W₀).toSection x := by
+  have h1 : (operatorFieldApply (I := I) (M := M) g₀ 2 2 C W₀).toSection x =
+      (operatorFieldApply (I := I) (M := M) g₀ 2 2 D W₀).toSection x := by
     rw [h W₀]
   have h2 : (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from C.toSection x)
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from W₀.toSection x)
@@ -158,11 +158,11 @@ private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kern
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v) :
+      smoothCcTensorBilinForm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x w v) :
     (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
         - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) =
       ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁
-        + bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁
+        + backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g₀ g₁
         + refoldKernelContractionField (I := I) (M := M) g₀ g₁
             (iteratedCovGrad (I := I) g₀ 0 2 2 P)
             (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
@@ -177,22 +177,22 @@ private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kern
   rw [hP] at hprim
   rw [appCc_smul_left (I := I) (M := M) g₀ 2 2, foldAppCc_sub_left (I := I) (M := M) g₀ 2 2]
   rw [hprim]
-  rw [show (appCcRS (I := I) (M := M) g₀ 2 2 2
-        (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
-          - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
-        (ccSlotSwapField (I := I) (M := M) g₀)
+  rw [show (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2
+        (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁
+          - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
+        (ccInputSlotSwapField (I := I) (M := M) g₀)
       + (1 / 2 : ℝ) •
           ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁
             (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁)
       - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁
           (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁)) =
-      bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁ from rfl]
+      backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g₀ g₁ from rfl]
   rw [appCc_add_left (I := I) (M := M) g₀ 2 2
     (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)
-    (bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁) W]
+    (backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g₀ g₁) W]
   rw [appCc_add_left (I := I) (M := M) g₀ 2 2
     (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁
-      + bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁)
+      + backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g₀ g₁)
     (refoldKernelContractionField (I := I) (M := M) g₀ g₁
       (iteratedCovGrad (I := I) g₀ 0 2 2
         (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁))
@@ -200,7 +200,7 @@ private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kern
       (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1) W]
   rw [appCc_add_left (I := I) (M := M) g₀ 2 2
     (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)
-    (bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁) W]
+    (backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g₀ g₁) W]
   rw [appCc_refoldKernelContractionField (I := I) (M := M) g₀ g₁
     (iteratedCovGrad (I := I) g₀ 0 2 2
       (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁))
@@ -214,18 +214,18 @@ theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationI
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v) :
-    ccInputSymm (I := I) (M := M) g₀
+      smoothCcTensorBilinForm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x w v) :
+    ccInputSlotSymm (I := I) (M := M) g₀
         (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁
           + (1 / 2 : ℝ) • (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁
               - ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀)) =
-      ccInputSymm (I := I) (M := M) g₀
+      ccInputSlotSymm (I := I) (M := M) g₀
           (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁)
-        + ccInputSymm (I := I) (M := M) g₀
-            (bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₁)
-        + ccInputSymm (I := I) (M := M) g₀
+        + ccInputSlotSymm (I := I) (M := M) g₀
+            (backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g₀ g₁)
+        + ccInputSlotSymm (I := I) (M := M) g₀
             (linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀ g₁)
-        + ccInputSymm (I := I) (M := M) g₀
+        + ccInputSlotSymm (I := I) (M := M) g₀
             (refoldKernelContractionField (I := I) (M := M) g₀ g₁
               (iteratedCovGrad (I := I) g₀ 0 2 2 P)
               (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)

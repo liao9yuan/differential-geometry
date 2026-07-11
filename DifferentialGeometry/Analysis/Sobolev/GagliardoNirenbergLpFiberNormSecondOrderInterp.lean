@@ -83,11 +83,11 @@ theorem secondOrderInterp_lpFiberJet_fin_rs
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) x _
   have hc0 : ∀ x, 0 ≤ c x := fun x =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
-  have hac : Continuous a := continuous_rfns_section (I := I) (M := M) g r m w
+  have hac : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r m w
   have hbc : Continuous b :=
-    continuous_rfns_section (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w)
   have hcc : Continuous c :=
-    continuous_rfns_section (I := I) (M := M) g r (m + 1 + 1)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1)
       (covGrad (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w))
   rcases lt_or_ge (i + 1) k with hreg | hreg
   · have hiR : (0 : ℝ) < (i : ℝ) := by exact_mod_cast hi1
@@ -267,9 +267,9 @@ theorem secondOrderInterp_lpFiberJet_sup_rs
   have hc0 : ∀ x, 0 ≤ c x := fun x =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
   have hbc : Continuous b :=
-    continuous_rfns_section (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w)
   have hcc : Continuous c :=
-    continuous_rfns_section (I := I) (M := M) g r (m + 1 + 1)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1)
       (covGrad (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w))
   set Ib : ℝ := ∫ x, b x ^ ((k : ℝ) / 1) ∂μ with hIb_def
   set Ic : ℝ := ∫ x, c x ^ ((k : ℝ) / 2) ∂μ with hIc_def

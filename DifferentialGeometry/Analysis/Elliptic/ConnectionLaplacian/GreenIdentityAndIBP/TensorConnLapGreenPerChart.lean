@@ -44,7 +44,7 @@ def frameVF
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   chartFrameNormGlobalSmooth (I := I) (M := M) g α i
 
-def perDirCross
+def frameDirGradPairing
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) : M → ℝ :=
@@ -52,7 +52,7 @@ def perDirCross
     (covDerivAlongVFSection (I := I) (M := M) g T.toSection (frameVF (I := I) (M := M) g α i))
     (covDerivAlongVFSection (I := I) (M := M) g v.toSection (frameVF (I := I) (M := M) g α i))
 
-def perDirSecond
+def frameDirSecondCovDerivPairing
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) : M → ℝ :=
@@ -62,7 +62,7 @@ def perDirSecond
       (frameVF (I := I) (M := M) g α i))
     v.toSection
 
-def perDirDiv
+def frameDirDivergencePairing
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) : M → ℝ :=
@@ -72,7 +72,7 @@ def perDirDiv
         v.toSection b
       * divergence_g (I := I) g (frameVF (I := I) (M := M) g α i) b
 
-def perDirWeight
+def frameDirWeightDerivPairing
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) : M → ℝ :=
@@ -87,14 +87,14 @@ private lemma perDirCross_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
-    Continuous (perDirCross (I := I) (M := M) g T v α i) :=
+    Continuous (frameDirGradPairing (I := I) (M := M) g T v α i) :=
   (tensorInnerScalar_contMDiff (I := I) (M := M) g 0 2 _ _).continuous
 
 private lemma perDirSecond_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
-    Continuous (perDirSecond (I := I) (M := M) g T v α i) :=
+    Continuous (frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i) :=
   (tensorInnerScalar_contMDiff (I := I) (M := M) g 0 2 _ _).continuous
 
 private lemma perDirInner_continuous
@@ -110,7 +110,7 @@ private lemma perDirDiv_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
-    Continuous (perDirDiv (I := I) (M := M) g T v α i) :=
+    Continuous (frameDirDivergencePairing (I := I) (M := M) g T v α i) :=
   (perDirInner_continuous (I := I) (M := M) g T v α i).mul
     (divergence_g_contMDiff (I := I) g (frameVF (I := I) (M := M) g α i)).continuous
 
@@ -118,7 +118,7 @@ private lemma perDirWeight_continuous
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
-    Continuous (perDirWeight (I := I) (M := M) g T v α i) :=
+    Continuous (frameDirWeightDerivPairing (I := I) (M := M) g T v α i) :=
   (perDirInner_continuous (I := I) (M := M) g T v α i).mul
     (tangentSectionAction_contMDiff (I := I) (frameVF (I := I) (M := M) g α i)
       (chartAtlasPOU I M α).contMDiff).continuous
@@ -137,7 +137,7 @@ private theorem tensorCovDerivPointwiseInner_eq_perDirCross_sum_on_support
           chartLeviCivitaGoodSet (I := I) α) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b =
       ∑ i : Fin (Module.finrank ℝ E),
-        perDirCross (I := I) (M := M) g T v α i b := by
+        frameDirGradPairing (I := I) (M := M) g T v α i b := by
   classical
   have hB_orth : ∀ i j : Fin (Module.finrank ℝ E),
       g.inner b
@@ -153,7 +153,7 @@ private theorem tensorCovDerivPointwiseInner_eq_perDirCross_sum_on_support
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun)
     hB_orth]
   refine Finset.sum_congr rfl (fun i _ => ?_)
-  unfold perDirCross frameVF
+  unfold frameDirGradPairing frameVF
   rw [tensorInnerScalar_apply,
     tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
       (covDerivAlongVFSection (I := I) (M := M) g T.toSection
@@ -170,13 +170,13 @@ private theorem integral_pou_perDirCross_eq
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
-    ∫ b, (chartAtlasPOU I M α : M → ℝ) b * perDirCross (I := I) (M := M) g T v α i b
+    ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirGradPairing (I := I) (M := M) g T v α i b
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
-      -(∫ b, (chartAtlasPOU I M α : M → ℝ) b * perDirSecond (I := I) (M := M) g T v α i b
+      -(∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g))
-      - (∫ b, (chartAtlasPOU I M α : M → ℝ) b * perDirDiv (I := I) (M := M) g T v α i b
+      - (∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirDivergencePairing (I := I) (M := M) g T v α i b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g))
-      - (∫ b, perDirWeight (I := I) (M := M) g T v α i b
+      - (∫ b, frameDirWeightDerivPairing (I := I) (M := M) g T v α i b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
   classical
   set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
@@ -187,13 +187,13 @@ private theorem integral_pou_perDirCross_eq
   have hIBP := integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     (I := I) (M := M) g T.toSection v.toSection B ρ hρ
   have hLHS_pt : ∀ b : M,
-      ρ b * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
+      ρ b * (covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g b
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g 0 2
                   (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B b))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2 v.toSection b))
-            + tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
+            + covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g b
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2
                   (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) b))
@@ -202,18 +202,18 @@ private theorem integral_pou_perDirCross_eq
             + tensorInnerScalar (I := I) (M := M) g 0 2
                 (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection b
               * divergence_g (I := I) g B b) =
-        ρ b * perDirSecond (I := I) (M := M) g T v α i b
-          + ρ b * perDirCross (I := I) (M := M) g T v α i b
-          + ρ b * perDirDiv (I := I) (M := M) g T v α i b := by
+        ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+          + ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b
+          + ρ b * frameDirDivergencePairing (I := I) (M := M) g T v α i b := by
     intro b
-    have hA : tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
+    have hA : covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g b
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g 0 2
                   (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) B b))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2 v.toSection b)) =
-        perDirSecond (I := I) (M := M) g T v α i b := by
-      unfold perDirSecond frameVF
+        frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b := by
+      unfold frameDirSecondCovDerivPairing frameVF
       rw [tensorInnerScalar_apply,
         tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
           (covDerivAlongVFSection (I := I) (M := M) g
@@ -227,14 +227,14 @@ private theorem integral_pou_perDirCross_eq
           (chartFrameNormGlobalSmooth (I := I) (M := M) g α i))
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i) b]
       rfl
-    have hC : tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
+    have hC : covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g b
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2
                   (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) b))
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g 0 2 v.toSection B b)) =
-        perDirCross (I := I) (M := M) g T v α i b := by
-      unfold perDirCross frameVF
+        frameDirGradPairing (I := I) (M := M) g T v α i b := by
+      unfold frameDirGradPairing frameVF
       rw [tensorInnerScalar_apply,
         tensorInnerPointwise_eq_liftedTensorSection_inner (I := I) (M := M) g 0 2
           (covDerivAlongVFSection (I := I) (M := M) g T.toSection
@@ -250,58 +250,58 @@ private theorem integral_pou_perDirCross_eq
     have hD : tensorInnerScalar (I := I) (M := M) g 0 2
                 (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection b
               * divergence_g (I := I) g B b =
-        perDirDiv (I := I) (M := M) g T v α i b := by
-      unfold perDirDiv frameVF; rw [hB_def]
+        frameDirDivergencePairing (I := I) (M := M) g T v α i b := by
+      unfold frameDirDivergencePairing frameVF; rw [hB_def]
     rw [hA, hC, hD]; ring
   have hRHS_pt : ∀ b : M,
       tensorInnerScalar (I := I) (M := M) g 0 2
             (covDerivAlongVFSection (I := I) (M := M) g T.toSection B) v.toSection b
           * tangentSectionAction (I := I) B ρ b =
-        perDirWeight (I := I) (M := M) g T v α i b := by
-    intro b; unfold perDirWeight frameVF; rw [hB_def, hρ_def]
+        frameDirWeightDerivPairing (I := I) (M := M) g T v α i b := by
+    intro b; unfold frameDirWeightDerivPairing frameVF; rw [hB_def, hρ_def]
   rw [integral_congr_ae (Filter.Eventually.of_forall hLHS_pt)] at hIBP
   rw [integral_congr_ae (Filter.Eventually.of_forall hRHS_pt)] at hIBP
   have hρ_cont : Continuous ρ := hρ.continuous
   have h_int_second : Integrable
-      (fun b : M => ρ b * perDirSecond (I := I) (M := M) g T v α i b) μ :=
+      (fun b : M => ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b) μ :=
     perDir_integrable_of_continuous (I := I) g
       (hρ_cont.mul (perDirSecond_continuous (I := I) (M := M) g T v α i))
   have h_int_cross : Integrable
-      (fun b : M => ρ b * perDirCross (I := I) (M := M) g T v α i b) μ :=
+      (fun b : M => ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b) μ :=
     perDir_integrable_of_continuous (I := I) g
       (hρ_cont.mul (perDirCross_continuous (I := I) (M := M) g T v α i))
   have h_int_div : Integrable
-      (fun b : M => ρ b * perDirDiv (I := I) (M := M) g T v α i b) μ :=
+      (fun b : M => ρ b * frameDirDivergencePairing (I := I) (M := M) g T v α i b) μ :=
     perDir_integrable_of_continuous (I := I) g
       (hρ_cont.mul (perDirDiv_continuous (I := I) (M := M) g T v α i))
   have hadd1 :
-      ∫ b, ((ρ b * perDirSecond (I := I) (M := M) g T v α i b
-              + ρ b * perDirCross (I := I) (M := M) g T v α i b)
-            + ρ b * perDirDiv (I := I) (M := M) g T v α i b) ∂μ =
-        (∫ b, (ρ b * perDirSecond (I := I) (M := M) g T v α i b
-              + ρ b * perDirCross (I := I) (M := M) g T v α i b) ∂μ)
-          + (∫ b, ρ b * perDirDiv (I := I) (M := M) g T v α i b ∂μ) :=
+      ∫ b, ((ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+              + ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b)
+            + ρ b * frameDirDivergencePairing (I := I) (M := M) g T v α i b) ∂μ =
+        (∫ b, (ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+              + ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b) ∂μ)
+          + (∫ b, ρ b * frameDirDivergencePairing (I := I) (M := M) g T v α i b ∂μ) :=
     integral_add (μ := μ)
-      (f := fun b : M => ρ b * perDirSecond (I := I) (M := M) g T v α i b
-              + ρ b * perDirCross (I := I) (M := M) g T v α i b)
-      (g := fun b : M => ρ b * perDirDiv (I := I) (M := M) g T v α i b)
+      (f := fun b : M => ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+              + ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b)
+      (g := fun b : M => ρ b * frameDirDivergencePairing (I := I) (M := M) g T v α i b)
       (h_int_second.add h_int_cross) h_int_div
   have hadd2 :
-      ∫ b, (ρ b * perDirSecond (I := I) (M := M) g T v α i b
-              + ρ b * perDirCross (I := I) (M := M) g T v α i b) ∂μ =
-        (∫ b, ρ b * perDirSecond (I := I) (M := M) g T v α i b ∂μ)
-          + (∫ b, ρ b * perDirCross (I := I) (M := M) g T v α i b ∂μ) :=
+      ∫ b, (ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+              + ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b) ∂μ =
+        (∫ b, ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b ∂μ)
+          + (∫ b, ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b ∂μ) :=
     integral_add (μ := μ)
-      (f := fun b : M => ρ b * perDirSecond (I := I) (M := M) g T v α i b)
-      (g := fun b : M => ρ b * perDirCross (I := I) (M := M) g T v α i b)
+      (f := fun b : M => ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b)
+      (g := fun b : M => ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b)
       h_int_second h_int_cross
   have h3 :
-      ∫ b, ((ρ b * perDirSecond (I := I) (M := M) g T v α i b
-            + ρ b * perDirCross (I := I) (M := M) g T v α i b)
-            + ρ b * perDirDiv (I := I) (M := M) g T v α i b) ∂μ =
-        (∫ b, ρ b * perDirSecond (I := I) (M := M) g T v α i b ∂μ)
-        + (∫ b, ρ b * perDirCross (I := I) (M := M) g T v α i b ∂μ)
-        + (∫ b, ρ b * perDirDiv (I := I) (M := M) g T v α i b ∂μ) := by
+      ∫ b, ((ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
+            + ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b)
+            + ρ b * frameDirDivergencePairing (I := I) (M := M) g T v α i b) ∂μ =
+        (∫ b, ρ b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b ∂μ)
+        + (∫ b, ρ b * frameDirGradPairing (I := I) (M := M) g T v α i b ∂μ)
+        + (∫ b, ρ b * frameDirDivergencePairing (I := I) (M := M) g T v α i b ∂μ) := by
     rw [hadd1, hadd2]
   rw [h3] at hIBP
   linarith [hIBP]
@@ -312,7 +312,7 @@ private theorem pou_tensorCovDerivPointwiseInner_eq_perDirCross_sum
     (chartAtlasPOU I M α : M → ℝ) b
         * tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b =
       (chartAtlasPOU I M α : M → ℝ) b
-        * ∑ i : Fin (Module.finrank ℝ E), perDirCross (I := I) (M := M) g T v α i b := by
+        * ∑ i : Fin (Module.finrank ℝ E), frameDirGradPairing (I := I) (M := M) g T v α i b := by
   classical
   by_cases hb_supp : b ∈ tsupport
       (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
@@ -338,7 +338,7 @@ private theorem integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum
           * tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       ∑ i : Fin (Module.finrank ℝ E),
-        ∫ b, (chartAtlasPOU I M α : M → ℝ) b * perDirCross (I := I) (M := M) g T v α i b
+        ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirGradPairing (I := I) (M := M) g T v α i b
           ∂(riemannianVolumeMeasure (I := I) (M := M) g) := by
   classical
   set μ := riemannianVolumeMeasure (I := I) (M := M) g with hμ_def
@@ -346,9 +346,9 @@ private theorem integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum
     (pou_tensorCovDerivPointwiseInner_eq_perDirCross_sum (I := I) (M := M) g T v α))]
   have hdist : ∀ b : M,
       (chartAtlasPOU I M α : M → ℝ) b
-          * ∑ i : Fin (Module.finrank ℝ E), perDirCross (I := I) (M := M) g T v α i b =
+          * ∑ i : Fin (Module.finrank ℝ E), frameDirGradPairing (I := I) (M := M) g T v α i b =
         ∑ i : Fin (Module.finrank ℝ E),
-          (chartAtlasPOU I M α : M → ℝ) b * perDirCross (I := I) (M := M) g T v α i b := by
+          (chartAtlasPOU I M α : M → ℝ) b * frameDirGradPairing (I := I) (M := M) g T v α i b := by
     intro b; rw [Finset.mul_sum]
   rw [integral_congr_ae (Filter.Eventually.of_forall hdist)]
   have hρ_cont : Continuous ((chartAtlasPOU I M α : M → ℝ)) :=
@@ -364,13 +364,13 @@ theorem integral_pou_tensorCovDerivPointwiseInner_eq_neg_second_div_weight
           * tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
       -(∑ i : Fin (Module.finrank ℝ E),
-          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * perDirSecond (I := I) (M := M) g T v α i b
+          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirSecondCovDerivPairing (I := I) (M := M) g T v α i b
             ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       - (∑ i : Fin (Module.finrank ℝ E),
-          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * perDirDiv (I := I) (M := M) g T v α i b
+          ∫ b, (chartAtlasPOU I M α : M → ℝ) b * frameDirDivergencePairing (I := I) (M := M) g T v α i b
             ∂(riemannianVolumeMeasure (I := I) (M := M) g))
       - (∑ i : Fin (Module.finrank ℝ E),
-          ∫ b, perDirWeight (I := I) (M := M) g T v α i b
+          ∫ b, frameDirWeightDerivPairing (I := I) (M := M) g T v α i b
             ∂(riemannianVolumeMeasure (I := I) (M := M) g)) := by
   classical
   rw [integral_pou_tensorCovDerivPointwiseInner_eq_frame_sum (I := I) (M := M) g T v α]

@@ -189,7 +189,7 @@ def secondFundamentalFormBoundary
     (νChart : E → E)
     (Xb Yb : hI.boundaryE) : ℝ :=
   secondFundamentalForm (I := I) (M := M) g x νChart
-    (dincl (M := M) x Xb) (dincl (M := M) x Yb)
+    (boundaryInclusionMfderiv (M := M) x Xb) (boundaryInclusionMfderiv (M := M) x Yb)
 
 @[simp] lemma secondFundamentalFormBoundary_def
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
@@ -197,7 +197,7 @@ def secondFundamentalFormBoundary
     (Xb Yb : hI.boundaryE) :
     secondFundamentalFormBoundary (I := I) (M := M) g x νChart Xb Yb =
       secondFundamentalForm (I := I) (M := M) g x νChart
-        (dincl (M := M) x Xb) (dincl (M := M) x Yb) := rfl
+        (boundaryInclusionMfderiv (M := M) x Xb) (boundaryInclusionMfderiv (M := M) x Yb) := rfl
 
 theorem secondFundamentalFormBoundary_symm
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
@@ -210,7 +210,7 @@ theorem secondFundamentalFormBoundary_symm
       secondFundamentalFormBoundary (I := I) (M := M) g x νChart Yb Xb := by
   unfold secondFundamentalFormBoundary
   exact secondFundamentalForm_symm (I := I) (M := M) g x νChart h_codazzi
-    (dincl (M := M) x Xb) (dincl (M := M) x Yb)
+    (boundaryInclusionMfderiv (M := M) x Xb) (boundaryInclusionMfderiv (M := M) x Yb)
 
 end WithBoundary
 end DivergenceTheorem

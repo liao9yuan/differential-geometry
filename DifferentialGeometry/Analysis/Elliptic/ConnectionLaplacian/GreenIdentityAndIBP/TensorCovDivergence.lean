@@ -46,14 +46,14 @@ theorem tensorInnerPointwise_0s_succ_eq_sum_curryLeft_orthoFrame
     (frame : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x))
     (horth : ∀ a b, g.inner x (frame a) (frame b) = if a = b then 1 else 0)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ) :
-    tensorInnerPointwise_0s (I := I) (M := M) (s + 1) g x S T =
+    covariantTensorInnerPointwise (I := I) (M := M) (s + 1) g x S T =
       ∑ a : Fin (Module.finrank ℝ E),
-        tensorInnerPointwise_0s (I := I) (M := M) s g x
+        covariantTensorInnerPointwise (I := I) (M := M) s g x
           (S.curryLeft (frame a)) (T.curryLeft (frame a)) := by
   classical
   rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (s + 1) frame horth S T]
   rw [show (∑ a : Fin (Module.finrank ℝ E),
-        tensorInnerPointwise_0s (I := I) (M := M) s g x
+        covariantTensorInnerPointwise (I := I) (M := M) s g x
           (S.curryLeft (frame a)) (T.curryLeft (frame a))) =
       ∑ a : Fin (Module.finrank ℝ E),
         ∑ φ : Fin s → Fin (Module.finrank ℝ E),
@@ -105,7 +105,7 @@ lemma contract_covariant_add_left (s : ℕ) (x : M) (v w : TangentSpace I x)
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
   rw [hmodel, hmodel, hmodel, map_add, map_add, ContinuousLinearMap.add_apply, map_add]
 
-noncomputable def codiffPsi
+noncomputable def covDivergenceBilinear
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) (y : M) :
     TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] TensorRSSpace 0 s I y :=
   TensorialAt.mkHom₂
@@ -175,19 +175,19 @@ theorem codiffPsi_apply
       (fun z : M => TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z (X z)) y)
     (hY : MDifferentiableAt I (I.prod 𝓘(ℝ, E))
       (fun z : M => TotalSpace.mk' E (E := fun w : M => TangentSpace I w) z (Y z)) y) :
-    codiffPsi (I := I) (M := M) g s V y (X y) (Y y) =
+    covDivergenceBilinear (I := I) (M := M) g s V y (X y) (Y y) =
       contract_covariant 0 s y (Y y)
         ((TensorRSNabla.tensorRSCovariantDerivative I M 0 (s + 1)
             (LeviCivita (I := I) g)).toFun (fun z : M => V.toSection z) y (X y)) := by
   classical
-  unfold codiffPsi
+  unfold covDivergenceBilinear
   exact TensorialAt.mkHom₂_apply _ _ hX hY
 
 def covDivergenceRaw
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1)) (b : M) :
     TensorRSSpace 0 s I b :=
   ∑ i : Fin (Module.finrank ℝ E),
-    codiffPsi (I := I) (M := M) g s V b
+    covDivergenceBilinear (I := I) (M := M) g s V b
       (smoothOrthoFrame (I := I) g b i b) (smoothOrthoFrame (I := I) g b i b)
 
 def covDivergenceFixedFrame
@@ -260,7 +260,7 @@ lemma covDivergenceRaw_eq_codiffPsi_smoothOrthoFrame_trace
       g.inner b (B i) (B j) = if i = j then (1 : ℝ) else 0) :
     covDivergenceRaw (I := I) (M := M) g s V b =
       ∑ i : Fin (Module.finrank ℝ E),
-        codiffPsi (I := I) (M := M) g s V b (B i) (B i) := by
+        covDivergenceBilinear (I := I) (M := M) g s V b (B i) (B i) := by
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) b).baseSet :=
     FiberBundle.mem_baseSet_trivializationAt E (TangentSpace I) b
@@ -269,10 +269,10 @@ lemma covDivergenceRaw_eq_codiffPsi_smoothOrthoFrame_trace
         if i = j then (1 : ℝ) else 0 :=
     fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g b i j
   have hcentral_trace := orthonormal_basis_bilin_trace_chartα (I := I)
-    (A := TensorRSSpace 0 s I b) g b hb_base (codiffPsi (I := I) (M := M) g s V b)
+    (A := TensorRSSpace 0 s I b) g b hb_base (covDivergenceBilinear (I := I) (M := M) g s V b)
     (fun i => smoothOrthoFrame (I := I) g b i b) hcentral
   have hB_trace := orthonormal_basis_bilin_trace_chartα (I := I)
-    (A := TensorRSSpace 0 s I b) g b hb_base (codiffPsi (I := I) (M := M) g s V b) B hB_orth
+    (A := TensorRSSpace 0 s I b) g b hb_base (covDivergenceBilinear (I := I) (M := M) g s V b) B hB_orth
   rw [covDivergenceRaw, hcentral_trace, ← hB_trace]
 
 set_option linter.unusedSectionVars false in
@@ -642,7 +642,7 @@ set_option linter.unusedSectionVars false in
 private lemma contract_eq_tensor0SAsRS_curry (s : ℕ) (x : M) (v : TangentSpace I x)
     (A : TensorRSSpace 0 (s+1) I x) :
     contract_covariant 0 s x v A =
-      tensor0SAsRS (I := I) (M := M) x
+      tensor0SToTensorRS (I := I) (M := M) x
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s+1) I x from A)
             (unitZeroSec (I := I) (M := M) x)) v) := by
@@ -653,7 +653,7 @@ private lemma contract_eq_tensor0SAsRS_curry (s : ℕ) (x : M) (v : TangentSpace
   intro m
   rw [contract_eval (I := I) (M := M) s x v A D m]
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-        tensor0SAsRS (I := I) (M := M) x
+        tensor0SToTensorRS (I := I) (M := M) x
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
             ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s+1) I x from A)
               (unitZeroSec (I := I) (M := M) x)) v)) D =
@@ -679,13 +679,13 @@ private lemma contract_eq_tensor0SAsRS_curry (s : ℕ) (x : M) (v : TangentSpace
 
 set_option linter.unusedSectionVars false in
 private lemma rs_zero_recover (s : ℕ) (x : M) (Φ : TensorRSSpace 0 s I x) :
-    Φ = tensor0SAsRS (I := I) (M := M) x
+    Φ = tensor0SToTensorRS (I := I) (M := M) x
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from Φ)
         (unitZeroSec (I := I) (M := M) x)) := by
   apply tensorRSSpace_ext 0 s x
   intro D
   rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
-        tensor0SAsRS (I := I) (M := M) x
+        tensor0SToTensorRS (I := I) (M := M) x
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from Φ)
             (unitZeroSec (I := I) (M := M) x))) D =
       tensor00Scalar (I := I) (M := M) x D •
@@ -696,13 +696,13 @@ private lemma rs_zero_recover (s : ℕ) (x : M) (Φ : TensorRSSpace 0 s I x) :
 
 set_option linter.unusedSectionVars false in
 private lemma tensor0SAsRS_add (s : ℕ) (x : M) (C D : Tensor0SSpace s I x) :
-    tensor0SAsRS (I := I) (M := M) x (C + D) =
-      tensor0SAsRS (I := I) (M := M) x C + tensor0SAsRS (I := I) (M := M) x D := by
+    tensor0SToTensorRS (I := I) (M := M) x (C + D) =
+      tensor0SToTensorRS (I := I) (M := M) x C + tensor0SToTensorRS (I := I) (M := M) x D := by
   apply ContinuousLinearMap.ext
   intro u
   change (tensor00Scalar (I := I) (M := M) x u) • (C + D) =
-    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from tensor0SAsRS (I := I) (M := M) x C) u +
-    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from tensor0SAsRS (I := I) (M := M) x D) u
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from tensor0SToTensorRS (I := I) (M := M) x C) u +
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from tensor0SToTensorRS (I := I) (M := M) x D) u
   rw [tensor0SAsRS_apply, tensor0SAsRS_apply, smul_add]
 
 set_option linter.unusedSectionVars false in
@@ -722,7 +722,7 @@ private lemma contract_covariant_leibniz
         + contract_covariant 0 s x ((LeviCivita (I := I) g).toFun X x (W x)) (V.toSection x) := by
   classical
   have hsec : (fun y : M => contract_covariant 0 s y (X y) (V.toSection y)) =
-      (fun y : M => tensor0SAsRS (I := I) (M := M) y
+      (fun y : M => tensor0SToTensorRS (I := I) (M := M) y
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
           ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s+1) I y from V.toSection y)
             (unitZeroSec (I := I) (M := M) y)) (X y))) := by
@@ -736,7 +736,7 @@ private lemma contract_covariant_leibniz
     ((LeviCivita (I := I) g).toFun X x (W x)) (V.toSection x)]
   rw [rs_zero_recover (I := I) (M := M) s x
     ((tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g)).toFun
-      (fun y : M => tensor0SAsRS (I := I) (M := M) y
+      (fun y : M => tensor0SToTensorRS (I := I) (M := M) y
         (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s y
           ((show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace (s+1) I y from V.toSection y)
             (unitZeroSec (I := I) (M := M) y)) (X y))) x (W x))]
@@ -762,7 +762,7 @@ private lemma contract_covGrad_eq_covDeriv
   rw [Fin.cons_zero, Matrix.vecTail, show (Fin.cons (v : E) m ∘ Fin.succ) = m from by funext i; simp]
 
 set_option linter.unusedSectionVars false in
-private lemma fnsc_contract (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
+private lemma fiberNormSqComponent_contract (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (n : ℕ) (e : Fin n → TangentSpace I x) (i : Fin n)
     (A : TensorRSSpace 0 (s + 1) I x) (J : Fin s → Fin n) :
     fiberNormSqComponent (I := I) (M := M) g x 0 s
@@ -778,7 +778,7 @@ private lemma fnsc_contract (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
   · intro j; simp
 
 set_option linter.unusedSectionVars false in
-private lemma tip_succ_eq_sum_contract_orthoFrame
+private lemma tensorInnerPointwise_succ_eq_sum_contract_orthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
     (bse : Module.Basis (Fin n) ℝ (TangentSpace I x))
@@ -820,8 +820,8 @@ private lemma tip_succ_eq_sum_contract_orthoFrame
         e bse hn hbse horth (contract_covariant 0 s x (e i) A) (contract_covariant 0 s x (e i) B)]
       rw [Finset.sum_eq_single (fun k : Fin 0 => k.elim0)]
       · refine Finset.sum_congr rfl (fun J _ => ?_)
-        rw [fnsc_contract (I := I) (M := M) g s x n e i A J,
-          fnsc_contract (I := I) (M := M) g s x n e i B J]
+        rw [fiberNormSqComponent_contract (I := I) (M := M) g s x n e i A J,
+          fiberNormSqComponent_contract (I := I) (M := M) g s x n e i B J]
       · intro K _ hK; exact absurd (funext fun k => k.elim0) hK
       · intro h; exact absurd (Finset.mem_univ _) h
   · intro K _ hK; exact absurd (funext fun k => k.elim0) hK
@@ -1050,7 +1050,7 @@ theorem divergence_oneSidedVF_eq
     divergence_oneSidedVF_summand_eq (I := I) (M := M) g s T V b i)]
   rw [Finset.sum_add_distrib]
   congr 1
-  · rw [tip_succ_eq_sum_contract_orthoFrame (I := I) (M := M) g s b
+  · rw [tensorInnerPointwise_succ_eq_sum_contract_orthoFrame (I := I) (M := M) g s b
       (e := fun i => smoothOrthoFrame (I := I) g b i b) frame rfl hframe_eq horth_e
       ((covGrad (I := I) (M := M) g 0 s T).toSection b) (V.toSection b)]
     refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -1060,26 +1060,26 @@ theorem divergence_oneSidedVF_eq
       (fun i => smoothOrthoFrame (I := I) g b i b) horth_e]
     rw [show TensorRSSpace.toModel
           (∑ i : Fin (Module.finrank ℝ E),
-            codiffPsi (I := I) (M := M) g s V b
+            covDivergenceBilinear (I := I) (M := M) g s V b
               (smoothOrthoFrame (I := I) g b i b) (smoothOrthoFrame (I := I) g b i b)) =
         ∑ i : Fin (Module.finrank ℝ E),
           TensorRSSpace.toModel
-            (codiffPsi (I := I) (M := M) g s V b
+            (covDivergenceBilinear (I := I) (M := M) g s V b
               (smoothOrthoFrame (I := I) g b i b)
               (smoothOrthoFrame (I := I) g b i b)) from by
       rw [show (TensorRSSpace.toModel
             (∑ i : Fin (Module.finrank ℝ E),
-              codiffPsi (I := I) (M := M) g s V b
+              covDivergenceBilinear (I := I) (M := M) g s V b
                 (smoothOrthoFrame (I := I) g b i b) (smoothOrthoFrame (I := I) g b i b))) =
           (TensorRSSpace.toModelL (I := I) 0 s b)
             (∑ i : Fin (Module.finrank ℝ E),
-              codiffPsi (I := I) (M := M) g s V b
+              covDivergenceBilinear (I := I) (M := M) g s V b
                 (smoothOrthoFrame (I := I) g b i b) (smoothOrthoFrame (I := I) g b i b)) from rfl,
         map_sum]
       rfl]
     rw [tip_sum_right (I := I) (M := M) g s b]
     refine Finset.sum_congr rfl (fun i _ => ?_)
-    have hcodiff : codiffPsi (I := I) (M := M) g s V b
+    have hcodiff : covDivergenceBilinear (I := I) (M := M) g s V b
           (smoothOrthoFrame (I := I) g b i b) (smoothOrthoFrame (I := I) g b i b) =
         contract_covariant 0 s b (smoothOrthoFrame (I := I) g b i b)
           ((tensorRSCovariantDerivative I M 0 (s + 1) (LeviCivita (I := I) g)).toFun

@@ -136,7 +136,7 @@ theorem thirdOrder_ricci_identity_firstSlot
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 2 T₀).toSection y)
     hX hY (covGrad_contMDiff_mk' (I := I) (M := M) g T₀)
 
-theorem hpt_to_unconditional_bound
+theorem secondCovGrad_globalL2Bound_of_pointwise_curvatureBound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)
     (hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 3 x

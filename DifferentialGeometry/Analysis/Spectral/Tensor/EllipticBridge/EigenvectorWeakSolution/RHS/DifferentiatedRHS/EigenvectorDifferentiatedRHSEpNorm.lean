@@ -115,14 +115,14 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le
     rw [h_eq]
     exact h0.restrict _
   have h_atom_le : ∀ a : Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
           (chartTargetEuclid (I := I) (M := M) α) ≤ A := by
     intro a
     rw [hA_def, diffNumeratorAggregate]
     refine le_trans (Finset.single_le_sum (f := fun a =>
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l)))
         (chartTargetEuclid (I := I) (M := M) α))
@@ -200,13 +200,13 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le
   have hK_in : chartPouKernel (I := I) (M := M) α ⊆ Ω :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
   have h_atom_le : ∀ a : Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l))) Ω ≤ A := by
     intro a
     rw [hA_def, diffNumeratorAggregate, ← hΩ_def]
     refine le_trans (Finset.single_le_sum (f := fun a =>
-      wkpNorm (d := Module.finrank ℝ E) 2 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) (Fin.cons a (Fin.init l))) Ω)
       (fun k _ => zero_le _) (Finset.mem_univ a)) ?_
@@ -297,7 +297,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le
   have hK_in : chartPouKernel (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
-  have h_atom_le : wkpNorm (d := Module.finrank ℝ E) 2 2
+  have h_atom_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ m (Fin.init l))
         (chartTargetEuclid (I := I) (M := M) α) ≤ A := by
@@ -382,7 +382,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le
     chartPouKernel_measurableSet (I := I) (M := M) α
   have hK_in : chartPouKernel (I := I) (M := M) α ⊆ Ω :=
     chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
-  have h_atom_le : wkpNorm (d := Module.finrank ℝ E) 1 2 fChartEffPrev Ω ≤ A := by
+  have h_atom_le : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 1 2 fChartEffPrev Ω ≤ A := by
     rw [hA_def, diffNumeratorAggregate, ← hΩ_def]
     exact le_trans le_add_self le_self_add
   obtain ⟨C₀, hC₀_nn, hC₀⟩ := eLpNorm_volume_restrict_contDiffOn_mul_le
@@ -638,7 +638,7 @@ end MainBoundUnconditional
 
 section SharpAtomBoundsUnconditional
 
-private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt
+private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -773,7 +773,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt
   refine le_trans (hC i) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_assoc C CatomA]
 
-private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt
+private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -899,7 +899,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt
   refine le_trans (hC i) ?_
   rw [← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_assoc C CatomB]
 
-private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt
+private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -962,7 +962,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt
                 g r s) i‖ := by
           rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomC]
 
-private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt
+private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -1023,7 +1023,7 @@ private lemma eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt
                 g r s) i‖ := by
           rw [← mul_assoc, ← ENNReal.ofReal_mul hC₀_nn, mul_assoc C₀ CatomD]
 
-private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt
+private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (_P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -1092,7 +1092,7 @@ end SharpAtomBoundsUnconditional
 
 section SharpMainBoundUnconditional
 
-theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_chartcpt
+theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_eigenIndexUniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))
@@ -1177,20 +1177,20 @@ theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_chartcpt
                   g r s) i‖ := by
   classical
   obtain ⟨CA, hCA_nn, hCA⟩ :=
-    eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_chartcpt
+    eigenvectorChartRHSDiffNumerator_layerA_eLpNorm_le_eigenIndexUniform
       (I := I) (M := M) g r s α P₀ m l CatomA eAtomA hCatomA_nn hAtomA_bd
   obtain ⟨CB, hCB_nn, hCB⟩ :=
-    eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_chartcpt
+    eigenvectorChartRHSDiffNumerator_layerB_eLpNorm_le_eigenIndexUniform
       (I := I) (M := M) g r s α P₀ m l CatomB eAtomB hCatomB_nn hAtomB_bd
   obtain ⟨CC, hCC_nn, hCC⟩ :=
-    eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_chartcpt
+    eigenvectorChartRHSDiffNumerator_layerC_eLpNorm_le_eigenIndexUniform
       (I := I) (M := M) g r s α P₀ m l CatomC eAtomC hCatomC_nn hAtomC_bd
   obtain ⟨CD, hCD_nn, hCD⟩ :=
-    eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_chartcpt
+    eigenvectorChartRHSDiffNumerator_layerD_eLpNorm_le_eigenIndexUniform
       (I := I) (M := M) g r s α P₀ m l fChartEffPrev CatomD eAtomD
       hCatomD_nn hAtomD_bd
   obtain ⟨CE, hCE_nn, hCE⟩ :=
-    eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_chartcpt
+    eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_eigenIndexUniform
       (I := I) (M := M) g r s α P₀ m l fChartEffPrev CatomE eAtomE
       hCatomE_nn hAtomE_bd
   set e : ℕ := max (max eAtomA (max eAtomB eAtomC)) (max eAtomD eAtomE)

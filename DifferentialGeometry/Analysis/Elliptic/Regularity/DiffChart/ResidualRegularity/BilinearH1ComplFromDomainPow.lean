@@ -728,7 +728,7 @@ private lemma fHLeibniz_eq_piecePreimage_add_residual
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
-    fHLeibniz (I := I) (M := M) g α u_h
+    leibnizCompensatedSource (I := I) (M := M) g α u_h
         (laplacianDomainPow_succ_subset_laplacianDomain
           (I := I) (M := M) g 1 hu_h) =
       smoothMulLpRhoPreimage (I := I) (M := M) g α hu_h +

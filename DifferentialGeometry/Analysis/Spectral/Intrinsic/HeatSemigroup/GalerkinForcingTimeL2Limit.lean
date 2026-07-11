@@ -90,20 +90,20 @@ theorem continuousOn_galerkinForcing
   by_cases hi : i ∈ eigenIdxFinset (I := I) (M := M) g₀ N
   · have hfield := continuousOn_galerkinForcing_field (I := I) (M := M) g₀ a U N hUcont
     have hcoeff : ContinuousOn
-        (fun t => (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (fun t => (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (finiteEigenComboHs (I := I) (M := M) g₀
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i)
         (Set.Icc (0 : ℝ) T) := by
       obtain ⟨K, hK⟩ := deTurckSobolevNHa2_lipschitzWith (I := I) (M := M) g₀ g_bg a ha_super
       have hN_cont : ContinuousOn
-          (fun t => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (fun t => deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2)))
           (Set.Icc (0 : ℝ) T) :=
         hK.continuous.comp_continuousOn hfield
       have hcoeff_cont : ContinuousOn
           (fun t => tensorHsCoeffL (I := I) (M := M) (a := (a : ℝ)) i
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀
                 (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))))
           (Set.Icc (0 : ℝ) T) :=
@@ -645,7 +645,7 @@ theorem galerkinForcing_field_eq_maxRegDuhamel_projTruncation
       fun s => spatialEigenProj (I := I) (M := M) g₀ (a : ℝ) N (gforceN s) :=
     ContinuousLinearMap.coeFn_compLpL _ gforceN
   have hgco : ⇑gforceN =ᵐ[timeMeasure T]
-      (fun s => deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (VN s)) :=
+      (fun s => deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (VN s)) :=
     nemytskii_coeFn (I := I) (M := M) hLipC VN
   have hPNforcing : ⇑(timeModeCoeff (I := I) (M := M)
         (timeL2EigenProj (I := I) (M := M) g₀ (a : ℝ) T N gforceN) i) =ᵐ[timeMeasure T]
@@ -705,14 +705,14 @@ theorem galerkinODE_solution_unique
     (hVderiv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
       HasDerivWithinAt (fun r => V r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
-          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S (V t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t)
     (hV'cont : ∀ i ∈ S, ContinuousOn (fun t => V' t i) (Set.Icc (0 : ℝ) T))
     (hV'deriv : ∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
       HasDerivWithinAt (fun r => V' r i)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V' t i +
-          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S (V' t) ((a : ℝ) + 2))).coeff i)
         (Set.Ici t) t)
     (hinit : ∀ i ∈ S, V 0 i = V' 0 i)
@@ -748,7 +748,7 @@ theorem galerkinODE_solution_unique
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
         HasDerivWithinAt (fun r => W r i)
           (-(TensorEigenIdx.lambda (I := I) (M := M) i) * W t i +
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff i)
           (Set.Ici t) t) →
       ∀ t ∈ Set.Ico (0 : ℝ) T,
@@ -758,7 +758,7 @@ theorem galerkinODE_solution_unique
     have hpi : HasDerivWithinAt (fun s => (fun j : {i // i ∈ S} => W s j.1))
         (fun j : {i // i ∈ S} =>
           -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * W t j.1 +
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff j.1)
         (Set.Ici t) t :=
       hasDerivWithinAt_pi.mpr (fun j => hWderiv t ht j.1 j.2)
@@ -768,7 +768,7 @@ theorem galerkinODE_solution_unique
     have hval : e.symm
         (fun j : {i // i ∈ S} =>
           -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * W t j.1 +
-            (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (W t) ((a : ℝ) + 2))).coeff j.1) =
         galerkinCoordField (I := I) (M := M) g₀ g_bg a S (γ W t) := by
       apply e.injective

@@ -123,7 +123,7 @@ private lemma sum_eLpNorm_norm_iteratedFDeriv_chartSmoothExt_le_wkpNorm
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
           : C^∞⟮I, M; ℝ⟯) x * u x)) z‖) p
         (volume.restrict (chartTargetEuclid (I := I) (M := M) α)) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartSmoothExt (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -160,7 +160,7 @@ private lemma sum_eLpNorm_norm_iteratedFDeriv_chartSmoothExt_le_wkpNorm
 private lemma wkpNorm_chartPushed_target_le_wkpNormChart_k
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (k : ℕ) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -173,13 +173,13 @@ private lemma wkpNorm_chartPushed_target_le_wkpNormChart_k
 
 private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target_k
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (k : ℕ) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartSmoothExt (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
             : C^∞⟮I, M; ℝ⟯) x * u x))
         (chartTargetEuclid (I := I) (M := M) α) =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartPushed (I := I) (M := M)
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
@@ -192,7 +192,7 @@ private lemma wkpNorm_chartSmoothExt_target_eq_wkpNorm_chartPushed_target_k
 private lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart_k
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) (k : ℕ) (α : M) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k q
         (chartSmoothExt (I := I) (M := M) α
           (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -376,7 +376,7 @@ private lemma per_chart_smooth_iteratedFDeriv_sup_bound
       ∑ j ∈ Finset.range (m + 2),
         eLpNorm (fun z : EuclN => ‖iteratedFDeriv ℝ j f z‖) (ENNReal.ofReal p)
           (volume.restrict (chartTargetEuclid (I := I) (M := M) α)) ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) (m + 1) (ENNReal.ofReal p) f
         (chartTargetEuclid (I := I) (M := M) α) := by
     rw [hf_def]
@@ -384,7 +384,7 @@ private lemma per_chart_smooth_iteratedFDeriv_sup_bound
       (I := I) (M := M) α hu hp_enn_one (m + 1)
     exact this
   have h_wkpNorm_le_wkpNormChart :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) (m + 1) (ENNReal.ofReal p) f
         (chartTargetEuclid (I := I) (M := M) α) ≤
       wkpNormChart (I := I) (M := M) g (m + 1) (ENNReal.ofReal p) u := by

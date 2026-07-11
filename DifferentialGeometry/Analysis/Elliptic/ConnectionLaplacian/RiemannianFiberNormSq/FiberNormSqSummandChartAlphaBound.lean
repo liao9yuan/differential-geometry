@@ -104,7 +104,7 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
           g.inner b (chartBasisVecFiber (I := I) α (Idx k) b)))) =
       ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
         (∏ k : Fin r, chartGramMatrix (I := I) g α b (Idx k) (Idx' k)) •
-          ((dualCovariantCMM (E := E) r Idx').compContinuousLinearMap
+          ((dualCoordinateProductMultilinearMap (E := E) r Idx').compContinuousLinearMap
             (fun _ : Fin r =>
               (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b)) := by
   classical
@@ -190,7 +190,7 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
   change ∏ i, chartGramMatrix (I := I) g α b (Idx i) (Idx' i) *
       ((chartModelBasis E).coord (Idx' i)) (cLMA (v i)) =
     (∏ k, chartGramMatrix (I := I) g α b (Idx k) (Idx' k)) •
-      ((dualCovariantCMM (E := E) r Idx').compContinuousLinearMap
+      ((dualCoordinateProductMultilinearMap (E := E) r Idx').compContinuousLinearMap
         (fun _ : Fin r => cLMA)) v
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     dualCovariantCMM_apply, smul_eq_mul]
@@ -204,7 +204,7 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     ((S.toSection b :
         Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b)
-        ((dualCovariantCMM (E := E) r Idx').compContinuousLinearMap
+        ((dualCoordinateProductMultilinearMap (E := E) r Idx').compContinuousLinearMap
           (fun _ : Fin r =>
             (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b) :
           Tensor0SSpace r I b) :
@@ -224,27 +224,27 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
   have hb_s : b ∈ es.baseSet := hb
   have hb_RS : b ∈ eRS.baseSet := ⟨hb_r, hb_s⟩
   have hA :
-      ((er.symmL ℝ b (dualCovariantCMM (E := E) r Idx')) :
+      ((er.symmL ℝ b (dualCoordinateProductMultilinearMap (E := E) r Idx')) :
         ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ) =
-      (dualCovariantCMM (E := E) r Idx').compContinuousLinearMap
+      (dualCoordinateProductMultilinearMap (E := E) r Idx').compContinuousLinearMap
         (fun _ : Fin r => T.continuousLinearMapAt ℝ b) :=
     Bundle.continuousMultilinearMap.triv_symmL_eq_compContinuousLinearMap
       (𝕜 := ℝ) (F := E) (E := (TangentSpace I : M → Type _)) (s := r)
-      α b hb_r (dualCovariantCMM (E := E) r Idx')
+      α b hb_r (dualCoordinateProductMultilinearMap (E := E) r Idx')
   have hA' :
-      ((dualCovariantCMM (E := E) r Idx').compContinuousLinearMap
+      ((dualCoordinateProductMultilinearMap (E := E) r Idx').compContinuousLinearMap
         (fun _ : Fin r => T.continuousLinearMapAt ℝ b) :
         Tensor0SSpace r I b) =
-      (er.symmL ℝ b (dualCovariantCMM (E := E) r Idx') :
+      (er.symmL ℝ b (dualCoordinateProductMultilinearMap (E := E) r Idx') :
         Tensor0SSpace r I b) := hA.symm
   rw [hA']
   set X : Tensor0SSpace s I b :=
     (S.toSection b : Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b)
-      (er.symmL ℝ b (dualCovariantCMM (E := E) r Idx')) with hX_def
+      (er.symmL ℝ b (dualCoordinateProductMultilinearMap (E := E) r Idx')) with hX_def
   have hForward :
       (eRS.continuousLinearMapAt ℝ b (S.toSection b) :
         Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)
-        (dualCovariantCMM (E := E) r Idx') =
+        (dualCoordinateProductMultilinearMap (E := E) r Idx') =
         es.continuousLinearMapAt ℝ b X := by
     have h_coe := eRS.coe_linearMapAt_of_mem (R := ℝ) hb_RS
     have h := congrFun h_coe (S.toSection b)
@@ -288,7 +288,7 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
   have h_def : tensorChartComponentRaw (I := I) (M := M) g r s S α Idx' Jdx b =
       ((tensorTrivProj (I := I) (M := M) g r s S α b :
         Tensor0SModel r ℝ E →L[ℝ] Tensor0SModel s ℝ E)
-        (dualCovariantCMM (E := E) r Idx'))
+        (dualCoordinateProductMultilinearMap (E := E) r Idx'))
         (fun k : Fin s => chartModelBasis E (Jdx k)) := rfl
   rw [h_def]
   unfold tensorTrivProj
@@ -322,7 +322,7 @@ private lemma section_omega_eIdx_apply_eq_sum_gram_components
             Tensor0SSpace r I b) =
         ∑ Idx' : Fin r → Fin (Module.finrank ℝ E),
           (∏ k : Fin r, chartGramMatrix (I := I) g α b (Idx k) (Idx' k)) •
-            (((dualCovariantCMM (E := E) r Idx').compContinuousLinearMap
+            (((dualCoordinateProductMultilinearMap (E := E) r Idx').compContinuousLinearMap
               (fun _ : Fin r => T.continuousLinearMapAt ℝ b)) :
                 Tensor0SSpace r I b) := h_omega_eq
   rw [h_omega_TSp]

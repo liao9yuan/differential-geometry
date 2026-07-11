@@ -38,7 +38,7 @@ def deTurckGalerkinForcing (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ) (t : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) : ℝ :=
   if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
-    (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+    (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
       (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
         (U N t) ((a : ℝ) + 2))).coeff i
   else 0
@@ -49,7 +49,7 @@ open scoped Classical in
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     deTurckGalerkinForcing (I := I) (M := M) g₀ g_bg a U N t i =
       (if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
-        (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
             (U N t) ((a : ℝ) + 2))).coeff i
       else 0) := rfl
@@ -59,7 +59,7 @@ def deTurckGalerkinForcingSymm (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ
     (U : ℕ → ℝ → TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) (N : ℕ) (t : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) : ℝ :=
   if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
-    (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+    (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
       (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
         (U N t) ((a : ℝ) + 2))).coeff i
   else 0
@@ -70,7 +70,7 @@ open scoped Classical in
     (i : TensorEigenIdx (I := I) (M := M) g₀ 0 2) :
     deTurckGalerkinForcingSymm (I := I) (M := M) g₀ g_bg a U N t i =
       (if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
-        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (finiteEigenComboHs (I := I) (M := M) g₀ (eigenIdxFinset (I := I) (M := M) g₀ N)
             (U N t) ((a : ℝ) + 2))).coeff i
       else 0) := rfl
@@ -175,7 +175,7 @@ noncomputable def galerkinCoordField
     EuclideanSpace ℝ {i // i ∈ S} → EuclideanSpace ℝ {i // i ∈ S} :=
   fun w => galerkinCoordDiag (I := I) (M := M) g₀ S w +
     galerkinCoordRestrict (I := I) (M := M) g₀ a S
-      (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
         (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))
 
 @[simp] lemma galerkinCoordField_apply
@@ -184,7 +184,7 @@ noncomputable def galerkinCoordField
     (w : EuclideanSpace ℝ {i // i ∈ S}) (j : {i // i ∈ S}) :
     (galerkinCoordField (I := I) (M := M) g₀ g_bg a S w) j =
       -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * w j +
-        (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (galerkinCoordEmbed (I := I) (M := M) g₀ a S w)).coeff j.1 := by
   change (galerkinCoordDiag (I := I) (M := M) g₀ S w) j +
     (galerkinCoordRestrict (I := I) (M := M) g₀ a S _) j = _
@@ -206,7 +206,7 @@ theorem galerkinCoordField_lipschitzWith
       (‖galerkinCoordRestrict (I := I) (M := M) g₀ a S‖₊ * K₀ *
         ‖galerkinCoordEmbed (I := I) (M := M) g₀ a S‖₊)
       (fun w => galerkinCoordRestrict (I := I) (M := M) g₀ a S
-        (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))) :=
     ((galerkinCoordRestrict (I := I) (M := M) g₀ a S).lipschitz.comp hK₀).comp
       (galerkinCoordEmbed (I := I) (M := M) g₀ a S).lipschitz
@@ -222,41 +222,41 @@ theorem galerkinCoordField_affineBound
   set Rst := galerkinCoordRestrict (I := I) (M := M) g₀ a S with hRst
   set Emb := galerkinCoordEmbed (I := I) (M := M) g₀ a S with hEmb
   set Diag := galerkinCoordDiag (I := I) (M := M) g₀ S with hDiag
-  set N0 : ℝ := ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+  set N0 : ℝ := ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ with hN0
   refine ⟨‖Rst‖ * N0, ‖Diag‖₊ + ‖Rst‖₊ * K₀ * ‖Emb‖₊,
     by positivity, ?_⟩
   intro w
   have hdecomp : galerkinCoordField (I := I) (M := M) g₀ g_bg a S w =
-      Diag w + Rst (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w)) := rfl
+      Diag w + Rst (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w)) := rfl
   rw [hdecomp]
   have hdiag_bd : ‖Diag w‖ ≤ ‖Diag‖ * ‖w‖ := Diag.le_opNorm w
-  have hN_bd : ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
+  have hN_bd : ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
       N0 + (K₀ : ℝ) * ‖Emb w‖ := by
-    have hlip2 : ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w) -
-        deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖ ≤ (K₀ : ℝ) * ‖Emb w‖ := by
+    have hlip2 : ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w) -
+        deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a 0‖ ≤ (K₀ : ℝ) * ‖Emb w‖ := by
       have hd := hK₀.dist_le_mul (Emb w) (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
       rw [dist_eq_norm, dist_eq_norm, sub_zero] at hd
       exact hd
-    have htri : ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
-        ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w) -
-          deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖ +
-        ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖ := by
-      calc ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w)‖
-          = ‖(deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w) -
-              deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0) +
-              deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a 0‖ := by
+    have htri : ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
+        ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w) -
+          deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a 0‖ +
+        ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a 0‖ := by
+      calc ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w)‖
+          = ‖(deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w) -
+              deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a 0) +
+              deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a 0‖ := by
             rw [sub_add_cancel]
         _ ≤ _ := norm_add_le _ _
     rw [hN0]; linarith [htri, hlip2]
-  have hRst_bd : ‖Rst (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w))‖ ≤
-      ‖Rst‖ * ‖deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w)‖ :=
+  have hRst_bd : ‖Rst (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w))‖ ≤
+      ‖Rst‖ * ‖deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w)‖ :=
     Rst.le_opNorm _
   have hEmb_bd : ‖Emb w‖ ≤ ‖Emb‖ * ‖w‖ := Emb.le_opNorm w
   have hRst_nn : 0 ≤ ‖Rst‖ := norm_nonneg Rst
   have hK₀_nn : 0 ≤ (K₀ : ℝ) := K₀.coe_nonneg
-  calc ‖Diag w + Rst (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w))‖
-      ≤ ‖Diag w‖ + ‖Rst (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a (Emb w))‖ :=
+  calc ‖Diag w + Rst (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w))‖
+      ≤ ‖Diag w‖ + ‖Rst (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a (Emb w))‖ :=
         norm_add_le _ _
     _ ≤ ‖Diag‖ * ‖w‖ +
           ‖Rst‖ * (N0 + (K₀ : ℝ) * ‖Emb w‖) := by
@@ -282,7 +282,7 @@ theorem deTurckGalerkin_solution_exists_single
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
         HasDerivWithinAt (fun r => V r i)
           (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
-            (if i ∈ S then (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            (if i ∈ S then (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (V t) ((a : ℝ) + 2))).coeff i else 0))
           (Set.Ici t) t) ∧
       (∀ i ∈ S, V 0 i = u₀.coeff i) ∧
@@ -337,7 +337,7 @@ theorem deTurckGalerkin_solution_exists_single
         (galerkinCoordField (I := I) (M := M) g₀ g_bg a S (γ t)) =
         -(TensorEigenIdx.lambda (I := I) (M := M) i) *
             (if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) +
-          (if i ∈ S then (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (if i ∈ S then (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S
               (fun i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) ((a : ℝ) + 2))).coeff i
             else 0) := by
@@ -356,7 +356,7 @@ theorem deTurckGalerkin_solution_exists_single
     have hfinal : HasDerivWithinAt (fun r => (γ r).ofLp ⟨i, hi⟩)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) *
             (if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) +
-          (if i ∈ S then (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (if i ∈ S then (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S
               (fun i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) ((a : ℝ) + 2))).coeff i
             else 0))
@@ -404,7 +404,7 @@ theorem deTurckGalerkin_solution_exists
     have hderiv := hVderiv N t ht i hi
     have hforcing_eq :
         (if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
-          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (V N t) ((a : ℝ) + 2))).coeff i
           else 0) =
@@ -420,7 +420,7 @@ theorem deTurckGalerkinForcing_seed_mass
       ∀ (N : ℕ) (k : ℕ),
         ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
             tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
-              ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+              ((deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
                 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 ≤
           Cseed k ^ 2 := by
   classical
@@ -451,7 +451,7 @@ theorem deTurckGalerkinForcing_seed_mass
       show SmoothCcTensor.toL2 (0 : SmoothCcTensor g₀ 0 2) = 0 from map_zero _,
       tensorL2Coeff_eq_inner, inner_zero_right]
   have hseed_coeff : ∀ i,
-      (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i =
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Wrem).coeff i := by
     intro i
@@ -462,7 +462,7 @@ theorem deTurckGalerkinForcing_seed_mass
   intro N k
   set v : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + (k : ℝ)) :=
     smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ)) Wrem with hv_def
-  have hcoeff_v : ∀ i, (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+  have hcoeff_v : ∀ i, (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i = v.coeff i := by
     intro i
     rw [hseed_coeff i, hv_def, smoothCcToTensorHs_coeff, smoothCcToTensorHs_coeff]
@@ -476,7 +476,7 @@ theorem deTurckGalerkinForcing_seed_mass
     v.weighted_summable.sum_le_tsum _ (fun i _ => hterm_nn i)
   calc ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
         tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
-          ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          ((deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2
       = ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
           tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) * (v.coeff i) ^ 2 := by
@@ -544,7 +544,7 @@ private noncomputable def galerkinCoordFieldSymm
     EuclideanSpace ℝ {i // i ∈ S} → EuclideanSpace ℝ {i // i ∈ S} :=
   fun w => galerkinCoordDiag (I := I) (M := M) g₀ S w +
     galerkinCoordRestrict (I := I) (M := M) g₀ a S
-      (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+      (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))
 
 private lemma galerkinCoordFieldSymm_apply
@@ -553,7 +553,7 @@ private lemma galerkinCoordFieldSymm_apply
     (w : EuclideanSpace ℝ {i // i ∈ S}) (j : {i // i ∈ S}) :
     (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S w) j =
       -(TensorEigenIdx.lambda (I := I) (M := M) j.1) * w j +
-        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (galerkinCoordEmbed (I := I) (M := M) g₀ a S w)).coeff j.1 := by
   change (galerkinCoordDiag (I := I) (M := M) g₀ S w) j +
     (galerkinCoordRestrict (I := I) (M := M) g₀ a S _) j = _
@@ -575,7 +575,7 @@ private lemma galerkinCoordFieldSymm_lipschitzWith
       (‖galerkinCoordRestrict (I := I) (M := M) g₀ a S‖₊ * K₀ *
         ‖galerkinCoordEmbed (I := I) (M := M) g₀ a S‖₊)
       (fun w => galerkinCoordRestrict (I := I) (M := M) g₀ a S
-        (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+        (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
           (galerkinCoordEmbed (I := I) (M := M) g₀ a S w))) :=
     ((galerkinCoordRestrict (I := I) (M := M) g₀ a S).lipschitz.comp hK₀).comp
       (galerkinCoordEmbed (I := I) (M := M) g₀ a S).lipschitz
@@ -591,41 +591,41 @@ private lemma galerkinCoordFieldSymm_affineBound
   set Rst := galerkinCoordRestrict (I := I) (M := M) g₀ a S with hRst
   set Emb := galerkinCoordEmbed (I := I) (M := M) g₀ a S with hEmb
   set Diag := galerkinCoordDiag (I := I) (M := M) g₀ S with hDiag
-  set N0 : ℝ := ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+  set N0 : ℝ := ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))‖ with hN0
   refine ⟨‖Rst‖ * N0, ‖Diag‖₊ + ‖Rst‖₊ * K₀ * ‖Emb‖₊,
     by positivity, ?_⟩
   intro w
   have hdecomp : galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S w =
-      Diag w + Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)) := rfl
+      Diag w + Rst (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w)) := rfl
   rw [hdecomp]
   have hdiag_bd : ‖Diag w‖ ≤ ‖Diag‖ * ‖w‖ := Diag.le_opNorm w
-  have hN_bd : ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
+  have hN_bd : ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
       N0 + (K₀ : ℝ) * ‖Emb w‖ := by
-    have hlip2 : ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w) -
-        deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ ≤ (K₀ : ℝ) * ‖Emb w‖ := by
+    have hlip2 : ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w) -
+        deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a 0‖ ≤ (K₀ : ℝ) * ‖Emb w‖ := by
       have hd := hK₀.dist_le_mul (Emb w) (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
       rw [dist_eq_norm, dist_eq_norm, sub_zero] at hd
       exact hd
-    have htri : ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
-        ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w) -
-          deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ +
-        ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ := by
-      calc ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖
-          = ‖(deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w) -
-              deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0) +
-              deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a 0‖ := by
+    have htri : ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w)‖ ≤
+        ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w) -
+          deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a 0‖ +
+        ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a 0‖ := by
+      calc ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w)‖
+          = ‖(deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w) -
+              deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a 0) +
+              deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a 0‖ := by
             rw [sub_add_cancel]
         _ ≤ _ := norm_add_le _ _
     rw [hN0]; linarith [htri, hlip2]
-  have hRst_bd : ‖Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w))‖ ≤
-      ‖Rst‖ * ‖deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w)‖ :=
+  have hRst_bd : ‖Rst (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w))‖ ≤
+      ‖Rst‖ * ‖deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w)‖ :=
     Rst.le_opNorm _
   have hEmb_bd : ‖Emb w‖ ≤ ‖Emb‖ * ‖w‖ := Emb.le_opNorm w
   have hRst_nn : 0 ≤ ‖Rst‖ := norm_nonneg Rst
   have hK₀_nn : 0 ≤ (K₀ : ℝ) := K₀.coe_nonneg
-  calc ‖Diag w + Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w))‖
-      ≤ ‖Diag w‖ + ‖Rst (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a (Emb w))‖ :=
+  calc ‖Diag w + Rst (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w))‖
+      ≤ ‖Diag w‖ + ‖Rst (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a (Emb w))‖ :=
         norm_add_le _ _
     _ ≤ ‖Diag‖ * ‖w‖ +
           ‖Rst‖ * (N0 + (K₀ : ℝ) * ‖Emb w‖) := by
@@ -651,7 +651,7 @@ private theorem deTurckGalerkin_solution_exists_singleSymm
       (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ i ∈ S,
         HasDerivWithinAt (fun r => V r i)
           (-(TensorEigenIdx.lambda (I := I) (M := M) i) * V t i +
-            (if i ∈ S then (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            (if i ∈ S then (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
               (finiteEigenComboHs (I := I) (M := M) g₀ S (V t) ((a : ℝ) + 2))).coeff i else 0))
           (Set.Ici t) t) ∧
       (∀ i ∈ S, V 0 i = u₀.coeff i) ∧
@@ -706,7 +706,7 @@ private theorem deTurckGalerkin_solution_exists_singleSymm
         (galerkinCoordFieldSymm (I := I) (M := M) g₀ g_bg a S (γ t)) =
         -(TensorEigenIdx.lambda (I := I) (M := M) i) *
             (if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) +
-          (if i ∈ S then (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (if i ∈ S then (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S
               (fun i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) ((a : ℝ) + 2))).coeff i
             else 0) := by
@@ -725,7 +725,7 @@ private theorem deTurckGalerkin_solution_exists_singleSymm
     have hfinal : HasDerivWithinAt (fun r => (γ r).ofLp ⟨i, hi⟩)
         (-(TensorEigenIdx.lambda (I := I) (M := M) i) *
             (if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) +
-          (if i ∈ S then (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (if i ∈ S then (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀ S
               (fun i => if h : i ∈ S then (γ t).ofLp ⟨i, h⟩ else 0) ((a : ℝ) + 2))).coeff i
             else 0))
@@ -773,7 +773,7 @@ theorem deTurckGalerkin_solution_existsSymm
     have hderiv := hVderiv N t ht i hi
     have hforcing_eq :
         (if i ∈ eigenIdxFinset (I := I) (M := M) g₀ N then
-          (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (finiteEigenComboHs (I := I) (M := M) g₀
               (eigenIdxFinset (I := I) (M := M) g₀ N) (V N t) ((a : ℝ) + 2))).coeff i
           else 0) =
@@ -784,13 +784,13 @@ theorem deTurckGalerkin_solution_existsSymm
 
 section
 
-open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (symmS symmS_smul domDomCongrSection)
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (ccTensorBilin)
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (ccTensor02Symm symmS_smul domDomCongrSection)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (smoothCcTensorBilinForm)
 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
-private lemma gscr_eigenIdxFinset_lambda_closed (g₀ : SmoothRiemannianMetric I M) (N : ℕ) :
+private lemma eigenIdxFinset_mem_iff_of_eigenvalue_eq (g₀ : SmoothRiemannianMetric I M) (N : ℕ) :
     ∀ i j : TensorEigenIdx (I := I) (M := M) g₀ 0 2, i.1 = j.1 →
       (i ∈ eigenIdxFinset (I := I) (M := M) g₀ N ↔
         j ∈ eigenIdxFinset (I := I) (M := M) g₀ N) := by
@@ -824,10 +824,10 @@ set_option maxHeartbeats 1600000 in
 theorem deTurckSmoothRemainder_spectralCoercive_split'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
-    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold'' (Module.finrank ℝ E))
+    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThresholdSharp (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
         (I := I) (M := M) g₀
         (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
           (I := I) g₀ T₀) δ) :
@@ -835,7 +835,7 @@ theorem deTurckSmoothRemainder_spectralCoercive_split'
       ∀ (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2)) (k : ℕ)
         (T₀ : SmoothCcTensor g₀ 0 2)
         (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v)
+          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v)
         (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
         (hsupp : ∀ i, i ∉ S →
           (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀).coeff i = 0),
@@ -962,17 +962,17 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a)
     {R₀ : ℝ} (hR₀ : 0 < R₀)
-    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold'' (Module.finrank ℝ E))
+    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThresholdSharp (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
         (I := I) (M := M) g₀
         (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
           (I := I) g₀ T₀) δ)
     (htie : ∀ (T : SmoothCcTensor g₀ 0 2),
-      deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) =
-        deTurckSmoothN (I := I) (M := M) g₀ g_bg a
+        deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a
           (radialScaleSmooth (I := I) (M := M) g₀ a R₀ T)
           (lt_of_le_of_lt hδ_le (deTurckArmContractionThreshold''_lt_one' (Module.finrank ℝ E)))
           (hδ_fibre _ (norm_smoothCcToTensorHs_radialScaleSmooth_le (I := I) (M := M) g₀ a
@@ -982,12 +982,12 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
       ∀ (N : ℕ) (k : ℕ) (t : ℝ),
         Real.sqrt (∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
             tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
-              ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+              ((deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
                   (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-                    (symmS (I := I) (M := M) g₀
+                    (ccTensor02Symm (I := I) (M := M) g₀
                       (finiteEigenCombo (I := I) (M := M) g₀
                         (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t))))).coeff i -
-                (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+                (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
                   (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2) ≤
           Cδ₀ * Real.sqrt (galerkinEnergy (I := I) (M := M)
               (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ) + 1) t) +
@@ -1005,7 +1005,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
   set σ : ℝ := (a : ℝ) + (k : ℝ) with hσ
   set Tb : SmoothCcTensor g₀ 0 2 := finiteEigenCombo (I := I) (M := M) g₀ S (U N t)
     with hTb_def
-  set Ts : SmoothCcTensor g₀ 0 2 := symmS (I := I) (M := M) g₀ Tb with hTs_def
+  set Ts : SmoothCcTensor g₀ 0 2 := ccTensor02Symm (I := I) (M := M) g₀ Tb with hTs_def
   set T₀ : SmoothCcTensor g₀ 0 2 := radialScaleSmooth (I := I) (M := M) g₀ a R₀ Ts
     with hT₀_def
   have hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ :=
@@ -1015,13 +1015,13 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
   have hc_nn : 0 ≤ c := le_min zero_le_one (div_nonneg hR₀.le (norm_nonneg _))
   have hc_le_one : c ≤ 1 := min_le_left _ _
   have hsmul : T₀ = c • Ts := by rw [hT₀_def, hc_def]; rfl
-  have hT₀_symmS : T₀ = symmS (I := I) (M := M) g₀ (c • Tb) := by
+  have hT₀_symmS : T₀ = ccTensor02Symm (I := I) (M := M) g₀ (c • Tb) := by
     rw [hsmul, hTs_def, symmS_smul]
   have hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v := by
+      smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v := by
     intro x v w
     rw [hT₀_symmS]
-    exact ccTensorBilin_symmS_symm' (I := I) (M := M) g₀ (c • Tb) x v w
+    exact bilinearForm_of_tensorSymmetrization_symm (I := I) (M := M) g₀ (c • Tb) x v w
   have hbridge : ∀ (τ : ℝ),
       finiteEigenComboHs (I := I) (M := M) g₀ S (U N t) τ =
         smoothCcToTensorHs (I := I) (M := M) g₀ τ Tb :=
@@ -1046,7 +1046,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
     intro i hi
     rw [hTs_def]
     exact tensorL2Coeff_toL2_symmS_eq_zero_of_notMem (I := I) (M := M) (g := g₀) S
-      (gscr_eigenIdxFinset_lambda_closed g₀ N) Tb hTb_L2_off i hi
+      (eigenIdxFinset_mem_iff_of_eigenvalue_eq g₀ N) Tb hTb_L2_off i hi
   have hTs_coeff_off : ∀ i, i ∉ S →
       (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts).coeff i = 0 := by
     intro i hi
@@ -1061,9 +1061,9 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
   have hzero : (0 : SmoothCcTensor g₀ 0 2) = (0 : ℝ) • (0 : SmoothCcTensor g₀ 0 2) :=
     (zero_smul _ _).symm
   have hLHS_eq : ∀ i,
-      (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts)).coeff i -
-          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i =
         (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
             (deTurckSmoothRemainder (I := I) g₀ g_bg T₀ hδ_lt (hδ_fibre T₀ hball))).coeff i -
@@ -1074,12 +1074,12 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
                   rw [hzero, smoothCcToTensorHs_smul, tensorHs_norm_smul]
                   simpa using hR₀.le)))).coeff i := by
     intro i
-    have hNT : (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+    have hNT : (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts)).coeff i =
         (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
           (deTurckSmoothRemainder (I := I) g₀ g_bg T₀ hδ_lt (hδ_fibre T₀ hball))).coeff i := by
       rw [htie Ts, deTurckSmoothN_coeff, smoothCcToTensorHs_coeff]
-    have hN0 : (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+    have hN0 : (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i =
         (smoothCcToTensorHs (I := I) (M := M) g₀ (σ - 1)
           (deTurckSmoothRemainder (I := I) g₀ g_bg (0 : SmoothCcTensor g₀ 0 2) hδ_lt
@@ -1098,12 +1098,12 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
       have hscale0 : radialScaleSmooth (I := I) (M := M) g₀ a R₀
           (0 : SmoothCcTensor g₀ 0 2) = (0 : SmoothCcTensor g₀ 0 2) := by
         rw [radialScaleSmooth, smul_zero]
-      have hRemEq : ∀ (hp : DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+      have hRemEq : ∀ (hp : DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
               (I := I) (M := M) g₀
               (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
                 (I := I) g₀ (radialScaleSmooth (I := I) (M := M) g₀ a R₀
                   (0 : SmoothCcTensor g₀ 0 2))) δ)
-            (hp0 : DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+            (hp0 : DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
               (I := I) (M := M) g₀
               (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
                 (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -1131,12 +1131,12 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
         ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
           (tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-            (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g₀ Tb)) i) ^ 2 := by
+            (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g₀ Tb)) i) ^ 2 := by
       refine Finset.sum_congr rfl (fun i _ => ?_)
       rw [smoothCcToTensorHs_coeff, hTs_def]
     have hstep2 := sum_tensorSobolevWeight_mul_sq_tensorL2Coeff_toL2_symmS_le
       (I := I) (M := M) (g := g₀) τ S
-      (gscr_eigenIdxFinset_lambda_closed g₀ N) Tb hTb_L2_off
+      (eigenIdxFinset_mem_iff_of_eigenvalue_eq g₀ N) Tb hTb_L2_off
     have hstep3 : (∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
         (tensorL2Coeff (I := I) (M := M)
           (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -1150,7 +1150,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
         = ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
           (tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-            (SmoothCcTensor.toL2 (symmS (I := I) (M := M) g₀ Tb)) i) ^ 2 := hstep1
+            (SmoothCcTensor.toL2 (ccTensor02Symm (I := I) (M := M) g₀ Tb)) i) ^ 2 := hstep1
       _ ≤ ∑ i ∈ S, tensorSobolevWeight (I := I) (M := M) i τ *
           (tensorL2Coeff (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
@@ -1181,11 +1181,11 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
   have hLHS_rw :
       Real.sqrt (∑ i ∈ S,
           tensorSobolevWeight (I := I) (M := M) i (σ - 1) *
-            ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            ((deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
                 (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-                  (symmS (I := I) (M := M) g₀
+                  (ccTensor02Symm (I := I) (M := M) g₀
                     (finiteEigenCombo (I := I) (M := M) g₀ S (U N t))))).coeff i -
-              (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+              (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
                 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2) =
         Real.sqrt (∑ i ∈ S,
           tensorSobolevWeight (I := I) (M := M) i (σ - 1) *
@@ -1199,7 +1199,7 @@ theorem deTurckSobolevNHa2_diff_sobolevSplit_perScale'
                       simpa using hR₀.le)))).coeff i) ^ 2) := by
     refine congrArg Real.sqrt (Finset.sum_congr rfl (fun i _ => ?_))
     rw [show (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-        (symmS (I := I) (M := M) g₀
+        (ccTensor02Symm (I := I) (M := M) g₀
           (finiteEigenCombo (I := I) (M := M) g₀ S (U N t)))) =
         smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) Ts from by
       rw [hTs_def, hTb_def]]
@@ -1217,16 +1217,16 @@ private lemma deTurckSobolevNHa2Symm_finiteEigenComboHs_eq
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ) :
-    deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+    deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (finiteEigenComboHs (I := I) (M := M) g₀ S c ((a : ℝ) + 2)) =
-      deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-          (symmS (I := I) (M := M) g₀ (finiteEigenCombo (I := I) (M := M) g₀ S c))) := by
+          (ccTensor02Symm (I := I) (M := M) g₀ (finiteEigenCombo (I := I) (M := M) g₀ S c))) := by
   rw [gscr_finiteEigenComboHs_eq_smoothCcToTensorHs g₀ S c ((a : ℝ) + 2),
     deTurckSobolevNHa2Symm_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super
       (finiteEigenCombo (I := I) (M := M) g₀ S c),
     ← deTurckSobolevNHa2_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super
-      (symmS (I := I) (M := M) g₀ (finiteEigenCombo (I := I) (M := M) g₀ S c))]
+      (ccTensor02Symm (I := I) (M := M) g₀ (finiteEigenCombo (I := I) (M := M) g₀ S c))]
 
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1234,9 +1234,9 @@ set_option maxHeartbeats 1600000 in
 private lemma deTurckSobolevNHa2Symm_zero_eq
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) :
-    deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+    deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) =
-      deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+      deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) := by
   have hzero_embed : (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) =
       smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
@@ -1246,7 +1246,7 @@ private lemma deTurckSobolevNHa2Symm_zero_eq
     rw [tensorHs.zero_coeff, smoothCcToTensorHs_coeff,
       show SmoothCcTensor.toL2 (0 : SmoothCcTensor g₀ 0 2) = 0 from map_zero _,
       tensorL2Coeff_eq_inner, inner_zero_right]
-  have hsymmS_zero : symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2) =
+  have hsymmS_zero : ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2) =
       (0 : SmoothCcTensor g₀ 0 2) := by
     have h0 := symmS_smul (I := I) (M := M) g₀ (0 : ℝ) (0 : SmoothCcTensor g₀ 0 2)
     rw [zero_smul, zero_smul] at h0
@@ -1255,7 +1255,7 @@ private lemma deTurckSobolevNHa2Symm_zero_eq
   rw [deTurckSobolevNHa2Symm_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super
       (0 : SmoothCcTensor g₀ 0 2),
     ← deTurckSobolevNHa2_smoothEmbed_eq (I := I) (M := M) g₀ g_bg a ha_super
-      (symmS (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)),
+      (ccTensor02Symm (I := I) (M := M) g₀ (0 : SmoothCcTensor g₀ 0 2)),
     hsymmS_zero, ← hzero_embed]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -1270,10 +1270,10 @@ theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
       ∀ (N : ℕ) (k : ℕ), ∀ t ∈ Set.Ico (0 : ℝ) T,
         ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
             tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
-              ((deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+              ((deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                   (finiteEigenComboHs (I := I) (M := M) g₀
                     (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i -
-                (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+                (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                   (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 ≤
           Cδ₀ ^ 2 * galerkinEnergy (I := I) (M := M)
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ) + 1) t +
@@ -1297,19 +1297,19 @@ theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
   have hEq :
       ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
           tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
-            ((deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            ((deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                 (finiteEigenComboHs (I := I) (M := M) g₀
                   (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i -
-              (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+              (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 =
         ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
           tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
-            ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            ((deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
                 (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-                  (symmS (I := I) (M := M) g₀
+                  (ccTensor02Symm (I := I) (M := M) g₀
                     (finiteEigenCombo (I := I) (M := M) g₀
                       (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t))))).coeff i -
-              (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+              (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
                 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 := by
     refine Finset.sum_congr rfl (fun i _ => ?_)
     rw [deTurckSobolevNHa2Symm_finiteEigenComboHs_eq (I := I) (M := M) g₀ g_bg a ha2
@@ -1317,12 +1317,12 @@ theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
       deTurckSobolevNHa2Symm_zero_eq (I := I) (M := M) g₀ g_bg a ha2]
   have hA_nn : 0 ≤ ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
       tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
-        ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+        ((deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2)
-              (symmS (I := I) (M := M) g₀
+              (ccTensor02Symm (I := I) (M := M) g₀
                 (finiteEigenCombo (I := I) (M := M) g₀
                   (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t))))).coeff i -
-          (deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+          (deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 :=
     Finset.sum_nonneg (fun i _ =>
       mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i _) (sq_nonneg _))
@@ -1340,10 +1340,10 @@ theorem deTurckGalerkinForcingSymm_tame_diff_mass_perScale
   have hfinal :
       ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
           tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ) - 1) *
-            ((deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+            ((deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                 (finiteEigenComboHs (I := I) (M := M) g₀
                   (eigenIdxFinset (I := I) (M := M) g₀ N) (U N t) ((a : ℝ) + 2))).coeff i -
-              (deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+              (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 ≤
         Real.sqrt ((1 + Cδ₀ ^ 2) / 2) ^ 2 * galerkinEnergy (I := I) (M := M)
             (eigenIdxFinset (I := I) (M := M) g₀ N) (U N) ((a : ℝ) + (k : ℝ) + 1) t +
@@ -1365,7 +1365,7 @@ theorem deTurckGalerkinForcingSymm_seed_mass
       ∀ (N : ℕ) (k : ℕ),
         ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
             tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
-              ((deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+              ((deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
                 (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 ≤
           Cseed k ^ 2 := by
   obtain ⟨Cseed, hCseed_nn, hb⟩ :=
@@ -1373,11 +1373,11 @@ theorem deTurckGalerkinForcingSymm_seed_mass
   refine ⟨Cseed, hCseed_nn, fun N k => ?_⟩
   calc ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
         tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
-          ((deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+          ((deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
             (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2
       = ∑ i ∈ eigenIdxFinset (I := I) (M := M) g₀ N,
           tensorSobolevWeight (I := I) (M := M) i ((a : ℝ) + (k : ℝ)) *
-            ((deTurckSobolevNHa2 (I := I) (M := M) g₀ g_bg a
+            ((deTurckSobolevNonlinearity (I := I) (M := M) g₀ g_bg a
               (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))).coeff i) ^ 2 := by
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [deTurckSobolevNHa2Symm_zero_eq (I := I) (M := M) g₀ g_bg a ha_super]
@@ -1416,9 +1416,9 @@ theorem deTurckGalerkin_forcing_dissipation_perScaleSymm
   set S := eigenIdxFinset (I := I) (M := M) g₀ N with hS
   set σ : ℝ := (a : ℝ) + (k : ℝ) with hσ
   set v := finiteEigenComboHs (I := I) (M := M) g₀ S (U N t) ((a : ℝ) + 2) with hv
-  set w0 := deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a
+  set w0 := deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a
     (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) with hw0
-  set w := deTurckSobolevNHa2Symm (I := I) (M := M) g₀ g_bg a v with hw
+  set w := deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a v with hw
   have hUcoeff : ∀ i ∈ S, U N t i = v.coeff i := by
     intro i hi
     rw [hv, finiteEigenComboHs_coeff, if_pos hi]

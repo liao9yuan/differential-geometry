@@ -59,10 +59,10 @@ structure IteratedDiffChartBilinearData
 
   directions : Fin m → Fin (Module.finrank ℝ E)
 
-  fChartEff : EuclN → ℝ
+  diffChartForcing : EuclN → ℝ
 
   fChartEff_memLp_weighted :
-    MemLp fChartEff 2
+    MemLp diffChartForcing 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α))
 
@@ -83,16 +83,16 @@ structure IteratedDiffChartBilinearData
             m directions y * ψ y
         ∂(volume : Measure EuclN)) =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
-        densityOnEuclid (I := I) g α y * fChartEff y * ψ y
+        densityOnEuclid (I := I) g α y * diffChartForcing y * ψ y
         ∂(volume : Measure EuclN)
 
 def IteratedDiffChartBilinearData.mk_from_hypotheses
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g} {m : ℕ}
     (directions : Fin m → Fin (Module.finrank ℝ E))
-    (fChartEff : EuclN → ℝ)
+    (diffChartForcing : EuclN → ℝ)
     (fChartEff_memLp_weighted :
-      MemLp fChartEff 2
+      MemLp diffChartForcing 2
         ((chartPulledWeightedMeasure (I := I) g α).restrict
           (chartTargetEuclid (I := I) (M := M) α)))
     (m_diff_variational_identity :
@@ -112,11 +112,11 @@ def IteratedDiffChartBilinearData.mk_from_hypotheses
               m directions y * ψ y
           ∂(volume : Measure EuclN)) =
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
-          densityOnEuclid (I := I) g α y * fChartEff y * ψ y
+          densityOnEuclid (I := I) g α y * diffChartForcing y * ψ y
           ∂(volume : Measure EuclN)) :
     IteratedDiffChartBilinearData (I := I) (M := M) g α u_h m :=
   { directions := directions
-    fChartEff := fChartEff
+    diffChartForcing := diffChartForcing
     fChartEff_memLp_weighted := fChartEff_memLp_weighted
     m_diff_variational_identity := m_diff_variational_identity }
 
@@ -221,7 +221,7 @@ def ofBase
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
     IteratedDiffChartBilinearData (I := I) (M := M) g α u_h 0 where
   directions := Fin.elim0
-  fChartEff :=
+  diffChartForcing :=
     (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α
       (laplacianDomainPow_succ_subset_laplacianDomain
         (I := I) (M := M) g 1 hu_h)).f_chart
@@ -339,11 +339,11 @@ def ofDiff
     (l : Fin (Module.finrank ℝ E)) :
     IteratedDiffChartBilinearData (I := I) (M := M) g α u_h 1 where
   directions := fun _ => l
-  fChartEff :=
-    DifferentialGeometry.Analysis.Laplacian.FChartEffDef.fChartEff
+  diffChartForcing :=
+    DifferentialGeometry.Analysis.Laplacian.FChartEffDef.diffChartForcing
       (I := I) (M := M) g α l hu_h
   fChartEff_memLp_weighted :=
-    DifferentialGeometry.Analysis.Laplacian.FChartEffDef.fChartEff_memLp_two_weighted
+    DifferentialGeometry.Analysis.Laplacian.FChartEffDef.diffChartForcing_memLp_two_weighted
       (I := I) (M := M) (g := g) (α := α) (l := l) (hu_h := hu_h)
   m_diff_variational_identity := by
     classical
@@ -432,8 +432,8 @@ def ofDiffTwice
     (l₁ l₂ : Fin (Module.finrank ℝ E)) :
     IteratedDiffChartBilinearData (I := I) (M := M) g α u_h 2 where
   directions := ![l₁, l₂]
-  fChartEff :=
-    DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef.fChartEffTwice
+  diffChartForcing :=
+    DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef.effectiveSourceChartSecondOrder
       (I := I) (M := M) g α l₁ l₂ hu_h
   fChartEff_memLp_weighted :=
     DifferentialGeometry.Analysis.Laplacian.FChartEffTwiceDef.fChartEffTwice_memLp_two_weighted

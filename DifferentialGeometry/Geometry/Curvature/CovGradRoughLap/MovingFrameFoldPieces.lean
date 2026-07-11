@@ -107,7 +107,7 @@ theorem frameSummed_contracted_second_bianchi_eq_half_nablaScalar
 noncomputable def christoffelResidualPairingFib
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (i : Fin (Module.finrank ℝ E)) : ℝ :=
-  tensorInnerPointwise_0s (I := I) (M := M) s g x
+  covariantTensorInnerPointwise (I := I) (M := M) s g x
     (Tensor0SSpace.toModel
       (secondOrderChristoffelResidual (I := I) g
         (Tensor0SNabla.tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))

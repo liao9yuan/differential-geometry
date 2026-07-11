@@ -37,7 +37,7 @@ open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow
-open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (gFibreOpBound ccTensorBilinSymm ccTensorBilin ccTensorBilin_apply ccTensorModel ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply ccTensorBilinSymm_symm)
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (metricCauchySchwarzBound ccTensorBilinSymm smoothCcTensorBilinForm ccTensorBilin_apply ccTensorModel ccTensorMultilinear ccTensorBilinSymm_contMDiff ccTensorBilinSymm_apply ccTensorBilinSymm_symm)
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
@@ -52,7 +52,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
-def ricEndoRaisedField (g : SmoothRiemannianMetric I M) :
+def ricciEndomorphismField (g : SmoothRiemannianMetric I M) :
     ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) where
   toFun := fun x : M => ricEndoRaisedFib (I := I) g x
@@ -62,7 +62,7 @@ set_option backward.isDefEq.respectTransparency false in
 def ricEndoBackgroundDifferenceField (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) :=
-  ricEndoRaisedField (I := I) (M := M) g₁ - ricEndoRaisedField (I := I) (M := M) g₀
+  ricciEndomorphismField (I := I) (M := M) g₁ - ricciEndomorphismField (I := I) (M := M) g₀
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
@@ -70,10 +70,10 @@ lemma ricEndoBackgroundDifferenceField_apply (g₀ g₁ : SmoothRiemannianMetric
     ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁ x =
       ricEndoRaisedFib (I := I) g₁ x - ricEndoRaisedFib (I := I) g₀ x := by
   rw [ricEndoBackgroundDifferenceField]
-  rw [show ((ricEndoRaisedField (I := I) (M := M) g₁ -
-        ricEndoRaisedField (I := I) (M := M) g₀) x) =
-      ricEndoRaisedField (I := I) (M := M) g₁ x -
-        ricEndoRaisedField (I := I) (M := M) g₀ x from by
+  rw [show ((ricciEndomorphismField (I := I) (M := M) g₁ -
+        ricciEndomorphismField (I := I) (M := M) g₀) x) =
+      ricciEndomorphismField (I := I) (M := M) g₁ x -
+        ricciEndomorphismField (I := I) (M := M) g₀ x from by
     rw [ContMDiffSection.coe_sub]; rfl]
   rfl
 
@@ -83,7 +83,7 @@ private lemma curvCoeffSlot_zero_backgroundDifference_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 0 -
         ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₀ 0 =
-      slotInsertEndoCc (I := I) (M := M) g₀ 1
+      endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
         (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -105,7 +105,7 @@ private lemma curvCoeffSlot_zero_backgroundDifference_eq
   rw [show ((ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₀ 0).toSection x) D =
       ricciArmOrder0CurvCoeffFibSlot (I := I) g₀ 0 x D from rfl]
   rw [ricciArmOrder0CurvCoeffFibSlot_toModel, ricciArmOrder0CurvCoeffFibSlot_toModel]
-  rw [show ((slotInsertEndoCc (I := I) (M := M) g₀ 1
+  rw [show ((endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
         (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁)).toSection x) D =
       slotInsertEndoFib (I := I) (M := M) 2 0 x
         (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁ x) D from rfl]
@@ -121,7 +121,7 @@ private lemma curvCoeffSlot_one_backgroundDifference_eq
         ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₀ 1 =
       reindexCoeffGen (I := I) (M := M) g₀ 2 2
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
             (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁)))
         (Equiv.swap (0 : Fin 2) 1) := by
   classical
@@ -147,13 +147,13 @@ private lemma curvCoeffSlot_one_backgroundDifference_eq
   rw [ricciArmOrder0CurvCoeffFibSlot_toModel, ricciArmOrder0CurvCoeffFibSlot_toModel]
   rw [show ((reindexCoeffGen (I := I) (M := M) g₀ 2 2
         (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ 1
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
             (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁)))
         (Equiv.swap (0 : Fin 2) 1)).toSection x) D =
       reindexCoeffFibGen (I := I) 2 2 (Equiv.swap (0 : Fin 2) 1) x
         (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
               (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁))).toSection x) D
       from rfl]
   rw [reindexCoeffFibGen_apply]
@@ -179,11 +179,11 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_decomp
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁ -
         ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₀ =
-      slotInsertEndoCc (I := I) (M := M) g₀ 1
+      endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
           (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁) +
         reindexCoeffGen (I := I) (M := M) g₀ 2 2
           (rsDomDomCongrSection (I := I) (M := M) g₀ 2 2 (Equiv.swap (0 : Fin 2) 1)
-            (slotInsertEndoCc (I := I) (M := M) g₀ 1
+            (endoSlotZeroCcTensor (I := I) (M := M) g₀ 1
               (ricEndoBackgroundDifferenceField (I := I) (M := M) g₀ g₁)))
           (Equiv.swap (0 : Fin 2) 1) := by
   rw [← curvCoeffSlot_one_backgroundDifference_eq (I := I) (M := M) g₀ g₁,
@@ -926,7 +926,7 @@ lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
 set_option linter.unusedSectionVars false in
-theorem exists_backgroundJet_rfns_bound (g₀ : SmoothRiemannianMetric I M)
+theorem exists_iteratedCovGrad_fiberNormSq_bound (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x

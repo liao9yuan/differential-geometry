@@ -77,7 +77,7 @@ private lemma riemannianFiberNormSq_eq_sum_toModel_sq
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 s x Tr]
   rw [show tensorInnerPointwise (I := I) (M := M) g 0 s x
         (TensorRSSpace.toModel Tr) (TensorRSSpace.toModel Tr) =
-      tensorInnerPointwise_0s (I := I) (M := M) (0 + s) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (0 + s) g x
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel Tr))
         (lowerAllUpperIndices (I := I) (M := M) g 0 s x (TensorRSSpace.toModel Tr)) from rfl]
   rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (0 + s)
@@ -195,7 +195,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
       ∀ (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) (v : TangentSpace I x),
         g.inner x v v = 1 →
         riemannianFiberNormSq (I := I) (M := M) g 0 s x
-            (genuineCurvTraceFixedFramePureR (I := I) g s
+            (genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s
               (smoothExtensionTangent (I := I) x v) (smoothOrthoFrame (I := I) g x)
               (fun y : M => S.toSection y) x) ≤
           Kpure s *
@@ -243,10 +243,10 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
       (smoothExtensionTangent (I := I) x v)
       (covApply (tensorCov (I := I) g 0 s) (smoothOrthoFrame (I := I) g x i)
         (fun y : M => S.toSection y)) x with hF_def
-  have htrace : genuineCurvTraceFixedFramePureR (I := I) g s
+  have htrace : genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s
       (smoothExtensionTangent (I := I) x v) (smoothOrthoFrame (I := I) g x)
       (fun y : M => S.toSection y) x = ∑ i : Fin n, F i := by
-    rw [genuineCurvTraceFixedFramePureR]
+    rw [genuineCurvTraceFixedFrameCurvatureOnly]
   rw [htrace]
 
   have hW : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (smoothExtensionTangent (I := I) x v)) :=
@@ -354,7 +354,7 @@ theorem exists_uniform_genuineCurvTracePureR_fiberNormSq_bound
           rw [← hone]; rfl
         rw [hscalar, one_smul]
       rw [hslot]
-      rw [curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S x (eF i)]
+      rw [curry_covGrad_unit_eval_general (I := I) (M := M) g s S x (eF i)]
       rw [covApply_apply, heF_def]
       rfl
     rw [← hslice_eq]
@@ -415,7 +415,7 @@ theorem genuineThirdCurvFieldFibPureR_fiberNormEnergy_le
     fun s S x n e hn horth => ?_⟩
 
   set Tr : Fin n → TensorRSSpace 0 s I x := fun a =>
-    genuineCurvTraceFixedFramePureR (I := I) g s
+    genuineCurvTraceFixedFrameCurvatureOnly (I := I) g s
       (smoothExtensionTangent (I := I) x (e a)) (smoothOrthoFrame (I := I) g x)
       (fun y : M => S.toSection y) x with hTr
   have hfield : ∀ (w : TangentSpace I x) (m : Fin s → TangentSpace I x),

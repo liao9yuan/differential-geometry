@@ -38,7 +38,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem deturck_mildsolution_timeh1
+theorem exists_deturck_remainder_mild_solution_timeH1
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
@@ -60,7 +60,7 @@ theorem deturck_mildsolution_timeh1
         ccTensorBilinSymm (I := I) g_bg (repr u) x v w)
     (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       ∃ δ' : ℝ, δ' < 1 ∧
-        gFibreOpBound (I := I) (M := M) g_bg
+        metricCauchySchwarzBound (I := I) (M := M) g_bg
           (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hNsec_lip : ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -90,7 +90,7 @@ theorem deturck_mildsolution_timeh1
             (fun t => N_cont
               (maxRegDuhamelSolFieldHa1 (I := I) (M := M) (a : ℝ) hT hT1 u₀ gforce t)) := by
   obtain ⟨L_R, R, hR, hLip⟩ :=
-    deturckN_hscale_lipschitz (I := I) (M := M) g_bg a u₀ N_cont repr Nsec
+    deturck_nemytskii_operator_hs_lipschitz_of_l2coeff_lipschitz (I := I) (M := M) g_bg a u₀ N_cont repr Nsec
       hN_coeff hNsec_realize hrepr_small hNsec_lip
   obtain ⟨T₀, hT₀_pos, hsol⟩ :=
     deTurckRemainder_strong_shortTime_exists (I := I) (M := M) g_bg

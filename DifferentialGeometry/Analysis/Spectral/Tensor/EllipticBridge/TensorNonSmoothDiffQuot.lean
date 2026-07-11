@@ -58,7 +58,7 @@ theorem tensor_h2_chart_loc_of_uniform_bound
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict Ω'') ≤
         ENNReal.ofReal (M_bound i k) := by
   classical
-  exact chart_loc_of_uniform_bound (I := I) (M := M)
+  exact exists_weak_second_partial_of_uniform_diffQuot_bound (I := I) (M := M)
     (g := g) (α := α) D.toChartData
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd
 

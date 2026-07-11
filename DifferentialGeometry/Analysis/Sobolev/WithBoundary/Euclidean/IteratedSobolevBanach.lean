@@ -32,7 +32,7 @@ theorem MemWkpHalfSpace.exists_limit_of_wkpNormHalfSpace_cauchy
     interiorHalfSpace_isOpen hΩ
   have hu_mem' : ∀ n, MemWkp (d := d) k p (u n) (interiorHalfSpace Ω) := hu_mem
   have hu_cauchy' : ∀ ε > 0, ∃ N, ∀ m n, N ≤ m → N ≤ n →
-      wkpNorm (d := d) k p (fun x => u m x - u n x)
+      iteratedWeakSobolevNorm (d := d) k p (fun x => u m x - u n x)
         (interiorHalfSpace Ω) ≤ ENNReal.ofReal ε := hu_cauchy
   obtain ⟨u_lim, hu_lim_mem, h_tendsto⟩ :=
     MemWkp.exists_limit_of_wkpNorm_cauchy hΩ_open k p hp_one hp_top

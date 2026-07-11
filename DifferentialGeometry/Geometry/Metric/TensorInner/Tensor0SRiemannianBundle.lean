@@ -88,7 +88,7 @@ theorem tensor0SRiemannianInner_smul_right
 lemma innerModel_diagonal_continuous
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Continuous (fun T : Tensor0SModel s ℝ E =>
-      tensorInnerPointwise_0s (I := I) (M := M) s g b T T) := by
+      covariantTensorInnerPointwise (I := I) (M := M) s g b T T) := by
   have hModelCLM := (innerModelCLM (I := I) (M := M) g s b).continuous
   have : Continuous (fun T : Tensor0SModel s ℝ E =>
       innerModelCLM (I := I) (M := M) g s b T T) :=
@@ -103,7 +103,7 @@ theorem tensor0SRiemannianInner_diagonal_continuous
   have heq : (fun v : Tensor0SSpace s I b =>
       tensor0SRiemannianInnerCLM (I := I) (M := M) g s b v v) =
       (fun v : Tensor0SSpace s I b =>
-        tensorInnerPointwise_0s (I := I) (M := M) s g b
+        covariantTensorInnerPointwise (I := I) (M := M) s g b
           (Tensor0SBundle.Tensor0SSpace.toModel
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) v)
           (Tensor0SBundle.Tensor0SSpace.toModel
@@ -129,7 +129,7 @@ private lemma tensor0SRiemannianInner_diagonal_clm_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T : Tensor0SSpace s I b) :
     tensor0SRiemannianInnerCLM (I := I) (M := M) g s b T T =
-      tensorInnerPointwise_0s (I := I) (M := M) s g b
+      covariantTensorInnerPointwise (I := I) (M := M) s g b
         (Tensor0SBundle.Tensor0SSpace.toModel
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) T)
         (Tensor0SBundle.Tensor0SSpace.toModel
@@ -150,7 +150,7 @@ private lemma innerModel_diagonal_sublevel_isBounded
     have hPD : ∀ v : Tensor0SModel s ℝ E,
         v ≠ 0 → 0 < innerModelCLM (I := I) (M := M) g s b v v := by
       intro v hv
-      change 0 < tensorInnerPointwise_0s (I := I) (M := M) s g b v v
+      change 0 < covariantTensorInnerPointwise (I := I) (M := M) s g b v v
       have hQpos := (tensorInnerPointwise_0s_eq_zero_iff
         (I := I) (M := M) g b s v).not.mpr hv
       have hnn := tensorInnerPointwise_0s_nonneg (I := I) (M := M) g b s v
@@ -162,15 +162,15 @@ private lemma innerModel_diagonal_sublevel_isBounded
         innerModelCLM (I := I) (M := M) g s b (c • v) w =
           c * innerModelCLM (I := I) (M := M) g s b v w := by
       intro c v w
-      change tensorInnerPointwise_0s (I := I) (M := M) s g b (c • v) w =
-        c * tensorInnerPointwise_0s (I := I) (M := M) s g b v w
+      change covariantTensorInnerPointwise (I := I) (M := M) s g b (c • v) w =
+        c * covariantTensorInnerPointwise (I := I) (M := M) s g b v w
       rw [tensorInnerPointwise_0s_smul_left]
     have hSmulR : ∀ (c : ℝ) (v w : Tensor0SModel s ℝ E),
         innerModelCLM (I := I) (M := M) g s b v (c • w) =
           c * innerModelCLM (I := I) (M := M) g s b v w := by
       intro c v w
-      change tensorInnerPointwise_0s (I := I) (M := M) s g b v (c • w) =
-        c * tensorInnerPointwise_0s (I := I) (M := M) s g b v w
+      change covariantTensorInnerPointwise (I := I) (M := M) s g b v (c • w) =
+        c * covariantTensorInnerPointwise (I := I) (M := M) s g b v w
       rw [tensorInnerPointwise_0s_smul_right]
     exact Tensor0SRiemannian.posDef_bilin_unit_ball_isBounded
       (innerModelCLM (I := I) (M := M) g s b) hPD hNN hSmulL hSmulR
@@ -224,13 +224,13 @@ theorem tensor0SRiemannianInner_isVonNBounded
             ((e.symm.toContinuousLinearMap :
               Tensor0SModel s ℝ E →L[ℝ] Tensor0SSpace s I b) T) = T := hRound
       rw [hToModel]
-      change tensorInnerPointwise_0s (I := I) (M := M) s g b T T < 1
+      change covariantTensorInnerPointwise (I := I) (M := M) s g b T T < 1
       exact hT
     · intro hv
       refine ⟨e v, ?_, ?_⟩
       · rw [Set.mem_setOf_eq]
         rw [Set.mem_setOf_eq, tensor0SRiemannianInner_diagonal_clm_apply] at hv
-        change tensorInnerPointwise_0s (I := I) (M := M) s g b _ _ < 1
+        change covariantTensorInnerPointwise (I := I) (M := M) s g b _ _ < 1
         exact hv
       · exact e.symm_apply_apply v
   rw [← hSetEq]

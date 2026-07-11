@@ -29,7 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-private lemma coframeS_one_eq_g0FlatCLM_pub
+private lemma coframe_arity_one_eq_metric_flat_apply
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 1 → Fin n) :
     coframeS (I := I) (M := M) g₀ x 1 e K = g0FlatCLM (I := I) g₀ x (e (K 0)) := by
@@ -47,7 +47,7 @@ private lemma coframeS_one_eq_g0FlatCLM_pub
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt
+theorem abs_tensor_one_three_flat_eval_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 1 3 I x) (d a b c : TangentSpace I x) :
     letI : Bundle.RiemannianBundle
@@ -85,7 +85,7 @@ theorem abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt
           ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from W)
             (coframeS (I := I) (M := M) g₀ x 1 e K))
           (fun i : Fin 3 => e (J i)) from rfl]
-    rw [coframeS_one_eq_g0FlatCLM_pub (I := I) (M := M) g₀ x e K]
+    rw [coframe_arity_one_eq_metric_flat_apply (I := I) (M := M) g₀ x e K]
   have hWd : (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 3 I x from W)
         (g0FlatCLM (I := I) g₀ x d) =
       ∑ k : Fin n, g₀.inner x (e k) d •
@@ -219,7 +219,7 @@ theorem abs_tensor13_flat_eval_le_fibreNorm_mul_sqrt
   have hcompsq : (∑ p : (Fin 1 → Fin n) × (Fin 3 → Fin n), comp p ^ 2) =
       ‖(W : Tensor0SBundle.TensorRSSpace 1 3 I x)‖ ^ 2 := by
     rw [← riemannianFiberNormSq_eq_bundle_norm_sq' (I := I) (M := M) g₀ 1 3 x W]
-    rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 3 x W e bse hnE hbse horth]
+    rw [riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ 1 3 x W e bse hnE hbse horth]
     rw [Fintype.sum_prod_type]
   have hnorm_nn : 0 ≤ ‖(W : Tensor0SBundle.TensorRSSpace 1 3 I x)‖ := norm_nonneg _
   have habs_sq : (∑ p : (Fin 1 → Fin n) × (Fin 3 → Fin n), coef p * comp p) ^ 2 ≤

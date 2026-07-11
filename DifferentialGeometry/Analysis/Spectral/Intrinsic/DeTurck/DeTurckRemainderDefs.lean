@@ -38,7 +38,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 def deTurckSmoothRemainder (g₀ g_bg : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
     SmoothCcTensor g₀ 0 2 :=
   { toSection :=
       (deTurckRHSSection (I := I) g_bg
@@ -116,40 +116,40 @@ lemma deTurckArmContractionThreshold_lt_one' (n : ℕ) [NeZero n] :
     deTurckArmContractionThreshold n < 1 :=
   deTurckArmContractionThreshold_lt_one (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
 
-def deTurckArmContractionThreshold'' (n : ℕ) : ℝ :=
+def deTurckArmContractionThresholdSharp (n : ℕ) : ℝ :=
   1 / (1 + 2 * (deTurckArmFibreConst n + 32 * deTurckArmFibreConst n ^ 3))
 
 lemma deTurckArmContractionThreshold''_pos (n : ℕ) :
-    0 < deTurckArmContractionThreshold'' n := by
-  unfold deTurckArmContractionThreshold''
+    0 < deTurckArmContractionThresholdSharp n := by
+  unfold deTurckArmContractionThresholdSharp
   have hf : 0 ≤ deTurckArmFibreConst n := deTurckArmFibreConst_nonneg n
   have hf3 : 0 ≤ deTurckArmFibreConst n ^ 3 := by positivity
   exact one_div_pos.mpr (by linarith)
 
 lemma deTurckArmContractionThreshold''_le {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n ≤ deTurckArmContractionThreshold n := by
+    deTurckArmContractionThresholdSharp n ≤ deTurckArmContractionThreshold n := by
   have hC := one_le_deTurckArmFibreConst hn
-  unfold deTurckArmContractionThreshold'' deTurckArmContractionThreshold
+  unfold deTurckArmContractionThresholdSharp deTurckArmContractionThreshold
   have hC3 : 0 ≤ deTurckArmFibreConst n ^ 3 := by positivity
   apply one_div_le_one_div_of_le (by linarith)
   linarith
 
 lemma deTurckArmContractionThreshold''_le_third {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n ≤ 1 / 3 :=
+    deTurckArmContractionThresholdSharp n ≤ 1 / 3 :=
   le_trans (deTurckArmContractionThreshold''_le hn)
     (deTurckArmContractionThreshold_le_third hn)
 
 lemma deTurckArmContractionThreshold''_lt_one {n : ℕ} (hn : 1 ≤ n) :
-    deTurckArmContractionThreshold'' n < 1 :=
+    deTurckArmContractionThresholdSharp n < 1 :=
   lt_of_le_of_lt (deTurckArmContractionThreshold''_le_third hn)
     (by norm_num : (1 : ℝ) / 3 < 1)
 
 lemma deTurckArmContractionThreshold''_le_third' (n : ℕ) [NeZero n] :
-    deTurckArmContractionThreshold'' n ≤ 1 / 3 :=
+    deTurckArmContractionThresholdSharp n ≤ 1 / 3 :=
   deTurckArmContractionThreshold''_le_third (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
 
 lemma deTurckArmContractionThreshold''_lt_one' (n : ℕ) [NeZero n] :
-    deTurckArmContractionThreshold'' n < 1 :=
+    deTurckArmContractionThresholdSharp n < 1 :=
   deTurckArmContractionThreshold''_lt_one (Nat.one_le_iff_ne_zero.mpr (NeZero.ne n))
 
 lemma deTurckArmFibreConst_mul_div_le_half {n : ℕ} (hn : 1 ≤ n) {δ : ℝ}

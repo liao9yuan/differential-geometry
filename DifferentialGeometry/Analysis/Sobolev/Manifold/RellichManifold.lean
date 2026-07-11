@@ -663,12 +663,12 @@ lemma eLpNorm_chartPushed_le_wkpNormChart
           (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u) p
           ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
             (chartTargetEuclid (I := I) (M := M) α)) ≤
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := by
-    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     rw [Finset.sum_range_succ]
     refine le_trans ?_ le_self_add
     rw [Finset.sum_range_one]
@@ -738,12 +738,12 @@ lemma eLpNorm_rellich_witness_weakGrad_le_wkpNormChart
             (chartTargetEuclid (I := I) (M := M) α)) (ENNReal.ofReal p)
           ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
             (chartTargetEuclid (I := I) (M := M) α)) ≤
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
           (chartPushed (I := I) (M := M)
             (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := by
-    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     rw [Finset.sum_range_succ, Finset.sum_range_one]
     refine le_trans ?_ le_add_self
     set f : (Fin 1 → Fin (Module.finrank ℝ E)) → ℝ≥0∞ := fun α' =>
@@ -894,12 +894,12 @@ private lemma exists_chart_rellich_subseq_aux
               (chartTargetEuclid (I := I) (M := M) α)) (ENNReal.ofReal p)
             ((volume : Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict
               (chartTargetEuclid (I := I) (M := M) α)) ≤
-          DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+          DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 (ENNReal.ofReal p)
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α (u (ψ n)))
             (chartTargetEuclid (I := I) (M := M) α) := by
-      unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       rw [Finset.sum_range_succ, Finset.sum_range_one]
       refine le_trans ?_ le_add_self
       let hEquiv : (Fin 1 → Fin (Module.finrank ℝ E)) ≃ Fin (Module.finrank ℝ E) := {

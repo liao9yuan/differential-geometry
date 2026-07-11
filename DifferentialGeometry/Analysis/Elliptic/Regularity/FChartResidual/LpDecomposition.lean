@@ -35,7 +35,7 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 lemma fHLeibnizGeneralResidualCLM_eq_fHLeibnizResidualLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
-    fHLeibnizGeneralResidualCLM (I := I) (M := M) g
+    leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h =
       -((2 : ℝ) • gradInnerCLM (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h) -
@@ -58,13 +58,13 @@ theorem preimage_smoothMulH1Compl_eq_smoothMulLp_preimage_add_residual
       smoothMulLp (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
           (laplacianDomain.preimage (I := I) (M := M) g ⟨u_h, hu_dom⟩) +
-        fHLeibnizGeneralResidualCLM (I := I) (M := M) g
+        leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g
           (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h := by
   classical
   have h_preimage_smoothMulH1Compl :=
     laplacianDomain_preimage_smoothMulH1Compl (I := I) (M := M) g
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) hu_dom
-  unfold fHLeibnizGeneral at h_preimage_smoothMulH1Compl
+  unfold leibnizCompensatedSourceOfSmoothFactor at h_preimage_smoothMulH1Compl
   have h_diff_eq :
       H1ComplToLp (I := I) (M := M) g u_h -
         laplacianOp (I := I) (M := M) g ⟨u_h, hu_dom⟩ =
@@ -78,7 +78,7 @@ theorem fHLeibnizGeneralResidualCLM_eq_preimageDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_dom : u_h ∈ laplacianDomain (I := I) (M := M) g) :
-    fHLeibnizGeneralResidualCLM (I := I) (M := M) g
+    leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g
         (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) u_h =
       laplacianDomain.preimage (I := I) (M := M) g
           ⟨smoothMulH1Compl (I := I) (M := M) g

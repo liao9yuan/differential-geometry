@@ -18,7 +18,7 @@ local notation "E" => EuclideanSpace ℝ (Fin d)
 
 set_option linter.unusedVariables false in
 
-private theorem cross_3_pointwise_bound_nonsmooth
+private theorem diffQuot_coeff_cutoff_gradient_pointwise_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (u : E → ℝ) (g : Fin d → E → ℝ)
     {η : E → ℝ} (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
@@ -345,7 +345,7 @@ private lemma integral_const_indicator_g_sq_eq
 
 set_option linter.unusedVariables false in
 
-theorem cross_3_bound_nonsmooth_quantitative
+theorem diffQuot_coeff_cutoff_gradient_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure E))
@@ -407,7 +407,7 @@ theorem cross_3_bound_nonsmooth_quantitative
   intro h hh hh_le
   have h_thick_in_Ω' : Metric.cthickening |h| (tsupport η) ⊆ Ω' := hh_supp_in_Ω' hh_le
   have h_each_pointwise := fun (i j : Fin d) (x : E) =>
-    cross_3_pointwise_bound_nonsmooth (d := d) B u g hη_range h_fderiv_eta i j k hM_nn h_M
+    diffQuot_coeff_cutoff_gradient_pointwise_bound_nonsmooth (d := d) B u g hη_range h_fderiv_eta i j k hM_nn h_M
       h_thick_in_Ω' x
   set S : ℝ := ∑ i : Fin d, ∑ j : Fin d, ∫ x, 2 *
         diffQuot k h (fun y : E => B.a y i j) x * (η x) *
@@ -725,7 +725,7 @@ theorem cross_3_bound_nonsmooth_quantitative
 
 set_option linter.unusedVariables false in
 
-theorem cross_3_bound_nonsmooth
+theorem diffQuot_coeff_cutoff_gradient_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure E))
@@ -771,7 +771,7 @@ theorem cross_3_bound_nonsmooth
     refine mul_nonneg ?_ hN
     exact mul_nonneg (by linarith) hM_nn
   · intro h hh hh_le
-    exact cross_3_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
+    exact diffQuot_coeff_cutoff_gradient_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
       h_weakPartial hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure
       hΩ'_compact hh_supp_in_Ω' k h_FK_diffQuot_u_bound hh hh_le
 

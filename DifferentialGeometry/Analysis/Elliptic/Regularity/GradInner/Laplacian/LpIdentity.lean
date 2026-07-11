@@ -58,7 +58,7 @@ theorem gradInnerCLM_eq_two_inv_preimageDiff
   classical
   have h_preimage :=
     laplacianDomain_preimage_smoothMulH1Compl (I := I) (M := M) g φ hu_dom
-  unfold fHLeibnizGeneral at h_preimage
+  unfold leibnizCompensatedSourceOfSmoothFactor at h_preimage
   have h_diff_eq :
       H1ComplToLp (I := I) (M := M) g u_h -
         laplacianOp (I := I) (M := M) g ⟨u_h, hu_dom⟩ =

@@ -31,7 +31,7 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_norm_le
     {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+      metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
     ∃ Clower : ℕ → ℝ, (∀ k, 0 ≤ Clower k) ∧
       ∀ (k : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
         (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
@@ -74,7 +74,7 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_Hs_inner_le
     {δ : ℝ} (hδ_le : δ ≤ 1 / 3)
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+      metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
     ∃ Clower : ℕ → ℝ, (∀ k, 0 ≤ Clower k) ∧
       ∀ (k : ℕ) (φ T₀ : SmoothCcTensor g₀ 0 2)
         (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
@@ -137,7 +137,7 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_spectralShift_le
     {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
+      metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T₀) δ) :
     ∃ Clower : ℕ → ℝ, (∀ k, 0 ≤ Clower k) ∧
       ∀ (k : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
         (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
@@ -204,17 +204,17 @@ theorem deTurckPrincipalCometricArm_realize_ballUniform_spectralShift_le
 theorem deTurckSmoothRemainderDiff_ballUniform_spectralSplit_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
-    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThreshold'' (Module.finrank ℝ E))
+    {δ : ℝ} (hδ_le : δ ≤ deTurckArmContractionThresholdSharp (Module.finrank ℝ E))
     (hδ_fibre : ∀ (T₀ : SmoothCcTensor g₀ 0 2),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀ →
-      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.gFibreOpBound
+      DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.metricCauchySchwarzBound
         (I := I) (M := M) g₀
         (DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization.ccTensorBilinSymm
           (I := I) g₀ T₀) δ) :
     ∃ (Cδ₀ : ℝ) (Crem : ℕ → ℝ), 0 ≤ Cδ₀ ∧ Cδ₀ < 1 ∧ (∀ k, 0 ≤ Crem k) ∧
       ∀ (k : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
         (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-          ccTensorBilin (I := I) g₀ T₀ x v w = ccTensorBilin (I := I) g₀ T₀ x w v)
+          smoothCcTensorBilinForm (I := I) g₀ T₀ x v w = smoothCcTensorBilinForm (I := I) g₀ T₀ x w v)
         (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀),
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + (k : ℝ) - 1)
             (deTurckSmoothRemainder (I := I) g₀ g_bg T₀

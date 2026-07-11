@@ -92,7 +92,7 @@ private lemma wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeF
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
     (P₀ : TensorCompIdx (E := E) r s) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
@@ -104,11 +104,11 @@ private lemma wkpNorm_two_eigenvectorChartComponentFun_eq_zero_of_notMem_activeF
     eigenvectorChartComponentFun_ae_zero_of_notMem_activeFinset
       (I := I) (M := M) g r s i hα P₀
   have h_swap :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀)
           (chartTargetEuclid (I := I) (M := M) α) =
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (fun _ : EuclN => (0 : ℝ))
           (chartTargetEuclid (I := I) (M := M) α) :=
@@ -144,7 +144,7 @@ private lemma perAlphaPCConstant_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 2 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M) g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α)
@@ -215,7 +215,7 @@ theorem eigenvector_chartComponent_wkpNorm_two_energy_le_uniform_β_unconditiona
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s)
         (i : TensorEigenIdx (I := I) (M := M) g r s),
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 2 2
             (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
               g r s i α P₀)

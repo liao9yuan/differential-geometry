@@ -61,7 +61,7 @@ theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
           (tensorCovDerivAt (I := I) (M := M) g 0 2 W x a))
         (TensorRSSpace.toModel
           (tensorCovDerivAt (I := I) (M := M) g 0 2 S x b)) =
-      tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+      covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
         (Tensor0SSpace.toModel
           (loweredCovDerivAt (I := I) (M := M) g 0 2 W.toSection x a))
         (Tensor0SSpace.toModel
@@ -87,7 +87,7 @@ theorem tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two
     (hB_orth : ∀ i j, g.inner b (B i b) (B j b) = if i = j then (1 : ℝ) else 0) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b =
       ∑ i : Fin (Module.finrank ℝ E),
-        tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g b
+        covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g b
           (Tensor0SSpace.toModel
             (loweredCovDerivAt (I := I) (M := M) g 0 2 T.toSection b (B i b)))
           (Tensor0SSpace.toModel

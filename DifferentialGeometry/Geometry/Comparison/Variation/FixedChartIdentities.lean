@@ -558,7 +558,7 @@ lemma nabla_s_nabla_t_eq
   rw [chartCovDerivAlong_def]
   rfl
 
-lemma hasDerivAt_innerW'
+lemma hasDerivAt_innerW_snd
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s, t))
     (hY : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => Y p.1 p.2) (s, t))
@@ -984,7 +984,7 @@ lemma commutator_eq_chartRiemannCLM
   rw [nabla_s_nabla_t_eq (I := I) g α f Y s t,
       nabla_t_nabla_s_eq (I := I) g α f Y s t]
   rw [(hasDerivAt_innerW (I := I) g α f Y s t hF hY hΓ).deriv,
-      (hasDerivAt_innerW' (I := I) g α f Y s t hF hY hΓ).deriv]
+      (hasDerivAt_innerW_snd (I := I) g α f Y s t hF hY hΓ).deriv]
   have hWs : chartCovDerivAlong (I := I) g α (fun v : ℝ => f s v) (fun v : ℝ => Y s v) t
       = fderiv ℝ (fun v : ℝ => Y s v) t (1 : ℝ)
         + chartChristoffelContraction (I := I) g α

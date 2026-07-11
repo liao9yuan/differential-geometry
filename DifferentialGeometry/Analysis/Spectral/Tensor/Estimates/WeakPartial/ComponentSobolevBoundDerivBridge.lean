@@ -268,7 +268,7 @@ theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
 
 theorem wkpNorm_one_two_decomposition
     (u : EuclN E → ℝ) (Ω : Set (EuclN E)) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 2 u Ω =
       eLpNorm u 2 (volume.restrict Ω) +
         ∑ k : Fin (Module.finrank ℝ E),
@@ -277,7 +277,7 @@ theorem wkpNorm_one_two_decomposition
               (d := Module.finrank ℝ E) 2 k u Ω) 2
             (volume.restrict Ω) := by
   classical
-  unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
   rw [show Finset.range (1 + 1) = {0, 1} from rfl]
   rw [Finset.sum_insert (by simp)]
   rw [Finset.sum_singleton]
@@ -323,7 +323,7 @@ theorem wkpNorm_chartPushed_tensorChartComponentScalar_le_per_section
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     ∃ C : ℝ, 0 ≤ C ∧
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 2
           (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β
             (tensorChartComponentScalar (I := I) (M := M)
@@ -388,7 +388,7 @@ theorem wkpNorm_chartPushed_tensorChartComponentScalar_le
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
     ∀ S : SmoothCcTensorH1 g r s,
       ∃ C : ℝ, 0 ≤ C ∧
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
             (d := Module.finrank ℝ E) 1 2
             (chartPushed (I := I) (M := M) (chartAtlasPOU I M) β
               (tensorChartComponentScalar (I := I) (M := M)

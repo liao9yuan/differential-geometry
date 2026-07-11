@@ -119,10 +119,10 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
           (Jdx : Fin (s + p) → Fin (Module.finrank ℝ E)),
           ∀ y ∈ K,
             ‖iteratedFDeriv ℝ l
-                (rawPullR (I := I) (M := M) g r (s + p)
+                (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                   (iteratedCovGrad g r s p T) α Idx Jdx) y‖ ≤
               C * ∑ i ∈ Finset.range (l + 1),
-                zeroContentR (I := I) (M := M) g r (s + (p + i))
+                tensorComponentAbsSum (I := I) (M := M) g r (s + (p + i))
                   (iteratedCovGrad g r s (p + i) T) α y := by
   classical
   obtain ⟨Γ, hΓ_nn, hΓ⟩ :=
@@ -140,11 +140,11 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
       simp only [Nat.add_zero, one_mul]
       have h1 := abs_rawPullR_le_zeroContentR (I := I) (M := M) g r (s + p)
         (iteratedCovGrad g r s p T) α Idx Jdx y
-      calc ‖rawPullR (I := I) (M := M) g r (s + p)
+      calc ‖tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
               (iteratedCovGrad g r s p T) α Idx Jdx y‖
-          = |rawPullR (I := I) (M := M) g r (s + p)
+          = |tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
               (iteratedCovGrad g r s p T) α Idx Jdx y| := Real.norm_eq_abs _
-        _ ≤ zeroContentR (I := I) (M := M) g r (s + (p + 0))
+        _ ≤ tensorComponentAbsSum (I := I) (M := M) g r (s + (p + 0))
               (iteratedCovGrad g r s (p + 0) T) α y := by
             rw [Nat.add_zero]; exact h1
   | succ j ih =>
@@ -169,7 +169,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
       · subst hlj
         have hy_mem : y ∈ chartTargetEuclid (I := I) (M := M) α := hK_sub hy
         set RHSsum : ℝ := ∑ i ∈ Finset.range ((j + 1) + 1),
-          zeroContentR (I := I) (M := M) g r (s + (p + i))
+          tensorComponentAbsSum (I := I) (M := M) g r (s + (p + i))
             (iteratedCovGrad g r s (p + i) T) α y with hRHSsum_def
         have hRHSsum_nn : 0 ≤ RHSsum :=
           Finset.sum_nonneg (fun i _ => zeroContentR_nonneg (I := I) (M := M) _ _ _ _ _ _)
@@ -178,13 +178,13 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
         have h_perm : ∀ m : Fin (Module.finrank ℝ E),
             ‖iteratedFDeriv ℝ j
                 (fun z => euclidPartial (E := E) m
-                  (rawPullR (I := I) (M := M) g r (s + p)
+                  (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                     (iteratedCovGrad g r s p T) α Idx Jdx) z) y‖ ≤
               Cm * RHSsum := by
           intro m
-          set u : EuclN → ℝ := rawPullR (I := I) (M := M) g r (s + p)
+          set u : EuclN → ℝ := tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
             (iteratedCovGrad g r s p T) α Idx Jdx with hu_def
-          set A : EuclN → ℝ := rawPullR (I := I) (M := M) g r ((s + p) + 1)
+          set A : EuclN → ℝ := tensorComponentEuclideanChart (I := I) (M := M) g r ((s + p) + 1)
             (covGrad (I := I) (M := M) g r (s + p) (iteratedCovGrad g r s p T))
             α Idx (Matrix.vecCons m Jdx) with hA_def
           set B : EuclN → ℝ := fun z => covDerivLowerOrderTerm (I := I) (M := M)
@@ -219,25 +219,25 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
               (Matrix.vecCons m Jdx) y hy
             have hA_eq : iteratedFDeriv ℝ j A y =
                 iteratedFDeriv ℝ j
-                  (rawPullR (I := I) (M := M) g r (s + (p + 1))
+                  (tensorComponentEuclideanChart (I := I) (M := M) g r (s + (p + 1))
                     (iteratedCovGrad g r s (p + 1) T) α Idx (Matrix.vecCons m Jdx)) y := rfl
             rw [hA_eq]
             refine le_trans hstep ?_
             apply mul_le_mul_of_nonneg_left _ hCj_nn
             calc (∑ i ∈ Finset.range (j + 1),
-                  zeroContentR (I := I) (M := M) g r (s + ((p + 1) + i))
+                  tensorComponentAbsSum (I := I) (M := M) g r (s + ((p + 1) + i))
                     (iteratedCovGrad g r s ((p + 1) + i) T) α y)
                 = ∑ i ∈ Finset.range (j + 1),
-                    zeroContentR (I := I) (M := M) g r (s + (p + (i + 1)))
+                    tensorComponentAbsSum (I := I) (M := M) g r (s + (p + (i + 1)))
                       (iteratedCovGrad g r s (p + (i + 1)) T) α y := by
                   refine Finset.sum_congr rfl (fun i _ => ?_)
                   rw [show (p + 1) + i = p + (i + 1) by ring]
               _ ≤ RHSsum := by
                   rw [hRHSsum_def]
                   rw [Finset.sum_range_succ' (fun i =>
-                    zeroContentR (I := I) (M := M) g r (s + (p + i))
+                    tensorComponentAbsSum (I := I) (M := M) g r (s + (p + i))
                       (iteratedCovGrad g r s (p + i) T) α y) (j + 1)]
-                  have hlast_nn : 0 ≤ zeroContentR (I := I) (M := M) g r (s + (p + 0))
+                  have hlast_nn : 0 ≤ tensorComponentAbsSum (I := I) (M := M) g r (s + (p + 0))
                       (iteratedCovGrad g r s (p + 0) T) α y :=
                     zeroContentR_nonneg (I := I) (M := M) _ _ _ _ _ _
                   linarith
@@ -256,7 +256,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                       (covDerivLowerOrderCoeff (I := I) (M := M) g r (s + p) α m Idx
                         q.1 Jdx q.2) y‖ *
                     ‖iteratedFDeriv ℝ (j - l')
-                      (rawPullR (I := I) (M := M) g r (s + p)
+                      (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                         (iteratedCovGrad g r s p T) α q.1 q.2) y‖) ≤
                   ((2 : ℝ) ^ j) * (Γ * Cj * RHSsum) := by
               intro q
@@ -266,7 +266,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                       (covDerivLowerOrderCoeff (I := I) (M := M) g r (s + p) α m Idx
                         q.1 Jdx q.2) y‖ *
                     ‖iteratedFDeriv ℝ (j - l')
-                      (rawPullR (I := I) (M := M) g r (s + p)
+                      (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                         (iteratedCovGrad g r s p T) α q.1 q.2) y‖) ≤
                   ∑ l' ∈ Finset.range (j + 1),
                     (j.choose l' : ℝ) * (Γ * Cj * RHSsum) := by
@@ -278,7 +278,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                       q.1 Jdx q.2) y‖ ≤ Γ :=
                   hΓ p hp_le_P m Idx Jdx q l' hl'P y hy
                 have hraw_bd : ‖iteratedFDeriv ℝ (j - l')
-                    (rawPullR (I := I) (M := M) g r (s + p)
+                    (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                       (iteratedCovGrad g r s p T) α q.1 q.2) y‖ ≤ Cj * RHSsum := by
                   have hsub : j - l' ≤ j := Nat.sub_le j l'
                   have hpj : p + j ≤ P := by omega
@@ -296,7 +296,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                   exact Finset.mem_range.mpr (lt_of_lt_of_le (Finset.mem_range.mp hx) hle)
                 have h_choose_nn : 0 ≤ (j.choose l' : ℝ) := by positivity
                 have hraw_nn : 0 ≤ ‖iteratedFDeriv ℝ (j - l')
-                    (rawPullR (I := I) (M := M) g r (s + p)
+                    (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                       (iteratedCovGrad g r s p T) α q.1 q.2) y‖ := norm_nonneg _
                 have hΓCj_nn : 0 ≤ Γ * Cj * RHSsum := by positivity
                 calc (j.choose l' : ℝ) *
@@ -304,7 +304,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                         (covDerivLowerOrderCoeff (I := I) (M := M) g r (s + p) α m Idx
                           q.1 Jdx q.2) y‖ *
                       ‖iteratedFDeriv ℝ (j - l')
-                        (rawPullR (I := I) (M := M) g r (s + p)
+                        (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                           (iteratedCovGrad g r s p T) α q.1 q.2) y‖
                     ≤ (j.choose l' : ℝ) * Γ * (Cj * RHSsum) := by
                       have ha : (j.choose l' : ℝ) *
@@ -317,7 +317,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                               (covDerivLowerOrderCoeff (I := I) (M := M) g r (s + p) α m Idx
                                 q.1 Jdx q.2) y‖ *
                             ‖iteratedFDeriv ℝ (j - l')
-                              (rawPullR (I := I) (M := M) g r (s + p)
+                              (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                                 (iteratedCovGrad g r s p T) α q.1 q.2) y‖
                           ≤ ((j.choose l' : ℝ) * Γ) * (Cj * RHSsum) := by
                             refine mul_le_mul ha hraw_bd hraw_nn ?_
@@ -332,7 +332,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                         (covDerivLowerOrderCoeff (I := I) (M := M) g r (s + p) α m Idx
                           q.1 Jdx q.2) y‖ *
                       ‖iteratedFDeriv ℝ (j - l')
-                        (rawPullR (I := I) (M := M) g r (s + p)
+                        (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                           (iteratedCovGrad g r s p T) α q.1 q.2) y‖)
                   ≤ ∑ l' ∈ Finset.range (j + 1), (j.choose l' : ℝ) * (Γ * Cj * RHSsum) := h1
                 _ = ((2 : ℝ) ^ j) * (Γ * Cj * RHSsum) := by
@@ -345,7 +345,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                         (covDerivLowerOrderCoeff (I := I) (M := M) g r (s + p) α m Idx
                           q.1 Jdx q.2) y‖ *
                       ‖iteratedFDeriv ℝ (j - l')
-                        (rawPullR (I := I) (M := M) g r (s + p)
+                        (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                           (iteratedCovGrad g r s p T) α q.1 q.2) y‖)
                 ≤ ∑ _q : (Fin r → Fin (Module.finrank ℝ E)) ×
                     (Fin (s + p) → Fin (Module.finrank ℝ E)),
@@ -370,7 +370,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
                 add_le_add h_lead h_lower
             _ = Cm * RHSsum := by rw [hCm_def]; ring
         have h_peel := iteratedFDeriv_succ_norm_le_sum_euclidPartial (E := E)
-          (u := rawPullR (I := I) (M := M) g r (s + p)
+          (u := tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
             (iteratedCovGrad g r s p T) α Idx Jdx)
           (O := chartTargetEuclid (I := I) (M := M) α)
           (chartTargetEuclid_isOpen (I := I) (M := M) α)
@@ -379,30 +379,30 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
         have h_sum_le : (∑ m : Fin (Module.finrank ℝ E),
             ‖iteratedFDeriv ℝ j
               (fun z => euclidPartial (E := E) m
-                (rawPullR (I := I) (M := M) g r (s + p)
+                (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                   (iteratedCovGrad g r s p T) α Idx Jdx) z) y‖) ≤
             (n : ℝ) * (Cm * RHSsum) := by
           calc (∑ m : Fin (Module.finrank ℝ E),
                 ‖iteratedFDeriv ℝ j
                   (fun z => euclidPartial (E := E) m
-                    (rawPullR (I := I) (M := M) g r (s + p)
+                    (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                       (iteratedCovGrad g r s p T) α Idx Jdx) z) y‖)
               ≤ ∑ _m : Fin (Module.finrank ℝ E), Cm * RHSsum :=
                 Finset.sum_le_sum (fun m _ => h_perm m)
             _ = (n : ℝ) * (Cm * RHSsum) := by
                 rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, hn_def]
         have h_final : ‖iteratedFDeriv ℝ (j + 1)
-            (rawPullR (I := I) (M := M) g r (s + p)
+            (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
               (iteratedCovGrad g r s p T) α Idx Jdx) y‖ ≤
             ((n : ℝ) * Cstep) * RHSsum := by
           calc ‖iteratedFDeriv ℝ (j + 1)
-                (rawPullR (I := I) (M := M) g r (s + p)
+                (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                   (iteratedCovGrad g r s p T) α Idx Jdx) y‖
               ≤ ((Module.finrank ℝ E) ^ j : ℝ) *
                   ∑ m : Fin (Module.finrank ℝ E),
                     ‖iteratedFDeriv ℝ j
                       (fun z => euclidPartial (E := E) m
-                        (rawPullR (I := I) (M := M) g r (s + p)
+                        (tensorComponentEuclideanChart (I := I) (M := M) g r (s + p)
                           (iteratedCovGrad g r s p T) α Idx Jdx) z) y‖ := h_peel
             _ ≤ ((Module.finrank ℝ E) ^ j : ℝ) * ((n : ℝ) * (Cm * RHSsum)) := by
                 apply mul_le_mul_of_nonneg_left h_sum_le (by positivity)
@@ -497,7 +497,7 @@ lemma exists_zeroContentR_le_fiberNorm_on_compact
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r s
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (S : SmoothCcTensor g r s) {b : M}, b ∈ K_M →
-        zeroContentR (I := I) (M := M) g r s S α
+        tensorComponentAbsSum (I := I) (M := M) g r s S α
             (toEuclidean (E := E) (extChartAt I α b)) ≤
           C * ‖S.toSection b‖ := by
   classical
@@ -532,13 +532,13 @@ lemma exists_zeroContentR_le_fiberNorm_on_compact
   have hfib_nn : 0 ≤ ‖S.toSection b‖ := norm_nonneg _
   have h_raw_eq : ∀ (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-      rawPullR (I := I) (M := M) g r s S α Idx Jdx y =
+      tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx y =
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b := by
     intro Idx Jdx
-    rw [rawPullR, Function.comp_apply, Function.comp_apply, hb_eq]
+    rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply, hb_eq]
   have h_each : ∀ (q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin s → Fin (Module.finrank ℝ E))),
-      |rawPullR (I := I) (M := M) g r s S α q.1 q.2 y| ≤
+      |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| ≤
         Real.sqrt Craw * ‖S.toSection b‖ := by
     intro q
     rw [h_raw_eq q.1 q.2]
@@ -552,10 +552,10 @@ lemma exists_zeroContentR_le_fiberNorm_on_compact
     rw [Real.sqrt_sq_eq_abs] at hroot
     refine hroot.trans (le_of_eq ?_)
     rw [Real.sqrt_mul hCraw_nn, hfib_eq]
-  calc zeroContentR (I := I) (M := M) g r s S α y
+  calc tensorComponentAbsSum (I := I) (M := M) g r s S α y
       = ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
-          |rawPullR (I := I) (M := M) g r s S α q.1 q.2 y| := rfl
+          |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| := rfl
     _ ≤ ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin s → Fin (Module.finrank ℝ E)),
           Real.sqrt Craw * ‖S.toSection b‖ :=

@@ -210,8 +210,8 @@ theorem jointTensor0SProd_local {p q : ℕ} {S : Set ℝ}
 
 private theorem realizedFam_chartDeTurckVFComp_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (α : M) (k : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
       (fun p : M × ℝ => PDE.DeTurck.DeTurckLinearization.chartDeTurckVFComp (I := I)
@@ -245,8 +245,8 @@ private theorem realizedFam_chartDeTurckVFComp_jointContMDiffOn
 
 private theorem deTurckVFChartLocal_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
@@ -302,8 +302,8 @@ private theorem deTurckVFChartLocal_realizedFam_jointContMDiffOn
 
 theorem deTurckVF_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
@@ -354,7 +354,7 @@ private def arm1LowerSwapPermC : Equiv.Perm (Fin 3) :=
 private noncomputable def covGradSymmSValue (g₀ : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g₀ 0 2) (x : M) : Tensor0SBundle.Tensor0SSpace 3 I x :=
   (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I x from
-    (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ V)).toSection x)
+    (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ V)).toSection x)
     (unitTensor (I := I) (M := M) x)
 
 set_option linter.unusedSectionVars false in
@@ -366,7 +366,7 @@ private theorem covGradSymmSValue_contMDiff (g₀ : SmoothRiemannianMetric I M)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) x
         (covGradSymmSValue (I := I) g₀ V x)) := by
   have h := ContMDiff.clm_bundle_apply (b := id)
-    (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ V)).toSection.contMDiff
+    (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ V)).toSection.contMDiff
     (unitZeroSec (I := I) (M := M)).contMDiff
   refine h.congr (fun x => ?_)
   rfl
@@ -379,9 +379,9 @@ private theorem covGradSymmSValue_convexPerturbation (g₀ : SmoothRiemannianMet
       (1 - s) • covGradSymmSValue (I := I) g₀ T' x +
         s • covGradSymmSValue (I := I) g₀ T x := by
   have hsplit : covGrad (I := I) (M := M) g₀ 0 2
-      (symmS (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)) =
-      (1 - s) • covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T')
-        + s • covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) g₀ T) := by
+      (ccTensor02Symm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)) =
+      (1 - s) • covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T')
+        + s • covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T) := by
     rw [convexPerturbation, symmS_add, symmS_smul, symmS_smul, covGrad_add,
       covGrad_smul, covGrad_smul]
   rw [covGradSymmSValue, hsplit, SmoothCcTensor.toSection_add, SmoothCcTensor.toSection_smul,
@@ -392,8 +392,8 @@ set_option linter.unusedVariables false in
 
 private theorem covGradSymmSValueFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) p.1
@@ -467,8 +467,8 @@ set_option linter.unusedSectionVars false in
 
 private theorem metricConnDiffLowered_fixedPair_affine (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (gB : SmoothRiemannianMetric I M) {s : ℝ}
     (hs : s ∈ realizedSmallSet (δ := δ) (δ' := δ')) (x : M) :
     metricConnDiffLoweredFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ gB x =
@@ -492,8 +492,8 @@ private theorem metricConnDiffLowered_fixedPair_affine (g₀ : SmoothRiemannianM
 
 theorem metricConnDiffLowered_selfFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) p.1
@@ -570,7 +570,7 @@ theorem metricConnDiffLowered_selfFam_jointContMDiffOn
   have huM : ∀ vv : Fin 3 → TangentSpace I p.1,
       unitModel (I := I) (M := M) g₀ 3
         (covGrad (I := I) (M := M) g₀ 0 2
-          (symmS (I := I) g₀ (convexPerturbation (I := I) g₀ T T' p.2))) p.1 vv =
+          (ccTensor02Symm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' p.2))) p.1 vv =
       Tensor0SBundle.Tensor0SSpace.toModel (Vfam p) vv := fun vv => rfl
   rw [huM ![v 1, v 0, v 2], huM ![v 0, v 1, v 2], huM ![v 2, v 1, v 0]]
   have hv012 : Tensor0SBundle.Tensor0SSpace.toModel (Vfam p) v =
@@ -582,8 +582,8 @@ theorem metricConnDiffLowered_selfFam_jointContMDiffOn
 
 theorem metricConnDiffLowered_bgFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (g_bg : SmoothRiemannianMetric I M) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)

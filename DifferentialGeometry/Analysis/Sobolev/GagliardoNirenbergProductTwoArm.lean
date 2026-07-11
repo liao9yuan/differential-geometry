@@ -89,7 +89,7 @@ private theorem real_holder_two_nonneg
 
 set_option linter.unusedSectionVars false in
 
-private theorem continuous_rfns
+private theorem continuous_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) :
     Continuous (fun x => riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) := by
@@ -100,7 +100,7 @@ private theorem continuous_rfns
 
 set_option linter.unusedSectionVars false in
 
-private theorem integrable_rfns_mul
+private theorem integrable_riemannianFiberNormSq_mul
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ)
     (S : Integral.L2.SmoothCcTensor g r₁ s₁) (T : Integral.L2.SmoothCcTensor g r₂ s₂) :
     Integrable
@@ -109,7 +109,7 @@ private theorem integrable_rfns_mul
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g
-  exact ((continuous_rfns g r₁ s₁ S).mul (continuous_rfns g r₂ s₂ T)).integrable_of_hasCompactSupport
+  exact ((continuous_riemannianFiberNormSq g r₁ s₁ S).mul (continuous_riemannianFiberNormSq g r₂ s₂ T)).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
 private theorem young_arm_split
@@ -241,9 +241,9 @@ theorem exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le
       ← Integral.L2.SmoothCcTensor.norm_def (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T)]
 
   have hSj_cont : ∀ a, Continuous (Sj a) := fun a => by
-    rw [hSj]; exact continuous_rfns g 0 (s₁ + a) _
+    rw [hSj]; exact continuous_riemannianFiberNormSq g 0 (s₁ + a) _
   have hTj_cont : ∀ b, Continuous (Tj b) := fun b => by
-    rw [hTj]; exact continuous_rfns g 0 (s₂ + b) _
+    rw [hTj]; exact continuous_riemannianFiberNormSq g 0 (s₂ + b) _
   have hSj_nn : ∀ a x, 0 ≤ Sj a x := fun a x => by
     rw [hSj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₁ + a) x _
   have hTj_nn : ∀ b x, 0 ≤ Tj b x := fun b x => by
@@ -580,11 +580,11 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
       ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T₂).toSection x) with hT2j
 
   have hWj_cont : ∀ a, Continuous (Wj a) := fun a => by
-    rw [hWj]; exact continuous_rfns g 0 (s₁ + a) _
+    rw [hWj]; exact continuous_riemannianFiberNormSq g 0 (s₁ + a) _
   have hT1j_cont : ∀ b, Continuous (T1j b) := fun b => by
-    rw [hT1j]; exact continuous_rfns g 0 (s₂ + b) _
+    rw [hT1j]; exact continuous_riemannianFiberNormSq g 0 (s₂ + b) _
   have hT2j_cont : ∀ b, Continuous (T2j b) := fun b => by
-    rw [hT2j]; exact continuous_rfns g 0 (s₂ + b) _
+    rw [hT2j]; exact continuous_riemannianFiberNormSq g 0 (s₂ + b) _
   have hWj_nn : ∀ a x, 0 ≤ Wj a x := fun a x => by
     rw [hWj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₁ + a) x _
   have hT1j_nn : ∀ b x, 0 ≤ T1j b x := fun b x => by
@@ -622,7 +622,7 @@ theorem exists_integrated_diagonalProductGrid_twoArm_pair_le
       (fun x => riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
           ((PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₁ j U).toSection x)) μ := by
     rw [hμ]
-    exact (continuous_rfns g 0 (s₁ + j) _).integrable_of_hasCompactSupport
+    exact (continuous_riemannianFiberNormSq g 0 (s₁ + j) _).integrable_of_hasCompactSupport
       (HasCompactSupport.of_compactSpace _)
 
   have hintU_le : ∫ x, riemannianFiberNormSq (I := I) (M := M) g 0 (s₁ + j) x
@@ -855,9 +855,9 @@ theorem exists_integrated_iteratedCovGrad_antiDiagGrid_topArm_scaled_le
         (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T),
       ← Integral.L2.SmoothCcTensor.norm_def (PDE.RicciFlow.iteratedCovGrad (I := I) g 0 s₂ b T)]
   have hSj_cont : ∀ a, Continuous (Sj a) := fun a => by
-    rw [hSj]; exact continuous_rfns g 0 (s₁ + a) _
+    rw [hSj]; exact continuous_riemannianFiberNormSq g 0 (s₁ + a) _
   have hTj_cont : ∀ b, Continuous (Tj b) := fun b => by
-    rw [hTj]; exact continuous_rfns g 0 (s₂ + b) _
+    rw [hTj]; exact continuous_riemannianFiberNormSq g 0 (s₂ + b) _
   have hSj_nn : ∀ a x, 0 ≤ Sj a x := fun a x => by
     rw [hSj]; exact riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 (s₁ + a) x _
   have hTj_nn : ∀ b x, 0 ≤ Tj b x := fun b x => by

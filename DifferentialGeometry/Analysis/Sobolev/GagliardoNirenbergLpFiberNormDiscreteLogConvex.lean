@@ -38,7 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section LpDiscreteLogConvex
 
-private lemma lp_slope_spread (Δ : ℕ → ℝ) (d : ℝ) (N : ℕ)
+private lemma discrete_slope_telescoping_bound (Δ : ℕ → ℝ) (d : ℝ) (N : ℕ)
     (hstep : ∀ i, i < N → Δ i ≤ Δ (i + 1) + d) :
     ∀ i i' : ℕ, i ≤ i' → i' ≤ N → Δ i ≤ Δ i' + (i' - i : ℕ) * d := by
   intro i i' hii' hiN
@@ -59,7 +59,7 @@ private lemma lp_slope_spread (Δ : ℕ → ℝ) (d : ℝ) (N : ℕ)
       · have hie : i = n + 1 := le_antisymm hii' hge
         subst hie; simp
 
-private lemma lp_chord_bound (Δ : ℕ → ℝ) (d : ℝ) (hd : 0 ≤ d) (j k : ℕ)
+private lemma discrete_partial_sum_chord_majorization (Δ : ℕ → ℝ) (d : ℝ) (hd : 0 ≤ d) (j k : ℕ)
     (hstep : ∀ i, i + 1 < k → Δ i ≤ Δ (i + 1) + d) (hj : 0 < j) (hjk : j < k) :
     (k : ℝ) * (∑ i ∈ Finset.range j, Δ i)
       ≤ (j : ℝ) * (∑ i ∈ Finset.range k, Δ i) + (k ^ 3 : ℕ) * d := by
@@ -97,7 +97,7 @@ private lemma lp_chord_bound (Δ : ℕ → ℝ) (d : ℝ) (hd : 0 ≤ d) (j k : 
       have hi'k : p.2 < k := (Finset.mem_Ico.mp hp2).2
       have hle : p.1 ≤ p.2 := le_trans (le_of_lt hi) hi'
       have hstep' : ∀ i, i < k - 1 → Δ i ≤ Δ (i + 1) + d := fun i hik => hstep i (by omega)
-      have hsp := lp_slope_spread Δ d (k - 1) hstep' p.1 p.2 hle (by omega)
+      have hsp := discrete_slope_telescoping_bound Δ d (k - 1) hstep' p.1 p.2 hle (by omega)
       have hdiff : ((p.2 - p.1 : ℕ) : ℝ) ≤ (k : ℝ) := by
         have hpp : p.2 - p.1 ≤ k := by omega
         exact_mod_cast hpp
@@ -178,7 +178,7 @@ private lemma lp_pos_propagate_up (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M :
       rw [hidx2] at hRr
       exact hRr
 
-theorem lp_hlp_real (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 ≤ M) (j k : ℕ)
+theorem discrete_log_convex_power_interpolation (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 ≤ M) (j k : ℕ)
     (hlc : ∀ i, i + 1 < k → (a (i + 1)) ^ 2 ≤ M * a i * a (i + 2))
     (hj : 0 < j) (hjk : j < k) :
     (a j) ^ k ≤ M ^ (k ^ 3) * (a 0) ^ (k - j) * (a k) ^ j := by
@@ -215,7 +215,7 @@ theorem lp_hlp_real (a : ℕ → ℝ) (ha : ∀ i, 0 ≤ a i) (M : ℝ) (hM : 1 
       simp only [hΔdef, hLdef]
       push_cast at hlog
       nlinarith [hlog]
-    have hchord := lp_chord_bound Δ (Real.log M) hlogM j k hstep hj hjk
+    have hchord := discrete_partial_sum_chord_majorization Δ (Real.log M) hlogM j k hstep hj hjk
     have htel : ∀ n, (∑ i ∈ Finset.range n, Δ i) = L n - L 0 := by
       intro n; simp only [hΔdef]; exact Finset.sum_range_sub L n
     rw [htel j, htel k] at hchord

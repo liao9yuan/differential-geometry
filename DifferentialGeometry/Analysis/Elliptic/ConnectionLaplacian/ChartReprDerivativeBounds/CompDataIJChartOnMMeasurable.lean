@@ -142,7 +142,7 @@ private lemma comp_extChartAtExt_continuousOn_chart_source
     extChartAtExt_apply_of_mem (I := I) (α := α) hb
   rw [h_eq]
 
-theorem compDataIJ_chart_on_M_measurable
+theorem measurable_tensorChartComponentRaw_iteratedFDeriv_normSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : SmoothCcTensor g r s) (α : M)

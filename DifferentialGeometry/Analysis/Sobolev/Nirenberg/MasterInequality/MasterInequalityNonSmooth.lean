@@ -169,7 +169,7 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
   have hC2 := cross_2_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
     h_weakPartial hη hη_supp hη_range hΩ' hΩ'_closure hΩ'_compact
     hh_supp_in_Ω' k (B.lam / 8) hε_eff_pos₀
-  have hC3 := cross_3_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
+  have hC3 := diffQuot_coeff_cutoff_gradient_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2
     h_weakPartial hη hη_supp hη_range hN h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact
     hh_supp_in_Ω' k h_FK_diffQuot_u_bound
   have hCc := c_term_bound_nonsmooth_quantitative (d := d) B hu_l2 hg_l2

@@ -64,7 +64,7 @@ theorem chart_loc_of_diff_data_and_uniform_bound
         ENNReal.ofReal (M_bound i k) := by
   classical
   intro i k
-  exact chart_loc_of_uniform_bound (I := I) (M := M)
+  exact exists_weak_second_partial_of_uniform_diffQuot_bound (I := I) (M := M)
     (g := g) (α := α) D_deriv
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd i k
 

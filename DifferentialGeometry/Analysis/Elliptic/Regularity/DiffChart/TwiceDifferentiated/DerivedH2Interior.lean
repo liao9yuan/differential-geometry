@@ -82,7 +82,7 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
             ∂(volume : Measure EuclN)) =
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
-            fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+            effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
           ∂(volume : Measure EuclN)) :
     ∃ Ω'' : Set EuclN,
       IsOpen Ω'' ∧
@@ -230,7 +230,7 @@ theorem twiceDerivedChartBilinear_memWkp_two_two_interior
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    chart_loc_of_uniform_bound
+    exists_weak_second_partial_of_uniform_diffQuot_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd

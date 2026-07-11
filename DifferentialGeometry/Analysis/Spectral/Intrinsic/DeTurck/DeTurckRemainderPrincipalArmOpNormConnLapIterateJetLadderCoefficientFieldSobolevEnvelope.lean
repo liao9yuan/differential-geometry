@@ -61,7 +61,7 @@ private lemma bal_hs_mono (g₀ : SmoothRiemannianMetric I M)
   rw [hbσ, hbτ]
   exact ccSpectralEmbed_norm_mono (I := I) (M := M) g₀ hστ w
 
-lemma bal_jet_hs_gap (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
+lemma exists_iteratedCovGrad_succ_le_tensorHs_add_mul_tensorHs (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ Cg : ℝ, 0 ≤ Cg ∧ ∀ u : SmoothCcTensor g₀ 0 2,
       ‖iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u‖ ≤
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℝ) + 1) u‖ +
@@ -192,7 +192,7 @@ private lemma bal_h1_sum (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
     refine le_trans hm (le_trans hp2 ?_)
     exact add_le_add ih (le_refl _)
 
-lemma bal_score (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+lemma tensorHs_norm_mul_le_ball_mul_tensorHs (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (T₀ : SmoothCcTensor g₀ 0 2)
     (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
     {u v γ : ℕ} (hv : v ≤ γ) (hsum : u + v ≤ (a + 2) + γ) (hu : u ≤ γ ∨ u ≤ a + 2) :
@@ -223,7 +223,7 @@ lemma bal_score (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {R₀ : ℝ} (hR�
       _ ≤ R₀ * f γ := mul_le_mul_of_nonneg_left h2 hR₀
 
 set_option linter.unusedSectionVars false in
-lemma bal_env_lin (g₀ : SmoothRiemannianMetric I M)
+lemma iteratedCovGrad_le_of_sq_envelope_bound (g₀ : SmoothRiemannianMetric I M)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (εa : ℝ) (hεa_nn : 0 ≤ εa)
     (C₀ : SmoothCcTensor g₀ 2 2) (T₀ : SmoothCcTensor g₀ 0 2)
     (henv : ∀ i : ℕ,
@@ -257,7 +257,7 @@ lemma bal_env_lin (g₀ : SmoothRiemannianMetric I M)
     mul_nonneg (Real.sqrt_nonneg (Kc i))
       (mul_nonneg hεa_nn (norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 (i + 2) T₀)))]
 
-lemma bal_jets_to_f (g₀ : SmoothRiemannianMetric I M) :
+lemma exists_iteratedCovGrad_le_const_mul_tensorHs (g₀ : SmoothRiemannianMetric I M) :
     ∃ CJ : ℕ → ℝ, (∀ j, 0 ≤ CJ j) ∧
       ∀ (j : ℕ) (T : SmoothCcTensor g₀ 0 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤
@@ -272,7 +272,7 @@ lemma bal_jets_to_f (g₀ : SmoothRiemannianMetric I M) :
     (f := fun b => ‖iteratedCovGrad (I := I) g₀ 0 2 b T‖)
     (fun b _ => norm_nonneg _) (Finset.mem_range.mpr (by omega))
 
-lemma bal_l2_two_family (g : SmoothRiemannianMetric I M)
+lemma tensorL2NormSq_le_of_pointwise_fiberNormSq_le_two_sum (g : SmoothRiemannianMetric I M)
     {rz sz : ℕ} (Z : SmoothCcTensor g rz sz)
     (n1 n2 : ℕ) (c1 c2 : ℕ → ℝ) (_hc1 : ∀ i, 0 ≤ c1 i) (_hc2 : ∀ i, 0 ≤ c2 i)
     (rw1 sw1 : ℕ → ℕ) (F1 : (i : ℕ) → SmoothCcTensor g (rw1 i) (sw1 i))
@@ -326,13 +326,13 @@ lemma bal_l2_two_family (g : SmoothRiemannianMetric I M)
       tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g
         (rw2 i) (sw2 i)]
 
-lemma bal_fmono (g₀ : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g₀ 0 2)
+lemma smoothCcToTensorHs_norm_mono_of_le (g₀ : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g₀ 0 2)
     {j k : ℕ} (hjk : j ≤ k) :
     ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j : ℕ) : ℝ) T₀‖ ≤
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((k : ℕ) : ℝ) T₀‖ :=
   bal_hs_mono (I := I) (M := M) g₀ (by exact_mod_cast hjk) T₀
 
-lemma bal_CJET (g₀ : SmoothRiemannianMetric I M)
+lemma exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs (g₀ : SmoothRiemannianMetric I M)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (εa : ℝ) (hεa_nn : 0 ≤ εa) :
     ∃ CC : ℕ → ℕ → ℝ, (∀ γ q, 0 ≤ CC γ q) ∧
       ∀ (C₀ : SmoothCcTensor g₀ 2 2) (T₀ : SmoothCcTensor g₀ 0 2),
@@ -347,8 +347,8 @@ lemma bal_CJET (g₀ : SmoothRiemannianMetric I M)
             CC γ q * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀
               ((γ + 2 * q + 2 : ℕ) : ℝ) T₀‖) := by
   classical
-  obtain ⟨cit, hcit_nn, hcit⟩ := bal_iter_jets (I := I) (M := M) g₀ 2 2
-  obtain ⟨CJ, hCJ_nn, hCJ⟩ := bal_jets_to_f (I := I) (M := M) g₀
+  obtain ⟨cit, hcit_nn, hcit⟩ := exists_iteratedCovGrad_connLapSmoothingIterate_window_le (I := I) (M := M) g₀ 2 2
+  obtain ⟨CJ, hCJ_nn, hCJ⟩ := exists_iteratedCovGrad_le_const_mul_tensorHs (I := I) (M := M) g₀
   refine ⟨fun γ q => cit γ q * ∑ b ∈ Finset.range (γ + 2 * q + 1),
       (Real.sqrt (Kc b) * (1 + ∑ j ∈ Finset.range (b + 2), CJ j) + εa * CJ (b + 2)),
     fun γ q => mul_nonneg (hcit_nn γ q) (Finset.sum_nonneg (fun b _ => by
@@ -368,14 +368,14 @@ lemma bal_CJET (g₀ : SmoothRiemannianMetric I M)
           (1 + fT) := by
     intro b hb
     have hbmem := Finset.mem_range.mp hb
-    refine le_trans (bal_env_lin (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn C₀ T₀ henv b) ?_
+    refine le_trans (iteratedCovGrad_le_of_sq_envelope_bound (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn C₀ T₀ henv b) ?_
     have hjets : ∀ j ∈ Finset.range (b + 2),
         ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ≤ CJ j * fT := by
       intro j hj
       have hjb := Finset.mem_range.mp hj
       refine le_trans (hCJ j T₀) ?_
       refine mul_le_mul_of_nonneg_left ?_ (hCJ_nn j)
-      exact bal_fmono (I := I) (M := M) g₀ T₀ (by omega)
+      exact smoothCcToTensorHs_norm_mono_of_le (I := I) (M := M) g₀ T₀ (by omega)
     have hsum : ∑ j ∈ Finset.range (b + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j T₀‖ ≤
         (∑ j ∈ Finset.range (b + 2), CJ j) * fT := by
       rw [Finset.sum_mul]
@@ -383,7 +383,7 @@ lemma bal_CJET (g₀ : SmoothRiemannianMetric I M)
     have htop : ‖iteratedCovGrad (I := I) g₀ 0 2 (b + 2) T₀‖ ≤ CJ (b + 2) * fT := by
       refine le_trans (hCJ (b + 2) T₀) ?_
       refine mul_le_mul_of_nonneg_left ?_ (hCJ_nn (b + 2))
-      exact bal_fmono (I := I) (M := M) g₀ T₀ (by omega)
+      exact smoothCcToTensorHs_norm_mono_of_le (I := I) (M := M) g₀ T₀ (by omega)
     have hCJsum_nn : 0 ≤ ∑ j ∈ Finset.range (b + 2), CJ j :=
       Finset.sum_nonneg (fun j _ => hCJ_nn j)
     nlinarith [Real.sqrt_nonneg (Kc b), hεa_nn, hCJ_nn (b + 2), hf_nn, hsum, htop,
@@ -401,7 +401,7 @@ lemma bal_CJET (g₀ : SmoothRiemannianMetric I M)
         rw [← Finset.sum_mul]
         ring
 
-lemma bal_CSUP (g₀ : SmoothRiemannianMetric I M)
+lemma riemannianFiberNormSq_iteratedCovGrad_oneMinusConnLapSmoothIter_le_sq_tensorHs (g₀ : SmoothRiemannianMetric I M)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (εa : ℝ) (hεa_nn : 0 ≤ εa) :
     ∃ CCS : ℕ → ℕ → ℝ, (∀ γ q, 0 ≤ CCS γ q) ∧
       ∀ (C₀ : SmoothCcTensor g₀ 2 2) (T₀ : SmoothCcTensor g₀ 0 2),
@@ -417,7 +417,7 @@ lemma bal_CSUP (g₀ : SmoothRiemannianMetric I M)
             (CCS γ q * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀
               ((γ + (Module.finrank ℝ E / 2 + 2) + 2 * q + 1 : ℕ) : ℝ) T₀‖)) ^ 2 := by
   classical
-  obtain ⟨CC, hCC_nn, hCC⟩ := bal_CJET (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
+  obtain ⟨CC, hCC_nn, hCC⟩ := exists_iteratedCovGrad_oneMinusConnLapSmoothIter_le_mul_tensorHs (I := I) (M := M) g₀ Kc hKc_nn εa hεa_nn
   have hfam := fun γ : ℕ =>
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g₀ 2 (2 + γ)
@@ -446,14 +446,14 @@ lemma bal_CSUP (g₀ : SmoothRiemannianMetric I M)
           (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q C₀))‖ =
         ‖iteratedCovGrad (I := I) g₀ 2 2 (γ + t)
           (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q C₀)‖ :=
-      bal_norm_icg_comp (I := I) (M := M) g₀ 2 2 γ t
+      norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g₀ 2 2 γ t
         (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q C₀)
     rw [hcomp]
     have hb := hCC C₀ T₀ henv (γ + t) q
     have hmono : ‖smoothCcToTensorHs (I := I) (M := M) g₀
         ((γ + t + 2 * q + 2 : ℕ) : ℝ) T₀‖ ≤ fT := by
       rw [hfT_def]
-      exact bal_fmono (I := I) (M := M) g₀ T₀ (by omega)
+      exact smoothCcToTensorHs_norm_mono_of_le (I := I) (M := M) g₀ T₀ (by omega)
     have hle : ‖iteratedCovGrad (I := I) g₀ 2 2 (γ + t)
         (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q C₀)‖ ≤
         CC (γ + t) q * (1 + fT) := by
@@ -475,15 +475,15 @@ lemma bal_CSUP (g₀ : SmoothRiemannianMetric I M)
         mul_le_mul_of_nonneg_left hsq (sq_nonneg _)
     _ = ((Csh γ * ∑ t ∈ Finset.range w, CC (γ + t) q) * (1 + fT)) ^ 2 := by ring
 
-lemma bal_DL2 (g₀ : SmoothRiemannianMetric I M) :
+lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_le_mul_tensorHs (g₀ : SmoothRiemannianMetric I M) :
     ∃ CDL : ℕ → ℝ, (∀ l, 0 ≤ CDL l) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2) (l : ℕ),
         ‖iteratedCovGrad (I := I) g₀ 0 2 l
             (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤
           CDL l * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + 2 : ℕ) : ℝ) T₀‖ := by
   classical
-  obtain ⟨cL, hcL_nn, hcL⟩ := bal_lap_jets (I := I) (M := M) g₀ 0 2
-  obtain ⟨CJ, hCJ_nn, hCJ⟩ := bal_jets_to_f (I := I) (M := M) g₀
+  obtain ⟨cL, hcL_nn, hcL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (I := I) (M := M) g₀ 0 2
+  obtain ⟨CJ, hCJ_nn, hCJ⟩ := exists_iteratedCovGrad_le_const_mul_tensorHs (I := I) (M := M) g₀
   refine ⟨fun l => cL l * ∑ b ∈ Finset.range (l + 3), CJ b,
     fun l => mul_nonneg (hcL_nn l) (Finset.sum_nonneg (fun b _ => hCJ_nn b)), ?_⟩
   intro T₀ l
@@ -495,7 +495,7 @@ lemma bal_DL2 (g₀ : SmoothRiemannianMetric I M) :
     have hbl := Finset.mem_range.mp hb
     refine le_trans (hCJ b T₀) ?_
     refine mul_le_mul_of_nonneg_left ?_ (hCJ_nn b)
-    exact bal_fmono (I := I) (M := M) g₀ T₀ (by omega)
+    exact smoothCcToTensorHs_norm_mono_of_le (I := I) (M := M) g₀ T₀ (by omega)
   calc cL l * ∑ b ∈ Finset.range (l + 3), ‖iteratedCovGrad (I := I) g₀ 0 2 b T₀‖
       ≤ cL l * ∑ b ∈ Finset.range (l + 3),
           CJ b * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + 2 : ℕ) : ℝ) T₀‖ :=
@@ -505,7 +505,7 @@ lemma bal_DL2 (g₀ : SmoothRiemannianMetric I M) :
         rw [← Finset.sum_mul]
         ring
 
-lemma bal_DSUPD (g₀ : SmoothRiemannianMetric I M) :
+lemma riemannianFiberNormSq_iteratedCovGrad_rawTensorConnLapSmooth_le_sq_tensorHs (g₀ : SmoothRiemannianMetric I M) :
     ∃ CDS : ℕ → ℝ, (∀ l, 0 ≤ CDS l) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2) (l : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
@@ -514,7 +514,7 @@ lemma bal_DSUPD (g₀ : SmoothRiemannianMetric I M) :
           (CDS l * ‖smoothCcToTensorHs (I := I) (M := M) g₀
             ((l + (Module.finrank ℝ E / 2 + 2) + 1 : ℕ) : ℝ) T₀‖) ^ 2 := by
   classical
-  obtain ⟨CDL, hCDL_nn, hCDL⟩ := bal_DL2 (I := I) (M := M) g₀
+  obtain ⟨CDL, hCDL_nn, hCDL⟩ := exists_iteratedCovGrad_rawTensorConnLapSmooth_le_mul_tensorHs (I := I) (M := M) g₀
   have hfam := fun l : ℕ =>
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g₀ 0 (2 + l)
@@ -542,14 +542,14 @@ lemma bal_DSUPD (g₀ : SmoothRiemannianMetric I M) :
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀))‖ =
         ‖iteratedCovGrad (I := I) g₀ 0 2 (l + t)
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ :=
-      bal_norm_icg_comp (I := I) (M := M) g₀ 0 2 l t
+      norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g₀ 0 2 l t
         (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)
     rw [hcomp]
     have hb := hCDL T₀ (l + t)
     have hmono : ‖smoothCcToTensorHs (I := I) (M := M) g₀
         ((l + t + 2 : ℕ) : ℝ) T₀‖ ≤ fT := by
       rw [hfT_def]
-      exact bal_fmono (I := I) (M := M) g₀ T₀ (by omega)
+      exact smoothCcToTensorHs_norm_mono_of_le (I := I) (M := M) g₀ T₀ (by omega)
     have hle : ‖iteratedCovGrad (I := I) g₀ 0 2 (l + t)
         (rawTensorConnLapSmooth (I := I) g₀ 0 2 T₀)‖ ≤ CDL (l + t) * fT := by
       refine le_trans hb ?_
@@ -569,7 +569,7 @@ lemma bal_DSUPD (g₀ : SmoothRiemannianMetric I M) :
         mul_le_mul_of_nonneg_left hsq (sq_nonneg _)
     _ = ((Csh l * ∑ t ∈ Finset.range w, CDL (l + t)) * fT) ^ 2 := by ring
 
-lemma bal_DSUPT (g₀ : SmoothRiemannianMetric I M) :
+lemma riemannianFiberNormSq_iteratedCovGrad_le_sq_tensorHs (g₀ : SmoothRiemannianMetric I M) :
     ∃ CDS0 : ℕ → ℝ, (∀ β, 0 ≤ CDS0 β) ∧
       ∀ (T₀ : SmoothCcTensor g₀ 0 2) (β : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + β) x
@@ -577,7 +577,7 @@ lemma bal_DSUPT (g₀ : SmoothRiemannianMetric I M) :
           (CDS0 β * ‖smoothCcToTensorHs (I := I) (M := M) g₀
             ((β + (Module.finrank ℝ E / 2 + 1) : ℕ) : ℝ) T₀‖) ^ 2 := by
   classical
-  obtain ⟨CJ, hCJ_nn, hCJ⟩ := bal_jets_to_f (I := I) (M := M) g₀
+  obtain ⟨CJ, hCJ_nn, hCJ⟩ := exists_iteratedCovGrad_le_const_mul_tensorHs (I := I) (M := M) g₀
   have hfam := fun β : ℕ =>
     exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
       (I := I) (M := M) g₀ 0 (2 + β)
@@ -600,12 +600,12 @@ lemma bal_DSUPT (g₀ : SmoothRiemannianMetric I M) :
     have hcomp : ‖iteratedCovGrad (I := I) g₀ 0 (2 + β) t
         (iteratedCovGrad (I := I) g₀ 0 2 β T₀)‖ =
         ‖iteratedCovGrad (I := I) g₀ 0 2 (β + t) T₀‖ :=
-      bal_norm_icg_comp (I := I) (M := M) g₀ 0 2 β t T₀
+      norm_iteratedCovGrad_iteratedCovGrad_eq (I := I) (M := M) g₀ 0 2 β t T₀
     rw [hcomp]
     have hb := hCJ (β + t) T₀
     have hmono : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((β + t : ℕ) : ℝ) T₀‖ ≤ fT := by
       rw [hfT_def]
-      exact bal_fmono (I := I) (M := M) g₀ T₀ (by omega)
+      exact smoothCcToTensorHs_norm_mono_of_le (I := I) (M := M) g₀ T₀ (by omega)
     have hle : ‖iteratedCovGrad (I := I) g₀ 0 2 (β + t) T₀‖ ≤ CJ (β + t) * fT :=
       le_trans hb (mul_le_mul_of_nonneg_left hmono (hCJ_nn (β + t)))
     exact pow_le_pow_left₀ (norm_nonneg _) hle 2

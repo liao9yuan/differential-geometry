@@ -214,7 +214,7 @@ theorem pouScalar_oneSubLapClassical_pointwise_leibniz
 
 private lemma fHLeibniz_smoothCase_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
-    ((fHLeibniz (I := I) (M := M) g α
+    ((leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)
           : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -318,7 +318,7 @@ theorem pouScalar_oneSubLap_aeEq_fHLeibniz_smooth
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =ᵐ[
         riemannianVolumeMeasure (I := I) (M := M) g]
-      ((fHLeibniz (I := I) (M := M) g α
+      ((leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g v)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v)
           : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))

@@ -71,7 +71,7 @@ lemma rfns_repr_of_orthoFrame_cb
     rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g 0 t x S]
     rw [show tensorInnerPointwise (I := I) (M := M) g 0 t x
           (TensorRSSpace.toModel S) (TensorRSSpace.toModel S) =
-        tensorInnerPointwise_0s (I := I) (M := M) (0 + t) g x
+        covariantTensorInnerPointwise (I := I) (M := M) (0 + t) g x
           (lowerAllUpperIndices (I := I) (M := M) g 0 t x (TensorRSSpace.toModel S))
           (lowerAllUpperIndices (I := I) (M := M) g 0 t x (TensorRSSpace.toModel S)) from rfl]
     rw [tensorInnerPointwise_0s_eq_diag_sum_orthoFrame (I := I) (M := M) g x (0 + t)
@@ -267,7 +267,7 @@ theorem exists_uniform_riemannianFiberNormSq_appCc_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (W : SmoothCcTensor g 0 r) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 s x
-          ((appCc (I := I) (M := M) g r s Φ W).toSection x) ≤
+          ((operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x) ≤
         C * riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) := by
   obtain ⟨K, hK_nn, hK⟩ := exists_bound_riemannianFiberNormSq_smoothCcTensor g r s Φ
   refine ⟨K, hK_nn, fun W x => ?_⟩

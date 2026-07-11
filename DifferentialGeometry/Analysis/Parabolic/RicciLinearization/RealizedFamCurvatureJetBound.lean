@@ -39,7 +39,7 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_perMetric_curvCoeff_le_of_jetEnvelope
+theorem exists_curvatureCoeff_riemannianFiberNormSq_le_of_perturbedMetric_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
     (hB : 0 ≤ B)
     (coeff : SmoothRiemannianMetric I M → SmoothCcTensor g₀ 2 2)
@@ -48,7 +48,7 @@ theorem exists_perMetric_curvCoeff_le_of_jetEnvelope
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -82,7 +82,7 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope
+theorem exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
     (hB : 0 ≤ B)
     (coeff : SmoothRiemannianMetric I M → SmoothCcTensor g₀ 2 2)
@@ -91,9 +91,9 @@ theorem exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
         (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
@@ -104,7 +104,7 @@ theorem exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope
               ((coeff (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) ≤ Λ := by
   classical
   obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
-    exists_perMetric_curvCoeff_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB coeff
+    exists_curvatureCoeff_riemannianFiberNormSq_le_of_perturbedMetric_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB coeff
       hcoeff_curvature
   refine ⟨Λ, hΛ_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
@@ -119,7 +119,7 @@ theorem exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope
         ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) y v w := by
     intro y v w
     rw [hg₁, realizedFam_inner_of_mem (I := I) g₀ T T' hδ hδ' hs_mem y v w]
-  have hδs_raw : gFibreOpBound (I := I) (M := M) g₀
+  have hδs_raw : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s))
       (|1 - s| * δ' + |s| * δ) :=
     convexPerturbation_gFibreOpBound_abs (I := I) g₀ T T' hδ hδ' s
@@ -133,7 +133,7 @@ theorem exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope
       mul_le_mul_of_nonneg_left hδ_le hs0
     have hδ₀_le : δ₀ ≤ δ₁ := le_max_left _ _
     nlinarith [h1, h2, hδ₀_le]
-  have hδs : gFibreOpBound (I := I) (M := M) g₀
+  have hδs : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s)) δ₁ := by
     intro y v w
     refine le_trans (hδs_raw y v w) ?_
@@ -149,15 +149,15 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_rfns_riemannBiContrFib_realizedFam_le_of_jetEnvelope
+theorem exists_riemannBiContrFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
     (hB : 0 ≤ B) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
         (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
@@ -170,7 +170,7 @@ theorem exists_rfns_riemannBiContrFib_realizedFam_le_of_jetEnvelope
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) x)) ≤ Λ := by
   classical
   obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
-    exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
+    exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
       (fun g₁ => ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) (Or.inl rfl)
   refine ⟨Λ, hΛ_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv
@@ -181,15 +181,15 @@ set_option linter.unusedSectionVars false in
 set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-theorem exists_rfns_ricciArmOrder0CurvCoeffFib_realizedFam_le_of_jetEnvelope
+theorem exists_ricciArmOrder0CurvCoeffFib_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ)
     (hB : 0 ≤ B) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
-        (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+        (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
         (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
@@ -202,7 +202,7 @@ theorem exists_rfns_ricciArmOrder0CurvCoeffFib_realizedFam_le_of_jetEnvelope
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) x)) ≤ Λ := by
   classical
   obtain ⟨Λ, hΛ_nn, hΛ⟩ :=
-    exists_rfns_curvCoeff_realizedFam_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
+    exists_curvatureCoeff_riemannianFiberNormSq_le_of_realizedFam_jetEnvelope (I := I) (M := M) g₀ hδ₀ B hB
       (fun g₁ => ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁) (Or.inr rfl)
   refine ⟨Λ, hΛ_nn, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' s hs x henv

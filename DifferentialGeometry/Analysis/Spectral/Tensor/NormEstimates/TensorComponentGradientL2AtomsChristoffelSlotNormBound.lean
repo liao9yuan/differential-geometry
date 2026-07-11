@@ -53,25 +53,25 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 
-private noncomputable def chrRiemBasisCoordSup : ℝ :=
+private noncomputable def chartModelBasisCoordNormSup : ℝ :=
   (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
     (Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
     (fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
 
-private noncomputable def chrRiemBasisVecSup : ℝ :=
+private noncomputable def chartModelBasisVectorNormSup : ℝ :=
   (Finset.univ : Finset (Fin (Module.finrank ℝ E))).sup'
     (Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
     (fun k => ‖(chartModelBasis E) k‖)
 
-private lemma chrRiemBasisCoordSup_nonneg : 0 ≤ chrRiemBasisCoordSup (E := E) := by
-  unfold chrRiemBasisCoordSup
+private lemma chrRiemBasisCoordSup_nonneg : 0 ≤ chartModelBasisCoordNormSup (E := E) := by
+  unfold chartModelBasisCoordNormSup
   set i₀ : Fin (Module.finrank ℝ E) := ⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩
   calc (0 : ℝ) ≤ ‖((chartModelBasis E).coord i₀).toContinuousLinearMap‖ := norm_nonneg _
     _ ≤ _ := Finset.le_sup' (f := fun i =>
         ‖((chartModelBasis E).coord i).toContinuousLinearMap‖) (Finset.mem_univ i₀)
 
-private lemma chrRiemBasisVecSup_nonneg : 0 ≤ chrRiemBasisVecSup (E := E) := by
-  unfold chrRiemBasisVecSup
+private lemma chrRiemBasisVecSup_nonneg : 0 ≤ chartModelBasisVectorNormSup (E := E) := by
+  unfold chartModelBasisVectorNormSup
   have hne : (Finset.univ : Finset (Fin (Module.finrank ℝ E))).Nonempty :=
     Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩
   obtain ⟨k₀, hk₀⟩ := hne
@@ -79,21 +79,21 @@ private lemma chrRiemBasisVecSup_nonneg : 0 ≤ chrRiemBasisVecSup (E := E) := b
     (Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
 
 private lemma chrRiem_repr_coord_abs_le (x : E) (i : Fin (Module.finrank ℝ E)) :
-    |((chartModelBasis E).repr x) i| ≤ chrRiemBasisCoordSup (E := E) * ‖x‖ := by
+    |((chartModelBasis E).repr x) i| ≤ chartModelBasisCoordNormSup (E := E) * ‖x‖ := by
   have h_eq : (chartModelBasis E).repr x i =
       ((chartModelBasis E).coord i).toContinuousLinearMap x := rfl
   rw [h_eq, ← Real.norm_eq_abs]
   calc ‖((chartModelBasis E).coord i).toContinuousLinearMap x‖
       ≤ ‖((chartModelBasis E).coord i).toContinuousLinearMap‖ * ‖x‖ :=
         ContinuousLinearMap.le_opNorm _ _
-    _ ≤ chrRiemBasisCoordSup (E := E) * ‖x‖ := by
+    _ ≤ chartModelBasisCoordNormSup (E := E) * ‖x‖ := by
         apply mul_le_mul_of_nonneg_right _ (norm_nonneg _)
         exact Finset.le_sup'
           (f := fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
           (Finset.mem_univ _)
 
 private lemma chrRiem_basis_vec_norm_le (k : Fin (Module.finrank ℝ E)) :
-    ‖(chartModelBasis E) k‖ ≤ chrRiemBasisVecSup (E := E) :=
+    ‖(chartModelBasis E) k‖ ≤ chartModelBasisVectorNormSup (E := E) :=
   Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ _)
 
 private theorem christoffelCorrection_riem_norm_le_on_pouTsupport
@@ -109,8 +109,8 @@ private theorem christoffelCorrection_riem_norm_le_on_pouTsupport
   obtain ⟨CΓ, hCΓ_nn, hCΓ_le⟩ :=
     chartChristoffel_bdd_on_pou_tsupport (I := I) (M := M) g α
   set n : ℕ := Module.finrank ℝ E
-  set Cc := chrRiemBasisCoordSup (E := E)
-  set Cv := chrRiemBasisVecSup (E := E)
+  set Cc := chartModelBasisCoordNormSup (E := E)
+  set Cv := chartModelBasisVectorNormSup (E := E)
   refine ⟨(n : ℝ) ^ 3 * Cc ^ 2 * Cv * CΓ,
     mul_nonneg (mul_nonneg (mul_nonneg (pow_nonneg (Nat.cast_nonneg _) 3)
       (sq_nonneg _)) (chrRiemBasisVecSup_nonneg (E := E))) hCΓ_nn, ?_⟩
@@ -210,20 +210,20 @@ private lemma chrRiem_slotConjFactor_self_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
     (hb : b ∈ (chartAt H α).source) (w : E) :
-    (chartJ (I := I) (M := M) α b).comp
+    (chartTrivializationLinearMap (I := I) (M := M) α b).comp
         ((chartLeviCivitaParallelCLM (I := I) g α b X).comp
-          (chartJinv (I := I) (M := M) α b)) w =
+          (chartTrivializationLinearMapSymm (I := I) (M := M) α b)) w =
       christoffelCorrection (I := I) g α b
         (trivToE (I := I) α b (X b))
         (trivFromE (I := I) α b w) := by
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   rw [ContinuousLinearMap.comp_apply]
-  change chartJ (I := I) (M := M) α b
+  change chartTrivializationLinearMap (I := I) (M := M) α b
       ((chartLeviCivitaParallelCLM (I := I) g α b X)
-        (chartJinv (I := I) (M := M) α b w)) = _
+        (chartTrivializationLinearMapSymm (I := I) (M := M) α b w)) = _
   rw [chartLeviCivitaParallelCLM_apply (I := I) g α b X
-    (chartJinv (I := I) (M := M) α b w)]
+    (chartTrivializationLinearMapSymm (I := I) (M := M) α b w)]
   change trivToE (I := I) α b
       (trivFromE (I := I) α b
         (christoffelCorrection (I := I) g α b
@@ -231,16 +231,16 @@ private lemma chrRiem_slotConjFactor_self_apply
           (trivFromE (I := I) α b w))) = _
   rw [trivToE_trivFromE (I := I) α hb_base]
 
-private lemma chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport
+private lemma christoffelChartConjugationFactor_basisVector_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {b : M}, b ∈ tsupport (fun x : M =>
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) →
         ∀ (k : Fin (Module.finrank ℝ E)),
-          ‖(chartJ (I := I) (M := M) α b).comp
+          ‖(chartTrivializationLinearMap (I := I) (M := M) α b).comp
               ((chartLeviCivitaParallelCLM (I := I) g α b
                   (chartBasisVecFiber (I := I) α k)).comp
-                (chartJinv (I := I) (M := M) α b))‖ ≤ C := by
+                (chartTrivializationLinearMapSymm (I := I) (M := M) α b))‖ ≤ C := by
   classical
   obtain ⟨Cχ, hCχ_nn, hCχ_bound⟩ :=
     christoffelCorrection_riem_norm_le_on_pouTsupport (I := I) (M := M) g α
@@ -270,10 +270,10 @@ private lemma chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport
     rw [hCvec_def]
     exact Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ k)
   have hpt : ∀ w : E,
-      ‖(chartJ (I := I) (M := M) α b).comp
+      ‖(chartTrivializationLinearMap (I := I) (M := M) α b).comp
           ((chartLeviCivitaParallelCLM (I := I) g α b
               (chartBasisVecFiber (I := I) α k)).comp
-            (chartJinv (I := I) (M := M) α b)) w‖ ≤ Cχ * Cvec * ‖w‖ := by
+            (chartTrivializationLinearMapSymm (I := I) (M := M) α b)) w‖ ≤ Cχ * Cvec * ‖w‖ := by
     intro w
     rw [chrRiem_slotConjFactor_self_apply (I := I) (M := M) g α
       (chartBasisVecFiber (I := I) α k) hb_src w, hX_triv]
@@ -292,7 +292,7 @@ private lemma chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport
   exact ContinuousLinearMap.opNorm_le_bound _
     (mul_nonneg hCχ_nn hCvec_nn) hpt
 
-private lemma chrRiem_slotInputConjCLM_prod_norm_le_on_pouTsupport
+private lemma christoffelChartConjugation_inputSlotCLM_prodNorm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ {b : M}, b ∈ tsupport (fun x : M =>
@@ -303,7 +303,7 @@ private lemma chrRiem_slotInputConjCLM_prod_norm_le_on_pouTsupport
               (chartBasisVecFiber (I := I) α k) i b j‖) ≤ C := by
   classical
   obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
-    chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport (I := I) (M := M) g α
+    christoffelChartConjugationFactor_basisVector_norm_le_on_pouTsupport (I := I) (M := M) g α
   refine ⟨(max C₀ 1) ^ r,
     pow_nonneg (le_trans zero_le_one (le_max_right _ _)) r, ?_⟩
   intro b hb k i
@@ -336,7 +336,7 @@ private lemma chrRiem_slotOutputConjCLM_prod_norm_le_on_pouTsupport
               (chartBasisVecFiber (I := I) α k) l b j‖) ≤ C := by
   classical
   obtain ⟨C₀, hC₀_nn, hC₀_bound⟩ :=
-    chrRiem_slotConjFactor_basis_norm_le_on_pouTsupport (I := I) (M := M) g α
+    christoffelChartConjugationFactor_basisVector_norm_le_on_pouTsupport (I := I) (M := M) g α
   refine ⟨(max C₀ 1) ^ s,
     pow_nonneg (le_trans zero_le_one (le_max_right _ _)) s, ?_⟩
   intro b hb k l
@@ -448,7 +448,7 @@ theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
       (I := I) (M := M) g r s α hK_cpt hK_sub
   obtain ⟨Cprod, hCprod_nn, hCprod_bound⟩ :=
-    chrRiem_slotInputConjCLM_prod_norm_le_on_pouTsupport (I := I) (M := M) g r α
+    christoffelChartConjugation_inputSlotCLM_prodNorm_le_on_pouTsupport (I := I) (M := M) g r α
   refine ⟨Cfrom * Cprod * Cto,
     mul_nonneg (mul_nonneg (le_of_lt hCfrom_pos) hCprod_nn) (le_of_lt hCto_pos), ?_⟩
   intro T b hb k i

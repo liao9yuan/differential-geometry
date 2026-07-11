@@ -610,23 +610,23 @@ theorem MemWkp.sub
   rw [hEq] at h
   exact h
 
-def wkpNorm (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) : ℝ≥0∞ :=
+def iteratedWeakSobolevNorm (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) : ℝ≥0∞ :=
   ∑ j ∈ Finset.range (k + 1),
     ∑ α : Fin j → Fin d,
       eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω)
 
 theorem wkpNorm_eq_sum
     (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
-    wkpNorm (d := d) k p u Ω =
+    iteratedWeakSobolevNorm (d := d) k p u Ω =
       ∑ j ∈ Finset.range (k + 1),
         ∑ α : Fin j → Fin d,
           eLpNorm (iterWeakPartial (d := d) p j α u Ω) p (volume.restrict Ω) := rfl
 
 theorem wkpNorm_zero
     (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
-    wkpNorm (d := d) 0 p u Ω = eLpNorm u p (volume.restrict Ω) := by
+    iteratedWeakSobolevNorm (d := d) 0 p u Ω = eLpNorm u p (volume.restrict Ω) := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   rw [Finset.sum_range_one]
   have hUniq : ∀ α : Fin 0 → Fin d, α = (fun i : Fin 0 => i.elim0) := fun α => by
     funext i; exact i.elim0
@@ -640,9 +640,9 @@ theorem wkpNorm_zero
 
 theorem wkpNorm_zero_fun_zero
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω) :
-    wkpNorm (d := d) k p (fun _ : E => (0 : ℝ)) Ω = 0 := by
+    iteratedWeakSobolevNorm (d := d) k p (fun _ : E => (0 : ℝ)) Ω = 0 := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   refine Finset.sum_eq_zero ?_
   intro j _
   refine Finset.sum_eq_zero ?_
@@ -657,9 +657,9 @@ theorem wkpNorm_zero_fun_zero
 theorem wkpNorm_lt_top_of_memWkp
     {k : ℕ} {p : ℝ≥0∞} {u : E → ℝ} {Ω : Set E}
     (h : MemWkp (d := d) k p u Ω) :
-    wkpNorm (d := d) k p u Ω < (⊤ : ℝ≥0∞) := by
+    iteratedWeakSobolevNorm (d := d) k p u Ω < (⊤ : ℝ≥0∞) := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   refine ENNReal.sum_lt_top.mpr ?_
   intro j hj
   refine ENNReal.sum_lt_top.mpr ?_
@@ -696,9 +696,9 @@ theorem iterWeakPartial_ae_congr
 theorem wkpNorm_congr_ae
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ} (huv : u =ᵐ[volume.restrict Ω] v) :
-    wkpNorm (d := d) k p u Ω = wkpNorm (d := d) k p v Ω := by
+    iteratedWeakSobolevNorm (d := d) k p u Ω = iteratedWeakSobolevNorm (d := d) k p v Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   refine Finset.sum_congr rfl ?_
   intro j _
   refine Finset.sum_congr rfl ?_
@@ -776,10 +776,10 @@ theorem wkpNorm_add_le
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u v : E → ℝ}
     (hu : MemWkp (d := d) k p u Ω) (hv : MemWkp (d := d) k p v Ω) :
-    wkpNorm (d := d) k p (fun x => u x + v x) Ω ≤
-      wkpNorm (d := d) k p u Ω + wkpNorm (d := d) k p v Ω := by
+    iteratedWeakSobolevNorm (d := d) k p (fun x => u x + v x) Ω ≤
+      iteratedWeakSobolevNorm (d := d) k p u Ω + iteratedWeakSobolevNorm (d := d) k p v Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   rw [← Finset.sum_add_distrib]
   refine Finset.sum_le_sum ?_
   intro j hj
@@ -817,10 +817,10 @@ theorem wkpNorm_const_smul
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ}
     (hu : MemWkp (d := d) k p u Ω) (c : ℝ) :
-    wkpNorm (d := d) k p (fun x => c * u x) Ω =
-      ‖c‖ₑ * wkpNorm (d := d) k p u Ω := by
+    iteratedWeakSobolevNorm (d := d) k p (fun x => c * u x) Ω =
+      ‖c‖ₑ * iteratedWeakSobolevNorm (d := d) k p u Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
   intro j hj
@@ -937,9 +937,9 @@ theorem wkpNorm_mono_set
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω Ω' : Set E}
     (_hΩ : IsOpen Ω) (hΩ' : IsOpen Ω') (hΩΩ' : Ω' ⊆ Ω)
     {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) :
-    wkpNorm (d := d) k p u Ω' ≤ wkpNorm (d := d) k p u Ω := by
+    iteratedWeakSobolevNorm (d := d) k p u Ω' ≤ iteratedWeakSobolevNorm (d := d) k p u Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   refine Finset.sum_le_sum ?_
   intro j hj
   refine Finset.sum_le_sum ?_
@@ -954,9 +954,9 @@ theorem wkpNorm_mono_set
 
 theorem wkpNorm_mono_order
     {k k' : ℕ} (hk : k ≤ k') {p : ℝ≥0∞} (u : E → ℝ) (Ω : Set E) :
-    wkpNorm (d := d) k p u Ω ≤ wkpNorm (d := d) k' p u Ω := by
+    iteratedWeakSobolevNorm (d := d) k p u Ω ≤ iteratedWeakSobolevNorm (d := d) k' p u Ω := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
   · intro j hj
     rw [Finset.mem_range] at hj ⊢

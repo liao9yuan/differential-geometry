@@ -668,7 +668,7 @@ private lemma fChartEffNumerator_ae_zero_off_K_α
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
     ∀ᵐ y ∂((volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α)),
-      fChartEffNumerator (I := I) (M := M) g α l hu_h y = 0 := by
+      diffChartForcingNumerator (I := I) (M := M) g α l hu_h y = 0 := by
   classical
   have h_fc_deriv := chosenFChartDeriv_ae_zero_off_K_α (I := I) (M := M) g α hu_h l
   have h_uc := base_u_chart_ae_zero_off_K_α (I := I) (M := M) g α
@@ -708,7 +708,7 @@ private lemma fChartEffNumerator_ae_zero_off_K_α
     rw [ae_all_iff]; intro i; rw [ae_all_iff]; intro j; exact h_cspu_each i j
   filter_upwards [h_fc_deriv, h_uc, h_fc, h_wp_combine, h_cspu_combine]
     with y hy_fcd hy_uc hy_fc hy_wp hy_cspu
-  unfold fChartEffNumerator
+  unfold diffChartForcingNumerator
   have h_sum_wp_zero :
       (∑ i : Fin (Module.finrank ℝ E),
         ∑ j : Fin (Module.finrank ℝ E),
@@ -738,11 +738,11 @@ private lemma integral_fChartEffNumerator_eq_integral_density_fChartEff
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
     (ψ : EuclN → ℝ) :
     ∫ y in chartTargetEuclid (I := I) (M := M) α,
-        fChartEffNumerator (I := I) (M := M) g α l hu_h y * ψ y
+        diffChartForcingNumerator (I := I) (M := M) g α l hu_h y * ψ y
         ∂(volume : Measure EuclN) =
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
         densityOnEuclid (I := I) g α y *
-          fChartEff (I := I) (M := M) g α l hu_h y * ψ y
+          diffChartForcing (I := I) (M := M) g α l hu_h y * ψ y
         ∂(volume : Measure EuclN) := by
   classical
   set Ω : Set EuclN := chartTargetEuclid (I := I) (M := M) α
@@ -751,26 +751,26 @@ private lemma integral_fChartEffNumerator_eq_integral_density_fChartEff
   have hU_meas : MeasurableSet (Ω \ K_α (I := I) (M := M) α) :=
     hΩ_meas.diff (K_α_meas (I := I) (M := M) α)
   have h_ae_eq : (fun y : EuclN =>
-      fChartEffNumerator (I := I) (M := M) g α l hu_h y * ψ y) =ᵐ[
+      diffChartForcingNumerator (I := I) (M := M) g α l hu_h y * ψ y) =ᵐ[
       (volume : Measure EuclN).restrict Ω]
       (fun y : EuclN => densityOnEuclid (I := I) g α y *
-        fChartEff (I := I) (M := M) g α l hu_h y * ψ y) := by
+        diffChartForcing (I := I) (M := M) g α l hu_h y * ψ y) := by
     have h_numer_off := fChartEffNumerator_ae_zero_off_K_α
       (I := I) (M := M) g α l hu_h
     refine (ae_restrict_iff' hΩ_meas).mpr ?_
     have h_off_vol : ∀ᵐ y ∂(volume : Measure EuclN),
         y ∈ Ω \ K_α (I := I) (M := M) α →
-        fChartEffNumerator (I := I) (M := M) g α l hu_h y = 0 := by
+        diffChartForcingNumerator (I := I) (M := M) g α l hu_h y = 0 := by
       rw [← ae_restrict_iff' hU_meas]; exact h_numer_off
     filter_upwards [h_off_vol] with y hy hy_Ω
     by_cases hy_K : y ∈ K_α (I := I) (M := M) α
-    · have h_pt := density_mul_fChartEff_eq_indicator_numerator
+    · have h_pt := density_mul_diffChartForcing_eq_indicator_numerator
         (I := I) (M := M) g α l hu_h y hy_Ω
       rw [Set.indicator_of_mem hy_K] at h_pt
       rw [h_pt]
     · have hy_diff : y ∈ Ω \ K_α (I := I) (M := M) α := ⟨hy_Ω, hy_K⟩
       rw [hy hy_diff]
-      have h_pt := density_mul_fChartEff_eq_indicator_numerator
+      have h_pt := density_mul_diffChartForcing_eq_indicator_numerator
         (I := I) (M := M) g α l hu_h y hy_Ω
       rw [Set.indicator_of_notMem hy_K] at h_pt
       rw [h_pt]
@@ -800,7 +800,7 @@ theorem derived_variational_identity_holds
       ∂(volume : Measure EuclN)) =
     ∫ y in chartTargetEuclid (I := I) (M := M) α,
       densityOnEuclid (I := I) g α y *
-        fChartEff (I := I) (M := M) g α l hu_h y * ψ y
+        diffChartForcing (I := I) (M := M) g α l hu_h y * ψ y
       ∂(volume : Measure EuclN) := by
   classical
   have h_diff := differentiated_variational_identity_holds
@@ -857,7 +857,7 @@ theorem derived_variational_identity_holds
     rw [h_diff', h_cross']; ring
   have h_RHS_eq_num : T3 + I_partials + I_cspu - A2_cross + B_cross =
       ∫ y in Ω,
-        fChartEffNumerator (I := I) (M := M) g α l hu_h y * ψ y
+        diffChartForcingNumerator (I := I) (M := M) g α l hu_h y * ψ y
         ∂(volume : Measure EuclN) := by
     set K : Set EuclN := tsupport ψ
     have hψ_cont : Continuous ψ := hψ_smooth.continuous
@@ -874,7 +874,7 @@ theorem derived_variational_identity_holds
       rw [Finset.sum_mul]
       exact Finset.sum_congr rfl fun i _ => Finset.sum_mul _ _ _
     have h_integrand_eq : (fun y : EuclN =>
-        fChartEffNumerator (I := I) (M := M) g α l hu_h y * ψ y) =
+        diffChartForcingNumerator (I := I) (M := M) g α l hu_h y * ψ y) =
         (fun y => densityOnEuclid (I := I) g α y *
             chosenFChartDeriv (I := I) (M := M) g α hu_h l y * ψ y) +
         (fun y => (∑ i, ∑ j,
@@ -890,7 +890,7 @@ theorem derived_variational_identity_holds
         (fun y => densityDerivOnEuclid (I := I) g α l y *
             D_base.f_chart y * ψ y) := by
       funext y
-      unfold fChartEffNumerator
+      unfold diffChartForcingNumerator
       simp only [Pi.add_apply, Pi.sub_apply]
       rw [← h_sum_distrib_ψ (fun i j =>
         (fderiv ℝ (weightedInvGramDerivOnEuclid (I := I) g α i j l) y)

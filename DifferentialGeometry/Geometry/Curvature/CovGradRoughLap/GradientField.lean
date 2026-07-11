@@ -84,7 +84,7 @@ lemma covGrad_apply_unit_eval_genVal
   covGrad_toSection_apply_eval (I := I) (M := M) g 0 s S x
     (unitZeroSec (I := I) (M := M) x) v
 
-lemma curry_covGrad_unit_eval_genVal
+lemma curry_covGrad_unit_eval_general
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M)
     (w : TangentSpace I x) :
     tensor0S_curry (I := I) (M := M) s x
@@ -241,7 +241,7 @@ lemma tensorSecondCovDeriv_covGrad_unit_eval
   · exact covDeriv_unit_eval_eq (I := I) (M := M) g
       (covGrad (I := I) (M := M) g 0 2 T₀).toSection x ((LeviCivita (I := I) g).toFun B x (B x))
 
-theorem abstract_succ_covDeriv_unfold_at_genVal
+theorem curry_covDeriv_succ_eq_covDeriv_curriedSection_sub_connCorrection
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : Π y : M, Tensor0SSpace (s + 1) I y)
     {Vfield Y : Π b : M, TangentSpace I b} {x : M}
@@ -343,7 +343,7 @@ lemma curry_unitGradFieldGen_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
         tensorCovDerivAt (I := I) (M := M) g 0 s S y w)
         (unitZeroSec (I := I) (M := M) y) := by
   rw [Tensor0SNabla.curriedSection_apply, unitGradFieldGen_apply]
-  exact curry_covGrad_unit_eval_genVal (I := I) (M := M) g s S y w
+  exact curry_covGrad_unit_eval_general (I := I) (M := M) g s S y w
 
 lemma covGrad_contMDiff_mk'_genVal
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
@@ -472,7 +472,7 @@ theorem tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
       (T := (Tensor0SNabla.tensor0SCovariantDerivative I M (s + 1) (LeviCivita (I := I) g)).toFun
         (unitGradFieldGen (I := I) (M := M) g s S) x (X x)) (v0 := Y x) (vs := m)).symm]
 
-  rw [abstract_succ_covDeriv_unfold_at_genVal (I := I) (M := M) g s
+  rw [curry_covDeriv_succ_eq_covDeriv_curriedSection_sub_connCorrection (I := I) (M := M) g s
     (unitGradFieldGen (I := I) (M := M) g s S) (Vfield := X) (Y := Y) (x := x)
     ((contMDiff_curried_unitGradFieldGen (I := I) (M := M) g s S x).mdifferentiableAt (by simp))
     ((hX x).mdifferentiableAt (by simp)) ((hY x).mdifferentiableAt (by simp))]

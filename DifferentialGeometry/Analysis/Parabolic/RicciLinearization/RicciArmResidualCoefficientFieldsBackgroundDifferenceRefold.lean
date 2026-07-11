@@ -49,12 +49,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def bgRDiffRefoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M) :
+def backgroundRicciCommutatorDiffRefoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
-  appCcRS (I := I) (M := M) g₀ 2 2 2
-      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
-        - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
-      (ccSlotSwapField (I := I) (M := M) g₀)
+  ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2
+      (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁
+        - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
+      (ccInputSlotSwapField (I := I) (M := M) g₀)
     + (1 / 2 : ℝ) • ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁
         (metricDifferenceCcTensor (I := I) (M := M) g₀ g₁)
     - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁
@@ -63,8 +63,8 @@ def bgRDiffRefoldRemainderField (g₀ g₁ : SmoothRiemannianMetric I M) :
 set_option linter.unusedSectionVars false in
 
 theorem bgRDiffRefoldRemainderField_self (g₀ : SmoothRiemannianMetric I M) :
-    bgRDiffRefoldRemainderField (I := I) (M := M) g₀ g₀ = 0 := by
-  rw [bgRDiffRefoldRemainderField, metricDifferenceCcTensor_self, sub_self,
+    backgroundRicciCommutatorDiffRefoldRemainderField (I := I) (M := M) g₀ g₀ = 0 := by
+  rw [backgroundRicciCommutatorDiffRefoldRemainderField, metricDifferenceCcTensor_self, sub_self,
     appCcRS_zero_left, ricciArmSharpGradKoszulResidualField_zero_weight,
     ricciArmRicciFoldRemainderField_zero_weight, smul_zero, add_zero, sub_zero]
 
@@ -79,7 +79,7 @@ private lemma inner_ext_vec (g : SmoothRiemannianMetric I M) (x : M) {a b : Tang
 
 private lemma toModel_slotSwapFib_pair (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I x)
     (u w : E) :
-    Tensor0SBundle.Tensor0SSpace.toModel (slotSwapFib (I := I) (M := M) x D) ![u, w] =
+    Tensor0SBundle.Tensor0SSpace.toModel (inputSlotSwapFib (I := I) (M := M) x D) ![u, w] =
       Tensor0SBundle.Tensor0SSpace.toModel D ![w, u] := by
   rw [slotSwapFib_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.domDomCongr_apply]
@@ -237,8 +237,8 @@ private lemma foldG2_pair_antisym (g₀ : SmoothRiemannianMetric I M)
         ![X x, Y x, c, d]
       - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 P) x
           ![Y x, X x, c, d] =
-    -(ccTensorBilin (I := I) g₀ P x (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) c) d
-      + ccTensorBilin (I := I) g₀ P x c (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d)) := by
+    -(smoothCcTensorBilinForm (I := I) g₀ P x (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) c) d
+      + smoothCcTensorBilinForm (I := I) g₀ P x c (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d)) := by
   classical
   have hicg : iteratedCovGrad (I := I) g₀ 0 2 2 P =
       covGrad (I := I) (M := M) g₀ 0 (2 + 1) (covGrad (I := I) (M := M) g₀ 0 2 P) := rfl
@@ -349,7 +349,7 @@ private lemma foldG2_pair_antisym (g₀ : SmoothRiemannianMetric I M)
   rw [hbase c, hbase d]
   have hAPtoModel : ∀ (m : Fin 2 → TangentSpace I x),
       Tensor0SBundle.Tensor0SSpace.toModel (AP x) (fun i => (m i : E)) =
-        ccTensorBilin (I := I) g₀ P x (m 0) (m 1) := by
+        smoothCcTensorBilinForm (I := I) g₀ P x (m 0) (m 1) := by
     intro m
     have h1 : Tensor0SBundle.Tensor0SSpace.toModel (AP x) (fun i => (m i : E)) =
         unitModel (I := I) (M := M) g₀ 2 P x m := rfl
@@ -358,20 +358,20 @@ private lemma foldG2_pair_antisym (g₀ : SmoothRiemannianMetric I M)
     rfl
   rw [show Tensor0SBundle.Tensor0SSpace.toModel (AP x)
         ![(riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) c : E), (d : E)] =
-      ccTensorBilin (I := I) g₀ P x (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) c) d from
+      smoothCcTensorBilinForm (I := I) g₀ P x (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) c) d from
     hAPtoModel ![riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) c, d]]
   rw [show Tensor0SBundle.Tensor0SSpace.toModel (AP x)
         ![(c : E), (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d : E)] =
-      ccTensorBilin (I := I) g₀ P x c (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d) from
+      smoothCcTensorBilinForm (I := I) g₀ P x c (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d) from
     hAPtoModel ![c, riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d]]
 
 set_option linter.unusedSectionVars false in
 private lemma foldBilinSymm_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v)
+      smoothCcTensorBilinForm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x w v)
     (x : M) (v w : TangentSpace I x) :
-    ccTensorBilinSymm (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x v w := by
+    ccTensorBilinSymm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x v w := by
   rw [ccTensorBilinSymm_apply, ← hPsymm x v w]
   ring
 
@@ -381,12 +381,12 @@ private lemma foldSkew_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v)
+      smoothCcTensorBilinForm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x w v)
     (x : M) (u p q z : TangentSpace I x) :
     g₁.inner x (riemannOp (LeviCivita (I := I) g₀) x u p q) z =
       - g₁.inner x q (riemannOp (LeviCivita (I := I) g₀) x u p z)
-        + (ccTensorBilin (I := I) g₀ P x q (riemannOp (LeviCivita (I := I) g₀) x u p z)
-          + ccTensorBilin (I := I) g₀ P x (riemannOp (LeviCivita (I := I) g₀) x u p q) z) := by
+        + (smoothCcTensorBilinForm (I := I) g₀ P x q (riemannOp (LeviCivita (I := I) g₀) x u p z)
+          + smoothCcTensorBilinForm (I := I) g₀ P x (riemannOp (LeviCivita (I := I) g₀) x u p q) z) := by
   have hskew := riemannOp_metric_skew (I := I) g₀ x u p q z
   have h1 := htie x (riemannOp (LeviCivita (I := I) g₀) x u p q) z
   have h2 := htie x q (riemannOp (LeviCivita (I := I) g₀) x u p z)
@@ -397,7 +397,7 @@ private lemma foldSkew_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [h1, hg]
   have h2' : g₀.inner x q (riemannOp (LeviCivita (I := I) g₀) x u p z) =
       g₁.inner x q (riemannOp (LeviCivita (I := I) g₀) x u p z)
-        - ccTensorBilin (I := I) g₀ P x q (riemannOp (LeviCivita (I := I) g₀) x u p z) := by
+        - smoothCcTensorBilinForm (I := I) g₀ P x q (riemannOp (LeviCivita (I := I) g₀) x u p z) := by
     rw [h2]; ring
   rw [h2']
   ring
@@ -479,22 +479,22 @@ private lemma foldCore_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
       g₁.inner x (riemannOp (LeviCivita (I := I) g₀) x (Xs x) (As x) (Bs x)) z
       + (1 / 2 : ℝ) *
           (unitModel (I := I) (M := M) g₀ 4
-              (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ P)) x
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ P)) x
               ![Xs x, As x, Bs x, z]
             - unitModel (I := I) (M := M) g₀ 4
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ P)) x
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ P)) x
                 ![As x, Xs x, Bs x, z]
             + unitModel (I := I) (M := M) g₀ 4
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ P)) x
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ P)) x
                 ![Xs x, Bs x, As x, z]
             + unitModel (I := I) (M := M) g₀ 4
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ P)) x
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ P)) x
                 ![As x, z, Xs x, Bs x]
             - unitModel (I := I) (M := M) g₀ 4
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ P)) x
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ P)) x
                 ![Xs x, z, As x, Bs x]
             - unitModel (I := I) (M := M) g₀ 4
-                (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) g₀ P)) x
+                (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) g₀ P)) x
                 ![As x, Bs x, Xs x, z])
       - g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Bs x) (As x))
           (PDE.DeTurck.connDiff (I := I) g₁ g₀ x z (Xs x))
@@ -630,7 +630,7 @@ private lemma foldMovingTraceRow (g₀ g₁ : SmoothRiemannianMetric I M)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v)
+      smoothCcTensorBilinForm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x w v)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I x) (u z : TangentSpace I x)
     (a : Fin (Module.finrank ℝ E)) :
     ∑ b : Fin (Module.finrank ℝ E),
@@ -648,10 +648,10 @@ private lemma foldMovingTraceRow (g₀ g₁ : SmoothRiemannianMetric I M)
         Tensor0SBundle.Tensor0SSpace.toModel D
             ![(smoothOrthoFrame (I := I) g₁ x a x : E),
               (smoothOrthoFrame (I := I) g₁ x b x : E)] *
-          (ccTensorBilin (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x)
+          (smoothCcTensorBilinForm (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x)
               (riemannOp (LeviCivita (I := I) g₀) x u
                 (smoothOrthoFrame (I := I) g₁ x a x) z)
-            + ccTensorBilin (I := I) g₀ P x
+            + smoothCcTensorBilinForm (I := I) g₀ P x
                 (riemannOp (LeviCivita (I := I) g₀) x u
                   (smoothOrthoFrame (I := I) g₁ x a x)
                   (smoothOrthoFrame (I := I) g₁ x b x)) z) := by
@@ -668,8 +668,8 @@ private lemma foldMovingTraceRow (g₀ g₁ : SmoothRiemannianMetric I M)
             ![(Ba : E), (smoothOrthoFrame (I := I) g₁ x b x : E)])
         + Tensor0SBundle.Tensor0SSpace.toModel D
             ![(Ba : E), (smoothOrthoFrame (I := I) g₁ x b x : E)] *
-          (ccTensorBilin (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x) Rz
-            + ccTensorBilin (I := I) g₀ P x
+          (smoothCcTensorBilinForm (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x) Rz
+            + smoothCcTensorBilinForm (I := I) g₀ P x
                 (riemannOp (LeviCivita (I := I) g₀) x u Ba
                   (smoothOrthoFrame (I := I) g₁ x b x)) z) := by
     intro b
@@ -710,8 +710,8 @@ private lemma foldKernelTerm_eval (g₀ g₁ : SmoothRiemannianMetric I M)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) b (Wsec b)))
     (G : SmoothCcTensor g₀ 0 4) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
-          (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁ Wsec hWsec
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
+          (curvatureActionKernelCoeffField (I := I) (M := M) g₀ g₁ Wsec hWsec
             (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
             (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1) G) x v =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -736,13 +736,13 @@ private lemma foldKernelTerm_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 4 I x from
       G.toSection x) (unitTensor (I := I) (M := M) x) with hGuv_def
   have hopen : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2
-        (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁ Wsec hWsec
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2
+        (curvatureActionKernelCoeffField (I := I) (M := M) g₀ g₁ Wsec hWsec
           (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
           (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1) G) x v =
       Tensor0SBundle.Tensor0SSpace.toModel
         ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
-          (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁ Wsec hWsec
+          (curvatureActionKernelCoeffField (I := I) (M := M) g₀ g₁ Wsec hWsec
             (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
             (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1).toSection x) Guv) v := by
     rw [unitModel, appCc_toSection]
@@ -758,7 +758,7 @@ private lemma foldKernelTerm_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.sum_apply]
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [Tensor0SBundle.Tensor0SSpace.toModelL_apply]
-  rw [curvatureRefoldKernelFib]
+  rw [curvatureActionKernelCLM]
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.sub_apply,
     ContinuousLinearMap.sub_apply, ContinuousLinearMap.add_apply,
     Tensor0SBundle.Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply,
@@ -832,11 +832,11 @@ set_option linter.unusedSectionVars false in
 private lemma foldSwapBgR_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
-          (appCcRS (I := I) (M := M) g₀ 2 2 2
-            (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
-              - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
-            (ccSlotSwapField (I := I) (M := M) g₀)) W) x v =
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2
+            (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁
+              - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
+            (ccInputSlotSwapField (I := I) (M := M) g₀)) W) x v =
       (∑ c : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel
             ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
@@ -858,55 +858,55 @@ private lemma foldSwapBgR_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
       W.toSection x) (unitTensor (I := I) (M := M) x) with hWuv_def
   have hopen : unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 2 2
-        (appCcRS (I := I) (M := M) g₀ 2 2 2
-          (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
-            - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
-          (ccSlotSwapField (I := I) (M := M) g₀)) W) x v =
+      (operatorFieldApply (I := I) (M := M) g₀ 2 2
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2
+          (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁
+            - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
+          (ccInputSlotSwapField (I := I) (M := M) g₀)) W) x v =
       Tensor0SBundle.Tensor0SSpace.toModel
         ((show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
-          ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
-            - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)).toSection x)
-          (slotSwapFib (I := I) (M := M) x Wuv)) v := by
+          ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁
+            - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)).toSection x)
+          (inputSlotSwapFib (I := I) (M := M) x Wuv)) v := by
     rw [unitModel, appCc_toSection]
     rfl
   rw [hopen]
-  have hsub : ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
-      - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)).toSection x =
-      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁).toSection x
-      - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x := by
+  have hsub : ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁
+      - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)).toSection x =
+      (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁).toSection x
+      - (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x := by
     rw [SmoothCcTensor.toSection_sub]
     rfl
   rw [hsub]
   rw [show (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ]
         Tensor0SBundle.Tensor0SSpace 2 I x from
-      ((ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁).toSection x
-        - (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)) =
+      ((ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁).toSection x
+        - (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x)) =
     (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
-      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁).toSection x)
+      (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁).toSection x)
     - (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
-      (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x) from rfl]
+      (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x) from rfl]
   rw [ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
   congr 1
   · rw [show (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ]
           Tensor0SBundle.Tensor0SSpace 2 I x from
-        (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁).toSection x)
-        (slotSwapFib (I := I) (M := M) x Wuv) =
-      bgRBiContrFib (I := I) g₀ g₁ x (slotSwapFib (I := I) (M := M) x Wuv) from rfl]
-    rw [show bgRBiContrFib (I := I) g₀ g₁ x =
-      bgRBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x) x from rfl]
-    rw [bgRBiContrFibFixedFrame_toModel]
+        (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁).toSection x)
+        (inputSlotSwapFib (I := I) (M := M) x Wuv) =
+      backgroundRiemannBiContrFib (I := I) g₀ g₁ x (inputSlotSwapFib (I := I) (M := M) x Wuv) from rfl]
+    rw [show backgroundRiemannBiContrFib (I := I) g₀ g₁ x =
+      backgroundRiemannBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₁ x) x from rfl]
+    rw [backgroundRiemannBiContrFibFixedFrame_toModel]
     refine Finset.sum_congr rfl (fun c _ => ?_)
     exact toModel_slotSwapFib_pair (I := I) (M := M) x Wuv _ _
   · rw [show (show Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ]
           Tensor0SBundle.Tensor0SSpace 2 I x from
-        (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀).toSection x)
-        (slotSwapFib (I := I) (M := M) x Wuv) =
-      bgRBiContrFib (I := I) g₀ g₀ x (slotSwapFib (I := I) (M := M) x Wuv) from rfl]
-    rw [show bgRBiContrFib (I := I) g₀ g₀ x =
-      bgRBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₀ x) x from rfl]
-    rw [bgRBiContrFibFixedFrame_toModel]
+        (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀).toSection x)
+        (inputSlotSwapFib (I := I) (M := M) x Wuv) =
+      backgroundRiemannBiContrFib (I := I) g₀ g₀ x (inputSlotSwapFib (I := I) (M := M) x Wuv) from rfl]
+    rw [show backgroundRiemannBiContrFib (I := I) g₀ g₀ x =
+      backgroundRiemannBiContrFibFixedFrame (I := I) g₀ (smoothOrthoFrame (I := I) g₀ x) x from rfl]
+    rw [backgroundRiemannBiContrFibFixedFrame_toModel]
     refine Finset.sum_congr rfl (fun c _ => ?_)
     exact toModel_slotSwapFib_pair (I := I) (M := M) x Wuv _ _
 
@@ -929,7 +929,7 @@ private lemma foldPsi_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-    (hsymmS : symmS (I := I) (M := M) g₀ P = P)
+    (hsymmS : ccTensor02Symm (I := I) (M := M) g₀ P = P)
     (x : M) (u ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ P x u ζ =
       PDE.DeTurck.connDiff (I := I) g₁ g₀ x u ζ := by
@@ -944,13 +944,13 @@ private lemma foldQuadKernel_split (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-    (hsymmS : symmS (I := I) (M := M) g₀ P = P)
+    (hsymmS : ccTensor02Symm (I := I) (M := M) g₀ P = P)
     (x : M) (p q v0 v1 : TangentSpace I x) :
     - g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x q p)
         (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v1 v0)
       + g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x q v0)
           (PDE.DeTurck.connDiff (I := I) g₁ g₀ x v1 p) =
-    connDiffAACommKernelBilin (I := I) g₀ g₁ x p q v0 v1
+    connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q v0 v1
       + sharpGradKoszulKernelBilin (I := I) g₀ g₁ P x p q v0 v1 := by
   rw [connDiffAACommKernelBilin_apply, sharpGradKoszulKernelBilin_apply]
   rw [foldPsi_eq_connDiff (I := I) (M := M) g₀ g₁ P htie hsymmS x q v0,
@@ -977,7 +977,7 @@ set_option linter.unusedSectionVars false in
 private lemma foldQtrue_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁) W) x v =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel
@@ -986,11 +986,11 @@ private lemma foldQtrue_eval (g₀ g₁ : SmoothRiemannianMetric I M)
               W.toSection x) (unitTensor (I := I) (M := M) x))
             ![(smoothOrthoFrame (I := I) g₁ x a x : E),
               (smoothOrthoFrame (I := I) g₁ x b x : E)] *
-          connDiffAACommKernelBilin (I := I) g₀ g₁ x
+          connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x
             (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
             (v 0) (v 1) := by
   rw [show unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 2 2
+      (operatorFieldApply (I := I) (M := M) g₀ 2 2
         (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁) W) x =
     Tensor0SBundle.Tensor0SSpace.toModel
       (connDiffAACommBiContrFib (I := I) g₀ g₁ x
@@ -1006,7 +1006,7 @@ private lemma foldSGK_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ P) W) x v =
       (2 : ℝ) * ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel
@@ -1019,7 +1019,7 @@ private lemma foldSGK_eval (g₀ g₁ : SmoothRiemannianMetric I M)
             (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
             (v 0) (v 1) := by
   rw [show unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 2 2
+      (operatorFieldApply (I := I) (M := M) g₀ 2 2
         (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ P) W) x =
     Tensor0SBundle.Tensor0SSpace.toModel
       (sharpGradKoszulBiContrFib (I := I) g₀ g₁ P x
@@ -1035,7 +1035,7 @@ private lemma foldRF_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ P) W) x v =
       ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
         Tensor0SBundle.Tensor0SSpace.toModel
@@ -1048,7 +1048,7 @@ private lemma foldRF_eval (g₀ g₁ : SmoothRiemannianMetric I M)
             (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
             (v 0) (v 1) := by
   rw [show unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 2 2
+      (operatorFieldApply (I := I) (M := M) g₀ 2 2
         (ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ P) W) x =
     Tensor0SBundle.Tensor0SSpace.toModel
       (ricciFoldBiContrFib (I := I) g₀ g₁ P x
@@ -1071,23 +1071,23 @@ private lemma foldHtie_zero (g₀ : SmoothRiemannianMetric I M) :
 set_option linter.unusedSectionVars false in
 private lemma foldPsymm_zero (g₀ : SmoothRiemannianMetric I M) :
     ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w =
-        ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x w v := by
+      smoothCcTensorBilinForm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w =
+        smoothCcTensorBilinForm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x w v := by
   intro x v w
   rw [ccTensorBilin_zero_weight, ccTensorBilin_zero_weight]
 
 set_option linter.unusedSectionVars false in
 theorem foldAppCc_sub_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
-      appCc (I := I) (M := M) g r s Φ₁ W - appCc (I := I) (M := M) g r s Φ₂ W := by
+    operatorFieldApply (I := I) (M := M) g r s (Φ₁ - Φ₂) W =
+      operatorFieldApply (I := I) (M := M) g r s Φ₁ W - operatorFieldApply (I := I) (M := M) g r s Φ₂ W := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appCc (I := I) (M := M) g r s Φ₁ W
-      - appCc (I := I) (M := M) g r s Φ₂ W).toSection x) =
-      (appCc (I := I) (M := M) g r s Φ₁ W).toSection x -
-        (appCc (I := I) (M := M) g r s Φ₂ W).toSection x from rfl]
+  rw [show ((operatorFieldApply (I := I) (M := M) g r s Φ₁ W
+      - operatorFieldApply (I := I) (M := M) g r s Φ₂ W).toSection x) =
+      (operatorFieldApply (I := I) (M := M) g r s Φ₁ W).toSection x -
+        (operatorFieldApply (I := I) (M := M) g r s Φ₂ W).toSection x from rfl]
   rw [appCc_toSection, appCc_toSection, appCc_toSection]
   rw [show ((Φ₁ - Φ₂).toSection x : TensorRSSpace r s I x) =
       Φ₁.toSection x - Φ₂.toSection x from by
@@ -1098,8 +1098,8 @@ set_option linter.unusedSectionVars false in
 theorem foldSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ S x u w = ccTensorBilin (I := I) g₀ S x w u) :
-    symmS (I := I) (M := M) g₀ S = S := by
+      smoothCcTensorBilinForm (I := I) g₀ S x u w = smoothCcTensorBilinForm (I := I) g₀ S x w u) :
+    ccTensor02Symm (I := I) (M := M) g₀ S = S := by
   have hswap : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S = S := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
     rw [domDomCongrSection_unitModel]
@@ -1122,7 +1122,7 @@ theorem foldSymmS_eq_self (g₀ : SmoothRiemannianMetric I M)
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
   have htwo : S + S = (2 : ℝ) • S := (two_smul ℝ S).symm
-  rw [symmS, hswap, htwo, smul_smul,
+  rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 set_option linter.unusedVariables false in
@@ -1132,31 +1132,31 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ P x v w = ccTensorBilin (I := I) g₀ P x w v)
+      smoothCcTensorBilinForm (I := I) g₀ P x v w = smoothCcTensorBilinForm (I := I) g₀ P x w v)
     (W : SmoothCcTensor g₀ 0 2) :
     (1 / 2 : ℝ) •
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁) W
-          - appCc (I := I) (M := M) g₀ 2 2
+          - operatorFieldApply (I := I) (M := M) g₀ 2 2
               (ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₀) W) =
-      appCc (I := I) (M := M) g₀ 2 2
+      operatorFieldApply (I := I) (M := M) g₀ 2 2
           (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁
-            + (appCcRS (I := I) (M := M) g₀ 2 2 2
-                  (ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₁
-                    - ricciArmOrder0BgRCommCoeffField (I := I) (M := M) g₀ g₀)
-                  (ccSlotSwapField (I := I) (M := M) g₀)
+            + (ccOperatorFieldComp (I := I) (M := M) g₀ 2 2 2
+                  (ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₁
+                    - ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g₀)
+                  (ccInputSlotSwapField (I := I) (M := M) g₀)
                 + (1 / 2 : ℝ) •
                     ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ P
                 - ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ P)) W
-        + appCc (I := I) (M := M) g₀ 4 2
-            (curvatureRefoldKernelCoeffField (I := I) (M := M) g₀ g₁
+        + operatorFieldApply (I := I) (M := M) g₀ 4 2
+            (curvatureActionKernelCoeffField (I := I) (M := M) g₀ g₁
               (ccTensorUnitValueSection (I := I) (M := M) g₀ W)
               (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ W)
               (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
               (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1)
             (iteratedCovGrad (I := I) g₀ 0 2 2 P) := by
   classical
-  have hsymmS : symmS (I := I) (M := M) g₀ P = P :=
+  have hsymmS : ccTensor02Symm (I := I) (M := M) g₀ P = P :=
     foldSymmS_eq_self (I := I) (M := M) g₀ P hPsymm
   rw [appCc_add_left (I := I) (M := M) g₀ 2 2, foldAppCc_sub_left (I := I) (M := M) g₀ 2 2,
     appCc_add_left (I := I) (M := M) g₀ 2 2, appCc_smul_left (I := I) (M := M) g₀ 2 2]
@@ -1305,7 +1305,7 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
               - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 P) x
                   ![smoothOrthoFrame (I := I) g₁ x a x,
                     smoothOrthoFrame (I := I) g₁ x b x, v 0, v 1])
-        + (connDiffAACommKernelBilin (I := I) g₀ g₁ x
+        + (connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x
               (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
               (v 0) (v 1)
             + sharpGradKoszulKernelBilin (I := I) g₀ g₁ P x
@@ -1405,7 +1405,7 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
             W.toSection x) (unitTensor (I := I) (M := M) x))
           ![(smoothOrthoFrame (I := I) g₁ x a x : E),
             (smoothOrthoFrame (I := I) g₁ x b x : E)] *
-          connDiffAACommKernelBilin (I := I) g₀ g₁ x
+          connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x
             (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
             (v 0) (v 1)
         + Tensor0SBundle.Tensor0SSpace.toModel
@@ -1451,10 +1451,10 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
             W.toSection x) (unitTensor (I := I) (M := M) x))
               ![(smoothOrthoFrame (I := I) g₁ x a x : E),
                 (smoothOrthoFrame (I := I) g₁ x b x : E)] *
-            (ccTensorBilin (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x)
+            (smoothCcTensorBilinForm (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x)
                 (riemannOp (LeviCivita (I := I) g₀) x (v 0)
                   (smoothOrthoFrame (I := I) g₁ x a x) (v 1))
-              + ccTensorBilin (I := I) g₀ P x
+              + smoothCcTensorBilinForm (I := I) g₀ P x
                   (riemannOp (LeviCivita (I := I) g₀) x (v 0)
                     (smoothOrthoFrame (I := I) g₁ x a x)
                     (smoothOrthoFrame (I := I) g₁ x b x)) (v 1)) :=
@@ -1469,10 +1469,10 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
             W.toSection x) (unitTensor (I := I) (M := M) x))
           ![(smoothOrthoFrame (I := I) g₁ x a x : E),
             (smoothOrthoFrame (I := I) g₁ x b x : E)] *
-        (ccTensorBilin (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x)
+        (smoothCcTensorBilinForm (I := I) g₀ P x (smoothOrthoFrame (I := I) g₁ x b x)
             (riemannOp (LeviCivita (I := I) g₀) x (v 0)
               (smoothOrthoFrame (I := I) g₁ x a x) (v 1))
-          + ccTensorBilin (I := I) g₀ P x
+          + smoothCcTensorBilinForm (I := I) g₀ P x
               (riemannOp (LeviCivita (I := I) g₀) x (v 0)
                 (smoothOrthoFrame (I := I) g₁ x a x)
                 (smoothOrthoFrame (I := I) g₁ x b x)) (v 1)) =
@@ -1556,11 +1556,11 @@ theorem ricciArmOrder0RiemannHalfBackgroundDifference_appCc_eq_residualFieldSum_
             W.toSection x) (unitTensor (I := I) (M := M) x))
             ![(smoothOrthoFrame (I := I) g₀ x a x : E),
               (smoothOrthoFrame (I := I) g₀ x b x : E)] *
-          (ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x
+          (smoothCcTensorBilinForm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x
               (smoothOrthoFrame (I := I) g₀ x b x)
               (riemannOp (LeviCivita (I := I) g₀) x (v 0)
                 (smoothOrthoFrame (I := I) g₀ x a x) (v 1))
-            + ccTensorBilin (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x
+            + smoothCcTensorBilinForm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x
                 (riemannOp (LeviCivita (I := I) g₀) x (v 0)
                   (smoothOrthoFrame (I := I) g₀ x a x)
                   (smoothOrthoFrame (I := I) g₀ x b x)) (v 1))) = 0 :=

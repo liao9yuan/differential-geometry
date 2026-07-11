@@ -311,7 +311,7 @@ private lemma flatArmCoeffCc_true_eq_cometricRaiseSlot0Field
     Matrix.cons_val_two, Matrix.tail_cons]
 
 set_option linter.unusedSectionVars false in
-theorem rfns_iteratedCovGrad_flatArmCoeffCc_true_eq_connDiffSection
+theorem riemannianFiberNormSq_iteratedCovGrad_flatArmCoeffCc_true_eq_connDiffSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x
         ((iteratedCovGrad (I := I) g₀ 1 2 i
@@ -328,7 +328,7 @@ theorem rfns_iteratedCovGrad_flatArmCoeffCc_true_eq_connDiffSection
     _ = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
           ((iteratedCovGrad (I := I) g₀ 0 3 i
             (-connDiffLoweredCc (I := I) g₀ g₁)).toSection x) :=
-        rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ 1
+        riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ 1
           (-connDiffLoweredCc (I := I) g₀ g₁) i x
     _ = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
           ((iteratedCovGrad (I := I) g₀ 0 3 i (connDiffLoweredCc (I := I) g₀ g₁)).toSection x) := by
@@ -350,7 +350,7 @@ theorem rfns_iteratedCovGrad_flatArmCoeffCc_true_eq_connDiffSection
             (cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
               (domDomCongrSection (I := I) g₀ (finRotate 3)
                 (connDiffLoweredCc (I := I) g₀ g₁)))).toSection x) :=
-        (rfns_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ 1
+        (riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq (I := I) (M := M) g₀ 1
           (domDomCongrSection (I := I) g₀ (finRotate 3)
             (connDiffLoweredCc (I := I) g₀ g₁)) i x).symm
     _ = riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x

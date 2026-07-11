@@ -82,7 +82,7 @@ theorem exists_Csob_convexPerturbation_pointwise_C2_le
   have hk_super : 2 * k > Module.finrank ℝ E + 4 := by rw [hk_def]; omega
   have h4k_le : 4 * k ≤ a + 2 := by rw [hk_def]; omega
   obtain ⟨Cc, hCc_pos, hCc⟩ :=
-    iteratedCovGrad_toSobolev_embedding_C2_unconditional (I := I) (M := M) g₀ k hk_super
+    iteratedCovGrad_toSobolev_embedding_C2_singleNorm (I := I) (M := M) g₀ k hk_super
   obtain ⟨Ch, hCh_nn, hCh⟩ :=
     exists_toHs_norm_le_iteratedCovGrad_tensorL2Norm_sum (I := I) (M := M) g₀ 0 2 (2 * k)
   refine ⟨Cc * Ch * ((4 * k + 1 : ℕ) : ℝ) * 2, ?_, ?_⟩

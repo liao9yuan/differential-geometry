@@ -54,7 +54,7 @@ private noncomputable def chartModelBasisProjE (m : Fin (Module.finrank ℝ E)) 
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-private noncomputable def lcFrameSelfCoord
+private noncomputable def leviCivitaFrameSelfCoord
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) (b : M) : ℝ := by
   classical
@@ -70,20 +70,20 @@ private lemma lcFrameSelfCoord_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
-    lcFrameSelfCoord (I := I) (M := M) g α i m b =
+    leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b =
       (chartBasisFamily (I := I) α hb).repr
         ((LeviCivita (I := I) g).toFun
           (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) m := by
   classical
-  unfold lcFrameSelfCoord
+  unfold leviCivitaFrameSelfCoord
   rw [dif_pos hb]
 
 private lemma lcFrameSelfCoord_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
-    lcFrameSelfCoord (I := I) (M := M) g α i m b =
+    leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b =
       chartModelBasisProjE (E := E) m
         ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
           ((LeviCivita (I := I) g).toFun
@@ -111,7 +111,7 @@ private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
         (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
         ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b) =
       ∑ m : Fin (Module.finrank ℝ E),
-        lcFrameSelfCoord (I := I) (M := M) g α i m b •
+        leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b •
           chartBasisVecFiber (I := I) α m b := by
   classical
   have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -227,7 +227,7 @@ private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
               (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
               ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)))) =
       ∑ m : Fin (Module.finrank ℝ E),
-        lcFrameSelfCoord (I := I) (M := M) g α i m b *
+        leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
           tensorChartComponentProjection (E := E) r s Idx Jdx
             ((trivializationAt (TensorRSModel r s ℝ E)
                 (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -249,10 +249,10 @@ private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
     with hLcov_def
   have hApply :
       L (Lcov (∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b •
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b •
               chartBasisVecFiber (I := I) α m b)) =
         ∑ m : Fin (Module.finrank ℝ E),
-          lcFrameSelfCoord (I := I) (M := M) g α i m b •
+          leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b •
             L (Lcov (chartBasisVecFiber (I := I) α m b)) := by
     rw [map_sum]
     rw [map_sum]
@@ -393,7 +393,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
                   ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))))) =
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               tensorChartComponentProjection (E := E) r s Idx Jdx
                 ((trivializationAt (TensorRSModel r s ℝ E)
                     (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -408,7 +408,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
     have hStep2 :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               tensorChartComponentProjection (E := E) r s Idx Jdx
                 ((trivializationAt (TensorRSModel r s ℝ E)
                     (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b
@@ -418,7 +418,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
                     (chartBasisVecFiber (I := I) α m b)))) =
         ∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               (euclidPartial (E := E) m
                 (chartPushedRaw I α
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)) y +
@@ -429,7 +429,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
         (I := I) (M := M) g r s α T₀ m Idx Jdx hb]
     rw [hStep2]
     have hcoord_eq : ∀ i m : Fin (Module.finrank ℝ E),
-        lcFrameSelfCoord (I := I) (M := M) g α i m b =
+        leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b =
         lcFrameSelfCoordPullback (I := I) (M := M) g α i m y := by
       intro i m
       have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
@@ -440,7 +440,7 @@ theorem chartFrameTraceΓCorrection_eq_T₀_linear
     have hStep3 :
         (∑ i : Fin (Module.finrank ℝ E),
           ∑ m : Fin (Module.finrank ℝ E),
-            lcFrameSelfCoord (I := I) (M := M) g α i m b *
+            leviCivitaFrameSelfCoord (I := I) (M := M) g α i m b *
               (euclidPartial (E := E) m
                 (chartPushedRaw I α
                   (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx)) y +

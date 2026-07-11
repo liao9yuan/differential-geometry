@@ -60,11 +60,11 @@ theorem chart_loc_of_iterated_diff_data_and_uniform_bound
         ENNReal.ofReal (M_bound i k) := by
   classical
   intro i k
-  exact chart_loc_of_uniform_bound (I := I) (M := M)
+  exact exists_weak_second_partial_of_uniform_diffQuot_bound (I := I) (M := M)
     (g := g) (α := α) D₂
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd i k
 
-theorem chart_loc_explicit_iterated
+theorem exists_weak_second_partial_of_iterated_diff_data_explicit
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D₀ : ChartBilinearH1ComplData (I := I) (M := M) g α)

@@ -239,7 +239,7 @@ theorem summable_homModeCoeff_Ha1 (hT : 0 ≤ T)
   · exact mul_le_mul_of_nonneg_right
       (tensorSobolevWeight_mono (I := I) (M := M) i (by linarith)) (sq_nonneg _)
 
-def maxRegHomogeneousSolFieldHa1 (a : ℝ) (T : ℝ)
+def maxRegHomogeneousSolFieldTraceScale (a : ℝ) (T : ℝ)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T :=
   timeL2OfModes (I := I) (M := M) (σ := a + 1)
@@ -249,7 +249,7 @@ theorem maxRegHomogeneousSolFieldHa1_timeModeCoeff (hT : 0 ≤ T)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     timeModeCoeff (I := I) (M := M)
-        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀) i =
+        (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀) i =
       homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
   timeL2OfModes_timeModeCoeff (I := I) (M := M) (σ := a + 1) _
     (summable_homModeCoeff_Ha1 (I := I) (M := M) (a := a) (T := T) hT u₀) i
@@ -418,7 +418,7 @@ def maxRegDuhamelSolFieldHa1 (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g r s a) T) :
     timeL2 (tensorHs (I := I) (M := M) g r s (a + 1)) T :=
-  maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ +
+  maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ +
     maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 gforce
 
 def maxRegDuhamelMap (a : ℝ) {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)

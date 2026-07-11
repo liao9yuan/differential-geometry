@@ -182,7 +182,7 @@ theorem wkpNormChart_zero_mul_le_const_mul_wkpNormChart_withBoundary
   refine ENNReal.tsum_le_tsum (fun α => ?_)
   exact wkpNormHalfSpace_zero_chartPushed_mul_le (n := n) (M := M) α hu_bound huMax_nn p
 
-private noncomputable def chartSmoothExt_local (α : M) (f : M → ℝ) :
+private noncomputable def chartPullbackZeroExtend (α : M) (f : M → ℝ) :
     EuclideanSpace ℝ (Fin n) → ℝ := by
   classical
   exact fun y =>
@@ -194,7 +194,7 @@ omit [IsManifold I_hs ∞ M] in
 private lemma chartSmoothExt_local_apply_of_mem_target
     (α : M) (f : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ (extChartAt I_hs α).target) :
-    chartSmoothExt_local (n := n) (M := M) α f y =
+    chartPullbackZeroExtend (n := n) (M := M) α f y =
       f ((extChartAt I_hs α).symm y) := by
   classical
   change (if y ∈ (extChartAt I_hs α).target then
@@ -206,7 +206,7 @@ omit [IsManifold I_hs ∞ M] in
 private lemma chartSmoothExt_local_apply_of_notMem_target
     (α : M) (f : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∉ (extChartAt I_hs α).target) :
-    chartSmoothExt_local (n := n) (M := M) α f y = 0 := by
+    chartPullbackZeroExtend (n := n) (M := M) α f y = 0 := by
   classical
   change (if y ∈ (extChartAt I_hs α).target then
       f ((extChartAt I_hs α).symm y)
@@ -216,7 +216,7 @@ private lemma chartSmoothExt_local_apply_of_notMem_target
 private lemma chartSmoothExt_local_eq_chartPushed_on_target
     (α : M) (u : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ (extChartAt I_hs α).target) :
-    chartSmoothExt_local (n := n) (M := M) α
+    chartPullbackZeroExtend (n := n) (M := M) α
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
           : C^∞⟮I_hs, M; ℝ⟯) x * u x) y =
       chartPushed (n := n) (M := M)
@@ -232,7 +232,7 @@ private lemma chartSmoothExt_local_eq_zero_off_image_tsupport
     (_hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
     {y : EuclideanSpace ℝ (Fin n)}
     (hy_off : y ∉ (extChartAt I_hs α) '' (tsupport f)) :
-    chartSmoothExt_local (n := n) (M := M) α f y = 0 := by
+    chartPullbackZeroExtend (n := n) (M := M) α f y = 0 := by
   classical
   by_cases hy_target : y ∈ (extChartAt I_hs α).target
   · rw [chartSmoothExt_local_apply_of_mem_target (n := n) (M := M) α f hy_target]
@@ -298,7 +298,7 @@ private lemma contDiffAt_chartSmoothExt_local_of_mem_interior_target
     {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
         (chartTargetEuclid (n := n) (M := M) α)) :
-    ContDiffAt ℝ ∞ (chartSmoothExt_local (n := n) (M := M) α f) y := by
+    ContDiffAt ℝ ∞ (chartPullbackZeroExtend (n := n) (M := M) α f) y := by
   classical
   have hOpen : IsOpen (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
       (d := n) (chartTargetEuclid (n := n) (M := M) α)) := by
@@ -330,7 +330,7 @@ private lemma contDiffAt_chartSmoothExt_local_of_notMem_image_tsupport
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
     (hf_compact : IsCompact (tsupport f)) {y : EuclideanSpace ℝ (Fin n)}
     (hy_off : y ∉ (extChartAt I_hs α) '' (tsupport f)) :
-    ContDiffAt ℝ ∞ (chartSmoothExt_local (n := n) (M := M) α f) y := by
+    ContDiffAt ℝ ∞ (chartPullbackZeroExtend (n := n) (M := M) α f) y := by
   classical
   set K : Set (EuclideanSpace ℝ (Fin n)) := (extChartAt I_hs α) '' (tsupport f)
   have hK_compact : IsCompact K := by
@@ -357,7 +357,7 @@ private lemma contDiff_chartSmoothExt_local
     (α : M) {f : M → ℝ} (hf : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ f)
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
     (h_int : chartSmoothExtInteriorSupport_local (n := n) (M := M) α f) :
-    ContDiff ℝ ∞ (chartSmoothExt_local (n := n) (M := M) α f) := by
+    ContDiff ℝ ∞ (chartPullbackZeroExtend (n := n) (M := M) α f) := by
   classical
   rw [contDiff_iff_contDiffAt]
   intro y
@@ -391,7 +391,7 @@ private lemma image_extChartAt_tsupport_compact_local
 private lemma hasCompactSupport_chartSmoothExt_local
     (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) :
-    HasCompactSupport (chartSmoothExt_local (n := n) (M := M) α f) := by
+    HasCompactSupport (chartPullbackZeroExtend (n := n) (M := M) α f) := by
   classical
   set K : Set (EuclideanSpace ℝ (Fin n)) := (extChartAt I_hs α) '' (tsupport f)
   have hK_compact : IsCompact K :=
@@ -406,14 +406,14 @@ private lemma hasCompactSupport_chartSmoothExt_local
 private lemma tsupport_chartSmoothExt_local
     (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) :
-    tsupport (chartSmoothExt_local (n := n) (M := M) α f) ⊆
+    tsupport (chartPullbackZeroExtend (n := n) (M := M) α f) ⊆
       (extChartAt I_hs α) '' (tsupport f) := by
   classical
   set K : Set (EuclideanSpace ℝ (Fin n)) := (extChartAt I_hs α) '' (tsupport f)
   have hK_compact : IsCompact K :=
     image_extChartAt_tsupport_compact_local (n := n) (M := M) (f := f) (α := α) hf_supp
   have hK_closed : IsClosed K := hK_compact.isClosed
-  have h_supp_sub : Function.support (chartSmoothExt_local (n := n) (M := M) α f) ⊆ K := by
+  have h_supp_sub : Function.support (chartPullbackZeroExtend (n := n) (M := M) α f) ⊆ K := by
     intro y hy
     by_contra hyK
     apply hy
@@ -426,7 +426,7 @@ omit [CompactSpace M] in
 
 private lemma chartSmoothExt_ae_eq_chartPushed_interior_local
     (α : M) (u : M → ℝ) :
-    chartSmoothExt_local (n := n) (M := M) α
+    chartPullbackZeroExtend (n := n) (M := M) α
         (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I_hs M α
           : C^∞⟮I_hs, M; ℝ⟯) x * u x) =ᵐ[volume.restrict
         (DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
@@ -764,7 +764,7 @@ theorem MemWkpChart_of_contMDiff_AllChartsInteriorSupport
         (chartTargetEuclid (n := n) (M := M) β) :=
     chartSmoothExtInteriorSupport_image_subset_interior_local
       (β := β) h_pou_supp_chart_src (h_int β)
-  set ext_β : EuclideanSpace ℝ (Fin n) → ℝ := chartSmoothExt_local β fβ with hext_β_def
+  set ext_β : EuclideanSpace ℝ (Fin n) → ℝ := chartPullbackZeroExtend β fβ with hext_β_def
   have hext_β_smooth : ContDiff ℝ ∞ ext_β :=
     contDiff_chartSmoothExt_local β hfβ_smooth h_pou_supp_chart_src (h_int β)
   have hext_β_compact : HasCompactSupport ext_β :=
@@ -898,7 +898,7 @@ private lemma chartLifted_local_apply_norm_le
 private lemma chartLifted_local_eq_chartSmoothExt_local
     (α : M) (v : M → ℝ) :
     chartLifted_local (n := n) (M := M) α v =
-      chartSmoothExt_local (n := n) (M := M) α v := by
+      chartPullbackZeroExtend (n := n) (M := M) α v := by
   funext y; rfl
 
 private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted_local_ae

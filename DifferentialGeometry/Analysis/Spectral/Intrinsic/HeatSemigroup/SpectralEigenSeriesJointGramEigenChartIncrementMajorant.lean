@@ -154,8 +154,8 @@ private lemma eigenSpatialFactor_eqOn
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
     Set.EqOn (eigenSpatialFactor (I := I) (M := M) g α i' j' i)
       (fun y : E => (1 / 2 : ℝ) *
-        (rawCompOnE (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
-          rawCompOnE (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y))
+        (tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
+          tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y))
       (interior (extChartAt I α).target) := by
   intro y hy
   have hsrc : (extChartAt I α).symm y ∈ (chartAt H α).source := by
@@ -175,8 +175,8 @@ private lemma eigenSpatialFactor_contDiffOn
       (interior (extChartAt I α).target) := by
   refine ContDiffOn.congr ?_ (eigenSpatialFactor_eqOn (I := I) (M := M) g α i' j' i)
   have hadd : ContDiffOn ℝ ∞
-      (fun y : E => rawCompOnE (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
-          rawCompOnE (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y)
+      (fun y : E => tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j'] y +
+          tensorChartComponentOnModel (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'] y)
       (interior (extChartAt I α).target) :=
     (rawCompOnE_contDiffOn (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![i', j']).add
       (rawCompOnE_contDiffOn (I := I) (M := M) g (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α ![j', i'])
@@ -215,27 +215,27 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
 
    have hcongr : iteratedFDerivWithin ℝ m' (eigenSpatialFactor (I := I) (M := M) g α i' j' i) O y =
        iteratedFDerivWithin ℝ m'
-         ((1 / 2 : ℝ) • (rawCompOnE (I := I) (M := M) g S α ![i', j'] +
-           rawCompOnE (I := I) (M := M) g S α ![j', i'])) O y := by
+         ((1 / 2 : ℝ) • (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j'] +
+           tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i'])) O y := by
      refine iteratedFDerivWithin_congr ?_ (hB hy) m'
      intro z hz
      rw [eigenSpatialFactor_eqOn (I := I) (M := M) g α i' j' i hz]
      simp only [Pi.smul_apply, Pi.add_apply, smul_eq_mul, hS_def]
    rw [hcongr]
-   have hcd_ab : ContDiffWithinAt ℝ (m' : ℕ∞) (rawCompOnE (I := I) (M := M) g S α ![i', j']) O y :=
+   have hcd_ab : ContDiffWithinAt ℝ (m' : ℕ∞) (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y :=
      ((rawCompOnE_contDiffOn (I := I) (M := M) g S α ![i', j']).contDiffWithinAt (hB hy)).of_le
        (by exact_mod_cast le_top)
-   have hcd_ba : ContDiffWithinAt ℝ (m' : ℕ∞) (rawCompOnE (I := I) (M := M) g S α ![j', i']) O y :=
+   have hcd_ba : ContDiffWithinAt ℝ (m' : ℕ∞) (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y :=
      ((rawCompOnE_contDiffOn (I := I) (M := M) g S α ![j', i']).contDiffWithinAt (hB hy)).of_le
        (by exact_mod_cast le_top)
-   rw [iteratedFDerivWithin_const_smul_apply (f := rawCompOnE (I := I) (M := M) g S α ![i', j'] +
-         rawCompOnE (I := I) (M := M) g S α ![j', i']) (hcd_ab.add hcd_ba) hUDO (hB hy),
+   rw [iteratedFDerivWithin_const_smul_apply (f := tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j'] +
+         tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) (hcd_ab.add hcd_ba) hUDO (hB hy),
      iteratedFDerivWithin_add_apply hcd_ab hcd_ba hUDO (hB hy)]
    refine le_trans (norm_smul_le (1 / 2 : ℝ)
-     (iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![i', j']) O y +
-       iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![j', i']) O y)) ?_
-   have htri : ‖iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![i', j']) O y +
-         iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![j', i']) O y‖ ≤
+     (iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
+       iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y)) ?_
+   have htri : ‖iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
+         iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y‖ ≤
        Cab * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * kE) S‖ +
          Cba * ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * kE) S‖ :=
      le_trans (norm_add_le _ _) (add_le_add (hCab S y hy) (hCba S y hy))
@@ -244,12 +244,12 @@ private lemma exists_eigenSpatialFactor_jet_le_lambda_pow
    have hdec : N ≤ Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) := hCdec i
    have hbase_nn : (0 : ℝ) ≤ (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE) :=
      pow_nonneg (by have := tensor_lambda_nonneg (I := I) (M := M) i; linarith) _
-   calc ‖(1 / 2 : ℝ)‖ * ‖iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![i', j']) O y +
-           iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![j', i']) O y‖
+   calc ‖(1 / 2 : ℝ)‖ * ‖iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
+           iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y‖
        ≤ ‖(1 / 2 : ℝ)‖ * ((Cab + Cba) * N) := by
          refine mul_le_mul_of_nonneg_left ?_ (norm_nonneg _)
-         calc ‖iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![i', j']) O y +
-               iteratedFDerivWithin ℝ m' (rawCompOnE (I := I) (M := M) g S α ![j', i']) O y‖
+         calc ‖iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![i', j']) O y +
+               iteratedFDerivWithin ℝ m' (tensorChartComponentOnModel (I := I) (M := M) g S α ![j', i']) O y‖
              ≤ Cab * N + Cba * N := htri
            _ = (Cab + Cba) * N := by ring
      _ ≤ ‖(1 / 2 : ℝ)‖ * ((Cab + Cba) * (Cdec * (1 + TensorEigenIdx.lambda (I := I) (M := M) i) ^ (2 * kE))) := by

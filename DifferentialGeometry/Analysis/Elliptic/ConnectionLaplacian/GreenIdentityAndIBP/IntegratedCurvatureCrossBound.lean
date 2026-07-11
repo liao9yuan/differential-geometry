@@ -40,21 +40,21 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-theorem exists_GcurvSection_l2Norm_le_covGrad
+theorem exists_genuineCurvPureRSection_l2Norm_le_covGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ Cr : ℝ, 0 ≤ Cr ∧ ∀ S : SmoothCcTensor g 0 s,
-      ‖GcurvSection (I := I) (M := M) g s S‖ ≤
+      ‖genuineCurvatureOnlySection (I := I) (M := M) g s S‖ ≤
         Cr * ‖covGrad (I := I) (M := M) g 0 s S‖ := by
   classical
   obtain ⟨kappa, hkappa_nn, hkappa⟩ := exists_proportional_pureRGenuineDiffOp (I := I) (M := M) g
   refine ⟨Real.sqrt (kappa 0 (s + 1)), Real.sqrt_nonneg _, fun S => ?_⟩
-  have hsec : GcurvSection (I := I) (M := M) g s S =
+  have hsec : genuineCurvatureOnlySection (I := I) (M := M) g s S =
       pureRGenuineDiffOp (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) :=
     (pureRGenuineDiffOp0_eq_GcurvSection (I := I) (M := M) g s S).symm
 
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
-          ((GcurvSection (I := I) (M := M) g s S).toSection x) ≤
+          ((genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection x) ≤
         (Real.sqrt (kappa 0 (s + 1))) ^ 2 *
           riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
             ((covGrad (I := I) (M := M) g 0 s S).toSection x) := by
@@ -67,7 +67,7 @@ theorem exists_GcurvSection_l2Norm_le_covGrad
 
   have hbound := tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two (I := I) (M := M) g
     (covGrad (I := I) (M := M) g 0 s S) (0 : SmoothCcTensor g 0 (s + 1))
-    (GcurvSection (I := I) (M := M) g s S) (Real.sqrt (kappa 0 (s + 1))) (Real.sqrt_nonneg _)
+    (genuineCurvatureOnlySection (I := I) (M := M) g s S) (Real.sqrt (kappa 0 (s + 1))) (Real.sqrt_nonneg _)
     (fun x => ?_)
   · rw [norm_zero, add_zero] at hbound; exact hbound
   · have hz : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
@@ -87,7 +87,7 @@ theorem exists_genuineDiffCurvSection_l2Norm_le_self
     (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s))
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, fun S => ?_⟩
   have hsec : genuineDiffCurvSection (I := I) (M := M) g s S =
-      appCc (I := I) (M := M) g (s + 0) (s + 0 + 1)
+      operatorFieldApply (I := I) (M := M) g (s + 0) (s + 0 + 1)
         (covGrad (I := I) (M := M) g (s + 0) (s + 0) (curvOpField (I := I) (M := M) g s)) S := rfl
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x

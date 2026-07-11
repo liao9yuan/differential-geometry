@@ -39,27 +39,27 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-theorem ccTensorBilinSymm_symmS_apply (g₀ : SmoothRiemannianMetric I M)
+theorem symmetricBilinearForm_of_tensorSymmetrization_eq_self (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
-    ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T) x v w =
+    ccTensorBilinSymm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) x v w =
       ccTensorBilinSymm (I := I) g₀ T x v w := by
   rw [ccTensorBilinSymm_apply, ccTensorBilin_symmS, ccTensorBilin_symmS,
     ccTensorBilinSymm_symm (I := I) g₀ T x w v, ccTensorBilinSymm_apply]
   ring
 
-theorem gFibreOpBound_symmS (g₀ : SmoothRiemannianMetric I M)
+theorem fiberwiseOperatorNormBound_of_tensorSymmetrization (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
-    gFibreOpBound (I := I) (M := M) g₀
-      (ccTensorBilinSymm (I := I) g₀ (symmS (I := I) (M := M) g₀ T)) δ := by
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ) :
+    metricCauchySchwarzBound (I := I) (M := M) g₀
+      (ccTensorBilinSymm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T)) δ := by
   intro x v w
-  rw [ccTensorBilinSymm_symmS_apply (I := I) (M := M) g₀ T x v w]
+  rw [symmetricBilinearForm_of_tensorSymmetrization_eq_self (I := I) (M := M) g₀ T x v w]
   exact hδ x v w
 
-theorem ccTensorBilin_symmS_symm' (g₀ : SmoothRiemannianMetric I M)
+theorem bilinearForm_of_tensorSymmetrization_symm (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ T) x v w =
-      ccTensorBilin (I := I) g₀ (symmS (I := I) (M := M) g₀ T) x w v := by
+    smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) x v w =
+      smoothCcTensorBilinForm (I := I) g₀ (ccTensor02Symm (I := I) (M := M) g₀ T) x w v := by
   rw [ccTensorBilin_symmS, ccTensorBilin_symmS, ccTensorBilinSymm_symm]
 
 theorem norm_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I M)
@@ -93,14 +93,14 @@ theorem norm_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I
   have hnnB : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 2 k T‖ := norm_nonneg _
   exact (sq_eq_sq₀ hnnA hnnB).mp hsq
 
-theorem norm_iteratedCovGrad_symmS_le (g₀ : SmoothRiemannianMetric I M)
+theorem norm_iteratedCovGrad_tensorSymmetrization_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
-    ‖iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T)‖ ≤
+    ‖iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T)‖ ≤
       ‖iteratedCovGrad (I := I) g₀ 0 2 k T‖ := by
   classical
   set Tsw : SmoothCcTensor g₀ 0 2 :=
     domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T with hTsw_def
-  have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T) =
+  have hiter_eq : iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T) =
       (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k T +
         (1 / 2 : ℝ) • iteratedCovGrad (I := I) g₀ 0 2 k Tsw := by
     rw [hTsw_def]; exact iteratedCovGrad_symmS_eq (I := I) g₀ T k

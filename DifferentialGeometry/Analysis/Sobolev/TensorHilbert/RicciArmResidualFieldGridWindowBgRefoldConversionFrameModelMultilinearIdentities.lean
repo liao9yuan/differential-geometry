@@ -154,7 +154,7 @@ lemma toModel_cons_cons_sum_smul (x : M) {n : ℕ}
 set_option linter.unusedSectionVars false in
 lemma unitModel_eq_ccTensorBilin_pt (S : SmoothCcTensor g₀ 0 2) (b : M)
     (u w : TangentSpace I b) :
-    unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = ccTensorBilin (I := I) g₀ S b u w := by
+    unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
   rw [ccTensorBilin_apply (I := I) g₀ S b u w, ccTensorModel]
   rw [show ccTensorMultilinear (I := I) g₀ S b =
       (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace 2 I b from S.toSection b)
@@ -186,7 +186,7 @@ private lemma reindexCoeffGen_one_eq (r s : ℕ) (R : SmoothCcTensor g₀ r s) :
   rfl
 
 set_option linter.unusedSectionVars false in
-lemma rfns_icg_rsDomDomCongrSection_eq (r s : ℕ) (σ : Equiv.Perm (Fin s))
+lemma riemannianFiberNormSq_iteratedCovGrad_rsDomDomCongrSection_eq (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (R : SmoothCcTensor g₀ r s) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x
         ((iteratedCovGrad (I := I) g₀ r s i
@@ -199,12 +199,12 @@ lemma rfns_icg_rsDomDomCongrSection_eq (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (rsDomDomCongrSection (I := I) (M := M) g₀ r s σ R)] at h
   exact h
 
-def sigmaE : Equiv.Perm (Fin 6) :=
+def ricciFoldRemainderSlotPerm : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![1, 3, 4, 5, 0, 2] : Fin 6 → Fin 6) i,
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-def tauK3b : Equiv.Perm (Fin 6) :=
+def ricciFoldWeightBPerm : Equiv.Perm (Fin 6) :=
   ⟨fun i => (![5, 0, 2, 1, 4, 3] : Fin 6 → Fin 6) i,
    fun i => (![1, 3, 2, 5, 4, 0] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
@@ -296,7 +296,7 @@ lemma slotExtend_toModel_cons (r s : ℕ) (Φ : SmoothCcTensor g₀ r s) (x : M)
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D v0)) vs := by
   rw [show ((show Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x from
       (slotExtend (I := I) (M := M) g₀ r s Φ).toSection x) D) =
-      slotExtendFib (I := I) (M := M) g₀ r s x
+      slotExtendPointwise (I := I) (M := M) g₀ r s x
         (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x) D from rfl]
   exact slotExtendFib_apply_eval (I := I) (M := M) g₀ r s x
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x) D
@@ -467,28 +467,28 @@ lemma metricCcTensor_unitModel_apply (g : SmoothRiemannianMetric I M) (x : M)
   rfl
 
 set_option linter.unusedSectionVars false in
-lemma ccTensorBilin_expand_left (S : SmoothCcTensor g₀ 0 2) (x : M)
+lemma tensorBilinearPairing_expand_left (S : SmoothCcTensor g₀ 0 2) (x : M)
     (u w : TangentSpace I x) :
-    ccTensorBilin (I := I) g₀ S x u w =
+    smoothCcTensorBilinForm (I := I) g₀ S x u w =
       ∑ e : Fin (Module.finrank ℝ E),
         g₀.inner x u (smoothOrthoFrame (I := I) g₀ x e x) *
-          ccTensorBilin (I := I) g₀ S x (smoothOrthoFrame (I := I) g₀ x e x) w := by
+          smoothCcTensorBilinForm (I := I) g₀ S x (smoothOrthoFrame (I := I) g₀ x e x) w := by
   conv_lhs => rw [orthoFrame_expansion_at_center (I := I) (M := M) g₀ x u]
-  rw [map_sum (ccTensorBilin (I := I) g₀ S x) _ Finset.univ, ContinuousLinearMap.sum_apply]
+  rw [map_sum (smoothCcTensorBilinForm (I := I) g₀ S x) _ Finset.univ, ContinuousLinearMap.sum_apply]
   refine Finset.sum_congr rfl fun e _ => ?_
-  rw [map_smul (ccTensorBilin (I := I) g₀ S x), ContinuousLinearMap.smul_apply, smul_eq_mul]
+  rw [map_smul (smoothCcTensorBilinForm (I := I) g₀ S x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
 set_option linter.unusedSectionVars false in
-lemma ccTensorBilin_expand_right (S : SmoothCcTensor g₀ 0 2) (x : M)
+lemma tensorBilinearPairing_expand_right (S : SmoothCcTensor g₀ 0 2) (x : M)
     (u w : TangentSpace I x) :
-    ccTensorBilin (I := I) g₀ S x u w =
+    smoothCcTensorBilinForm (I := I) g₀ S x u w =
       ∑ e : Fin (Module.finrank ℝ E),
         g₀.inner x w (smoothOrthoFrame (I := I) g₀ x e x) *
-          ccTensorBilin (I := I) g₀ S x u (smoothOrthoFrame (I := I) g₀ x e x) := by
+          smoothCcTensorBilinForm (I := I) g₀ S x u (smoothOrthoFrame (I := I) g₀ x e x) := by
   conv_lhs => rw [orthoFrame_expansion_at_center (I := I) (M := M) g₀ x w]
-  rw [map_sum (ccTensorBilin (I := I) g₀ S x u) _ Finset.univ]
+  rw [map_sum (smoothCcTensorBilinForm (I := I) g₀ S x u) _ Finset.univ]
   refine Finset.sum_congr rfl fun e _ => ?_
-  rw [map_smul (ccTensorBilin (I := I) g₀ S x u), smul_eq_mul]
+  rw [map_smul (smoothCcTensorBilinForm (I := I) g₀ S x u), smul_eq_mul]
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in

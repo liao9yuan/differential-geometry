@@ -743,7 +743,7 @@ lemma chartInvGramBeta_mul_chartGramOnE_diag
   rw [Matrix.mul_apply] at this
   rw [this, Matrix.one_apply]
 
-lemma chartTransition_raw_collapse [I.Boundaryless]
+lemma chartChristoffelNumerator_transitionIdentity [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
@@ -1112,7 +1112,7 @@ theorem chartChristoffel_transform [I.Boundaryless]
               partialDeriv (E := E) i
                 (fun z => chartTransitionJacEntry (I := I) α β z b j) x := by
     intro d
-    have h := chartTransition_raw_collapse (I := I) g α β hp_α hp_β i j d
+    have h := chartChristoffelNumerator_transitionIdentity (I := I) g α β hp_α hp_β i j d
     rw [hK, hS]
     rw [show (∑ l, chartTransitionJacEntry (I := I) β α Tx l d *
         (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j) x +

@@ -81,7 +81,7 @@ theorem partialDeriv_chartDeTurckVFComp_sub_eq
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 
-theorem chartLieDeTurckCompZerothGroup_sub_eq
+theorem chartLieDeTurckCompAdvectionTerm_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -105,7 +105,7 @@ theorem chartLieDeTurckCompZerothGroup_sub_eq
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 
-theorem chartLieDeTurckCompFirstGroup_sub_eq
+theorem chartLieDeTurckCompIDerivTerm_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -128,7 +128,7 @@ theorem chartLieDeTurckCompFirstGroup_sub_eq
 omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M]
   [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 
-theorem chartLieDeTurckCompSecondGroup_sub_eq
+theorem chartLieDeTurckCompJDerivTerm_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -201,9 +201,9 @@ theorem chartLieDeTurckComp_sub_eq
               (∑ k, chartGramOnE (I := I) g₂ α i k y *
                   partialDeriv (E := E) j (chartDeTurckVFComp (I := I) g₂ g_bg α k) y))) from by
         ring]
-  rw [chartLieDeTurckCompZerothGroup_sub_eq (I := I) g₁ g₂ g_bg α i j y,
-    chartLieDeTurckCompFirstGroup_sub_eq (I := I) g₁ g₂ g_bg α i j y,
-    chartLieDeTurckCompSecondGroup_sub_eq (I := I) g₁ g₂ g_bg α i j y]
+  rw [chartLieDeTurckCompAdvectionTerm_sub_eq (I := I) g₁ g₂ g_bg α i j y,
+    chartLieDeTurckCompIDerivTerm_sub_eq (I := I) g₁ g₂ g_bg α i j y,
+    chartLieDeTurckCompJDerivTerm_sub_eq (I := I) g₁ g₂ g_bg α i j y]
   ring
 
 end DeTurckCoefficients

@@ -39,7 +39,7 @@ variable
 
 set_option linter.unusedVariables false in
 
-theorem deturckN_hscale_lipschitz
+theorem deturck_nemytskii_operator_hs_lipschitz_of_l2coeff_lipschitz
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))
     (N_cont : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1) →
@@ -61,7 +61,7 @@ theorem deturckN_hscale_lipschitz
         ccTensorBilinSymm (I := I) g_bg (repr u) x v w)
     (hrepr_small : ∀ u : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       ∃ δ' : ℝ, δ' < 1 ∧
-        gFibreOpBound (I := I) (M := M) g_bg
+        metricCauchySchwarzBound (I := I) (M := M) g_bg
           (ccTensorBilinSymm (I := I) g_bg (repr u)) δ')
     (hNsec_lip : ∃ K : ℝ≥0, ∀ u u' : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 1),
       Summable (fun i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx

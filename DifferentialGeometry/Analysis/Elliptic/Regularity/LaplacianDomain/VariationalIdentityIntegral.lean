@@ -1142,7 +1142,7 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
         (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
         (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
         (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h))) := by
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))) := by
   classical
   have h_eq_smooth : ∀ n,
       ∫ y in chartTargetEuclid (I := I) (M := M) α,
@@ -1166,7 +1166,7 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
   have h_eq_fHLeibniz_smooth : ∀ n,
       smoothToLp (I := I) (M := M) g
           (pouScalar (I := I) (M := M) α (v n)).oneSubLapClassical =
-        fHLeibniz (I := I) (M := M) g α
+        leibnizCompensatedSource (I := I) (M := M) g α
           (smoothToH1Compl (I := I) (M := M) g (v n))
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) (v n)) :=
     fun n => smoothToLp_pouScalar_oneSubLap_eq_fHLeibniz (I := I) (M := M) g α (v n)
@@ -1277,7 +1277,7 @@ private lemma rhs_smooth_tendsto_chartPulledIntegralCLM_fHLeibniz_general
           (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
           (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
           (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-          (fHLeibniz (I := I) (M := M) g α u_h hu_h) :=
+          (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) :=
     laplacianDomain_variational_identity_clm_form
       (I := I) (M := M) g α hu_h hψ hψ_cs hψ_supp
   rw [show (fun n =>
@@ -1337,7 +1337,7 @@ theorem laplacianDomain_variational_identity_general
       (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
       (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
       (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h) := by
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) := by
   classical
   obtain ⟨v, h_v_tendsto⟩ :=
     exists_smooth_approx_seq (I := I) (M := M) g u_h
@@ -1536,7 +1536,7 @@ theorem laplacianDomain_variational_identity_general
       (densityPsi_cont (I := I) (M := M) (g := g) (α := α) hψ hψ_supp)
       (densityPsi_cs (I := I) (M := M) (g := g) (α := α) hψ_cs)
       (densityPsi_supp (I := I) (M := M) (g := g) (α := α) hψ_supp)
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h) := by
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) := by
     have h_seq_eq : (fun n =>
         (∫ y in chartTargetEuclid (I := I) (M := M) α,
           (∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),

@@ -169,7 +169,7 @@ def wtwokTwoNorm
   ∑' α : M,
     ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α)
 
@@ -180,7 +180,7 @@ theorem wtwokTwoNorm_eq_tsum
       ∑' α : M,
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
               (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α) := rfl
 
@@ -197,7 +197,7 @@ theorem wtwokTwoNorm_zero_section
   have hpt : ∀ α : M,
       (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (tensorChartComp (I := I) (M := M) g r s
               (0 : SmoothCcTensor g r s) α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α)) = 0 := by

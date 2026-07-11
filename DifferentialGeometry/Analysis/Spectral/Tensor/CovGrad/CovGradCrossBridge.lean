@@ -468,7 +468,7 @@ theorem tensorCovDerivCrossLeft_eq_tensorInnerPointwise_grad
                 (tensorCovDerivAt (I := I) (M := M) g r s w x
                   ((chartModelBasis E) k)))
               (S.toFun x) =
-            tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (lowW k) lowS from by
         rw [hlowW_def, hlowS_def]
         rfl]
@@ -494,7 +494,7 @@ theorem tensorCovDerivCrossLeft_eq_tensorInnerPointwise_grad
               ((covGrad (I := I) (M := M) g r s w).toSection x))
             (TensorRSSpace.toModel
               ((prependCovGradSlot (I := I) (M := M) g r s ζ S).toSection x)) =
-          tensorInnerPointwise_0s (I := I) (M := M) (r + (s + 1)) g x
+          covariantTensorInnerPointwise (I := I) (M := M) (r + (s + 1)) g x
             (lowerAllUpperIndices (I := I) (M := M) g r (s + 1) x
               (TensorRSSpace.toModel
                 ((covGrad (I := I) (M := M) g r s w).toSection x)))

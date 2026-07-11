@@ -67,12 +67,12 @@ private lemma chartTensorInnerPointwise_0s_nonneg_aux
     0 ≤ chartTensorInnerPointwise_0s (I := I) (M := M) n g α b T T := by
   set Tback : Tensor0SModel n ℝ E :=
     T.compContinuousLinearMap (fun _ : Fin n =>
-      chartJ (I := I) (M := M) α b) with hTback_def
+      chartTrivializationLinearMap (I := I) (M := M) α b) with hTback_def
   have hbridge :=
     tensorInnerPointwise_0s_bridge_identity (I := I) (M := M) g α n hb Tback Tback
   have hcomp_id :
       Tback.compContinuousLinearMap
-          (fun _ : Fin n => chartJinv (I := I) (M := M) α b)
+          (fun _ : Fin n => chartTrivializationLinearMapSymm (I := I) (M := M) α b)
         = T := by
     refine ContinuousMultilinearMap.ext ?_
     intro v

@@ -24,7 +24,7 @@ where
       (y : M) ∈ (chartAt H (α₁ : M)).source →
       ∃ c : ℝ, 0 < c ∧
         inwardCoordAt (M := M) α₀ y - c • inwardCoordAt (M := M) α₁ y ∈
-          Set.range (dincl (M := M) y).toLinearMap
+          Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
@@ -39,14 +39,14 @@ theorem inwardCoord_chart_consistent
     (hα₁ : (y : M) ∈ (chartAt H (α₁ : M)).source) :
     ∃ c : ℝ, 0 < c ∧
       inwardCoordAt (M := M) α₀ y - c • inwardCoordAt (M := M) α₁ y ∈
-        Set.range (dincl (M := M) y).toLinearMap :=
+        Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap :=
   HasOrientableBoundary.inwardCoord_chart_consistent α₀ α₁ y hα₀ hα₁
 
 theorem inwardCoord_chart_consistent_self (α : BoundaryManifold I M)
     (y : BoundaryManifold I M) :
     ∃ c : ℝ, 0 < c ∧
       inwardCoordAt (M := M) α y - c • inwardCoordAt (M := M) α y ∈
-        Set.range (dincl (M := M) y).toLinearMap := by
+        Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap := by
   refine ⟨1, by norm_num, ?_⟩
   simp only [one_smul, sub_self]
   exact ⟨0, map_zero _⟩

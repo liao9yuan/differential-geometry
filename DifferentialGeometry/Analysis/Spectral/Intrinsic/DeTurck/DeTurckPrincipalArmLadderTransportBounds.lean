@@ -57,11 +57,11 @@ theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric I M) (n
     ∃ C : ℝ, 0 ≤ C ∧ ∀ u₀ : SmoothCcTensor g₀ 0 2,
       |tensorL2Inner (I := I) (M := M) g₀ 0 2
           (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 n u₀).toFun
-          (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0)
-            (appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0)
+            (ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
               (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
               (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-                (slotInsertEndoCc (I := I) (M := M) g₀ 2
+                (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
                   (gInvDiffRaisedEndoField (I := I) g₀ g₁))))
             (covGrad (I := I) (M := M) g₀ 0 2 u₀)).toFun| ≤
       C * ((∑ j ∈ Finset.range (n + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖) *
@@ -70,10 +70,10 @@ theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric I M) (n
   set a : ℕ := n / 2 with ha_def
   set b : ℕ := n - n / 2 with hb_def
   set Gf : SmoothCcTensor g₀ (2 + 1) (2 + 0) :=
-    appCcRS (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
+    ccOperatorFieldComp (I := I) (M := M) g₀ (2 + 1) ((2 + 1) + 1) (2 + 0)
       (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
       (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
-        (slotInsertEndoCc (I := I) (M := M) g₀ 2
+        (endoSlotZeroCcTensor (I := I) (M := M) g₀ 2
           (gInvDiffRaisedEndoField (I := I) g₀ g₁))) with hGf_def
   obtain ⟨CfL, hCfL_nn, hCfL⟩ := armJet_iteratedCovGrad_iterL_le (I := I) (M := M) g₀ 2 b
   obtain ⟨CfR, hCfR_nn, hCfR⟩ := armJet_iteratedCovGrad_iterL_le (I := I) (M := M) g₀ 2 a
@@ -83,7 +83,7 @@ theorem arm_g0Term_abs_le_jetProduct (g₀ g₁ : SmoothRiemannianMetric I M) (n
   · exact mul_nonneg (hCfL_nn 0)
       (mul_nonneg (hCfR_nn 0) (Finset.sum_nonneg (fun q _ => hCfG_nn q)))
   · set GT : SmoothCcTensor g₀ 0 (2 + 0) :=
-      appCc (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf (covGrad (I := I) (M := M) g₀ 0 2 u₀)
+      operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) Gf (covGrad (I := I) (M := M) g₀ 0 2 u₀)
       with hGT_def
     have hsym := oneMinusConnLapSmoothIter_l2Inner_sym_split (I := I) (M := M) g₀ 0 2 a b u₀ GT
     have hab : a + b = n := by omega
@@ -376,7 +376,7 @@ theorem armAsm_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (base c : �
     (Φ : SmoothCcTensor g₀ (2 + base) c) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 c p
-          (appCc (I := I) (M := M) g₀ (2 + base) c Φ
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + base) c Φ
             (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨Cf, hCf_nn, hCf⟩ := armJet_iteratedCovGrad_appCc_le (I := I) (M := M) g₀ (2 + base) c Φ
@@ -387,11 +387,11 @@ theorem armAsm_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (base c : �
   rw [show p + 1 + base = p + base + 1 from by omega] at hsh
   exact hsh
 
-theorem armAsm_appFullSec_jet_window (g₀ : SmoothRiemannianMetric I M) (base c : ℕ)
+theorem exists_appFullSec_iteratedCovGrad_shiftedJetWindow_bound (g₀ : SmoothRiemannianMetric I M) (base c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) 0 (2 + base) c I) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 c p
-          (appFullSec (I := I) (M := M) g₀ 0 (2 + base) c Q
+          (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) c Q
             (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨cq, hcq_nn, hcq⟩ :=
@@ -403,28 +403,28 @@ theorem armAsm_appFullSec_jet_window (g₀ : SmoothRiemannianMetric I M) (base c
   rw [show p + 1 + base = p + base + 1 from by omega] at hsh
   exact hsh
 
-theorem armAsm_appCc_appFullSec_jet_window (g₀ : SmoothRiemannianMetric I M)
+theorem exists_appCc_appFullSec_iteratedCovGrad_jetWindow_bound (g₀ : SmoothRiemannianMetric I M)
     (base b2 c2 : ℕ) (Q : HomTensorRSField (E := E) (M := M) 0 (2 + base) b2 I)
     (Φ : SmoothCcTensor g₀ b2 c2) :
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 c2 p
-          (appCc (I := I) (M := M) g₀ b2 c2 Φ
-            (appFullSec (I := I) (M := M) g₀ 0 (2 + base) b2 Q
+          (operatorFieldApply (I := I) (M := M) g₀ b2 c2 Φ
+            (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) b2 Q
               (iteratedCovGrad (I := I) g₀ 0 2 base u₀)))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨Cf, hCf_nn, hCf⟩ := armJet_iteratedCovGrad_appCc_le (I := I) (M := M) g₀ b2 c2 Φ
   obtain ⟨cq, hcq_nn, hcq⟩ :=
-    armAsm_appFullSec_jet_window (I := I) (M := M) g₀ base b2 Q
+    exists_appFullSec_iteratedCovGrad_shiftedJetWindow_bound (I := I) (M := M) g₀ base b2 Q
   refine ⟨fun p => Cf p * ∑ e ∈ Finset.range (p + 1), cq e,
     fun p => mul_nonneg (hCf_nn p) (Finset.sum_nonneg fun e _ => hcq_nn e),
     fun u₀ p => ?_⟩
-  refine le_trans (hCf p (appFullSec (I := I) (M := M) g₀ 0 (2 + base) b2 Q
+  refine le_trans (hCf p (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) b2 Q
     (iteratedCovGrad (I := I) g₀ 0 2 base u₀))) ?_
   rw [mul_assoc]
   refine mul_le_mul_of_nonneg_left ?_ (hCf_nn p)
   have hwin := armAsm_sum_window_le (p + 1) base cq
     (fun e => ‖iteratedCovGrad (I := I) g₀ 0 b2 e
-      (appFullSec (I := I) (M := M) g₀ 0 (2 + base) b2 Q
+      (homTensorRSFieldApply (I := I) (M := M) g₀ 0 (2 + base) b2 Q
         (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖)
     (fun j => ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖)
     hcq_nn (fun _ => norm_nonneg _) (fun e _ => hcq u₀ e)
@@ -436,7 +436,7 @@ theorem armAsm_covGrad_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (bas
     ∃ cc : ℕ → ℝ, (∀ p, 0 ≤ cc p) ∧ ∀ (u₀ : SmoothCcTensor g₀ 0 2) (p : ℕ),
       ‖iteratedCovGrad (I := I) g₀ 0 ((2 + base) + 1) p
           (covGrad (I := I) (M := M) g₀ 0 (2 + base)
-            (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+            (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
               (iteratedCovGrad (I := I) g₀ 0 2 base u₀)))‖ ≤
         cc p * ∑ j ∈ Finset.range (p + base + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j u₀‖ := by
   obtain ⟨Cf, hCf_nn, hCf⟩ :=
@@ -444,13 +444,13 @@ theorem armAsm_covGrad_appCc_jet_window (g₀ : SmoothRiemannianMetric I M) (bas
   refine ⟨fun p => Cf (1 + p), fun p => hCf_nn (1 + p), fun u₀ p => ?_⟩
   have hnc : ‖iteratedCovGrad (I := I) g₀ 0 ((2 + base) + 1) p
       (covGrad (I := I) (M := M) g₀ 0 (2 + base)
-        (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
           (iteratedCovGrad (I := I) g₀ 0 2 base u₀)))‖ =
       ‖iteratedCovGrad (I := I) g₀ 0 (2 + base) (1 + p)
-        (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+        (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
           (iteratedCovGrad (I := I) g₀ 0 2 base u₀))‖ :=
     armJet_norm_comp (I := I) (M := M) g₀ (2 + base) 1 p
-      (appCc (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
+      (operatorFieldApply (I := I) (M := M) g₀ (2 + base) (2 + base) Φ
         (iteratedCovGrad (I := I) g₀ 0 2 base u₀))
   rw [hnc]
   refine le_trans (hCf (1 + p) (iteratedCovGrad (I := I) g₀ 0 2 base u₀)) ?_
@@ -546,16 +546,16 @@ set_option backward.isDefEq.respectTransparency false in
 private theorem armSwap_appFullSec_sub_right (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)
     (A B : SmoothCcTensor g 0 (t + 2)) :
-    appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F (A - B) =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
-        appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B := by
+    homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F (A - B) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
+        homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
   intro x
-  rw [show ((appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x) =
-    (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F A).toSection x -
-      (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x from by
+  rw [show ((homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A -
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x) =
+    (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F A).toSection x -
+      (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F B).toSection x from by
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [appFullSec_toSection, appFullSec_toSection, appFullSec_toSection]
   rw [show ((A - B).toSection x : TensorRSSpace 0 (t + 2) I x) =
@@ -576,8 +576,8 @@ private theorem armSwap_oneMinusConnLapSmooth_comm (g : SmoothRiemannianMetric I
           (Fin.cons b (Fin.cons a w)))
     (U : SmoothCcTensor g 0 (t + 2)) :
     oneMinusConnLapSmooth (I := I) g 0 (t + 2)
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F
         (oneMinusConnLapSmooth (I := I) g 0 (t + 2) U) := by
   unfold oneMinusConnLapSmooth
   rw [appFullSec_swap_rawConnLap_comm (I := I) (M := M) g t F hF U,
@@ -597,8 +597,8 @@ theorem armSwap_iterL_comm (g : SmoothRiemannianMetric I M) (t : ℕ)
           (Fin.cons b (Fin.cons a w)))
     (k : ℕ) (U : SmoothCcTensor g 0 (t + 2)) :
     oneMinusConnLapSmoothIter (I := I) g 0 (t + 2) k
-        (appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
-      appFullSec (I := I) (M := M) g 0 (t + 2) (t + 2) F
+        (homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F U) =
+      homTensorRSFieldApply (I := I) (M := M) g 0 (t + 2) (t + 2) F
         (oneMinusConnLapSmoothIter (I := I) g 0 (t + 2) k U) := by
   induction k with
   | zero => simp only [oneMinusConnLapSmoothIter_zero]

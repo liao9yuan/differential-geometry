@@ -57,7 +57,7 @@ lemma eigenvectorVec_pou_memWkp_and_wkpNorm_le
                 g r s) i) β Q :
             Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
         (chartTargetEuclid (I := I) (M := M) β) ∧
-      wkpNorm (d := Module.finrank ℝ E) N 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) N 2
           (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
               (tensorResolventEigenbasisVec (I := I) (M := M)
                 (tensorResolventL2_isCompactOperator (I := I) (M := M)
@@ -65,7 +65,7 @@ lemma eigenvectorVec_pou_memWkp_and_wkpNorm_le
               Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y)
           (chartTargetEuclid (I := I) (M := M) β)
         ≤ ENNReal.ofReal ‖(i.fst.val)⁻¹‖ *
-          wkpNorm (d := Module.finrank ℝ E) N 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) N 2
             (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
                 (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
                   (eigenvectorResolvent (I := I) (M := M) g r s i))
@@ -119,13 +119,13 @@ lemma eigenvectorVec_pou_memWkp_and_wkpNorm_le
       (MemWkp.const_smul (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_res (i.fst.val)⁻¹)
   refine ⟨h_mem, ?_⟩
-  have h_norm_eq : wkpNorm (d := Module.finrank ℝ E) N 2
+  have h_norm_eq : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) N 2
       (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
           (tensorResolventEigenbasisVec (I := I) (M := M)
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g r s)
             i) β Q :
           Lp ℝ 2 (chartL2Measure (I := I) (M := M) β)) : EuclN → ℝ) y) Ω =
-      wkpNorm (d := Module.finrank ℝ E) N 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) N 2
         (fun y => (i.fst.val)⁻¹ *
           ((tensorL2ChartComponent (I := I) (M := M) g r s
             (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
@@ -144,7 +144,7 @@ def chartCompNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
     (β' : M) (Q : TensorCompIdx (E := E) r s) : ℝ≥0∞ :=
-  wkpNorm (d := Module.finrank ℝ E) (K + 1) 2
+  iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (K + 1) 2
     (fun y => ((tensorL2ChartComponent (I := I) (M := M) g r s
         (TensorH1ComplToTensorL2 (I := I) (M := M) g r s
           (eigenvectorResolvent (I := I) (M := M) g r s i))

@@ -209,7 +209,7 @@ theorem wkpNormChart_succ_subcritical_step_withBoundary_perChart_smooth
   intro u _hu_smooth h_compact h_supp hu
   exact h h_compact h_supp hu
 
-theorem kp_gt_d_of_kp1p_gt_d
+theorem dim_lt_mul_sobolevConjugate_of_dim_lt_succ_mul
     (d : ℕ) (k : ℕ) (p : ℝ) (hp_pos : 0 < p) (hp_dim : p < (d : ℝ))
     (hkp : (d : ℝ) < (k + 1 : ℝ) * p) :
     (d : ℝ) < (k : ℝ) * ((d : ℝ) * p / ((d : ℝ) - p)) :=

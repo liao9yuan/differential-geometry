@@ -252,7 +252,7 @@ theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
               (TensorRSSpace.toModel
                 (tensorCovDerivAt (I := I) (M := M) g r s T x
                   ((chartModelBasis E) l))) =
-            tensorInnerPointwise_0s (I := I) (M := M) (r + s) g x
+            covariantTensorInnerPointwise (I := I) (M := M) (r + s) g x
               (lowS k) (lowT l) from rfl]
       rw [tensorInnerPointwise_0s_eq_sum, Finset.mul_sum]
       refine Finset.sum_congr rfl (fun i _ => ?_)
@@ -272,7 +272,7 @@ theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
               ((covGrad (I := I) (M := M) g r s S).toSection x))
             (TensorRSSpace.toModel
               ((covGrad (I := I) (M := M) g r s T).toSection x)) =
-          tensorInnerPointwise_0s (I := I) (M := M) (r + (s + 1)) g x
+          covariantTensorInnerPointwise (I := I) (M := M) (r + (s + 1)) g x
             (lowerAllUpperIndices (I := I) (M := M) g r (s + 1) x
               (TensorRSSpace.toModel
                 ((covGrad (I := I) (M := M) g r s S).toSection x)))

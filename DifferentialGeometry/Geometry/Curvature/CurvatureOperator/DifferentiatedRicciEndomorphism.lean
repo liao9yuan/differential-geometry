@@ -886,28 +886,28 @@ theorem tensorInnerPointwise_slotSubst_sum
     (A D : Tensor0SSpace s I x) :
     tensorInnerPointwise (I := I) (M := M) g 0 s x
         (TensorRSSpace.toModel (∑ k : Fin s,
-          tensor0SAsRS (I := I) (M := M) x
+          tensor0SToTensorRS (I := I) (M := M) x
             (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)))
-        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) =
+        (TensorRSSpace.toModel (tensor0SToTensorRS (I := I) (M := M) x D)) =
       ∑ k : Fin s,
         tensorInnerPointwise (I := I) (M := M) g 0 s x
           (TensorRSSpace.toModel
-            (tensor0SAsRS (I := I) (M := M) x
+            (tensor0SToTensorRS (I := I) (M := M) x
               (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)))
-          (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D)) := by
+          (TensorRSSpace.toModel (tensor0SToTensorRS (I := I) (M := M) x D)) := by
   classical
 
   have hsum : TensorRSSpace.toModel (∑ k : Fin s,
-        tensor0SAsRS (I := I) (M := M) x
+        tensor0SToTensorRS (I := I) (M := M) x
           (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) =
       ∑ k : Fin s, TensorRSSpace.toModel (E := E) (I := I) (M := M) (r := 0) (s := s)
-        (x := x) (tensor0SAsRS (I := I) (M := M) x
+        (x := x) (tensor0SToTensorRS (I := I) (M := M) x
           (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) := by
     have hL : TensorRSSpace.toModel (∑ k : Fin s,
-          tensor0SAsRS (I := I) (M := M) x
+          tensor0SToTensorRS (I := I) (M := M) x
             (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) =
         (TensorRSSpace.toModelL (I := I) (M := M) 0 s x) (∑ k : Fin s,
-          tensor0SAsRS (I := I) (M := M) x
+          tensor0SToTensorRS (I := I) (M := M) x
             (tensorSlotSubstCLM (I := I) s x (tangentSlotCLM (I := I) s k T) A)) :=
       (TensorRSSpace.toModelL_apply _).symm
     rw [hL, map_sum]
@@ -916,7 +916,7 @@ theorem tensorInnerPointwise_slotSubst_sum
 
   let φ : TensorRSModel 0 s ℝ E →+ ℝ :=
     { toFun := fun m => tensorInnerPointwise (I := I) (M := M) g 0 s x m
-        (TensorRSSpace.toModel (tensor0SAsRS (I := I) (M := M) x D))
+        (TensorRSSpace.toModel (tensor0SToTensorRS (I := I) (M := M) x D))
       map_zero' := tensorInnerPointwise_zero_left (I := I) (M := M) g 0 s x _
       map_add' := fun a b => tensorInnerPointwise_add_left (I := I) (M := M) g 0 s x a b _ }
   exact map_sum φ _ Finset.univ

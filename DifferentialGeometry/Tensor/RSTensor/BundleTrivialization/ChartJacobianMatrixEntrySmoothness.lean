@@ -84,7 +84,7 @@ private noncomputable def basisCoordCLM (j : Fin (Module.finrank ℝ E)) : E →
 @[simp] private lemma basisCoordCLM_apply (j : Fin (Module.finrank ℝ E)) (v : E) :
     basisCoordCLM (E := E) j v = (Module.finBasis ℝ E).coord j v := rfl
 
-theorem chartJinvMatrix_wrapped_entry_contMDiffOn
+theorem tangentCoordChangeL_entry_contMDiffOn
     (α β : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun b : M => (Module.finBasis ℝ E).coord j
@@ -117,7 +117,7 @@ theorem chartJinvMatrix_wrapped_entry_contMDiffOn
     (coordChangeL_apply_eq_clmAt_symmL (I := I) α β hbα hbβ
       ((Module.finBasis ℝ E) i))).symm
 
-theorem chartJMatrix_wrapped_entry_contMDiffOn
+theorem tangentCoordChangeL_entry_contMDiffOn_swap
     (α β : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun b : M => (Module.finBasis ℝ E).coord j
@@ -126,12 +126,12 @@ theorem chartJMatrix_wrapped_entry_contMDiffOn
             ((Module.finBasis ℝ E) i))))
       ((chartAt H α).source ∩ (chartAt H β).source) := by
 
-  have h := chartJinvMatrix_wrapped_entry_contMDiffOn (I := I) β α i j
+  have h := tangentCoordChangeL_entry_contMDiffOn (I := I) β α i j
 
   rw [Set.inter_comm] at h
   exact h
 
-theorem chartJinvMatrix_entry_contMDiffAt_via_wrapped
+theorem tangentCoordChangeL_entry_contMDiffAt
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
@@ -140,14 +140,14 @@ theorem chartJinvMatrix_entry_contMDiffAt_via_wrapped
           ((trivializationAt E (TangentSpace I) α).symmL ℝ b
             ((Module.finBasis ℝ E) i))))
       b₀ := by
-  have hwrapped := chartJinvMatrix_wrapped_entry_contMDiffOn (I := I) α b₀ i j
+  have hwrapped := tangentCoordChangeL_entry_contMDiffOn (I := I) α b₀ i j
   have hOpen : IsOpen ((chartAt H α).source ∩ (chartAt H b₀).source) :=
     (chartAt H α).open_source.inter (chartAt H b₀).open_source
   have hb₀mem : b₀ ∈ (chartAt H α).source ∩ (chartAt H b₀).source :=
     ⟨hb₀, mem_chart_source H b₀⟩
   exact (hwrapped _ hb₀mem).contMDiffAt (hOpen.mem_nhds hb₀mem)
 
-theorem chartJinvMatrix_entry_wrapped_at_centre
+theorem tangentCoordChangeL_entry_eq_symmL_entry_self
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (_hb₀ : b₀ ∈ (chartAt H α).source) :
     (Module.finBasis ℝ E).coord j
@@ -161,7 +161,7 @@ theorem chartJinvMatrix_entry_wrapped_at_centre
   rw [h]
   rfl
 
-theorem chartJMatrix_entry_contMDiffAt_via_wrapped
+theorem tangentCoordChangeL_entry_contMDiffAt_swap
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
@@ -170,14 +170,14 @@ theorem chartJMatrix_entry_contMDiffAt_via_wrapped
           ((trivializationAt E (TangentSpace I) b₀).symmL ℝ b
             ((Module.finBasis ℝ E) i))))
       b₀ := by
-  have hwrapped := chartJMatrix_wrapped_entry_contMDiffOn (I := I) α b₀ i j
+  have hwrapped := tangentCoordChangeL_entry_contMDiffOn_swap (I := I) α b₀ i j
   have hOpen : IsOpen ((chartAt H α).source ∩ (chartAt H b₀).source) :=
     (chartAt H α).open_source.inter (chartAt H b₀).open_source
   have hb₀mem : b₀ ∈ (chartAt H α).source ∩ (chartAt H b₀).source :=
     ⟨hb₀, mem_chart_source H b₀⟩
   exact (hwrapped _ hb₀mem).contMDiffAt (hOpen.mem_nhds hb₀mem)
 
-theorem chartJMatrix_entry_wrapped_at_centre
+theorem tangentCoordChangeL_entry_eq_continuousLinearMapAt_entry_self
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (_hb₀ : b₀ ∈ (chartAt H α).source) :
     (Module.finBasis ℝ E).coord j

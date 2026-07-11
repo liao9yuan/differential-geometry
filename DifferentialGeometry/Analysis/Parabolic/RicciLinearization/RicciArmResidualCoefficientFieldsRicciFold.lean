@@ -48,7 +48,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 set_option linter.unusedSectionVars false in
 lemma ccTensorBilin_zero_weight (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
-    ccTensorBilin (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by
+    smoothCcTensorBilinForm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by
   rw [ccTensorBilin_apply, ccTensorModel]
   rw [show (ccTensorMultilinear (I := I) g (0 : SmoothCcTensor g 0 2) x :
       Tensor0SSpace 2 I x) =
@@ -68,9 +68,9 @@ def ricciFoldKernelBilin (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor
   LinearMap.toContinuousLinearMap
     { toFun := fun v0 =>
         (-(1 / 2) : ℝ) •
-          (ccTensorBilin (I := I) g₀ S x
+          (smoothCcTensorBilinForm (I := I) g₀ S x
               (riemannOp (LeviCivita (I := I) g₀) x v0 p q)
-            + (ccTensorBilin (I := I) g₀ S x q).comp
+            + (smoothCcTensorBilinForm (I := I) g₀ S x q).comp
                 (riemannOp (LeviCivita (I := I) g₀) x v0 p))
       map_add' := fun v0 v0' => by
         rw [show riemannOp (LeviCivita (I := I) g₀) x (v0 + v0') =
@@ -93,9 +93,9 @@ set_option linter.unusedSectionVars false in
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
     ricciFoldKernelBilin (I := I) g₀ S x p q v0 v1 =
       (-(1 / 2) : ℝ) *
-        (ccTensorBilin (I := I) g₀ S x
+        (smoothCcTensorBilinForm (I := I) g₀ S x
             (riemannOp (LeviCivita (I := I) g₀) x v0 p q) v1
-          + ccTensorBilin (I := I) g₀ S x q
+          + smoothCcTensorBilinForm (I := I) g₀ S x q
               (riemannOp (LeviCivita (I := I) g₀) x v0 p v1)) := by
   rw [ricciFoldKernelBilin, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk,
     AddHom.coe_mk, ContinuousLinearMap.smul_apply, ContinuousLinearMap.add_apply,
@@ -106,9 +106,9 @@ def frameRicciFoldKernel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   (-(1 / 2) : ℝ) •
     ((ContinuousLinearMap.compL ℝ (TangentSpace I x) (TangentSpace I x) ℝ
-        ((ccTensorBilin (I := I) g₀ S x).flip v1)).comp
+        ((smoothCcTensorBilinForm (I := I) g₀ S x).flip v1)).comp
         (riemannOp (LeviCivita (I := I) g₀) x v0)
-      + (ccTensorBilin (I := I) g₀ S x).flip.comp
+      + (smoothCcTensorBilinForm (I := I) g₀ S x).flip.comp
           ((riemannOp (LeviCivita (I := I) g₀) x v0).flip v1))
 
 set_option linter.unusedSectionVars false in
@@ -192,14 +192,14 @@ theorem ricciFoldKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric
     (φ := fun x : M => ricciFoldKernelBilin (I := I) g₀ S x (p x) (q x) (V0 x))
   intro W
   have hs1 : ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => ccTensorBilin (I := I) g₀ S x
+      (fun x : M => smoothCcTensorBilinForm (I := I) g₀ S x
         (riemannSec (LeviCivita (I := I) g₀) V0 p q x) (W x)) :=
     ccTensorBilin_scalar_contMDiff (I := I) g₀ S
       ⟨fun b => riemannSec (LeviCivita (I := I) g₀) V0 p q b,
         riemannSec_contMDiff (cov := LeviCivita (I := I) g₀) V0.contMDiff hp hq⟩
       ⟨fun b => W b, W.contMDiff⟩
   have hs2 : ContMDiff I 𝓘(ℝ, ℝ) ∞
-      (fun x : M => ccTensorBilin (I := I) g₀ S x (q x)
+      (fun x : M => smoothCcTensorBilinForm (I := I) g₀ S x (q x)
         (riemannSec (LeviCivita (I := I) g₀) V0 p W x)) :=
     ccTensorBilin_scalar_contMDiff (I := I) g₀ S
       ⟨fun b => q b, hq⟩
@@ -207,9 +207,9 @@ theorem ricciFoldKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric
         riemannSec_contMDiff (cov := LeviCivita (I := I) g₀) V0.contMDiff hp W.contMDiff⟩
   have h_scalar : ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x : M => (-(1 / 2) : ℝ) *
-        (ccTensorBilin (I := I) g₀ S x
+        (smoothCcTensorBilinForm (I := I) g₀ S x
             (riemannSec (LeviCivita (I := I) g₀) V0 p q x) (W x)
-          + ccTensorBilin (I := I) g₀ S x (q x)
+          + smoothCcTensorBilinForm (I := I) g₀ S x (q x)
               (riemannSec (LeviCivita (I := I) g₀) V0 p W x))) :=
     contMDiff_const.mul (hs1.add hs2)
   intro x

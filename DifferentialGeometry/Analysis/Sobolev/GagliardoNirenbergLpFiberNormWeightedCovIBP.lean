@@ -335,7 +335,7 @@ theorem weightedCovIBP_lpFiberJet_sup_rs
     rw [hdir] at hgreen
     rw [hgreen, Integral.L2.tensorL2Inner, hLw]
   have hb_cont : Continuous b := hb_smooth.continuous
-  have hc_cont : Continuous c := continuous_rfns_section (I := I) (M := M) g r (m + 1 + 1) ggw
+  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1) ggw
   have hζ_cont : Continuous (ζ : M → ℝ) := by
     simp only [hζ_apply]; exact hb_cont.pow (k - 1)
   have htcdpi_cont : Continuous (tensorCovDerivPointwiseInner (I := I) (M := M) g r m w v) :=
@@ -594,8 +594,8 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq_rs
     rw [hgreen, Integral.L2.tensorL2Inner, hLw]
 
   have hb_cont : Continuous b := hb_smooth.continuous
-  have ha_cont : Continuous a := continuous_rfns_section (I := I) (M := M) g r m w
-  have hc_cont : Continuous c := continuous_rfns_section (I := I) (M := M) g r (m + 1 + 1) ggw
+  have ha_cont : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r m w
+  have hc_cont : Continuous c := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1) ggw
   have hbε_cont : Continuous bε := hbε_smooth.continuous
   have hζ_cont : Continuous (ζ : M → ℝ) := by
     rw [hζ_apply]; exact hbε_cont.rpow_const (fun y => Or.inl (hbε_ne y))
@@ -930,11 +930,11 @@ private theorem weightedCovIBP_lpFiberJet_fin_regLimit_rs
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1) x _
   have hc0 : ∀ x, 0 ≤ c x := fun x =>
     riemannianFiberNormSq_nonneg (I := I) (M := M) g r (m + 1 + 1) x _
-  have hac : Continuous a := continuous_rfns_section (I := I) (M := M) g r m w
+  have hac : Continuous a := continuous_riemannianFiberNormSq_section (I := I) (M := M) g r m w
   have hbc : Continuous b :=
-    continuous_rfns_section (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w)
   have hcc : Continuous c :=
-    continuous_rfns_section (I := I) (M := M) g r (m + 1 + 1)
+    continuous_riemannianFiberNormSq_section (I := I) (M := M) g r (m + 1 + 1)
       (covGrad (I := I) (M := M) g r (m + 1) (covGrad (I := I) (M := M) g r m w))
 
   have hε_pos : ∀ n : ℕ, (0 : ℝ) < 1 / ((n : ℝ) + 1) := fun n => by positivity

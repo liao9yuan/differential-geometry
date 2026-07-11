@@ -35,7 +35,7 @@ lemma wkpNorm_chartPushed_eq_zero_of_pou_zero
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ)
     (hρα_zero : ∀ x : M, (ρ α : C^∞⟮I, M; ℝ⟯) x = 0) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M) ρ α u)
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
@@ -50,13 +50,13 @@ theorem wkpNorm_chartPushed_eq_zero_of_wkpNormChartGen_eq_zero
     {k : ℕ} {p : ℝ≥0∞}
     (ρ : SmoothPartitionOfUnity M I M Set.univ) {u : M → ℝ}
     (h : wkpNormChartGen (I := I) (M := M) g k p ρ u = 0) (α : M) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M) ρ α u)
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
   classical
   have h_def : ∑' β : M,
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M) ρ β u)
         (chartTargetEuclid (I := I) (M := M) β) = 0 := h
@@ -69,7 +69,7 @@ theorem wkpNormChartGen_eq_zero_iff
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (u : M → ℝ) :
     wkpNormChartGen (I := I) (M := M) g k p ρ u = 0 ↔
       ∀ α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) k p
           (chartPushed (I := I) (M := M) ρ α u)
           (chartTargetEuclid (I := I) (M := M) α) = 0 := by
@@ -80,7 +80,7 @@ theorem wkpNormChartGen_eq_zero_iff
   · intro h
     unfold wkpNormChartGen
     exact (ENNReal.tsum_eq_zero (f := fun α =>
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (chartPushed (I := I) (M := M) ρ α u)
         (chartTargetEuclid (I := I) (M := M) α))).mpr h

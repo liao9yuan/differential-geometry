@@ -279,7 +279,7 @@ noncomputable def iteratedChartBilinearH1ComplData_weak
       (chartTargetEuclid (I := I) (M := M) α)) :
     ChartBilinearH1ComplData (I := I) (M := M) g α where
   u_chart := iterated_u_chart_weak (I := I) (M := M) g α u_h m D_m.directions
-  f_chart := D_m.fChartEff
+  f_chart := D_m.diffChartForcing
   weak_partial :=
     iterated_weak_partial_weak (I := I) (M := M) g α u_h m D_m.directions
   u_chart_memLp_weighted := by
@@ -514,7 +514,7 @@ theorem iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened
       hΩ'_open h_closureΩ'_in_chart hΩ'_compact_closure
       hη_in_Ω' hR₀_pos hh_supp_in_Ω' hη_one_on_Ω'' hΩ''_open.measurableSet
   have h_h2 :=
-    chart_loc_of_uniform_bound
+    exists_weak_second_partial_of_uniform_diffQuot_bound
       (I := I) (M := M) (g := g) (α := α) D
       hΩ''_open hΩ''_compact_closure hR₀_pos h_room
       hM_nn h_uniform_bd

@@ -38,8 +38,8 @@ def appCcLeibnizPsi (g : SmoothRiemannianMetric I M) (b c : ℕ)
           (if j + 1 < i + 1 then
               covGrad (I := I) (M := M) g (b + (j + 1)) (c + i) (appCcLeibnizPsi g b c Φ i (j + 1))
             else 0) +
-            castSrcCc g (c + (i + 1)) (by omega : (b + j) + 1 = b + (j + 1))
-              (castRankCc_db g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
+            castCcTensorSourceRank g (c + (i + 1)) (by omega : (b + j) + 1 = b + (j + 1))
+              (castCcTensorRank g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
                 (slotExtend (I := I) (M := M) g (b + j) (c + i) (appCcLeibnizPsi g b c Φ i j)))
 
 set_option linter.unusedSectionVars false in
@@ -48,11 +48,11 @@ private theorem covGrad_appCcLeibniz_sum (g : SmoothRiemannianMetric I M) (a b c
     (Ψ : (k : ℕ) → SmoothCcTensor g (b + k) (c + i)) (W : SmoothCcTensor g a b) :
     covGrad (I := I) (M := M) g a (c + i)
         (∑ k ∈ Finset.range (i + 1),
-          appCcRS (I := I) (M := M) g a (b + k) (c + i) (Ψ k) (iteratedCovGrad g a b k W)) =
+          ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + i) (Ψ k) (iteratedCovGrad g a b k W)) =
       ∑ k ∈ Finset.range (i + 1),
-        (appCcRS (I := I) (M := M) g a (b + k) (c + (i + 1))
+        (ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + (i + 1))
             (covGrad (I := I) (M := M) g (b + k) (c + i) (Ψ k)) (iteratedCovGrad g a b k W) +
-          appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+          ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
             (slotExtend (I := I) (M := M) g (b + k) (c + i) (Ψ k))
             (iteratedCovGrad g a b (k + 1) W)) := by
   rw [covGrad_finset_sum]
@@ -79,8 +79,8 @@ private theorem appCcLeibnizPsi_succ_succ (g : SmoothRiemannianMetric I M) (b c 
           covGrad (I := I) (M := M) g (b + (j + 1)) (c + i)
             (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (j + 1))
         else 0) +
-        castSrcCc g (c + (i + 1)) (by omega : (b + j) + 1 = b + (j + 1))
-          (castRankCc_db g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
+        castCcTensorSourceRank g (c + (i + 1)) (by omega : (b + j) + 1 = b + (j + 1))
+          (castCcTensorRank g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
             (slotExtend (I := I) (M := M) g (b + j) (c + i)
               (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))) :=
   rfl
@@ -89,9 +89,9 @@ set_option linter.unusedSectionVars false in
 
 theorem iteratedCovGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (i : ℕ) :
-    iteratedCovGrad (I := I) g a c i (appCcRS (I := I) (M := M) g a b c Φ W) =
+    iteratedCovGrad (I := I) g a c i (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) =
       ∑ k ∈ Finset.range (i + 1),
-        appCcRS (I := I) (M := M) g a (b + k) (c + i)
+        ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + i)
           (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k)
           (iteratedCovGrad (I := I) g a b k W) := by
   classical
@@ -104,64 +104,64 @@ theorem iteratedCovGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ
       rw [covGrad_appCcLeibniz_sum (I := I) (M := M) g a b c i
         (fun k => appCcLeibnizPsi (I := I) (M := M) g b c Φ i k) W]
       rw [show (∑ k ∈ Finset.range (i + 1),
-            (appCcRS (I := I) (M := M) g a (b + k) (c + (i + 1))
+            (ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + (i + 1))
                 (covGrad (I := I) (M := M) g (b + k) (c + i)
                   (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k))
                 (iteratedCovGrad g a b k W) +
-              appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+              ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
                 (slotExtend (I := I) (M := M) g (b + k) (c + i)
                   (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k))
                 (iteratedCovGrad g a b (k + 1) W))) =
           (∑ k ∈ Finset.range (i + 1),
-            appCcRS (I := I) (M := M) g a (b + k) (c + (i + 1))
+            ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + (i + 1))
               (covGrad (I := I) (M := M) g (b + k) (c + i)
                 (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k))
               (iteratedCovGrad g a b k W)) +
           (∑ k ∈ Finset.range (i + 1),
-            appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+            ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
               (slotExtend (I := I) (M := M) g (b + k) (c + i)
                 (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k))
               (iteratedCovGrad g a b (k + 1) W)) from Finset.sum_add_distrib]
       rw [Finset.sum_range_succ' (fun j =>
-        appCcRS (I := I) (M := M) g a (b + j) (c + (i + 1))
+        ccOperatorFieldComp (I := I) (M := M) g a (b + j) (c + (i + 1))
           (appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) j)
           (iteratedCovGrad g a b j W)) (i + 1)]
       rw [show (∑ k ∈ Finset.range (i + 1),
-            appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+            ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
               (appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (k + 1))
               (iteratedCovGrad g a b (k + 1) W)) =
           (∑ k ∈ Finset.range (i + 1),
-            appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+            ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
               (if k + 1 < i + 1 then
                   covGrad (I := I) (M := M) g (b + (k + 1)) (c + i)
                     (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (k + 1))
                 else 0)
               (iteratedCovGrad g a b (k + 1) W)) +
           (∑ k ∈ Finset.range (i + 1),
-            appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+            ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
               (slotExtend (I := I) (M := M) g (b + k) (c + i)
                 (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k))
               (iteratedCovGrad g a b (k + 1) W)) from by
         rw [← Finset.sum_add_distrib]
         refine Finset.sum_congr rfl (fun k _ => ?_)
         rw [appCcLeibnizPsi_succ_succ]
-        rw [show castSrcCc g (c + (i + 1)) (by omega : (b + k) + 1 = b + (k + 1))
-              (castRankCc_db g ((b + k) + 1) (by omega : (c + i) + 1 = c + (i + 1))
+        rw [show castCcTensorSourceRank g (c + (i + 1)) (by omega : (b + k) + 1 = b + (k + 1))
+              (castCcTensorRank g ((b + k) + 1) (by omega : (c + i) + 1 = c + (i + 1))
                 (slotExtend (I := I) (M := M) g (b + k) (c + i)
                   (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k))) =
             slotExtend (I := I) (M := M) g (b + k) (c + i)
               (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k) from by
-          rw [castRankCc_db, castSrcCc]]
+          rw [castCcTensorRank, castCcTensorSourceRank]]
         rw [appCcRS_add_left]]
       rw [show (∑ k ∈ Finset.range (i + 1),
-            appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+            ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
               (if k + 1 < i + 1 then
                   covGrad (I := I) (M := M) g (b + (k + 1)) (c + i)
                     (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (k + 1))
                 else 0)
               (iteratedCovGrad g a b (k + 1) W)) =
           ∑ k ∈ Finset.range i,
-            appCcRS (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
+            ccOperatorFieldComp (I := I) (M := M) g a (b + (k + 1)) (c + (i + 1))
               (covGrad (I := I) (M := M) g (b + (k + 1)) (c + i)
                 (appCcLeibnizPsi (I := I) (M := M) g b c Φ i (k + 1)))
               (iteratedCovGrad g a b (k + 1) W) from by
@@ -170,7 +170,7 @@ theorem iteratedCovGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ
         refine Finset.sum_congr rfl (fun k hk => ?_)
         rw [if_pos (by simp only [Finset.mem_range] at hk; omega : k + 1 < i + 1)]]
       rw [Finset.sum_range_succ' (fun k =>
-        appCcRS (I := I) (M := M) g a (b + k) (c + (i + 1))
+        ccOperatorFieldComp (I := I) (M := M) g a (b + k) (c + (i + 1))
           (covGrad (I := I) (M := M) g (b + k) (c + i)
             (appCcLeibnizPsi (I := I) (M := M) g b c Φ i k))
           (iteratedCovGrad g a b k W)) i]
@@ -179,11 +179,11 @@ theorem iteratedCovGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ
 
 set_option linter.unusedSectionVars false in
 
-theorem iteratedCovGrad_appCc_eq (g : SmoothRiemannianMetric I M) (b s : ℕ)
+theorem iteratedCovGrad_operatorFieldApply_eq (g : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g b s) (W : SmoothCcTensor g 0 b) (i : ℕ) :
-    iteratedCovGrad (I := I) g 0 s i (appCc (I := I) (M := M) g b s Φ W) =
+    iteratedCovGrad (I := I) g 0 s i (operatorFieldApply (I := I) (M := M) g b s Φ W) =
       ∑ k ∈ Finset.range (i + 1),
-        appCcRS (I := I) (M := M) g 0 (b + k) (s + i)
+        ccOperatorFieldComp (I := I) (M := M) g 0 (b + k) (s + i)
           (appCcLeibnizPsi (I := I) (M := M) g b s Φ i k)
           (iteratedCovGrad (I := I) g 0 b k W) := by
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g b s Φ W]

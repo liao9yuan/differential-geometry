@@ -196,7 +196,7 @@ lemma innerBundleCLM_inCoordinates_apply
   have hsymm : ∀ (z : Tensor0SModel s ℝ E),
       (trivializationAt (Tensor0SModel s ℝ E)
         (fun b' : M => Tensor0SSpace s I b') α).symm b z =
-      z.compContinuousLinearMap (fun _ : Fin s => chartJ (I := I) (M := M) α b) := by
+      z.compContinuousLinearMap (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b) := by
     intro z
 
     have hsymmL_eq :
@@ -231,8 +231,8 @@ lemma innerBundleCLM_inCoordinates_apply
   rw [tensorInnerPointwise_0s_bridge_identity (I := I) (M := M) g α s hb]
 
   have hcomp : ∀ (z : Tensor0SModel s ℝ E),
-      (z.compContinuousLinearMap (fun _ : Fin s => chartJ (I := I) (M := M) α b)).compContinuousLinearMap
-        (fun _ : Fin s => chartJinv (I := I) (M := M) α b) = z := by
+      (z.compContinuousLinearMap (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b)).compContinuousLinearMap
+        (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) = z := by
     intro z
     ext m
 

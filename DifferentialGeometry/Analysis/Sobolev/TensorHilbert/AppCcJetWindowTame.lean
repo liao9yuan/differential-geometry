@@ -33,12 +33,12 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_left
+theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (B : ℝ) (hB : 0 ≤ B)
     (hΦ : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g b c x (Φ.toSection x) ≤ B ^ 2) :
-    ‖appCcRS (I := I) (M := M) g a b c Φ W‖ ≤ B * ‖W‖ := by
+    ‖ccOperatorFieldComp (I := I) (M := M) g a b c Φ W‖ ≤ B * ‖W‖ := by
   classical
   set F : M → ℝ := fun x => B ^ 2 *
     riemannianFiberNormSq (I := I) (M := M) g a b x (W.toSection x) with hF_def
@@ -48,7 +48,7 @@ theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_left
     exact (integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g a b W).const_mul _
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g a c x
-          ((appCcRS (I := I) (M := M) g a b c Φ W).toSection x) ≤ F x := by
+          ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x) ≤ F x := by
     intro x
     rw [appCcRS_toSection]
     refine le_trans (riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g a b c x
@@ -56,9 +56,9 @@ theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_left
     rw [hF_def]
     exact mul_le_mul_of_nonneg_right (hΦ x)
       (riemannianFiberNormSq_nonneg (I := I) (M := M) g a b x _)
-  have hsq : ‖appCcRS (I := I) (M := M) g a b c Φ W‖ ^ 2 ≤ B ^ 2 * ‖W‖ ^ 2 := by
+  have hsq : ‖ccOperatorFieldComp (I := I) (M := M) g a b c Φ W‖ ^ 2 ≤ B ^ 2 * ‖W‖ ^ 2 := by
     have h1 := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g a c
-      (appCcRS (I := I) (M := M) g a b c Φ W) F hF_int hpt
+      (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) F hF_int hpt
     rw [hF_def, MeasureTheory.integral_const_mul] at h1
     have hbridge := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
       (I := I) (M := M) g a b W
@@ -70,12 +70,12 @@ theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_left
   exact hsq
 
 set_option linter.unusedSectionVars false in
-theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_right
+theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (B : ℝ) (hB : 0 ≤ B)
     (hW : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g a b x (W.toSection x) ≤ B ^ 2) :
-    ‖appCcRS (I := I) (M := M) g a b c Φ W‖ ≤ ‖Φ‖ * B := by
+    ‖ccOperatorFieldComp (I := I) (M := M) g a b c Φ W‖ ≤ ‖Φ‖ * B := by
   classical
   set F : M → ℝ := fun x => B ^ 2 *
     riemannianFiberNormSq (I := I) (M := M) g b c x (Φ.toSection x) with hF_def
@@ -85,7 +85,7 @@ theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_right
     exact (integrable_riemannianFiberNormSq_toSection (I := I) (M := M) g b c Φ).const_mul _
   have hpt : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g a c x
-          ((appCcRS (I := I) (M := M) g a b c Φ W).toSection x) ≤ F x := by
+          ((ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x) ≤ F x := by
     intro x
     rw [appCcRS_toSection]
     refine le_trans (riemannianFiberNormSq_compRS_le_mul (I := I) (M := M) g a b c x
@@ -97,9 +97,9 @@ theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_right
           mul_le_mul_of_nonneg_left (hW x)
             (riemannianFiberNormSq_nonneg (I := I) (M := M) g b c x _)
       _ = B ^ 2 * riemannianFiberNormSq (I := I) (M := M) g b c x (Φ.toSection x) := by ring
-  have hsq : ‖appCcRS (I := I) (M := M) g a b c Φ W‖ ^ 2 ≤ ‖Φ‖ ^ 2 * B ^ 2 := by
+  have hsq : ‖ccOperatorFieldComp (I := I) (M := M) g a b c Φ W‖ ^ 2 ≤ ‖Φ‖ ^ 2 * B ^ 2 := by
     have h1 := normSq_le_integral_of_pointwise_fiberNormSq_le_rs (I := I) (M := M) g a c
-      (appCcRS (I := I) (M := M) g a b c Φ W) F hF_int hpt
+      (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W) F hF_int hpt
     rw [hF_def, MeasureTheory.integral_const_mul] at h1
     have hbridge := tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
       (I := I) (M := M) g b c Φ
@@ -111,24 +111,24 @@ theorem appCcRS_l2_le_of_pointwise_fiberNormSq_bound_right
   exact hsq
 
 set_option linter.unusedSectionVars false in
-theorem appCc_l2_le_of_pointwise_fiberNormSq_bound_left
+theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (B : ℝ) (hB : 0 ≤ B)
     (hΦ : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) ≤ B ^ 2) :
-    ‖appCc (I := I) (M := M) g r s Φ W‖ ≤ B * ‖W‖ := by
+    ‖operatorFieldApply (I := I) (M := M) g r s Φ W‖ ≤ B * ‖W‖ := by
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
-  exact appCcRS_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g 0 r s Φ W B hB hΦ
+  exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g 0 r s Φ W B hB hΦ
 
 set_option linter.unusedSectionVars false in
-theorem appCc_l2_le_of_pointwise_fiberNormSq_bound_right
+theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (B : ℝ) (hB : 0 ≤ B)
     (hW : ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) g 0 r x (W.toSection x) ≤ B ^ 2) :
-    ‖appCc (I := I) (M := M) g r s Φ W‖ ≤ ‖Φ‖ * B := by
+    ‖operatorFieldApply (I := I) (M := M) g r s Φ W‖ ≤ ‖Φ‖ * B := by
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
-  exact appCcRS_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ W B hB hW
+  exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ W B hB hW
 
 set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
@@ -219,7 +219,7 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_ballUniform_generic
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
@@ -656,7 +656,7 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R₀) →
@@ -667,7 +667,7 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
   haveI : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g₀) :=
     riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace g₀
   obtain ⟨Cgrid, hCgrid_nn, hgrid⟩ :=
-    rfns_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le (I := I) (M := M) g₀ hδ₀
+    riemannianFiberNormSq_iteratedCovGrad_gInvDiffSlotCoeff_diagonalProductGrid_le (I := I) (M := M) g₀ hδ₀
   obtain ⟨Cemb, hCemb_nn, hCemb⟩ :=
     DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.deTurckSmoothRemainderDiff_supercritical_pointwise_jet_le_fixedWindow
       (I := I) (M := M) g₀ a ha_super
@@ -946,7 +946,7 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R₀) →

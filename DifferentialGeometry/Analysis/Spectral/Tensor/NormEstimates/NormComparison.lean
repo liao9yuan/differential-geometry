@@ -41,14 +41,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 theorem chartJ_apply_chartBasisVecFiber_continuousOn
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContinuousOn
-      (fun b : M => chartJ (I := I) (M := M) α b
+      (fun b : M => chartTrivializationLinearMap (I := I) (M := M) α b
         (chartBasisVecFiber (I := I) α i b))
       (trivializationAt E (TangentSpace I) α).baseSet := by
   have heq : ∀ b ∈ (trivializationAt E (TangentSpace I) α).baseSet,
-      chartJ (I := I) (M := M) α b
+      chartTrivializationLinearMap (I := I) (M := M) α b
           (chartBasisVecFiber (I := I) α i b) = (chartModelBasis E) i := by
     intro b hb
-    unfold chartJ chartBasisVecFiber
+    unfold chartTrivializationLinearMap chartBasisVecFiber
     exact (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL hb
       ((chartModelBasis E) i)
   refine ContinuousOn.congr ?_ (fun b hb => heq b hb)

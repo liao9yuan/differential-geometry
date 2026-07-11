@@ -160,7 +160,7 @@ theorem riemannianFiberNormSq_contract_trace_le
   riemannianFiberNormSq_tensorRS_clm_apply_le (I := I) (M := M) g (1 + r) (s + 1) r s x
     (Tensor0SBundle.contract_trace (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) r s x)
 
-theorem rfns_contractCcTensor_le
+theorem riemannianFiberNormSq_contractCcTensor_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ∃ Cφ : ℝ, 0 ≤ Cφ ∧ ∀ T : SmoothCcTensor g (1 + r) (s + 1),
       riemannianFiberNormSq (I := I) (M := M) g r s x

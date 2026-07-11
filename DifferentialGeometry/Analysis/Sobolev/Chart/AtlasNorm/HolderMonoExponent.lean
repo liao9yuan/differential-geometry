@@ -418,12 +418,12 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ u : M → ℝ,
         MemWkpChart (I := I) (M := M) g k p u →
-        wkpNorm (d := Module.finrank ℝ E) k p'
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p'
             (chartPushed (I := I) (M := M)
               (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
             (chartTargetEuclid (I := I) (M := M) α)
           ≤ ENNReal.ofReal C *
-              wkpNorm (d := Module.finrank ℝ E) k p
+              iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p
                 (chartPushed (I := I) (M := M)
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u)
                 (chartTargetEuclid (I := I) (M := M) α) := by
@@ -461,11 +461,11 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
     exact fRaw_tsupport_subset_K (I := I) (M := M) α u
   have h_Cenn_eq_ofReal : Cenn = ENNReal.ofReal Cenn.toReal := by
     rw [ENNReal.ofReal_toReal hCenn_ne_top]
-  have h_wkpNorm_p'_eq : wkpNorm (d := Module.finrank ℝ E) k p' f Ω =
-      wkpNorm (d := Module.finrank ℝ E) k p' fR Ω :=
+  have h_wkpNorm_p'_eq : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p' f Ω =
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p' fR Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E) hp'_one hΩ_open h_f_eq_fR
-  have h_wkpNorm_p_eq : wkpNorm (d := Module.finrank ℝ E) k p f Ω =
-      wkpNorm (d := Module.finrank ℝ E) k p fR Ω :=
+  have h_wkpNorm_p_eq : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p f Ω =
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k p fR Ω :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E) hp_one hΩ_open h_f_eq_fR
   rw [h_wkpNorm_p'_eq, h_wkpNorm_p_eq]
   have h_fR_memWkp_p : MemWkp (d := Module.finrank ℝ E) k p fR Ω := by
@@ -480,7 +480,7 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
     exact EuclideanIteratedMonoExp.memWkp_mono_exponent_of_tsupport_subset
       (d := Module.finrank ℝ E) k hΩ_open hK_closed hK_vol_lt_top
       hp'_one hp'_le_p h_fR_supp h_fR_memWkp_p
-  rw [show (DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  rw [show (DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p' fR Ω) =
       ∑ j ∈ Finset.range (k + 1),
         ∑ β : Fin j → Fin (Module.finrank ℝ E),
@@ -488,7 +488,7 @@ theorem wkpNorm_chartPushed_mono_exponent_holder
             ((MeasureTheory.volume :
                 MeasureTheory.Measure
                   (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))).restrict Ω) from rfl]
-  rw [show (DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  rw [show (DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) k p fR Ω) =
       ∑ j ∈ Finset.range (k + 1),
         ∑ β : Fin j → Fin (Module.finrank ℝ E),

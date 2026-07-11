@@ -67,9 +67,9 @@ private lemma chain_step_le
 private lemma sum_componentNorm_mono_order
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (F : SmoothCcTensor g r s)
     (α : M) {Ω'' : Set EuclN} {n n' : ℕ} (hn : n ≤ n') :
-    (∑ Q : CompIdx E r s, wkpNorm (d := dimE) n 2
+    (∑ Q : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) n 2
         (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'') ≤
-      ∑ Q : CompIdx E r s, wkpNorm (d := dimE) n' 2
+      ∑ Q : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) n' 2
         (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'' :=
   Finset.sum_le_sum (fun _Q _ => wkpNorm_mono_order (d := dimE) hn _ _)
 
@@ -95,14 +95,14 @@ theorem tensorComponent_aPriori_estimate
         ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s T v x
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
           tensorL2Inner (I := I) (M := M) g r s F.toFun v.toFun) →
-      wkpNorm (d := dimE) (2 * k + 2) 2
+      iteratedWeakSobolevNorm (d := dimE) (2 * k + 2) 2
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) Ω'' ≤
         ENNReal.ofReal C *
           ((∑ Q : CompIdx E r s,
-              wkpNorm (d := dimE) (2 * k) 2
+              iteratedWeakSobolevNorm (d := dimE) (2 * k) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'') +
             ∑ P : CompIdx E r s,
-              wkpNorm (d := dimE) 1 2
+              iteratedWeakSobolevNorm (d := dimE) 1 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') := by
   classical
   suffices h_tuple : ∃ C : ℝ, 0 ≤ C ∧ ∀ (T F : SmoothCcTensor g r s),
@@ -117,19 +117,19 @@ theorem tensorComponent_aPriori_estimate
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
           tensorL2Inner (I := I) (M := M) g r s F.toFun v.toFun) →
       (∑ P : CompIdx E r s,
-        wkpNorm (d := dimE) (2 * k + 2) 2
+        iteratedWeakSobolevNorm (d := dimE) (2 * k + 2) 2
           (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') ≤
         ENNReal.ofReal C *
           ((∑ Q : CompIdx E r s,
-              wkpNorm (d := dimE) (2 * k) 2
+              iteratedWeakSobolevNorm (d := dimE) (2 * k) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'') +
             ∑ P : CompIdx E r s,
-              wkpNorm (d := dimE) 1 2
+              iteratedWeakSobolevNorm (d := dimE) 1 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') by
     obtain ⟨C, hC_nn, hC⟩ := h_tuple
     refine ⟨C, hC_nn, fun T F hT_supp hF_supp hT_K hF_K hweak => ?_⟩
     exact (Finset.single_le_sum
-      (f := fun P : CompIdx E r s => wkpNorm (d := dimE) (2 * k + 2) 2
+      (f := fun P : CompIdx E r s => iteratedWeakSobolevNorm (d := dimE) (2 * k + 2) 2
         (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'')
       (fun P _ => zero_le _) (Finset.mem_univ P₀)).trans
         (hC T F hT_supp hF_supp hT_K hF_K hweak)
@@ -151,16 +151,16 @@ theorem tensorComponent_aPriori_estimate
           (2 * k + 2) hΩ''_open hΩ''_compact_closure hΩ''_target hK_Ω''
       refine ⟨B * (1 + A * (1 + Ck)), by positivity,
         fun T F hT_supp hF_supp hT_K hF_K hweak => ?_⟩
-      set L : ℝ≥0∞ := ∑ P : CompIdx E r s, wkpNorm (d := dimE) 1 2
+      set L : ℝ≥0∞ := ∑ P : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) 1 2
         (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'' with hL_def
       have h_ih := hCk T F hT_supp hF_supp hT_K hF_K hweak
       have h_step1 := hA T F hT_supp hF_supp hT_K hF_K hweak
       have h_step2 := hB T F hT_supp hF_supp hT_K hF_K hweak
       have h_23 :
-          (∑ P : CompIdx E r s, wkpNorm (d := dimE) (2 * k + 1 + 2) 2
+          (∑ P : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) (2 * k + 1 + 2) 2
             (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') ≤
           ENNReal.ofReal (A * (1 + Ck)) *
-            ((∑ Q : CompIdx E r s, wkpNorm (d := dimE) (2 * k + 1) 2
+            ((∑ Q : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) (2 * k + 1) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'') +
               L) :=
         chain_step_le hA_nn hCk_nn
@@ -168,10 +168,10 @@ theorem tensorComponent_aPriori_estimate
             (Ω'' := Ω'') (by omega : 2 * k ≤ 2 * k + 1))
           h_ih h_step1
       have h_24 :
-          (∑ P : CompIdx E r s, wkpNorm (d := dimE) (2 * k + 2 + 2) 2
+          (∑ P : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) (2 * k + 2 + 2) 2
             (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') ≤
           ENNReal.ofReal (B * (1 + A * (1 + Ck))) *
-            ((∑ Q : CompIdx E r s, wkpNorm (d := dimE) (2 * k + 2) 2
+            ((∑ Q : CompIdx E r s, iteratedWeakSobolevNorm (d := dimE) (2 * k + 2) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'') +
               L) :=
         chain_step_le hB_nn (by positivity)
@@ -203,14 +203,14 @@ theorem tensorComponent_aPriori_estimate_all
         ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s T v x
             ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
           tensorL2Inner (I := I) (M := M) g r s F.toFun v.toFun) →
-      wkpNorm (d := dimE) (2 * k + 2) 2
+      iteratedWeakSobolevNorm (d := dimE) (2 * k + 2) 2
           (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) Ω'' ≤
         ENNReal.ofReal C *
           ((∑ Q : CompIdx E r s,
-              wkpNorm (d := dimE) (2 * k) 2
+              iteratedWeakSobolevNorm (d := dimE) (2 * k) 2
                 (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'') +
             ∑ P : CompIdx E r s,
-              wkpNorm (d := dimE) 1 2
+              iteratedWeakSobolevNorm (d := dimE) 1 2
                 (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') := by
   classical
   have h_per : ∀ P₀ : CompIdx E r s, ∃ C : ℝ, 0 ≤ C ∧
@@ -225,14 +225,14 @@ theorem tensorComponent_aPriori_estimate_all
           ∫ x, tensorCovDerivPointwiseInner (I := I) (M := M) g r s T v x
               ∂(riemannianVolumeMeasure (I := I) (M := M) g) =
             tensorL2Inner (I := I) (M := M) g r s F.toFun v.toFun) →
-        wkpNorm (d := dimE) (2 * k + 2) 2
+        iteratedWeakSobolevNorm (d := dimE) (2 * k + 2) 2
             (tensorComponentEuclid (I := I) (M := M) g r s T α P₀) Ω'' ≤
           ENNReal.ofReal C *
             ((∑ Q : CompIdx E r s,
-                wkpNorm (d := dimE) (2 * k) 2
+                iteratedWeakSobolevNorm (d := dimE) (2 * k) 2
                   (tensorComponentEuclid (I := I) (M := M) g r s F α Q) Ω'') +
               ∑ P : CompIdx E r s,
-                wkpNorm (d := dimE) 1 2
+                iteratedWeakSobolevNorm (d := dimE) 1 2
                   (tensorComponentEuclid (I := I) (M := M) g r s T α P) Ω'') :=
     fun P₀ => tensorComponent_aPriori_estimate (I := I) (M := M) g r s α hK
       hK_target k P₀ hΩ''_open hΩ''_compact_closure hΩ''_target hK_Ω''

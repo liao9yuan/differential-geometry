@@ -746,7 +746,7 @@ theorem slotInsertEndo0Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
         (E := fun z : M => TangentSpace I z →L[ℝ] Tensor0SBundle.Tensor0SSpace d I z) p.1
         ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) d p.1 (A p)).comp (Λ p)))
       ((Set.univ : Set M) ×ˢ S) := by
-    apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
       (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
       (F₂ := Tensor0SBundle.Tensor0SModel d ℝ E) (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace d I x)
       (φ := fun p : M × ℝ => (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) d p.1 (A p)).comp (Λ p))
@@ -801,7 +801,7 @@ theorem slotInsertEndo1Field_apply_jointContMDiffOn {d : ℕ} {S : Set ℝ}
         ((slotInsertEndoFib (I := I) (M := M) (d + 1) 0 p.1 (Λ p)).comp
           (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (d + 1) p.1 (A p))))
       ((Set.univ : Set M) ×ˢ S) := by
-    apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    apply contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
       (F₁ := E) (V₁ := fun x : M => TangentSpace I x)
       (F₂ := Tensor0SBundle.Tensor0SModel (d + 1) ℝ E)
       (V₂ := fun x : M => Tensor0SBundle.Tensor0SSpace (d + 1) I x)

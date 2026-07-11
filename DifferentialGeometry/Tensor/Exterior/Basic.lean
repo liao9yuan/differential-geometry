@@ -240,11 +240,11 @@ theorem mpullback_smul (f : M → N) (c : ℝ) :
 
 end mpullback
 
-section miprod
+section minteriorProduct
 
 variable [Π (x : M), NormedAddCommGroup (TangentSpace IM x)]
 
-def miprod (α : Ω^k,(m + 1)⟮EM,IM,M⟯) (V : Π (x : M), TangentSpace IM x) :
+def minteriorProduct (α : Ω^k,(m + 1)⟮EM,IM,M⟯) (V : Π (x : M), TangentSpace IM x) :
     (x : M) → TangentSpace IM x [⋀^Fin m]→L[ℝ] Trivial M ℝ x := by
   intro x
   let triv_α := trivializationAt (EM [⋀^Fin (m + 1)]→L[ℝ] ℝ) ⋀^Fin (m + 1)⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
@@ -253,14 +253,14 @@ def miprod (α : Ω^k,(m + 1)⟮EM,IM,M⟯) (V : Π (x : M), TangentSpace IM x) 
   let triv_ip := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin m⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
   exact triv_ip.symm x ip_local
 
-end miprod
+end minteriorProduct
 
-section mwedge_product
+section mwedgeProduct
 
 variable
   [Π (x : M), NormedAddCommGroup (TangentSpace IM x)]
 
-def mwedge_product (α : Ω^k,m⟮EM,IM,M⟯) (β : Ω^l,n⟮EM,IM,M⟯) :
+def mwedgeProduct (α : Ω^k,m⟮EM,IM,M⟯) (β : Ω^l,n⟮EM,IM,M⟯) :
     (x : M) → TangentSpace IM x [⋀^Fin (m + n)]→L[ℝ] Trivial M ℝ x := by
   intro x
   let triv_α := trivializationAt (EM [⋀^Fin m]→L[ℝ] ℝ) ⋀^Fin m⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
@@ -271,7 +271,7 @@ def mwedge_product (α : Ω^k,m⟮EM,IM,M⟯) (β : Ω^l,n⟮EM,IM,M⟯) :
   let triv_wedge := trivializationAt (EM [⋀^Fin (m + n)]→L[ℝ] ℝ) ⋀^Fin (m + n)⟮ℝ; EM, TangentSpace IM; ℝ, Bundle.Trivial M ℝ⟯ x
   exact triv_wedge.symm x wedge_local
 
-end mwedge_product
+end mwedgeProduct
 
 section mederiv
 

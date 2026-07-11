@@ -37,7 +37,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem flat_assembly_interior
+theorem pullbackMetric_hasDerivWithinAt_ricciFlow_interior
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

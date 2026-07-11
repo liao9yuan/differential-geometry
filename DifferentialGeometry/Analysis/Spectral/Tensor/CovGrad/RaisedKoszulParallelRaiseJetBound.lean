@@ -55,7 +55,7 @@ theorem rfns_iteratedCovGrad_symmS_le
         ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
     (k : ℕ) (hk : k ≤ a + 1) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
-        ((iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T)).toSection x) ≤
+        ((iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T)).toSection x) ≤
       R ^ 2 := by
   have hswap_inv : riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
       ((iteratedCovGrad (I := I) g₀ 0 2 k
@@ -67,11 +67,11 @@ theorem rfns_iteratedCovGrad_symmS_le
   set A := iteratedCovGrad (I := I) g₀ 0 2 k T with hA
   set B := iteratedCovGrad (I := I) g₀ 0 2 k
     (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) with hB
-  have hiter : iteratedCovGrad (I := I) g₀ 0 2 k (symmS (I := I) (M := M) g₀ T) =
+  have hiter : iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T) =
       (1 / 2 : ℝ) • A + (1 / 2 : ℝ) • B := by
     rw [hA, hB]; exact iteratedCovGrad_symmS_eq (I := I) (M := M) g₀ T k
   have htoSec : ((iteratedCovGrad (I := I) g₀ 0 2 k
-        (symmS (I := I) (M := M) g₀ T)).toSection x : TensorRSSpace 0 (2 + k) I x) =
+        (ccTensor02Symm (I := I) (M := M) g₀ T)).toSection x : TensorRSSpace 0 (2 + k) I x) =
       (1 / 2 : ℝ) • (A.toSection x) + (1 / 2 : ℝ) • (B.toSection x) := by
     rw [hiter]
     rw [show (((1 / 2 : ℝ) • A + (1 / 2 : ℝ) • B).toSection x) =
@@ -114,7 +114,7 @@ private lemma rfns_iteratedCovGrad_domDomCongr_symmSCovGrad3_le
   rw [riemannianFiberNormSq_iteratedCovGrad_domDomCongrSection (I := I) (M := M) g₀ σ
     (symmSCovGrad3 (I := I) g₀ T) i x]
   have hcomm := rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M) g₀ 0 2 i
-    (symmS (I := I) g₀ T) x
+    (ccTensor02Symm (I := I) g₀ T) x
   have hbnd := rfns_iteratedCovGrad_symmS_le (I := I) (M := M) g₀ a T hTjet (i + 1) (by omega) x
   exact le_trans (le_of_eq hcomm) hbnd
 

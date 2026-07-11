@@ -306,29 +306,29 @@ theorem tensorL2Inner_appCc_slotInsertEndoCc_self_adjoint
       g₀.inner x (Λ x a) b = g₀.inner x a (Λ x b))
     (A B : SmoothCcTensor g₀ 0 (s + 1)) :
     tensorL2Inner (I := I) (M := M) g₀ 0 (s + 1)
-        (appCc (I := I) (M := M) g₀ (s + 1) (s + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ s Λ) A).toFun
+        (operatorFieldApply (I := I) (M := M) g₀ (s + 1) (s + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ s Λ) A).toFun
         B.toFun =
       tensorL2Inner (I := I) (M := M) g₀ 0 (s + 1)
         A.toFun
-        (appCc (I := I) (M := M) g₀ (s + 1) (s + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ s Λ) B).toFun := by
+        (operatorFieldApply (I := I) (M := M) g₀ (s + 1) (s + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ s Λ) B).toFun := by
   classical
   refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
   simp only []
   obtain ⟨e, bse, hbse, horth⟩ :=
     exists_orthoFrame_basis_E (I := I) (M := M) g₀ x
   have hslotA :
-      (appCc (I := I) (M := M) g₀ (s + 1) (s + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ s Λ) A).toFun x =
+      (operatorFieldApply (I := I) (M := M) g₀ (s + 1) (s + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ s Λ) A).toFun x =
         TensorRSSpace.toModel
           (show TensorRSSpace 0 (s + 1) I x from
             TensorRSSpace.ofCLM ((slotInsertEndoFib (s + 1) 0 x (Λ x)).comp
               (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
                 A.toSection x))) := rfl
   have hslotB :
-      (appCc (I := I) (M := M) g₀ (s + 1) (s + 1)
-          (slotInsertEndoCc (I := I) (M := M) g₀ s Λ) B).toFun x =
+      (operatorFieldApply (I := I) (M := M) g₀ (s + 1) (s + 1)
+          (endoSlotZeroCcTensor (I := I) (M := M) g₀ s Λ) B).toFun x =
         TensorRSSpace.toModel
           (show TensorRSSpace 0 (s + 1) I x from
             TensorRSSpace.ofCLM ((slotInsertEndoFib (s + 1) 0 x (Λ x)).comp

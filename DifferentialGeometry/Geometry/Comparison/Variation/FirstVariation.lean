@@ -552,7 +552,7 @@ theorem first_variation_of_arcLength_fixed_endpoints
       = (fun s : ℝ => ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t)) := by
     funext s; exact arcLength_slice_eq_integral_sqrt_speedSq (I := I) g f s L
   rw [harc]
-  have hS2 := S2_diff_under_interval_integral (I := I) g f L hf hL hUnit'
+  have hS2 := speedIntegral_hasDerivAt (I := I) g f L hf hL hUnit'
   have hsqrt1 : ∀ t ∈ Set.Icc (0 : ℝ) L, Real.sqrt (speedSq (I := I) g f 0 t) = 1 := by
     intro t ht; rw [hUnit' t ht, Real.sqrt_one]
   have hintegrand_eq : Set.EqOn
@@ -659,7 +659,7 @@ theorem first_variation_of_arcLength_fixed_endpoints
   have hD2num_eq : ∀ t : ℝ,
       D2num t = fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0) := by
     intro t
-    have hS1 := S1_moving_foot_metric_compatibility (I := I) g f t hf
+    have hS1 := speedSq_hasDerivAt (I := I) g f t hf
     have hslice : HasDerivAt
         (fun u : ℝ => (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (u, t))
         (fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0)) 0 := by
@@ -753,7 +753,7 @@ theorem first_variation_of_arcLength_free_endpoints
       = (fun s : ℝ => ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t)) := by
     funext s; exact arcLength_slice_eq_integral_sqrt_speedSq (I := I) g f s L
   rw [harc]
-  have hS2 := S2_diff_under_interval_integral (I := I) g f L hf hL hUnit'
+  have hS2 := speedIntegral_hasDerivAt (I := I) g f L hf hL hUnit'
   have hsqrt1 : ∀ t ∈ Set.Icc (0 : ℝ) L, Real.sqrt (speedSq (I := I) g f 0 t) = 1 := by
     intro t ht; rw [hUnit' t ht, Real.sqrt_one]
   have hintegrand_eq : Set.EqOn
@@ -845,7 +845,7 @@ theorem first_variation_of_arcLength_free_endpoints
   have hD2num_eq : ∀ t : ℝ,
       D2num t = fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0) := by
     intro t
-    have hS1 := S1_moving_foot_metric_compatibility (I := I) g f t hf
+    have hS1 := speedSq_hasDerivAt (I := I) g f t hf
     have hslice : HasDerivAt
         (fun u : ℝ => (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (u, t))
         (fderiv ℝ (fun p : ℝ × ℝ => speedSq (I := I) g f p.1 p.2) (0, t) (1, 0)) 0 := by

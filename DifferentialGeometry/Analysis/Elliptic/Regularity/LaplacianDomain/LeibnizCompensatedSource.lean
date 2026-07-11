@@ -38,7 +38,7 @@ noncomputable def laplacianOfChartPOU (g : SmoothRiemannianMetric I M) (α : M) 
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x =
       Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff x := rfl
 
-noncomputable def fHLeibniz (g : SmoothRiemannianMetric I M) (α : M)
+noncomputable def leibnizCompensatedSource (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
@@ -52,7 +52,7 @@ noncomputable def fHLeibniz (g : SmoothRiemannianMetric I M) (α : M)
 
 lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
-    fHLeibniz (I := I) (M := M) g α u_h hu_h =
+    leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h =
       smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
           (H1ComplToLp (I := I) (M := M) g u_h -
             laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩)
@@ -64,7 +64,7 @@ lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
 
 theorem fHLeibniz_smoothToH1Compl (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
-    fHLeibniz (I := I) (M := M) g α
+    leibnizCompensatedSource (I := I) (M := M) g α
         (smoothToH1Compl (I := I) (M := M) g v)
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) v) =
       smoothMulLp (I := I) (M := M) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯)
@@ -94,7 +94,7 @@ example (g : SmoothRiemannianMetric I M) (α : M) :
 example (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
-  fHLeibniz (I := I) (M := M) g α u_h hu_h
+  leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h
 
 end Laplacian
 end Analysis

@@ -70,7 +70,7 @@ lemma exists_manifold_cutoff_one_on_tsupport_pou
     rw [hη_support]
     exact (closure_mono interior_subset).trans h_closed_K.closure_subset
 
-def etaEuclid (α : M) (η_M : M → ℝ) : EuclN → ℝ := by
+def chartCutoffEuclidean (α : M) (η_M : M → ℝ) : EuclN → ℝ := by
   classical
   exact fun y =>
     if y ∈ chartTargetEuclid (I := I) (M := M) α then
@@ -81,19 +81,19 @@ omit [IsManifold I ∞ M] in
 
 lemma etaEuclid_apply_of_mem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
-    etaEuclid (I := I) (M := M) α η_M y =
+    chartCutoffEuclidean (I := I) (M := M) α η_M y =
       η_M ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) := by
   classical
-  unfold etaEuclid
+  unfold chartCutoffEuclidean
   simp [hy]
 
 omit [IsManifold I ∞ M] in
 
 lemma etaEuclid_apply_of_notMem (α : M) (η_M : M → ℝ)
     {y : EuclN} (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
-    etaEuclid (I := I) (M := M) α η_M y = 0 := by
+    chartCutoffEuclidean (I := I) (M := M) α η_M y = 0 := by
   classical
-  unfold etaEuclid
+  unfold chartCutoffEuclidean
   simp [hy]
 
 lemma chartImage_isCompact_of_compact_in_source (α : M)
@@ -140,7 +140,7 @@ lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
     {y : EuclN}
     (hy_off : y ∉ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
       tsupport η_M) :
-    etaEuclid (I := I) (M := M) α η_M y = 0 := by
+    chartCutoffEuclidean (I := I) (M := M) α η_M y = 0 := by
   classical
   by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
   · rw [etaEuclid_apply_of_mem (I := I) (M := M) α η_M hy_target]
@@ -163,7 +163,7 @@ lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
 lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
     (h_tsupp_compact : IsCompact (tsupport η_M))
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
-    tsupport (etaEuclid (I := I) (M := M) α η_M) ⊆
+    tsupport (chartCutoffEuclidean (I := I) (M := M) α η_M) ⊆
       (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
         tsupport η_M := by
   classical
@@ -172,7 +172,7 @@ lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
     chartImage_isCompact_of_compact_in_source (I := I) (M := M)
       α h_tsupp_compact h_tsupp_chart
   have h_image_closed : IsClosed _ := h_image_compact.isClosed
-  have h_support_in : Function.support (etaEuclid (I := I) (M := M) α η_M) ⊆
+  have h_support_in : Function.support (chartCutoffEuclidean (I := I) (M := M) α η_M) ⊆
       (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
         tsupport η_M := by
     intro y hy
@@ -181,16 +181,16 @@ lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
       α η_M hy_off
     simp only [Function.mem_support, ne_eq] at hy
     exact hy h_zero
-  change closure (Function.support (etaEuclid (I := I) (M := M) α η_M)) ⊆ _
+  change closure (Function.support (chartCutoffEuclidean (I := I) (M := M) α η_M)) ⊆ _
   exact subset_trans (closure_mono h_support_in) h_image_closed.closure_subset
 
 lemma contDiff_etaEuclid [I.Boundaryless] [T2Space M] (α : M) (η_M : M → ℝ)
     (hη_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ η_M)
     (hη_cpt : HasCompactSupport η_M)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
-    ContDiff ℝ (⊤ : ℕ∞) (etaEuclid (I := I) (M := M) α η_M) := by
+    ContDiff ℝ (⊤ : ℕ∞) (chartCutoffEuclidean (I := I) (M := M) α η_M) := by
   classical
-  set f : EuclN → ℝ := etaEuclid (I := I) (M := M) α η_M with hf_def
+  set f : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) α η_M with hf_def
   set Sα : Set EuclN :=
     (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' tsupport η_M
     with hSα_def
@@ -291,7 +291,7 @@ omit [IsManifold I ∞ M] in
 
 lemma etaEuclid_range_Icc (α : M) (η_M : M → ℝ)
     (hη_range : Set.range η_M ⊆ Set.Icc (0 : ℝ) 1) :
-    Set.range (etaEuclid (I := I) (M := M) α η_M) ⊆ Set.Icc (0 : ℝ) 1 := by
+    Set.range (chartCutoffEuclidean (I := I) (M := M) α η_M) ⊆ Set.Icc (0 : ℝ) 1 := by
   classical
   rintro v ⟨y, hy⟩
   by_cases hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α
@@ -310,7 +310,7 @@ lemma etaEuclid_eq_one_of_eta_eq_one
     (hy : y ∈ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
       tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :
-    etaEuclid (I := I) (M := M) α η_M y = 1 := by
+    chartCutoffEuclidean (I := I) (M := M) α η_M y = 1 := by
   classical
   obtain ⟨x, hx_supp, hxy⟩ := hy
   have hx_chart : x ∈ (chartAt H α).source :=
@@ -343,19 +343,19 @@ lemma etaEuclid_eq_one_of_eta_eq_one
 lemma hasCompactSupport_etaEuclid [T2Space M] (α : M) (η_M : M → ℝ)
     (hη_cpt : HasCompactSupport η_M)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
-    HasCompactSupport (etaEuclid (I := I) (M := M) α η_M) := by
+    HasCompactSupport (chartCutoffEuclidean (I := I) (M := M) α η_M) := by
   have h_tsupp_cpt_image : IsCompact
       ((fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' tsupport η_M) :=
     chartImage_isCompact_of_compact_in_source (I := I) (M := M) α
       hη_cpt h_tsupp_chart
-  have hf_supp_in : tsupport (etaEuclid (I := I) (M := M) α η_M) ⊆
+  have hf_supp_in : tsupport (chartCutoffEuclidean (I := I) (M := M) α η_M) ⊆
       (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' tsupport η_M :=
     tsupport_etaEuclid_subset_chartImage (I := I) (M := M) α η_M
       hη_cpt h_tsupp_chart
   refine HasCompactSupport.intro' (K := _) h_tsupp_cpt_image
     h_tsupp_cpt_image.isClosed ?_
   intro y hy_off
-  have : y ∉ tsupport (etaEuclid (I := I) (M := M) α η_M) :=
+  have : y ∉ tsupport (chartCutoffEuclidean (I := I) (M := M) α η_M) :=
     fun h => hy_off (hf_supp_in h)
   exact image_eq_zero_of_notMem_tsupport this
 
@@ -364,8 +364,8 @@ lemma exists_grad_bound_etaEuclid [I.Boundaryless] [T2Space M]
     (hη_smooth : ContMDiff I (modelWithCornersSelf ℝ ℝ) ∞ η_M)
     (hη_cpt : HasCompactSupport η_M)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
-    ∃ C : ℝ, 0 < C ∧ ∀ x : EuclN, ‖fderiv ℝ (etaEuclid (I := I) (M := M) α η_M) x‖ ≤ C := by
-  set f : EuclN → ℝ := etaEuclid (I := I) (M := M) α η_M
+    ∃ C : ℝ, 0 < C ∧ ∀ x : EuclN, ‖fderiv ℝ (chartCutoffEuclidean (I := I) (M := M) α η_M) x‖ ≤ C := by
+  set f : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) α η_M
   have hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f :=
     contDiff_etaEuclid (I := I) (M := M) α η_M hη_smooth hη_cpt h_tsupp_chart
   have hf_cpt : HasCompactSupport f :=
@@ -387,7 +387,7 @@ theorem exists_strict_strong_support_approx
             ContDiff ℝ (⊤ : ℕ∞) χ ∧ HasCompactSupport χ ∧
             tsupport χ ⊆
               (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) '' K_α ∧
-            DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+            DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
               (d := Module.finrank ℝ E) 1 p
               (fun y => chartPushed (I := I) (M := M)
                   (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u y - χ y)
@@ -403,7 +403,7 @@ theorem exists_strict_strong_support_approx
     hη_tsupp_chart_K.trans hK_chart
   have hη_cpt_M : HasCompactSupport η_M :=
     hK_compact.of_isClosed_subset (isClosed_tsupport _) hη_tsupp_chart_K
-  set ηE : EuclN → ℝ := etaEuclid (I := I) (M := M) α η_M with hηE_def
+  set ηE : EuclN → ℝ := chartCutoffEuclidean (I := I) (M := M) α η_M with hηE_def
   have hηE_smooth : ContDiff ℝ (⊤ : ℕ∞) ηE :=
     contDiff_etaEuclid (I := I) (M := M) α η_M hη_smooth_M hη_cpt_M hη_tsupp_chart_α
   have hηE_cpt : HasCompactSupport ηE :=
@@ -509,9 +509,9 @@ theorem exists_strict_strong_support_approx
     intro y hy
     exact h_decomp y hy
   have h_norm_eq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p (fun y => f y - χ y) Ωα =
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p (fun y => ηE y * (f y - ψ y)) Ωα :=
     DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_congr_ae
       (d := Module.finrank ℝ E) hp_one hΩα_open h_diff_eq
@@ -529,16 +529,16 @@ theorem exists_strict_strong_support_approx
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.sub
       (d := Module.finrank ℝ E) hp_one hΩα_open hf_mem hψ_mem
   have h_leib_bound :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p (fun y => ηE y * (f y - ψ y)) Ωα ≤
       ENNReal.ofReal K_leib *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 p (fun y => f y - ψ y) Ωα :=
     hK_leib_bound hfψ_mem
   rw [h_norm_eq]
   refine h_leib_bound.trans ?_
   have h_step : ENNReal.ofReal K_leib *
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 p (fun y => f y - ψ y) Ωα ≤
       ENNReal.ofReal K_leib * ENNReal.ofReal ε_inner := by
     exact mul_le_mul_of_nonneg_left hψ_close (by simp : (0 : ℝ≥0∞) ≤ ENNReal.ofReal K_leib)

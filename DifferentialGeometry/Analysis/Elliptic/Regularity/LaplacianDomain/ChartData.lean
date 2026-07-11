@@ -1179,7 +1179,7 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
           (I := I) (M := M) α))) : EuclN → ℝ)
   f_chart :=
     ((chartPushedRawLpFromLp (I := I) (M := M) g α
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h) :
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) :
       Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α))) : EuclN → ℝ)
@@ -1194,7 +1194,7 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
       (H1ComplToLp (I := I) (M := M) g u_h))
   f_chart_memLp_weighted :=
     Lp.memLp (chartPushedRawLpFromLp (I := I) (M := M) g α
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h))
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h))
   weak_partial_locally_memLp := fun i K hK hK_in =>
     chartPushedWeakPartialLp_locally_memLp (I := I) (M := M) g α i u_h hK hK_in
   weak_partial_isWeakPartial := fun i => by
@@ -1309,7 +1309,7 @@ noncomputable def chartBilinearH1ComplData_of_laplacianDomain
       (I := I) (M := M) g α hu_h hψ hψ_cs hψ_supp
     have h_partA := chartPulledIntegralCLM_density_ψ_eq_setIntegral
       (I := I) (M := M) g α hψ hψ_cs hψ_supp
-      (fHLeibniz (I := I) (M := M) g α u_h hu_h)
+      (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h)
     rw [h_partA] at h_integralForm
     have h_u_chart_ae := chartPushedLpFromLp_coeFn (I := I) (M := M) g α
       (H1ComplToLp (I := I) (M := M) g u_h)
@@ -1370,7 +1370,7 @@ lemma chartBilinearH1ComplData_of_laplacianDomain_f_chart_def
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     (chartBilinearH1ComplData_of_laplacianDomain (I := I) (M := M) g α hu_h).f_chart =
       ((chartPushedRawLpFromLp (I := I) (M := M) g α
-        (fHLeibniz (I := I) (M := M) g α u_h hu_h) :
+        (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h) :
         Lp ℝ 2 ((chartPulledWeightedMeasure (I := I) g α).restrict
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α))) : EuclN → ℝ) := rfl

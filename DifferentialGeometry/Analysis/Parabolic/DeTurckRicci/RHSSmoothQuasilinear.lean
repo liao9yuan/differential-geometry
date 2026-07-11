@@ -190,7 +190,7 @@ theorem liederivmetric_chart_component_smooth_in_g_w_input
     rw [hb i, hb j]
   exact h_chart_at.contMDiffWithinAt
 
-theorem chartRicci_affine_in_d2g
+theorem ricciTensor_chartFrameComponent_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -244,7 +244,7 @@ theorem combine_smoothness_of_summands
       (fun x : M => ricciTensor (I := I) g x
         (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))
       (chartAt H α).source :=
-    chartRicci_affine_in_d2g (I := I) g α i j
+    ricciTensor_chartFrameComponent_contMDiffOn (I := I) g α i j
   have hLie : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
       (fun x : M => lieDerivMetric (I := I) g W x
         (chartFrameVec (I := I) α i x) (chartFrameVec (I := I) α j x))

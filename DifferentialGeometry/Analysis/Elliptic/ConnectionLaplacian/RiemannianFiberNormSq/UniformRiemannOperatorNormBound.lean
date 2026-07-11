@@ -367,7 +367,7 @@ private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
 
   rw [Finset.sum_comm]
 
-private lemma gNorm_riemannOp_le_chartConstants
+private lemma riemannOp_normSq_le_chartConstants
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (hx_good : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -655,7 +655,7 @@ theorem exists_uniform_riemannOp_LeviCivita_gNorm_bound
   have hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
     chartLeviCivitaGoodSet_mem_baseSet (I := I) hx_good
 
-  have hpt := gNorm_riemannOp_le_chartConstants (I := I) g α hx_base hx_good
+  have hpt := riemannOp_normSq_le_chartConstants (I := I) g α hx_base hx_good
     (CR := CR α) (CG := CG α) (cg := cg α) (hCR0 α) (hCG0 α) (hcg0 α)
     (fun i j k l => hCRbound α x hx_tsupport i j k l)
     (fun ξ => hCGbound α x hx_tsupport ξ)

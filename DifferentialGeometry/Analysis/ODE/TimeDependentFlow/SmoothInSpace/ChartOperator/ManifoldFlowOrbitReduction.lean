@@ -20,7 +20,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 theorem chartCloseDop_apply_eq_mfderiv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ) (v : TangentSpace I x)
     (hsrc : (Φ_fam s : M → M) x ∈ (chartAt H α).source) :
-    chartCloseDop (I := I) Φ_fam α x s v = mfderiv I I (Φ_fam s : M → M) x v := by
+    flowOrbitChartTrivDerivOp (I := I) Φ_fam α x s v = mfderiv I I (Φ_fam s : M → M) x v := by
   have hF : MDifferentiableAt I I (Φ_fam s : M → M) x :=
     flowFamily_mdifferentiableAt_fixed_time (I := I) Φ_fam s x
   rw [chartCloseDop_apply]
@@ -28,14 +28,14 @@ theorem chartCloseDop_apply_eq_mfderiv
 
 theorem chartCloseDop_basepoint_apply_eq_mfderiv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (v : TangentSpace I x) :
-    chartCloseDop (I := I) Φ_fam (Φ_fam t x) x t v
+    flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x t v
       = mfderiv I I (Φ_fam t : M → M) x v :=
   chartCloseDop_apply_eq_mfderiv (I := I) Φ_fam (Φ_fam t x) x t v (mem_chart_source H _)
 
 theorem chartCloseDop_eventuallyEq_mfderiv_orbit
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) (v : TangentSpace I x)
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
-    (fun s : ℝ => chartCloseDop (I := I) Φ_fam (Φ_fam t x) x s v)
+    (fun s : ℝ => flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x s v)
       =ᶠ[𝓝 t] (fun s : ℝ => mfderiv I I (Φ_fam s : M → M) x v) := by
   have hmem : ∀ᶠ s : ℝ in 𝓝 t,
       (Φ_fam s : M → M) x ∈ (chartAt H (Φ_fam t x)).source :=
@@ -50,7 +50,7 @@ theorem rawVariationalIdentity_iff_hasDerivAt_chartCloseDop
     (t : ℝ) (x : M) (v : TangentSpace I x)
     (hcontAt : ContinuousAt (fun s : ℝ => (Φ_fam s : M → M) x) t) :
     RawVariationalIdentity (I := I) g X Φ_fam t x v
-      ↔ HasDerivAt (fun s : ℝ => chartCloseDop (I := I) Φ_fam (Φ_fam t x) x s v)
+      ↔ HasDerivAt (fun s : ℝ => flowOrbitChartTrivDerivOp (I := I) Φ_fam (Φ_fam t x) x s v)
           (-(LeviCivita (I := I) g) (X : ∀ x : M, TangentSpace I x) (Φ_fam t x)
             (mfderiv I I (Φ_fam t : M → M) x v)) t := by
   unfold RawVariationalIdentity

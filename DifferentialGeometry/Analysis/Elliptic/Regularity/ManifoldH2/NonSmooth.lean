@@ -115,7 +115,7 @@ theorem wkpNormChart_two_eq_tsum
     DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart
       (I := I) (M := M) g 2 2 u =
       ∑' α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
             (I := I) (M := M) (chartAtlasPOU I M) α u)
@@ -140,7 +140,7 @@ theorem wkpNormChart_two_le_tsum_chart_norms
     DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart
       (I := I) (M := M) g 2 2 u ≤
       ∑' α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
             (I := I) (M := M) (chartAtlasPOU I M) α u)
@@ -198,7 +198,7 @@ theorem loc_chart_of_chartH2NonSmoothBridgeData
         (h.D.weak_partial i) h.Omega'' ∧
       eLpNorm g_ik 2 ((volume : Measure EuclN).restrict h.Omega'') ≤
         ENNReal.ofReal (h.M_bound i k) := by
-  exact chart_loc_of_uniform_bound (I := I) (M := M) (g := g) (α := α)
+  exact exists_weak_second_partial_of_uniform_diffQuot_bound (I := I) (M := M) (g := g) (α := α)
     h.D h.Omega''_open h.Omega''_compact_closure h.h0_pos h.room
     h.M_bound_nn h.uniform_diffQuot_bound
 
@@ -253,7 +253,7 @@ theorem memWkpChart_two_of_laplacianDomain_with_norm
     DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart
       (I := I) (M := M) g 2 2 u =
       ∑' α : M,
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 2 2
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
             (I := I) (M := M) (chartAtlasPOU I M) α u)

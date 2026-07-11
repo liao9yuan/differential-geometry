@@ -39,7 +39,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem geometry_slot_joint_datum
+theorem exists_jointFDerivWithinAt_evalForm_pullbackPart
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
@@ -68,7 +68,7 @@ theorem geometry_slot_joint_datum
   let _ := hΦ
   exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
-theorem evalform_joint_frechet_datum
+theorem exists_jointFDerivWithinAt_evalFormTwoVar
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hΦ : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞
@@ -94,7 +94,7 @@ theorem evalform_joint_frechet_datum
   let _ := hΦ
   exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
-theorem evalform_geometry_slot
+theorem evalForm_pullbackPart_hasDerivWithinAt_neg_lieDerivMetric_deTurckVF
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hΦ_orbit : ∀ x : M, ∀ s ∈ Set.Ioo (0 : ℝ) T,
@@ -165,7 +165,7 @@ theorem evalform_geometry_slot
   let R : ℝ × ℝ → ℝ := fun p : ℝ × ℝ => (g_DT t).inner ((Φ_fam p.1 : M → M) x)
       (mfderiv I I (Φ_fam p.2 : M → M) x v)
       (mfderiv I I (Φ_fam p.2 : M → M) x w)
-  obtain ⟨R', hR'⟩ := geometry_slot_joint_datum (I := I) g_DT T Φ_fam hΦ
+  obtain ⟨R', hR'⟩ := exists_jointFDerivWithinAt_evalForm_pullbackPart (I := I) g_DT T Φ_fam hΦ
     (Cgeom) hclm_geom (Vpush) hpush_v (Wpush) hpush_w t ht x v w
   have hdiag : HasDerivWithinAt (fun s : ℝ => R (s, s)) (R' (1, 0) + R' (0, 1))
       (Set.Ici (0 : ℝ)) t :=
@@ -205,7 +205,7 @@ theorem evalform_geometry_slot
   rw [hsum] at hdiag
   exact hdiag
 
-theorem total_eval_three_piece_chain_rule
+theorem evalFormTwoVar_diag_hasDerivWithinAt_deTurckRicciRHS_chainRule
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (hDT_deriv : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,

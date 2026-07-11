@@ -469,7 +469,7 @@ lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
     (hψ_compact : HasCompactSupport ψ) (hψ_supp : tsupport ψ ⊆ Ω) :
     eLpNorm (fun z : EuclN_E => ‖fderiv ℝ ψ z‖) q (volume.restrict Ω) ≤
       ((Module.finrank ℝ E : ℕ) : ℝ≥0∞) *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q ψ Ω := by
   classical
   have h_grad_le := eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
@@ -496,7 +496,7 @@ lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
     Finset.sum_congr rfl (fun i _ => h_each_eq i)
   rw [h_step1]
   have hWkpEq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q ψ Ω =
         ∑ j ∈ Finset.range 2,
           ∑ β : Fin j → Fin (Module.finrank ℝ E),
@@ -554,7 +554,7 @@ lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
           eLpNorm
             (DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'
               q i ψ Ω) q (volume.restrict Ω)) ≤
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q ψ Ω := by
     rw [hWkpEq, Finset.sum_range_succ, Finset.sum_range_one, ← h_j1_term]
     refine le_add_of_nonneg_left ?_
@@ -563,9 +563,9 @@ lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
   have hd_pos : 0 < Module.finrank ℝ E := NeZero.pos _
   have hd_one_le : (1 : ℝ≥0∞) ≤ ((Module.finrank ℝ E : ℕ) : ℝ≥0∞) := by
     exact_mod_cast hd_pos
-  conv_lhs => rw [show DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  conv_lhs => rw [show DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
     (d := Module.finrank ℝ E) 1 q ψ Ω = 1 *
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
       (d := Module.finrank ℝ E) 1 q ψ Ω from
     (one_mul _).symm]
   gcongr
@@ -574,7 +574,7 @@ lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (α : M) {q : ℝ≥0∞} (hq_one : 1 ≤ q) (u : M → ℝ) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) 1 q
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
           (I := I) (M := M) α
@@ -615,7 +615,7 @@ lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
     rw [if_pos hsymm_target]
     rfl
   have h_eq :
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartSmoothExt
             (I := I) (M := M) α
@@ -623,7 +623,7 @@ lemma wkpNorm_chartSmoothExt_pou_mul_le_wkpNormChart
               : C^∞⟮I, M; ℝ⟯) x * u x))
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
             (I := I) (M := M) α) =
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) 1 q
           (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushed
             (I := I) (M := M)

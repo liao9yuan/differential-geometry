@@ -172,7 +172,7 @@ private lemma base_f_chart_locally_memLp
     h_weighted.smul_measure hc_ne_top
   exact h_smul.mono_measure h_le
 
-private lemma term1_per_pair_ibp
+private lemma weightedInvGram_ibp_per_pair
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -353,7 +353,7 @@ private lemma term1_per_pair_ibp
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-private lemma term1_double_sum_ibp
+private lemma weightedInvGram_ibp_double_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -586,7 +586,7 @@ private lemma term1_double_sum_ibp
             (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
             ∂(volume : Measure EuclN))) := by
     intro i j
-    exact term1_per_pair_ibp (I := I) (M := M) g α hu_h l i j
+    exact weightedInvGram_ibp_per_pair (I := I) (M := M) g α hu_h l i j
       hψ_smooth hψ_cs hψ_supp
   rw [hLHS_sum_swap, hRHS1_sum_swap, hRHS2_sum_swap]
   have hLHS_neg :
@@ -747,7 +747,7 @@ private lemma density_coef_ibp
   rw [hLeibniz1_eq, hLeibniz2_eq] at h_ibp_ext
   exact h_ibp_ext
 
-private lemma term2_ibp
+private lemma density_u_chart_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -790,7 +790,7 @@ private lemma term2_ibp
       (laplacianDomainPow_succ_subset_laplacianDomain
         (I := I) (M := M) g 1 hu_h) l' hK'_compact hK'_in
 
-private lemma term3_ibp
+private lemma density_f_chart_ibp
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2)
@@ -909,11 +909,11 @@ theorem differentiated_variational_identity_holds
   have hψl_supp : tsupport ψl ⊆ Ω :=
     (tsupport_fderiv_apply_single_subset ψ l).trans hψ_supp
   have h_base_id := D_base.variational_identity ψl hψl_smooth hψl_cs hψl_supp
-  have hT1 := term1_double_sum_ibp (I := I) (M := M) g α hu_h l
+  have hT1 := weightedInvGram_ibp_double_sum (I := I) (M := M) g α hu_h l
     hψ_smooth hψ_cs hψ_supp
-  have hT2 := term2_ibp (I := I) (M := M) g α hu_h l
+  have hT2 := density_u_chart_ibp (I := I) (M := M) g α hu_h l
     hψ_smooth hψ_cs hψ_supp
-  have hT3 := term3_ibp (I := I) (M := M) g α hu_h l
+  have hT3 := density_f_chart_ibp (I := I) (M := M) g α hu_h l
     hψ_smooth hψ_cs hψ_supp
   set T1 : ℝ := ∫ y in Ω,
     (∑ i : Fin (Module.finrank ℝ E),

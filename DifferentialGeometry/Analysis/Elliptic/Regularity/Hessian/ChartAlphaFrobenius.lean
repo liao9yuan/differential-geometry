@@ -774,7 +774,7 @@ theorem chartFrobeniusSqHSBridge_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
     (hx : x ∈ (chartAt H α).source) :
-    chartFrobeniusSqHSBridge (I := I) (M := M) g α f x := by
+    chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α f x := by
   classical
   rw [chartFrobeniusSqHSBridge_def]
   have h_inv := chartFrobeniusInvariance_holds (I := I) g α hf hx
@@ -799,12 +799,12 @@ theorem smoothTensorPairingChart_eq_hessPairingChart_pullback
       rw [hx_y_def]
       exact (extChartAt I α).map_target hy_target
     rwa [extChartAt_source_eq_chartAt_source] at hx_y_source_ext
-  have h_HS_add : chartFrobeniusSqHSBridge (I := I) (M := M) g α
+  have h_HS_add : chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α
       (fun z : M => (φ : M → ℝ) z + v.toFun z) x_y := by
     have hf_add : ContMDiff I 𝓘(ℝ) ∞ (fun z : M => (φ : M → ℝ) z + v.toFun z) :=
       φ.contMDiff.add v.smooth
     exact chartFrobeniusSqHSBridge_holds (I := I) g α hf_add hx_y_chart
-  have h_HS_sub : chartFrobeniusSqHSBridge (I := I) (M := M) g α
+  have h_HS_sub : chartFrobeniusSqGradVectorBridge (I := I) (M := M) g α
       (fun z : M => (φ : M → ℝ) z - v.toFun z) x_y := by
     have hf_sub : ContMDiff I 𝓘(ℝ) ∞ (fun z : M => (φ : M → ℝ) z - v.toFun z) :=
       φ.contMDiff.sub v.smooth

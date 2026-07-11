@@ -205,7 +205,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-noncomputable def Tensor3rdCurv
+noncomputable def tensorThirdOrderCurvatureDefect
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
     TensorRSSpace r s I x :=
@@ -227,7 +227,7 @@ noncomputable def Tensor3rdCurv
 lemma Tensor3rdCurv_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
-    Tensor3rdCurv (I := I) g r s W T x =
+    tensorThirdOrderCurvatureDefect (I := I) g r s W T x =
       ∑ i : Fin (Module.finrank ℝ E),
         ((tensorCov (I := I) g r s).toFun
             (covApply (tensorCov (I := I) g r s) (smoothOrthoFrame (I := I) g x i) T) x
@@ -288,7 +288,7 @@ theorem frame_trace_thirdCovDeriv_swap
             (covApply (tensorCov (I := I) g r s) (smoothOrthoFrame (I := I) g x i)
               (covApply (tensorCov (I := I) g r s) (smoothOrthoFrame (I := I) g x i) T)) x
             (W x)
-        + Tensor3rdCurv (I := I) g r s W T x := by
+        + tensorThirdOrderCurvatureDefect (I := I) g r s W T x := by
   classical
   rw [Tensor3rdCurv_def, ← Finset.sum_add_distrib]
   refine Finset.sum_congr rfl (fun i _ => ?_)

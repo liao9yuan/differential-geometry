@@ -64,7 +64,7 @@ private theorem eLpNorm_abs_rawPullR_ball_le_tensorL2Norm
     ∃ B : ℝ, 0 ≤ B ∧ ∀ (S : SmoothCcTensor g r s)
       (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin s → Fin (Module.finrank ℝ E)),
-      eLpNorm (fun z => |rawPullR (I := I) (M := M) g r s S α Idx Jdx z|) 2
+      eLpNorm (fun z => |tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx z|) 2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) ≤
         ENNReal.ofReal ((Real.sqrt c⁻¹ * B) *
           tensorL2Norm (I := I) (M := M) g r s S.toFun) := by
@@ -74,7 +74,7 @@ private theorem eLpNorm_abs_rawPullR_ball_le_tensorL2Norm
   refine ⟨CA, hCA_nn, ?_⟩
   intro S Idx Jdx
   have habs_eq : (fun z : EuclN =>
-      |rawPullR (I := I) (M := M) g r s S α Idx Jdx z|) =ᵐ[
+      |tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx z|) =ᵐ[
       (volume : Measure EuclN).restrict (Metric.ball y₀ R)]
       (fun z : EuclN => ‖iteratedFDeriv ℝ 0
         (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx
@@ -180,9 +180,9 @@ private theorem sharpRawPullCenter_le_jetSum
   have h_refold : ∀ j : ℕ, ∃ Cj : ℝ, 0 ≤ Cj ∧ (j ≤ m →
       ∀ (T : SmoothCcTensor g r s), ∀ y ∈ Metric.ball y₀ R,
         ‖iteratedFDeriv ℝ j
-            (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) y‖ ≤
+            (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) y‖ ≤
           Cj * ∑ i ∈ Finset.range (j + 1),
-            zeroContentR (I := I) (M := M) g r (s + i)
+            tensorComponentAbsSum (I := I) (M := M) g r (s + i)
               (iteratedCovGrad g r s i T) α y) := by
     intro j
     by_cases hjm : j ≤ m
@@ -191,10 +191,10 @@ private theorem sharpRawPullCenter_le_jetSum
       refine ⟨Cj, hCj_nn, fun _ T y hy => ?_⟩
       have h := hCj T j (le_refl j) 0 (by omega) IJ.1 IJ.2 y (h_mem_pou y hy)
       have hsum : (∑ i ∈ Finset.range (j + 1),
-          zeroContentR (I := I) (M := M) g r (s + (0 + i))
+          tensorComponentAbsSum (I := I) (M := M) g r (s + (0 + i))
             (iteratedCovGrad g r s (0 + i) T) α y) =
           ∑ i ∈ Finset.range (j + 1),
-            zeroContentR (I := I) (M := M) g r (s + i)
+            tensorComponentAbsSum (I := I) (M := M) g r (s + i)
               (iteratedCovGrad g r s i T) α y := by
         refine Finset.sum_congr rfl (fun i _ => ?_)
         rw [Nat.zero_add]
@@ -205,7 +205,7 @@ private theorem sharpRawPullCenter_le_jetSum
   have h_l2 : ∀ i : ℕ, ∃ B : ℝ, 0 ≤ B ∧ ∀ (S : SmoothCcTensor g r (s + i))
       (Idx : Fin r → Fin (Module.finrank ℝ E))
       (Jdx : Fin (s + i) → Fin (Module.finrank ℝ E)),
-      eLpNorm (fun z => |rawPullR (I := I) (M := M) g r (s + i) S α Idx Jdx z|) 2
+      eLpNorm (fun z => |tensorComponentEuclideanChart (I := I) (M := M) g r (s + i) S α Idx Jdx z|) 2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) ≤
         ENNReal.ofReal ((Real.sqrt c⁻¹ * B) *
           tensorL2Norm (I := I) (M := M) g r (s + i) S.toFun) :=
@@ -254,7 +254,7 @@ private theorem sharpRawPullCenter_le_jetSum
       eLpNorm (fun z => ‖iteratedFDeriv ℝ j ftil z‖) 2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) =
         eLpNorm (fun z => ‖iteratedFDeriv ℝ j
-            (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
+            (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) := by
     intro j
     refine eLpNorm_congr_ae ?_
@@ -271,7 +271,7 @@ private theorem sharpRawPullCenter_le_jetSum
     rfl
   have h_raw_meas : ∀ (i : ℕ) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
       (Fin (s + i) → Fin (Module.finrank ℝ E))),
-      AEStronglyMeasurable (fun z => |rawPullR (I := I) (M := M) g r (s + i)
+      AEStronglyMeasurable (fun z => |tensorComponentEuclideanChart (I := I) (M := M) g r (s + i)
         (iteratedCovGrad g r s i T) α q.1 q.2 z|)
         ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) := by
     intro i q
@@ -279,7 +279,7 @@ private theorem sharpRawPullCenter_le_jetSum
     exact (((rawPullR_contDiffOn (I := I) (M := M) g r (s + i)
       (iteratedCovGrad g r s i T) α q.1 q.2).continuousOn).mono hball_open).abs
   set Zc : ℕ → EuclN → ℝ := fun i z =>
-    zeroContentR (I := I) (M := M) g r (s + i) (iteratedCovGrad g r s i T) α z
+    tensorComponentAbsSum (I := I) (M := M) g r (s + i) (iteratedCovGrad g r s i T) α z
     with hZc_def
   have hZc_nn : ∀ i z, 0 ≤ Zc i z := fun i z =>
     zeroContentR_nonneg (I := I) (M := M) g r (s + i) _ α z
@@ -288,7 +288,7 @@ private theorem sharpRawPullCenter_le_jetSum
     intro i
     have hZc_eq : Zc i = fun z => ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin (s + i) → Fin (Module.finrank ℝ E)),
-        |rawPullR (I := I) (M := M) g r (s + i)
+        |tensorComponentEuclideanChart (I := I) (M := M) g r (s + i)
           (iteratedCovGrad g r s i T) α q.1 q.2 z| := rfl
     rw [hZc_eq]
     refine ContinuousOn.aestronglyMeasurable ?_ measurableSet_ball
@@ -303,7 +303,7 @@ private theorem sharpRawPullCenter_le_jetSum
     intro i _
     have hZc_sum : Zc i = ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
         (Fin (s + i) → Fin (Module.finrank ℝ E)),
-        (fun z => |rawPullR (I := I) (M := M) g r (s + i)
+        (fun z => |tensorComponentEuclideanChart (I := I) (M := M) g r (s + i)
           (iteratedCovGrad g r s i T) α q.1 q.2 z|) := by
       funext z
       rw [Finset.sum_apply]
@@ -311,7 +311,7 @@ private theorem sharpRawPullCenter_le_jetSum
     calc eLpNorm (Zc i) 2 ((volume : Measure EuclN).restrict (Metric.ball y₀ R))
         ≤ ∑ q : (Fin r → Fin (Module.finrank ℝ E)) ×
             (Fin (s + i) → Fin (Module.finrank ℝ E)),
-            eLpNorm (fun z => |rawPullR (I := I) (M := M) g r (s + i)
+            eLpNorm (fun z => |tensorComponentEuclideanChart (I := I) (M := M) g r (s + i)
               (iteratedCovGrad g r s i T) α q.1 q.2 z|) 2
               ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) := by
           rw [hZc_sum]
@@ -331,7 +331,7 @@ private theorem sharpRawPullCenter_le_jetSum
           ring
   have h_perj : ∀ j ∈ Finset.range (m + 1),
       (eLpNorm (fun z => ‖iteratedFDeriv ℝ j
-          (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
+          (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
         ((volume : Measure EuclN).restrict (Metric.ball y₀ R))).toReal ≤
         Cmax * (Kmax * JS) := by
     intro j hj
@@ -339,7 +339,7 @@ private theorem sharpRawPullCenter_le_jetSum
       rw [Finset.mem_range] at hj
       omega
     have h_pt : ∀ y ∈ Metric.ball y₀ R,
-        ‖iteratedFDeriv ℝ j (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) y‖ ≤
+        ‖iteratedFDeriv ℝ j (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) y‖ ≤
           Cjfun j * ∑ i ∈ Finset.range (m + 1), Zc i y := by
       intro y hy
       refine (hCjfun j hjm T y hy).trans ?_
@@ -348,7 +348,7 @@ private theorem sharpRawPullCenter_le_jetSum
         Finset.range_subset_range.mpr (Nat.add_le_add_right hjm 1)
       refine Finset.sum_le_sum_of_subset_of_nonneg hsubset (fun i _ _ => hZc_nn i y)
     have h_mono : eLpNorm (fun z => ‖iteratedFDeriv ℝ j
-        (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
+        (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
         ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) ≤
         eLpNorm (Cjfun j • fun z => ∑ i ∈ Finset.range (m + 1), Zc i z) 2
           ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) := by
@@ -358,9 +358,9 @@ private theorem sharpRawPullCenter_le_jetSum
       have h2 : 0 ≤ Cjfun j * ∑ i ∈ Finset.range (m + 1), Zc i z :=
         mul_nonneg (hCjfun_nn j) (Finset.sum_nonneg (fun i _ => hZc_nn i z))
       calc ‖‖iteratedFDeriv ℝ j
-              (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖‖
+              (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖‖
           = ‖iteratedFDeriv ℝ j
-              (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖ := norm_norm _
+              (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖ := norm_norm _
         _ ≤ Cjfun j * ∑ i ∈ Finset.range (m + 1), Zc i z := h_pt z hz
         _ = ‖(Cjfun j • fun z' => ∑ i ∈ Finset.range (m + 1), Zc i z') z‖ := by
             rw [Pi.smul_apply, smul_eq_mul, Real.norm_eq_abs, abs_of_nonneg h2]
@@ -369,7 +369,7 @@ private theorem sharpRawPullCenter_le_jetSum
       funext z
       rw [Finset.sum_apply]
     have h_enn : eLpNorm (fun z => ‖iteratedFDeriv ℝ j
-        (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
+        (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
         ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) ≤
         ENNReal.ofReal (Cjfun j) *
           ∑ i ∈ Finset.range (m + 1),
@@ -380,7 +380,7 @@ private theorem sharpRawPullCenter_le_jetSum
       rw [h_sum_fun]
       exact eLpNorm_sum_le (fun i _ => hZc_meas i) (by norm_num)
     have h_enn2 : eLpNorm (fun z => ‖iteratedFDeriv ℝ j
-        (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
+        (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
         ((volume : Measure EuclN).restrict (Metric.ball y₀ R)) ≤
         ENNReal.ofReal (Cjfun j * ∑ i ∈ Finset.range (m + 1),
           Kfun i * tensorL2Norm (I := I) (M := M) g r (s + i)
@@ -443,7 +443,7 @@ private theorem sharpRawPullCenter_le_jetSum
             ((volume : Measure EuclN).restrict (Metric.ball y₀ R))).toReal := h_loc
     _ = Cloc * ∑ j ∈ Finset.range (m + 1),
           (eLpNorm (fun z => ‖iteratedFDeriv ℝ j
-              (rawPullR (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
+              (tensorComponentEuclideanChart (I := I) (M := M) g r s T α IJ.1 IJ.2) z‖) 2
             ((volume : Measure EuclN).restrict (Metric.ball y₀ R))).toReal := by
         congr 1
         exact Finset.sum_congr rfl (fun j _ => by rw [h_eLp_eq j])

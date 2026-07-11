@@ -50,7 +50,7 @@ theorem wtwokTwoNorm_chartTerm_eq_zero_of_notMem_finset
     (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M)) :
     (∑ Idx : Fin r → Fin (Module.finrank ℝ E),
       ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-        wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α)) = 0 := by
   refine Finset.sum_eq_zero ?_
@@ -136,7 +136,7 @@ theorem wtwokTwoNorm_eq_finset_sum
       ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
           ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-            wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+            iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
               (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α) := by
   unfold wtwokTwoNorm
@@ -150,7 +150,7 @@ def wtwokTwoChartTerm
     (k : ℕ) (T : SmoothCcTensor g r s) (α : M) : ℝ≥0∞ :=
   ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
     ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α)
 
@@ -160,7 +160,7 @@ def wtwokTwoChartTerm
     wtwokTwoChartTerm (I := I) (M := M) g k T α =
       ∑ Idx : Fin r → Fin (Module.finrank ℝ E),
         ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-          wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
             (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α) := rfl
 
@@ -209,7 +209,7 @@ theorem wkpNorm_tensorChartComp_le_wtwokTwoNorm
     (hα : α ∈ chartAtlasPOU_finset (I := I) (M := M))
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
-    wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α) ≤
       wtwokTwoNorm (I := I) (M := M) g k T := by
@@ -217,12 +217,12 @@ theorem wkpNorm_tensorChartComp_le_wtwokTwoNorm
   rw [wtwokTwoChartTerm_def]
   refine le_trans ?_ (Finset.single_le_sum
     (f := fun Idx => ∑ Jdx : Fin s → Fin (Module.finrank ℝ E),
-      wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
         (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α))
     (fun Idx _ => zero_le _) (Finset.mem_univ Idx))
   exact Finset.single_le_sum
-    (f := fun Jdx => wkpNorm (d := Module.finrank ℝ E) (2 * k) 2
+    (f := fun Jdx => iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (2 * k) 2
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α))
     (fun Jdx _ => zero_le _) (Finset.mem_univ Jdx)

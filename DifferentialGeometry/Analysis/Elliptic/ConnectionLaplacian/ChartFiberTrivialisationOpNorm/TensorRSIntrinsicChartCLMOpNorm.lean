@@ -33,7 +33,7 @@ private lemma tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
     (hC_fib : ∀ D : TensorRSModel r s ℝ E,
       ‖tensorRSChartFiberFromModel (I := I) r s α b D‖ ≤ C_fib * ‖D‖)
     (hC_fib_nn : 0 ≤ C_fib)
-    (hC_J : ‖chartJ (I := I) (M := M) α b‖ ≤ C_J)
+    (hC_J : ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ ≤ C_J)
     (_hC_J_nn : 0 ≤ C_J)
     (X : TangentSpace I b) :
     ‖tensorRSIntrinsicChartCLM (I := I) r s α T b X‖ ≤
@@ -60,7 +60,7 @@ private lemma tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
       ‖trivToE (I := I) α b X‖ ≤ ‖trivToE (I := I) α b‖ * ‖X‖ :=
     (trivToE (I := I) α b).le_opNorm X
   have h_triv_J :
-      ‖trivToE (I := I) α b‖ = ‖chartJ (I := I) (M := M) α b‖ := rfl
+      ‖trivToE (I := I) α b‖ = ‖chartTrivializationLinearMap (I := I) (M := M) α b‖ := rfl
   have h_X_nn : 0 ≤ ‖X‖ := norm_nonneg _
   have h_trivToE_le_CJ : ‖trivToE (I := I) α b X‖ ≤ C_J * ‖X‖ := by
     refine h_trivToE_le.trans ?_

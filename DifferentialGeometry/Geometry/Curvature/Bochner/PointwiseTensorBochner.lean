@@ -218,7 +218,7 @@ noncomputable def tensor3rdCurvBracket
 theorem Tensor3rdCurv_eq_genuine_add_bracket
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
-    Tensor3rdCurv (I := I) g r s W T x =
+    tensorThirdOrderCurvatureDefect (I := I) g r s W T x =
       tensor3rdCurvGenuine (I := I) g r s W T x +
         tensor3rdCurvBracket (I := I) g r s W T x := by
   classical

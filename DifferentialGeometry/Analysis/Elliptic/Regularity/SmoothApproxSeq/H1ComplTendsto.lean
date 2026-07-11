@@ -37,12 +37,12 @@ private lemma wkpNorm_succ_ge
     (d : ℕ) (k : ℕ) (p : ℝ≥0∞)
     (u : EuclideanSpace ℝ (Fin d) → ℝ)
     (Ω : Set (EuclideanSpace ℝ (Fin d))) :
-    DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+    DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := d) k p u Ω ≤
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := d) (k + 1) p u Ω := by
   classical
-  unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+  unfold DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
   refine Finset.sum_le_sum_of_subset_of_nonneg ?_ ?_
   · intro j hj
     rw [Finset.mem_range] at hj ⊢

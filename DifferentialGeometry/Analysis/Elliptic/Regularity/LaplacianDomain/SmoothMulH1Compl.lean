@@ -711,7 +711,7 @@ noncomputable def smoothLaplacianBundle
     (smoothLaplacianBundle (I := I) (M := M) g φ : M → ℝ) x =
       Δ_g (I := I) g φ.contMDiff x := rfl
 
-noncomputable def fHLeibnizGeneralResidualCLM
+noncomputable def leibnizCompensatedSourceResidualCLMOfSmoothFactor
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     H1Compl (I := I) (M := M) g →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
@@ -723,22 +723,22 @@ noncomputable def fHLeibnizGeneralResidualCLM
 @[simp] lemma fHLeibnizGeneralResidualCLM_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) :
-    fHLeibnizGeneralResidualCLM (I := I) (M := M) g φ u_h =
+    leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g φ u_h =
       -((2 : ℝ) • gradInnerCLM (I := I) (M := M) g φ u_h) -
         smoothMulLp (I := I) (M := M) g
           (smoothLaplacianBundle (I := I) (M := M) g φ)
           (H1ComplToLp (I := I) (M := M) g u_h) := by
-  unfold fHLeibnizGeneralResidualCLM
+  unfold leibnizCompensatedSourceResidualCLMOfSmoothFactor
   rfl
 
-noncomputable def fHLeibnizGeneral
+noncomputable def leibnizCompensatedSourceOfSmoothFactor
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   smoothMulLp (I := I) (M := M) g φ
       (H1ComplToLp (I := I) (M := M) g u_h -
         laplacianOp (I := I) (M := M) g ⟨u_h, hu_h⟩) +
-    fHLeibnizGeneralResidualCLM (I := I) (M := M) g φ u_h
+    leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g φ u_h
 
 private noncomputable def smoothMulH1ComplInnerCLM
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g) :
@@ -837,12 +837,12 @@ private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
 
 private theorem fHLeibnizGeneral_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g) :
-    fHLeibnizGeneral (I := I) (M := M) g φ
+    leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g uT)
         (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) uT) =
       smoothToLp (I := I) (M := M) g
         (smoothScalarMulFun (I := I) (M := M) g φ uT).oneSubLapClassical := by
-  unfold fHLeibnizGeneral
+  unfold leibnizCompensatedSourceOfSmoothFactor
   apply MeasureTheory.Lp.ext
   have h_oneSubLap_arg :
       H1ComplToLp (I := I) (M := M) g
@@ -939,7 +939,7 @@ private theorem smoothMulH1Compl_smoothToH1Compl_eq_resolvent_fHLeibnizGeneral
     smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g uT) =
       resolvent (I := I) (M := M) g
-        (fHLeibnizGeneral (I := I) (M := M) g φ
+        (leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ
           (smoothToH1Compl (I := I) (M := M) g uT)
           (smoothToH1Compl_mem_laplacianDomain (I := I) (M := M) uT)) := by
   rw [smoothMulH1Compl_smoothToH1Compl, fHLeibnizGeneral_smoothToH1Compl]
@@ -979,7 +979,7 @@ private noncomputable def rewrittenRHSCLM
     ((innerSL ℝ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ)
       (smoothToLp (I := I) (M := M) g vT)).comp
-      (fHLeibnizGeneralResidualCLM (I := I) (M := M) g φ)
+      (leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g φ)
 
 @[simp] private lemma rewrittenRHSCLM_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (vT : SmoothScalar g)
@@ -988,7 +988,7 @@ private noncomputable def rewrittenRHSCLM
       ⟪u_h, smoothMulH1Compl (I := I) (M := M) g φ
         (smoothToH1Compl (I := I) (M := M) g vT)⟫_ℝ +
       ⟪smoothToLp (I := I) (M := M) g vT,
-        fHLeibnizGeneralResidualCLM (I := I) (M := M) g φ u_h⟫_ℝ := by
+        leibnizCompensatedSourceResidualCLMOfSmoothFactor (I := I) (M := M) g φ u_h⟫_ℝ := by
   unfold rewrittenRHSCLM
   rfl
 
@@ -1005,7 +1005,7 @@ private lemma smoothMulH1ComplInner_eq_rewrittenRHS_smoothToH1Compl
     (I := I) (M := M) g φ uT]
   rw [resolvent_inner_eq_lpFunctional]
   rw [H1ComplToLp_smoothToH1Compl]
-  unfold fHLeibnizGeneral
+  unfold leibnizCompensatedSourceOfSmoothFactor
   rw [inner_add_right]
   have h_oneSubLap_arg :
       H1ComplToLp (I := I) (M := M) g
@@ -1102,10 +1102,10 @@ private lemma rewrittenRHS_eq_original_RHS_on_laplacianDomain
     rewrittenRHSCLM (I := I) (M := M) g φ vT u_h =
     ⟪H1ComplToLp (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g vT),
-      fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h⟫_ℝ := by
+      leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h⟫_ℝ := by
   rw [rewrittenRHSCLM_apply]
   rw [H1ComplToLp_smoothToH1Compl]
-  unfold fHLeibnizGeneral
+  unfold leibnizCompensatedSourceOfSmoothFactor
   rw [inner_add_right]
   congr 1
   have h_preimage_eq :
@@ -1147,7 +1147,7 @@ private theorem smoothMulH1ComplInner_eq_lpFunctional_smoothToH1Compl
       smoothToH1Compl (I := I) (M := M) g vT⟫_ℝ =
     ⟪H1ComplToLp (I := I) (M := M) g
         (smoothToH1Compl (I := I) (M := M) g vT),
-      fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h⟫_ℝ := by
+      leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h⟫_ℝ := by
   rw [smoothMulH1ComplInner_eq_rewrittenRHS (I := I) (M := M) g φ vT u_h]
   exact rewrittenRHS_eq_original_RHS_on_laplacianDomain
     (I := I) (M := M) g φ vT hu_h
@@ -1162,31 +1162,31 @@ theorem smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     smoothMulH1Compl (I := I) (M := M) g φ u_h =
       resolvent (I := I) (M := M) g
-        (fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h) := by
+        (leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h) := by
   have h_dense := denseRange_smoothToH1Compl (I := I) (M := M) g
   refine ext_inner_left ℝ ?_
   intro w
   refine h_dense.induction_on (p := fun w =>
       ⟪w, smoothMulH1Compl (I := I) (M := M) g φ u_h⟫_ℝ =
         ⟪w, resolvent (I := I) (M := M) g
-          (fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h)⟫_ℝ) w ?_ ?_
+          (leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h)⟫_ℝ) w ?_ ?_
   · refine isClosed_eq ?_ ?_
     · exact (continuous_innerSL_right (I := I) (M := M) g
         (smoothMulH1Compl (I := I) (M := M) g φ u_h))
     · exact (continuous_innerSL_right (I := I) (M := M) g
         (resolvent (I := I) (M := M) g
-          (fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h)))
+          (leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h)))
   · intro vT
     change ⟪smoothToH1Compl (I := I) (M := M) g vT,
         smoothMulH1Compl (I := I) (M := M) g φ u_h⟫_ℝ =
       ⟪smoothToH1Compl (I := I) (M := M) g vT,
         resolvent (I := I) (M := M) g
-          (fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h)⟫_ℝ
+          (leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h)⟫_ℝ
     rw [real_inner_comm (smoothMulH1Compl (I := I) (M := M) g φ u_h)
       (smoothToH1Compl (I := I) (M := M) g vT)]
     rw [real_inner_comm
       (resolvent (I := I) (M := M) g
-        (fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h))
+        (leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h))
       (smoothToH1Compl (I := I) (M := M) g vT)]
     rw [smoothMulH1ComplInner_eq_lpFunctional_smoothToH1Compl
       (I := I) (M := M) g φ vT hu_h]
@@ -1198,7 +1198,7 @@ theorem smoothMulH1Compl_mem_laplacianDomain
     smoothMulH1Compl (I := I) (M := M) g φ u_h ∈
       laplacianDomain (I := I) (M := M) g := by
   rw [laplacianDomain_mem_iff]
-  exact ⟨fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h,
+  exact ⟨leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h,
     smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral (I := I) (M := M) g φ hu_h⟩
 
 theorem laplacianDomain_preimage_smoothMulH1Compl
@@ -1207,7 +1207,7 @@ theorem laplacianDomain_preimage_smoothMulH1Compl
     laplacianDomain.preimage (I := I) (M := M) g
         ⟨smoothMulH1Compl (I := I) (M := M) g φ u_h,
           smoothMulH1Compl_mem_laplacianDomain (I := I) (M := M) g φ hu_h⟩ =
-      fHLeibnizGeneral (I := I) (M := M) g φ u_h hu_h := by
+      leibnizCompensatedSourceOfSmoothFactor (I := I) (M := M) g φ u_h hu_h := by
   apply resolvent_injective (I := I) (M := M) g
   rw [resolvent_laplacianDomain_preimage_eq]
   exact smoothMulH1Compl_eq_resolvent_fHLeibnizGeneral

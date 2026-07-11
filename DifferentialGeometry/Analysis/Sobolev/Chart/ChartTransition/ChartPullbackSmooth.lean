@@ -387,7 +387,7 @@ lemma chartTransitionEuclid_contDiffOn_overlap
     htoE_contDiff.comp_contDiffOn h_step2
   exact h_step3
 
-def chartTransitionExtensionSubC
+def chartTransitionCutoffShifted
     (γ α : M)
     (η : EuclN → ℝ)
     (c : EuclN) : EuclN → EuclN := fun y =>
@@ -398,9 +398,9 @@ lemma chartTransitionExtensionSubC_zero_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
     (c : EuclN) {y : EuclN} (hy : y ∉ tsupport η) :
-    chartTransitionExtensionSubC (I := I) (M := M) γ α η c y = 0 := by
+    chartTransitionCutoffShifted (I := I) (M := M) γ α η c y = 0 := by
   have hη_zero : η y = 0 := image_eq_zero_of_notMem_tsupport hy
-  unfold chartTransitionExtensionSubC
+  unfold chartTransitionCutoffShifted
   rw [hη_zero]
   simp
 
@@ -410,9 +410,9 @@ lemma chartTransitionExtensionSubC_contDiffOn_off_tsupport
     (γ α : M)
     {η : EuclN → ℝ}
     (c : EuclN) :
-    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
       ((tsupport η)ᶜ) := by
-  have h_zero : Set.EqOn (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+  have h_zero : Set.EqOn (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
       (fun _ : EuclN => (0 : EuclN)) ((tsupport η)ᶜ) := by
     intro y hy
     simp only [Set.mem_compl_iff] at hy
@@ -427,9 +427,9 @@ lemma chartTransitionExtensionSubC_contDiffOn_overlap
     {η : EuclN → ℝ}
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     (c : EuclN) :
-    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+    ContDiffOn ℝ (⊤ : ℕ∞) (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
       (chartOverlapEuclid (I := I) (M := M) γ α) := by
-  unfold chartTransitionExtensionSubC
+  unfold chartTransitionCutoffShifted
   have h_T : ContDiffOn ℝ (⊤ : ℕ∞)
       (chartTransitionEuclid (I := I) (M := M) γ α)
       (chartOverlapEuclid (I := I) (M := M) γ α) :=
@@ -447,7 +447,7 @@ lemma chartTransitionExtensionSubC_contDiff
     (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_supp : tsupport η ⊆ chartOverlapEuclid (I := I) (M := M) γ α)
     (c : EuclN) :
-    ContDiff ℝ (⊤ : ℕ∞) (chartTransitionExtensionSubC (I := I) (M := M) γ α η c) := by
+    ContDiff ℝ (⊤ : ℕ∞) (chartTransitionCutoffShifted (I := I) (M := M) γ α η c) := by
   rw [contDiff_iff_contDiffAt]
   intro y
   by_cases hy_supp : y ∈ tsupport η
@@ -455,7 +455,7 @@ lemma chartTransitionExtensionSubC_contDiff
     have h_overlap_open : IsOpen (chartOverlapEuclid (I := I) (M := M) γ α) :=
       chartOverlapEuclid_isOpen (I := I) (M := M) γ α
     have h_smooth_on : ContDiffOn ℝ (⊤ : ℕ∞)
-        (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+        (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
         (chartOverlapEuclid (I := I) (M := M) γ α) :=
       chartTransitionExtensionSubC_contDiffOn_overlap (I := I) (M := M) γ α
         hη_smooth c
@@ -463,7 +463,7 @@ lemma chartTransitionExtensionSubC_contDiff
   · have h_open : IsOpen ((tsupport η)ᶜ) := (isClosed_tsupport _).isOpen_compl
     have hy_in : y ∈ ((tsupport η)ᶜ) := hy_supp
     have h_smooth_on : ContDiffOn ℝ (⊤ : ℕ∞)
-        (chartTransitionExtensionSubC (I := I) (M := M) γ α η c)
+        (chartTransitionCutoffShifted (I := I) (M := M) γ α η c)
         ((tsupport η)ᶜ) :=
       chartTransitionExtensionSubC_contDiffOn_off_tsupport (I := I) (M := M) γ α c
     exact h_smooth_on.contDiffAt (h_open.mem_nhds hy_in)
@@ -477,7 +477,7 @@ lemma chartTransitionExtended_contDiff
     (c : EuclN) :
     ContDiff ℝ (⊤ : ℕ∞) (chartTransitionExtended (I := I) (M := M) γ α η c) := by
   have h_eq : chartTransitionExtended (I := I) (M := M) γ α η c =
-      fun y => c + chartTransitionExtensionSubC (I := I) (M := M) γ α η c y := by
+      fun y => c + chartTransitionCutoffShifted (I := I) (M := M) γ α η c y := by
     funext y
     have h_sub := chartTransitionExtended_sub_const (I := I) (M := M) γ α η c y
     rw [show (chartTransitionExtended (I := I) (M := M) γ α η c) y =
@@ -498,12 +498,12 @@ lemma chartTransitionExtended_hasCompactSupport_sub
     HasCompactSupport
       (fun y => chartTransitionExtended (I := I) (M := M) γ α η c y - c) := by
   have h_eq : (fun y => chartTransitionExtended (I := I) (M := M) γ α η c y - c) =
-      chartTransitionExtensionSubC (I := I) (M := M) γ α η c := by
+      chartTransitionCutoffShifted (I := I) (M := M) γ α η c := by
     funext y
     exact chartTransitionExtended_sub_const (I := I) (M := M) γ α η c y
   rw [h_eq]
   have h_supp_sub : Function.support
-      (chartTransitionExtensionSubC (I := I) (M := M) γ α η c) ⊆ tsupport η := by
+      (chartTransitionCutoffShifted (I := I) (M := M) γ α η c) ⊆ tsupport η := by
     intro y hy
     by_contra hy_not
     apply hy
@@ -513,7 +513,7 @@ lemma chartTransitionExtended_hasCompactSupport_sub
     h_tsupport_compact (isClosed_tsupport _) ?_
   intro y hy
   have hy_not : y ∉ Function.support
-      (chartTransitionExtensionSubC (I := I) (M := M) γ α η c) := by
+      (chartTransitionCutoffShifted (I := I) (M := M) γ α η c) := by
     intro hy_supp
     exact hy (h_supp_sub hy_supp)
   simpa [Function.mem_support, not_not] using hy_not

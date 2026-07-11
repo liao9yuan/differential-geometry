@@ -41,7 +41,7 @@ set_option linter.unusedSectionVars false in
 lemma ccTensorBilin_chartBasis_eq_tensorChartComponent
     (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2) (x : M)
     (a b : Fin (Module.finrank ℝ E)) :
-    ccTensorBilin (I := I) g₀ W x (chartModelBasis E a) (chartModelBasis E b) =
+    smoothCcTensorBilinForm (I := I) g₀ W x (chartModelBasis E a) (chartModelBasis E b) =
       tensorChartComponentRaw (I := I) (M := M) g₀ 0 2 W x ![] ![a, b] x := by
   rw [← unitModel_eq_ccTensorBilin_local (I := I) (M := M) g₀ W x
     (chartModelBasis E a) (chartModelBasis E b)]
@@ -87,7 +87,7 @@ lemma cometricFinBasisTrace_eq_chartInvGram_bilin
   rw [map_smul, ContinuousLinearMap.smul_apply]
 
 set_option linter.unusedSectionVars false in
-def unitModel4SlotBilin
+def quadrilinearMapSlotBilinearAt
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
     (i j : Fin 4) (hij : i ≠ j) (base : Fin 4 → E) : E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -116,7 +116,7 @@ set_option linter.unusedSectionVars false in
 lemma unitModel4SlotBilin_apply
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
     (i j : Fin 4) (hij : i ≠ j) (base : Fin 4 → E) (c v : E) :
-    unitModel4SlotBilin (E := E) f i j hij base c v =
+    quadrilinearMapSlotBilinearAt (E := E) f i j hij base c v =
       f (Function.update (Function.update base i c) j v) := rfl
 
 set_option linter.unusedSectionVars false in
@@ -230,9 +230,9 @@ set_option linter.unusedSectionVars false in
 lemma realizedGramDeriv_eventuallyEq_symm_scalarOnE_raw
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (a b : Fin (Module.finrank ℝ E)) :
     realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b =ᶠ[𝓝 (extChartAt I x x)]
       (fun y => (1 / 2 : ℝ) *
@@ -311,9 +311,9 @@ set_option linter.unusedSectionVars false in
 lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (m₁ m₂ a b : Fin (Module.finrank ℝ E)) :
     partialDeriv (E := E) m₂
         (partialDeriv (E := E) m₁
@@ -400,7 +400,7 @@ lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
   ring
 
 set_option linter.unusedSectionVars false in
-lemma eP2_swap
+lemma euclidPartial_swap_chartPushedRaw_tensorChartComponentRaw
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
     euclidPartial (E := E) a
@@ -457,9 +457,9 @@ set_option linter.unusedSectionVars false in
 lemma partialDeriv_realizedGramDeriv_eq_half_sum_euclidPartial
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (x : M) (m a b : Fin (Module.finrank ℝ E)) :
     partialDeriv (E := E) m
         (realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b)

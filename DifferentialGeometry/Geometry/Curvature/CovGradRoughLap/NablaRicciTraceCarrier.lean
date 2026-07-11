@@ -291,7 +291,7 @@ set_option backward.isDefEq.respectTransparency false in
 def nablaRicTraceSection (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=
-  appCc (I := I) (M := M) g (s + 1) (s + 1)
+  operatorFieldApply (I := I) (M := M) g (s + 1) (s + 1)
     (nablaRicSlotOpField (I := I) (M := M) g X s) (covGrad (I := I) (M := M) g 0 s S)
 
 set_option linter.unusedSectionVars false in
@@ -547,13 +547,13 @@ set_option backward.isDefEq.respectTransparency false in
 theorem covGrad_ricTraceSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g 0 s) :
     covGrad (I := I) (M := M) g 0 (s + 1) (ricTraceSection (I := I) (M := M) g s S) =
-      appCc (I := I) (M := M) g (s + 1) (s + 2)
+      operatorFieldApply (I := I) (M := M) g (s + 1) (s + 2)
           (covGrad (I := I) (M := M) g (s + 1) (s + 1) (ricSlotOpField (I := I) (M := M) g s))
           (covGrad (I := I) (M := M) g 0 s S) +
-        appCc (I := I) (M := M) g (s + 2) (s + 2)
+        operatorFieldApply (I := I) (M := M) g (s + 2) (s + 2)
           (slotExtend (I := I) (M := M) g (s + 1) (s + 1) (ricSlotOpField (I := I) (M := M) g s))
           (covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S)) :=
-  covGrad_appCc_eq (I := I) (M := M) g (s + 1) (s + 1)
+  covGrad_operatorFieldApply_eq (I := I) (M := M) g (s + 1) (s + 1)
     (ricSlotOpField (I := I) (M := M) g s) (covGrad (I := I) (M := M) g 0 s S)
 
 set_option linter.unusedSectionVars false in
@@ -575,7 +575,7 @@ theorem tensorCovDerivAt_ricTraceSection_eq_nablaRicTrace_add
               tensorCovDerivAt (I := I) (M := M) g 0 (s + 1)
                 (covGrad (I := I) (M := M) g 0 s S) x (X x))) := by
   rw [show ricTraceSection (I := I) (M := M) g s S =
-      appCc (I := I) (M := M) g (s + 1) (s + 1) (ricSlotOpField (I := I) (M := M) g s)
+      operatorFieldApply (I := I) (M := M) g (s + 1) (s + 1) (ricSlotOpField (I := I) (M := M) g s)
         (covGrad (I := I) (M := M) g 0 s S) from rfl]
   rw [tensorCovDerivAt_appCc_eq (I := I) (M := M) g (s + 1) (s + 1)
     (ricSlotOpField (I := I) (M := M) g s) (covGrad (I := I) (M := M) g 0 s S) x (X x)]

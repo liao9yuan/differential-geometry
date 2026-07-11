@@ -55,7 +55,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option linter.unusedSectionVars false in
-def bdKRaw (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
+def koszulCovGradRaw (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 3 :=
   (1 / 2 : ℝ) •
     (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 3) 2)
@@ -68,7 +68,7 @@ def bdKRaw (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
 set_option linter.unusedSectionVars false in
 private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (a b c : TangentSpace I x) :
-    unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
+    unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x ![b, a, c]
           + unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 S) x ![a, b, c]
@@ -82,7 +82,7 @@ private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCc
     intro σ m
     rw [domDomCongrSection_unitModel (I := I) g₀ σ W x,
       ContinuousMultilinearMap.domDomCongr_apply]
-  have hlin : unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
+  have hlin : unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
       (1 / 2 : ℝ) *
         (unitModel (I := I) (M := M) g₀ 3 (domDomCongrSection (I := I) g₀
               (Equiv.swap (0 : Fin 3) 2) W) x ![c, a, b]
@@ -90,7 +90,7 @@ private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCc
               ![c, a, b]
           - unitModel (I := I) (M := M) g₀ 3 (domDomCongrSection (I := I) g₀
               (Equiv.swap (1 : Fin 3) 2) W) x ![c, a, b]) := by
-    simp only [bdKRaw, unitModel, SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add,
+    simp only [koszulCovGradRaw, unitModel, SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_add,
       SmoothCcTensor.toSection_sub, ContMDiffSection.coe_smul, ContMDiffSection.coe_add,
       ContMDiffSection.coe_sub, Pi.smul_apply, Pi.add_apply, Pi.sub_apply]
     rfl
@@ -109,7 +109,7 @@ private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCc
 set_option linter.unusedSectionVars false in
 private lemma bdKRaw_unitModel_eq_linearizedKoszul (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (a b c : TangentSpace I x) :
-    unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
+    unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
       linearizedKoszulCovec (I := I) g₀ S x a b c := by
   rw [bdKRaw_unitModel (I := I) (M := M) g₀ S x a b c,
     linearizedKoszulCovec_apply (I := I) g₀ S x a b c]
@@ -286,10 +286,10 @@ set_option maxHeartbeats 12800000 in
 private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (P S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
     unitModel (I := I) (M := M) g₀ 4
-        (appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
-            (appCcRS (I := I) (M := M) g₀ 0 3 6
-              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (bdKRaw (I := I) (M := M) g₀ S))
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
               (koszulCovecCc (I := I) g₀ P)))) x m =
       ∑ e : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
@@ -302,7 +302,7 @@ private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I 
               ((Fin.cons ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E)
                 (Fin.cons ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E) m) :
                   Fin 6 → E) (σ 2))] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((Fin.cons ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E)
                 (Fin.cons ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E) m) :
                   Fin 6 → E) (σ 3)),
@@ -313,7 +313,7 @@ private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I 
                 (Fin.cons ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E) m) :
                   Fin 6 → E) (σ 5))] := by
   classical
-  set κ3 : SmoothCcTensor g₀ 0 3 := bdKRaw (I := I) (M := M) g₀ S with hκ3_def
+  set κ3 : SmoothCcTensor g₀ 0 3 := koszulCovGradRaw (I := I) (M := M) g₀ S with hκ3_def
   set Cval : Tensor0SSpace 3 I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x from
       (koszulCovecCc (I := I) g₀ P).toSection x)
@@ -321,7 +321,7 @@ private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I 
   set Y : Tensor0SSpace 6 I x :=
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
       (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
-        (appCcRS (I := I) (M := M) g₀ 0 3 6
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
           (slotExtendIter (I := I) (M := M) g₀ 0 3 3 κ3)
           (koszulCovecCc (I := I) g₀ P))).toSection x)
       (unitTensor (I := I) (M := M) x) with hY_def
@@ -334,25 +334,25 @@ private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I 
     rw [hY_def]
     rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
-          (appCcRS (I := I) (M := M) g₀ 0 3 6
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
             (slotExtendIter (I := I) (M := M) g₀ 0 3 3 κ3)
             (koszulCovecCc (I := I) g₀ P))).toSection x)
         (unitTensor (I := I) (M := M) x)) =
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
-          rsDomDomCongr σ
-            ((appCcRS (I := I) (M := M) g₀ 0 3 6
+          tensorRS_domDomCongr σ
+            ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
               (slotExtendIter (I := I) (M := M) g₀ 0 3 3 κ3)
               (koszulCovecCc (I := I) g₀ P)).toSection x))
           (unitTensor (I := I) (M := M) x)) from by
       rw [rsDomDomCongrSection_toSection]]
     rw [toModel_rsDomDomCongr_apply (I := I) (M := M) σ
-      ((appCcRS (I := I) (M := M) g₀ 0 3 6
+      ((ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
         (slotExtendIter (I := I) (M := M) g₀ 0 3 3 κ3)
         (koszulCovecCc (I := I) g₀ P)).toSection x)
       (unitTensor (I := I) (M := M) x)]
     rw [ContinuousMultilinearMap.domDomCongr_apply]
     rw [show ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 6 I x from
-        (appCcRS (I := I) (M := M) g₀ 0 3 6
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
           (slotExtendIter (I := I) (M := M) g₀ 0 3 3 κ3)
           (koszulCovecCc (I := I) g₀ P)).toSection x)
         (unitTensor (I := I) (M := M) x)) =
@@ -373,9 +373,9 @@ private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I 
         funext k
         fin_cases k <;> rfl]
   rw [show unitModel (I := I) (M := M) g₀ 4
-      (appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
-          (appCcRS (I := I) (M := M) g₀ 0 3 6
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
             (slotExtendIter (I := I) (M := M) g₀ 0 3 3 κ3)
             (koszulCovecCc (I := I) g₀ P)))) x =
       Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g₁ 4 x Y) from by
@@ -391,12 +391,12 @@ private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I 
   rw [hYval]
   rfl
 
-def bdSGKMvWeight (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 6))
+def sharpGradKoszulWeightedTerm (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 6))
     (P S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
-  appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+  ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
     (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
-      (appCcRS (I := I) (M := M) g₀ 0 3 6
-        (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (bdKRaw (I := I) (M := M) g₀ S))
+      (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
+        (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
         (koszulCovecCc (I := I) g₀ P)))
 
 set_option backward.isDefEq.respectTransparency false in
@@ -408,28 +408,28 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
     (x : M) (p q v0 v1 : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
-        ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-          (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)) x
+        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)) x
         ![(v0 : E), (v1 : E), (p : E), (q : E)] =
       sharpGradKoszulKernelBilin (I := I) g₀ g₁ S x p q v0 v1 := by
   classical
   have hM1 : unitModel (I := I) (M := M) g₀ 4
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S) x
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S) x
       ![(v0 : E), (v1 : E), (p : E), (q : E)] =
       ∑ e : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![(v1 : E), (p : E),
               ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (v0 : E)] := by
-    rw [show bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S =
-        appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+    rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S =
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-            (appCcRS (I := I) (M := M) g₀ 0 3 6
-              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (bdKRaw (I := I) (M := M) g₀ S))
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
               (koszulCovecCc (I := I) g₀ P))) from rfl]
     rw [bdSGKMvWeight_unitModel_gen (I := I) (M := M) g₀ g₁ bdSGKTau1 P S x
       ![(v0 : E), (v1 : E), (p : E), (q : E)]]
@@ -442,20 +442,20 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
       funext k
       fin_cases k <;> rfl
   have hM2 : unitModel (I := I) (M := M) g₀ 4
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) x
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) x
       ![(v0 : E), (v1 : E), (p : E), (q : E)] =
       ∑ e : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (p : E), (v1 : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (v0 : E)] := by
-    rw [show bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S =
-        appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+    rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S =
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-            (appCcRS (I := I) (M := M) g₀ 0 3 6
-              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (bdKRaw (I := I) (M := M) g₀ S))
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
               (koszulCovecCc (I := I) g₀ P))) from rfl]
     rw [bdSGKMvWeight_unitModel_gen (I := I) (M := M) g₀ g₁ bdSGKTau2 P S x
       ![(v0 : E), (v1 : E), (p : E), (q : E)]]
@@ -468,20 +468,20 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
       funext k
       fin_cases k <;> rfl
   have hM3 : unitModel (I := I) (M := M) g₀ 4
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S) x
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S) x
       ![(v0 : E), (v1 : E), (p : E), (q : E)] =
       ∑ e : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![(v1 : E), (v0 : E),
               ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (p : E)] := by
-    rw [show bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S =
-        appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+    rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S =
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-            (appCcRS (I := I) (M := M) g₀ 0 3 6
-              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (bdKRaw (I := I) (M := M) g₀ S))
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
               (koszulCovecCc (I := I) g₀ P))) from rfl]
     rw [bdSGKMvWeight_unitModel_gen (I := I) (M := M) g₀ g₁ bdSGKTau3 P S x
       ![(v0 : E), (v1 : E), (p : E), (q : E)]]
@@ -494,20 +494,20 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
       funext k
       fin_cases k <;> rfl
   have hM4 : unitModel (I := I) (M := M) g₀ 4
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S) x
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S) x
       ![(v0 : E), (v1 : E), (p : E), (q : E)] =
       ∑ e : Fin (Module.finrank ℝ E),
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (v0 : E), (v1 : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (p : E)] := by
-    rw [show bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S =
-        appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+    rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S =
+        ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
           (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-            (appCcRS (I := I) (M := M) g₀ 0 3 6
-              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (bdKRaw (I := I) (M := M) g₀ S))
+            (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
+              (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ S))
               (koszulCovecCc (I := I) g₀ P))) from rfl]
     rw [bdSGKMvWeight_unitModel_gen (I := I) (M := M) g₀ g₁ bdSGKTau4 P S x
       ![(v0 : E), (v1 : E), (p : E), (q : E)]]
@@ -525,7 +525,7 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![(v1 : E), (p : E),
               ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (v0 : E)] := by
     conv_lhs => rw [bdOrthoFrame_center_repr (I := I) (M := M) g₁ x
@@ -546,7 +546,7 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (p : E), (v1 : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (v0 : E)] := by
     conv_lhs => rw [bdOrthoFrame_center_repr (I := I) (M := M) g₁ x
@@ -568,7 +568,7 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![(v1 : E), (v0 : E),
               ((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (p : E)] := by
     conv_lhs => rw [bdOrthoFrame_center_repr (I := I) (M := M) g₁ x
@@ -589,7 +589,7 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
         unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ P) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (v0 : E), (v1 : E)] *
-          unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ S) x
+          unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x
             ![((smoothOrthoFrame (I := I) g₁ x e x : TangentSpace I x) : E),
               (q : E), (p : E)] := by
     conv_lhs => rw [bdOrthoFrame_center_repr (I := I) (M := M) g₁ x
@@ -623,13 +623,13 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
     ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ S =
       (2 : ℝ) •
-        appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-                (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)))) := by
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)))) := by
   classical
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -642,45 +642,45 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
   beta_reduce
   have hRHSsmul : ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
       (((2 : ℝ) •
-        appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-                (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x)) D) =
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x)) D) =
       (2 : ℝ) • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
-        (appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-                (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x) D) := by
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x) D) := by
     rw [show ((((2 : ℝ) •
-        appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-                (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                  bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x)) =
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x)) =
         (2 : ℝ) •
-          ((appCcRS (I := I) (M := M) g₀ 2 6 2 (bdPairTraceOp (I := I) (M := M) g₀ g₁)
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2 (armPairTraceOpCc (I := I) (M := M) g₀ g₁)
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-                    bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-                  (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-                    bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x) from by
+                ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+                    sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+                  (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+                    sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S))))).toSection x) from by
       rw [SmoothCcTensor.toSection_smul]; rfl]
     rfl
   rw [hRHSsmul, Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [bdPairTraceOp_apply_toModel (I := I) (M := M) g₀ g₁
-    ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-        bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-        bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)) x D v]
+    ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)) x D v]
   rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from
       (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ S).toSection x) D) =
       sharpGradKoszulBiContrFib (I := I) g₀ g₁ S x D from rfl]
@@ -694,10 +694,10 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
   refine Finset.sum_congr rfl fun b _ => ?_
   refine Finset.sum_congr rfl fun a _ => ?_
   rw [show unitModel (I := I) (M := M) g₀ 4
-      ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
-          bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
-        (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
-          bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)) x
+      ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 P S +
+          sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 P S) -
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 P S +
+          sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 P S)) x
       ![v 0, v 1, (smoothOrthoFrame (I := I) g₁ x a x : E),
         (smoothOrthoFrame (I := I) g₁ x b x : E)] =
       sharpGradKoszulKernelBilin (I := I) g₀ g₁ S x
@@ -722,7 +722,7 @@ private lemma bdSymmSCovGrad3_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     unitModel (I := I) (M := M) g₀ 3 (symmSCovGrad3 (I := I) g₀ (c • T)) x v =
       c * unitModel (I := I) (M := M) g₀ 3 (symmSCovGrad3 (I := I) g₀ T) x v := by
   rw [symmSCovGrad3_def, symmSCovGrad3_def, symmS_smul (I := I) (M := M) g₀ c T]
-  exact bdCovGrad_unitModel_smul (I := I) (M := M) g₀ (symmS (I := I) g₀ T) c x v
+  exact bdCovGrad_unitModel_smul (I := I) (M := M) g₀ (ccTensor02Symm (I := I) g₀ T) c x v
 
 set_option linter.unusedSectionVars false in
 private lemma bdKoszulCc_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
@@ -742,8 +742,8 @@ private lemma bdKoszulCc_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
 set_option linter.unusedSectionVars false in
 private lemma bdKRaw_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) (x : M) (m : Fin 3 → TangentSpace I x) :
-    unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ (c • T)) x m =
-      c * unitModel (I := I) (M := M) g₀ 3 (bdKRaw (I := I) (M := M) g₀ T) x m := by
+    unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ (c • T)) x m =
+      c * unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ T) x m := by
   rw [show m = ![m 0, m 1, m 2] from by
     funext k
     fin_cases k <;> rfl]
@@ -759,8 +759,8 @@ set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
-    bdSGKMvWeight (I := I) (M := M) g₀ g₁ σ (c • T) (c • T) =
-      (c * c) • bdSGKMvWeight (I := I) (M := M) g₀ g₁ σ T T := by
+    sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ (c • T) (c • T) =
+      (c * c) • sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ T T := by
   classical
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -777,24 +777,24 @@ private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
   refine congrArg _ ?_
   show unitModel (I := I) (M := M) g₀ 4
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ σ (c • T) (c • T)) x m =
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ (c • T) (c • T)) x m =
     unitModel (I := I) (M := M) g₀ 4
-      ((c * c) • bdSGKMvWeight (I := I) (M := M) g₀ g₁ σ T T) x m
+      ((c * c) • sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ T T) x m
   rw [bdUnitModel_smul (I := I) (M := M) g₀ 4 (c * c)
-    (bdSGKMvWeight (I := I) (M := M) g₀ g₁ σ T T) x]
+    (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ T T) x]
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
-  rw [show bdSGKMvWeight (I := I) (M := M) g₀ g₁ σ (c • T) (c • T) =
-      appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+  rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ (c • T) (c • T) =
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
-          (appCcRS (I := I) (M := M) g₀ 0 3 6
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
             (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-              (bdKRaw (I := I) (M := M) g₀ (c • T)))
+              (koszulCovGradRaw (I := I) (M := M) g₀ (c • T)))
             (koszulCovecCc (I := I) g₀ (c • T)))) from rfl]
-  rw [show bdSGKMvWeight (I := I) (M := M) g₀ g₁ σ T T =
-      appCcRS (I := I) (M := M) g₀ 0 6 4 (bdPureDT (I := I) (M := M) g₀ g₁ 4)
+  rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ T T =
+      ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceCc (I := I) (M := M) g₀ g₁ 4)
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 σ
-          (appCcRS (I := I) (M := M) g₀ 0 3 6
-            (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (bdKRaw (I := I) (M := M) g₀ T))
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
+            (slotExtendIter (I := I) (M := M) g₀ 0 3 3 (koszulCovGradRaw (I := I) (M := M) g₀ T))
             (koszulCovecCc (I := I) g₀ T))) from rfl]
   rw [bdSGKMvWeight_unitModel_gen (I := I) (M := M) g₀ g₁ σ (c • T) (c • T) x m,
     bdSGKMvWeight_unitModel_gen (I := I) (M := M) g₀ g₁ σ T T x m]
@@ -807,15 +807,15 @@ private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
 set_option linter.unusedSectionVars false in
 private lemma bdSGKWeights_pair_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
-    (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 (c • T) (c • T) +
-        bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 (c • T) (c • T)) -
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 (c • T) (c • T) +
-        bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 (c • T) (c • T)) =
+    (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 (c • T) (c • T) +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 (c • T) (c • T)) -
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 (c • T) (c • T) +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 (c • T) (c • T)) =
       (c * c) •
-        ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) := by
+        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) := by
   rw [bdSGKMvWeight_smul (I := I) (M := M) g₀ g₁ bdSGKTau1 T c,
     bdSGKMvWeight_smul (I := I) (M := M) g₀ g₁ bdSGKTau2 T c,
     bdSGKMvWeight_smul (I := I) (M := M) g₀ g₁ bdSGKTau3 T c,
@@ -828,42 +828,42 @@ private lemma bdXiChain_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) (w : Fin 6 → E) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X)).toSection x) D) w =
       Tensor0SSpace.toModel D
-          ![(fun i => w (bdSigmaE0 i)) 0, (fun i => w (bdSigmaE0 i)) 1] *
+          ![(fun i => w (armPairTraceSlotPerm6 i)) 0, (fun i => w (armPairTraceSlotPerm6 i)) 1] *
         unitModel (I := I) (M := M) g₀ 4 X x
-          (fun k : Fin 4 => (fun i => w (bdSigmaE0 i)) (Fin.natAdd 2 k)) := by
+          (fun k : Fin 4 => (fun i => w (armPairTraceSlotPerm6 i)) (Fin.natAdd 2 k)) := by
   rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
-      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X)).toSection x) D) =
       ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
-        rsDomDomCongr bdSigmaE0
+        tensorRS_domDomCongr armPairTraceSlotPerm6
           ((slotExtendIter (I := I) (M := M) g₀ 0 4 2 X).toSection x)) D) from by
     rw [rsDomDomCongrSection_toSection]]
-  rw [toModel_rsDomDomCongr_apply (I := I) (M := M) bdSigmaE0
+  rw [toModel_rsDomDomCongr_apply (I := I) (M := M) armPairTraceSlotPerm6
     ((slotExtendIter (I := I) (M := M) g₀ 0 4 2 X).toSection x) D]
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   exact bdSlotExtendIter_two_toModel (I := I) (M := M) g₀ X x D
-    (fun i => w (bdSigmaE0 i))
+    (fun i => w (armPairTraceSlotPerm6 i))
 
 set_option backward.isDefEq.respectTransparency false in
 set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
-    rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+    rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-        ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 (c • T) (c • T) +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 (c • T) (c • T)) -
-          (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 (c • T) (c • T) +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 (c • T) (c • T)))) =
-    (c * c) • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 (c • T) (c • T) +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 (c • T) (c • T)) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 (c • T) (c • T) +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 (c • T) (c • T)))) =
+    (c * c) • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
       (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-        ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-          (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-            bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))) := by
+        ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+          (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+            sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))) := by
   classical
   rw [bdSGKWeights_pair_smul (I := I) (M := M) g₀ g₁ T c]
   apply SmoothCcTensor.ext
@@ -875,50 +875,50 @@ lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
   apply ContinuousMultilinearMap.ext
   intro w
   rw [show ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
-      (((c * c) • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (((c * c) • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-              bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-            (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-              bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)) D) =
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)) D) =
       (c * c) • ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-            ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-                bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-              (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-                bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) D) from by
-    rw [show ((((c * c) • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+              (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) D) from by
+    rw [show ((((c * c) • rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-              bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-            (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-              bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)) =
-        (c * c) • ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+              sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x)) =
+        (c * c) • ((rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-            ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-                bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-              (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-                bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) from by
+            ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+              (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+                sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)))).toSection x) from by
       rw [SmoothCcTensor.toSection_smul]; rfl]
     rfl]
   beta_reduce
   rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rw [bdXiChain_toModel (I := I) (M := M) g₀ ((c * c) •
-      ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-          bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-        (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-          bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))) x D w,
+      ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+          sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+          sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T))) x D w,
     bdXiChain_toModel (I := I) (M := M) g₀
-      ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-          bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-        (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-          bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) x D w]
+      ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+          sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+          sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) x D w]
   rw [bdUnitModel_smul (I := I) (M := M) g₀ 4 (c * c)
-    ((bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
-        bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
-      (bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
-        bdSGKMvWeight (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) x]
+    ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 T T +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau2 T T) -
+      (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau3 T T +
+        sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau4 T T)) x]
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
@@ -943,10 +943,10 @@ set_option linter.unusedSectionVars false in
 private lemma bdSGKProd_toSection (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
-      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2 X)).toSection x) D =
       Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
-        (ContinuousMultilinearMap.domDomCongr bdSigmaE0
+        (ContinuousMultilinearMap.domDomCongr armPairTraceSlotPerm6
           (Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 x D
             ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from X.toSection x)
               (unitTensor (I := I) (M := M) x))))) := by
@@ -962,11 +962,11 @@ private lemma bdSGKProd_toSection (g₀ : SmoothRiemannianMetric I M)
     funext k
     fin_cases k <;> rfl
   · rw [show unitModel (I := I) (M := M) g₀ 4 X x
-        (fun k : Fin 4 => (fun i => w (bdSigmaE0 i)) (Fin.natAdd 2 k)) =
+        (fun k : Fin 4 => (fun i => w (armPairTraceSlotPerm6 i)) (Fin.natAdd 2 k)) =
         Tensor0SSpace.toModel
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 4 I x from X.toSection x)
             (unitTensor (I := I) (M := M) x))
-          (fun k : Fin 4 => (fun i => w (bdSigmaE0 i)) (Fin.natAdd 2 k)) from rfl]
+          (fun k : Fin 4 => (fun i => w (armPairTraceSlotPerm6 i)) (Fin.natAdd 2 k)) from rfl]
     refine congrArg _ ?_
     funext k
     fin_cases k <;> rfl
@@ -1116,8 +1116,8 @@ set_option linter.unusedVariables false in
 
 theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (fun s => ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀
@@ -1137,52 +1137,52 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
             (E := fun z : M => Tensor0SSpace 6 I z) q.1
             (unitEvalSection (I := I) (M := M) g₀ 6
               (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 τ
-                (appCcRS (I := I) (M := M) g₀ 0 3 6
+                (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                   (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                    (bdKRaw (I := I) (M := M) g₀ T))
+                    (koszulCovGradRaw (I := I) (M := M) g₀ T))
                   (koszulCovecCc (I := I) g₀ T))) q.1))
           ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) := fun τ =>
       ((contMDiff_unitEvalSection (I := I) (M := M) g₀ 6
         (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 τ
-          (appCcRS (I := I) (M := M) g₀ 0 3 6
+          (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
             (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-              (bdKRaw (I := I) (M := M) g₀ T))
+              (koszulCovGradRaw (I := I) (M := M) g₀ T))
             (koszulCovecCc (I := I) g₀ T)))).comp_contMDiffOn
         contMDiffOn_fst).mono (Set.subset_univ _)
     have hV1 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 4)
       g₀ T 0 hδ hδZ
       (fun q : M × ℝ => unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)
       (hZjoint bdSGKTau1)
     have hV2 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 4)
       g₀ T 0 hδ hδZ
       (fun q : M × ℝ => unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)
       (hZjoint bdSGKTau2)
     have hV3 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 4)
       g₀ T 0 hδ hδZ
       (fun q : M × ℝ => unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)
       (hZjoint bdSGKTau3)
     have hV4 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 4)
       g₀ T 0 hδ hδZ
       (fun q : M × ℝ => unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)
       (hZjoint bdSGKTau4)
     have hX12 := bdJointTotalSpace0S_add_local (I := I) (M := M) (d := 4)
@@ -1203,107 +1203,107 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)) -
         (cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1))))
       hYj hX
-    have hRX := domDomCongrField_jointContMDiffOn (I := I) (M := M) (d := 6) bdSigmaE0
+    have hRX := domDomCongrField_jointContMDiffOn (I := I) (M := M) (d := 6) armPairTraceSlotPerm6
       (S := realizedSmallSet (δ := δ) (δ' := δ))
       (fun q : M × ℝ => tensorProdWithCLM (I := I) 2 4 q.1 (Y q.1)
         ((cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)) -
         (cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1))))
       hTP
     have hDT4 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 4)
       g₀ T 0 hδ hδZ
       (fun q : M × ℝ => Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := q.1)
-          (ContinuousMultilinearMap.domDomCongr bdSigmaE0
+          (ContinuousMultilinearMap.domDomCongr armPairTraceSlotPerm6
             (Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 q.1 (Y q.1)
               ((cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)) -
         (cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)))))))
       hRX
     have hDT2 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 2)
@@ -1311,39 +1311,39 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
       (fun q : M × ℝ => cometricDoubleTraceFib (I := I)
         (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
         (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := q.1)
-          (ContinuousMultilinearMap.domDomCongr bdSigmaE0
+          (ContinuousMultilinearMap.domDomCongr armPairTraceSlotPerm6
             (Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 q.1 (Y q.1)
               ((cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)) -
         (cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1))))))))
       hDT4
     have hsmul := bdJointTotalSpace0S_smulFun_local (I := I) (M := M) (d := 2)
@@ -1356,39 +1356,39 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
         (cometricDoubleTraceFib (I := I)
         (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
         (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := q.1)
-          (ContinuousMultilinearMap.domDomCongr bdSigmaE0
+          (ContinuousMultilinearMap.domDomCongr armPairTraceSlotPerm6
             (Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 q.1 (Y q.1)
               ((cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)) -
         (cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) +
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1)))))))))
       hDT2
     refine hsmul.congr (fun q hq => ?_)
@@ -1405,17 +1405,17 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
     have h1 : sharpGradKoszulBiContrFib (I := I) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) (q.2 • T) q.1 (Y q.1) =
         (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-          (((2 : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
-            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (((2 : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                ((bdSGKMvWeight (I := I) (M := M) g₀
+                ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 (q.2 • T) (q.2 • T) +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 (q.2 • T) (q.2 • T)) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 (q.2 • T) (q.2 • T) +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 (q.2 • T) (q.2 • T)))))).toSection q.1)) (Y q.1) := by
       rw [← bdSGK_eq_refold (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2)
         (q.2 • T) (q.2 • T) htie]
@@ -1423,261 +1423,261 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
     rw [h1]
     rw [bdSGKXi_smul (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) T q.2]
     rw [appCcRS_smul_right (I := I) (M := M) g₀ 2 6 2 (q.2 * q.2)
-      (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          ((bdSGKMvWeight (I := I) (M := M) g₀
+          ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))]
     rw [show ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-        (((2 : ℝ) • (q.2 * q.2) • appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (((2 : ℝ) • (q.2 * q.2) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) (Y q.1)) =
         ((2 : ℝ) * (q.2 * q.2)) •
           ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-            ((appCcRS (I := I) (M := M) g₀ 2 6 2
-              (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+              (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                  ((bdSGKMvWeight (I := I) (M := M) g₀
+                  ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) (Y q.1)) from by
-      rw [show ((((2 : ℝ) • (q.2 * q.2) • appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      rw [show ((((2 : ℝ) • (q.2 * q.2) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) =
-          (2 : ℝ) • (q.2 * q.2) • ((appCcRS (I := I) (M := M) g₀ 2 6 2
-            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (2 : ℝ) • (q.2 * q.2) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                ((bdSGKMvWeight (I := I) (M := M) g₀
+                ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1) from by
         rw [SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_smul]; rfl]
-      rw [show (((2 : ℝ) • (q.2 * q.2) • ((appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      rw [show (((2 : ℝ) • (q.2 * q.2) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) : _) =
-          ((2 : ℝ) * (q.2 * q.2)) • ((appCcRS (I := I) (M := M) g₀ 2 6 2
-            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          ((2 : ℝ) * (q.2 * q.2)) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                ((bdSGKMvWeight (I := I) (M := M) g₀
+                ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1) from by
         rw [smul_smul]]
       rfl]
     refine congrArg (fun t => ((2 : ℝ) * (q.2 * q.2)) • t) ?_
     rw [show ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-        ((appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              ((bdSGKMvWeight (I := I) (M := M) g₀
+              ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))))).toSection q.1)) (Y q.1)) =
         cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2 q.1
           (cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
             ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
-              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                  ((bdSGKMvWeight (I := I) (M := M) g₀
+                  ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T)))).toSection q.1) (Y q.1))) from by
       rw [appCcRS_toSection]
       rfl]
     rw [bdSGKProd_toSection (I := I) (M := M) g₀
-      ((bdSGKMvWeight (I := I) (M := M) g₀
+      ((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T)) q.1 (Y q.1)]
     refine congrArg (fun t => cometricDoubleTraceFib (I := I)
       (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2 q.1
       (cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1 t)) ?_
     refine congrArg (fun t => Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := q.1)
-      (ContinuousMultilinearMap.domDomCongr bdSigmaE0
+      (ContinuousMultilinearMap.domDomCongr armPairTraceSlotPerm6
         (Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 q.1 (Y q.1) t)))) ?_
     rw [show ((show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-        (((bdSGKMvWeight (I := I) (M := M) g₀
+        (((sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T) -
-                (bdSGKMvWeight (I := I) (M := M) g₀
+                (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T +
-                  bdSGKMvWeight (I := I) (M := M) g₀
+                  sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T))).toSection q.1))
         (unitTensor (I := I) (M := M) q.1) =
         (((show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-            (bdSGKMvWeight (I := I) (M := M) g₀
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T).toSection q.1)
           (unitTensor (I := I) (M := M) q.1) +
           (show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-            (bdSGKMvWeight (I := I) (M := M) g₀
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T).toSection q.1)
           (unitTensor (I := I) (M := M) q.1)) -
           ((show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-            (bdSGKMvWeight (I := I) (M := M) g₀
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T).toSection q.1)
           (unitTensor (I := I) (M := M) q.1) +
           (show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-            (bdSGKMvWeight (I := I) (M := M) g₀
+            (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T).toSection q.1)
           (unitTensor (I := I) (M := M) q.1))) from by
       rw [SmoothCcTensor.toSection_sub, SmoothCcTensor.toSection_add,
         SmoothCcTensor.toSection_add]
       rfl]
     rw [show (show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-        (bdSGKMvWeight (I := I) (M := M) g₀
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T).toSection q.1)
         (unitTensor (I := I) (M := M) q.1) =
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) from by
-      rw [show bdSGKMvWeight (I := I) (M := M) g₀
+      rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau1 T T =
-          appCcRS (I := I) (M := M) g₀ 0 6 4
-            (bdPureDT (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
+          ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+            (cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau1
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) from rfl]
       rw [appCcRS_toSection]
       rfl]
     rw [show (show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-        (bdSGKMvWeight (I := I) (M := M) g₀
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T).toSection q.1)
         (unitTensor (I := I) (M := M) q.1) =
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) from by
-      rw [show bdSGKMvWeight (I := I) (M := M) g₀
+      rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau2 T T =
-          appCcRS (I := I) (M := M) g₀ 0 6 4
-            (bdPureDT (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
+          ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+            (cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau2
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) from rfl]
       rw [appCcRS_toSection]
       rfl]
     rw [show (show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-        (bdSGKMvWeight (I := I) (M := M) g₀
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T).toSection q.1)
         (unitTensor (I := I) (M := M) q.1) =
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) from by
-      rw [show bdSGKMvWeight (I := I) (M := M) g₀
+      rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau3 T T =
-          appCcRS (I := I) (M := M) g₀ 0 6 4
-            (bdPureDT (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
+          ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+            (cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau3
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) from rfl]
       rw [appCcRS_toSection]
       rfl]
     rw [show (show Tensor0SSpace 0 I q.1 →L[ℝ] Tensor0SSpace 4 I q.1 from
-        (bdSGKMvWeight (I := I) (M := M) g₀
+        (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T).toSection q.1)
         (unitTensor (I := I) (M := M) q.1) =
         cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           (unitEvalSection (I := I) (M := M) g₀ 6
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) q.1) from by
-      rw [show bdSGKMvWeight (I := I) (M := M) g₀
+      rw [show sharpGradKoszulWeightedTerm (I := I) (M := M) g₀
                   (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) bdSGKTau4 T T =
-          appCcRS (I := I) (M := M) g₀ 0 6 4
-            (bdPureDT (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
+          ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4
+            (cometricDoubleTraceCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4)
             (rsDomDomCongrSection (I := I) (M := M) g₀ 0 6 bdSGKTau4
-              (appCcRS (I := I) (M := M) g₀ 0 3 6
+              (ccOperatorFieldComp (I := I) (M := M) g₀ 0 3 6
                 (slotExtendIter (I := I) (M := M) g₀ 0 3 3
-                  (bdKRaw (I := I) (M := M) g₀ T))
+                  (koszulCovGradRaw (I := I) (M := M) g₀ T))
                 (koszulCovecCc (I := I) g₀ T))) from rfl]
       rw [appCcRS_toSection]
       rfl]
-  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
     (φ := fun p : M × ℝ => sharpGradKoszulBiContrFib (I := I) g₀
@@ -1690,8 +1690,8 @@ set_option linter.unusedVariables false in
 
 theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    (hδZ : gFibreOpBound (I := I) (M := M) g₀
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
       (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ) :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 2
       (fun s => ricciArmRicciFoldRemainderField (I := I) (M := M) g₀
@@ -1709,41 +1709,41 @@ theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
         (fun x : M => TotalSpace.mk' (Tensor0SModel 6 ℝ E)
           (E := fun z : M => Tensor0SSpace 6 I z) x
           ((show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) (Y x))) :=
+                (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection x) (Y x))) :=
       ContMDiff.clm_bundle_apply (b := id)
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-              bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection.contMDiff Y.contMDiff
+            (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+              palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection.contMDiff Y.contMDiff
     have hXiJoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel 6 ℝ E)) ∞
         (fun q : M × ℝ => TotalSpace.mk' (Tensor0SModel 6 ℝ E)
           (E := fun z : M => Tensor0SSpace 6 I z) q.1
           ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1)))
+                (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1)))
         ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) :=
       (hXiApp.comp_contMDiffOn contMDiffOn_fst).mono (Set.subset_univ _)
     have hcdtf4 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 4)
       g₀ T 0 hδ hδZ
       (fun q : M × ℝ => (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
-        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
           (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-            (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-              bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1)) hXiJoint
+            (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+              palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1)) hXiJoint
     have hcdtf2 := cometricDoubleTraceFib_realizedFam_jointContMDiffOn (I := I) (p := 2)
       g₀ T 0 hδ hδZ
       (fun q : M × ℝ => cometricDoubleTraceFib (I := I)
         (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
         ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))) hcdtf4
+              (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))) hcdtf4
     have hsmul := bdJointTotalSpace0S_smulFun_local (I := I) (M := M) (d := 2)
       (S := realizedSmallSet (δ := δ) (δ' := δ))
       (f := fun s : ℝ => (-(1 / 2) : ℝ) * s)
@@ -1754,10 +1754,10 @@ theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
         (cometricDoubleTraceFib (I := I)
           (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
           ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                  bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))))
+                (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))))
       hcdtf2
     refine hsmul.congr (fun q _ => ?_)
     refine congrArg (fun t => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -1765,12 +1765,12 @@ theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
     have h1 : ricciFoldBiContrFib (I := I) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2)
         (q.2 • T) q.1 (Y q.1) =
         (show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-          (((-(1 / 2) : ℝ) • appCcRS (I := I) (M := M) g₀ 2 6 2
-            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          (((-(1 / 2) : ℝ) • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (bdRicciFoldWeightA (I := I) (M := M) g₀ (q.2 • T) +
-                  bdRicciFoldWeightB (I := I) (M := M) g₀ (q.2 • T))))).toSection q.1))
+                (palatiniRicciFoldWeightA (I := I) (M := M) g₀ (q.2 • T) +
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ (q.2 • T))))).toSection q.1))
           (Y q.1) := by
       rw [← bdRicciFold_eq_refold (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) (q.2 • T)]
@@ -1778,70 +1778,70 @@ theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
     rw [h1]
     rw [bdRicciFoldXi_smul (I := I) (M := M) g₀ T q.2]
     rw [appCcRS_smul_right (I := I) (M := M) g₀ 2 6 2 q.2
-      (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+      (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
         (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-          (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-            bdRicciFoldWeightB (I := I) (M := M) g₀ T)))]
+          (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+            palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))]
     rw [show ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-        (((-(1 / 2) : ℝ) • q.2 • appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        (((-(1 / 2) : ℝ) • q.2 • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) =
+              (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) =
         ((-(1 / 2) : ℝ) * q.2) • ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-          ((appCcRS (I := I) (M := M) g₀ 2 6 2
-            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+          ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) from by
-      rw [show ((((-(1 / 2) : ℝ) • q.2 • appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+                (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) from by
+      rw [show ((((-(1 / 2) : ℝ) • q.2 • ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) =
-          (-(1 / 2) : ℝ) • q.2 • ((appCcRS (I := I) (M := M) g₀ 2 6 2
-            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) =
+          (-(1 / 2) : ℝ) • q.2 • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1) from by
+                (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1) from by
         rw [SmoothCcTensor.toSection_smul, SmoothCcTensor.toSection_smul]; rfl]
-      rw [show (((-(1 / 2) : ℝ) • q.2 • ((appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+      rw [show (((-(1 / 2) : ℝ) • q.2 • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) : _) =
-          ((-(1 / 2) : ℝ) * q.2) • ((appCcRS (I := I) (M := M) g₀ 2 6 2
-            (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) : _) =
+          ((-(1 / 2) : ℝ) * q.2) • ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+            (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+            (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
               (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                  bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1) from by
+                (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                  palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1) from by
         rw [smul_smul]]
       rfl]
     refine congrArg (fun t => ((-(1 / 2) : ℝ) * q.2) • t) ?_
     rw [show ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 2 I q.1 from
-        ((appCcRS (I := I) (M := M) g₀ 2 6 2
-          (bdPairTraceOp (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
-          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+        ((ccOperatorFieldComp (I := I) (M := M) g₀ 2 6 2
+          (armPairTraceOpCc (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T 0 hδ hδZ q.2))
+          (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
             (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-              (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                bdRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) =
+              (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                palatiniRicciFoldWeightB (I := I) (M := M) g₀ T)))).toSection q.1)) (Y q.1)) =
         cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 2 q.1
           (cometricDoubleTraceFib (I := I) (realizedFam (I := I) g₀ T 0 hδ hδZ q.2) 4 q.1
             ((show Tensor0SSpace 2 I q.1 →L[ℝ] Tensor0SSpace 6 I q.1 from
-              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 bdSigmaE0
+              (rsDomDomCongrSection (I := I) (M := M) g₀ 2 6 armPairTraceSlotPerm6
                 (slotExtendIter (I := I) (M := M) g₀ 0 4 2
-                  (bdRicciFoldWeightA (I := I) (M := M) g₀ T +
-                    bdRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))) from by
+                  (palatiniRicciFoldWeightA (I := I) (M := M) g₀ T +
+                    palatiniRicciFoldWeightB (I := I) (M := M) g₀ T))).toSection q.1) (Y q.1))) from by
       rw [appCcRS_toSection]
       rfl]
-  have hCLM := contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+  have hCLM := contMDiffOn_clm_section_of_pointwise_joint_manifold_time (I := I) (M := M)
     (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
     (φ := fun p : M × ℝ => ricciFoldBiContrFib (I := I) g₀

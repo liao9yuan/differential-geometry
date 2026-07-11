@@ -173,7 +173,7 @@ private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem
     (i : TensorEigenIdx (I := I) (M := M) g r s)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
     (P₀ : TensorCompIdx (E := E) r s) (K' : ℕ) :
-    wkpNorm (d := Module.finrank ℝ E) K' 2
+    iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α) = 0 := by
@@ -206,11 +206,11 @@ private lemma wkpNorm_eigenvectorChartComponentFun_eq_zero_of_notMem
     rw [h_kernel_empty, Set.diff_empty]
   rw [h_target_eq] at h_ae_off
   have h_swap :
-      wkpNorm (d := Module.finrank ℝ E) K' 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
             g r s i α P₀)
           (chartTargetEuclid (I := I) (M := M) α) =
-        wkpNorm (d := Module.finrank ℝ E) K' 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) K' 2
           (fun _ : EuclN => (0 : ℝ))
           (chartTargetEuclid (I := I) (M := M) α) :=
     wkpNorm_congr_ae (d := Module.finrank ℝ E)
@@ -294,7 +294,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     (m : ℕ) (C_IH : ℝ) (hC_IH_nn : 0 ≤ C_IH)
     (hC_IH_bd : ∀ (α' : M) (P₀' : TensorCompIdx (E := E) r s)
         (i : TensorEigenIdx (I := I) (M := M) g r s),
-        wkpNorm (d := Module.finrank ℝ E) (m + 2) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (m + 2) 2
             (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
               g r s i α' P₀')
             (chartTargetEuclid (I := I) (M := M) α')
@@ -307,7 +307,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
-        wkpNorm (d := Module.finrank ℝ E) ((m + 1) + 2) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) ((m + 1) + 2) 2
             (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
               g r s i α P₀)
             (chartTargetEuclid (I := I) (M := M) α)
@@ -333,7 +333,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       (I := I) (M := M) g r s i K' β Q
   have h_IH_bd_at : ∀ (α' : M) (P₀' : TensorCompIdx (E := E) r s)
       (i : TensorEigenIdx (I := I) (M := M) g r s),
-      wkpNorm (d := Module.finrank ℝ E) (0 + (m + 1) + 1) 2
+      iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (0 + (m + 1) + 1) 2
           (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
             g r s i α' P₀')
           (chartTargetEuclid (I := I) (M := M) α')
@@ -356,7 +356,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       (m + 1) h_IH_bd_at h_pou_resolv α P).choose K' with hC_cut_per_def
   set C_cut : ℕ → ℝ := fun K' =>
     ∑ P : TensorCompIdx (E := E) r s, C_cut_per P K' with hC_cut_def
-  set H : sharpDiffPerKBdd (I := I) (M := M) g r s α P₀
+  set H : eigenvectorChartRHSDiffSharpWkpBoundsUpToOrder (I := I) (M := M) g r s α P₀
       (0 + (m + 1) + 1) :=
     { h_pou_resolv := fun i K' β Q hK' => h_pou_resolv i K' β Q hK'
       Ceig := fun _ => C_IH
@@ -449,7 +449,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       h_eAtomMax).choose_spec.1
   have hC_p5_bd : ∀ directions
       (i : TensorEigenIdx (I := I) (M := M) g r s),
-      wkpNorm (d := n) 0 2
+      iteratedWeakSobolevNorm (d := n) 0 2
           (eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ (m + 1) directions)
           (chartTargetEuclid (I := I) (M := M) α)
@@ -542,7 +542,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       (I := I) (M := M) g r s i (j + 1) α P₀
   have h_W1_per_summand : ∀ (j : ℕ) (hj : j ≤ m + 1)
       (idx : Fin j → Fin n),
-      wkpNorm (d := n) 1 2
+      iteratedWeakSobolevNorm (d := n) 1 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ j idx)
           (chartTargetEuclid (I := I) (M := M) α)
@@ -556,11 +556,11 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     have h_w1_slot := (eigenvectorChartIteratedPartial_wkpNorm_one_two_le
       (I := I) (M := M) g r s i α P₀ j idx
       (h_parent_succ_arb j)).2
-    have h_mono : wkpNorm (d := n) (j + 1) 2
+    have h_mono : iteratedWeakSobolevNorm (d := n) (j + 1) 2
         (eigenvectorChartComponentFun (I := I) (M := M)
           g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α)
-          ≤ wkpNorm (d := n) (m + 2) 2
+          ≤ iteratedWeakSobolevNorm (d := n) (m + 2) 2
         (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
           g r s i α P₀)
         (chartTargetEuclid (I := I) (M := M) α) :=
@@ -578,7 +578,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     unfold eigenvectorIteratedW1Aggregate
     have h_inner : ∀ j ∈ Finset.range ((m + 1) + 1),
         ∑ idx : Fin j → Fin n,
-          wkpNorm (d := n) 1 2
+          iteratedWeakSobolevNorm (d := n) 1 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
                 g r s i α P₀ j idx)
               (chartTargetEuclid (I := I) (M := M) α)
@@ -593,7 +593,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
       intro j hj
       rw [Finset.mem_range] at hj
       have h_each : ∀ idx ∈ (Finset.univ : Finset (Fin j → Fin n)),
-          wkpNorm (d := n) 1 2
+          iteratedWeakSobolevNorm (d := n) 1 2
               (eigenvectorChartIteratedPartial (I := I) (M := M)
                 g r s i α P₀ j idx)
               (chartTargetEuclid (I := I) (M := M) α)
@@ -605,7 +605,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
                     (I := I) (M := M) g r s) i‖ := fun idx _ =>
         h_W1_per_summand j (by omega) idx
       calc ∑ idx : Fin j → Fin n,
-              wkpNorm (d := n) 1 2
+              iteratedWeakSobolevNorm (d := n) 1 2
                 (eigenvectorChartIteratedPartial (I := I) (M := M)
                   g r s i α P₀ j idx)
                 (chartTargetEuclid (I := I) (M := M) α)
@@ -665,7 +665,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     resolventChartComponent_memWkp_arbitrary_local
       (I := I) (M := M) g r s i (j + 2) β Q
   have h_W2_per_summand : ∀ (idx : Fin (m + 1) → Fin n),
-      wkpNorm (d := n) 2 2
+      iteratedWeakSobolevNorm (d := n) 2 2
           (eigenvectorChartIteratedPartial (I := I) (M := M)
             g r s i α P₀ (m + 1) idx)
           (chartTargetEuclid (I := I) (M := M) α)
@@ -683,7 +683,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
     obtain ⟨_, h_w2_slot⟩ := hC_W2_bd i idx D_m hD_m_dirs h_parent_m2
     have h_w1_of_idx := (eigenvectorChartIteratedPartial_wkpNorm_one_two_le
       (I := I) (M := M) g r s i α P₀ (m + 1) idx h_parent_m2).2
-    have h_w1_le : wkpNorm (d := n) 1 2
+    have h_w1_le : iteratedWeakSobolevNorm (d := n) 1 2
         (eigenvectorChartIteratedPartial (I := I) (M := M)
           g r s i α P₀ (m + 1) idx)
         (chartTargetEuclid (I := I) (M := M) α)
@@ -699,7 +699,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
             (I := I) (M := M) g r s i α P₀ D_m h_parent_m2).f_chart =
           eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ (m + 1) idx := by
-      change D_m.fChartEff = eigenvectorChartRHSDiff (I := I) (M := M)
+      change D_m.diffChartForcing = eigenvectorChartRHSDiff (I := I) (M := M)
         g r s i α P₀ (m + 1) idx
       exact hD_m_fChartEff
     have h_eLp_vol_eq_wkp_zero := wkpNorm_zero (d := n) 2
@@ -818,7 +818,7 @@ private lemma eigenvector_chartComponent_wkpNorm_step_perPair
                 g r s) i‖ := by
     unfold eigenvectorIteratedW2Aggregate
     have h_sum_le : ∑ idx : Fin (m + 1) → Fin n,
-        wkpNorm (d := n) 2 2
+        iteratedWeakSobolevNorm (d := n) 2 2
             (eigenvectorChartIteratedPartial (I := I) (M := M)
               g r s i α P₀ (m + 1) idx)
             (chartTargetEuclid (I := I) (M := M) α)
@@ -977,7 +977,7 @@ private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s)
         (i : TensorEigenIdx (I := I) (M := M) g r s),
-        wkpNorm (d := Module.finrank ℝ E) (m + 2) 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (m + 2) 2
             (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
               g r s i α P₀)
             (chartTargetEuclid (I := I) (M := M) α)
@@ -1004,7 +1004,7 @@ private theorem eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
           (I := I) (M := M) g r s m C_IH hC_IH_nn hC_IH_bd
             α P₀).choose_spec.1
       have hC_step_bd : ∀ α P₀ i,
-          wkpNorm (d := Module.finrank ℝ E) ((m + 1) + 2) 2
+          iteratedWeakSobolevNorm (d := Module.finrank ℝ E) ((m + 1) + 2) 2
               (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
                 g r s i α P₀)
               (chartTargetEuclid (I := I) (M := M) α)
@@ -1064,7 +1064,7 @@ theorem eigenvector_chartComponent_wkpNorm_arbitrary
     (k : ℕ) (α : M) (P₀ : TensorCompIdx (E := E) r s) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s),
-        wkpNorm (d := Module.finrank ℝ E) k 2
+        iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k 2
             (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
               g r s i α P₀)
             (chartTargetEuclid (I := I) (M := M) α)
@@ -1079,11 +1079,11 @@ theorem eigenvector_chartComponent_wkpNorm_arbitrary
     eigenvector_chartComponent_wkpNorm_pm_uniform_β_unconditional
       (I := I) (M := M) g r s k
   refine ⟨C, hC_nn, fun i => ?_⟩
-  have h_mono : wkpNorm (d := Module.finrank ℝ E) k 2
+  have h_mono : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) k 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α)
-        ≤ wkpNorm (d := Module.finrank ℝ E) (k + 2) 2
+        ≤ iteratedWeakSobolevNorm (d := Module.finrank ℝ E) (k + 2) 2
       (eigenvectorChartComponentFun_unconditional (I := I) (M := M)
         g r s i α P₀)
       (chartTargetEuclid (I := I) (M := M) α) :=

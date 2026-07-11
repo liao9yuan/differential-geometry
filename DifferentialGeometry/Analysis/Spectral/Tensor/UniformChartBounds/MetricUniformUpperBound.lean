@@ -45,8 +45,8 @@ private lemma achart_eq_of_chartAt_eq {b b₀ : M}
 private lemma chartJinv_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
-    chartJinv (I := I) (M := M) b₀ b = (1 : E →L[ℝ] E) := by
-  unfold chartJinv
+    chartTrivializationLinearMapSymm (I := I) (M := M) b₀ b = (1 : E →L[ℝ] E) := by
+  unfold chartTrivializationLinearMapSymm
   rw [TangentBundle.symmL_trivializationAt_eq_core (𝕜 := ℝ) (I := I)
     (b₀ := b₀) (b := b) hb]
   rw [achart_eq_of_chartAt_eq (H := H) (M := M) h_chart]
@@ -144,7 +144,7 @@ private lemma chartGramBilin_self_nonneg
     0 ≤ chartGramBilin (I := I) (M := M) g α b v v := by
   rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g α b v v]
   exact metric_inner_self_nonneg (I := I) (M := M) g b
-    (chartJinv (I := I) (M := M) α b v)
+    (chartTrivializationLinearMapSymm (I := I) (M := M) α b v)
 
 private lemma chartGramBilin_self_le_norm_sq
     (g : SmoothRiemannianMetric I M) (α b : M) (v : E) :
@@ -200,8 +200,8 @@ theorem g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional
     (hK_sub : K_base ⊆ (chartAt H α).source) :
     ∃ K : ℝ, 0 < K ∧ ∀ b ∈ K_base, ∀ v : E,
       Real.sqrt (g.inner b
-          (chartJinv (I := I) (M := M) α b v)
-          (chartJinv (I := I) (M := M) α b v)) ≤ K * ‖v‖ := by
+          (chartTrivializationLinearMapSymm (I := I) (M := M) α b v)
+          (chartTrivializationLinearMapSymm (I := I) (M := M) α b v)) ≤ K * ‖v‖ := by
   obtain ⟨K, hK_pos, h⟩ :=
     g_inner_sqrt_uniform_upper_bound_on_compact
       (I := I) (M := M) g α hK_base hK_sub

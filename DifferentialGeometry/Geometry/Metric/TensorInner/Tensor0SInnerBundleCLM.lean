@@ -45,7 +45,7 @@ private def innerModelBilin
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Tensor0SModel s ℝ E →ₗ[ℝ] Tensor0SModel s ℝ E →ₗ[ℝ] ℝ :=
   LinearMap.mk₂ ℝ
-    (fun T S => tensorInnerPointwise_0s (I := I) (M := M) s g b T S)
+    (fun T S => covariantTensorInnerPointwise (I := I) (M := M) s g b T S)
     (fun T₁ T₂ S =>
       tensorInnerPointwise_0s_add_left (I := I) (M := M) g b s T₁ T₂ S)
     (fun c T S =>
@@ -59,7 +59,7 @@ private def innerModelBilin
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SModel s ℝ E) :
     innerModelBilin (I := I) (M := M) g s b T S =
-      tensorInnerPointwise_0s (I := I) (M := M) s g b T S := rfl
+      covariantTensorInnerPointwise (I := I) (M := M) s g b T S := rfl
 
 private def innerModelLinearOuter
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
@@ -70,15 +70,15 @@ private def innerModelLinearOuter
   map_add' := fun T₁ T₂ => by
     refine ContinuousLinearMap.ext ?_
     intro S
-    change tensorInnerPointwise_0s (I := I) (M := M) s g b (T₁ + T₂) S =
-      tensorInnerPointwise_0s (I := I) (M := M) s g b T₁ S +
-        tensorInnerPointwise_0s (I := I) (M := M) s g b T₂ S
+    change covariantTensorInnerPointwise (I := I) (M := M) s g b (T₁ + T₂) S =
+      covariantTensorInnerPointwise (I := I) (M := M) s g b T₁ S +
+        covariantTensorInnerPointwise (I := I) (M := M) s g b T₂ S
     exact tensorInnerPointwise_0s_add_left (I := I) (M := M) g b s T₁ T₂ S
   map_smul' := fun c T => by
     refine ContinuousLinearMap.ext ?_
     intro S
-    change tensorInnerPointwise_0s (I := I) (M := M) s g b (c • T) S =
-      c • tensorInnerPointwise_0s (I := I) (M := M) s g b T S
+    change covariantTensorInnerPointwise (I := I) (M := M) s g b (c • T) S =
+      c • covariantTensorInnerPointwise (I := I) (M := M) s g b T S
     rw [tensorInnerPointwise_0s_smul_left]
     rfl
 
@@ -92,7 +92,7 @@ def innerModelCLM
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SModel s ℝ E) :
     innerModelCLM (I := I) (M := M) g s b T S =
-      tensorInnerPointwise_0s (I := I) (M := M) s g b T S := rfl
+      covariantTensorInnerPointwise (I := I) (M := M) s g b T S := rfl
 
 private def bundleCLE (s : ℕ) (b : M) :
     Tensor0SSpace s I b ≃L[ℝ]
@@ -144,7 +144,7 @@ def innerBundleCLM
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SSpace s I b) :
     innerBundleCLM (I := I) (M := M) g s b T S =
-      tensorInnerPointwise_0s (I := I) (M := M) s g b
+      covariantTensorInnerPointwise (I := I) (M := M) s g b
         (Tensor0SBundle.Tensor0SSpace.toModel (I := I) (M := M)
           (𝕜 := ℝ) (E := E) (s := s) (x := b) T)
         (Tensor0SBundle.Tensor0SSpace.toModel (I := I) (M := M)
@@ -181,7 +181,7 @@ lemma innerBundleCLM_pos
         (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
     exact hinj (h.trans hzero.symm)
   have hnn :
-      0 ≤ tensorInnerPointwise_0s (I := I) (M := M) s g b
+      0 ≤ covariantTensorInnerPointwise (I := I) (M := M) s g b
           (Tensor0SBundle.Tensor0SSpace.toModel
             (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b) T)
           (Tensor0SBundle.Tensor0SSpace.toModel

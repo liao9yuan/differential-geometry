@@ -46,7 +46,7 @@ private def applyJac (α : M) (p : TangentBundle I M) (z : E × E) : E :=
 private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
-    secondaryTrivSndForm (I := I) α p =ᶠ[𝓝 ((extChartAt I.tangent p) p)]
+    secondaryTrivFiberComponentMap (I := I) α p =ᶠ[𝓝 ((extChartAt I.tangent p) p)]
       applyJac (I := I) α p := by
   classical
   have hbp1 : ((extChartAt I.tangent p) p).1 = extChartAt I p.proj p.proj :=
@@ -78,7 +78,7 @@ private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
   refine Filter.eventuallyEq_of_mem (hUopen.mem_nhds hbp_memU) ?_
   intro z hz
   obtain ⟨hz_tgt, hz_src⟩ := hz
-  unfold secondaryTrivSndForm applyJac
+  unfold secondaryTrivFiberComponentMap applyJac
   rw [tangentCoordChange_eq_chartTransitionAt (I := I) p.proj α ((extChartAt I p.proj).symm z.1)]
   congr 2
   exact (extChartAt I p.proj).right_inv hz_tgt
@@ -258,18 +258,18 @@ theorem geodesicVectorFieldChart_eq_geodesicVectorField
       rw [hh]; exact h2
     have hsnd_clm :
         ((e.continuousLinearMapAt ℝ p) (geodesicVectorFieldChart (I := I) g α p)).2 =
-          (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp)
+          (fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) bp)
             (geodesicVectorFieldChart (I := I) g α p) :=
       snd_continuousLinearMapAt_secondaryTriv (I := I) (α := α) (p := p) hp
         (geodesicVectorFieldChart (I := I) g α p)
     have hkey0 : (geodesicVectorFieldChartFiber (I := I) g α p).2 =
-        (fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp)
+        (fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) bp)
           (geodesicVectorFieldChart (I := I) g α p) := by
       rw [← hsnd_clm, hlin_at_gvf]
     have hrangeT : (range (I.tangent) : Set (E × E)) = Set.univ :=
       ModelWithCorners.Boundaryless.range_eq_univ (I := I.tangent)
     have hfderiv_eq :
-        fderivWithin ℝ (secondaryTrivSndForm (I := I) α p) (range I.tangent) bp =
+        fderivWithin ℝ (secondaryTrivFiberComponentMap (I := I) α p) (range I.tangent) bp =
           fderiv ℝ (applyJac (I := I) α p) bp := by
       rw [hrangeT, fderivWithin_univ]
       exact Filter.EventuallyEq.fderiv_eq

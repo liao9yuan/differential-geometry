@@ -288,12 +288,12 @@ theorem wkpNorm_partialDerivOnEuclid_le_wkpNorm_chartPushedRaw_succ
     ∃ C : ℝ, 0 < C ∧ ∀ {u : M → ℝ},
       ContMDiff I 𝓘(ℝ, ℝ) ∞ u →
       tsupport u ⊆ (chartAt H α).source →
-      DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+      DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
         (d := Module.finrank ℝ E) k p
         (partialDerivOnEuclid (I := I) (M := M) α i u)
         (chartTargetEuclid (I := I) (M := M) α)
       ≤ ENNReal.ofReal C *
-        DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm
+        DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm
           (d := Module.finrank ℝ E) (k+1) p
           (chartPushedRaw (I := I) (M := M) α u)
           (chartTargetEuclid (I := I) (M := M) α) := by

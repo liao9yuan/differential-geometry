@@ -167,7 +167,7 @@ private noncomputable def hkOneTerm
 
 set_option linter.unusedSectionVars false in
 
-private noncomputable def hkInner
+private noncomputable def sobolevHkInner
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T S : SmoothCcTensorHs g r s k) : ℝ :=
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -737,7 +737,7 @@ set_option linter.unusedSectionVars false in
 private lemma hkInner_self_eq_normSq_toReal
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
     (T : SmoothCcTensorHs g r s k) :
-    hkInner (I := I) (M := M) T T =
+    sobolevHkInner (I := I) (M := M) T T =
       (tensorPouSobolevHsNormSq (I := I) (M := M) g k T.toCcTensor).toReal := by
   classical
   rw [tensorPouSobolevHsNormSq_eq_inner_sum]
@@ -811,7 +811,7 @@ private lemma hkInner_self_eq_normSq_toReal
       h_integrand_zero]
     simp
   rw [htsum_eq]
-  unfold hkInner
+  unfold sobolevHkInner
   have h_each_lt_top :
       ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       ∀ IJ : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -879,11 +879,11 @@ set_option linter.unusedSectionVars false in
 noncomputable instance instPreInnerProductSpaceCore
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
     PreInnerProductSpace.Core ℝ (SmoothCcTensorHs g r s k) where
-  inner T S := hkInner (I := I) (M := M) T S
+  inner T S := sobolevHkInner (I := I) (M := M) T S
   conj_inner_symm T S := by
-    change (hkInner (I := I) (M := M) S T : ℝ) =
-      hkInner (I := I) (M := M) T S
-    unfold hkInner
+    change (sobolevHkInner (I := I) (M := M) S T : ℝ) =
+      sobolevHkInner (I := I) (M := M) T S
+    unfold sobolevHkInner
     refine Finset.sum_congr rfl ?_
     intro α _
     refine Finset.sum_congr rfl ?_
@@ -894,8 +894,8 @@ noncomputable instance instPreInnerProductSpaceCore
     intro basisIdx _
     exact hkOneTerm_symm (I := I) (M := M) S T α IJ j basisIdx
   re_inner_nonneg T := by
-    change (0 : ℝ) ≤ hkInner (I := I) (M := M) T T
-    unfold hkInner
+    change (0 : ℝ) ≤ sobolevHkInner (I := I) (M := M) T T
+    unfold sobolevHkInner
     refine Finset.sum_nonneg ?_
     intro α _
     refine Finset.sum_nonneg ?_
@@ -906,10 +906,10 @@ noncomputable instance instPreInnerProductSpaceCore
     intro basisIdx _
     exact hkOneTerm_self_nonneg (I := I) (M := M) T α IJ j basisIdx
   add_left T₁ T₂ S := by
-    change hkInner (I := I) (M := M) (T₁ + T₂) S =
-      hkInner (I := I) (M := M) T₁ S +
-        hkInner (I := I) (M := M) T₂ S
-    unfold hkInner
+    change sobolevHkInner (I := I) (M := M) (T₁ + T₂) S =
+      sobolevHkInner (I := I) (M := M) T₁ S +
+        sobolevHkInner (I := I) (M := M) T₂ S
+    unfold sobolevHkInner
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_
     intro α _
@@ -924,9 +924,9 @@ noncomputable instance instPreInnerProductSpaceCore
     intro basisIdx _
     exact hkOneTerm_add_left (I := I) (M := M) T₁ T₂ S α IJ j basisIdx
   smul_left T S c := by
-    change hkInner (I := I) (M := M) (c • T) S =
-      (c : ℝ) * hkInner (I := I) (M := M) T S
-    unfold hkInner
+    change sobolevHkInner (I := I) (M := M) (c • T) S =
+      (c : ℝ) * sobolevHkInner (I := I) (M := M) T S
+    unfold sobolevHkInner
     rw [Finset.mul_sum]
     refine Finset.sum_congr rfl ?_
     intro α _
@@ -982,7 +982,7 @@ theorem tensorPouSobolevHilbert_norm_eq
   have h_norm_eq :
       ‖(⟨T⟩ : SmoothCcTensorHs g r s k)‖ =
         Real.sqrt
-          (hkInner (I := I) (M := M)
+          (sobolevHkInner (I := I) (M := M)
             (⟨T⟩ : SmoothCcTensorHs g r s k)
             (⟨T⟩ : SmoothCcTensorHs g r s k)) := by
     rfl

@@ -99,13 +99,13 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     (T v : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (ρ : M → ℝ) (hρ : ContMDiff I 𝓘(ℝ) ∞ ρ) :
-    ∫ x, ρ x * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+    ∫ x, ρ x * (covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g 0 2
                 (covDerivAlongVFSection (I := I) (M := M) g T B) B x))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 2 v x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 2
                 (covDerivAlongVFSection (I := I) (M := M) g T B) x))
@@ -133,12 +133,12 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     (I := I) g hf_smooth Y hY_cs
   have hLHS_pt : ∀ x : M,
       tangentSectionAction (I := I) Y f x =
-        ρ x * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+        ρ x * (covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g 0 2 W B x))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2 v x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2 W x))
               (Tensor0SSpace.toModel
@@ -182,12 +182,12 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
       (HasCompactSupport.of_compactSpace _)
   rw [integral_add h_int_a h_int_b, neg_add] at hIBP
   have hgoal_pt : ∀ x : M,
-      ρ x * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+      ρ x * (covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
               (Tensor0SSpace.toModel
                 (loweredCovDerivAlongVF (I := I) (M := M) g 0 2 W B x))
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2 v x))
-            + tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+            + covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
               (Tensor0SSpace.toModel
                 (liftedTensorSection (I := I) (M := M) g 0 2 W x))
               (Tensor0SSpace.toModel
@@ -198,12 +198,12 @@ theorem integral_weighted_secondOrder_combined_eq_neg_weightDeriv
     intro x
     rw [hLHS_pt x]
     ring
-  rw [show (fun x : M => ρ x * (tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+  rw [show (fun x : M => ρ x * (covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
             (Tensor0SSpace.toModel
               (loweredCovDerivAlongVF (I := I) (M := M) g 0 2 W B x))
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 2 v x))
-          + tensorInnerPointwise_0s (I := I) (M := M) (0 + 2) g x
+          + covariantTensorInnerPointwise (I := I) (M := M) (0 + 2) g x
             (Tensor0SSpace.toModel
               (liftedTensorSection (I := I) (M := M) g 0 2 W x))
             (Tensor0SSpace.toModel

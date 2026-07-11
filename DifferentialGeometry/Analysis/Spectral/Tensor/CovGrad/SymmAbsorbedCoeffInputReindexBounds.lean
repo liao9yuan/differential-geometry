@@ -309,7 +309,7 @@ private lemma iteratedCovGrad_smul_aux (g : SmoothRiemannianMetric I M) (r s j :
   | succ j ih =>
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
-theorem symmAbsorbedCoeff_rfns_le (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
+theorem symmAbsorbedCoeff_riemannianFiberNormSq_le (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     (R : SmoothCcTensor g₀ (2 + i) 2) (σ' : Equiv.Perm (Fin (2 + i))) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ (2 + i) 2 x
         ((symmAbsorbedCoeff (I := I) (M := M) g₀ i R σ').toSection x) ≤

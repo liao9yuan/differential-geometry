@@ -59,7 +59,7 @@ private lemma domDomCongr_swap_smul (c : ℝ)
   ext m
   simp [ContinuousMultilinearMap.domDomCongr_apply]
 
-def slotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
+def inputSlotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace 2 I x) := inferInstance
   LinearMap.toContinuousLinearMap
     { toFun := fun D => Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
@@ -73,13 +73,13 @@ def slotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
 
 set_option linter.unusedSectionVars false in
 @[simp] lemma slotSwapFib_apply (x : M) (D : Tensor0SSpace 2 I x) :
-    slotSwapFib (I := I) (M := M) x D =
+    inputSlotSwapFib (I := I) (M := M) x D =
       Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
         (ContinuousMultilinearMap.domDomCongr (Equiv.swap (0 : Fin 2) 1)
           (Tensor0SSpace.toModel (𝕜 := ℝ) D)) := rfl
 
 def ccSlotSwapFib (x : M) : TensorRSSpace 2 2 I x :=
-  slotSwapFib (I := I) (M := M) x
+  inputSlotSwapFib (I := I) (M := M) x
 
 set_option linter.unusedSectionVars false in
 theorem ccSlotSwapFib_contMDiff :
@@ -90,13 +90,13 @@ theorem ccSlotSwapFib_contMDiff :
   apply contMDiff_clm_section_of_pointwise (I := I) (M := M)
     (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
     (F₂ := Tensor0SModel 2 ℝ E) (V₂ := fun x : M => Tensor0SSpace 2 I x)
-    (φ := fun x => slotSwapFib (I := I) (M := M) x)
+    (φ := fun x => inputSlotSwapFib (I := I) (M := M) x)
   intro Y
   letI := Tensor0SBundle.tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) 2
   classical
   have heq : (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
       (E := fun z : M => Tensor0SSpace 2 I z) x
-      (slotSwapFib (I := I) (M := M) x (Y x))) =
+      (inputSlotSwapFib (I := I) (M := M) x (Y x))) =
       (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
         (E := fun z : M => Tensor0SSpace 2 I z) x
         ((Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
@@ -130,7 +130,7 @@ theorem ccSlotSwapFib_contMDiff :
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-def ccSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2 where
+def ccInputSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2 where
   toSection :=
     { toFun := fun x : M => ccSlotSwapFib (I := I) (M := M) x
       contMDiff_toFun := ccSlotSwapFib_contMDiff (I := I) (M := M) }
@@ -138,33 +138,33 @@ def ccSlotSwapField (g : SmoothRiemannianMetric I M) : SmoothCcTensor g 2 2 wher
 
 set_option linter.unusedSectionVars false in
 @[simp] lemma ccSlotSwapField_toSection (g : SmoothRiemannianMetric I M) (x : M) :
-    (ccSlotSwapField (I := I) (M := M) g).toSection x =
+    (ccInputSlotSwapField (I := I) (M := M) g).toSection x =
       ccSlotSwapFib (I := I) (M := M) x := rfl
 
-def ccInputSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) :
+def ccInputSlotSymm (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2) :
     SmoothCcTensor g 2 2 :=
-  (1 / 2 : ℝ) • (C + appCcRS (I := I) (M := M) g 2 2 2 C (ccSlotSwapField (I := I) (M := M) g))
+  (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C (ccInputSlotSwapField (I := I) (M := M) g))
 
 set_option linter.unusedSectionVars false in
 lemma ccInputSymm_toSection (g : SmoothRiemannianMetric I M) (C : SmoothCcTensor g 2 2)
     (x : M) :
-    (ccInputSymm (I := I) (M := M) g C).toSection x =
+    (ccInputSlotSymm (I := I) (M := M) g C).toSection x =
       (1 / 2 : ℝ) • (C.toSection x +
         (show TensorRSSpace 2 2 I x from
           (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x from C.toSection x).comp
-            (slotSwapFib (I := I) (M := M) x))) := rfl
+            (inputSlotSwapFib (I := I) (M := M) x))) := rfl
 
 set_option linter.unusedSectionVars false in
 
 theorem ccInputSymm_add (g : SmoothRiemannianMetric I M) (C D : SmoothCcTensor g 2 2) :
-    ccInputSymm (I := I) (M := M) g (C + D) =
-      ccInputSymm (I := I) (M := M) g C + ccInputSymm (I := I) (M := M) g D := by
-  simp only [ccInputSymm]
+    ccInputSlotSymm (I := I) (M := M) g (C + D) =
+      ccInputSlotSymm (I := I) (M := M) g C + ccInputSlotSymm (I := I) (M := M) g D := by
+  simp only [ccInputSlotSymm]
   rw [appCcRS_add_left]
-  rw [show C + D + (appCcRS (I := I) (M := M) g 2 2 2 C (ccSlotSwapField (I := I) (M := M) g)
-      + appCcRS (I := I) (M := M) g 2 2 2 D (ccSlotSwapField (I := I) (M := M) g)) =
-      (C + appCcRS (I := I) (M := M) g 2 2 2 C (ccSlotSwapField (I := I) (M := M) g))
-        + (D + appCcRS (I := I) (M := M) g 2 2 2 D (ccSlotSwapField (I := I) (M := M) g)) from by
+  rw [show C + D + (ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C (ccInputSlotSwapField (I := I) (M := M) g)
+      + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g)) =
+      (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C (ccInputSlotSwapField (I := I) (M := M) g))
+        + (D + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 D (ccInputSlotSwapField (I := I) (M := M) g)) from by
     abel]
   rw [smul_add]
 
@@ -172,12 +172,12 @@ set_option linter.unusedSectionVars false in
 
 lemma sub_ccInputSymm_eq_half_smul_sub_appCcRS (g : SmoothRiemannianMetric I M)
     (C : SmoothCcTensor g 2 2) :
-    C - ccInputSymm (I := I) (M := M) g C =
-      (1 / 2 : ℝ) • (C - appCcRS (I := I) (M := M) g 2 2 2 C
-        (ccSlotSwapField (I := I) (M := M) g)) := by
-  rw [show ccInputSymm (I := I) (M := M) g C =
-      (1 / 2 : ℝ) • (C + appCcRS (I := I) (M := M) g 2 2 2 C
-        (ccSlotSwapField (I := I) (M := M) g)) from rfl,
+    C - ccInputSlotSymm (I := I) (M := M) g C =
+      (1 / 2 : ℝ) • (C - ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
+        (ccInputSlotSwapField (I := I) (M := M) g)) := by
+  rw [show ccInputSlotSymm (I := I) (M := M) g C =
+      (1 / 2 : ℝ) • (C + ccOperatorFieldComp (I := I) (M := M) g 2 2 2 C
+        (ccInputSlotSwapField (I := I) (M := M) g)) from rfl,
     smul_add, smul_sub]
   nth_rewrite 1 [show C = (1 / 2 : ℝ) • C + (1 / 2 : ℝ) • C from by
     rw [← add_smul, show (1 / 2 + 1 / 2 : ℝ) = 1 from by norm_num, one_smul]]

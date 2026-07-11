@@ -97,7 +97,7 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
                     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))) ^ 2)
             ∂(volume : Measure EuclN) ≤
           ENNReal.ofReal K *
-            (wkpNorm (d := Module.finrank ℝ E) 0 2
+            (iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2
                 (tensorChartComp (I := I) (M := M) g r s T β Idx Jdx)
                 (chartTargetEuclid (I := I) (M := M) β)) ^ 2 := by
   classical
@@ -317,7 +317,7 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
       eLpNorm g_β 2 ((volume : Measure EuclN).restrict Ω_βα) ≤
         eLpNorm g_β 2 ((volume : Measure EuclN).restrict EuclTargetβ) :=
     eLpNorm_mono_measure _ h_meas_mono
-  have h_wkp : wkpNorm (d := Module.finrank ℝ E) 0 2 g_β EuclTargetβ =
+  have h_wkp : iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2 g_β EuclTargetβ =
       eLpNorm g_β 2 ((volume : Measure EuclN).restrict EuclTargetβ) :=
     wkpNorm_zero (d := Module.finrank ℝ E) 2 g_β EuclTargetβ
   calc (∫⁻ y in Ω_αβ,
@@ -340,10 +340,10 @@ theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
             (eLpNorm g_β 2 ((volume : Measure EuclN).restrict EuclTargetβ)) ^ 2 := by
           gcongr
     _ = (ENNReal.ofReal Kchg) ^ 2 *
-            (wkpNorm (d := Module.finrank ℝ E) 0 2 g_β EuclTargetβ) ^ 2 := by
+            (iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2 g_β EuclTargetβ) ^ 2 := by
           rw [h_wkp]
     _ = ENNReal.ofReal (Kchg ^ 2) *
-            (wkpNorm (d := Module.finrank ℝ E) 0 2 g_β EuclTargetβ) ^ 2 := by
+            (iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2 g_β EuclTargetβ) ^ 2 := by
           rw [← ENNReal.ofReal_pow hKchg_nn]
 
 end TensorSpectral

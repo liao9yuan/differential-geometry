@@ -66,7 +66,7 @@ theorem iteratedCovGradSobolevNorm_le_topOrder
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-theorem iteratedCovGrad_toSobolev_embedding_Cm_collapsed
+theorem iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound
     (g : SmoothRiemannianMetric I M) (r s k m : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 2 * m)
     (Cred : ℝ)
@@ -113,7 +113,7 @@ theorem iteratedCovGrad_toSobolev_embedding_Cm_collapsed
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-theorem iteratedCovGrad_toSobolev_embedding_C2_collapsed
+theorem iteratedCovGrad_toSobolev_embedding_C2_of_rankBound
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (h_super : 2 * k > Module.finrank ℝ E + 4)
     (Cred : ℝ)
@@ -130,7 +130,7 @@ theorem iteratedCovGrad_toSobolev_embedding_C2_collapsed
           C * ((2 + 1 : ℝ) * Cred) *
             ‖SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) (2 * k) T‖ := by
   have h_super' : 2 * k > Module.finrank ℝ E + 2 * 2 := by omega
-  exact iteratedCovGrad_toSobolev_embedding_Cm_collapsed (I := I) (M := M)
+  exact iteratedCovGrad_toSobolev_embedding_Cm_of_rankBound (I := I) (M := M)
     g 0 2 k 2 h_super' Cred h_rank
 
 end DifferentialGeometry.PDE.RicciFlow

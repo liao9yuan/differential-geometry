@@ -30,11 +30,11 @@ def fixedCoeffTowerOp (g : SmoothRiemannianMetric I M)
     (Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0)) :
     ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p)
   | 0, r => fun W =>
-      appCc (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W
+      operatorFieldApply (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W
   | (p + 1), r => fun W =>
       covGrad (I := I) (M := M) g 0 (r + p)
           (fixedCoeffTowerOp g Φ₀ p r W) -
-        castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+        castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
           (fixedCoeffTowerOp g Φ₀ p (r + 1) (covGrad (I := I) (M := M) g 0 r W))
 
 theorem fixedCoeffTower_covGrad_op (g : SmoothRiemannianMetric I M)
@@ -43,12 +43,12 @@ theorem fixedCoeffTower_covGrad_op (g : SmoothRiemannianMetric I M)
     covGrad (I := I) (M := M) g 0 (r + p)
         (fixedCoeffTowerOp (I := I) (M := M) g Φ₀ p r W) =
       fixedCoeffTowerOp (I := I) (M := M) g Φ₀ (p + 1) r W +
-        castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+        castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
           (fixedCoeffTowerOp (I := I) (M := M) g Φ₀ p (r + 1)
             (covGrad (I := I) (M := M) g 0 r W)) := by
   change _ = (covGrad (I := I) (M := M) g 0 (r + p)
       (fixedCoeffTowerOp (I := I) (M := M) g Φ₀ p r W) -
-      castRankCc_db g 0 (by omega : (r + 1) + p = r + (p + 1))
+      castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
         (fixedCoeffTowerOp (I := I) (M := M) g Φ₀ p (r + 1)
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
@@ -57,7 +57,7 @@ theorem fixedCoeffTower_base_appCc (g : SmoothRiemannianMetric I M)
     (Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0))
     (r : ℕ) (W : SmoothCcTensor g 0 r) :
     fixedCoeffTowerOp (I := I) (M := M) g Φ₀ 0 r W =
-      appCc (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W :=
+      operatorFieldApply (I := I) (M := M) g (r + 0) (r + 0) (Φ₀ r) W :=
   rfl
 
 def fixedCoeffDiffOp (g : SmoothRiemannianMetric I M)
@@ -65,7 +65,7 @@ def fixedCoeffDiffOp (g : SmoothRiemannianMetric I M)
     DiffBilinOp (I := I) (M := M) g :=
   let op := fixedCoeffTowerOp (I := I) (M := M) g Φ₀
   let covGrad_op := fixedCoeffTower_covGrad_op (I := I) (M := M) g Φ₀
-  let hNF : ∀ (p r : ℕ), NormalForm (I := I) (M := M) g op p r :=
+  let hNF : ∀ (p r : ℕ), IsIteratedCovGradNormalForm (I := I) (M := M) g op p r :=
     fun p => normalForm_of_base (I := I) (M := M) g op covGrad_op Φ₀
       (fun r W => fixedCoeffTower_base_appCc (I := I) (M := M) g Φ₀ r W) p
   { op := op

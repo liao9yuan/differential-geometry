@@ -40,7 +40,7 @@ variable
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 
-private theorem neg_tangentMap_cmdwa
+private theorem contMDiffWithinAt_neg_tangentBundleSection
     (X : ℝ → ∀ x : M, TangentSpace I x)
     {u : Set (ℝ × M)} {q₀ : ℝ × M}
     (hX : ContMDiffWithinAt (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -97,7 +97,7 @@ theorem conjugating_diffeo_family_jointsmooth
   have hsmooth0_X : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
       (Set.Icc (0 : ℝ) T_DT ×ˢ Set.univ) :=
-    fun q hq => neg_tangentMap_cmdwa
+    fun q hq => contMDiffWithinAt_neg_tangentBundleSection
       (fun s x => (deTurckVF (I := I) (g_DT s) g_bg x : TangentSpace I x)) (h_smooth0 q hq)
   obtain ⟨Φ, hΦ0, hdiffeo, hflow, hΦcont0,
       hΦbundle0, hΦorbit_joint, hΦsection_joint, lo, hi, hlo, hhi, hΦsm⟩ :=

@@ -91,7 +91,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
         {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
@@ -175,7 +175,7 @@ theorem exists_riemannOp_LeviCivita_difference_gQuadratic_le_of_jetEnvelope
     have h1mem : (1 : ℕ) ∈ Finset.range 3 := by decide
     exact le_trans (Finset.single_le_sum hsum_terms h1mem) henv
 
-  have hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) (max δ 0) := by
+  have hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) (max δ 0) := by
     intro y a b
     refine le_trans (hδ y a b) ?_
     have hle : δ ≤ max δ 0 := le_max_left _ _

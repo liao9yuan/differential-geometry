@@ -274,7 +274,7 @@ theorem wkpNorm_smul_smooth_bounded_lt_top
     {C : ℝ}
     (hη_bound : ∀ j ≤ k, ∀ x ∈ Ω, ‖iteratedFDeriv ℝ j η x‖ ≤ C)
     {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω) :
-    wkpNorm (d := d) k p (fun x => η x * u x) Ω < (⊤ : ℝ≥0∞) :=
+    iteratedWeakSobolevNorm (d := d) k p (fun x => η x * u x) Ω < (⊤ : ℝ≥0∞) :=
   wkpNorm_lt_top_of_memWkp
     (MemWkp.smul_smooth_bounded (d := d) k hp hΩ hη hη_bound hu)
 

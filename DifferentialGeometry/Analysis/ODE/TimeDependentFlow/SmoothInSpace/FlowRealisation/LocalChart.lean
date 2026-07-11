@@ -86,7 +86,7 @@ theorem spatial_fderiv_precomp_factor
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
-theorem heucl_precomp
+theorem chartPrecomp_spatialFderiv_hasDerivAt
     {f : ℝ → E → E} {t : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {ΦE : E × ℝ → E}
     (hΦE : IsLocalFlow f t x₀ r tmin tmax ΦE)
     (hf : ContDiff ℝ ∞ (uncurry f))
@@ -218,7 +218,7 @@ theorem rawVariationalIdentityFlat_of_localGeometricFlow
       (fun s : ℝ => fderiv ℝ (fun z => Φ_eucl z s) z₀)
       (((fderiv ℝ (f t) (ΦE (w₀, t))).comp (fderiv ℝ (fun w => ΦE (w, t)) w₀)).comp
         (fderiv ℝ (precompMap (I := I) Φ_fam t α) z₀)) t :=
-    heucl_precomp (I := I) hΦE hf hUopen hΦsmooth Φ_fam α x hprecomp_diff hzsU hz ht
+    chartPrecomp_spatialFderiv_hasDerivAt (I := I) hΦE hf hUopen hΦsmooth Φ_fam α x hprecomp_diff hzsU hz ht
       hΦsmooth_time
   have heucl_diff : ∀ᶠ s : ℝ in 𝓝 t,
       DifferentiableAt ℝ (fun z => Φ_eucl z s) z₀ := by

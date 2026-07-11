@@ -105,13 +105,13 @@ theorem pointwiseTensorCurv_toSection_eq_genuine_add_bracket_ofOrthonormal
 noncomputable def genuineCurvPureRSubtracted
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=
-  pointwiseTensorCurv (I := I) (M := M) g s S - GcurvSection (I := I) (M := M) g s S
+  pointwiseTensorCurv (I := I) (M := M) g s S - genuineCurvatureOnlySection (I := I) (M := M) g s S
 
 @[simp] lemma genuineCurvPureRSubtracted_toSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     (genuineCurvPureRSubtracted (I := I) (M := M) g s S).toSection =
       (pointwiseTensorCurv (I := I) (M := M) g s S).toSection -
-        (GcurvSection (I := I) (M := M) g s S).toSection := by
+        (genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection := by
   rw [genuineCurvPureRSubtracted, SmoothCcTensor.toSection_sub]
 
 theorem genuineCurvPureRSubtracted_toSection_eq_covDeriv_add_bracket
@@ -141,22 +141,22 @@ theorem genuineCurvPureRSubtracted_toSection_eq_covDeriv_add_bracket
             (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) -
         Tensor0SSpace.toModel
           ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-            (GcurvSection (I := I) (M := M) g s S).toSection x)
+            (genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection x)
             (unitZeroSec (I := I) (M := M) x)) (Fin.cons w m) := by
     rw [genuineCurvPureRSubtracted_toSection]
     rw [show ((pointwiseTensorCurv (I := I) (M := M) g s S).toSection -
-        (GcurvSection (I := I) (M := M) g s S).toSection) x =
+        (genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection) x =
       (pointwiseTensorCurv (I := I) (M := M) g s S).toSection x -
-        (GcurvSection (I := I) (M := M) g s S).toSection x from rfl]
+        (genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection x from rfl]
     rw [show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (pointwiseTensorCurv (I := I) (M := M) g s S).toSection x -
-            (GcurvSection (I := I) (M := M) g s S).toSection x)
+            (genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection x)
           (unitZeroSec (I := I) (M := M) x) =
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
           (pointwiseTensorCurv (I := I) (M := M) g s S).toSection x)
           (unitZeroSec (I := I) (M := M) x) -
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from
-          (GcurvSection (I := I) (M := M) g s S).toSection x)
+          (genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection x)
           (unitZeroSec (I := I) (M := M) x) from
       ContinuousLinearMap.sub_apply _ _ _]
     rw [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
@@ -171,14 +171,14 @@ theorem genuineCurvPureRSubtracted_toSection_eq_covDeriv_add_bracket
 noncomputable def movingFrameRemainderSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     SmoothCcTensor g 0 (s + 1) :=
-  pointwiseTensorCurv (I := I) (M := M) g s S - GcurvSection (I := I) (M := M) g s S -
+  pointwiseTensorCurv (I := I) (M := M) g s S - genuineCurvatureOnlySection (I := I) (M := M) g s S -
     genuineDiffCurvSection (I := I) (M := M) g s S - ricTraceSection (I := I) (M := M) g s S
 
 @[simp] lemma movingFrameRemainderSection_toSection
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     (movingFrameRemainderSection (I := I) (M := M) g s S).toSection =
       (pointwiseTensorCurv (I := I) (M := M) g s S).toSection -
-          (GcurvSection (I := I) (M := M) g s S).toSection -
+          (genuineCurvatureOnlySection (I := I) (M := M) g s S).toSection -
           (genuineDiffCurvSection (I := I) (M := M) g s S).toSection -
         (ricTraceSection (I := I) (M := M) g s S).toSection := by
   rw [movingFrameRemainderSection, SmoothCcTensor.toSection_sub,

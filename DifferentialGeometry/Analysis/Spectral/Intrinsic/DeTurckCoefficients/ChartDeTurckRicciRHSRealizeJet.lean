@@ -48,9 +48,9 @@ theorem hasChartJetLip_chartDeTurckRicciRHS
 theorem chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g_bg (ccTensorBilinSymm (I := I) g_bg T') δ')
     (α : M) {K : Set E} (hK : IsCompact K)
     (hKsub : K ⊆ interior (extChartAt I α).target)
     (i k : Fin (Module.finrank ℝ E)) (N : ℕ) :
@@ -61,7 +61,7 @@ theorem chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE
             chartDeTurckRicciRHS (I := I)
               (tensorSectionRealizeMetric (I := I) g_bg T' hδ'_lt hδ') g_bg α i k z)
           (interior (extChartAt I α).target) y ≤
-        C * bareChartJetContentOnE (I := I) (M := M) g_bg (T - T') α (N + 2) y := by
+        C * chartComponentJetSeminormSum (I := I) (M := M) g_bg (T - T') α (N + 2) y := by
   classical
   set g₁ := tensorSectionRealizeMetric (I := I) g_bg T hδ_lt hδ with hg₁_def
   set g₂ := tensorSectionRealizeMetric (I := I) g_bg T' hδ'_lt hδ' with hg₂_def
@@ -77,9 +77,9 @@ theorem chartDeTurckRicciRHS_realize_seminorm_le_bareChartJetContentOnE
   calc C * chartGramJetDiffSeminormSum (I := I) (M := M) (N + 2) g₁ g₂ α
         (interior (extChartAt I α).target) y
       ≤ C * (((Module.finrank ℝ E) : ℝ) *
-          bareChartJetContentOnE (I := I) (M := M) g_bg (T - T') α (N + 2) y) :=
+          chartComponentJetSeminormSum (I := I) (M := M) g_bg (T - T') α (N + 2) y) :=
         mul_le_mul_of_nonneg_left hgram hC_pos.le
     _ = (C * ((Module.finrank ℝ E) : ℝ)) *
-          bareChartJetContentOnE (I := I) (M := M) g_bg (T - T') α (N + 2) y := by ring
+          chartComponentJetSeminormSum (I := I) (M := M) g_bg (T - T') α (N + 2) y := by ring
 
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients

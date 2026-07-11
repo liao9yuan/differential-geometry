@@ -30,7 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-def ccTensor01Covec (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1) :
+def ccTensorOneForm (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1) :
     Π b : M, TangentSpace I b →L[ℝ] ℝ :=
   fun b => cotangentToCLM (I := I)
     (unitEvalSection (I := I) (M := M) g 1 σ b)
@@ -103,10 +103,10 @@ lemma tensor0SCovariantDerivative_one_cotangentToCLM
 
 theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
     (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1) {x : M}
-    (hθ : MDiffAtCotangent (ccTensor01Covec g σ) x)
+    (hθ : MDiffAtCotangent (ccTensorOneForm g σ) x)
     (hUz : TensorSectionMDiffAt (I := I) 1 (unitEvalSection (I := I) (M := M) g 1 σ) x)
     (v w : TangentSpace I x) :
-    cotangentCov (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w =
+    cotangentCov (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w =
       cotangentToCLM (I := I)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
             tensorCovDerivAt g 0 1 σ x v) (unitZeroSec (I := I) (M := M) x)) w := by
@@ -120,11 +120,11 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
   have hYmd : MDiffAt (T% (fun b : M => Y b)) x :=
     Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
-  have hcov : cotangentCov (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w =
-      cotangentScalar ((LeviCivita (I := I) g).toFun) (ccTensor01Covec g σ) x
+  have hcov : cotangentCov (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w =
+      cotangentScalar ((LeviCivita (I := I) g).toFun) (ccTensorOneForm g σ) x
         (fun b : M => X b) (fun b : M => Y b) := by
-    have hco : cotangentCov (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w =
-        cotangentCovAt (LeviCivita (I := I) g) (ccTensor01Covec g σ) x v w := by
+    have hco : cotangentCov (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w =
+        cotangentCovAt (LeviCivita (I := I) g) (ccTensorOneForm g σ) x v w := by
       rw [cotangentCov_toFun, cotangentCovFun_apply]
     rw [hco, ← hXx, ← hYx]
     exact cotangentCovAt_apply_of_diff (LeviCivita (I := I) g) hθ hXmd hYmd
@@ -135,11 +135,11 @@ theorem cotangentCov_eq_tensorCovDerivAt_ccTensor01
   have hpair := tensor0SCovariantDerivative_one_cotangentToCLM (I := I) (M := M)
     g (unitEvalSection (I := I) (M := M) g 1 σ) hUz Y v
 
-  have hθeq : (fun b : M => ccTensor01Covec g σ b (Y b)) =
+  have hθeq : (fun b : M => ccTensorOneForm g σ b (Y b)) =
       (fun b : M => cotangentToCLM (I := I)
         (unitEvalSection (I := I) (M := M) g 1 σ b) (Y b)) := rfl
   rw [hθeq]
-  rw [show (ccTensor01Covec g σ x)
+  rw [show (ccTensorOneForm g σ x)
         ((LeviCivita (I := I) g).toFun (fun b : M => Y b) x v) =
       cotangentToCLM (I := I) (unitEvalSection (I := I) (M := M) g 1 σ x)
         ((LeviCivita (I := I) g).toFun (fun y => Y y) x v) from rfl]

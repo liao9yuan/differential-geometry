@@ -227,7 +227,7 @@ theorem connLaplacian_grad_curvature_term [I.Boundaryless]
                 (fun b => gradFun (I := I) g f b) x) (B x) =
       - g.inner x (gradFun (I := I) g f x)
           (riemannSec (LeviCivita (I := I) g) B w B x) :=
-  heart_of_bochner_curvature_term (I := I) g hf hB hw
+  inner_riemannSec_gradFun_skew_symm (I := I) g hf hB hw
 
 theorem smoothOrthoFrame_orthonormal_center
     (g : SmoothRiemannianMetric I M) (x : M)

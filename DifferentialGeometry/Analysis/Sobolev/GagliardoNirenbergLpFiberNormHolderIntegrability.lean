@@ -40,7 +40,7 @@ section SecondOrderInterpInfra
 
 set_option linter.unusedSectionVars false in
 
-theorem continuous_rfns_section
+theorem continuous_riemannianFiberNormSq_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) :
     Continuous (fun x => riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) := by
@@ -51,7 +51,7 @@ theorem continuous_rfns_section
 
 set_option linter.unusedSectionVars false in
 
-private theorem memLp_rfns_rpow
+private theorem memLp_riemannianFiberNormSq_rpow
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) (a : ℝ) (ha : 0 ≤ a) (p : ℝ≥0∞) :
     MeasureTheory.MemLp
@@ -62,7 +62,7 @@ private theorem memLp_rfns_rpow
       (I := I) (M := M) g
   have hcont : Continuous
       (fun x => (riemannianFiberNormSq (I := I) (M := M) g r s x (S.toSection x)) ^ a) :=
-    (continuous_rfns_section (I := I) (M := M) g r s S).rpow_const (fun _ => Or.inr ha)
+    (continuous_riemannianFiberNormSq_section (I := I) (M := M) g r s S).rpow_const (fun _ => Or.inr ha)
   exact hcont.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
 
 set_option linter.unusedSectionVars false in

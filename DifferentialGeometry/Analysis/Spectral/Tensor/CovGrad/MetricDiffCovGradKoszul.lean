@@ -181,7 +181,7 @@ private lemma unitEvalSection_toModel_eq_ccTensorBilin
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (b : M)
     (Y Z : TangentSpace I b) :
     Tensor0SSpace.toModel (unitEvalSection (I := I) (M := M) g₀ 2 S b) (Fin.cons Y ![Z]) =
-      ccTensorBilin (I := I) g₀ S b Y Z := by
+      smoothCcTensorBilinForm (I := I) g₀ S b Y Z := by
   rw [ccTensorBilin_apply (I := I) g₀ S b Y Z]
   rw [ccTensorModel]
   rw [show ccTensorMultilinear (I := I) g₀ S b =
@@ -195,7 +195,7 @@ private lemma unitEvalSection_toModel_eq_ccTensorBilin
 theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ S b u w =
+      smoothCcTensorBilinForm (I := I) g₀ S b u w =
         g₁.inner b u w - g₁'.inner b u w)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     Tensor0SSpace.toModel
@@ -255,7 +255,7 @@ theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv
 theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (hbil : ∀ (b : M) (u w : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ S b u w =
+      smoothCcTensorBilinForm (I := I) g₀ S b u w =
         g₁.inner b u w - g₁'.inner b u w)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     Tensor0SSpace.toModel

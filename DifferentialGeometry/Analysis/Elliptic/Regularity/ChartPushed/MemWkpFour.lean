@@ -66,7 +66,7 @@ private lemma twice_diff_identities_at
             ∂(volume : Measure EuclN)) =
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
-            fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+            effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
           ∂(volume : Measure EuclN) := by
   intro l₁ l₂ ψ hψ_smooth hψ_cs hψ_supp
   have h_base_f_chart_memWkp22 :=

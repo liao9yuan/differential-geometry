@@ -57,14 +57,14 @@ theorem timeModeCoeff_homog_sub_const_coeFn
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ⇑(timeModeCoeff (I := I) (M := M)
-        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+        (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T
             (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i) =ᵐ[timeMeasure T]
       fun t => (Real.exp (-(TensorEigenIdx.lambda (I := I) (M := M) i) * t) - 1) *
         u₀.coeff i := by
   have hhom : timeModeCoeff (I := I) (M := M)
-      (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀) i =
+      (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀) i =
         homModeCoeff (I := I) (M := M) (a := a) (T := T) u₀ i :=
     maxRegHomogeneousSolFieldHa1_timeModeCoeff (I := I) (M := M) (a := a) hT u₀ i
   have hneg : timeModeCoeff (I := I) (M := M)
@@ -80,11 +80,11 @@ theorem timeModeCoeff_homog_sub_const_coeFn
             (show (a + 1) ≤ a + 2 by linarith) u₀) by rw [neg_one_smul],
       timeModeCoeff_smul (I := I) (M := M),
       timeModeCoeff_const_inclusion (I := I) (M := M) u₀ i, neg_one_smul]
-  rw [show (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+  rw [show (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
         TimeSobolev.const T
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀)) =
-      maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ +
+      maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ +
         (-TimeSobolev.const T
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀)) from by rw [sub_eq_add_neg],
@@ -105,7 +105,7 @@ theorem norm_timeModeCoeff_homog_sub_const_sq_le
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
     ‖timeModeCoeff (I := I) (M := M)
-        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+        (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T
             (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i‖ ^ 2 ≤
@@ -116,7 +116,7 @@ theorem norm_timeModeCoeff_homog_sub_const_sq_le
   have hcont : Continuous fdiff := by rw [hfdiff_def]; fun_prop
   have hae := timeModeCoeff_homog_sub_const_coeFn (I := I) (M := M) u₀ hT i
   have heq : timeModeCoeff (I := I) (M := M)
-        (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+        (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T
             (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
               (show (a + 1) ≤ a + 2 by linarith) u₀)) i =
@@ -156,7 +156,7 @@ theorem maxRegHomogeneousSolFieldHa1_sub_const_norm_le
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (hT : 0 ≤ T) :
-    ‖maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+    ‖maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
         TimeSobolev.const T
           (tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
             (show (a + 1) ≤ a + 2 by linarith) u₀)‖ ≤
@@ -200,7 +200,7 @@ theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 :
     (show (a + 1) ≤ a + 2 by linarith) u₀ with hιu₀
   have hsplit : maxRegDuhamelSolFieldHa1 (I := I) (M := M) a hT hT1 u₀ gforce -
         TimeSobolev.const T ιu₀ =
-      (maxRegHomogeneousSolFieldHa1 (I := I) (M := M) a T u₀ -
+      (maxRegHomogeneousSolFieldTraceScale (I := I) (M := M) a T u₀ -
           TimeSobolev.const T ιu₀) +
         maximalRegularitySolFieldHa1 (I := I) (M := M) a hT hT1 gforce := by
     rw [maxRegDuhamelSolFieldHa1]; abel
@@ -212,7 +212,7 @@ theorem maxRegDuhamelSolFieldHa1_sub_const_norm_le_ofCompact (hT : 0 < T) (hT1 :
     (h_compact := h_compact) (a := a) hT hT1 gforce
   exact add_le_add hhom hduh
 
-theorem maxRegDuhamelSolFieldHa1_tendsto_const_ofCompact
+theorem maxRegDuhamelSolFieldTraceScale_tendsto_const_ofCompact
     (h_compact : IsCompactOperator (tensorResolventL2
       (I := I) (M := M) g r s))
     (u₀ : tensorHs (I := I) (M := M) g r s (a + 2)) (B : ℝ) {ε : ℝ} (hε : 0 < ε) :

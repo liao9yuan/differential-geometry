@@ -21,7 +21,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 theorem perturbedInner_self_upper_bound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) :
     perturbedInner g h x v v ≤ (1 + δ) * g.inner x v v := by
   have hnn : 0 ≤ g.inner x v v := metric_inner_self_nonneg (I := I) (M := M) g x v
@@ -40,7 +40,7 @@ theorem perturbedInner_self_upper_bound
 theorem gInner_self_le_of_gFibreOpBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
-    {δ : ℝ} (hδ : gFibreOpBound g h δ)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound g h δ)
     (x : M) (v : TangentSpace I x) :
     g.inner x v v + h x v v ≤ (1 + δ) * g.inner x v v := by
   have h := perturbedInner_self_upper_bound (I := I) (M := M) g h hδ x v

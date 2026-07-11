@@ -48,8 +48,8 @@ set_option linter.unusedSectionVars false in
 private lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ S x u w = ccTensorBilin (I := I) g₀ S x w u) :
-    symmS (I := I) (M := M) g₀ S = S := by
+      smoothCcTensorBilinForm (I := I) g₀ S x u w = smoothCcTensorBilinForm (I := I) g₀ S x w u) :
+    ccTensor02Symm (I := I) (M := M) g₀ S = S := by
   have hswap : domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) S = S := by
     refine smoothCcTensor_ext_of_unitModel (I := I) (M := M) g₀ (fun x => ?_)
     rw [domDomCongrSection_unitModel]
@@ -72,7 +72,7 @@ private lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
     conv_rhs => rw [hveta']
     exact hv (v 1) (v 0)
   have htwo : S + S = (2 : ℝ) • S := (two_smul ℝ S).symm
-  rw [symmS, hswap, htwo, smul_smul,
+  rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 set_option linter.unusedSectionVars false
@@ -1087,35 +1087,35 @@ lemma covGradUnit_toModel_eval (g : SmoothRiemannianMetric I M) (n : ℕ)
   rw [show Matrix.vecTail (Fin.cons p w : Fin (n + 1) → TangentSpace I y) = w from
     Matrix.tail_cons p w]
 
-private def hUnitSec (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
+private def symmVelocityDiffSec (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
     Π y : M, Tensor0SBundle.Tensor0SSpace 2 I y :=
   fun y : M =>
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I y from
-      (symmS (I := I) (M := M) g₀ (T - T')).toSection y) (unitZeroSec (I := I) (M := M) y)
+      (ccTensor02Symm (I := I) (M := M) g₀ (T - T')).toSection y) (unitZeroSec (I := I) (M := M) y)
 
 private lemma hUnitSec_tsmdiffAt (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (y : M) :
-    TensorSectionMDiffAt (I := I) 2 (hUnitSec (I := I) (M := M) g₀ T T') y :=
+    TensorSectionMDiffAt (I := I) 2 (symmVelocityDiffSec (I := I) (M := M) g₀ T T') y :=
   unitEval_tensorSectionMDiffAt (I := I) (M := M) g₀ 2
-    (symmS (I := I) (M := M) g₀ (T - T')) y
+    (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) y
 
-private def kZeroSec (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
+private def symmVelocityDiffCovGradBaseSec (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2) :
     Π y : M, Tensor0SBundle.Tensor0SSpace 3 I y :=
   fun y : M =>
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I y from
       (covGrad (I := I) (M := M) g₀ 0 2
-        (symmS (I := I) (M := M) g₀ (T - T'))).toSection y)
+        (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))).toSection y)
       (unitZeroSec (I := I) (M := M) y)
 
 private lemma kZeroSec_tsmdiffAt (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (y : M) :
-    TensorSectionMDiffAt (I := I) 3 (kZeroSec (I := I) (M := M) g₀ T T') y :=
+    TensorSectionMDiffAt (I := I) 3 (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') y :=
   unitEval_tensorSectionMDiffAt (I := I) (M := M) g₀ 3
-    (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) (M := M) g₀ (T - T'))) y
+    (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))) y
 
-private def kOneSec (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+private def symmVelocityDiffCovGradRealizedSec (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) : Π y : M, Tensor0SBundle.Tensor0SSpace 3 I y :=
   fun y : M =>
     (show Tensor0SBundle.Tensor0SSpace 0 I y →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I y from
@@ -1125,37 +1125,37 @@ private def kOneSec (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g
 
 private lemma kOneSec_tsmdiffAt (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (y : M) :
-    TensorSectionMDiffAt (I := I) 3 (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s) y :=
+    TensorSectionMDiffAt (I := I) 3 (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s) y :=
   unitEval_tensorSectionMDiffAt (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 3
     (covGrad (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2
       (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)) y
 
 private lemma kZeroSec_eval (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (y : M) (p q r : TangentSpace I y) :
-    Tensor0SBundle.Tensor0SSpace.toModel (kZeroSec (I := I) (M := M) g₀ T T' y) ![p, q, r] =
+    Tensor0SBundle.Tensor0SSpace.toModel (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' y) ![p, q, r] =
       Tensor0SBundle.Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 2 (LeviCivita (I := I) g₀)
-          (hUnitSec (I := I) (M := M) g₀ T T') y p) ![q, r] := by
+          (symmVelocityDiffSec (I := I) (M := M) g₀ T T') y p) ![q, r] := by
   have h := covGradUnit_toModel_eval (I := I) (M := M) g₀ 2
-    (symmS (I := I) (M := M) g₀ (T - T')) y p ![q, r]
+    (ccTensor02Symm (I := I) (M := M) g₀ (T - T')) y p ![q, r]
   rw [show (Fin.cons p ![q, r] : Fin 3 → TangentSpace I y) = ![p, q, r] from
     funext fun j => by fin_cases j <;> rfl] at h
   exact h
 
 private lemma kOneSec_eval (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (y : M) (p q r : TangentSpace I y) :
     Tensor0SBundle.Tensor0SSpace.toModel
-        (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s y) ![p, q, r] =
+        (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s y) ![p, q, r] =
       Tensor0SBundle.Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 2
           (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
-          (hUnitSec (I := I) (M := M) g₀ T T') y p) ![q, r] := by
+          (symmVelocityDiffSec (I := I) (M := M) g₀ T T') y p) ![q, r] := by
   have h := covGradUnit_toModel_eval (I := I) (M := M)
     (realizedFam (I := I) g₀ T T' hδ hδ' s) 2
     (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s) y p ![q, r]
@@ -1165,39 +1165,39 @@ private lemma kOneSec_eval (g₀ : SmoothRiemannianMetric I M)
       (show Tensor0SBundle.Tensor0SSpace 0 I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I z from
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s).toSection z)
         (unitZeroSec (I := I) (M := M) z)) =
-      hUnitSec (I := I) (M := M) g₀ T T' from rfl] at h
+      symmVelocityDiffSec (I := I) (M := M) g₀ T T' from rfl] at h
   exact h
 
 private lemma kSec_bridge (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (y : M) (p q r : TangentSpace I y) :
     Tensor0SBundle.Tensor0SSpace.toModel
-        (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s y) ![p, q, r] =
-      Tensor0SBundle.Tensor0SSpace.toModel (kZeroSec (I := I) (M := M) g₀ T T' y) ![p, q, r]
-        - Tensor0SBundle.Tensor0SSpace.toModel (hUnitSec (I := I) (M := M) g₀ T T' y)
+        (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s y) ![p, q, r] =
+      Tensor0SBundle.Tensor0SSpace.toModel (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' y) ![p, q, r]
+        - Tensor0SBundle.Tensor0SSpace.toModel (symmVelocityDiffSec (I := I) (M := M) g₀ T T' y)
             ![PDE.DeTurck.connDiff (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ y q p, r]
-        - Tensor0SBundle.Tensor0SSpace.toModel (hUnitSec (I := I) (M := M) g₀ T T' y)
+        - Tensor0SBundle.Tensor0SSpace.toModel (symmVelocityDiffSec (I := I) (M := M) g₀ T T' y)
             ![q, PDE.DeTurck.connDiff (I := I)
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ y r p] := by
   rw [kOneSec_eval (I := I) (M := M) g₀ T T' hδ hδ' s y p q r,
     kZeroSec_eval (I := I) (M := M) g₀ T T' y p q r]
   exact bridge02_eval (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀
-    (hUnitSec (I := I) (M := M) g₀ T T')
+    (symmVelocityDiffSec (I := I) (M := M) g₀ T T')
     (hUnitSec_tsmdiffAt (I := I) (M := M) g₀ T T' y) p q r
 
 private lemma velFibre_toModel_eval (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
         (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x m =
       Tensor0SBundle.Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 3
           (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
-          (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s) x (m 0)) ![m 1, m 2, m 3] := by
+          (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s) x (m 0)) ![m 1, m 2, m 3] := by
   have hm : m = Fin.cons (m 0) ![m 1, m 2, m 3] := by
     funext j
     fin_cases j <;> rfl
@@ -1210,7 +1210,7 @@ private lemma velFibre_toModel_eval (g₀ : SmoothRiemannianMetric I M)
         (covGrad (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) 0 2
           (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s)).toSection z)
         (unitZeroSec (I := I) (M := M) z)) =
-      kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s from rfl] at h
+      symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s from rfl] at h
   rw [show unitModel (I := I) (M := M) g₀ 4
       (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x m =
       Tensor0SBundle.Tensor0SSpace.toModel
@@ -1226,30 +1226,30 @@ private lemma velFibre_toModel_eval (g₀ : SmoothRiemannianMetric I M)
 private lemma w2Fibre_toModel_eval (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4
-        (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x m =
+        (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))) x m =
       Tensor0SBundle.Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g₀)
-          (kZeroSec (I := I) (M := M) g₀ T T') x (m 0)) ![m 1, m 2, m 3] := by
+          (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') x (m 0)) ![m 1, m 2, m 3] := by
   have hm : m = Fin.cons (m 0) ![m 1, m 2, m 3] := by
     funext j
     fin_cases j <;> rfl
   have h := covGradUnit_toModel_eval (I := I) (M := M) g₀ 3
-    (covGrad (I := I) (M := M) g₀ 0 2 (symmS (I := I) (M := M) g₀ (T - T')))
+    (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))
     x (m 0) ![m 1, m 2, m 3]
   rw [show (fun z : M =>
       (show Tensor0SBundle.Tensor0SSpace 0 I z →L[ℝ] Tensor0SBundle.Tensor0SSpace 3 I z from
         (covGrad (I := I) (M := M) g₀ 0 2
-          (symmS (I := I) (M := M) g₀ (T - T'))).toSection z)
+          (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))).toSection z)
         (unitZeroSec (I := I) (M := M) z)) =
-      kZeroSec (I := I) (M := M) g₀ T T' from rfl] at h
+      symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' from rfl] at h
   rw [show unitModel (I := I) (M := M) g₀ 4
-      (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T'))) x m =
+      (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))) x m =
       Tensor0SBundle.Tensor0SSpace.toModel
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
             Tensor0SBundle.Tensor0SSpace 4 I x from
           (covGrad (I := I) (M := M) g₀ 0 3
             (covGrad (I := I) (M := M) g₀ 0 2
-              (symmS (I := I) (M := M) g₀ (T - T')))).toSection x)
+              (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))).toSection x)
           (unitZeroSec (I := I) (M := M) x)) m from rfl]
   conv_lhs => rw [hm]
   exact h
@@ -1323,27 +1323,27 @@ set_option maxHeartbeats 3200000 in
 
 private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
         (Tensor0SNabla.tensor0SCovariantDerivative I M 3
           (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s))
-          (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s) x a) ![b, c, d] =
+          (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s) x a) ![b, c, d] =
       Tensor0SBundle.Tensor0SSpace.toModel
           (Tensor0SNabla.tensor0SCovariantDerivative I M 3 (LeviCivita (I := I) g₀)
-            (kZeroSec (I := I) (M := M) g₀ T T') x a) ![b, c, d]
+            (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') x a) ![b, c, d]
         + Tensor0SBundle.Tensor0SSpace.toModel
             (linearizedRicciConnDiffOrder1CLM (I := I) x
               ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
-              (kZeroSec (I := I) (M := M) g₀ T T' x)) ![a, b, c, d]
+              (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' x)) ![a, b, c, d]
         + Tensor0SBundle.Tensor0SSpace.toModel
             (linearizedRicciConnDiffOrder0CLM (I := I) x
               ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
               ((covGrad (I := I) (M := M) g₀ 1 2
                 (connDiffSection (I := I)
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)).toSection x)
-              (hUnitSec (I := I) (M := M) g₀ T T' x)) ![a, b, c, d] := by
+              (symmVelocityDiffSec (I := I) (M := M) g₀ T T' x)) ![a, b, c, d] := by
   classical
   obtain ⟨Af, hAx⟩ := ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x a
@@ -1355,10 +1355,10 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
     (F := E) (V := (TangentSpace I : M → Type _)) x d
   rw [← hAx, ← hBx, ← hCx, ← hDx]
   have hL := peel3_core (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s)
-    (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s)
+    (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s)
     (kOneSec_tsmdiffAt (I := I) (M := M) g₀ T T' hδ hδ' s x) Bf Cf Df (Af x)
   have hR := peel3_core (I := I) (M := M) g₀
-    (kZeroSec (I := I) (M := M) g₀ T T')
+    (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T')
     (kZeroSec_tsmdiffAt (I := I) (M := M) g₀ T T' x) Bf Cf Df (Af x)
   have hDB : (LeviCivita (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s)).toFun
       (fun y => Bf y) x (Af x) =
@@ -1401,12 +1401,12 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
       (Bf x) (Cf x) (PDE.DeTurck.connDiff (I := I)
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ x (Df x) (Af x))] at hL
   have hexpC1 := peel2_core (I := I) (M := M) g₀
-    (hUnitSec (I := I) (M := M) g₀ T T')
+    (symmVelocityDiffSec (I := I) (M := M) g₀ T T')
     (hUnitSec_tsmdiffAt (I := I) (M := M) g₀ T T' x)
     (connDiffVecField (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Cf Bf)
     Df (Af x)
   have hexpC2 := peel2_core (I := I) (M := M) g₀
-    (hUnitSec (I := I) (M := M) g₀ T T')
+    (symmVelocityDiffSec (I := I) (M := M) g₀ T T')
     (hUnitSec_tsmdiffAt (I := I) (M := M) g₀ T T' x) Cf
     (connDiffVecField (I := I) (M := M) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Df Bf)
     (Af x)
@@ -1472,35 +1472,35 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
         (fun y' : M => Tensor0SNabla.curriedSection I M
           (fun z : M => Tensor0SNabla.curriedSection I M
             (fun u : M => Tensor0SNabla.curriedSection I M
-              (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s) u (Bf u)) z (Cf z)) y' (Df y')) y =
+              (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s) u (Bf u)) z (Cf z)) y' (Df y')) y =
       Tensor0SNabla.scalarFn I M
         (fun y' : M => Tensor0SNabla.curriedSection I M
           (fun z : M => Tensor0SNabla.curriedSection I M
             (fun u : M => Tensor0SNabla.curriedSection I M
-              (kZeroSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y')) y
+              (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y')) y
         - Tensor0SNabla.scalarFn I M
             (fun y' : M => Tensor0SNabla.curriedSection I M
               (fun z : M => Tensor0SNabla.curriedSection I M
-                (hUnitSec (I := I) (M := M) g₀ T T') z
+                (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z
                 ((connDiffVecField (I := I) (M := M)
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Cf Bf) z)) y' (Df y')) y
         - Tensor0SNabla.scalarFn I M
             (fun y' : M => Tensor0SNabla.curriedSection I M
               (fun z : M => Tensor0SNabla.curriedSection I M
-                (hUnitSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
+                (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
               ((connDiffVecField (I := I) (M := M)
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Df Bf) y')) y := by
     intro y
     rw [curried3_toModel_eval (I := I) (M := M)
-      (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s) Bf Cf Df y]
+      (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s) Bf Cf Df y]
     rw [curried3_toModel_eval (I := I) (M := M)
-      (kZeroSec (I := I) (M := M) g₀ T T') Bf Cf Df y]
+      (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') Bf Cf Df y]
     rw [curried2_toModel_eval (I := I) (M := M)
-      (hUnitSec (I := I) (M := M) g₀ T T')
+      (symmVelocityDiffSec (I := I) (M := M) g₀ T T')
       (connDiffVecField (I := I) (M := M)
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Cf Bf) Df y]
     rw [curried2_toModel_eval (I := I) (M := M)
-      (hUnitSec (I := I) (M := M) g₀ T T') Cf
+      (symmVelocityDiffSec (I := I) (M := M) g₀ T T') Cf
       (connDiffVecField (I := I) (M := M)
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Df Bf) y]
     rw [show ((connDiffVecField (I := I) (M := M)
@@ -1517,7 +1517,7 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
         (fun y' : M => Tensor0SNabla.curriedSection I M
           (fun z : M => Tensor0SNabla.curriedSection I M
             (fun u : M => Tensor0SNabla.curriedSection I M
-              (kZeroSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y'))) x :=
+              (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y'))) x :=
     (Tensor0SNabla.mdifferentiableAt_scalarFn_iff_section I M _).mpr
       (curried_tsmdiffAt (I := I) (M := M) 0 _
         (curried_tsmdiffAt (I := I) (M := M) 1 _
@@ -1527,7 +1527,7 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
       (Tensor0SNabla.scalarFn I M
         (fun y' : M => Tensor0SNabla.curriedSection I M
           (fun z : M => Tensor0SNabla.curriedSection I M
-            (hUnitSec (I := I) (M := M) g₀ T T') z
+            (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z
             ((connDiffVecField (I := I) (M := M)
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Cf Bf) z)) y' (Df y'))) x :=
     (Tensor0SNabla.mdifferentiableAt_scalarFn_iff_section I M _).mpr
@@ -1540,7 +1540,7 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
       (Tensor0SNabla.scalarFn I M
         (fun y' : M => Tensor0SNabla.curriedSection I M
           (fun z : M => Tensor0SNabla.curriedSection I M
-            (hUnitSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
+            (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
           ((connDiffVecField (I := I) (M := M)
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Df Bf) y'))) x :=
     (Tensor0SNabla.mdifferentiableAt_scalarFn_iff_section I M _).mpr
@@ -1554,48 +1554,48 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
         (fun y' : M => Tensor0SNabla.curriedSection I M
           (fun z : M => Tensor0SNabla.curriedSection I M
             (fun u : M => Tensor0SNabla.curriedSection I M
-              (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s) u (Bf u)) z (Cf z)) y' (Df y'))) x
+              (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s) u (Bf u)) z (Cf z)) y' (Df y'))) x
         (Af x) =
       extDerivFun (I := I)
         (Tensor0SNabla.scalarFn I M
           (fun y' : M => Tensor0SNabla.curriedSection I M
             (fun z : M => Tensor0SNabla.curriedSection I M
               (fun u : M => Tensor0SNabla.curriedSection I M
-                (kZeroSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y'))) x (Af x)
+                (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y'))) x (Af x)
       - extDerivFun (I := I)
           (Tensor0SNabla.scalarFn I M
             (fun y' : M => Tensor0SNabla.curriedSection I M
               (fun z : M => Tensor0SNabla.curriedSection I M
-                (hUnitSec (I := I) (M := M) g₀ T T') z
+                (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z
                 ((connDiffVecField (I := I) (M := M)
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Cf Bf) z)) y' (Df y'))) x (Af x)
       - extDerivFun (I := I)
           (Tensor0SNabla.scalarFn I M
             (fun y' : M => Tensor0SNabla.curriedSection I M
               (fun z : M => Tensor0SNabla.curriedSection I M
-                (hUnitSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
+                (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
               ((connDiffVecField (I := I) (M := M)
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Df Bf) y'))) x (Af x) := by
     have hfx : Tensor0SNabla.scalarFn I M
         (fun y' : M => Tensor0SNabla.curriedSection I M
           (fun z : M => Tensor0SNabla.curriedSection I M
             (fun u : M => Tensor0SNabla.curriedSection I M
-              (kOneSec (I := I) (M := M) g₀ T T' hδ hδ' s) u (Bf u)) z (Cf z)) y' (Df y')) =
+              (symmVelocityDiffCovGradRealizedSec (I := I) (M := M) g₀ T T' hδ hδ' s) u (Bf u)) z (Cf z)) y' (Df y')) =
         (Tensor0SNabla.scalarFn I M
           (fun y' : M => Tensor0SNabla.curriedSection I M
             (fun z : M => Tensor0SNabla.curriedSection I M
               (fun u : M => Tensor0SNabla.curriedSection I M
-                (kZeroSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y'))
+                (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T') u (Bf u)) z (Cf z)) y' (Df y'))
           - Tensor0SNabla.scalarFn I M
               (fun y' : M => Tensor0SNabla.curriedSection I M
                 (fun z : M => Tensor0SNabla.curriedSection I M
-                  (hUnitSec (I := I) (M := M) g₀ T T') z
+                  (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z
                   ((connDiffVecField (I := I) (M := M)
                     (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Cf Bf) z)) y' (Df y')))
           - Tensor0SNabla.scalarFn I M
               (fun y' : M => Tensor0SNabla.curriedSection I M
                 (fun z : M => Tensor0SNabla.curriedSection I M
-                  (hUnitSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
+                  (symmVelocityDiffSec (I := I) (M := M) g₀ T T') z (Cf z)) y'
                 ((connDiffVecField (I := I) (M := M)
                   (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Df Bf) y')) := by
       funext y
@@ -1608,10 +1608,10 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
     rw [ContinuousLinearMap.sub_apply, ContinuousLinearMap.sub_apply]
   have hE1 := order1CLM_toModel_eval (I := I) (M := M)
     (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ x
-    (kZeroSec (I := I) (M := M) g₀ T T' x) (Af x) (Bf x) (Cf x) (Df x)
+    (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' x) (Af x) (Bf x) (Cf x) (Df x)
   have hE0 := order0CLM_toModel_eval (I := I) (M := M)
     (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ x
-    (hUnitSec (I := I) (M := M) g₀ T T' x) (Af x) (Bf x) (Cf x) (Df x)
+    (symmVelocityDiffSec (I := I) (M := M) g₀ T T' x) (Af x) (Bf x) (Cf x) (Df x)
   rw [rs13ContrVec_covGrad_eq (I := I) (M := M)
       (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀ Af Bf Cf x,
     rs13ContrVec_covGrad_eq (I := I) (M := M)
@@ -1620,8 +1620,8 @@ private theorem kOneSec_deriv_eq_threeArm_kernel (g₀ : SmoothRiemannianMetric 
 
 private lemma lichnerowiczFib_toModel_eq_fourTrace (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (P : Tensor0SBundle.Tensor0SSpace 4 I x)
     (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -1666,9 +1666,9 @@ private lemma lichnerowiczFib_toModel_eq_fourTrace (g₀ : SmoothRiemannianMetri
         Tensor0SBundle.Tensor0SSpace 2 I x from
       (ricciArmPrincipalCoeff (I := I) (M := M) g₀
         (realizedFam (I := I) g₀ T T' hδ hδ' s)).toSection x) P =
-      ricciArmPrincipalCoeffFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x P from rfl]
+      ricciDeTurckPrincipalCoeffAtPoint (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x P from rfl]
   rw [ricciArmPrincipalCoeffFib_toModel,
-    combinedTrace42Model_apply (E := E)
+    ricciPrincipalCoeffDoubleTraceModel_apply (E := E)
       (cometricLmodel (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x)]
   rw [show (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ]
         Tensor0SBundle.Tensor0SSpace 2 I x from
@@ -1767,26 +1767,26 @@ set_option linter.style.show false in
 private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
           (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s)) x v =
       unitModel (I := I) (M := M) g₀ 2
-          (appCc (I := I) (M := M) g₀ 2 2
+          (operatorFieldApply (I := I) (M := M) g₀ 2 2
             (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
-            (iteratedCovGrad (I := I) g₀ 0 2 0 (symmS (I := I) (M := M) g₀ (T - T')))) x v
+            (iteratedCovGrad (I := I) g₀ 0 2 0 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v
         + unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 3 2
+            (operatorFieldApply (I := I) (M := M) g₀ 3 2
               (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s)
-              (iteratedCovGrad (I := I) g₀ 0 2 1 (symmS (I := I) (M := M) g₀ (T - T')))) x v
+              (iteratedCovGrad (I := I) g₀ 0 2 1 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v
         + unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 4 2
+            (operatorFieldApply (I := I) (M := M) g₀ 4 2
               (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
-              (iteratedCovGrad (I := I) g₀ 0 2 2 (symmS (I := I) (M := M) g₀ (T - T')))) x v := by
+              (iteratedCovGrad (I := I) g₀ 0 2 2 (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v := by
   classical
   have hVel : (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
         Tensor0SBundle.Tensor0SSpace 4 I x from
@@ -1795,17 +1795,17 @@ private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
       (show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
           Tensor0SBundle.Tensor0SSpace 4 I x from
         (iteratedCovGrad (I := I) g₀ 0 2 2
-          (symmS (I := I) (M := M) g₀ (T - T'))).toSection x)
+          (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))).toSection x)
         (unitTensor (I := I) (M := M) x)
       + linearizedRicciConnDiffOrder1CLM (I := I) x
           ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
-          (kZeroSec (I := I) (M := M) g₀ T T' x)
+          (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' x)
       + linearizedRicciConnDiffOrder0CLM (I := I) x
           ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
           ((covGrad (I := I) (M := M) g₀ 1 2
             (connDiffSection (I := I)
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)).toSection x)
-          (hUnitSec (I := I) (M := M) g₀ T T' x) := by
+          (symmVelocityDiffSec (I := I) (M := M) g₀ T T' x) := by
     apply Tensor0SBundle.tensor0SSpace_ext 4 x
     intro m
     have h2 := velFibre_toModel_eval (I := I) (M := M) g₀ T T' hδ hδ' s x m
@@ -1821,33 +1821,33 @@ private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
             Tensor0SBundle.Tensor0SSpace 4 I x from
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T'))).toSection x)
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))).toSection x)
           (unitTensor (I := I) (M := M) x)
         + linearizedRicciConnDiffOrder1CLM (I := I) x
             ((connDiffSection (I := I)
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
-            (kZeroSec (I := I) (M := M) g₀ T T' x)
+            (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' x)
         + linearizedRicciConnDiffOrder0CLM (I := I) x
             ((connDiffSection (I := I)
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
             ((covGrad (I := I) (M := M) g₀ 1 2
               (connDiffSection (I := I)
                 (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)).toSection x)
-            (hUnitSec (I := I) (M := M) g₀ T T' x)) m
+            (symmVelocityDiffSec (I := I) (M := M) g₀ T T' x)) m
     rw [Tensor0SBundle.Tensor0SSpace.toModel_add, Tensor0SBundle.Tensor0SSpace.toModel_add,
       ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply]
     rw [show Tensor0SBundle.Tensor0SSpace.toModel
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
             Tensor0SBundle.Tensor0SSpace 4 I x from
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T'))).toSection x)
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))).toSection x)
           (unitTensor (I := I) (M := M) x)) m =
         unitModel (I := I) (M := M) g₀ 4
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T'))) x m from rfl]
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))) x m from rfl]
     rw [h2, h4, h3, ← hm4]
   rw [show unitModel (I := I) (M := M) g₀ 2
-      (appCc (I := I) (M := M) g₀ 4 2
+      (operatorFieldApply (I := I) (M := M) g₀ 4 2
         (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
         (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s)) x v =
       Tensor0SBundle.Tensor0SSpace.toModel
@@ -1864,14 +1864,14 @@ private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
   rw [lichnerowiczFib_toModel_eq_fourTrace (I := I) (M := M) g₀ T T' hδ hδ' s x
       (linearizedRicciConnDiffOrder1CLM (I := I) x
         ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
-        (kZeroSec (I := I) (M := M) g₀ T T' x)) v,
+        (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' x)) v,
     lichnerowiczFib_toModel_eq_fourTrace (I := I) (M := M) g₀ T T' hδ hδ' s x
       (linearizedRicciConnDiffOrder0CLM (I := I) x
         ((connDiffSection (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
         ((covGrad (I := I) (M := M) g₀ 1 2
           (connDiffSection (I := I)
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)).toSection x)
-        (hUnitSec (I := I) (M := M) g₀ T T' x)) v]
+        (symmVelocityDiffSec (I := I) (M := M) g₀ T T' x)) v]
   rw [show Tensor0SBundle.Tensor0SSpace.toModel
       ((show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ]
           Tensor0SBundle.Tensor0SSpace 2 I x from
@@ -1879,24 +1879,24 @@ private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]
             Tensor0SBundle.Tensor0SSpace 4 I x from
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T'))).toSection x)
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T'))).toSection x)
           (unitTensor (I := I) (M := M) x))) v =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 4 2
+        (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
           (iteratedCovGrad (I := I) g₀ 0 2 2
-            (symmS (I := I) (M := M) g₀ (T - T')))) x v from rfl]
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v from rfl]
   rw [show Tensor0SBundle.Tensor0SSpace.toModel
       (ricciCometricFourTraceCLM (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
         (linearizedRicciConnDiffOrder1CLM (I := I) x
           ((connDiffSection (I := I)
             (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀).toSection x)
-          (kZeroSec (I := I) (M := M) g₀ T T' x))) v =
+          (symmVelocityDiffCovGradBaseSec (I := I) (M := M) g₀ T T' x))) v =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 3 2
+        (operatorFieldApply (I := I) (M := M) g₀ 3 2
           (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s)
           (iteratedCovGrad (I := I) g₀ 0 2 1
-            (symmS (I := I) (M := M) g₀ (T - T')))) x v from rfl]
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v from rfl]
   rw [show Tensor0SBundle.Tensor0SSpace.toModel
       (ricciCometricFourTraceCLM (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s) x
         (linearizedRicciConnDiffOrder0CLM (I := I) x
@@ -1905,47 +1905,47 @@ private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
           ((covGrad (I := I) (M := M) g₀ 1 2
             (connDiffSection (I := I)
               (realizedFam (I := I) g₀ T T' hδ hδ' s) g₀)).toSection x)
-          (hUnitSec (I := I) (M := M) g₀ T T' x))) v =
+          (symmVelocityDiffSec (I := I) (M := M) g₀ T T' x))) v =
       unitModel (I := I) (M := M) g₀ 2
-        (appCc (I := I) (M := M) g₀ 2 2
+        (operatorFieldApply (I := I) (M := M) g₀ 2 2
           (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s)
           (iteratedCovGrad (I := I) g₀ 0 2 0
-            (symmS (I := I) (M := M) g₀ (T - T')))) x v from rfl]
+            (ccTensor02Symm (I := I) (M := M) g₀ (T - T')))) x v from rfl]
   ring
 
 theorem linearizedRicciAt_eq_threeArm_connDiffCoeff (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
     (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
-      ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+      smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v)
     {δ : ℝ} (hδ_lt : δ < 1)
-    (hδ : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ'_lt : δ' < 1)
-    (hδ' : gFibreOpBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ∀ (s : ℝ), s ∈ Set.Ioo (0 : ℝ) 1 →
       ∀ (x : M) (v : Fin 2 → TangentSpace I x),
         linearizedRicciAt (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x (v 0) (v 1) s =
           unitModel (I := I) (M := M) g₀ 2
-            (appCc (I := I) (M := M) g₀ 2 2
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2
                 (linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s
                   + (linearizedRicciConnDiffOrder0Coeff (I := I) g₀ T T' hδ hδ' s
                       - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s))
                 (iteratedCovGrad (I := I) g₀ 0 2 0 (T - T'))
-              + appCc (I := I) (M := M) g₀ 3 2
+              + operatorFieldApply (I := I) (M := M) g₀ 3 2
                 (linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s
                   + (linearizedRicciConnDiffOrder1Coeff (I := I) g₀ T T' hδ hδ' s
                       - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s))
                 (iteratedCovGrad (I := I) g₀ 0 2 1 (T - T'))
-              + appCc (I := I) (M := M) g₀ 4 2
+              + operatorFieldApply (I := I) (M := M) g₀ 4 2
                 (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
                 (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v := by
   intro s hs x v
   have hsubsymm : ∀ (b : M) (p q : TangentSpace I b),
-      ccTensorBilin (I := I) g₀ (T - T') b p q = ccTensorBilin (I := I) g₀ (T - T') b q p := by
+      smoothCcTensorBilinForm (I := I) g₀ (T - T') b p q = smoothCcTensorBilinForm (I := I) g₀ (T - T') b q p := by
     intro b p q
     rw [ccTensorBilin_sub_two, ccTensorBilin_sub_two, hTsymm b p q, hT'symm b p q]
-  have hcollapse : symmS (I := I) (M := M) g₀ (T - T') = T - T' :=
+  have hcollapse : ccTensor02Symm (I := I) (M := M) g₀ (T - T') = T - T' :=
     symmS_eq_self_of_symm (I := I) (M := M) g₀ (T - T') hsubsymm
   rw [← linearizedRicciConnDiffOrder0Coeff_eq_base_add_sub (I := I) g₀ T T' hδ hδ' s,
     ← linearizedRicciConnDiffOrder1Coeff_eq_base_add_sub (I := I) g₀ T T' hδ hδ' s]

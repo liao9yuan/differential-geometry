@@ -46,7 +46,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-theorem interior_ici_deriv_to_ordinary
+theorem differentiableOn_and_deriv_eq_of_hasDerivWithinAt_Ici
     (f : ℝ → ℝ) {T : ℝ} (e : ℝ → ℝ)
     (h_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt f (e t) (Set.Ici 0) t) :
     DifferentiableOn ℝ f (Set.Ioo 0 T) ∧
@@ -75,7 +75,7 @@ theorem ricci_flow_pde_at_zero
   set e : ℝ → ℝ := fun s : ℝ => (-2) * ricciTensor (I := I) (g_fam s) x v w with he
   have h_int : ∀ t ∈ Set.Ioo (0 : ℝ) T, HasDerivWithinAt f (e t) (Set.Ici 0) t :=
     h_interior
-  obtain ⟨h_diff, h_derivEq⟩ := interior_ici_deriv_to_ordinary f e h_int
+  obtain ⟨h_diff, h_derivEq⟩ := differentiableOn_and_deriv_eq_of_hasDerivWithinAt_Ici f e h_int
   refine hasDerivWithinAt_Ici_of_tendsto_deriv (s := Set.Ioo 0 T) h_diff ?_ ?_ ?_
   · have h0 : (0 : ℝ) ∈ Set.Ico (0 : ℝ) T := ⟨le_rfl, hT⟩
     exact (h_cont.continuousWithinAt h0).mono Set.Ioo_subset_Ico_self

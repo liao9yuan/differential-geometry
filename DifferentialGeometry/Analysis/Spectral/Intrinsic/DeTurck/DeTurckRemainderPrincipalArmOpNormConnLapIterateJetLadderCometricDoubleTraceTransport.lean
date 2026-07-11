@@ -101,7 +101,7 @@ private lemma bal_appCcRS_cometric_eval (g : SmoothRiemannianMetric I M) (r s : 
     (m : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
-          (appCcRS (I := I) (M := M) g r (s + 2) s
+          (ccOperatorFieldComp (I := I) (M := M) g r (s + 2) s
             (DeTurck.cometricDoubleTraceField (I := I) g s) K).toSection x) D) m =
       ∑ k : Fin (Module.finrank ℝ E),
         Tensor0SSpace.toModel
@@ -112,7 +112,7 @@ private lemma bal_appCcRS_cometric_eval (g : SmoothRiemannianMetric I M) (r s : 
                 ((Module.finBasis ℝ E).cDualBasis k)))
             (Fin.cons ((Module.finBasis ℝ E) k) m)) := by
   rw [show (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
-        (appCcRS (I := I) (M := M) g r (s + 2) s
+        (ccOperatorFieldComp (I := I) (M := M) g r (s + 2) s
           (DeTurck.cometricDoubleTraceField (I := I) g s) K).toSection x) D =
       DeTurck.cometricDoubleTraceFib (I := I) g s x
         ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace (s + 2) I x from
@@ -130,7 +130,7 @@ open Tensor0SBundle in
 private lemma bal_rawLap_toSection_eq_cometric (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :
     (rawTensorConnLapSmooth (I := I) g r s Φ).toSection x =
-      (appCcRS (I := I) (M := M) g r (s + 2) s
+      (ccOperatorFieldComp (I := I) (M := M) g r (s + 2) s
         (DeTurck.cometricDoubleTraceField (I := I) g s)
         (iteratedCovGrad (I := I) g r s 2 Φ)).toSection x := by
   classical
@@ -152,7 +152,7 @@ set_option maxHeartbeats 1600000 in
 theorem rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) :
     rawTensorConnLapSmooth (I := I) g r s Φ =
-      appCcRS (I := I) (M := M) g r (s + 2) s (DeTurck.cometricDoubleTraceField (I := I) g s)
+      ccOperatorFieldComp (I := I) (M := M) g r (s + 2) s (DeTurck.cometricDoubleTraceField (I := I) g s)
         (iteratedCovGrad (I := I) g r s 2 Φ) := by
   apply SmoothCcTensor.ext
   apply ContMDiffSection.ext
@@ -161,8 +161,8 @@ theorem rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs
 
 private lemma bal_appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (A B : SmoothCcTensor g 0 r) :
-    appCc (I := I) (M := M) g r s Φ (A - B) =
-      appCc (I := I) (M := M) g r s Φ A - appCc (I := I) (M := M) g r s Φ B := by
+    operatorFieldApply (I := I) (M := M) g r s Φ (A - B) =
+      operatorFieldApply (I := I) (M := M) g r s Φ A - operatorFieldApply (I := I) (M := M) g r s Φ B := by
   have hAB : A - B = A + (-1 : ℝ) • B := by
     rw [neg_one_smul]
     exact sub_eq_add_neg A B
@@ -170,7 +170,7 @@ private lemma bal_appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     appCc_smul_right (I := I) (M := M) g r s (-1 : ℝ) Φ B,
     neg_one_smul, ← sub_eq_add_neg]
 
-lemma bal_iter_sub (g : SmoothRiemannianMetric I M) (r s : ℕ) (q : ℕ)
+lemma oneMinusConnLapSmoothIter_sub (g : SmoothRiemannianMetric I M) (r s : ℕ) (q : ℕ)
     (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s q (A - B) =
       oneMinusConnLapSmoothIter (I := I) g r s q A -
@@ -210,21 +210,21 @@ private lemma bal_P_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
   abel
 
 private lemma bal_peel (Φ : SmoothCcTensor g₀ 2 2) (W : SmoothCcTensor g₀ 0 2) :
-    oneMinusConnLapSmooth (I := I) g₀ 0 2 (appCc (I := I) (M := M) g₀ 2 2 Φ W) =
-      appCc (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmooth (I := I) g₀ 2 2 Φ) W +
-        (-(appCc (I := I) (M := M) g₀ 2 2 Φ (rawTensorConnLapSmooth (I := I) g₀ 0 2 W))
-          - appCc (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-              (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 2)
+    oneMinusConnLapSmooth (I := I) g₀ 0 2 (operatorFieldApply (I := I) (M := M) g₀ 2 2 Φ W) =
+      operatorFieldApply (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmooth (I := I) g₀ 2 2 Φ) W +
+        (-(operatorFieldApply (I := I) (M := M) g₀ 2 2 Φ (rawTensorConnLapSmooth (I := I) g₀ 0 2 W))
+          - operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+              (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 2)
                 (slotExtend (I := I) (M := M) g₀ 2 (2 + 1) (covGrad (I := I) (M := M) g₀ 2 2 Φ))
                 (covGrad (I := I) (M := M) g₀ 0 2 W))
-          - appCc (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-              (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 2)
+          - operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+              (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 2)
                 (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
                   (slotExtend (I := I) (M := M) g₀ 2 2 Φ))
                 (covGrad (I := I) (M := M) g₀ 0 2 W))) := by
-  have hlap : appCc (I := I) (M := M) g₀ 2 2 (rawTensorConnLapSmooth (I := I) g₀ 2 2 Φ) W =
-      appCc (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-        (appCc (I := I) (M := M) g₀ 2 (2 + 2)
+  have hlap : operatorFieldApply (I := I) (M := M) g₀ 2 2 (rawTensorConnLapSmooth (I := I) g₀ 2 2 Φ) W =
+      operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+        (operatorFieldApply (I := I) (M := M) g₀ 2 (2 + 2)
           (covGrad (I := I) (M := M) g₀ 2 (2 + 1) (covGrad (I := I) (M := M) g₀ 2 2 Φ)) W) := by
     rw [rawTensorConnLapSmooth_eq_appCcRS_cometricDoubleTrace_rs (I := I) (M := M) g₀ 2 2 Φ]
     rw [show iteratedCovGrad (I := I) g₀ 2 2 2 Φ =
@@ -237,35 +237,35 @@ private lemma bal_peel (Φ : SmoothCcTensor g₀ 2 2) (W : SmoothCcTensor g₀ 0
   abel
 
 lemma bal_transport (Φ : SmoothCcTensor g₀ 2 2) (W : SmoothCcTensor g₀ 0 2) (p : ℕ) :
-    oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p (appCc (I := I) (M := M) g₀ 2 2 Φ W) =
-      appCc (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 p Φ) W +
+    oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p (operatorFieldApply (I := I) (M := M) g₀ 2 2 Φ W) =
+      operatorFieldApply (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 p Φ) W +
         ∑ q ∈ Finset.range p, oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (p - 1 - q)
-          (-(appCc (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)
+          (-(operatorFieldApply (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)
                 (rawTensorConnLapSmooth (I := I) g₀ 0 2 W))
-            - appCc (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-                (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 2)
+            - operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+                (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 2)
                   (slotExtend (I := I) (M := M) g₀ 2 (2 + 1)
                     (covGrad (I := I) (M := M) g₀ 2 2
                       (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)))
                   (covGrad (I := I) (M := M) g₀ 0 2 W))
-            - appCc (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-                (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 2)
+            - operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+                (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 2)
                   (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
                     (slotExtend (I := I) (M := M) g₀ 2 2
                       (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)))
                   (covGrad (I := I) (M := M) g₀ 0 2 W))) := by
   classical
   set Efun : ℕ → SmoothCcTensor g₀ 0 2 := fun q =>
-    -(appCc (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)
+    -(operatorFieldApply (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)
           (rawTensorConnLapSmooth (I := I) g₀ 0 2 W))
-      - appCc (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-          (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 2)
+      - operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 2)
             (slotExtend (I := I) (M := M) g₀ 2 (2 + 1)
               (covGrad (I := I) (M := M) g₀ 2 2
                 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)))
             (covGrad (I := I) (M := M) g₀ 0 2 W))
-      - appCc (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
-          (appCc (I := I) (M := M) g₀ (2 + 1) (2 + 2)
+      - operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 (DeTurck.cometricDoubleTraceField (I := I) g₀ 2)
+          (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 2)
             (covGrad (I := I) (M := M) g₀ (2 + 1) (2 + 1)
               (slotExtend (I := I) (M := M) g₀ 2 2
                 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 q Φ)))
@@ -282,17 +282,17 @@ lemma bal_transport (Φ : SmoothCcTensor g₀ 2 2) (W : SmoothCcTensor g₀ 0 2)
     have hpeelp := bal_peel (I := I) (M := M) g₀
       (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 p Φ) W
     calc oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (p + 1)
-          (appCc (I := I) (M := M) g₀ 2 2 Φ W) = oneMinusConnLapSmooth (I := I) g₀ 0 2
+          (operatorFieldApply (I := I) (M := M) g₀ 2 2 Φ W) = oneMinusConnLapSmooth (I := I) g₀ 0 2
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p
-              (appCc (I := I) (M := M) g₀ 2 2 Φ W)) := by
+              (operatorFieldApply (I := I) (M := M) g₀ 2 2 Φ W)) := by
           rw [oneMinusConnLapSmoothIter_succ]
       _ = oneMinusConnLapSmooth (I := I) g₀ 0 2
-            (appCc (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 p Φ) W +
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 p Φ) W +
               ∑ q ∈ Finset.range p,
                 oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (p - 1 - q) (Efun q)) := by
           rw [ih]
       _ = oneMinusConnLapSmooth (I := I) g₀ 0 2
-            (appCc (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 p Φ) W) +
+            (operatorFieldApply (I := I) (M := M) g₀ 2 2 (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 p Φ) W) +
             ∑ q ∈ Finset.range p,
               oneMinusConnLapSmooth (I := I) g₀ 0 2
                 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (p - 1 - q) (Efun q)) := by
@@ -301,13 +301,13 @@ lemma bal_transport (Φ : SmoothCcTensor g₀ 2 2) (W : SmoothCcTensor g₀ 0 2)
           exact map_sum (AddMonoidHom.mk' (oneMinusConnLapSmooth (I := I) g₀ 0 2)
             (fun A B => hPhom A B)) (fun q => oneMinusConnLapSmoothIter (I := I) g₀ 0 2
               (p - 1 - q) (Efun q)) (Finset.range p)
-      _ = (appCc (I := I) (M := M) g₀ 2 2
+      _ = (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 (p + 1) Φ) W + Efun p) +
             ∑ q ∈ Finset.range p,
               oneMinusConnLapSmooth (I := I) g₀ 0 2
                 (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (p - 1 - q) (Efun q)) := by
           rw [hpeelp, ← oneMinusConnLapSmoothIter_succ (I := I) g₀ 2 2 p Φ]
-      _ = (appCc (I := I) (M := M) g₀ 2 2
+      _ = (operatorFieldApply (I := I) (M := M) g₀ 2 2
               (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 (p + 1) Φ) W + Efun p) +
             ∑ q ∈ Finset.range p,
               oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (p + 1 - 1 - q) (Efun q) := by
@@ -316,7 +316,7 @@ lemma bal_transport (Φ : SmoothCcTensor g₀ 2 2) (W : SmoothCcTensor g₀ 0 2)
           have hqlt : q < p := Finset.mem_range.mp hq
           rw [← oneMinusConnLapSmoothIter_succ (I := I) g₀ 0 2 (p - 1 - q) (Efun q),
             show p - 1 - q + 1 = p + 1 - 1 - q from by omega]
-      _ = appCc (I := I) (M := M) g₀ 2 2
+      _ = operatorFieldApply (I := I) (M := M) g₀ 2 2
               (oneMinusConnLapSmoothIter (I := I) g₀ 2 2 (p + 1) Φ) W +
             ∑ q ∈ Finset.range (p + 1),
               oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (p + 1 - 1 - q) (Efun q) := by

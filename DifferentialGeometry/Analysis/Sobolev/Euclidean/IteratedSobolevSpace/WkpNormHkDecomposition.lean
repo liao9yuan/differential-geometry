@@ -32,21 +32,21 @@ private theorem order_zero_sum_eq_eLpNorm
 
 theorem wkpNorm_split_order_zero
     (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
-    wkpNorm (d := d) k p u Ω =
+    iteratedWeakSobolevNorm (d := d) k p u Ω =
       eLpNorm u p (volume.restrict Ω) +
         ∑ j ∈ Finset.range k,
           ∑ α : Fin (j + 1) → Fin d,
             eLpNorm (iterWeakPartial (d := d) p (j + 1) α u Ω)
               p (volume.restrict Ω) := by
   classical
-  unfold wkpNorm
+  unfold iteratedWeakSobolevNorm
   rw [Finset.sum_range_succ']
   rw [order_zero_sum_eq_eLpNorm (d := d) p u Ω]
   rw [add_comm]
 
 theorem wkpNorm_k_decomposition
     (k : ℕ) (p : ℝ≥0∞) (u : E → ℝ) (Ω : Set E) :
-    wkpNorm (d := d) k p u Ω =
+    iteratedWeakSobolevNorm (d := d) k p u Ω =
       eLpNorm u p (volume.restrict Ω) +
         ∑ j ∈ Finset.Icc 1 k,
           ∑ α : Fin j → Fin d,
@@ -72,7 +72,7 @@ theorem wkpNorm_k_decomposition
 
 theorem wkpNorm_k_two_decomposition
     (k : ℕ) (u : E → ℝ) (Ω : Set E) :
-    wkpNorm (d := d) k 2 u Ω =
+    iteratedWeakSobolevNorm (d := d) k 2 u Ω =
       eLpNorm u 2 (volume.restrict Ω) +
         ∑ j ∈ Finset.Icc 1 k,
           ∑ α : Fin j → Fin d,

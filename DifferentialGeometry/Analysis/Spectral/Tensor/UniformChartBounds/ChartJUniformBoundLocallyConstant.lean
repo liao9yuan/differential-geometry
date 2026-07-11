@@ -91,7 +91,7 @@ private lemma coordChangeL_eq_chartJ_of_locality
     (h_chart : chartAt H b = chartAt H b₀) :
     ((trivializationAt E (TangentSpace I) b₀).coordChangeL ℝ
         (trivializationAt E (TangentSpace I) α) b : E →L[ℝ] E) =
-      chartJ (I := I) (M := M) α b := by
+      chartTrivializationLinearMap (I := I) (M := M) α b := by
   ext v
   have hb_b₀' : b ∈ (trivializationAt E (TangentSpace I) b₀).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) b₀]
@@ -128,7 +128,7 @@ private lemma coordChangeL_eq_chartJinv_of_locality
     (h_chart : chartAt H b = chartAt H b₀) :
     ((trivializationAt E (TangentSpace I) α).coordChangeL ℝ
         (trivializationAt E (TangentSpace I) b₀) b : E →L[ℝ] E) =
-      chartJinv (I := I) (M := M) α b := by
+      chartTrivializationLinearMapSymm (I := I) (M := M) α b := by
   ext v
   have hb_b₀' : b ∈ (trivializationAt E (TangentSpace I) b₀).baseSet := by
     rw [TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) b₀]
@@ -169,7 +169,7 @@ private lemma chartJ_continuousOn_loc
     (hU_sub_b₀ : U ⊆ (chartAt H b₀).source)
     (hU_sub_α : U ⊆ (chartAt H α).source)
     (hU_const : ∀ b ∈ U, chartAt H b = chartAt H b₀) :
-    ContinuousOn (fun b : M => chartJ (I := I) (M := M) α b) U := by
+    ContinuousOn (fun b : M => chartTrivializationLinearMap (I := I) (M := M) α b) U := by
   have h_coord_cont :
       ContinuousOn
         (fun b : M => ((trivializationAt E (TangentSpace I) b₀).coordChangeL ℝ
@@ -178,7 +178,7 @@ private lemma chartJ_continuousOn_loc
     intro b hb
     exact ⟨hU_sub_b₀ hb, hU_sub_α hb⟩
   have h_eq : EqOn
-      (fun b : M => chartJ (I := I) (M := M) α b)
+      (fun b : M => chartTrivializationLinearMap (I := I) (M := M) α b)
       (fun b : M => ((trivializationAt E (TangentSpace I) b₀).coordChangeL ℝ
         (trivializationAt E (TangentSpace I) α) b : E →L[ℝ] E)) U := by
     intro b hb
@@ -192,7 +192,7 @@ private lemma chartJinv_continuousOn_loc
     (hU_sub_b₀ : U ⊆ (chartAt H b₀).source)
     (hU_sub_α : U ⊆ (chartAt H α).source)
     (hU_const : ∀ b ∈ U, chartAt H b = chartAt H b₀) :
-    ContinuousOn (fun b : M => chartJinv (I := I) (M := M) α b) U := by
+    ContinuousOn (fun b : M => chartTrivializationLinearMapSymm (I := I) (M := M) α b) U := by
   have h_coord_cont :
       ContinuousOn
         (fun b : M => ((trivializationAt E (TangentSpace I) α).coordChangeL ℝ
@@ -202,7 +202,7 @@ private lemma chartJinv_continuousOn_loc
     intro b hb
     exact ⟨hU_sub_α hb, hU_sub_b₀ hb⟩
   have h_eq : EqOn
-      (fun b : M => chartJinv (I := I) (M := M) α b)
+      (fun b : M => chartTrivializationLinearMapSymm (I := I) (M := M) α b)
       (fun b : M => ((trivializationAt E (TangentSpace I) α).coordChangeL ℝ
         (trivializationAt E (TangentSpace I) b₀) b : E →L[ℝ] E)) U := by
     intro b hb

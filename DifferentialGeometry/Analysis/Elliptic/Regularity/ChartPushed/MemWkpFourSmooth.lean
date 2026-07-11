@@ -166,7 +166,7 @@ theorem chosenSecondPartialChartPushedU_memWkp_two_two_of_twice_diff_identity
             ∂(volume : Measure EuclN)) =
         ∫ y in chartTargetEuclid (I := I) (M := M) α,
           densityOnEuclid (I := I) g α y *
-            fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+            effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
           ∂(volume : Measure EuclN)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
@@ -222,7 +222,7 @@ theorem chartPushedChosenFirstPartial_memWkp_three_two_of_twice_diff_identities
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN))
     (l₁ : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -269,7 +269,7 @@ theorem chartPushed_memWkp_four_two_of_laplacianDomainPow_two_of_twice_diff_iden
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 4 2
@@ -313,7 +313,7 @@ theorem chartSideH2kBridge_two_of_twice_diff_identities
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN)) :
     ChartSideH2kBridge (I := I) (M := M) g 2
       (((H1ComplToLp (I := I) (M := M) g u_h :
@@ -347,7 +347,7 @@ theorem laplacianDomainPow_memWkpChart_four_two_of_twice_diff_identities
               ∂(volume : Measure EuclN)) =
           ∫ y in chartTargetEuclid (I := I) (M := M) α,
             densityOnEuclid (I := I) g α y *
-              fChartEffTwice (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
+              effectiveSourceChartSecondOrder (I := I) (M := M) g α l₁ l₂ hu_h y * ψ y
             ∂(volume : Measure EuclN)) :
     DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart
       (I := I) (M := M) g 4 2

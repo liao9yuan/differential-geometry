@@ -229,7 +229,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
     (directions : Fin m → Fin (Module.finrank ℝ E))
     (D_m : eigenvectorIteratedTensorChartBilinearData (I := I) (M := M)
       g r s i α P₀ m)
-    (h_fChartEff : D_m.fChartEff =
+    (h_fChartEff : D_m.diffChartForcing =
       eigenvectorChartRHSDiff (I := I) (M := M)
         g r s i α P₀ m directions)
     (h_parent : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -258,7 +258,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le
           (I := I) (M := M) g r s i α P₀ D_m h_parent).f_chart =
         eigenvectorChartRHSDiff (I := I) (M := M)
           g r s i α P₀ m directions := by
-    change D_m.fChartEff =
+    change D_m.diffChartForcing =
       eigenvectorChartRHSDiff (I := I) (M := M)
         g r s i α P₀ m directions
     exact h_fChartEff
@@ -316,7 +316,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
       ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
         (D_m : eigenvectorIteratedTensorChartBilinearData
           (I := I) (M := M) g r s i α P₀ m)
-        (_h_fChartEff : D_m.fChartEff =
+        (_h_fChartEff : D_m.diffChartForcing =
           eigenvectorChartRHSDiff (I := I) (M := M)
             g r s i α P₀ m directions)
         (h_parent : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -355,7 +355,7 @@ theorem eigenvectorIteratedCarrier_fChartEff_eLpNorm_le_uniform
           (I := I) (M := M) g r s i α P₀ D_m h_parent).f_chart =
         eigenvectorChartRHSDiff (I := I) (M := M)
           g r s i α P₀ m directions := by
-    change D_m.fChartEff =
+    change D_m.diffChartForcing =
       eigenvectorChartRHSDiff (I := I) (M := M)
         g r s i α P₀ m directions
     exact h_fChartEff

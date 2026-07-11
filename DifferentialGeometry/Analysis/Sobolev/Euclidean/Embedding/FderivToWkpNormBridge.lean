@@ -196,10 +196,10 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
     (∑ i : Fin d,
         eLpNorm (chosenWeakPartial' (d := d) (2 : ℝ≥0∞) i ψ Ω) 2
           (volume.restrict Ω)) ≤
-      wkpNorm (d := d) 2 2 ψ Ω := by
+      iteratedWeakSobolevNorm (d := d) 2 2 ψ Ω := by
   classical
   have hWkpEq :
-      wkpNorm (d := d) 2 2 ψ Ω =
+      iteratedWeakSobolevNorm (d := d) 2 2 ψ Ω =
         ∑ j ∈ Finset.range 3,
           ∑ β : Fin j → Fin d,
             eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) j β ψ Ω) 2
@@ -260,7 +260,7 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_two
     {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)
     (hu_compact : HasCompactSupport u) (hu_supp : tsupport u ⊆ Ω) :
     eLpNorm (fun y : EuclN => ‖fderiv ℝ u y‖) 2 (volume.restrict Ω) ≤
-      wkpNorm (d := d) 2 2 u Ω := by
+      iteratedWeakSobolevNorm (d := d) 2 2 u Ω := by
   classical
   have hq_one : (1 : ℝ≥0∞) ≤ 2 := by
     exact_mod_cast (by norm_num : (1 : ℕ) ≤ 2)
@@ -292,10 +292,10 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
     (∑ i : Fin d,
         eLpNorm (chosenWeakPartial' (d := d) (2 : ℝ≥0∞) i ψ Ω) 2
           (volume.restrict Ω)) ≤
-      wkpNorm (d := d) 1 2 ψ Ω := by
+      iteratedWeakSobolevNorm (d := d) 1 2 ψ Ω := by
   classical
   have hWkpEq :
-      wkpNorm (d := d) 1 2 ψ Ω =
+      iteratedWeakSobolevNorm (d := d) 1 2 ψ Ω =
         ∑ j ∈ Finset.range 2,
           ∑ β : Fin j → Fin d,
             eLpNorm (iterWeakPartial (d := d) (2 : ℝ≥0∞) j β ψ Ω) 2
@@ -329,7 +329,7 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_one_two
     {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)
     (hu_compact : HasCompactSupport u) (hu_supp : tsupport u ⊆ Ω) :
     eLpNorm (fun y : EuclN => ‖fderiv ℝ u y‖) 2 (volume.restrict Ω) ≤
-      wkpNorm (d := d) 1 2 u Ω := by
+      iteratedWeakSobolevNorm (d := d) 1 2 u Ω := by
   classical
   have hq_one : (1 : ℝ≥0∞) ≤ 2 := by
     exact_mod_cast (by norm_num : (1 : ℕ) ≤ 2)
