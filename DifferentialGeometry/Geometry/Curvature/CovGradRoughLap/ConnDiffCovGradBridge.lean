@@ -8,7 +8,6 @@ import DifferentialGeometry.Tensor.Multilinear.Basis
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
@@ -242,7 +241,6 @@ def connDiffSection (g₁ g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g�
 @[simp] lemma connDiffSection_toSection (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) :
     (connDiffSection (I := I) g₁ g₀).toSection x = connDiffFib (I := I) g₁ g₀ x := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma connDiffSection_tensorCovDerivAt_homSplit
     (g₁ g₀ : SmoothRiemannianMetric I M)
@@ -284,7 +282,6 @@ private lemma connDiffSection_tensorCovDerivAt_homSplit
   rw [hsplit, hval]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensorSectionMDiffAt_connDiffPairing
     (g₁ g₀ : SmoothRiemannianMetric I M)
@@ -319,7 +316,6 @@ private lemma tensorSectionMDiffAt_connDiffPairing
       (connDiffSection (I := I) g₁ g₀).toSection y))
     (v := fun y : M => om y) hτ hw
 
-set_option linter.unusedSectionVars false in
 
 private lemma connDiffPairing_covariantDerivative02_eval
     (g₁ g₀ : SmoothRiemannianMetric I M)
@@ -422,7 +418,6 @@ private lemma connDiffPairing_covariantDerivative02_eval
   rw [hpeel2, hbase, hcorr2, hcorr1]
   ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma connDiffPairing_covariantDerivative01_eval
     (g₁ g₀ : SmoothRiemannianMetric I M)
@@ -507,7 +502,6 @@ private lemma connDiffPairing_covariantDerivative01_eval
     rfl
   rw [hbase, hcorr]
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiffSection_covGrad_eq_covDerivConnDiff
     (g₁ g₀ : SmoothRiemannianMetric I M)

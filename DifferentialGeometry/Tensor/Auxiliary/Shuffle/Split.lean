@@ -103,7 +103,7 @@ theorem removeNone_inv_mul {α : Type*} [DecidableEq α]
     | some a =>
       simp only [Equiv.optionCongr_apply, Equiv.Perm.coe_mul,
         Function.comp_apply, Equiv.Perm.inv_def]
-      show some ((Equiv.removeNone σ₁).symm ((Equiv.removeNone σ₂) a)) =
+      change some ((Equiv.removeNone σ₁).symm ((Equiv.removeNone σ₂) a)) =
         σ₁.symm (σ₂ (some a))
 
       rw [← h_oc σ₂ h₂ a]
@@ -136,7 +136,7 @@ theorem permCongr_inv_mul {α β : Type*}
   have h_inv : (Equiv.permCongr e σ₁ : Equiv.Perm _)⁻¹ =
       Equiv.permCongr e σ₁⁻¹ := by
     ext y
-    show (Equiv.permCongr e σ₁).symm y = e (σ₁⁻¹ (e.symm y))
+    change (Equiv.permCongr e σ₁).symm y = e (σ₁⁻¹ (e.symm y))
     simp [Equiv.permCongr_def, Equiv.Perm.inv_def]
   ext x
   simp only [Equiv.Perm.coe_mul, Function.comp_apply, Equiv.permCongr_apply,

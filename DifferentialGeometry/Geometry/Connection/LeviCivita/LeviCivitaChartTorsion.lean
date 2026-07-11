@@ -34,7 +34,6 @@ lemma christoffelCorrection_symm_cancel
   congr 1
   ring
 
-set_option linter.unusedVariables false in
 
 theorem chartLeviCivita_torsion_free_on (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ {X Y : Π x : M, TangentSpace I x} {x : M},

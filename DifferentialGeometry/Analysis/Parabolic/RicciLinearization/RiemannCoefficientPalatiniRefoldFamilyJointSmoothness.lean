@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -65,7 +64,6 @@ def riemannPalatiniRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
         (qB 0) (qB 1) (qB 2) (qB 3)))
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma riemannPalatiniRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
@@ -96,7 +94,6 @@ def deTurckLieCovDerivArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       contMDiff_toFun := dLaBiContrFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem deTurckLieCovDerivArmField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieCovDerivArmField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
@@ -112,14 +109,12 @@ def deTurckLieEndoArmField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       contMDiff_toFun := deTurckLieDLbFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem deTurckLieEndoArmField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (deTurckLieDLbFib (I := I) g₁ g_bg x)) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieCoeffField_eq_covDerivArm_add_endoArm
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
@@ -133,7 +128,6 @@ theorem deTurckLieCoeffField_eq_covDerivArm_add_endoArm
     deTurckLieEndoArmField_toSection]
   rfl
 
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -143,7 +137,7 @@ theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_riemannianFiberNormSq_ball
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -325,7 +319,6 @@ theorem exists_ricciArmOrder0RiemannCoeff_realizedFam_riemannianFiberNormSq_ball
   rw [Real.sq_sqrt hsum_nn]
   exact hfin
 
-set_option linter.unusedSectionVars false in
 theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -360,7 +353,6 @@ theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
-set_option linter.unusedSectionVars false in
 theorem jointTotalSpaceRS_sub_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -395,7 +387,6 @@ theorem jointTotalSpaceRS_sub_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
-set_option linter.unusedSectionVars false in
 theorem jointTotalSpaceRS_const_smul_local {r s : ℕ} {S : Set ℝ} (a : ℝ)
     (A : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -424,7 +415,6 @@ theorem jointTotalSpaceRS_const_smul_local {r s : ℕ} {S : Set ℝ} (a : ℝ)
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       a (A p₀)
 
-set_option linter.unusedSectionVars false in
 theorem jointTotalSpaceRS_smulFun_local {r s : ℕ} {S : Set ℝ}
     {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     (A : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
@@ -488,7 +478,6 @@ private noncomputable def outerPairBilinChartα (g : SmoothRiemannianMetric I M)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
-set_option linter.unusedSectionVars false in
 private lemma outerPairBilinChartα_apply (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     outerPairBilinChartα (I := I) g α K Dd X X' =
@@ -543,7 +532,6 @@ private def toModelEvalCLM (s : ℕ) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 private lemma toModelEvalCLM_apply (s : ℕ) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     toModelEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
@@ -563,7 +551,6 @@ private def pairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           map_smul] }
 
-set_option linter.unusedSectionVars false in
 private lemma pairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) (p q : TangentSpace I x) :
     pairFeedScalarCLM (I := I) (M := M) s x G v p q =
@@ -881,7 +868,6 @@ theorem curvatureRefoldMonomialCoeffField_realizedFam_jointContMDiffOn
   rw [curvatureRefoldMonomialCoeffField_toSection]
   rfl
 
-set_option linter.unusedVariables false in
 
 theorem riemannPalatiniRefoldC2Family_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)

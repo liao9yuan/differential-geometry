@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCovaria
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 6400000
 
@@ -33,7 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -46,7 +44,6 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma coframeS_one_eq_g0FlatCLM' (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 1 → Fin n) :
     coframeS (I := I) (M := M) g₀ x 1 e K = g0FlatCLM (I := I) g₀ x (e (K 0)) := by
@@ -61,7 +58,6 @@ private lemma coframeS_one_eq_g0FlatCLM' (g₀ : SmoothRiemannianMetric I M) (x 
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_zero_toModel
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -76,7 +72,6 @@ private lemma fiberNormSqComponent_zero_toModel
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g₀ x e K]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_cometricRaiseSlot0Field_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 (s + 2))
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -335,7 +330,6 @@ private lemma iteratedCovGrad_zero_tensor (g₀ : SmoothRiemannianMetric I M) (r
   | zero => rw [iteratedCovGrad_zero]
   | succ m ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
-set_option linter.unusedSectionVars false in
 private lemma unitModel_eq_ccTensorBilin_loc (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -471,12 +465,11 @@ private lemma rfns_idEndo_le (g₀ : SmoothRiemannianMetric I M) (x : M) :
   rw [hsimp] at hb
   exact hb
 
-set_option linter.unusedVariables false in
 theorem riemannianFiberNormSq_iteratedCovGrad_omRecoverEndoCc_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-    {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
+    {R : ℝ} (_hR : 0 ≤ R) {δ : ℝ} (_hδ0 : 0 ≤ δ) (_hδ1 : δ < 1)
     (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
         ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2) :

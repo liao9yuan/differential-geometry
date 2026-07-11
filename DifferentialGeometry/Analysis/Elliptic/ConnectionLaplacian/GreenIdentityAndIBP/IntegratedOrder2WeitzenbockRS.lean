@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -28,7 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 lemma covGrad_l2Inner_self_eq_neg_rawTensorConnLap_inner_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
@@ -47,7 +45,6 @@ lemma covGrad_l2Inner_self_eq_neg_rawTensorConnLap_inner_rs
     (covGrad (I := I) (M := M) g r s S)
     (covGrad (I := I) (M := M) g r s S)
 
-set_option linter.unusedSectionVars false in
 
 lemma covGrad_rawTensorConnLap_l2Inner_covGrad_eq_neg_normSq_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
@@ -68,7 +65,6 @@ lemma covGrad_rawTensorConnLap_l2Inner_covGrad_eq_neg_normSq_rs
   rw [tensorL2Norm_sq_toFun (I := I) (M := M) g r s
     (rawTensorConnLapSmooth (I := I) g r s S)]
 
-set_option linter.unusedSectionVars false in
 
 lemma rawTensorConnLap_l2Inner_covGrad_split_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
@@ -100,7 +96,6 @@ lemma rawTensorConnLap_l2Inner_covGrad_split_rs
   rw [hGΔ_def, hGS_def]
   rw [covGrad_rawTensorConnLap_l2Inner_covGrad_eq_neg_normSq_rs (I := I) (M := M) g r s S]
 
-set_option linter.unusedSectionVars false in
 
 theorem weitzenbock_integrated_covGrad_l2_normSq_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :

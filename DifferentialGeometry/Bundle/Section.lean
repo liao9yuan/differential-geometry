@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import DifferentialGeometry.Bundle.Equiv
 import DifferentialGeometry.Bundle.Frame
 
-set_option autoImplicit false
 
 open scoped Manifold ContDiff
 open Bundle

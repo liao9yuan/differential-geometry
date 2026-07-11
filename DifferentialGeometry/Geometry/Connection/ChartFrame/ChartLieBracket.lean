@@ -57,14 +57,12 @@ lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
   filter_upwards [htgt_nhds] with y hy
   exact mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm V hy
 
-set_option linter.unusedVariables false in
-set_option linter.style.show false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem mlieBracket_eq_chart_fderiv_diff
     (x : M) (X Y : Π y : M, TangentSpace I y)
     (hxint : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
-    (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x) :
+    (_hX : MDiffAt (T% X) x) (_hY : MDiffAt (T% Y) x) :
     VectorField.mlieBracket I X Y x =
       fderiv ℝ (chartE_section_repr (I := I) x Y ∘ (extChartAt I x).symm)
           (extChartAt I x x) (X x)
@@ -102,7 +100,7 @@ theorem mlieBracket_eq_chart_fderiv_diff
           (extChartAt I x x) :=
     Filter.EventuallyEq.fderiv_eq
       (mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm (x := x) Y hxint)
-  show VectorField.mlieBracketWithin I X Y univ x =
+  change VectorField.mlieBracketWithin I X Y univ x =
         fderiv ℝ (chartE_section_repr (I := I) x Y ∘ (extChartAt I x).symm)
             (extChartAt I x x) (X x)
           - fderiv ℝ (chartE_section_repr (I := I) x X ∘ (extChartAt I x).symm)
@@ -116,8 +114,6 @@ theorem mlieBracket_eq_chart_fderiv_diff
   rw [hVE_at, hWE_at, hVE_eq, hWE_eq]
   rfl
 
-set_option linter.unusedVariables false in
-set_option linter.style.show false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem mlieBracket_eq_chart_fderiv_diff_general
@@ -221,7 +217,7 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
       Filter.mem_of_superset
         (Filter.mem_of_superset (hint_open.mem_nhds hz) interior_subset)
         (extChartAt_target_subset_range α)
-    show (mfderiv 𝓘(ℝ, E) I φ.symm z).inverse (V (φ.symm z)) =
+    change (mfderiv 𝓘(ℝ, E) I φ.symm z).inverse (V (φ.symm z)) =
       (mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) z).inverse (V (φ.symm z))
     have hmf_eq :
         mfderiv 𝓘(ℝ, E) I φ.symm z = mfderivWithin 𝓘(ℝ, E) I φ.symm (range I) z :=
@@ -263,14 +259,14 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
       VectorField.lieBracket ℝ V_E W_E y₀ =
         fderiv ℝ W_E y₀ (V_E y₀) - fderiv ℝ V_E y₀ (W_E y₀) := rfl
   have hVE_y₀ : V_E y₀ = trivToE (I := I) α x (X x) := by
-    show (chartE_section_repr (I := I) α X ∘ φ.symm) y₀ =
+    change (chartE_section_repr (I := I) α X ∘ φ.symm) y₀ =
       trivToE (I := I) α x (X x)
     change chartE_section_repr (I := I) α X (φ.symm y₀) =
       trivToE (I := I) α x (X x)
     rw [hxsymm]
     exact chartE_section_repr_eq_trivToE (I := I) α X x
   have hWE_y₀ : W_E y₀ = trivToE (I := I) α x (Y x) := by
-    show (chartE_section_repr (I := I) α Y ∘ φ.symm) y₀ =
+    change (chartE_section_repr (I := I) α Y ∘ φ.symm) y₀ =
       trivToE (I := I) α x (Y x)
     change chartE_section_repr (I := I) α Y (φ.symm y₀) =
       trivToE (I := I) α x (Y x)
@@ -394,7 +390,6 @@ theorem mfderiv_scalar_along_eq_chart_fderiv
   rw [hφ_id]
   rfl
 
-set_option linter.style.show false in
 
 theorem extDerivFun_apply_mlieBracket
     {x : M} {X Y : Π b : M, TangentSpace I b}
@@ -442,14 +437,14 @@ theorem extDerivFun_apply_mlieBracket
       ContinuousLinearMap.id ℝ _
     rw [← htriv_eq, hid]
   have hXchart_at : Xchart (φ x) = X x := by
-    show chartE_section_repr (I := I) x X (φ.symm (φ x)) = X x
+    change chartE_section_repr (I := I) x X (φ.symm (φ x)) = X x
     rw [hxsymm]
-    show trivToE (I := I) x x (X x) = X x
+    change trivToE (I := I) x x (X x) = X x
     rw [htriv_id]; rfl
   have hYchart_at : Ychart (φ x) = Y x := by
-    show chartE_section_repr (I := I) x Y (φ.symm (φ x)) = Y x
+    change chartE_section_repr (I := I) x Y (φ.symm (φ x)) = Y x
     rw [hxsymm]
-    show trivToE (I := I) x x (Y x) = Y x
+    change trivToE (I := I) x x (Y x) = Y x
     rw [htriv_id]; rfl
   have hbracket_chart :
       VectorField.mlieBracket I X Y x =
@@ -469,7 +464,7 @@ theorem extDerivFun_apply_mlieBracket
   have hLHS_chart :
       extDerivFun f x (VectorField.mlieBracket I X Y x) =
         fderiv ℝ ftilde (φ x) (VectorField.mlieBracket I X Y x) := by
-    show (NormedSpace.fromTangentSpace (f x))
+    change (NormedSpace.fromTangentSpace (f x))
         (mfderiv I 𝓘(ℝ) f x (VectorField.mlieBracket I X Y x)) =
       fderiv ℝ ftilde (φ x) (VectorField.mlieBracket I X Y x)
     rw [mfderiv_scalar_eq_chart_fderiv (I := I) x f hsrc_chart hx_int hf_mdiff
@@ -487,7 +482,7 @@ theorem extDerivFun_apply_mlieBracket
       extDerivFun (fun b => extDerivFun f b (Y b)) x (X x) =
         fderiv ℝ (fun y => fderiv ℝ ftilde y (Ychart y)) (φ x) (Xchart (φ x)) := by
     rw [hg_eq_Y]
-    show (NormedSpace.fromTangentSpace _)
+    change (NormedSpace.fromTangentSpace _)
         (mfderiv I 𝓘(ℝ) (fun b => mfderiv I 𝓘(ℝ) f b (Y b)) x (X x)) = _
     have hkey := mfderiv_scalar_along_eq_chart_fderiv (X := X) (Y := Y) hx_int hf hY
     rw [hkey, hXchart_at]
@@ -496,7 +491,7 @@ theorem extDerivFun_apply_mlieBracket
       extDerivFun (fun b => extDerivFun f b (X b)) x (Y x) =
         fderiv ℝ (fun y => fderiv ℝ ftilde y (Xchart y)) (φ x) (Ychart (φ x)) := by
     rw [hg_eq_X]
-    show (NormedSpace.fromTangentSpace _)
+    change (NormedSpace.fromTangentSpace _)
         (mfderiv I 𝓘(ℝ) (fun b => mfderiv I 𝓘(ℝ) f b (X b)) x (Y x)) = _
     have hkey := mfderiv_scalar_along_eq_chart_fderiv (X := Y) (Y := X) hx_int hf hX
     rw [hkey, hYchart_at]

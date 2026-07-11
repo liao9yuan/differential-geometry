@@ -10,10 +10,11 @@ weak.linter.mathlibStandardSet = true
 maxSynthPendingDepth = 3
 autoImplicit = false
 linter.style.longLine = false
-linter.unusedSectionVars = false
 linter.style.emptyLine = false
 linter.style.whitespace = false
 linter.style.maxHeartbeats = false
+linter.style.setOption = false
+linter.unusedSectionVars = false
 
 [[require]]
 name = "mathlib"

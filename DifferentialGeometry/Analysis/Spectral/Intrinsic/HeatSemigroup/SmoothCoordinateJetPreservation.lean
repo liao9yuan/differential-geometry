@@ -128,10 +128,9 @@ theorem perModeConv_sq_le_time_mul_integral' (lam : ℝ) (hlam : 0 ≤ lam)
     _ ≤ t * ∫ s in (0 : ℝ)..t, (c s) ^ 2 :=
         mul_le_mul_of_nonneg_left hk_sq_int ht
 
-set_option linter.unusedVariables false in
 theorem deTurckRemainder_path_timeJet_section
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀

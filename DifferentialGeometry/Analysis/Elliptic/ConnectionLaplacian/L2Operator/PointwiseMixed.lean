@@ -6,10 +6,8 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option warningAsError false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -35,7 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 def connLaplacianMixed (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -43,7 +40,6 @@ def connLaplacianMixed (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) : TensorRSSpace r s I x :=
   rawTensorConnLap (I := I) g r s (fun b : M => T b) x
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma connLaplacianMixed_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -52,7 +48,6 @@ set_option linter.unusedSectionVars false in
     connLaplacianMixed (I := I) g r s T x =
       rawTensorConnLap (I := I) g r s (fun b : M => T b) x := rfl
 
-set_option linter.unusedSectionVars false in
 
 def connLaplacianMixedSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -60,7 +55,6 @@ def connLaplacianMixedSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
     M → (Π x : M, TensorRSSpace r s I x) :=
   fun _ x => connLaplacianMixed (I := I) g r s T x
 
-set_option linter.unusedSectionVars false in
 
 theorem connLaplacianMixed_scalar_eq_function
     (g : SmoothRiemannianMetric I M)

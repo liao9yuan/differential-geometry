@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -53,7 +52,6 @@ def secondMetricCometricDoubleTraceField (s : ℕ) : SmoothCcTensor g₀ (s + 2)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma mvDoubleTraceField_self_eq (s : ℕ) :
     secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₀ s = cometricDoubleTraceField (I := I) g₀ s := by
   apply SmoothCcTensor.ext
@@ -63,7 +61,6 @@ lemma mvDoubleTraceField_self_eq (s : ℕ) :
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma slotInsertEndoCc_add_local (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -86,7 +83,6 @@ private lemma slotInsertEndoCc_add_local (s : ℕ)
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma fullRaisedEndoField_diff_split_local :
     fullRaisedEndoField (I := I) (M := M) g₀ g₁ =
       gInvDiffRaisedEndoField (I := I) g₀ g₁ +
@@ -109,7 +105,6 @@ private lemma fullRaisedEndoField_diff_split_local :
     rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma appCcRS_slotInsert_id_eq (s c : ℕ) (Φ : SmoothCcTensor g₀ (s + 1) c) :
     ccOperatorFieldComp (I := I) (M := M) g₀ (s + 1) (s + 1) c Φ
       (endoSlotZeroCcTensor (I := I) (M := M) g₀ s
@@ -136,7 +131,6 @@ private lemma appCcRS_slotInsert_id_eq (s c : ℕ) (Φ : SmoothCcTensor g₀ (s 
   rw [Function.update_eq_self]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma mvDoubleTraceField_eq_trace_fullRaised (s : ℕ) :
     secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ s =
@@ -286,7 +280,6 @@ private lemma mvDoubleTraceField_eq_trace_fullRaised (s : ℕ) :
         rw [← hrep0]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma mvDoubleTraceField_cross_split (s : ℕ) :
     secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ s =
       ccOperatorFieldComp (I := I) (M := M) g₀ (s + 2) (s + 2) s
@@ -308,7 +301,6 @@ def secondMetricPairTraceOp : SmoothCcTensor g₀ 6 2 :=
     (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ 4)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 
 lemma mvPairTraceOp_apply_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
@@ -390,7 +382,6 @@ def riemannCometricDoubleTraceFold : SmoothCcTensor g₀ 2 4 :=
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma bgRArmWeight_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (m : Fin 4 → TangentSpace I x) :
@@ -451,7 +442,7 @@ lemma bgRArmWeight_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (Tensor0SSpace.toModel Y) (fun j => (m j : E))]
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [hYval]
-  show Tensor0SSpace.toModel D
+  change Tensor0SSpace.toModel D
       ![((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E), (m 1 : E)] *
       unitModel (I := I) (M := M) g₀ 4
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x
@@ -462,15 +453,14 @@ lemma bgRArmWeight_toModel (x : M) (D : Tensor0SSpace 2 I x)
       (m 2 : E), (m 3 : E)]]
   rfl
 
-set_option linter.unusedVariables false in
 lemma exists_rfns_icg_mvDoubleTraceField_window (s : ℕ) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ u, 0 ≤ C u) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (u K : ℕ) (huK : u ≤ K) (x : M),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (u K : ℕ) (_huK : u ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ (s + 2) (s + u) x
             ((iteratedCovGrad (I := I) g₀ (s + 2) s u
               (secondMetricCometricDoubleTraceField (I := I) (M := M) g₀ g₁ s)).toSection x) ≤
@@ -651,16 +641,15 @@ lemma exists_rfns_icg_mvDoubleTraceField_window (s : ℕ) {δ₀ : ℝ} (hδ₀ 
             ∑ u₂ ∈ Finset.range (u + 1 - u₁),
               (Module.finrank ℝ E : ℝ) ^ (s + 1) * CΛ u₂) + 2 * KD u) * W := by ring
 
-set_option linter.unusedVariables false in
 
 lemma exists_rfns_icg_mvPairTraceOp_window {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ u, 0 ≤ C u) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (u K : ℕ) (huK : u ≤ K) (x : M),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (u K : ℕ) (_huK : u ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + u) x
             ((iteratedCovGrad (I := I) g₀ 6 2 u
               (secondMetricPairTraceOp (I := I) (M := M) g₀ g₁)).toSection x) ≤

@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -44,7 +43,6 @@ private theorem traceHessianSlotPerm_inv_mul_apply (σ : Equiv.Perm (Fin 4)) (j 
     traceHessianSlotPerm ((traceHessianSlotPerm⁻¹ * σ) j) = σ j := by
   rw [Equiv.Perm.mul_apply, Equiv.Perm.inv_def, Equiv.apply_symm_apply]
 
-set_option linter.unusedSectionVars false in
 private theorem deTurckLieTraceCoeff_eq_reindex_traceHessianCoeff
     (g₀ g₁ : SmoothRiemannianMetric I M) (σ ρ : Equiv.Perm (Fin 4))
     (hcomp : ∀ j : Fin 4, traceHessianSlotPerm (ρ j) = σ j) :
@@ -73,7 +71,6 @@ private theorem deTurckLieTraceCoeff_eq_reindex_traceHessianCoeff
     rw [hcomp j]
   rw [harg]
 
-set_option linter.unusedSectionVars false in
 private theorem normSq_iteratedCovGrad_reindexCoeffGen_eq
     (g₀ : SmoothRiemannianMetric I M) (R : SmoothCcTensor g₀ 4 2)
     (ρ : Equiv.Perm (Fin 4)) (i : ℕ) :
@@ -90,7 +87,6 @@ private theorem normSq_iteratedCovGrad_reindexCoeffGen_eq
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 4 2 R ρ i x
 
-set_option linter.unusedSectionVars false in
 private theorem rfns_toSection_reindexCoeffGen_eq
     (g₀ : SmoothRiemannianMetric I M) (R : SmoothCcTensor g₀ 4 2)
     (ρ : Equiv.Perm (Fin 4)) (x : M) :
@@ -102,7 +98,6 @@ private theorem rfns_toSection_reindexCoeffGen_eq
     (show Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x from
       R.toSection x)
 
-set_option linter.unusedSectionVars false in
 private theorem riemannianFiberNormSq_neg_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =
@@ -115,16 +110,15 @@ private theorem riemannianFiberNormSq_neg_local
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedVariables false in
 theorem deTurckLieArm2PrincipalCoeff_realizedFam_jetL2_perOrder_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -180,16 +174,15 @@ theorem deTurckLieArm2PrincipalCoeff_realizedFam_jetL2_perOrder_ballUniform
     mul_le_mul htri htri (norm_nonneg (X + Y - Z))
       (add_nonneg (add_nonneg (norm_nonneg X) (norm_nonneg Y)) (norm_nonneg Z))]
 
-set_option linter.unusedVariables false in
 theorem deTurckLieArm2PrincipalCoeff_realizedFam_rfns_order0_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →

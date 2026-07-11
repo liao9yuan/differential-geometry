@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricRaiseSlot0C
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 3200000
 
@@ -43,7 +42,6 @@ noncomputable def raisedKoszulComponentBound (R δ : ℝ) (i : ℕ) : ℝ :=
 noncomputable def raisedKoszulJetBound (R δ : ℝ) (i : ℕ) : ℝ :=
   (Module.finrank ℝ E : ℝ) ^ (3 + i) * raisedKoszulComponentBound (E := E) R δ i
 
-set_option linter.unusedSectionVars false in
 lemma raisedKoszulJetBase_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) :
     0 ≤ raisedKoszulJetBase (E := E) R δ := by
   have h1 : 0 < 1 - δ := by linarith
@@ -54,20 +52,17 @@ lemma raisedKoszulJetBase_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) :
     · linarith
   · exact div_nonneg zero_le_one h1.le
 
-set_option linter.unusedSectionVars false in
 lemma raisedKoszulComponentBound_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) (i : ℕ) :
     0 ≤ raisedKoszulComponentBound (E := E) R δ i := by
   unfold raisedKoszulComponentBound
   exact pow_nonneg (raisedKoszulJetBase_nonneg R δ hR hδ1) _
 
-set_option linter.unusedSectionVars false in
 lemma raisedKoszulJetBound_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) (i : ℕ) :
     0 ≤ raisedKoszulJetBound (E := E) R δ i := by
   unfold raisedKoszulJetBound
   exact mul_nonneg (pow_nonneg (Nat.cast_nonneg _) _)
     (raisedKoszulComponentBound_nonneg R δ hR hδ1 i)
 
-set_option linter.unusedSectionVars false in
 lemma ten_R_sq_le_raisedKoszulComponentBound {R : ℝ} (hR : 0 ≤ R) {δ : ℝ}
     (hδ0 : 0 ≤ δ) (hδ1 : δ < 1) (i : ℕ) :
     10 * R ^ 2 ≤ raisedKoszulComponentBound (E := E) R δ i := by
@@ -101,7 +96,6 @@ lemma ten_R_sq_le_raisedKoszulComponentBound {R : ℝ} (hR : 0 ≤ R) {δ : ℝ}
     _ ≤ raisedKoszulJetBase (E := E) R δ ^ 2 := hbase_sq
     _ ≤ raisedKoszulJetBase (E := E) R δ ^ (2 * (i + 1) ^ 2) := hpow
 
-set_option linter.unusedSectionVars false in
 private lemma rfns_eq_sum_componentSq_of_horth
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -134,7 +128,6 @@ private lemma rfns_eq_sum_componentSq_of_horth
     intro i; rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   exact riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse hn hbse horth
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_sq_le_rfns
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -153,7 +146,6 @@ private lemma fiberNormSqComponent_sq_le_rfns
         Finset.single_le_sum
           (fun K' _ => Finset.sum_nonneg (fun J' _ => sq_nonneg _)) (Finset.mem_univ K)
 
-set_option linter.unusedSectionVars false in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -166,7 +158,6 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma coframeS_one_eq_g0FlatCLM' (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 1 → Fin n) :
     coframeS (I := I) (M := M) g₀ x 1 e K = g0FlatCLM (I := I) g₀ x (e (K 0)) := by
@@ -181,7 +172,6 @@ private lemma coframeS_one_eq_g0FlatCLM' (g₀ : SmoothRiemannianMetric I M) (x 
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_zero_toModel
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -196,7 +186,6 @@ private lemma fiberNormSqComponent_zero_toModel
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g₀ x e K]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_cometricRaiseSlot0Field_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 (s + 2))
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -292,7 +281,6 @@ private lemma rfns_cometricRaiseSlot0Field_eq
       (fun pr => by simp only [Fin.consEquiv, Equiv.coe_fn_mk])]
   rw [Fintype.sum_prod_type]
 
-set_option linter.unusedSectionVars false in
 lemma raisedKoszul_eq_cometricRaiseSlot0Field_koszulCovecCc
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -470,7 +458,6 @@ lemma riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
 
-set_option linter.unusedVariables false in
 private lemma fiberNormSqComponent_sq_iteratedCovGrad_raisedKoszul_le_koszul_rfns
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -499,13 +486,12 @@ private lemma fiberNormSqComponent_sq_iteratedCovGrad_raisedKoszul_le_koszul_rfn
           ((iteratedCovGrad (I := I) g₀ 0 3 i (koszulCovecCc (I := I) g₀ T)).toSection x) :=
         riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_koszul_eq (I := I) (M := M) g₀ T i x
 
-set_option linter.unusedVariables false in
 theorem riemannianFiberNormSq_iteratedCovGrad_raisedKoszul_perComponent_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
     {R : ℝ} (hR : 0 ≤ R) {δ : ℝ} (hδ0 : 0 ≤ δ) (hδ1 : δ < 1)
-    (hδ : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    (_hδ : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (hTjet : ∀ j : ℕ, j ≤ a + 1 → ∀ y : M,
       riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) y
         ((iteratedCovGrad (I := I) g₀ 0 2 j T).toSection y) ≤ R ^ 2)
@@ -529,7 +515,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_raisedKoszul_perComponent_le
     _ ≤ raisedKoszulComponentBound (E := E) R δ i :=
         ten_R_sq_le_raisedKoszulComponentBound (E := E) hR hδ0 hδ1 i
 
-set_option linter.unusedVariables false in
 theorem riemannianFiberNormSq_iteratedCovGrad_raisedKoszul_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (a : ℕ) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

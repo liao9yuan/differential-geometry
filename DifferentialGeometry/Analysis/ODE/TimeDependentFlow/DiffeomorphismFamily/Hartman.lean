@@ -71,15 +71,14 @@ theorem picard_data_chart_coord_in_closedBall
   unfold ChartLocalPicardData.U at hx
   exact Metric.ball_subset_closedBall hx.2
 
-set_option linter.unusedVariables false in
 
 theorem time_dependent_vf_flow_diffeomorph_on_closed_manifold
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α)
     (hperNeg : ∀ α : M, ChartLocalPicardData (fun t x => -(X t x)) α)
-    (hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+    (_hSmoothX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       (X t ((chartAt H α).symm (I.symm y)) : E)))
-    (hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
+    (_hSmoothNegX_chart : ∀ α : M, ContDiff ℝ ∞ (Function.uncurry fun t y =>
       ((-X t ((chartAt H α).symm (I.symm y))) : E)))
     (hLocalFwd : ∀ (Φ : ℝ → M → M) (T : ℝ), 0 < T →
       (∀ x : M, ∃ α : M, x ∈ (hper α).U ∧

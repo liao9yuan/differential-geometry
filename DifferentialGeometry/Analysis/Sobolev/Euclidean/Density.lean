@@ -345,9 +345,8 @@ theorem hasWeakPartialDeriv_indicator_chosenWeakPartial_univ
     _ = -∫ x in Ω, g x * ψ x := by rw [hRHS_eq]
     _ = -∫ x : E, Ω.indicator g x * ψ x := by rw [hRHS_E]
 
-set_option linter.unusedVariables false in
 
-theorem MemWkp.extend_zero {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
+theorem MemWkp.extend_zero {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (_hp_top : p ≠ (⊤ : ℝ≥0∞))
     {Ω V : Set E} (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
     {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω)
     (hu_supp : tsupport u ⊆ Ω) (hu_compactSupport : HasCompactSupport u) :

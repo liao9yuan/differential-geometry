@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set Tensor0SBundle
@@ -32,7 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 theorem chartGramMatrix_realize_apply
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
@@ -118,7 +116,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
       funext k; fin_cases k <;> rfl
     rw [hvecAB, ccTensorBilin_apply, ccTensorBilin_apply]
 
-    show Tensor0SSpace.toModel
+    change Tensor0SSpace.toModel
         ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
             (fun _ : Fin 0 => TangentSpace I p) (1 : ℝ)))
@@ -197,7 +195,7 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
         ![chartBasisVecFiber (I := I) α i p, chartBasisVecFiber (I := I) α j p] := by
       funext k; fin_cases k <;> rfl
     rw [hvecAB, ccTensorBilin_apply, ccTensorBilin_apply]
-    show Tensor0SSpace.toModel
+    change Tensor0SSpace.toModel
         ((T - T').toSection p
           (ContinuousMultilinearMap.constOfIsEmpty ℝ
             (fun _ : Fin 0 => TangentSpace I p) (1 : ℝ)))

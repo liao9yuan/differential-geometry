@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -36,8 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
@@ -45,9 +42,9 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
     (hB : 0 ≤ B) :
     ∃ Cw : ℝ, 0 ≤ Cw ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -172,7 +169,6 @@ private theorem exists_norm_covGrad_connDiffSection_le_of_jetEnvelope
   rw [← Real.sqrt_sq hWnn]
   exact Real.sqrt_le_sqrt hWsq
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private theorem covGrad_connDiffSection_flat_eval_eq_inner
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
@@ -228,8 +224,6 @@ private theorem covGrad_connDiffSection_flat_eval_eq_inner
   rw [hA_def]
   exact hbridge
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope
@@ -237,9 +231,9 @@ theorem exists_covDerivConnDiff_gQuadratic_le_of_jetEnvelope
     (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),

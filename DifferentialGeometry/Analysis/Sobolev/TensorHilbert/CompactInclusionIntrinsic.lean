@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobo
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -34,7 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 private lemma exists_smooth_close_to_TensorH1_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -55,7 +53,6 @@ private lemma exists_smooth_close_to_TensorH1_intrinsic
   exact hS_close
 
 set_option maxHeartbeats 4000000 in
-set_option linter.unusedSectionVars false in
 
 theorem tensorH1ComplToTensorL2_isCompactOperator_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

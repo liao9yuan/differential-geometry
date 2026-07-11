@@ -24,7 +24,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -144,9 +143,8 @@ theorem linearizedRicci_lichnerowicz_arm1_identity (g₀ : SmoothRiemannianMetri
                   (iteratedCovGrad (I := I) g₀ 0 2 2 (T - T'))) x v :=
   exists_linearizedRicciOrder1DivCoeff (I := I) g₀ T T' hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
 
-set_option linter.unusedVariables false in
 theorem exists_linearizedRicci_threeArm_coeffFields
-    (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
+    (g₀ _g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
       smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
     (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
@@ -176,7 +174,6 @@ theorem exists_linearizedRicci_threeArm_coeffFields
   exact linearizedRicci_lichnerowicz_arm1_identity (I := I) g₀ T T'
     hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_ricciArmOrder1Coeff
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -264,7 +261,6 @@ theorem exists_ricciArmOrder1Coeff
   rw [← hR₂] at he2
   rw [← he0, ← he1, ← he2, unitModel_add2_apply, unitModel_add2_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem ricciTensor_realize_sub_eq_threeArm_appCc
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

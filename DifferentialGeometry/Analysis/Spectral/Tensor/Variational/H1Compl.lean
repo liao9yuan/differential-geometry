@@ -11,7 +11,6 @@ import Mathlib.Analysis.Normed.Operator.Extend
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -54,7 +53,6 @@ noncomputable def smoothToTensorH1Compl
       (S : TensorH1Compl g r s) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma SmoothCcTensor.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -64,7 +62,6 @@ lemma SmoothCcTensor.norm_sq_eq_inner_self
   rw [SmoothCcTensor.inner_def] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
 
 lemma SmoothCcTensorH1.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -75,7 +72,6 @@ lemma SmoothCcTensorH1.norm_sq_eq_inner_self
   rw [SmoothCcTensorH1.inner_def] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
 
 lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -94,7 +90,6 @@ lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
       S.toCcTensor x
   linarith
 
-set_option linter.unusedSectionVars false in
 
 lemma SmoothCcTensorH1.l2Norm_le_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -104,7 +99,6 @@ lemma SmoothCcTensorH1.l2Norm_le_h1Norm
   have h_rhs_nn : 0 ≤ ‖S‖ := norm_nonneg _
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
-set_option linter.unusedSectionVars false in
 
 lemma SmoothCcTensorH1.l2Norm_le_one_mul_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -133,7 +127,6 @@ noncomputable def smoothCcTensorH1ToTensorL2Lin
     smoothCcTensorH1ToTensorL2Lin (I := I) (M := M) g r s S =
       (S.toCcTensor : TensorL2 r s g) := rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma smoothCcTensorH1ToTensorL2Lin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

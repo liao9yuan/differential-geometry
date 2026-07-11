@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -55,7 +54,6 @@ theorem exists_Ccross_for_secondCovGrad
                   (covGrad (I := I) (M := M) g 0 2 T).toFun) :=
   exists_integrated_curvatureCrossBound (I := I) (M := M) g 2
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_secondCovGrad_l2NormSq_le_rawConnLap
     (g : SmoothRiemannianMetric I M) :
@@ -72,7 +70,6 @@ theorem exists_secondCovGrad_l2NormSq_le_rawConnLap
   refine ⟨2 + 2 * Ccross, by positivity, fun T => ?_⟩
   exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g 2 T Ccross hCcross (hcross T)
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_secondCovGrad_l2Norm_le_rawConnLap_add_self
     (g : SmoothRiemannianMetric I M) :
@@ -108,7 +105,6 @@ theorem exists_secondCovGrad_l2Norm_le_rawConnLap_add_self
     mul_nonneg (Real.sqrt_nonneg _) (by linarith)
   exact le_of_sq_le_sq hkey hrhs_nn
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
     (g : SmoothRiemannianMetric I M) :
@@ -191,7 +187,6 @@ theorem exists_tensorPouSobolevHsNorm_one_le_rawConnLap_add_self
         mul_le_mul_of_nonneg_left hsum_le hCb
     _ = Cb * (1 + Cg + 1) * (nLap + nT) := by ring
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_tensorPouSobolevHsNorm_one_le_sum_rawConnLapIter
     (g : SmoothRiemannianMetric I M) :

@@ -6,7 +6,6 @@ import Mathlib.Analysis.MeanInequalities
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -34,7 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedVariables false in
 private theorem diagonalProductTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -428,11 +426,10 @@ private theorem diagonalProductTerm_integral_le
             _ = Mbar ^ (7 * i) := e3
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) := e5
 
-set_option linter.unusedVariables false in
 theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform_succ
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (_hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →

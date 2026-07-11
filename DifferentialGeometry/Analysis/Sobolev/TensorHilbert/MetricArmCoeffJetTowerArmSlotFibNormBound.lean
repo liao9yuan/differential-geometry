@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -44,7 +43,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 open TensorMultilinear
 
-set_option linter.unusedSectionVars false in
 private lemma curry_symm_smul_aux (s : ℕ) (x : M) (c : ℝ)
     (a : TangentSpace I x →L[ℝ] Tensor0SSpace (s+1) I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm (c • a) =
@@ -58,7 +56,6 @@ private lemma curry_symm_smul_aux (s : ℕ) (x : M) (c : ℝ)
   rw [← tensor0S_curry_apply_eval (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm a)]
   simp only [ContinuousLinearEquiv.apply_symm_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma curry_symm_add_aux (s : ℕ) (x : M)
     (a b : TangentSpace I x →L[ℝ] Tensor0SSpace (s+1) I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm (a + b) =
@@ -88,14 +85,12 @@ def bilinearSlotInsertCurriedCLM (s : ℕ) (x : M)
         rw [slotInsertEndoFib_smul_left (I := I) (M := M) (s+1) 0 x c (Arm a)]
         rfl }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma armCurryCLM_apply (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) (v0 : TangentSpace I x) :
     bilinearSlotInsertCurriedCLM (I := I) (M := M) s x Arm D v0 =
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Arm v0) D := rfl
 
-set_option linter.unusedSectionVars false in
 lemma armCurryCLM_add (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D D' : Tensor0SSpace (s + 1) I x) :
@@ -104,7 +99,6 @@ lemma armCurryCLM_add (s : ℕ) (x : M)
   apply ContinuousLinearMap.ext; intro v0
   simp only [ContinuousLinearMap.add_apply, armCurryCLM_apply, map_add]
 
-set_option linter.unusedSectionVars false in
 lemma armCurryCLM_smul (s : ℕ) (x : M) (c : ℝ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) :
@@ -125,7 +119,6 @@ def bilinearSlotInsertCLM (s : ℕ) (x : M)
       map_smul' := fun c D => by
         rw [armCurryCLM_smul, curry_symm_smul_aux]; rfl }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma armSlotFib_apply (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) :
@@ -133,7 +126,6 @@ set_option linter.unusedSectionVars false in
       (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm
         (bilinearSlotInsertCurriedCLM (I := I) (M := M) s x Arm D) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma armSlotFib_apply_eval (s : ℕ) (x : M)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
     (D : Tensor0SSpace (s + 1) I x) (v : Fin (s + 1 + 1) → TangentSpace I x) :
@@ -148,7 +140,6 @@ lemma armSlotFib_apply_eval (s : ℕ) (x : M)
   conv_lhs => rw [show v = Fin.cons (v 0) (Matrix.vecTail v) from (Fin.cons_self_tail v).symm]
   exact hkey.symm
 
-set_option linter.unusedSectionVars false in
 private lemma fiberComponent_bilinearSlotInsertCLM_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -189,8 +180,6 @@ private lemma fiberComponent_bilinearSlotInsertCLM_eq
   rw [show Matrix.vecTail (fun l => e (J l)) l = e (J (Fin.succ l)) from rfl,
     horth (K l) (J (Fin.succ l))]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 private lemma sum_compSq_armSlotFib_eq_normSq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -277,8 +266,6 @@ private lemma sum_compSq_armSlotFib_eq_normSq
   exact hpars w
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 theorem riemannianFiberNormSq_bilinearSlotInsertCLM_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) (B : ℝ)
@@ -320,7 +307,6 @@ theorem riemannianFiberNormSq_bilinearSlotInsertCLM_le
         push_cast; ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma rfns_armSlotFib_eq_sum_normSq_frame
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -379,7 +365,6 @@ private lemma rfns_armSlotFib_eq_sum_normSq_frame
   rw [Fintype.sum_prod_type]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_armSlotFib_spectator_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (Arm : TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -467,7 +452,7 @@ theorem armSlotFib_contMDiff (s : ℕ)
     rw [Tensor0SSpace.toModel]
     have htail0 : Matrix.vecTail (fun j : Fin (s + 1 + 1) => e₁.symmL ℝ x (b (σ j))) 0 =
         (Y (σ 1)) x := by
-      show e₁.symmL ℝ x (b (σ (Fin.succ 0))) = _
+      change e₁.symmL ℝ x (b (σ (Fin.succ 0))) = _
       rw [hframeS (Fin.succ 0)]; rfl
     have hupd : Function.update (Matrix.vecTail
           (fun j : Fin (s + 1 + 1) => e₁.symmL ℝ x (b (σ j)))) 0
@@ -480,7 +465,7 @@ theorem armSlotFib_contMDiff (s : ℕ)
       · subst hj
         simp only [Function.update_self, hframeS 0, htail0]
       · rw [Function.update_of_ne hj, Function.update_of_ne hj]
-        show e₁.symmL ℝ x (b (σ (Fin.succ j))) = (Y (σ (Fin.succ j))) x
+        change e₁.symmL ℝ x (b (σ (Fin.succ j))) = (Y (σ (Fin.succ j))) x
         rw [hframeS (Fin.succ j)]
     rw [hupd]
   refine hsec.congr ?_

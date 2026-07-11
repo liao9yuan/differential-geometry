@@ -35,16 +35,15 @@ section ExplicitNormBound
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M]
   [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedVariables false
 
 theorem eLpNorm_weighted_contDiffOn_mul_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
-    {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
+    {K : Set EuclN} (hK_compact : IsCompact K) (_hK_meas : MeasurableSet K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {w : EuclN → ℝ}
-    (hw : MemLp w 2
+    (_hw : MemLp w 2
       ((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)))
     (hw_zero : ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
@@ -98,7 +97,7 @@ theorem eLpNorm_weighted_contDiffOn_mul_le_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
-    {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
+    {K : Set EuclN} (hK_compact : IsCompact K) (_hK_meas : MeasurableSet K)
     (hK_in : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ w : EuclN → ℝ,

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Iter
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 
 open Manifold Set Filter Topology

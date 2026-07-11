@@ -27,7 +27,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficien
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -57,7 +56,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma slotInsertEndoCc_add_endo_c (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : ContMDiffSection I (E →L[ℝ] E) ∞
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x)) :
@@ -79,7 +77,6 @@ private lemma slotInsertEndoCc_add_endo_c (g₀ : SmoothRiemannianMetric I M) (s
   rw [show ((A + B) x) = A x + B x from by rw [ContMDiffSection.coe_add]; rfl]
   rw [slotInsertEndoFib_add_left, ContinuousLinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma fullRaisedEndoField_diff_split_c (g₀ g₁ : SmoothRiemannianMetric I M) :
     fullRaisedEndoField (I := I) (M := M) g₀ g₁ =
       gInvDiffRaisedEndoField (I := I) g₀ g₁ +
@@ -101,7 +98,6 @@ private lemma fullRaisedEndoField_diff_split_c (g₀ g₁ : SmoothRiemannianMetr
   rw [show metricComparisonEndo (I := I) g₀ g₀ x v = v from by
     rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]]
 
-set_option linter.unusedSectionVars false in
 private lemma g1_inner_gInvRaisedEndo_left_c (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g₁.inner x (metricComparisonEndo (I := I) g₀ g₁ x v) w = g₀.inner x v w := by
@@ -112,7 +108,6 @@ private lemma g1_inner_gInvRaisedEndo_left_c (g₀ g₁ : SmoothRiemannianMetric
   rw [cotangentToDual_g0FlatCLM]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma appCcRS_sub_left_local (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g₀ b c) (W : SmoothCcTensor g₀ a b) :
     ccOperatorFieldComp (I := I) (M := M) g₀ a b c (Φ₁ - Φ₂) W =
@@ -148,7 +143,6 @@ lemma appCcRS_sub_left_local (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma appCcRS_sub_right_cc (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) (W₁ W₂ : SmoothCcTensor g₀ a b) :
     ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ (W₁ - W₂) =
@@ -202,7 +196,6 @@ private def pureDoubleTraceField (g₀ g₁ : SmoothRiemannianMetric I M) (s : �
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma appCcRS_slotInsert_id_eq (g₀ : SmoothRiemannianMetric I M) (s c : ℕ)
     (Φ : SmoothCcTensor g₀ (s + 1) c) :
     ccOperatorFieldComp (I := I) (M := M) g₀ (s + 1) (s + 1) c Φ
@@ -229,9 +222,7 @@ lemma appCcRS_slotInsert_id_eq (g₀ : SmoothRiemannianMetric I M) (s c : ℕ)
     rw [fullRaisedEndoField_apply, gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]]
   rw [Function.update_eq_self]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-private lemma toModel_cons_sum_smul (x : M) {n : ℕ}
+private lemma toModel_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons (∑ c, t c • u c) rest) =
@@ -263,9 +254,7 @@ private lemma toModel_cons_sum_smul (x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-private lemma toModel_cons_cons_sum_smul (x : M) {n : ℕ}
+private lemma toModel_cons_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons aa (Fin.cons (∑ c, t c • u c) rest)) =
@@ -299,7 +288,6 @@ private lemma toModel_cons_cons_sum_smul (x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedSectionVars false in
 private lemma orthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
@@ -354,7 +342,6 @@ private lemma orthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
   rw [hrepr v i, hbB_coe i]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma pureDoubleTraceField_eq_trace_fullRaised (g₀ g₁ : SmoothRiemannianMetric I M)
     (s : ℕ) :
@@ -491,7 +478,6 @@ private lemma pureDoubleTraceField_eq_trace_fullRaised (g₀ g₁ : SmoothRieman
         rw [← hrep0]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma appCcRS_add_left_local (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g₀ b c) (W : SmoothCcTensor g₀ a b) :
     ccOperatorFieldComp (I := I) (M := M) g₀ a b c (Φ₁ + Φ₂) W =
@@ -502,7 +488,6 @@ lemma appCcRS_add_left_local (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
   abel
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma slotExtend_sub_cc (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : SmoothCcTensor g₀ r s) :
     slotExtend (I := I) (M := M) g₀ r s (X - Y) =
@@ -546,7 +531,6 @@ lemma slotExtend_sub_cc (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [map_sub]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma rsDomDomCongrSection_sub_cc (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) (X Y : SmoothCcTensor g₀ r s) :
     rsDomDomCongrSection (I := I) (M := M) g₀ r s σ (X - Y) =
@@ -600,7 +584,6 @@ def pairTraceOp (g₀ gm : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 6 2
     (pureDoubleTraceField (I := I) (M := M) g₀ gm 4)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma pairTraceOp_apply_toModel (g₀ gm : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -675,7 +658,6 @@ private lemma pairTraceOp_apply_toModel (g₀ gm : SmoothRiemannianMetric I M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 theorem riemannCoeff_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0RiemannCoeff (I := I) (M := M) g₀ g₁ =
@@ -744,7 +726,6 @@ theorem riemannCoeff_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M) :
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 theorem riemannMixedCoeff_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M) :
     ricciArmOrder0RiemannMixedCoeff (I := I) (M := M) g₀ g₁ =
@@ -814,7 +795,6 @@ theorem riemannMixedCoeff_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M) 
     smoothOrthoFrame (I := I) g₀ x a x from rfl]
   ring
 
-set_option linter.unusedSectionVars false in
 lemma iteratedCovGrad_zero_of_covGrad_zero (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (Φ : SmoothCcTensor g₀ r s)
     (hΦ : covGrad (I := I) (M := M) g₀ r s Φ = 0) (m : ℕ) :
@@ -827,7 +807,6 @@ lemma iteratedCovGrad_zero_of_covGrad_zero (g₀ : SmoothRiemannianMetric I M)
       rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma pureDoubleTraceField_self_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ) :
     pureDoubleTraceField (I := I) (M := M) g₀ g₀ s = cometricDoubleTraceField (I := I) g₀ s := by
   apply SmoothCcTensor.ext
@@ -836,13 +815,11 @@ private lemma pureDoubleTraceField_self_eq (g₀ : SmoothRiemannianMetric I M) (
   rw [cometricDoubleTraceField_toSection]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma pairTraceOp_self_eq (g₀ : SmoothRiemannianMetric I M) :
     pairTraceOp (I := I) (M := M) g₀ g₀ = pairTraceKernel (I := I) (M := M) g₀ := by
   rw [pairTraceOp, pairTraceKernel, pureDoubleTraceField_self_eq (I := I) (M := M) g₀ 2,
     pureDoubleTraceField_self_eq (I := I) (M := M) g₀ 4]
 
-set_option linter.unusedSectionVars false in
 private lemma pureDoubleTraceField_cross_split (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
     pureDoubleTraceField (I := I) (M := M) g₀ g₁ s =
       ccOperatorFieldComp (I := I) (M := M) g₀ (s + 2) (s + 2) s
@@ -858,15 +835,14 @@ private lemma pureDoubleTraceField_cross_split (g₀ g₁ : SmoothRiemannianMetr
   rw [appCcRS_slotInsert_id_eq (I := I) (M := M) g₀ (s + 1) s
     (cometricDoubleTraceField (I := I) g₀ s)]
 
-set_option linter.unusedVariables false in
 theorem exists_fiberNormSq_iteratedCovGrad_pairTraceOp_diff_grid
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ CΔ : ℕ → ℝ, (∀ j, 0 ≤ CΔ j) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (j : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 6 (2 + j) x
             ((iteratedCovGrad (I := I) g₀ 6 2 j

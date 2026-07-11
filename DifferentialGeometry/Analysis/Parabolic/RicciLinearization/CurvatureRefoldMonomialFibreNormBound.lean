@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -36,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → ℝ) :
     ∑ K : Fin 4 → Fin n, F (K 0) (K 1) =
@@ -64,7 +62,6 @@ private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → 
     rw [Finset.sum_congr rfl (fun l _ => h4 l), ← Finset.mul_sum]
   rw [Finset.sum_congr rfl (fun k _ => h2 k), ← Finset.mul_sum]
 
-set_option linter.unusedSectionVars false in
 
 private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) :
@@ -72,7 +69,6 @@ private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
   rw [map_sum]
   exact Finset.sum_congr rfl (fun b _ => by rw [map_smul, smul_eq_mul])
 
-set_option linter.unusedSectionVars false in
 
 private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) (u : TangentSpace I x) :
@@ -84,7 +80,6 @@ private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
   exact Finset.sum_congr rfl (fun a _ => by
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul])
 
-set_option linter.unusedSectionVars false in
 
 private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (B : Fin d → TangentSpace I x)
@@ -99,7 +94,6 @@ private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) 
   rw [Finset.sum_ite_eq]
   exact if_pos (Finset.mem_univ a)
 
-set_option linter.unusedSectionVars false in
 
 private lemma sum_sq_component_le_of_orthonormal
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) {δ : ℝ} (h1mδ : (0 : ℝ) < 1 - δ)
@@ -128,19 +122,16 @@ private lemma sum_sq_component_le_of_orthonormal
       ≤ (∑ a, (c a) ^ 2) / (1 - δ) := (le_div_iff₀ h1mδ).mpr h4
     _ = (1 / (1 - δ)) * ∑ a, (c a) ^ 2 := by ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma div_pow_div_arith {t : ℝ} (ht : t ≠ 0) (u : ℝ) :
     (u / t) ^ 2 / t = u ^ 2 / t ^ 3 := by
   field_simp
 
-set_option linter.unusedSectionVars false in
 
 private lemma one_div_mul_pow_arith {t : ℝ} (ht : t ≠ 0) (D u : ℝ) :
     (1 / t) * (D * (u / t ^ 3)) = D * (u / t ^ 4) := by
   field_simp
 
-set_option linter.unusedSectionVars false in
 
 private lemma weight_row_g0norm_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) {δ δW : ℝ}
@@ -240,7 +231,6 @@ private lemma weight_row_g0norm_le
     _ ≤ (δW / (1 - δ)) ^ 2 / (1 - δ) := by gcongr
     _ = δW ^ 2 / (1 - δ) ^ 3 := div_pow_div_arith (ne_of_gt h1mδ) δW
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
@@ -259,7 +249,6 @@ theorem riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) 
     fiberNormSqComponent_smul]
   ring
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 

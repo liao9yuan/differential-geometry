@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieRealizedF
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -404,7 +403,6 @@ private theorem jointTotalSpace0S_smulScalar_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       (c p₀) (A p₀)
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieEvalScalar_section_contMDiff
     (U : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 0 ℝ E) ∞
@@ -418,7 +416,6 @@ private theorem dLieEvalScalar_section_contMDiff
     ContinuousMultilinearMap.apply_apply, Tensor0SBundle.Tensor0SSpace.toModelL_apply]
   exact congrArg _ (Subsingleton.elim _ _)
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieEmbedRS_section_contMDiff {d : ℕ}
     (A : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
@@ -460,7 +457,6 @@ private noncomputable def dLiePack0S {d : ℕ} (g₀ : SmoothRiemannianMetric I 
       contMDiff_toFun := dLieEmbedRS_section_contMDiff (I := I) A hA }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLiePack0S_unitEval {d : ℕ} (g₀ : SmoothRiemannianMetric I M)
     (A : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
@@ -471,7 +467,6 @@ private theorem dLiePack0S_unitEval {d : ℕ} (g₀ : SmoothRiemannianMetric I M
       (dLiePack0S (I := I) g₀ A hA).toSection y) (unitZeroSec (I := I) (M := M) y) = A y :=
   embedRS_unitZeroSec_apply (I := I) (M := M) y d (A y)
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLiePack0S_unitEvalSection {d : ℕ} (g₀ : SmoothRiemannianMetric I M)
     (A : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
@@ -545,7 +540,6 @@ private theorem dLieCovGradVal_jointContMDiffOn {d : ℕ} {S : Set ℝ}
     (unitZeroSec (I := I) (M := M)).contMDiff.comp_contMDiffOn contMDiffOn_fst
   exact ContMDiffOn.clm_bundle_apply (b := Prod.fst) hstep hunit
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieCovGradVal_toNabla {d : ℕ} (g₀ : SmoothRiemannianMetric I M)
     (F : SmoothCcTensor g₀ 0 d) (x : M) (v0 : TangentSpace I x)
@@ -572,7 +566,6 @@ private def dLieTriEvalFn (V : Π b : M, Tensor0SBundle.Tensor0SSpace 3 I b)
     (A B C : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
   fun b => Tensor0SBundle.Tensor0SSpace.toModel (V b) (Fin.cons (A b) (Fin.cons (B b) ![C b]))
 
-set_option linter.unusedSectionVars false in
 
 private lemma dLieTriMDiffAt_curried
     (s : ℕ) (W : Π x : M, Tensor0SBundle.Tensor0SSpace (s + 1) I x) {x : M}
@@ -594,7 +587,6 @@ private lemma dLieTriMDiffAt_curried
     (b := id) (ϕ := fun y : M => Tensor0SNabla.curriedSection I M W y)
     (v := fun y : M => Y y) hCurried hY
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieNabla3_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SBundle.Tensor0SSpace 3 I b) {x : M}
@@ -723,7 +715,6 @@ private theorem dLieNabla3_consEval_leibnizDefect
   rw [hfin1 ((LeviCivita (I := I) g₀).toFun (fun b => C b) x v), hfin1 (C x)]
   ring
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLie_toModel_g0Flat (g : SmoothRiemannianMetric I M) (x : M)
     (w t : TangentSpace I x) :
@@ -759,7 +750,6 @@ private noncomputable def dLieFlatPack (g₀ : SmoothRiemannianMetric I M)
       DifferentialGeometry.Analysis.Sobolev.TensorHilbert.g0FlatCLM (I := I) g₀ x (V x))
     (dLieFlatSection_contMDiff (I := I) g₀ V)
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieFlatCovGradVal_eval (g₀ : SmoothRiemannianMetric I M)
     (V : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -825,7 +815,6 @@ private noncomputable def dLieLoweredPack (g₀ gm gA gB : SmoothRiemannianMetri
     (fun x : M => metricConnDiffLoweredFib (I := I) gm gA gB x)
     (metricConnDiffLoweredFib_contMDiff (I := I) gm gA gB)
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieDiagTrace_toModel (g₁ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (p + 2) I x) (u : Fin p → TangentSpace I x) :
@@ -849,7 +838,6 @@ private theorem dLieDiagTrace_toModel (g₁ : SmoothRiemannianMetric I M) (p : �
     (T := D) (v0 := smoothOrthoFrame (I := I) g₁ x e x)
     (vs := Fin.cons (smoothOrthoFrame (I := I) g₁ x e x) u)]
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieFrameExpand_update (g₁ : SmoothRiemannianMetric I M) (x : M)
     (L3 : Tensor0SBundle.Tensor0SSpace 3 I x)
@@ -910,28 +898,24 @@ private def dLieXiPermA : Equiv.Perm (Fin 4) :=
 private def dLieXiPermB : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 3, 0], ![3, 0, 1, 2], by decide, by decide⟩
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieUpdateZero (x : M) (a b c u : TangentSpace I x) :
     Function.update (![a, b, c] : Fin 3 → TangentSpace I x) 0 u = ![u, b, c] := by
   funext j
   fin_cases j <;> simp [Function.update]
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieUpdateOne (x : M) (a b c u : TangentSpace I x) :
     Function.update (![a, b, c] : Fin 3 → TangentSpace I x) 1 u = ![a, u, c] := by
   funext j
   fin_cases j <;> simp [Function.update]
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieUpdateTwo (x : M) (a b c u : TangentSpace I x) :
     Function.update (![a, b, c] : Fin 3 → TangentSpace I x) 2 u = ![a, b, u] := by
   funext j
   fin_cases j <;> simp [Function.update]
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieCorrA_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (w : Fin 4 → TangentSpace I x) :
@@ -1014,7 +998,6 @@ private theorem dLieCorrA_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
     (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w 1) (w 0))]
   exact congrArg _ (hupd _).symm
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieCorrB_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (w : Fin 4 → TangentSpace I x) :
@@ -1097,7 +1080,6 @@ private theorem dLieCorrB_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
     (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w 2) (w 0))]
   exact congrArg _ (hupd _).symm
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieCorrC_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (w : Fin 4 → TangentSpace I x) :
@@ -1180,7 +1162,6 @@ private theorem dLieCorrC_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
     (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w 3) (w 0))]
   exact congrArg _ (hupd _).symm
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieTheta_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (w0 w1 w2 w3 : TangentSpace I x) :
@@ -1727,7 +1708,6 @@ private theorem deTurckLieEndoDerivation_realizedFam_apply_jointContMDiffOn
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) ?_
   rw [deTurckLieDLbFib, ContinuousLinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieBiArgY (x : M) (u0 u1 u2 u3 : TangentSpace I x)
     (v : Fin 2 → TangentSpace I x) :
@@ -1737,7 +1717,6 @@ private theorem dLieBiArgY (x : M) (u0 u1 u2 u3 : TangentSpace I x)
   funext j
   fin_cases j <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieBiArgXi (x : M) (u0 u1 u2 u3 : TangentSpace I x)
     (v : Fin 2 → TangentSpace I x) :
@@ -1747,7 +1726,6 @@ private theorem dLieBiArgXi (x : M) (u0 u1 u2 u3 : TangentSpace I x)
   funext j
   fin_cases j <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieXiArgA (x : M) (a0 a1 a2 a3 : TangentSpace I x) :
     (fun i : Fin 4 => (![a0, a1, a2, a3] : Fin 4 → TangentSpace I x) (dLieXiPermA i)) =
@@ -1755,7 +1733,6 @@ private theorem dLieXiArgA (x : M) (a0 a1 a2 a3 : TangentSpace I x) :
   funext j
   fin_cases j <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem dLieXiArgB (x : M) (a0 a1 a2 a3 : TangentSpace I x) :
     (fun i : Fin 4 => (![a0, a1, a2, a3] : Fin 4 → TangentSpace I x) (dLieXiPermB i)) =

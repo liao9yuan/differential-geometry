@@ -23,7 +23,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -54,7 +53,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 def koszulCovGradRaw (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) :
     SmoothCcTensor g₀ 0 3 :=
   (1 / 2 : ℝ) •
@@ -65,7 +63,6 @@ def koszulCovGradRaw (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g�
         - domDomCongrSection (I := I) g₀ (Equiv.swap (1 : Fin 3) 2)
           (covGrad (I := I) (M := M) g₀ 0 2 S))
 
-set_option linter.unusedSectionVars false in
 private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (x : M) (a b c : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
@@ -106,7 +103,6 @@ private lemma bdKRaw_unitModel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCc
     funext i; fin_cases i <;> simp [Equiv.swap_apply_def]
   rw [e1, e2, e3]
 
-set_option linter.unusedSectionVars false in
 private lemma bdKRaw_unitModel_eq_linearizedKoszul (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (a b c : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ S) x ![c, a, b] =
@@ -114,7 +110,6 @@ private lemma bdKRaw_unitModel_eq_linearizedKoszul (g₀ : SmoothRiemannianMetri
   rw [bdKRaw_unitModel (I := I) (M := M) g₀ S x a b c,
     linearizedKoszulCovec_apply (I := I) g₀ S x a b c]
 
-set_option linter.unusedSectionVars false in
 private lemma bdInner_sharpKoszul_left (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (a b z : TangentSpace I x) :
     g₁.inner x (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) z =
@@ -122,7 +117,6 @@ private lemma bdInner_sharpKoszul_left (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [sharpRaisedKoszulVec]
   exact inner_metricSharp (I := I) g₁ x (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
-set_option linter.unusedSectionVars false in
 private lemma bdInner_sharpKoszul_right (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (a b z : TangentSpace I x) :
     g₁.inner x z (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) =
@@ -131,7 +125,6 @@ private lemma bdInner_sharpKoszul_right (g₀ g₁ : SmoothRiemannianMetric I M)
   exact inner_metricSharp_right (I := I) g₁ x (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma bdKoszulCc_unitModel_eq_g1_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -144,7 +137,6 @@ private lemma bdKoszulCc_unitModel_eq_g1_inner (g₀ g₁ : SmoothRiemannianMetr
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma bdSlotExtendIter_three_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 3) (x : M) (D : Tensor0SSpace 3 I x)
     (u : Fin 6 → TangentSpace I x) :
@@ -281,7 +273,6 @@ def bdSGKTau4 : Equiv.Perm (Fin 6) :=
    by decide, by decide⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdSGKMvWeight_unitModel_gen (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (P S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
@@ -400,7 +391,6 @@ def sharpGradKoszulWeightedTerm (g₀ g₁ : SmoothRiemannianMetric I M) (σ : E
         (koszulCovecCc (I := I) g₀ P)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetric I M)
     (P S : SmoothCcTensor g₀ 0 2)
@@ -615,7 +605,6 @@ private lemma bdSGKWeights_unitModel_eq_kernel (g₀ g₁ : SmoothRiemannianMetr
   rw [hT1, hT2, hT3, hT4]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
     (P S : SmoothCcTensor g₀ 0 2)
@@ -707,7 +696,6 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
       (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
       (v 0) (v 1)]
 
-set_option linter.unusedSectionVars false in
 private lemma bdCovGrad_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) (x : M) (v : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 (c • T)) x v =
@@ -716,7 +704,6 @@ private lemma bdCovGrad_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
   rw [bdUnitModel_smul (I := I) (M := M) g₀ 3 c (covGrad (I := I) (M := M) g₀ 0 2 T) x]
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma bdSymmSCovGrad3_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) (x : M) (v : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (symmSCovGrad3 (I := I) g₀ (c • T)) x v =
@@ -724,7 +711,6 @@ private lemma bdSymmSCovGrad3_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
   rw [symmSCovGrad3_def, symmSCovGrad3_def, symmS_smul (I := I) (M := M) g₀ c T]
   exact bdCovGrad_unitModel_smul (I := I) (M := M) g₀ (ccTensor02Symm (I := I) g₀ T) c x v
 
-set_option linter.unusedSectionVars false in
 private lemma bdKoszulCc_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (koszulCovecCc (I := I) g₀ (c • T)) x m =
@@ -739,7 +725,6 @@ private lemma bdKoszulCc_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     bdSymmSCovGrad3_unitModel_smul (I := I) (M := M) g₀ T c x]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma bdKRaw_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (koszulCovGradRaw (I := I) (M := M) g₀ (c • T)) x m =
@@ -755,7 +740,6 @@ private lemma bdKRaw_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
@@ -776,7 +760,7 @@ private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_smul,
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
   refine congrArg _ ?_
-  show unitModel (I := I) (M := M) g₀ 4
+  change unitModel (I := I) (M := M) g₀ 4
       (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ (c • T) (c • T)) x m =
     unitModel (I := I) (M := M) g₀ 4
       ((c * c) • sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ σ T T) x m
@@ -804,7 +788,6 @@ private lemma bdSGKMvWeight_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     bdKRaw_unitModel_smul (I := I) (M := M) g₀ T c x]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma bdSGKWeights_pair_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
     (sharpGradKoszulWeightedTerm (I := I) (M := M) g₀ g₁ bdSGKTau1 (c • T) (c • T) +
@@ -823,7 +806,6 @@ private lemma bdSGKWeights_pair_smul (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [← smul_add, ← smul_add, ← smul_sub]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma bdXiChain_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) (w : Fin 6 → E) :
     Tensor0SSpace.toModel
@@ -848,7 +830,6 @@ private lemma bdXiChain_toModel (g₀ : SmoothRiemannianMetric I M)
     (fun i => w (armPairTraceSlotPerm6 i))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
@@ -922,7 +903,6 @@ lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma bdTensorProd_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (W : Tensor0SSpace 4 I x) (u : Fin 6 → E) :
     Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 x D W) u =
@@ -939,7 +919,6 @@ private lemma bdTensorProd_toModel (x : M) (D : Tensor0SSpace 2 I x)
     fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma bdSGKProd_toSection (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x) :
     (show Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 6 I x from
@@ -971,7 +950,6 @@ private lemma bdSGKProd_toSection (g₀ : SmoothRiemannianMetric I M)
     funext k
     fin_cases k <;> rfl
 
-set_option linter.unusedSectionVars false in
 private theorem bdJointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -1006,7 +984,6 @@ private theorem bdJointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
-set_option linter.unusedSectionVars false in
 private theorem bdJointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -1041,7 +1018,6 @@ private theorem bdJointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
-set_option linter.unusedSectionVars false in
 private theorem bdTensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
     (P : ∀ p : M × ℝ, Tensor0SSpace m I p.1)
     (Q : ∀ p : M × ℝ, Tensor0SSpace k I p.1)
@@ -1112,7 +1088,6 @@ private theorem bdTensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
     exact hpointwise p hx
   · exact hpointwise p₀ (by rw [← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)
 
-set_option linter.unusedVariables false in
 
 theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
@@ -1686,7 +1661,6 @@ theorem ricciArmSharpGradKoszulResidualField_realizedFam_threeArmHjoint
   refine hCLM.congr (fun p _ => ?_)
   rfl
 
-set_option linter.unusedVariables false in
 
 theorem ricciArmRicciFoldRemainderField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}

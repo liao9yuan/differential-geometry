@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -43,7 +42,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
@@ -53,7 +51,6 @@ private theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : �
   | succ j ih =>
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 
 theorem iteratedCovGrad_symmS_eq (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (k : ℕ) :
@@ -63,7 +60,6 @@ theorem iteratedCovGrad_symmS_eq (g₀ : SmoothRiemannianMetric I M)
           (domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T) := by
   rw [ccTensor02Symm, iteratedCovGrad_smul, iteratedCovGrad_add, smul_add]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -80,7 +76,6 @@ private theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.smul_comp]
 
-set_option linter.unusedSectionVars false in
 
 theorem symmAbsorbedPrincipalCoeff_appCc_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
@@ -152,7 +147,6 @@ noncomputable def reindexCoeffFibGen (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x :
             σ').toContinuousLinearEquiv.toContinuousLinearMap).comp
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) r x).toContinuousLinearMap))
 
-set_option linter.unusedSectionVars false in
 
 theorem reindexCoeffFibGen_apply (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x)
@@ -166,7 +160,6 @@ theorem reindexCoeffFibGen_apply (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x : M)
   congr 1
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem reindexCoeffFibGen_contMDiff (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) :
@@ -229,7 +222,6 @@ noncomputable def reindexCoeffGen (g₀ : SmoothRiemannianMetric I M) (r s : ℕ
       contMDiff_toFun := reindexCoeffFibGen_contMDiff (I := I) (M := M) g₀ r s R σ' }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem reindexCoeffGen_toSection (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) (x : M) :
@@ -240,7 +232,6 @@ set_option linter.unusedSectionVars false in
             R.toSection x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem reindexCoeffGen_appCc_eq (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
     (R : SmoothCcTensor g₀ r 2) (σ' : Equiv.Perm (Fin r))
@@ -278,7 +269,6 @@ noncomputable def symmAbsorbedCoeff (g₀ : SmoothRiemannianMetric I M) (i : ℕ
     (σ' : Equiv.Perm (Fin (2 + i))) : SmoothCcTensor g₀ (2 + i) 2 :=
   (1 / 2 : ℝ) • R + (1 / 2 : ℝ) • reindexCoeffGen (I := I) (M := M) g₀ (2 + i) 2 R σ'
 
-set_option linter.unusedSectionVars false in
 
 theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     (S : SmoothCcTensor g₀ 0 2) (R : SmoothCcTensor g₀ (2 + i) 2)
@@ -340,7 +330,6 @@ theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     simp only [smul_eq_mul]
   rw [symmAbsorbedCoeff, hLHS, hRHS]
 
-set_option linter.unusedSectionVars false in
 
 theorem inverseMetricSharpFib_sub_inner_g1
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
@@ -353,7 +342,6 @@ theorem inverseMetricSharpFib_sub_inner_g1
   rw [map_sub, ContinuousLinearMap.sub_apply,
       inverseMetricSharpFib_inner (I := I) g₁ x α w]
 
-set_option linter.unusedSectionVars false in
 
 theorem inverseMetricSharpFib_sub_inner_g1_realize
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -386,7 +374,6 @@ theorem inverseMetricSharpFib_sub_inner_g1_realize
     ring
   rw [hsub]; ring
 
-set_option linter.unusedSectionVars false in
 
 theorem cotangentCov_leviCivita_diff_endpoint
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
@@ -414,7 +401,6 @@ theorem cotangentCov_leviCivita_diff_endpoint
   rw [hcocycle, map_sub]
   linarith [h1, h1']
 
-set_option linter.unusedSectionVars false in
 
 theorem oArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (dir : TangentSpace I x) :
@@ -450,7 +436,6 @@ theorem oArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
   rw [map_sub]
   abel
 
-set_option linter.unusedSectionVars false in
 
 theorem oArm_leg_eq_connDiff (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (dir : TangentSpace I x) :
@@ -475,7 +460,6 @@ theorem oArm_leg_eq_connDiff (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     ContinuousLinearMap.flip_apply, ContinuousLinearMap.coe_coe]
   exact hbridge
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (w v : TangentSpace I x) :
@@ -492,7 +476,6 @@ theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
   rw [hYx] at e1 e2 e3
   rw [e1, e2, e3]; abel
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiff_bilinear_diff_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (a a' dir : TangentSpace I x) :
@@ -504,7 +487,6 @@ theorem connDiff_bilinear_diff_split (g₀ g₁ g₁' : SmoothRiemannianMetric I
   rw [map_sub, ContinuousLinearMap.sub_apply]
   abel
 
-set_option linter.unusedSectionVars false in
 
 theorem quadArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (q q' dir : TangentSpace I x) :
@@ -516,7 +498,6 @@ theorem quadArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
   rw [map_sub, ContinuousLinearMap.sub_apply]
   abel
 
-set_option linter.unusedSectionVars false in
 
 theorem combinedLowerArm_extension_free
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -1053,7 +1034,6 @@ theorem combinedLowerArm_extension_free
   simp only [← hZv, ← hYw]
   linarith [hP]
 
-set_option linter.unusedSectionVars false in
 
 def lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] Tensor0SSpace 1 I x :=
@@ -1075,14 +1055,12 @@ def lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M) :
       dualToCotangent (I := I) (x := x) (g₁'.inner x v).toLinearMap := by
   rw [lowerFlatCLM, LinearMap.coe_toContinuousLinearMap']; rfl
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma cotangentToDual_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) (lowerFlatCLM (I := I) g₁' x v) w = g₁'.inner x v w := by
   rw [lowerFlatCLM_apply, cotangentToDual_dualToCotangent]; rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma inverseMetricSharpFib_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
@@ -1110,7 +1088,6 @@ lemma inverseMetricSharpFib_lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x
     exact absurd hzero (ne_of_gt hpos)
   exact hinj hkey
 
-set_option linter.unusedSectionVars false in
 
 lemma inverseMetricSharpFib_lowerFlatCLM_eq_metricSharp
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -1135,14 +1112,12 @@ def combinedLowerRaisedEndo0 (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
   rw [combinedLowerRaisedEndo0, ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.id_apply]
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma combinedLowerRaisedEndo0_self (g₁' : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     combinedLowerRaisedEndo0 (I := I) g₁' g₁' x v = 0 := by
   rw [combinedLowerRaisedEndo0_apply, inverseMetricSharpFib_lowerFlatCLM, sub_self]
 
-set_option linter.unusedSectionVars false in
 
 lemma combinedLowerRaisedEndo0_eq_metricSharp_flatDiff
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -1165,7 +1140,6 @@ lemma combinedLowerRaisedEndo0_eq_metricSharp_flatDiff
       DifferentialGeometry.Integral.DivergenceTheorem.metricSharp_def, map_sub]
   rw [hsharp_sub, hv]
 
-set_option linter.unusedSectionVars false in
 
 theorem metricFlat_chartComponent_contMDiffOn_local (g : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1191,7 +1165,6 @@ theorem metricFlat_chartComponent_contMDiffOn_local (g : SmoothRiemannianMetric 
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpb
   exact hpb.2
 
-set_option linter.unusedSectionVars false in
 
 theorem metricFlatDiff_chartComponent_contMDiffOn_local (g₁ g₁' : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1250,7 +1223,6 @@ def lowerSlotInsert0Fib (x : M) (Λ : TangentSpace I x →L[ℝ] TangentSpace I 
         ext m
         simp }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma lowerSlotInsert0Fib_apply_eval (x : M)
@@ -1272,7 +1244,6 @@ lemma lowerSlotInsert0Fib_apply_eval (x : M)
     · rw [if_neg h, Function.update_of_ne h]; rfl
   exact congrArg (fun t => Tensor0SSpace.toModel A t) hfam
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma lowerSlotInsert0Fib_curry (x : M)
@@ -1300,7 +1271,6 @@ def combinedLowerCoeff0Fib (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   lowerSlotInsert0Fib (I := I) (M := M) x (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x)
 
-set_option linter.unusedSectionVars false in
 
 lemma combinedLowerCoeff0Fib_apply_eval (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 2 I x) (m : Fin 2 → E) :
@@ -1373,13 +1343,11 @@ noncomputable def combinedLowerCoeff0 (g₀ g₁ g₁' : SmoothRiemannianMetric 
       contMDiff_toFun := combinedLowerCoeff0Fib_contMDiff (I := I) g₁ g₁' }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem combinedLowerCoeff0_toSection (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
     (combinedLowerCoeff0 (I := I) (M := M) g₀ g₁ g₁').toSection x =
       (show Tensor0SBundle.TensorRSSpace 2 2 I x from combinedLowerCoeff0Fib (I := I) g₁ g₁' x) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem combinedLowerCoeff0_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)
@@ -1401,7 +1369,6 @@ theorem combinedLowerCoeff0_appCc_eq
   rw [combinedLowerCoeff0Fib_apply_eval]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiff_g1g1'_order_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -1419,7 +1386,6 @@ theorem connDiff_g1g1'_order_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M
   rw [map_sub (inverseMetricSharpFib (I := I) g₁' x)]
   abel
 
-set_option linter.unusedSectionVars false in
 
 theorem order1CocycleLeg_flat_eq_explicit
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
@@ -1503,7 +1469,6 @@ noncomputable def ricciArmSubleadingCoeff (g₀ g₁ g₁' : SmoothRiemannianMet
     - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g₁'
         - ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁')
 
-set_option linter.unusedSectionVars false in
 
 theorem ricciArmSubleadingCoeff_appCc_eq
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
@@ -1599,7 +1564,6 @@ noncomputable def ricciArmOrder0CurvCoeffFib (g₁ : SmoothRiemannianMetric I M)
   ricciArmOrder0CurvCoeffFibSlot (I := I) (M := M) g₁ 0 x +
     ricciArmOrder0CurvCoeffFibSlot (I := I) (M := M) g₁ 1 x
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciArmOrder0CurvCoeffFibSlot_toModel (g₁ : SmoothRiemannianMetric I M)
     (k : Fin 2) (x : M)
@@ -1612,7 +1576,6 @@ set_option linter.unusedSectionVars false in
   exact slotInsertEndoFib_apply_eval (I := I) (M := M) 2 k x
     (ricEndoRaisedFib (I := I) g₁ x) D v
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciArmOrder0CurvCoeffFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -1626,7 +1589,6 @@ set_option linter.unusedSectionVars false in
     ricciArmOrder0CurvCoeffFibSlot_toModel, ricciArmOrder0CurvCoeffFibSlot_toModel]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem ricciArmOrder0CurvCoeffFibSlot_contMDiff (g₁ : SmoothRiemannianMetric I M) (k : Fin 2) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 2 2 ℝ E)) ∞
@@ -1646,7 +1608,6 @@ noncomputable def ricciArmOrder0CurvCoeffSlot (g₀ g₁ : SmoothRiemannianMetri
       contMDiff_toFun := ricciArmOrder0CurvCoeffFibSlot_contMDiff (I := I) g₁ k }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciArmOrder0CurvCoeffSlot_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (k : Fin 2) (x : M) :
@@ -1659,7 +1620,6 @@ noncomputable def ricciArmOrder0CurvCoeff (g₀ g₁ : SmoothRiemannianMetric I 
   ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 0 +
     ricciArmOrder0CurvCoeffSlot (I := I) (M := M) g₀ g₁ 1
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciArmOrder0CurvCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder0CurvCoeff (I := I) (M := M) g₀ g₁).toSection x =
@@ -1669,7 +1629,6 @@ set_option linter.unusedSectionVars false in
     Pi.add_apply, ricciArmOrder0CurvCoeffSlot_toSection, ricciArmOrder0CurvCoeffSlot_toSection]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem ricciArmOrder0CurvCoeff_appCc_eq_curvatureAction
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2)

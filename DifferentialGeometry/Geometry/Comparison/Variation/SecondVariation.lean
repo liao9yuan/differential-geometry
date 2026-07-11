@@ -23,7 +23,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.RegularParameterFirstVariation
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -887,7 +886,6 @@ theorem second_variation_of_arcLength_eq_indexForm
 
 set_option maxHeartbeats 4000000 in
 set_option synthInstance.maxHeartbeats 4000000 in
-set_option maxSynthPendingDepth 4 in
 
 theorem indexFormIntegrand_intervalIntegrable
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (L : ℝ) (_hL : 0 < L)

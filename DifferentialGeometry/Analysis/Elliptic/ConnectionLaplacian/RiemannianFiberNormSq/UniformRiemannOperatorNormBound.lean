@@ -28,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -37,7 +36,6 @@ private lemma metric_inner_self_nonneg
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
-set_option linter.unusedSectionVars false in
 
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
@@ -228,7 +226,6 @@ theorem exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     obtain ⟨ξ₀, hξ₀⟩ := hSph_ne
     exact absurd ⟨(b, ξ₀), hb, hξ₀⟩ hK_ne
 
-set_option linter.unusedSectionVars false in
 
 private lemma gInner_self_eq_chartGram_quadForm
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
@@ -264,7 +261,6 @@ private lemma gInner_self_eq_chartGram_quadForm
           (∑ j, c j • chartBasisVecFiber (I := I) α j x) := by rw [← hv]
     _ = _ := hgi
 
-set_option linter.unusedSectionVars false in
 
 private lemma riemannOp_LeviCivita_chartAlpha_frame_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}

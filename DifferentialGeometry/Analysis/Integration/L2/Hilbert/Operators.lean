@@ -14,7 +14,6 @@ import Mathlib.Analysis.Normed.Operator.Extend
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -45,7 +44,6 @@ section UniformInducing
 variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-set_option linter.unusedSectionVars false in
 
 theorem isUniformInducing_toL2 :
     IsUniformInducing (toL2 (g := g) (r := r) (s := s)) := by
@@ -69,20 +67,17 @@ variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
 
-set_option linter.unusedSectionVars false in
 
 def extendL2 (T : SmoothCcTensor g r s →L[ℝ] F) :
     TensorL2 r s g →L[ℝ] F :=
   T.extend (toL2 (g := g) (r := r) (s := s))
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem extendL2_apply_toL2 (T : SmoothCcTensor g r s →L[ℝ] F)
     (S : SmoothCcTensor g r s) :
     extendL2 T ((toL2 (g := g) (r := r) (s := s)) S) = T S :=
   ContinuousLinearMap.extend_eq T denseRange_toL2 isUniformInducing_toL2 S
 
-set_option linter.unusedSectionVars false in
 
 theorem extendL2_unique (T : SmoothCcTensor g r s →L[ℝ] F)
     (U : TensorL2 r s g →L[ℝ] F)
@@ -97,14 +92,12 @@ section MapL2
 variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
 variable {g : SmoothRiemannianMetric I M} {r₁ s₁ r₂ s₂ : ℕ}
 
-set_option linter.unusedSectionVars false in
 
 def mapL2
     (T : SmoothCcTensor g r₁ s₁ →L[ℝ] SmoothCcTensor g r₂ s₂) :
     TensorL2 r₁ s₁ g →L[ℝ] TensorL2 r₂ s₂ g :=
   T.completion
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem mapL2_apply_toL2
     (T : SmoothCcTensor g r₁ s₁ →L[ℝ] SmoothCcTensor g r₂ s₂)
@@ -118,7 +111,6 @@ set_option linter.unusedSectionVars false in
     (T S : UniformSpace.Completion (SmoothCcTensor g r₂ s₂))
   exact T.completion_apply_coe S
 
-set_option linter.unusedSectionVars false in
 
 theorem mapL2_unique
     (T : SmoothCcTensor g r₁ s₁ →L[ℝ] SmoothCcTensor g r₂ s₂)

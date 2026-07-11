@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamily
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 2400000
 set_option synthInstance.maxHeartbeats 1600000
 

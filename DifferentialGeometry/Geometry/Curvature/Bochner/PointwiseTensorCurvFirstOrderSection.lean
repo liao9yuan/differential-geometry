@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -144,7 +143,6 @@ noncomputable def tensorSlotZeroEvalFib (x : M) (s : ℕ)
           ContinuousLinearMap.smul_apply, tensor0SAsRS_smul_loc (I := I) (M := M) x]
         rfl }
 
-set_option linter.unusedSectionVars false in
 
 lemma slot0SliceFib_apply (x : M) (s : ℕ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
@@ -197,7 +195,6 @@ lemma slot0SliceFib_covGrad_eq (g : SmoothRiemannianMetric I M) (s : ℕ) (S : S
   exact tensor0SAsRS_unit_recover (I := I) (M := M) s x
     ((tensorCov (I := I) g 0 s).toFun (fun y : M => S.toSection y) x v)
 
-set_option linter.unusedSectionVars false in
 
 lemma slot0SliceFib_dir_add (x : M) (s : ℕ) (v v' : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
@@ -209,7 +206,6 @@ lemma slot0SliceFib_dir_add (x : M) (s : ℕ) (v v' : TangentSpace I x)
       (unitZeroSec (I := I) (M := M) x)))]
   rw [tensor0SAsRS_add_loc (I := I) (M := M) x]
 
-set_option linter.unusedSectionVars false in
 
 lemma slot0SliceFib_dir_smul (x : M) (s : ℕ) (c : ℝ) (v : TangentSpace I x)
     (Wx : TensorRSSpace 0 (s + 1) I x) :
@@ -333,7 +329,6 @@ noncomputable def curvatureGradContractionFib
         rw [gradArmDirCLM_value_smul (I := I) (M := M) g s B x c W, map_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 
 lemma gradArmFib_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -395,10 +390,9 @@ lemma gradArmFib_covGrad_slice_eq
     rw [hWx, slot0SliceFib_covGrad_eq (I := I) (M := M) g s S x
       (riemannOp (LeviCivita (I := I) g) x (B i x) (B a x) (B i x))]
 
-set_option linter.unusedVariables false in
 
 lemma slot0SliceFib_section_contMDiff
-    (g : SmoothRiemannianMetric I M) (s : ℕ)
+    (_g : SmoothRiemannianMetric I M) (s : ℕ)
     {Y : Π b : M, TensorRSSpace 0 (s + 1) I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
       (fun b : M => TotalSpace.mk' (TensorRSModel 0 (s + 1) ℝ E)

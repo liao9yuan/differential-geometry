@@ -341,7 +341,6 @@ lemma riemannSec_add_third
   simp only [ContinuousLinearMap.add_apply]
   abel
 
-set_option linter.style.show false in
 
 lemma riemannSec_smul_third
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -480,7 +479,6 @@ private lemma cov_covApply_sub_eq_cov_mlieBracket
       hσ_mdiff hbracket (Filter.univ_mem) hsec_ev
   rw [← hcov_swap, hσ_val]
 
-set_option linter.style.show false in
 
 theorem riemannSec_first_bianchi_levi_civita
     (g : SmoothRiemannianMetric I M)

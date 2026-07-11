@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatu
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -49,7 +48,6 @@ def ricBackgroundArmCoeffField (g₀ : SmoothRiemannianMetric I M) :
     | _ => 0
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem ricBackgroundArm_iteratedCovGrad_singleSum_le
     (g₀ : SmoothRiemannianMetric I M) (x₀ : M) (W : SmoothCcTensor g₀ 0 2) (a : ℕ) :

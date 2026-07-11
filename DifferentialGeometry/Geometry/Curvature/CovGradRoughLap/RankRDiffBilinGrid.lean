@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLe
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -28,7 +27,6 @@ variable [CompleteSpace E]
 
 section RankCastRS
 
-set_option linter.unusedSectionVars false in
 
 private theorem covGrad_heq_congr_dbRS (g : SmoothRiemannianMetric I M) (c : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b} (hYZ : HEq Y Z) :
@@ -46,7 +44,6 @@ private theorem iteratedCovGrad_covGrad_comm_heq_dbRS (g : SmoothRiemannianMetri
       rw [iteratedCovGrad_succ (g := g) (r := c) (s := s) (j := k + 1) X]
       exact covGrad_heq_congr_dbRS g c (by omega : (s + 1) + k = s + (k + 1)) ih
 
-set_option linter.unusedSectionVars false in
 
 private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
     (c : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b}

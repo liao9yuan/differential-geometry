@@ -222,7 +222,6 @@ lemma tensorHs_norm_mul_le_ball_mul_tensorHs (g₀ : SmoothRiemannianMetric I M)
     calc f u * f v ≤ R₀ * f v := mul_le_mul_of_nonneg_right h1 (hf_nn v)
       _ ≤ R₀ * f γ := mul_le_mul_of_nonneg_left h2 hR₀
 
-set_option linter.unusedSectionVars false in
 lemma iteratedCovGrad_le_of_sq_envelope_bound (g₀ : SmoothRiemannianMetric I M)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) (εa : ℝ) (hεa_nn : 0 ≤ εa)
     (C₀ : SmoothCcTensor g₀ 2 2) (T₀ : SmoothCcTensor g₀ 0 2)

@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutio
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -44,7 +43,6 @@ noncomputable def domDomCongrFibRank (d : ℕ) (σ : Equiv.Perm (Fin d)) (x : M)
           σ).toContinuousLinearEquiv.toContinuousLinearMap).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) d x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 theorem domDomCongrFibRank_apply (d : ℕ) (σ : Equiv.Perm (Fin d)) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace d I x) :
@@ -108,7 +106,6 @@ noncomputable def modelProdCLM (p q : ℕ) :
         simp only [smul_eq_mul]
         ring }
 
-set_option linter.unusedSectionVars false in
 
 theorem modelProdCLM_apply (p q : ℕ)
     (A : Tensor0SBundle.Tensor0SModel p ℝ E) (B : Tensor0SBundle.Tensor0SModel q ℝ E) :
@@ -126,7 +123,6 @@ noncomputable def tensor0SProdKappaFib {p q : ℕ} (x : M)
         (Tensor0SBundle.Tensor0SSpace.toModel κ)).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) p x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 theorem tensor0SProdKappaFib_apply {p q : ℕ} (x : M)
     (κ : Tensor0SBundle.Tensor0SSpace q I x) (D : Tensor0SBundle.Tensor0SSpace p I x) :
@@ -172,7 +168,6 @@ noncomputable def metricConnDiffLoweredTrilin (gm gA gB : SmoothRiemannianMetric
       (TangentSpace I x →L[ℝ] ℝ) (gm.inner x)).comp
     (PDE.DeTurck.connDiff (I := I) gA gB x)
 
-set_option linter.unusedSectionVars false in
 
 theorem metricConnDiffLoweredTrilin_apply (gm gA gB : SmoothRiemannianMetric I M) (x : M)
     (a b c : TangentSpace I x) :
@@ -186,7 +181,6 @@ noncomputable def metricConnDiffLoweredFib (gm gA gB : SmoothRiemannianMetric I 
   Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
     (trilinFormToModel (TangentSpace I x) (metricConnDiffLoweredTrilin (I := I) gm gA gB x))
 
-set_option linter.unusedSectionVars false in
 
 theorem metricConnDiffLoweredFib_toModel (gm gA gB : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 3 → TangentSpace I x) :
@@ -204,7 +198,6 @@ noncomputable def ccBilinConnDiffLoweredTrilin (g₀ : SmoothRiemannianMetric I 
       (TangentSpace I x →L[ℝ] ℝ) (ccTensorBilinSymm (I := I) g₀ V x)).comp
     (PDE.DeTurck.connDiff (I := I) gA gB x)
 
-set_option linter.unusedSectionVars false in
 
 theorem ccBilinConnDiffLoweredTrilin_apply (g₀ : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M) (x : M)
@@ -220,7 +213,6 @@ noncomputable def ccBilinConnDiffLoweredFib (g₀ : SmoothRiemannianMetric I M)
   Tensor0SBundle.Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
     (trilinFormToModel (TangentSpace I x) (ccBilinConnDiffLoweredTrilin (I := I) g₀ V gA gB x))
 
-set_option linter.unusedSectionVars false in
 
 theorem ccBilinConnDiffLoweredFib_toModel (g₀ : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M) (x : M)
@@ -235,7 +227,6 @@ theorem ccBilinConnDiffLoweredFib_toModel (g₀ : SmoothRiemannianMetric I M)
   rw [trilinFormToModel_apply, ccBilinConnDiffLoweredTrilin_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 private theorem trilinKernel_section_contMDiff
     (K : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)

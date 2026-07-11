@@ -5,10 +5,8 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tenso
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open scoped Manifold ContDiff Topology
 open Bundle Set Tensor0SBundle

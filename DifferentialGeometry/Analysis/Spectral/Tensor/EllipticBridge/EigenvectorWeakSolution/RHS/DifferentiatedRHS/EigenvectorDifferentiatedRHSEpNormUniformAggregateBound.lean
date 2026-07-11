@@ -418,7 +418,6 @@ private lemma eigenvectorChartRHSDiffNumerator_layerE_eLpNorm_le_uniform
   exact le_trans (wkpNorm_chosenWeakPartial_le (d := Module.finrank ℝ E) 0
     hΩ_open _ (l (Fin.last m))) (h_atom_le i)
 
-set_option linter.unusedVariables false in
 
 theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -434,7 +433,7 @@ theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le_uniform
     (h_prev : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       MemWkp (d := Module.finrank ℝ E) 1 2 (fChartEffPrev i)
         (chartTargetEuclid (I := I) (M := M) α))
-    (h_prev_zero : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+    (_h_prev_zero : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
       ∀ᵐ y ∂((volume : Measure EuclN).restrict
           (chartTargetEuclid (I := I) (M := M) α)),
         y ∉ chartPouKernel (I := I) (M := M) α → fChartEffPrev i y = 0) :

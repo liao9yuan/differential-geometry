@@ -318,7 +318,7 @@ theorem nablaRicci_eq_frame_trace_nablaCurvSec
       (fun i => B i b) (fun i j => smoothOrthoFrame_orthonormal (I := I) g x hb i j)]
     refine Finset.sum_congr rfl ?_
     intro i _
-    show g.inner b (riemannOp cov b (B i b) (V b) (W b)) (B i b) =
+    change g.inner b (riemannOp cov b (B i b) (V b) (W b)) (B i b) =
       g.inner b (riemannSec cov (B i) V W b) (B i b)
     rw [riemannOp_apply_smooth cov (hBsm i) hV hW]
   have hginner_sm : ∀ i, ContMDiff I 𝓘(ℝ) ∞ (fun b => g.inner b (S i b) (B i b)) := by
@@ -361,11 +361,11 @@ theorem nablaRicci_eq_frame_trace_nablaCurvSec
           - riemannSec cov (B i) (covApply cov X V) W x
           - riemannSec cov (B i) V (covApply cov X W) x := nablaCurvSec_def cov X (B i) V W x
     rw [hnc]
-    show cov.toFun (fun b => riemannSec cov (B i) V W b) x (X x) = _
+    change cov.toFun (fun b => riemannSec cov (B i) V W b) x (X x) = _
     abel
   have hriS : ∀ i, S i x = riemannOp cov x (B i x) (V x) (W x) := by
     intro i
-    show riemannSec cov (B i) V W x = riemannOp cov x (B i x) (V x) (W x)
+    change riemannSec cov (B i) V W x = riemannOp cov x (B i x) (V x) (W x)
     rw [← riemannOp_apply_smooth cov (hBsm i) hV hW]
   have hcVsm : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (covApply cov X V)) :=
     covApply_contMDiff (cov := cov) hX hV
@@ -615,7 +615,7 @@ theorem nablaCurvSec_metric_skew45
       (riemannOp_apply_smooth cov hY hZ hU).symm
     have hsk := riemannOp_metric_skew (I := I) g b (Y b) (Z b) (W b) (U b)
     rw [g.symm b (W b) (riemannOp cov b (Y b) (Z b) (U b))] at hsk
-    show g.inner b (riemannSec cov Y Z W b) (U b)
+    change g.inner b (riemannSec cov Y Z W b) (U b)
         + g.inner b (riemannSec cov Y Z U b) (W b) = 0
     rw [h1, h2]; exact hsk
   have hRWat : MDiffAt (T% (fun b => riemannSec cov Y Z W b)) x :=
@@ -642,7 +642,7 @@ theorem nablaCurvSec_metric_skew45
             + (fun b => g.inner b (riemannSec cov Y Z U b) (W b))) x =
           mfderiv I 𝓘(ℝ, ℝ) (fun _ : M => (0 : ℝ)) x :=
         Filter.EventuallyEq.mfderiv_eq hskew_sec
-      show (mfderiv I 𝓘(ℝ, ℝ)
+      change (mfderiv I 𝓘(ℝ, ℝ)
         ((fun b => g.inner b (riemannSec cov Y Z W b) (U b))
           + (fun b => g.inner b (riemannSec cov Y Z U b) (W b))) x) (X x) = 0
       rw [hmfd0, mfderiv_const]; rfl
@@ -725,7 +725,7 @@ theorem nablaCurvSec_inner_pair_symm
       (riemannOp_apply_smooth cov hY hZ hW).symm
     have h2 : riemannSec cov W U Y b = riemannOp cov b (W b) (U b) (Y b) :=
       (riemannOp_apply_smooth cov hW hU hY).symm
-    show g.inner b (riemannSec cov Y Z W b) (U b)
+    change g.inner b (riemannSec cov Y Z W b) (U b)
         - g.inner b (riemannSec cov W U Y b) (Z b) = 0
     rw [h1, h2, riemannOp_inner_pair_symm (I := I) g b (Y b) (Z b) (W b) (U b), sub_self]
   have hmd1 : MDifferentiableAt I 𝓘(ℝ)
@@ -746,7 +746,7 @@ theorem nablaCurvSec_inner_pair_symm
             - (fun b => g.inner b (riemannSec cov W U Y b) (Z b))) x =
           mfderiv I 𝓘(ℝ, ℝ) (fun _ : M => (0 : ℝ)) x :=
         Filter.EventuallyEq.mfderiv_eq hps_sec
-      show (mfderiv I 𝓘(ℝ, ℝ)
+      change (mfderiv I 𝓘(ℝ, ℝ)
         ((fun b => g.inner b (riemannSec cov Y Z W b) (U b))
           - (fun b => g.inner b (riemannSec cov W U Y b) (Z b))) x) (X x) = 0
       rw [hmfd0, mfderiv_const]; rfl

@@ -354,7 +354,6 @@ theorem principal_term_ge_lambda_norm_sq_nonsmooth
     exact integrable_finset_sum _ (fun i _ => h_inner i)
   exact integral_mono h_lhs_int h_rhs_int h_pointwise
 
-set_option linter.unusedVariables false in
 
 theorem nirenberg_master_inequality_nonsmooth
     {Ω : Set EuclN} (B : SmoothEllipticBilinearForm d Ω)

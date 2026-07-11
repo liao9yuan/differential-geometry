@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDiffer
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -46,7 +45,6 @@ def gInvDiffMetricArmCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
     | _ => 0
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem gInvDiffMetricArm_iteratedCovGrad_singleSum_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x₀ : M) (W : SmoothCcTensor g₀ 0 2) (a : ℕ) :
@@ -63,7 +61,6 @@ theorem gInvDiffMetricArm_iteratedCovGrad_singleSum_le
   fixedCoeffDiffOp_iteratedCovGrad_singleSum_le (I := I) (M := M) g₀
     (gInvDiffMetricArmCoeffField (I := I) g₀ g₁) x₀ 2 W a
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_gInvDiffMetricArm_neumannFibreBound (g₀ : SmoothRiemannianMetric I M) :
     ∃ Cnorm : ℝ, 0 ≤ Cnorm ∧
@@ -80,7 +77,6 @@ theorem exists_gInvDiffMetricArm_neumannFibreBound (g₀ : SmoothRiemannianMetri
   exists_gInvDiffFibreEndo_neumannFibreBound (I := I) g₀
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem covGrad_gInvDiffSlotCoeff_toSection_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
@@ -91,7 +87,6 @@ theorem covGrad_gInvDiffSlotCoeff_toSection_eq
   covGrad_toSection_apply (I := I) (M := M) g₀ 2 2 (gInvDiffSlotCoeff (I := I) g₀ g₁) x
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem covGrad_gInvDiffSlotCoeff_leibniz
     (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -109,7 +104,6 @@ theorem covGrad_gInvDiffSlotCoeff_leibniz
     (gInvDiffSlotCoeff (I := I) g₀ g₁).toSection w x v
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem covGrad_gInvDiffSlotCoeff_leibniz_value
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x)

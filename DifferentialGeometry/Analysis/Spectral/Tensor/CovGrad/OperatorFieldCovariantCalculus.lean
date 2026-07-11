@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldEvalua
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -66,7 +65,6 @@ def appCcFib (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem appCcFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -105,7 +103,6 @@ def operatorFieldApply (g : SmoothRiemannianMetric I M) (r s : ℕ)
       contMDiff_toFun := appCcFib_contMDiff (I := I) (M := M) g r s Φ W }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma appCc_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -114,10 +111,9 @@ set_option backward.isDefEq.respectTransparency false in
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x) := rfl
 
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 
-def slotExtendPointwise (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
+def slotExtendPointwise (_g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
     Tensor0SSpace (r + 1) I x →L[ℝ] Tensor0SSpace (s + 1) I x :=
   haveI : FiniteDimensional ℝ (Tensor0SSpace (r + 1) I x) := inferInstance
@@ -133,7 +129,6 @@ def slotExtendPointwise (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
           ContinuousLinearMap.comp_smul, map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotExtendFib_apply (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -144,7 +139,6 @@ set_option backward.isDefEq.respectTransparency false in
   rw [slotExtendPointwise, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotExtendFib_apply_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -162,7 +156,6 @@ lemma slotExtendFib_apply_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x :
   rw [hcurry]
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem contMDiff_uncurriedSection_of_contMDiff_homSection {n : ℕ}
@@ -212,7 +205,6 @@ theorem contMDiff_uncurriedSection_of_contMDiff_homSection {n : ℕ}
   exact (LinearIsometryEquiv.symm_apply_apply
     (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (n + 1) => E) ℝ) _).symm
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem slotExtendFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -289,7 +281,6 @@ def slotExtend (g : SmoothRiemannianMetric I M) (r s : ℕ)
       contMDiff_toFun := slotExtendFib_contMDiff (I := I) (M := M) g r s Φ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotExtend_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -299,7 +290,6 @@ set_option backward.isDefEq.respectTransparency false in
         slotExtendPointwise (I := I) (M := M) g r s x
           (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)) := rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem appCc_add_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -317,7 +307,6 @@ theorem appCc_add_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_add]; rfl]
   rw [ContinuousLinearMap.comp_add]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem appCc_smul_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -334,7 +323,6 @@ theorem appCc_smul_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.comp_smul]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -351,7 +339,6 @@ theorem appCc_smul_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.smul_comp]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem appCc_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -369,7 +356,6 @@ theorem appCc_add_left (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_add]; rfl]
   rw [ContinuousLinearMap.add_comp]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) (v : E) :
@@ -455,7 +441,6 @@ theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     hLHS, hT1, hT2]
   abel
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem tensor0S_curry_covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r : ℕ)
@@ -474,7 +459,6 @@ theorem tensor0S_curry_covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r : �
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons v0 m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 theorem covGrad_operatorFieldApply_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :

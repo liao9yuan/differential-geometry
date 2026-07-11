@@ -22,7 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M]
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
@@ -52,10 +51,10 @@ theorem mfderiv_expMapIntrinsic_at_zero
         (show TangentSpace I p from (0 : E))) = 0 := by
       have hgz : g.inner p (show TangentSpace I p from (0 : E))
           (show TangentSpace I p from (0 : E)) = 0 := by
-        show g.inner p (0 : TangentSpace I p) (0 : TangentSpace I p) = 0
+        change g.inner p (0 : TangentSpace I p) (0 : TangentSpace I p) = 0
         simp
       rw [hgz, Real.sqrt_zero]
-    show Real.sqrt (g.inner p (show TangentSpace I p from (0 : E))
+    change Real.sqrt (g.inner p (show TangentSpace I p from (0 : E))
       (show TangentSpace I p from (0 : E))) < ρ
     rw [h0]; exact hρ_pos
   have hEvEq :

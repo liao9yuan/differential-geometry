@@ -22,7 +22,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

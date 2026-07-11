@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponent
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -133,7 +132,6 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     _ = Npair * Real.sqrt Craw * ‖S.toSection b‖ := by
         rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hNpair_def]; ring
 
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 

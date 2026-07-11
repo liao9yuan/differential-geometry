@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -32,7 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem rawConnLap_three_l2Inner_covGrad_eq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
@@ -61,7 +59,6 @@ theorem rawConnLap_three_l2Inner_covGrad_eq
   rw [hGΔ_def, hS_def]
   rw [covGrad_rawConnLap_l2Inner_covGrad_eq_neg_rawConnLap_normSq (I := I) (M := M) g T]
 
-set_option linter.unusedSectionVars false in
 
 theorem secondCovGrad_l2NormSq_le_rawConnLap_add_self
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)

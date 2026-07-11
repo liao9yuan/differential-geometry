@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Geodesic.GeodesicEquationFromIntegralCurve
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,11 +30,10 @@ section UniformConfinement
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedVariables false in
 
 lemma exists_uniform_orbit_in_inner_ball
     (g : SmoothRiemannianMetric I M) (p : M)
-    {x₀ : E} (hx₀_def : x₀ = extChartAt I p p)
+    {x₀ : E} (_hx₀_def : x₀ = extChartAt I p p)
     {b : ContDiffBump ((x₀, (0 : E)) : E × E)}
     {ρ_V4 T_V4 : ℝ} (hρ_V4_pos : 0 < ρ_V4) (hT_V4_pos : 0 < T_V4)
     {Φ : (E × E) × ℝ → E × E}
@@ -180,20 +178,19 @@ section UniformChartPhaseODE
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedVariables false in
 
 lemma orbit_hasDerivAt_chartPhaseVF_uniform
     (g : SmoothRiemannianMetric I M) (p : M)
-    {x₀ : E} (hx₀_def : x₀ = extChartAt I p p)
+    {x₀ : E} (_hx₀_def : x₀ = extChartAt I p p)
     {b : ContDiffBump ((x₀, (0 : E)) : E × E)}
-    {r : ℝ≥0} {ε : ℝ} (hr_pos : 0 < r) (hε_pos : 0 < ε)
+    {r : ℝ≥0} {ε : ℝ} (_hr_pos : 0 < r) (_hε_pos : 0 < ε)
     {Φ : (E × E) × ℝ → E × E}
     (hΦ_ILF : DifferentialGeometry.Analysis.ODE.Flow.IsLocalFlow
         (chartPhaseVFTime (I := I) g p ((x₀, (0 : E)) : E × E) b)
         (0 : ℝ) ((x₀, (0 : E)) : E × E) r (-ε) ε Φ)
-    (hb_sub : Metric.closedBall ((x₀, (0 : E)) : E × E) b.rOut ⊆
+    (_hb_sub : Metric.closedBall ((x₀, (0 : E)) : E × E) b.rOut ⊆
       (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E))
-    {ρ T : ℝ} (_hρ_pos : 0 < ρ) (hT_pos : 0 < T) (hT_lt_ε : T < ε)
+    {ρ T : ℝ} (_hρ_pos : 0 < ρ) (_hT_pos : 0 < T) (hT_lt_ε : T < ε)
     (hρ_le_r : ρ ≤ (r : ℝ))
     (h_orbit_in : ∀ v ∈ Metric.ball (0 : E) ρ, ∀ s ∈ Set.Icc (-T) T,
       Φ (((x₀, v) : E × E), s) ∈

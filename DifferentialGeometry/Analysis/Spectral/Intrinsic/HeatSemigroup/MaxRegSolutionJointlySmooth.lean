@@ -69,10 +69,9 @@ private theorem ccTensorBilinSymm_zero_apply_jsmooth (g : SmoothRiemannianMetric
   rw [h0, ccTensorBilinSymm_smul]
   ring
 
-set_option linter.unusedVariables false in
 
 private theorem realizedSolField_continuousOn_smoothCcToTensorHs
-    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T₁ : ℝ} (hT₁_pos : 0 < T₁)
+    (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T₁ : ℝ} (_hT₁_pos : 0 < T₁)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
     (φ : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ)
     (hφ_smooth : ∀ i, ContDiff ℝ ∞ (φ i))
@@ -116,15 +115,14 @@ private theorem realizedSolField_continuousOn_smoothCcToTensorHs
     (fun t => smoothCcToTensorHs (I := I) (M := M) g₀ σ (F t)) φ hcoeff'
     (fun i => (hφ_smooth i).continuous.continuousOn) hCmaj_sum hmass
 
-set_option linter.unusedVariables false in
 
 private theorem realizedFamily_flowDeriv_of_repr
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (F_RHS : SmoothRiemannianMetric I M →
       (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
-    (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+    (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ S) δ),
       SmoothCcTensor g₀ 0 2)
     (hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -134,9 +132,9 @@ private theorem realizedFamily_flowDeriv_of_repr
       ccTensorBilinSymm (I := I) g₀
           (Nsec S hδ_lt hδ + rawTensorConnLapSmooth (I := I) g₀ 0 2 S) x v w =
         F_RHS (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδ) x v w)
-    {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
-    {d₂F : ℝ} (hd₂F_pos : 0 < d₂F) (hd₂F_le : d₂F ≤ T) (hT₁_le_d2F : T₁ ≤ d₂F)
+    {T : ℝ} (_hT : 0 < T) (_hT1 : T ≤ 1)
+    {T₁ : ℝ} (_hT₁_pos : 0 < T₁) (_hT₁_le : T₁ ≤ T)
+    {d₂F : ℝ} (hd₂F_pos : 0 < d₂F) (_hd₂F_le : d₂F ≤ T) (hT₁_le_d2F : T₁ ≤ d₂F)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
@@ -494,7 +492,6 @@ private theorem realizedFamily_jointChartGramSmooth
   jointChartGramSmooth_of_spectralSmooth_timeSmooth (I := I) (M := M)
     g hT T_rep hδ_lt hδ φ hφ_smooth hcoeff hmodemass
 
-set_option linter.unusedVariables false in
 
 private theorem forcingSmoothTimeCoordsSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -527,7 +524,6 @@ private theorem forcingSmoothTimeCoordsSymm
   deTurckForcing_smoothTimeCoordinateFamilySymm (I := I) (M := M) g₀ g_bg a ha_super hT hT1
     hTT₀ gforce hforce hgforce
 
-set_option linter.unusedVariables false in
 
 private theorem forcingSmoothCoordsRealizeSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -548,7 +544,7 @@ private theorem forcingSmoothCoordsRealizeSymm
         (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) gforce t)))
     (hgforce : ‖gforce‖ ≤ deTurckForceBallRadiusSymm (I := I) (M := M) g₀ g_bg a (by omega))
-    (htrace : timeH1.trace0 _ T u = 0) :
+    (_htrace : timeH1.trace0 _ T u = 0) :
     ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∃ f : TensorEigenIdx (I := I) (M := M) g₀ 0 2 → ℝ → ℝ,
       (∀ i, ContDiff ℝ ∞ (f i)) ∧
@@ -595,7 +591,6 @@ private theorem forcingSmoothCoordsRealizeSymm
     (measurableSet_Icc (a := (0 : ℝ)) (b := d₂))] with s hs
   rw [Set.IccExtend_of_mem hd₂_pos.le _ hs, hF_coeff s hs i]
 
-set_option linter.unusedVariables false in
 
 private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -652,20 +647,19 @@ private theorem realizedSol_solField_smallnessHorizon_Ha2Symm
   rwa [hW_def] at this
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (ccTensor02Symm) in
-set_option linter.unusedVariables false in
 
 private theorem realizedForcingCoord_eq_smoothNSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
-    (hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
+    (_hTT₀ : T ≤ (quasilinear_maxreg_solution_of_nemytskii g₀ a
       (deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a)
       (deTurckSobolevNHa2Symm_lipschitzWith_lipConst (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a ha_super)
       (deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (I := I) (M := M) (g₀ := g₀)
         (g_bg := g_bg) a ha_super)).choose)
     {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
-    {d₂F : ℝ} (hd₂F_pos : 0 < d₂F) (hd₂F_le : d₂F ≤ T) (hT₁_le_d2F : T₁ ≤ d₂F)
+    {d₂F : ℝ} (hd₂F_pos : 0 < d₂F) (_hd₂F_le : d₂F ≤ T) (hT₁_le_d2F : T₁ ≤ d₂F)
     (u : MaxRegSolutionSpace (I := I) (M := M) (a : ℝ) T)
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)) T)
     (hduh : u = maxRegDuhamelMap (I := I) (M := M) (a : ℝ) hT hT1
@@ -869,7 +863,6 @@ private theorem realizedForcingCoord_eq_smoothNSymm
   exact heqOn ht₀
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (ccTensor02Symm) in
-set_option linter.unusedVariables false in
 
 theorem deTurckRicci_forcingBootstrap_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -914,17 +907,17 @@ theorem deTurckRicci_forcingBootstrap_symm
                     (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                     (Nat.cast_nonneg a) (timeH1.toFun u t) →
                   ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀) ∧
-            (∀ {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
-                (hT₁_le_d2F : T₁ ≤ d₂F)
+            (∀ {T₁ : ℝ} (_hT₁_pos : 0 < T₁) (_hT₁_le : T₁ ≤ T)
+                (_hT₁_le_d2F : T₁ ≤ d₂F)
                 (Ffam : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
                 (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
                   (ccTensorBilinSymm (I := I) g₀ (Ffam t)) δ)
-                (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+                (_h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
                   SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (Ffam t) =
                     tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
                       (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
                       (Nat.cast_nonneg a) (timeH1.toFun u t))
-                (hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+                (_hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
                   ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (Ffam t)‖ ≤ R₀),
               ∀ t ∈ Set.Ico (0 : ℝ) T₁, ∀ i,
                 f i t = tensorL2Coeff (I := I) (M := M)
@@ -952,18 +945,17 @@ theorem deTurckRicci_forcingBootstrap_symm
       hT hT1 hTT₀ hT₁_pos hT₁_le hd₂F_pos hd₂F_le hT₁_le_d2F u gforce hduh hforce htrace
       Ffam hδ_lt hδ f hf_id hf_smooth hf_mass hforce_coord h_pin hball
 
-set_option linter.unusedVariables false in
 
 theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     (ha_eq : a = 4 * Module.finrank ℝ E + 10)
-    (Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
+    (_Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ))
     (F_RHS : SmoothRiemannianMetric I M →
       (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
-    (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
+    (Nsec : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (_hδ_lt : δ < 1)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ S) δ),
       SmoothCcTensor g₀ 0 2)
     (hRepr : ∀ (S : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -991,7 +983,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Nat.cast_nonneg a) (timeH1.toFun u t)) i =
         perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i) (f i) t)
-    {R₀ : ℝ} (hR₀_pos : 0 < R₀)
+    {R₀ : ℝ} (_hR₀_pos : 0 < R₀)
     (hHorizon : ∃ d₂ : ℝ, 0 < d₂ ∧ d₂ ≤ T ∧
       ∀ t ∈ Set.Icc (0 : ℝ) d₂, ∀ S : SmoothCcTensor g₀ 0 2,
         SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) S =
@@ -999,17 +991,17 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
             (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
             (Nat.cast_nonneg a) (timeH1.toFun u t) →
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) S‖ ≤ R₀)
-    (hForceRepr_fam : ∀ {T₁ : ℝ} (hT₁_pos : 0 < T₁) (hT₁_le : T₁ ≤ T)
-        (hT₁_le_d2F : T₁ ≤ d₂F)
+    (hForceRepr_fam : ∀ {T₁ : ℝ} (_hT₁_pos : 0 < T₁) (_hT₁_le : T₁ ≤ T)
+        (_hT₁_le_d2F : T₁ ≤ d₂F)
         (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
         (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (F t)) δ)
-        (h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
+        (_h_pin : ∀ t ∈ Set.Icc (0 : ℝ) T₁,
           SmoothCcTensor.toL2 (g := g₀) (r := 0) (s := 2) (F t) =
             tensorHsToL2 (I := I) (M := M) (g := g₀) (r := 0) (s := 2)
               (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
               (Nat.cast_nonneg a) (timeH1.toFun u t))
-        (hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
+        (_hball : ∀ t ∈ Set.Ico (0 : ℝ) T₁,
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) (F t)‖ ≤ R₀),
       ∀ t ∈ Set.Ico (0 : ℝ) T₁, ∀ i,
         f i t = tensorL2Coeff (I := I) (M := M)

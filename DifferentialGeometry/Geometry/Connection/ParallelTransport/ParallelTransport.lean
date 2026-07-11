@@ -12,7 +12,6 @@ import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.Calculus.MeanValue
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -625,11 +624,10 @@ theorem exists_piece_parallel_section [I.Boundaryless]
       rw [hrep_eqβ.deriv_eq, hrep_eqβ.eq_of_nhds]
     rw [hgoal, hYβ_zero]
 
-set_option linter.unusedVariables false in
 
 theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (hlohi : lo ≤ hi)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (_hlohi : lo ≤ hi)
     (V W : ∀ t, TangentSpace I (γ t))
     (hVdiff : ∀ t ∈ Set.Icc lo hi,
       DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)

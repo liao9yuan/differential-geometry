@@ -1187,7 +1187,6 @@ private theorem pje_icg_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma riemannianFiberNormSq_toSection_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (V : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r s x ((c • V).toSection x) =
@@ -3754,7 +3753,6 @@ theorem exists_smoothCcToTensorHs_coeffAction_fibreSmallCoeff_opNorm_le
       rw [hnormL, hnorm2, hnorm1]
       exact hb
 
-set_option linter.unusedSectionVars false in
 private lemma gFibreOpBound_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMetric I M)
     {δ : ℝ}
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -3775,7 +3773,6 @@ private lemma gFibreOpBound_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMe
   rw [hgi, Real.sqrt_one, mul_one, mul_one] at hb
   exact le_trans (abs_nonneg _) hb
 
-set_option linter.unusedSectionVars false in
 
 private lemma riemannianFiberNormSq_le_of_ccTensorBilinSymm_gFibreOpBound [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) {δ : ℝ}
@@ -3885,8 +3882,6 @@ private lemma riemannianFiberNormSq_le_of_ccTensorBilinSymm_gFibreOpBound [Nonem
     _ = (Module.finrank ℝ E : ℝ) * δ ^ 2 := by
         rw [show n = Module.finrank ℝ E from hn]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
 
 private lemma coeffAction_arm0_oneMinusConnLapIter_l2_le

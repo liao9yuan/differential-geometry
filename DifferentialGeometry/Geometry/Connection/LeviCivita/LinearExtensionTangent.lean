@@ -173,7 +173,7 @@ lemma chartE_section_repr_linearExtensionTangent_eventuallyEq_const
   have hWb : linearExtensionTangent (I := I) x w b =
       coordExtensionTangent (I := I) x w b := by
     rw [linearExtensionTangent_apply, hb1, one_smul]
-  show chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w) b =
+  change chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w) b =
     tangentCoord (I := I) x w
   rw [chartE_section_repr_eq_trivToE, hWb, ← chartE_section_repr_eq_trivToE]
   exact chartE_section_repr_coordExtensionTangent_eq (I := I) x w hb2

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Geodesic.CrossVFReduction
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

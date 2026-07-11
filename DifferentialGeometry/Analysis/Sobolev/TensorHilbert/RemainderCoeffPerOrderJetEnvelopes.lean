@@ -44,7 +44,6 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-set_option linter.unusedVariables false in
 private theorem diagonalProductTerm_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -438,11 +437,10 @@ private theorem diagonalProductTerm_integral_le
             _ = Mbar ^ (7 * i) := e3
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) := e5
 
-set_option linter.unusedVariables false in
 theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
+    {δ₀ : ℝ} (_hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
@@ -625,16 +623,15 @@ theorem diagonalProductGrid_riemannianFiberNormSq_integral_ballUniform
       rw [heq2]
       exact le_add_of_nonneg_right hvol_nn
 
-set_option linter.unusedVariables false in
 theorem gInvDiffSlotCoeff_perOrder_l2_ballUniform_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →
@@ -696,16 +693,15 @@ theorem gInvDiffSlotCoeff_perOrder_l2_ballUniform_generic
     rw [hz]
     simpa using mul_nonneg (hCgrid_nn i) (hKgrid_nn i)
 
-set_option linter.unusedVariables false in
 theorem gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -762,7 +758,6 @@ theorem gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform
   exact hK (realizedFam (I := I) g₀ T T' hδ hδ' s) (convexPerturbation (I := I) g₀ T T' s)
     hδP_le hδP htie hPball i hi
 
-set_option linter.unusedSectionVars false in
 private theorem continuous_rfns_arm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -772,7 +767,6 @@ private theorem continuous_rfns_arm
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (S.toSection x),
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
-set_option linter.unusedSectionVars false in
 private theorem real_holder_two_nonneg_arm
     (g : SmoothRiemannianMetric I M) (φ ψ : M → ℝ)
     (hφc : Continuous φ) (hψc : Continuous ψ)
@@ -1368,7 +1362,6 @@ private lemma raisedKoszul_norm_iteratedCovGrad_koszul_le
 
 end RaisedKoszulOrder0SumHelpers
 
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral in
@@ -1378,9 +1371,9 @@ theorem raisedKoszul_order0sup_jetL2_ballUniform_generic
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (F : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ F i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 1 2 x
@@ -1465,7 +1458,6 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 lemma cometricDoubleTraceFib_sub_toModel_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
@@ -1510,7 +1502,6 @@ lemma cometricDoubleTraceFib_sub_toModel_eq
   rw [cometricLmodel_sub_eq_gInvDiffRaisedEndo (I := I) g₀ g₁ x
     ((Module.finBasis ℝ E).cDualBasis k)]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma cometricCastG0_sub_doubleTrace_clm
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
@@ -1522,7 +1513,6 @@ private lemma cometricCastG0_sub_doubleTrace_clm
       = (cometricDoubleTraceField (I := I) g₁ 1).toSection x := rfl
   rw [hcast, cometricDoubleTraceField_toSection, cometricDoubleTraceField_toSection]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 theorem cometricCastG0_eq_doubleTrace_add_appCcRS
     (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -1560,7 +1550,6 @@ end CometricCastG0Decomposition
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck in
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 theorem cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic
@@ -1569,9 +1558,9 @@ theorem cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ (Λ : ℝ) (F : ℕ → ℝ), 0 ≤ Λ ∧ (∀ i, 0 ≤ F i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         (∀ x : M, riemannianFiberNormSq (I := I) (M := M) g₀ 3 1 x
@@ -1817,16 +1806,15 @@ theorem cometricDoubleTraceField_order0sup_jetL2_ballUniform_generic
       rw [hsum0]
       exact hFnn i
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder1KoszulCoeff_perOrder_l2_ballUniform_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →

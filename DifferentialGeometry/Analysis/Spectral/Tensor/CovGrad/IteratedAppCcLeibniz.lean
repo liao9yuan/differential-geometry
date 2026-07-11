@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.AppCcDropIteratedGr
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 3200000
 
@@ -42,7 +41,6 @@ def appCcLeibnizPsi (g : SmoothRiemannianMetric I M) (b c : ℕ)
               (castCcTensorRank g ((b + j) + 1) (by omega : (c + i) + 1 = c + (i + 1))
                 (slotExtend (I := I) (M := M) g (b + j) (c + i) (appCcLeibnizPsi g b c Φ i j)))
 
-set_option linter.unusedSectionVars false in
 
 private theorem covGrad_appCcLeibniz_sum (g : SmoothRiemannianMetric I M) (a b c i : ℕ)
     (Ψ : (k : ℕ) → SmoothCcTensor g (b + k) (c + i)) (W : SmoothCcTensor g a b) :
@@ -62,7 +60,6 @@ private theorem covGrad_appCcLeibniz_sum (g : SmoothRiemannianMetric I M) (a b c
       iteratedCovGrad g a b (k + 1) W from (iteratedCovGrad_succ g a b k W).symm]
   congr 1
 
-set_option linter.unusedSectionVars false in
 
 private theorem appCcLeibnizPsi_succ_zero (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i : ℕ) :
@@ -70,7 +67,6 @@ private theorem appCcLeibnizPsi_succ_zero (g : SmoothRiemannianMetric I M) (b c 
       covGrad (I := I) (M := M) g (b + 0) (c + i) (appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem appCcLeibnizPsi_succ_succ (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i j : ℕ) :
@@ -85,7 +81,6 @@ private theorem appCcLeibnizPsi_succ_succ (g : SmoothRiemannianMetric I M) (b c 
               (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem iteratedCovGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (i : ℕ) :
@@ -177,7 +172,6 @@ theorem iteratedCovGrad_appCcRS_eq (g : SmoothRiemannianMetric I M) (a b c : ℕ
       rw [appCcLeibnizPsi_succ_zero]
       abel
 
-set_option linter.unusedSectionVars false in
 
 theorem iteratedCovGrad_operatorFieldApply_eq (g : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g b s) (W : SmoothCcTensor g 0 b) (i : ℕ) :

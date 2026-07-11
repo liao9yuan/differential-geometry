@@ -18,7 +18,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -57,7 +56,6 @@ def ccTensorRank4EvalAtUnitZeroSec (g : SmoothRiemannianMetric I M)
     (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 4 I y from G.toSection y)
       (unitZeroSec (I := I) (M := M) y)
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorFourUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (G : SmoothCcTensor g 0 4) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
@@ -85,7 +83,6 @@ private def refoldKernelArgumentPairEvalCLM (x : M) (v : Fin 2 → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 private lemma refoldKernelArgumentPairEvalCLM_apply (x : M) (v : Fin 2 → E)
     (D : Tensor0SSpace 2 I x) :
     refoldKernelArgumentPairEvalCLM (I := I) (M := M) x v D =
@@ -101,7 +98,6 @@ def curvatureRefoldMonomialFrameContraction (Gs : Π b : M, Tensor0SSpace 4 I b)
       (tensorLeadingPairSlotEvalCLM (I := I) (M := M) 2 x (B a x) (B b x)
         (tensorRank4PermuteCLM (I := I) (M := M) x σ (Gs x)))
 
-set_option linter.unusedSectionVars false in
 
 lemma refoldKernelContractionMonomialFibFixedFrame_apply
     (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4))
@@ -119,7 +115,6 @@ lemma refoldKernelContractionMonomialFibFixedFrame_apply
   rw [ContinuousLinearMap.smulRight_apply, refoldKernelArgumentPairEvalCLM_apply,
     curvatureRefoldMonomialFib_apply]
 
-set_option linter.unusedSectionVars false in
 lemma refoldKernelContractionMonomialFibFixedFrame_toModel
     (Gs : Π b : M, Tensor0SSpace 4 I b) (σ : Equiv.Perm (Fin 4))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
@@ -270,7 +265,6 @@ private def kcInnerPairBilin (x : M)
       map_add' := fun Y Y' => by rw [map_add, add_smul]
       map_smul' := fun c Y => by rw [map_smul, smul_eq_mul, RingHom.id_apply, mul_smul] }
 
-set_option linter.unusedSectionVars false in
 private lemma kcInnerPairBilin_apply (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X Y Y' : TangentSpace I x) :
@@ -307,7 +301,6 @@ private def kcOuterPairBilin (g : SmoothRiemannianMetric I M) (x : M)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
-set_option linter.unusedSectionVars false in
 private lemma kcOuterPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     kcOuterPairBilin (I := I) g x K L X X' =
@@ -370,7 +363,6 @@ private def kcToModelEvalCLM (s : ℕ) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 private lemma kcToModelEvalCLM_apply (s : ℕ) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     kcToModelEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
@@ -390,7 +382,6 @@ private def kcPairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           map_smul] }
 
-set_option linter.unusedSectionVars false in
 private lemma kcPairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) (p q : TangentSpace I x) :
     kcPairFeedScalarCLM (I := I) (M := M) s x G v p q =
@@ -503,7 +494,6 @@ def refoldKernelContractionMonomialField (g₀ g₁ : SmoothRiemannianMetric I M
         (ccTensorFourUnitValueSection_contMDiff (I := I) (M := M) g₀ G) σ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem refoldKernelContractionMonomialField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
     (σ : Equiv.Perm (Fin 4)) (x : M) :
@@ -521,7 +511,6 @@ def refoldKernelContractionField (g₀ g₁ : SmoothRiemannianMetric I M)
       - refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₃
       - refoldKernelContractionMonomialField (I := I) (M := M) g₀ g₁ G σ₄)
 
-set_option linter.unusedSectionVars false in
 
 theorem refoldKernelContractionField_toSection_eq_kernelFib_sum
     (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)
@@ -691,7 +680,6 @@ theorem refoldKernelContractionField_zero_argument (g₀ g₁ : SmoothRiemannian
   rw [refoldKernelContractionField, hmono σ₁, hmono σ₂, hmono σ₃, hmono σ₄]
   rw [show (0 : SmoothCcTensor g₀ 2 2) + 0 - 0 - 0 = 0 from by abel, smul_zero]
 
-set_option linter.unusedSectionVars false in
 private theorem foldIteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =
@@ -700,7 +688,6 @@ private theorem foldIteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (
   | zero => simp only [iteratedCovGrad_zero]
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma foldIteratedCovGrad_zero_arg (g₀ : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g₀ r s j (0 : SmoothCcTensor g₀ r s) = 0 := by
   rw [show (0 : SmoothCcTensor g₀ r s) = (0 : ℝ) • (0 : SmoothCcTensor g₀ r s) from
@@ -721,7 +708,6 @@ theorem refoldKernelContractionField_self (g₀ : SmoothRiemannianMetric I M)
         (metricDifferenceCcTensor (I := I) (M := M) g₀ g₀)) σ₁ σ₂ σ₃ σ₄ = 0 := by
   rw [metricDifferenceCcTensor_self, refoldKernelContractionField_zero_weight]
 
-set_option linter.unusedSectionVars false in
 
 theorem appCc_refoldKernelContractionField
     (g₀ g₁ : SmoothRiemannianMetric I M) (G : SmoothCcTensor g₀ 0 4)

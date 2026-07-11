@@ -68,7 +68,6 @@ private lemma chartPushed_pou_zero_off_KApha
   intro y hy hy_off
   exact chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M) α u hy hy_off
 
-set_option linter.unusedVariables false in
 
 theorem chartH2NonSmoothPOUWitness_of_laplacianDomain
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]

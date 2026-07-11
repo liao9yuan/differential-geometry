@@ -22,7 +22,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -56,7 +55,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g 0 r) :
     operatorFieldApply (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) W =
@@ -71,7 +69,6 @@ lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [show ((0 : SmoothCcTensor g 0 s).toSection x : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) =
       (0 : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) from rfl]
 
-set_option linter.unusedSectionVars false in
 lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric I M)
     {δ δ' : ℝ} :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3
@@ -95,7 +92,6 @@ lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric I M)
     Bundle.contMDiff_zeroSection ℝ (fun z : M => Tensor0SBundle.TensorRSSpace 3 2 I z)
   exact (hzero.comp contMDiff_fst).contMDiffOn
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_Csob_sub_pointwise_jet3_le
@@ -167,7 +163,6 @@ theorem exists_Csob_sub_pointwise_jet3_le
         mul_le_mul_of_nonneg_left hMn_le hCc_pos.le
     _ = (Cc * Ch * ((4 * k + 1 : ℕ) : ℝ) * 2) * R := by ring
 
-set_option linter.unusedSectionVars false in
 theorem ricciArmOrder1KoszulCoeff_appCc_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -540,19 +535,17 @@ theorem linearizedRicci_arm1Field_jointSmooth (g₀ : SmoothRiemannianMetric I M
       (linearizedRicciArm1Field (I := I) g₀ T T' hδ hδ') (δ := δ) (δ' := δ') :=
   (exists_arm0_arm1_corrField_data (I := I) g₀ T T' hδ hδ').choose_spec.choose_spec.2.1
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 3200000 in
 
 theorem ricciArmBaseFields_lichnerowicz_uniform_rfns_ballUniform
-    (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
+    (g₀ _g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ ΛC : ℝ, 0 ≤ ΛC ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -639,17 +632,15 @@ theorem ricciArmBaseFields_lichnerowicz_uniform_rfns_ballUniform
       nlinarith [hsub, hPrin', hTH', hK_nn]
     refine Real.sqrt_le_sqrt hbound
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 theorem exists_arm1Base_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -669,7 +660,6 @@ theorem exists_arm1Base_realizedFam_rfns_ballUniform
   refine hΛarm1 T T' hδ_le hδ hδ'_le hδ' s hs x ?_
   exact hCsob T T' hR hTball hT'ball s hs x
 
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 3200000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -679,9 +669,9 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λcorr : ℝ, 0 ≤ Λcorr ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -763,8 +753,6 @@ theorem exists_arm0_arm1_corrField_rfns_ballUniform
         corrFieldChristoffelBound (I := I) (M := M) g₀ a R δ₀ := hb1
     linarith [hbase1', hcorr1, hΛCbase_nn]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 3200000 in
 
 theorem ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
@@ -773,9 +761,9 @@ theorem ricciArmFields_concrete_lichnerowicz_uniform_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ ΛC : ℝ, 0 ≤ ΛC ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →

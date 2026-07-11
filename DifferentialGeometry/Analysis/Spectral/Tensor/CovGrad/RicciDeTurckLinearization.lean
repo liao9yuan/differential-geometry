@@ -15,7 +15,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -159,7 +158,6 @@ noncomputable def domDomCongrSection (g : SmoothRiemannianMetric I M) {s : ℕ}
       (E := (TangentSpace I : M → Type _)) ∞ (domDomCongrField (I := I) g σ S)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 theorem domDomCongrSection_unitModel (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) (x : M) :

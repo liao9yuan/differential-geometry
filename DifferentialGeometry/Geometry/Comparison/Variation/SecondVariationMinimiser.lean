@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.DerivativeTest
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

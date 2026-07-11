@@ -91,7 +91,6 @@ private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
         g r s S α P₀.1 P₀.2 hy_in)
       hy_ne
 
-set_option linter.unusedSectionVars false in
 
 private lemma eLpNorm_chartPulledWeighted_restrict_le_of_support_subset
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -177,7 +176,6 @@ private def chartL2RestrictLin (α : M) (s : Set EuclN) :
     exact (Measure.restrict_le_self.absolutelyContinuous).ae_eq
       (Lp.coeFn_smul c lp)
 
-set_option linter.unusedSectionVars false in
 private lemma chartL2RestrictLin_norm_le (α : M) (s : Set EuclN)
     (lp : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
     ‖chartL2RestrictLin (I := I) (M := M) α s lp‖ ≤ 1 * ‖lp‖ := by
@@ -194,7 +192,6 @@ private def chartL2RestrictCLM (α : M) (s : Set EuclN) :
   (chartL2RestrictLin (I := I) (M := M) α s).mkContinuous 1
     (chartL2RestrictLin_norm_le (I := I) (M := M) α s)
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma chartL2RestrictCLM_apply (α : M) (s : Set EuclN)
     (lp : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
     chartL2RestrictCLM (I := I) (M := M) α s lp =

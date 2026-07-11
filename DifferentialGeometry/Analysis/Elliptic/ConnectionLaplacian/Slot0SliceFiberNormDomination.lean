@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParse
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative

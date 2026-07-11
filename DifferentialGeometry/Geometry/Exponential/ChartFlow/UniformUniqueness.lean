@@ -3,7 +3,6 @@ import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.Calculus.ContDiff.RCLike
 import Mathlib.Topology.Algebra.MetricSpace.Lipschitz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

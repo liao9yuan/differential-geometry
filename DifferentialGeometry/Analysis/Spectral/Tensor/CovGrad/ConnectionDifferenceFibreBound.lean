@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -36,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private lemma frame03_data
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -86,7 +84,6 @@ private lemma frame03_data
   · intro S
     rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tensor03_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 3 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -104,7 +101,6 @@ private lemma tensor03_component_eq_toModel
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g₀ x e K₀]
   rfl
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem abs_tensor03_unit_eval_le_fibreNorm_mul_sqrt
@@ -222,7 +218,6 @@ theorem abs_tensor03_unit_eval_le_fibreNorm_mul_sqrt
     rw [Real.sqrt_mul (mul_nonneg haa_nn hbb_nn), Real.sqrt_mul haa_nn]
     ring
 
-set_option linter.unusedSectionVars false in
 private lemma frame04_data
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -272,7 +267,6 @@ private lemma frame04_data
   · intro S
     rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tensor04_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 4 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -290,7 +284,6 @@ private lemma tensor04_component_eq_toModel
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g₀ x e K₀]
   rfl
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem abs_tensor04_unit_eval_le_fibreNorm_mul_sqrt
@@ -406,7 +399,6 @@ theorem abs_tensor04_unit_eval_le_fibreNorm_mul_sqrt
       Real.sqrt_mul (mul_nonneg haa_nn hbb_nn), Real.sqrt_mul haa_nn]
     ring
 
-set_option linter.unusedSectionVars false in
 lemma g0FlatCLM_inverseMetricSharpFib
     (g₀ : SmoothRiemannianMetric I M) (x : M) (θ : Tensor0SSpace 1 I x) :
     g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₀ x θ) = θ := by
@@ -427,7 +419,6 @@ private def covGrad3Eval
       (unitZeroSec (I := I) (M := M) x))
     (Fin.cons (P x) (Fin.cons (Q x) ![R x]))
 
-set_option linter.unusedSectionVars false in
 private lemma covGrad3Eval_eq_metricDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -448,7 +439,6 @@ private lemma covGrad3Eval_eq_metricDiff
     unfold metricDiffCovDeriv; rw [sub_self]
   rw [hzero, sub_zero]
 
-set_option linter.unusedSectionVars false in
 private lemma connDiff_inner_eq_half_covGrad3Eval
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -464,7 +454,6 @@ private lemma connDiff_inner_eq_half_covGrad3Eval
   exact connDiff_koszul_metricDiff (I := I) g₁ g₀
     X.mdifferentiableAt Y.mdifferentiableAt Z.mdifferentiableAt
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private lemma abs_covGrad3Eval_le
@@ -486,7 +475,6 @@ private lemma abs_covGrad3Eval_le
     ((covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T)).toSection x)
     (P x) (Q x) (R x)
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private lemma norm_covGrad_symmS_le
@@ -548,18 +536,16 @@ private lemma norm_covGrad_symmS_le
   nlinarith [htri, norm_nonneg ((covGrad (I := I) (M := M) g₀ 0 2 T).toSection x :
     Tensor0SBundle.TensorRSSpace 0 3 I x)]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem connDiff_gFibreNorm_le_iteratedCovGrad
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
-      (h : ∀ y v w, g₁.inner y v w =
+      (_h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-      {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
-      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      {δ : ℝ} (_hδ : δ < 1 / 2) (_hδ0 : 0 ≤ δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M) (v w : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -717,18 +703,16 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad
     exact mul_le_mul_of_nonneg_right hf2 hNw_nn
   exact h3
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (_hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
-      (h : ∀ y v w, g₁.inner y v w =
+      (_h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      {δ : ℝ} (_hδ : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M) (v w : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -885,7 +869,6 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
       (1 / (1 - δ₀)) * (3 / 2) * Gt * Nv * Nw := by ring
   rw [hfinal]
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_connDiffFib
     (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
     (e : Fin n → TangentSpace I x)
@@ -910,18 +893,16 @@ private lemma fiberNormSqComponent_connDiffFib
         (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (e (J 0)) (e (J 1))) from rfl]
   rw [Fin.prod_univ_one]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
-      {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
-      (h : ∀ y v w, g₁.inner y v w =
+      {δ : ℝ} (_hδ : δ < 1 / 2) (_hδ0 : 0 ≤ δ)
+      (_h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
@@ -995,18 +976,16 @@ theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad
         push_cast
         ring
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem connDiffSection_riemannianFiberNormSq_le_iteratedCovGrad_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
-      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (h : ∀ y v w, g₁.inner y v w =
+      {δ : ℝ} (_hδ : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+      (_h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (x : M),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=

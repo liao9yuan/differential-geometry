@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutio
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -60,7 +59,6 @@ noncomputable def domDomCongrFibPerm (σ : Equiv.Perm (Fin 4)) (x : M) :
           σ).toContinuousLinearEquiv.toContinuousLinearMap).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 theorem domDomCongrFibPerm_apply (σ : Equiv.Perm (Fin 4)) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
@@ -79,7 +77,6 @@ noncomputable def deTurckLieTraceFib (g₁ : SmoothRiemannianMetric I M)
   (cometricDoubleTraceFib (I := I) g₁ 2 x).comp (domDomCongrFibPerm (I := I) σ x)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem domDomCongr_section_contMDiff_local {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
@@ -113,7 +110,6 @@ theorem domDomCongr_section_contMDiff_local {d : ℕ} (ρ : Equiv.Perm (Fin d))
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieTraceFib_contMDiff (g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
@@ -143,7 +139,6 @@ noncomputable def deTurckLieTraceCoeff (g₀ g₁ : SmoothRiemannianMetric I M)
       contMDiff_toFun := deTurckLieTraceFib_contMDiff (I := I) g₁ σ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem deTurckLieTraceCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (x : M) :
@@ -250,9 +245,8 @@ private theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
-set_option linter.unusedVariables false in
 
-def deTurckLieArm2PrincipalCoeff (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
+def deTurckLieArm2PrincipalCoeff (g₀ g₁ _g_bg : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 4 2 :=
   deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ deTurckLieArm2DivSlotPermA
     + deTurckLieTraceCoeff (I := I) (M := M) g₀ g₁ deTurckLieArm2DivSlotPermAT

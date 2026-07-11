@@ -6,7 +6,6 @@ import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -96,7 +95,6 @@ noncomputable def slotPermCLM {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x : M) :
           ρ).toContinuousLinearEquiv.toContinuousLinearMap).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) d x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 theorem slotPermCLM_apply {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace d I x) :
@@ -118,7 +116,6 @@ noncomputable def tensorProdWithCLM (m k : ℕ) (x : M)
         (Tensor0SBundle.Tensor0SSpace.toModel P)).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) k x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorProdWithCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) (Q : Tensor0SBundle.Tensor0SSpace k I x) :
@@ -176,7 +173,6 @@ noncomputable def tensorProdPairCLM (m k : ℕ) (x : M) :
         exact map_smul
           ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (m + k) x).symm) c _ }
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem tensorProdPairCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) :

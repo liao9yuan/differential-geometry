@@ -238,14 +238,13 @@ private lemma tsupport_mul_subset_left (f h : M → ℝ) :
     exact hne (subset_tsupport _ hne')
   exact hx (by rw [hf_zero, zero_mul])
 
-set_option linter.unusedVariables false in
 
 theorem integral_tangentSectionAction_mul_add_eq_neg_with_boundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ) ∞ h)
-    (hf_int : tsupport f ⊆ I.interior M) (hh_int : tsupport h ⊆ I.interior M)
+    (hf_int : tsupport f ⊆ I.interior M) (_hh_int : tsupport h ⊆ I.interior M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (hX : HasCompactSupport X)
     (hX_int : tsupport X ⊆ I.interior M) :

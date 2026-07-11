@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -42,7 +41,6 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
-set_option linter.unusedSectionVars false in
 lemma unitModel_add_pt (s : ℕ) (A B : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (A + B) x =
       unitModel (I := I) (M := M) g₀ s A x + unitModel (I := I) (M := M) g₀ s B x := by
@@ -53,7 +51,6 @@ lemma unitModel_add_pt (s : ℕ) (A B : SmoothCcTensor g₀ 0 s) (x : M) :
       rw [SmoothCcTensor.toSection_add]; rfl]
   rw [ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-set_option linter.unusedSectionVars false in
 private lemma unitModel_smul_pt (s : ℕ) (c : ℝ) (A : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (c • A) x =
       c • unitModel (I := I) (M := M) g₀ s A x := by
@@ -66,7 +63,6 @@ private lemma unitModel_smul_pt (s : ℕ) (c : ℝ) (A : SmoothCcTensor g₀ 0 s
     rfl
   rw [unitModel, unitModel, h, Tensor0SSpace.toModel_smul]
 
-set_option linter.unusedSectionVars false in
 lemma unitModel_sub_pt (s : ℕ) (A B : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (A - B) x =
       unitModel (I := I) (M := M) g₀ s A x - unitModel (I := I) (M := M) g₀ s B x := by
@@ -81,9 +77,7 @@ lemma unitModel_sub_pt (s : ℕ) (A B : SmoothCcTensor g₀ 0 s) (x : M) :
     rfl
   rw [unitModel, unitModel, unitModel, h, Tensor0SSpace.toModel_sub]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-lemma toModel_cons_sum_smul (x : M) {n : ℕ}
+lemma toModel_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons (∑ c, t c • u c) rest) =
@@ -115,9 +109,7 @@ lemma toModel_cons_sum_smul (x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-lemma toModel_cons_cons_sum_smul (x : M) {n : ℕ}
+lemma toModel_cons_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons aa (Fin.cons (∑ c, t c • u c) rest)) =
@@ -151,7 +143,6 @@ lemma toModel_cons_cons_sum_smul (x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedSectionVars false in
 lemma unitModel_eq_ccTensorBilin_pt (S : SmoothCcTensor g₀ 0 2) (b : M)
     (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -165,7 +156,6 @@ lemma unitModel_eq_ccTensorBilin_pt (S : SmoothCcTensor g₀ 0 2) (b : M)
   fin_cases k <;> rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma reindexCoeffGen_one_eq (r s : ℕ) (R : SmoothCcTensor g₀ r s) :
     reindexCoeffGen (I := I) (M := M) g₀ r s R 1 = R := by
   apply SmoothCcTensor.ext
@@ -185,7 +175,6 @@ private lemma reindexCoeffGen_one_eq (r s : ℕ) (R : SmoothCcTensor g₀ r s) :
   rw [Tensor0SSpace.toModel_ofModel, ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_iteratedCovGrad_rsDomDomCongrSection_eq (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (R : SmoothCcTensor g₀ r s) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x
@@ -229,7 +218,6 @@ def tauM4 : Equiv.Perm (Fin 6) :=
    fun i => (![2, 3, 4, 5, 1, 0] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-set_option linter.unusedSectionVars false in
 lemma mvOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
@@ -284,7 +272,6 @@ lemma mvOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
   rw [hrepr v i, hbB_coe i]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma slotExtend_toModel_cons (r s : ℕ) (Φ : SmoothCcTensor g₀ r s) (x : M)
     (D : Tensor0SSpace (r + 1) I x) (v0 : TangentSpace I x) (vs : Fin s → E) :
     Tensor0SSpace.toModel
@@ -303,7 +290,6 @@ lemma slotExtend_toModel_cons (r s : ℕ) (Φ : SmoothCcTensor g₀ r s) (x : M)
     (show E from v0) vs
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma slotExtendIter_two_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
     (D : Tensor0SSpace 2 I x) (u : Fin 6 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -363,7 +349,6 @@ lemma slotExtendIter_two_toModel (X : SmoothCcTensor g₀ 0 4) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma slotExtendIter_three_toModel (X : SmoothCcTensor g₀ 0 3) (x : M)
     (D : Tensor0SSpace 3 I x) (u : Fin 6 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -447,7 +432,6 @@ lemma slotExtendIter_three_toModel (X : SmoothCcTensor g₀ 0 3) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma metricCcTensor_unitModel_apply (g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → E) :
     unitModel (I := I) (M := M) g₀ 2 (metricCcTensor (I := I) (M := M) g₀ g) x m =
@@ -466,7 +450,6 @@ lemma metricCcTensor_unitModel_apply (g : SmoothRiemannianMetric I M) (x : M)
   rw [hbase]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma tensorBilinearPairing_expand_left (S : SmoothCcTensor g₀ 0 2) (x : M)
     (u w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ S x u w =
@@ -478,7 +461,6 @@ lemma tensorBilinearPairing_expand_left (S : SmoothCcTensor g₀ 0 2) (x : M)
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [map_smul (smoothCcTensorBilinForm (I := I) g₀ S x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 lemma tensorBilinearPairing_expand_right (S : SmoothCcTensor g₀ 0 2) (x : M)
     (u w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ S x u w =
@@ -490,9 +472,7 @@ lemma tensorBilinearPairing_expand_right (S : SmoothCcTensor g₀ 0 2) (x : M)
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [map_smul (smoothCcTensorBilinForm (I := I) g₀ S x u), smul_eq_mul]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-lemma toModel_vec3_slot0_sum_smul (x : M)
+lemma toModel_vec3_slot0_sum_smul (_x : M)
     (Zm : Tensor0SModel 3 ℝ E) (d : ℕ) (t : Fin d → ℝ) (u : Fin d → E) (a b : E) :
     Zm ![∑ c, t c • u c, a, b] = ∑ c, t c * Zm ![u c, a, b] := by
   classical
@@ -522,9 +502,7 @@ lemma toModel_vec3_slot0_sum_smul (x : M)
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-lemma toModel_vec3_slot2_sum_smul (x : M)
+lemma toModel_vec3_slot2_sum_smul (_x : M)
     (Zm : Tensor0SModel 3 ℝ E) (d : ℕ) (t : Fin d → ℝ) (u : Fin d → E) (a b : E) :
     Zm ![a, b, ∑ c, t c • u c] = ∑ c, t c * Zm ![a, b, u c] := by
   classical

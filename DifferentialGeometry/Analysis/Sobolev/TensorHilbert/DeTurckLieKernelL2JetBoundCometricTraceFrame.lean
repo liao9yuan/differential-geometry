@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDiverg
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -76,7 +75,6 @@ def sigmaE0dla : Equiv.Perm (Fin 6) :=
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0S_zero_rank_decomp_dla (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) • unitTensor (I := I) (M := M) x := by
   apply Tensor0SSpace.toModel_injective
@@ -93,7 +91,6 @@ private lemma tensor0S_zero_rank_decomp_dla (x : M) (t : Tensor0SSpace 0 I x) :
   rw [smul_eq_mul, mul_one]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma slotExtendIter_two_toModel_dla (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x)
     (u : Fin 6 → TangentSpace I x) :
@@ -179,9 +176,7 @@ def cometricDoubleTraceSmoothCcTensor (g₀ g₁ : SmoothRiemannianMetric I M) (
       contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₁ s }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-lemma toModel_cons_sum_smul_dla (x : M) {n : ℕ}
+lemma toModel_cons_sum_smul_dla (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons (∑ c, t c • u c) rest) =
@@ -213,9 +208,7 @@ lemma toModel_cons_sum_smul_dla (x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-lemma toModel_cons_cons_sum_smul_dla (x : M) {n : ℕ}
+lemma toModel_cons_cons_sum_smul_dla (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
     Zm (Fin.cons aa (Fin.cons (∑ c, t c • u c) rest)) =
@@ -249,7 +242,6 @@ lemma toModel_cons_cons_sum_smul_dla (x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
-set_option linter.unusedSectionVars false in
 lemma smoothOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),

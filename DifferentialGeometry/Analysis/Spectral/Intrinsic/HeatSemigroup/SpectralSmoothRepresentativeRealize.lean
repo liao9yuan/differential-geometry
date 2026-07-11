@@ -39,7 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable (g : SmoothRiemannianMetric I M)
 
-set_option linter.unusedSectionVars false in
 
 theorem eigenSpan_pouHs_le_spectral (k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

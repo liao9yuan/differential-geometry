@@ -289,12 +289,11 @@ section PerpFrame
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-set_option linter.unusedVariables false in
 
 theorem perp_to_velocity_preserved_of_parallel
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
-    {L : ℝ} (hL : 0 < L) (V : ∀ t, TangentSpace I (γ t))
+    {L : ℝ} (_hL : 0 < L) (V : ∀ t, TangentSpace I (γ t))
     (hVdiff : ∀ t ∈ Set.Icc (0 : ℝ) L,
       DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
     (hVpar : ∀ t ∈ Set.Icc (0 : ℝ) L, covDerivAlong (I := I) g γ V t = 0)
@@ -658,11 +657,10 @@ theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
     intro x hx
     exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
 
-set_option linter.unusedVariables false in
 
 theorem perp_to_velocity_preserved_on
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L)
+    (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (_hL : 0 < L)
     (hgeo : IsGeodesicOn (I := I) g γ (Set.Icc 0 L))
     (V : ∀ t, TangentSpace I (γ t))
     (hVdiff : ∀ t ∈ Set.Icc (0 : ℝ) L,

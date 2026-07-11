@@ -218,9 +218,9 @@ theorem uniform_C0_bound_concrete_lichnerowicz_coeffFields
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ ΛC : ℝ, 0 ≤ ΛC ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -240,9 +240,9 @@ private theorem linearizedRicciArm0BaseCoeff_perOrder_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -262,9 +262,9 @@ private theorem linearizedRicciArm0CorrField_perOrder_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -505,9 +505,9 @@ private theorem linearizedRicciArm1BaseCoeff_perOrder_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -523,9 +523,9 @@ private theorem linearizedRicciArm1CorrField_perOrder_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -592,9 +592,9 @@ private theorem ricciArmPrincipalCoeff_realizedFam_perOrder_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -611,9 +611,9 @@ private theorem traceHessianCoeff_realizedFam_perOrder_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -703,9 +703,9 @@ private theorem linearizedRicciArm_concreteField_perOrder_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ P : ℕ → ℝ, (∀ i, 0 ≤ P i) ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -765,9 +765,9 @@ theorem linearizedRicciArm_concreteField_jetL2_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ B : ℝ, 0 ≤ B ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -826,9 +826,9 @@ private theorem uniform_rfns_bound_lichnerowicz_coeffFields
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -925,9 +925,9 @@ private theorem ricciArm_threeArm_coeffFields_uniformC0
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -981,9 +981,9 @@ private theorem ricciArm_threeArm_coeffFields_C0_bound
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -1037,9 +1037,9 @@ theorem exists_ricciArm_threeArm_coeffFields_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -1093,9 +1093,9 @@ private theorem exists_ricciArmCoeff_ballUniform_C0_sup
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -1251,9 +1251,9 @@ theorem deTurckRicciArm_appCc_graded_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →

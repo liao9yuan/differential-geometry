@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -27,7 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 
 private theorem riemannianFiberNormSq_toSection_heq_congr_leibnizTower (g : SmoothRiemannianMetric I M)
     {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g 0 a} {Z : SmoothCcTensor g 0 b}
@@ -36,7 +34,6 @@ private theorem riemannianFiberNormSq_toSection_heq_congr_leibnizTower (g : Smoo
       riemannianFiberNormSq (I := I) (M := M) g 0 b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
-set_option linter.unusedSectionVars false in
 
 private theorem rfns_iteratedCovGrad_covGrad_comm_drop (g : SmoothRiemannianMetric I M)
     (s m : ℕ) (W : SmoothCcTensor g 0 s) (x : M) :
@@ -52,7 +49,6 @@ private lemma sum_range_shift_le_drop (n : ℕ) (f : ℕ → ℝ) (hf : ∀ i, 0
   rw [Finset.sum_range_succ' f n]
   exact le_add_of_nonneg_right (hf 0)
 
-set_option linter.unusedSectionVars false in
 
 theorem rfns_iteratedCovGrad_covGrad_comm (g : SmoothRiemannianMetric I M)
     (s m : ℕ) (W : SmoothCcTensor g 0 s) (x : M) :

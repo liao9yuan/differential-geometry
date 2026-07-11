@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -46,7 +45,6 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma metricDifferenceCcTensor_eq_symmS (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w) :
@@ -87,7 +85,6 @@ def ricciFoldWeightB (S : SmoothCcTensor g₀ 0 2) : SmoothCcTensor g₀ 0 4 :=
           (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
     (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
@@ -192,7 +189,6 @@ private lemma ricciFoldWeight_unitModel_gen (σ : Equiv.Perm (Fin 6))
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2) (x : M)
     (p q v0 v1 : TangentSpace I x) :
@@ -364,7 +360,6 @@ private lemma ricciFoldWeights_unitModel_eq_kernel (S : SmoothCcTensor g₀ 0 2)
   rw [hA, hB]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma ricciFoldRemainderField_eq_refold (S : SmoothCcTensor g₀ 0 2) :
     ricciArmRicciFoldRemainderField (I := I) (M := M) g₀ g₁ S =
@@ -442,14 +437,13 @@ lemma ricciFoldRemainderField_eq_refold (S : SmoothCcTensor g₀ 0 2) :
       (v 0) (v 1)]
   ring
 
-set_option linter.unusedVariables false in
 lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_boundedFactorGridWindow_le (σ : Equiv.Perm (Fin 6))
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
       ∀ (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (w K : ℕ) (hwK : w ≤ K) (x : M),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (w K : ℕ) (_hwK : w ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
             ((iteratedCovGrad (I := I) g₀ 0 4 w
               (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)
@@ -657,7 +651,6 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciFoldWeightGeneral_bounde
         ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
     ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g =
@@ -698,7 +691,7 @@ lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
     (fun j => (v j : E))]
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [bgRArmWeight_toModel (I := I) (M := M) g₀ x D]
-  show Tensor0SSpace.toModel D
+  change Tensor0SSpace.toModel D
       (Fin.cons (show E from riemannOp (LeviCivita (I := I) g₀) x
           (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
         (Fin.cons ((smoothOrthoFrame (I := I) g x c x : TangentSpace I x) : E)
@@ -743,7 +736,6 @@ lemma bgRCommCoeffField_eq_refold (g : SmoothRiemannianMetric I M) :
   rw [mul_comm]
 
 
-set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
 private lemma sharpRaisedKoszulVec_symmS_eq_connDiff (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -761,7 +753,6 @@ private lemma sharpRaisedKoszulVec_symmS_eq_connDiff (P : SmoothCcTensor g₀ 0 
   rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x u ζ z]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma koszulCovecCc_unitModel_eq_connDiff_g1_inner (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
@@ -781,7 +772,6 @@ def koszulConnDiffFoldWeight (σ : Equiv.Perm (Fin 6)) (P : SmoothCcTensor g₀ 
         (connDiffLoweredCc (I := I) g₀ g₁)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma koszulConnDiffFoldWeight_unitModel_general (σ : Equiv.Perm (Fin 6))
     (P : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
@@ -892,7 +882,6 @@ lemma koszulConnDiffFoldWeight_unitModel_general (σ : Equiv.Perm (Fin 6))
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma k2FoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1247,7 +1236,6 @@ private lemma k2FoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
   rw [hT1, hT2, hT3, hT4]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1339,17 +1327,15 @@ lemma sharpGradKoszulResidualField_eq_refold (P : SmoothCcTensor g₀ 0 2)
       (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
       (v 0) (v 1)]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 lemma exists_riemannianFiberNormSq_iteratedCovGrad_koszulConnDiffFoldWeightGeneral_boundedFactorGridWindow_le (σ : Equiv.Perm (Fin 6))
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ w, 0 ≤ C w) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (w K : ℕ) (hwK : w + 1 ≤ K) (x : M),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (w K : ℕ) (_hwK : w + 1 ≤ K) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 0 (4 + w) x
             ((iteratedCovGrad (I := I) g₀ 0 4 w
               (ccOperatorFieldComp (I := I) (M := M) g₀ 0 6 4 (cometricDoubleTraceField (I := I) g₀ 4)

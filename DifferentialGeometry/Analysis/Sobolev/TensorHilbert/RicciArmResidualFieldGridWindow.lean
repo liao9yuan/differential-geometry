@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -45,7 +44,6 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma riemannianFiberNormSq_smul_value (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -56,16 +54,15 @@ private lemma riemannianFiberNormSq_smul_value (g : SmoothRiemannianMetric I M) 
     tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedVariables false in
 
 theorem riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0BgRCommCoeffFieldDifference_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -237,16 +234,15 @@ theorem riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0BgRCommCoeffFieldDif
         rw [Finset.sum_congr rfl fun u _ => hstep u, ← Finset.sum_mul]
         ring
 
-set_option linter.unusedVariables false in
 
 theorem rfns_iteratedCovGrad_ricciArmSharpGradKoszulResidualFieldMetricDifference_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -572,16 +568,15 @@ theorem rfns_iteratedCovGrad_ricciArmSharpGradKoszulResidualFieldMetricDifferenc
               CX w * Combinatorics.windowPairCellCount (u + 1) (w + 3))) *
           Combinatorics.boundedFactorGridWindow b (i + 1) (i + 3) := by ring
 
-set_option linter.unusedVariables false in
 
 theorem rfns_iteratedCovGrad_ricciArmRicciFoldRemainderFieldMetricDifference_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -800,7 +795,6 @@ theorem rfns_iteratedCovGrad_ricciArmRicciFoldRemainderFieldMetricDifference_bou
               CX w * Combinatorics.windowPairCellCount (u + 1) (w + 1))) *
           Combinatorics.boundedFactorGridWindow b (i + 1) (i + 3) := by ring
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem appCcRS_smul_left_local (g : SmoothRiemannianMetric I M) (a b c : ℕ)
@@ -818,7 +812,6 @@ private theorem appCcRS_smul_left_local (g : SmoothRiemannianMetric I M) (a b c 
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.smul_comp]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] private theorem appCcRS_ccSlotSwapField_involutive (g : SmoothRiemannianMetric I M)
@@ -846,16 +839,15 @@ set_option backward.isDefEq.respectTransparency false in
     exact congrArg m (Equiv.swap_apply_self (0 : Fin 2) 1 i)]
   exact Tensor0SSpace.ofModel_toModel D
 
-set_option linter.unusedVariables false in
 
 theorem rfns_iteratedCovGrad_bgRDiffRefoldRemainderFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -1112,9 +1104,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
-private lemma toModel_vec3_slot1_sum_smul (x : M)
+private lemma toModel_vec3_slot1_sum_smul (_x : M)
     (Zm : Tensor0SModel 3 ℝ E) (d : ℕ) (t : Fin d → ℝ) (u : Fin d → E) (a b : E) :
     Zm ![a, ∑ c, t c • u c, b] = ∑ c, t c * Zm ![a, u c, b] := by
   classical
@@ -1155,7 +1145,6 @@ private def sigmaQ2 : Equiv.Perm (Fin 6) :=
    by decide, by decide⟩
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma qCommFoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1349,7 +1338,6 @@ private lemma qCommFoldWeights_unitModel_eq_kernel (P : SmoothCcTensor g₀ 0 2)
   rw [hT1, hT2]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma ricciArmOrder0AACommCoeffField_eq_refold (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -1392,16 +1380,14 @@ private lemma ricciArmOrder0AACommCoeffField_eq_refold (P : SmoothCcTensor g₀ 
       (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
       (v 0) (v 1)]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0AACommCoeffField_window
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -1599,16 +1585,15 @@ lemma exists_riemannianFiberNormSq_iteratedCovGrad_ricciArmOrder0AACommCoeffFiel
 
 end qCommConversion
 
-set_option linter.unusedVariables false in
 
 theorem rfns_iteratedCovGrad_ricciArmOrder0AACommCoeffFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -1813,15 +1798,14 @@ theorem refoldKernelContractionMonomialField_eq_mvPairTraceRefold
       simp only [Equiv.Perm.mul_apply, Equiv.swap_apply_def] <;> rfl
   exact hcons (σ j)
 
-set_option linter.unusedVariables false in
 private theorem exists_rfns_icg_refoldKernelContractionMonomialField_window
     (g₀ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 4)) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -1980,15 +1964,14 @@ private theorem exists_rfns_icg_refoldKernelContractionMonomialField_window
   rw [← Finset.sum_mul]
   exact le_of_eq (by ring)
 
-set_option linter.unusedVariables false in
 private theorem exists_rfns_icg_refoldKernelContractionField_window
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -2075,16 +2058,15 @@ private theorem exists_rfns_icg_refoldKernelContractionField_window
   nlinarith [h1, h2, h3, h4, hs1, hs2, hs3, hgrid_nn, hC1_nn i, hC2_nn i, hC3_nn i,
     hC4_nn i]
 
-set_option linter.unusedVariables false in
 
 theorem rfns_iteratedCovGrad_refoldKernelContractionFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i
@@ -2366,7 +2348,6 @@ private lemma k4a_covGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : �
   subst h
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_rsDomDomCongrSection_comp (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ ρ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g r s) :
     rsDomDomCongrSection (I := I) (M := M) g r s σ
@@ -2379,7 +2360,6 @@ private lemma k4a_rsDomDomCongrSection_comp (g : SmoothRiemannianMetric I M) (r 
     rsDomDomCongrSection_toSection]
   exact rsDomDomCongr_rsDomDomCongr (I := I) (M := M) σ ρ (S.toSection x)
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_covGrad_rsDomDomCongrSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g r s) :
     covGrad (I := I) (M := M) g r s (rsDomDomCongrSection (I := I) (M := M) g r s σ S) =
@@ -2421,7 +2401,6 @@ private lemma k4a_covGrad_rsDomDomCongrSection (g : SmoothRiemannianMetric I M) 
         (rsDomDomCongrSection (I := I) (M := M) g r s σ S) hrel x d v)
   rw [hsec, rsDomDomCongrSection_toSection]
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_slotExtend_rsDomDomCongrSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ρ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g r s) :
     slotExtend (I := I) (M := M) g r s
@@ -2501,7 +2480,6 @@ private lemma k4a_slotExtend_rsDomDomCongrSection (g : SmoothRiemannianMetric I 
     rfl
   rw [hsec, rsDomDomCongrSection_toSection]
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_covGrad_slotExtend_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) (x : M) :
     (covGrad (I := I) (M := M) g (r + 1) (s + 1)
@@ -2567,7 +2545,6 @@ private lemma k4a_covGrad_slotExtend_toSection
       exact fun h => Fin.succ_ne_zero _ (Fin.succ_injective _ h)
   rw [hdir, htail]
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_covGrad_slotExtend (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) :
     covGrad (I := I) (M := M) g (r + 1) (s + 1) (slotExtend (I := I) (M := M) g r s Φ) =
@@ -2581,7 +2558,6 @@ private lemma k4a_covGrad_slotExtend (g : SmoothRiemannianMetric I M) (r s : ℕ
   rw [k4a_covGrad_slotExtend_toSection (I := I) (M := M) g r s Φ x,
     rsDomDomCongrSection_toSection]
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_icg_refoldArgument_structure (g₀ : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g₀ 0 4) (i : ℕ) :
     ∃ τ : Equiv.Perm (Fin (((4 + i) + 1) + 1)),
@@ -2618,7 +2594,6 @@ private lemma k4a_icg_refoldArgument_structure (g₀ : SmoothRiemannianMetric I 
         rw [← iteratedCovGrad_succ]
         rfl
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_castRankCc_db_toModel (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g r a) (x : M) (D : Tensor0SSpace r I x)
     (w : Fin b → TangentSpace I x) :
@@ -2631,7 +2606,6 @@ private lemma k4a_castRankCc_db_toModel (g : SmoothRiemannianMetric I M) (r : �
   subst h
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_slotExtend_two_toModel (g₀ : SmoothRiemannianMetric I M) (c : ℕ)
     (S : SmoothCcTensor g₀ 0 c) (x : M) (D : Tensor0SSpace 2 I x)
     (u : Fin ((c + 1) + 1) → TangentSpace I x) :
@@ -2680,7 +2654,6 @@ private lemma k4a_slotExtend_two_toModel (g₀ : SmoothRiemannianMetric I M) (c 
   rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_icg_refoldArgument_toModel (g₀ : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g₀ 0 4) (i : ℕ) (x : M) (D : Tensor0SSpace 2 I x)
     (w : Fin (6 + i) → TangentSpace I x) :
@@ -2750,7 +2723,6 @@ private lemma k4a_icg_refoldArgument_toModel (g₀ : SmoothRiemannianMetric I M)
     refine Fin.ext ?_
     rw [Fin.val_cast, hτ ⟨(q : ℕ) + 2, by have := q.isLt; omega⟩]
 
-set_option linter.unusedSectionVars false in
 private def k4a_slotExtendIterFib (g : SmoothRiemannianMetric I M) (b c : ℕ) (x : M)
     (A : Tensor0SSpace b I x →L[ℝ] Tensor0SSpace c I x) :
     ∀ w : ℕ, Tensor0SSpace (b + w) I x →L[ℝ] Tensor0SSpace (c + w) I x
@@ -2758,7 +2730,6 @@ private def k4a_slotExtendIterFib (g : SmoothRiemannianMetric I M) (b c : ℕ) (
   | (w + 1) => slotExtendPointwise (I := I) (M := M) g (b + w) (c + w) x
       (k4a_slotExtendIterFib g b c x A w)
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_appCcLeibnizPsi_succ_succ_eq (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i j : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =
@@ -2779,7 +2750,6 @@ private lemma k4a_appCcLeibnizPsi_succ_succ_eq (g : SmoothRiemannianMetric I M) 
               (appCcLeibnizPsi (I := I) (M := M) g b c Φ i j))) from rfl]
   rw [castCcTensorRank, castCcTensorSourceRank]
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_appCcLeibnizPsi_diag_toSection (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i : ℕ) (x : M) :
     ((appCcLeibnizPsi (I := I) (M := M) g b c Φ i i).toSection x :
@@ -2804,7 +2774,6 @@ private lemma k4a_appCcLeibnizPsi_diag_toSection (g : SmoothRiemannianMetric I M
       rw [← ih]
       rfl
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_mvPairTraceOp_fib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (Z : Tensor0SSpace 6 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -2856,7 +2825,6 @@ private def k4aTuple (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
   else if (k : ℕ) = i + 4 then ((u ⟨i, by omega⟩ : TangentSpace I x) : E)
   else ((u ⟨i + 1, by omega⟩ : TangentSpace I x) : E)
 
-set_option linter.unusedSectionVars false in
 private lemma k4aTuple_zero (g₁ : SmoothRiemannianMetric I M) (x : M)
     (u : Fin 2 → TangentSpace I x) (a b : Fin (Module.finrank ℝ E)) :
     k4aTuple (I := I) (M := M) g₁ x 0 u a b =
@@ -2868,7 +2836,6 @@ private lemma k4aTuple_zero (g₁ : SmoothRiemannianMetric I M) (x : M)
   funext k
   fin_cases k <;> rfl
 
-set_option linter.unusedSectionVars false in
 private lemma k4aTuple_succ (g₁ : SmoothRiemannianMetric I M) (x : M) (w : ℕ)
     (u : Fin (2 + (w + 1)) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E)) :
     k4aTuple (I := I) (M := M) g₁ x (w + 1) u a b =
@@ -2913,7 +2880,6 @@ private lemma k4aTuple_succ (g₁ : SmoothRiemannianMetric I M) (x : M) (w : ℕ
             beta_reduce
             exact congrArg u (Fin.ext (by simp))
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_sEIterFib_mvPT_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     ∀ (i : ℕ) (Y : Tensor0SSpace (6 + i) I x) (u : Fin (2 + i) → TangentSpace I x),
     Tensor0SSpace.toModel
@@ -2964,7 +2930,6 @@ private lemma k4a_sEIterFib_mvPT_toModel (g₀ g₁ : SmoothRiemannianMetric I M
       exact (k4aTuple_succ (I := I) (M := M) g₁ x w u a b).symm
 
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
-set_option linter.unusedSectionVars false in
 private lemma k4a_frame_collapse (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v z : TangentSpace I x) :
     ∑ a : Fin (Module.finrank ℝ E),
@@ -2996,7 +2961,6 @@ private lemma k4a_frame_collapse (g₀ g₁ : SmoothRiemannianMetric I M) (x : M
   ring
 
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
-set_option linter.unusedSectionVars false in
 private lemma k4a_W_op_bound (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -3035,7 +2999,6 @@ private lemma k4a_W_op_bound (g₀ g₁ : SmoothRiemannianMetric I M)
         rw [mul_pow, hsqu]
 
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
-set_option linter.unusedSectionVars false in
 private lemma k4a_W_absorption (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -3083,7 +3046,6 @@ private lemma k4a_W_absorption (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [← hnorm]
   exact k4a_W_op_bound (I := I) (M := M) g₀ g₁ P htie hδ₀ hδ_le hδ0 hbound x u
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_toModel_update_sum {m : ℕ} (Zm : Tensor0SModel m ℝ E)
     (w : Fin m → E) (t : Fin m) (d : ℕ) (c : Fin d → ℝ) (u : Fin d → E) :
     Zm (Function.update w t (∑ j, c j • u j)) =
@@ -3114,7 +3076,6 @@ private def k4aR (i : ℕ) {n : ℕ} (J : Fin (2 + i) → Fin n) (p q : Fin n) :
   else if (t : ℕ) = 2 + i then p
   else q
 
-set_option linter.unusedSectionVars false in
 private lemma k4aTuple_apply_lt (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) < i) :
@@ -3123,7 +3084,6 @@ private lemma k4aTuple_apply_lt (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_pos h]
 
-set_option linter.unusedSectionVars false in
 private lemma k4aTuple_apply_fa (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) = i ∨ (t : ℕ) = i + 1) :
@@ -3132,7 +3092,6 @@ private lemma k4aTuple_apply_fa (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_neg (by omega), if_pos h]
 
-set_option linter.unusedSectionVars false in
 private lemma k4aTuple_apply_fb (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) = i + 2 ∨ (t : ℕ) = i + 3) :
@@ -3141,7 +3100,6 @@ private lemma k4aTuple_apply_fb (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_neg (by omega), if_neg (by omega), if_pos h]
 
-set_option linter.unusedSectionVars false in
 private lemma k4aTuple_apply_i4 (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) = i + 4) :
@@ -3150,7 +3108,6 @@ private lemma k4aTuple_apply_i4 (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_neg (by omega), if_neg (by omega), if_neg (by omega), if_pos h]
 
-set_option linter.unusedSectionVars false in
 private lemma k4aTuple_apply_last (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : i + 5 ≤ (t : ℕ)) :
@@ -3159,7 +3116,6 @@ private lemma k4aTuple_apply_last (g₁ : SmoothRiemannianMetric I M) (x : M) (i
   unfold k4aTuple
   rw [dif_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega)]
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_mixTuple_eq_update (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin (2 + i) → Fin n)
     (a b : Fin (Module.finrank ℝ E)) :
@@ -3240,7 +3196,6 @@ private lemma k4a_mixTuple_eq_update (g₁ : SmoothRiemannianMetric I M) (x : M)
             (le_refl (i + 5))]
           exact congrArg e (congrArg J (Fin.ext hi1.symm))
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_update_update_eq_R (x : M) (i : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin (2 + i) → Fin n) (p q : Fin n) :
     Function.update
@@ -3264,28 +3219,24 @@ private lemma k4a_update_update_eq_R (x : M) (i : ℕ)
       have ht : (t : ℕ) < 2 + i := by have := t.isLt; omega
       rw [dif_pos ht, dif_pos ht]
 
-set_option linter.unusedSectionVars false in
 private lemma k4aR_apply_lt (i : ℕ) {n : ℕ} (J : Fin (2 + i) → Fin n) (p q : Fin n)
     (t : Fin (4 + i)) (h : (t : ℕ) < 2 + i) :
     k4aR i J p q t = J ⟨(t : ℕ), h⟩ := by
   unfold k4aR
   rw [dif_pos h]
 
-set_option linter.unusedSectionVars false in
 private lemma k4aR_apply_p (i : ℕ) {n : ℕ} (J : Fin (2 + i) → Fin n) (p q : Fin n)
     (t : Fin (4 + i)) (h : (t : ℕ) = 2 + i) :
     k4aR i J p q t = p := by
   unfold k4aR
   rw [dif_neg (by omega), if_pos h]
 
-set_option linter.unusedSectionVars false in
 private lemma k4aR_apply_q (i : ℕ) {n : ℕ} (J : Fin (2 + i) → Fin n) (p q : Fin n)
     (t : Fin (4 + i)) (h2 : ¬ (t : ℕ) < 2 + i) (h3 : ¬ (t : ℕ) = 2 + i) :
     k4aR i J p q t = q := by
   unfold k4aR
   rw [dif_neg h2, if_neg h3]
 
-set_option linter.unusedSectionVars false in
 private lemma k4a_rfns_icg_order_congr (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {m m' : ℕ} (h : m = m') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + m) x
@@ -3335,7 +3286,6 @@ private lemma k4a_sum_reorg {d m : ℕ} (A B : Fin d → ℝ) (C D : Fin m → F
         ring
 
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert in
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 6400000 in
 
 theorem riemannianFiberNormSq_compRS_mvPairTraceOp_leibnizCorner_le
@@ -3674,16 +3624,15 @@ theorem riemannianFiberNormSq_compRS_mvPairTraceOp_leibnizCorner_le
             ((iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P).toSection x) := by
         ring
 
-set_option linter.unusedVariables false in
 
 theorem exists_rfns_icg_refoldKernelContractionMonomialField_leibnizResidual_window
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (σ : Equiv.Perm (Fin 4)) (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i

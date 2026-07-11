@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffKa
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -61,7 +60,6 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SBundle.Tensor0SSpace 1 I x) (w : Fin 2 → TangentSpace I x) :
@@ -71,7 +69,6 @@ private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) 
       Tensor0SBundle.Tensor0SSpace.toModel om
         (fun _ : Fin 1 => (show E from PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w 0) (w 1))) := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLiePairTraceFib_toModel_eval (g₁ gA gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
@@ -99,7 +96,6 @@ private lemma deTurckLiePairTraceFib_toModel_eval (g₁ gA gB : SmoothRiemannian
     cometricDoubleTraceFib_toModel, Tensor0SSpace.toModel_ofModel]
   simp only [modelDoubleTrace_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieKoszulTraceFib_toModel_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
@@ -121,7 +117,6 @@ private lemma deTurckLieKoszulTraceFib_toModel_eval (g₀ g₁ : SmoothRiemannia
   funext i
   fin_cases i <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1CoreFib_toModel_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (a b : TangentSpace I x) :
@@ -305,7 +300,6 @@ private lemma deTurckLieArm1CoreFib_toModel_eval (g₀ g₁ g_bg : SmoothRiemann
     Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
   rw [hS2, hB, hT2, hT3, hT4, hT5]
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (w : Fin 2 → TangentSpace I x) :
@@ -374,7 +368,6 @@ private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRieman
   conv_lhs => rw [hw]
   exact deTurckLieArm1CoreFib_toModel_eval (I := I) g₀ g₁ g_bg x D (w 0) (w 1)
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
@@ -389,7 +382,6 @@ private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMet
     (deTurckLieArm1CoreFib (I := I) g₀ g₁ g_bg x D) t)
     (by funext i; fin_cases i <;> rfl)
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
@@ -404,7 +396,6 @@ private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianM
   exact congrArg (fun t : Fin 3 → E => Tensor0SBundle.Tensor0SSpace.toModel D t)
     (by funext i; fin_cases i <;> rfl)
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
@@ -425,7 +416,6 @@ private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric
 
 open DifferentialGeometry.Integral.DivergenceTheorem (chartInvGramMatrix)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_omega_eval (g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
     om (fun _ : Fin 1 => w) =
@@ -433,7 +423,6 @@ private lemma lieArm1_omega_eval (g₁ : SmoothRiemannianMetric I M) (x : M)
   rw [inverseMetricSharpFib_inner (I := I) g₁ x om w, cotangentToDualLinear_apply,
     cotangentToDual_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_psiB_raw (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -493,7 +482,6 @@ private def lieArm1PsiBKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
       (show E →L[ℝ] ℝ from
         (g₁.inner x v).comp (PDE.DeTurck.connDiff (I := I) g_bg g₁ x w)))
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1PsiBKernel_inner (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     g₁.inner x (lieArm1PsiBKernel (I := I) (M := M) g₁ g_bg x v w) u =
@@ -501,7 +489,6 @@ private lemma lieArm1PsiBKernel_inner (g₁ g_bg : SmoothRiemannianMetric I M) (
   rw [lieArm1PsiBKernel, cometricLmodel_covectorOfCLM_inner]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_psiB_hPsi (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 2 I x from
@@ -515,7 +502,6 @@ private lemma lieArm1_psiB_hPsi (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x
     (PDE.DeTurck.connDiff (I := I) g_bg g₁ x (YZ 1)
       (inverseMetricSharpFib (I := I) g₁ x om)) (YZ 0)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1PsiBKernel_inner_neg (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     g₁.inner x (lieArm1PsiBKernel (I := I) (M := M) g₁ g_bg x v w) u =
@@ -528,7 +514,6 @@ private lemma lieArm1PsiBKernel_inner_neg (g₁ g_bg : SmoothRiemannianMetric I 
   rw [map_neg (g₁.inner x) (PDE.DeTurck.connDiff (I := I) g₁ g_bg x w u)]
   rw [ContinuousLinearMap.neg_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_cometric_collapse_full (g₁ : SmoothRiemannianMetric I M) (x : M)
     (w : TangentSpace I x) :
     ∑ k : Fin (Module.finrank ℝ E),
@@ -539,7 +524,6 @@ private lemma lieArm1_cometric_collapse_full (g₁ : SmoothRiemannianMetric I M)
                 ((Module.finBasis ℝ E).cDualBasis k))) = w :=
   lieArm1_cometric_collapse (I := I) g₁ x w
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_slot2_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₀ c₁ : E) (X : TangentSpace I x) :
     Tensor0SSpace.toModel D ![c₀, c₁, (show E from X)] =
@@ -596,7 +580,6 @@ private lemma lieArm1_slot2_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
         ((Module.finBasis ℝ E).cDualBasis j)))).symm
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_slot0_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₁ c₂ : E) (X : TangentSpace I x) :
     Tensor0SSpace.toModel D ![(show E from X), c₁, c₂] =
@@ -653,7 +636,6 @@ private lemma lieArm1_slot0_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
         ((Module.finBasis ℝ E).cDualBasis j)))).symm
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_cometricTrace_eq_chartInvGram (g₁ : SmoothRiemannianMetric I M) (x : M)
     (F : E →L[ℝ] E →L[ℝ] ℝ) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -694,7 +676,6 @@ private lemma lieArm1_cometricTrace_eq_chartInvGram (g₁ : SmoothRiemannianMetr
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [map_smul, ContinuousLinearMap.smul_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_deTurckVF_cometric_trace (g₁ gB : SmoothRiemannianMetric I M) (x : M) :
     (∑ k : Fin (Module.finrank ℝ E),
         (PDE.DeTurck.connDiff (I := I) g₁ gB x
@@ -764,7 +745,6 @@ private lemma lieArm1_deTurckVF_cometric_trace (g₁ gB : SmoothRiemannianMetric
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   rw [h2 k l]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_slot2_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₀ c₁ : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -842,7 +822,6 @@ private lemma lieArm1_slot2_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x :
               ((PDE.DeTurck.deTurckVF (I := I) g₁ gB : Π y : M, TangentSpace I y) x))] :=
         (congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t) (hupd _)).symm
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_slot0_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (c₁ c₂ : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -920,14 +899,12 @@ private lemma lieArm1_slot0_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x :
             c₁, c₂] :=
         (congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t) (hupd _)).symm
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_neg_double_sum (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) :
     (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), -(f k l)) =
       -∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), f k l := by
   rw [← Finset.sum_neg_distrib]
   exact Finset.sum_congr rfl fun k _ => by rw [← Finset.sum_neg_distrib]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p1 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -960,7 +937,6 @@ private lemma lieArm1_match_p1 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   exact lieArm1_slot0_vf_trace (I := I) (M := M) g₁ g_bg x D
     ((m 0 : TangentSpace I x) : E) ((m 1 : TangentSpace I x) : E)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p2 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1021,7 +997,6 @@ private lemma lieArm1_match_p2 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p3 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1100,7 +1075,6 @@ private lemma lieArm1_match_p3 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   rw [Finset.sum_comm]
   exact lieArm1_neg_double_sum (E := E) _
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p4 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1133,7 +1107,6 @@ private lemma lieArm1_match_p4 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   exact lieArm1_slot2_vf_trace (I := I) (M := M) g₁ g₀ x D
     ((m 0 : TangentSpace I x) : E) ((m 1 : TangentSpace I x) : E)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p5 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1193,7 +1166,6 @@ private lemma lieArm1_match_p5 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p6 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1218,7 +1190,6 @@ private lemma lieArm1_match_p6 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t)
       (by funext i; fin_cases i <;> rfl))
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p7 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1279,7 +1250,6 @@ private lemma lieArm1_match_p7 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p8 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1340,7 +1310,6 @@ private lemma lieArm1_match_p8 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p9 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1419,7 +1388,6 @@ private lemma lieArm1_match_p9 (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x 
   rw [Finset.sum_comm]
   exact lieArm1_neg_double_sum (E := E) _
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p10 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1452,7 +1420,6 @@ private lemma lieArm1_match_p10 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   exact lieArm1_slot2_vf_trace (I := I) (M := M) g₁ g₀ x D
     ((m 1 : TangentSpace I x) : E) ((m 0 : TangentSpace I x) : E)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p11 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1512,7 +1479,6 @@ private lemma lieArm1_match_p11 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p12 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1537,7 +1503,6 @@ private lemma lieArm1_match_p12 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t)
       (by funext i; fin_cases i <;> rfl))
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p13 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1598,7 +1563,6 @@ private lemma lieArm1_match_p13 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun k _ => Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm1_match_p14 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -1623,7 +1587,6 @@ private lemma lieArm1_match_p14 (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t)
       (by funext i; fin_cases i <;> rfl))
 
-set_option linter.unusedSectionVars false in
 theorem lieArm1_coeff_pieces_pointwise (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 3 I x) (m : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel

@@ -41,7 +41,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedVariables false in
 theorem deTurckForcing_solCoeff_continuous_smallTimeBase
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -1683,7 +1682,6 @@ end IterLaplacianInduction
 
 end FiniteOrderAnisotropicReconstruction
 
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1721,7 +1719,6 @@ private theorem deTurckRHSReconSectionFO_oneMinusConnLapIter_path_jointContMDiff
 
 end FiniteOrderReconJetEnergy
 
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1920,7 +1917,6 @@ private theorem deTurckRHSReconSectionFO_pathCoeff_timeContDiff_spectralJetMass
         mul_le_mul_of_nonneg_left hsq hwneg_nn
     _ = C ^ 2 * tensorSobolevWeight (I := I) (M := M) i (-sW) := by ring
 
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -2081,7 +2077,6 @@ private theorem deTurckRHSReconSectionFO_path_timeJet_mixed_regularity
         iteratedDeriv j (chat i) t)
       hφκ_smooth hκcoeff hκmass
 
-set_option linter.unusedVariables false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -2239,7 +2234,6 @@ private theorem deTurckRHSReconSectionFO_eigenPairing_jointCk_timeJet_realizatio
       exact hcd.continuousOn
     exact hfinal
 
-set_option linter.unusedVariables false in
 private theorem deTurckRHSRecon_pathCoeff_finiteOrder_timeContDiff_withinMass
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -2382,7 +2376,6 @@ private theorem deTurckRHSRecon_pathCoeff_finiteOrder_timeContDiff_withinMass
           exact hC i t ht
       _ = C * tensorSobolevWeight (I := I) (M := M) i (-s) := by ring
 
-set_option linter.unusedVariables false in
 private theorem deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass
     (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
@@ -2537,10 +2530,9 @@ private theorem deTurckRemainder_pathCoeff_finiteOrder_timeContDiff_withinMass
         _ ≤ Braw i := hmm
     nlinarith [hterm_recon, hterm_raw]
 
-set_option linter.unusedVariables false in
 private theorem deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
     {T : ℝ} (hT : 0 < T) (k : ℕ)
     (F : ℝ → SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : ∀ t : ℝ, metricCauchySchwarzBound (I := I) (M := M) g₀
@@ -2673,7 +2665,6 @@ private theorem deTurckRemainder_path_coeff_finiteOrder_timeJet_globalSection
           hCle (Rjet j t)
       _ ≤ C * Real.sqrt (∑' i, B i) := mul_le_mul_of_nonneg_left hnorm_le hC_nn
 
-set_option linter.unusedVariables false in
 theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -2771,11 +2762,10 @@ theorem deTurckSmoothN_path_coeff_finiteOrder_jetSpectralMass
     rw [deTurckSmoothN_coeff]
     exact (hψ_eq i t ht).symm
 
-set_option linter.unusedVariables false in
 theorem deTurckSobolevNHa2_finiteOrder_jetSpectralMass_preserving
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
-    {T : ℝ} (hT : 0 < T) {d₂ : ℝ} (hd₂_pos : 0 < d₂) (hd₂_le : d₂ ≤ T)
+    {T : ℝ} (_hT : 0 < T) {d₂ : ℝ} (hd₂_pos : 0 < d₂) (_hd₂_le : d₂ ≤ T)
     (w : ℝ → tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2))
     (hw_ball : ∀ᵐ t ∂(MeasureTheory.volume.restrict (Set.Icc (0 : ℝ) d₂)),
       ‖w t‖ ≤ deTurckRealizabilityRadius (I := I) (M := M) g₀ a ha_super)
@@ -2966,7 +2956,6 @@ theorem deTurckSobolevNHa2_finiteOrder_jetSpectralMass_preserving
         rw [hpf]; exact hle)]
   exact hψ_coeff t htmem i
 
-set_option linter.unusedVariables false in
 theorem deTurckForcing_finiteOrderSmoothDriver
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)

@@ -21,7 +21,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_sq_le_mul
     [T2Space M] [SigmaCompactSpace M]
@@ -184,7 +183,6 @@ theorem tensorL2Inner_sq_le_mul
     rw [hb_zero, hc_eq, mul_zero]
     simp
 
-set_option linter.unusedSectionVars false in
 
 theorem abs_tensorL2Inner_le
     [T2Space M] [SigmaCompactSpace M]
@@ -222,7 +220,6 @@ theorem abs_tensorL2Inner_le
   rw [h2] at h1
   exact h1
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Norm_add_le
     [T2Space M] [SigmaCompactSpace M]

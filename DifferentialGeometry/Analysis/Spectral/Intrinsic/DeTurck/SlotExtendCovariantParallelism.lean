@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -118,7 +117,6 @@ private theorem core_curry_reading (g₀ : SmoothRiemannianMetric I M) (r s : �
   rw [hcurU_op, ContinuousLinearMap.comp_apply]
   abel
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s) (x : M) (v : E) :
@@ -144,7 +142,6 @@ theorem tensorCovDerivAt_slotExtend_eq (g₀ : SmoothRiemannianMetric I M) (r s 
   congr 1
   exact core_curry_reading (I := I) (M := M) g₀ r s Φ x v D (m 0)
 
-set_option linter.unusedSectionVars false in
 
 theorem covGrad_slotExtend_eq_zero_of_covGrad_eq_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : Integral.L2.SmoothCcTensor g₀ r s)

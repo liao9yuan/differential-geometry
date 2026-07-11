@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCu
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -596,11 +595,10 @@ theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
   rw [hRHS]
   abel
 
-set_option linter.unusedVariables false in
 
 theorem chartRepAtBase_differentiableAt [I.Boundaryless]
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
-    (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
+    (_g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
     (t : ℝ) (β : M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
     (hβ : γ t ∈ (chartAt H β).source)

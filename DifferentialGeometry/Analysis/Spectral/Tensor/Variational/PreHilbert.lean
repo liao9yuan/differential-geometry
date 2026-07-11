@@ -22,7 +22,6 @@ import Mathlib.Topology.ContinuousOn
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -208,7 +207,6 @@ instance : Module ℝ (SmoothCcTensorH1 g r s) :=
 
 end SmoothCcTensorH1
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instPreInnerProductSpaceCore
     {g : SmoothRiemannianMetric I M} {r s : ℕ} :
@@ -237,21 +235,18 @@ noncomputable instance instPreInnerProductSpaceCore
     exact tensorH1Inner_smul_left (I := I) (M := M) g r s
       c S.toCcTensor T.toCcTensor
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instSeminormedAddCommGroup
     {g : SmoothRiemannianMetric I M} {r s : ℕ} :
     SeminormedAddCommGroup (SmoothCcTensorH1 g r s) :=
   InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := ℝ)
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instInnerProductSpace
     {g : SmoothRiemannianMetric I M} {r s : ℕ} :
     InnerProductSpace ℝ (SmoothCcTensorH1 g r s) :=
   InnerProductSpace.ofCore _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem SmoothCcTensorH1.inner_def
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -259,7 +254,6 @@ set_option linter.unusedSectionVars false in
     ⟪S, T⟫_ℝ =
       tensorH1Inner (I := I) (M := M) g r s S.toCcTensor T.toCcTensor := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem SmoothCcTensorH1.norm_def
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

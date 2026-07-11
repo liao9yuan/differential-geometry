@@ -46,7 +46,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedVariables false in
 theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMass
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a)
@@ -543,7 +542,6 @@ private theorem deTurckSobolevNHa2Symm_embed_eq_raw_embed_symmS
     (le_trans (norm_smoothCcToTensorHs_symmS_le (I := I) (M := M) g₀ ((a : ℝ) + 2) X)
       hball)).symm
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_jetSpectralMass_preservingSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -632,7 +630,6 @@ private theorem deTurckForcing_jetSpectralMass_preservingSymm
     g₀ g_bg a ha_super (F t) hballF]
   exact hψt
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -731,7 +728,6 @@ private theorem deTurckSobolevNHa2Symm_finiteOrder_jetSpectralMass_preserving
     g₀ g_bg a ha_super (F t) hballF]
   exact hψt
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_finiteOrderSmoothDriverSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -846,7 +842,6 @@ private theorem deTurckForcing_finiteOrderSmoothDriverSymm
         hφ_cont hφ_mass hw_coeff
     exact ⟨ψ, hψ_smooth, hψ_mass, fun i => (hforce_coeff i).trans (hψ_ae i)⟩
 
-set_option linter.unusedVariables false in
 
 theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMassSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -922,7 +917,6 @@ theorem maxRegForcing_smoothTimeJetDriver_of_galerkinSpatialMassSymm
 
 end SymmSCoefficientBlockTransfer
 
-set_option linter.unusedVariables false in
 
 theorem maxRegSolField_parabolicInterior_jetSpectralMassSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1060,7 +1054,6 @@ theorem maxRegSolField_parabolicInterior_jetSpectralMassSymm
         hforce_ae ht
     exact hstep1.trans hstep2
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_smoothForcingDriverSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1110,7 +1103,6 @@ private theorem deTurckForcing_smoothForcingDriverSymm
       (hforce.fun_comp (fun w => w.coeff i))
   exact hforce_coeff.trans (hψ_ae i)
 
-set_option linter.unusedVariables false in
 
 private theorem deTurckForcing_fixedPoint_coeff_smooth_and_massSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1152,7 +1144,6 @@ private theorem deTurckForcing_fixedPoint_coeff_smooth_and_massSymm
       (timeModeCoeff_coeFn (I := I) (M := M) gforce i)
   exact hbridge.trans (hf_ae i)
 
-set_option linter.unusedVariables false in
 
 theorem deTurckForcing_timeModeCoeff_smooth_allOrderJetSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1183,7 +1174,6 @@ theorem deTurckForcing_timeModeCoeff_smooth_allOrderJetSymm
   deTurckForcing_fixedPoint_coeff_smooth_and_massSymm (I := I) (M := M)
     g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce
 
-set_option linter.unusedVariables false in
 
 theorem deTurckForcing_smoothCoordinate_aeTimeJetSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)

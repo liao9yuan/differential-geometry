@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -1108,11 +1107,10 @@ private lemma gauss_phi_continuousOn
       (fun t ht => (hγC2 t ht).continuousAt.continuousWithinAt) hWdiff
   exact Variation.continuousOn_g_inner_along_curve (I := I) g hsecV hsecW
 
-set_option linter.unusedVariables false in
 
 theorem gauss_lemma_pullback
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
     g.inner (expMap (I := I) g p (show TangentSpace I p from v))
         (mfderiv 𝓘(ℝ, E) I

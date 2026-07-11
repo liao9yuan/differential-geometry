@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.FamilyDecomposition
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 
 open MeasureTheory Set Filter Topology

@@ -5,10 +5,8 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBo
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold MeasureTheory Set Filter
 open scoped Manifold Topology ContDiff ENNReal NNReal BigOperators
@@ -54,10 +52,9 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact hs.nullMeasurableSet
 
-set_option linter.unusedVariables false in
 
 def transportCoeffManifold
-    (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
+    (_g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) : M → ℝ :=
   fun x =>
     ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *

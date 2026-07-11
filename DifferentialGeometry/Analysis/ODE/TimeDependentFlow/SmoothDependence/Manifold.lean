@@ -67,12 +67,11 @@ theorem manifoldFlow_contMDiffOn_of_jointContDiffOn
     exact htgt q.2 hq.2 q.1 hq.1
   exact hsymm.comp hΦh hsubtgt
 
-set_option linter.unusedVariables false in
 theorem chart_pushforward_field_jointContDiff
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X q.1 q.2) : TangentBundle I M)))
-    (p₀ : M) {ρ : ℝ} (hρ : 0 < ρ)
+    (p₀ : M) {ρ : ℝ} (_hρ : 0 < ρ)
     (hρ_sub : Metric.ball (extChartAt I p₀ p₀) ρ ⊆ (extChartAt I p₀).target) :
     ContDiffOn ℝ ∞
       (Function.uncurry (fun (s : ℝ) (c : E) =>
@@ -351,7 +350,6 @@ theorem pushforward_velocity_cancellation (p₀ q : M)
   have hv := congrArg (fun L => L v) hid
   simpa only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using hv
 
-set_option linter.unusedVariables false in
 theorem chartflow_eq_bareflow_on_U
     (X : ℝ → ∀ x : M, TangentSpace I x) (p₀ : M)
     (F : ℝ → E → E) (ΦE : E × ℝ → E) (U : Set M) {a b : ℝ}
@@ -363,7 +361,7 @@ theorem chartflow_eq_bareflow_on_U
           ((extChartAt I p₀).symm c) (X s ((extChartAt I p₀).symm c)))
     (hconf : ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
       ΦE (extChartAt I p₀ p, t) ∈ (extChartAt I p₀).target)
-    (hUsrc : U ⊆ (extChartAt I p₀).source) :
+    (_hUsrc : U ⊆ (extChartAt I p₀).source) :
     ∀ (p : M), p ∈ U → ∀ t ∈ Set.Ioo a b,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I
         (fun s => (extChartAt I p₀).symm (ΦE (extChartAt I p₀ p, s)))

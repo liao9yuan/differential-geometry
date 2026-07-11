@@ -38,7 +38,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 section SecondOrderInterpInfra
 
-set_option linter.unusedSectionVars false in
 
 theorem continuous_riemannianFiberNormSq_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -49,7 +48,6 @@ theorem continuous_riemannianFiberNormSq_section
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (S.toSection x),
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
-set_option linter.unusedSectionVars false in
 
 private theorem memLp_riemannianFiberNormSq_rpow
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -65,7 +63,6 @@ private theorem memLp_riemannianFiberNormSq_rpow
     (continuous_riemannianFiberNormSq_section (I := I) (M := M) g r s S).rpow_const (fun _ => Or.inr ha)
   exact hcont.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
 
-set_option linter.unusedSectionVars false in
 
 theorem real_holder_three_nonneg
     (g : SmoothRiemannianMetric I M) (f₁ f₂ f₃ : M → ℝ)

@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.Deriv.Slope
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 2400000
@@ -43,7 +42,6 @@ def ccTensorRetagMetric (g' : SmoothRiemannianMetric I M) {g : SmoothRiemannianM
   { toSection := S.toSection
     hasCompactSupport := S.hasCompactSupport }
 
-set_option linter.unusedSectionVars false in
 lemma ccTensorBilin_ccTensorRetagMetric (g' : SmoothRiemannianMetric I M)
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) (b : M)
     (u w : TangentSpace I b) :
@@ -75,7 +73,6 @@ private lemma vec3_update_two {F : Type*} (a b c z : F) :
   funext k
   fin_cases k <;> simp [Function.update]
 
-set_option linter.unusedSectionVars false in
 lemma linearizedKoszulCovec_apply (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g' 0 2)
     (x : M) (u ζ z : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u ζ z =
@@ -103,7 +100,6 @@ lemma linearizedKoszulCovec_apply (g' : SmoothRiemannianMetric I M) (S : SmoothC
   rw [LinearMap.smul_apply, LinearMap.sub_apply, LinearMap.add_apply, h1, h2, h3]
   rw [smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma continuous_linearizedKoszulCovec_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (ζ z : TangentSpace I x) :
     Continuous (fun u : TangentSpace I x =>
@@ -136,7 +132,6 @@ def linearizedConnSharp (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g'
     (x : M) (u ζ : TangentSpace I x) : TangentSpace I x :=
   metricSharp (I := I) g' x (linearizedKoszulCovec (I := I) g' S x u ζ)
 
-set_option linter.unusedSectionVars false in
 lemma inner_linearizedConnSharp (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g' 0 2)
     (x : M) (u ζ z : TangentSpace I x) :
     g'.inner x (linearizedConnSharp (I := I) g' S x u ζ) z =

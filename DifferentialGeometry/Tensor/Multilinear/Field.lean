@@ -49,7 +49,6 @@ def smulByFun {s : ℕ}
     MultilinearSection 𝕜 F IB E n s :=
   ⟨fun x => φ x • α x, hφ.smul_section α.contMDiff⟩
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem smulByFun_apply {s : ℕ}
     (φ : B → 𝕜) (hφ : ContMDiff IB 𝓘(𝕜) n φ)
@@ -77,7 +76,6 @@ noncomputable def fromScalarField
     simp_rw [hcoord]
     exact hf.contMDiffAt⟩
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem fromScalarField_apply
     (f : B → 𝕜) (hf : ContMDiff IB 𝓘(𝕜) n f) (x : B)
@@ -122,12 +120,11 @@ theorem fromScalarField_toScalarField
   apply ContMDiffSection.ext; intro x
   simp only [fromScalarField]
   apply Bundle.continuousMultilinearMap.ext; intro v
-  show (ContinuousMultilinearMap.constOfIsEmpty 𝕜 (fun _ : Fin 0 => E x)
+  change (ContinuousMultilinearMap.constOfIsEmpty 𝕜 (fun _ : Fin 0 => E x)
     (α.toFun x Fin.elim0)) v = α.toFun x v
   rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
   exact congrArg (α.toFun x) (Subsingleton.elim Fin.elim0 v)
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem toScalarField_add
     (α β : MultilinearSection 𝕜 F IB E n 0) :
@@ -138,7 +135,6 @@ theorem toScalarField_add
   rw [show (α + β).toFun x = α.toFun x + β.toFun x from rfl]
   exact ContinuousMultilinearMap.add_apply _ _ _
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem toScalarField_smulByFun
     (φ : B → 𝕜) (hφ : ContMDiff IB 𝓘(𝕜) n φ)
@@ -146,7 +142,7 @@ theorem toScalarField_smulByFun
     (smulByFun n φ hφ α).toScalarField n = φ * α.toScalarField n := by
   ext x
   simp only [toScalarField, Pi.mul_apply]
-  show (φ x • α.toFun x) Fin.elim0 = φ x * α.toFun x Fin.elim0
+  change (φ x • α.toFun x) Fin.elim0 = φ x * α.toFun x Fin.elim0
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
 end MultilinearSection

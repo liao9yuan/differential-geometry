@@ -744,7 +744,6 @@ private lemma jet_fibreNormSq_sup_le (g₀ : SmoothRiemannianMetric I M) (r s : 
 set_option maxHeartbeats 3200000 in
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 800000 in
-set_option linter.unusedVariables false in
 private lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -753,12 +752,12 @@ private lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
     (Kw : ℕ → ℝ) (hKw_nn : ∀ l, 0 ≤ Kw l) :
     ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
       ∀ (p : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
-        (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
+        (_hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
         (Φ : SmoothCcTensor g₀ b₀ s₀)
-        (hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ≤
+        (_hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ≤
           Kc i * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + dc : ℕ) : ℝ) T₀‖))
         (W : SmoothCcTensor g₀ 0 b₀)
-        (hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
+        (_hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
           Kw l * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + dd : ℕ) : ℝ)
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖)
         (q : ℕ),
@@ -1020,7 +1019,6 @@ private lemma coeffContract_iteratedCovGrad_jet_bound [Nonempty M]
   rw [mul_pow, Real.sq_sqrt (mul_nonneg hG_nn (add_nonneg (hS1_nn q) (hS2_nn q)))]
   exact hfinalsq
 
-set_option linter.unusedVariables false in
 private lemma coeffContract_Hs_bound [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -1029,12 +1027,12 @@ private lemma coeffContract_Hs_bound [Nonempty M]
     (Kw : ℕ → ℝ) (hKw_nn : ∀ l, 0 ≤ Kw l) :
     ∃ CE : ℕ → ℝ, (∀ j, 0 ≤ CE j) ∧
       ∀ (p : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
-        (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
+        (_hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
         (Φ : SmoothCcTensor g₀ b₀ 2)
-        (hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ 2 i Φ‖ ≤
+        (_hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ 2 i Φ‖ ≤
           Kc i * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + dc : ℕ) : ℝ) T₀‖))
         (W : SmoothCcTensor g₀ 0 b₀)
-        (hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
+        (_hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
           Kw l * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + dd : ℕ) : ℝ)
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖)
         (j : ℕ),
@@ -1117,7 +1115,6 @@ private lemma iteratedCovGrad_slotExtend_norm_le (g₀ : SmoothRiemannianMetric 
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 800000 in
-set_option linter.unusedVariables false in
 private theorem arm_commutator_Hs_family_tame [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 4 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -1129,7 +1126,7 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
       ∀ (j : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
         (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
         (S : SmoothCcTensor g₀ 0 2)
-        (hSfam : ∃ p : ℕ, S = oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀),
+        (_hSfam : ∃ p : ℕ, S = oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀),
         ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((j : ℕ) : ℝ)
             (rawTensorConnLapSmooth (I := I) g₀ 0 2
                 (deTurckPrincipalCometricArm (I := I) (M := M) g₀
@@ -1373,7 +1370,7 @@ private theorem arm_commutator_Hs_family_tame [Nonempty M]
             (iteratedCovGrad (I := I) g₀ 0 2 2 (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)) +
           t2 + t3 + t4 + t5 + t6 := by
       rw [rawConnLap_appCc_iteratedCovGrad_two_comm (I := I) g₀ 2 2 C S]
-    show rawTensorConnLapSmooth (I := I) g₀ 0 2
+    change rawTensorConnLapSmooth (I := I) g₀ 0 2
         (operatorFieldApply (I := I) (M := M) g₀ 4 2 C (iteratedCovGrad (I := I) g₀ 0 2 2 S)) -
       operatorFieldApply (I := I) (M := M) g₀ 4 2 C
         (iteratedCovGrad (I := I) g₀ 0 2 2 (rawTensorConnLapSmooth (I := I) g₀ 0 2 S)) =

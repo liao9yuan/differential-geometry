@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleNabla
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1600000
 
@@ -522,7 +521,7 @@ lemma chartE_section_repr_polyCoordExtensionTangent_eventuallyEq
     have hWb : polyCoordExtensionTangent (I := I) x₀ P b =
         trivFromE (I := I) x₀ b (P (φ b - φ x₀)) := by
       rw [polyCoordExtensionTangent_apply, hb1, one_smul]
-    show chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) b = P (φ b - φ x₀)
+    change chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) b = P (φ b - φ x₀)
     rw [chartE_section_repr_eq_trivToE, hWb]
     exact trivToE_trivFromE (I := I) x₀ hbbase _
   have hsymm_cont : ContinuousAt φ.symm (φ x₀) := continuousAt_extChartAt_symm x₀
@@ -540,7 +539,7 @@ lemma chartE_section_repr_polyCoordExtensionTangent_eventuallyEq
   filter_upwards [hpre, htgt] with y hy hy_tgt
   have hy' : chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) (φ.symm y)
       = P (φ (φ.symm y) - φ x₀) := hy
-  show chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) (φ.symm y)
+  change chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) (φ.symm y)
       = P (y - φ x₀)
   rw [hy', φ.right_inv hy_tgt]
 
@@ -679,7 +678,7 @@ private lemma LeviCivita_covApply_polyCoordExt_firstLayer_pointwise
       have hWd : polyCoordExtensionTangent (I := I) x₀ P d =
           trivFromE (I := I) x₀ d (P (φ d - c)) := by
         rw [polyCoordExtensionTangent_apply, hd1, one_smul]
-      show chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) d = P (φ d - c)
+      change chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) d = P (φ d - c)
       rw [chartE_section_repr_eq_trivToE, hWd]
       exact trivToE_trivFromE (I := I) x₀ hdbase _
     have htgt : φ.target ∈ 𝓝 (φ b) :=
@@ -689,7 +688,7 @@ private lemma LeviCivita_covApply_polyCoordExt_firstLayer_pointwise
       with y hy hy_tgt
     have hy' : chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) (φ.symm y)
         = P (φ (φ.symm y) - c) := hy
-    show (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) ∘ φ.symm) y
+    change (chartE_section_repr (I := I) x₀ (polyCoordExtensionTangent (I := I) x₀ P) ∘ φ.symm) y
         = P (y - c)
     simp only [Function.comp_apply]
     rw [hy', φ.right_inv hy_tgt]
@@ -924,7 +923,7 @@ private lemma fderiv_jetCancelPoly_centred
     rw [add_zero] at hadd
     refine hadd.congr_of_eventuallyEq ?_
     filter_upwards with y
-    show jetCancelPoly (I := I) g x₀ v Qbil (y - c) =
+    change jetCancelPoly (I := I) g x₀ v Qbil (y - c) =
       -(L (y - c)) + (1 / 2 : ℝ) • Qbil (y - c) (y - c)
     rw [hL]; rfl
   rw [hsum.fderiv]
@@ -959,7 +958,7 @@ private lemma christoffelCorrectionBilin_apply (g : SmoothRiemannianMetric I M) 
   rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.comp_apply, smul_smul, smul_smul]
   congr 1
-  show ((chartModelBasis E).coord j) Y * ((chartModelBasis E).coord i) (trivToE (I := I) x₀ x₀ v) *
+  change ((chartModelBasis E).coord j) Y * ((chartModelBasis E).coord i) (trivToE (I := I) x₀ x₀ v) *
       chartChristoffel (I := I) g x₀ i j k (extChartAt I x₀ x₀) =
     ((chartModelBasis E).coord i) (trivToE (I := I) x₀ x₀ v) * ((chartModelBasis E).coord j) Y *
       chartChristoffel (I := I) g x₀ i j k (extChartAt I x₀ x₀)
@@ -1074,7 +1073,7 @@ private lemma fderiv_jetCancelPoly_apply (g : SmoothRiemannianMetric I M) (x₀ 
         (Qbil.comp (ContinuousLinearMap.id ℝ E)).flip z)) z := by
     refine (hlin.add hquad).congr_of_eventuallyEq ?_
     filter_upwards with y
-    show jetCancelPoly (I := I) g x₀ v Qbil y = -(L y) + (1 / 2 : ℝ) • Qbil y y
+    change jetCancelPoly (I := I) g x₀ v Qbil y = -(L y) + (1 / 2 : ℝ) • Qbil y y
     rw [hL]; rfl
   rw [hsum.fderiv]
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.neg_apply,

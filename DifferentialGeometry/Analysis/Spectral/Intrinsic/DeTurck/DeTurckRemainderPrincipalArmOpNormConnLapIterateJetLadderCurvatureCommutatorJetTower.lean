@@ -227,7 +227,6 @@ private lemma bal_ptcRS_jet_le (g : SmoothRiemannianMetric I M) (r s : ℕ) :
         add_le_add (add_le_add h₀ h₁) h₂
     _ = (Real.sqrt (cc₀ j) + Real.sqrt (cc₁ j) + Real.sqrt (cc₂ j)) * Sj := by ring
 
-set_option linter.unusedSectionVars false in
 lemma covGrad_eq_iteratedCovGrad_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) :
     covGrad (I := I) (M := M) g r s X = iteratedCovGrad (I := I) g r s 1 X := rfl
@@ -280,7 +279,7 @@ private lemma bal_comm_tower (g : SmoothRiemannianMetric I M) (r s : ℕ) (m : �
           covGrad (I := I) (M := M) g r (s + m) Cm := by
       rw [iteratedCovGrad_succ, iteratedCovGrad_succ, hCm_def]
       rw [covGrad_sub (I := I) (M := M) g r (s + m)]
-      show rawTensorConnLapSmooth (I := I) g r ((s + m) + 1)
+      change rawTensorConnLapSmooth (I := I) g r ((s + m) + 1)
           (covGrad (I := I) (M := M) g r (s + m) Y) -
           covGrad (I := I) (M := M) g r (s + m)
             (iteratedCovGrad (I := I) g r s m (rawTensorConnLapSmooth (I := I) g r s S)) =
@@ -748,7 +747,7 @@ lemma bal_Ccore (g : SmoothRiemannianMetric I M) (r s : ℕ) :
         simp only [Nat.mul_zero, Finset.range_zero, Finset.sum_empty, mul_zero, add_zero]
         rw [iteratedCovGrad_zero]
       · rw [oneMinusConnLapSmoothIter_zero]
-        show ‖covGrad (I := I) (M := M) g r s S‖ ≤
+        change ‖covGrad (I := I) (M := M) g r s S‖ ≤
           ‖iteratedCovGrad (I := I) g r s 1 S‖ +
             0 * ∑ b ∈ Finset.range 1, ‖iteratedCovGrad (I := I) g r s b S‖
         rw [covGrad_eq_iteratedCovGrad_one (I := I) (M := M) g r s S]

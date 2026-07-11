@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsio
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter
 open scoped Manifold Topology ContDiff

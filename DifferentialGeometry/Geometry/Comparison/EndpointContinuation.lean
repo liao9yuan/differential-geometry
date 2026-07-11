@@ -21,7 +21,6 @@ import DifferentialGeometry.Geometry.Comparison.GeodesicSpeedBound
 import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -441,7 +440,7 @@ theorem hasEndpointContinuation_of_complete
       intro s hs; rw [hval]; exact mem_of_mem_nhds hs
     have hmono : Tendsto cf (𝓝[Set.Icc a'' b] b) (𝓝 L) :=
       hIic.mono_left (nhdsWithin_mono b (fun s hs => hs.2))
-    show Tendsto cf (𝓝[Set.Icc a'' b] b) (𝓝 (cf b))
+    change Tendsto cf (𝓝[Set.Icc a'' b] b) (𝓝 (cf b))
     rw [hval]; exact hmono
   have hcγ_contOn : ContinuousOn cγ (Set.Icc a'' b) := by
     intro s hs

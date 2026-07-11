@@ -577,7 +577,7 @@ private lemma logConvex_single_step {f : ℕ → ℝ} (hnn : ∀ k, 0 ≤ f k)
     · have ha' : a ≤ b' := Nat.lt_succ_iff.mp hlt
       have hIH := ih a ha'
       have hlcb := hlc b'
-      show f (a + 1) * f (b' + 1) ≤ f a * f (b' + 2)
+      change f (a + 1) * f (b' + 1) ≤ f a * f (b' + 2)
       have hprod : f (a + 1) * f (b' + 1) * f b' ≤ f a * f (b' + 2) * f b' := by
         calc f (a + 1) * f (b' + 1) * f b'
             = (f (a + 1) * f b') * f (b' + 1) := by ring

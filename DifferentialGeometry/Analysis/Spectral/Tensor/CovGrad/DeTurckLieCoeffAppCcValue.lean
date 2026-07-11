@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2Jet
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -35,7 +34,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ₁ Φ₂ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
@@ -52,7 +50,6 @@ private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -63,7 +60,6 @@ private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -74,7 +70,6 @@ private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub,
     ContinuousMultilinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieTraceCoeff_apply_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 4)) (D : SmoothCcTensor g₀ 0 4) (x : M)
@@ -109,7 +104,6 @@ theorem deTurckLieTraceCoeff_apply_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     cometricDoubleTraceFib_toModel, Tensor0SSpace.toModel_ofModel, modelDoubleTrace_apply]
   simp only [unitModel]
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieArm2PrincipalCoeff_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 0 4) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -156,7 +150,6 @@ theorem deTurckLieArm2PrincipalCoeff_apply_eq (g₀ g₁ g_bg : SmoothRiemannian
     exact congrArg (fun t : Fin 4 → E => unitModel (I := I) (M := M) g₀ 4 D x t)
       (by funext i; fin_cases i <;> rfl)
 
-set_option linter.unusedSectionVars false in
 
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SBundle.Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
@@ -171,7 +164,6 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SBundle.Tensor0SSpace 1 I x) (w : Fin 2 → TangentSpace I x) :
@@ -181,7 +173,6 @@ private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) 
       Tensor0SBundle.Tensor0SSpace.toModel om
         (fun _ : Fin 1 => (show E from PDE.DeTurck.connDiff (I := I) g₁ g₀ x (w 0) (w 1))) := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLiePairTraceFib_toModel_eval (g₁ gA gB : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
@@ -209,7 +200,6 @@ private lemma deTurckLiePairTraceFib_toModel_eval (g₁ gA gB : SmoothRiemannian
     cometricDoubleTraceFib_toModel, Tensor0SSpace.toModel_ofModel]
   simp only [modelDoubleTrace_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieKoszulTraceFib_toModel_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 3)) (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
@@ -231,7 +221,6 @@ private lemma deTurckLieKoszulTraceFib_toModel_eval (g₀ g₁ : SmoothRiemannia
   funext i
   fin_cases i <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1CoreFib_toModel_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (a b : TangentSpace I x) :
@@ -415,7 +404,6 @@ private lemma deTurckLieArm1CoreFib_toModel_eval (g₀ g₁ g_bg : SmoothRiemann
     Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
   rw [hS2, hB, hT2, hT3, hT4, hT5]
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (w : Fin 2 → TangentSpace I x) :
@@ -484,7 +472,6 @@ private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRieman
   conv_lhs => rw [hw]
   exact deTurckLieArm1CoreFib_toModel_eval (I := I) g₀ g₁ g_bg x D (w 0) (w 1)
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
@@ -499,7 +486,6 @@ private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMet
     (deTurckLieArm1CoreFib (I := I) g₀ g₁ g_bg x D) t)
     (by funext i; fin_cases i <;> rfl)
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
@@ -514,7 +500,6 @@ private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianM
   exact congrArg (fun t : Fin 3 → E => Tensor0SBundle.Tensor0SSpace.toModel D t)
     (by funext i; fin_cases i <;> rfl)
 
-set_option linter.unusedSectionVars false in
 
 private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
@@ -533,7 +518,6 @@ private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric
   exact congrArg (fun t : Fin 3 → E => Tensor0SBundle.Tensor0SSpace.toModel D t)
     (by funext i; fin_cases i <;> rfl)
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieArm1Coeff_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 0 3) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -695,7 +679,6 @@ theorem deTurckLieArm1Coeff_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I 
     deTurckLieArm1_koszulZero_eval]
   simp only [unitModel]
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -729,7 +712,6 @@ theorem deTurckLieCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I
                   (smoothExtensionTangent (I := I) x (v 1)) x)) :=
   ricciArmOrder0DeTurckLieCoeff_appCc_eq (I := I) (M := M) g₀ g₁ g_bg W x v
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieDLaCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -781,7 +763,6 @@ theorem deTurckLieDLaCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetri
   funext j
   fin_cases j <;> simp
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieDLbCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -827,7 +808,6 @@ theorem deTurckLieDLbCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetri
     funext j
     fin_cases j <;> simp
 
-set_option linter.unusedSectionVars false in
 
 private lemma christoffelCorrection_chartModelBasis_pair_self
     (g : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E)) :
@@ -854,7 +834,6 @@ private lemma christoffelCorrection_chartModelBasis_pair_self
   · intro h
     exact absurd (Finset.mem_univ i) h
 
-set_option linter.unusedSectionVars false in
 
 private lemma leviCivita_toFun_chartBasis_eval_of_localComponents
     (g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -969,7 +948,6 @@ private lemma leviCivita_toFun_chartBasis_eval_of_localComponents
     ContinuousLinearMap.map_smul, trivFromE_self_apply (I := I) x ((chartModelBasis E) p),
     ← add_smul]
 
-set_option linter.unusedSectionVars false in
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
 theorem deTurckLieCovDerivW_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I M)
@@ -1001,7 +979,6 @@ theorem deTurckLieCovDerivW_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I 
     (fun b hb => PDE.DeTurck.deTurckVF_apply_eq_chartDeTurckVFComp_sum (I := I) g₁ g_bg x hb)
     i
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieCovDerivA_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (i j k : Fin (Module.finrank ℝ E)) :

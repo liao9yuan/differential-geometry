@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff

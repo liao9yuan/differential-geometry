@@ -128,7 +128,6 @@ noncomputable def ContMDiffSection.tensorProduct
     congr 1 <;> simp [Trivialization.continuousLinearMapAt,
       e₁.coe_linearMapAt_of_mem hx.1, e₂.coe_linearMapAt_of_mem hx.2]⟩
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem ContMDiffSection.tensorProduct_apply
     (g : ContMDiffSection IB F₁ n E₁)

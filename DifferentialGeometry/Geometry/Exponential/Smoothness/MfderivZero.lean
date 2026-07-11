@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.AtZero
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.FrechetDerivative
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

@@ -136,12 +136,11 @@ private lemma f_mul_Δ_continuous
       f x * Δ_g_with_boundary (I := I) g hh hh_int x) :=
   hf.continuous.mul (Δ_g_with_boundary_continuous (I := I) g hh hh_int)
 
-set_option linter.unusedVariables false in
 
 private lemma f_mul_Δ_hasCompactSupport
     [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
-    {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
+    {f h : M → ℝ} (_hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
     (hh_int : tsupport h ⊆ I.interior M) :
     HasCompactSupport (fun x : M =>
       f x * Δ_g_with_boundary (I := I) g hh hh_int x) :=
@@ -237,7 +236,6 @@ theorem green_first_with_boundary
   rw [integral_add h_int_fΔh h_int_inner] at hStokes
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem green_first_with_boundary_face_sum_eq_zero_of_interior_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

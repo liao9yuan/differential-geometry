@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -94,18 +93,16 @@ private lemma fiberNormSqComponent_connDiffBiContrFib_self
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
   rw [hcf]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (P : SmoothCcTensor g₀ 0 2)
-      (h : ∀ y v w, g₁.inner y v w =
+      (_h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+      {δ : ℝ} (_hδ : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
       (x : M),
       letI : Bundle.RiemannianBundle (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=
         Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 3
@@ -252,8 +249,6 @@ theorem riemannianFiberNormSq_gInvDiffQuadResidualField_le_of_lt_one
           push_cast; ring
         rw [hcard, ← hnE]; ring
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballUniform
@@ -262,9 +257,9 @@ theorem exists_gInvDiffQuadResidualField_realizedFam_riemannianFiberNormSq_ballU
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -679,18 +674,16 @@ private lemma fiberNormSqComponent_bgRBiContrFib
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
   rw [hcf]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem riemannianFiberNormSq_backgroundRiemannBiContrFib_le
-    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
+    (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (_hδ₀0 : 0 ≤ δ₀) (hδ₀ : δ₀ < 1) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (P : SmoothCcTensor g₀ 0 2)
-      (h : ∀ y v w, g₁.inner y v w =
+      (_h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-      {δ : ℝ} (hδ : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+      {δ : ℝ} (_hδ : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
       (x : M),
       riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
           (show TensorRSSpace 2 2 I x from
@@ -805,19 +798,17 @@ theorem riemannianFiberNormSq_backgroundRiemannBiContrFib_le
           push_cast; ring
         rw [hcard, ← hnE]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_ricciArmOrder0BackgroundCurvatureCoeffField_realizedFam_riemannianFiberNormSq_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (_hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →

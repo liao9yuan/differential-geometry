@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
 import Mathlib.Analysis.Calculus.Deriv.Mul
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

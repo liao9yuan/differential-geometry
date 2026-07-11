@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -41,7 +40,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section OffKernelCoefBound
 
-set_option linter.unusedSectionVars false in
 
 private lemma wkpNorm_offKernelSmoothCoef_mul_le
     (α : M) (K : ℕ)
@@ -106,7 +104,6 @@ end OffKernelCoefBound
 
 section MemWkpFinsetSum
 
-set_option linter.unusedSectionVars false in
 
 private lemma memWkp_finset_sum_iota
     {k : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
@@ -132,7 +129,6 @@ end MemWkpFinsetSum
 
 section UniformConstant
 
-set_option linter.unusedSectionVars false in
 
 private lemma exists_uniform_wkpNorm_bound
     {ι : Type*} [Finite ι] {K : ℕ}
@@ -154,7 +150,6 @@ end UniformConstant
 
 section OffKernelCoefBoundUniform
 
-set_option linter.unusedSectionVars false in
 
 private lemma wkpNorm_offKernelSmoothCoef_mul_le_uniform
     (α : M) (K : ℕ)

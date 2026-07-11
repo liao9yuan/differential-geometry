@@ -11,7 +11,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetri
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -36,7 +35,6 @@ noncomputable def modelRankCast {m n : ℕ} (h : m = n) :
   (ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
     (finCongr h)).toContinuousLinearEquiv.toContinuousLinearMap
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem modelRankCast_refl {m : ℕ} (T : Tensor0SBundle.Tensor0SModel m ℝ E) :
     modelRankCast (E := E) (rfl : m = m) T = T := by
@@ -46,7 +44,6 @@ set_option linter.unusedSectionVars false in
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem interiorProductField_contMDiff (s : ℕ)
     (α : ∀ x : M, Tensor0SBundle.Tensor0SSpace (s + 1) I x)
@@ -99,7 +96,6 @@ theorem interiorProductField_contMDiff (s : ℕ)
     rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem contractTraceField_contMDiff (r s : ℕ)
     (T : ∀ x : M, Tensor0SBundle.TensorRSSpace (1 + r) (s + 1) I x)
@@ -239,7 +235,6 @@ theorem contractTraceField_contMDiff (r s : ℕ)
     r s L Linv hL hR Tx).symm
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem tensor0SField_castRank_contMDiff {m n : ℕ} (h : m = n)
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace m I x)
@@ -269,7 +264,6 @@ noncomputable def modelDoubleTrace (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1
         (L (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
           ((Module.finBasis ℝ E).cDualBasis k))))
 
-set_option linter.unusedSectionVars false in
 
 theorem modelDoubleTrace_apply (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel (s + 2) ℝ E) (m : Fin s → E) :
@@ -292,7 +286,6 @@ noncomputable def ricciCometricDoubleTraceFib (g₀ : SmoothRiemannianMetric I M
         ((modelRankCast (E := E) (by omega : (4 + a) = (2 + a) + 2)).comp
           (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (4 + a) x).toContinuousLinearMap))
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciCometricDoubleTraceFib_toModel (g₀ : SmoothRiemannianMetric I M) (a : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (4 + a) I x) :
@@ -306,14 +299,12 @@ noncomputable def raiseSlot0ModelL (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1
   ContinuousLinearMap.flip
     ((Tensor0SBundle.model_interior_bilinear ℝ E (s + 1)).comp L)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem raiseSlot0ModelL_apply (s : ℕ) (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel (s + 2) ℝ E) (β : Tensor0SBundle.Tensor0SModel 1 ℝ E) :
     raiseSlot0ModelL (E := E) s L D β =
       Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (s + 1) (L β) D := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem model_contract_trace_raiseSlot0ModelL (s : ℕ)
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
@@ -359,7 +350,6 @@ noncomputable def cometricRaiseSlot0Fib (g₀ : SmoothRiemannianMetric I M) (s :
     ((raiseSlot0ModelL (E := E) s (cometricLmodel (I := I) g₀ x)).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (s + 2) x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem cometricRaiseSlot0Fib_toModel (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (s + 2) I x) :
@@ -406,7 +396,6 @@ theorem cometricRaiseSlot0Fib_section_contMDiff (g₀ : SmoothRiemannianMetric I
 
   congr 1
 
-set_option linter.unusedSectionVars false in
 
 theorem contract_trace_unitZero_toModel (s : ℕ) (x : M)
     (T : Tensor0SBundle.TensorRSSpace 1 (s + 1) I x) :
@@ -489,7 +478,6 @@ noncomputable def cometricDoubleTraceFib (g₀ : SmoothRiemannianMetric I M) (p 
       ((modelRankCast (E := E) (rfl : (p + 2) = p + 2)).comp
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (p + 2) x).toContinuousLinearMap))
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem cometricDoubleTraceFib_toModel (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (p + 2) I x) :
@@ -548,14 +536,12 @@ noncomputable def cometricDoubleTraceField (g₀ : SmoothRiemannianMetric I M) (
       contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₀ p }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem cometricDoubleTraceField_toSection (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M) :
     (cometricDoubleTraceField (I := I) g₀ p).toSection x =
       (show Tensor0SBundle.TensorRSSpace (p + 2) p I x from
         cometricDoubleTraceFib (I := I) g₀ p x) := rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem model_cons_slot0_sum {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (f : ι → E) (rest : Fin s → E) :
@@ -567,7 +553,6 @@ private theorem model_cons_slot0_sum {s : ℕ} {ι : Type*} (fs : Finset ι)
   rw [h, map_sum, ContinuousMultilinearMap.sum_apply]
   exact Finset.sum_congr rfl fun i _ => (h (f i)).symm
 
-set_option linter.unusedSectionVars false in
 
 private theorem model_cons_slot0_smul {s : ℕ} (c : ℝ) (u : E)
     (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (rest : Fin s → E) :
@@ -578,7 +563,6 @@ private theorem model_cons_slot0_smul {s : ℕ} (c : ℝ) (u : E)
     rw [continuousMultilinearCurryLeftEquiv_apply]
   rw [h, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
 
-set_option linter.unusedSectionVars false in
 
 private theorem smoothOrthoFrame_basis_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) :
@@ -612,7 +596,6 @@ private theorem smoothOrthoFrame_basis_at (g₀ : SmoothRiemannianMetric I M) (x
   exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
-set_option linter.unusedSectionVars false in
 
 private theorem smoothOrthoFrame_expansion_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) (u : TangentSpace I y) :
@@ -645,7 +628,6 @@ private theorem smoothOrthoFrame_expansion_at (g₀ : SmoothRiemannianMetric I M
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
-set_option linter.unusedSectionVars false in
 
 private theorem cometricLmodel_dualBasis_inner (g₀ : SmoothRiemannianMetric I M) (y : M)
     (k : Fin (Module.finrank ℝ E)) (u : TangentSpace I y) :
@@ -675,7 +657,6 @@ private theorem cometricLmodel_dualBasis_inner (g₀ : SmoothRiemannianMetric I 
     exact congrFun (Module.Basis.coe_dualBasis (Module.finBasis ℝ E)) k]
   rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
     {s : ℕ} (x : M) {y : M}
@@ -766,7 +747,6 @@ theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M
               rw [(Module.finBasis ℝ E).sum_repr
                 ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E), ← hcurry]
 
-set_option linter.unusedSectionVars false in
 
 private theorem tensor0SCovDeriv_finset_sum (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     {ι : Type*} (fs : Finset ι)
@@ -803,7 +783,6 @@ private theorem tensor0SCovDeriv_finset_sum (g₀ : SmoothRiemannianMetric I M) 
       funext fun y => Finset.sum_cons hb]
     rw [hadd, ih, Finset.sum_cons]
 
-set_option linter.unusedSectionVars false in
 
 theorem cometricDoubleTraceFib_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M)
     (p : ℕ) (x : M) {y : M} (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x)
@@ -846,7 +825,6 @@ theorem cometricDoubleTraceFib_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric
       (v0 := ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E))
       (vs := Fin.cons ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E) mm)]
 
-set_option linter.unusedSectionVars false in
 
 private theorem orthoFrame_skew_correction_cancel (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (v : E) (T : Tensor0SBundle.Tensor0SModel (p + 2) ℝ E) (mm : Fin p → E) :
@@ -938,7 +916,6 @@ private theorem orthoFrame_skew_correction_cancel (g₀ : SmoothRiemannianMetric
     exact Finset.sum_congr rfl fun i _ => by rw [← Finset.sum_neg_distrib]]
   exact add_neg_cancel _
 
-set_option linter.unusedSectionVars false in
 
 private theorem orthoFrame_corrections_sum_eq_zero (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (v : E) (W : Tensor0SBundle.Tensor0SSpace (p + 2) I x) :
@@ -1009,7 +986,6 @@ private theorem orthoFrame_corrections_sum_eq_zero (g₀ : SmoothRiemannianMetri
   exact orthoFrame_skew_correction_cancel (I := I) g₀ p x v
     (Tensor0SBundle.Tensor0SSpace.toModel W) mm
 
-set_option linter.unusedSectionVars false in
 
 private theorem covDeriv_doubleInsert_leibniz (g₀ : SmoothRiemannianMetric I M) (p : ℕ)
     (w : ∀ y : M, Tensor0SBundle.Tensor0SSpace (p + 2) I y)

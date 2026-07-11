@@ -45,12 +45,11 @@ private lemma primitive_hasDerivAt {f₀ : ℝ → ℝ} (hf₀ : Continuous f₀
     hf₀.stronglyMeasurable.stronglyMeasurableAtFilter
     hf₀.continuousAt
 
-set_option linter.unusedVariables false in
 
 theorem gronwall_integral_le
-    {T A K : ℝ} (hT : 0 ≤ T) (hA : 0 ≤ A) (hK : 0 ≤ K)
+    {T A K : ℝ} (hT : 0 ≤ T) (_hA : 0 ≤ A) (hK : 0 ≤ K)
     {f : ℝ → ℝ} (hf_cont : ContinuousOn f (Set.Icc 0 T))
-    (hf_nn : ∀ t ∈ Set.Icc (0:ℝ) T, 0 ≤ f t)
+    (_hf_nn : ∀ t ∈ Set.Icc (0:ℝ) T, 0 ≤ f t)
     (hf_int : ∀ t ∈ Set.Icc (0:ℝ) T,
       f t ≤ A + K * ∫ τ in (0:ℝ)..t, f τ) :
     ∀ t ∈ Set.Icc (0:ℝ) T, f t ≤ A * Real.exp (K * t) := by
@@ -93,12 +92,11 @@ theorem gronwall_integral_le
     rw [gronwallBound_ε0, sub_zero]
   linarith [hgt, hfg_t, hsim.le, hsim.ge]
 
-set_option linter.unusedVariables false in
 
 theorem integral_gronwall_le_affine
-    {T A B K : ℝ} (hT : 0 ≤ T) (hA : 0 ≤ A) (hB : 0 ≤ B) (hK : 0 ≤ K)
+    {T A B K : ℝ} (hT : 0 ≤ T) (_hA : 0 ≤ A) (hB : 0 ≤ B) (hK : 0 ≤ K)
     {f : ℝ → ℝ} (hf_cont : ContinuousOn f (Set.Icc 0 T))
-    (hf_nn : ∀ t ∈ Set.Icc (0:ℝ) T, 0 ≤ f t)
+    (_hf_nn : ∀ t ∈ Set.Icc (0:ℝ) T, 0 ≤ f t)
     (hf_int : ∀ t ∈ Set.Icc (0:ℝ) T,
       f t ≤ A + B * t + K * ∫ τ in (0:ℝ)..t, f τ) :
     ∀ t ∈ Set.Icc (0:ℝ) T, f t ≤ (A + B * t) * Real.exp (K * t) := by

@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -42,7 +41,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
@@ -75,7 +73,6 @@ private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
@@ -92,7 +89,6 @@ theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (slotPermCLM_apply (I := I) ρ x (Z x))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
     (P : ∀ x : M, Tensor0SBundle.Tensor0SSpace m I x)
@@ -142,7 +138,6 @@ private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem connContrCLM_field_contMDiff (m k : ℕ)
     (Bf : ∀ x : M, Tensor0SBundle.TensorRSSpace 1 (k + 1) I x)
@@ -202,7 +197,6 @@ theorem connContrCLM_field_contMDiff (m k : ℕ)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace (m + 1 + k) I z) x t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder1CLM_field_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -244,7 +238,6 @@ theorem linearizedRicciConnDiffOrder1CLM_field_contMDiff
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder0CLM_field_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -324,7 +317,6 @@ theorem linearizedRicciConnDiffOrder0CLM_field_contMDiff
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 4 I z) x t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem ricciCometricFourTraceCLM_field_contMDiff (g₁ : SmoothRiemannianMetric I M)
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace 4 I x)
@@ -368,7 +360,6 @@ noncomputable def linearizedRicciConnDiffOrder0CometricTracedCLM (g₀ g₁ : Sm
       ((covGrad (I := I) (M := M) g₀ 1 2 (connDiffSection (I := I) g₁ g₀)).toSection x))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder1CometricTracedCLM_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 3 2 ℝ E)) ∞
@@ -392,7 +383,6 @@ theorem linearizedRicciConnDiffOrder1CometricTracedCLM_contMDiff (g₀ g₁ : Sm
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) x t) rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxRecDepth 8000 in
 
 theorem linearizedRicciConnDiffOrder0CometricTracedCLM_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
@@ -436,7 +426,6 @@ noncomputable def linearizedRicciConnDiffOrder0CoeffField
       contMDiff_toFun := linearizedRicciConnDiffOrder0CometricTracedCLM_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem linearizedRicciConnDiffOrder1CoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
@@ -444,7 +433,6 @@ set_option linter.unusedSectionVars false in
       (show Tensor0SBundle.TensorRSSpace 3 2 I x from
         linearizedRicciConnDiffOrder1CometricTracedCLM (I := I) g₀ g₁ x) := rfl
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem linearizedRicciConnDiffOrder0CoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
@@ -468,7 +456,6 @@ def linearizedRicciConnDiffOrder0Coeff (g₀ : SmoothRiemannianMetric I M)
   linearizedRicciConnDiffOrder0CoeffField (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder0Coeff_eq_base_add_sub
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -481,7 +468,6 @@ theorem linearizedRicciConnDiffOrder0Coeff_eq_base_add_sub
             - linearizedRicciArm0BaseCoeff (I := I) g₀ T T' hδ hδ' s) := by
   abel
 
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder1Coeff_eq_base_add_sub
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

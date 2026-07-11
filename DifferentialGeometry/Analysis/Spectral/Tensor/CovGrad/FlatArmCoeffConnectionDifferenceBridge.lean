@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RecoveryEndomorphis
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 6400000
 
@@ -30,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSimpArgs false in
 def connDiffLoweredCovec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 3 I x :=
   (show ContinuousMultilinearMap ℝ (fun _ : Fin 3 => TangentSpace I x) ℝ from
@@ -161,7 +159,6 @@ private lemma connDiffLoweredCc_unitModel_apply (g₀ g₁ : SmoothRiemannianMet
   rw [connDiffLoweredCc_unitModel]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -186,7 +183,6 @@ private theorem riemannianFiberNormSq_neg_value
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma connDiffSection_eq_cometricRaiseSlot0Field (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
       cometricRaiseSlot0Field (I := I) (M := M) g₀ 1
@@ -248,7 +244,6 @@ private lemma connDiffSection_eq_cometricRaiseSlot0Field (g₀ g₁ : SmoothRiem
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
-set_option linter.unusedSectionVars false in
 private lemma flatArmCoeffCc_true_eq_cometricRaiseSlot0Field
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     flatArmCoeffCc (I := I) g₀ g₁ true =
@@ -310,7 +305,6 @@ private lemma flatArmCoeffCc_true_eq_cometricRaiseSlot0Field
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons]
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_iteratedCovGrad_flatArmCoeffCc_true_eq_connDiffSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + i) x

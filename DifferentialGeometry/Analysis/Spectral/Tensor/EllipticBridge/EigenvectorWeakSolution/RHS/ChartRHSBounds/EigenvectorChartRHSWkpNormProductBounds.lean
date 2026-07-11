@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -46,7 +45,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section SmoothCoefBound
 
-set_option linter.unusedSectionVars false in
 
 lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
     (α : M) (K : ℕ)
@@ -172,7 +170,6 @@ lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-set_option linter.unusedSectionVars false in
 
 lemma memWkpFinsetSum
     {k : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
@@ -196,7 +193,6 @@ lemma memWkpFinsetSum
 
 end SmoothCoefBound
 
-set_option linter.unusedSectionVars false in
 
 lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -207,7 +203,6 @@ lemma one_div_densityOnEuclid_contDiffOn
 
 section Aggregation
 
-set_option linter.unusedSectionVars false in
 
 lemma wkpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
@@ -305,7 +300,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-set_option linter.unusedSectionVars false in
 
 lemma wkpNorm_sub_le
     {Ω : Set EuclN} (hΩ : IsOpen Ω) {u v : EuclN → ℝ}
@@ -335,7 +329,6 @@ end BracketBound
 
 section UniformBounds
 
-set_option linter.unusedSectionVars false in
 
 lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
     (α : M) (K : ℕ)
@@ -463,7 +456,6 @@ lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-set_option linter.unusedSectionVars false in
 
 lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {δ : Type*} {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)

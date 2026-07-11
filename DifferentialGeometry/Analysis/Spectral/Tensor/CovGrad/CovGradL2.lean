@@ -7,7 +7,6 @@ import Mathlib.Analysis.Normed.Operator.Extend
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -58,7 +57,6 @@ private lemma tensorL2Inner_covGrad_self_eq_dirichlet
   exact (tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
     (I := I) (M := M) g r s S S x).symm
 
-set_option linter.unusedSectionVars false in
 
 private lemma covGrad_l2NormSq_le_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -83,7 +81,6 @@ private lemma covGrad_l2NormSq_le_h1NormSq
     tensorL2Inner_nonneg (I := I) (M := M) g r s S.toCcTensor.toFun
   linarith
 
-set_option linter.unusedSectionVars false in
 
 private lemma covGrad_l2Norm_le_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -94,7 +91,6 @@ private lemma covGrad_l2Norm_le_h1Norm
   have h_rhs_nn : 0 ≤ ‖S‖ := norm_nonneg _
   exact (abs_le_of_sq_le_sq' h_sq h_rhs_nn).2
 
-set_option linter.unusedSectionVars false in
 
 private lemma covGrad_l2Norm_le_one_mul_h1Norm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -136,7 +132,6 @@ noncomputable def covGradL2Lin
       ((covGrad (I := I) (M := M) g r s w.toCcTensor :
         SmoothCcTensor g r (s + 1)) : TensorL2 r (s + 1) g) := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma covGradL2Lin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -207,7 +202,6 @@ theorem tensorCovGradL2Compl_smoothToTensorH1Compl_eq_coe
   rw [tensorCovGradL2Compl_smoothToTensorH1Compl (I := I) (M := M) g r s w,
     tensorCovGradL2_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorCovGradL2_opNorm_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -215,7 +209,6 @@ theorem tensorCovGradL2_opNorm_le_one
   LinearMap.mkContinuous_norm_le (covGradL2Lin (I := I) (M := M) g r s)
     zero_le_one (fun w => covGradL2Lin_norm_le (I := I) (M := M) g r s w)
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorCovGradL2Compl_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -248,7 +241,6 @@ theorem tensorCovGradL2Compl_apply_norm_le
   exact (denseRange_smoothToTensorH1Compl (I := I) (M := M) g r s).induction_on
     x h_closed h_dense
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorCovGradL2Compl_opNorm_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -258,7 +250,6 @@ theorem tensorCovGradL2Compl_opNorm_le_one
       rw [one_mul]
       exact tensorCovGradL2Compl_apply_norm_le (I := I) (M := M) g r s x)
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorCovGradL2_inner_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -54,7 +53,6 @@ section UniformTermBoundsUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-set_option linter.unusedSectionVars false in
 
 private lemma resolventEigenvectorComponent_wkpNorm_le_uniform :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -69,7 +67,6 @@ private lemma resolventEigenvectorComponent_wkpNorm_le_uniform :
   exact le_trans (le_of_eq rfl)
     (aggrUchart_le (I := I) (M := M) g r s i α P₀ K)
 
-set_option linter.unusedSectionVars false in
 
 private lemma crossLeftBracketTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -209,7 +206,6 @@ private lemma crossLeftBracketTerm_wkpNorm_le_uniform
   rw [h_eq, hΩ_def]
   exact hC_bd i
 
-set_option linter.unusedSectionVars false in
 
 private lemma crossRightBracketTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -346,7 +342,6 @@ private lemma crossRightBracketTerm_wkpNorm_le_uniform
   rw [h_eq, hΩ_def]
   exact hC_bd i
 
-set_option linter.unusedSectionVars false in
 
 private lemma principalRotationCoeffTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -373,7 +368,6 @@ private lemma principalRotationCoeffTerm_wkpNorm_le_uniform
   gcongr
   exact aggrPartial_le (I := I) (M := M) g r s i α P₀ K
 
-set_option linter.unusedSectionVars false in
 
 private lemma lowerOrderRotationCoeffTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -419,7 +413,6 @@ private lemma lowerOrderRotationCoeffTerm_wkpNorm_le_uniform
             g r s i α P₀ K := by
         rw [← ofReal_two, ← mul_assoc, ← ENNReal.ofReal_mul hC_nn, mul_comm C 2]
 
-set_option linter.unusedSectionVars false in
 
 private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -497,7 +490,6 @@ private lemma weightedGradCoeffDivLimit_sum_wkpNorm_le_uniform
     (fun l => ⟨Cl l, hCl_nn l, fun i => (hCl l i).2⟩)
   exact ⟨C, hC_nn, fun i => hC_bd i⟩
 
-set_option linter.unusedSectionVars false in
 
 private lemma weightedGradDivTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -579,7 +571,6 @@ private lemma weightedGradDivTerm_wkpNorm_le_uniform
             g r s i α P₀ K := by
         rw [ENNReal.ofReal_mul hC₁_nn, mul_assoc]
 
-set_option linter.unusedSectionVars false in
 
 private lemma crossRightGradDivTerm_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -670,7 +661,6 @@ section UniformBracketBoundUnconditional
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-set_option linter.unusedSectionVars false in
 
 lemma rhsBracket_wkpNorm_le_uniform
     (h_pou : ∀ (i : TensorEigenIdx (I := I) (M := M) g r s)

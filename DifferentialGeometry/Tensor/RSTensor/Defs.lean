@@ -317,7 +317,6 @@ def ofModel {s : ℕ} {x : M}
     Tensor0SSpace s I x :=
   (tensor0SSpace_continuousLinearEquiv s x).symm f
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem toModelL_apply {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     toModelL s x T = toModel T := rfl
@@ -354,7 +353,6 @@ theorem ofModel_toModel {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     ofModel (toModel T) = T :=
   (tensor0SSpace_continuousLinearEquiv s x).symm_apply_apply T
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem toModel_ofModel {s : ℕ} {x : M}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
@@ -437,7 +435,6 @@ def ofModel {r s : ℕ} {x : M} (f : TensorRSModel r s 𝕜 E) :
     TensorRSSpace r s I x :=
   (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm f
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem toModelL_apply {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
     (toModelL (I := I) r s x).toFun T = toModel T := rfl
@@ -472,7 +469,6 @@ theorem ofModel_toModel {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
     ofModel (toModel T) = T :=
   (tensorRSSpace_continuousLinearEquiv (I := I) r s x).symm_apply_apply T
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem toModel_ofModel {r s : ℕ} {x : M} (f : TensorRSModel r s 𝕜 E) :
     toModel (ofModel (I := I) (x := x) f) = f :=

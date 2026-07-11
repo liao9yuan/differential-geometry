@@ -19,11 +19,10 @@ section defs
 variable (𝕜 : Type*) [CommSemiring 𝕜] [TopologicalSpace 𝕜] (ι : Type*) [Fintype ι]
 variable {B : Type*}
 
-set_option linter.unusedVariables false in
 
-protected def Bundle.continuousAlternatingMap (F₁ : Type*) (E₁ : B → Type*)
+protected def Bundle.continuousAlternatingMap (_F₁ : Type*) (E₁ : B → Type*)
     [Π x, AddCommMonoid (E₁ x)] [Π x, Module 𝕜 (E₁ x)] [Π x, TopologicalSpace (E₁ x)]
-    (F₂ : Type*) (E₂ : B → Type*) [Π x, AddCommMonoid (E₂ x)] [Π x, Module 𝕜 (E₂ x)]
+    (_F₂ : Type*) (E₂ : B → Type*) [Π x, AddCommMonoid (E₂ x)] [Π x, Module 𝕜 (E₂ x)]
     [Π x, TopologicalSpace (E₂ x)] (x : B) : Type _ :=
   (E₁ x) [⋀^ι]→L[𝕜] (E₂ x)
 
@@ -159,7 +158,7 @@ instance continuousAlternatingMap.isLinear
   linear x _ :=
   { map_add := fun L L' ↦ by
       ext v
-      show (e₂.continuousLinearMapAt 𝕜 x)
+      change (e₂.continuousLinearMapAt 𝕜 x)
         (((L + L').compContinuousLinearMap (e₁.symmL 𝕜 x)) v) =
         (e₂.continuousLinearMapAt 𝕜 x) ((L.compContinuousLinearMap (e₁.symmL 𝕜 x)) v) +
         (e₂.continuousLinearMapAt 𝕜 x) ((L'.compContinuousLinearMap (e₁.symmL 𝕜 x)) v)
@@ -169,7 +168,7 @@ instance continuousAlternatingMap.isLinear
       congr 1
     map_smul := fun c L ↦ by
       ext v
-      show (e₂.continuousLinearMapAt 𝕜 x)
+      change (e₂.continuousLinearMapAt 𝕜 x)
         (((c • L).compContinuousLinearMap (e₁.symmL 𝕜 x)) v) =
         c • (e₂.continuousLinearMapAt 𝕜 x) ((L.compContinuousLinearMap (e₁.symmL 𝕜 x)) v)
       rw [ContinuousAlternatingMap.compContinuousLinearMap_apply,

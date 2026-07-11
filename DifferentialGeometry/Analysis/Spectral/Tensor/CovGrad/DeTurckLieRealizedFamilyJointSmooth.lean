@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLower
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -357,7 +356,6 @@ private noncomputable def covGradSymmSValue (g₀ : SmoothRiemannianMetric I M)
     (covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ V)).toSection x)
     (unitTensor (I := I) (M := M) x)
 
-set_option linter.unusedSectionVars false in
 
 private theorem covGradSymmSValue_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g₀ 0 2) :
@@ -371,7 +369,6 @@ private theorem covGradSymmSValue_contMDiff (g₀ : SmoothRiemannianMetric I M)
   refine h.congr (fun x => ?_)
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem covGradSymmSValue_convexPerturbation (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (s : ℝ) (x : M) :
@@ -388,12 +385,11 @@ private theorem covGradSymmSValue_convexPerturbation (g₀ : SmoothRiemannianMet
     SmoothCcTensor.toSection_smul]
   rfl
 
-set_option linter.unusedVariables false in
 
 private theorem covGradSymmSValueFam_jointContMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
+    {δ : ℝ} (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+    {δ' : ℝ} (_hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ') :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)
         (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) p.1
@@ -447,7 +443,6 @@ private theorem connDiff_split_middle (gA gC gB : SmoothRiemannianMetric I M) (x
   rw [h1, h2, h3]
   exact (sub_add_sub_cancel _ _ _).symm
 
-set_option linter.unusedSectionVars false in
 
 private theorem metricConnDiffLoweredFib_split (gm gA gC gB : SmoothRiemannianMetric I M)
     (x : M) :
@@ -463,7 +458,6 @@ private theorem metricConnDiffLoweredFib_split (gm gA gC gB : SmoothRiemannianMe
     metricConnDiffLoweredFib_toModel, metricConnDiffLoweredFib_toModel,
     connDiff_split_middle (I := I) gA gC gB, map_add, ContinuousLinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 
 private theorem metricConnDiffLowered_fixedPair_affine (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)

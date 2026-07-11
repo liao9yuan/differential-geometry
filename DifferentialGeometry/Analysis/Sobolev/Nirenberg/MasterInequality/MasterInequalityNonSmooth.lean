@@ -82,7 +82,6 @@ theorem nirenbergMasterYoungConstant_nonneg
     refine mul_nonneg ?_ (sq_nonneg _)
     exact mul_nonneg (by linarith) hε₀.le
 
-set_option linter.unusedVariables false in
 
 theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
@@ -446,7 +445,6 @@ theorem nirenberg_master_inequality_after_young_nonsmooth_quantitative
   rw [h_const_eq]
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem nirenberg_master_inequality_absorbed_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
@@ -535,7 +533,6 @@ theorem nirenberg_master_inequality_absorbed_nonsmooth_quantitative
   have h_lam_split : B.lam * I - (B.lam / 2) * I = (B.lam / 2) * I := by ring
   linarith [h_main]
 
-set_option linter.unusedVariables false in
 
 theorem nirenberg_diffQuot_g_localL2_bound_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
@@ -702,7 +699,6 @@ theorem nirenberg_diffQuot_g_localL2_bound_quantitative
     mul_le_mul_of_nonneg_left h_int_le h_lam_half_nn
   exact h_step1.trans h_main
 
-set_option linter.unusedVariables false in
 
 theorem nirenberg_master_inequality_after_young_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
@@ -788,7 +784,6 @@ theorem nirenberg_master_inequality_after_young_nonsmooth
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k
     h_FK_diffQuot_u_bound h_v_test_sq_bound h_master_nonsmooth hh hh_le
 
-set_option linter.unusedVariables false in
 
 theorem nirenberg_master_inequality_absorbed_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
@@ -870,7 +865,6 @@ theorem nirenberg_master_inequality_absorbed_nonsmooth
     h_fderiv_eta hΩ' hΩ'_closure hΩ'_compact hη_in_Ω' hh_supp_in_Ω' k
     h_FK_diffQuot_u_bound h_v_test_sq_bound h_master_nonsmooth hh hh_le
 
-set_option linter.unusedVariables false in
 
 theorem nirenberg_diffQuot_g_localL2_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)

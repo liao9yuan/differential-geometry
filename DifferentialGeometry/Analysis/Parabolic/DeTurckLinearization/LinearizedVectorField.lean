@@ -21,9 +21,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-set_option linter.unusedVariables false in
 
-def chartLinearizedDeTurckVFPrincipal (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartLinearizedDeTurckVFPrincipal (g _g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     chartInvGramOnE (I := I) g α a b y *

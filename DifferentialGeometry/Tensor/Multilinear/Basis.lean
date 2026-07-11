@@ -115,7 +115,6 @@ variable {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
   [FiberBundle F E] [VectorBundle 𝕜 F E]
   (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
-set_option linter.unusedSectionVars false in
 
 theorem contMDiff_multilinearSection_iff_coord {d : ℕ}
     (b : Module.Basis (Fin d) 𝕜 F) {s : ℕ}

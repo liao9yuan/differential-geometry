@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
@@ -29,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' := by
@@ -37,7 +35,6 @@ private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace 
     ContinuousMultilinearMap.ext h
   exact Tensor0SSpace.toModel_injective hM
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0S_toModel_sum {s : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace s I x) :
@@ -67,7 +64,6 @@ def slotInsertEndoFib (s : ℕ) (k : Fin s) (x : M)
         intro v
         simp }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotInsertEndoFib_apply (s : ℕ) (k : Fin s) (x : M)
@@ -79,7 +75,6 @@ set_option backward.isDefEq.respectTransparency false in
   rw [slotInsertEndoFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
@@ -99,7 +94,6 @@ lemma slotInsertEndoFib_apply_eval (s : ℕ) (k : Fin s) (x : M)
       rfl
   exact congrArg (fun t => Tensor0SSpace.toModel A t) hfam
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
@@ -117,7 +111,6 @@ lemma slotInsertEndoFib_add_left (s : ℕ) (k : Fin s) (x : M)
     slotInsertEndoFib_apply_eval, ContinuousLinearMap.add_apply,
     ContinuousMultilinearMap.map_update_add]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
@@ -133,7 +126,6 @@ lemma slotInsertEndoFib_smul_left (s : ℕ) (k : Fin s) (x : M) (c : ℝ)
     ContinuousMultilinearMap.smul_apply, slotInsertEndoFib_apply_eval,
     ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.map_update_smul]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
@@ -154,7 +146,6 @@ lemma slotInsertEndoFib_zero (s : ℕ) (x : M)
     rw [Fin.cons_zero, Fin.update_cons_zero]
   rw [← hcurry, ContinuousLinearEquiv.symm_apply_apply]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin s) (x : M)
@@ -180,7 +171,6 @@ lemma slotInsertEndoFib_succ (g : SmoothRiemannianMetric I M) (s : ℕ) (j : Fin
   rw [slotExtendFib_apply (I := I) (M := M) g s s x, ← hcurry,
     ContinuousLinearEquiv.symm_apply_apply]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem slotInsertEndoFib_contMDiff (g : SmoothRiemannianMetric I M) :
@@ -270,7 +260,6 @@ def curvatureTensorActionFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
   -(∑ k : Fin s, slotInsertEndoFib (I := I) (M := M) s k x
       (riemannOp (LeviCivita (I := I) g) x u w))
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -286,7 +275,6 @@ lemma slotCurvSumFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : 
     slotInsertEndoFib_apply_eval (I := I) (M := M) s k x
       (riemannOp (LeviCivita (I := I) g) x u w) A m
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_add_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -305,7 +293,6 @@ lemma slotCurvSumFib_add_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
       (riemannOp (LeviCivita (I := I) g) x u' w)]
   rw [Finset.sum_add_distrib, neg_add]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_smul_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
@@ -321,7 +308,6 @@ lemma slotCurvSumFib_smul_left (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M
       (riemannOp (LeviCivita (I := I) g) x u w)]
   rw [← Finset.smul_sum, ← smul_neg]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_add_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -340,7 +326,6 @@ lemma slotCurvSumFib_add_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M
       (riemannOp (LeviCivita (I := I) g) x u w')]
   rw [Finset.sum_add_distrib, neg_add]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotCurvSumFib_smul_right (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (c : ℝ)
@@ -373,7 +358,6 @@ def slotFreeCurvWCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
           ContinuousLinearMap.smul_apply]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvWCLM_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -414,7 +398,6 @@ def slotFreeCurvUCLM (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
         rw [hW, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm)]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvUCLM_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -467,7 +450,6 @@ def curvatureOperatorOnTensorFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x :
         rw [hU, map_smul ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm)]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -478,7 +460,6 @@ set_option backward.isDefEq.respectTransparency false in
   rw [curvatureOperatorOnTensorFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma slotFreeCurvOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -500,7 +481,6 @@ lemma slotFreeCurvOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x
   rw [ContinuousLinearEquiv.apply_symm_apply, slotFreeCurvWCLM_apply]
   exact slotCurvSumFib_apply_eval (I := I) (M := M) g s x u w A m
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem slotFreeCurvOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -618,7 +598,6 @@ def curvatureOperatorOnTensorHomFib (g : SmoothRiemannianMetric I M) (s : ℕ) (
           ContinuousLinearMap.comp_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvHomFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -633,7 +612,6 @@ set_option backward.isDefEq.respectTransparency false in
   rw [curvatureOperatorOnTensorHomFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -672,7 +650,6 @@ theorem slotFreeCurvHomFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) 
       ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from Z x) (ζ x)) from by
     rw [slotFreeCurvHomFib_apply, ContinuousLinearMap.comp_apply]]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 def curvatureOperatorOnTensorHomField (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -680,7 +657,6 @@ def curvatureOperatorOnTensorHomField (g : SmoothRiemannianMetric I M) (s : ℕ)
   toFun := fun x : M => curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x
   contMDiff_toFun := slotFreeCurvHomFib_contMDiff (I := I) (M := M) g s
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma slotFreeCurvHomField_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
@@ -688,7 +664,6 @@ set_option backward.isDefEq.respectTransparency false in
         curvatureOperatorOnTensorHomField (I := I) (M := M) g s x) =
       curvatureOperatorOnTensorHomFib (I := I) (M := M) g s x := rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem exists_slotFreeCurvOpField_baseSlot_eval (g : SmoothRiemannianMetric I M) :

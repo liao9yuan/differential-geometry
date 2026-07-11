@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldDiffer
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -976,7 +975,6 @@ private noncomputable def pureRDirCLMTensor
         map_smul' := fun c v => by
           rw [map_smul (riemannOp (tensorCov (I := I) g 0 m) x (B i x)) c v]; rfl })
 
-set_option linter.unusedSectionVars false in
 
 private lemma pureRDirCLMTensor_apply
     (g : SmoothRiemannianMetric I M) (m : ℕ)
@@ -991,7 +989,6 @@ private lemma pureRDirCLMTensor_apply
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
-set_option linter.unusedSectionVars false in
 
 private lemma pureRFrozenDirCLM_eq_pureRDirCLMTensor
     (g : SmoothRiemannianMetric I M) (m : ℕ)
@@ -1002,7 +999,6 @@ private lemma pureRFrozenDirCLM_eq_pureRDirCLMTensor
   refine ContinuousLinearMap.ext (fun v => ?_)
   rw [pureRFrozenDirCLM_apply, pureRDirCLMTensor_apply]
 
-set_option linter.unusedSectionVars false in
 
 private theorem riemannOp_tensorCov_homNatural
     (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M) (v w : TangentSpace I x)
@@ -1076,7 +1072,6 @@ private theorem riemannOp_tensorCov_homNatural
       (cov := Tensor0SNabla.tensor0SCovariantDerivative I M m (LeviCivita (I := I) g)) hX hW
       hΞd_smooth]
 
-set_option linter.unusedSectionVars false in
 
 private lemma covGradBundleEquiv_symm_apply_eq_curry
     (m : ℕ) (x : M)
@@ -1101,7 +1096,6 @@ private lemma covGradBundleEquiv_symm_apply_eq_curry
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from τ) d) w v']
 
-set_option linter.unusedSectionVars false in
 
 private lemma pureRDirCLMTensor_covGradEquiv_eval
     (g : SmoothRiemannianMetric I M) (m : ℕ)
@@ -1136,7 +1130,6 @@ private lemma pureRDirCLMTensor_covGradEquiv_eval
     ((covGradBundleEquiv (I := I) (M := M) 0 m x).symm τ (B i x)) d]
   rw [covGradBundleEquiv_symm_apply_eq_curry (I := I) (M := M) m x τ (B i x) d]
 
-set_option linter.unusedSectionVars false in
 
 private lemma pureREndoOpFibVal_eval
     (g : SmoothRiemannianMetric I M) (m : ℕ)
@@ -1158,7 +1151,6 @@ private lemma pureREndoOpFibVal_eval
     (unitScalarRSLift (I := I) (M := M) x S) (unitZeroSec (I := I) (M := M) x) v]
   rw [unitScalarRSLift_apply_unit (I := I) (M := M) x S]
 
-set_option linter.unusedSectionVars false in
 
 private noncomputable def pureREndoOpFib
     (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
@@ -1265,7 +1257,6 @@ private noncomputable def pureREndoOpFib
           x (smoothOrthoFrame (I := I) g x i x) (v 0)), Tensor0SSpace.toModel_smul,
           ContinuousMultilinearMap.smul_apply] }
 
-set_option linter.unusedSectionVars false in
 
 private lemma pureREndoOpFib_apply
     (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M) (S : Tensor0SSpace (m + 1) I x) :
@@ -1277,7 +1268,6 @@ private lemma pureREndoOpFib_apply
         (unitZeroSec (I := I) (M := M) x) := by
   rw [pureREndoOpFib, LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
-set_option linter.unusedSectionVars false in
 
 private lemma pureRGenuineEndoFib_eq_comp
     (g : SmoothRiemannianMetric I M) (m : ℕ) (W : SmoothCcTensor g 0 (m + 1)) (x : M) :
@@ -1320,7 +1310,6 @@ private lemma pureRGenuineEndoFib_eq_comp
   rw [unitScalarRSLift_apply_unit (I := I) (M := M) x
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from W.toSection x) d)]
 
-set_option linter.unusedSectionVars false in
 
 theorem pureRGenuineDiffOp_zero_succ_toSection_unit_eval
     (g : SmoothRiemannianMetric I M) (m : ℕ) (W : SmoothCcTensor g 0 (m + 1)) (x : M)
@@ -1352,7 +1341,6 @@ theorem pureRGenuineDiffOp_zero_succ_toSection_unit_eval
   rw [pureRDirCLMTensor_covGradEquiv_eval (I := I) (M := M) g m (smoothOrthoFrame (I := I) g x) x
     (W.toSection x) (unitZeroSec (I := I) (M := M) x) v]
 
-set_option linter.unusedSectionVars false in
 
 private theorem pureREndoOp_contMDiff (g : SmoothRiemannianMetric I M) (m : ℕ) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel (m + 1) (m + 1) ℝ E)) ∞

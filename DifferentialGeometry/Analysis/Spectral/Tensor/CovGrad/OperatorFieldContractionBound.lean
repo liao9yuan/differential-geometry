@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -29,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 
 lemma rfns_repr_of_orthoFrame_cb
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (S : TensorRSSpace 0 t I x)
@@ -150,7 +148,6 @@ lemma rfns_repr_of_orthoFrame_cb
   · intro K _ hK; exact absurd (Subsingleton.elim K (fun k : Fin 0 => k.elim0)) hK
   · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
 
-set_option linter.unusedSectionVars false in
 
 private lemma fiberNormSqComponent_comp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -206,7 +203,6 @@ private lemma fiberNormSqComponent_comp_eq
       fiberNormSqComponent (I := I) (M := M) g x 0 r Wx n e K₀ P := rfl
   rw [hwcomp, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannianFiberNormSq_comp_le_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -261,7 +257,6 @@ theorem riemannianFiberNormSq_comp_le_mul
         (fiberNormSqComponent (I := I) (M := M) g x r s Φx n e P J) ^ 2 from Finset.sum_comm,
     hΦrepr]
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_uniform_riemannianFiberNormSq_appCc_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) :

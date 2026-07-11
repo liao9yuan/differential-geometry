@@ -636,18 +636,17 @@ theorem conjugating_flow_orbit_pushforward_continuity_data
       (fun s : ℝ => (Φ_fam s : M → M) y) (fun s : ℝ => mfderiv I I (Φ_fam s : M → M) y u)
       ⟨hs₀.1, hs₀.2⟩ (horbit y |>.continuousWithinAt hs₀) hchartRepDiff
 
-set_option linter.unusedVariables false in
 
 theorem conjugating_flow_t0_continuity_data
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (hT : 0 < T) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
-    (hΦode : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
+    (_hΦode : ∀ x : M, ∀ t ∈ Set.Ioo (0 : ℝ) T,
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I (fun s : ℝ => (Φ_fam s : M → M) x)
         (Set.Ici (0 : ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight
           (-(deTurckVF (I := I) (g_DT t) g_bg ((Φ_fam t : M → M) x)))))
-    (hΦ0 : Φ_fam 0 = _root_.Diffeomorph.refl I M ∞)
-    (hDT_init : g_DT 0 = g_bg)
+    (_hΦ0 : Φ_fam 0 = _root_.Diffeomorph.refl I M ∞)
+    (_hDT_init : g_DT 0 = g_bg)
     (hg_joint : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
         (fun q : ℝ × M =>

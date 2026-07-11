@@ -3,7 +3,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 import Mathlib.Geometry.Manifold.ContMDiffMap
 import Mathlib.Analysis.Calculus.Deriv.Basic
 
-set_option autoImplicit false
 
 open scoped Manifold ContDiff
 

@@ -22,7 +22,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvature
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -85,7 +84,7 @@ theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M) (r s : 
         = (fun x => (-1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s x
           (S₂.toFun x) (T.toFun x)) := by
       funext x
-      show tensorInnerPointwise (I := I) (M := M) g r s x ((-1 : ℝ) • S₂.toFun x) (T.toFun x) = _
+      change tensorInnerPointwise (I := I) (M := M) g r s x ((-1 : ℝ) • S₂.toFun x) (T.toFun x) = _
       rw [tensorInnerPointwise_smul_left]
     rw [heq]
     exact hbase.const_mul (-1 : ℝ)
@@ -114,7 +113,7 @@ theorem tensorL2Inner_sub_right_smoothCc (g : SmoothRiemannianMetric I M) (r s :
         = (fun x => (-1 : ℝ) * tensorInnerPointwise (I := I) (M := M) g r s x
           (S.toFun x) (T₂.toFun x)) := by
       funext x
-      show tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) ((-1 : ℝ) • T₂.toFun x) = _
+      change tensorInnerPointwise (I := I) (M := M) g r s x (S.toFun x) ((-1 : ℝ) • T₂.toFun x) = _
       rw [tensorInnerPointwise_smul_right]
     rw [heq]
     exact hbase.const_mul (-1 : ℝ)

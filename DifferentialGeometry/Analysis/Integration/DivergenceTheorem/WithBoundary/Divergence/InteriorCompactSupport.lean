@@ -133,13 +133,12 @@ lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
   exact localDivergenceWithin_zero_of_eventuallyEq_zero (I := I) g x X
     (mem_chart_source H x) hev
 
-set_option linter.unusedVariables false in
 
 lemma support_divergence_g_with_boundary_subset_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
-    (hX_int : tsupport X ⊆ I.interior M) :
+    (_hX_int : tsupport X ⊆ I.interior M) :
     Function.support (divergence_g_with_boundary (I := I) g X) ⊆ tsupport X := by
   intro x hx
   by_contra hxnotin

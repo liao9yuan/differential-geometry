@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParal
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter CovariantDerivative
@@ -27,7 +26,6 @@ noncomputable def tensor0SToTensorRS {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
     TensorRSSpace 0 s I x :=
   (tensor00Scalar (I := I) (M := M) x).smulRight C
 
-set_option linter.unusedSectionVars false in
 
 lemma tensor0SAsRS_apply {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
     (τ : Tensor0SSpace 0 I x) :
@@ -37,7 +35,6 @@ lemma tensor0SAsRS_apply {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
   change ((tensor00Scalar (I := I) (M := M) x).smulRight C) τ = _
   rw [ContinuousLinearMap.smulRight_apply]
 
-set_option linter.unusedSectionVars false in
 
 lemma coframeS_zero_eq_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -53,7 +50,6 @@ lemma coframeS_zero_eq_unitZeroSec
   rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
-set_option linter.unusedSectionVars false in
 
 lemma slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)

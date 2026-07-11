@@ -26,7 +26,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipal
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -1615,13 +1614,12 @@ private theorem oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_le_jetProduc
         (operatorFieldApply (I := I) (M := M) g₀ (2 + 1) (2 + 0) G₀ Du).toFun| := neg_le_abs _
   linarith [h₁u, h₂u, habs1, habs2, hgreen]
 
-set_option linter.unusedVariables false in
 private theorem exists_oneMinusConnLapIter_arm_sub_armPrincipalSlotPairing_jetBound_core
     [Nonempty M] (g₀ g₁ : SmoothRiemannianMetric I M) (n : ℕ)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
-    (htie : ∀ (y : M) (v w : TangentSpace I y),
+    (_htie : ∀ (y : M) (v w : TangentSpace I y),
       g₁.inner y v w = g₀.inner y v w + h y v w)
-    {δ : ℝ} (hδ_lt : δ < 1) (hδ_nn : 0 ≤ δ) (hδ : metricCauchySchwarzBound (I := I) g₀ h δ) :
+    {δ : ℝ} (_hδ_lt : δ < 1) (_hδ_nn : 0 ≤ δ) (_hδ : metricCauchySchwarzBound (I := I) g₀ h δ) :
     ∃ Clower : ℝ, 0 ≤ Clower ∧
       ∀ (u₀ : SmoothCcTensor g₀ 0 2),
         tensorL2Inner (I := I) (M := M) g₀ 0 2

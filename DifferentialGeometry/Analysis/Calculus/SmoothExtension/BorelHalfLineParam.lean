@@ -586,7 +586,6 @@ private theorem exists_contDiff_tsupport_subset_eventuallyEq_one
       (x := x) : Filter.Tendsto toEuclidean (𝓝 x) (𝓝 (toEuclidean x)))
     simpa only [hρ_def, Function.comp_def, Pi.one_apply] using this
 
-set_option linter.unusedVariables false in
 
 theorem borel_halfLine_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
     (g : ℝ → E → F) (K : Set E) (z₀ : E) (hz₀ : z₀ ∈ interior K)
@@ -965,10 +964,9 @@ private theorem prodMatch_intervalCutoff (T : ℝ) (hT : 0 < T) (Φ : ℝ × E �
       rw [intervalCutoff_eq_one T hT (by positivity), one_smul]
   exact iteratedFDerivWithin_prod_match hV hΦ.contDiffOn hĥsmooth htjet n hz
 
-set_option linter.unusedVariables false in
 
 theorem borel_interval_extend_param [FiniteDimensional ℝ E] [CompleteSpace F]
-    (g : ℝ → E → F) (T : ℝ) (hT : 0 < T) (K : Set E) (hK : IsCompact K)
+    (g : ℝ → E → F) (T : ℝ) (hT : 0 < T) (K : Set E) (_hK : IsCompact K)
     (z₀ : E) (hz₀ : z₀ ∈ interior K)
     (hg : ContDiffOn ℝ ∞ (Function.uncurry g) (Set.Icc (0:ℝ) T ×ˢ K)) :
     ∃ gext : ℝ → E → F, ∃ V ∈ nhds z₀,

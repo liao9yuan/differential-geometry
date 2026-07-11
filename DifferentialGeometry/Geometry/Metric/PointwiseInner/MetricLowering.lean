@@ -16,7 +16,6 @@ import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 

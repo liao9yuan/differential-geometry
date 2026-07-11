@@ -26,7 +26,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -57,7 +56,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma coeffOpApply_slotSwapField_eq_apply_of_symm (g₀ : SmoothRiemannianMetric I M)
     (D : SmoothCcTensor g₀ 2 2) (T : SmoothCcTensor g₀ 0 2)
@@ -103,7 +101,6 @@ private lemma coeffOpApply_slotSwapField_eq_apply_of_symm (g₀ : SmoothRiemanni
   rw [hswapfix]
   rfl
 
-set_option linter.unusedVariables false in
 
 theorem exists_riemannPalatini_refold_identity_data
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -113,9 +110,9 @@ theorem exists_riemannPalatini_refold_identity_data
       ∃ qA qB : Fin 4 → Equiv.Perm (Fin 4),
       IsFramePairPartner qA qB ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -488,7 +485,6 @@ theorem exists_riemannPalatini_refold_identity_data
       le_mul_of_one_le_right (sq_nonneg _) hW1
     linarith [t1, t2, t3, t4, t5, t6, hjs_nn, hQ, hD, hS, hF, hcW]
 
-set_option linter.unusedVariables false in
 
 theorem riemannPalatiniRefoldC2Family_riemannianFiberNormSq_le
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -632,7 +628,6 @@ theorem riemannPalatiniRefoldC2Family_riemannianFiberNormSq_le
     sq_nonneg (fC * (δ / (1 - δ) ^ 2)),
     mul_nonneg (mul_nonneg hδ0 hδ0) (sq_nonneg (fC * (δ / (1 - δ) ^ 2)))]
 
-set_option linter.unusedVariables false in
 
 theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -641,7 +636,7 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
     (hq : IsFramePairPartner qA qB) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ_half : δ ≤ 1 / 2)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ_half : δ ≤ 1 / 2)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -759,7 +754,6 @@ theorem exists_riemannPalatiniRefoldC2Family_l2JetWindow
   rw [hexp]
   linarith [hG0w, hG1w, hG2w, hG3w]
 
-set_option linter.unusedVariables false in
 
 theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -768,7 +762,7 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
     (hε : ∀ i, |ε i| ≤ 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -1025,7 +1019,6 @@ theorem exists_deTurckLieCovDerivRefoldC2Family_cap_l2JetWindow
       sq_nonneg (‖G0‖ - ‖G2‖), norm_nonneg G0, norm_nonneg G1, norm_nonneg G2,
       hK0_nn i, hK1_nn i, hK2_nn i, hwin_nn]
 
-set_option linter.unusedVariables false in
 
 theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1033,9 +1026,9 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -1088,7 +1081,6 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     refine le_trans (henv2 i s hs) (mul_le_mul_of_nonneg_right (le_max_right _ _) ?_)
     positivity
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckVF_background_sub_eq_connDiff_trace
     (g₁ gA gB : SmoothRiemannianMetric I M) (x : M) :
@@ -1114,7 +1106,6 @@ theorem deTurckVF_background_sub_eq_connDiff_trace
       (chartBasisVecFiber (I := I) x j x) (chartBasisVecFiber (I := I) x k x),
     add_sub_cancel_left]
 
-set_option linter.unusedVariables false in
 
 theorem exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_generic
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1122,9 +1113,9 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_g
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ),
@@ -1167,7 +1158,6 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_perOrder_l2_tameEnvelope_g
       mul_nonneg (hC_nn i) (Finset.sum_nonneg fun k _ => hKg_nn k)
     nlinarith [hwin_nn, hK_nn]
 
-set_option linter.unusedVariables false in
 
 theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1175,7 +1165,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -1235,7 +1225,6 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_l2JetWindow
   nlinarith [sq_nonneg ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖, h1,
     norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 j T)]
 
-set_option linter.unusedVariables false in
 
 theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1243,7 +1232,7 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧ ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -1309,7 +1298,6 @@ theorem exists_deTurckLieEndoArm_backgroundDifference_order0_data
     refine le_trans (riemannianFiberNormSq_sub_le (I := I) (M := M) g₀ 2 2 x _ _) ?_
     linarith [h1, h2]
 
-set_option linter.unusedVariables false in
 
 theorem covDerivConnDiff_realizedFam_zero_endpoint_eq_smul_covDerivSharp
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)

@@ -7,7 +7,6 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import DifferentialGeometry.Bundle.Zero
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
-set_option autoImplicit false
 
 open Bundle
 

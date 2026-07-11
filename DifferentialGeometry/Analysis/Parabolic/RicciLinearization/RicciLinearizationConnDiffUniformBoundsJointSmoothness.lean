@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -640,7 +639,6 @@ theorem linearizedRicciConnDiffOrder0Fib_realizedFam_jointContMDiffOn
   exact congrArg (fun t => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 2 ℝ E)
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 2 I z) p.1 t) rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -653,7 +651,6 @@ theorem linearizedRicciConnDiffOrder0Coeff_jointContMDiffOn_smallPerturbationSet
   refine h.congr (fun p _ => ?_)
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder1Coeff_jointContMDiffOn_smallPerturbationSet
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)

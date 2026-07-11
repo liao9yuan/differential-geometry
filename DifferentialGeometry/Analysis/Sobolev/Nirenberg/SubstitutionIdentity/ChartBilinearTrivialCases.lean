@@ -248,7 +248,6 @@ private lemma chartBilinear_substitution_identity_K_0_empty
   rw [h_cthick_empty]
   simp [Measure.restrict_empty, integral_zero_measure]
 
-set_option linter.unusedVariables false in
 
 theorem chartBilinear_substitution_identity_holds_composite
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -258,7 +257,7 @@ theorem chartBilinear_substitution_identity_holds_composite
     {η : EuclN → ℝ}
     (hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ}
+    {_R₀ : ℝ} {h : ℝ}
     (h_substitution_identity_holds :
       h ≠ 0 → K_0 ≠ ∅ →
       chartBilinear_LHS (I := I) (M := M) D K_0 η k h =

@@ -10,7 +10,6 @@ import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmooth
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 2400000
 set_option synthInstance.maxHeartbeats 1600000
@@ -186,7 +185,6 @@ theorem interiorProductField_jointContMDiffOn_vecJoint (s : ℕ) {S : Set ℝ}
       rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
 
 private theorem contractTraceField_joint_pointwise (r s : ℕ) (x₀ : M) (z : M)
@@ -357,7 +355,6 @@ theorem contractTraceField_jointContMDiffOn (r s : ℕ) {S : Set ℝ}
     exact contractTraceField_joint_pointwise (I := I) r s x₀ p₀.1 (T p₀) hx0
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 open DifferentialGeometry.Integral.DivergenceTheorem in
 
 private theorem domDomCongrField_joint_pointwise {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x₀ : M) (z : M)

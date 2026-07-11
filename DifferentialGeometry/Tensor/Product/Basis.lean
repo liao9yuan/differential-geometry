@@ -16,7 +16,6 @@ noncomputable instance tensorProduct_finiteDimensional :
     FiniteDimensional 𝕜 (F₁ ⊗[𝕜] F₂) :=
   Module.Finite.tensorProduct 𝕜 F₁ F₂
 
-set_option linter.unusedSectionVars false in
 
 theorem finrank_tensorProduct' :
     Module.finrank 𝕜 (F₁ ⊗[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ :=
@@ -27,7 +26,6 @@ noncomputable def tensorProduct_basis {d₁ d₂ : ℕ}
     Module.Basis (Fin d₁ × Fin d₂) 𝕜 (F₁ ⊗[𝕜] F₂) :=
   b₁.tensorProduct b₂
 
-set_option linter.unusedSectionVars false in
 
 @[simp]
 theorem tensorProduct_basis_apply {d₁ d₂ : ℕ}
@@ -36,7 +34,6 @@ theorem tensorProduct_basis_apply {d₁ d₂ : ℕ}
     tensorProduct_basis b₁ b₂ (i, j) = b₁ i ⊗ₜ b₂ j :=
   Module.Basis.tensorProduct_apply b₁ b₂ i j
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorProduct_basis_apply' {d₁ d₂ : ℕ}
     (b₁ : Module.Basis (Fin d₁) 𝕜 F₁) (b₂ : Module.Basis (Fin d₂) 𝕜 F₂)
@@ -44,7 +41,6 @@ theorem tensorProduct_basis_apply' {d₁ d₂ : ℕ}
     tensorProduct_basis b₁ b₂ p = b₁ p.1 ⊗ₜ b₂ p.2 :=
   Module.Basis.tensorProduct_apply' b₁ b₂ p
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorProduct_basis_repr_tmul {d₁ d₂ : ℕ}
     (b₁ : Module.Basis (Fin d₁) 𝕜 F₁) (b₂ : Module.Basis (Fin d₂) 𝕜 F₂)
@@ -79,7 +75,6 @@ variable [∀ x, ContinuousAdd (E₂ x)] [∀ x, ContinuousSMul 𝕜 (E₂ x)]
 variable (n : WithTop ℕ∞)
 variable [ContMDiffVectorBundle n F₁ E₁ IB] [ContMDiffVectorBundle n F₂ E₂ IB]
 
-set_option linter.unusedSectionVars false in
 
 theorem contMDiff_tensorProductSection_iff_coord
     {d₁ d₂ : ℕ}

@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputS
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -63,7 +62,6 @@ def connDiffIteratedCommKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x 
         simp only [map_smul, ContinuousLinearMap.smul_apply]
         rw [smul_sub] }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma connDiffAACommKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (p q v0 v1 : TangentSpace I x) :
     connDiffIteratedCommKernelBilin (I := I) g₀ g₁ x p q v0 v1 =
@@ -115,7 +113,6 @@ def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
         ring }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma frameConnDiffAACommKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (v0 v1 p q : TangentSpace I x) :
     frameConnDiffAACommKernel (I := I) g₀ g₁ x v0 v1 p q =
@@ -138,7 +135,6 @@ def connDiffAACommSummandFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma connDiffAACommSummandFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (connDiffAACommSummandFib (I := I) g₀ g₁ x p q D) v =
@@ -155,7 +151,6 @@ def connDiffAACommBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     connDiffAACommSummandFib (I := I) g₀ g₁ x (B a x) (B b x)
 
-set_option linter.unusedSectionVars false in
 lemma connDiffAACommBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -344,7 +339,6 @@ def connDiffAACommBiContrFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x :=
   connDiffAACommBiContrFibFixedFrame (I := I) g₀ g₁ (smoothOrthoFrame (I := I) g₁ x) x
 
-set_option linter.unusedSectionVars false in
 
 lemma connDiffAACommBiContrFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -427,14 +421,12 @@ def ricciArmOrder0AACommCoeffField (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := connDiffAACommBiContrFib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem ricciArmOrder0AACommCoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₁).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (connDiffAACommBiContrFib (I := I) g₀ g₁ x)) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiffAACommBiContrFib_self (g₀ : SmoothRiemannianMetric I M) (x : M) :
     connDiffAACommBiContrFib (I := I) g₀ g₀ x = 0 := by
@@ -461,7 +453,6 @@ theorem connDiffAACommBiContrFib_self (g₀ : SmoothRiemannianMetric I M) (x : M
   simp only [ContinuousLinearMap.zero_apply, Tensor0SSpace.toModel_zero,
     ContinuousMultilinearMap.zero_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem ricciArmOrder0AACommCoeffField_self (g₀ : SmoothRiemannianMetric I M) :
     ricciArmOrder0AACommCoeffField (I := I) (M := M) g₀ g₀ = 0 := by

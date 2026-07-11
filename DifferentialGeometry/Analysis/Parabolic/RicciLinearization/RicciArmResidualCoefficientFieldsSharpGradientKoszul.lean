@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputS
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -60,7 +59,6 @@ private lemma vec3_upd_two {F : Type*} (a b c z : F) :
   funext k
   fin_cases k <;> simp [Function.update]
 
-set_option linter.unusedSectionVars false in
 
 lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u u' ζ : TangentSpace I x) :
@@ -84,7 +82,6 @@ lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
   rw [h1, h2, h3]
   ring
 
-set_option linter.unusedSectionVars false in
 
 lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
@@ -107,7 +104,6 @@ lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
   simp only [smul_eq_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 
 lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u ζ ζ' : TangentSpace I x) :
@@ -131,7 +127,6 @@ lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
   rw [h1, h2, h3]
   ring
 
-set_option linter.unusedSectionVars false in
 
 lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
@@ -154,7 +149,6 @@ lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
   simp only [smul_eq_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 
 lemma linearizedKoszulCovec_zero_weight (g' : SmoothRiemannianMetric I M) (x : M)
     (u ζ : TangentSpace I x) :
@@ -180,7 +174,6 @@ def sharpRaisedKoszulVec (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcT
     (x : M) (u ζ : TangentSpace I x) : TangentSpace I x :=
   metricSharp (I := I) g₁ x (linearizedKoszulCovec (I := I) g₀ S x u ζ)
 
-set_option linter.unusedSectionVars false in
 lemma sharpRaisedKoszulVec_add_fst (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (u u' ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x (u + u') ζ =
@@ -189,7 +182,6 @@ lemma sharpRaisedKoszulVec_add_fst (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [sharpRaisedKoszulVec, sharpRaisedKoszulVec, sharpRaisedKoszulVec,
     linearizedKoszulCovec_add_fst, metricSharp_def, metricSharp_def, metricSharp_def, map_add]
 
-set_option linter.unusedSectionVars false in
 lemma sharpRaisedKoszulVec_smul_fst (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x (c • u) ζ =
@@ -197,7 +189,6 @@ lemma sharpRaisedKoszulVec_smul_fst (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [sharpRaisedKoszulVec, sharpRaisedKoszulVec, linearizedKoszulCovec_smul_fst,
     metricSharp_def, metricSharp_def, map_smul]
 
-set_option linter.unusedSectionVars false in
 lemma sharpRaisedKoszulVec_add_snd (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (u ζ ζ' : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x u (ζ + ζ') =
@@ -206,7 +197,6 @@ lemma sharpRaisedKoszulVec_add_snd (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [sharpRaisedKoszulVec, sharpRaisedKoszulVec, sharpRaisedKoszulVec,
     linearizedKoszulCovec_add_snd, metricSharp_def, metricSharp_def, metricSharp_def, map_add]
 
-set_option linter.unusedSectionVars false in
 lemma sharpRaisedKoszulVec_smul_snd (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ S x u (c • ζ) =
@@ -214,7 +204,6 @@ lemma sharpRaisedKoszulVec_smul_snd (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [sharpRaisedKoszulVec, sharpRaisedKoszulVec, linearizedKoszulCovec_smul_snd,
     metricSharp_def, metricSharp_def, map_smul]
 
-set_option linter.unusedSectionVars false in
 lemma sharpRaisedKoszulVec_zero_weight (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (u ζ : TangentSpace I x) :
     sharpRaisedKoszulVec (I := I) g₀ g₁ (0 : SmoothCcTensor g₀ 0 2) x u ζ = 0 := by
@@ -252,7 +241,6 @@ def sharpGradKoszulKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M)
           ContinuousLinearMap.smul_apply, map_smul, ContinuousLinearMap.comp_smul]
         rw [smul_sub, smul_add, smul_add] }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma sharpGradKoszulKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
     sharpGradKoszulKernelBilin (I := I) g₀ g₁ S x p q v0 v1 =
@@ -320,7 +308,6 @@ def frameSharpGradKoszulKernel (g₀ g₁ : SmoothRiemannianMetric I M)
         simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
         ring }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma frameSharpGradKoszulKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v0 v1 p q : TangentSpace I x) :
     frameSharpGradKoszulKernel (I := I) g₀ g₁ S x v0 v1 p q =
@@ -343,7 +330,6 @@ def sharpGradKoszulSummandFib (g₀ g₁ : SmoothRiemannianMetric I M)
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma sharpGradKoszulSummandFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -362,7 +348,6 @@ def sharpGradKoszulBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
   (2 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     sharpGradKoszulSummandFib (I := I) g₀ g₁ S x (B a x) (B b x)
 
-set_option linter.unusedSectionVars false in
 lemma sharpGradKoszulBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
@@ -495,7 +480,6 @@ private lemma linearizedKoszulCovec_basis_contMDiffOn_generic
     funext i
     fin_cases i <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma sharpRaisedKoszulVec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
@@ -776,14 +760,12 @@ def ricciArmSharpGradKoszulResidualField (g₀ g₁ : SmoothRiemannianMetric I M
       contMDiff_toFun := sharpGradKoszulBiContrFib_contMDiff (I := I) g₀ g₁ S }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem ricciArmSharpGradKoszulResidualField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M) :
     (ricciArmSharpGradKoszulResidualField (I := I) (M := M) g₀ g₁ S).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (sharpGradKoszulBiContrFib (I := I) g₀ g₁ S x)) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem ricciArmSharpGradKoszulResidualField_zero_weight
     (g₀ g₁ : SmoothRiemannianMetric I M) :

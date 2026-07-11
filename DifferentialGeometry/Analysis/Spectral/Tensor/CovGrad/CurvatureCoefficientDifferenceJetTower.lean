@@ -27,7 +27,6 @@ import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -60,11 +59,9 @@ section TopSeparatedTransportMirrors
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedSectionVars false in
 private lemma tsCastRankCc_db_refl (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a : ℕ} (h : a = a)
     (W : SmoothCcTensor g₀ r a) : castCcTensorRank g₀ r h W = W := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsCovGrad_castRankCc_db (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g₀ r a) :
     covGrad (I := I) (M := M) g₀ r b (castCcTensorRank g₀ r h W) =
@@ -72,26 +69,22 @@ private lemma tsCovGrad_castRankCc_db (g₀ : SmoothRiemannianMetric I M) (r : �
         (covGrad (I := I) (M := M) g₀ r a W) := by
   subst h; rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsCastRankCc_db_trans (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b c : ℕ}
     (h₁ : a = b) (h₂ : b = c) (W : SmoothCcTensor g₀ r a) :
     castCcTensorRank g₀ r h₂ (castCcTensorRank g₀ r h₁ W) =
       castCcTensorRank g₀ r (h₁.trans h₂) W := by
   subst h₁; subst h₂; rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsCastRankCc_db_sub (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W W' : SmoothCcTensor g₀ r a) :
     castCcTensorRank g₀ r h (W - W') = castCcTensorRank g₀ r h W - castCcTensorRank g₀ r h W' := by
   subst h; rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsCastRankCc_db_add (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W W' : SmoothCcTensor g₀ r a) :
     castCcTensorRank g₀ r h (W + W') = castCcTensorRank g₀ r h W + castCcTensorRank g₀ r h W' := by
   subst h; rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsExists_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I M)
     {s : ℕ} (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) (i : ℕ) :
     ∃ σ' : Equiv.Perm (Fin (s + i)),
@@ -105,7 +98,6 @@ private lemma tsExists_iteratedCovGrad_domDomCongrSection (g₀ : SmoothRiemanni
   intro x
   rw [hσ' x, domDomCongrSection_unitModel]
 
-set_option linter.unusedSectionVars false in
 private lemma tsExists_covGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric I M)
     {s : ℕ} (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) :
     ∃ σ' : Equiv.Perm (Fin (s + 1)),
@@ -120,7 +112,6 @@ private lemma tsExists_covGrad_domDomCongrSection (g₀ : SmoothRiemannianMetric
     rw [iteratedCovGrad_succ, iteratedCovGrad_zero]; rfl] at hσ'
   exact ⟨σ', hσ'⟩
 
-set_option linter.unusedSectionVars false in
 private lemma tsDomDomCongrSection_refl (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
     (S : SmoothCcTensor g₀ 0 s) :
     domDomCongrSection (I := I) g₀ (Equiv.refl (Fin s)) S = S := by
@@ -132,7 +123,6 @@ private lemma tsDomDomCongrSection_refl (g₀ : SmoothRiemannianMetric I M) {s :
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsDomDomCongrSection_comp (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
     (σ τ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) :
     domDomCongrSection (I := I) g₀ τ (domDomCongrSection (I := I) g₀ σ S) =
@@ -145,7 +135,6 @@ private lemma tsDomDomCongrSection_comp (g₀ : SmoothRiemannianMetric I M) {s :
   intro v
   simp only [ContinuousMultilinearMap.domDomCongr_apply, Equiv.trans_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma tsDomDomCongrSection_sub (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S S' : SmoothCcTensor g₀ 0 s) :
     domDomCongrSection (I := I) g₀ σ (S - S') =
@@ -166,7 +155,6 @@ private lemma tsDomDomCongrSection_sub (g₀ : SmoothRiemannianMetric I M) {s : 
   intro v
   simp only [ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma tsDomDomCongrSection_add (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S S' : SmoothCcTensor g₀ 0 s) :
     domDomCongrSection (I := I) g₀ σ (S + S') =
@@ -187,7 +175,6 @@ private lemma tsDomDomCongrSection_add (g₀ : SmoothRiemannianMetric I M) {s : 
   intro v
   simp only [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma tsIteratedCovGrad_covGrad_eq_cast (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g₀ r s) (i : ℕ) :
     iteratedCovGrad (I := I) g₀ r (s + 1) i (covGrad (I := I) (M := M) g₀ r s W) =
@@ -206,7 +193,6 @@ private lemma tsIteratedCovGrad_covGrad_eq_cast (g₀ : SmoothRiemannianMetric I
             (iteratedCovGrad (I := I) g₀ r s (i + 1) W) from by
         rw [iteratedCovGrad_succ]]
 
-set_option linter.unusedSectionVars false in
 private lemma tsExists_iteratedCovGrad_rsDomDomCongrSection (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (σ : Equiv.Perm (Fin s)) (Z : SmoothCcTensor g₀ r s) (i : ℕ) :
     ∃ σ' : Equiv.Perm (Fin (s + i)),
@@ -272,13 +258,11 @@ private def tsMetricCovec (g₀ : SmoothRiemannianMetric I M) (x : M) : Tensor0S
         (continuous_apply 1) }
     : Tensor0SSpace 2 I x)
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma tsMetricCovec_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → TangentSpace I x) :
     tsMetricCovec (I := I) g₀ x m = g₀.inner x (m 0) (m 1) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private theorem tsMetricCovec_section_contMDiff (g₀ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -321,7 +305,6 @@ private def tsMetricCc (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma tsMetricCc_unitModel (g₀ : SmoothRiemannianMetric I M) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (tsMetricCc (I := I) (M := M) g₀) x =
       Tensor0SSpace.toModel (tsMetricCovec (I := I) g₀ x) := by
@@ -336,7 +319,6 @@ private lemma tsMetricCc_unitModel (g₀ : SmoothRiemannianMetric I M) (x : M) :
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsToModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel om (fun k => (m k : E)) =
@@ -346,7 +328,6 @@ private lemma tsToModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
   rw [cotangentToDual_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsMetricCovec_curry_eq_flat (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 1 x) (tsMetricCovec (I := I) g₀ x) v =
@@ -370,7 +351,6 @@ private noncomputable def tsLoweredSlot0 (g₀ : SmoothRiemannianMetric I M) (s 
   operatorFieldApply (I := I) (M := M) g₀ 2 (s + 2)
     (slotExtend (I := I) (M := M) g₀ 1 (s + 1) Z) (tsMetricCc (I := I) (M := M) g₀)
 
-set_option linter.unusedSectionVars false in
 private lemma tsMetricCc_toSection_unit (g₀ : SmoothRiemannianMetric I M) (x : M) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
         (tsMetricCc (I := I) (M := M) g₀).toSection x)
@@ -380,7 +360,6 @@ private lemma tsMetricCc_toSection_unit (g₀ : SmoothRiemannianMetric I M) (x :
   rw [unitModel] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 private lemma tsLoweredSlot0_unitModel_apply (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g₀ 1 (s + 1)) (x : M) (m : Fin (s + 2) → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ (s + 2) (tsLoweredSlot0 (I := I) (M := M) g₀ s Z) x m =
@@ -428,7 +407,6 @@ private lemma tsLoweredSlot0_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     rfl]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsInteriorProduct_toModel_eval (s : ℕ) (x : M) (vv : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -441,7 +419,6 @@ private lemma tsInteriorProduct_toModel_eval (s : ℕ) (x : M) (vv : TangentSpac
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 private theorem tsLoweredSlot0_cometricRaise (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) :
     tsLoweredSlot0 (I := I) (M := M) g₀ s
@@ -468,7 +445,6 @@ private theorem tsLoweredSlot0_cometricRaise (g₀ : SmoothRiemannianMetric I M)
   funext k
   refine Fin.cases rfl (fun j => rfl) k
 
-set_option linter.unusedSectionVars false in
 private lemma tsExists_iteratedCovGrad_cometricRaiseSlot0Field (g₀ : SmoothRiemannianMetric I M)
     (s : ℕ) (W : SmoothCcTensor g₀ 0 (s + 2)) (i : ℕ) :
     ∃ σ : Equiv.Perm (Fin ((s + i) + 2)),
@@ -512,7 +488,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedSectionVars false in
 private lemma tsRfns_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
@@ -521,7 +496,6 @@ private lemma tsRfns_order_congr (g : SmoothRiemannianMetric I M)
         ((iteratedCovGrad (I := I) g r s n' S).toSection x) := by
   subst h; rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsRfns_domDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g₀ 0 s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 s x
@@ -532,7 +506,6 @@ private lemma tsRfns_domDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M)
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 private lemma tsRfns_castRankCc_db_zero (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g₀ r a) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r b x
@@ -540,7 +513,6 @@ private lemma tsRfns_castRankCc_db_zero (g₀ : SmoothRiemannianMetric I M) (r :
       riemannianFiberNormSq (I := I) (M := M) g₀ r a x (W.toSection x) := by
   subst h; rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsSlotExtend_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (X X' : SmoothCcTensor g₀ r s) :
     slotExtend (I := I) (M := M) g₀ r s (X - X') =
@@ -582,7 +554,6 @@ private lemma tsSlotExtend_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [e0, ContinuousLinearMap.sub_comp, map_sub]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tsAppCc_sub_left (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ Φ' : SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r) :
     operatorFieldApply (I := I) (M := M) g₀ r s (Φ - Φ') W =
@@ -602,7 +573,6 @@ private lemma tsAppCc_sub_left (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
-set_option linter.unusedSectionVars false in
 private lemma tsRsDomDomCongr_sub {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T T' : TensorRSSpace r s I x) :
     tensorRS_domDomCongr (I := I) (M := M) σ (T - T') =
@@ -674,7 +644,6 @@ private lemma tsRsDomDomCongr_sub {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
         rw [e2, Tensor0SSpace.toModel_sub]
         simp only [ContinuousMultilinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma tsExists_loweredPair_headTransport (g₀ : SmoothRiemannianMetric I M)
     (σ₀ : Equiv.Perm (Fin (2 + 2)))
     (Y : SmoothCcTensor g₀ 1 (2 + 1)) (i : ℕ) (HY : SmoothCcTensor g₀ 1 ((2 + 1) + i)) :
@@ -944,7 +913,6 @@ section TsCarrierSplit
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedSectionVars false in
 private lemma tsConnDiff_carrier_split (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) :
     iteratedCovGrad (I := I) g₀ 1 2 j (connDiffSection (I := I) g₁ g₀) =
       ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 (2 + j)
@@ -974,7 +942,6 @@ private lemma tsConnDiff_carrier_split (g₀ g₁ : SmoothRiemannianMetric I M) 
   rw [hf0]
   exact add_comm _ _
 
-set_option linter.unusedSectionVars false in
 private lemma tsRfns_rsDomDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (σ : Equiv.Perm (Fin s)) (Z : SmoothCcTensor g₀ r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r s x
@@ -983,7 +950,6 @@ private lemma tsRfns_rsDomDomCongrSection_zero (g₀ : SmoothRiemannianMetric I 
   rw [rsDomDomCongrSection_toSection]
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g₀ r s x σ _
 
-set_option linter.unusedSectionVars false in
 private lemma tsRfns_iteratedCovGrad_rsDomDomCongrSection_eq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Z : SmoothCcTensor g₀ r s) (m : ℕ) (x : M) :
@@ -1050,15 +1016,14 @@ private lemma tsRfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   rw [sub_eq_add_neg]
   exact h1
 
-set_option linter.unusedVariables false in
 private theorem tsExists_quad_jets (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (hδ₀ : δ₀ < 1) :
     ∃ KQ : ℕ → ℝ, (∀ m, 0 ≤ KQ m) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (m : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x
             ((iteratedCovGrad (I := I) g₀ 1 3 m
@@ -1191,15 +1156,14 @@ private theorem tsExists_quad_jets (g₀ : SmoothRiemannianMetric I M) {δ₀ : 
   refine mul_le_mul_of_nonneg_left ?_ (appCcGdiag_nonneg (E := E) m)
   exact Finset.sum_le_sum hterm
 
-set_option linter.unusedVariables false in
 private theorem tsExists_palatiniPair_jets (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ}
     (hδ₀ : δ₀ < 1) :
     ∃ KP : ℕ → ℝ, (∀ m, 0 ≤ KP m) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (m : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 1 (3 + m) x
             ((iteratedCovGrad (I := I) g₀ 1 3 m
@@ -1280,15 +1244,14 @@ private theorem tsExists_palatiniPair_jets (g₀ : SmoothRiemannianMetric I M) {
     (finRotate 3) A m x]
   nlinarith [hAjets]
 
-set_option linter.unusedVariables false in
 theorem riemannianFiberNormSq_iteratedCovGrad_riemannLoweredBackgroundDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (i : ℕ),
         ∃ Hd : SmoothCcTensor g₀ 0 (4 + i),
           (∀ x : M,
@@ -1646,7 +1609,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedSectionVars false in
 private lemma tsCometricRaise_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W W' : SmoothCcTensor g₀ 0 (s + 2)) :
     cometricRaiseSlot0Field (I := I) (M := M) g₀ s (W - W') =
@@ -1735,7 +1697,6 @@ private lemma tsCometricRaise_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
         rw [Tensor0SSpace.toModel_sub]
         simp only [ContinuousMultilinearMap.sub_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma tsRfns_cometricRaise_eq (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 (s + 2)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (s + 1) x
@@ -1745,7 +1706,6 @@ private lemma tsRfns_cometricRaise_eq (g₀ : SmoothRiemannianMetric I M) (s : �
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 private lemma tsAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g₀ b c) (W : SmoothCcTensor g₀ a b) (j : ℕ) :
     iteratedCovGrad (I := I) g₀ a c j (ccOperatorFieldComp (I := I) (M := M) g₀ a b c Φ W) =
@@ -1771,7 +1731,6 @@ private lemma tsAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (a
   rw [hf0]
   exact add_comm _ _
 
-set_option linter.unusedSectionVars false in
 private lemma tsParallel_argCorner_head_le (g₀ : SmoothRiemannianMetric I M) (p a b : ℕ)
     (Φ : SmoothCcTensor g₀ a b) (i : ℕ) (HX : SmoothCcTensor g₀ p (a + i)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ p (b + i) x
@@ -1781,7 +1740,6 @@ private lemma tsParallel_argCorner_head_le (g₀ : SmoothRiemannianMetric I M) (
         riemannianFiberNormSq (I := I) (M := M) g₀ p (a + i) x (HX.toSection x) :=
   rfns_appCcRS_appCcLeibnizPsi_diag_le (I := I) (M := M) g₀ p a b Φ i HX x
 
-set_option linter.unusedSectionVars false in
 private lemma tsParallel_argCorner_residual_le (g₀ : SmoothRiemannianMetric I M) (p a b : ℕ)
     (Φ : SmoothCcTensor g₀ a b)
     (hΦ : covGrad (I := I) (M := M) g₀ a b Φ = 0)
@@ -1851,15 +1809,14 @@ private lemma tsParallel_argCorner_residual_le (g₀ : SmoothRiemannianMetric I 
       (iteratedCovGrad (I := I) g₀ p a i X - HX) x) (le_refl _)
   linarith [hhead, hcorr]
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_slotInsertEndoCc_zero_ricEndoBackgroundDifferenceField_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (i : ℕ),
         ∃ Hd : SmoothCcTensor g₀ 1 (1 + i),
           (∀ x : M,
@@ -2405,15 +2362,14 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_riemannG1LoweringDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (i : ℕ),
         ∃ Hd : SmoothCcTensor g₀ 0 (4 + i),
           (∀ x : M,
@@ -2755,7 +2711,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedSectionVars false in
 private lemma tsSlotInsertEndoCc_succ_eq_reindex_slotExtend
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞
@@ -2826,7 +2781,6 @@ private lemma tsSlotInsertEndoCc_succ_eq_reindex_slotExtend
         m ((Equiv.swap (0 : Fin (s + 1 + 1)) 1) (Fin.succ (Fin.succ k₂)))
       rw [Equiv.swap_apply_of_ne_of_ne hne0 hne1]
 
-set_option linter.unusedSectionVars false in
 private lemma tsReindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R₁ R₂ : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) :
     reindexCoeffGen (I := I) (M := M) g₀ r s (R₁ - R₂) σ' =
@@ -2846,7 +2800,6 @@ private lemma tsReindexCoeffGen_sub (g₀ : SmoothRiemannianMetric I M) (r s : �
   rw [reindexCoeffFibGen, reindexCoeffFibGen, reindexCoeffFibGen]
   exact ContinuousLinearMap.sub_comp _ _ _
 
-set_option linter.unusedSectionVars false in
 private lemma tsRfns_reindexCoeffGen_zero (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r s x
@@ -2856,7 +2809,6 @@ private lemma tsRfns_reindexCoeffGen_zero (g₀ : SmoothRiemannianMetric I M) (r
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 private lemma tsExists_slotExtend_headTransport (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (V : SmoothCcTensor g₀ r s) (i : ℕ) (HV : SmoothCcTensor g₀ r (s + i)) :
     ∃ HW : SmoothCcTensor g₀ (r + 1) ((s + 1) + i),
@@ -2923,7 +2875,6 @@ private lemma tsExists_slotExtend_headTransport (g₀ : SmoothRiemannianMetric I
       (by omega : (s + i) + 1 = (s + 1) + i) _ x]
     rw [rfns_slotExtend_eq (I := I) (M := M) g₀ r (s + i) _ x]
 
-set_option linter.unusedSectionVars false in
 private lemma tsExists_rsDDC_headTransport (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (σ : Equiv.Perm (Fin s)) (V : SmoothCcTensor g₀ r s) (i : ℕ)
     (HV : SmoothCcTensor g₀ r (s + i)) :
@@ -2963,15 +2914,14 @@ private lemma tsExists_rsDDC_headTransport (g₀ : SmoothRiemannianMetric I M) (
     rw [hpt]
     rw [riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g₀ r (s + i) x σ' _]
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_ricciArmOrder0CurvCoeff_backgroundDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (i : ℕ),
         ∃ Hd : SmoothCcTensor g₀ 2 (2 + i),
           (∀ x : M,
@@ -3138,15 +3088,14 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem rfns_iteratedCovGrad_ricciArmOrder0RiemannCoeff_backgroundDifference_topSeparated_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (i : ℕ),
         ∃ Hd : SmoothCcTensor g₀ 2 (2 + i),
           (∀ x : M,
@@ -3890,7 +3839,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
-set_option linter.unusedVariables false in
 theorem boundedFactorGridWindow_integral_ballUniform_tameWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -4420,7 +4368,6 @@ private theorem productTerm_integral_tame_le_ordS
             _ = Mbar ^ (7 * i) * R ^ 2 := by rw [← mul_assoc, e3]
             _ ≤ (i : ℝ) * Mbar ^ (7 * i) * R ^ 2 := e5
 
-set_option linter.unusedVariables false in
 private theorem cappedTopLayerCell_integral_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -4755,7 +4702,6 @@ private theorem cappedTopLayerCell_integral_le
           apply mul_le_mul_of_nonneg_left hWsum1 (by positivity)
       _ = (((i : ℝ) + 2) * MBv ^ (9 * (i + 2))) * Wsum := by ring
 
-set_option linter.unusedVariables false in
 theorem boundedFactorGrid_cappedTopLayer_integral_flat
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -4995,7 +4941,6 @@ theorem boundedFactorGrid_cappedTopLayer_integral_flat
           (1 + ∑ j ∈ Finset.range (i + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
         ring
 
-set_option linter.unusedVariables false in
 theorem boundedFactorGridWindow_integral_ballUniform_flat_allOrders
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -5127,7 +5072,6 @@ theorem boundedFactorGridWindow_integral_ballUniform_flat_allOrders
           ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ^ 2) := by
         rw [← Finset.sum_mul, ← add_mul]
 
-set_option linter.unusedVariables false in
 theorem boundedFactorGridWindow_integral_ballUniform_tameWindow_allOrders
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R) :
@@ -5157,16 +5101,15 @@ theorem boundedFactorGridWindow_integral_ballUniform_tameWindow_allOrders
   rw [show (0 : ℝ) * ‖iteratedCovGrad (I := I) g₀ 0 2 (i + 2) P‖ ^ 2 = 0 by ring, add_zero]
   exact hbound
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →
@@ -5481,16 +5424,15 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic
           (hKI_nn i)
       nlinarith
 
-set_option linter.unusedVariables false in
 theorem ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic_allOrders
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Ktop : ℝ, 0 ≤ Ktop ∧ ∃ Kc : ℕ → ℝ, (∀ i, 0 ≤ Kc i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ),
@@ -5807,7 +5749,6 @@ theorem ricciArmOrder0BaseCoeff_perOrder_l2_topSeparated_generic_allOrders
 
 section TopSeparatedKoszulExport
 
-set_option linter.unusedSectionVars false in
 theorem rfns_iteratedCovGrad_raisedKoszul_pointwise_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),

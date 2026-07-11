@@ -75,7 +75,6 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization (lieDeTurckChartSlope d
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricLmodel)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (reindexCoeffGen reindexCoeffFibGen reindexCoeffFibGen_apply reindexCoeffGen_toSection deTurckLieArm2PrincipalCoeff deTurckLieArm1Coeff deTurckLieCoeffField deTurckLieArm2PrincipalCoeff_realizedFam_jointSmooth deTurckLieArm1Coeff_realizedFam_jointSmooth deTurckLieCoeffField_realizedFam_jointSmooth deTurckLieArm2PrincipalCoeff_apply_eq cometricFinBasisTrace_eq_chartInvGram_bilin quadrilinearMapSlotBilinearAt unitModel4SlotBilin_apply)
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 
 private theorem lieArm_shell_reduction
@@ -220,7 +219,6 @@ private theorem lieArm_shell_reduction
     ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.add_apply]
   rw [habs0, habs1, habs2]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm2_appCc_value_invGram
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (D : SmoothCcTensor g₀ 0 4)
     (x : M) (i j : Fin (Module.finrank ℝ E)) :
@@ -342,14 +340,12 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization (chartDeTurckCorrPrin
 open DifferentialGeometry.Integral.DivergenceTheorem (partialDeriv chartGramOnE chartInvGramOnE)
 open DifferentialGeometry.Integral.Measure (chartGramMatrix)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_frame0_eq_unitTensor (x b : M) :
     chartFrameBasisModel (I := I) (M := M) x b 0 ![] = unitTensor (I := I) (M := M) b := by
   apply ContinuousMultilinearMap.ext
   intro v
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_rawComponent_eq_unitModel_frame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M)
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) {b : M}
@@ -361,7 +357,6 @@ private lemma lieArm_rawComponent_eq_unitModel_frame
   rw [lieArm_frame0_eq_unitTensor (I := I) (M := M) x b]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_euclidPartial_add_local
     (l : Fin (Module.finrank ℝ E))
     {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -372,7 +367,6 @@ private lemma lieArm_euclidPartial_add_local
   rw [euclidPartial_def, euclidPartial_def, euclidPartial_def, fderiv_fun_add hf hh,
     ContinuousLinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_covDerivLowerOrderTerm_differentiableAt_center
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g₀ r s) (x : M)
     (m : Fin (Module.finrank ℝ E))
@@ -394,7 +388,6 @@ private lemma lieArm_covDerivLowerOrderTerm_differentiableAt_center
     ((DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) x).mem_nhds hmem)).differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_euclidPartial_chartPushedRaw_differentiableAt_center
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g₀ r s) (x : M)
     (k : Fin (Module.finrank ℝ E))
@@ -418,7 +411,6 @@ private lemma lieArm_euclidPartial_chartPushedRaw_differentiableAt_center
     ((DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid_isOpen
       (I := I) (M := M) x).mem_nhds hmem)).differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_unitModel4_basisChart_readout_split
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -467,7 +459,6 @@ private lemma lieArm_unitModel4_basisChart_readout_split
   rw [lieArm_euclidPartial_add_local a hPdiff hQdiff]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_unitModel3_basisChart_readout_split
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c : Fin (Module.finrank ℝ E)) :
@@ -502,7 +493,6 @@ private lemma lieArm_unitModel3_basisChart_readout_split
     funext j; fin_cases j <;> rfl
   simp only [arm1ReadoutCovDeriv, hJ0, hJtail]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_symmS_rawComponent
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (x : M)
     (c d : Fin (Module.finrank ℝ E)) {b : M}
@@ -528,7 +518,6 @@ private lemma lieArm_symmS_rawComponent
   rw [tensorChartComponentRaw_smul, tensorChartComponentRaw_add, hswap]
   rw [smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_scalarOnE_symmS_eventuallyEq_realizedGramDeriv
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -559,7 +548,6 @@ private lemma lieArm_scalarOnE_symmS_eventuallyEq_realizedGramDeriv
   rw [DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_def,
     DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_def]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_partialDeriv_symmS_scalar_eventuallyEq
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -579,7 +567,6 @@ private lemma lieArm_partialDeriv_symmS_scalar_eventuallyEq
   unfold DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv
   rw [hy.fderiv_eq]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U4_readout
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -617,7 +604,6 @@ private lemma lieArm_U4_readout
       (extChartAt I x x) ((chartModelBasis E) a)
   rw [hev1.fderiv_eq]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_readout
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -661,7 +647,6 @@ private lemma lieArm_U3_readout
   unfold DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv
   rw [hev1.fderiv_eq]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_chartInvGramOnE_center (g : SmoothRiemannianMetric I M) (x : M)
     (a b : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Integral.DivergenceTheorem.chartInvGramOnE (I := I) g x a b
@@ -672,7 +657,6 @@ private lemma lieArm_chartInvGramOnE_center (g : SmoothRiemannianMetric I M) (x 
     rw [extChartAt_source (I := I)]; exact mem_chart_source H x
   rw [(extChartAt I x).left_inv hx_src]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_chartGramOnE_center (g : SmoothRiemannianMetric I M) (x : M)
     (a b : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I) g x a b
@@ -683,7 +667,6 @@ private lemma lieArm_chartGramOnE_center (g : SmoothRiemannianMetric I M) (x : M
     rw [extChartAt_source (I := I)]; exact mem_chart_source H x
   rw [(extChartAt I x).left_inv hx_src]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_chartInvGramMatrix_symm (g : SmoothRiemannianMetric I M) (x : M)
     (a b : Fin (Module.finrank ℝ E)) :
     chartInvGramMatrix (I := I) g x x a b = chartInvGramMatrix (I := I) g x x b a := by
@@ -693,7 +676,6 @@ private lemma lieArm_chartInvGramMatrix_symm (g : SmoothRiemannianMetric I M) (x
   rw [Matrix.conjTranspose_apply, star_trivial] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_gram_invGram_collapse (g : SmoothRiemannianMetric I M) (x : M)
     (l j : Fin (Module.finrank ℝ E)) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -716,7 +698,6 @@ private lemma lieArm_gram_invGram_collapse (g : SmoothRiemannianMetric I M) (x :
       rw [lieArm_chartInvGramMatrix_symm (I := I) g x k l]; ring)]
   rw [h]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_partialDeriv2_realizedGramDeriv_swap
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -742,7 +723,6 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization (chartDeTurckCorrPrin
 open DifferentialGeometry.Integral.DivergenceTheorem (partialDeriv chartGramOnE chartInvGramOnE)
 open DifferentialGeometry.Integral.Measure (chartGramMatrix)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_P2_halfCollapse
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -884,7 +864,6 @@ private lemma lieArm_P2_halfCollapse
   ring
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieArm2PrincipalCoeff deTurckLieArm2PrincipalCoeff_apply_eq cometricFinBasisTrace_eq_chartInvGram_bilin quadrilinearMapSlotBilinearAt unitModel4SlotBilin_apply)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_arm2_value_eq_principal_add_tail
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -1005,7 +984,6 @@ private lemma lieArm_arm2_value_eq_principal_add_tail
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private def lieArm_slot34Eval (F : E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
     (u w : E) : E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -1022,14 +1000,12 @@ private def lieArm_slot34Eval (F : E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[�
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_slot34Eval_apply (F : E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ)
     (u w c v : E) :
     lieArm_slot34Eval (E := E) F u w c v = F c v u w := rfl
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_cometric_doubleTrace_eq_invGram
     (g₁ : SmoothRiemannianMetric I M) (x : M)
     (F : E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) :
@@ -1119,7 +1095,6 @@ private lemma lieArm_cometric_doubleTrace_eq_invGram
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (unitModel3SlotBilin metricConnDiffLoweredTrilin metricConnDiffLoweredTrilin_apply deTurckLieArm1Coeff deTurckLieArm1Coeff_apply_eq)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_unitModel3SlotBilin_apply
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (i j : Fin 3) (hij : i ≠ j) (base : Fin 3 → E) (c v : E) :
@@ -1128,8 +1103,6 @@ private lemma lieArm_unitModel3SlotBilin_apply
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSimpArgs false in
-set_option linter.unusedSectionVars false in
 private def lieArm_F4mul (A B : E →L[ℝ] E →L[ℝ] ℝ) :
     E →L[ℝ] E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -1172,14 +1145,11 @@ private def lieArm_F4mul (A B : E →L[ℝ] E →L[ℝ] ℝ) :
           ContinuousLinearMap.smul_apply, smul_eq_mul]
         ring }
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_F4mul_apply (A B : E →L[ℝ] E →L[ℝ] ℝ) (c v c' v' : E) :
     lieArm_F4mul (E := E) A B c v c' v' = A c c' * B v v' := rfl
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSimpArgs false in
-set_option linter.unusedSectionVars false in
 private def lieArm_fix3 (f : E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) (e : E) :
     E →L[ℝ] E →L[ℝ] ℝ :=
   LinearMap.toContinuousLinearMap
@@ -1196,11 +1166,9 @@ private def lieArm_fix3 (f : E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) (e : E) :
         ext v
         simp [LinearMap.toContinuousLinearMap, map_smul, ContinuousLinearMap.smul_apply] }
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_fix3_apply (f : E →L[ℝ] E →L[ℝ] E →L[ℝ] ℝ) (e c v : E) :
     lieArm_fix3 (E := E) f e c v = f c v e := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_doubleTrace_slotBilin
     (g₁ : SmoothRiemannianMetric I M) (x : M)
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
@@ -1251,7 +1219,6 @@ private lemma lieArm_doubleTrace_slotBilin
     rw [lieArm_F4mul_apply]
   · rw [lieArm_F4mul_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_slot12_pack
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ) (w c v : E) :
     unitModel3SlotBilin (E := E) W3 1 2 (by decide) ![w, 0, 0] c v = W3 ![w, c, v] := by
@@ -1260,7 +1227,6 @@ private lemma lieArm_slot12_pack
   funext j
   fin_cases j <;> simp [Function.update]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_slot02_pack
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ) (w c v : E) :
     unitModel3SlotBilin (E := E) W3 0 2 (by decide) ![0, w, 0] c v = W3 ![c, w, v] := by
@@ -1271,7 +1237,6 @@ private lemma lieArm_slot02_pack
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_arm1_group_traced
     (g₀X g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
@@ -1499,7 +1464,6 @@ private lemma lieArm_arm1_group_traced
       rw [smul_eq_mul, lieArm_slot02_pack]
   rw [hT2, hT3, hT5, hT7, hT6]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_arm1_T14_traced
     (g₀X g₁ : SmoothRiemannianMetric I M) (x : M)
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
@@ -1527,7 +1491,6 @@ private lemma lieArm_arm1_T14_traced
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_arm1_value_traced
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (D : SmoothCcTensor g₀ 0 3)
     (x : M) (i j : Fin (Module.finrank ℝ E)) :
@@ -1627,7 +1590,6 @@ private lemma lieArm_arm1_value_traced
   · exact lieArm_arm1_T14_traced (I := I) g₀ g₁ x
       (unitModel (I := I) (M := M) g₀ 3 D x) (chartModelBasis E i) (chartModelBasis E j)
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_inner_chartBasis_center (g : SmoothRiemannianMetric I M) (x : M)
     (p q : Fin (Module.finrank ℝ E)) :
     g.inner x ((chartModelBasis E) p : TangentSpace I x)
@@ -1637,7 +1599,6 @@ private lemma lieArm_inner_chartBasis_center (g : SmoothRiemannianMetric I M) (x
     DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x p,
     DifferentialGeometry.Integral.Connection.chartBasisVecFiber_self (I := I) x q]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_connDiff_chartBasis_center
     (gA gB : SmoothRiemannianMetric I M) (x : M) (j k : Fin (Module.finrank ℝ E)) :
     PDE.DeTurck.connDiff (I := I) gA gB x
@@ -1663,7 +1624,6 @@ private lemma lieArm_connDiff_chartBasis_center
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_bilin_expand_fst (F : E →L[ℝ] E →L[ℝ] ℝ)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → E) (v : E) :
     F (∑ q : Fin (Module.finrank ℝ E), c q • w q) v =
@@ -1674,7 +1634,6 @@ private lemma lieArm_bilin_expand_fst (F : E →L[ℝ] E →L[ℝ] ℝ)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_bilin_expand_snd (F : E →L[ℝ] E →L[ℝ] ℝ) (u : E)
     (c : Fin (Module.finrank ℝ E) → ℝ) (w : Fin (Module.finrank ℝ E) → E) :
     F u (∑ q : Fin (Module.finrank ℝ E), c q • w q) =
@@ -1685,7 +1644,6 @@ private lemma lieArm_bilin_expand_snd (F : E →L[ℝ] E →L[ℝ] ℝ) (u : E)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_sum_slot0
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (c : Fin (Module.finrank ℝ E) → ℝ) (u v : E) :
@@ -1701,7 +1659,6 @@ private lemma lieArm_U3_sum_slot0
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_sum_slot1
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (u : E) (c : Fin (Module.finrank ℝ E) → ℝ) (v : E) :
@@ -1717,7 +1674,6 @@ private lemma lieArm_U3_sum_slot1
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_sum_slot2
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (u v : E) (c : Fin (Module.finrank ℝ E) → ℝ) :
@@ -1733,7 +1689,6 @@ private lemma lieArm_U3_sum_slot2
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_inner_connDiff_chartBasis_value
     (gm gA gB : SmoothRiemannianMetric I M) (x : M)
     (a c d : Fin (Module.finrank ℝ E)) :
@@ -1759,7 +1714,6 @@ private lemma lieArm_inner_connDiff_chartBasis_value
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_deTurckVF_slot0_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M) (u v : E) :
@@ -1783,7 +1737,6 @@ private lemma lieArm_U3_deTurckVF_slot0_value
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_deTurckVF_slot2_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M) (u v : E) :
@@ -1807,7 +1760,6 @@ private lemma lieArm_U3_deTurckVF_slot2_value
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_connDiff_slot0_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M)
@@ -1838,7 +1790,6 @@ private lemma lieArm_U3_connDiff_slot0_value
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_U3_connDiff_slot1_value
     (W3 : ContinuousMultilinearMap ℝ (fun _ : Fin 3 => E) ℝ)
     (gA gB : SmoothRiemannianMetric I M) (x : M)
@@ -1869,13 +1820,11 @@ private lemma lieArm_U3_connDiff_slot1_value
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_arm1_value_realized
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ_lt : δ < 1)
+    {δ : ℝ} (_hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    {δ' : ℝ} (_hδ'_lt : δ' < 1)
     (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
     (s : ℝ) (x : M) (i j : Fin (Module.finrank ℝ E)) :
     unitModel (I := I) (M := M) g₀ 2
@@ -2916,7 +2865,7 @@ private lemma o1_rf1b
         Finset.sum_congr rfl (fun l _ => by ring)))]
     rw [o1_ftriple3 f3 (fun a b l => -((1 / 2 : ℝ) * (ig a b * g1 u v l)))
       (fun a b l => by
-        show -((1 / 2 : ℝ) * (ig a b * g1 u v l)) = -((1 / 2 : ℝ) * (ig b a * g1 u v l))
+        change -((1 / 2 : ℝ) * (ig a b * g1 u v l)) = -((1 / 2 : ℝ) * (ig b a * g1 u v l))
         rw [higs a b])]
     have hE : (∑ a : Fin n, ∑ b : Fin n, ∑ l : Fin n,
         (-((1 / 2 : ℝ) * (ig a b * g1 u v l))) * f3 a l b)
@@ -2968,7 +2917,7 @@ private lemma o1_rf1b
     rw [o1_ftriple5 f3
       (fun a b l p k => -((1 / 2 : ℝ) * (ig a b * (ig p l * (g1 u p k * cg k v)))))
       (fun a b l p k => by
-        show -((1 / 2 : ℝ) * (ig a b * (ig p l * (g1 u p k * cg k v))))
+        change -((1 / 2 : ℝ) * (ig a b * (ig p l * (g1 u p k * cg k v))))
           = -((1 / 2 : ℝ) * (ig b a * (ig p l * (g1 u p k * cg k v))))
         rw [higs a b])]
     have hR1 : (∑ a : Fin n, ∑ b : Fin n, ∑ l : Fin n, ∑ p : Fin n, ∑ k : Fin n,
@@ -3085,7 +3034,7 @@ private lemma o1_rlvf
     rw [o1_ftriple5 f3
       (fun a b l k c => (1 / 2 : ℝ) * (ig a b * (ig k l * (cg v' c * g1 k u' c))))
       (fun a b l k c => by
-        show (1 / 2 : ℝ) * (ig a b * (ig k l * (cg v' c * g1 k u' c)))
+        change (1 / 2 : ℝ) * (ig a b * (ig k l * (cg v' c * g1 k u' c)))
           = (1 / 2 : ℝ) * (ig b a * (ig k l * (cg v' c * g1 k u' c)))
         rw [higs a b])]
     have hB1 : (∑ a : Fin n, ∑ b : Fin n, ∑ l : Fin n, ∑ k : Fin n, ∑ c : Fin n,
@@ -3437,7 +3386,6 @@ private lemma o1_master (ig cg : Fin n → Fin n → ℝ)
 
 end O1Abstract
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_chartGramMatrix_symm (g : SmoothRiemannianMetric I M) (x : M)
     (a b : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Integral.Measure.chartGramMatrix (I := I) g x x a b
@@ -3446,8 +3394,6 @@ private lemma lieArm_chartGramMatrix_symm (g : SmoothRiemannianMetric I M) (x : 
     DifferentialGeometry.Integral.Measure.chartGramMatrix_apply]
   exact g.symm _ _ _
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 private lemma lieArm_realizedGramDeriv_symm (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -3458,7 +3404,7 @@ private lemma lieArm_realizedGramDeriv_symm (g₀ : SmoothRiemannianMetric I M)
     realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b
     = realizedGramDeriv (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x b a := by
   funext y
-  show DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I)
+  change DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I)
       (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ) x a b y
     - DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE (I := I)
       (tensorSectionRealizeMetric (I := I) g₀ T' hδ'_lt hδ') x a b y
@@ -3469,7 +3415,6 @@ private lemma lieArm_realizedGramDeriv_symm (g₀ : SmoothRiemannianMetric I M)
   rw [DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_symm (I := I) _ x a b,
     DifferentialGeometry.Integral.DivergenceTheorem.chartGramOnE_symm (I := I) _ x a b]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_chartChristoffel_center (g : SmoothRiemannianMetric I M) (x : M)
     (a b k : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Integral.DivergenceTheorem.chartChristoffel (I := I) g x a b k (extChartAt I x x)
@@ -3480,7 +3425,6 @@ private lemma lieArm_chartChristoffel_center (g : SmoothRiemannianMetric I M) (x
   refine congrArg (HMul.hMul (1 / 2 : ℝ)) (Finset.sum_congr rfl (fun l _ => ?_))
   rw [lieArm_chartInvGramOnE_center (I := I) g x k l]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_partial_chartInvGramOnE_center (g : SmoothRiemannianMetric I M) (x : M)
     (m a b : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Integral.DivergenceTheorem.partialDeriv (E := E) m
@@ -3496,7 +3440,6 @@ private lemma lieArm_partial_chartInvGramOnE_center (g : SmoothRiemannianMetric 
   refine congrArg Neg.neg (Finset.sum_congr rfl (fun x' _ => Finset.sum_congr rfl (fun y' _ => ?_)))
   rw [lieArm_chartInvGramOnE_center (I := I) g x a x', lieArm_chartInvGramOnE_center (I := I) g x y' b]
 
-set_option linter.unusedSectionVars false in
 private lemma lieArm_chartDeTurckVFComp_center (gA gB : SmoothRiemannianMetric I M) (x : M)
     (k : Fin (Module.finrank ℝ E)) :
     PDE.DeTurck.DeTurckLinearization.chartDeTurckVFComp (I := I) gA gB x k (extChartAt I x x)
@@ -3510,8 +3453,6 @@ private lemma lieArm_chartDeTurckVFComp_center (gA gB : SmoothRiemannianMetric I
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_o1raw_center_eq (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -3553,8 +3494,6 @@ private lemma lieArm_o1raw_center_eq (g₀ g_bg : SmoothRiemannianMetric I M) (T
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private lemma lieArm_arm1_value_eq_order1Raw_add_tail (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -3884,7 +3823,6 @@ private lemma lieArm_arm1_value_eq_order1Raw_add_tail (g₀ g_bg : SmoothRiemann
     hcol' higs' hcgs' hf3s' hg1s' hg0s' hgbdef' hdgs' hga1' hdig' i j
   linear_combination hM
 
-set_option linter.unusedSectionVars false in
 private theorem lieArm_jointRS_add_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -3917,7 +3855,6 @@ private theorem lieArm_jointRS_add_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
-set_option linter.unusedSectionVars false in
 theorem lieArm_jointRS_const_smul_local {r s : ℕ} {S : Set ℝ} (a : ℝ)
     (A : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -4041,11 +3978,9 @@ private theorem lieArm_hjAbsorb (g₀ : SmoothRiemannianMetric I M) {δ δ' : �
   rw [symmAbsorbedCoeff, smoothCcTensor_toSection_add_apply,
     smoothCcTensor_toSection_smul_apply, smoothCcTensor_toSection_smul_apply]
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1600000
 set_option synthInstance.maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (deTurckLieWEndo deTurckLieWEndo_apply deTurckLieWEndo_homSection_contMDiff deTurckVFCovDeriv connDiffOp_homSection_contMDiff metricConnDiffLoweredFib metricConnDiffLoweredFib_toModel metricConnDiffLoweredFib_contMDiff domDomCongrFibRank domDomCongrFibRank_apply tensor0SProdKappaFib tensor0SProdKappaFib_apply)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricDoubleTraceFib cometricDoubleTraceFib_toModel cometricDoubleTraceFib_contMDiff)
@@ -6995,13 +6930,9 @@ end LieCorr0Joint
 
 section LieCorr0MasterValue
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 3200000
 set_option synthInstance.maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
-set_option linter.unusedVariables false
-set_option linter.unusedSimpArgs false
 
 open DifferentialGeometry.Integral.DivergenceTheorem (chartInvGramMatrix partialDeriv chartChristoffel chartGramOnE chartInvGramOnE chartRiemannTensor chartChristoffel_symm chartGramOnE_symm chartInvGramOnE_symm partialDeriv_chartInvGramOnE_eq extChartAt_target_subset_interior_of_boundaryless)
 open DifferentialGeometry.Integral.Measure (chartGramMatrix)
@@ -7534,7 +7465,7 @@ private lemma lc0_master_inst (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (fun a b k => lc0_hga1e (I := I) g₁ x a b k)
     (fun m a b k => lc0_hdga1e (I := I) g₁ x m a b k)
     (fun m a b => lc0_hdige (I := I) g₁ x m a b)
-    (fun a b l => rfl)
+    (fun _a _b _l => rfl)
     (fun m a b l => lc0_hdgbe (I := I) g₁ x m a b l)
     i j
 
@@ -7978,8 +7909,6 @@ end LieCorr0MasterValue
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 lemma lieArm_chartSlope_center_value_eq_threeArm
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -8023,8 +7952,6 @@ lemma lieArm_chartSlope_center_value_eq_threeArm
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 theorem realizedDeTurckLie_threeArm_symmAbsorbed_perm_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

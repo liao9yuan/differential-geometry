@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomTensorRSRiemanni
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -408,7 +407,6 @@ def metricComparisonDiffFibreEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : 
           ContinuousLinearMap.comp_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma gInvDiffFibreEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
@@ -465,7 +463,6 @@ theorem gInvDiffFibreEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from Z x) (ζ x)) from by
     rw [gInvDiffFibreEndo_apply, ContinuousLinearMap.comp_apply]]
 
-set_option linter.unusedSectionVars false in
 
 private lemma exists_orthonormalFrame_fiberNormSq_rank22_repr (g₀ : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -504,7 +501,6 @@ private lemma exists_orthonormalFrame_fiberNormSq_rank22_repr (g₀ : SmoothRiem
     rw [← hinner_eq u (eob b), sq, real_inner_comm (eob b) u]
   · intro S; rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma slotInsert_sqsum_kroneckerDelta_eq_dim_mul_sqsum (n : ℕ) (f : Fin n → Fin n → ℝ) :
     (∑ K : Fin 2 → Fin n, ∑ J : Fin 2 → Fin n,
@@ -548,7 +544,6 @@ private lemma slotInsert_sqsum_kroneckerDelta_eq_dim_mul_sqsum (n : ℕ) (f : Fi
   refine Finset.sum_congr rfl (fun j0 _ => ?_)
   rw [Finset.mul_sum]
 
-set_option linter.unusedSectionVars false in
 
 private lemma slotEndo_fiberComponent_endo_eq (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -575,7 +570,6 @@ private lemma slotEndo_fiberComponent_endo_eq (g₀ : SmoothRiemannianMetric I M
     Function.update_of_ne (by decide : (1 : Fin 2) ≠ 0)]
   rw [g₀.symm x (e (K 0)) (Λ (e (J 0))), horth (K 1) (J 1)]
 
-set_option linter.unusedSectionVars false in
 
 private lemma riemannianFiberNormSq_slotInsert_eq_dim_mul (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) :
@@ -613,7 +607,6 @@ private lemma riemannianFiberNormSq_slotInsert_eq_dim_mul (g₀ : SmoothRiemanni
   rw [h22',
     slotInsert_sqsum_kroneckerDelta_eq_dim_mul_sqsum n (fun a b => g₀.inner x (Λ (e a)) (e b))]
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannianFiberNormSq_gInvDiffSlotEndo_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
@@ -668,7 +661,6 @@ theorem riemannianFiberNormSq_gInvDiffSlotEndo_le
       ≤ (n : ℝ) * ((n : ℝ) * r ^ 2) := mul_le_mul_of_nonneg_left hsum_le hn_nn
     _ = ((Module.finrank ℝ E : ℝ) * r) ^ 2 := by rw [← hnE]; ring
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_gInvDiffFibreEndo_neumannFibreBound
     (g₀ : SmoothRiemannianMetric I M) :
@@ -844,7 +836,6 @@ theorem gInvSlotEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
   refine hsharpY.congr (fun x => ?_)
   rw [gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM_eq_metricSharp]
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannianFiberNormSq_gInvSlotEndo_le
     (g₀ g₁ : SmoothRiemannianMetric I M)

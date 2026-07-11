@@ -37,13 +37,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedVariables false in
 
 theorem exists_chart_target_cutoff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M}
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    {R₀ : ℝ} {h : ℝ}
+    {_R₀ : ℝ} {h : ℝ}
     (h_thick :
       Metric.cthickening |h| K_0 ⊆ chartTargetEuclid (I := I) (M := M) α) :
     ∃ χ : EuclN → ℝ, ContDiff ℝ (⊤ : ℕ∞) χ ∧ HasCompactSupport χ ∧

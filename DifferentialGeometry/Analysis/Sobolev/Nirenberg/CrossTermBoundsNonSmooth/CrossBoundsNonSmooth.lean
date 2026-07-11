@@ -543,7 +543,6 @@ private lemma gradL2sqOn_nonsmooth_nonneg
   intro x
   exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
-set_option linter.unusedVariables false in
 
 theorem cross_1_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
@@ -551,11 +550,11 @@ theorem cross_1_bound_nonsmooth_quantitative
     (hu_l2 : MemLp u 2 (volume : Measure E))
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
-    (h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
+    (_h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
-    {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
-    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    {N : ℝ} (_hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
+    {Ω' : Set E} (_hΩ' : IsOpen Ω') (_hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
@@ -823,7 +822,6 @@ theorem cross_1_bound_nonsmooth_quantitative
     rw [h_C_eq]; exact mul_nonneg h_d_real_sq_nn h_factor_nn
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem cross_1_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)

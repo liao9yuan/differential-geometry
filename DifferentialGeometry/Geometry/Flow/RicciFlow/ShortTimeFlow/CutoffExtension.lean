@@ -155,13 +155,12 @@ theorem smul_tangentMap_global
 end CutoffExtensionAux
 
 open CutoffExtensionAux in
-set_option linter.unusedVariables false in
 theorem interior_field_global_cutoff_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
       (fun q : ℝ × M => (TotalSpace.mk' E q.2 (X_DT q.1 q.2) : TangentBundle I M))
       (Set.Ioo (0 : ℝ) T ×ˢ Set.univ))
-    {a b : ℝ} (hab : 0 < a) (hab' : a < b) (hbT : b < T) :
+    {a b : ℝ} (hab : 0 < a) (_hab' : a < b) (hbT : b < T) :
     ∃ (Xt : ℝ → ∀ x : M, TangentSpace I x) (δ : ℝ), 0 < δ ∧
       (∀ s ∈ Set.Ioo (a - δ) (b + δ), ∀ x : M, Xt s x = X_DT s x) ∧
       ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

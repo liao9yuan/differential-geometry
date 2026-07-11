@@ -56,7 +56,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 section CentredFrameCoordExpansion
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
@@ -855,7 +854,6 @@ end CentredFrameCoordExpansion
 
 section B4Bridge
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000

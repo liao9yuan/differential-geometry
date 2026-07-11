@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1600000
 
@@ -29,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 theorem secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
@@ -46,7 +44,6 @@ theorem secondCovDeriv_covGrad_antisymm_eq_riemannOp_gen
     (T := fun y : M => (covGrad (I := I) (M := M) g 0 s S).toSection y)
     hX hY (covGrad (I := I) (M := M) g 0 s S).toSection.contMDiff
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannOp_covGrad_fiberNormSq_le_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (x : M) :

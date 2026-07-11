@@ -81,7 +81,6 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization (convexPerturbation con
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma dim1_smul_rep (h1 : Module.finrank ℝ E = 1) (e : E) (he : e ≠ 0) (v : E) :
     ∃ c : ℝ, c • e = v :=
   exists_smul_eq_of_finrank_eq_one (K := ℝ) (V := E) h1 he v
@@ -89,7 +88,6 @@ private lemma dim1_smul_rep (h1 : Module.finrank ℝ E = 1) (e : E) (he : e ≠ 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma dim1_domDomCongr_eq (h1 : Module.finrank ℝ E = 1) {d : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin d => E) ℝ) (ρ : Equiv.Perm (Fin d)) :
     ContinuousMultilinearMap.domDomCongr ρ f = f := by
@@ -167,7 +165,7 @@ lemma dim1_linearizedRicciConnDiffOrder0CoeffField_eq_zero
   apply ContMDiffSection.ext
   intro x
   rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CoeffField_toSection]
-  show (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CometricTracedCLM
+  change (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CometricTracedCLM
       (I := I) g₀ g₁ x) = _
   rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.linearizedRicciConnDiffOrder0CometricTracedCLM]
   rw [ricciCometricFourTraceCLM_eq_zero_of_finrank_eq_one (I := I) h1 g₁ x]
@@ -177,7 +175,6 @@ lemma dim1_linearizedRicciConnDiffOrder0CoeffField_eq_zero
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma dim1_riemannOp_first_two_eq_zero (h1 : Module.finrank ℝ E = 1)
     (g₁ : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x)
     (hw : w ≠ 0) :
@@ -205,7 +202,6 @@ private lemma dim1_riemannOp_first_two_eq_zero (h1 : Module.finrank ℝ E = 1)
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma dim1_smoothOrthoFrame_ne_zero (g₁ : SmoothRiemannianMetric I M) (x : M)
     (a : Fin (Module.finrank ℝ E)) :
     DifferentialGeometry.Integral.Connection.smoothOrthoFrame (I := I) g₁ x a x ≠ 0 := by
@@ -228,7 +224,7 @@ lemma dim1_ricciArmOrder0RiemannCoeff_eq_zero (h1 : Module.finrank ℝ E = 1)
   apply ContMDiffSection.ext
   intro x
   rw [DifferentialGeometry.Analysis.Parabolic.TensorSpectral.ricciArmOrder0RiemannCoeff_toSection]
-  show (Tensor0SBundle.TensorRSSpace.ofCLM
+  change (Tensor0SBundle.TensorRSSpace.ofCLM
       (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannBiContrFib (I := I) g₁ x)) = _
   have hfib : DifferentialGeometry.Analysis.Parabolic.TensorSpectral.riemannBiContrFib
       (I := I) g₁ x = 0 := by
@@ -256,7 +252,7 @@ lemma dim1_ricciArmOrder0RiemannCoeff_eq_zero (h1 : Module.finrank ℝ E = 1)
     simp only [smul_zero, mul_zero]
     have : (Tensor0SBundle.Tensor0SSpace.toModel (𝕜 := ℝ)
         ((0 : Tensor0SBundle.TensorRSSpace 2 2 I x) D)) v = 0 := by
-      show (Tensor0SBundle.Tensor0SSpace.toModel (𝕜 := ℝ)
+      change (Tensor0SBundle.Tensor0SSpace.toModel (𝕜 := ℝ)
         ((0 : Tensor0SBundle.Tensor0SSpace 2 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x) D)) v = 0
       rw [ContinuousLinearMap.zero_apply]
       rw [show (Tensor0SBundle.Tensor0SSpace.toModel (𝕜 := ℝ)

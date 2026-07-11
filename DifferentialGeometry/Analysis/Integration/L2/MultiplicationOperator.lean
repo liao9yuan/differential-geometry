@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 set_option backward.isDefEq.respectTransparency false
@@ -36,7 +35,6 @@ section SmoothSide
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-set_option linter.unusedSectionVars false in
 
 theorem norm_appFullRS_sq_eq_integral
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
@@ -60,7 +58,6 @@ theorem norm_appFullRS_sq_eq_integral
   refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
   simp only [appFullRS_toSection (I := I) (M := M) g r s s Ψ hΨ W]
 
-set_option linter.unusedSectionVars false in
 
 theorem integrable_riemannianFiberNormSq_appFullRS
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
@@ -79,7 +76,6 @@ theorem integrable_riemannianFiberNormSq_appFullRS
   exact (riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x
     (Ψ x (W.toSection x))).symm
 
-set_option linter.unusedSectionVars false in
 
 theorem integrable_riemannianFiberNormSq_toSection
     (W : SmoothCcTensor g r s) :
@@ -93,7 +89,6 @@ theorem integrable_riemannianFiberNormSq_toSection
   exact (riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x
     (W.toSection x)).symm
 
-set_option linter.unusedSectionVars false in
 
 theorem norm_appFullRS_le_sqrt_mul
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
@@ -132,7 +127,6 @@ theorem norm_appFullRS_le_sqrt_mul
   rw [hsq_rhs]
   exact hsq_int
 
-set_option linter.unusedSectionVars false in
 
 def fibreFieldMulSmoothCLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -152,7 +146,6 @@ def fibreFieldMulSmoothCLM
     (Real.sqrt C)
     (fun W => norm_appFullRS_le_sqrt_mul (I := I) (M := M) Ψ hΨ hC hbound W)
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem fibreFieldMulSmoothCLM_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
@@ -173,7 +166,6 @@ section L2Operator
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-set_option linter.unusedSectionVars false in
 
 def fibreFieldMulL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -188,7 +180,6 @@ def fibreFieldMulL2
     TensorL2 r s g →L[ℝ] TensorL2 r s g :=
   SmoothCcTensor.mapL2 (fibreFieldMulSmoothCLM (I := I) (M := M) g r s Ψ hΨ hC hbound)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem fibreFieldMulL2_apply_toL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -208,7 +199,6 @@ set_option linter.unusedSectionVars false in
   rw [fibreFieldMulL2, SmoothCcTensor.mapL2_apply_toL2,
     fibreFieldMulSmoothCLM_apply (I := I) (M := M) g r s Ψ hΨ hC hbound S]
 
-set_option linter.unusedSectionVars false in
 
 theorem fibreFieldMulL2_opNorm_le_sqrt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

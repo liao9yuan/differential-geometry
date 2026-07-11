@@ -30,7 +30,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option linter.unusedFintypeInType false in
 
 lemma continuousAt_clm_of_basis_continuousAt
     {F G : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
@@ -90,7 +89,6 @@ lemma continuousAt_clm_of_basis_continuousAt
   rw [dist_eq_norm]
   exact lt_of_le_of_lt hChain (by linarith)
 
-set_option linter.unusedFintypeInType false in
 
 lemma continuousAt_bilin_of_basis_continuousAt
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
@@ -111,7 +109,6 @@ lemma continuousAt_bilin_of_basis_continuousAt
     (F := F) (G := F →L[ℝ] ℝ) (N := N) (v := v)
     (u := u) (x₀ := x₀) h_inner_each
 
-set_option linter.unusedSectionVars false in
 
 lemma chartTensorInnerPointwise_0sCLM_continuousAt_of_baseSet
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
@@ -145,7 +142,6 @@ lemma chartTensorInnerPointwise_0sCLM_continuousAt_of_baseSet
     (trivializationAt E (TangentSpace I) α).open_baseSet
   exact hCont.continuousAt (hOpen.mem_nhds hb₀)
 
-set_option linter.unusedSectionVars false in
 
 lemma innerBundleCLM_inCoordinates_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
@@ -242,7 +238,6 @@ lemma innerBundleCLM_inCoordinates_apply
     exact chartJ_chartJinv (I := I) (M := M) α hb (m i)
   rw [hcomp v, hcomp w]
 
-set_option linter.unusedSectionVars false in
 
 theorem innerBundleCLM_continuousOn (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M) :
     ContinuousOn (fun b : M =>
@@ -288,7 +283,6 @@ theorem innerBundleCLM_continuousOn (g : SmoothRiemannianMetric I M) (s : ℕ) (
 
   exact (innerBundleCLM_inCoordinates_apply (I := I) (M := M) g s b₀ hx v w).symm
 
-set_option linter.unusedSectionVars false in
 
 theorem innerBundleCLM_continuous (g : SmoothRiemannianMetric I M) (s : ℕ) :
     Continuous (fun b : M =>
@@ -301,7 +295,6 @@ theorem innerBundleCLM_continuous (g : SmoothRiemannianMetric I M) (s : ℕ) :
   exact (innerBundleCLM_continuousOn (I := I) (M := M) g s b).continuousAt
     (hOpen.mem_nhds hb_source)
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace in
 
@@ -321,7 +314,6 @@ noncomputable def tensor0SContinuousRiemannianMetric
     have h := innerBundleCLM_continuous (I := I) (M := M) g s
     convert h using 0
 
-set_option linter.unusedSectionVars false in
 
 theorem isContinuousRiemannianBundle_data
     (g : SmoothRiemannianMetric I M) (s : ℕ) :

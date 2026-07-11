@@ -6,7 +6,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -28,7 +27,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
-set_option linter.unusedSectionVars false in
 
 lemma chartRSTwist_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
@@ -90,7 +88,6 @@ lemma chartRSTwist_opNorm_le
   rw [h_final] at h_combined
   exact h_combined
 
-set_option linter.unusedSectionVars false in
 
 lemma chartRSTwistInv_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -32,7 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
@@ -44,7 +42,6 @@ theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
   rw [hfun]
   exact tensorL2Norm_sq_eq_integral_riemannianFiberNormSq (I := I) (M := M) g 0 s _
 
-set_option linter.unusedSectionVars false in
 
 theorem integrable_riemannianFiberNormSq_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
@@ -61,7 +58,6 @@ theorem integrable_riemannianFiberNormSq_toSection
   exact (riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x
     (S.toSection x)).symm
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three
     (g : SmoothRiemannianMetric I M) {a b c d : ℕ}
@@ -168,7 +164,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three
     nlinarith [mul_le_mul_of_nonneg_left hcross (sq_nonneg C), sq_nonneg C]
   nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C * (nA + nB + nD))]
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
     (g : SmoothRiemannianMetric I M) {a b c : ℕ}
@@ -190,7 +185,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
       exact riemannianFiberNormSq_zero (I := I) (M := M) g 0 b x
     rw [hz, add_zero]; exact hpt x
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum
     (g : SmoothRiemannianMetric I M) {c : ℕ} (N : ℕ) (v : ℕ → ℕ)

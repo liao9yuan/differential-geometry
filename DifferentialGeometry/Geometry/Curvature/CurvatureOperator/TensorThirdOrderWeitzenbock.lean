@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciComm
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
 
@@ -32,7 +31,6 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [FiberBundle F V] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
   [FiniteDimensional ℝ F]
 
-set_option linter.unusedSectionVars false in
 
 theorem covApply_outer_swap_eq_riemannSec
     (cov : CovariantDerivative I F V)
@@ -61,7 +59,6 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
   [FiberBundle F V] [VectorBundle ℝ F V] [ContMDiffVectorBundle ∞ F V I]
   [FiniteDimensional ℝ F]
 
-set_option linter.unusedSectionVars false in
 
 theorem covApply_contMDiff
     (cov : CovariantDerivative I F V)
@@ -85,7 +82,6 @@ theorem covApply_covApply_contMDiff
     ContMDiff I (I.prod 𝓘(ℝ, F)) ∞ (T% (covApply cov X (covApply cov Y T))) :=
   covApply_contMDiff (cov := cov) hX (covApply_contMDiff (cov := cov) hY hT)
 
-set_option linter.unusedSectionVars false in
 
 theorem mlieBracket_contMDiff
     {X Y : Π b : M, TangentSpace I b}

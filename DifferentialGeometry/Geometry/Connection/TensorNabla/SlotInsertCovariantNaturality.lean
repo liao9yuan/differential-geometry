@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatu
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
 
 noncomputable section
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
@@ -25,7 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 def endoCovariantDerivative (g : SmoothRiemannianMetric I M) :
     CovariantDerivative I (E →L[ℝ] E)
       (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x) :=
@@ -33,14 +31,12 @@ def endoCovariantDerivative (g : SmoothRiemannianMetric I M) :
     E (fun x : M => TangentSpace I x) E (fun x : M => TangentSpace I x)
     (LeviCivita (I := I) g) (LeviCivita (I := I) g)
 
-set_option linter.unusedSectionVars false in
 instance endoCovariantDerivative_contMDiff (g : SmoothRiemannianMetric I M) :
     (endoCovariantDerivative (I := I) (M := M) g).ContMDiffCovariantDerivative ∞ :=
   HomConnectionGen.homBundleCovariantDerivativeGen_contMDiff I M
     E (fun x : M => TangentSpace I x) E (fun x : M => TangentSpace I x)
     (LeviCivita (I := I) g) (LeviCivita (I := I) g)
 
-set_option linter.unusedSectionVars false in
 theorem endoCovariantDerivative_apply (g : SmoothRiemannianMetric I M)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (Y : ContMDiffSection I E ∞ (TangentSpace I)) (x : M) (v : E) :
@@ -51,7 +47,6 @@ theorem endoCovariantDerivative_apply (g : SmoothRiemannianMetric I M)
     E (fun x : M => TangentSpace I x) E (fun x : M => TangentSpace I x)
     (LeviCivita (I := I) g) (LeviCivita (I := I) g) Λ Y x v
 
-set_option linter.unusedSectionVars false in
 theorem endoApplySection_contMDiff
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (Y : ContMDiffSection I E ∞ (fun y : M => TangentSpace I y)) :
@@ -73,7 +68,6 @@ def endoSlotZeroCcTensor (g : SmoothRiemannianMetric I M) (s : ℕ)
         slotInsertEndoFib_contMDiff (I := I) (M := M) g (s + 1) 0 (fun x : M => Λ x) Λ.contMDiff }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma slotInsertEndoCc_toSection (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) :
@@ -81,7 +75,6 @@ set_option linter.unusedSectionVars false in
         (endoSlotZeroCcTensor (I := I) (M := M) g s Λ).toSection x) =
       slotInsertEndoFib (I := I) (M := M) (s + 1) 0 x (Λ x) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma curry_slotInsertEndoFib_zero (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace (s + 1) I x) :
     tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x
@@ -96,7 +89,6 @@ lemma curry_slotInsertEndoFib_zero (s : ℕ) (x : M)
   congr 1
   rw [Fin.cons_zero, Fin.update_cons_zero]
 
-set_option linter.unusedSectionVars false in
 private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (v : E) (D : Tensor0SSpace (s + 1) I x) (v0 : E) :
@@ -176,7 +168,6 @@ private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (
       tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x (w x) from rfl]
   abel
 
-set_option linter.unusedSectionVars false in
 theorem tensorCovDerivAt_slotInsertEndoCc_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (v : E) :
@@ -200,7 +191,6 @@ theorem tensorCovDerivAt_slotInsertEndoCc_eq (g : SmoothRiemannianMetric I M) (s
   congr 1
   rw [Fin.cons_zero, Fin.update_cons_zero]
 
-set_option linter.unusedSectionVars false in
 theorem covGrad_slotInsertEndoCc_toSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (x : M) (D : Tensor0SSpace (s + 1) I x) (v : Fin (s + 1 + 1) → TangentSpace I x) :
@@ -216,7 +206,6 @@ theorem covGrad_slotInsertEndoCc_toSection_eq (g : SmoothRiemannianMetric I M) (
     (endoSlotZeroCcTensor (I := I) (M := M) g s Λ) x D v]
   rw [tensorCovDerivAt_slotInsertEndoCc_eq (I := I) (M := M) g s Λ x (v 0)]
 
-set_option linter.unusedSectionVars false in
 def identityHomTensorRSField (r a : ℕ) :
     HomTensorRSField (E := E) (M := M) r a a I where
   toFun := fun x : M => (ContinuousLinearMap.id ℝ (TensorRSSpace r a I x) :
@@ -228,13 +217,11 @@ def identityHomTensorRSField (r a : ℕ) :
       (φ := fun x : M => ContinuousLinearMap.id ℝ (TensorRSSpace r a I x))
       (fun Y => Y.contMDiff)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma idHomTensorRSField_apply (r a : ℕ) (x : M) :
     (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r a I x from
         identityHomTensorRSField (E := E) (M := M) (I := I) r a x) =
       ContinuousLinearMap.id ℝ (TensorRSSpace r a I x) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma appFullSec_idHomTensorRSField (g : SmoothRiemannianMetric I M) (r a : ℕ)
     (W : SmoothCcTensor g r a) :
     homTensorRSFieldApply (I := I) (M := M) g r a a (identityHomTensorRSField (E := E) (M := M) (I := I) r a) W = W := by
@@ -243,7 +230,6 @@ lemma appFullSec_idHomTensorRSField (g : SmoothRiemannianMetric I M) (r a : ℕ)
   intro x
   rw [appFullSec_toSection, idHomTensorRSField_apply, ContinuousLinearMap.id_apply]
 
-set_option linter.unusedSectionVars false in
 theorem iteratedCovGrad_slotInsertEndoCc_expansion (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))
     (k : ℕ) :

@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDiverg
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -50,7 +49,6 @@ def deTurckLieConnDiffDerivCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I
       contMDiff_toFun := dLaBiContrFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem deTurckLieDLaCoeffField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
@@ -66,14 +64,12 @@ def deTurckLieDLbCoeffField (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
       contMDiff_toFun := deTurckLieDLbFib_contMDiff (I := I) g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem deTurckLieDLbCoeffField_toSection
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieDLbCoeffField (I := I) (M := M) g₀ g₁ g_bg).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (deTurckLieDLbFib (I := I) g₁ g_bg x)) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
     deTurckLieConnDiffDerivCoeffField (I := I) (M := M) g₀ g₁ g_bg +
@@ -87,7 +83,6 @@ theorem deTurckLieDLaCoeffField_add_deTurckLieDLbCoeffField
     deTurckLieCoeffField_toSection]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem connDiff_cocycle (gA gB gC : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v + PDE.DeTurck.connDiff (I := I) gB gC x u v =
@@ -102,7 +97,6 @@ theorem connDiff_cocycle (gA gB gC : SmoothRiemannianMetric I M) (x : M)
     PDE.DeTurck.connDiff_apply (I := I) gA gC hσ v]
   abel
 
-set_option linter.unusedSectionVars false in
 theorem deTurckLieCovDerivA_backgroundSplit
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (X P Q : Π b : M, TangentSpace I b) (x : M)
@@ -244,7 +238,6 @@ theorem deTurckLieCovDerivA_backgroundSplit
   rw [hout', hinnP', hinnQ', hsplitT2, hsplitT3, hT2c, hT3c, hsplit, hA, hB]
   abel
 
-set_option linter.unusedSectionVars false in
 theorem dLaCovKernel_backgroundSplit (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 p q : TangentSpace I x) :
     connDiffCovDerivOp (I := I) g₁ g_bg x v0 p q =
@@ -283,7 +276,6 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
-set_option linter.unusedSectionVars false in
 private theorem abs_metric_inner_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     |g.inner x u v| ≤ Real.sqrt (g.inner x u u) * Real.sqrt (g.inner x v v) := by
@@ -294,7 +286,6 @@ private theorem abs_metric_inner_le (g : SmoothRiemannianMetric I M) (x : M)
   refine le_trans (Real.sqrt_le_sqrt h2) ?_
   rw [Real.sqrt_mul (metric_inner_self_nonneg (I := I) (M := M) g x u)]
 
-set_option linter.unusedSectionVars false in
 private theorem sqrt_metric_inner_add_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     Real.sqrt (g.inner x (u + v) (u + v)) ≤
@@ -317,7 +308,6 @@ private theorem sqrt_metric_inner_add_le (g : SmoothRiemannianMetric I M) (x : M
   refine le_trans (Real.sqrt_le_sqrt hsq) ?_
   rw [Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))]
 
-set_option linter.unusedSectionVars false in
 private theorem sqrt_metric_inner_sub_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     Real.sqrt (g.inner x (u - v) (u - v)) ≤
@@ -329,7 +319,6 @@ private theorem sqrt_metric_inner_sub_le (g : SmoothRiemannianMetric I M) (x : M
   rw [hneg] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 theorem gFibreOpBound_mono_of_le (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     {δ δ' : ℝ} (hle : δ ≤ δ')
@@ -345,7 +334,6 @@ theorem gFibreOpBound_mono_of_le (g₀ : SmoothRiemannianMetric I M)
         mul_le_mul_of_nonneg_right hle hnn
     _ = δ' * Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) := by ring
 
-set_option linter.unusedSectionVars false in
 private theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -363,7 +351,6 @@ private theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M
     mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)
   nlinarith [h1, h2, hnn]
 
-set_option linter.unusedSectionVars false in
 private theorem coframeS_one_eq_g0FlatCLM_local
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 1 → Fin n) :
@@ -379,7 +366,6 @@ private theorem coframeS_one_eq_g0FlatCLM_local
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private theorem toModel_coframeS_two (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 2 → Fin n)
     (p q : TangentSpace I x) :
@@ -390,7 +376,6 @@ private theorem toModel_coframeS_two (g₀ : SmoothRiemannianMetric I M) (x : M)
   rw [coframeS_apply (I := I) (M := M) g₀ x 2 e K ![p, q], Fin.prod_univ_two]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem abs_tensor12_flat_eval_le_fibreNorm_mul_sqrt_local
@@ -588,7 +573,6 @@ private theorem abs_tensor12_flat_eval_le_fibreNorm_mul_sqrt_local
     rw [Real.sqrt_mul hdd_nn, Real.sqrt_mul haa_nn]
     ring
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem exists_fixed_connDiff_sqrt_bound (g₀ g_bg : SmoothRiemannianMetric I M) :
@@ -665,7 +649,6 @@ private theorem exists_fixed_connDiff_sqrt_bound (g₀ g_bg : SmoothRiemannianMe
         have hprod_nn : 0 ≤ Sv * Sw := mul_nonneg hSv_nn hSw_nn
         nlinarith [hWnorm, hprod_nn, hSv_nn, hSw_nn, hNW_nn]
 
-set_option linter.unusedSectionVars false in
 private theorem covGrad_connDiffSection_flat_eval_eq_inner_local
     (g₀ g_c : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -720,7 +703,6 @@ private theorem covGrad_connDiffSection_flat_eval_eq_inner_local
   rw [hA_def]
   exact hbridge
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem exists_fixed_covDerivConnDiff_sqrt_bound
@@ -796,8 +778,6 @@ private theorem exists_fixed_covDerivConnDiff_sqrt_bound
         have hprod_nn : 0 ≤ Sv * Sw * Su := by positivity
         nlinarith [hWnorm, hprod_nn, hSv_nn, hSw_nn, hSu_nn, hNW_nn]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
@@ -806,9 +786,9 @@ theorem deTurckLieDLaCoeffField_realizedFam_rfns_order0_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →

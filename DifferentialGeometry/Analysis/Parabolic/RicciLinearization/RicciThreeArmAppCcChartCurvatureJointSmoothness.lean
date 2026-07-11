@@ -21,7 +21,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -55,7 +54,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 lemma appCc_smul_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
@@ -71,7 +69,6 @@ lemma appCc_smul_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.smul_comp]
 
-set_option linter.unusedSectionVars false in
 
 lemma unitModel_smul_local (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
@@ -81,7 +78,6 @@ lemma unitModel_smul_local (g₀ : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_add2_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) :
@@ -91,7 +87,6 @@ private lemma unitModel_add2_local (g₀ : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-set_option linter.unusedSectionVars false in
 
 lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -99,7 +94,6 @@ lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
       unitModel (I := I) (M := M) g₀ 2 S x v + unitModel (I := I) (M := M) g₀ 2 S' x v := by
   rw [unitModel_add2_local, ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 
 lemma continuousBilinearMap_basis_expand
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
@@ -158,7 +152,6 @@ lemma continuousBilinearMap_basis_expand
     rw [Fin.prod_univ_two]; rfl
   rw [hbasis, hprod]
 
-set_option linter.unusedSectionVars false in
 
 lemma unitModel_basis_expand_two (g₀ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -177,7 +170,6 @@ def linearizedRicciThreeArmHcont (g₀ : SmoothRiemannianMetric I M) (r : ℕ)
     (fun t : ℝ => Tensor0SBundle.TensorRSSpace.toModel ((Φ t).toSection x))
     (realizedSmallSet (δ := δ) (δ' := δ'))
 
-set_option linter.unusedSectionVars false in
 
 lemma threeArm_unitModel_appCc_intervalIntegrable
     (g₀ : SmoothRiemannianMetric I M) (r : ℕ)

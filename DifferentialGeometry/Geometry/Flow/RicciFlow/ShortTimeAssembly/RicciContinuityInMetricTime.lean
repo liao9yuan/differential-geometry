@@ -939,9 +939,8 @@ private lemma ricci_moving_chart_sum
 
 end MovingPushforwardAux
 
-set_option linter.unusedVariables false in
 theorem gfam_inner_continuous_on
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (_hT : 0 < T)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
     (hg_joint : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)),
       ContinuousOn
@@ -1054,9 +1053,8 @@ theorem gfam_inner_continuous_on
     exact hsum s hb hsr
   · exact hsum s₀ hbase0 hsrc0
 
-set_option linter.unusedVariables false in
 theorem ricci_gfam_continuous_on
-    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (hT : 0 < T)
+    (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (_hT : 0 < T)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (x : M) (v w : TangentSpace I x)
     (hC2 : ∀ (α : M) (i j : Fin (Module.finrank ℝ E)) (k : ℕ), k ≤ 2 →
         ContinuousOn
@@ -1176,7 +1174,6 @@ theorem ricci_gfam_continuous_on
     exact hsum s hg
   · exact hsum s₀ hgood0
 
-set_option linter.unusedVariables false in
 theorem ricci_continuous_in_metric_time
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ) (x : M) (v w : TangentSpace I x)
     (hC2 : ∀ (α : M) (y : M), y ∈ chartLeviCivitaGoodSet (I := I) α →

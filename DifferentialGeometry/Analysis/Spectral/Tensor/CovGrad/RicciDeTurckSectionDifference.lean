@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -46,7 +45,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiffQuad_telescope (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (p q r : TangentSpace I x) :
@@ -63,7 +61,6 @@ theorem connDiffQuad_telescope (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x
         (PDE.DeTurck.connDiff (I := I) g₁' g₀ x p q) r]
   rw [connDiff_endpoint_cocycle (I := I) g₀ g₁ g₁' x p q]
 
-set_option linter.unusedSectionVars false in
 
 theorem block3LegSummand_telescope (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (Xv0 Xv1 Xei : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -414,7 +411,6 @@ noncomputable def connDiffBiContrCoeff (gj g₀ g₁ g₁' : SmoothRiemannianMet
         TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) gj g₀ g₁ g₁' x)) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem connDiffBiContrCoeff_appCc_eq (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :

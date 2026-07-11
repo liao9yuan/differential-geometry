@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -41,7 +40,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 theorem trace_eq_basis_repr_sum (G : E →ₗ[ℝ] E) :
     ∑ i : Fin (Module.finrank ℝ E),
         (chartModelBasis E).repr (G ((chartModelBasis E) i)) i =
@@ -51,7 +49,6 @@ theorem trace_eq_basis_repr_sum (G : E →ₗ[ℝ] E) :
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Matrix.diag_apply, LinearMap.toMatrix_apply]
 
-set_option linter.unusedSectionVars false in
 private theorem cometricLmodel_finBasis_inner_eq_kronecker (g₁ : SmoothRiemannianMetric I M) (x : M)
     (j k : Fin (Module.finrank ℝ E)) :
     g₁.inner x
@@ -138,7 +135,6 @@ theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) 
   rw [hrepr, hε]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α + β)
       = dualToCotangent (I := I) (x := x) α + dualToCotangent (I := I) (x := x) β := by
@@ -147,7 +143,6 @@ lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) 
     cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
-set_option linter.unusedSectionVars false in
 lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (c • α)
       = c • dualToCotangent (I := I) (x := x) α := by
@@ -155,7 +150,6 @@ lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpac
   rw [map_smul, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
-set_option linter.unusedSectionVars false in
 lemma dualToCotangent_subC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α - β)
       = dualToCotangent (I := I) (x := x) α - dualToCotangent (I := I) (x := x) β := by
@@ -502,7 +496,6 @@ def koszulZSlotPerm2 : Equiv.Perm (Fin 4) :=
 def koszulZSlotPerm3 : Equiv.Perm (Fin 4) :=
   Equiv.swap (0 : Fin 4) 2
 
-set_option linter.unusedSectionVars false in
 
 private theorem zSlotPerm_apply :
     (koszulZSlotPerm1 0 = 2 ∧ koszulZSlotPerm1 1 = 0 ∧ koszulZSlotPerm1 2 = 3 ∧ koszulZSlotPerm1 3 = 1) ∧
@@ -525,7 +518,6 @@ noncomputable def combinedTrace42ModelZSlot
           ((ContinuousMultilinearMap.domDomCongrₗᵢ ℝ E ℝ
             koszulZSlotPerm3).toContinuousLinearEquiv.toContinuousLinearMap))
 
-set_option linter.unusedSectionVars false in
 
 theorem combinedTrace42ModelZ_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
@@ -601,7 +593,6 @@ noncomputable def ricciArmPrincipalCoeffZSlotFib (g₁ : SmoothRiemannianMetric 
     ((combinedTrace42ModelZSlot (E := E) (cometricLmodel (I := I) g₁ x)).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciArmPrincipalCoeffZFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
@@ -610,7 +601,6 @@ set_option linter.unusedSectionVars false in
         (Tensor0SBundle.Tensor0SSpace.toModel D) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem ricciArmPrincipalCoeffZFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
@@ -715,13 +705,11 @@ noncomputable def ricciArmPrincipalCoeffZSlot (g₀ g₁ : SmoothRiemannianMetri
       contMDiff_toFun := ricciArmPrincipalCoeffZFib_contMDiff (I := I) g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciArmPrincipalCoeffZ_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmPrincipalCoeffZSlot (I := I) (M := M) g₀ g₁).toSection x =
       (show Tensor0SBundle.TensorRSSpace 4 2 I x from ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem ricciArmPrincipalCoeffZ_appCc_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
@@ -829,7 +817,6 @@ private def secondCovGradZSlotCovec (g₀ : SmoothRiemannianMetric I M) (S : Smo
         simp only [smul_eq_mul, RingHom.id_apply]
         ring }
 
-set_option linter.unusedSectionVars false in
 
 private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e ζ : TangentSpace I x) :
@@ -839,7 +826,6 @@ private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : Smo
           + unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, W x, e, ζ]
           - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]) := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e e' : TangentSpace I x) :
@@ -884,7 +870,6 @@ private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : Smoot
         funext j; fin_cases j <;> rfl]
   rw [h1, h2, h3]; ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma zPrincipalCovec_smul (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (e : TangentSpace I x) :
@@ -951,7 +936,6 @@ def alignedPrincipalEndoZSlot (g₀ g₁ : SmoothRiemannianMetric I M) (S : Smoo
       rw [zPrincipalCovec_smul]; rfl]
     rw [dualToCotangent_smulC, map_smul]; rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma alignedPrincipalEndoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
@@ -969,7 +953,6 @@ private lemma alignedPrincipalEndoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I
     cotangentToDual_dualToCotangent]
   exact zPrincipalCovec_apply (I := I) (M := M) g₀ S V W x e ζ
 
-set_option linter.unusedSectionVars false in
 
 lemma alignedPrincipalEndoCZ_trace_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
@@ -990,7 +973,6 @@ lemma alignedPrincipalEndoCZ_trace_eq (g₀ g₁ : SmoothRiemannianMetric I M)
         ((Module.finBasis ℝ E).cDualBasis k))) ((Module.finBasis ℝ E) k)]
   norm_num [Matrix.cons_val_zero, Matrix.cons_val_one]
 
-set_option linter.unusedSectionVars false in
 
 theorem alignedPrincipalEndoC_sub_endoCZ_inner (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
@@ -1049,7 +1031,6 @@ def palatiniTracedPrincipalZRemainder (g₀ g₁ : SmoothRiemannianMetric I M)
             smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
           W x (V x)) i)
 
-set_option linter.unusedSectionVars false in
 
 theorem palatini_tracedPrincipal_Zslot_eq_combinedTrace
     (g₀ g₁ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)

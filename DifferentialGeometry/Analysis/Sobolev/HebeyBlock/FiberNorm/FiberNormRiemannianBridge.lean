@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.TensorRSBundleL
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 4000000
 
@@ -28,7 +27,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 theorem triv_eq_toModel_at_chartCenter
     (r s : ℕ) (b₀ : M) (T : TensorRSSpace r s I b₀) :
@@ -44,7 +42,6 @@ theorem triv_eq_toModel_at_chartCenter
   rw [h_loc]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem symmL_toModel_eq_self_at_chartCenter
     (r s : ℕ) (b₀ : M) (T : TensorRSSpace r s I b₀) :
@@ -59,7 +56,6 @@ theorem symmL_toModel_eq_self_at_chartCenter
       (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) b₀) h_mem T
 
-set_option linter.unusedSectionVars false in
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
@@ -84,7 +80,6 @@ theorem modelNorm_le_gNorm_pointwise
   rw [triv_eq_toModel_at_chartCenter (I := I) r s x₀ T] at h_triv
   exact h_triv
 
-set_option linter.unusedSectionVars false in
 set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -31,7 +30,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 theorem multilinear_slot0_pairing_self_adjoint
     (g₀ : SmoothRiemannianMetric I M) (x : M) {s : ℕ}
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -127,7 +125,6 @@ theorem multilinear_slot0_pairing_self_adjoint
   rw [hLHS, hRHS]
   rw [hadj wB wA, g₀.symm x wB (Λ wA)]
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_slotΛ_self_adjoint
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -297,7 +294,6 @@ theorem tensorInnerPointwise_slotΛ_self_adjoint
     rw [hkeyL, hkey, hkeyR]
   rw [hkey']
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_appCc_slotInsertEndoCc_self_adjoint
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞

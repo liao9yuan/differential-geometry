@@ -2,8 +2,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
-set_option linter.unusedSectionVars false
-set_option linter.style.show false
 
 noncomputable section
 

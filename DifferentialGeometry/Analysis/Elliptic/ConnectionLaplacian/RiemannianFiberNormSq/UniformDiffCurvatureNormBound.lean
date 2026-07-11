@@ -5,8 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 
 noncomputable section
 
-set_option linter.style.setOption false
-set_option linter.unusedSectionVars false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -31,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -505,7 +502,6 @@ private lemma exists_nablaChartRiemannData_uniform_bound_pouTsupport
     _ ≤ C_fn (((p, q), (r, s)), l) := hbd_idx
     _ ≤ C := hidx_le
 
-set_option linter.unusedSectionVars false in
 
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
@@ -519,7 +515,6 @@ private lemma pouTsupport_subset_goodSet (α : M) :
   rw [heq]
   exact chartAtlasPOU_isSubordinate I M α hb
 
-set_option linter.unusedSectionVars false in
 
 private lemma gInner_self_eq_chartGram_quadForm
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
@@ -572,7 +567,6 @@ private lemma chartCoord_sq_sum_le
     rw [gInner_self_eq_chartGram_quadForm (I := I) g α hx v]; exact hcgbound ξ
   rw [inv_mul_eq_div, le_div_iff₀' hcg]; exact hlow
 
-set_option linter.unusedSectionVars false in
 
 private lemma sum4_prod_factor {ι : Type*} [Fintype ι] (F G H K : ι → ℝ) :
     (∑ p : ι, ∑ q : ι, ∑ r : ι, ∑ s : ι, F p * G q * H r * K s) =
@@ -620,7 +614,6 @@ private lemma W_chartFrame_expand
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [Finset.sum_smul]
 
-set_option linter.unusedSectionVars false in
 
 private lemma diffCurv_arith_core
     {CR Sa Su T N G U : ℝ}

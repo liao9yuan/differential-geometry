@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCha
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -37,7 +36,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 lemma ccTensorBilin_chartBasis_eq_tensorChartComponent
     (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 2) (x : M)
     (a b : Fin (Module.finrank ℝ E)) :
@@ -47,7 +45,6 @@ lemma ccTensorBilin_chartBasis_eq_tensorChartComponent
     (chartModelBasis E a) (chartModelBasis E b)]
   exact unitModel_basisChart_eq_tensorChartComponent (I := I) (M := M) g₀ W x a b
 
-set_option linter.unusedSectionVars false in
 lemma cometricFinBasisTrace_eq_chartInvGram_bilin
     (g₁ : SmoothRiemannianMetric I M) (x : M)
     (F : E →L[ℝ] E →L[ℝ] ℝ) :
@@ -86,7 +83,6 @@ lemma cometricFinBasisTrace_eq_chartInvGram_bilin
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [map_smul, ContinuousLinearMap.smul_apply]
 
-set_option linter.unusedSectionVars false in
 def quadrilinearMapSlotBilinearAt
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
     (i j : Fin 4) (hij : i ≠ j) (base : Fin 4 → E) : E →L[ℝ] E →L[ℝ] ℝ :=
@@ -112,14 +108,12 @@ def quadrilinearMapSlotBilinearAt
         rw [Function.update_comm hij c v base, Function.update_comm hij (r • c) v base]
         rw [f.map_update_smul (Function.update base j v) i r c] }
 
-set_option linter.unusedSectionVars false in
 lemma unitModel4SlotBilin_apply
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
     (i j : Fin 4) (hij : i ≠ j) (base : Fin 4 → E) (c v : E) :
     quadrilinearMapSlotBilinearAt (E := E) f i j hij base c v =
       f (Function.update (Function.update base i c) j v) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma partialDeriv_scalarOnE_eq_euclidPartial_local
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -156,7 +150,6 @@ lemma partialDeriv_scalarOnE_eq_euclidPartial_local
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
-set_option linter.unusedSectionVars false in
 lemma euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m₁ m₂ : Fin (Module.finrank ℝ E)) (a b : Fin (Module.finrank ℝ E)) :
@@ -226,7 +219,6 @@ lemma euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE
   rw [partialDeriv, partialDeriv]
   rw [Filter.EventuallyEq.fderiv_eq hscalarOnE_gm]
 
-set_option linter.unusedSectionVars false in
 lemma realizedGramDeriv_eventuallyEq_symm_scalarOnE_raw
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -256,7 +248,6 @@ lemma realizedGramDeriv_eventuallyEq_symm_scalarOnE_raw
     (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b y hp]
   rw [scalarOnE_def, scalarOnE_def]
 
-set_option linter.unusedSectionVars false in
 private lemma scalarOnE_contDiffOn_tensorChartComponentRaw
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -282,7 +273,6 @@ private lemma scalarOnE_contDiffOn_tensorChartComponentRaw
   rw [(toEuclidean (E := E)).symm_apply_apply]
   rw [scalarOnE_def]
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_scalarOnE_tensorChartComponentRaw_differentiableAt
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m : Fin (Module.finrank ℝ E)) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -307,7 +297,6 @@ private lemma partialDeriv_scalarOnE_tensorChartComponentRaw_differentiableAt
     exact hfderiv.clm_apply contDiffOn_const
   exact (hpd.contDiffAt (isOpen_interior.mem_nhds hint)).differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -399,7 +388,6 @@ lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
   rw [partialDeriv_add Pab Pba hPab_diff hPba_diff]
   ring
 
-set_option linter.unusedSectionVars false in
 lemma euclidPartial_swap_chartPushedRaw_tensorChartComponentRaw
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -453,7 +441,6 @@ lemma euclidPartial_swap_chartPushedRaw_tensorChartComponentRaw
   rw [hkey a b, hkey b a]
   exact (hsymm2 _ _).symm
 
-set_option linter.unusedSectionVars false in
 lemma partialDeriv_realizedGramDeriv_eq_half_sum_euclidPartial
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -543,7 +530,6 @@ private lemma sum_pi_fin_succ' {n : ℕ} {β : Type*} [AddCommMonoid β]
   rw [Fintype.sum_prod_type]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma covDerivLowerOrderTerm02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m p q : Fin (Module.finrank ℝ E)) :
@@ -664,7 +650,6 @@ lemma covDerivLowerOrderTerm02_center_eq
     exact absurd (Subsingleton.elim b ![]) hb
   · intro h; exact absurd (Finset.mem_univ _) h
 
-set_option linter.unusedSectionVars false in
 lemma covDerivLowerOrderTerm03_center_hout
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m b c d : Fin (Module.finrank ℝ E))
@@ -709,7 +694,6 @@ lemma covDerivLowerOrderTerm03_center_hout
     chartChristoffel_symm (I := I) g₀ x c m (J' 1) (extChartAt I x x),
     chartChristoffel_symm (I := I) g₀ x d m (J' 2) (extChartAt I x x)]
 
-set_option linter.unusedSectionVars false in
 private lemma sum_fin3_collapse_gen
     (F : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Fin (Module.finrank ℝ E) → ℝ) :
@@ -728,7 +712,6 @@ private lemma sum_fin3_collapse_gen
     show ((1 : Fin 2) = (Fin.succ 0)) from rfl, Fin.cons_succ]
   rw [show (default : Fin 1) = (0 : Fin 1) from rfl]
 
-set_option linter.unusedSectionVars false in
 lemma covDerivLowerOrderTerm03_center_eq
     (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3) (x : M)
     (m b c d : Fin (Module.finrank ℝ E)) :
@@ -846,7 +829,6 @@ lemma covDerivLowerOrderTerm03_center_eq
     exact absurd (Subsingleton.elim b' ![]) hb'
   · intro h; exact absurd (Finset.mem_univ _) h
 
-set_option linter.unusedSectionVars false in
 lemma euclidPartial_covDerivLowerOrderTerm02_center_eq_sum
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :

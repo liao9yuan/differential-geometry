@@ -693,23 +693,23 @@ noncomputable def diffTwiceChartBilinearH1ComplData_of_diff
   weak_partial_second_deriv_isWeakPartial := fun i =>
     chosenSecondPartialWeakPartialDeriv_isWeakPartial
       (I := I) (M := M) (h_wpDeriv_memW1p i) l₂
-  u_chart_deriv2_locally_memLp := fun K hK hKin =>
+  u_chart_deriv2_locally_memLp := fun _K hK hKin =>
     memLp_restrict_of_memLp_chartTarget (I := I) (M := M) α
       (chosenSecondPartialUChartDeriv_memLp
         (I := I) (M := M) h_uDeriv_memW1p l₂) hK hKin
-  f_chart_deriv2_locally_memLp := fun K hK hKin =>
+  f_chart_deriv2_locally_memLp := fun _K hK hKin =>
     memLp_restrict_of_memLp_chartTarget (I := I) (M := M) α
       (chosenSecondPartialFChartDeriv_memLp
         (I := I) (M := M) h_fDeriv_memW1p l₂) hK hKin
-  u_chart_second_deriv_locally_memLp := fun K hK hKin =>
+  u_chart_second_deriv_locally_memLp := fun _K hK hKin =>
     memLp_restrict_of_memLp_chartTarget (I := I) (M := M) α
       (chosenSecondPartialUChartDeriv_memLp
         (I := I) (M := M) h_uDeriv_memW1p l₂) hK hKin
-  weak_partial_deriv2_locally_memLp := fun i K hK hKin =>
+  weak_partial_deriv2_locally_memLp := fun i _K hK hKin =>
     memLp_restrict_of_memLp_chartTarget (I := I) (M := M) α
       (chosenSecondPartialWeakPartialDeriv_memLp
         (I := I) (M := M) (h_wpDeriv_memW1p i) l₂) hK hKin
-  weak_partial_second_deriv_locally_memLp := fun i K hK hKin =>
+  weak_partial_second_deriv_locally_memLp := fun i _K hK hKin =>
     memLp_restrict_of_memLp_chartTarget (I := I) (M := M) α
       (chosenSecondPartialWeakPartialDeriv_memLp
         (I := I) (M := M) (h_wpDeriv_memW1p i) l₂) hK hKin

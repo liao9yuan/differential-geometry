@@ -632,7 +632,7 @@ theorem spectralPathFO_toFun_timeJet_eq_of_coeff_jets_local
         (fun s : ℝ => tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep s) α ![]
           Q.2 x) := by
       funext s
-      show tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep s) α Q.1 Q.2 x = _
+      change tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep s) α Q.1 Q.2 x = _
       rw [hQ1 Q]
     rw [hfun]
     exact h.of_le (by exact_mod_cast hj)
@@ -702,7 +702,7 @@ theorem spectralPathFO_toFun_timeJet_eq_of_coeff_jets_local
         tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) := by
       intro a ha
       funext i
-      show (if a ≤ kk then CK * (Real.sqrt (Cmf a i) *
+      change (if a ≤ kk then CK * (Real.sqrt (Cmf a i) *
         tensorSobolevWeight (I := I) (M := M) i (-(sW : ℝ))) else 0) = _
       rw [if_pos ha]
     have hv_sum : ∀ a : ℕ, a ≤ kk → Summable (v a) := by
@@ -751,7 +751,7 @@ theorem spectralPathFO_toFun_timeJet_eq_of_coeff_jets_local
       intro s hs
       have hfun : rawγ s Q =
           tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep s) α ![] Q.2 x := by
-        show tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep s) α Q.1 Q.2 x = _
+        change tensorChartComponentRaw (I := I) (M := M) g 0 2 (T_rep s) α Q.1 Q.2 x = _
         rw [hQ1 Q]
       rw [hfun]
       exact smoothCcTensor_rawChartComponent_eigenSeries_tsum_eq_local (I := I) (M := M)

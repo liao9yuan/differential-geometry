@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -50,7 +49,6 @@ def gInvDiffRaisedEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
   contMDiff_toFun := gInvDiffRaisedEndo_contMDiff (I := I) g₀ g₁
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 theorem inverseMetricSharpFib_g0FlatY_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -66,7 +64,6 @@ theorem inverseMetricSharpFib_g0FlatY_contMDiff
   refine hsharpY.congr (fun x => ?_)
   rw [inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (I := I) g₀ g₁ x (Y x)]
 
-set_option linter.unusedSectionVars false in
 private theorem cotangent_g0FlatY_mdiffAtCotangent
     (g₀ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -84,7 +81,6 @@ private theorem cotangent_g0FlatY_mdiffAtCotangent
   exact metricFlat_mdiff (I := I) g₀ (Y.contMDiff.mdifferentiableAt (by norm_num))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 theorem endoCov_gInvDiffRaisedField_apply
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
@@ -178,7 +174,6 @@ theorem endoCov_gInvDiffRaisedField_apply
     rw [hβdef, gInvRaisedEndo_apply]]
   abel
 
-set_option linter.unusedSectionVars false in
 private lemma sqrt_g0_inner_add_le'
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g₀.inner x (a + b) (a + b)) ≤
@@ -219,18 +214,16 @@ private lemma sqrt_g0_inner_add_le'
     _ = na + nb := by rw [Real.sqrt_sq hsum_pos_nn]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem sqrt_inner_endoCov_gInvDiffRaisedField_le
     (g₀ : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (g₁ : SmoothRiemannianMetric I M)
       (T : SmoothCcTensor g₀ 0 2)
-      (h : ∀ y v w, g₁.inner y v w =
+      (_h : ∀ y v w, g₁.inner y v w =
         g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ T y v w)
-      {δ : ℝ} (hδ : δ < 1 / 2) (hδ0 : 0 ≤ δ)
-      (hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
+      {δ : ℝ} (_hδ : δ < 1 / 2) (_hδ0 : 0 ≤ δ)
+      (_hbound : metricCauchySchwarzBound (I := I) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x),
       letI : Bundle.RiemannianBundle
           (fun y : M => Tensor0SBundle.TensorRSSpace 0 3 I y) :=

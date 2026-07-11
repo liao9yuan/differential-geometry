@@ -20,9 +20,8 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-set_option linter.unusedVariables false in
 
-def chartDeTurckCorrHessBlock (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartDeTurckCorrHessBlock (g _g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
     chartInvGramOnE (I := I) g α k l y *
@@ -40,9 +39,8 @@ def chartDeTurckCorrHessBlock (g g' : SmoothRiemannianMetric I M) (α : M)
            partialDeriv (E := E) d (partialDeriv (E := E) b (h l a)) y -
            partialDeriv (E := E) d (partialDeriv (E := E) l (h a b)) y) := rfl
 
-set_option linter.unusedVariables false in
 
-def chartDeTurckCorrGramDerivBlock (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartDeTurckCorrGramDerivBlock (g _g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
     partialDeriv (E := E) d (chartInvGramOnE (I := I) g α k l) y *

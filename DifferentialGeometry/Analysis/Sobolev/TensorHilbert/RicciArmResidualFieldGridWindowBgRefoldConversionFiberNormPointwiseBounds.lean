@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -45,7 +44,6 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma riemannianFiberNormSq_smul_value (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -62,7 +60,6 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
-set_option linter.unusedSectionVars false in
 private lemma rfns_neg_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =
@@ -71,7 +68,6 @@ private lemma rfns_neg_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   rw [neg_one_smul] at h
   rw [h]; norm_num
 
-set_option linter.unusedSectionVars false in
 lemma rfns_eq_sum_componentSq_of_horth_pt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -104,7 +100,6 @@ lemma rfns_eq_sum_componentSq_of_horth_pt
     intro i; rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   exact riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g r s x S e bse hn hbse horth
 
-set_option linter.unusedSectionVars false in
 lemma fiberNormSqComponent_zero_toModel_pt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -119,7 +114,6 @@ lemma fiberNormSqComponent_zero_toModel_pt
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g x e K]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma rfns_symmS_zero_le_of_ball (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 : 0 ≤ δ)
     (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     (x : M) :
@@ -181,7 +175,6 @@ lemma rfns_symmS_zero_le_of_ball (T : SmoothCcTensor g₀ 0 2) {δ : ℝ} (hδ0 
           ring
         rw [hc0, hc2, one_mul, hnE]
 
-set_option linter.unusedSectionVars false in
 lemma rfns_iteratedCovGrad_symmS_pointwise (T : SmoothCcTensor g₀ 0 2) (k : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x
         ((iteratedCovGrad (I := I) g₀ 0 2 k (ccTensor02Symm (I := I) (M := M) g₀ T)).toSection x) ≤
@@ -226,7 +219,6 @@ lemma rfns_iteratedCovGrad_symmS_pointwise (T : SmoothCcTensor g₀ 0 2) (k : �
     _ = riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + k) x (A.toSection x) := by
         rw [hRB]; ring
 
-set_option linter.unusedSectionVars false in
 lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (T : SmoothCcTensor g₀ 0 2)
     (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
@@ -311,7 +303,6 @@ lemma rfns_iteratedCovGrad_koszulCovecCc_pointwise (T : SmoothCcTensor g₀ 0 2)
   nlinarith [hsum, hR2_nn,
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
 
-set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_sub_le_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (a - b) ≤
@@ -321,7 +312,6 @@ lemma riemannianFiberNormSq_sub_le_pt (g : SmoothRiemannianMetric I M) (r s : �
   refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g r s x a (-b)) ?_
   rw [rfns_neg_pt (I := I) (M := M) g r s x b]
 
-set_option linter.unusedSectionVars false in
 lemma single_b_le_grid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) (q : ℕ) (hq : 1 ≤ q) :
     b q ≤ Combinatorics.antidiagonalTupleGrid b q := by
   have h := Combinatorics.single_factor_mul_antidiagonalTupleGrid_le b hb 0 q hq

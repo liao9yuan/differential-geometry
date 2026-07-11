@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRem
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -218,9 +217,8 @@ private theorem tensorInnerPointwise_diag_section_jointContMDiffOn
     (fun p => loweredCompose (I := I) (M := M) g₀ 0 2 α p.1 ((Sfam p.2).toFun p.1))
     hcoeff_S hcoeff_S
 
-set_option linter.unusedVariables false in
 theorem deTurckRHSReconSection_oneMinusConnLapIter_normSq_continuousOn
-    (g₀ g_bg : SmoothRiemannianMetric I M) {T : ℝ} (hT : 0 < T)
+    (g₀ _g_bg : SmoothRiemannianMetric I M) {T : ℝ} (_hT : 0 < T)
     (Rjt : ℝ → SmoothCcTensor g₀ 0 2) (k : ℕ)
     (hRjt : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 0 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (Tensor0SBundle.TensorRSModel 0 2 ℝ E)

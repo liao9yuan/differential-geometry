@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChristoffelCorrectionL2.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 4000000
 set_option maxHeartbeats 4000000
 

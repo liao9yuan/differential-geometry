@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldDiffer
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -79,7 +78,6 @@ def fixedCoeffDiffOp (g : SmoothRiemannianMetric I M)
       (Classical.choose_spec
         (exists_jet_bound_of_normalForm (I := I) (M := M) g op p r (hNF p r))).2 W x }
 
-set_option linter.unusedSectionVars false in
 
 theorem fixedCoeffDiffOp_iteratedCovGrad_singleSum_le (g : SmoothRiemannianMetric I M)
     (Φ₀ : ∀ r : ℕ, SmoothCcTensor g (r + 0) (r + 0))

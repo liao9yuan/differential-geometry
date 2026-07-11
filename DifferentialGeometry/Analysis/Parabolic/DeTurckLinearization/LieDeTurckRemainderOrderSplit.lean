@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
 
 noncomputable section
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 open Set Function
@@ -572,8 +571,7 @@ def chartLinearizedChristoffelPrincipalRaw (g : SmoothRiemannianMetric I M) (α 
        partialDeriv (E := E) j (f l i) y -
        partialDeriv (E := E) l (f i j) y)
 
-set_option linter.unusedVariables false in
-def chartLinearizedDeTurckVFPrincipalRaw (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartLinearizedDeTurckVFPrincipalRaw (g _g' : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
     (k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -643,8 +641,7 @@ def deTurckVFFirstOrderCorrDeriv0Raw (g₀ g_bg : SmoothRiemannianMetric I M) (�
                   chartInvGramOnE (I := I) g₀ α q l y)) *
               partialDeriv (E := E) m (gramBracket (I := I) g₀ α a b l) y)))
 
-set_option linter.unusedVariables false in
-def chartDeTurckCorrHessBlockRaw (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartDeTurckCorrHessBlockRaw (g _g' : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),
@@ -653,8 +650,7 @@ def chartDeTurckCorrHessBlockRaw (g g' : SmoothRiemannianMetric I M) (α : M)
        partialDeriv (E := E) d (partialDeriv (E := E) b (f l a)) y -
        partialDeriv (E := E) d (partialDeriv (E := E) l (f a b)) y)
 
-set_option linter.unusedVariables false in
-def chartDeTurckCorrGramDerivBlockRaw (g g' : SmoothRiemannianMetric I M) (α : M)
+def chartDeTurckCorrGramDerivBlockRaw (g _g' : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) : ℝ :=
   (1 / 2 : ℝ) * ∑ l : Fin (Module.finrank ℝ E),

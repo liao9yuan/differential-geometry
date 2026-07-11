@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -54,7 +53,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 set_option maxHeartbeats 3200000
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → E) :
     unitModel (I := I) (M := M) g₀ 2 (metricCcTensor (I := I) (M := M) g₀ g) x m =
@@ -74,7 +72,6 @@ private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetri
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 private theorem foldPerturbation_eq_metricDifference (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -151,7 +148,6 @@ private theorem foldCcTensor22_ext_of_appCc (g₀ : SmoothRiemannianMetric I M)
   rw [hWval] at h2
   exact h2
 
-set_option linter.unusedSectionVars false in
 
 private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kernelContraction
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -207,7 +203,6 @@ private theorem foldHalfRiemannBackgroundDifference_eq_residualFieldSum_add_kern
     (Equiv.swap (0 : Fin 4) 2) (Equiv.swap (1 : Fin 4) 3)
     (Equiv.swap (0 : Fin 4) 2 * Equiv.swap (1 : Fin 4) 3) 1 W]
 
-set_option linter.unusedSectionVars false in
 
 theorem linearizedRicciConnDiffOrder0RiemannHalfBackgroundDifferenceCombinationInputSymm_eq_residualFieldSum
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)

@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionItera
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -465,21 +464,20 @@ private lemma jet_fibreNormSq_sup_le_sharp (g₀ : SmoothRiemannianMetric I M) (
   exact ⟨Cemb, hCemb_nn, fun Ψ l x => hCemb l Ψ x⟩
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedVariables false in
 private lemma master_appCc_jet_le_sharp
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     (b₀ s₀ dc dd : ℕ) (hdc : dc ≤ 3) (hdd : dd ≤ 3)
-    (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i)
-    (Kw : ℕ → ℝ) (hKw_nn : ∀ l, 0 ≤ Kw l) :
+    (Kc : ℕ → ℝ) (_hKc_nn : ∀ i, 0 ≤ Kc i)
+    (Kw : ℕ → ℝ) (_hKw_nn : ∀ l, 0 ≤ Kw l) :
     ∃ Cm : ℕ → ℝ, (∀ q, 0 ≤ Cm q) ∧
       ∀ (p : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
-        (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
+        (_hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
         (Φ : SmoothCcTensor g₀ b₀ s₀)
-        (hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ≤
+        (_hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ s₀ i Φ‖ ≤
           Kc i * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + dc : ℕ) : ℝ) T₀‖))
         (W : SmoothCcTensor g₀ 0 b₀)
-        (hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
+        (_hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
           Kw l * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + dd : ℕ) : ℝ)
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖)
         (q : ℕ),
@@ -745,7 +743,6 @@ private lemma master_appCc_jet_le_sharp
   rw [mul_pow, Real.sq_sqrt (mul_nonneg hG_nn (add_nonneg (hS1_nn q) (hS2_nn q)))]
   exact hfinalsq
 
-set_option linter.unusedVariables false in
 private lemma coeffContraction_Hs_bound_sharp
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
@@ -754,12 +751,12 @@ private lemma coeffContraction_Hs_bound_sharp
     (Kw : ℕ → ℝ) (hKw_nn : ∀ l, 0 ≤ Kw l) :
     ∃ CE : ℕ → ℝ, (∀ j, 0 ≤ CE j) ∧
       ∀ (p : ℕ) (T₀ : SmoothCcTensor g₀ 0 2)
-        (hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
+        (_hball : ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T₀‖ ≤ R₀)
         (Φ : SmoothCcTensor g₀ b₀ 2)
-        (hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ 2 i Φ‖ ≤
+        (_hΦ : ∀ i, ‖iteratedCovGrad (I := I) g₀ b₀ 2 i Φ‖ ≤
           Kc i * (1 + ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((i + dc : ℕ) : ℝ) T₀‖))
         (W : SmoothCcTensor g₀ 0 b₀)
-        (hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
+        (_hW : ∀ l, ‖iteratedCovGrad (I := I) g₀ 0 b₀ l W‖ ≤
           Kw l * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((l + dd : ℕ) : ℝ)
             (oneMinusConnLapSmoothIter (I := I) g₀ 0 2 p T₀)‖)
         (j : ℕ),
@@ -855,7 +852,7 @@ private lemma coeff_jet_linear_of_sq (g₀ : SmoothRiemannianMetric I M)
 
 theorem exists_coeffContraction_covGrad_secondCovGrad_l2_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
+    (ha : Module.finrank ℝ E + 5 ≤ a) {R₀ : ℝ} (_hR₀ : 0 ≤ R₀)
     (Kc : ℕ → ℝ) (hKc_nn : ∀ i, 0 ≤ Kc i) :
     ∃ Cgrad : ℝ, 0 ≤ Cgrad ∧
       ∀ (C₂ : SmoothCcTensor g₀ (2 + 2) 2) (T₀ : SmoothCcTensor g₀ 0 2),
@@ -964,7 +961,6 @@ theorem exists_coeffContraction_covGrad_secondCovGrad_l2_le
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 800000 in
-set_option linter.unusedVariables false in
 
 theorem exists_rawConnLap_coeffContraction_secondCovGrad_commutator_Hs_family_le
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)

@@ -8,7 +8,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -37,7 +36,6 @@ private instance tensor0SModelNormedSpace_local {n : ℕ} :
 private instance tensor0SModelNormedAddCommGroup_local {n : ℕ} :
     NormedAddCommGroup (Tensor0SModel n ℝ E) := inferInstance
 
-set_option linter.unusedSectionVars false in
 
 lemma contMDiffOn_eval_basisTuple_of_into_tensor0SModel
     {n : ℕ} {U : Set M} {Φ : M → Tensor0SModel n ℝ E}
@@ -58,7 +56,6 @@ lemma contMDiffOn_eval_basisTuple_of_into_tensor0SModel
   rw [heq]
   exact evalCLM.contMDiff.comp_contMDiffOn hΦ
 
-set_option linter.unusedSectionVars false in
 
 theorem chartTensorInnerPointwise_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
@@ -91,7 +88,6 @@ theorem chartTensorInnerPointwise_contMDiffOn
         (I := I) (M := M) hS φ)
   exact hsmooth
 
-set_option linter.unusedSectionVars false in
 
 theorem chartLocal_contMDiff_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -170,7 +166,6 @@ private instance tensor0SModelNormedSpace_local {n : ℕ} :
     NormedSpace ℝ (Tensor0SModel n ℝ E) :=
   Tensor0SBundle.tensor0SModel_normedSpace n
 
-set_option linter.unusedSectionVars false in
 
 theorem contMDiff_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -221,7 +216,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorInnerPointwise_contMDiff_of_mdiff
     [InnerProductSpace ℝ E]
@@ -242,7 +236,6 @@ theorem tensorInnerPointwise_contMDiff_of_mdiff
       TensorMetricLowering.contMDiffOn_loweredCompose
         (I := I) (M := M) g r s S α)
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorInnerPointwise_contMDiff
     [InnerProductSpace ℝ E]

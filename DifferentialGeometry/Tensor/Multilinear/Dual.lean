@@ -428,7 +428,7 @@ theorem dualBundle_triv_symmL_eq_comp (x₀ x : B)
   have h_rt : (e ⟨x, e.symm x ζ⟩ : B × _) = (x, ζ) := e.apply_mk_symm hbase ζ
   have h_snd : (e ⟨x, e.symm x ζ⟩ : B × _).2 = ζ := congrArg Prod.snd h_rt
   have hxTriv : x ∈ (trivializationAt 𝕜 (fun _ : B => 𝕜) x₀).baseSet := by
-    show x ∈ Set.univ; trivial
+    change x ∈ Set.univ; trivial
   have h_fwd : (e ⟨x, e.symm x ζ⟩).2
       ((trivializationAt F E x₀).continuousLinearMapAt 𝕜 x v) =
     ((Trivialization.continuousLinearEquivAt 𝕜 (trivializationAt 𝕜 (Trivial B 𝕜) x₀) x hxTriv)
@@ -604,17 +604,17 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
         (𝕜 := 𝕜) (F := F) r).apply_symm_apply _]
   apply ContinuousMultilinearMap.ext
   intro β
-  show (ContinuousMultilinearMap.dualMultilinearLinearMap 𝕜 F r
+  change (ContinuousMultilinearMap.dualMultilinearLinearMap 𝕜 F r
     (_ : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜)) β = _
   rw [ContinuousMultilinearMap.dualMultilinearLinearMap_apply]
   rw [hom_trivializationAt_apply]
   have hxTriv : x ∈ (trivializationAt 𝕜 (fun _ : B => 𝕜) x₀).baseSet := by
-    show x ∈ Set.univ; trivial
+    change x ∈ Set.univ; trivial
   have hxMlb : x ∈ (trivializationAt
     (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
     (fun x => Bundle.continuousMultilinearMap 𝕜 r F E x) x₀).baseSet := hx
   rw [ContinuousLinearMap.inCoordinates_eq hxMlb hxTriv]
-  show ((Trivialization.continuousLinearEquivAt 𝕜
+  change ((Trivialization.continuousLinearEquivAt 𝕜
       (trivializationAt 𝕜 (Trivial B 𝕜) x₀) x hxTriv : 𝕜 →L[𝕜] 𝕜).comp
     ((Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x a).comp
       ((Trivialization.continuousLinearEquivAt 𝕜
@@ -631,7 +631,7 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
         (trivializationAt 𝕜 (Trivial B 𝕜) x₀) x hxTriv : 𝕜 →L[𝕜] 𝕜) : 𝕜 → 𝕜) z = z := by
     intro z; rfl
   rw [h_cle_triv]
-  show (Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x a)
+  change (Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x a)
     ((trivializationAt (ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜)
       (Bundle.continuousMultilinearMap 𝕜 r F E) x₀).symmL 𝕜 x
       (ContinuousMultilinearMap.tensorOfDualLinearForms 𝕜 F r β)) = _
@@ -661,11 +661,11 @@ theorem dualLiftFiber_triv_eq {r : ℕ} (x₀ x : B)
     have h2 := congr_fun (congr_arg DFunLike.coe this) γ
     exact h2
   rw [h_rt]
-  show (Bundle.continuousMultilinearMap.continuousLinearEquivAt
+  change (Bundle.continuousMultilinearMap.continuousLinearEquivAt
       (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜) (E := Bundle.dual 𝕜 E) r x a)
     (fun i => (β i).comp (((trivializationAt F E x₀).continuousLinearMapAt 𝕜 x).comp
       ((trivializationAt F E x).symmL 𝕜 x))) = _
-  show a (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).symmL 𝕜 x
+  change a (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).symmL 𝕜 x
     ((β i).comp (((trivializationAt F E x₀).continuousLinearMapAt 𝕜 x).comp
       ((trivializationAt F E x).symmL 𝕜 x)))) = _
   change a (fun i => (trivializationAt (F →L[𝕜] 𝕜) (Bundle.dual 𝕜 E) x).symmL 𝕜 x
@@ -722,7 +722,7 @@ theorem dualUnliftFiber_triv_eq {r : ℕ} (x₀ x : B)
         ⟨x, ψ⟩).2) := by
   have h_rt_fiber : Bundle.continuousMultilinearMap.dualLiftFiber (F := F) r x
       (Bundle.continuousMultilinearMap.dualUnliftFiber (F := F) r x ψ) = ψ := by
-    show (Bundle.continuousMultilinearMap.dualBundleContinuousLinearEquivAt
+    change (Bundle.continuousMultilinearMap.dualBundleContinuousLinearEquivAt
           (𝕜 := 𝕜) (F := F) (E := E) r x).symm
         ((ContinuousMultilinearMap.dualMultilinearEquivMultilinearOfDual 𝕜 F r).symm
           ((Bundle.continuousMultilinearMap.continuousLinearEquivAt

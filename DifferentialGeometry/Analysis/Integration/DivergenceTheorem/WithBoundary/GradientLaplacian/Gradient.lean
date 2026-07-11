@@ -558,11 +558,10 @@ theorem grad_g_with_boundary_contMDiffOn_interior [T2Space M]
       (I.interior M) :=
   gradFun_contMDiffOn_interior (I := I) g hf
 
-set_option linter.unusedVariables false in
 
 theorem tangentSectionAction_grad_g_with_boundary_eq_inner
     (g : SmoothRiemannianMetric I M)
-    {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    {f : M → ℝ} (_hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     tangentSectionAction (I := I) X f x =
       g.inner x (X x) (grad_g_with_boundary (I := I) g f x) := by
@@ -570,7 +569,6 @@ theorem tangentSectionAction_grad_g_with_boundary_eq_inner
   rw [inner_gradFun_right (I := I) g f x (X x)]
   rfl
 
-set_option linter.unusedVariables false in
 
 theorem tangentSectionAction_grad_g_with_boundary_eq_inner_left
     (g : SmoothRiemannianMetric I M)
@@ -581,7 +579,6 @@ theorem tangentSectionAction_grad_g_with_boundary_eq_inner_left
   rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf X x]
   exact g.symm x (X x) (grad_g_with_boundary (I := I) g f x)
 
-set_option linter.unusedVariables false in
 
 theorem inner_grad_g_with_boundary_symm
     (g : SmoothRiemannianMetric I M)

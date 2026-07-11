@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import Mathlib.Data.ENNReal.Real
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

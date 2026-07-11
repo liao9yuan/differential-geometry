@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -31,7 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 private theorem real_holder_two_nonneg
     (g : SmoothRiemannianMetric I M) (φ ψ : M → ℝ)
@@ -87,7 +85,6 @@ private theorem real_holder_two_nonneg
   have hrhs_nn : 0 ≤ (∫ x, φ x ^ p ∂μ) ^ (1 / p) * (∫ x, ψ x ^ q ∂μ) ^ (1 / q) := by positivity
   exact (ENNReal.ofReal_le_ofReal_iff hrhs_nn).mp hHolder
 
-set_option linter.unusedSectionVars false in
 
 private theorem continuous_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -98,7 +95,6 @@ private theorem continuous_riemannianFiberNormSq
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (S.toSection x),
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
-set_option linter.unusedSectionVars false in
 
 private theorem integrable_riemannianFiberNormSq_mul
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ)

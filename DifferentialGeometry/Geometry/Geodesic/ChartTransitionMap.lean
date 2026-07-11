@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

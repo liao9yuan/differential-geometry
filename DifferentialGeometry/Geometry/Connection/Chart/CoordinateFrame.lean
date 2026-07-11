@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

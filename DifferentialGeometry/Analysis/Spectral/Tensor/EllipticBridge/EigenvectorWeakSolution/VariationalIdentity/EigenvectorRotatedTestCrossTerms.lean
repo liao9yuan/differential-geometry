@@ -18,7 +18,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 6400000
 
@@ -57,9 +56,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.style.show false in
 
-set_option linter.style.show false in
 
 def eigenvectorRotatedTestSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

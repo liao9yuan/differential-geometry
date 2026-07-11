@@ -5,7 +5,6 @@ import Mathlib.MeasureTheory.Integral.MeanInequalities
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -84,7 +83,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem holder_integral_prod_riemannianFiberNormSq_le
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
@@ -148,7 +146,6 @@ theorem holder_integral_prod_riemannianFiberNormSq_le
               ^ (1 / θ m))
           θ hF_int hF_nn (fun m hm => (hθ m hm).le) hθ1
 
-set_option linter.unusedSectionVars false in
 
 theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} [DecidableEq ι]
@@ -211,7 +208,6 @@ theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (holder_integral_prod_riemannianFiberNormSq_le (I := I) (M := M) g (t \ t₀) r s S θ hθ hθ1)
     (Finset.prod_nonneg hΛ_nn)
 
-set_option linter.unusedSectionVars false in
 
 theorem holder_integral_prod_riemannianFiberNormSq_natWeight_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)

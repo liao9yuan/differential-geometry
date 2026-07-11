@@ -25,7 +25,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -56,7 +55,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma bdWindowOneThree_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {B : ℝ}
     (hB1 : b 1 ≤ B) :
@@ -93,13 +91,12 @@ private lemma bdWindowOneThree_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {B :
         (fun e : Fin 2 → ℕ => ∀ m, e m ≤ 1) = {![1, 1]} := by
       decide
     rw [h22, Finset.sum_singleton, Fin.prod_univ_two]
-    show (0 : ℝ) + 0 + b (![1, 1] 0) * b (![1, 1] 1) = b 1 * b 1
+    change (0 : ℝ) + 0 + b (![1, 1] 0) * b (![1, 1] 1) = b 1 * b 1
     norm_num
   rw [Combinatorics.boundedFactorGridWindow, Finset.sum_range_succ, Finset.sum_range_succ,
     Finset.sum_range_one, hgrid0, hgrid1, hgrid2]
   nlinarith [hb 1, hB1, hB0, sq_nonneg (b 1 - B)]
 
-set_option linter.unusedVariables false in
 
 theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_fiberNormSq_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -107,7 +104,7 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_fiberNormSq_ballUnifor
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -176,7 +173,6 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_fiberNormSq_ballUnifor
     hb1
   exact le_trans h0 (mul_le_mul_of_nonneg_left hwin (hC_nn 0))
 
-set_option linter.unusedVariables false in
 
 theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -184,7 +180,7 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -283,7 +279,6 @@ theorem exists_ricciArmOrder0AACommCoeffField_realizedFam_l2JetWindow
     have hK_nn : 0 ≤ C i * Kflat i := mul_nonneg (hC_nn i) (hKflat_nn i)
     nlinarith [hwin_nn, hK_nn]
 
-set_option linter.unusedSectionVars false in
 private lemma bdBoundedFactorGridWindow_mono_of_le (b b' : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
     (hbb : ∀ j, b j ≤ b' j) (K w : ℕ) :
     Combinatorics.boundedFactorGridWindow b K w ≤
@@ -295,7 +290,6 @@ private lemma bdBoundedFactorGridWindow_mono_of_le (b b' : ℕ → ℝ) (hb : �
   refine Finset.sum_le_sum fun e _ => ?_
   exact Finset.prod_le_prod (fun m _ => hb (e m)) (fun m _ => hbb (e m))
 
-set_option linter.unusedVariables false in
 
 theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -303,7 +297,7 @@ theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -407,9 +401,7 @@ theorem exists_ricciArmOrder0BgRCommCoeffField_realizedFam_backgroundDifference_
     have hK_nn : 0 ≤ C i * Kflat i := mul_nonneg (hC_nn i) (hKflat_nn i)
     nlinarith [hwin_nn, hK_nn]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
-private lemma bdTupleWindow_le_boundedWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
+private lemma bdTupleWindow_le_boundedWindow (b : ℕ → ℝ) (_hb : ∀ j, 0 ≤ b j)
     {K W : ℕ} (hW : W ≤ K + 1) :
     Combinatorics.antidiagonalTupleGridWindow b W ≤
       Combinatorics.boundedFactorGridWindow b K W := by
@@ -418,7 +410,6 @@ private lemma bdTupleWindow_le_boundedWindow (b : ℕ → ℝ) (hb : ∀ j, 0 �
   rw [Finset.mem_range] at hk
   exact le_of_eq (Combinatorics.antidiagonalTupleGrid_eq_boundedFactorGrid b (by omega))
 
-set_option linter.unusedSectionVars false in
 private lemma bdSingleCell_le_boundedGrid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
     {K q : ℕ} (hq : 1 ≤ q) (hqK : q ≤ K) :
     b q ≤ Combinatorics.boundedFactorGrid b K q := by
@@ -426,7 +417,6 @@ private lemma bdSingleCell_le_boundedGrid (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b
   rw [Combinatorics.boundedFactorGrid_zero, mul_one, zero_add] at h
   exact h
 
-set_option linter.unusedSectionVars false in
 private lemma bdPairCell_le_boundedWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j)
     {K W q₁ q₂ : ℕ} (hq₁ : 1 ≤ q₁) (hq₁K : q₁ ≤ K) (hq₂ : 1 ≤ q₂) (hq₂K : q₂ ≤ K)
     (hW : q₁ + q₂ < W) :
@@ -441,7 +431,6 @@ private lemma bdPairCell_le_boundedWindow (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b
   refine le_trans hle ?_
   exact Combinatorics.boundedFactorGrid_le_boundedFactorGridWindow b hb (by omega)
 
-set_option linter.unusedSectionVars false in
 private lemma sharpGradKoszulRaw_gridWindow (g₀ : SmoothRiemannianMetric I M) :
     ∃ CZ : ℕ → ℝ, (∀ w, 0 ≤ CZ w) ∧
       ∀ (τ : Equiv.Perm (Fin 6)) (T : SmoothCcTensor g₀ 0 2) (w K : ℕ), w + 1 ≤ K →
@@ -576,19 +565,17 @@ private lemma sharpGradKoszulRaw_gridWindow (g₀ : SmoothRiemannianMetric I M) 
   rw [h1]
   exact le_of_eq (by ring)
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 private lemma sharpGradKoszulMvWeight_gridWindow (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ CW : ℕ → ℝ, (∀ l, 0 ≤ CW l) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (τ : Equiv.Perm (Fin 6))
         (P T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (x : M)
-        (hPT : ∀ l' : ℕ,
+        (_hPT : ∀ l' : ℕ,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
               ((iteratedCovGrad (I := I) g₀ 0 2 l' P).toSection x) ≤
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
@@ -726,16 +713,14 @@ private lemma sharpGradKoszulMvWeight_gridWindow (g₀ : SmoothRiemannianMetric 
   rw [hrw]
   exact le_of_eq (by ring)
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 private lemma sharpGradKoszulComposite_pointwise_boundedWindow (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         (∀ l' : ℕ,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l') x
@@ -957,7 +942,6 @@ private lemma sharpGradKoszulComposite_pointwise_boundedWindow (g₀ : SmoothRie
   rw [hrw]
   exact le_of_eq (by ring)
 
-set_option linter.unusedVariables false in
 
 theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -965,7 +949,7 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -1152,22 +1136,20 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_l2JetWindow
       mul_nonneg (by norm_num) (mul_nonneg (hC_nn i) (hKflat_nn i))
     nlinarith [hwin_nn, hK_nn]
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 private theorem ricciFoldWeightComposite_pointwise_gridWindow (g₀ : SmoothRiemannianMetric I M)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (Λ0 : ℝ) (hΛ0 : 0 ≤ Λ0) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P T : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (hPT : ∀ (l : ℕ) (x : M),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hboundP : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_hPT : ∀ (l : ℕ) (x : M),
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l P).toSection x) ≤
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + l) x
               ((iteratedCovGrad (I := I) g₀ 0 2 l T).toSection x))
-        (hT0 : ∀ x : M,
+        (_hT0 : ∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 0 2 x (T.toSection x) ≤ Λ0)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
@@ -1611,7 +1593,6 @@ private theorem ricciFoldWeightComposite_pointwise_gridWindow (g₀ : SmoothRiem
     (appCcGdiag_nonneg (E := E) i)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
 
-set_option linter.unusedVariables false in
 
 theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1619,7 +1600,7 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_l2JetWindow
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),

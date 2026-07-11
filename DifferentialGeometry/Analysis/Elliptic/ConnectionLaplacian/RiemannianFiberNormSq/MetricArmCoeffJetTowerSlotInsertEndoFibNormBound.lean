@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -42,7 +41,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private lemma fiberComponent_slotInsertEndoFib_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -70,13 +68,11 @@ private lemma fiberComponent_slotInsertEndoFib_eq
   rw [g₀.symm x (e (K 0)) (Λ (e (J 0))), horth (K 1) (J 1)]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (B : ℝ)
     (hΛ : ∀ a : TangentSpace I x, g₀.inner x a a = 1 → g₀.inner x (Λ a) (Λ a) ≤ B)
-    (hB : 0 ≤ B) :
+    (_hB : 0 ≤ B) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
         (show TensorRSSpace 2 2 I x from
           TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) 2 0 x Λ)) ≤
@@ -141,7 +137,6 @@ lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul
           Fintype.card_fin, nsmul_eq_mul, ← hnE]
         push_cast; ring
 
-set_option linter.unusedSectionVars false in
 private lemma fiberComponent_slotInsertEndoFib_eq_general
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -177,8 +172,6 @@ private lemma fiberComponent_slotInsertEndoFib_eq_general
   have hlk : l ≠ k := Finset.ne_of_mem_erase hl
   rw [Function.update_of_ne hlk, horth (K l) (J l)]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 private lemma sum_compSq_slotInsertEndoFib_eq_normSq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -257,13 +250,11 @@ private lemma sum_compSq_slotInsertEndoFib_eq_normSq
   exact hpars (Λ (e (J k)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 private lemma riemannianFiberNormSq_slotInsertEndoFib_le_card_mul_general
     (g₀ : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (k : Fin s)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (B : ℝ)
     (hΛ : ∀ a : TangentSpace I x, g₀.inner x a a = 1 → g₀.inner x (Λ a) (Λ a) ≤ B)
-    (hB : 0 ≤ B) :
+    (_hB : 0 ≤ B) :
     riemannianFiberNormSq (I := I) (M := M) g₀ s s x
         (show TensorRSSpace s s I x from
           TensorRSSpace.ofCLM (slotInsertEndoFib (I := I) (M := M) s k x Λ)) ≤

@@ -42,14 +42,13 @@ private lemma integral_const_indicator_eq
     · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx]; ring]
   rw [MeasureTheory.integral_indicator (isClosed_tsupport η).measurableSet]
 
-set_option linter.unusedVariables false in
 
 theorem translated_coeff_cutoff_deriv_diffQuot_cross_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
-    {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
-    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    {N : ℝ} (_hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
+    {Ω' : Set E} (hΩ' : IsOpen Ω') (_hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
@@ -321,13 +320,12 @@ theorem translated_coeff_cutoff_deriv_diffQuot_cross_bound
     rw [h_C_eq]; exact mul_nonneg h_d_real_sq_nn h_factor_nn
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem coeff_diffQuot_cutoff_sq_gradient_cross_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
-    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    {Ω' : Set E} (hΩ' : IsOpen Ω') (_hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
@@ -834,14 +832,13 @@ theorem coeff_diffQuot_cutoff_sq_gradient_cross_bound
     rw [← h_C_eq]
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem coeff_diffQuot_cutoff_deriv_cross_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
-    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    {Ω' : Set E} (hΩ' : IsOpen Ω') (_hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
@@ -1372,16 +1369,15 @@ private theorem nirenbergTestFunction_sq_integral_le
     rw [integral_const_mul]
   rw [h_t2_eq]
 
-set_option linter.unusedVariables false in
 
 theorem c_term_bound
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
-    {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
+    {N : ℝ} (_hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
-    (hη_in_Ω' : tsupport η ⊆ Ω')
+    (_hη_in_Ω' : tsupport η ⊆ Ω')
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')
@@ -1664,16 +1660,15 @@ theorem c_term_bound
     linarith
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem f_term_bound
     {Ω : Set E}
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
-    {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
+    {N : ℝ} (_hN : 0 ≤ N) (h_fderiv_eta : ∀ x : E, ‖fderiv ℝ η x‖ ≤ N)
     {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
-    (hη_in_Ω' : tsupport η ⊆ Ω')
+    (_hη_in_Ω' : tsupport η ⊆ Ω')
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω')

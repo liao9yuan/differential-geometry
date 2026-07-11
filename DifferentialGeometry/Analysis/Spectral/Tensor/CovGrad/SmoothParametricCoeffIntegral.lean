@@ -5,7 +5,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -27,7 +26,6 @@ section ModelKernel
 
 variable {H : Type u} [NormedAddCommGroup H] [NormedSpace ℝ H] [FiniteDimensional ℝ H]
 
-set_option linter.unusedSectionVars false in
 
 private theorem tube_bound {W : Type*} [NormedAddCommGroup W] (Φ : H × ℝ → W) (U : Set H)
     (hU : IsOpen U) (a b : ℝ) (S : Set ℝ) (hSI : Set.uIcc a b ⊆ S) (y₀ : H) (hy₀ : y₀ ∈ U)
@@ -40,7 +38,6 @@ private theorem tube_bound {W : Type*} [NormedAddCommGroup W] (Φ : H × ℝ →
   exact ⟨C, by filter_upwards [hKnhds] with y hyK t ht
                   using hC ⟨(y,t), ⟨hyK, uIoc_subset_uIcc ht⟩, rfl⟩⟩
 
-set_option linter.unusedSectionVars false in
 
 private theorem slice_continuousOn {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (G : H × ℝ → F) (U : Set H) (hU : IsOpen U) (S : Set ℝ) (hS : IsOpen S)
@@ -50,7 +47,6 @@ private theorem slice_continuousOn {F : Type u} [NormedAddCommGroup F] [NormedSp
   refine (hGc.continuousAt ((hU.prod hS).mem_nhds ⟨hy', ht⟩)).comp_continuousWithinAt ?_
   exact (continuousWithinAt_const.prodMk continuousWithinAt_id)
 
-set_option linter.unusedSectionVars false in
 
 private theorem fderiv_fst_contDiffOn {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (G : H × ℝ → F) (U : Set H) (hU : IsOpen U) (S : Set ℝ) (hS : IsOpen S)
@@ -144,7 +140,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private theorem contMDiffAt_manifold_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [CompleteSpace F] (g : M × ℝ → F) (a b : ℝ) (S : Set ℝ) (hS : IsOpen S)
@@ -185,7 +180,6 @@ def pathIntegralFib (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (x : M) : TensorRSSpace r s I x :=
   TensorRSSpace.ofModel (∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)))
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma pathIntegralFib_toModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (x : M) :
@@ -287,7 +281,6 @@ def pathIntegralCoeffField (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
         contMDiff_pathIntegralFib_of_jointContMDiff (I := I) (M := M) g₀ r s Φ S hS hSI hjoint }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma pathIntegralCoeffField_toSection (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)
@@ -299,7 +292,6 @@ set_option linter.unusedSectionVars false in
     (pathIntegralCoeffField (I := I) (M := M) g₀ r s Φ S hS hSI hjoint).toSection x =
       pathIntegralFib (I := I) (M := M) g₀ r s Φ x := rfl
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma pathIntegralCoeffField_toModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)

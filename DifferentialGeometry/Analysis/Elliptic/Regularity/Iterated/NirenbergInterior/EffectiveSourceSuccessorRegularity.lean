@@ -47,22 +47,18 @@ private abbrev Kα (α : M) : Set EuclN :=
 private abbrev Ωα (α : M) : Set EuclN :=
   chartTargetEuclid (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_compact (α : M) :
     IsCompact (Kα (I := I) (M := M) α) :=
   chartImagePOUTsupport_isCompact (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_meas (α : M) :
     MeasurableSet (Kα (I := I) (M := M) α) :=
   (Kα_compact (I := I) (M := M) α).isClosed.measurableSet
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_subset_Ωα (α : M) :
     Kα (I := I) (M := M) α ⊆ Ωα (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 
@@ -83,7 +79,6 @@ private lemma chartPushed_u_h_ae_zero_off_Kα
   exact chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
 
-set_option linter.unusedSectionVars false in
 private lemma chosenWeakPartial'_ae_zero_on_open_sub_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -968,7 +963,6 @@ private lemma fChartEffStepNumerator_ae_zero_off_Kα
           (Ωα (I := I) (M := M) α) y) = 0
   rw [hA, hB, hC, hD, hE]; ring
 
-set_option linter.unusedSectionVars false in
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞)

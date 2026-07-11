@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Metric.PointwiseInner.Algebra
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -31,7 +30,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
 private local instance : Module.Finite ℝ E := inferInstance
 
-set_option linter.unusedSectionVars false in
 
 theorem rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum
     (g : SmoothRiemannianMetric I M) {N : ℕ}
@@ -85,13 +83,11 @@ theorem rawTensorConnLapSmooth_toSection_eq_parseval_secondCovDeriv_sum
         refine Finset.sum_congr rfl (fun a _ => ?_)
         rw [hBval (V a x) (V a x), hψa a]
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0SAsRS_add (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (C + D) =
@@ -115,7 +111,6 @@ private lemma tensor0SAsRS_add (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     ring
   exact h
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0SAsRS_smul (t : ℕ) (x : M) (c : ℝ) (C : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (c • C) =
@@ -131,7 +126,6 @@ private lemma tensor0SAsRS_smul (t : ℕ) (x : M) (c : ℝ) (C : Tensor0SSpace t
     rw [smul_comm]
   exact h
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorInnerPointwise_succ_eq_parseval_sum_slot0
     (g : SmoothRiemannianMetric I M) {N : ℕ}

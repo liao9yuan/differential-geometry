@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFr
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -33,7 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_eq_toModel_unitEval
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g₀ 0 s) (x : M)
@@ -43,7 +41,6 @@ private lemma unitModel_eq_toModel_unitEval
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from W.toSection x)
           (unitZeroSec (I := I) (M := M) x)) v := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma secondCovDeriv_frame_unitEval_eq_iteratedCovGrad
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
@@ -68,7 +65,6 @@ private lemma secondCovDeriv_frame_unitEval_eq_iteratedCovGrad
   rw [unitModel_eq_toModel_unitEval, hiter]
   exact hbridge.symm
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_rawTensorConnLapSmooth_eq_frame_sum
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
@@ -107,7 +103,6 @@ private lemma unitModel_rawTensorConnLapSmooth_eq_frame_sum
   rw [Tensor0SSpace.toModelL_apply]
   exact secondCovDeriv_frame_unitEval_eq_iteratedCovGrad (I := I) g₀ S x v i
 
-set_option linter.unusedSectionVars false in
 
 theorem rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)

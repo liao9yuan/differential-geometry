@@ -53,7 +53,7 @@ lemma grad_g_congr_funext
     (grad_g (I := I) g hf₁ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) =
       (grad_g (I := I) g hf₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) := by
   refine ContMDiffSection.ext (fun x => ?_)
-  show gradFun (I := I) g f₁ x = gradFun (I := I) g f₂ x
+  change gradFun (I := I) g f₁ x = gradFun (I := I) g f₂ x
   rw [h_eq]
 
 lemma Δ_g_congr_funext

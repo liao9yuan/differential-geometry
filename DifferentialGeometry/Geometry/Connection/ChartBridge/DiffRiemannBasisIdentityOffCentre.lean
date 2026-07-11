@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedR
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 3200000
 set_option synthInstance.maxHeartbeats 1600000
 
@@ -44,7 +43,6 @@ def nablaChartRiemannCoeff (g : SmoothRiemannianMetric I M) (α : M)
           chartChristoffel (I := I) g α p s m y *
             chartRiemannTensor (I := I) g α m q r l y)
 
-set_option linter.unusedSectionVars false in
 
 private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
     (α : M) {f : E → ℝ}
@@ -60,7 +58,6 @@ private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
   rw [hrw]
   exact hfderiv.clm_apply contDiffOn_const
 
-set_option linter.unusedSectionVars false in
 
 private lemma chartRiemannTensor_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -99,7 +96,6 @@ private lemma chartRiemannTensor_contDiffOn_interior
   rw [hrw]
   exact (hdΓ1.sub hdΓ2).add hΓΓ
 
-set_option linter.unusedSectionVars false in
 
 theorem nablaChartRiemannCoeff_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)

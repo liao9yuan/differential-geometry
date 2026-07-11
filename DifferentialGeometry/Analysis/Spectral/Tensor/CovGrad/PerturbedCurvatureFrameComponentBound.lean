@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.Pertur
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -43,7 +42,6 @@ private lemma inv_le_inv_of_le_of_pos {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
   have ha : 0 < a := lt_of_lt_of_le hb hab
   rw [inv_le_inv₀ ha hb]; exact hab
 
-set_option linter.unusedSectionVars false in
 private theorem orthoFrame_to_basis
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -72,8 +70,6 @@ private theorem orthoFrame_to_basis
   refine ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
@@ -95,13 +91,11 @@ private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
         (fiberNormSqComponent (I := I) (M := M) g x 2 2 S (Module.finrank ℝ E) e K' J) ^ 2)
     (fun K' _ => Finset.sum_nonneg (fun J _ => sq_nonneg _)) (Finset.mem_univ K)
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private theorem riemannianFiberNormSq_le_of_componentSlice_sq_sum_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (S : TensorRSSpace 2 2 I x) (C : ℝ)
-    (hC : 0 ≤ C)
+    (_hC : 0 ≤ C)
     (hslice : ∀ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (_horth : ∀ a b : Fin (Module.finrank ℝ E),
         g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
@@ -129,7 +123,6 @@ private theorem riemannianFiberNormSq_le_of_componentSlice_sq_sum_le
         simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul,
           Nat.cast_pow]
 
-set_option linter.unusedSectionVars false in
 private lemma riemannBiContr_fiberComponent_expand
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -170,7 +163,6 @@ private lemma riemannBiContr_fiberComponent_expand
   rw [coframeS_apply, Fin.prod_univ_two]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
 
-set_option linter.unusedSectionVars false in
 private lemma g_inner_off_frame_le
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -183,8 +175,6 @@ private lemma g_inner_off_frame_le
   rw [hkk, Real.sqrt_one, one_mul] at hCS
   exact le_trans hCS (Real.sqrt_le_sqrt hw)
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_riemannBiContrFib_perturbed_frameComponentSlice_sq_le_of_jetEnvelope
@@ -192,9 +182,9 @@ theorem exists_riemannBiContrFib_perturbed_frameComponentSlice_sq_le_of_jetEnvel
     (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -465,8 +455,6 @@ theorem exists_riemannBiContrFib_perturbed_frameComponentSlice_sq_le_of_jetEnvel
         push_cast
         ring
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_riemannBiContrFib_perturbed_riemannianFiberNormSq_le_of_jetEnvelope
@@ -474,9 +462,9 @@ theorem exists_riemannBiContrFib_perturbed_riemannianFiberNormSq_le_of_jetEnvelo
     (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -499,7 +487,6 @@ theorem exists_riemannBiContrFib_perturbed_riemannianFiberNormSq_le_of_jetEnvelo
   refine le_trans hred (le_of_eq ?_)
   rw [mul_pow]
 
-set_option linter.unusedSectionVars false in
 private lemma slice_indicator_sum_eq_dim {n : ℕ} (K : Fin 2 → Fin n) (k : Fin 2) :
     (∑ J : Fin 2 → Fin n, (if K k = J k then (1 : ℝ) else 0)) = (n : ℝ) := by
   classical
@@ -537,7 +524,6 @@ private lemma slice_indicator_sum_eq_dim {n : ℕ} (K : Fin 2 → Fin n) (k : Fi
     rw [Finset.sum_congr rfl (fun a _ => hinner a), Finset.sum_const, Finset.card_univ,
       Fintype.card_fin, nsmul_eq_mul, mul_one]
 
-set_option linter.unusedSectionVars false in
 private lemma slotEndo_fiberComponent_slotk_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -572,7 +558,6 @@ private lemma slotEndo_fiberComponent_slotk_eq
   have hik : i ≠ k := Finset.ne_of_mem_erase hi
   rw [Function.update_of_ne hik, horth (K i) (J i)]
 
-set_option linter.unusedSectionVars false in
 private lemma ricciArm_fiberComponent_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -606,7 +591,6 @@ private lemma ricciArm_fiberComponent_eq
   · rw [show (Finset.univ.erase (1 : Fin 2)) = {0} from by decide]
     rw [Finset.prod_singleton]
 
-set_option linter.unusedSectionVars false in
 private lemma ricciArm_component_abs_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -632,8 +616,6 @@ private lemma ricciArm_component_abs_le
   rw [hKKunit, Real.sqrt_one, one_mul] at hCS
   exact le_trans hCS hsqrtΛ
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponentSlice_sq_le_of_jetEnvelope
@@ -641,9 +623,9 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponentSlice_sq_le_of
     (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -730,8 +712,6 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponentSlice_sq_le_of
         nlinarith [sq_nonneg C0, hC0_nn, hn1, hnn,
           mul_le_mul_of_nonneg_right hn1 (by positivity : (0:ℝ) ≤ 4 * (Module.finrank ℝ E : ℝ) * C0 ^ 2)]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_riemannianFiberNormSq_le_of_jetEnvelope
@@ -739,9 +719,9 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_riemannianFiberNormSq_le_of_
     (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -764,8 +744,6 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_riemannianFiberNormSq_le_of_
   refine le_trans hred (le_of_eq ?_)
   rw [mul_pow]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_riemannBiContrFib_perturbed_frameComponent_sum_sq_le_of_jetEnvelope
@@ -773,9 +751,9 @@ theorem exists_riemannBiContrFib_perturbed_frameComponent_sum_sq_le_of_jetEnvelo
     (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -804,8 +782,6 @@ theorem exists_riemannBiContrFib_perturbed_frameComponent_sum_sq_le_of_jetEnvelo
       e horth K)
     (hC g₁ P hδ_le hδ htie x henv)
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponent_sum_sq_le_of_jetEnvelope
@@ -813,9 +789,9 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_frameComponent_sum_sq_le_of_
     (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),

@@ -7,10 +7,8 @@ import Mathlib.Analysis.Normed.Operator.ContinuousLinearMap
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option warningAsError false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -33,7 +31,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def smoothInclusionHsSuccLin
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
@@ -695,7 +692,6 @@ private lemma tensorPouSobolevHsNorm_ne_top
   exact tensorPouSobolevHsNorm_inner_integral_lt_top
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j basisIdx
 
-set_option linter.unusedSectionVars false in
 
 lemma smoothInclusionHsSuccLin_norm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -742,7 +738,6 @@ lemma smoothInclusionHsSuccLin_norm_le
     (tensorPouSobolevHsNorm_ne_top (I := I) (M := M) g (k + 1) T)
     (tensorPouSobolevHsNorm_le_succ (I := I) (M := M) g k T)
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def smoothInclusionHsSucc
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
@@ -750,7 +745,6 @@ noncomputable def smoothInclusionHsSucc
   (smoothInclusionHsSuccLin (I := I) (M := M) g r s k).mkContinuous 1
     (fun S => smoothInclusionHsSuccLin_norm_le (I := I) (M := M) g r s k S)
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def smoothInclusionHsSuccToHkCompl
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
@@ -760,7 +754,6 @@ noncomputable def smoothInclusionHsSuccToHkCompl
     SmoothCcTensorHs g r s k →L[ℝ] TensorPouSobolevHilbert g r s k).comp
     (smoothInclusionHsSucc (I := I) (M := M) g r s k)
 
-set_option linter.unusedSectionVars false in
 
 noncomputable def inclusionHk_succ
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
@@ -772,7 +765,6 @@ noncomputable def inclusionHk_succ
       SmoothCcTensorHs g r s (k + 1) →L[ℝ]
         TensorPouSobolevHilbert g r s (k + 1))
 
-set_option linter.unusedSectionVars false in
 
 theorem inclusionHk_succ_opNorm_le_one
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :

@@ -2,9 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.Christoffel
 import DifferentialGeometry.Geometry.Connection.Chart.CoordinateFrame
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-set_option autoImplicit false
-set_option linter.style.longLine false
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

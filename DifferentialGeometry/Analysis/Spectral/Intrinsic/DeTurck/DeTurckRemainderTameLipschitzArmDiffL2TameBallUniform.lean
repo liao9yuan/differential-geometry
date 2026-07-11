@@ -72,7 +72,6 @@ private local instance instCompleteSpaceE_tame : CompleteSpace E :=
 
 set_option maxHeartbeats 3200000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-set_option linter.style.setOption false in
 private theorem lieArm_threeArm_coeffFields_perOrder_data
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
@@ -676,9 +675,9 @@ private theorem deTurckRHSArmDiff_threeArm_unitModel_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -790,9 +789,9 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -835,9 +834,9 @@ private theorem deTurckRHSArmDiff_order0_riemannianFiberNormSq_intrinsic_ballUni
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -948,9 +947,9 @@ private theorem deTurckRicciArm_appCc_graded_jetL2_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -1286,9 +1285,9 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -1414,9 +1413,9 @@ private theorem deTurckRHSArmDiff_topOrder_l2_intrinsic_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -1646,9 +1645,9 @@ private theorem deTurckRHSArmDiff_endpoints_l2_tame_ballUniform
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -2313,12 +2312,11 @@ private theorem deTurckRHSArmDiff_threeArm_coeffC0_jetL2_crude_ballUniform
   · exact (symmAbsorbedCoeff_jet_le g₀ 1 (a + 1) C₁ σ'₁).trans h1j
   · exact (symmAbsorbedCoeff_jet_le g₀ 2 (a + 1) C₂ σ'₂).trans h2j
 
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 1000000 in
 private theorem deTurckSmoothRemainderDiff_connLapResidual_topCoeff_crude_ballUniform
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
-    {ΛC Γ : ℝ} (hΛC_nn : 0 ≤ ΛC) (hΓ_nn : 0 ≤ Γ)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (_hR : 0 ≤ R)
+    {ΛC Γ : ℝ} (_hΛC_nn : 0 ≤ ΛC) (_hΓ_nn : 0 ≤ Γ)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λw Γw : ℝ, 0 ≤ Λw ∧ 0 ≤ Γw ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)

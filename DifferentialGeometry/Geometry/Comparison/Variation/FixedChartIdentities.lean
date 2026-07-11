@@ -240,7 +240,6 @@ theorem commute_ds_dt_fixed_chart
 
 section FixedChartCurvatureHelpers
 open DifferentialGeometry.Integral.DivergenceTheorem
-set_option linter.unusedSectionVars false
 
 def chartCoordCLM (i : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   (chartModelBasis E).coord i |>.toContinuousLinearMap
@@ -316,7 +315,6 @@ end FixedChartCurvatureHelpers
 
 namespace Aux2
 open DifferentialGeometry.Geometry.Riemannian.Variation
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 
 lemma partial_snd_apply_one (G : ℝ × ℝ → E) (u t : ℝ)
@@ -452,7 +450,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -484,7 +481,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open Aux2
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -627,7 +623,6 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 
@@ -671,7 +666,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open Aux5
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]
@@ -952,7 +946,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.Connection
 open Aux4 Aux6
 open scoped Manifold ContDiff Topology
-set_option linter.unusedSectionVars false
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boundaryless]

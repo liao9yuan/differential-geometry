@@ -13,7 +13,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 theorem chartE_jointReading_contMDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
@@ -45,7 +44,6 @@ theorem chartE_jointReading_contMDiffOn
     exact chartE_section_repr_eq_trivialization_snd (I := I) α (X q.1) hq2
   · exact Set.prod_mono (subset_refl _) (subset_univ _)
 
-set_option linter.unusedSectionVars false in
 
 theorem partitionOfUnity_assembled_section_contMDiff
     {ι : Type*} {ρ : SmoothPartitionOfUnity ι I M (univ : Set M)} {U : ι → Set M}
@@ -146,7 +144,6 @@ theorem partitionOfUnity_assembled_section_contMDiff
   · exact contMDiffAt_of_notMem (compl_subset_compl.mpr
       (tsupport_smul_subset_left (fun q : ℝ × M => ρ i q.2) (g i)) hi) ∞
 
-set_option linter.unusedSectionVars false in
 
 private theorem chartE_euclideanReading_contDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
@@ -181,7 +178,6 @@ private theorem chartE_euclideanReading_contDiffOn
   rw [← contMDiffOn_iff_contDiffOn, ← chartedSpaceSelf_prod, modelWithCornersSelf_prod]
   exact hcomp
 
-set_option linter.unusedSectionVars false in
 
 private theorem lift_extended_reading_contMDiffOn
     (α : M) (gext : ℝ → E → E) (V : Set E)

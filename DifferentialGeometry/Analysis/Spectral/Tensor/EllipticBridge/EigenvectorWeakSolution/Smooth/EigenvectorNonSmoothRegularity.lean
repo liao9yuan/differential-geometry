@@ -160,7 +160,6 @@ private lemma eigenvectorTensorChartBilinear_uniform_diffQuot_bound
   refine ⟨M_bound, hM_nn, fun j k h hh_pos hh_le => ?_⟩
   exact h_bd j k h hh_pos (by rw [hε_def] at *; linarith)
 
-set_option linter.unusedVariables false in
 
 theorem eigenvector_chartComponent_memWkp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -52,9 +52,8 @@ end GramBridge
 
 section SymbolComponent
 
-set_option linter.unusedVariables false in
 
-def deTurckCorrSymbolComp (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
+def deTurckCorrSymbolComp (g _g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) : ℝ :=
   (∑ k : Fin (Module.finrank ℝ E),

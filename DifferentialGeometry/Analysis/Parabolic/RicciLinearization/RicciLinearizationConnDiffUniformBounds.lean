@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -50,8 +49,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 section UniformBound
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 set_option maxRecDepth 16000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
@@ -59,10 +56,10 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δc : ℝ} (hδc_le : δc ≤ max δ₀ 0)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δc)
+        {δc : ℝ} (_hδc_le : δc ≤ max δ₀ 0)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δc)
         (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle
@@ -339,8 +336,6 @@ private theorem exists_uniformBound_riemannianFiberNormSq_linearizedRicciConnDif
           ring
   exact ⟨le_trans hO0 (le_max_left _ _), le_trans hO1 (le_max_right _ _)⟩
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCoeff_realizedFam_of_jetEnvelope
@@ -349,9 +344,9 @@ theorem exists_uniformBound_sqrt_riemannianFiberNormSq_linearizedRicciConnDiffCo
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →

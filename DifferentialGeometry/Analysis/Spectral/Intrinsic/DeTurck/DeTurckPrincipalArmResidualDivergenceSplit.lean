@@ -22,7 +22,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvature
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -51,19 +50,16 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_vecTail_cons {α : Type*} {n : ℕ} (a : α) (w : Fin n → α) :
     Matrix.vecTail (Fin.cons a w) = w := by
   funext j
   simp [Matrix.vecTail, Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_toModel_sum {s : ℕ} (b : M) {ι : Type*} (fs : Finset ι)
     (f : ι → Tensor0SSpace s I b) :
     Tensor0SSpace.toModel (∑ i ∈ fs, f i) = ∑ i ∈ fs, Tensor0SSpace.toModel (f i) :=
   map_sum (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) s b) f fs
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_model_slot0_linear {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (c : ι → ℝ) (f : ι → E)
     (rest : Fin s → E) :
@@ -76,7 +72,6 @@ private lemma armResidual_model_slot0_linear {s : ℕ} {ι : Type*} (fs : Finset
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1 + 1) ℝ E) (a : E) (c : ι → ℝ) (f : ι → E)
     (rest : Fin s → E) :
@@ -93,7 +88,6 @@ private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset
       c f rest]
   exact Finset.sum_congr rfl fun j _ => by rw [hcur]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_orthoFrame_expansion (g₀ : SmoothRiemannianMetric I M) (b : M)
     (u : TangentSpace I b) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -146,7 +140,6 @@ private lemma armResidual_orthoFrame_expansion (g₀ : SmoothRiemannianMetric I 
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_toModel_contract_covariant (s : ℕ) (b : M) (v : TangentSpace I b)
     (A : TensorRSSpace 0 (s + 1) I b) (D : Tensor0SSpace 0 I b) (m : Fin s → E) :
     Tensor0SSpace.toModel
@@ -157,7 +150,6 @@ private lemma armResidual_toModel_contract_covariant (s : ℕ) (b : M) (v : Tang
         (Fin.cons ((v : TangentSpace I b) : E) m) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_covDivergence_toSection (g₀ : SmoothRiemannianMetric I M)
     (s : ℕ) (V : SmoothCcTensor g₀ 0 (s + 1)) (b : M) :
     ((covDivergence (I := I) (M := M) g₀ s V).toSection b : TensorRSSpace 0 s I b) =
@@ -177,7 +169,6 @@ private lemma armResidual_covDivergence_toSection (g₀ : SmoothRiemannianMetric
   rw [tensorCovDerivAt_def (I := I) (M := M) g₀ 0 (s + 1) V b
     (smoothOrthoFrame (I := I) g₀ b i b)]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_toModel_doubleTraceFib (g₀ : SmoothRiemannianMetric I M) (b : M)
     (W : Tensor0SSpace (2 + 2) I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel (DeTurck.cometricDoubleTraceFib (I := I) g₀ 2 b W) m =
@@ -203,7 +194,6 @@ private lemma armResidual_toModel_doubleTraceFib (g₀ : SmoothRiemannianMetric 
     (v0 := ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E))
     (vs := Fin.cons ((smoothOrthoFrame (I := I) g₀ b i b : TangentSpace I b) : E) m)]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_slot01_transpose (g₀ g₁ : SmoothRiemannianMetric I M) (b : M)
     (T : Tensor0SBundle.Tensor0SModel (2 + 1 + 1) ℝ E) (m : Fin 2 → E) :
     (∑ i : Fin (Module.finrank ℝ E),
@@ -252,7 +242,6 @@ private lemma armResidual_slot01_transpose (g₀ g₁ : SmoothRiemannianMetric I
     rw [hadj (e j) (e i), g₀.symm b (e j) (Λ (e i))]
   rw [hco]
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_covGrad_eval (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 s) (b : M) (D : Tensor0SSpace 0 I b)
     (v0 : E) (vs : Fin s → E) :
@@ -271,7 +260,6 @@ private lemma armResidual_covGrad_eval (g₀ : SmoothRiemannianMetric I M) (s : 
       ((show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace s I b from
         tensorCovDerivAt (I := I) (M := M) g₀ 0 s W b v0) D) w) ht)
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E)
     (i : Fin (Module.finrank ℝ E)) :
@@ -345,7 +333,6 @@ private lemma armResidual_contract_term_eq (g₀ g₁ : SmoothRiemannianMetric I
       ((ei : TangentSpace I b) : E)
       (Fin.cons ((Λf b (ei : TangentSpace I b) : TangentSpace I b) : E) m)).symm
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel
@@ -391,7 +378,6 @@ private lemma armResidual_arm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M
   rw [Fin.cons_zero, Fin.update_cons_zero]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma armResidual_gTerm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) (b : M) (D : Tensor0SSpace 0 I b) (m : Fin 2 → E) :
     Tensor0SSpace.toModel
@@ -504,7 +490,6 @@ private lemma armResidual_gTerm_toModel_eq (g₀ g₁ : SmoothRiemannianMetric I
     from rfl]
   rw [Fin.update_cons_zero]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 theorem armResidual_covDivergence_split (g₀ g₁ : SmoothRiemannianMetric I M)
     (u₀ : SmoothCcTensor g₀ 0 2) :

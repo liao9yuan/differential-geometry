@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputS
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -68,12 +67,10 @@ def metricCcTensorFib (g : SmoothRiemannianMetric I M) (x : M) : Tensor0SSpace 2
         (continuous_apply 1) }
     : Tensor0SSpace 2 I x)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma metricCcTensorFib_apply (g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → TangentSpace I x) :
     metricCcTensorFib (I := I) g x m = g.inner x (m 0) (m 1) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem metricCcTensorFib_section_contMDiff (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -144,7 +141,6 @@ theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (v := fun y : M => unitZeroSec (I := I) (M := M) y)
     T.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
 
-set_option linter.unusedSectionVars false in
 private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =
@@ -163,14 +159,12 @@ def gInvDiffQuadResidualField (g₀ g₁ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 2 :=
   connDiffBiContrCoeffField (I := I) (M := M) g₁ g₀ g₁ g₀
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem gInvDiffQuadResidualField_toSection (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) :
     (gInvDiffQuadResidualField (I := I) (M := M) g₀ g₁).toSection x =
       (show TensorRSSpace 2 2 I x from
         TensorRSSpace.ofCLM (connDiffBiContrFib (I := I) g₁ g₀ g₁ g₀ x)) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem gInvDiffQuadResidualField_self (g₀ : SmoothRiemannianMetric I M) :
     gInvDiffQuadResidualField (I := I) (M := M) g₀ g₀ = 0 := by

@@ -24,7 +24,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -55,7 +54,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 lemma bdRfns_iCG_koszulCovecCc_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
@@ -140,7 +138,6 @@ lemma bdRfns_iCG_koszulCovecCc_le (g₀ : SmoothRiemannianMetric I M)
   nlinarith [hsum, hR2_nn,
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
 
-set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_iteratedCovGrad_bdKRaw_le (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + i) x
@@ -222,8 +219,6 @@ lemma riemannianFiberNormSq_iteratedCovGrad_bdKRaw_le (g₀ : SmoothRiemannianMe
   nlinarith [hsum, hR2_nn,
     riemannianFiberNormSq_nonneg (I := I) (M := M) g₀ 0 (3 + i) x (PA + PB - PC)]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -278,7 +273,6 @@ theorem exists_sobolevConst_riemannianFiberNormSq_covGrad_T_le_sq (g₀ : Smooth
     norm_nonneg _
   nlinarith [h0', hb, hnn, mul_nonneg hCsob_nn hR]
 
-set_option linter.unusedVariables false in
 
 theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberNormSq_uniformBound
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -286,7 +280,7 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),
@@ -911,7 +905,6 @@ theorem exists_ricciArmSharpGradKoszulResidualField_realizedFam_riemannianFiberN
         refine mul_le_mul_of_nonneg_left ?_ (by norm_num)
         exact mul_le_mul hPTO hXi hcompnn (hCP_nn 0)
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_sobolevConst_riemannianFiberNormSq_T_le_sq (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -960,7 +953,6 @@ theorem exists_sobolevConst_riemannianFiberNormSq_T_le_sq (g₀ : SmoothRiemanni
     norm_nonneg _
   nlinarith [h0', hb, hnn, mul_nonneg hCsob_nn hR]
 
-set_option linter.unusedVariables false in
 
 theorem exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq_uniformBound
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -968,7 +960,7 @@ theorem exists_ricciArmRicciFoldRemainderField_realizedFam_riemannianFiberNormSq
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         (hδZ : metricCauchySchwarzBound (I := I) (M := M) g₀
           (ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2)) δ),

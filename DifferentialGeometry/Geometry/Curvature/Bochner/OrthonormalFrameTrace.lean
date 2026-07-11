@@ -495,11 +495,9 @@ private def riemannCurvatureEndo
   toFun Z := riemannOp (LeviCivita (I := I) g) x Z v w
   map_add' Z Z' := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_add Z Z'
-    set_option linter.unnecessarySimpa false in
     simpa using h
   map_smul' c Z := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_smul c Z
-    set_option linter.unnecessarySimpa false in
     simpa using h
 
 @[simp] private lemma riemannCurvatureEndo_apply

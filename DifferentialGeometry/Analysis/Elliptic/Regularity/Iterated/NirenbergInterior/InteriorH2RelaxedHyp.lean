@@ -356,7 +356,6 @@ noncomputable def iteratedChartBilinearH1ComplData_weak
     rw [h_principal_eq] at h_in
     exact h_in
 
-set_option linter.unusedVariables false in
 
 theorem iteratedDerivedChartBilinear_memWkp_two_two_interior_weakened
     (g : SmoothRiemannianMetric I M) (α : M)

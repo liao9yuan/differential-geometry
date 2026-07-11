@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.CauchySchwarz
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -34,7 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 lemma tensorL2Norm_sq_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
@@ -43,7 +41,6 @@ lemma tensorL2Norm_sq_toFun
   rw [tensorL2Norm_def]
   exact Real.sq_sqrt (tensorL2Inner_nonneg (I := I) (M := M) g r s S.toFun)
 
-set_option linter.unusedSectionVars false in
 
 lemma tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
@@ -54,7 +51,6 @@ lemma tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner
           (rawTensorConnLapSmooth (I := I) g 0 2 T).toFun T.toFun :=
   green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed (I := I) (M := M) g T T
 
-set_option linter.unusedSectionVars false in
 
 theorem covGrad_l2NormSq_le_rawConnLap_mul_self
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
@@ -83,7 +79,6 @@ theorem covGrad_l2NormSq_le_rawConnLap_mul_self
     neg_le_abs _
   exact le_trans hneg_le hcs
 
-set_option linter.unusedSectionVars false in
 
 theorem covGrad_l2Norm_le_geomMean
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :

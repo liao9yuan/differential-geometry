@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 import Mathlib.Topology.Compactness.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

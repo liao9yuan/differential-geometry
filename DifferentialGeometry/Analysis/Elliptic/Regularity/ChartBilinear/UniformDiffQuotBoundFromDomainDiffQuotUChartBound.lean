@@ -44,17 +44,16 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedVariables false in
 
 theorem chartBilinearFK_diffQuot_u_discharge
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
     {η : EuclN → ℝ} (hη_supp : HasCompactSupport η)
-    {Ω' : Set EuclN} (hΩ'_open : IsOpen Ω')
+    {Ω' : Set EuclN} (_hΩ'_open : IsOpen Ω')
     (hΩ'_chart : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α)
     (hΩ'_compact_closure : IsCompact (closure Ω'))
-    (hη_in_Ω' : tsupport η ⊆ Ω')
+    (_hη_in_Ω' : tsupport η ⊆ Ω')
     {R₀ : ℝ} (hR₀_pos : 0 < R₀)
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω') :

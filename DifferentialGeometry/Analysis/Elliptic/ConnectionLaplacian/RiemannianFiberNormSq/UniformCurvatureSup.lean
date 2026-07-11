@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -43,7 +42,6 @@ def curvatureContraction
         riemannSec_contMDiff (cov := tensorCov (I := I) g 0 s) hX hY Z.toSection.contMDiff }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma curvatureContraction_toSection_eq_riemannSec
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -54,7 +52,6 @@ set_option linter.unusedSectionVars false in
     (curvatureContraction (I := I) (M := M) g s Z hX hY).toSection x =
       riemannSec (tensorCov (I := I) g 0 s) X Y (fun y : M => Z.toSection y) x := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem curvatureContraction_toSection_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -68,7 +65,6 @@ theorem curvatureContraction_toSection_apply
   exact riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 s) hX hY
     Z.toSection.contMDiff
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_uniform_riemannianFiberNormSq_riemannOp_bound
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -95,7 +91,6 @@ def covGradCurvatureContraction
     SmoothCcTensor g 0 (s + 1) :=
   covGrad g 0 s (curvatureContraction (I := I) (M := M) g s Z hX hY)
 
-set_option linter.unusedSectionVars false in
 
 lemma covGradCurvatureContraction_toSection
     (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -106,7 +101,6 @@ lemma covGradCurvatureContraction_toSection
     (covGradCurvatureContraction (I := I) (M := M) g s Z hX hY).toSection =
       (covGrad g 0 s (curvatureContraction (I := I) (M := M) g s Z hX hY)).toSection := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_uniform_riemannianFiberNormSq_covGrad_riemannOp_bound
     (g : SmoothRiemannianMetric I M) (s : ℕ)

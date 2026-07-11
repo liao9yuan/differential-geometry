@@ -16,7 +16,6 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,14 +44,13 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 section LengthBookkeeping
 
-set_option linter.unusedVariables false in
 
 theorem subArc_of_minimizer_is_minimizer
     {γ : ℝ → M} {a b s t : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
     (hmin : riemannianEDist I (γ a) (γ b) = pathELength I γ a b)
     (hfin : pathELength I γ a b ≠ ⊤)
-    (hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
+    (_hab : a ≤ b) (has : a ≤ s) (hst : s ≤ t) (htb : t ≤ b) :
     riemannianEDist I (γ s) (γ t) = pathELength I γ s t := by
   set L_left := pathELength I γ a s with hL_left_def
   set L_mid := pathELength I γ s t with hL_mid_def
@@ -409,13 +407,12 @@ private theorem mfderiv_expMap_injective_of_norm_lt_radius
   rw [hA_eq]
   exact hΦinj
 
-set_option linter.unusedVariables false in
 
 theorem normalBall_radial_length_le_riemannianEDist
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (hsmall_g : Real.sqrt (g.inner p v v) < metricCoerciveExpRadius (I := I) g p) :
     ENNReal.ofReal (Real.sqrt (g.inner p v v)) ≤
@@ -1207,14 +1204,13 @@ private theorem radial_minimizer_radiality
     rw [hcv₂_eq] at hradial
     exact hradial
 
-set_option linter.unusedVariables false in
 set_option maxHeartbeats 1600000 in
 
 theorem normalBall_radial_minimizer_equality
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
         ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
-    (hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
+    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hball : v ∈ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (hsmall_g : Real.sqrt (g.inner p v v) < metricCoerciveExpRadius (I := I) g p)
     {γ : ℝ → M} {a b : ℝ} (hab : a < b)

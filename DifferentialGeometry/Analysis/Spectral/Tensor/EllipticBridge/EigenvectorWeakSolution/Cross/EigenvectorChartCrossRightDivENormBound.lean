@@ -36,7 +36,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section PerSummandBound
 
-set_option linter.unusedSectionVars false in
 
 private lemma eLpNorm_indicatorPou_mul_le
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -97,7 +96,6 @@ private lemma eLpNorm_indicatorPou_mul_le
         ≤ eLpNorm (fun y => (C : ℝ) • w y) 2 μw := h_mono
     _ = ENNReal.ofReal C * eLpNorm w 2 μw := h_smul
 
-set_option linter.unusedSectionVars false in
 
 private lemma eLpNorm_indicatorPou_mul_le_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -162,7 +160,6 @@ end PerSummandBound
 
 section MeasurabilityTransfer
 
-set_option linter.unusedSectionVars false in
 
 private lemma aestronglyMeasurable_weighted_of_chartL2
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -179,7 +176,6 @@ end MeasurabilityTransfer
 
 section UniformConstant
 
-set_option linter.unusedSectionVars false in
 
 private lemma exists_uniform_eLpNorm_bound
     {ι : Type*} [Finite ι]

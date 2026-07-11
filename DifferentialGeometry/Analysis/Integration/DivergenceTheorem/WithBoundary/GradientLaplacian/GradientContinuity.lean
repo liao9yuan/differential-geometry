@@ -23,7 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-set_option linter.unusedSectionVars false in
 
 private lemma partialDerivWithin_scalarOnE_continuousOn_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -44,7 +43,6 @@ private lemma partialDerivWithin_scalarOnE_continuousOn_target
     partialDerivWithin_contDiffOn_top_of_uniqueDiffOn (i := j) hbase hUD
   exact hpartial_target.continuousOn
 
-set_option linter.unusedSectionVars false in
 
 private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -73,7 +71,6 @@ private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     exact (extChartAt I α).map_source hxsrc
   exact hpartial.comp hchart hmaps
 
-set_option linter.unusedSectionVars false in
 
 private lemma gradChartCoeffWithin_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -105,7 +102,6 @@ private lemma gradChartCoeffWithin_continuousOn_source
   · exact partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
       (I := I) α hf j
 
-set_option linter.unusedSectionVars false in
 
 private lemma chartGramMatrix_entry_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -120,7 +116,6 @@ private lemma chartGramMatrix_entry_continuousOn_source
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hy
 
-set_option linter.unusedSectionVars false in
 
 private lemma g_inner_gradChartLocalWithin_expand
     (g : SmoothRiemannianMetric I M) (α : M) (f h : M → ℝ) (y : M) :
@@ -182,7 +177,6 @@ private lemma g_inner_gradChartLocalWithin_expand
     rw [map_smul]
     rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -210,7 +204,6 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
   · exact gradChartCoeffWithin_continuousOn_source (I := I) g α hh j
   · exact chartGramMatrix_entry_continuousOn_source (I := I) g α i j
 
-set_option linter.unusedSectionVars false in
 
 private lemma g_inner_gradFun_gradFun_continuous_general
     (g : SmoothRiemannianMetric I M)

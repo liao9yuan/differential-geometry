@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstr
 
 noncomputable section
 
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter MeasureTheory
 open scoped Manifold Topology ContDiff BigOperators ENNReal NNReal

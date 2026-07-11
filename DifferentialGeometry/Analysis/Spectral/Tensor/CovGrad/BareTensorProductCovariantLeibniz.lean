@@ -7,7 +7,6 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -104,7 +103,6 @@ noncomputable def unitModelProdSection (g : SmoothRiemannianMetric I M) {p q : �
       (E := (TangentSpace I : M → Type _)) ∞ (unitModelProdField (I := I) g S T)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 theorem unitModelProdSection_unitModel (g : SmoothRiemannianMetric I M) {p q : ℕ}
     (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M) :

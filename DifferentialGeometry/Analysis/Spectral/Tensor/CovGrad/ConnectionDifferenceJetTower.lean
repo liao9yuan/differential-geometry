@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentCovDerivIde
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
@@ -188,7 +187,6 @@ def sharpFlatRaiseEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
         (g0FlatCLM (I := I) g₁ x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x a b)) := by
   unfold raisedKoszulVec; rfl
 
-set_option linter.unusedSectionVars false in
 lemma raisedKoszulVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     Continuous (fun p : TangentSpace I x × TangentSpace I x =>
       raisedKoszulVec (I := I) g₀ g₁ x p.1 p.2) := by
@@ -381,7 +379,6 @@ def symmSCovGrad3 (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0
     symmSCovGrad3 (I := I) (M := M) g₀ T =
       covGrad (I := I) (M := M) g₀ 0 2 (ccTensor02Symm (I := I) g₀ T) := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma connDiffPairing_eq_raisedKoszul_sharpFlat (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (om : Tensor0SSpace 1 I x) (YZ : Fin 2 → TangentSpace I x) :
     om (fun _ : Fin 1 => PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1)) =
@@ -528,7 +525,6 @@ theorem covDerivConnDiff_g1inner_eq_secondCovGrad_lowerArms
     exact h]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem connDiffSection_eq_appCcRS_raisedKoszul_sharpFlatEndoCc
     (g₀ g₁ : SmoothRiemannianMetric I M) :
     connDiffSection (I := I) g₁ g₀ =
@@ -686,7 +682,6 @@ private lemma flatArmVec_smul_v0 (g₀ g₁ : SmoothRiemannianMetric I M) (kind 
       c • flatArmVec (I := I) g₀ g₁ kind x om v0 := by
   rw [← flatArmVecCLM_apply, ← flatArmVecCLM_apply, map_smul]
 
-set_option linter.unusedSectionVars false in
 lemma flatArmVec_continuous₂ (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) :
     Continuous (fun v0 : TangentSpace I x => flatArmVec (I := I) g₀ g₁ kind x om v0) := by
@@ -999,7 +994,6 @@ def flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) : Smoo
           (omRecoverEndoCc (I := I) g₀ g₁).toSection x) := by
   rw [flatArmCoeffCc, appCcRS_toSection]
 
-set_option linter.unusedSectionVars false in
 theorem flatArmCc_eq_appCcRS_flatArmCoeffCc (g₀ g₁ : SmoothRiemannianMetric I M) (kind : Bool) :
     flatArmCc (I := I) g₀ g₁ kind =
       ccOperatorFieldComp (I := I) (M := M) g₀ 1 1 2
@@ -1048,7 +1042,6 @@ theorem raisedKoszulVec_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [raisedKoszulVec_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma raisedKoszul_tensorCovDerivAt_homSplit
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1088,7 +1081,6 @@ private lemma raisedKoszul_tensorCovDerivAt_homSplit
   rw [hsplit, hval]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tensorSectionMDiffAt_raisedKoszulPairing
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯) (x : M) :
@@ -1400,7 +1392,6 @@ private lemma toModel_tensor0SOne_eq_cotangentToCLM (x : M)
   congr 1
   funext i; fin_cases i; rfl
 
-set_option linter.unusedSectionVars false in
 private lemma raisedKoszulPairing_covariantDerivative02_eval
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1497,7 +1488,6 @@ private lemma raisedKoszulPairing_covariantDerivative02_eval
   rw [hpeel2, hbase, hcorr2, hcorr1]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma raisedKoszulPairing_covariantDerivative01_eval
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1583,7 +1573,6 @@ def covDerivRaisedKoszulVec (g₀ g₁ : SmoothRiemannianMetric I M)
     - raisedKoszulVec (I := I) g₀ g₁ x (Y x)
         ((LeviCivita (I := I) g₀).toFun (fun b => Z b) x (X x))
 
-set_option linter.unusedSectionVars false in
 theorem raisedKoszul_covGrad_eq_covDerivRaisedKoszulVec
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (om : Cₛ^∞⟮I; Tensor0SModel 1 ℝ E, (fun x : M => Tensor0SSpace 1 I x)⟯)
@@ -1698,7 +1687,6 @@ theorem covGrad_sharpFlatEndoCc_eq_arms (g₀ g₁ : SmoothRiemannianMetric I M)
     rfl
   rw [hRHS]
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGrid_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (2 + j) x
@@ -1715,7 +1703,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_diagonalProductGri
   exact riemannianFiberNormSq_iteratedCovGrad_ccTensorCompose_diagonalProductGrid_leftFactor_le (I := I) (M := M) g₀ j 1 1 2
     (raisedKoszul (I := I) g₀ g₁) (sharpFlatEndoCc (I := I) g₀ g₁) x
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_iteratedCovGrad_connDiffSection_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (j : ℕ) (x : M)
     (B S : ℕ → ℝ)
@@ -1772,7 +1759,6 @@ private lemma riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s :
     tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_iteratedCovGrad_sharpFlatEndoCc_succ_le_arms
     (g₀ g₁ : SmoothRiemannianMetric I M) (m : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 1 (1 + (m + 1)) x
@@ -1840,7 +1826,6 @@ private lemma diagonalGrid_power_closure (G Bc : ℝ) (hG : 0 ≤ G) (hB : 0 ≤
         mul_le_mul_of_nonneg_left hsum hG
     _ = (G * (↑(j + 1) * Bc) ^ 2) * r ^ (2 * (j + 2)) := by ring
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem norm_iteratedCovGrad_two_symmS_le

@@ -21,7 +21,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedVariables false in
 
 theorem exists_pou_chartDensity_bound_on_chartTarget
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

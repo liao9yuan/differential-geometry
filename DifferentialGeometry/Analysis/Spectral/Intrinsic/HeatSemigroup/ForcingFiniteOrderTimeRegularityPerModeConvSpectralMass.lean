@@ -256,7 +256,6 @@ private theorem perModeConv_finiteOrder_timeDeriv_spectralMass_le
             have h2 := mul_le_mul_of_nonneg_left hlam_sq_term (by norm_num : (0 : ℝ) ≤ 2)
             linarith
 
-set_option linter.unusedVariables false in
 theorem perModeConv_finiteOrder_timeJet_spectralMass_gain
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {T : ℝ} (hT : 0 ≤ T) (k : ℕ)
     (f : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)

@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRem
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -670,7 +669,6 @@ private theorem iteratedDerivWithin_integral_param_Icc
       refine integral_congr_ae (Filter.Eventually.of_forall (fun x => ?_))
       exact (iteratedDerivWithin_succ').symm
 
-set_option linter.unusedVariables false in
 private theorem partialSnd_set_contMDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ} (U : Set M)
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)

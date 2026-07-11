@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrde
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 3200000
 
@@ -32,7 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma secondCovDeriv_section_contMDiff' (g : SmoothRiemannianMetric I M) (k : ℕ)
     {T : Π b : M, TensorRSSpace 0 k I b}
@@ -65,7 +63,6 @@ def secondCovDerivCc (g : SmoothRiemannianMetric I M) (k : ℕ)
         (T := fun y : M => T.toSection y) T.toSection.contMDiff hV }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma secondCovDerivCc_toSection_apply (g : SmoothRiemannianMetric I M) (k : ℕ)
     {V : Π b : M, TangentSpace I b}
@@ -75,7 +72,6 @@ set_option linter.unusedSectionVars false in
     (secondCovDerivCc (I := I) (M := M) g k hV T).toSection x =
       tensorSecondCovDeriv (I := I) g 0 k V V (fun y : M => T.toSection y) x := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor00Scalar_unitZeroSec (x : M) :
     tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
@@ -85,13 +81,11 @@ private lemma tensor00Scalar_unitZeroSec (x : M) :
   rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0S_eq_of_toModel_eq {t : ℕ} {x : M} {T T' : Tensor0SSpace t I x}
     (h : ∀ v : Fin t → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' :=
   Tensor0SSpace.toModel_injective (ContinuousMultilinearMap.ext h)
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
     τ = tensor00Scalar (I := I) (M := M) x τ • unitZeroSec (I := I) (M := M) x := by
@@ -108,7 +102,6 @@ private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
     (tensor00Scalar_apply (I := I) (M := M) x τ (fun k : Fin 0 => k.elim0)).symm]
   rw [smul_eq_mul, mul_one]
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
     tensor0SToTensorRS (I := I) (M := M) x
@@ -127,7 +120,6 @@ private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x)
   conv_rhs => rw [tensor0S_zero_span (I := I) (M := M) x τ]
   rw [ContinuousLinearMap.map_smul]
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     tensor0SToTensorRS (I := I) (M := M) x (C - D) =
@@ -151,7 +143,6 @@ private lemma tensor0SAsRS_sub (t : ℕ) (x : M) (C D : Tensor0SSpace t I x) :
     ring
   exact h
 
-set_option linter.unusedSectionVars false in
 
 private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
@@ -159,7 +150,6 @@ private lemma rs_sub_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A) τ -
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from B) τ := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
     (τ : Tensor0SSpace 0 I x) :
@@ -167,7 +157,6 @@ private lemma rs_add_apply' {t : ℕ} {x : M} (A B : TensorRSSpace 0 t I x)
       (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from A) τ +
         (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from B) τ := rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensorCov_toFun_sub (g : SmoothRiemannianMetric I M) (k : ℕ)
     {P Q : Π y : M, TensorRSSpace 0 k I y} {x : M}
@@ -193,7 +182,6 @@ private lemma tensorCov_toFun_sub (g : SmoothRiemannianMetric I M) (k : ℕ)
     funext fun y => sub_add_cancel (P y) (Q y)] at hadd
   exact eq_sub_of_add_eq hadd.symm
 
-set_option linter.unusedSectionVars false in
 
 private lemma curry_covGrad_unit_read (g : SmoothRiemannianMetric I M) (k : ℕ)
     (P : SmoothCcTensor g 0 k) (y : M) (w : TangentSpace I y) :
@@ -206,7 +194,6 @@ private lemma curry_covGrad_unit_read (g : SmoothRiemannianMetric I M) (k : ℕ)
         (unitZeroSec (I := I) (M := M) y) :=
   curry_unitGradFieldGen_eq (I := I) (M := M) g k P y w
 
-set_option linter.unusedSectionVars false in
 
 private lemma slotRead_covGrad_dir (g : SmoothRiemannianMetric I M) (k : ℕ)
     (P : SmoothCcTensor g 0 k) (y : M) (w : TangentSpace I y) :
@@ -219,7 +206,6 @@ private lemma slotRead_covGrad_dir (g : SmoothRiemannianMetric I M) (k : ℕ)
   rw [curry_covGrad_unit_read (I := I) (M := M) g k P y w]
   exact tensor0SAsRS_rs_unit (I := I) (M := M) k y _
 
-set_option linter.unusedSectionVars false in
 
 private lemma slotRead_covGrad_section (g : SmoothRiemannianMetric I M) (k : ℕ)
     (P : SmoothCcTensor g 0 k) (B : Π b : M, TangentSpace I b) :

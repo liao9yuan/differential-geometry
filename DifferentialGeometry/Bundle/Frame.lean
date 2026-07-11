@@ -4,7 +4,6 @@ Authors: Jack McCarthy
 import Mathlib.Geometry.Manifold.VectorBundle.LocalFrame
 import Mathlib.Geometry.Manifold.BumpFunction
 
-set_option autoImplicit false
 
 open scoped Manifold Topology ContDiff
 open Bundle Filter

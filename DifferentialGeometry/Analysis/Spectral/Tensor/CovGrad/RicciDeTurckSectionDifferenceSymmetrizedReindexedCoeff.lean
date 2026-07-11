@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -46,7 +45,6 @@ noncomputable def ccTensor02Symm (g₀ : SmoothRiemannianMetric I M) (T : Smooth
     SmoothCcTensor g₀ 0 2 :=
   (1 / 2 : ℝ) • (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)
 
-set_option linter.unusedSectionVars false in
 
 lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) :
@@ -56,7 +54,6 @@ lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
@@ -70,7 +67,6 @@ private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
   funext k
   fin_cases k <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 private lemma ccTensorBilin_domDomCongrSection_swap (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
@@ -85,7 +81,6 @@ private lemma ccTensorBilin_domDomCongrSection_swap (g₀ : SmoothRiemannianMetr
   funext k
   fin_cases k <;> simp [Equiv.swap_apply_left, Equiv.swap_apply_right]
 
-set_option linter.unusedSectionVars false in
 
 lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
@@ -96,7 +91,6 @@ lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
       ← unitModel_eq_ccTensorBilin (I := I) (M := M) g₀ T b u w]
   rw [unitModel_add2 (I := I) (M := M) g₀ S T b, ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 
 lemma ccTensorBilin_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
@@ -105,7 +99,6 @@ lemma ccTensorBilin_smul (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 
 theorem ccTensorBilin_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (b : M) (u w : TangentSpace I b) :
@@ -115,7 +108,6 @@ theorem ccTensorBilin_symmS (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTen
     ccTensorBilin_domDomCongrSection_swap (I := I) (M := M) g₀ T b u w,
     ccTensorBilinSymm_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem symmS_hbil_of_realize (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (hg₁ : ∀ (b : M) (u w : TangentSpace I b),
@@ -126,7 +118,6 @@ theorem symmS_hbil_of_realize (g₀ g₁ : SmoothRiemannianMetric I M) (T : Smoo
   rw [ccTensorBilin_symmS (I := I) (M := M) g₀ T b u w, hg₁ b u w]
   ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_domDomCongrSection_swap_add (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (x : M) :
@@ -144,7 +135,6 @@ private lemma unitModel_domDomCongrSection_swap_add (g₀ : SmoothRiemannianMetr
     ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.domDomCongr_apply,
     ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_domDomCongrSection_swap_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
@@ -164,7 +154,6 @@ private lemma unitModel_domDomCongrSection_swap_smul (g₀ : SmoothRiemannianMet
   rw [ContinuousMultilinearMap.domDomCongr_apply, ContinuousMultilinearMap.smul_apply,
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedSectionVars false in
 
 lemma unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
@@ -455,7 +444,6 @@ def palatiniTracedPrincipalRemainderCrossMetric (g₀ gop gcov : SmoothRiemannia
   secondKoszulFrameRemainder (I := I) (M := M) g₀ gop S' Z Y x
     + alignmentTraceRemainderCross (I := I) (M := M) g₀ gop gcov Z Y x
 
-set_option linter.unusedSectionVars false in
 
 theorem palatini_tracedPrincipal_cross_eq_combinedTrace
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
@@ -509,7 +497,6 @@ def palatiniTracedPrincipalDiffRemainder (g₀ g₁ g₁' : SmoothRiemannianMetr
   palatiniTracedPrincipalRemainder (I := I) (M := M) g₀ g₁ S Z Y x
     - palatiniTracedPrincipalRemainderCrossMetric (I := I) (M := M) g₀ g₁ g₁' S' Z Y x
 
-set_option linter.unusedSectionVars false in
 
 theorem palatini_tracedPrincipalDiff_covector_eq_combinedTrace
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -603,7 +590,6 @@ def palatiniTracedPrincipalZRemainderCross (g₀ gop gcov : SmoothRiemannianMetr
             smoothExtensionTangent_contMDiff (I := I) x ((chartModelBasis E) i)⟩)
           W x (V x)) i)
 
-set_option linter.unusedSectionVars false in
 
 theorem palatini_tracedPrincipal_Zslot_cross_eq_combinedTrace
     (g₀ gop gcov : SmoothRiemannianMetric I M) (S' : SmoothCcTensor g₀ 0 2)
@@ -672,7 +658,6 @@ def palatiniTracedPrincipalZDiffRemainder (g₀ g₁ g₁' : SmoothRiemannianMet
   palatiniTracedPrincipalZRemainder (I := I) (M := M) g₀ g₁ S V W x
     - palatiniTracedPrincipalZRemainderCross (I := I) (M := M) g₀ g₁ g₁' S' V W x
 
-set_option linter.unusedSectionVars false in
 
 theorem palatini_tracedPrincipalDiff_Zslot_eq_combinedTrace
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -748,7 +733,6 @@ noncomputable def reindexCoeffFib (σ' : Equiv.Perm (Fin 4)) (x : M)
             σ').toContinuousLinearEquiv.toContinuousLinearMap).comp
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap))
 
-set_option linter.unusedSectionVars false in
 
 theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
@@ -761,7 +745,6 @@ theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
     ContinuousLinearMap.comp_apply]
   congr 1
 
-set_option linter.unusedSectionVars false in
 
 private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
     (A B : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
@@ -772,7 +755,6 @@ private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
     ContinuousLinearMap.add_apply]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) :
@@ -836,7 +818,6 @@ noncomputable def reindexCoeff (g₀ : SmoothRiemannianMetric I M)
       contMDiff_toFun := reindexCoeffFib_contMDiff (I := I) (M := M) g₀ R σ' }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem reindexCoeff_toSection (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) (x : M) :
@@ -847,7 +828,6 @@ set_option linter.unusedSectionVars false in
             R.toSection x)) := rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem reindexCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4))

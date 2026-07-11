@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGra
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -32,7 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (B : ℝ) (hB : 0 ≤ B)
@@ -69,7 +67,6 @@ theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left
   rw [mul_pow]
   exact hsq
 
-set_option linter.unusedSectionVars false in
 theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right
     (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (B : ℝ) (hB : 0 ≤ B)
@@ -110,7 +107,6 @@ theorem operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right
   rw [mul_pow]
   exact hsq
 
-set_option linter.unusedSectionVars false in
 theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (B : ℝ) (hB : 0 ≤ B)
@@ -120,7 +116,6 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_left
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
   exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_left (I := I) (M := M) g 0 r s Φ W B hB hΦ
 
-set_option linter.unusedSectionVars false in
 theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (B : ℝ) (hB : 0 ≤ B)
@@ -130,7 +125,6 @@ theorem operatorFieldApply_l2_le_of_pointwise_fiberNormSq_bound_right
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g r s Φ W]
   exact operatorFieldCompose_l2_le_of_pointwise_fiberNormSq_bound_right (I := I) (M := M) g 0 r s Φ W B hB hW
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_iteratedCovGrad_fiberNormSq_le_smoothCcToTensorHs_sq
@@ -210,17 +204,15 @@ theorem exists_iteratedCovGrad_fiberNormSq_le_smoothCcToTensorHs_sq
   refine le_trans hsq_le ?_
   rw [hNm_def, mul_pow]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 theorem deTurckPrincipalCometricCoeff_perOrder_l2_ballUniform_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R) →
         ∀ (i : ℕ), i ≤ a →
@@ -270,7 +262,6 @@ theorem deTurckPrincipalCometricCoeff_perOrder_l2_ballUniform_generic
     le_trans (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)) hi
   exact hKslot g₁ P hδ_le hδ htie hPball j hj_le
 
-set_option linter.unusedVariables false in
 private theorem productGridTerm_integral_le_topOrderJetSq
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
@@ -648,16 +639,15 @@ private theorem productGridTerm_integral_le_topOrderJetSq
             mul_le_mul_of_nonneg_right (pow_le_pow_right₀ hMbar1 (by omega)) (sq_nonneg Rtop)
           exact le_trans e4 e5
 
-set_option linter.unusedVariables false in
 private theorem gInvDiffSlotCoeff_perOrder_l2_tame
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R₀) →
         ∀ (i : ℕ),
@@ -938,16 +928,15 @@ private theorem gInvDiffSlotCoeff_perOrder_l2_tame
         mul_nonneg hKival_nn (by positivity)
       simpa using this
 
-set_option linter.unusedVariables false in
 theorem deTurckPrincipalCometricCoeff_perOrder_l2_tame_generic
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R₀ : ℝ} (hR₀ : 0 ≤ R₀)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ K : ℕ → ℝ, (∀ i, 0 ≤ K i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j P‖ ≤ R₀) →
         ∀ (i : ℕ),

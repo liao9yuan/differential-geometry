@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnect
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -43,7 +42,6 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma riemannianFiberNormSq_smul_value (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -68,7 +66,6 @@ private def gInvQuadRefoldWeight : SmoothCcTensor g₀ 2 1 :=
       (slotExtend (I := I) (M := M) g₀ 1 2 (gInvQuadRefoldArm (I := I) (M := M) g₀ g₁))
       (Equiv.swap (0 : Fin 2) 1))
 
-set_option linter.unusedSectionVars false in
 lemma tensor0S_rank0_eq_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
     c = Tensor0SSpace.toModel c (fun i : Fin 0 => i.elim0) •
       unitTensor (I := I) (M := M) x := by
@@ -83,7 +80,6 @@ lemma tensor0S_rank0_eq_smul_unit (x : M) (c : Tensor0SSpace 0 I x) :
   funext i
   exact i.elim0
 
-set_option linter.unusedSectionVars false in
 private theorem orthoFrame_basis_at_center (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
       ∀ i, bse i = smoothOrthoFrame (I := I) g₀ x i x := by
@@ -115,7 +111,6 @@ private theorem orthoFrame_basis_at_center (x : M) :
   exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
-set_option linter.unusedSectionVars false in
 theorem orthoFrame_expansion_at_center (x : M) (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
       g₀.inner x u (smoothOrthoFrame (I := I) g₀ x i x) •
@@ -146,7 +141,6 @@ theorem orthoFrame_expansion_at_center (x : M) (u : TangentSpace I x) :
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
-set_option linter.unusedSectionVars false in
 lemma connDiffLowered_unitModel_value (x : M) (m : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (connDiffLoweredCc (I := I) g₀ g₁) x m =
       g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (m 0) (m 1)) (m 2) := by
@@ -165,7 +159,6 @@ lemma connDiffLowered_unitModel_value (x : M) (m : Fin 3 → TangentSpace I x) :
   rw [hbase]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma interiorProduct_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -178,7 +171,6 @@ private lemma interiorProduct_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma connDiffSection_eq_raise_lowered :
     connDiffSection (I := I) g₁ g₀ =
@@ -241,7 +233,6 @@ private lemma connDiffSection_eq_raise_lowered :
     Matrix.cons_val_two, Matrix.tail_cons]
   rw [g₀.symm x u (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (YZ 0) (YZ 1))]
 
-set_option linter.unusedSectionVars false in
 lemma rfns_icg_connDiffLowered_eq_connDiffSection (n : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ 0 (3 + n) x
         ((iteratedCovGrad (I := I) g₀ 0 3 n (connDiffLoweredCc (I := I) g₀ g₁)).toSection x) =
@@ -267,7 +258,6 @@ lemma rfns_icg_connDiffLowered_eq_connDiffSection (n : ℕ) (x : M) :
           ((iteratedCovGrad (I := I) g₀ 1 2 n (connDiffSection (I := I) g₁ g₀)).toSection x) := by
         rw [connDiffSection_eq_raise_lowered (I := I) (M := M) g₀ g₁]
 
-set_option linter.unusedSectionVars false in
 private lemma cometricDoubleTraceFib_toModel_center (p : ℕ) (x : M)
     (D : Tensor0SSpace (p + 2) I x) (m : Fin p → E) :
     Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g₀ p x D) m =
@@ -285,7 +275,6 @@ private lemma cometricDoubleTraceFib_toModel_center (p : ℕ) (x : M)
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
     (Tensor0SSpace.toModel D) m
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma slotExtend_connDiffLowered_toModel (x : M)
     (om : Tensor0SSpace 1 I x) (v0 : E) (vs : Fin 3 → E) :
@@ -321,7 +310,6 @@ private lemma slotExtend_connDiffLowered_toModel (x : M)
   rw [unitModel] at hu
   exact hu
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma gInvQuadRefoldArm_toModel (x : M) (om : Tensor0SSpace 1 I x) (m : Fin 2 → E) :
     Tensor0SSpace.toModel
@@ -351,7 +339,6 @@ private lemma gInvQuadRefoldArm_toModel (x : M) (om : Tensor0SSpace 1 I x) (m : 
     (Fin.cons ((smoothOrthoFrame (I := I) g₀ x c x : TangentSpace I x) : E) m)]
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma gInvQuadRefoldWeight_toModel (x : M) (D : Tensor0SSpace 2 I x) (m : Fin 1 → E) :
     Tensor0SSpace.toModel
@@ -419,7 +406,6 @@ private lemma gInvQuadRefoldWeight_toModel (x : M) (D : Tensor0SSpace 2 I x) (m 
     funext i
     fin_cases i <;> rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private theorem gInvDiffQuadResidualField_eq_refold :
     gInvDiffQuadResidualField (I := I) (M := M) g₀ g₁ =
@@ -562,7 +548,6 @@ private theorem gInvDiffQuadResidualField_eq_refold :
             (gInvQuadRefoldArm (I := I) (M := M) g₀ g₁)
             (gInvQuadRefoldWeight (I := I) (M := M) g₀ g₁)).toSection x) D) v := hRHS.symm
 
-set_option linter.unusedSectionVars false in
 private lemma sum_range_mono_of_nonneg (a : ℕ → ℝ) (ha : ∀ j, 0 ≤ a j)
     {m n : ℕ} (hmn : m ≤ n) :
     ∑ w ∈ Finset.range m, a w ≤ ∑ w ∈ Finset.range n, a w := by
@@ -570,7 +555,6 @@ private lemma sum_range_mono_of_nonneg (a : ℕ → ℝ) (ha : ∀ j, 0 ≤ a j)
   intro j _ _
   exact ha j
 
-set_option linter.unusedSectionVars false in
 private lemma sum_rect_le_sum_triangle (a : ℕ → ℝ) (ha : ∀ j, 0 ≤ a j)
     {k l i : ℕ} (hkl : k + l ≤ i) :
     (∑ j₁ ∈ Finset.range (k + 1), a j₁) * (∑ j₂ ∈ Finset.range (l + 1), a j₂) ≤
@@ -598,7 +582,6 @@ private lemma sum_rect_le_sum_triangle (a : ℕ → ℝ) (ha : ∀ j, 0 ≤ a j)
 
 end helpers
 
-set_option linter.unusedVariables false in
 
 theorem exists_riemannianFiberNormSq_iteratedCovGrad_gInvDiffQuadResidualField_connDiffSection_diagonalProductGrid
     (g₀ : SmoothRiemannianMetric I M) :
@@ -975,16 +958,15 @@ theorem exists_riemannianFiberNormSq_iteratedCovGrad_gInvDiffQuadResidualField_c
                   (connDiffSection (I := I) g₁ g₀)).toSection x) := by
         rw [mul_assoc]
 
-set_option linter.unusedVariables false in
 
 theorem riemannianFiberNormSq_iteratedCovGrad_gInvDiffQuadResidualFieldInputSymm_boundedFactorGridWindow_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ C : ℕ → ℝ, (∀ i, 0 ≤ C i) ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        (htie : ∀ (y : M) (v w : TangentSpace I y),
+        (_htie : ∀ (y : M) (v w : TangentSpace I y),
           g₁.inner y v w = g₀.inner y v w + ccTensorBilinSymm (I := I) g₀ P y v w)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀) (hδ0 : 0 ≤ δ)
-        (hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀) (_hδ0 : 0 ≤ δ)
+        (_hbound : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
         (i : ℕ) (x : M),
         riemannianFiberNormSq (I := I) (M := M) g₀ 2 (2 + i) x
             ((iteratedCovGrad (I := I) g₀ 2 2 i

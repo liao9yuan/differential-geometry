@@ -10,10 +10,8 @@ import Mathlib.Analysis.InnerProductSpace.Completion
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option warningAsError false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -126,7 +124,6 @@ instance : Module ℝ (SmoothCcTensorHs g r s k) :=
 
 end SmoothCcTensorHs
 
-set_option linter.unusedSectionVars false in
 
 private noncomputable def hkIntegrand
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -152,7 +149,6 @@ private noncomputable def hkIntegrand
           (fun i => EuclideanSpace.basisFun
             (Fin (Module.finrank ℝ E)) ℝ (basisIdx i)))
 
-set_option linter.unusedSectionVars false in
 
 private noncomputable def hkOneTerm
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -165,7 +161,6 @@ private noncomputable def hkOneTerm
     ∂(volume :
       Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
 
-set_option linter.unusedSectionVars false in
 
 private noncomputable def sobolevHkInner
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -177,7 +172,6 @@ private noncomputable def sobolevHkInner
         ∑ basisIdx : Fin j → Fin (Module.finrank ℝ E),
           hkOneTerm (I := I) (M := M) T S α IJ j basisIdx
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkIntegrand_continuousOn
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -308,7 +302,6 @@ private lemma hkIntegrand_continuousOn
   exact hPOU_pull_cont.mul ((h_eval_contOn T.toCcTensor).mul
     (h_eval_contOn S.toCcTensor))
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkIntegrand_zero_off_compact
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -340,7 +333,6 @@ private lemma hkIntegrand_zero_off_compact
   unfold hkIntegrand
   rw [hPOU_y, zero_mul]
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkIntegrand_zero_of_notMem_finset
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -356,7 +348,6 @@ private lemma hkIntegrand_zero_of_notMem_finset
   unfold hkIntegrand
   rw [hPOU_zero, zero_mul]
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkOneTerm_zero_of_notMem_finset
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -375,7 +366,6 @@ private lemma hkOneTerm_zero_of_notMem_finset
   rw [h]
   simp
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkIntegrand_integrableOn
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -439,7 +429,6 @@ private lemma hkIntegrand_integrableOn
   rw [← MeasureTheory.integrable_indicator_iff hT_meas]
   exact h_int_T
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkIntegrand_symm
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -453,7 +442,6 @@ private lemma hkIntegrand_symm
   unfold hkIntegrand
   ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkIntegrand_add_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -477,7 +465,6 @@ private lemma hkIntegrand_add_left
   rw [hadd]
   ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkIntegrand_smul_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -500,7 +487,6 @@ private lemma hkIntegrand_smul_left
   simp only [smul_eq_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkOneTerm_symm
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -516,7 +502,6 @@ private lemma hkOneTerm_symm
   intro y _
   exact hkIntegrand_symm (I := I) (M := M) T S α IJ j basisIdx y
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkOneTerm_add_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -536,7 +521,6 @@ private lemma hkOneTerm_add_left
   intro y hy
   exact hkIntegrand_add_left (I := I) (M := M) T₁ T₂ S α IJ j basisIdx hy
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkOneTerm_smul_left
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -553,7 +537,6 @@ private lemma hkOneTerm_smul_left
   intro y hy
   exact hkIntegrand_smul_left (I := I) (M := M) c T S α IJ j basisIdx hy
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkOneTerm_self_nonneg
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -593,7 +576,6 @@ private lemma hkOneTerm_self_nonneg
     simpa [sq] using h
   exact mul_nonneg hPOU_nn hsq_nn
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkOneTerm_self_eq_lintegral_toReal
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -732,7 +714,6 @@ private lemma hkOneTerm_self_eq_lintegral_toReal
     exact h_int.aestronglyMeasurable
   exact h_int_eq
 
-set_option linter.unusedSectionVars false in
 
 private lemma hkInner_self_eq_normSq_toReal
     {g : SmoothRiemannianMetric I M} {r s k : ℕ}
@@ -874,7 +855,6 @@ private lemma hkInner_self_eq_normSq_toReal
     intro basisIdx hbasisIdx
     exact h_each_lt_top α hα IJ hIJ j hj basisIdx hbasisIdx
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instPreInnerProductSpaceCore
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
@@ -941,14 +921,12 @@ noncomputable instance instPreInnerProductSpaceCore
     intro basisIdx _
     exact hkOneTerm_smul_left (I := I) (M := M) c T S α IJ j basisIdx
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instSeminormedAddCommGroup
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
     SeminormedAddCommGroup (SmoothCcTensorHs g r s k) :=
   InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := ℝ)
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instInnerProductSpace
     {g : SmoothRiemannianMetric I M} {r s k : ℕ} :
@@ -968,7 +946,6 @@ noncomputable def toHs {g : SmoothRiemannianMetric I M} {r s : ℕ} (k : ℕ)
 
 end SmoothCcTensor
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorPouSobolevHilbert_norm_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)

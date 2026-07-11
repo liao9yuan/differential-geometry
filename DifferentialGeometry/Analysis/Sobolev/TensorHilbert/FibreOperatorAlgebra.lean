@@ -35,7 +35,6 @@ section Neumann
 variable {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
   {Dom : Type*} [NormedAddCommGroup Dom] [NormedSpace ℝ Dom]
 
-set_option linter.unusedSectionVars false
 
 theorem contDiffOn_inverseGram_clm
     (g₀ : SmoothRiemannianMetric I M) {s : Set Dom}

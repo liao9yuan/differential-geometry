@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

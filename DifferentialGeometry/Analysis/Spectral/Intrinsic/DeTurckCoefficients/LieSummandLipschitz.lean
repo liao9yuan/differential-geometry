@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorF
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -41,7 +40,6 @@ private lemma exists_bound_of_contDiffOn_int
     exact ⟨|f y₀|, abs_nonneg _, fun y hy => hy₀max hy⟩
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
-set_option linter.unusedFintypeInType false in
 
 private lemma exists_uniform_bound_family
     {ι : Type*} [Fintype ι] [Nonempty ι]
@@ -763,7 +761,6 @@ private lemma sum_prod_sub_abs_le
       _ = (Ca * Mb + Ma * Cb) * jet := by ring
   · simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul, le_refl]
 
-set_option linter.unusedFintypeInType false in
 
 private lemma exists_partialDeriv_chartDeTurckVFComp_lipschitz_alldir
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)

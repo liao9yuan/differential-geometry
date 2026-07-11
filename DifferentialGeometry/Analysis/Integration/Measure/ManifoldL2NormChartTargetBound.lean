@@ -100,7 +100,6 @@ private lemma enorm_sq_apply_eq_ofReal_pushedNormSq
   rw [henorm_eq, hpush_eq, ← hnorm_eq]
   rw [← ENNReal.ofReal_pow (norm_nonneg _) 2]
 
-set_option linter.unusedSectionVars false in
 
 theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -402,7 +401,6 @@ theorem manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     rw [← hpull_out]
     exact hsum_bound
 
-set_option linter.unusedSectionVars false in
 
 theorem uniform_manifold_l2_norm_sq_le_finset_sum_chart_target_l2_norm_sq
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

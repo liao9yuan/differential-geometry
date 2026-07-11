@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -32,7 +31,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor00Scalar_unitZeroSec (x : M) :
     tensor00Scalar (I := I) (M := M) x (unitZeroSec (I := I) (M := M) x) = 1 := by
@@ -42,7 +40,6 @@ private lemma tensor00Scalar_unitZeroSec (x : M) :
   rw [unitZeroSec_apply (I := I) (M := M) x, Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensor0SAsRS_unit_eval (t : ℕ) (x : M) (C : Tensor0SSpace t I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from
@@ -55,7 +52,6 @@ private lemma tensor0SAsRS_unit_eval (t : ℕ) (x : M) (C : Tensor0SSpace t I x)
     tensor0SAsRS_apply (I := I) (M := M) x C (unitZeroSec (I := I) (M := M) x)]
   rw [tensor00Scalar_unitZeroSec (I := I) (M := M) x, one_smul]
 
-set_option linter.unusedSectionVars false in
 
 private lemma contMDiff_tensor00Scalar_read
     (Y : Cₛ^∞⟮I; Tensor0SModel 0 ℝ E, (fun z : M => Tensor0SSpace 0 I z)⟯) :
@@ -88,7 +84,6 @@ private lemma contMDiff_tensor0SAsRS_wrap (t : ℕ) {C : Π y : M, Tensor0SSpace
       tensor00Scalar (I := I) (M := M) y (Y y) • C y from rfl]
   rw [← tensor0SAsRS_apply (I := I) (M := M) y (C y) (Y y)]
 
-set_option linter.unusedSectionVars false in
 
 private lemma contMDiff_unitEvalSection (g : SmoothRiemannianMetric I M) (k : ℕ)
     (Z : SmoothCcTensor g 0 k) :
@@ -111,7 +106,6 @@ private lemma contMDiff_unitEvalSection (g : SmoothRiemannianMetric I M) (k : �
     (E₁ := fun z : M => Tensor0SSpace 0 I z) (E₂ := fun z : M => Tensor0SSpace k I z)
     (F₁ := Tensor0SModel 0 ℝ E) (F₂ := Tensor0SModel k ℝ E) hϕ hv
 
-set_option linter.unusedSectionVars false in
 
 private lemma contMDiff_slot0Read (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 (s + 1)) {X : Π b : M, TangentSpace I b}

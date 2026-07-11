@@ -610,13 +610,12 @@ private theorem principal_pointwise_bound
     rw [hη_zero]
     simp
 
-set_option linter.unusedVariables false in
 
 theorem principal_term_ge_lambda_norm_sq
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (k : Fin d) {h : ℝ} (hh : h ≠ 0)
+    (k : Fin d) {h : ℝ} (_hh : h ≠ 0)
     (hh_supp : Metric.cthickening |h| (tsupport η) ⊆ Ω) :
     B.lam * ∫ x, (η x)^2 * (∑ i : Fin d,
         DifferentialGeometry.Analysis.Sobolev.diffQuot k h

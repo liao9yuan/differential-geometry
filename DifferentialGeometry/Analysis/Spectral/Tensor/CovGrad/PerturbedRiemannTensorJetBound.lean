@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -33,7 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -67,7 +65,6 @@ private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (
   refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-set_option linter.unusedSectionVars false in
 private theorem riemannianFiberNormSq_le_of_componentSq_sum_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     (C : ℝ)
@@ -92,8 +89,6 @@ private theorem riemannianFiberNormSq_le_of_componentSq_sum_le
         simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul,
           Nat.cast_pow]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_riemannBiContrFib_perturbed_rfns_le_of_jetEnvelope
@@ -101,9 +96,9 @@ theorem exists_riemannBiContrFib_perturbed_rfns_le_of_jetEnvelope
     (hB : 0 ≤ B) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -124,8 +119,6 @@ theorem exists_riemannBiContrFib_perturbed_rfns_le_of_jetEnvelope
     (show TensorRSSpace 2 2 I x from TensorRSSpace.ofCLM (riemannBiContrFib (I := I) g₁ x)) C
     (fun e horth K => hC g₁ P hδ_le hδ htie x henv e horth K)
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_rfns_le_of_jetEnvelope
@@ -133,9 +126,9 @@ theorem exists_ricciArmOrder0CurvCoeffFib_perturbed_rfns_le_of_jetEnvelope
     (hB : 0 ≤ B) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),

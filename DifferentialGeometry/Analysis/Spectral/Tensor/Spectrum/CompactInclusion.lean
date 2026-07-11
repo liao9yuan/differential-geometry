@@ -6,7 +6,6 @@ import Mathlib.Topology.Sequences
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -34,7 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 lemma norm_TensorH1ComplToTensorL2_apply_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -63,7 +61,6 @@ lemma norm_TensorH1ComplToTensorL2_apply_le
     rw [h_coe_norm]
     exact SmoothCcTensorH1.l2Norm_le_h1Norm (I := I) (M := M) a
 
-set_option linter.unusedSectionVars false in
 
 lemma denseRange_smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -77,7 +74,6 @@ lemma denseRange_smoothToTensorH1Compl
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-set_option linter.unusedSectionVars false in
 
 private lemma exists_smooth_close_to_TensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

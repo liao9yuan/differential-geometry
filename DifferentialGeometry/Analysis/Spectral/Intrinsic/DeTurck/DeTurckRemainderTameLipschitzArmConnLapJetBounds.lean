@@ -185,7 +185,6 @@ private theorem pointwiseTensorCurv_iteratedCovGrad_fiberNormSq_jet_le
             (mul_le_mul_of_nonneg_left hsubdR (hccdR_nn p)) (by norm_num)
     _ = (2 * ccR p + 2 * ccdR p) * FULL := by ring
 
-set_option linter.style.show false in
 
 private theorem iteratedRoughLapGrad_commutator_fiberNormSq_jet_le_aux
     (g₀ : SmoothRiemannianMetric I M) (m : ℕ) :
@@ -244,7 +243,7 @@ private theorem iteratedRoughLapGrad_commutator_fiberNormSq_jet_le_aux
       rw [iteratedCovGrad_succ (I := I) (M := M) g₀ 0 s m S,
         iteratedCovGrad_succ (I := I) (M := M) g₀ 0 s m
           (rawTensorConnLapSmooth (I := I) g₀ 0 s S)]
-      show rawTensorConnLapSmooth (I := I) g₀ 0 (s + m + 1)
+      change rawTensorConnLapSmooth (I := I) g₀ 0 (s + m + 1)
             (covGrad (I := I) (M := M) g₀ 0 (s + m) (iteratedCovGrad (I := I) g₀ 0 s m S)) -
           covGrad (I := I) (M := M) g₀ 0 (s + m)
             (iteratedCovGrad (I := I) g₀ 0 s m (rawTensorConnLapSmooth (I := I) g₀ 0 s S)) =
@@ -865,7 +864,7 @@ theorem deTurckRHSArmG0_symmS_eq
     deTurckRHSArmG0 (I := I) g₀ g_bg (ccTensor02Symm (I := I) g₀ T) hδ₁_lt hδ₁ =
       deTurckRHSArmG0 (I := I) g₀ g_bg T hδ_lt hδ := by
   refine SmoothCcTensor.ext ?_
-  show (deTurckRHSSection (I := I) g_bg
+  change (deTurckRHSSection (I := I) g_bg
       (tensorSectionRealizeMetric (I := I) g₀ (ccTensor02Symm (I := I) g₀ T) hδ₁_lt hδ₁)).toSection =
     (deTurckRHSSection (I := I) g_bg
       (tensorSectionRealizeMetric (I := I) g₀ T hδ_lt hδ)).toSection

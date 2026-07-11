@@ -1055,7 +1055,6 @@ theorem chartBilinear_diffQuot_ibp_per_ij
   rw [← h_rhs_eq, ← h_lhs_eq]
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_after_ibp_unconditional
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

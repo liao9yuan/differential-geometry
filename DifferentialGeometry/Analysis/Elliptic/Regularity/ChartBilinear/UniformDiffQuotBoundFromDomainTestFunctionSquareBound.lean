@@ -45,7 +45,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 set_option maxHeartbeats 1200000 in
-set_option linter.unusedVariables false in
 
 theorem chartBilinear_v_test_sq_discharge
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -55,10 +54,10 @@ theorem chartBilinear_v_test_sq_discharge
     (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     {N : ℝ} (hN : 0 ≤ N) (h_fderiv_eta : ∀ x : EuclN, ‖fderiv ℝ η x‖ ≤ N)
-    {Ω' : Set EuclN} (hΩ'_open : IsOpen Ω')
+    {Ω' : Set EuclN} (_hΩ'_open : IsOpen Ω')
     (hΩ'_chart : closure Ω' ⊆ chartTargetEuclid (I := I) (M := M) α)
-    (hΩ'_compact_closure : IsCompact (closure Ω'))
-    (hη_in_Ω' : tsupport η ⊆ Ω')
+    (_hΩ'_compact_closure : IsCompact (closure Ω'))
+    (_hη_in_Ω' : tsupport η ⊆ Ω')
     {R₀ : ℝ} (hR₀_pos : 0 < R₀)
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
       Metric.cthickening |h| (tsupport η) ⊆ Ω') :

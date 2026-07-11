@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Exponential.IntrinsicExpContinuity
 import Mathlib.Topology.Connected.PathConnected
 import Mathlib.Topology.UnitInterval
 
-set_option linter.unusedSectionVars false
 
 open Set Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal

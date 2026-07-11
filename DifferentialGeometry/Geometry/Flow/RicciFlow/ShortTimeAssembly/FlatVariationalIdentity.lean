@@ -70,7 +70,6 @@ theorem flatVariationalIdentity_eq_rawFderiv_add_movingTrivCorrection
   exact flatLinearization_eq_rawFderiv_add_movingTriv (I := I) (Φ_fam t x)
     (X : ∀ y : M, TangentSpace I y) (mfderiv I I (Φ_fam t : M → M) x v) hRdiff hCdiff
 
-set_option linter.unusedVariables false in
 theorem flat_raw_variational_identity
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (X : ℝ → ∀ x : M, TangentSpace I x)

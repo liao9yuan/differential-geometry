@@ -408,7 +408,6 @@ end LayerBoundsUnconditional
 
 section MainBoundUnconditional
 
-set_option linter.unusedVariables false in
 
 theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -423,7 +422,7 @@ theorem eigenvectorChartRHSDiffNumerator_eLpNorm_le
         (chartTargetEuclid (I := I) (M := M) α))
     (h_prev : MemWkp (d := Module.finrank ℝ E) 1 2 fChartEffPrev
       (chartTargetEuclid (I := I) (M := M) α))
-    (h_prev_zero : ∀ᵐ y ∂((volume : Measure EuclN).restrict
+    (_h_prev_zero : ∀ᵐ y ∂((volume : Measure EuclN).restrict
         (chartTargetEuclid (I := I) (M := M) α)),
       y ∉ chartPouKernel (I := I) (M := M) α → fChartEffPrev y = 0) :
     ∃ C : ℝ, 0 ≤ C ∧

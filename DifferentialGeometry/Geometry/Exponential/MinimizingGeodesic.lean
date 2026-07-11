@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Topology.Order.Compact
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -43,7 +42,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
@@ -75,7 +73,6 @@ private lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
-set_option linter.unusedSectionVars false
 
 lemma toModel_empty_eq_iso {y : M} (T : Tensor0SBundle.Tensor0SSpace 0 I y)
     (m : Fin 0 → TangentSpace I y) :
@@ -1761,16 +1758,14 @@ private lemma lichnerowiczFib_toModel_eq_fourTrace (g₀ : SmoothRiemannianMetri
   ring
 
 set_option maxRecDepth 16000 in
-set_option linter.unusedVariables false in
-set_option linter.style.show false in
 
 private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ_lt : δ < 1)
+    {δ : ℝ} (_hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ'_lt : δ' < 1)
+    {δ' : ℝ} (_hδ'_lt : δ' < 1)
     (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-    {s : ℝ} (hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
+    {s : ℝ} (_hs : s ∈ Set.Ioo (0 : ℝ) 1) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2
         (operatorFieldApply (I := I) (M := M) g₀ 4 2
           (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s)
@@ -1815,7 +1810,7 @@ private theorem lichnerowicz_velocitySecondCovGrad_eq_threeArm_symm
     have hm4 : m = ![m 0, m 1, m 2, m 3] := by
       funext j
       fin_cases j <;> rfl
-    show unitModel (I := I) (M := M) g₀ 4
+    change unitModel (I := I) (M := M) g₀ 4
         (velocitySecondCovGradCc (I := I) g₀ T T' hδ hδ' s) x m =
       Tensor0SBundle.Tensor0SSpace.toModel
         ((show Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ]

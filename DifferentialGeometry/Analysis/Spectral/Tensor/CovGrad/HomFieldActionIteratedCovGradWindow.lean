@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalc
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -27,7 +26,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M) (r m c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r m c I) (k : ℕ) :
@@ -128,7 +126,6 @@ theorem homFieldAction_iteratedCovGrad_expansion (g : SmoothRiemannianMetric I M
 
       abel
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetric I M)
     (r m c : ℕ) (Q : HomTensorRSField (E := E) (M := M) r m c I) :
@@ -222,7 +219,6 @@ private theorem riemannianFiberNormSq_congr_of_heq (g : SmoothRiemannianMetric I
   subst h
   rw [eq_of_heq hYZ]
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannianFiberNormSq_iteratedCovGrad_comp (g : SmoothRiemannianMetric I M) (r s j i : ℕ)
     (S : SmoothCcTensor g r s) (x : M) :
@@ -243,7 +239,6 @@ private theorem riemannianFiberNormSq_iteratedCovGrad_order_congr (g : SmoothRie
   subst h
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_appFullSec_on_jet_iteratedCovGrad_window_bound (g : SmoothRiemannianMetric I M)
     (r s j c : ℕ) (Q : HomTensorRSField (E := E) (M := M) r (s + j) c I) :

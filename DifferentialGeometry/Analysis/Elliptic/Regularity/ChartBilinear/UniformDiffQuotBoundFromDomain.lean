@@ -192,7 +192,6 @@ private theorem exists_smooth_metric_extension_with_density
   exact ⟨B, h_agree_a, h_agree_c⟩
 
 set_option maxHeartbeats 8000000 in
-set_option linter.unusedVariables false in
 
 theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -1376,7 +1375,6 @@ theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data_quantitative
   exact h_g_g_bd
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedVariables false in
 
 theorem chartBilinearH1Compl_uniform_diffQuot_bound_of_data
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

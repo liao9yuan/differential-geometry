@@ -22,7 +22,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -53,7 +52,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 lemma riemannianFiberNormSq_addsub4_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M) (u v w z : TensorRSSpace r s I x) :
@@ -74,7 +72,6 @@ lemma riemannianFiberNormSq_addsub4_le (g : SmoothRiemannianMetric I M)
   have hwz := riemannianFiberNormSq_add_le (I := I) (M := M) g r s x w z
   linarith
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannPalatiniRefoldC2Family_eq_symmS_kernel
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
@@ -103,7 +100,6 @@ theorem riemannPalatiniRefoldC2Family_eq_symmS_kernel
   rw [← h0, ← h1, ← h2, ← h3]
   module
 
-set_option linter.unusedSectionVars false in
 lemma ccTensorBilin_smul_local (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     smoothCcTensorBilinForm (I := I) g₀ (c • S) b u w =
@@ -111,7 +107,6 @@ lemma ccTensorBilin_smul_local (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorModel_smul,
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (hsymm : ∀ (x : M) (u w : TangentSpace I x),
@@ -142,7 +137,6 @@ lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
-set_option linter.unusedSectionVars false in
 
 theorem threeArmHjoint_const_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (F : SmoothCcTensor g₀ r 2) {δ δ' : ℝ} :
@@ -151,7 +145,6 @@ theorem threeArmHjoint_const_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
   rw [linearizedRicciThreeArmHjoint]
   exact (F.toSection.contMDiff.comp contMDiff_fst).contMDiffOn
 
-set_option linter.unusedSectionVars false in
 theorem threeArmHjoint_const_smul_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (c : ℝ) (A : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
     (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ')) :
@@ -165,7 +158,6 @@ theorem threeArmHjoint_const_smul_local (g₀ : SmoothRiemannianMetric I M) {r :
     (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
-set_option linter.unusedSectionVars false in
 lemma norm_add_sq_le_local (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) :
     ‖A + B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
@@ -181,7 +173,6 @@ private def backgroundRiemannCommWeightKernel (g₀ : SmoothRiemannianMetric I M
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdBgRArmWeight_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (m : Fin 4 → TangentSpace I x) :
@@ -242,7 +233,7 @@ private lemma bdBgRArmWeight_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
     (Tensor0SSpace.toModel Y) (fun j => (m j : E))]
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [hYval]
-  show Tensor0SSpace.toModel D
+  change Tensor0SSpace.toModel D
       ![((smoothOrthoFrame (I := I) g₀ x e x : TangentSpace I x) : E), (m 1 : E)] *
       unitModel (I := I) (M := M) g₀ 4
         (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀) x
@@ -254,7 +245,6 @@ private lemma bdBgRArmWeight_toModel (g₀ : SmoothRiemannianMetric I M) (x : M)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private theorem bdBgRComm_eq_refold (g₀ g : SmoothRiemannianMetric I M) :
     ricciArmOrder0BackgroundCurvatureCoeffField (I := I) (M := M) g₀ g =
@@ -295,7 +285,7 @@ private theorem bdBgRComm_eq_refold (g₀ g : SmoothRiemannianMetric I M) :
     (fun j => (v j : E))]
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [bdBgRArmWeight_toModel (I := I) (M := M) g₀ x D]
-  show Tensor0SSpace.toModel D
+  change Tensor0SSpace.toModel D
       (Fin.cons (show E from riemannOp (LeviCivita (I := I) g₀) x
           (smoothOrthoFrame (I := I) g x c x) (v 0) (v 1))
         (Fin.cons ((smoothOrthoFrame (I := I) g x c x : TangentSpace I x) : E)
@@ -348,7 +338,6 @@ def palatiniRicciFoldWeightBPerm : Equiv.Perm (Fin 6) :=
    fun i => (![1, 3, 2, 5, 4, 0] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
-set_option linter.unusedSectionVars false in
 private theorem bdOrthoFrameBasis_at_center (g₀ : SmoothRiemannianMetric I M) (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
       ∀ i, bse i = smoothOrthoFrame (I := I) g₀ x i x := by
@@ -380,7 +369,6 @@ private theorem bdOrthoFrameBasis_at_center (g₀ : SmoothRiemannianMetric I M) 
   exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
-set_option linter.unusedSectionVars false in
 private theorem bdOrthoFrame_expansion_at_center (g₀ : SmoothRiemannianMetric I M)
     (x : M) (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -412,7 +400,6 @@ private theorem bdOrthoFrame_expansion_at_center (g₀ : SmoothRiemannianMetric 
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
-set_option linter.unusedSectionVars false in
 private lemma bdCcTensorBilin_expand_left (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (u w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ S x u w =
@@ -424,7 +411,6 @@ private lemma bdCcTensorBilin_expand_left (g₀ : SmoothRiemannianMetric I M)
   refine Finset.sum_congr rfl fun e _ => ?_
   rw [map_smul (smoothCcTensorBilinForm (I := I) g₀ S x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma bdCcTensorBilin_expand_right (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (u w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ S x u w =
@@ -453,7 +439,6 @@ def palatiniRicciFoldWeightB (g₀ : SmoothRiemannianMetric I M)
           (riemannLoweredCc (I := I) (M := M) g₀ g₀ g₀)) S))
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdRicciFoldWeight_unitModel_gen (g₀ : SmoothRiemannianMetric I M)
     (σ : Equiv.Perm (Fin 6)) (S : SmoothCcTensor g₀ 0 2) (x : M) (m : Fin 4 → E) :
@@ -558,7 +543,6 @@ private lemma bdRicciFoldWeight_unitModel_gen (g₀ : SmoothRiemannianMetric I M
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdRicciFoldWeights_unitModel_eq_kernel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
@@ -730,7 +714,6 @@ private lemma bdRicciFoldWeights_unitModel_eq_kernel (g₀ : SmoothRiemannianMet
   rw [hA, hB]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma bdRicciFold_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
@@ -811,7 +794,6 @@ lemma bdRicciFold_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
@@ -834,7 +816,7 @@ private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
   rw [Tensor0SSpace.toModel_smul, Tensor0SSpace.toModel_smul,
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
   refine congrArg _ ?_
-  show unitModel (I := I) (M := M) g₀ 4
+  change unitModel (I := I) (M := M) g₀ 4
       (palatiniRicciFoldWeightA (I := I) (M := M) g₀ (c • T) +
         palatiniRicciFoldWeightB (I := I) (M := M) g₀ (c • T)) x m =
     unitModel (I := I) (M := M) g₀ 4
@@ -868,7 +850,6 @@ private lemma bdRicciFoldWeights_pair_smul (g₀ : SmoothRiemannianMetric I M)
   ring
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 12800000 in
 lemma bdRicciFoldXi_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) :
@@ -944,7 +925,6 @@ lemma bdRicciFoldXi_smul (g₀ : SmoothRiemannianMetric I M)
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem bdJointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
     {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     (A : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
@@ -979,7 +959,6 @@ theorem bdJointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       (f p₀.2) (A p₀)
 
-set_option linter.unusedSectionVars false in
 private lemma connDiffQuadraticMonomial_chartBasis_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
     (j k u v : Fin (Module.finrank ℝ E)) :
@@ -1018,7 +997,6 @@ private lemma connDiffQuadraticMonomial_chartBasis_eq (g₀ g₁ : SmoothRiemann
   rw [map_smul, ContinuousLinearMap.smul_apply, map_smul, ContinuousLinearMap.smul_apply,
     smul_eq_mul, houter c]
 
-set_option linter.unusedSectionVars false in
 private lemma palatiniRefoldGenJointGram_const_g0
     (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
     ChartGramFamilyJointSmoothNondegenerate (I := I) (fun _ : ℝ => g₀) α S := by
@@ -1030,7 +1008,6 @@ private lemma palatiniRefoldGenJointGram_const_g0
   · intro s₀ _ x hx
     exact chartGramMatrix_det_pos (I := I) g₀ α hx
 
-set_option linter.unusedSectionVars false in
 private lemma bdChartChristoffel_g0_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (α : M) (i j k : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -1061,7 +1038,6 @@ private lemma bdChartChristoffel_g0_jointContMDiffOn
     exact hm
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr (fun q _ => rfl) rfl
 
-set_option linter.unusedSectionVars false in
 private lemma bdRealizedFam_chartGramMatrix_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1100,7 +1076,6 @@ private lemma bdRealizedFam_chartGramMatrix_jointContMDiffOn
     rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hqx]
   · rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hxsrc]
 
-set_option linter.unusedSectionVars false in
 private lemma connDiffQuadraticCommKernel_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1164,7 +1139,6 @@ private lemma connDiffQuadraticCommKernel_realizedFam_jointContMDiffOn
     connDiffQuadraticMonomial_chartBasis_eq (I := I) (M := M) g₀
       (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α hxgood k u m v]
 
-set_option linter.unusedSectionVars false in
 private lemma bdAACommBiContrFib_toModel_chartα (g₀ g : SmoothRiemannianMetric I M)
     (α : M) {x : M}
     (hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -1215,7 +1189,6 @@ private lemma bdAACommBiContrFib_toModel_chartα (g₀ g : SmoothRiemannianMetri
     bilinFormToModel_symm_apply (TangentSpace I x) (Tensor0SSpace.toModel D) _ _]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma connDiffQuadraticCommBiContraction_applyY_chartCoord_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1293,7 +1266,6 @@ private lemma connDiffQuadraticCommBiContraction_applyY_chartCoord_jointContMDif
   rw [bdAACommBiContrFib_toModel_chartα (I := I) (M := M) g₀
     (realizedFam (I := I) g₀ T T' hδ hδ' p.2) α hxbase]
 
-set_option linter.unusedSectionVars false in
 private lemma bdAACommBiContrFibAppY_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -1389,7 +1361,6 @@ private lemma bdAACommBiContrFibAppY_realizedFam_jointContMDiffOn
     · exact (Bcmm.equivFun.symm_apply_apply _).symm
   exact hfinal
 
-set_option linter.unusedVariables false in
 
 theorem connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
@@ -1405,7 +1376,6 @@ theorem connDiffAACommBiContrFib_realizedFam_apply_section_jointContMDiffOn
       ((Set.univ : Set M) ×ˢ realizedSmallSet (δ := δ) (δ' := δ)) :=
   bdAACommBiContrFibAppY_realizedFam_jointContMDiffOn (I := I) (M := M) g₀ T 0 hδ hδZ Y
 
-set_option linter.unusedVariables false in
 
 theorem ricciArmOrder0AACommCoeffField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
@@ -1427,7 +1397,6 @@ theorem ricciArmOrder0AACommCoeffField_realizedFam_threeArmHjoint
   refine hCLM.congr (fun p _ => ?_)
   rfl
 
-set_option linter.unusedVariables false in
 
 theorem ricciArmOrder0BgRCommCoeffField_realizedFam_threeArmHjoint
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -75,7 +74,6 @@ theorem nablaRicci_contMDiff
     ricciTensor_pairing_contMDiff (I := I) g V.contMDiff hcovW
   exact (hterm1.sub hterm2).sub hterm3
 
-set_option linter.unusedSectionVars false in
 
 theorem nablaRicciBilin_chartBasis_contMDiffOn
     (g : SmoothRiemannianMetric I M)
@@ -125,7 +123,6 @@ theorem nablaRicciBilin_chartBasis_contMDiffOn
     hsmooth.congr_of_eventuallyEq hrw
   exact hAt.contMDiffWithinAt
 
-set_option linter.unusedSectionVars false in
 
 theorem nablaRicciEndo_contMDiff
     (g : SmoothRiemannianMetric I M)
@@ -174,7 +171,6 @@ def nablaRicSlotOpFib (g : SmoothRiemannianMetric I M)
           map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma nablaRicSlotOpFib_apply (g : SmoothRiemannianMetric I M)
@@ -187,7 +183,6 @@ set_option backward.isDefEq.respectTransparency false in
   rw [nablaRicSlotOpFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma nablaRicSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M)
@@ -207,7 +202,6 @@ lemma nablaRicSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M)
   rw [hcurry]
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem nablaRicSlotOpFib_contMDiff (g : SmoothRiemannianMetric I M)
@@ -279,7 +273,6 @@ def nablaRicSlotOpField (g : SmoothRiemannianMetric I M)
       contMDiff_toFun := nablaRicSlotOpFib_contMDiff (I := I) (M := M) g X s }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma nablaRicSlotOpField_toSection (g : SmoothRiemannianMetric I M)
@@ -294,7 +287,6 @@ def nablaRicTraceSection (g : SmoothRiemannianMetric I M)
   operatorFieldApply (I := I) (M := M) g (s + 1) (s + 1)
     (nablaRicSlotOpField (I := I) (M := M) g X s) (covGrad (I := I) (M := M) g 0 s S)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma nablaRicTraceSection_toSection (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ)
@@ -308,7 +300,6 @@ set_option linter.unusedSectionVars false in
     appCc_toSection (I := I) (M := M) g (s + 1) (s + 1)
       (nablaRicSlotOpField (I := I) (M := M) g X s) (covGrad (I := I) (M := M) g 0 s S) x]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem nablaRicTraceSection_apply_leadingSlot
@@ -344,7 +335,6 @@ theorem nablaRicTraceSection_apply_leadingSlot
       (covGrad (I := I) (M := M) g 0 s S).toSection x)
       (unitZeroSec (I := I) (M := M) x)) (nablaRicciEndo (I := I) g X x v0) vs]
 
-set_option linter.unusedSectionVars false in
 
 theorem leviCivita_covDeriv_ricEndoRaisedFib (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -416,7 +406,6 @@ theorem leviCivita_covDeriv_ricEndoRaisedFib (g : SmoothRiemannianMetric I M)
   rw [hsplit, ← hWx]
   linarith [hcomp', hnabla', hcorr, hraise]
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 private theorem ricSlotOp_core_curry_reading (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -511,7 +500,6 @@ private theorem ricSlotOp_core_curry_reading (g : SmoothRiemannianMetric I M) (s
   rw [hEndo, map_add]
   abel
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem tensorCovDerivAt_ricSlotOpField_eq_nablaRicSlotOpFib
@@ -541,7 +529,6 @@ theorem tensorCovDerivAt_ricSlotOpField_eq_nablaRicSlotOpFib
   congr 1
   exact ricSlotOp_core_curry_reading (I := I) (M := M) g s X x D (m 0)
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem covGrad_ricTraceSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
@@ -556,7 +543,6 @@ theorem covGrad_ricTraceSection_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
   covGrad_operatorFieldApply_eq (I := I) (M := M) g (s + 1) (s + 1)
     (ricSlotOpField (I := I) (M := M) g s) (covGrad (I := I) (M := M) g 0 s S)
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem tensorCovDerivAt_ricTraceSection_eq_nablaRicTrace_add

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrde
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -43,7 +42,6 @@ noncomputable def unitEvalSection
     (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from S.toSection y)
       (unitZeroSec (I := I) (M := M) y)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma unitEvalSection_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) (y : M) :
     unitEvalSection (I := I) (M := M) g s S y =

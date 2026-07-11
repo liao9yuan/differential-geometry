@@ -22,7 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 lemma smoothCcTensor_toSection_add_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -30,7 +29,6 @@ lemma smoothCcTensor_toSection_add_apply
     (S + T).toSection x = S.toSection x + T.toSection x := by
   rw [SmoothCcTensor.toSection_add]; rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma smoothCcTensor_toSection_smul_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -38,7 +36,6 @@ lemma smoothCcTensor_toSection_smul_apply
     (c • T).toSection x = c • (T.toSection x) := by
   rw [SmoothCcTensor.toSection_smul]; rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma smoothCcTensor_toSection_neg_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
@@ -46,7 +43,6 @@ lemma smoothCcTensor_toSection_neg_apply
     (-T).toSection x = -(T.toSection x) := by
   rw [SmoothCcTensor.toSection_neg]; rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma smoothCcTensor_toSection_zero_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (x : M) :
@@ -83,7 +79,6 @@ lemma bddAbove_section_norm_range
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma gSupVal_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) : 0 ≤ gSupVal (I := I) (M := M) g r s T := by
@@ -96,7 +91,6 @@ lemma gSupVal_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma gSupVal_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     gSupVal (I := I) (M := M) g r s 0 = 0 := by
@@ -114,7 +108,6 @@ lemma gSupVal_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma gSupVal_neg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -128,7 +121,6 @@ lemma gSupVal_neg (g : SmoothRiemannianMetric I M) (r s : ℕ)
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma gSupVal_add_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (S T : SmoothCcTensor g r s) :
@@ -152,7 +144,6 @@ lemma gSupVal_add_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma gSupVal_smul_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (c : ℝ) (T : SmoothCcTensor g r s) :
@@ -175,7 +166,6 @@ lemma gSupVal_smul_le (g : SmoothRiemannianMetric I M) (r s k : ℕ)
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma gSupVal_smul (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (c : ℝ) (T : SmoothCcTensor g r s) :
@@ -301,7 +291,6 @@ end CSupTensor
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 def gSupAddGroupSeminorm (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) :
@@ -324,7 +313,6 @@ def gSupAddGroupSeminorm (g : SmoothRiemannianMetric I M) (r s k : ℕ)
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 @[reducible] noncomputable def csupSeminormedAddCommGroup
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -336,7 +324,6 @@ set_option linter.unusedSectionVars false in
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma csupSeminormedAddCommGroup_norm
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -347,7 +334,6 @@ lemma csupSeminormedAddCommGroup_norm
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 @[reducible] noncomputable def csupNormedSpace
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -396,7 +382,6 @@ instance instCSupBanachCompleteSpace
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 noncomputable def smoothToC0Lin
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -413,7 +398,6 @@ noncomputable def smoothToC0Lin
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma norm_smoothToC0Lin
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -437,7 +421,6 @@ lemma norm_smoothToC0Lin
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma norm_coe_toCompl_eq_toHs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -454,7 +437,6 @@ lemma norm_coe_toCompl_eq_toHs
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma exists_smoothToC0Lin_norm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -481,7 +463,6 @@ lemma exists_smoothToC0Lin_norm_le
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 noncomputable def tensorHsToC0
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -496,7 +477,6 @@ noncomputable def tensorHsToC0
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 lemma denseRange_toComplL_toLinearMap
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
@@ -516,7 +496,6 @@ lemma denseRange_toComplL_toLinearMap
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 theorem tensorHsToC0_coe
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -538,7 +517,6 @@ theorem tensorHsToC0_coe
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 theorem tensorHsToC0_norm_apply_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -554,7 +532,6 @@ theorem tensorHsToC0_norm_apply_le
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 theorem tensorHsToC0_opNorm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
@@ -569,7 +546,6 @@ theorem tensorHsToC0_opNorm_le
 set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 
 theorem tensorHsToC0_norm_le_of_norm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)

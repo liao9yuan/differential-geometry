@@ -44,7 +44,6 @@ def MemL2
     (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (S x) (S x))
     (riemannianVolumeMeasure (I := I) (M := M) g)
 
-set_option linter.unusedSectionVars false in
 
 lemma MemL2.integrable_inner_self
     [T2Space M] [SigmaCompactSpace M]
@@ -54,7 +53,6 @@ lemma MemL2.integrable_inner_self
       (fun x => tensorInnerPointwise (I := I) (M := M) g r s x (S x) (S x))
       (riemannianVolumeMeasure (I := I) (M := M) g) := hS
 
-set_option linter.unusedSectionVars false in
 
 theorem MemL2.zero
     [T2Space M] [SigmaCompactSpace M]
@@ -78,7 +76,6 @@ noncomputable def tensorL2Norm
     (S : M → TensorRSModel r s ℝ E) : ℝ :=
   Real.sqrt (tensorL2Inner (I := I) (M := M) g r s S S)
 
-set_option linter.unusedSectionVars false in
 
 lemma tensorL2Norm_def
     [T2Space M] [SigmaCompactSpace M]
@@ -87,7 +84,6 @@ lemma tensorL2Norm_def
     tensorL2Norm (I := I) (M := M) g r s S =
       Real.sqrt (tensorL2Inner (I := I) (M := M) g r s S S) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Norm_nonneg
     [T2Space M] [SigmaCompactSpace M]

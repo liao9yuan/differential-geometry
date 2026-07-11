@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -65,7 +64,6 @@ def deTurckLieCovDerivRefoldC2Family (g₀ : SmoothRiemannianMetric I M)
         (ccTensorUnitValueSection_contMDiff (I := I) (M := M) g₀ T)
         ((q i).trans (Equiv.swap (0 : Fin 4) 1))))
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma deTurckLieCovDerivRefoldC2Family_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
@@ -76,7 +74,6 @@ set_option linter.unusedSectionVars false in
     deTurckLieCovDerivRefoldC2Family (I := I) (M := M) g₀ T hδ hδZ q ε 0 = 0 := by
   rw [deTurckLieCovDerivRefoldC2Family, zero_smul]
 
-set_option linter.unusedSectionVars false in
 
 lemma toModel_ccTensorUnitValueSection_domDomCongrSection_swap
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
@@ -95,7 +92,6 @@ lemma toModel_ccTensorUnitValueSection_domDomCongrSection_swap
   funext i
   fin_cases i <;> rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -146,7 +142,6 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
   refine Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => ?_))
   rw [toModel_ccTensorUnitValueSection_domDomCongrSection_swap]
 
-set_option linter.unusedSectionVars false in
 
 lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (y : M) :
@@ -159,7 +154,6 @@ lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensorUnitValueSection, ccTensorUnitValueSection, ccTensorUnitValueSection, h]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ)
     (S : SmoothCcTensor g₀ 0 2) (y : M) :
@@ -171,7 +165,6 @@ lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ
   rw [ccTensorUnitValueSection, ccTensorUnitValueSection, h]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem curvatureRefoldMonomialCoeffField_unitValue_add
     (g₀ g₁ : SmoothRiemannianMetric I M) (S S' : SmoothCcTensor g₀ 0 2)
@@ -217,7 +210,6 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_add
   simp only [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
   rw [add_mul]
 
-set_option linter.unusedSectionVars false in
 
 theorem curvatureRefoldMonomialCoeffField_unitValue_smul
     (g₀ g₁ : SmoothRiemannianMetric I M) (c : ℝ) (S : SmoothCcTensor g₀ 0 2)
@@ -254,7 +246,6 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_smul
   simp only [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 
 theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
@@ -285,7 +276,6 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_pair_eq_symmS
     curvatureRefoldMonomialCoeffField_unitValue_add,
     curvatureRefoldMonomialCoeffField_unitValue_trans_swap]
 
-set_option linter.unusedSectionVars false in
 
 theorem deTurckLieCovDerivRefoldC2Family_eq_symmS_weight (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}

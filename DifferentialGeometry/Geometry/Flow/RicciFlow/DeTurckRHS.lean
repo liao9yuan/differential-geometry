@@ -36,7 +36,6 @@ private noncomputable def lieDerivMetricClmAux
       have := (lieDerivMetric (I := I) g W x).map_add v v'
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      set_option linter.unnecessarySimpa false in
       simpa [LinearMap.add_apply, ContinuousLinearMap.add_apply,
              LinearMap.coe_toContinuousLinearMap'] using happ
     map_smul' := fun c v => by
@@ -44,7 +43,6 @@ private noncomputable def lieDerivMetricClmAux
       have := (lieDerivMetric (I := I) g W x).map_smul c v
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      set_option linter.unnecessarySimpa false in
       simpa [LinearMap.smul_apply, ContinuousLinearMap.smul_apply,
              LinearMap.coe_toContinuousLinearMap', smul_eq_mul] using happ }
 

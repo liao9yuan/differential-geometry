@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -48,7 +47,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 section MainBound
 
-set_option linter.unusedSectionVars false in
 
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -60,7 +58,6 @@ private lemma eigenIdx_val_pos
   exact (tensorResolvent_eigenvalue_mem_unit_interval
     (I := I) (M := M) g r s hu_in hu_ne).1
 
-set_option linter.unusedSectionVars false in
 
 private lemma eigenIdx_val_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -435,7 +432,6 @@ theorem eigenvectorChartRHSDiff_wkpNorm_le
         exact add_le_add h_tail_one h_tail_one
       exact add_le_add h_head_le h_tail_le
 
-set_option linter.style.multiGoal false in
 
 theorem eigenvectorChartRHSDiff_wkpNorm_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

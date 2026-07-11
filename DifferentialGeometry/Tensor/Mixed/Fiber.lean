@@ -88,7 +88,6 @@ def mixedOfModel {r s : ℕ} {x : B}
     Bundle.continuousMultilinearMap 𝕜 s F E x :=
   (mixedContinuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r s x).symm.toContinuousLinearMap f
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem mixedToModelL_apply {r s : ℕ} {x : B}
     (T : Bundle.continuousMultilinearMap 𝕜 r F E x →L[𝕜]
@@ -141,7 +140,6 @@ theorem mixedOfModel_mixedToModel {r s : ℕ} {x : B}
     mixedOfModel (𝕜 := 𝕜) (F := F) (E := E) (mixedToModel T) = T :=
   (mixedContinuousLinearEquivAt (𝕜 := 𝕜) (F := F) (E := E) r s x).left_inv T
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem mixedToModel_mixedOfModel {r s : ℕ} {x : B}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜]

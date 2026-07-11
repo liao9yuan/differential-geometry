@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDiverg
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -63,7 +62,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
-set_option linter.unusedSectionVars false in
 lemma interiorProduct_toModel_eval_dla (s : ℕ) (x : M) (vv : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -76,7 +74,6 @@ lemma interiorProduct_toModel_eval_dla (s : ℕ) (x : M) (vv : TangentSpace I x)
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma toModel_om_single_eq_cotangentToDual_dla (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel om (fun k => (m k : E)) =
@@ -86,7 +83,6 @@ lemma toModel_om_single_eq_cotangentToDual_dla (x : M) (om : Tensor0SSpace 1 I x
   rw [cotangentToDual_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma cotangentToDual_eq_inner_sharp_dla (g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (ww : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) om ww =
@@ -97,7 +93,6 @@ lemma cotangentToDual_eq_inner_sharp_dla (g₀ : SmoothRiemannianMetric I M) (x 
     rw [← inverseMetricSharpFib_inner (I := I) g₀ x om ww]]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma cotangentToDual_map_sub_dla (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) om (a - b) =
@@ -106,7 +101,6 @@ lemma cotangentToDual_map_sub_dla (x : M) (om : Tensor0SSpace 1 I x)
       cotangentToDualLinear (I := I) (x := x) om v from fun v => rfl]
   exact map_sub _ a b
 
-set_option linter.unusedSectionVars false in
 lemma cotangentToDual_map_add_dla (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) om (a + b) =
@@ -135,7 +129,6 @@ private noncomputable def deTurckLieConnDiffDerivKernelCLM (g₁ g_bg : SmoothRi
         simp only [RingHom.id_apply, ContinuousLinearMap.smul_apply]
         exact dLaCovKernel_smul_left (I := I) g₁ g_bg x c v0 p q }
 
-set_option linter.unusedSectionVars false in
 private lemma dLaCovKernelCLM_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v0 p q : TangentSpace I x) :
     deTurckLieConnDiffDerivKernelCLM (I := I) (M := M) g₁ g_bg x v0 p q =
@@ -192,7 +185,6 @@ private noncomputable def dLaLoweredCovec (g₀ g₁ g_bg : SmoothRiemannianMetr
         exact ((g₀.inner x).continuous.comp hK).clm_apply (continuous_apply 0) }
     : Tensor0SSpace 4 I x)
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma dLaLoweredCovec_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     dLaLoweredCovec (I := I) g₀ g₁ g_bg x m =
@@ -200,7 +192,6 @@ set_option linter.unusedSectionVars false in
   change g₀.inner x (deTurckLieConnDiffDerivKernelCLM (I := I) (M := M) g₁ g_bg x (m 1) (m 2) (m 3)) (m 0) = _
   rw [dLaCovKernelCLM_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma dLaLoweredScalar_global (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     {V0 W p q : Π b : M, TangentSpace I b}
     (hV0 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V0))
@@ -224,7 +215,6 @@ private lemma dLaLoweredScalar_global (g₀ g₁ g_bg : SmoothRiemannianMetric I
   exact contMDiff_g_inner_of_smooth_sections (I := I) g₀
     ⟨fun b => deTurckConnDiffCovDeriv (I := I) g₁ g_bg V0 p q b, hAsec⟩ ⟨fun b => W b, hW⟩
 
-set_option linter.unusedSectionVars false in
 private lemma dLaLoweredScalar_contMDiffAt (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (V0 V1 V2 V3 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x₀ : M) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
@@ -283,7 +273,6 @@ def dLaLoweredCc (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor 
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 private lemma dLaLoweredCc_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     unitModel (I := I) (M := M) g₀ 4 (dLaLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x =
       Tensor0SSpace.toModel (dLaLoweredCovec (I := I) g₀ g₁ g_bg x) := by
@@ -298,7 +287,6 @@ private lemma dLaLoweredCc_unitModel (g₀ g₁ g_bg : SmoothRiemannianMetric I 
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma dLaLoweredCc_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 4 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 4 (dLaLoweredCc (I := I) (M := M) g₀ g₁ g_bg) x m =
@@ -314,7 +302,6 @@ def dLaConnArmPt (g₀ gc : SmoothRiemannianMetric I M) :
       (fun x : M => PDE.DeTurck.connDiff (I := I) gc g₀ x)
       (fun V0 W => PDE.DeTurck.connDiff_contMDiff (I := I) gc g₀ V0.contMDiff W.contMDiff)⟩
 
-set_option linter.unusedSectionVars false in
 private lemma dLaConnArmPt_apply (g₀ gc : SmoothRiemannianMetric I M) (x : M) :
     dLaConnArmPt (I := I) (M := M) g₀ gc x = PDE.DeTurck.connDiff (I := I) gc g₀ x := rfl
 
@@ -325,7 +312,6 @@ def dLaQuadCc (g₀ g_arm g_out : SmoothRiemannianMetric I M) :
     (connDiffSection (I := I) g_out g₀)
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 lemma dLaQuadCc_toModel (g₀ g_arm g_out : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : Fin 3 → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -396,7 +382,6 @@ def dLaCovectorExtensionSection (g₀ : SmoothRiemannianMetric I M) (x : M)
        smoothExtensionTangent_contMDiff (I := I) x (inverseMetricSharpFib (I := I) g₀ x om)
      exact ContMDiff.clm_bundle_apply (b := id) (g0FlatField_contMDiff (I := I) g₀) hU⟩
 
-set_option linter.unusedSectionVars false in
 lemma dLaCovectorExtensionSection_self (g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) :
     dLaCovectorExtensionSection (I := I) (M := M) g₀ x om x = om := by

@@ -1,7 +1,6 @@
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-set_option autoImplicit false
 
 namespace DifferentialGeometry
 

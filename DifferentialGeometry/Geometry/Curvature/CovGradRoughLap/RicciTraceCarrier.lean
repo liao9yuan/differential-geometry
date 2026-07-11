@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -141,7 +140,6 @@ def ricSlotOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
           map_smul (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm]
         rfl }
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma ricSlotOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -153,7 +151,6 @@ set_option backward.isDefEq.respectTransparency false in
   rw [ricSlotOpFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 lemma ricSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -172,7 +169,6 @@ lemma ricSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
   rw [hcurry]
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem ricSlotOpFib_contMDiff (g : SmoothRiemannianMetric I M) (s : ℕ) :
@@ -242,7 +238,6 @@ def ricSlotOpField (g : SmoothRiemannianMetric I M) (s : ℕ) :
       contMDiff_toFun := ricSlotOpFib_contMDiff (I := I) (M := M) g s }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 @[simp] lemma ricSlotOpField_toSection (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
@@ -254,7 +249,6 @@ def ricTraceSection (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTens
   operatorFieldApply (I := I) (M := M) g (s + 1) (s + 1)
     (ricSlotOpField (I := I) (M := M) g s) (covGrad (I := I) (M := M) g 0 s S)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] lemma ricTraceSection_toSection (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : SmoothCcTensor g 0 s) (x : M) :
@@ -304,7 +298,6 @@ theorem exists_ricTraceSection_fiberNormSq_bound
   have h := hC s S x
   nlinarith [h, hfgS_nn, hfS_nn, hC_nn s, mul_nonneg (hC_nn s) hfgS_nn]
 
-set_option linter.unusedSectionVars false in
 
 theorem ricTraceSection_zero_apply (g : SmoothRiemannianMetric I M) (f : SmoothCcTensor g 0 0)
     (x : M) (v : E) :

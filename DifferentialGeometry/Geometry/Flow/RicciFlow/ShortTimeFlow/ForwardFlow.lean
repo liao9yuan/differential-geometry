@@ -41,7 +41,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 
 private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
     (Φ : ℝ → M → M) {lo hi : ℝ} (hlo : lo < 0) (hhi : 0 < hi)
@@ -155,7 +154,6 @@ private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
       htm_at hpath
   exact (hRHScont.congr hrecon.symm).continuousWithinAt
 
-set_option linter.unusedSectionVars false in
 
 private theorem flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth
     (Φ : ℝ → M → M) {lo hi : ℝ}

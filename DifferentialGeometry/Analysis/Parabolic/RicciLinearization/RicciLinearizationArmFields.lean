@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -64,7 +63,6 @@ noncomputable def linearizedRicciArm1Fib (g₀ g₁ : SmoothRiemannianMetric I M
       raisedKoszulFib (I := I) g₀ g₁ x).comp
     (cometricDoubleTraceFib (I := I) g₁ 1 x)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem linearizedRicciArm1Fib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 3 I x) :
@@ -112,7 +110,6 @@ noncomputable def ricciArmOrder1KoszulCoeff (g₀ g₁ : SmoothRiemannianMetric 
       contMDiff_toFun := linearizedRicciArm1Fib_contMDiff (I := I) g₀ g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem ricciArmOrder1KoszulCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (ricciArmOrder1KoszulCoeff (I := I) (M := M) g₀ g₁).toSection x =
@@ -134,7 +131,6 @@ noncomputable def domDomCongrFib (x : M) :
           traceHessianSlotPerm).toContinuousLinearEquiv.toContinuousLinearMap).comp
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 theorem domDomCongrFib_apply (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     domDomCongrFib (I := I) x D =
@@ -150,7 +146,6 @@ noncomputable def traceHessianFib (g₁ : SmoothRiemannianMetric I M) (x : M) :
     Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x :=
   (cometricDoubleTraceFib (I := I) g₁ 2 x).comp (domDomCongrFib (I := I) x)
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem traceHessianFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
@@ -162,7 +157,6 @@ set_option linter.unusedSectionVars false in
     domDomCongrFib_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 private theorem domDomCongr_section_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
@@ -196,7 +190,6 @@ private theorem domDomCongr_section_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d)
   rfl
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 theorem traceHessianFib_contMDiff (g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞
@@ -226,7 +219,6 @@ noncomputable def traceHessianCoeff (g₀ g₁ : SmoothRiemannianMetric I M) :
       contMDiff_toFun := traceHessianFib_contMDiff (I := I) g₁ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem traceHessianCoeff_toSection (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     (traceHessianCoeff (I := I) (M := M) g₀ g₁).toSection x =
@@ -240,7 +232,6 @@ def linearizedRicciArm2FieldLichnerowicz (g₀ : SmoothRiemannianMetric I M)
   ricciArmPrincipalCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
     - (1 / 2 : ℝ) • traceHessianCoeff (I := I) (M := M) g₀ (realizedFam (I := I) g₀ T T' hδ hδ' s)
 
-set_option linter.unusedSectionVars false in
 lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -253,7 +244,6 @@ lemma unitModel_eq_ccTensorBilin_local (g₀ : SmoothRiemannianMetric I M)
   funext k
   fin_cases k <;> rfl
 
-set_option linter.unusedSectionVars false in
 theorem cometricLmodel_covectorOfCLM_inner (g₁ : SmoothRiemannianMetric I M) (y : M)
     (φ : E →L[ℝ] ℝ) (u : TangentSpace I y) :
     g₁.inner y (cometricLmodel (I := I) g₁ y
@@ -269,7 +259,6 @@ theorem cometricLmodel_covectorOfCLM_inner (g₁ : SmoothRiemannianMetric I M) (
       (fun _ : Fin 1 => (u : E)) = φ (u : E)
   rw [Tensor0SBundle.model_covectorOfCLM_apply]
 
-set_option linter.unusedSectionVars false in
 theorem traceHessianCoeff_apply_eq
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 4)
     (x : M) (v : Fin 2 → TangentSpace I x) :
@@ -296,7 +285,6 @@ theorem traceHessianCoeff_apply_eq
   rw [traceHessianCoeff_toSection, traceHessianFib_toModel,
     modelDoubleTrace_apply (E := E) 2 (cometricLmodel (I := I) g₁ x)]
 
-set_option linter.unusedSectionVars false in
 theorem cDualBasis_trace_basis_indep
     (B : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E)
     (F : (E →L[ℝ] ℝ) →L[ℝ] E →L[ℝ] ℝ) :

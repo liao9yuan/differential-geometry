@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Slot0SliceFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1600000
 
@@ -31,7 +30,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 private lemma g_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
@@ -124,7 +122,6 @@ private lemma riemannianFiberNormSq_eq_sum_toModel_sq
     have : Fin.cast (Nat.zero_add s) (Fin.natAdd 0 k) = k := by ext; simp
     rw [this]
 
-set_option linter.unusedSectionVars false in
 
 private lemma orthoWeighted_frame_sum_collapse
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)

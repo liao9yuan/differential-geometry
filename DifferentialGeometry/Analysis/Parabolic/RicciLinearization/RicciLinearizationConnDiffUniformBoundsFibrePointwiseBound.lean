@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -48,7 +47,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 section UniformBound
 
-set_option linter.unusedSectionVars false in
 
 private lemma flat_toModel_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (uu : TangentSpace I x) (v : Fin 1 → E) :
@@ -68,15 +66,13 @@ private lemma flat_toModel_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     from (cotangentToDual_apply (I := I) (x := x) _ _).symm]
   rw [cotangentToDual_g0FlatCLM]
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 
 private lemma dualPair_sum_swap (g₀ : SmoothRiemannianMetric I M) (x : M)
     (F : Tensor0SBundle.Tensor0SModel 1 ℝ E → E → ℝ)
     (hFβ : ∀ z : E, IsLinearMap ℝ (fun β => F β z))
     (hFz : ∀ β, IsLinearMap ℝ (fun z : E => F β z))
     {n : ℕ} (e : Fin n → TangentSpace I x)
-    (horth : ∀ a b : Fin n, g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
+    (_horth : ∀ a b : Fin n, g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
     (hrepr : ∀ v : TangentSpace I x, v = ∑ a : Fin n, g₀.inner x (e a) v • e a) :
     (∑ i : Fin (Module.finrank ℝ E),
         F (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
@@ -184,7 +180,6 @@ def fibPointwiseBound (g₀ : SmoothRiemannianMetric I M) (x : M) (d : ℕ) (c :
     |Tensor0SBundle.Tensor0SSpace.toModel Z (fun j => (w j : E))| ≤
       c * ∏ j, Real.sqrt (g₀.inner x (w j) (w j))
 
-set_option linter.unusedSectionVars false in
 
 lemma fibPointwiseBound_coframe (g₀ : SmoothRiemannianMetric I M) (x : M) (d : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -203,7 +198,6 @@ lemma fibPointwiseBound_coframe (g₀ : SmoothRiemannianMetric I M) (x : M) (d :
   rw [h1, Real.sqrt_one, one_mul] at hcs
   exact hcs
 
-set_option linter.unusedSectionVars false in
 
 private lemma fibPointwiseBound_slotPerm (g₀ : SmoothRiemannianMetric I M) (x : M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) {c : ℝ} {Z : Tensor0SBundle.Tensor0SSpace d I x}
@@ -222,14 +216,12 @@ private lemma fibPointwiseBound_slotPerm (g₀ : SmoothRiemannianMetric I M) (x 
   congr 1
   exact Equiv.prod_comp ρ (fun j => Real.sqrt (g₀.inner x (w j) (w j)))
 
-set_option linter.unusedSectionVars false in
 
 private lemma fibPointwiseBound_prod_nonneg (g₀ : SmoothRiemannianMetric I M) (x : M) {d : ℕ}
     (w : Fin d → TangentSpace I x) :
     0 ≤ ∏ j, Real.sqrt (g₀.inner x (w j) (w j)) :=
   Finset.prod_nonneg (fun _ _ => Real.sqrt_nonneg _)
 
-set_option linter.unusedSectionVars false in
 
 lemma connDiff_flat_factor_bound (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -272,7 +264,6 @@ lemma connDiff_flat_factor_bound (g₀ g₁ : SmoothRiemannianMetric I M) (x : M
   refine le_trans hcs (le_trans (hpwA (v 0) (v 1)) (le_of_eq ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma fibPointwiseBound_connContr21 (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -414,7 +405,6 @@ private lemma fibPointwiseBound_connContr21 (g₀ : SmoothRiemannianMetric I M) 
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma fibPointwiseBound_connContr11 (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -547,7 +537,6 @@ private lemma fibPointwiseBound_connContr11 (g₀ : SmoothRiemannianMetric I M) 
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma fibPointwiseBound_connContr12 (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -683,7 +672,6 @@ private lemma fibPointwiseBound_connContr12 (g₀ : SmoothRiemannianMetric I M) 
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
-set_option linter.unusedSectionVars false in
 
 private lemma cometricDoubleTrace_toModel_bound (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -831,7 +819,6 @@ private lemma cometricDoubleTrace_toModel_bound (g₀ g₁ : SmoothRiemannianMet
         rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
         ring
 
-set_option linter.unusedSectionVars false in
 
 lemma fourTrace_toModel_bound (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -900,7 +887,6 @@ lemma fourTrace_toModel_bound (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         mul_le_mul_of_nonneg_left htotal (by norm_num)
     _ = 2 * (n : ℝ) * q * c * W := by ring
 
-set_option linter.unusedSectionVars false in
 
 lemma fibPointwiseBound_order1CLM (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -985,7 +971,6 @@ lemma fibPointwiseBound_order1CLM (g₀ : SmoothRiemannianMetric I M) (x : M)
   calc |v₁ + v₂ + v₃ + v₄ + v₅| ≤ |v₁| + |v₂| + |v₃| + |v₄| + |v₅| := habs
     _ ≤ 5 * ((n : ℝ) * CA * c) * P4 := by linarith
 
-set_option linter.unusedSectionVars false in
 
 lemma fibPointwiseBound_order0CLM (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)

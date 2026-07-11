@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 6400000
 
@@ -563,7 +562,6 @@ private lemma principalIntegrand_eigenvectorPouApprox_eqOn
       rw [hu_partial_zero k]; ring
     rw [hLHS_zero, hRHS_zero]
 
-set_option linter.style.show false in
 
 private lemma bilin_eigenvectorPouApprox_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -640,7 +638,7 @@ private lemma bilin_eigenvectorPouApprox_eq_sum
     rw [SmoothEllipticBilinearForm.bilin, MeasureTheory.setIntegral_univ]
     refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall ?_)
     intro y
-    show Bform.principalIntegrand uₙ ψ y + Bform.c y * uₙ y * ψ y =
+    change Bform.principalIntegrand uₙ ψ y + Bform.c y * uₙ y * ψ y =
       Bform.principalIntegrand uₙ ψ y
     rw [hBform_def, tensorPrincipalForm_c_apply (I := I) (M := M) g α
       (chartPouKernel_isCompact (I := I) (M := M) α)
@@ -840,7 +838,6 @@ private lemma bilin_eigenvectorPouApprox_eq_sum
     rw [hdouble_split]
   rw [hbilin_eq, hPI_volume_to_target, hPI_target_eq, hreorg]
 
-set_option linter.style.show false in
 
 lemma bilin_eigenvectorPouApprox_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -1002,7 +999,7 @@ lemma bilin_eigenvectorPouApprox_tendsto
         rw [hy_m, hy_g, smul_eq_mul]; ring
       rw [integral_congr_ae h_ae_prod, MeasureTheory.integral_const_mul]
       congr 1
-      show ∫ y, (principalSymbolTest (I := I) (M := M) g α ψ i' y *
+      change ∫ y, (principalSymbolTest (I := I) (M := M) g α ψ i' y *
           eigenvectorChartWeakPartial (I := I) (M := M)
             g r s i α P₀ i' y)
           ∂((volume : Measure EuclN).restrict

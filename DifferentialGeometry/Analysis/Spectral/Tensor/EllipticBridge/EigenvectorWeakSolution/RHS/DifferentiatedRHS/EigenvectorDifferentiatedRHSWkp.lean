@@ -39,20 +39,16 @@ private abbrev Kα (α : M) : Set EuclN :=
 private abbrev Ωα (α : M) : Set EuclN :=
   chartTargetEuclid (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_compact (α : M) : IsCompact (Kα (I := I) (M := M) α) :=
   chartPouKernel_isCompact (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_meas (α : M) : MeasurableSet (Kα (I := I) (M := M) α) :=
   chartPouKernel_measurableSet (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Kα_subset_Ωα (α : M) :
     Kα (I := I) (M := M) α ⊆ Ωα (I := I) (M := M) α :=
   chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 

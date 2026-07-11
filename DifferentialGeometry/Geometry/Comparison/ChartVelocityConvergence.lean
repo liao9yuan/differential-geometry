@@ -19,7 +19,6 @@ import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 import DifferentialGeometry.Geometry.Comparison.GeodesicSpeedBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -43,7 +42,6 @@ private lemma exists_bound_of_contDiffOn_int
     exact ⟨|f y₀|, abs_nonneg _, fun y hy => hy₀max hy⟩
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
-set_option linter.unusedFintypeInType false in
 
 private lemma exists_uniform_bound_of_int_family
     {ι : Type*} [Fintype ι] [Nonempty ι]

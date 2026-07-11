@@ -8,8 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
-set_option linter.unusedSectionVars false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -63,7 +61,6 @@ private lemma cons_cons_comp_decomposeFin_double {α : Type*} {s : ℕ}
     · rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self]
       simp only [Equiv.refl_apply, Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 
 private lemma unitModel_add (s : ℕ) (S S' : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (S + S') x =
@@ -444,12 +441,11 @@ theorem tensorL2Coeff_toL2_symmS_eq_zero_of_notMem
     hX i hi, hswap]
   ring
 
-set_option linter.unusedVariables false in
 
 theorem sum_tensorSobolevWeight_mul_sq_tensorL2Coeff_toL2_symmS_le
     (σ : ℝ)
     (S : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
-    (hS : ∀ i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2,
+    (_hS : ∀ i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2,
       i.1 = j.1 → (i ∈ S ↔ j ∈ S))
     (X : SmoothCcTensor g 0 2)
     (hX : ∀ k ∉ S, tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g)

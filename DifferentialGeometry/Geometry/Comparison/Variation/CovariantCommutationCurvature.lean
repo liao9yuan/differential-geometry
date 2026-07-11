@@ -21,7 +21,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

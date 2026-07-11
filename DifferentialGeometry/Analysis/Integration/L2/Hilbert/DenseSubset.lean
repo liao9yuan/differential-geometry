@@ -11,7 +11,6 @@ import Mathlib.Analysis.InnerProductSpace.Completion
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -42,12 +41,10 @@ section DenseEmbedding
 variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-set_option linter.unusedSectionVars false in
 
 def toL2 : SmoothCcTensor g r s →L[ℝ] TensorL2 r s g :=
   UniformSpace.Completion.toComplL
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem toL2_apply (S : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s) S : TensorL2 r s g) =
@@ -56,7 +53,6 @@ set_option linter.unusedSectionVars false in
     (S : UniformSpace.Completion (SmoothCcTensor g r s))
   rw [UniformSpace.Completion.coe_toComplL]
 
-set_option linter.unusedSectionVars false in
 
 theorem denseRange_toL2 :
     DenseRange (toL2 (g := g) (r := r) (s := s)) := by
@@ -69,7 +65,6 @@ theorem denseRange_toL2 :
   rw [hcoe]
   exact UniformSpace.Completion.denseRange_coe
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem norm_toL2 (S : SmoothCcTensor g r s) :
     ‖toL2 (g := g) (r := r) (s := s) S‖ = ‖S‖ := by
@@ -79,7 +74,6 @@ set_option linter.unusedSectionVars false in
       congrArg norm h]
   exact UniformSpace.Completion.norm_coe S
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem inner_toL2 (S T : SmoothCcTensor g r s) :
     ⟪toL2 (g := g) (r := r) (s := s) S,
@@ -93,7 +87,6 @@ set_option linter.unusedSectionVars false in
       rw [hS, hT]]
   exact UniformSpace.Completion.inner_coe S T
 
-set_option linter.unusedSectionVars false in
 
 theorem smoothCcTensor_eq_of_toL2_eq (S T : SmoothCcTensor g r s)
     (h : toL2 (g := g) (r := r) (s := s) S =

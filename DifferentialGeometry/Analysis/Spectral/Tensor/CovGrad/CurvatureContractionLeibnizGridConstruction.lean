@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldDiffer
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -35,7 +34,6 @@ variable [CompleteSpace E]
 
 section RankCast
 
-set_option linter.unusedSectionVars false in
 
 private theorem covGrad_heq_congr_lg (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
@@ -56,7 +54,6 @@ private theorem iteratedCovGrad_covGrad_comm_heq_lg (g : SmoothRiemannianMetric 
       rw [iteratedCovGrad_succ (g := g) (r := r) (s := s) (j := k + 1) X]
       exact covGrad_heq_congr_lg g r (by omega : (s + 1) + k = s + (k + 1)) ih
 
-set_option linter.unusedSectionVars false in
 
 private theorem rfns_toSection_heq_congr_lg (g : SmoothRiemannianMetric I M)
     (r : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
@@ -79,7 +76,6 @@ private def castRankCc_lg (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (W : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
   h ▸ W
 
-set_option linter.unusedSectionVars false in
 
 private theorem rfns_iteratedCovGrad_castRankCc_lg (g : SmoothRiemannianMetric I M) (r : ℕ)
     {a b : ℕ} (h : a = b) (W : SmoothCcTensor g r a) (j : ℕ) (x : M) :
@@ -104,13 +100,11 @@ def diffCurvOp : ∀ (p r : ℕ) (_ : SmoothCcTensor g 0 r), SmoothCcTensor g 0 
         castRankCc_lg g 0 (by omega : (r + 1) + p = r + (p + 1))
           (diffCurvOp p (r + 1) (covGrad (I := I) (M := M) g 0 r W))
 
-set_option linter.unusedSectionVars false in
 
 theorem diffCurvOp_zero (r : ℕ) (W : SmoothCcTensor g 0 r) :
     diffCurvOp (I := I) (M := M) g hX hY 0 r W =
       curvatureContraction (I := I) (M := M) g r W hX hY := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem covGrad_diffCurvOp_eq (p r : ℕ) (W : SmoothCcTensor g 0 r) :
     covGrad (I := I) (M := M) g 0 (r + p) (diffCurvOp (I := I) (M := M) g hX hY p r W) =
@@ -159,7 +153,6 @@ noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
     riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g)) x (X x) (Y x) :
     TensorRSSpace r r I x)
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 
 theorem diffCurvPhi0Fib_contMDiff (g : SmoothRiemannianMetric I M)
@@ -223,7 +216,7 @@ theorem diffCurvOp_zero_eq_appCc (g : SmoothRiemannianMetric I M)
   apply ContinuousLinearMap.ext
   intro d
 
-  show (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+  change (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
       (diffCurvOp (I := I) (M := M) g hX hY 0 r W).toSection x) d =
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace r I x from
         riemannOp (Tensor0SNabla.tensor0SCovariantDerivative I M r (LeviCivita (I := I) g))
@@ -382,7 +375,6 @@ theorem exists_continuous_proportional_diffCurvOp (p : ℕ) :
       rw [show (p' + 1) + 1 = p' + 2 from rfl]
       exact hkappaHigh p' r W x
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_proportional_diffCurvOp :
     ∃ kappa : ℕ → ℕ → ℝ, (∀ p r, 0 ≤ kappa p r) ∧
@@ -429,7 +421,6 @@ variable {kappa : ℕ → ℕ → ℝ} (hkappa_nn : ∀ p r, 0 ≤ kappa p r)
           ((iteratedCovGrad g 0 r q W).toSection x))
 
 include hkappa_nn hkappa in
-set_option linter.unusedSectionVars false in
 
 theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
     ∀ (p r : ℕ) (W : SmoothCcTensor g 0 r) (x : M),
@@ -583,7 +574,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_diffCurvOp_grid (j : ℕ) :
 
 end GridInduction
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_riemannianFiberNormSq_iteratedCovGrad_curvatureContraction_kappaGrid_le_of_construction
     (s : ℕ) :

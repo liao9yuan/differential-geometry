@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Operator.L2P
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -31,7 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 def dirichletForm (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s → SmoothCcTensor g r s → ℝ :=
@@ -41,7 +39,6 @@ def dirichletForm (g : SmoothRiemannianMetric I M) (r s : ℕ) :
           toL2_mem_connLaplacianL2_domain (I := I) g r s T⟩)
       (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S))
 
-set_option linter.unusedSectionVars false in
 
 theorem dirichletForm_eq_neg_inner_laplacian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -35,7 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedVariables false in
 
 theorem deTurckForcing_smoothTimeCoordinateFieldSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -96,7 +95,6 @@ theorem deTurckForcing_smoothTimeCoordinateFieldSymm
   funext i
   rw [ht_eq i, hF_coeff t ht_mem i]
 
-set_option linter.unusedVariables false in
 
 theorem deTurckForcing_smoothTimeCoordinateFamilySymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)

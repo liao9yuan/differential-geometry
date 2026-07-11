@@ -11,7 +11,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -40,7 +39,6 @@ section PreHilbert
 variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instPreInnerProductSpaceCore :
     PreInnerProductSpace.Core ℝ (SmoothCcTensor g r s) where
@@ -66,24 +64,20 @@ noncomputable instance instPreInnerProductSpaceCore :
     rw [SmoothCcTensor.toFun_smul]
     exact tensorL2Inner_smul_left (I := I) (M := M) g r s c S.toFun T.toFun
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instSeminormedAddCommGroup :
     SeminormedAddCommGroup (SmoothCcTensor g r s) :=
   InnerProductSpace.Core.toSeminormedAddCommGroup (𝕜 := ℝ)
 
-set_option linter.unusedSectionVars false in
 
 noncomputable instance instInnerProductSpace :
     InnerProductSpace ℝ (SmoothCcTensor g r s) :=
   InnerProductSpace.ofCore _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem SmoothCcTensor.inner_def (S T : SmoothCcTensor g r s) :
     ⟪S, T⟫_ℝ = tensorL2Inner (I := I) (M := M) g r s S.toFun T.toFun := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem SmoothCcTensor.norm_def (S : SmoothCcTensor g r s) :
     ‖S‖ = tensorL2Norm (I := I) (M := M) g r s S.toFun := rfl

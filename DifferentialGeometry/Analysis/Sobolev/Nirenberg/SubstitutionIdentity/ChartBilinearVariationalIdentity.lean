@@ -41,13 +41,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedVariables false in
 
 private theorem exists_chart_target_cutoff_strong
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M}
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    {R₀ : ℝ} {h : ℝ} (hh_le : |h| ≤ R₀)
+    {R₀ : ℝ} {h : ℝ} (_hh_le : |h| ≤ R₀)
     (h_thick :
       Metric.cthickening |h| K_0 ⊆ chartTargetEuclid (I := I) (M := M) α) :
     ∃ (δ : ℝ) (χ : EuclN → ℝ),
@@ -87,10 +86,9 @@ private lemma fderiv_chi_zero_on_cthickening
   DifferentialGeometry.Analysis.Sobolev.Euclidean.fderiv_cutoff_apply_zero_on_cthickening
     (d := Module.finrank ℝ E) hδ hχ_one hx i
 
-set_option linter.unusedVariables false in
 
 private lemma chi_eq_one_on_cthickening
-    {δ : ℝ} (hδ : 0 < δ) {χ : EuclN → ℝ} {h : ℝ} {K_0 : Set EuclN}
+    {δ : ℝ} (_hδ : 0 < δ) {χ : EuclN → ℝ} {h : ℝ} {K_0 : Set EuclN}
     (hχ_one : ∀ x ∈ Metric.cthickening δ (Metric.cthickening |h| K_0), χ x = 1)
     {x : EuclN} (hx : x ∈ Metric.cthickening |h| K_0) : χ x = 1 := by
   have hx_inner : x ∈ Metric.cthickening δ (Metric.cthickening |h| K_0) :=
@@ -633,7 +631,6 @@ private lemma standardNirenbergTest_uChart_memLp_cthickening
   rw [h_test_eq]
   exact h_restrict_lp
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_at_v_h_unconditional
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -746,7 +743,6 @@ theorem variational_identity_at_v_h_unconditional
     wpv hv_h_lp hv_h_grad_lp u_seq hu_seq_smooth hu_seq_cs h_v_seq_supp
     h_v_seq_l2 h_v_seq_grad_l2
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_v_h_expanded_unconditional
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -1036,14 +1032,13 @@ private lemma diffQuot_uChart_memLp_K_0
     exact (h_pt_eq y hy).symm
   exact MemLp.ae_eq h_ae_eq hdq_u_ext_lp_restrict
 
-set_option linter.unusedVariables false in
 
 private lemma translate_weightedInvGramOnEuclid_continuousOn_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
     {K_0 : Set EuclN} (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh_le : |h| ≤ R₀)
+    {R₀ : ℝ} {h : ℝ} (_hh_le : |h| ≤ R₀)
     (h_thick : Metric.cthickening |h| K_0 ⊆
       chartTargetEuclid (I := I) (M := M) α) :
     ContinuousOn (DifferentialGeometry.Analysis.Sobolev.translate
@@ -1345,7 +1340,6 @@ private lemma diffQuotCoeff_cutoffDeriv_partial_diffQuotUChart_integrable_K_0
   rw [← h_eq]
   exact h_int
 
-set_option linter.unusedVariables false in
 
 private lemma principal_post_ibp_integral_eq_symbolic
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -1353,7 +1347,7 @@ private lemma principal_post_ibp_integral_eq_symbolic
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
     (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
+    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (_hη_supp : HasCompactSupport η)
     (hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
     {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
@@ -1712,7 +1706,6 @@ private lemma principal_post_ibp_integral_eq_symbolic
   rw [h_int_expand, h_thick_to_K_0, h_split, h_principalTerm, h_cross1,
     h_cross2, h_cross3]
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_after_product_rule_unconditional
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

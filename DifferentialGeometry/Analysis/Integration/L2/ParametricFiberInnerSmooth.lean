@@ -13,7 +13,6 @@ import Mathlib.Analysis.Normed.Group.Bounded
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -139,7 +138,6 @@ private theorem fiber_contDiffOn_Icc
   rw [contMDiffOn_iff_contDiffOn] at hcomp
   exact hcomp
 
-set_option linter.unusedVariables false in
 theorem partialSnd_contMDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ}
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
@@ -355,7 +353,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem contDiff_integral_fiberInner_of_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)

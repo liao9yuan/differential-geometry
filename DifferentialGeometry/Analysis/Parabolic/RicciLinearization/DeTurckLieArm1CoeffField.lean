@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLower
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -101,7 +100,6 @@ noncomputable def deTurckLieArm1Fib (g₀ g₁ g_bg : SmoothRiemannianMetric I M
     + deTurckLieKoszulTraceFib (I := I) g₀ g₁ deTurckLieArm1KoszulZeroPerm x
 
 set_option backward.isDefEq.respectTransparency false in
-set_option linter.unusedSectionVars false in
 
 private theorem tensor0SProd_section_contMDiff {p q : ℕ}
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace p I x)
@@ -148,7 +146,6 @@ private theorem tensor0SProd_section_contMDiff {p q : ℕ}
   rw [Bundle.continuousMultilinearMap.modelProduct_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem deTurckLiePairTraceFib_apply_section_contMDiff
     (g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 6))
@@ -181,7 +178,6 @@ private theorem deTurckLiePairTraceFib_apply_section_contMDiff
     ContinuousLinearMap.comp_apply, tensor0SProdKappaFib_apply, domDomCongrFibRank_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem deTurckLieKoszulTraceFib_apply_section_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin 3))
@@ -205,7 +201,6 @@ private theorem deTurckLieKoszulTraceFib_apply_section_contMDiff
     domDomCongrFibRank_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 private theorem deTurckLieArm1CoreFib_apply_section_contMDiff
     (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
@@ -287,7 +282,6 @@ noncomputable def deTurckLieArm1Coeff (g₀ g₁ g_bg : SmoothRiemannianMetric I
       contMDiff_toFun := deTurckLieArm1Fib_contMDiff (I := I) g₀ g₁ g_bg }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem deTurckLieArm1Coeff_toSection (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     (deTurckLieArm1Coeff (I := I) (M := M) g₀ g₁ g_bg).toSection x =

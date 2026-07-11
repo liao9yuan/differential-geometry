@@ -205,7 +205,6 @@ private lemma base_u_chart_ae_zero_off_K_α
   exact chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M) α _
     hy_diff.1 hy_diff.2
 
-set_option linter.unusedVariables false in
 
 private lemma locallyIntegrableOn_of_memLp_two_global
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
@@ -248,7 +247,6 @@ private lemma locallyIntegrableOn_of_memLp_two_global
     (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
-set_option linter.unusedVariables false in
 
 private lemma locallyIntegrableOn_of_locally_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
@@ -284,7 +282,6 @@ private lemma locallyIntegrableOn_of_locally_memLp_two
     (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
-set_option linter.unusedVariables false in
 
 private lemma memLp_top_of_continuousOn_on_compact
     (g : SmoothRiemannianMetric I M) (α : M) {f : EuclN → ℝ}
@@ -1115,7 +1112,6 @@ theorem derived_variational_identity_holds
   exact integral_fChartEffNumerator_eq_integral_density_fChartEff
     (I := I) (M := M) g α l hu_h ψ
 
-set_option linter.unusedVariables false in
 
 noncomputable def derivedChartBilinearH1ComplDataUnconditional
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -1124,7 +1120,7 @@ noncomputable def derivedChartBilinearH1ComplDataUnconditional
     (hu_h : u_h ∈ laplacianDomainPow (I := I) (M := M) g 2) :
     ChartBilinearH1ComplData (I := I) (M := M) g α :=
   derivedChartBilinearH1ComplData (I := I) (M := M) g α l hu_h
-    (fun ψ hψ hψ_cs hψ_supp =>
+    (fun _ψ hψ hψ_cs hψ_supp =>
       derived_variational_identity_holds (I := I) (M := M) g α l hu_h
         hψ hψ_cs hψ_supp)
 

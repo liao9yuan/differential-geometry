@@ -31,14 +31,12 @@ def ricciEndo (g : SmoothRiemannianMetric I M) (x : M)
     have happ := congrArg
       (fun (φ : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) =>
         φ v w) h
-    set_option linter.unnecessarySimpa false in
     simpa [ContinuousLinearMap.add_apply] using happ
   map_smul' c Z := by
     have h := (riemannOp (LeviCivita (I := I) g) x).map_smul c Z
     have happ := congrArg
       (fun (φ : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x) =>
         φ v w) h
-    set_option linter.unnecessarySimpa false in
     simpa [ContinuousLinearMap.smul_apply] using happ
 
 @[simp] lemma ricciEndo_apply (g : SmoothRiemannianMetric I M) (x : M)
@@ -118,7 +116,6 @@ private def ricciTensorAuxClm (g : SmoothRiemannianMetric I M) (x : M) :
       have := (ricciTensorBilin (I := I) g x).map_add v v'
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      set_option linter.unnecessarySimpa false in
       simpa [LinearMap.add_apply, ContinuousLinearMap.add_apply,
              LinearMap.coe_toContinuousLinearMap'] using happ
     map_smul' := fun c v => by
@@ -126,7 +123,6 @@ private def ricciTensorAuxClm (g : SmoothRiemannianMetric I M) (x : M) :
       have := (ricciTensorBilin (I := I) g x).map_smul c v
       have happ := congrArg
         (fun (φ : TangentSpace I x →ₗ[ℝ] ℝ) => φ w) this
-      set_option linter.unnecessarySimpa false in
       simpa [LinearMap.smul_apply, ContinuousLinearMap.smul_apply,
              LinearMap.coe_toContinuousLinearMap', smul_eq_mul] using happ }
 
@@ -598,11 +594,9 @@ private def riemannOpEndo
   toFun Z := riemannOp (LeviCivita (I := I) g) x v w Z
   map_add' Z Z' := by
     have h := (riemannOp (LeviCivita (I := I) g) x v w).map_add Z Z'
-    set_option linter.unnecessarySimpa false in
     simpa using h
   map_smul' c Z := by
     have h := (riemannOp (LeviCivita (I := I) g) x v w).map_smul c Z
-    set_option linter.unnecessarySimpa false in
     simpa using h
 
 @[simp] private lemma riemannOpEndo_apply

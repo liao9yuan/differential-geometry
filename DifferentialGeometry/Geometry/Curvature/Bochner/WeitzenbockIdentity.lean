@@ -54,7 +54,7 @@ theorem leibniz_inner_globally [I.Boundaryless]
 theorem laplacian_inner_self_half [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {V : Π b : M, TangentSpace I b}
-    (hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V))
+    (_hV : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V))
     (hgVV : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => g.inner b (V b) (V b)))
     (x : M)
     (hLeibniz :

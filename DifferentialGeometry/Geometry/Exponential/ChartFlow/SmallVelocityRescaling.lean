@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformExistence
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1200000
 set_option maxHeartbeats 1600000
 
@@ -24,7 +23,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 namespace SmoothCcTensor
 
-set_option linter.unusedSectionVars false in
 
 def toFunAddHom {g : SmoothRiemannianMetric I M} {r s : ℕ} :
     SmoothCcTensor g r s →+ (M → TensorRSModel r s ℝ E) where
@@ -32,21 +30,18 @@ def toFunAddHom {g : SmoothRiemannianMetric I M} {r s : ℕ} :
   map_zero' := SmoothCcTensor.toFun_zero
   map_add' := SmoothCcTensor.toFun_add
 
-set_option linter.unusedSectionVars false in
 
 lemma toSection_sum {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {ι : Type*} (t : Finset ι) (F : ι → SmoothCcTensor g r s) :
     (∑ i ∈ t, F i).toSection = ∑ i ∈ t, (F i).toSection :=
   map_sum (SmoothCcTensor.toSectionAddHom (I := I) (M := M) (g := g) (r := r) (s := s)) F t
 
-set_option linter.unusedSectionVars false in
 
 lemma toFun_sum {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {ι : Type*} (t : Finset ι) (F : ι → SmoothCcTensor g r s) :
     (∑ i ∈ t, F i).toFun = ∑ i ∈ t, (F i).toFun :=
   map_sum (SmoothCcTensor.toFunAddHom (I := I) (M := M) (g := g) (r := r) (s := s)) F t
 
-set_option linter.unusedSectionVars false in
 
 lemma toSection_sum_apply {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {ι : Type*} (t : Finset ι) (F : ι → SmoothCcTensor g r s) (x : M) :

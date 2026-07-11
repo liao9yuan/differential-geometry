@@ -21,7 +21,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_symm
     [T2Space M] [SigmaCompactSpace M]
@@ -35,7 +34,6 @@ theorem tensorL2Inner_symm
   intro x
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s x (S x) (T x)
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_add_left
     [T2Space M] [SigmaCompactSpace M]
@@ -66,7 +64,6 @@ theorem tensorL2Inner_add_left
   rw [hcongr]
   exact MeasureTheory.integral_add h₁ h₂
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_add_right
     [T2Space M] [SigmaCompactSpace M]
@@ -97,7 +94,6 @@ theorem tensorL2Inner_add_right
   rw [hcongr]
   exact MeasureTheory.integral_add h₁ h₂
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_smul_left
     [T2Space M] [SigmaCompactSpace M]
@@ -118,7 +114,6 @@ theorem tensorL2Inner_smul_left
     exact this
   rw [hcongr, MeasureTheory.integral_const_mul]
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_smul_right
     [T2Space M] [SigmaCompactSpace M]
@@ -139,7 +134,6 @@ theorem tensorL2Inner_smul_right
     exact this
   rw [hcongr, MeasureTheory.integral_const_mul]
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_zero_left
     [T2Space M] [SigmaCompactSpace M]
@@ -157,7 +151,6 @@ theorem tensorL2Inner_zero_left
   rw [hzero]
   exact MeasureTheory.integral_zero M ℝ
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_zero_right
     [T2Space M] [SigmaCompactSpace M]
@@ -175,7 +168,6 @@ theorem tensorL2Inner_zero_right
   rw [hzero]
   exact MeasureTheory.integral_zero M ℝ
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Inner_nonneg
     [T2Space M] [SigmaCompactSpace M]
@@ -187,7 +179,6 @@ theorem tensorL2Inner_nonneg
   intro x
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s x (S x)
 
-set_option linter.unusedSectionVars false in
 
 theorem MemL2.integrable_inner_of_aestronglyMeasurable
     [T2Space M] [SigmaCompactSpace M]
@@ -255,7 +246,6 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
   refine MeasureTheory.Integrable.mono' hG_integrable hST_meas ?_
   exact Filter.Eventually.of_forall h_bound
 
-set_option linter.unusedSectionVars false in
 
 theorem MemL2.add
     [T2Space M] [SigmaCompactSpace M]
@@ -316,7 +306,6 @@ theorem MemL2.add
   rw [hcongr]
   exact hsum
 
-set_option linter.unusedSectionVars false in
 
 theorem MemL2.smul
     [T2Space M] [SigmaCompactSpace M]

@@ -1401,7 +1401,6 @@ private theorem linearODESolution_partial_t_continuousOn
   exact h_app_cont.comp_continuousOn h_pair_cont
 
 open Classical in
-set_option linter.style.setOption false in
 set_option maxHeartbeats 800000 in
 
 private theorem variationalW_clm_continuousOn

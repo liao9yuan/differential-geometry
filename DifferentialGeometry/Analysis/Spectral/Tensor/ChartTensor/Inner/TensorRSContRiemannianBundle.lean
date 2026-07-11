@@ -12,7 +12,6 @@ import Mathlib.Topology.VectorBundle.Riemannian
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
 
@@ -108,7 +107,6 @@ def chartTensorInnerRSCLM
       chartTensorInnerPointwise_rs_model
         (I := I) (M := M) g r s α b T S := rfl
 
-set_option linter.unusedSectionVars false in
 
 lemma chartTensorInnerRSCLM_continuousAt_of_baseSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -141,7 +139,6 @@ lemma chartTensorInnerRSCLM_continuousAt_of_baseSet
     (trivializationAt E (TangentSpace I) α).open_baseSet
   exact hCont.continuousAt (hOpen.mem_nhds hb₀)
 
-set_option linter.unusedSectionVars false in
 
 private lemma toModel_trivAt_symm_eq_chartRSTwist
     (r s : ℕ) (α : M) {b : M}
@@ -245,7 +242,6 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
       ((es.symmL ℝ b) Tβ) = chartRSTwist (I := I) (M := M) α b r s v α'
   rw [h_lhs_simplify, chartRSTwist_apply]
 
-set_option linter.unusedSectionVars false in
 
 private lemma tensorRSRiemannianInnerCLM_at_trivAt_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
@@ -264,7 +260,6 @@ private lemma tensorRSRiemannianInnerCLM_at_trivAt_symm
   exact (chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise
     (I := I) (M := M) g r s α hb v w).symm
 
-set_option linter.unusedSectionVars false in
 
 lemma tensorRSRiemannianInnerCLM_inCoordinates_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -309,7 +304,6 @@ lemma tensorRSRiemannianInnerCLM_inCoordinates_apply
     (I := I) (M := M) g r s α hb v w]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorRSRiemannianInnerCLM_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -345,7 +339,6 @@ theorem tensorRSRiemannianInnerCLM_continuousOn
   exact (tensorRSRiemannianInnerCLM_inCoordinates_apply
     (I := I) (M := M) g r s b₀ hx v w).symm
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorRSRiemannianInnerCLM_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

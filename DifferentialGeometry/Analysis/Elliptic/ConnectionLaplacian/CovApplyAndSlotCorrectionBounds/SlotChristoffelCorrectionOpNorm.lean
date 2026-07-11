@@ -5,10 +5,8 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 800000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set
 open scoped Manifold Topology ContDiff BigOperators

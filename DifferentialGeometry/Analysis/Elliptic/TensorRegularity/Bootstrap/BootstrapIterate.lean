@@ -2,10 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Iterate
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 3200000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set Filter MeasureTheory Topology Function
 open scoped Manifold Topology ContDiff BigOperators Matrix InnerProductSpace

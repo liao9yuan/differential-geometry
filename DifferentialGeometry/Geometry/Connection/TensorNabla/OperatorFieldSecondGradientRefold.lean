@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -43,13 +42,11 @@ def tensorLeadingSlotEvalCLM (s : ℕ) (x : M) (p : TangentSpace I x) :
         rw [map_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma slotFeedFib_apply (s : ℕ) (x : M) (p : TangentSpace I x)
     (G : Tensor0SSpace (s + 1) I x) :
     tensorLeadingSlotEvalCLM (I := I) (M := M) s x p G =
       (tensor0S_curry (𝕜 := ℝ) (I := I) (M := M) s x) G p := rfl
 
-set_option linter.unusedSectionVars false in
 lemma slotFeedFib_toModel (s : ℕ) (x : M) (p : TangentSpace I x)
     (G : Tensor0SSpace (s + 1) I x) (v : Fin s → E) :
     Tensor0SSpace.toModel (tensorLeadingSlotEvalCLM (I := I) (M := M) s x p G) v =
@@ -61,7 +58,6 @@ def tensorLeadingPairSlotEvalCLM (s : ℕ) (x : M) (p q : TangentSpace I x) :
   (tensorLeadingSlotEvalCLM (I := I) (M := M) s x q).comp
     (tensorLeadingSlotEvalCLM (I := I) (M := M) (s + 1) x p)
 
-set_option linter.unusedSectionVars false in
 lemma leadingPairFeedFib_toModel (s : ℕ) (x : M) (p q : TangentSpace I x)
     (G : Tensor0SSpace (s + 2) I x) (v : Fin s → E) :
     Tensor0SSpace.toModel (tensorLeadingPairSlotEvalCLM (I := I) (M := M) s x p q G) v =
@@ -69,21 +65,18 @@ lemma leadingPairFeedFib_toModel (s : ℕ) (x : M) (p q : TangentSpace I x)
   rw [tensorLeadingPairSlotEvalCLM, ContinuousLinearMap.comp_apply, slotFeedFib_toModel,
     slotFeedFib_toModel]
 
-set_option linter.unusedSectionVars false in
 private lemma ofModel4_add {x : M}
     (f g : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ) :
     (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x) (f + g) : Tensor0SSpace 4 I x) =
       Tensor0SSpace.ofModel f + Tensor0SSpace.ofModel g :=
   map_add (tensor0SSpace_continuousLinearEquiv 4 x).symm f g
 
-set_option linter.unusedSectionVars false in
 private lemma ofModel4_smul {x : M} (c : ℝ)
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ) :
     (Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x) (c • f) : Tensor0SSpace 4 I x) =
       c • Tensor0SSpace.ofModel f :=
   map_smul (tensor0SSpace_continuousLinearEquiv 4 x).symm c f
 
-set_option linter.unusedSectionVars false in
 private lemma domDomCongr4_add (σ : Equiv.Perm (Fin 4))
     (f g : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ) :
     ContinuousMultilinearMap.domDomCongr σ (f + g) =
@@ -92,7 +85,6 @@ private lemma domDomCongr4_add (σ : Equiv.Perm (Fin 4))
   ext m
   simp [ContinuousMultilinearMap.domDomCongr_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma domDomCongr4_smul (σ : Equiv.Perm (Fin 4)) (c : ℝ)
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ) :
     ContinuousMultilinearMap.domDomCongr σ (c • f) =
@@ -112,13 +104,11 @@ def tensorRank4PermuteCLM (x : M) (σ : Equiv.Perm (Fin 4)) :
         rw [Tensor0SSpace.toModel_smul, domDomCongr4_smul, ofModel4_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma slotPerm4Fib_apply (x : M) (σ : Equiv.Perm (Fin 4)) (G : Tensor0SSpace 4 I x) :
     tensorRank4PermuteCLM (I := I) (M := M) x σ G =
       Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
         (ContinuousMultilinearMap.domDomCongr σ (Tensor0SSpace.toModel (𝕜 := ℝ) G)) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma slotPerm4Fib_toModel (x : M) (σ : Equiv.Perm (Fin 4)) (G : Tensor0SSpace 4 I x) :
     Tensor0SSpace.toModel (tensorRank4PermuteCLM (I := I) (M := M) x σ G) =
       ContinuousMultilinearMap.domDomCongr σ (Tensor0SSpace.toModel (𝕜 := ℝ) G) := by
@@ -180,7 +170,6 @@ lemma curvatureRefoldMonomialFib_apply (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 
       tw • (tensorLeadingPairSlotEvalCLM (I := I) (M := M) 2 x p q)
         (tensorRank4PermuteCLM (I := I) (M := M) x σ G) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma curvatureRefoldMonomialFib_toModel (x : M) (tw : ℝ) (σ : Equiv.Perm (Fin 4))
     (p q : TangentSpace I x) (G : Tensor0SSpace 4 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (curvatureActionMonomialCLM (I := I) (M := M) x tw σ p q G) v =
@@ -222,7 +211,6 @@ private def innerPairBilin (x : M) (K L : TangentSpace I x →L[ℝ] TangentSpac
       map_add' := fun Y Y' => by rw [map_add, add_smul]
       map_smul' := fun c Y => by rw [map_smul, smul_eq_mul, RingHom.id_apply, mul_smul] }
 
-set_option linter.unusedSectionVars false in
 private lemma innerPairBilin_apply (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X Y Y' : TangentSpace I x) :
@@ -259,7 +247,6 @@ private def outerPairBilin (g : SmoothRiemannianMetric I M) (x : M)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
-set_option linter.unusedSectionVars false in
 private lemma outerPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     outerPairBilin (I := I) g x K L X X' =
@@ -322,7 +309,6 @@ private def toModelEvalCLM (s : ℕ) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 private lemma toModelEvalCLM_apply (s : ℕ) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     toModelEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
@@ -342,7 +328,6 @@ private def pairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           map_smul] }
 
-set_option linter.unusedSectionVars false in
 private lemma pairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) (p q : TangentSpace I x) :
     pairFeedScalarCLM (I := I) (M := M) s x G v p q =
@@ -362,7 +347,6 @@ def curvatureActionMonomialFrameTrace (W : Π b : M, Tensor0SSpace 2 I b)
     curvatureActionMonomialCLM (I := I) (M := M) x
       (Tensor0SSpace.toModel (𝕜 := ℝ) (W x) ![(B a x : E), (B b x : E)]) σ (B a x) (B b x)
 
-set_option linter.unusedSectionVars false in
 theorem curvatureRefoldMonomialFibFixedFrame_toModel (W : Π b : M, Tensor0SSpace 2 I b)
     (σ : Equiv.Perm (Fin 4))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
@@ -599,7 +583,6 @@ def curvatureActionMonomialCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
         g₁ W hW σ }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem curvatureRefoldMonomialCoeffField_toSection
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)
     (hW : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -636,7 +619,6 @@ def curvatureActionKernelCoeffField (g₀ g₁ : SmoothRiemannianMetric I M)
       - curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₃
       - curvatureActionMonomialCoeffField (I := I) (M := M) g₀ g₁ W hW σ₄)
 
-set_option linter.unusedSectionVars false in
 
 theorem curvatureRefoldKernelCoeffField_toSection_eq_kernelFib_sum
     (g₀ g₁ : SmoothRiemannianMetric I M) (W : Π b : M, Tensor0SSpace 2 I b)

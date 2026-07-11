@@ -36,12 +36,11 @@ private lemma two_abs_mul_le_eps_sq_add_cross2 (a b ε : ℝ) (hε : 0 < ε) :
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
-set_option linter.unusedVariables false in
 
 private theorem cross_2_pointwise_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     (g : Fin d → E → ℝ)
-    {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
+    {η : E → ℝ} (_hη : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
     (i j k : Fin d)
     {Ω' : Set E} {M : ℝ} (hM_nn : 0 ≤ M)
@@ -424,18 +423,17 @@ private lemma integrable_eta_sq_diffQuot_g_sq_cross2
   rw [h_eq]
   exact hint
 
-set_option linter.unusedVariables false in
 
 theorem cross_2_bound_nonsmooth_quantitative
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)
     {u : E → ℝ}
-    (hu_l2 : MemLp u 2 (volume : Measure E))
+    (_hu_l2 : MemLp u 2 (volume : Measure E))
     {g : Fin d → E → ℝ}
     (hg_l2 : ∀ i, MemLp (g i) 2 (volume : Measure E))
-    (h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
+    (_h_weakPartial : ∀ i, DeGiorgi.HasWeakPartialDeriv (d := d) i (g i) u Set.univ)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1)
-    {Ω' : Set E} (hΩ' : IsOpen Ω') (hΩ'_closure : closure Ω' ⊆ Ω)
+    {Ω' : Set E} (hΩ' : IsOpen Ω') (_hΩ'_closure : closure Ω' ⊆ Ω)
     (hΩ'_compact : IsCompact (closure Ω'))
     {R₀ : ℝ}
     (hh_supp_in_Ω' : ∀ {h : ℝ}, |h| ≤ R₀ →
@@ -927,7 +925,6 @@ theorem cross_2_bound_nonsmooth_quantitative
     rw [← h_C_eq]
   linarith
 
-set_option linter.unusedVariables false in
 
 theorem cross_2_bound_nonsmooth
     {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω)

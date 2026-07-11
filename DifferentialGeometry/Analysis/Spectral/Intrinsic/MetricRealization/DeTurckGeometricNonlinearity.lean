@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Char
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
 
@@ -59,7 +58,6 @@ def realizeMetricAt (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
   else
     g_bg
 
-set_option linter.unusedSectionVars false in
 
 theorem realizeMetricAt_inner_of_realizable (g_bg : SmoothRiemannianMetric I M)
     {σ : ℝ} (u : tensorHs (I := I) (M := M) g_bg 0 2 σ)
@@ -75,7 +73,6 @@ theorem realizeMetricAt_inner_of_realizable (g_bg : SmoothRiemannianMetric I M)
   rw [realizeMetricAt, dif_pos hex, tensorSectionRealizeMetric_inner]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem realizeMetricAt_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
     {σ : ℝ} (u : tensorHs (I := I) (M := M) g_bg 0 2 σ)
@@ -147,7 +144,6 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow
 open TensorMultilinear Tensor0SBundle
 
-set_option linter.unusedSectionVars false in
 
 private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -155,7 +151,6 @@ private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
       = chartBasisVecFiber (I := I) α i x := by
   rw [chartBasisVecFiber, Trivialization.symmL_apply]
 
-set_option linter.unusedSectionVars false in
 
 theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
     (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -194,7 +189,6 @@ theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
     (fun q _ => rfl) rfl
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedSectionVars false in
 
 theorem deTurckRHSField_realizeMetric_jointContMDiffOn
     (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
@@ -314,7 +308,6 @@ theorem deTurckRHSField_realizeMetric_jointContMDiffOn
         (Bb.equivFun_apply _).symm]
     exact (Bb.equivFun.symm_apply_apply _).symm
 
-set_option linter.unusedSectionVars false in
 
 private theorem smoothCcChartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -378,7 +371,6 @@ private theorem smoothCcChartRepr_jointContMDiffOn
       ((F p.2).toSection p.1) = _
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
-set_option linter.unusedSectionVars false in
 
 private theorem smoothCcChartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
@@ -453,7 +445,6 @@ private theorem smoothCcChartRepr_euclid_jointContDiffWithinAt
   exact hself
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 
 private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
@@ -569,14 +560,14 @@ private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
         chartLeviCivitaGoodSet_mem_chartAt_source (I := I) hx'_good
       have hx'_extsrc : x' ∈ φ.source := by rw [hφ, extChartAt_source]; exact hx'_src
       have hx'_inv : φ.symm y = x' := by rw [← hx'y]; exact φ.left_inv hx'_extsrc
-      show _ = Ker y (chartRep t y)
+      change _ = Ker y (chartRep t y)
       rw [hKer, hchartRep]
       simp only []
       exact (chartTensorRSOutputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ 0 2 α
         (fun b' : M => (F t).toSection b') B.toFun
         (b := φ.symm y) (by rw [hx'_inv]; exact hx'_src) l)
     · have hgood_inv : φ.symm (φ b) = b := φ.left_inv (by rw [hφ, extChartAt_source]; exact hb_src)
-      show _ = Ker (φ b) (chartRep t₀ (φ b))
+      change _ = Ker (φ b) (chartRep t₀ (φ b))
       rw [hKer, hchartRep]
       simp only []
       exact (chartTensorRSOutputSlotCorrection_chart_kernel_factorization (I := I) (M := M) g₀ 0 2 α
@@ -615,7 +606,7 @@ private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
       rw [← hx'y, φ.left_inv hx'_extsrc]; exact hx'_good
     have hform := chart_pulled_covApply_explicit_formula_target_smoothCc (I := I) (M := M)
       g₀ 0 2 α (F t) B hy_tgt hy_good
-    show DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
+    change DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g₀))
           B.toFun (fun z : M => (F t).toSection z)) (φ.symm y) = _
     rw [hchartRep]
@@ -623,14 +614,13 @@ private theorem smoothCcCovApplyChartRepr_euclid_jointContDiffWithinAt
   · have hgood_inv : φ.symm (φ b) = b := φ.left_inv (by rw [hφ, extChartAt_source]; exact hb_src)
     have hform := chart_pulled_covApply_explicit_formula_target_smoothCc (I := I) (M := M)
       g₀ 0 2 α (F t₀) B hyb_tgt (by rw [hgood_inv]; exact hb_good)
-    show DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
+    change DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr (I := I) 0 2 α
         (covApply (TensorRSNabla.tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g₀))
           B.toFun (fun z : M => (F t₀).toSection z)) (φ.symm (φ b)) = _
     rw [hchartRep]
     exact hform
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 
 private theorem smoothCcCovApplyChartRepr_manifold_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -692,7 +682,6 @@ private theorem smoothCcCovApplyChartRepr_manifold_jointContMDiffOn
     rw [φ.left_inv hpsrc]
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 
 private theorem smoothCcCovApplySection_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -792,7 +781,6 @@ private theorem smoothCcCovApplySection_jointContMDiffOn
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α) hsource).mpr
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
-set_option linter.unusedSectionVars false in
 
 private theorem genChartRepr_jointContMDiffOn
     (S : Set ℝ) (α : M)
@@ -862,7 +850,6 @@ private def toSmoothCcTensor
   hasCompactSupport :=
     IsCompact.of_isClosed_subset isCompact_univ (isClosed_tsupport _) (Set.subset_univ _)
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma toSmoothCcTensor_toSection
     (g₀ : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; Tensor0SBundle.TensorRSModel 0 2 ℝ E,
@@ -870,7 +857,6 @@ set_option linter.unusedSectionVars false in
     (toSmoothCcTensor (I := I) g₀ σ).toSection = σ := rfl
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 
 private theorem covApplyGenFamily_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -904,7 +890,6 @@ private def covApplySection
   contMDiff_toFun :=
     covApplyRS_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma covApplySection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -926,7 +911,6 @@ private def christoffelSelfField
     intro b
     exact hOn.contMDiffAt (Filter.univ_mem)
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma christoffelSelfField_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -934,7 +918,6 @@ set_option linter.unusedSectionVars false in
       covApply (LeviCivita (I := I) g₀) B.toFun B.toFun y := rfl
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 
 private theorem traceTerm1_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -959,7 +942,6 @@ private theorem traceTerm1_jointContMDiffOn
   exact hStep
 
 set_option maxHeartbeats 1600000 in
-set_option linter.unusedSectionVars false in
 
 private theorem traceTerm2_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -995,7 +977,6 @@ private def iteratedCovApplySection
   contMDiff_toFun :=
     covApply_covApply_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma iteratedCovApplySection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1018,7 +999,6 @@ private def covApplyChristoffelSection
   contMDiff_toFun :=
     covApply_christoffel_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma covApplyChristoffelSection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1029,7 +1009,6 @@ set_option linter.unusedSectionVars false in
         ((LeviCivita (I := I) g₀).toFun B.toFun y (B.toFun y)) := rfl
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedSectionVars false in
 
 private theorem fixedFrameTrace_chartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
@@ -1107,7 +1086,6 @@ private theorem fixedFrameTrace_chartRepr_jointContMDiffOn
     ← map_sub, iteratedCovApplySection_apply, covApplyChristoffelSection_apply]
 
 set_option maxHeartbeats 3200000 in
-set_option linter.unusedSectionVars false in
 
 theorem rawTensorConnLapSmooth_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)

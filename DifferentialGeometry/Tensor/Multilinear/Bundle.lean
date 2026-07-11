@@ -15,10 +15,9 @@ section defs
 variable (𝕜 : Type*) [NontriviallyNormedField 𝕜] (s : ℕ)
 variable {B : Type*}
 
-set_option linter.unusedVariables false in
 
 @[reducible]
-protected def Bundle.continuousMultilinearMap (F : Type*) (E : B → Type*)
+protected def Bundle.continuousMultilinearMap (_F : Type*) (E : B → Type*)
     [Π x, AddCommMonoid (E x)] [Π x, Module 𝕜 (E x)] [Π x, TopologicalSpace (E x)]
     (x : B) : Type _ :=
   ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E x) 𝕜
@@ -239,7 +238,6 @@ variable {𝕜 B F : Type*} {E : B → Type*} (s : ℕ)
 
 local notation "MLF" => ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜
 
-set_option linter.unusedSectionVars false in
 
 theorem contMDiffOn_continuousMultilinearMapCoordChange
     [ContMDiffVectorBundle n F E IB]

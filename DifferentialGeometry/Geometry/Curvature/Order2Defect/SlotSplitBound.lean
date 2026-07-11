@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParse
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -34,7 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannianFiberNormSq_three_eq_sum_slot0Curry
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
@@ -49,7 +47,6 @@ theorem riemannianFiberNormSq_three_eq_sum_slot0Curry
   exact riemannianFiberNormSq_succ_eq_sum_slot0Curry (I := I) (M := M) g 2 x
     ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x)
 
-set_option linter.unusedSectionVars false in
 
 theorem riemannianFiberNormSq_three_le_of_slot0_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M)
@@ -87,7 +84,6 @@ private noncomputable def secondCovGradEnergyBudget
       ((covGrad (I := I) (M := M) g 0 3
         (covGrad (I := I) (M := M) g 0 2 T₀)).toSection x)
 
-set_option linter.unusedSectionVars false in
 private lemma rfnsBudget_nonneg
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     0 ≤ secondCovGradEnergyBudget (I := I) (M := M) g T₀ x := by
@@ -99,7 +95,6 @@ private lemma rfnsBudget_nonneg
     ((covGrad (I := I) (M := M) g 0 3 (covGrad (I := I) (M := M) g 0 2 T₀)).toSection x)
   linarith
 
-set_option linter.unusedSectionVars false in
 
 theorem covGradRoughLapCurv_hpt_of_slot0_budget
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)

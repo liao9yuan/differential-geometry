@@ -37,7 +37,6 @@ noncomputable def product_fun {s q : ℕ} {x : B}
 
 scoped infixl:70 " ⊗ₘ " => product_fun
 
-set_option linter.unusedSimpArgs false in
 omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
 
 theorem product_fun_apply {s q : ℕ} {x : B}
@@ -572,7 +571,6 @@ theorem triv_fwdEquiv_eq (s q : ℕ) (x₀ x : B)
   rw [hα]
   exact (triv_toTensor_eq_modelFromTensorEquiv_symm (Module.finBasis 𝕜 F) s q x₀ x hx t).symm
 
-set_option linter.unusedSectionVars false in
 
 theorem multilinearTensorFiberwiseEquiv_smooth :
     ContMDiff
@@ -611,7 +609,6 @@ theorem multilinearTensorFiberwiseEquiv_smooth :
     exact triv_fwdEquiv_eq s q p₀.proj p.proj hp p.snd
 
 set_option maxHeartbeats 400000 in
-set_option linter.unusedSectionVars false in
 
 theorem multilinearTensorFiberwiseEquiv_symm_smooth :
     ContMDiff

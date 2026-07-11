@@ -21,7 +21,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option backward.isDefEq.respectTransparency false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 1600000
@@ -55,7 +54,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 private lemma jetEnvelope_covGrad_one_le (g₀ : SmoothRiemannianMetric I M)
@@ -78,7 +76,6 @@ private lemma jetEnvelope_covGrad_one_le (g₀ : SmoothRiemannianMetric I M)
         norm_nonneg ((iteratedCovGrad (I := I) g₀ 0 2 j P).toSection x))
       (by simp : (1 : ℕ) ∈ Finset.range 3)
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
@@ -86,9 +83,9 @@ theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
     (hB : 0 ≤ B) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ max δ₀ 0)
-        (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
-        (htie : ∀ (x : M) (v w : TangentSpace I x),
+        {δ : ℝ} (_hδ_le : δ ≤ max δ₀ 0)
+        (_hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ)
+        (_htie : ∀ (x : M) (v w : TangentSpace I x),
           g₁.inner x v w = g₀.inner x v w +
             ccTensorBilinSymm (I := I) g₀ P x v w)
         (x : M),
@@ -173,8 +170,6 @@ theorem exists_perMetric_linearizedRicciArm1Fib_le_of_jetEnvelope
     mul_le_mul hkosB hcometB hrfns_com_nn hCkosB_nn
   exact hfinal
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_riemannianFiberNormSq_linearizedRicciArm1Fib_realizedFam_le_of_jetEnvelope
@@ -182,11 +177,11 @@ theorem exists_riemannianFiberNormSq_linearizedRicciArm1Fib_realizedFam_le_of_je
     (hB : 0 ≤ B) :
     ∃ Λ : ℝ, 0 ≤ Λ ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
+        (s : ℝ) (_hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
@@ -238,7 +233,6 @@ theorem exists_riemannianFiberNormSq_linearizedRicciArm1Fib_realizedFam_le_of_je
     nlinarith [hle', hprod]
   exact hΛ g₁ (convexPerturbation (I := I) g₀ T T' s) (le_of_eq hδ₁_def) hδs htie x henv
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope
@@ -246,11 +240,11 @@ theorem exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope
     (hB : 0 ≤ B) :
     ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
+        (s : ℝ) (_hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
@@ -267,8 +261,6 @@ theorem exists_arm1Koszul_realizedFam_pointwise_le_of_jetEnvelope
   rw [ricciArmOrder1KoszulCoeff_toSection]
   exact hΛarm1 T T' hδ_le hδ hδ'_le hδ' s hs x henv
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 
 theorem exists_arm1Koszul_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -276,9 +268,9 @@ theorem exists_arm1Koszul_realizedFam_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λarm1 : ℝ, 0 ≤ Λarm1 ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -298,7 +290,6 @@ theorem exists_arm1Koszul_realizedFam_rfns_ballUniform
   refine hΛarm1 T T' hδ_le hδ hδ'_le hδ' s hs x ?_
   exact hCsob T T' hR hTball hT'ball s hs x
 
-set_option linter.unusedSectionVars false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 theorem exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope
@@ -306,11 +297,11 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope
     (hB : 0 ≤ B) :
     ∃ Λcurv : ℝ, 0 ≤ Λcurv ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (s : ℝ) (hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
+        (s : ℝ) (_hs : s ∈ Set.Icc (0 : ℝ) 1) (x : M),
         (∑ j ∈ Finset.range 3,
             (letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace 0 (2 + j) I b) :=
               Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g₀ 0 (2 + j)
@@ -337,8 +328,6 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_pointwise_le_of_jetEnvelope
   · rw [ricciArmOrder0CurvCoeff_toSection]
     exact le_trans (hΛ2 T T' hδ_le hδ hδ'_le hδ' s hs x henv) (le_max_right _ _)
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 
 theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -346,9 +335,9 @@ theorem exists_riemannArm0_curvCoeff_realizedFam_rfns_ballUniform
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λcurv : ℝ, 0 ≤ Λcurv ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -425,18 +414,16 @@ theorem corrFieldTameJetBound_nonneg (g₀ : SmoothRiemannianMetric I M)
     linarith
   next => exact le_refl 0
 
-set_option linter.unusedSectionVars false in
-set_option linter.unusedVariables false in
 
 theorem exists_lichnerowicz_cometric_realizedFam_rfns_ballUniform
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
-    (ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (hR : 0 ≤ R)
+    (_ha_super : 2 * Module.finrank ℝ E + 10 ≤ a) {R : ℝ} (_hR : 0 ≤ R)
     {δ₀ : ℝ} (hδ₀ : δ₀ < 1) :
     ∃ Λcom : ℝ, 0 ≤ Λcom ∧
       ∀ (T T' : SmoothCcTensor g₀ 0 2)
-        {δ : ℝ} (hδ_le : δ ≤ δ₀)
+        {δ : ℝ} (_hδ_le : δ ≤ δ₀)
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
-        {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
+        {δ' : ℝ} (_hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ'),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →

@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -116,7 +115,6 @@ def rhsBracket : EuclN → ℝ :=
       rhsTerm6 (I := I) (M := M) g r s i α P₀ -
       rhsTerm7 (I := I) (M := M) g r s i α P₀
 
-set_option linter.unusedSectionVars false in
 
 lemma eigenvectorChartRHS_eq_smul_bracket :
     eigenvectorChartRHS (I := I) (M := M) g r s i α P₀
@@ -289,35 +287,30 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
-set_option linter.unusedSectionVars false in
 
 lemma aggrUchart_le :
     aggrUchart (I := I) (M := M) g r s i α P₀ K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).1
 
-set_option linter.unusedSectionVars false in
 
 lemma aggrCrossLeft_le :
     aggrCrossLeft (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.1
 
-set_option linter.unusedSectionVars false in
 
 lemma aggrCrossRight_le :
     aggrCrossRight (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.2.1
 
-set_option linter.unusedSectionVars false in
 
 lemma aggrPartial_le :
     aggrPartial (I := I) (M := M) g r s i α K
       ≤ wkpRhsAggregate (I := I) (M := M) g r s i α P₀ K := by
   rw [wkpRhsAggregate]; exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.1
 
-set_option linter.unusedSectionVars false in
 
 lemma aggrComponent_le :
     aggrComponent (I := I) (M := M) g r s i α K
@@ -325,7 +318,6 @@ lemma aggrComponent_le :
   rw [wkpRhsAggregate]
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.1
 
-set_option linter.unusedSectionVars false in
 
 lemma aggrCrossRightLimit_le :
     aggrCrossRightLimit (I := I) (M := M) g r s i α K
@@ -333,7 +325,6 @@ lemma aggrCrossRightLimit_le :
   rw [wkpRhsAggregate]
   exact (le_sevenSum _ _ _ _ _ _ _).2.2.2.2.2.1
 
-set_option linter.unusedSectionVars false in
 
 lemma aggrCutoffPartial_le :
     aggrCutoffPartial (I := I) (M := M) g r s i α K

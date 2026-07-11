@@ -12,10 +12,8 @@ import Mathlib.Algebra.Module.Projective
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 800000
-set_option warningAsError false
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators Matrix
@@ -43,14 +41,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 def smoothCcToL2Submodule (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Submodule ℝ (TensorL2 r s g) :=
   LinearMap.range
     ((SmoothCcTensor.toL2 (g := g) (r := r) (s := s)).toLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →ₗ[ℝ] TensorL2 r s g where
@@ -133,21 +129,18 @@ def connLaplacianL2Action (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     rw [h_lap_smul, SmoothCcTensor.toL2_smul]
     rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma connLaplacianL2Action_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     connLaplacianL2Action (I := I) g r s T =
       SmoothCcTensor.toL2 (g := g) (r := r) (s := s)
         (rawTensorConnLapSmooth (I := I) g r s T) := rfl
 
-set_option linter.unusedSectionVars false in
 
 def toL2RangeRestrict (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →ₗ[ℝ] smoothCcToL2Submodule (I := I) g r s :=
   LinearMap.rangeRestrict
     ((SmoothCcTensor.toL2 (g := g) (r := r) (s := s)).toLinearMap)
 
-set_option linter.unusedSectionVars false in
 
 lemma toL2RangeRestrict_surjective
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -158,7 +151,6 @@ lemma toL2RangeRestrict_surjective
   apply Subtype.ext
   exact hT
 
-set_option linter.unusedSectionVars false in
 
 def smoothCcSection (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     smoothCcToL2Submodule (I := I) g r s →ₗ[ℝ] SmoothCcTensor g r s :=
@@ -167,7 +159,6 @@ def smoothCcSection (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       (LinearMap.range_eq_top.mpr
         (toL2RangeRestrict_surjective (I := I) g r s)))
 
-set_option linter.unusedSectionVars false in
 
 lemma toL2RangeRestrict_smoothCcSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -178,7 +169,6 @@ lemma toL2RangeRestrict_smoothCcSection
       (LinearMap.range_eq_top.mpr
         (toL2RangeRestrict_surjective (I := I) g r s)))
 
-set_option linter.unusedSectionVars false in
 
 lemma toL2RangeRestrict_smoothCcSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -188,7 +178,6 @@ lemma toL2RangeRestrict_smoothCcSection_apply
   have h := toL2RangeRestrict_smoothCcSection (I := I) g r s
   exact congrArg (fun (f : _ →ₗ[ℝ] _) => f u) h
 
-set_option linter.unusedSectionVars false in
 
 lemma toL2_smoothCcSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -208,14 +197,12 @@ lemma toL2_smoothCcSection
   rw [hrr] at hval
   exact hval
 
-set_option linter.unusedSectionVars false in
 
 def connLaplacianL2OnDomain (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     smoothCcToL2Submodule (I := I) g r s →ₗ[ℝ] TensorL2 r s g :=
   (connLaplacianL2Action (I := I) g r s).comp
     (smoothCcSection (I := I) g r s)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma connLaplacianL2OnDomain_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : smoothCcToL2Submodule (I := I) g r s) :
@@ -223,21 +210,18 @@ set_option linter.unusedSectionVars false in
       connLaplacianL2Action (I := I) g r s
         (smoothCcSection (I := I) g r s u) := rfl
 
-set_option linter.unusedSectionVars false in
 
 def connLaplacianL2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     TensorL2 r s g →ₗ.[ℝ] TensorL2 r s g where
   domain := smoothCcToL2Submodule (I := I) g r s
   toFun := connLaplacianL2OnDomain (I := I) g r s
 
-set_option linter.unusedSectionVars false in
 
 @[simp] theorem connLaplacianL2_domain_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     (connLaplacianL2 (I := I) g r s).domain =
       smoothCcToL2Submodule (I := I) g r s := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem connLaplacianL2_apply_toL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
@@ -249,7 +233,6 @@ theorem connLaplacianL2_apply_toL2
         (smoothCcSection (I := I) g r s
           ⟨SmoothCcTensor.toL2 (g := g) (r := r) (s := s) T, hT⟩) := rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem toL2_mem_connLaplacianL2_domain
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :

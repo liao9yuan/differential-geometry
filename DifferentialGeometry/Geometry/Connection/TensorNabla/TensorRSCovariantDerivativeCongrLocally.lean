@@ -4,10 +4,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 400000
 set_option maxHeartbeats 400000
-set_option linter.unusedSectionVars false
 
 open Bundle CovariantDerivative Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff

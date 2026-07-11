@@ -149,7 +149,6 @@ theorem chart_bilinear_identity_h1_0_smooth_seq
     h_thick_compact h_thick ψ weak_partial_ψ hψ_lp hψ_grad_lp ψ_seq
     hψ_seq_smooth hψ_seq_cs hψ_seq_supp hψ_seq_l2 hψ_seq_grad_l2
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_at_v_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -158,7 +157,7 @@ theorem variational_identity_at_v_h
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
     (_hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    (_hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
     {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
     (h_thick : Metric.cthickening |h| K_0 ⊆
@@ -224,7 +223,6 @@ theorem variational_identity_at_v_h
     v_h_seq h_v_seq_smooth h_v_seq_cs h_v_seq_supp h_v_seq_l2
     h_v_seq_grad_l2
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_v_h_expanded
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
@@ -233,7 +231,7 @@ theorem variational_identity_v_h_expanded
     {K_0 : Set EuclN}
     {η : EuclN → ℝ}
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ}
+    {_R₀ : ℝ} {h : ℝ}
     (weak_partial_v_h : Fin (Module.finrank ℝ E) → EuclN → ℝ)
     (h_var_id_at_v_h :
       (∫ y in Metric.cthickening |h| K_0,
@@ -342,19 +340,18 @@ theorem variational_identity_v_h_expanded
   rw [← h_principal_eq]
   exact h_var_id_at_v_h
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_after_ibp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    {K_0 : Set EuclN} (_hK_0_compact : IsCompact K_0)
+    (_hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {η : EuclN → ℝ} (_hη : ContDiff ℝ (⊤ : ℕ∞) η) (_hη_supp : HasCompactSupport η)
+    (_hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
+    {R₀ : ℝ} {h : ℝ} (_hh : h ≠ 0) (_hh_le : |h| ≤ R₀)
+    (_h_thick : Metric.cthickening |h| K_0 ⊆
       chartTargetEuclid (I := I) (M := M) α)
     (h_expanded :
       (∫ y in Metric.cthickening |h| K_0,
@@ -564,19 +561,18 @@ theorem variational_identity_after_ibp
   rw [h_int_swap_before, h_per_ij_eq, ← h_int_swap_after] at h_expanded
   exact h_expanded
 
-set_option linter.unusedVariables false in
 
 theorem variational_identity_after_product_rule
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
     (D : ChartBilinearH1ComplData (I := I) (M := M) g α)
-    {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
-    (hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
-    {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
-    (hη_supp_in_K_0 : tsupport η ⊆ K_0)
+    {K_0 : Set EuclN} (_hK_0_compact : IsCompact K_0)
+    (_hK_0_in : K_0 ⊆ chartTargetEuclid (I := I) (M := M) α)
+    {η : EuclN → ℝ} (_hη : ContDiff ℝ (⊤ : ℕ∞) η) (_hη_supp : HasCompactSupport η)
+    (_hη_supp_in_K_0 : tsupport η ⊆ K_0)
     (k : Fin (Module.finrank ℝ E))
-    {R₀ : ℝ} {h : ℝ} (hh : h ≠ 0) (hh_le : |h| ≤ R₀)
-    (h_thick : Metric.cthickening |h| K_0 ⊆
+    {R₀ : ℝ} {h : ℝ} (_hh : h ≠ 0) (_hh_le : |h| ≤ R₀)
+    (_h_thick : Metric.cthickening |h| K_0 ⊆
       chartTargetEuclid (I := I) (M := M) α)
     (h_after_ibp :
       -(∫ y in Metric.cthickening |h| K_0,

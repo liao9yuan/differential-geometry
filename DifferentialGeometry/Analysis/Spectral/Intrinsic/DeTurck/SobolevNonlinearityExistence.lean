@@ -181,7 +181,6 @@ theorem deTurckSmoothN_sub_eq_smoothCcToTensorHs_remainderSub
   rw [hsub, deTurckSmoothN_coeff, deTurckSmoothN_coeff, smoothCcToTensorHs_coeff, hcoeff_sub]
 
 
-set_option linter.unusedVariables false in
 
 theorem smoothRemainderDiff_ballLipschitz_sobolev
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -317,7 +316,6 @@ theorem smoothRemainderDiff_ballLipschitz_sobolev
     _ = Ca * Real.sqrt (((a : ℝ) + 1) * (Ccol * Cb ^ 2)) * Ndist := by ring
 
 
-set_option linter.unusedVariables false in
 
 theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_dataWeighted_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -329,9 +327,9 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_dataWeighted_of_symm
         (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
         {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
         (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+        (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
           smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T‖ ≤ R) →
         (∀ j : ℕ, j ≤ a + 2 → ‖iteratedCovGrad (I := I) g₀ 0 2 j T'‖ ≤ R) →
@@ -431,7 +429,6 @@ theorem deTurckRemainderDiff_iteratedCovGrad_ballLipschitz_dataWeighted_of_symm
         mul_le_mul_of_nonneg_left hstep hCcov_nn
     _ = Ccov * max Cb2 Cb1 * (Dm * H2 + H1) := by ring
 
-set_option linter.unusedVariables false in
 
 theorem smoothRemainderDiff_ballLipschitz_sobolev_dataWeighted_of_symm
     (g₀ g_bg : SmoothRiemannianMetric I M)
@@ -442,9 +439,9 @@ theorem smoothRemainderDiff_ballLipschitz_sobolev_dataWeighted_of_symm
       (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
       (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-      (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
         smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-      (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
         smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R →
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R →
@@ -567,9 +564,9 @@ theorem deTurckSmoothRemainderTensorHs_ballLipschitz_dataWeighted_of_symm (g₀ 
       (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
       {δ' : ℝ} (hδ'_le : δ' ≤ δ₀)
       (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
-      (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+      (_hTsymm : ∀ (x : M) (v w : TangentSpace I x),
         smoothCcTensorBilinForm (I := I) g₀ T x v w = smoothCcTensorBilinForm (I := I) g₀ T x w v)
-      (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+      (_hT'symm : ∀ (x : M) (v w : TangentSpace I x),
         smoothCcTensorBilinForm (I := I) g₀ T' x v w = smoothCcTensorBilinForm (I := I) g₀ T' x w v),
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T‖ ≤ R →
       ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T'‖ ≤ R →
@@ -1345,7 +1342,7 @@ theorem deTurckSobolevNHa2Symm_lipschitzWith (g₀ g_bg : SmoothRiemannianMetric
   have heq_fun : deTurckSobolevNonlinearitySymm (I := I) (M := M) g₀ g_bg a =
       Dense.extend hdense F := by
     funext v
-    show (dite _ _ _) = _
+    change (dite _ _ _) = _
     rw [dif_pos h]
   rw [heq_fun]
   exact hext_lip
@@ -1456,7 +1453,7 @@ theorem deTurckSobolevNHa2Symm_eq_smoothN (g₀ g_bg : SmoothRiemannianMetric I 
       (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) =
       Dense.extend hdense F
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) := by
-    show (dite _ _ _) = _
+    change (dite _ _ _) = _
     rw [dif_pos h]
   rw [hunfold, hdense.extend_eq hF_cont ⟨_, hmem⟩]
   change deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a
@@ -1619,7 +1616,7 @@ theorem deTurckSobolevNHa2Symm_smoothEmbed_eq (g₀ g_bg : SmoothRiemannianMetri
       (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) =
       Dense.extend hdense F
         (smoothCcToTensorHs (I := I) (M := M) g₀ ((a : ℝ) + 2) T) := by
-    show (dite _ _ _) = _
+    change (dite _ _ _) = _
     rw [dif_pos h]
   rw [hunfold, hdense.extend_eq hF_cont ⟨_, hmem⟩]
   change deTurckSmoothRemainderTensorHs (I := I) (M := M) g₀ g_bg a
@@ -1799,7 +1796,7 @@ theorem deTurckSobolevNonlinearitySymm_mixed_lipschitz_pointwise
             (radialScaleSmooth (I := I) (M := M) g₀ a R₀
               (ccTensor02Symm (I := I) (M := M) g₀ Y)) x w v := by
       intros Y x v w
-      show smoothCcTensorBilinForm (I := I) g₀ (_ • ccTensor02Symm (I := I) (M := M) g₀ Y) x v w =
+      change smoothCcTensorBilinForm (I := I) g₀ (_ • ccTensor02Symm (I := I) (M := M) g₀ Y) x v w =
           smoothCcTensorBilinForm (I := I) g₀ (_ • ccTensor02Symm (I := I) (M := M) g₀ Y) x w v
       rw [hccBilin_smul, hccBilin_smul,
         bilinearForm_of_tensorSymmetrization_symm (I := I) (M := M) g₀ Y x v w]

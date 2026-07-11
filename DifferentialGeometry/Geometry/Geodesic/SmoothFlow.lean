@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalMapContDiffOnK
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

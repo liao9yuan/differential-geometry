@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 

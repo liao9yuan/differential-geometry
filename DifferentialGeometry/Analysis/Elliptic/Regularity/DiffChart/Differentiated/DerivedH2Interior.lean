@@ -53,7 +53,6 @@ private lemma self_subset_thickening_of_pos
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
-set_option linter.unusedVariables false in
 
 theorem derivedChartBilinear_memWkp_two_two_interior
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]

@@ -57,7 +57,6 @@ theorem timeWindowBump_section_contMDiff (a b δ : ℝ) :
     ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => timeWindowBump a b δ q.1) :=
   (timeWindowBump_contDiff a b δ).contMDiff.comp contMDiff_fst
 
-set_option linter.unusedSectionVars false in
 
 theorem smul_tangentBundleSection_contMDiffWithinAt
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ)
@@ -84,7 +83,6 @@ theorem smul_tangentBundleSection_contMDiffWithinAt
   · simpa using
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).2 (η q₀.1) (X q₀.1 q₀.2)
 
-set_option linter.unusedSectionVars false in
 
 theorem smul_tangentBundleSection_contMDiff
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ) (T : ℝ)
@@ -127,8 +125,6 @@ theorem smul_tangentBundleSection_contMDiff
     · exact Or.inr h
   exact contMDiff_of_contMDiffOn_union_of_isOpen honU honV hcover hUopen hVopen
 
-set_option linter.unusedVariables false in
-set_option linter.unusedSectionVars false in
 
 theorem interior_field_global_cutoff_extension_loc
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
@@ -196,7 +192,6 @@ theorem interior_field_global_cutoff_extension_loc
       exact smul_tangentBundleSection_contMDiff X_DT (timeWindowBump a b δ) T hηsm hint htsupp
     exact autonomizedFieldJointC1_of_contMDiff (fun s x => timeWindowBump a b δ s • X_DT s x) hsm
 
-set_option linter.unusedSectionVars false in
 
 theorem contMDiff_timeSlice_of_jointlyContMDiffOn
     {Ψ : M → ℝ → M} {a b : ℝ} (t : ℝ) (ht : t ∈ Set.Ioo a b)
@@ -215,7 +210,6 @@ theorem contMDiff_timeSlice_of_jointlyContMDiffOn
     exact h1.comp x (hpair x).contMDiffWithinAt hmaps
   exact hcomp.contMDiffAt (by simp)
 
-set_option linter.unusedSectionVars false in
 
 theorem hasMFDerivWithinAt_piecewise_of_agree_at_junction
     (X : ℝ → ∀ x : M, TangentSpace I x)
@@ -295,7 +289,6 @@ theorem hasMFDerivWithinAt_piecewise_of_agree_at_junction
           = ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (f2 t))) by rw [hval]]
       exact hmono.congr_of_eventuallyEq heq hval
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_local_flow_anchored_at_interior_time
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
@@ -353,7 +346,6 @@ theorem exists_local_flow_anchored_at_interior_time
         = ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ p t))) by rw [heq]]
     exact hbare
 
-set_option linter.unusedSectionVars false in
 
 private theorem integralCurves_eqOn_Icc_of_agree_at_left
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
@@ -394,9 +386,7 @@ private theorem integralCurves_eqOn_Icc_of_agree_at_left
     rw [hXt_eq t (hsub ht) (Φ' t x')]; exact hflow' t ht
   exact bare_forward_flow_eqOn_of_jointC1 Xt hXt_auto Φ Φ' x x' hflowXt hflowXt' hstart
 
-set_option linter.unusedSectionVars false in
 
-set_option linter.unusedVariables false in
 
 theorem exists_uniformRadius_local_flow_cover_of_compact_Icc
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
@@ -555,14 +545,12 @@ private def existsForwardIntegralCurveUpTo (X : ℝ → ∀ x : M, TangentSpace 
       HasMFDerivWithinAt 𝓘(ℝ, ℝ) I c (Set.Ici (0:ℝ)) t
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (c t)))
 
-set_option linter.unusedSectionVars false in
 
 private theorem existsForwardIntegralCurveUpTo_mono (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s s' : ℝ}
     (hss : s' ≤ s) (h : existsForwardIntegralCurveUpTo X x s) : existsForwardIntegralCurveUpTo X x s' := by
   obtain ⟨c, hc0, hc⟩ := h
   exact ⟨c, hc0, fun t ht => hc t ⟨ht.1, lt_of_lt_of_le ht.2 hss⟩⟩
 
-set_option linter.unusedSectionVars false in
 
 private theorem existsForwardIntegralCurveUpTo_extend
     (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s e ρ : ℝ}
@@ -595,7 +583,6 @@ private theorem existsForwardIntegralCurveUpTo_extend
     exact hasMFDerivWithinAt_piecewise_of_agree_at_junction X c f2 (c := e) (c' := e + ρ)
       (by linarith) hagree hf1 hf1c hf2
 
-set_option linter.unusedSectionVars false in
 
 private theorem existsForwardIntegralCurveUpTo_chain
     (X : ℝ → ∀ x : M, TangentSpace I x) (x : M)

@@ -379,7 +379,6 @@ private theorem uncurrySum_summand_uncurryFin_left_expand_mk
   refine Finset.sum_congr rfl fun j _ => ?_
   simp [L, uncurryFinLeftExpandedSummand]
 
-set_option linter.flexible false in
 private theorem derivShuffleLeft_expanded_summand_eq
     (f : N →L[𝕜] N' →L[𝕜] N'')
     (g' : M →L[𝕜] (M [⋀^Fin m]→L[𝕜] N)) (h : M [⋀^Fin n]→L[𝕜] N')

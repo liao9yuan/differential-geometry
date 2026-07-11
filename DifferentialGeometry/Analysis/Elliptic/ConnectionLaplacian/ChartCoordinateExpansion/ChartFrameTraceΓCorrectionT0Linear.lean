@@ -7,10 +7,8 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFor
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
-set_option linter.unusedSectionVars false
 
 open Bundle Manifold Set IsManifold ContinuousLinearMap Filter
 open scoped Manifold Topology Bundle ContDiff BigOperators
@@ -44,6 +42,7 @@ private noncomputable def chartModelBasisProjE (m : Fin (Module.finrank ℝ E)) 
     (((LinearMap.proj m).comp ((chartModelBasis E).equivFun.toLinearMap)) :
       E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartModelBasisProjE_apply (m : Fin (Module.finrank ℝ E))
     (v : E) :
     chartModelBasisProjE (E := E) m v =

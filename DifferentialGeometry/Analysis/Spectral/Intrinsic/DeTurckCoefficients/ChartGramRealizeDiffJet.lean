@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Iter
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option maxHeartbeats 1600000
 
 open Manifold Set Filter Topology
@@ -87,7 +86,7 @@ lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor
   have hYt : Y ∈ (extChartAt I α).target := interior_subset hY
   have hmem : (toEuclidean (E := E)) Y ∈ chartTargetEuclid (I := I) (M := M) α :=
     ⟨Y, hYt, rfl⟩
-  show tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] Jdx ((extChartAt I α).symm Y) =
+  change tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] Jdx ((extChartAt I α).symm Y) =
     chartPushedRaw I α (tensorChartComponentRaw (I := I) (M := M) g 0 2 S α ![] Jdx)
       ((toEuclidean (E := E)) Y)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hmem,

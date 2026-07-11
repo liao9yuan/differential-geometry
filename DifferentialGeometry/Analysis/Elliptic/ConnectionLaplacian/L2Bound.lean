@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFi
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000
 
@@ -35,7 +34,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 
 theorem integrable_riemannianFiberNormSq_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
@@ -52,7 +50,6 @@ theorem integrable_riemannianFiberNormSq_toSection
   exact (riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x
     (S.toSection x)).symm
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
@@ -186,7 +183,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound
     nlinarith [mul_le_mul_of_nonneg_left hcross (sq_nonneg C₀), sq_nonneg C₀]
   nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C₀ * (nT + nGrad + nHess))]
 
-set_option linter.unusedSectionVars false in
 
 theorem secondCovGrad_l2NormSq_le_rawConnLap_of_pointwise_curv_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)

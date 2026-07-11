@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 
 noncomputable section
 
-set_option linter.style.setOption false
 set_option synthInstance.maxHeartbeats 1600000
 set_option maxHeartbeats 3200000
 
@@ -32,7 +31,6 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 
 theorem g0_polarized_parseval
     (g₀ : SmoothRiemannianMetric I M) (x : M)
@@ -51,7 +49,6 @@ theorem g0_polarized_parseval
         rw [map_sum]
     _ = g₀.inner x v w := by rw [hexp]
 
-set_option linter.unusedSectionVars false in
 
 theorem multilinear_firstSlot_pairing_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) {s : ℕ}
@@ -123,7 +120,6 @@ theorem multilinear_firstSlot_pairing_le
   rw [hkey, hself]
   exact hbound w
 
-set_option linter.unusedSectionVars false in
 
 theorem slotInsertEndoFib_bundle_eval (s : ℕ) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -137,7 +133,6 @@ theorem slotInsertEndoFib_bundle_eval (s : ℕ) (x : M)
   rw [h]
   rfl
 
-set_option linter.unusedSectionVars false in
 
 theorem exists_orthoFrame_basis_E (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -168,7 +163,6 @@ theorem exists_orthoFrame_basis_E (g : SmoothRiemannianMetric I M) (x : M) :
   refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-set_option linter.unusedSectionVars false in
 
 theorem tensorInnerPointwise_slotΛ_le
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
@@ -286,7 +280,6 @@ def gInvDiffSlotApplied (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) (x : 
   TensorRSSpace.ofCLM ((slotInsertEndoFib (s+1) 0 x (metricComparisonDiffEndo (I := I) g₀ g₁ x)).comp
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s+1) I x from W))
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_gInvDiffSlot_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -305,7 +298,6 @@ theorem tensorInnerPointwise_gInvDiffSlot_le
     (fun v => gInvDiffRaisedEndo_inner_self_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v)
     W e bse hbse horth
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_slotΛ_le
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {κ : ℝ}
     (Wfield Sfield : M → TensorRSModel 0 (s+1) ℝ E)
@@ -325,7 +317,6 @@ theorem tensorL2Inner_slotΛ_le
   refine integral_mono hWS_int (hWW_int.const_mul κ) ?_
   intro x; exact hptwise x
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_gInvDiffSlot_le
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)

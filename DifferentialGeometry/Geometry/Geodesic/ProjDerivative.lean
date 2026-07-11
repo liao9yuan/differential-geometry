@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
