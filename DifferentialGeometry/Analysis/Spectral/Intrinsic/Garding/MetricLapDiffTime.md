@@ -33,7 +33,7 @@ limit directly is both cheaper and exactly the consumer-facing result.
 
 - Requested genuine `A2 : H²(gT) →L L²(gT)` with `omega -> 0`: complete
   (100%).
-- Ready `H⁰`/strongly-measurable input for `nonaut_strong_exists`: about 70%;
-  the postcomposition and interval measurability remain.
+- Ready `H⁰`/strongly-measurable input for `nonaut_strong_exists`: complete
+  (100%) via `lapDiffA20_short`.
 - Moving conjugate-heat theorem: not proved (0%).
 - Perelman no-local-collapsing theorem: not proved (0%).

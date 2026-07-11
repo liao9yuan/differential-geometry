@@ -31,19 +31,25 @@ No geometric realization, moving-metric heat existence theorem, axiom, or
 
 ## Remaining frontier
 
-The genuine frozen moving-metric Laplacian difference is now realized as
-`lapDiffA2 : H^2(gT) →L TensorL2 0 0 gT`, and its operator norm tends to zero.
-The remaining interface work is to postcompose with the canonical `H^0`/`L²`
-isometry, prove strong measurability on a short time interval, and realize the
-remaining first/zeroth-order terms as `A1`.  These are downstream of the now
-proved critical `A2` smallness estimate.
+The two genuine frozen-scale input families are complete.  `lapDiffA20_short`
+supplies the short-time `A2 : H^2(gT) →L H^0(gT)` input, while
+`conjA1_short` supplies the scalar-curvature multiplier
+`A1 : H^1(gT) →L H^0(gT)`.  Both provide operator-norm continuity, strong
+measurability, and finite pointwise/a.e. bounds on a positive backward-time
+interval.  `Entropy/ConjStrong.lean` now performs their honest specialized
+wiring into `nonaut_strong_exists`.  The remaining frontier is the independent
+strong-to-classical realization needed by `IsHeatPotOn`.
 
 ## Honest progress
 
 - Abstract combined fixed-point theorem: verified without warnings or `sorry` (100%).
 - Genuine moving-Laplacian `A2 : H^2(gT) →L L²(gT)`: complete (100%).
-- Full geometric non-autonomous input package (`A2` measurability/H⁰ plus
-  `A1`): dedicated machinery about 40%; endpoint theorem not proved (0%).
+- `A2` as a short-time measurable `H^2(gT) →L H^0(gT)` input: complete (100%).
+- Genuine scalar-potential `A1 : H^1(gT) →L H^0(gT)` and its short-time input:
+  complete (100%).
+- Separate geometric input producers (`A2` plus `A1`): dedicated machinery
+  complete (100%); specialized `conj_strong_exists` assembly theorem complete
+  (100%).
 - Classical moving-metric conjugate heat existence: not proved (0%).
 - Perelman no-local-collapsing and `ham3_noncollapse`: not proved (0%).
 
@@ -54,10 +60,11 @@ perturbation is the fixed-scale realization of
 
 `A2(s) u = Delta_(g_s) u - Delta_(gT) u`
 
-as a map `tensorHs gT 0 0 2 -> tensorHs gT 0 0 0`.  No such geometric
-continuous linear map is currently available.  The missing content is not the
-abstract `ContinuousLinearMap` packaging; it is the following dense-core
-estimate.
+as a map `tensorHs gT 0 0 2 -> tensorHs gT 0 0 0`.  At the time of this
+historical audit no such geometric continuous linear map was available; that
+frontier is now resolved by the verified modules recorded in the progress
+section below.  The missing content identified by the audit was the following
+dense-core estimate.
 
 ### Minimal analytic theorem
 
@@ -195,6 +202,13 @@ The invariant route is now closed and verified end to end:
   `TensorL2` target, and `lapDiffOp_core` identifies its finite-core values.
 - `lapDiffA2_bound` produces `omega(s) → 0`, uniformly in spectral support;
   `lapDiffA2_zero` proves the operator norm tends to zero.
+- `cross_energy_le` controls the Hessian/gradient energy measured at an
+  arbitrary fixed center metric by the frozen spectral `H²` norm.
+- `lapDiff_pair_norm` proves fixed-reference two-time operator-norm control
+  without a whole-CLM equality.
+- `lapDiffA20` is the canonical `H²(gT) →L H⁰(gT)` postcomposition, and
+  `lapDiffA20_short` supplies operator-norm continuity, strong measurability,
+  and an arbitrarily small short-interval a.e. bound.
 
 No generic mixed-Hessian `L²` isometry, `HasLocallyConstantChartAt`, global
 frame, or new convergence assumption is used.  The endpoint remains honestly
@@ -204,9 +218,23 @@ Honest accounting at this point:
 
 - genuine `A2 : H²(gT) →L L²(gT)` and its vanishing modulus: complete
   (100%);
-- `A2` as a ready `nonaut_strong_exists` input: about 70%; the remaining work
-  is the canonical `H⁰` postcomposition and short-interval strong
-  measurability;
-- geometric non-autonomous conjugate-heat realization: about 35% dedicated
-  machinery, endpoint theorem 0%;
+- `A2` as a ready `nonaut_strong_exists` input: complete (100%);
+- separate A2/A1 non-autonomous input machinery and specialized
+  `conj_strong_exists` assembly theorem: complete (100%);
 - Perelman no-local-collapsing theorem: not stated/proved here (0%).
+
+## Scalar-potential `A1` — 2026-07-10
+
+`ScalarPotential.lean` constructs the genuine fixed-metric multiplier on the
+finite spectral core and extends it to `H^1(gT) ->L H^0(gT)`, with single and
+pairwise operator-norm bounds.  `Evolution/Scalar/Uniform.lean` proves the
+compact local-to-global uniform time modulus for scalar curvature.
+`Entropy/ConjPotential.lean` combines them into `conjA1`; `conjA1_short`
+provides a positive interval, continuity, strong measurability, and a uniform
+finite operator bound.  Focused and targeted verification pass without a local
+warning or `sorry`.
+
+`Entropy/ConjStrong.lean` adapts the literal `a + 2` / `a + 1` exponent forms,
+proves the combined contraction bound, and applies `nonaut_strong_exists`.
+Focused and targeted verification pass.  This completes the spectral strong
+solution theorem, but not the jointly smooth `IsHeatPotOn` theorem.

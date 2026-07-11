@@ -1,4 +1,4 @@
-# B1 join — live handoff (2026-07-10)
+# B1 join — live handoff (2026-07-11)
 
 Work in `E:\testdifferential-geometry`, branch `short-time-existence`.  Read
 `AGENTS.md`, `important_lesson.md`, `lessons.md`, `PROJECT_MAP.md`, and the
@@ -10,9 +10,9 @@ prefer focused checks, and do not force-release stale locks.
 - Textbook B1 theorem: 0%.
 - Concrete `StepB1RawInput` producer: 0%.
 - Checked conditional assemblies: `stepB1_of_raw`, `stepB1_of_bounds`.
-- Dedicated Step-B1 machinery: about 73%.
-- Chapter 4 machinery: about 72%.
-- Whole HCG compactness machinery: about 49%.
+- Dedicated Step-B1 machinery: about 77%.
+- Chapter 4 machinery: about 74%.
+- Whole HCG compactness machinery: about 51%.
 - Conditional/final compactness endpoints: 0%.
 
 Do not report a checked wrapper or local green module as completion of B1.
@@ -58,27 +58,39 @@ Do not report a checked wrapper or local green module as completion of B1.
   two `expDiffeoRadius` smallness inequalities.
 - `DiagExpDerivative.diagExpInv_diagExp` supplies the source-side IFT germ, so
   compatibility of the two branches on a verified overlap is no longer open.
+- The explicit-branch architecture is now checked: `DiagInvBranch`,
+  `DiagInvReadout`, `stdBranch`, the branch-parametric center equation and
+  smoothness consumers, `normalDiagAtFull`, `IsNormalDiag.toBranch`, and
+  `IsNormalDiag.full_transport`.  The latter exposes exact source/target image
+  equalities and the inverse formula on the whole quantitative target.
+- `exists_phase_scale` and `normalBrAccept` choose global positive coefficients
+  `aq`, `aδ`, and `aρ`; for each exhaustion radius they choose `q` and `δ`
+  before the sequence index and center, retain the whole `δ` target ball and
+  inverse formula, and provide a common branch domain of radius `aρ * mu R`.
+  `normalBrScale` is the checked compatibility projection; `normalBrHat` is the
+  direct finite-hat scale inequality.
+- `NormalDiagBranch.exists_pair_branch` carries one branch over any controlled
+  family of point pairs.  `NormalBranchCage.seqCenterD_dist_le`,
+  `liveCenters_cage`, and `exists_live_dom` put every stabilized live center in
+  one fixed sublevel and one selected relative branch domain on a common tail.
+  `exists_cm_branch` is now checked for the whole finite center/point family in
+  `B.readDom`.
+- `centerReadoutB_zero` consumes that `readDom` membership directly.  It derives
+  the fixed-trivialization base condition and branch/normal-coordinate equality
+  internally, leaving only the genuine named-radius and first-variation inputs.
 
 ## Next tasks, in order
 
-1. Consume the already bundled relative branch scale.  The endpoint's
-   `MetricCompactnessInputs.normalRadius : NormalRadiusProfile ...` supplies the
-   positive `ratio * mu(distance)` floor, with checked `floor_le_radius`,
-   `floor_le_exp`, and `mul_lambda_lt_*` consumers.  Feed those bounds to
-   `exists_normal_diag`; do not add another profile or a naked `branchRadius`
-   field.
-2. Resolve the branch-domain design gate.  Either prove an explicit
-   sequence-uniform containment theorem for the exact qualitative `diagExpIFT`
-   source/target, together with the two `expDiffeoRadius` inequalities, or
-   refactor the canonical/readout branch package to consume the transported
-   quantitative partial homeomorphism.  Pointwise openness and a fixed-index
-   finite minimum are insufficient for `StepB1RawInput`.  Consult
-   `NORMAL_BRANCH_RECONCILIATION_CONSULT.md` before choosing between these routes.
-3. Use `centerPairs_lt_le` to thread
-   finite-hat configuration containment through the branch domain and
-   `centerOfMass.eqnRadius`.  Instantiate the checked fixed-target
-   `exists_halfSqDist_md` producer by proving reverse-chart source/smallness,
-   then use `centerReadout_zero` to discharge `hzero`.
+1. Resolve the quantitative intrinsic/realized-exp compatibility design in
+   `B1_INTRINSIC_REALIZED_CONSULT.md`.  The current `expDiffeoRadius` contains a
+   pointwise qualitative agreement radius with no `NormalRadiusProfile` floor;
+   do not hide it behind a new consumer assumption.
+2. On the chosen route, produce uniform reverse-chart/half-squared-distance
+   differentiability and center-equation control for the concrete finite-hat
+   family.  This must discharge both `hreal` and `centerOfMass.eqnRadius`, not
+   merely rename them.
+3. Finish the physical large-`D`/`radSeq` ledger using `normalBrHat` and the
+   explicit coefficient returned by `normalBrScale`.
 4. Supply the book-scale Hessian/Neumann input, instantiate
    `existsCmExtension`, upgrade the ambient root with `cmExt_contDiffOn`, and
    compose it with the verified atom/weight/target limits.
@@ -87,29 +99,24 @@ Do not report a checked wrapper or local green module as completion of B1.
 
 ## Current mathematical frontier
 
-Pinned-map extraction, compact gluing, subtype continuity, and agreement are
-now implemented and verified.  `centerReadout_zero` is a checked conditional
-producer for the selected center's root equation, but its finite-hat
-instantiation still depends on the named geometric hypotheses above.
+Pinned-map extraction, compact gluing, subtype continuity, selected quantitative
+branch construction, and finite-family `B.readDom` containment are implemented
+and verified.  Do not restart any of those stages.
 
-The qualitative all-order inverse/readout issue and local containment ledger
-are closed by `exists_diagInvDom_inf`, `exists_readoutDom_inf`,
-`exists_readoutEBall`, and `centerPairs_lt_le`.  The earlier claim that the
-relative profile was missing was stale: it is the checked
-`MetricCompactnessInputs.normalRadius` field.  The ODE-side uniform family,
-phase-box confinement, quantitative approximation, arbitrary-velocity
-cross-model naturality, endpoint uniqueness, explicit quantitative branch,
-and its exact `diagExp` commutative square are checked.  Branch uniqueness on
-overlap is also checked.  The current failure is architectural: the explicit
-uniform target ball is not known to lie in the pointwise qualitative
-`diagExpIFT` germ underlying totalized `diagExpInv`; the current API provides no
-uniform radius from openness alone.
-`halfSqDist` differentiability and
-intrinsic/realized-exp agreement now have checked pointwise producers
-(`exists_halfSqDist_md` and `diagInv_eq_normal_lt`); their concrete finite-hat
-source/smallness hypotheses are still configuration-containment obligations,
-not consequences of bare branch membership.  The book-scale
-Hessian/Neumann producer remains independent and honest;
+The current stop is quantitative compatibility, not domain membership.
+`expDiffeoRadius` is defined as the minimum of `expRadiusGp` and a
+`Classical.choose` radius witnessing `expMapIntrinsic = expMap`.  The H6
+`NormalRadiusProfile` controls `expRadiusGp`, but it gives no lower bound for the
+chosen agreement radius.  Consequently the selected branch source and the
+large-`D` scalar ledger cannot prove `centerReadoutB_zero`'s `hreal`.
+
+Three routes were audited.  A branch-source estimate still needs the missing
+agreement lower bound; global equality of the exponentials enters the unfinished
+cross-chart maximal-geodesic continuation layer; and a center equation stated
+directly for the intrinsic branch needs a new quantitative minimizing/first-
+variation theorem because the current `HalfSqDistGrad` route uses the same
+qualitative radius.  This is a design/API consult point.  The book-scale
+Hessian/Neumann producer remains an independent honest frontier;
 `CmHessianBoundInput.toInv` is only a projection from it.
 
 ## Forbidden routes
@@ -130,22 +137,23 @@ Hessian/Neumann producer remains independent and honest;
 - Do not replace the intrinsic atoms by the old fixed-psi `bumpNumConv` route.
 - Do not infer a uniform branch radius from uniform `metricC`; the radius field
   itself is only pointwise positive.
-- Do not add a consumer-side `branchRadius` assumption that simply renames the
-  missing quantitative geometry/ODE producer.
+- Do not add a consumer-side `branchRadius` or fixed-trivialization assumption.
+  The relative scale and chart containment are already produced.
+- Do not add a uniform lower bound for `expDiffeoRadius` as a new endpoint or
+  finite-hat assumption.  Prove the compatibility geometrically or change the
+  canonical construction after an explicit architecture decision.
 
 ## Acceptance criteria for the next brick
 
-- Reuse the checked fixed open inverse-exp/readout branch and local containment
-  APIs; do not return to order-dependent neighborhoods.
-- Either prove explicit sequence-uniform containment in the exact existing IFT
-  source/target, or complete a canonical-branch/readout refactor using the
-  transported quantitative partial homeomorphism.  A pointwise positive radius
-  or a finite minimum at one index does not meet this criterion.
-- Then prove the concrete finite-hat configurations land in that domain and below
-  `centerOfMass.eqnRadius`; prove the reverse fixed-target normal-chart facts
-  needed by `exists_halfSqDist_md` and the `expDiffeoRadius` smallness needed by
-  `diagInv_eq_normal_lt`, so `centerReadout_zero` discharges the root equation
-  without a renamed consumer assumption.
+- Preserve the explicit `DiagInvBranch` architecture and the checked
+  `normalBrScale` quantifier order; do not return to order-dependent
+  neighborhoods or the qualitative `exists_readoutEBall` route.
+- Preserve the checked selected branch and `B.readDom` finite-family theorem.
+- Choose and justify one route that removes the unquantified
+  intrinsic/realized-exp agreement radius from the B1 critical path.
+- Then prove the concrete finite-hat configurations lie below the resulting
+  center-equation and differentiability scales, so `centerReadoutB_zero`
+  discharges the root equation without a renamed consumer assumption.
 - Keep the independent Hessian/Neumann producer visible if it is not discharged
   in the same brick, and update the same-name note plus `PROJECT_MAP.md` with
   theorem completion separated from machinery progress.

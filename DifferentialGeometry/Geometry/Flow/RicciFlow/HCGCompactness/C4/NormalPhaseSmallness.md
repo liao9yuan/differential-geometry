@@ -26,16 +26,22 @@ inverse theorem.
   `phaseRadius`.  Combined with `phaseRadius_metric` and `phaseRadius_exp`, it
   supplies every radius and numerical input needed by `exists_normalFlow` on a
   fixed distance sublevel.
+- `NormalRadiusProfile.exists_phase_scale` makes the selection relative: it
+  chooses global positive coefficients `aq` and `aδ`, then for every `R ≥ 0`
+  takes `q = aq * mu R`.  The result satisfies the stronger bilateral-flow
+  fences `6q < phaseRadius` and
+  `3 C (2q)^2 ≤ (2/3)q`, stays below the inverse threshold, and proves the
+  quantitative target-radius lower bound `aδ * mu R ≤ δ`.
 
 Focused verification and the targeted module build passed for the complete
-API, including the new `q`-selection producer and its profile specialization,
+API, including the relative-scale producer and its profile specialization,
 without local proof or style warnings.
 
 ## Frontier
 
-The small-radius numerical selection and profile containment are now complete.
-The remaining frontier is geometric: identify the retained time-one endpoint
-with the moving diagonal exponential, then consume the quantitative inverse
-branch.  The moving inverse theorem itself remains unstated and therefore 0%;
-this numerical-selection substage is 100%, but this module only advances the
-theorem's dedicated machinery.
+The small-radius numerical selection, profile containment, and proportional
+target-radius lower bound are complete.  The next consumer is a fixed-`q`
+`normalDiagAt` worker in `NormalPhaseEndpoint`, followed by the transported
+`DiagInvBranch` package.  `StepB1RawInput` and textbook B1 remain unstated and
+0%; this numerical-selection substage is 100%, but it only advances their
+dedicated machinery.

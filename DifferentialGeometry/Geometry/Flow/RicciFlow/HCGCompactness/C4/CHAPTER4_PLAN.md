@@ -23,7 +23,7 @@ former all-order `cmChartDerivLe` endpoint was deleted: only
 unstated and 0%.  Older occurrences of those two deleted theorem names below
 describe historical planning only; they are not live APIs or proved gates.
 
-**Current B/C producer state (2026-07-10):** the parallel metric-origin and
+**Current B/C producer state (2026-07-11):** the parallel metric-origin and
 transition branches have been joined on one common refinement.  Intrinsic
 finite-hat atoms, support/coverage, normalized weights, and their common
 `C^infty` subsequential limit are packaged by
@@ -31,9 +31,8 @@ finite-hat atoms, support/coverage, normalized weights, and their common
 ambient root-extension gluing/agreement (`existsRootExtension` /
 `existsCmExtension`), and the generic conditional center-root producer
 `centerReadout_zero` are also checked.  Its concrete finite-hat instantiation
-still requires the common branch/containment facts and the reverse-chart and
-named-radius smallness needed to instantiate the checked pointwise
-differentiability/agreement producers.
+still requires reverse-chart and named-radius smallness needed to instantiate
+the checked pointwise differentiability/agreement producers.
 `exists_diagInvDom_inf` and `exists_readoutDom_inf` now expose one fixed open
 off-diagonal inverse-exp/readout domain carrying all orders simultaneously,
 using the existing Route-A `diagExpInv` branch.  `exists_readoutEBall` extracts
@@ -41,13 +40,24 @@ a positive finite radius for each fixed base, and `centerPairs_lt_le` closes the
 local cage-containment ledger.  The endpoint bundle contains the required
 sequence-relative floor as `MetricCompactnessInputs.normalRadius :
 NormalRadiusProfile ...`, including `floor_le_radius` and `floor_le_exp`.
-After the checked `exists_normal_diag` endpoint square and the overlap identities
-`diagExpInv_diagExp` / `normal_inv_eq`, the next design gate is uniform branch
-reconciliation.  The existing qualitative `diagExpIFT` germ carries no explicit
-uniform radius, so this requires either a new quantitative containment theorem or
-a canonical-branch/readout refactor; pointwise openness does not discharge it.
-The review prompt is `NORMAL_BRANCH_RECONCILIATION_CONSULT.md`.
-Dedicated Step-B/B1 machinery is about 73%; the
+The explicit selected-branch route is now checked through
+`DiagInvBranch`, `DiagInvReadout`, `stdBranch`, the branch-parametric center
+  consumers, `normalDiagAtFull`, and `IsNormalDiag.toBranch`; the quantitative branch
+  has forward and inverse `C^infinity` regularity on its full named domains, and
+  `IsNormalDiag.full_transport` proves its exact source, target, and inverse
+  formulas.  `exists_phase_scale` and `normalBrAccept` choose global positive coefficients
+  `aq`, `aδ`, and `aρ`, with `q`, `δ`, the whole quantitative target ball, and
+  the common `aρ * mu R` branch domain selected before the sequence index and
+  center.  `normalBrScale` preserves the established consumer interface, while
+  `normalBrHat` supplies the
+finite-hat scale inequality.  `NormalBranchCage` now checks the eventual
+live-center sublevel, the common selected branch domains, and the finite
+center/point family in `B.readDom`.  `centerReadoutB_zero` consumes this
+membership and derives fixed-trivialization base membership and branch equality
+internally.  The live design gate is now the unquantified
+`expMapIntrinsic = expMap` component of `expDiffeoRadius`; see
+`B1_INTRINSIC_REALIZED_CONSULT.md`.
+Dedicated Step-B/B1 machinery is about 77%; the
 `StepB1RawInput` producer and textbook B1 theorem remain 0%.
 
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
@@ -56,11 +66,13 @@ in `lbl387`, the Hessian comparison `lbl413`) — with one declared exception: t
 "`D` large enough" **scale-choice inputs** (`Item3RadiusInput`, `Item3GpScaleInput`,
 `SigmaScaleField`), which are book-internal choices deferred to the D6 assembly,
 where each must be DISCHARGED rather than survive to the endpoint.
-**2026-07-10 correction:** the relative `kappa * mu(distance)` lower profile is
+**2026-07-11 correction:** the relative `kappa * mu(distance)` lower profile is
 already encoded separately by the endpoint's `normalRadius` field and consumed by
-the checked `NormalRadiusProfile.floor_le_*` / `mul_lambda_lt_*` API.  The live
-discharge problem is threading that profile through the quantitative moving-diagonal
-branch and eventual live-slot assembly, not adding another radius record.
+the checked `NormalRadiusProfile.floor_le_*`, `exists_phase_scale`,
+`normalBrScale`, and `mul_lambda_lt_*` API.  Branch-scale and
+fixed-trivialization `readDom` production are closed.  The live discharge
+problem is quantitative intrinsic/realized-exp compatibility followed by the
+physical large-`D` ledger, not another radius record.
 Everything the book proves, we prove. Build via
 `& .\scripts\lake-locked.ps1 build +<Module>`; no
 `sorry`/admissions; `#print axioms`-clean.
@@ -378,7 +390,7 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
 
 ---
 
-## Critical path (updated 2026-07-10)
+## Critical path (updated 2026-07-11)
 
 **DONE:** Step A (metric core + item 3, modulo declared inputs); F-track about 95%
 (F4 closed; F2-book wrapper remains); `lbl394` (both halves);
@@ -390,11 +402,11 @@ conditional endpoint `MetricCompactnessInputs.metricCompactness` is STATED
 1. **B/C lane:** the parallel origin-metric/transition extraction, common
    refinement, atom/weight package, pinned implicit-center branch, and
    gluing/agreement are checked; the generic conditional center-root producer
-   and the common all-order `diagExpInv`/readout domain are also checked.  A
-   pointwise finite branch radius and the local cage-containment inequalities
-   are checked as well.  Resolve the sequence-uniform branch-scale design,
-   then continue Route A with concrete branch/configuration containment,
-   instantiate the checked pointwise intrinsic/realized-exp and fixed-target
+   and the explicit branch-parametric all-order readout machinery are also
+   checked.  The transported quantitative branch, its global relative
+   coefficients, and finite-family `B.readDom` containment are checked.  Resolve
+   the quantitative intrinsic/realized-exp compatibility design, then
+   instantiate the checked pointwise compatibility and fixed-target
    `halfSqDist` differentiability producers, prove the Hessian/Neumann producer,
    and assemble `StepB1RawInput`.  Finite-order center
    regularity and the Faà-di-Bruno composition engine are checked;
@@ -423,42 +435,29 @@ USES Step C's averaging (`lbl434`). So B1 and C are NOT cleanly sequential; the 
 `B1→…→B6 → C` ordering is a labeling artifact. Actual structure:
 `lbl394 (J,J̄ limits, done) → lbl398/lbl399 (local maps F^α_{kℓ,β}=J̄∘J → id) → [C averaging] → lbl397`.
 
-**Precise next brick:** close uniform branch/configuration containment for the
-checked quantitative diagonal branch.
-The fixed-phase-ball forward theorem, common domains
-`exists_diagInvDom_inf` / `exists_readoutDom_inf`, pointwise numerical radius
-`exists_readoutEBall`, and local cage-containment bridge
-`centerPairs_lt_le` are checked.  They give `δ_{k,α} > 0`; an absolute
-`inf_{k,α} δ_{k,α} > 0` is neither encoded nor the correct noncompact target.
-The selected global route already has one positive ratio through
-`MetricCompactnessInputs.normalRadius`; after fixing an exhaustion radius,
-`floor_le_radius` and `floor_le_exp` yield the common positive floor on precisely
-the consumed slots.  The quantitative ODE producer is also checked:
-`NormalPhaseSym.exists_normal_biflow` gives a confined bilateral family and
-`ApproximatesLinearOn`; `NormalPhaseSmallness` drives its error below the inverse
-threshold.  The former naturality frontier is now closed:
-`covAlong_natCrossAt` / `geodesicOn_mapLocal` handle arbitrary curve velocities,
-`normalGeo_map` transports through the quarter-ball pullback metric, and
-`geo_end_eq_intr` supplies interval endpoint uniqueness.  Consequently
-`NormalPhaseEndpoint.exists_normal_diag` now gives one common model branch, its
-explicit positive target ball and radius formula, and the exact commutative
-square with the intrinsic `diagExp`.  `normal_inv_eq` proves that this is not a
-second intrinsic inverse: under the existing `diagExpInv` branch identities and
-the two concrete `expDiffeoRadius` inequalities it equals `diagExpInv`.
+**Precise next brick:** resolve the architecture question recorded in
+`B1_INTRINSIC_REALIZED_CONSULT.md`.  The selected branch and finite-family
+`B.readDom` containment are checked, but `expDiffeoRadius` still includes a
+pointwise qualitative intrinsic/realized-exp agreement radius with no H6 lower
+bound.  The next producer must remove that unquantified radius from the B1 path,
+not repackage it as an assumption.
 
-The unresolved choice is how to place the whole explicit target ball in the
-canonical readout branch.  `exists_diagInvDom_inf` is only a pointwise open germ;
-its current API does not imply a sequence-uniform radius.  Either prove an
-explicit quantitative containment theorem for that exact IFT source/target, or
-refactor the canonical/readout branch package to consume the transported
-quantitative partial homeomorphism.  A fixed-index finite-minimum route still
-does not reach `StepB1RawInput`, and a bare `branchRadius` input would only rename
-this obligation.  After this design gate, the next concrete bricks are
-reverse-chart source/smallness for the checked `exists_halfSqDist_md` producer
+The ODE/branch-scale work preceding this gate is complete: `normalDiagAtFull`
+packages the smooth quantitative endpoint and normal-coordinate fence,
+`IsNormalDiag.toBranch` / `full_transport` transport it exactly to
+`DiagInvBranch`, and `normalBrAccept` supplies global positive relative
+coefficients, whole-target domain and inverse data with the required quantifier
+order.  `normalBrScale` is its checked compatibility projection.  `NormalBranchCage` already
+checks the eventual live-center sublevel, one common selected `B.readDom`
+branch, and the finite center/point consumer.  After the compatibility decision,
+the next bricks are the physical large-`D` ledger and reverse-chart
+source/smallness for the checked
+`exists_halfSqDist_md` producer
 and the independent Hessian/Neumann producer.  Atom/weight
 production and pinned gluing/agreement are no longer frontiers;
-`centerReadout_zero` remains the checked conditional consumer of these missing
-geometric facts rather than an already-instantiated finite-hat equation.
+`centerReadoutB_zero` is the checked selected-branch conditional consumer of
+these missing geometric facts rather than an already-instantiated finite-hat
+equation.
 
 **Off the critical path (reusable analysis, do NOT re-couple to Thm 3.9):** the
 Jacobi/Grönwall nonsingularity tower (`CovariantGronwall`/`ExpNonsingular`/`InnerExpansion`

@@ -22,7 +22,10 @@ quantitative branch together with its exact `diagExp` commutative square, and
 `normal_inv_eq` proves compatibility with the existing `diagExpInv` under the
 concrete branch-domain and `expDiffeoRadius` hypotheses.
 
-The next target is to prove those domain/smallness hypotheses uniformly on the
-selected phase ball, then transport the explicit target ball into the existing
-readout domain.  See `NormalPhaseEndpoint.md`; do not restart the naturality
-audit or expose a second consumer-facing inverse.
+The qualitative branch germ cannot supply the required uniform target radius.
+The selected route is to consume the quantitative branch directly in the HCG
+readout layer.  `PhaseFlow.quantInv_smooth` closes smoothness of its exact
+inverse once forward smoothness is known; the next producer is joint
+`C^infinity` dependence of the retained endpoint on initial phase data.  See
+`NormalPhaseEndpoint.md`; do not restart the naturality audit or expose a second
+consumer-facing inverse.

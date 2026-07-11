@@ -705,108 +705,100 @@ terms of derivatives of metric components in the coordinate frame.
 
 \subsection{A concrete checked example: the general mixed-tensor coordinate formula}
 
-A representative checked example is not a low-valence special case, but the
-general coordinate theorem for mixed tensor covariant derivatives:
-\[
-  \texttt{nablaRS\_coordFrame\_slots\_of\_smooth}.
-\]
-This theorem appears in
-\[
-  \texttt{...Coordinates/NablaComponents/TensorRS/Formula.lean}.
-\]
-It states the coordinate-frame component formula for the covariant derivative of
-an arbitrary mixed $(r,s)$-tensor field.
+As a representative worked example we take not a low-valence special case but
+the general coordinate identity for the covariant derivative of a mixed tensor,
+formalized as \leanref{nablaRS_coordFrame_slots_of_smooth} in
+\rffile{Coordinates/NablaComponents/TensorRS/Formula.lean}.
 
-Let $T$ be a mixed tensor field of type $(r,s)$, let
+Fix a coordinate chart on an $n$-dimensional manifold and let $T$ be a smooth
+mixed tensor field of type $(r,s)$.  A choice of upper and lower coordinate
+indices
 \[
   I : \operatorname{Fin}(r) \to \{1,\ldots,n\},
   \qquad
   J : \operatorname{Fin}(s) \to \{1,\ldots,n\}
 \]
-be choices of upper and lower coordinate indices, and write
-\[
-  T^I{}_J
-\]
-for the corresponding coordinate component of $T$.  The theorem proves the
+selects a scalar component $T^I{}_J$.  The theorem is the classical component
 formula
 \[
-\begin{aligned}
   (\nabla_X T)^I{}_J
-  &=
-  X(T^I{}_J)                                                     \\
-  &\quad
+  =
+  X\bigl(T^I{}_J\bigr)
   +
-  \sum_{a\in \operatorname{Fin}(r)}
-  \sum_k
-  \Gamma^{I_a}(X,k)\,
-  T^{I[a\mapsto k]}{}_J                                      \\
-  &\quad
+  \sum_{a=1}^{r}\sum_{k}
+  \Gamma^{I_a}(X,k)\,T^{I[a\mapsto k]}{}_J
   -
-  \sum_{b\in \operatorname{Fin}(s)}
-  \sum_k
-  \Gamma^k(X,J_b)\,
-  T^I{}_{J[b\mapsto k]} .
-\end{aligned}
+  \sum_{b=1}^{s}\sum_{k}
+  \Gamma^k(X,J_b)\,T^I{}_{J[b\mapsto k]},
 \]
-Here $I[a\mapsto k]$ denotes the index tuple obtained from $I$ by replacing its
-$a$-th upper index by $k$, and similarly $J[b\mapsto k]$ denotes replacement in
-the lower-index tuple.  The sign convention is exactly the classical one:
-contravariant slots contribute positive Christoffel terms, while covariant slots
-contribute negative Christoffel terms.
+where $I[a\mapsto k]$ replaces the $a$-th upper index of $I$ by $k$ and
+$J[b\mapsto k]$ replaces the $b$-th lower index of $J$ by $k$.  The signs are the
+usual ones: each contravariant slot contributes a positive Christoffel term and
+each covariant slot a negative one.
 
-The proof of \texttt{nablaRS\_coordFrame\_slots\_of\_smooth} is organized as a
-sequence of exchange lemmas between three representations of the same object.
-The theorem itself is a smooth-input wrapper around the more explicit theorem
-\texttt{nablaRS\_coordFrame\_slots}, whose additional hypothesis asserts that
-the fixed-chart model derivative agrees with the scalar directional derivative
-of the corresponding coordinate component.
+Although this identity is classical, the formalization does not adopt it as the
+definition of the covariant derivative: $\nabla$ is defined invariantly, and the
+formula is \emph{proved} by projecting that invariant operator into a chart.
+Fix the chart and identify its domain with an open set $U\subseteq\mathbb R^n$.
+Over $U$ the tensor field $T$ is the same data as a single smooth map
+\[
+  \check T : U \longrightarrow \mathcal T^{(r,s)},
+  \qquad
+  \check T(x)=\bigl(T^I{}_J(x)\bigr)_{I,J},
+\]
+valued in the fixed finite-dimensional model fiber $\mathcal T^{(r,s)}$ of
+$(r,s)$-tensors on $\mathbb R^n$ (the space \leanref{TensorRSModel}); evaluating
+$\check T(x)$ on the coordinate basis vectors $e_{I_1},\dots,e_{J_s}$ returns the
+scalar component $T^I{}_J(x)$.  The connection, read in the same chart, becomes
+matrix-valued: contracting the chart's Christoffel symbols against a direction
+$X$ gives an endomorphism $\Gamma(X)$ of $\mathbb R^n$, with entries
+$\Gamma^p(X,q)$, the \emph{connection endomorphism in the chart}
+(\leanref{connectionEndomorphismInChart}).  That the invariant $\nabla_X T$,
+restricted to the chart, \emph{is} the model-space covariant derivative of
+$\check T$ is the definition unfolded by \leanref{nablaRSFun}.
 
-The core proof first unfolds \texttt{nablaRSFun} into its chart-level
-definition.  This replaces the invariant-looking tensor field
+On the model side the covariant derivative is transparent, because
+$\mathcal T^{(r,s)}$ is a fixed vector space.  It is the sum of the ordinary
+(Fr\'echet) derivative of the map $\check T$ and the induced action of
+$\Gamma(X)$ on the fiber,
 \[
-  \nabla_XT
+  \nabla_X\check T = D\check T(X) + \Gamma(X)\cdot\check T ,
 \]
-by the model-space covariant derivative of the fixed-chart representative of
-$T$, with the connection represented by
-\[
-  \texttt{connectionEndomorphismInChart}.
-\]
-It then rewrites the desired coordinate component using the bridge theorem
-\[
-  \texttt{tensorRSModelAt\_coordComponentRSAt},
-\]
-which identifies the fixed-chart model component at the base point with the
-coordinate-frame component.
+and, since the fiber is assembled from $r$ contravariant and $s$ covariant
+copies of $\mathbb R^n$, the endomorphism $\Gamma(X)$ acts on it as a
+derivation---one term per slot---by $\Gamma(X)$ on each contravariant slot and
+by its dual (the transpose, carrying the opposite sign) on each covariant slot.
+Evaluating $\nabla_X\check T$ on the basis tuple $e_{I_1},\dots,e_{J_s}$
+therefore produces exactly three kinds of term: the derivative term
+$D\check T(X)$ read on that tuple; for each upper slot $a$, the sum
+$\sum_k\Gamma^{I_a}(X,k)\,\check T(\dots,e_k,\dots)$ in which the $a$-th argument
+$e_{I_a}$ has been replaced by $e_k$; and, for each lower slot $b$, the same
+expression with a minus sign, $-\sum_k\Gamma^k(X,J_b)\,\check T(\dots,e_k,\dots)$.
+This slotwise product rule is the algebraic heart of the proof
+(\leanref{covariantDeriv_tensorRSModelWithin_apply_basis_slots}), and it already
+has the shape of the displayed formula.
 
-After this normalization, the proof invokes the model-space formula
-\[
-  \texttt{covariantDeriv\_tensorRSModelWithin\_apply\_basis\_slots}.
-\]
-This theorem supplies the algebraic mixed-tensor covariant-derivative formula:
-one derivative term, one positive Christoffel correction for each upper slot,
-and one negative Christoffel correction for each lower slot.  The remaining work
-is to translate the three types of terms back into coordinate language.
-
-First, the model connection coefficients are rewritten as Christoffel
-coefficients in the coordinate frame using
-\[
-  \texttt{connCoeff\_eq\_christoffelAlong\_coord}.
-\]
-Second, the model derivative term is rewritten as the coordinate directional
-derivative by the bridge
-\[
-  \texttt{modelDeriv\_eq\_coordDerivRSAt}.
-\]
-This is the only genuinely analytic bridge in the proof: it identifies the
-Fr\'echet derivative of the fixed-chart model representative with the manifold
-directional derivative of the scalar coordinate component.  Finally, the tensor
-evaluations inside the two correction sums are rewritten back to coordinate
-components by another use of
-\[
-  \texttt{tensorRSModelAt\_coordComponentRSAt}.
-\]
-The proof then closes by congruence of finite sums and elementary simplification
-of \texttt{Function.update} on the upper and lower index tuples.
+It remains to read the three kinds of term as the coordinate quantities in the
+statement.  The entries $\Gamma^p(X,q)$ of the connection endomorphism are the
+coordinate Christoffel symbols contracted with $X$
+(\leanref{connCoeff_eq_christoffelAlong_coord}).  Each basis evaluation
+$\check T(e_{K_1},\dots)$ is, by definition, the coordinate component $T^K{}_L$
+(\leanref{tensorRSModelAt_coordComponentRSAt}), and replacing one argument
+$e_{I_a}$ by $e_k$ is exactly the index substitution $I[a\mapsto k]$---in Lean
+this replacement is the combinator \texttt{Function.update} acting on the index
+tuple.  The only step that uses genuine analysis is the derivative term:
+$D\check T(X)$ is the Fr\'echet derivative of a vector-valued map on
+$U\subseteq\mathbb R^n$, whereas $X(T^I{}_J)$ is a directional derivative of a
+scalar function on the manifold, and the bridge
+\leanref{modelDeriv_eq_coordDerivRSAt} proves that the two agree componentwise;
+every remaining step is pointwise linear algebra on the fixed fiber
+$\mathcal T^{(r,s)}$.  With all three kinds of term matched, the two sides are
+finite sums over the same index sets $I$, $J$, and ranges of $k$, and the
+identity follows by term-by-term comparison.  The smooth-input theorem
+\leanref{nablaRS_coordFrame_slots_of_smooth} packages this argument under a
+smoothness hypothesis on $T$; its explicit form
+\leanref{nablaRS_coordFrame_slots} carries out the same computation with the
+derivative identification supplied as a separate hypothesis.
 
 
 

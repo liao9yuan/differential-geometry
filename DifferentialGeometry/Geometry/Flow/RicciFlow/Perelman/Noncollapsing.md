@@ -38,12 +38,13 @@ The checked supporting chain now also contains the interval-local
 `IsHeatPotOn` / `IsConjHeatOn` interfaces and time reversal,
 `heat_pot_nonneg`, the time-operator lift, the abstract
 `nonaut_strong_exists` fixed-point theorem, and the local moving-volume
-first-variation theorem `first_var_local`.  The source-level scalar Laplacian
-bridge is focused-checked, but its targeted refresh is blocked by the upstream
-`nablaRSFun_eval_moving_raw` elaboration performance wall.  Independently, the
-geometric `A2` realization needs a support-independent fixed-metric estimate
-for `Delta_(g_s) - Delta_(gT)`; the exact theorem and three audited routes are
-recorded in `TensorMaximalRegularity/Nonautonomous.md`.
+first-variation theorem `first_var_local`.  The scalar Laplacian bridge now has
+a successful targeted build.  The genuine short-time non-autonomous inputs are
+also complete: `lapDiffA20_short` supplies the support-independent moving
+Laplacian difference `A2`, while `conjA1_short` supplies the scalar-curvature
+potential `A1`.  `conj_strong_exists` completes their specialized spectral
+strong-solution assembly.  The strong-to-classical regularity bridge remains
+open.
 
 The geometric scale-transfer lane is now complete.  The canonical volume law
 is in `Analysis/Integration/Measure/Scaling.lean`; `Metric/DistanceScaling.lean`
@@ -56,5 +57,5 @@ fixed rescaled-ball conclusion to a genuine original-flow
 
 Consequently the scale-transfer sublane is 100%, but the analytic
 no-local-collapsing theorem and `ham3_noncollapse` remain theorem-level 0%.
-Dedicated analytic machinery is about 25%; whole HCG machinery remains about
+Dedicated analytic machinery is about 32%; whole HCG machinery remains about
 45% with endpoint theorems at 0%.

@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCCenterOfMass
 import DifferentialGeometry.Geometry.Exponential.DiagExpDerivative
+import DifferentialGeometry.Geometry.Exponential.DiagInvReadout
 import Mathlib.Analysis.Calculus.Implicit
 
 set_option autoImplicit false
@@ -862,6 +863,23 @@ theorem centerPairs_lt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- The readout-form center equation attached to an explicit selected inverse
+branch.  Quantitative HCG consumers choose `B`; the legacy equation below uses
+the standard qualitative branch. -/
+noncomputable def chartCmEqnB
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (z : E) (params : (ι → ℝ) × (ι → E)) : E :=
+  ∑ i : ι, params.1 i •
+    B.diagReadout
+      ((NormalCoordinates.normalChartAt (I := I) g p).symm z,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i))
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **The readout-form center-of-mass equation `G'`** (PLANNER RULING #3).  Same shape as
 `chartCmEqn`, but each summand is the trivialization-at-`p` fiber *readout* of the moving-base
 inverse exponential `(diagExpInv g hEnorm p (y, qᵢ)).snd` instead of the (non-smooth-to-project)
@@ -880,6 +898,215 @@ noncomputable def chartCmEqn'
       (diagExpInv (I := I) g hEnorm p
         ((NormalCoordinates.normalChartAt (I := I) g p).symm z,
           (NormalCoordinates.normalChartAt (I := I) g p).symm (params.2 i)))).2
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The standard selected branch recovers the existing readout center
+equation. -/
+theorem chartCmEqnB_std
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) {ι : Type} [Fintype ι] (z : E) (params : (ι → ℝ) × (ι → E)) :
+    chartCmEqnB (I := I) g hEnorm p (stdBranch (I := I) g hEnorm p) z params =
+      chartCmEqn' (I := I) g hEnorm p z params := by
+  unfold chartCmEqnB chartCmEqn' DiagInvBranch.diagReadout
+  rw [std_inv_eq (I := I) g hEnorm p]
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- Joint smoothness of the selected-branch readout equation at an arbitrary
+order. -/
+theorem chartCmEqnB_cdAt
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
+    (n : ℕ∞)
+    (hchz : ContMDiffAt 𝓘(ℝ, E) I n
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+    (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I n
+      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+    (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) n
+      (fun yq : M × M => B.diagReadout yq)
+      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i))) :
+    ContDiffAt ℝ n
+      (fun w : E × ((ι → ℝ) × (ι → E)) =>
+        chartCmEqnB (I := I) g hEnorm p B w.1 w.2) (z₀, params₀) := by
+  unfold chartCmEqnB
+  apply ContDiffAt.sum
+  intro i _
+  apply ContDiffAt.smul
+  · fun_prop
+  · rw [← contMDiffAt_iff_contDiffAt]
+    have hfst : ContMDiffAt 𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) 𝓘(ℝ, E) n
+        (fun w : E × ((ι → ℝ) × (ι → E)) => w.1) (z₀, params₀) := by
+      rw [contMDiffAt_iff_contDiffAt]
+      fun_prop
+    have hproj : ContMDiffAt 𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) 𝓘(ℝ, E) n
+        (fun w : E × ((ι → ℝ) × (ι → E)) => w.2.2 i) (z₀, params₀) := by
+      rw [contMDiffAt_iff_contDiffAt]
+      fun_prop
+    have hinner : ContMDiffAt
+        𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) (I.prod I) n
+        (fun w : E × ((ι → ℝ) × (ι → E)) =>
+          ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
+            (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i))) (z₀, params₀) :=
+      ContMDiffAt.prodMk (ContMDiffAt.comp (z₀, params₀) hchz hfst)
+        (ContMDiffAt.comp (z₀, params₀) (hchξ i) hproj)
+    have hcomp : ContMDiffAt
+        𝓘(ℝ, E × ((ι → ℝ) × (ι → E))) 𝓘(ℝ, E) n
+        (fun w : E × ((ι → ℝ) × (ι → E)) =>
+          B.diagReadout
+            ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
+              (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i)))
+        (z₀, params₀) :=
+      ContMDiffAt.comp
+        (I := 𝓘(ℝ, E × ((ι → ℝ) × (ι → E))))
+        (I' := I.prod I) (I'' := 𝓘(ℝ, E))
+        (f := fun w : E × ((ι → ℝ) × (ι → E)) =>
+          ((NormalCoordinates.normalChartAt (I := I) g p).symm w.1,
+            (NormalCoordinates.normalChartAt (I := I) g p).symm (w.2.2 i)))
+        (g := fun yq : M × M => B.diagReadout yq)
+        (z₀, params₀) (hsm i) hinner
+    exact hcomp
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A selected-branch readout sum is the fixed-trivialization image of the
+intrinsic normal-coordinate sum whenever the branch realizes those tangent
+vectors. -/
+theorem readoutB_sum_eq
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (μ : ι → ℝ) (y : M) (qs : ι → M)
+    (hy : y ∈ (trivializationAt E (TangentSpace I) p).baseSet)
+    (hpt : ∀ i, B.inv (y, qs i) =
+      (⟨y, (show TangentSpace I y from
+        (NormalCoordinates.normalChartAt (I := I) g y (qs i) : E))⟩ : TangentBundle I M)) :
+    (∑ i, μ i • B.diagReadout (y, qs i)) =
+      (trivializationAt E (TangentSpace I) p).continuousLinearEquivAt ℝ y hy
+        (show TangentSpace I y from
+          ∑ i, μ i • (NormalCoordinates.normalChartAt (I := I) g y (qs i) : E)) := by
+  have hterm : ∀ i, B.diagReadout (y, qs i) =
+      (trivializationAt E (TangentSpace I) p).continuousLinearEquivAt ℝ y hy
+        (show TangentSpace I y from
+          (NormalCoordinates.normalChartAt (I := I) g y (qs i) : E)) := by
+    intro i
+    unfold DiagInvBranch.diagReadout
+    rw [hpt i]
+    exact congrArg Prod.snd
+      ((trivializationAt E (TangentSpace I) p).apply_eq_prod_continuousLinearEquivAt ℝ y hy _)
+  simp_rw [hterm]
+  rw [map_sum]
+  exact Finset.sum_congr rfl (fun i _ => (map_smul _ (μ i) _).symm)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The selected-branch readout sum vanishes exactly when the intrinsic normal
+coordinate sum vanishes. -/
+theorem readoutB_zero_iff
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (μ : ι → ℝ) (y : M) (qs : ι → M)
+    (hy : y ∈ (trivializationAt E (TangentSpace I) p).baseSet)
+    (hpt : ∀ i, B.inv (y, qs i) =
+      (⟨y, (show TangentSpace I y from
+        (NormalCoordinates.normalChartAt (I := I) g y (qs i) : E))⟩ : TangentBundle I M)) :
+    (∑ i, μ i • B.diagReadout (y, qs i)) = 0 ↔
+      (∑ i, μ i • (NormalCoordinates.normalChartAt (I := I) g y (qs i) : E)) = 0 := by
+  rw [readoutB_sum_eq (I := I) g hEnorm p B μ y qs hy hpt]
+  exact (trivializationAt E (TangentSpace I) p).continuousLinearEquivAt ℝ y hy |>.map_eq_zero_iff
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The selected-branch readout equation has a strictly differentiable local
+implicit solution once its center derivative is invertible. -/
+theorem readoutSolB_strict
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
+    (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+    (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
+      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+    (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
+      (fun yq : M × M => B.diagReadout yq)
+      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+    (hinv : ∃ L : E ≃L[ℝ] E,
+      HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
+        (L : E →L[ℝ] E) z₀)
+    (hzero : chartCmEqnB (I := I) g hEnorm p B z₀ params₀ = 0) :
+    ∃ (f : ((ι → ℝ) × (ι → E)) → E)
+      (Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E),
+      f params₀ = z₀ ∧ HasStrictFDerivAt f Df params₀ ∧
+        (∀ᶠ params in nhds params₀,
+          chartCmEqnB (I := I) g hEnorm p B (f params) params = 0) ∧
+        (∀ᶠ zp in nhds (z₀, params₀),
+          chartCmEqnB (I := I) g hEnorm p B zp.1 zp.2 = 0 → zp.1 = f zp.2) := by
+  have hjoint : HasStrictFDerivAt
+      (fun w : E × ((ι → ℝ) × (ι → E)) =>
+        chartCmEqnB (I := I) g hEnorm p B w.1 w.2)
+      (fderiv ℝ (fun w : E × ((ι → ℝ) × (ι → E)) =>
+        chartCmEqnB (I := I) g hEnorm p B w.1 w.2) (z₀, params₀))
+      (z₀, params₀) :=
+    (chartCmEqnB_cdAt (I := I) g hEnorm p B z₀ params₀ 1 hchz hchξ hsm).hasStrictFDerivAt
+      one_ne_zero
+  exact implicitSol_hasStrictFDerivAt
+    (fun z params => chartCmEqnB (I := I) g hEnorm p B z params)
+    z₀ params₀ _ hjoint hinv hzero
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The selected-branch readout equation has a finite-order smooth local
+implicit solution once its center derivative is invertible. -/
+theorem readoutSolB_cdAt
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
+    (n : ℕ) (hn : 1 ≤ n)
+    (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+    (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
+      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+    (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
+      (fun yq : M × M => B.diagReadout yq)
+      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+    (hinv : ∃ L : E ≃L[ℝ] E,
+      HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
+        (L : E →L[ℝ] E) z₀)
+    (hzero : chartCmEqnB (I := I) g hEnorm p B z₀ params₀ = 0) :
+    ∃ f : ((ι → ℝ) × (ι → E)) → E,
+      f params₀ = z₀ ∧ ContDiffAt ℝ (n : ℕ∞) f params₀ ∧
+        (∀ᶠ params in nhds params₀,
+          chartCmEqnB (I := I) g hEnorm p B (f params) params = 0) ∧
+        (∀ᶠ zp in nhds (z₀, params₀),
+          chartCmEqnB (I := I) g hEnorm p B zp.1 zp.2 = 0 → zp.1 = f zp.2) := by
+  have hjoint : ContDiffAt ℝ (n : ℕ∞)
+      (fun w : E × ((ι → ℝ) × (ι → E)) =>
+        chartCmEqnB (I := I) g hEnorm p B w.1 w.2) (z₀, params₀) :=
+    chartCmEqnB_cdAt (I := I) g hEnorm p B z₀ params₀ n hchz hchξ hsm
+  exact implicitSol_contDiffAt
+    (fun z params => chartCmEqnB (I := I) g hEnorm p B z params)
+    z₀ params₀ n hn hjoint hinv hzero
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -1107,6 +1334,91 @@ theorem readoutSol_contDiffAt
     chartCmEqn'_contDiffAt_order (I := I) g hEnorm p z₀ params₀ n hchz hchξ hsm
   exact implicitSol_contDiffAt
     (fun z params => chartCmEqn' (I := I) g hEnorm p z params) z₀ params₀ n hn hjoint_cd hinv' hz₀'
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A continuous center family solving the selected-branch readout equation
+inherits the strict derivative of the local implicit solution. -/
+theorem centerB_hasStrict
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
+    (hchz : ContMDiffAt 𝓘(ℝ, E) I 1
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+    (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I 1
+      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+    (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) 1
+      (fun yq : M × M => B.diagReadout yq)
+      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+    (hinv : ∃ L : E ≃L[ℝ] E,
+      HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
+        (L : E →L[ℝ] E) z₀)
+    (hzero : chartCmEqnB (I := I) g hEnorm p B z₀ params₀ = 0)
+    (c : ((ι → ℝ) × (ι → E)) → M)
+    (hc_solves : ∀ᶠ params in nhds params₀,
+      chartCmEqnB (I := I) g hEnorm p B
+        (NormalCoordinates.normalChartAt (I := I) g p (c params)) params = 0)
+    (hc_cont : Filter.Tendsto
+      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      (nhds params₀) (nhds z₀)) :
+    ∃ Df : ((ι → ℝ) × (ι → E)) →L[ℝ] E,
+      HasStrictFDerivAt
+        (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) Df params₀ := by
+  obtain ⟨f, Df, hf0, hfderiv, hsolves, huniq⟩ :=
+    readoutSolB_strict (I := I) g hEnorm p B z₀ params₀ hchz hchξ hsm hinv hzero
+  refine ⟨Df, ?_⟩
+  have huniq' := (hc_cont.prodMk_nhds Filter.tendsto_id).eventually huniq
+  have hid : (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      =ᶠ[nhds params₀] f := by
+    filter_upwards [huniq', hc_solves] with params hu hs
+    exact hu hs
+  exact hfderiv.congr_of_eventuallyEq hid.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A continuous center family solving the selected-branch readout equation is
+`C^n` whenever the selected branch and the implicit equation are `C^n`. -/
+theorem centerB_contDiff
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (z₀ : E) (params₀ : (ι → ℝ) × (ι → E))
+    (n : ℕ) (hn : 1 ≤ n)
+    (hchz : ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z) z₀)
+    (hchξ : ∀ i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
+      (fun ξ : E => (NormalCoordinates.normalChartAt (I := I) g p).symm ξ) (params₀.2 i))
+    (hsm : ∀ i, ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
+      (fun yq : M × M => B.diagReadout yq)
+      ((NormalCoordinates.normalChartAt (I := I) g p).symm z₀,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (params₀.2 i)))
+    (hinv : ∃ L : E ≃L[ℝ] E,
+      HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params₀)
+        (L : E →L[ℝ] E) z₀)
+    (hzero : chartCmEqnB (I := I) g hEnorm p B z₀ params₀ = 0)
+    (c : ((ι → ℝ) × (ι → E)) → M)
+    (hc_solves : ∀ᶠ params in nhds params₀,
+      chartCmEqnB (I := I) g hEnorm p B
+        (NormalCoordinates.normalChartAt (I := I) g p (c params)) params = 0)
+    (hc_cont : Filter.Tendsto
+      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      (nhds params₀) (nhds z₀)) :
+    ContDiffAt ℝ (n : ℕ∞)
+      (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E)) params₀ := by
+  obtain ⟨f, hf0, hfcd, hsolves, huniq⟩ :=
+    readoutSolB_cdAt (I := I) g hEnorm p B z₀ params₀ n hn hchz hchξ hsm hinv hzero
+  have huniq' := (hc_cont.prodMk_nhds Filter.tendsto_id).eventually huniq
+  have hid : (fun params => (NormalCoordinates.normalChartAt (I := I) g p (c params) : E))
+      =ᶠ[nhds params₀] f := by
+    filter_upwards [huniq', hc_solves] with params hu hs
+    exact hu hs
+  exact hfcd.congr_of_eventuallyEq hid
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

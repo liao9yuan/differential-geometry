@@ -29,5 +29,7 @@ warning remains.
 
 This layer is now consumed by `NormalPhaseEndpoint.normal_end_eq_intr` and
 `normal_end_eq_diag`; endpoint transport and uniqueness are closed.  The live
-frontier is the uniform branch-domain and `expDiffeoRadius` containment needed
-to apply `normal_inv_eq`, not phase-trajectory regularity.
+frontier is not regularity of each time trajectory.  It is joint
+`C^infinity` dependence of the retained time-one endpoint on the initial phase
+point, needed before `PhaseFlow.quantInv_smooth` can supply a smooth inverse on
+the explicit quantitative target.

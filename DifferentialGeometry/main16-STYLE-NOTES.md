@@ -108,9 +108,11 @@ Theory in Lean*, arXiv:2604.05984, 2026 — the closest published analogue)
   → "we" or "the proof" for mathematical choices; reserve "Lean" / "the Lean
   development" for what the machine does (checks, verifies, records). §5 already
   follows this.
-- **§3.4 "concrete checked example"** walks through five internal bridge lemmas;
-  compress to the classical formula + the one genuinely analytic step
-  (`modelDeriv_eq_coordDerivRSAt`), pushing the chain to the reference table.
+- ~~**§3.4 "concrete checked example"** walks through five internal bridge lemmas~~
+  — **done**: rewritten math-first (classical formula → three-step
+  chart/model/coordinate narrative, the one analytic step
+  `modelDeriv_eq_coordDerivRSAt` highlighted, the five-lemma chain moved to a
+  footnote, identifiers switched to `\leanref`).
 - **Introduction** reaches the actual contribution only in paragraph 7–8; tighten
   the two general formalization-history paragraphs into one so the reader hits
   "what this paper does" a screen earlier.

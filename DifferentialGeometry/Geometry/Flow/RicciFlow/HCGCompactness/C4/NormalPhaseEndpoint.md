@@ -23,13 +23,24 @@ second intrinsic inverse.
   `diagExp`.
 - `exists_normal_diag` packages one positive bilateral flow ball, the
   quantitative `OpenPartialHomeomorph`, its explicit positive target-ball
-  radius, and the commutative square with `diagExp`.
+  radius, forward and inverse `C^infinity` regularity, and the commutative
+  square with `diagExp`.
+- `IsNormalDiag` is the minimal consumer specification for that exact branch:
+  explicit source ball, `e 0 = 0`, fixed-origin target ball, smooth
+  forward/inverse maps, and the intrinsic endpoint square.
+- `NormalRadiusProfile.exists_uniform_diag` has the required quantifier order.
+  For each fixed basepoint-distance sublevel it chooses one `q` and one explicit
+  positive `delta` before quantifying over all stages and admissible centers.
+  It consumes the existing profile and adds no branch-radius assumption.
 - `normal_inv_eq` proves that this model branch agrees with the existing
   `diagExpInv` whenever the existing branch identities hold and both tangent
   vectors satisfy the concrete `expDiffeoRadius` smallness conditions.
 - `DiagExpDerivative.diagExpInv_diagExp` supplies the complementary
   source-side germ identity, so the two branches are now formally compatible on
   every verified overlap.
+- `PhaseFlow.inv_smooth_of_approx` closes the generic last step from forward
+  `C^infinity` regularity to inverse regularity for the exact supplied
+  quantitative partial homeomorphism.  It does not choose another branch.
 
 Focused verification passed without local warnings, `sorry`, or `admit`.
 The public declarations' axiom audit contains only `propext`,
@@ -51,19 +62,16 @@ tangent norm instance diamond that `PointedEmetric` is designed to avoid.
 
 ## Frontier
 
-The next target is no longer geodesic, endpoint naturality, or branch uniqueness.
-The genuine design gate is sequence-uniform domain reconciliation.  The
-quantitative branch has an explicit uniform model target ball, while
-`exists_diagInvDom_inf` exposes only a pointwise open germ for the privately
-chosen qualitative `diagExpIFT` branch.  Its openness supplies no uniform
-radius, so the whole quantitative ball cannot be placed in that germ from the
-current API.
+The normal quantitative producer is now closed: endpoint naturality, forward
+smoothness, inverse smoothness, zero normalization, and a uniform positive
+target radius are all checked on the same branch.  The next target is a
+consumer refactor: parameterize the HCG readout by the selected inverse branch
+instead of hard-coding the privately chosen qualitative `diagExpInv` germ.
+Compatibility with `diagExpInv` remains an overlap theorem, not a global
+equality of totalized functions.
 
-Two honest routes remain: refactor the canonical/readout branch package to
-consume the transported quantitative partial homeomorphism, or add a new
-quantitative theorem proving explicit containment in the existing IFT source
-and target.  A pointwise shrink, a finite minimum at one index, or an assumption
-renaming this containment does not solve `StepB1RawInput`.
+After that refactor, the next geometric obligations are concrete finite-hat
+containment and the independent half-squared-distance Hessian/Neumann bound.
 
 ## Project position
 
@@ -71,9 +79,14 @@ renaming this containment does not solve `StepB1RawInput`.
 - Textbook B1 theorem: unstated/unproved, 0%.
 - Quantitative normal-coordinate `diagExp` branch theorem
   (`exists_normal_diag`): proved, 100%.
+- Uniform fixed-sublevel quantitative branch producer
+  (`exists_uniform_diag`): proved, 100%.
 - Uniform theorem identifying the whole branch with totalized `diagExpInv`:
-  unstated/unproved, 0%.
-- Dedicated normal-coordinate quantitative branch machinery: about 92%.
-- Step B/B1 infrastructure: about 73%.
-- Chapter 4 infrastructure: about 72%.
-- Whole HCG compactness infrastructure: about 49%.
+  intentionally not pursued; global totalized equality is not the selected API.
+- Smooth quantitative inverse implication (`inv_smooth_of_approx`): proved, 100%.
+- Forward smooth endpoint theorem on the explicit source ball:
+  proved, 100%.
+- Dedicated normal-coordinate quantitative branch machinery: about 98%.
+- Step B/B1 infrastructure: about 75%.
+- Chapter 4 infrastructure: about 73%.
+- Whole HCG compactness infrastructure: about 50%.

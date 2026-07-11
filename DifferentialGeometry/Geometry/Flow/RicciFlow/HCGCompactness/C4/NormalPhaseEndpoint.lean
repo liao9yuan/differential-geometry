@@ -25,8 +25,8 @@ universe u uE uH
 namespace DifferentialGeometry
 namespace HCGCompactness
 
-open Set Bundle Manifold
-open scoped Manifold ContDiff ENNReal
+open Filter Set Bundle Manifold
+open scoped Manifold ContDiff ENNReal NNReal
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
@@ -39,6 +39,75 @@ variable [FiniteDimensional Real E] [CompleteSpace E]
 variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+
+/-- A phase radius small enough for the wider bilateral fence and the existing
+quantitative inverse threshold. -/
+private theorem exists_smooth_q
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : NormalCoordMetricBoundInput (I := I) X) {r : Real} (hr : 0 < r) :
+    ∃ q : NNReal, 0 < q ∧
+      6 * (q : Real) < r ∧
+      3 * h.metricC 1 * (2 * (q : Real)) ^ 2 ≤
+        (2 / 3 : Real) * (q : Real) ∧
+      PhaseFlow.phaseErr (normalPhaseK h (2 * q)) <
+        ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))‖₊⁻¹ := by
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos
+    (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank Real E)))
+  let threshold : NNReal :=
+    ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+      (E × E) →L[Real] (E × E))‖₊⁻¹
+  have hthreshold : 0 < threshold := PhaseFlow.freeDiagInv_pos (E := E)
+  have htwo : Tendsto (fun q : NNReal ↦ 2 * q) (nhds 0) (nhds 0) := by
+    have hcont : Continuous (fun q : NNReal ↦ 2 * q) :=
+      continuous_const.mul continuous_id
+    have hAt : Tendsto (fun q : NNReal ↦ 2 * q) (nhds (0 : NNReal))
+        (nhds ((fun q : NNReal ↦ 2 * q) 0)) := hcont.continuousAt
+    simpa using hAt
+  have herrEv : ∀ᶠ q : NNReal in nhds 0,
+      PhaseFlow.phaseErr (normalPhaseK h (2 * q)) < threshold :=
+    htwo (normalPhaseErr_lt_ev (I := I) h hthreshold)
+  obtain ⟨eps, heps, herr⟩ := Metric.eventually_nhds_iff_ball.mp herrEv
+  let C : Real := h.metricC 1
+  have hC : 0 ≤ C := h.metricC_nonneg 1
+  let accelBound : Real := 1 / (18 * (C + 1))
+  have hden : 0 < 18 * (C + 1) := mul_pos (by norm_num) (by linarith)
+  have haccelBound : 0 < accelBound := one_div_pos.mpr hden
+  let qReal : Real := min (eps / 4) (min (r / 12) accelBound)
+  have hqReal : 0 < qReal := by
+    dsimp only [qReal]
+    exact lt_min (div_pos heps (by norm_num))
+      (lt_min (div_pos hr (by norm_num)) haccelBound)
+  let q : NNReal := ⟨qReal, hqReal.le⟩
+  have hqEps : qReal ≤ eps / 4 := min_le_left _ _
+  have hqRadius : qReal ≤ r / 12 :=
+    (min_le_right _ _).trans (min_le_left _ _)
+  have hqAccel : qReal ≤ accelBound :=
+    (min_le_right _ _).trans (min_le_right _ _)
+  have hqBall : q ∈ Metric.ball (0 : NNReal) eps := by
+    rw [Metric.mem_ball, NNReal.dist_eq]
+    change |qReal - 0| < eps
+    rw [sub_zero, abs_of_pos hqReal]
+    exact hqEps.trans_lt (div_lt_self heps (by norm_num))
+  have herrQ : PhaseFlow.phaseErr (normalPhaseK h (2 * q)) < threshold :=
+    herr q hqBall
+  have hqRadius' : 6 * qReal < r := by
+    nlinarith
+  have hqProd : qReal * (18 * (C + 1)) ≤ 1 := by
+    apply (le_div_iff₀ hden).mp
+    simpa only [accelBound, one_div] using hqAccel
+  have hlinear : 18 * C * qReal ≤ 1 := by
+    nlinarith
+  have hcoef : 12 * C * qReal ≤ (2 / 3 : Real) := by
+    nlinarith
+  have hmul : 0 ≤ qReal * ((2 / 3 : Real) - 12 * C * qReal) :=
+    mul_nonneg hqReal.le (sub_nonneg.mpr hcoef)
+  refine ⟨q, ?_, ?_, ?_, ?_⟩
+  · exact_mod_cast hqReal
+  · simpa only [q, NNReal.coe_mk] using hqRadius'
+  · change 3 * C * (2 * qReal) ^ 2 ≤ (2 / 3 : Real) * qReal
+    nlinarith
+  · simpa only [threshold] using herrQ
 
 omit [CompleteSpace E] [I.Boundaryless] in
 /-- The Riemannian tangent norm formula used by the intrinsic endpoint API. -/
@@ -96,6 +165,67 @@ noncomputable def normalPair
   letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
   exact (expMapDiffeo (I := I) Y.metric x z.1,
     expMapDiffeo (I := I) Y.metric x z.2)
+
+/-- A quantitative normal-coordinate inverse branch with one explicit source
+ball, one explicit target radius, smooth forward and inverse maps, and the
+intrinsic diagonal-exponential compatibility square. -/
+def IsNormalDiag
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) (q : NNReal) (δ : Real)
+    (e : OpenPartialHomeomorph (E × E) (E × E)) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    Prop := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  exact
+    e.source = Metric.ball (0 : E × E) q ∧
+    e 0 = 0 ∧
+    ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+    Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
+    ContDiffOn Real ∞ e.symm e.target ∧
+    ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) Y x (e z) =
+        diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+          (normalTangent (I := I) Y x z)
 
 /-- The launch tangent of the pushed normal phase curve is the differential of
 the normal exponential applied to the phase velocity. -/
@@ -406,6 +536,8 @@ theorem exists_normal_diag
       ApproximatesLinearOn (fun z ↦ (z.1, (Φ z 1).1)) PhaseFlow.freeDiag
         (Metric.closedBall (0 : E × E) q)
         (PhaseFlow.phaseErr (normalPhaseK h (2 * q))) ∧
+      ContDiffOn Real ∞ (fun z ↦ (z.1, (Φ z 1).1))
+        (Metric.ball (0 : E × E) q) ∧
       0 < δ ∧
       e.source = Metric.ball (0 : E × E) q ∧
       (e : E × E → E × E) = (fun z ↦ (z.1, (Φ z 1).1)) ∧
@@ -414,6 +546,7 @@ theorem exists_normal_diag
         (E × E) →L[Real] (E × E))‖₊⁻¹ -
           PhaseFlow.phaseErr (normalPhaseK h (2 * q)) : NNReal) : Real) *
         ((q : Real) / 2) ∧
+      ContDiffOn Real ∞ e.symm e.target ∧
       ∀ z ∈ Metric.closedBall (0 : E × E) q,
         normalPair (I := I) (X.obj k) x (e z) =
           diagExp (I := I) (X.obj k).metric
@@ -442,20 +575,160 @@ theorem exists_normal_diag
   letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
   letI : CompleteSpace (X.obj k).M :=
     MetricComplete.complete (I := I) (X.obj k) hcomplete
-  obtain ⟨q, hq, hqRadius, hqAccel, herr⟩ :=
-    exists_normal_q (I := I) h hr
-  obtain ⟨Φ, hΦ0, hΦcont, hΦwithin, hΦat, hΦbox, happrox⟩ :=
+  obtain ⟨q, hq, hqWide, hqAccel, herr⟩ :=
+    exists_smooth_q (I := I) h hr
+  have hqRadius : 4 * (q : Real) < r := by nlinarith [hqWide]
+  obtain ⟨Φ, hΦ0, hΦcont, hΦwithin, hΦat, hΦbox, _hΦzero,
+      happrox, hΦsmooth⟩ :=
     exists_normal_biflow (I := I) h k x hrMetric hrQuarter q hq
-      hqRadius hqAccel
+      hqWide hqAccel
   obtain ⟨e, δ, hδ, hsource, hcoe, htarget, hδeq⟩ :=
     PhaseFlow.exists_quant_inv hq happrox herr
+  have happroxOpen : ApproximatesLinearOn
+      (fun z ↦ (z.1, (Φ z 1).1))
+      (PhaseFlow.freeDiagCLE (E := E) : (E × E) →L[Real] (E × E))
+      (Metric.ball (0 : E × E) q)
+      (PhaseFlow.phaseErr (normalPhaseK h (2 * q))) := by
+    simpa only [PhaseFlow.freeDiagCLE_coe] using
+      happrox.mono_set Metric.ball_subset_closedBall
+  have hinvSmooth : ContDiffOn Real ∞ e.symm e.target :=
+    PhaseFlow.inv_smooth_of_approx happroxOpen (Or.inr herr)
+      Metric.isOpen_ball hΦsmooth e hsource hcoe
   refine ⟨q, Φ, e, δ, hq, hqRadius, hΦ0, hΦcont, hΦwithin, hΦat,
-    hΦbox, happrox, hδ, hsource, hcoe, htarget, hδeq, ?_⟩
+    hΦbox, happrox, hΦsmooth, hδ, hsource, hcoe, htarget, hδeq, hinvSmooth, ?_⟩
   intro z hz
   have hdiag := normal_end_eq_diag (I := I) (X.obj k) hcomplete hconn x
     hrQuarter (hΦcont z hz) (hΦwithin z hz) (hΦbox z hz)
   rw [hcoe]
   simpa only [hΦ0 z hz] using hdiag
+
+namespace NormalRadiusProfile
+
+/-- On every fixed basepoint-distance sublevel, one source radius and one
+explicit target radius work for the quantitative normal diagonal branch at
+every stage and every admissible center. -/
+theorem exists_uniform_diag
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (R : Real) :
+    ∃ (q : NNReal) (δ : Real),
+      0 < q ∧
+      4 * (q : Real) < h.phaseRadius R ∧
+      0 < δ ∧
+      δ = ((‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹ -
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
+        ((q : Real) / 2) ∧
+      ∀ k (x : (X.obj k).M),
+        hd.dist k x (X.obj k).basepoint ≤ R →
+        ∃ e : OpenPartialHomeomorph (E × E) (E × E),
+          IsNormalDiag (I := I) (X.obj k) (hcomplete.complete k) (hconn k)
+            x q δ e := by
+  obtain ⟨q, hq, hqWide, hqAccel, herr⟩ :=
+    exists_smooth_q (I := I) hb (h.phaseRadius_pos R)
+  let δ : Real := ((‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+      (E × E) →L[Real] (E × E))‖₊⁻¹ -
+        PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
+    ((q : Real) / 2)
+  have hmargin : 0 <
+      ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹ -
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) :=
+    tsub_pos_iff_lt.mpr herr
+  have hqReal : (0 : Real) < q := by exact_mod_cast hq
+  have hδ : 0 < δ := by
+    dsimp only [δ]
+    exact mul_pos (by exact_mod_cast hmargin) (div_pos hqReal (by norm_num))
+  have hqRadius : 4 * (q : Real) < h.phaseRadius R := by
+    nlinarith [hqWide]
+  refine ⟨q, δ, hq, hqRadius, hδ, rfl, ?_⟩
+  intro k x hx
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M := IsManifold.of_le
+    (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : ConnectedSpace (X.obj k).M := hconn k
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle
+      (fun y : (X.obj k).M ↦ TangentSpace I y) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (y : (X.obj k).M) → InnerProductSpace Real (TangentSpace I y) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : (X.obj k).M ↦ TangentSpace I y) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
+  have hrMetric := h.phaseRadius_metric hx
+  have hrQuarter := h.phaseRadius_exp hx
+  obtain ⟨Φ, hΦ0, hΦcont, hΦwithin, _hΦat, hΦbox, hΦzero,
+      happrox, hΦsmooth⟩ :=
+    exists_normal_biflow (I := I) hb k x hrMetric hrQuarter q hq
+      hqWide hqAccel
+  obtain ⟨e, δ', _hδ', hsource, hcoe, htarget, hδeq⟩ :=
+    PhaseFlow.exists_quant_inv hq happrox herr
+  have hδ'eq : δ' = δ := by
+    simpa only [δ] using hδeq
+  have heSmooth : ContDiffOn Real ∞ (e : E × E → E × E) e.source := by
+    rw [hsource, hcoe]
+    exact hΦsmooth
+  have heZero : e 0 = 0 := by
+    rw [hcoe]
+    simp only [Prod.fst_zero, hΦzero]
+    rfl
+  have htargetE : Metric.closedBall (e 0) δ' ⊆ e.target := by
+    simpa only [hcoe] using htarget
+  have htarget' : Metric.closedBall (0 : E × E) δ ⊆ e.target := by
+    simpa only [heZero, hδ'eq] using htargetE
+  have happroxOpen : ApproximatesLinearOn
+      (fun z ↦ (z.1, (Φ z 1).1))
+      (PhaseFlow.freeDiagCLE (E := E) : (E × E) →L[Real] (E × E))
+      (Metric.ball (0 : E × E) q)
+      (PhaseFlow.phaseErr (normalPhaseK hb (2 * q))) := by
+    simpa only [PhaseFlow.freeDiagCLE_coe] using
+      happrox.mono_set Metric.ball_subset_closedBall
+  have hinvSmooth : ContDiffOn Real ∞ e.symm e.target :=
+    PhaseFlow.inv_smooth_of_approx happroxOpen (Or.inr herr)
+      Metric.isOpen_ball hΦsmooth e hsource hcoe
+  have hdiag : ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) (X.obj k) x (e z) =
+        diagExp (I := I) (X.obj k).metric
+          (normal_enorm (I := I) (X.obj k))
+          (normalTangent (I := I) (X.obj k) x z) := by
+    intro z hz
+    have hzdiag := normal_end_eq_diag (I := I) (X.obj k)
+      (hcomplete.complete k) (hconn k) x hrQuarter
+      (hΦcont z hz) (hΦwithin z hz) (hΦbox z hz)
+    rw [hcoe]
+    simpa only [hΦ0 z hz] using hzdiag
+  refine ⟨e, ?_⟩
+  change e.source = Metric.ball (0 : E × E) q ∧
+    e 0 = 0 ∧
+    ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+    Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
+    ContDiffOn Real ∞ e.symm e.target ∧
+    ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) (X.obj k) x (e z) =
+        diagExp (I := I) (X.obj k).metric
+          (normal_enorm (I := I) (X.obj k))
+          (normalTangent (I := I) (X.obj k) x z)
+  exact ⟨hsource, heZero, heSmooth, htarget', hinvSmooth, hdiag⟩
+
+end NormalRadiusProfile
 
 /-- On the common small exponential domain, the existing moving inverse
 `diagExpInv` agrees with the tangent vector supplied by the quantitative normal
