@@ -7,68 +7,6 @@ import Mathlib.Topology.Compactness.Compact
 
 set_option linter.unusedSectionVars false
 
-/-!
-# Continuity of the intrinsic exponential map in the initial velocity
-
-For a complete Riemannian manifold the intrinsic exponential map
-`expMapIntrinsic g hEnorm p v = intrinsicGeodesic g hEnorm p v 1`
-(`Exponential/IntrinsicExp.lean`) follows the *complete* moving-foot geodesic
-through `p` with launch velocity `v`.  Unlike the chart-fixed `expMap`, this
-object is genuinely defined and geodesic across charts, so continuity in `v` is
-*true* (the chart-fixed `expMap` continuity, by contrast, can only be stated on
-small balls because `maximalGeodesic` reverts to its junk value once the
-geodesic leaves the home chart).
-
-This file develops the continuity of `v ↦ expMapIntrinsic g hEnorm p v`.  The
-metric-geometry compactness endpoint (e.g. `bonnet_myers_compactSpace_of_ricci_bound`) consumes it as
-"`M = expMapIntrinsic g p '' closedBall` is a continuous image of a compact
-set".
-
-## Mathematical structure
-
-The geodesic `intrinsicGeodesic g hEnorm p v` depends continuously on the
-initial velocity `v` because:
-
-* the geodesic flow is continuous in initial conditions **per chart** — the
-  per-chart Picard–Lindelöf phase-flow `Φ` of `SmoothFlow.exists_chartPhase_…`
-  is jointly `C¹` (in particular continuous) in `(z, t)`, where `z = (x, w)` is
-  the chart-coordinate position/velocity;
-* the arc `[0, 1] ∋ t ↦ intrinsicGeodesic g hEnorm p v t` is a **compact** subset
-  of `M` (continuous image of `[0, 1]`), so by the Lebesgue-number lemma the
-  *time* interval `[0, 1]` is covered by finitely many subintervals each of whose
-  arc-image lies in a single chart source;
-* on each such subinterval the per-chart continuous-in-`(v, t)` flow applies,
-  re-based at the foot point `intrinsicGeodesic g hEnorm p v₀ τ` via the proven
-  cross-chart re-basing `Geodesic.gc_cross_vf_projection_uniqueness`, and
-  the *uniqueness* of the geodesic with prescribed initial data identifies
-  `intrinsicGeodesic g hEnorm p v` with the chained flow uniformly in `v` over a
-  small ball;
-* chaining the finitely many per-chart flows yields the joint continuity of
-  `(v, t) ↦ intrinsicGeodesic g hEnorm p v t` on `ball v₀ ρ ×ˢ [0, 1]`, whence
-  continuity of `v ↦ … 1` by restriction to the `t = 1` slice.
-
-## What this file establishes unconditionally
-
-* `intrinsicGeodesic_compactArc` — the arc image `… '' Icc 0 1` is compact (from
-  the proven `intrinsicGeodesic_continuous`).
-* `intrinsicGeodesic_arc_finite_chart_cover` — the *time* interval `[0, 1]` is
-  covered by finitely many open subintervals each carrying the arc into a single
-  chart source (Lebesgue number lemma + finite subcover).
-* `expMapIntrinsic_continuous_of_jointContinuity` — the headline-from-joint
-  reduction: given the per-ball joint continuity of the chained flow, the
-  intrinsic exponential map is continuous.  This mirrors the chart-fixed
-  `expMap_continuous` but for the genuine complete geodesic.
-
-## Residual (single isolated analytic input)
-
-The remaining input is the *uniform-in-`v`* joint continuity of
-`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` on a ball `ball v₀ ρ ×ˢ [0, 1]`
-(`intrinsicGeodesic_jointContinuity`).  It is the only `sorry` below and the only
-genuinely analytic piece; the headline `expMapIntrinsic_continuous` is then a
-one-step corollary.  Its sub-lemma decomposition is recorded in the docstring of
-`intrinsicGeodesic_jointContinuity`.
--/
-
 noncomputable section
 
 open Set Filter Topology Metric Bundle Manifold Function
@@ -94,13 +32,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Compactness of the intrinsic geodesic arc.** The image of the unit time
-interval `[0, 1]` under the intrinsic complete geodesic through `p` with launch
-velocity `v` is a compact subset of `M`.
 
-This is fully unconditional: `intrinsicGeodesic g hEnorm p v` is continuous on all
-of `ℝ` (`intrinsicGeodesic_continuous`), and `[0, 1]` is compact, so the image is
-compact (`IsCompact.image_of_continuousOn`). -/
 theorem intrinsicGeodesic_compactArc
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -114,16 +46,7 @@ theorem intrinsicGeodesic_compactArc
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Finite chart cover of the time interval.** There is a mesh `δ > 0` such that
-for every `t ∈ [0, 1]` there is a base point `q : M` with the whole
-`δ`-time-neighbourhood `ball t δ` of `t` carrying the arc into the single chart
-source `(chartAt H q).source`:
-`∀ s ∈ ball t δ, intrinsicGeodesic g hEnorm p v s ∈ (chartAt H q).source`.
 
-Construction: the chart sources `{(chartAt H q).source | q : M}` cover `M`, so
-their preimages under the continuous arc cover `[0, 1] ⊆ ℝ`.  The Lebesgue-number
-lemma `lebesgue_number_lemma_of_metric` on the compact metric set `[0, 1]` yields
-the uniform mesh `δ`. -/
 theorem intrinsicGeodesic_arc_lebesgue_mesh
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -159,14 +82,7 @@ theorem intrinsicGeodesic_arc_lebesgue_mesh
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Finite chart cover of the time interval (finite-subcover form).** There is a
-mesh `δ > 0`, a finite index set `s : Finset (Set.Icc (0 : ℝ) 1)` of times, and
-for each indexed time a base point `q`, such that the open `δ`-balls of the chosen
-times cover `[0, 1]` and each such ball carries the arc into one chart source.
 
-This packages `intrinsicGeodesic_arc_lebesgue_mesh` with the compactness of
-`[0, 1]` (`IsCompact.elim_finite_subcover`) into the explicit finite partition
-data consumed by the chained-flow gluing. -/
 theorem intrinsicGeodesic_arc_finite_chart_cover
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -207,31 +123,7 @@ theorem intrinsicGeodesic_arc_finite_chart_cover
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Converse lift from the moving-foot geodesic equation.**  If `γ` is a
-geodesic (`IsGeodesic g γ`, i.e. it satisfies the moving-foot geodesic equation
-at every time) and is continuous, then at every time `t` there is a
-chart-`γ(t)`-centred local integral curve `f₁` of the chart-fixed geodesic
-vector field at `γ t` whose projection agrees with `γ` on a neighbourhood of
-`t`.
 
-This is the mirror of `Geodesic.gc_cross_vf_projection_uniqueness` but
-starting from the *moving-foot* geodesic equation (the structure the intrinsic
-geodesic exposes through `intrinsicGeodesic_isGeodesic`) rather than from
-`IsGeodesicAt`.  The proof:
-
-* extracts the chart velocity `v := deriv (chartCurve (γ t) γ) t`;
-* builds, via `exists_chartCenteredLift_at`, the chart-`γ(t)`-centred integral
-  curve `f₁` with `f₁ t = ⟨γ t, v⟩`;
-* reduces both the fixed-`γ(t)`-chart curve of `γ` and the chart-pushed lift of
-  `f₁` to first-order solutions of the chart-phase ODE `chartPhaseVF g (γ t)` on
-  a neighbourhood of `t` (the `γ`-side via the moving-foot → fixed-chart
-  conversion `hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity` and its
-  eventual first-derivative companion
-  `hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt`, applied at every
-  nearby time using `IsGeodesic`), matching at `t`, and applies the proven
-  chart-phase ODE uniqueness `chartPhaseVF_orbit_uniqueness` to conclude the two
-  agree, hence `γ` agrees with `projectCurve f₁` near `t` after applying the
-  chart inverse. -/
 theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
     (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} (hγ : IsGeodesic (I := I) g γ) (hγ_cont : Continuous γ) (t : ℝ) :
@@ -354,19 +246,13 @@ theorem intrinsicGeodesic_hasGeodesicEquationAt_to_lift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The base-manifold projection of the chart-`α`-centred phase flow `Φ` started
-at phase point `z` and run for time `s`. -/
+
 private def flowProj (α : M) (Φ : (E × E) × ℝ → E × E) (z : E × E) (s : ℝ) : M :=
   (extChartAt I α).symm (Φ (z, s)).1
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Joint continuity of the foot-varying flow projection.** Suppose `Φ` is
-continuous on the phase-product `ball z₀ ρ ×ˢ Ioo (-T) T`, the phase parameter
-map `z : N → E × E` is continuous on the parameter set `s` with values in
-`ball z₀ ρ`, and for every `(n, τ)` in `s ×ˢ Ioo (-T) T` the flowed first
-component `(Φ (z n, τ)).1` lies in the (open) chart target `(extChartAt I α).target`.
-Then `(n, τ) ↦ flowProj α Φ (z n) τ` is continuous on `s ×ˢ Ioo (-T) T`. -/
+
 private theorem flowProj_continuousOn
     [I.Boundaryless]
     {α : M} {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T : ℝ}
@@ -404,21 +290,7 @@ private theorem flowProj_continuousOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-chart foot-varying joint continuity, from a flow identification.**
-This is the reusable producer of the induction step: on a window
-`ball v₀ r ×ˢ Ioo (tₖ - ε) (tₖ + ε)`, suppose the intrinsic geodesic
-`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` agrees with the foot-varying flow
-projection `flowProj α Φ (z v) (t - tₖ)`, where `Φ` is continuous on the phase
-product `ball z₀ ρ ×ˢ Ioo (-T) T`, the phase parameter `z` is continuous in `v`
-on `ball v₀ r` with values in `ball z₀ ρ`, and the flowed first component stays in
-the chart target.  Then the intrinsic geodesic is jointly continuous on the
-window.
 
-The hypothesis `hident` is a genuine geometric *identification* of two a priori
-distinct objects (the intrinsic geodesic and the projection of a per-chart phase
-flow), supplied by geodesic uniqueness at the foot; it is **not** the continuity
-conclusion.  Joint continuity then follows from `flowProj_continuousOn` and a
-change of time variable `t ↦ t - tₖ`. -/
 private theorem perChart_jointContinuity_of_flowIdentifiedOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -471,12 +343,7 @@ private theorem perChart_jointContinuity_of_flowIdentifiedOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Uniform confinement of a parameter-varying flow orbit.** Suppose `Φ` is
-continuous on `ball z₀ ρ_f ×ˢ Ioo (-T_f) T_f` with `Φ (z₀, 0) = z₀`, the
-phase-parameter map `z : N → E × E` is continuous at `v₀` with `z v₀ = z₀`, and
-`W` is a neighbourhood of `z₀`.  Then there are a parameter neighbourhood `S` of
-`v₀` with `z '' S ⊆ ball z₀ ρ_f` and a time horizon `T' ∈ (0, T_f)` such that the
-orbit `Φ (z v, s)` lies in `W` for all `v ∈ S` and `s ∈ Ioo (-T') T'`. -/
+
 private theorem flowOrbit_uniform_confinement
     {N : Type*} [TopologicalSpace N]
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ_f T_f : ℝ}
@@ -546,18 +413,7 @@ private theorem flowOrbit_uniform_confinement
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Geodesic-side fixed-chart phase curve satisfies `chartPhaseVF` on a
-window.** Let `γ` be a geodesic, continuous, whose values on an open set
-`U ∋ t` all lie in the chart-`α` source.  Then the fixed-`α`-chart phase curve
-`c s := (extChartAt I α (γ s), deriv (extChartAt I α ∘ γ) s)` satisfies the
-chart-phase ODE `HasDerivAt c (chartPhaseVF g α (c s)) s` at every `s ∈ U`, and
-`(c s).1 ∈ interior (extChartAt I α).target`.
 
-This is the fixed-chart reading of the moving-foot geodesic equation: at each
-`s ∈ U`, `γ s` lies in the chart-`α` source, so the moving-foot equation
-`hγ.hasGeodesicEquationAt s` transforms (via the chart-transition Christoffel law)
-into the fixed-`α`-chart second-order ODE, which combines with the first-order
-differentiability companion into the first-order phase system on `E × E`. -/
 private theorem geodesic_chartPhaseVF_on_open
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M}
     (hγ : IsGeodesic (I := I) g γ) (hγ_cont : Continuous γ)
@@ -614,16 +470,7 @@ private theorem geodesic_chartPhaseVF_on_open
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-junction uniform geodesic↔flow-projection identification.** On a window
-`ball v₀ r ×ˢ Ioo (tₖ - T') (tₖ + T')`, with `Φ` continuous on the phase product
-`ball z₀ ρ ×ˢ Ioo (-T) T` and satisfying the chart-phase ODE along each orbit
-`Φ (z v, ·)` confined to the compact ball `closedBall z₀ R ⊆ interior target ×ˢ
-univ`, the geodesic `intrinsicGeodesic g hEnorm p v` confined in chart `α` to the
-same ball, and matching initial phase data `z v = (extChartAt I α (γ_v tₖ),
-deriv (chartCurve α γ_v) tₖ)`, the intrinsic geodesic agrees with the foot-varying
-flow projection `flowProj α Φ (z v) (t - tₖ)` on the window.
 
-This is the uniform identification feeding `perChart_jointContinuity_of_flowIdentifiedOn`. -/
 private theorem perJunction_flowIdentification
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -733,14 +580,7 @@ private theorem perJunction_flowIdentification
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-junction full-phase identification.** Same hypotheses as
-`perJunction_flowIdentification`, but the conclusion identifies the *entire* phase
-pair (position and velocity) of the geodesic in chart `α` with the flow orbit
-`Φ (z v, t - tₖ)`, not merely the position component.  The velocity component is
-exactly the second-component identification proven internally inside
-`perJunction_flowIdentification` (the uniform chart-phase ODE uniqueness on the
-compact confinement ball); here it is exposed.  This drives the velocity
-continuity across junctions. -/
+
 private theorem perJunction_phaseIdentification
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1044,10 +884,7 @@ private theorem intrinsicGeodesic_window_of_junction_data
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The intrinsic geodesic's **velocity tangent-bundle lift**: the point
-`⟨γ_v s, mfderiv γ_v s (1)⟩` of `TM`, where `γ_v := intrinsicGeodesic g hEnorm p v`.
-Its projection is the foot `γ_v s`, and its chart-`α` fibre coordinate is the
-chart-`α` velocity `deriv (chartCurve α γ_v) s` (the velocity bridge below). -/
+
 private def intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1060,7 +897,7 @@ private def intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- The projection of the velocity lift is the foot. -/
+
 private theorem intrinsicVelocityLift_proj
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1073,11 +910,7 @@ private theorem intrinsicVelocityLift_proj
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Velocity bridge.** At a time `s` where the geodesic foot `γ_v s` lies in the
-chart-`α` source, the chart-`α` fibre coordinate of the velocity lift equals the
-chart-`α` velocity `deriv (chartCurve α γ_v) s`.  This is the chain-rule identity
-`MFDerivAlongCurve.chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt`
-combined with `fderiv (extChartAt I α ∘ γ_v) s 1 = deriv (chartCurve α γ_v) s`. -/
+
 private theorem chartFiberCoord_intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1123,10 +956,7 @@ private theorem chartFiberCoord_intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Phase point as a chart-of-`TM` reading of the velocity lift.** At a time `s`
-where the foot `γ_v s` lies in the chart-`α` source, the phase point
-`(chartCurve α γ_v s, deriv (chartCurve α γ_v) s)` equals the chart-`⟨α, 0⟩` reading
-`extChartAt I.tangent ⟨α, 0⟩ (liftPt v s)` of the velocity lift. -/
+
 private theorem phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1158,16 +988,7 @@ private theorem phasePoint_eq_extChartAt_tangent_intrinsicVelocityLift
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Per-junction velocity-lift window producer.** Same junction data as
-`intrinsicGeodesic_window_of_junction_data`, but the conclusion is the joint
-continuity of the *velocity tangent-bundle lift*
-`(v, s) ↦ intrinsicVelocityLift g hEnorm p v s` on a window around `tₖ`.  The proof
-mirrors the position-window producer: it builds the per-chart joint-`C¹` phase flow
-`Φ`, the uniform orbit confinement, the full-phase identification
-`perJunction_phaseIdentification` (geodesic phase pair `= Φ (z v, t - tₖ)`), and
-then expresses the velocity lift as the chart-of-`TM` inverse of the flow orbit,
-whose joint continuity follows from continuity of `Φ`, of `z`, and of the
-chart-of-`TM` inverse on its target. -/
+
 private theorem intrinsicVelocityLift_window_of_junction_data
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1495,15 +1316,7 @@ private theorem continuousOn_ball_prod_Icc_of_local_windows
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Junction data from local velocity-lift continuity.** If the velocity lift
-`(v, s) ↦ intrinsicVelocityLift g hEnorm p v s` is jointly continuous on a window
-`ball v₀ r₀ ×ˢ Ioo a c` containing `(v₀, t)` (with `t ∈ Ioo a c`), then with chart
-centre `α := γ_{v₀} t` the phase point `z v = (chartCurve α γ_v t,
-deriv (chartCurve α γ_v) t)` is continuous on a small ball and the geodesic-side
-confinement holds on a small window.  This is the chart-of-`TM` reading of the lift
-continuity: the phase point equals `extChartAt I.tangent ⟨α, 0⟩ (liftPt v ·)`, and
-all confinement facts are continuity statements about this reading, anchored at
-the base value `(x₀, w₀)` at `(v₀, t)`. -/
+
 private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1697,13 +1510,7 @@ private theorem intrinsicGeodesic_junctionData_of_lift_continuousOn
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **One velocity-lift continuity step.** If the velocity lift is jointly
-continuous on a window `ball v₀ r₀ ×ˢ Ioo a c` containing `(v₀, τ)`, then it is
-jointly continuous on a window `ball v₀ r' ×ˢ Ioo (τ - ε') (τ + ε')` for some
-`r', ε' > 0`.  This composes the junction-data extraction
-`intrinsicGeodesic_junctionData_of_lift_continuousOn` (chart centre `α := γ_{v₀} τ`)
-with the velocity-lift window producer
-`intrinsicVelocityLift_window_of_junction_data`. -/
+
 private theorem intrinsicVelocityLift_continuousOn_step
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1756,10 +1563,6 @@ private theorem intrinsicVelocityLift_continuousOn_step
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
-/-- **Joint continuity of the chained intrinsic geodesic flow (analytic
-residual).** For every launch velocity `v₀` there is a radius `ρ > 0` such that
-`(v, t) ↦ intrinsicGeodesic g hEnorm p v t` is jointly continuous on
-`ball v₀ ρ ×ˢ [0, 1]`.
 
 theorem expMapIntrinsic_continuous_of_jointContinuity
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]

@@ -19,59 +19,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.PointwiseDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 
-/-! # Jointly-smooth representative of the maximal-regularity DeTurck–Ricci solution
-
-For the genuine second-order quasilinear spectral maximal-regularity Duhamel solution `u`
-of the Ricci–DeTurck flow linearized about a closed background metric `g₀` — the Duhamel
-image of its own genuinely-second-order Nemytskii forcing `gforce`, with zero initial
-perturbation and trace `0` at `t = 0` — the smooth-initial-data parabolic solution is
-**jointly `C∞` in `(t, x)` up to `t = 0`**.
-
-This is the single classical parabolic-regularity fact behind the realized DeTurck–Ricci
-family (Chow–Knopf, DeTurck's Step 1; Ladyzhenskaya–Solonnikov–Uraltseva; Amann maximal
-regularity; the interior parabolic smoothing carried up to the smooth initial datum).  It
-packages, on a positive smallness horizon `T₁ ≤ T`, a **single time-regular** family of
-`C∞` representatives `F : ℝ → SmoothCcTensor g₀ 0 2` (uniformly `g₀`-fibre small with one
-constant `δ < 1`) that carries simultaneously:
-
-* `F 0 = 0` — the family starts at the zero initial perturbation;
-* the interior `L²` pin tying `F t` to the solution value `u.toFun t` on the closed slab;
-* the **Ricci–DeTurck flow derivative**: at every `t ∈ Ico 0 T₁`, base point `x`, and
-  tangent pair `(v, w)`, the pointwise `[0, ∞)`-derivative of the perturbation part of the
-  realized inner product `s ↦ ccTensorBilinSymm g₀ (F s) x v w` equals the intrinsic
-  Ricci–DeTurck right-hand side `deTurckRicciRHS g_bg (g_DT t) x v w`, where
-  `g_DT t = tensorSectionRealizeMetric g₀ (F t) hδ_lt (hδ t)`;
-* the **joint chart-Gram interior regularity** `JointChartGramSmooth T₁ g_DT` — the
-  chart-Gram entries of the realized metric family are jointly `C∞` up to `t = 0`.
-
-## Decomposition of the leaf
-
-The family is assembled from two genuine deep analytic inputs and the proved spectral
-infrastructure:
-
-* the **smooth forcing eigen-coordinate family** `forcingSmoothCoordsRealize` — the
-  parabolic time-bootstrap of the engine's own Nemytskii forcing: a `C∞`-in-time per-mode
-  coordinate family `f` with a `t`-independent summable all-order time-jet spectral-mass
-  majorant, realizing the eigen-coordinates of the solution value as the per-mode Duhamel
-  convolutions `perModeConv λᵢ (f i)` (the `C∞` strengthening of the every-time spectral
-  coordinate identity `maxRegDuhamel_toFun_tensorL2Coeff_eq_perModeConv`); and
-* the **Ricci–DeTurck flow derivative** `realizedFamily_flowDeriv` — the soundness core:
-  the chart-evaluated maximal-regularity `L²`-time-derivative of `u`
-  (`maxRegDuhamelMap_timeDeriv_eq`, transported by
-  `maxreg_l2deriv_to_pointwise_hasderivwithinat`) realized pointwise to the intrinsic
-  Ricci–DeTurck remainder on the realized metric.
-
-The smooth representatives themselves are the Weyl-free spectral smooth-representative gate
-`spectralSmoothRealizesAsSmooth_holds` applied to the per-time Duhamel value, which lies in
-`⋂_σ Hˢ` by `duhamel_into_all_tensorHs`; the short-time fibre smallness is the lossy
-spectral fibre bound about the zero initial datum; the joint chart-Gram regularity is the
-time-smooth spectral-series interior smoothing
-`jointChartGramSmooth_of_spectralSmooth_timeSmooth`, fed the time-jet mode-mass from
-`perModeConv_allOrder_timeDeriv_spectralMass_le`.
-
-The two named inputs are honest `sorry`s (the deep parabolic prerequisites); consumers
-transitively depend on their `sorryAx`. -/
-
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle
@@ -97,10 +44,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-/-- **Coordinate faithfulness of the chart-locality-free eigenbasis coordinate.**
-Two `L²` tensors with the same `tensorL2Coeff` family are equal: `HilbertBasis.repr`
-injectivity on the eigenbasis `tensorResolventHilbertEigenbasisSigma`, of which
-`tensorL2Coeff` is the coordinate readout. -/
 private theorem tensorL2_ext_of_tensorL2Coeff_jsmooth
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator
@@ -118,7 +61,6 @@ private theorem tensorL2_ext_of_tensorL2Coeff_jsmooth
   have hT : (b.repr T) i = tensorL2Coeff (I := I) (M := M) h_compact T i := rfl
   rw [hS, hT, h i]
 
-/-- **The symmetrized extraction of the zero smooth tensor section vanishes.** -/
 private theorem ccTensorBilinSymm_zero_apply_jsmooth (g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by
@@ -128,31 +70,7 @@ private theorem ccTensorBilinSymm_zero_apply_jsmooth (g : SmoothRiemannianMetric
   ring
 
 set_option linter.unusedVariables false in
-/-- **The order-`(a+2)` time-continuity of the realized smooth-representative field.**
 
-For a time-smooth spectral family whose order-`0` `L²` eigen-coordinates of the smooth
-representative `F t` are the `C∞`-in-time scalars `φ i t` on the closed slab (`hcoeff`),
-with the all-order time-jet spectral-mass majorant (`hmodemass`), the order-`(a+2)`
-spectral-embedding field `t ↦ smoothCcToTensorHs g₀ (a+2) (F t)` is continuous in time on
-the closed slab `Icc 0 T₁`.
-
-This is the **continuity analogue** of the joint chart-Gram interior regularity
-`realizedFamily_jointChartGramSmooth` (and of the order-`(a+2)` smallness horizon
-`realizedSol_solField_smallnessHorizon_Ha2`): it is the Weierstrass `M`-test on the
-order-`(a+2)` `Hˢ`-norm series `∑ᵢ (φ i t) • bᵢ` fed the continuity of each mode `φ i`
-and a single uniform-in-`t` summable majorant.  The order-`(a+2)` topology is genuinely
-stronger than the `L²` topology of the file's existing `hF_cont`, so this is the genuine
-parabolic order-`(a+2)` time-regularity of the realized field, not a consequence of the
-`L²`-continuity.
-
-PROVEN sorry-free by `tensorHs_continuousOn_of_coeff_of_higher_mass`: the eigen-coordinate
-presentation `(smoothCcToTensorHs g₀ (a+2) (F t)).coeff i = φ i t` (`smoothCcToTensorHs_coeff`
-+ `hcoeff`) exhibits the field as the basis series `∑ᵢ (φ i t) • bᵢ`; the per-mode norm
-`‖(φ i t) • bᵢ‖² = tensorSobolevWeight i (a+2) · (φ i t)²` is dominated, *uniformly in `t`*,
-by the geometric/arithmetic-mean split against the `(0, (a+2)+(weylSobolevExp+1))` instance of
-the all-order time-jet majorant `hmodemass` — the gain of `weylSobolevExp+1` spatial orders
-turns the Weyl-summable inverse weight (`tensorEigen_summable_negpow`) into a summable
-square-root majorant — and Mathlib's `continuousOn_tsum` closes the continuity. -/
 private theorem realizedSol_solField_continuousOn_Ha2
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {T₁ : ℝ} (hT₁_pos : 0 < T₁)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -199,7 +117,6 @@ private theorem realizedSol_solField_continuousOn_Ha2
     (fun i => (hφ_smooth i).continuous.continuousOn) hCmaj_sum hmass
 
 set_option linter.unusedVariables false in
-/-- **DEEP ANALYTIC INPUT (2/2a) — the pointwise forcing-coordinate identification.**
 
 private theorem realizedFamily_flowDeriv_of_repr
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1138,8 +1055,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
     · refine mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) i c) ?_
       refine intervalIntegral.integral_nonneg ht.1 ?_
       intro x _; positivity
-    · -- `wt · ∫₀ᵗ (f i)² ≤ wt · ∫₀ᵀ (f i)² ≤ T · B i`
-      have hwt_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i c :=
+    · have hwt_nn : 0 ≤ tensorSobolevWeight (I := I) (M := M) i c :=
         tensorSobolevWeight_nonneg (I := I) (M := M) i c
       have hcont_sq : Continuous (fun s => (f i s) ^ 2) := ((hf_smooth i).continuous).pow 2
       have htint : (∫ s in (0 : ℝ)..t, (f i s) ^ 2) ≤ ∫ s in (0 : ℝ)..d₂F, (f i s) ^ 2 := by
@@ -1243,8 +1159,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
       (ccTensorBilinSymm (I := I) g₀ (F t)) (1 / 2) := by
     intro t
     by_cases ht : t ∈ Set.Ioc (0 : ℝ) T₁
-    · -- on `(0, T₁]`: the lossy bound scaled by the horizon smallness
-      have hFt : F t = Fdef t := by simp only [hF_def, if_pos ht]
+    · have hFt : F t = Fdef t := by simp only [hF_def, if_pos ht]
       have ht_icc : t ∈ Set.Icc (0 : ℝ) T :=
         ⟨ht.1.le, le_trans ht.2 hT₁_le⟩
       have ht_icc_d2F : t ∈ Set.Icc (0 : ℝ) d₂F :=
@@ -1282,8 +1197,7 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
         _ ≤ (1 / 2 : ℝ) * (Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w)) :=
             mul_le_mul_of_nonneg_right hCN_le hmul_nn
         _ = (1 / 2 : ℝ) * Real.sqrt (g₀.inner x v v) * Real.sqrt (g₀.inner x w w) := by ring
-    · -- off `(0, T₁]`: `F t = 0`
-      have hFt : F t = 0 := by simp only [hF_def, if_neg ht]
+    · have hFt : F t = 0 := by simp only [hF_def, if_neg ht]
       intro x v w
       rw [hFt, ccTensorBilinSymm_zero_apply_jsmooth]
       have hsv_nn : 0 ≤ Real.sqrt (g₀.inner x v v) := Real.sqrt_nonneg _
@@ -1297,11 +1211,9 @@ theorem maxreg_solution_jointly_smooth_representative_of_nemytskii
           h_compact (Nat.cast_nonneg a) (timeH1.toFun u t) := by
     intro t ht
     rcases eq_or_lt_of_le ht.1 with h0 | h0
-    · -- `t = 0`: both sides are `0`
-      rw [← h0, hF_zero, hu0]
+    · rw [← h0, hF_zero, hu0]
       simp only [map_zero]
-    · -- `t ∈ (0, T₁]`: `F t = Fdef t` and the `Fdef` pin applies
-      have ht_ioc : t ∈ Set.Ioc (0 : ℝ) T₁ := ⟨h0, ht.2⟩
+    · have ht_ioc : t ∈ Set.Ioc (0 : ℝ) T₁ := ⟨h0, ht.2⟩
       have hFt : F t = Fdef t := by simp only [hF_def, if_pos ht_ioc]
       have ht_icc : t ∈ Set.Icc (0 : ℝ) d₂F := ⟨ht.1, le_trans ht.2 hT₁_le_d2F⟩
       rw [hFt]

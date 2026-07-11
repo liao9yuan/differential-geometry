@@ -5,31 +5,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbitUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ForwardIntegralCurveUniqueness
 
-/-!
-# Interior bare flow on the full time horizon
-
-Assembles the local Hartman flows of an interior-`C∞` time-dependent vector field `X` into a
-single forward flow `Φ` (together with the reverse flow `Ψ` of `-X`) on the **full** horizon
-`(0, T)`: `Φ 0 = id`, per-time `C∞` slices on `(0, T)`, the **bare** geometric velocity on
-`(0, T)`, the mutual-inverse (group/cocycle) law on `[0, T)`, and joint orbit continuity up to
-`t = 0` on `Ico 0 T ×ˢ univ`.
-
-The construction covers `(0, T)` by finitely many overlapping windows; on each window a time-cutoff
-of `X` is globally `C∞` (`interior_field_global_cutoff_extension_loc`), its global bare flow on a
-uniform sub-horizon is supplied by `global_flow_jointContMDiffOn_on_closed_manifold`, and the
-per-window flows are glued by forward bare-flow uniqueness
-(`bare_forward_flow_eqOn_of_jointC1`); the `[0, δ)` seed (and the `Φ 0 = id` anchor with the joint
-continuity up to `0`) is the from-`0` orbit germ `fromZero_forward_orbit_germ_flow`.  The reverse
-flow `Ψ` is the same construction applied to `-X`; mutual inversion is per-window bijectivity glued
-by the same uniqueness.
-
-The time-cutoff bridge `interior_field_global_cutoff_extension_loc` is re-derived here (the canonical
-`interior_field_global_cutoff_extension` lives in the downstream Ricci-flow capstone and is not
-importable into this analytic file without a file-level import cycle); it uses only the smooth time
-cutoff `wchCutoffEta` (from `Real.smoothTransition`) and the tangent-bundle scalar-multiplication
-smoothness `wch_smul_tangentMap_global`, both pure analytic facts.
--/
-
 open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff NNReal
 
@@ -42,10 +17,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M]
 
-/-! ## A smooth time cutoff and the interior-to-global field extension (re-derived locally) -/
-
-/-- A smooth time cutoff equal to `1` on `(a - δ, b + δ)` and supported in `[a - 2δ, b + 2δ]`,
-built from `Real.smoothTransition`. -/
 noncomputable def wchCutoffEta (a b δ : ℝ) (s : ℝ) : ℝ :=
   Real.smoothTransition ((s - (a - 2 * δ)) / δ) *
     Real.smoothTransition (((b + 2 * δ) - s) / δ)
@@ -87,7 +58,7 @@ theorem wchCutoffEta_section_contMDiff (a b δ : ℝ) :
   (wchCutoffEta_contDiff a b δ).contMDiff.comp contMDiff_fst
 
 set_option linter.unusedSectionVars false in
-/-- **Scalar-multiplication of a tangent-bundle map (pointwise).** -/
+
 theorem wch_smul_tangentMap_cmdwa
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ)
     {u : Set (ℝ × M)} {q₀ : ℝ × M}
@@ -114,8 +85,7 @@ theorem wch_smul_tangentMap_cmdwa
       (e.linear ℝ (FiberBundle.mem_baseSet_trivializationAt' q₀.2)).2 (η q₀.1) (X q₀.1 q₀.2)
 
 set_option linter.unusedSectionVars false in
-/-- **Global scalar-multiplication of a tangent-bundle map by a cutoff supported in the
-interior.** -/
+
 theorem wch_smul_tangentMap_global
     (X : ℝ → ∀ x : M, TangentSpace I x) (η : ℝ → ℝ) (T : ℝ)
     (hηsm : ContMDiff (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞ (fun q : ℝ × M => η q.1))
@@ -159,12 +129,7 @@ theorem wch_smul_tangentMap_global
 
 set_option linter.unusedVariables false in
 set_option linter.unusedSectionVars false in
-/-- **Interior-to-global field extension by a smooth time cutoff (local re-derivation).**
 
-For a field `X_DT` jointly `C∞` on the interior `(0, T) ×ˢ univ`, a time cutoff supported inside
-`(0, T)` produces a *globally* `C∞` field `Xt` agreeing with `X_DT` on `(a - δ, b + δ)`, which is
-also `AutonomizedFieldJointC1`.  This is the importable replacement for the downstream capstone's
-`interior_field_global_cutoff_extension` (which is not importable into this analytic file). -/
 theorem interior_field_global_cutoff_extension_loc
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -231,11 +196,8 @@ theorem interior_field_global_cutoff_extension_loc
       exact wch_smul_tangentMap_global X_DT (wchCutoffEta a b δ) T hηsm hint htsupp
     exact autonomizedFieldJointC1_of_contMDiff (fun s x => wchCutoffEta a b δ s • X_DT s x) hsm
 
-/-! ## Window-flow machinery for the finite chaining -/
-
 set_option linter.unusedSectionVars false in
-/-- **Per-time `C∞` slice of a jointly-`C∞` flow on an open time window.**  Fixing `t` interior to
-the window, the spatial slice `x ↦ Ψ x t` is `ContMDiff I I ∞`. -/
+
 theorem wch_slice_smooth_of_jointOn
     {Ψ : M → ℝ → M} {a b : ℝ} (t : ℝ) (ht : t ∈ Set.Ioo a b)
     (hsm : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Ψ q.2 q.1)
@@ -254,10 +216,7 @@ theorem wch_slice_smooth_of_jointOn
   exact hcomp.contMDiffAt (by simp)
 
 set_option linter.unusedSectionVars false in
-/-- **Bare-velocity seam gluing.**  If `f1` carries the bare velocity (right-handed, `Ici 0`) on
-`[0, c)` and at the seam `c` from the left (`Iic c`), and `f2` carries it from `c` (`Ici c`) on
-`[c, c')`, and they agree at `c`, then the piecewise stitch
-`s ↦ if s ≤ c then f1 s else f2 s` carries the bare velocity on `[0, c')`. -/
+
 theorem wch_piecewise_bare_velocity
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (f1 f2 : ℝ → M) {c c' : ℝ} (hcc' : c < c')
@@ -337,11 +296,7 @@ theorem wch_piecewise_bare_velocity
       exact hmono.congr_of_eventuallyEq heq hval
 
 set_option linter.unusedSectionVars false in
-/-- **Anchored window flow carrying `X`'s bare velocity.**  For an interior anchor
-`t₀ ∈ (0, T)`, there is a window radius `T' > 0` (with the window inside `(0, T)`) and a flow
-`W : M → ℝ → M` with `W p t₀ = p`, jointly `C∞` on the window, carrying `X`'s **bare** velocity on
-the window.  Built by cutting off `X` to a global field agreeing on the window and taking its
-global Hartman flow. -/
+
 theorem wch_anchored_window_flow
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -398,17 +353,8 @@ theorem wch_anchored_window_flow
         = ((1 : ℝ →L[ℝ] ℝ).smulRight (Xt t (Φ p t))) by rw [heq]]
     exact hbare
 
-/-! ## Coherence of bare-velocity flows -/
-
 set_option linter.unusedSectionVars false in
-/-- **Interior coherence of two bare-velocity flows.**  On a closed interior window
-`[a, b] ⊂ (0, T)`, two curves `s ↦ Φ s x` and `s ↦ Φ' s x'` both carrying `X`'s bare velocity
-(`Icc a b` form) and agreeing at the left endpoint `a` agree on all of `[a, b]`.
 
-Proof: cut off `X` to a global field `Xt` (`interior_field_global_cutoff_extension_loc`) agreeing
-with `X` on a window strictly containing `[a, b]` and globally `AutonomizedFieldJointC1`; both curves
-then carry `Xt`'s bare velocity on `[a, b]`, so forward bare-flow uniqueness
-`bare_forward_flow_eqOn_of_jointC1` for `Xt` forces agreement. -/
 private theorem wch_interior_coherence
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -449,38 +395,9 @@ private theorem wch_interior_coherence
   exact bare_forward_flow_eqOn_of_jointC1 Xt hXt_auto Φ Φ' x x' hflowXt hflowXt' hstart
 
 set_option linter.unusedSectionVars false in
-/-- **Full-horizon coherence of two bare-velocity flows.**  Two curves `s ↦ Φ s x` and
-`s ↦ Φ' s x'` carrying `X`'s bare velocity (`Ici 0` form) on `Ico 0 T` and agreeing at `t = 0`
-agree on `Icc 0 β` for every `β < T`.
 
 set_option linter.unusedVariables false in
-/-- **Anchor-uniform interior local existence radius (the no-blow-up ODE kernel input).**
 
-On a closed interior anchor interval `[a, b] ⊂ (0, T)` there is a single positive window radius
-`r` that works **uniformly over every anchor** `e ∈ [a, b]`: at each such `e` the field `X` admits
-a flow `W : M → ℝ → M` anchored at `e` (`W p e = p`), defined on the window `Ioo (e - r) (e + r)`
-(which stays inside `(0, T)`), carrying `X`'s two-sided bare geometric velocity on the window.
-
-This is the *uniform* local-existence radius — the standard `ε`-of-room input that drives the
-classical no-blow-up continuation argument, **strictly weaker** than the full-horizon orbit it is
-used to build: per anchor it is only the short-window Hartman flow `wch_anchored_window_flow`, whose
-own radius `T'(e)` is anchor-dependent and can shrink to `0` as `e → T`; the content here is the
-uniform-over-anchors *lower bound* `r`.
-
-The proof is the **time-shift reduction**, realised through the *autonomisation* of a single global
-cut-off field.  First `interior_field_global_cutoff_extension_loc` produces one globally-`C∞` field
-`Xt` agreeing with `X` on a window `(lo - δ, hi + δ) ⊇ [a, b]`.  Its autonomisation
-`Ξ := (1, Xt)` on `N := ℝ × M` is a single autonomous `C∞` field, and an integral curve of `Ξ`
-through the point `(e, q)` is exactly an `X`-orbit from `(e, q)` (the time component runs as
-`s ↦ e + s`, the time-shift).  The manifold smooth-dependence theorem
-`local_flow_jointSmooth_and_integralCurve` gives, at every point of `N`, an open neighbourhood on
-which one existence radius works *uniformly*; the compact anchor box `[a, b] ×ˢ univ ⊆ N` is covered
-by finitely many such neighbourhoods, and the minimum of their radii is the single `r` valid for
-every anchor `e` and every base point `q` simultaneously (the opaque per-neighbourhood radius is
-fine — uniformity comes from the finite subcover of *one* field, not from any radius formula).  The
-reparametrisation `t ↦ t - e` re-anchors the orbit at `e` (`W q e = q`) and shifts the bare velocity
-back to `X t (W q t)` on the window.  It does not package any hypothesis: it asserts genuine flow
-existence with a uniform radius (the zero/degenerate window is rejected, `r > 0`). -/
 theorem wch_uniform_interior_window
     (X : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -632,10 +549,6 @@ theorem wch_uniform_interior_window
     have he_b : e ≤ b := he.2
     apply Set.Ioo_subset_Ioo <;> · linarith
 
-/-- The reachability predicate of the no-blow-up continuation: a from-`0` orbit carrying `X`'s
-**bare** geometric velocity (one-sided, `Ici 0`) on the whole half-open sub-horizon `Ico 0 s`.  The
-two-sided interior velocity is not tracked separately: at any interior `t > 0` the set `Ici 0` is a
-neighbourhood, so the one-sided derivative upgrades to the two-sided `HasMFDerivAt`. -/
 private def whzReached (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) (s : ℝ) : Prop :=
   ∃ c : ℝ → M, c 0 = x ∧
     ∀ t ∈ Set.Ico (0:ℝ) s,
@@ -643,18 +556,14 @@ private def whzReached (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) (s : �
         ((1 : ℝ →L[ℝ] ℝ).smulRight (X t (c t)))
 
 set_option linter.unusedSectionVars false in
-/-- Shrinking the reached horizon. -/
+
 private theorem whzReached_mono (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s s' : ℝ}
     (hss : s' ≤ s) (h : whzReached X x s) : whzReached X x s' := by
   obtain ⟨c, hc0, hc⟩ := h
   exact ⟨c, hc0, fun t ht => hc t ⟨ht.1, lt_of_lt_of_le ht.2 hss⟩⟩
 
 set_option linter.unusedSectionVars false in
-/-- **One window-step of the continuation.**  A reached orbit on `Ico 0 s` is extended past an
-interior anchor `e ∈ (0, s)` by an `e`-anchored window flow `W` carrying `X`'s two-sided velocity on
-`Ioo (e - ρ) (e + ρ)`: the stitch `s ↦ if s ≤ e then c s else W (c e) s` reaches `e + ρ`.  The seam
-glue is `wch_piecewise_bare_velocity`; the orbit's left derivative at the interior seam `e` is the
-upgrade of its one-sided velocity (since `Ici 0 ∈ 𝓝 e` for `e > 0`). -/
+
 private theorem whzReached_extend
     (X : ℝ → ∀ x : M, TangentSpace I x) (x : M) {s e ρ : ℝ}
     (he0 : 0 < e) (hes : e < s) (hρ : 0 < ρ)
@@ -687,11 +596,7 @@ private theorem whzReached_extend
       (by linarith) hagree hf1 hf1c hf2
 
 set_option linter.unusedSectionVars false in
-/-- **The finite continuation chain.**  From a seed reaching `δ` and an anchor-uniform window radius
-`r` over `[δ/2, β]`, the orbit reaches `β` in finitely many `r/4`-steps.  Inducting on the step
-count `n`, the orbit reaches `min (δ + n·(r/4)) β`; each step anchors at `e = s - min (r/4) (s/2)`
-(interior to the current horizon and inside `[δ/2, β]`), extending the horizon by `≥ r/4` via
-`whzReached_extend`; a large enough `n` clears `β`. -/
+
 private theorem whzReached_chain
     (X : ℝ → ∀ x : M, TangentSpace I x) (x : M)
     {δ β r : ℝ} (hδ : 0 < δ) (hr : 0 < r)

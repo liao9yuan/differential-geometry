@@ -5,35 +5,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.HomFieldActionIterat
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotExtendCovariantParallelism
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.RankRReadingDominationUniformSup
 
-/-! # Operator-field fibre-norm jet estimates for the valence-dropping drop tower
-
-For a closed (compact, boundaryless) smooth Riemannian manifold `(M, g)` modelled on a real
-inner-product space `E`, this file proves the foundational intrinsic fibre-norm (`rfns`) estimates that
-bound the `covGrad`/`slotExtend` covariant jets `dropTowerPsi g b₀ s₀ C p w k` of a fixed coefficient
-operator field `C : SmoothCcTensor g b₀ s₀` by the section-level iterated covariant gradients
-`iteratedCovGrad g b₀ s₀ j C` of `C` itself, with a polynomial factor that is *independent* of `C`
-(depending only on `Module.finrank ℝ E` and the indices).
-
-## The foundational fibre-norm estimates
-
-* `rfns_rs_eq_sum_componentSq_of_basis` — the valence-generic frame Parseval: the intrinsic fibre norm
-  squared is the double-multi-index sum of squared `g_x`-orthonormal-frame components, for an arbitrary
-  caller-supplied frame at *any* tensor valence (the `(r, s)` lift of
-  `rfns_eq_sum_fiberNormSqSummand_of_orthoFrame`).
-* `rfns_slotExtendFib_eq` / `rfns_slotExtend_eq` — the **passenger-slot scaling**: inserting one leading
-  covariant passenger slot scales the intrinsic fibre norm by the dimension factor `n = finrank ℝ E`:
-  `rfns(slotExtend g r s Φ) x = n · rfns(Φ) x`.
-* `rfns_slotExtendIter_eq` — the iterated form: `rfns(slotExtendIter g r s w Φ) x = n^w · rfns(Φ) x`.
-* `rfns_covGrad_slotExtend_eq` / `rfns_covGrad_slotExtend_scale` — the **gradient/slot-extension
-  fibre-norm commutation**: `covGrad (slotExtend Φ)` and `slotExtend (covGrad Φ)` differ by a
-  transposition of the two leading covariant output slots (the gradient slot and the passenger slot are
-  read in the opposite order), so they have *equal* intrinsic fibre norm; combined with the passenger
-  scaling, `rfns(covGrad (slotExtend Φ)) x = n · rfns(covGrad Φ) x`.  This is the slot-insertion ×
-  differentiation fibre-norm interaction at the heart of the valence-dropping `dropTowerPsi` jet bound.
-
-All fibre norms are the intrinsic Riemannian fibre norm `riemannianFiberNormSq` (`rfns`).
--/
-
 noncomputable section
 
 set_option linter.style.setOption false
@@ -62,14 +33,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
-/-! ## A single `g_x`-orthonormal frame representing the fibre norm at every valence -/
-
-/-- **A single `g_x`-orthonormal frame (as a `Module.Basis`), usable at every tensor valence.**  The
-`stdOrthonormalBasis` of the metric-induced inner product on `TangentSpace I x`, packaged as a
-`Module.Basis bse` with `n = Module.finrank ℝ E` directions and the δ-form Gram.  Unlike
-`exists_orthonormal_frame_riemannianFiberNormSq` (which bundles a per-valence representation), this
-exposes the underlying frame and its `Module.Basis` witness, so the valence-generic Parseval
-`rfns_rs_eq_sum_componentSq_of_basis` can be applied at *two different valences with the same frame*. -/
 private lemma exists_orthoFrame_basis (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -102,13 +65,6 @@ private lemma exists_orthoFrame_basis (g : SmoothRiemannianMetric I M) (x : M) :
   refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
-/-- **The intrinsic `(r, s)` fibre norm is the frame component-square sum in any `g_x`-orthonormal
-frame (valence-generic, public).**  For any `g_x`-orthonormal frame `e` packaged as a `Module.Basis
-bse` with `n = Module.finrank ℝ E`, the intrinsic fibre norm squared is the double-multi-index sum of
-squared frame components.  The valence-generic Parseval (the rank-`(r, s)` lift of
-`rfns_eq_sum_fiberNormSqSummand_of_orthoFrame`), obtained from the bilinear frame inner-product bridge
-`tensorInnerPointwise_eq_sum_componentS_mul` (diagonal) through
-`riemannianFiberNormSq_eq_tensorInnerPointwise`. -/
 theorem rfns_rs_eq_sum_componentSq_of_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -123,14 +79,6 @@ theorem rfns_rs_eq_sum_componentSq_of_basis
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
-/-! ## The passenger-slot scaling of the fibre norm -/
-
-/-- **The slot-`0` reading frame component of a slot-extended fibre operator.**  For a `g_x`-orthonormal
-frame `e`, the `(K', J')`-frame component of the slot-extended fibre operator `slotExtendFib g r s x A`
-(an `(r + 1, s + 1)`-tensor) factors as the Kronecker delta `[K' 0 = J' 0]` times the `(K' ∘ succ,
-J' ∘ succ)` frame component of the rank-`(r, s)` operator `A`: the leading passenger slot is read
-identically on source and target (`slotExtendFib_apply_eval`), and orthonormality of `e` selects the
-diagonal `K' 0 = J' 0`. -/
 private lemma fiberNormSqComponent_slotExtendFib_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x)
@@ -199,15 +147,6 @@ private lemma fiberNormSqComponent_slotExtendFib_eq
 
   congr 1
 
-/-- **The passenger-slot scaling of the fibre norm (fibre level).**  Inserting one leading covariant
-passenger slot scales the intrinsic fibre norm by the dimension factor `n = Module.finrank ℝ E`:
-```
-rfns(slotExtendFib g r s x A) = n · rfns(A).
-```
-Parseval-expand both fibre norms in any `g_x`-orthonormal frame `e`; the slot-extended component factors
-as `[K' 0 = J' 0] · A_{K' ∘ succ, J' ∘ succ}` (`fiberNormSqComponent_slotExtendFib_eq`), so squaring and
-summing collapses the Kronecker delta (`∑_{K' 0} [K' 0 = J' 0] = 1` against the leading `J'`-index, and
-the residual leading `J'`-index ranges over `n` values, contributing the factor `n`). -/
 private lemma rfns_slotExtendFib_eq_frame
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x)
@@ -275,15 +214,6 @@ private lemma rfns_slotExtendFib_eq_frame
 
   rw [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
 
-/-- **The passenger-slot scaling of the fibre norm (fibre level).**  Inserting one leading covariant
-passenger slot scales the intrinsic fibre norm by the dimension factor `n = Module.finrank ℝ E`:
-```
-rfns(slotExtendFib g r s x A) = n · rfns(A).
-```
-Parseval-expand both fibre norms in any `g_x`-orthonormal frame `e`; the slot-extended component factors
-as `[K' 0 = J' 0] · A_{K' ∘ succ, J' ∘ succ}` (`fiberNormSqComponent_slotExtendFib_eq`), so squaring and
-summing collapses the Kronecker delta (`∑_{K' 0} [K' 0 = J' 0] = 1` against the leading `J'`-index, and
-the residual leading `J'`-index ranges over `n` values, contributing the factor `n`). -/
 theorem rfns_slotExtendFib_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
@@ -294,14 +224,6 @@ theorem rfns_slotExtendFib_eq
   obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis (I := I) (M := M) g x
   exact rfns_slotExtendFib_eq_frame (I := I) (M := M) g r s x A e bse rfl hbse horth
 
-/-- **The passenger-slot scaling of the fibre norm of the slot-extended section.**  At every base point
-`x`, the intrinsic fibre norm of the slot-extension `slotExtend g r s Φ` of an operator field `Φ` is
-`n = Module.finrank ℝ E` times the fibre norm of `Φ`:
-```
-rfns(slotExtend g r s Φ)(x) = n · rfns(Φ)(x).
-```
-The section value of `slotExtend Φ` at `x` is `slotExtendFib g r s x (Φ x)` (`slotExtend_toSection`), so
-this is the section-level reading of `rfns_slotExtendFib_eq`. -/
 theorem rfns_slotExtend_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (r + 1) (s + 1) x
@@ -312,21 +234,6 @@ theorem rfns_slotExtend_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
   exact rfns_slotExtendFib_eq (I := I) (M := M) g r s x
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
 
-/-! ## The gradient/slot-extension fibre-norm commutation
-
-The covariant gradient does NOT commute with the leading-passenger-slot extension on the nose: both
-`covGrad (slotExtend Φ)` and `slotExtend (covGrad Φ)` are `(r + 1, s + 2)`-tensor fields, but they read
-the new gradient slot and the new passenger slot in the OPPOSITE order — they differ by a transposition
-of the two leading covariant (output) slots.  The intrinsic fibre norm is invariant under any
-permutation of the covariant slots, so they have the SAME fibre norm; combined with the passenger-slot
-scaling, `rfns(covGrad (slotExtend Φ)) = n · rfns(covGrad Φ)`. -/
-
-/-- **The leading-output-slot frame component of `covGrad (slotExtend Φ)` is the slot-`0,1`-swapped
-component of `slotExtend (covGrad Φ)`.**  For a `g_x`-orthonormal frame `e`, the `(K', J')`-frame
-component of `covGrad (slotExtend Φ)` at `x` equals the `(K', J' ∘ swap 0 1)`-frame component of
-`slotExtend (covGrad Φ)`: both read the same underlying directional data, with the gradient and
-passenger output slots transposed (`covGrad_toSection_apply_eval`, `slotExtendFib_apply_eval`,
-`tensorCovDerivAt_slotExtend_eq`). -/
 private lemma fiberNormSqComponent_covGrad_slotExtend_eq_swap
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (Φ : SmoothCcTensor g r s)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -441,15 +348,6 @@ private lemma fiberNormSqComponent_covGrad_slotExtend_eq_swap
     rw [hdir, htail]
   rw [hLHS, hRHS]
 
-/-- **The covariant gradient and the leading-passenger-slot extension commute up to fibre norm.**  At
-every base point `x`, `covGrad (slotExtend Φ)` and `slotExtend (covGrad Φ)` — which differ by a
-transposition of the two leading covariant output slots — have equal intrinsic fibre norm:
-```
-rfns(covGrad (slotExtend g r s Φ))(x) = rfns(slotExtend g r (s + 1) (covGrad g r s Φ))(x).
-```
-Parseval-expand both in a `g_x`-orthonormal frame; each component of the left side is the slot-`0,1`-
-swapped component of the right (`fiberNormSqComponent_covGrad_slotExtend_eq_swap`), and the swap is a
-bijective reindexing of the `J'`-sum, hence leaves the component-square sum unchanged. -/
 theorem rfns_covGrad_slotExtend_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (r + 1) (s + 1 + 1) x
@@ -485,14 +383,6 @@ theorem rfns_covGrad_slotExtend_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [heqv]
   rw [fiberNormSqComponent_covGrad_slotExtend_eq_swap (I := I) (M := M) g r s x Φ e K' J']
 
-/-- **The covariant gradient of a slot-extension scales the fibre norm by `n` over the gradient.**  At
-every base point `x`,
-```
-rfns(covGrad (slotExtend g r s Φ))(x) = n · rfns(covGrad g r s Φ)(x),   n = Module.finrank ℝ E.
-```
-Compose `rfns_covGrad_slotExtend_eq` (the fibre norm is insensitive to the slot transposition between
-`covGrad (slotExtend Φ)` and `slotExtend (covGrad Φ)`) with the passenger-slot scaling
-`rfns_slotExtend_eq` applied to `covGrad Φ`. -/
 theorem rfns_covGrad_slotExtend_scale (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (r + 1) (s + 1 + 1) x
@@ -504,11 +394,6 @@ theorem rfns_covGrad_slotExtend_scale (g : SmoothRiemannianMetric I M) (r s : �
   rw [rfns_covGrad_slotExtend_eq (I := I) (M := M) g r s Φ x]
   exact rfns_slotExtend_eq (I := I) (M := M) g r (s + 1) (covGrad (I := I) (M := M) g r s Φ) x
 
-/-- **The `w`-fold passenger-slot extension scales the fibre norm by `n^w`.**  At every base point `x`,
-```
-rfns(slotExtendIter g r s w Φ)(x) = n^w · rfns(Φ)(x),   n = Module.finrank ℝ E.
-```
-Induction on `w`, each step applying the single passenger-slot scaling `rfns_slotExtend_eq`. -/
 theorem rfns_slotExtendIter_eq (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∀ (w : ℕ) (Φ : SmoothCcTensor g r s) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g (r + w) (s + w) x
@@ -531,19 +416,6 @@ theorem rfns_slotExtendIter_eq (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       rw [pow_succ]
       ring
 
-/-! ## General-valence covariant-slot permutation invariance of the fibre norm
-
-The intrinsic fibre norm of an `(r, s)`-tensor is invariant under any permutation of its `s` covariant
-output slots.  This is the general-valence `(r, s)` lift of the rank-`0` slot-permutation invariance
-`riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr`; here the contravariant rank `r` is
-arbitrary (untouched by the output-slot permutation), which is exactly what the iterated
-slot-extension fibre-norm scaling needs when it must commute an inner covariant gradient past the
-slot-extension's covariant-output-slot transposition at positive contravariant rank. -/
-
-/-- **The covariant-slot permutation of an `(r, s)`-tensor fibre.**  Post-compose the output
-`(0, s)`-fibre `Tensor0SSpace s I x` of the `(r, s)`-tensor `T` (a continuous linear map from
-`(0, r)`-fibres) with the isometric slot reindexing `domDomCongr σ`.  The result is the `(r, s)`-tensor
-whose `(K, J)`-frame component is the `(K, J ∘ σ)`-component of `T`. -/
 def rsDomDomCongr {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T : TensorRSSpace r s I x) : TensorRSSpace r s I x :=
   TensorRSSpace.ofCLM
@@ -553,8 +425,6 @@ def rsDomDomCongr {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
           ((tensor0SSpace_continuousLinearEquiv s x).toContinuousLinearMap))).comp
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T))
 
-/-- **The model form of `rsDomDomCongr σ T` on a `(0, r)`-tensor `d` is the slot-reindexing of the
-model form of `T d`.** -/
 lemma toModel_rsDomDomCongr_apply {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) :
     Tensor0SSpace.toModel
@@ -570,8 +440,6 @@ lemma toModel_rsDomDomCongr_apply {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     LinearIsometryEquiv.coe_toContinuousLinearEquiv]
   rfl
 
-/-- **Evaluation of the slot-permuted tensor.**  On a `(0, r)`-tensor `d` and a tangent tuple `v`,
-`rsDomDomCongr σ T` reads `T d` on the slot-reindexed tuple `v ∘ σ`. -/
 lemma rsDomDomCongr_apply_eval {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) (v : Fin s → TangentSpace I x) :
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from rsDomDomCongr σ T) d v =
@@ -582,8 +450,6 @@ lemma rsDomDomCongr_apply_eval {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
       (y : Tensor0SSpace s I x) w = Tensor0SSpace.toModel y w := fun y w => rfl
   rw [hfib, hL, ContinuousMultilinearMap.domDomCongr_apply, ← hfib]
 
-/-- **Composition of two covariant-slot permutations.**  `rsDomDomCongr σ (rsDomDomCongr τ T) =
-rsDomDomCongr (τ.trans σ) T`. -/
 lemma rsDomDomCongr_rsDomDomCongr {r s : ℕ} {x : M} (σ τ : Equiv.Perm (Fin s))
     (T : TensorRSSpace r s I x) :
     rsDomDomCongr (I := I) (M := M) σ (rsDomDomCongr (I := I) (M := M) τ T) =
@@ -601,9 +467,6 @@ lemma rsDomDomCongr_rsDomDomCongr {r s : ℕ} {x : M} (σ τ : Equiv.Perm (Fin s
     rsDomDomCongr_apply_eval (I := I) (M := M) (τ.trans σ) T d v]
   rfl
 
-/-- **The frame component of a slot-permuted tensor reindexes the output multi-index.**  For a
-`g_x`-orthonormal frame `e`, the `(K, J)`-frame component of `rsDomDomCongr σ T` is the
-`(K, J ∘ σ)`-frame component of `T` (the slot reindexing acts on the output-slot reading). -/
 lemma fiberNormSqComponent_rsDomDomCongr {r s : ℕ} (g : SmoothRiemannianMetric I M) (x : M)
     (σ : Equiv.Perm (Fin s)) (T : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin r → Fin n) (J : Fin s → Fin n) :
@@ -612,15 +475,6 @@ lemma fiberNormSqComponent_rsDomDomCongr {r s : ℕ} (g : SmoothRiemannianMetric
   rw [fiberNormSqComponent, fiberNormSqComponent]
   exact rsDomDomCongr_apply_eval (I := I) (M := M) σ T _ (fun k => e (J k))
 
-/-- **General-valence covariant-slot permutation invariance of the intrinsic fibre norm.**  For any
-permutation `σ : Equiv.Perm (Fin s)` of the `s` covariant output slots and any `(r, s)`-tensor `T`,
-```
-rfns(rsDomDomCongr σ T)(x) = rfns(T)(x).
-```
-Parseval-expand both fibre norms in a `g_x`-orthonormal frame (`rfns_rs_eq_sum_componentSq_of_basis`);
-the `(K, J)`-component of `rsDomDomCongr σ T` is the `(K, J ∘ σ)`-component of `T`
-(`fiberNormSqComponent_rsDomDomCongr`), and `J ↦ J ∘ σ` is a bijective reindexing of the inner
-`J`-sum, hence leaves the component-square sum unchanged.  The contravariant index `K` is untouched. -/
 theorem riemannianFiberNormSq_domDomCongr_covariant
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (σ : Equiv.Perm (Fin s)) (T : TensorRSSpace r s I x) :
@@ -646,11 +500,8 @@ theorem riemannianFiberNormSq_domDomCongr_covariant
   rw [heqv]
   rw [fiberNormSqComponent_rsDomDomCongr (I := I) (M := M) g x σ T e K J]
 
-/-! ## Cast / commute bookkeeping for the diagonal product grid (generic contravariant rank) -/
-
 set_option linter.unusedSectionVars false in
-/-- **`rfns` is invariant under a `SmoothCcTensor` rank-cast (heterogeneous form, generic
-contravariant rank `r`).** -/
+
 private theorem rfns_toSection_heq_congr_rs (g : SmoothRiemannianMetric I M)
     {r a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
     (hYZ : HEq Y Z) (x : M) :
@@ -659,9 +510,7 @@ private theorem rfns_toSection_heq_congr_rs (g : SmoothRiemannianMetric I M)
   subst h; rw [eq_of_heq hYZ]
 
 set_option linter.unusedSectionVars false in
-/-- **Front-commuting one covariant gradient through the iterated gradient (rfns form, generic
-contravariant rank `r`).**  `rfns(∇^m(∇Φ))` at valence `(r, (s + 1) + m)` equals `rfns(∇^{m+1}Φ)` at
-valence `(r, s + (m + 1))`; the generic-rank instance of `rfns_iteratedCovGrad_covGrad_comm`. -/
+
 theorem rfns_iteratedCovGrad_covGrad_comm_rs (g : SmoothRiemannianMetric I M)
     (r s m : ℕ) (Φ : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r ((s + 1) + m) x
@@ -671,23 +520,6 @@ theorem rfns_iteratedCovGrad_covGrad_comm_rs (g : SmoothRiemannianMetric I M)
   rfns_toSection_heq_congr_rs g (by omega : (s + 1) + m = s + (m + 1))
     (iteratedCovGrad_covGrad_comm_heq' g r s m Φ) x
 
-/-! ## The iterated slot-extension fibre-norm bound
-
-Iterating the single-step gradient/slot-extension fibre-norm scaling `rfns_covGrad_slotExtend_scale`
-over the gradient order, the covariant slot permutation invariance `riemannianFiberNormSq_domDomCongr_covariant`
-absorbs the order-dependent transposition of the passenger slot through the accumulated gradient slots
-(needed because the contravariant rank `r + 1 > 0` makes the rank-`0` naturality inapplicable). -/
-
-/-- **Covariant gradient commutes with the leading-passenger-slot extension up to a leading-slot
-transposition (section level).**  At every base point `x`, the section value of `covGrad (slotExtend
-g r s Φ)` is the slot-`0,1`-transposition (`rsDomDomCongr (Equiv.swap 0 1)`) of the section value of
-`slotExtend g r (s + 1) (covGrad g r s Φ)`:
-```
-(covGrad (slotExtend Φ)).toSection x = rsDomDomCongr (swap 0 1) ((slotExtend (covGrad Φ)).toSection x).
-```
-Both sides are `(r + 1, (s + 1) + 1)`-tensors reading the gradient slot and the new passenger slot in
-the opposite order; the section identity is the `toModel`-level reading of `covGrad_toSection_apply_eval`,
-`tensorCovDerivAt_slotExtend_eq` and `slotExtendFib_apply_eval`. -/
 private lemma covGrad_slotExtend_toSection_rsDomDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (Φ : SmoothCcTensor g r s) (x : M) :
     (covGrad (I := I) (M := M) g (r + 1) (s + 1)
@@ -757,7 +589,6 @@ private lemma covGrad_slotExtend_toSection_rsDomDomCongr
       exact fun h => Fin.succ_ne_zero _ (Fin.succ_injective _ h)
   rw [hdir, htail]
 
-/-- **The covariant gradient commutes with the covariant-rank cast `castRankCc_db`.** -/
 private lemma covGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
     (W : SmoothCcTensor g r a) :
     covGrad (I := I) (M := M) g r b
@@ -766,16 +597,10 @@ private lemma covGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {
         (covGrad (I := I) (M := M) g r a W) := by
   subst h; rfl
 
-/-- **A leading-slot transposition is heterogeneously equal across a covariant-rank cast.** -/
 private lemma heq_swap_zero_one_of_eq {p q : ℕ} (h : p = q) :
     HEq (Equiv.swap (0 : Fin (p + 1)) 1) (Equiv.swap (0 : Fin (q + 1)) 1) := by
   subst h; rfl
 
-/-- **Succ-step cast/transposition bookkeeping.**  Given two `(r + 1, a)`-tensors `P, Q` related at
-the section level by the leading-slot transposition `rsDomDomCongr swapA` (helper 1), casting both up
-along `h : a = b` and reindexing by `σ̂` on the cast valence composes the transposition into
-`swapB.trans σ̂`.  Proven by `subst h` (collapsing the cast and identifying `swapA = swapB`), then the
-permutation composition `rsDomDomCongr_rsDomDomCongr`. -/
 private lemma succ_step_cast_transposition_eq {r a b : ℕ} (h : a = b)
     (g : SmoothRiemannianMetric I M)
     (P Q : SmoothCcTensor g (r + 1) a) (x : M)
@@ -885,23 +710,6 @@ lemma exists_iteratedCovGrad_slotExtend_rsDomDomCongr
         (covGrad_slotExtend_toSection_rsDomDomCongr (I := I) (M := M) g r (s + i)
           (iteratedCovGrad (I := I) g r s i Φ) x)
 
-/-- **The iterated slot-extension fibre-norm bound.**  At every base point `x` and gradient order `i`,
-inserting one leading covariant passenger slot scales the iterated covariant-gradient fibre norm by at
-most the dimension factor `n = Module.finrank ℝ E`:
-```
-rfns(∇^i (slotExtend g r s Φ))(x) ≤ n · rfns(∇^i Φ)(x).
-```
-The single-step `i = 0`/`i = 1` instances are `rfns_slotExtend_eq` / `rfns_covGrad_slotExtend_scale`;
-the iterate commutes the inner covariant gradient `∇^i` past the slot-extension's covariant-output-slot
-transposition, whose fibre norm is invariant by `riemannianFiberNormSq_domDomCongr_covariant` (the
-general-valence slot-permutation invariance, applicable at the positive contravariant rank `r + 1`),
-then applies the passenger scaling `rfns_slotExtend_eq` to `∇^i Φ`.
-
-This is the section-level slot-extension jet scaling consumed by the `appCc` diagonal product grid; it
-is the general-valence analogue of the rank-`0` slot-permutation jet invariance
-`riemannianFiberNormSq_iteratedCovGrad_eq_of_section_domDomCongr`, lifted to positive contravariant
-rank through `riemannianFiberNormSq_domDomCongr_covariant` and the general-rank covariant-gradient
-slot-permutation naturality `covGrad_rs_toModel_domDomCongr`. -/
 theorem rfns_iteratedCovGrad_slotExtend_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (i : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g (r + 1) ((s + 1) + i) x
@@ -926,33 +734,13 @@ theorem rfns_iteratedCovGrad_slotExtend_le (g : SmoothRiemannianMetric I M) (r s
       (slotExtend (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ))).symm x]
   rw [rfns_slotExtend_eq (I := I) (M := M) g r (s + i) (iteratedCovGrad (I := I) g r s i Φ) x]
 
-/-! ## The `appCc` diagonal product grid
-
-The covariant Leibniz diagonal product grid for the operator-field action: the iterated covariant
-gradient `∇^j (appCc C W)` of the contracted action of a coefficient field `C` on a section `W` is
-bounded, fibrewise, by the diagonal product of the `C`-jets and the `W`-jets,
-```
-rfns(∇^j (appCc C W))(x) ≤ Gdiag j · ∑_{i ≤ j} rfns(∇^i C)(x) · ∑_{l ≤ j − i} rfns(∇^l W)(x),
-```
-with `Gdiag j = (2 (n + 1))^j`, `n = Module.finrank ℝ E`.  This is the chart-jet-free Moser-tame grid
-fed to the integrated Gagliardo–Nirenberg two-arm engine. -/
-
-/-- **The per-order diagonal product-grid constant `Gdiag j = (2 (n + 1))^j`.** -/
 def appCcGdiag (j : ℕ) : ℝ := (2 * ((Module.finrank ℝ E : ℝ) + 1)) ^ j
 
 set_option linter.unusedSectionVars false in
-/-- `appCcGdiag` is nonnegative. -/
+
 theorem appCcGdiag_nonneg (j : ℕ) : 0 ≤ appCcGdiag (E := E) j := by
   rw [appCcGdiag]; positivity
 
-/-- **The pure combinatorial diagonal-grid step inequality.**  For nonnegative jet-coefficient
-families `cΦ, cW : ℕ → ℝ` and dimension factor `n ≥ 0`, the gradient-step combination of the
-`Φ`-shifted and `W`-shifted diagonal grids is dominated by `(n + 1)` times the order-`(j + 1)`
-diagonal grid:
-```
-∑_{i≤j} cΦ(i+1)·(∑_{l≤j-i} cW l) + n · ∑_{i≤j} cΦ(i)·(∑_{l≤j-i} cW(l+1))
-  ≤ (n + 1) · ∑_{i≤j+1} cΦ(i)·(∑_{l≤j+1-i} cW l).
-``` -/
 private lemma diagonalGrid_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ) (cΦ cW : ℕ → ℝ)
     (hcΦ : ∀ i, 0 ≤ cΦ i) (hcW : ∀ l, 0 ≤ cW l) :
     (∑ i ∈ Finset.range (j + 1), cΦ (i + 1) * ∑ l ∈ Finset.range (j + 1 - i), cW l) +
@@ -997,19 +785,7 @@ private lemma diagonalGrid_step_le (n : ℝ) (hn : 0 ≤ n) (j : ℕ) (cΦ cW : 
     _ = (n + 1) * D := by ring
 
 set_option maxHeartbeats 6400000 in
-/-- **The generic-rank diagonal product grid for the operator-field action `appCcRS`.**  For an
-operator field `Φ : SmoothCcTensor g a b` and a contracted section `W : SmoothCcTensor g 0 a`, the
-iterated covariant gradient of `appCcRS g 0 a b Φ W` is bounded fibrewise by the diagonal product of the
-`Φ`-jets (at contravariant valence `a`) and the `W`-jets:
-```
-rfns(∇^j (appCcRS Φ W))(x) ≤ Gdiag j · ∑_{i ≤ j} rfns(∇^i Φ)(x) · ∑_{l ≤ j − i} rfns(∇^l W)(x).
-```
-Induction on `j`: the single-step operator-field covariant product rule `covGrad_appCcRS_eq` splits the
-gradient into the `Φ`-differentiated arm `appCcRS (∇Φ) W` and the `slotExtend`-passenger arm
-`appCcRS (slotExtend Φ) (∇W)`; `riemannianFiberNormSq_add_le` separates them, the inductive hypothesis
-(at `(a, b + 1)` and `(a + 1, b + 1)`) bounds each, the front-commute `rfns_iteratedCovGrad_covGrad_comm_rs`
-reindexes the differentiated jets, and the slot-extension scaling `rfns_iteratedCovGrad_slotExtend_le`
-collapses the passenger arm's `Φ`-jets back to the `∇^i Φ` jets with the dimension factor `n`. -/
+
 theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (g : SmoothRiemannianMetric I M) :
     ∀ (j a b : ℕ) (Φ : SmoothCcTensor g a b) (W : SmoothCcTensor g 0 a) (x : M),
       riemannianFiberNormSq (I := I) (M := M) g 0 (b + j) x
@@ -1139,24 +915,6 @@ theorem rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (g : SmoothRiemannia
       nlinarith [mul_le_mul_of_nonneg_left hstep (by positivity : (0:ℝ) ≤ 2 * Gj), hGj_nn',
         hstep]
 
-/-- **The `appCc` diagonal product grid (the headline pointwise Moser-tame grid).**
-
-For a fixed coefficient operator field `C : SmoothCcTensor g b₀ s₀` (covariant source width `b₀`,
-target `s₀`) acting on a section `W : SmoothCcTensor g 0 b₀`, at every base point `x` and gradient
-order `j` the iterated covariant gradient of the contracted action `appCc C W` is bounded by the
-**diagonal product** of the `C`-jets (at contravariant valence `b₀`) and the `W`-jets:
-```
-rfns(∇^j (appCc C W))(x) ≤ Gdiag j · ∑_{i ≤ j} rfns(∇^i C)(x) · ∑_{l ≤ j − i} rfns(∇^l W)(x),
-```
-with `Gdiag j = (2 (n + 1))^j`, `n = Module.finrank ℝ E`.  This is the diagonal companion of the
-single-sum drop bound `appCc_iteratedCovGrad_drop_singleSum_le`: there the coefficient is collapsed
-into an `L^∞` window envelope, here it carries its own covariant-`L²` jets, so the apex top-order
-Ricci–DeTurck-arm leaf can feed it into the integrated Gagliardo–Nirenberg two-arm EXTREMES engine
-`exists_integrated_iteratedCovGrad_diagonalProductGrid_twoArm_le` with each arm carrying one factor's
-full covariant-`L²` jet scale against the other factor's order-`0` `C⁰` sup.
-
-The rank-`0` reading of the generic-valence diagonal grid
-`rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le` through `appCcRS_zero_eq_appCc`. -/
 theorem appCc_iteratedCovGrad_diagonalProductGrid_le (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (W : SmoothCcTensor g 0 b₀) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 (s₀ + j) x
@@ -1170,6 +928,242 @@ theorem appCc_iteratedCovGrad_diagonalProductGrid_le (g : SmoothRiemannianMetric
                 ((iteratedCovGrad (I := I) g 0 b₀ l W).toSection x) := by
   rw [← appCcRS_zero_eq_appCc (I := I) (M := M) g b₀ s₀ C W]
   exact rfns_iteratedCovGrad_appCcRS_diagonalProductGrid_le (I := I) (M := M) g j b₀ s₀ C W x
+
+private lemma sum_finZeroFun_eq {N : ℕ} (f : (Fin 0 → Fin N) → ℝ) :
+    ∑ K : Fin 0 → Fin N, f K = f (fun k : Fin 0 => k.elim0) := by
+  refine Finset.sum_eq_single (fun k : Fin 0 => k.elim0) ?_ ?_
+  · exact fun K _ hK => absurd (funext (fun k : Fin 0 => k.elim0)) hK
+  · exact fun h => absurd (Finset.mem_univ _) h
+
+private lemma sum_consEquiv {N t : ℕ} (F : (Fin (t + 1) → Fin N) → ℝ) :
+    ∑ J : Fin (t + 1) → Fin N, F J =
+      ∑ j0 : Fin N, ∑ J' : Fin t → Fin N, F (Fin.cons j0 J') := by
+  rw [← Fintype.sum_equiv (Fin.consEquiv (fun _ : Fin (t + 1) => Fin N))
+      (fun pr : Fin N × (Fin t → Fin N) => F (Fin.cons pr.1 pr.2)) F
+      (fun pr => by simp [Fin.consEquiv])]
+  rw [Fintype.sum_prod_type]
+
+set_option linter.unusedSectionVars false in
+
+private lemma tensor00Scalar_coframe0_eq_one (g : SmoothRiemannianMetric I M) (x : M)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (K : Fin 0 → Fin N) :
+    tensor00Scalar (I := I) (M := M) x (coframeS (I := I) (M := M) g x 0 e K) = 1 := by
+  rw [tensor00Scalar_apply (I := I) (M := M) x _ (fun k : Fin 0 => k.elim0),
+    coframeS_apply (I := I) (M := M) g x 0 e K (fun k : Fin 0 => k.elim0)]
+  simp
+
+set_option linter.unusedSectionVars false in
+
+private lemma rfns_zero_eq_sum_componentSq
+    (g : SmoothRiemannianMetric I M) (x : M) (m : ℕ) (S : TensorRSSpace 0 m I x)
+    {N : ℕ} (e : Fin N → TangentSpace I x)
+    (bse : Module.Basis (Fin N) ℝ (TangentSpace I x))
+    (hn : N = Module.finrank ℝ E) (hbse : ∀ i : Fin N, bse i = e i)
+    (horth : ∀ a b : Fin N, g.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 m x S =
+      ∑ J : Fin m → Fin N,
+        (fiberNormSqComponent (I := I) (M := M) g x 0 m S N e (fun k : Fin 0 => k.elim0) J) ^ 2 := by
+  rw [rfns_rs_eq_sum_componentSq_of_basis (I := I) (M := M) g 0 m x S e bse hn hbse horth]
+  rw [sum_finZeroFun_eq]
+
+private noncomputable def appCcSlice (g : SmoothRiemannianMetric I M) (r : ℕ) (x : M)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (W : SmoothCcTensor g 0 (r + 1))
+    (j0 : Fin N) : TensorRSSpace 0 r I x :=
+  (tensor00Scalar (I := I) (M := M) x).smulRight
+    (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x
+      ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+        (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+      (show E from e j0))
+
+set_option linter.unusedSectionVars false in
+
+private lemma appCcSlice_apply_coframe0 (g : SmoothRiemannianMetric I M) (r : ℕ) (x : M)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (W : SmoothCcTensor g 0 (r + 1))
+    (j0 : Fin N) (K : Fin 0 → Fin N) :
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from appCcSlice (I := I) (M := M) g r x e W j0)
+        (coframeS (I := I) (M := M) g x 0 e K) =
+      tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+          (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+        (show E from e j0) := by
+  rw [appCcSlice, ContinuousLinearMap.smulRight_apply,
+    tensor00Scalar_coframe0_eq_one (I := I) (M := M) g x e K, one_smul]
+
+set_option linter.unusedSectionVars false in
+
+private lemma fiberNormSqComponent_zero_eq_toModel
+    (g : SmoothRiemannianMetric I M) (x : M) (m : ℕ) (S : TensorRSSpace 0 m I x)
+    {N : ℕ} (e : Fin N → TangentSpace I x) (K : Fin 0 → Fin N) (J : Fin m → Fin N) :
+    fiberNormSqComponent (I := I) (M := M) g x 0 m S N e K J =
+      Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace m I x from S)
+          (coframeS (I := I) (M := M) g x 0 e K))
+        (fun k => (show E from e (J k))) := rfl
+
+set_option maxHeartbeats 6400000 in
+
+theorem riemannianFiberNormSq_appCc_slotExtend_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 (r + 1)) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+        ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+          (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) ≤
+      riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+        riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
+  classical
+  obtain ⟨e, bse, hbse, horth⟩ := exists_orthoFrame_basis (I := I) (M := M) g x
+  have hdiamond : ∀ (j0 : Fin (Module.finrank ℝ E))
+      (J' : Fin s → Fin (Module.finrank ℝ E)),
+      fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1)
+          ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g r s Φ) W).toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 J') =
+        fiberNormSqComponent (I := I) (M := M) g x 0 s
+          (show TensorRSSpace 0 s I x from
+            (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                appCcSlice (I := I) (M := M) g r x e W j0))
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) J' := by
+    intro j0 J'
+    have hL : fiberNormSqComponent (I := I) (M := M) g x 0 (s + 1)
+          ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g r s Φ) W).toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 J') =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+            ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x)
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+                (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+              (show E from e j0)))
+          (fun k : Fin s => (show E from e (J' k))) := by
+      rw [fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x (s + 1)
+        ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+          (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) e (fun k : Fin 0 => k.elim0)
+        (Fin.cons j0 J')]
+      rw [appCc_toSection, slotExtend_toSection, ContinuousLinearMap.comp_apply]
+      rw [show (fun k => (show E from
+            e ((Fin.cons j0 J' : Fin (s + 1) → Fin (Module.finrank ℝ E)) k))) =
+          Fin.cons (show E from e j0) (fun k : Fin s => (show E from e (J' k))) from by
+        funext k
+        rcases Fin.eq_zero_or_eq_succ k with rfl | ⟨i, rfl⟩
+        · simp only [Fin.cons_zero]
+        · simp only [Fin.cons_succ]]
+      rw [slotExtendFib_apply_eval (I := I) (M := M) g r s x
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+          (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+        (show E from e j0) (fun k : Fin s => (show E from e (J' k)))]
+    have hR : fiberNormSqComponent (I := I) (M := M) g x 0 s
+          (show TensorRSSpace 0 s I x from
+            (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+              (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                appCcSlice (I := I) (M := M) g r x e W j0))
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) J' =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)
+            ((tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x)
+              ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+                (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+              (show E from e j0)))
+          (fun k : Fin s => (show E from e (J' k))) := by
+      rw [fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x s
+        (show TensorRSSpace 0 s I x from
+          (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+            (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+              appCcSlice (I := I) (M := M) g r x e W j0)) e (fun k : Fin 0 => k.elim0) J']
+      rw [ContinuousLinearMap.comp_apply,
+        appCcSlice_apply_coframe0 (I := I) (M := M) g r x e W j0 (fun k : Fin 0 => k.elim0)]
+    rw [hL, hR]
+  have hVW : ∀ (j0 : Fin (Module.finrank ℝ E))
+      (P : Fin r → Fin (Module.finrank ℝ E)),
+      fiberNormSqComponent (I := I) (M := M) g x 0 r
+          (appCcSlice (I := I) (M := M) g r x e W j0)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) P =
+        fiberNormSqComponent (I := I) (M := M) g x 0 (r + 1) (W.toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 P) := by
+    intro j0 P
+    have hL : fiberNormSqComponent (I := I) (M := M) g x 0 r
+          (appCcSlice (I := I) (M := M) g r x e W j0)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) P =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+            (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+          (Fin.cons (show E from e j0) (fun k : Fin r => (show E from e (P k)))) := by
+      rw [fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x r
+        (appCcSlice (I := I) (M := M) g r x e W j0) e (fun k : Fin 0 => k.elim0) P]
+      rw [appCcSlice_apply_coframe0 (I := I) (M := M) g r x e W j0 (fun k : Fin 0 => k.elim0)]
+      rw [tensor0S_curry_apply_eval
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+          (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+        (show E from e j0) (fun k : Fin r => (show E from e (P k)))]
+    have hR : fiberNormSqComponent (I := I) (M := M) g x 0 (r + 1) (W.toSection x)
+          (Module.finrank ℝ E) e (fun k : Fin 0 => k.elim0) (Fin.cons j0 P) =
+        Tensor0SSpace.toModel
+          ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (r + 1) I x from W.toSection x)
+            (coframeS (I := I) (M := M) g x 0 e (fun k : Fin 0 => k.elim0)))
+          (fun k => (show E from
+            e ((Fin.cons j0 P : Fin (r + 1) → Fin (Module.finrank ℝ E)) k))) :=
+      fiberNormSqComponent_zero_eq_toModel (I := I) (M := M) g x (r + 1) (W.toSection x)
+        e (fun k : Fin 0 => k.elim0) (Fin.cons j0 P)
+    rw [hL, hR]
+    congr 1
+    funext k
+    rcases Fin.eq_zero_or_eq_succ k with rfl | ⟨i, rfl⟩
+    · simp only [Fin.cons_zero]
+    · simp only [Fin.cons_succ]
+  have hLHS : riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+            (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) =
+        ∑ j0 : Fin (Module.finrank ℝ E),
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (show TensorRSSpace 0 s I x from
+              (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                  appCcSlice (I := I) (M := M) g r x e W j0)) := by
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x (s + 1)
+      ((appCc (I := I) (M := M) g (r + 1) (s + 1)
+        (slotExtend (I := I) (M := M) g r s Φ) W).toSection x) e bse rfl hbse horth]
+    rw [sum_consEquiv]
+    refine Finset.sum_congr rfl (fun j0 _ => ?_)
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x s
+      (show TensorRSSpace 0 s I x from
+        (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+          (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+            appCcSlice (I := I) (M := M) g r x e W j0)) e bse rfl hbse horth]
+    refine Finset.sum_congr rfl (fun J' _ => ?_)
+    rw [hdiamond j0 J']
+  have hsum : ∑ j0 : Fin (Module.finrank ℝ E),
+        riemannianFiberNormSq (I := I) (M := M) g 0 r x
+          (appCcSlice (I := I) (M := M) g r x e W j0) =
+      riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x (r + 1) (W.toSection x)
+      e bse rfl hbse horth]
+    rw [sum_consEquiv]
+    refine Finset.sum_congr rfl (fun j0 _ => ?_)
+    rw [rfns_zero_eq_sum_componentSq (I := I) (M := M) g x r
+      (appCcSlice (I := I) (M := M) g r x e W j0) e bse rfl hbse horth]
+    refine Finset.sum_congr rfl (fun P _ => ?_)
+    rw [hVW j0 P]
+  rw [hLHS]
+  calc ∑ j0 : Fin (Module.finrank ℝ E),
+          riemannianFiberNormSq (I := I) (M := M) g 0 s x
+            (show TensorRSSpace 0 s I x from
+              (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x).comp
+                (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from
+                  appCcSlice (I := I) (M := M) g r x e W j0))
+      ≤ ∑ j0 : Fin (Module.finrank ℝ E),
+          riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+            riemannianFiberNormSq (I := I) (M := M) g 0 r x
+              (appCcSlice (I := I) (M := M) g r x e W j0) :=
+        Finset.sum_le_sum (fun j0 _ => riemannianFiberNormSq_compRS_le_mul (I := I) (M := M)
+          g 0 r s x (Φ.toSection x) (appCcSlice (I := I) (M := M) g r x e W j0))
+    _ = riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+          ∑ j0 : Fin (Module.finrank ℝ E),
+            riemannianFiberNormSq (I := I) (M := M) g 0 r x
+              (appCcSlice (I := I) (M := M) g r x e W j0) := by
+        rw [Finset.mul_sum]
+    _ = riemannianFiberNormSq (I := I) (M := M) g r s x (Φ.toSection x) *
+          riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
+        rw [hsum]
 
 private lemma rfns_iteratedCovGrad_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
