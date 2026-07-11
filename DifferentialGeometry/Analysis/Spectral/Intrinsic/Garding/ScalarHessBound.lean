@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.ScalarHessGraph
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.RankZeroRealization
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInner
+import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 
 /-!
@@ -234,6 +235,30 @@ theorem grad_energy_le
     (covGrad (I := I) (M := M) g 0 0
       (tensorHsSmoothRepr (I := I) (M := M) v hv)), norm_nonneg v]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private theorem du_normSq
+    (g : SmoothRiemannianMetric I M)
+    {f : M -> Real} (hf : ContMDiff I 𝓘(Real, Real) ∞ f) (x : M) :
+    normSq0S (I := I) g x 1 (duSec (I := I) f hf x) =
+      normGradSqFun (I := I) g f x := by
+  rw [duSec_apply, normSq0S_eq_inner,
+    inner0S_differential1FormFun_pair_eq_grad_inner]
+  rfl
+
+/-- The intrinsic squared norm of `du` is bounded by the spectral `H²` norm,
+with a constant independent of the finite support. -/
+theorem du_energy_le
+    (g : SmoothRiemannianMetric I M)
+    (v : tensorHs (I := I) (M := M) g 0 0 2)
+    (hv : (Function.support v.coeff).Finite) :
+    ∫ x, normSq0S (I := I) g x 1
+        (duSec (I := I)
+          (reprScalar0 (I := I) (M := M) v hv)
+          (reprScalar0_smooth (I := I) (M := M) v hv) x)
+        ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤ ‖v‖ ^ 2 := by
+  simpa only [du_normSq] using grad_energy_le (I := I) (M := M) g v hv
+
 /-- The scalar Hessian energy of every finite spectral representative is
 bounded by its spectral `H²` norm, with a metric-only constant independent of
 the finite support. -/
@@ -269,6 +294,24 @@ theorem hess_energy_le
     _ ≤ ‖v‖ ^ 2 + C * ‖v‖ ^ 2 :=
       add_le_add hlap (mul_le_mul_of_nonneg_left hgrad hC)
     _ = (1 + C) * ‖v‖ ^ 2 := by ring
+
+/-- The intrinsic Levi-Civita Hessian energy is bounded by the spectral `H²`
+norm, with a metric-only constant independent of the finite support. -/
+theorem hessSec_energy_le
+    (g : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ (v : tensorHs (I := I) (M := M) g 0 0 2)
+        (hv : (Function.support v.coeff).Finite),
+        ∫ x, normSq0S (I := I) g x 2
+            (leviHessSec (I := I) g
+              (reprScalar0 (I := I) (M := M) v hv)
+              (reprScalar0_smooth (I := I) (M := M) v hv) x)
+            ∂(riemannianVolumeMeasure (I := I) (M := M) g) ≤
+          C * ‖v‖ ^ 2 := by
+  obtain ⟨C, hC, hess⟩ := hess_energy_le (I := I) (M := M) g
+  refine ⟨C, hC, ?_⟩
+  intro v hv
+  simpa only [hessSec_normSq] using hess v hv
 
 end IntrinsicSpectral
 end RicciFlow

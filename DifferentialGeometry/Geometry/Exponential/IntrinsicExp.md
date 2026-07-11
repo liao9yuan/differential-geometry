@@ -22,3 +22,24 @@ The checked endpoint producers are:
 The remaining V1c bridge is downstream: use this slice acceleration result in
 the radial Jacobi variation endpoint proof to close the concrete
 `D_t^2 J(0)=0` input.  Verification passed for the file.
+
+## 2026-07-10 moving-chart interval uniqueness
+
+Added `geo_eqOn_of_init`, the open-preconnected-domain form of geodesic
+uniqueness.  It propagates equality by moving to the chart centered at each
+cluster point, so neither curve must remain in one fixed chart.  The producer
+only assumes continuity and the geodesic equation on the common open time
+domain, together with matching foot and tangent vector at time zero.
+
+Added `geo_end_eq_intr`, which applies that producer on `(-1,1)` and then uses
+continuity on `[-1,1]` to pass to the right endpoint.  Thus a segment launched
+from `(q,v)` has value `expMapIntrinsic g hEnorm q v` at time `1` without any
+fixed-chart confinement hypothesis.  Focused verification passed without
+warnings, and the targeted module build passed; replayed upstream warnings do
+not affect these declarations.
+
+This closes the endpoint-uniqueness producer itself (100%).  It remains one
+supporting brick for the moving inverse route: that final theorem is still
+unstated (0%), while its dedicated infrastructure remains only partially
+complete; the HCG project map remains the authoritative source for aggregate
+percentages.

@@ -1624,6 +1624,226 @@ theorem isGeodesic_eq_of_initial
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Uniqueness on an open preconnected time domain.**  Two continuous
+moving-foot geodesics on the same open preconnected set containing `0`, with
+the same foot and tangent vector at `0`, agree throughout that set.  The proof
+uses moving charts at cluster points, so it does not require either curve to
+remain in one fixed chart. -/
+theorem geo_eqOn_of_init
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    (g : SmoothRiemannianMetric I M) {Γ₁ Γ₂ : ℝ → M} {O : Set ℝ}
+    (hO_open : IsOpen O) (hO_conn : IsPreconnected O) (h0O : (0 : ℝ) ∈ O)
+    (h₁ : Geodesic.IsGeodesicOn (I := I) g Γ₁ O)
+    (h₂ : Geodesic.IsGeodesicOn (I := I) g Γ₂ O)
+    (hc₁ : ContinuousOn Γ₁ O) (hc₂ : ContinuousOn Γ₂ O)
+    (h0 : Γ₁ 0 = Γ₂ 0)
+    (hv : (mfderiv 𝓘(ℝ, ℝ) I Γ₁ 0 (1 : ℝ) : E) =
+      (mfderiv 𝓘(ℝ, ℝ) I Γ₂ 0 (1 : ℝ) : E)) :
+    Set.EqOn Γ₁ Γ₂ O := by
+  classical
+  have hC1₁ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 Γ₁ O :=
+    HopfRinow.isGeodesicOn_contMDiffOn_one (I := I) g hO_open h₁ hc₁
+  have hC1₂ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 Γ₂ O :=
+    HopfRinow.isGeodesicOn_contMDiffOn_one (I := I) g hO_open h₂ hc₂
+  have hmdiff₁ : ∀ t ∈ O, MDifferentiableAt 𝓘(ℝ, ℝ) I Γ₁ t := fun t ht =>
+    (hC1₁.contMDiffAt (hO_open.mem_nhds ht)).mdifferentiableAt (by norm_num)
+  have hmdiff₂ : ∀ t ∈ O, MDifferentiableAt 𝓘(ℝ, ℝ) I Γ₂ t := fun t ht =>
+    (hC1₂.contMDiffAt (hO_open.mem_nhds ht)).mdifferentiableAt (by norm_num)
+  set S : Set (↥O) :=
+    {x | Γ₁ =ᶠ[𝓝 (x : ℝ)] Γ₂} with hS_def
+  have hS_open : IsOpen S := by
+    rw [isOpen_iff_mem_nhds]
+    intro x hx
+    rcases Filter.eventually_iff_exists_mem.mp hx with ⟨U, hU_nhds, hU_eq⟩
+    rcases mem_nhds_iff.mp hU_nhds with ⟨V, hVU, hV_open, hxV⟩
+    have hmem : Subtype.val ⁻¹' V ∈ 𝓝 x :=
+      (hV_open.preimage continuous_subtype_val).mem_nhds hxV
+    refine Filter.mem_of_superset hmem ?_
+    intro y hy
+    exact Filter.eventually_iff_exists_mem.mpr
+      ⟨V, hV_open.mem_nhds hy, fun r hr => hU_eq r (hVU hr)⟩
+  have hP_closed : IsClosed {x : ↥O | Γ₁ (x : ℝ) = Γ₂ (x : ℝ)} := by
+    have hΓ₁_sub : Continuous (fun x : ↥O => Γ₁ (x : ℝ)) :=
+      hc₁.comp_continuous continuous_subtype_val (fun x => x.2)
+    have hΓ₂_sub : Continuous (fun x : ↥O => Γ₂ (x : ℝ)) :=
+      hc₂.comp_continuous continuous_subtype_val (fun x => x.2)
+    exact isClosed_eq hΓ₁_sub hΓ₂_sub
+  have hS_closed : IsClosed S := by
+    rw [isClosed_iff_clusterPt]
+    intro x hx
+    have hx_closure : x ∈ closure S := mem_closure_iff_clusterPt.mpr hx
+    have hS_sub_P : S ⊆ {y : ↥O | Γ₁ (y : ℝ) = Γ₂ (y : ℝ)} := by
+      intro y hy
+      exact hy.self_of_nhds
+    have hfeet : Γ₁ (x : ℝ) = Γ₂ (x : ℝ) :=
+      hP_closed.closure_subset (closure_mono hS_sub_P hx_closure)
+    set q : M := Γ₁ (x : ℝ) with hq_def
+    have hq_src : q ∈ (chartAt H q).source := mem_chart_source H q
+    have hΓ₁_contAt : ContinuousAt Γ₁ (x : ℝ) :=
+      (hc₁ (x : ℝ) x.2).continuousAt (hO_open.mem_nhds x.2)
+    have hΓ₂_contAt : ContinuousAt Γ₂ (x : ℝ) :=
+      (hc₂ (x : ℝ) x.2).continuousAt (hO_open.mem_nhds x.2)
+    have hsrc₁_nhds : Γ₁ ⁻¹' (chartAt H q).source ∈ 𝓝 (x : ℝ) :=
+      hΓ₁_contAt (by rw [hq_def]; exact (chartAt H q).open_source.mem_nhds hq_src)
+    have hsrc₂_nhds : Γ₂ ⁻¹' (chartAt H q).source ∈ 𝓝 (x : ℝ) :=
+      hΓ₂_contAt ((chartAt H q).open_source.mem_nhds (by
+        rw [← hfeet]
+        exact hq_src))
+    have hnbhd : O ∩ (Γ₁ ⁻¹' (chartAt H q).source ∩
+        Γ₂ ⁻¹' (chartAt H q).source) ∈ 𝓝 (x : ℝ) :=
+      Filter.inter_mem (hO_open.mem_nhds x.2) (Filter.inter_mem hsrc₁_nhds hsrc₂_nhds)
+    obtain ⟨U, hU_sub, hU_open, hxU⟩ := mem_nhds_iff.mp hnbhd
+    have hU_sub_O : U ⊆ O := fun y hy => (hU_sub hy).1
+    have hsrc₁ : ∀ y ∈ U, Γ₁ y ∈ (chartAt H q).source :=
+      fun y hy => (hU_sub hy).2.1
+    have hsrc₂ : ∀ y ∈ U, Γ₂ y ∈ (chartAt H q).source :=
+      fun y hy => (hU_sub hy).2.2
+    have hphase₁ : ContinuousAt
+        (fun r => (chartCurve (I := I) q Γ₁ r,
+          deriv (chartCurve (I := I) q Γ₁) r)) (x : ℝ) :=
+      chartPhase_continuousAt_of_geodesicOn (I := I) g q hU_open hxU
+        (hc₁.mono hU_sub_O) hsrc₁ (fun y hy => h₁ y (hU_sub_O hy))
+    have hphase₂ : ContinuousAt
+        (fun r => (chartCurve (I := I) q Γ₂ r,
+          deriv (chartCurve (I := I) q Γ₂) r)) (x : ℝ) :=
+      chartPhase_continuousAt_of_geodesicOn (I := I) g q hU_open hxU
+        (hc₂.mono hU_sub_O) hsrc₂ (fun y hy => h₂ y (hU_sub_O hy))
+    set c₁ : ↥O → E × E := fun y =>
+      (chartCurve (I := I) q Γ₁ (y : ℝ), deriv (chartCurve (I := I) q Γ₁) (y : ℝ))
+      with hc₁_def
+    set c₂ : ↥O → E × E := fun y =>
+      (chartCurve (I := I) q Γ₂ (y : ℝ), deriv (chartCurve (I := I) q Γ₂) (y : ℝ))
+      with hc₂_def
+    have hc₁_cont : ContinuousAt c₁ x := by
+      rw [hc₁_def]
+      exact hphase₁.comp continuousAt_subtype_val
+    have hc₂_cont : ContinuousAt c₂ x := by
+      rw [hc₂_def]
+      exact hphase₂.comp continuousAt_subtype_val
+    have hc_eq : ∀ y ∈ S, c₁ y = c₂ y := by
+      intro y hy
+      have hcc : chartCurve (I := I) q Γ₁ =ᶠ[𝓝 (y : ℝ)]
+          chartCurve (I := I) q Γ₂ := by
+        filter_upwards [hy] with r hr
+        simp only [chartCurve_def, hr]
+      have hfst : chartCurve (I := I) q Γ₁ (y : ℝ) =
+          chartCurve (I := I) q Γ₂ (y : ℝ) := hcc.self_of_nhds
+      have hsnd : deriv (chartCurve (I := I) q Γ₁) (y : ℝ) =
+          deriv (chartCurve (I := I) q Γ₂) (y : ℝ) :=
+        Filter.EventuallyEq.deriv_eq hcc
+      simp only [hc₁_def, hc₂_def, hfst, hsnd]
+    let l : Filter (↥O) := 𝓝 x ⊓ 𝓟 S
+    letI : NeBot l := hx
+    have hS_mem : S ∈ l := by
+      rw [show l = 𝓝 x ⊓ 𝓟 S by rfl]
+      exact Filter.mem_inf_of_right (by simp)
+    have hc_event : c₁ =ᶠ[l] c₂ := by
+      filter_upwards [hS_mem] with y hy
+      exact hc_eq y hy
+    have hc_at : c₁ x = c₂ x :=
+      tendsto_nhds_unique_of_eventuallyEq
+        (hc₁_cont.mono_left inf_le_left) (hc₂_cont.mono_left inf_le_left) hc_event
+    have hphase :
+        (chartCurve (I := I) q Γ₁ (x : ℝ), deriv (chartCurve (I := I) q Γ₁) (x : ℝ)) =
+          (chartCurve (I := I) q Γ₂ (x : ℝ), deriv (chartCurve (I := I) q Γ₂) (x : ℝ)) := by
+      simpa [hc₁_def, hc₂_def] using hc_at
+    exact geodesic_eventuallyEq_of_chartPhase_eq (I := I) g q hU_open hxU
+      (hc₁.mono hU_sub_O) (hc₂.mono hU_sub_O) hsrc₁ hsrc₂
+      (fun y hy => h₁ y (hU_sub_O hy)) (fun y hy => h₂ y (hU_sub_O hy)) hphase
+  have h0S : (⟨0, h0O⟩ : ↥O) ∈ S := by
+    set q : M := Γ₁ 0 with hq_def
+    have hv₁ : deriv (chartCurve (I := I) q Γ₁) 0 =
+        ((trivializationAt E (TangentSpace I) q).continuousLinearMapAt ℝ q)
+          (mfderiv 𝓘(ℝ, ℝ) I Γ₁ 0 (1 : ℝ) : E) :=
+      chartCurve_deriv_zero_eq (I := I) q (hmdiff₁ 0 h0O) rfl rfl
+    have hv₂ : deriv (chartCurve (I := I) q Γ₂) 0 =
+        ((trivializationAt E (TangentSpace I) q).continuousLinearMapAt ℝ q)
+          (mfderiv 𝓘(ℝ, ℝ) I Γ₂ 0 (1 : ℝ) : E) :=
+      chartCurve_deriv_zero_eq (I := I) q (hmdiff₂ 0 h0O) h0.symm rfl
+    have hvel : deriv (chartCurve (I := I) q Γ₁) 0 =
+        deriv (chartCurve (I := I) q Γ₂) 0 := by rw [hv₁, hv₂, hv]
+    have hq_src : q ∈ (chartAt H q).source := mem_chart_source H q
+    have hΓ₁_contAt : ContinuousAt Γ₁ 0 :=
+      (hc₁ 0 h0O).continuousAt (hO_open.mem_nhds h0O)
+    have hΓ₂_contAt : ContinuousAt Γ₂ 0 :=
+      (hc₂ 0 h0O).continuousAt (hO_open.mem_nhds h0O)
+    have hsrc₁_nhds : Γ₁ ⁻¹' (chartAt H q).source ∈ 𝓝 (0 : ℝ) :=
+      hΓ₁_contAt (by rw [hq_def]; exact (chartAt H q).open_source.mem_nhds hq_src)
+    have hsrc₂_nhds : Γ₂ ⁻¹' (chartAt H q).source ∈ 𝓝 (0 : ℝ) :=
+      hΓ₂_contAt ((chartAt H q).open_source.mem_nhds (by
+        rw [← h0]
+        exact hq_src))
+    have hnbhd : O ∩ (Γ₁ ⁻¹' (chartAt H q).source ∩
+        Γ₂ ⁻¹' (chartAt H q).source) ∈ 𝓝 (0 : ℝ) :=
+      Filter.inter_mem (hO_open.mem_nhds h0O) (Filter.inter_mem hsrc₁_nhds hsrc₂_nhds)
+    obtain ⟨U, hU_sub, hU_open, h0U⟩ := mem_nhds_iff.mp hnbhd
+    have hU_sub_O : U ⊆ O := fun y hy => (hU_sub hy).1
+    have hsrc₁ : ∀ y ∈ U, Γ₁ y ∈ (chartAt H q).source :=
+      fun y hy => (hU_sub hy).2.1
+    have hsrc₂ : ∀ y ∈ U, Γ₂ y ∈ (chartAt H q).source :=
+      fun y hy => (hU_sub hy).2.2
+    have hphase :
+        (chartCurve (I := I) q Γ₁ 0, deriv (chartCurve (I := I) q Γ₁) 0) =
+          (chartCurve (I := I) q Γ₂ 0, deriv (chartCurve (I := I) q Γ₂) 0) := by
+      have hfst : chartCurve (I := I) q Γ₁ 0 = chartCurve (I := I) q Γ₂ 0 := by
+        simpa only [chartCurve_def] using congrArg (extChartAt I q) h0
+      rw [hfst, hvel]
+    exact geodesic_eventuallyEq_of_chartPhase_eq (I := I) g q hU_open h0U
+      (hc₁.mono hU_sub_O) (hc₂.mono hU_sub_O) hsrc₁ hsrc₂
+      (fun y hy => h₁ y (hU_sub_O hy)) (fun y hy => h₂ y (hU_sub_O hy)) hphase
+  haveI : PreconnectedSpace (↥O) := isPreconnected_iff_preconnectedSpace.mp hO_conn
+  have hS_univ : S = Set.univ := (show IsClopen S from ⟨hS_closed, hS_open⟩).eq_univ
+    ⟨⟨0, h0O⟩, h0S⟩
+  intro t ht
+  have htS : (⟨t, ht⟩ : ↥O) ∈ S := by rw [hS_univ]; exact Set.mem_univ _
+  exact htS.self_of_nhds
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **Endpoint identification for an intrinsic geodesic segment.**  A curve
+continuous on `[-1,1]`, geodesic on `(-1,1)`, and launched from `(q,v)` reaches
+`expMapIntrinsic g hEnorm q v` at time `1`. -/
+theorem geo_end_eq_intr
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (q : M) (v : TangentSpace I q) {Γ : ℝ → M}
+    (hcont : ContinuousOn Γ (Set.Icc (-1 : ℝ) 1))
+    (hgeo : Geodesic.IsGeodesicOn (I := I) g Γ (Set.Ioo (-1 : ℝ) 1))
+    (h0 : Γ 0 = q)
+    (hv : (mfderiv 𝓘(ℝ, ℝ) I Γ 0 (1 : ℝ) : E) = (v : E)) :
+    Γ 1 = expMapIntrinsic (I := I) g hEnorm q v := by
+  let γI : ℝ → M := intrinsicGeodesic (I := I) g hEnorm q v
+  have hO_sub : Set.Ioo (-1 : ℝ) 1 ⊆ Set.Icc (-1 : ℝ) 1 := fun _ ht =>
+    ⟨le_of_lt ht.1, le_of_lt ht.2⟩
+  have hEq : Set.EqOn Γ γI (Set.Ioo (-1 : ℝ) 1) := by
+    apply geo_eqOn_of_init (I := I) g isOpen_Ioo isPreconnected_Ioo
+      (show (0 : ℝ) ∈ Set.Ioo (-1 : ℝ) 1 by norm_num) hgeo
+      ((intrinsicGeodesic_isGeodesic (I := I) g hEnorm q v).isGeodesicOn _)
+      (hcont.mono hO_sub)
+      (intrinsicGeodesic_continuous (I := I) g hEnorm q v).continuousOn
+    · simp [h0]
+    · simpa [γI, hv] using
+        (intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm q v).symm
+  have h1_closure : (1 : ℝ) ∈ closure (Set.Ioo (-1 : ℝ) 1) := by
+    rw [closure_Ioo (by norm_num : (-1 : ℝ) ≠ 1)]
+    norm_num
+  letI : NeBot (𝓝[Set.Ioo (-1 : ℝ) 1] (1 : ℝ)) :=
+    mem_closure_iff_nhdsWithin_neBot.mp h1_closure
+  have hΓ_lim : Filter.Tendsto Γ (𝓝[Set.Ioo (-1 : ℝ) 1] (1 : ℝ)) (𝓝 (Γ 1)) :=
+    (hcont 1 (by norm_num)).mono hO_sub
+  have hγI_lim : Filter.Tendsto γI (𝓝[Set.Ioo (-1 : ℝ) 1] (1 : ℝ)) (𝓝 (γI 1)) :=
+    (intrinsicGeodesic_continuous (I := I) g hEnorm q v).continuousAt.continuousWithinAt
+  have hevent : Γ =ᶠ[𝓝[Set.Ioo (-1 : ℝ) 1] (1 : ℝ)] γI := by
+    filter_upwards [self_mem_nhdsWithin] with t ht
+    exact hEq ht
+  have : Γ 1 = γI 1 := tendsto_nhds_unique_of_eventuallyEq hΓ_lim hγI_lim hevent
+  simpa [γI, expMapIntrinsic] using this
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **Spray homogeneity of the intrinsic geodesic.**  For every scalar `t`,
 `intrinsicGeodesic g hEnorm p (t • u) 1 = intrinsicGeodesic g hEnorm p u t`.
 Equivalently `expMapIntrinsic p (t • u) = intrinsicGeodesic p u t`, so the radial

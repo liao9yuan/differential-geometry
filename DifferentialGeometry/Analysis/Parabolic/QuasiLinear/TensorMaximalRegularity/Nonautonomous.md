@@ -1,6 +1,6 @@
 # Non-autonomous tensor maximal regularity
 
-## State — 2026-07-09
+## State — 2026-07-10
 
 This module combines the existing forcing-space maximal-regularity estimates
 for two bounded time-dependent operator families:
@@ -31,16 +31,19 @@ No geometric realization, moving-metric heat existence theorem, axiom, or
 
 ## Remaining frontier
 
-For the conjugate heat equation, the next producer must realize the frozen
-moving-metric Laplacian difference as `A2` and the remaining first/zeroth-order
-terms as `A1`, with strong measurability and bounds satisfying the combined
-smallness inequality.  The critical `A2` bound must genuinely be small; only
-the lower-order `A1` contribution vanishes as the time horizon shrinks.
+The genuine frozen moving-metric Laplacian difference is now realized as
+`lapDiffA2 : H^2(gT) →L TensorL2 0 0 gT`, and its operator norm tends to zero.
+The remaining interface work is to postcompose with the canonical `H^0`/`L²`
+isometry, prove strong measurability on a short time interval, and realize the
+remaining first/zeroth-order terms as `A1`.  These are downstream of the now
+proved critical `A2` smallness estimate.
 
 ## Honest progress
 
 - Abstract combined fixed-point theorem: verified without warnings or `sorry` (100%).
-- Geometric operator realization: not started (0%).
+- Genuine moving-Laplacian `A2 : H^2(gT) →L L²(gT)`: complete (100%).
+- Full geometric non-autonomous input package (`A2` measurability/H⁰ plus
+  `A1`): dedicated machinery about 40%; endpoint theorem not proved (0%).
 - Classical moving-metric conjugate heat existence: not proved (0%).
 - Perelman no-local-collapsing and `ham3_noncollapse`: not proved (0%).
 
@@ -165,39 +168,45 @@ concrete:
 - `hess_sub_conn` and `lap_sub_conn` give the invariant Hessian and scalar
   Laplacian difference formulas with no chart-locality assumption.
 
-The exact remaining geometric producer is uniform compact `C¹` continuity of
-the moving metric at a regular terminal time:
+Uniform compact `C¹` continuity of the moving metric at a regular terminal
+time is now proved:
 
 ```text
 metricDerivNormSupOn univ 1 (g t) (g T) (g T) → 0  as t → T.
 ```
 
-The suggested theorem is `metric_c1_tendsto`.  It should be produced from
-`MetricFamilySmoothOn.frameCompSmooth` by proving joint spacetime smoothness of
-the first fixed-background metric covariant derivative in actual local-frame
-domains and then taking a finite compact subcover.  The tree currently has
-only the fixed-metric, spatial theorem `metricDerivNorm_cont`; it has no public
-joint `(t,x)` theorem at this norm level.  This is a missing producer/API, not
-an assumption to add to the `A2` consumer.
+`metric_c1_tendsto` in
+`HCGCompactness/MetricC1Continuity.lean` is focused-check green.  It is
+produced from `MetricFamilySmoothOn.frameCompSmooth` and the existing scalar
+covariant-derivative tower, works in actual local-frame domains, proves both
+exact orders zero and one, and uses a compact finite subcover.  It adds no
+consumer assumption and does not construct a varying-fibre tensor-valued map.
 
-After that producer, the pointwise coefficient algebra still needs three small
-reusable bridges:
+The invariant route is now closed and verified end to end:
 
-- `trace_sub_le_c0` for the metric-trace difference;
-- `connOut_norm_le` for `connectionDifferenceOutput`;
-- `hessSec_normSq` identifying the canonical Hessian's intrinsic norm with
-  `chartHessFrobeniusSq` (unless folded into a Hessian-specific trace bound).
+- `trace_sub_le_c0`, `connOut_norm_le`, and `hessSec_normSq` close the two
+  pointwise coefficient arms without a global frame or whole-Hom equality.
+- `HCGCompactness.lapDiff_sq_le` gives the genuine pointwise square estimate.
+- `lapDiff_energy_le` integrates it and proves the support-independent spectral
+  `H²` bound.
+- `finiteReprLin`, `SmoothCcTensor.retagEquiv`, and `rawConnLapLin` package the
+  actual finite-core action linearly.
+- `lapDiffOp` extends that action by `LinearMap.extendOfNorm` to the fixed
+  `TensorL2` target, and `lapDiffOp_core` identifies its finite-core values.
+- `lapDiffA2_bound` produces `omega(s) → 0`, uniformly in spectral support;
+  `lapDiffA2_zero` proves the operator norm tends to zero.
 
-No generic mixed-Hessian `L²` isometry is required.  At a mere carrier endpoint
-the connection coefficient need not tend to zero from the currently exposed
-regularity; the assumption-free endpoint is `T : D.RegularTime`.
+No generic mixed-Hessian `L²` isometry, `HasLocallyConstantChartAt`, global
+frame, or new convergence assumption is used.  The endpoint remains honestly
+`T : D.RegularTime`.
 
 Honest accounting at this point:
 
-- final geometric `A2` theorem: not stated/proved (0%);
-- dedicated `A2` machinery: about 68%; the fixed-metric scalar spectral
-  Hessian assembly is now verified, while the moving-metric coefficient
-  producers listed above remain open;
-- geometric non-autonomous conjugate-heat realization: about 25% machinery,
-  endpoint theorem 0%;
-- Perelman no-local-collapsing theorem: 0%.
+- genuine `A2 : H²(gT) →L L²(gT)` and its vanishing modulus: complete
+  (100%);
+- `A2` as a ready `nonaut_strong_exists` input: about 70%; the remaining work
+  is the canonical `H⁰` postcomposition and short-interval strong
+  measurability;
+- geometric non-autonomous conjugate-heat realization: about 35% dedicated
+  machinery, endpoint theorem 0%;
+- Perelman no-local-collapsing theorem: not stated/proved here (0%).

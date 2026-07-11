@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
+import DifferentialGeometry.Analysis.ODE.PhaseFlowPerturbation
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 
 set_option linter.unusedSectionVars false
@@ -501,13 +502,7 @@ theorem diagExp_hasFDerivAt_zero
 /-- The unipotent continuous linear equivalence `(z₁, z₂) ↦ (z₁, z₁ + z₂)` on
 `E × E`, whose underlying map is the zero-section derivative of `diagExp`. -/
 def unipotentCLE : (E × E) ≃L[ℝ] (E × E) :=
-  ContinuousLinearEquiv.equivOfInverse
-    ((ContinuousLinearMap.fst ℝ E E).prod
-      (ContinuousLinearMap.fst ℝ E E + ContinuousLinearMap.snd ℝ E E))
-    ((ContinuousLinearMap.fst ℝ E E).prod
-      (ContinuousLinearMap.snd ℝ E E - ContinuousLinearMap.fst ℝ E E))
-    (by intro z; simp)
-    (by intro z; simp)
+  DifferentialGeometry.PhaseFlow.freeDiagCLE
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -932,6 +927,61 @@ theorem diagExp_diagExpInv
         (diagExp (I := I) g hEnorm (diagExpInv (I := I) g hEnorm p y)) := rfl
   rw [e2, diagExp_zero_eq (I := I) g hEnorm p] at hy1
   exact (extChartAt (I.prod I) (p, p)).injOn hy3 hy2 hy1
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- **The left-inverse property.** Near the zero vector at `p`, the moving-base
+inverse section recovers a tangent vector after applying `diagExp`. -/
+theorem diagExpInv_diagExp
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    ∀ᶠ u in nhds (⟨p, (0 : E)⟩ : TangentBundle I M),
+      diagExpInv (I := I) g hEnorm p (diagExp (I := I) g hEnorm u) = u := by
+  have hsrc : diagExpZeroPt (I := I) p ∈ (diagExpIFT (I := I) g hEnorm p).source :=
+    ContDiffAt.mem_toOpenPartialHomeomorph_source
+      (chartedDiagExp_cdaOne (I := I) g hEnorm p)
+      (diagExp_hasFDerivAt_zero_unipotent (I := I) g hEnorm p 1 le_rfl) one_ne_zero
+  have hev_li := (diagExpIFT (I := I) g hEnorm p).eventually_left_inverse hsrc
+  have htend : Filter.Tendsto
+      (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M))
+      (nhds (⟨p, (0 : E)⟩ : TangentBundle I M))
+      (nhds (diagExpZeroPt (I := I) p)) := by
+    simpa only [diagExpZeroPt] using
+      (continuousAt_extChartAt (I := I.tangent)
+        (⟨p, (0 : E)⟩ : TangentBundle I M)).tendsto
+  have hev1 := htend.eventually hev_li
+  have hev_u : ∀ᶠ u in nhds (⟨p, (0 : E)⟩ : TangentBundle I M),
+      u ∈ (extChartAt I.tangent
+        (⟨p, (0 : E)⟩ : TangentBundle I M)).source :=
+    extChartAt_source_mem_nhds (I := I.tangent)
+      (⟨p, (0 : E)⟩ : TangentBundle I M)
+  filter_upwards [hev1, hev_u] with u hu hu_src
+  have hinner :
+      (extChartAt I.tangent
+        (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
+          (extChartAt I.tangent
+            (⟨p, (0 : E)⟩ : TangentBundle I M) u) = u :=
+    (extChartAt I.tangent
+      (⟨p, (0 : E)⟩ : TangentBundle I M)).left_inv hu_src
+  have hforward :
+      (diagExpIFT (I := I) g hEnorm p)
+          (extChartAt I.tangent
+            (⟨p, (0 : E)⟩ : TangentBundle I M) u) =
+        extChartAt (I.prod I) (p, p) (diagExp (I := I) g hEnorm u) := by
+    rw [diagExpIFT_coe (I := I) g hEnorm p]
+    simp only [chartedDiagExp, Function.comp_apply]
+    rw [hinner, diagExp_zero_eq (I := I) g hEnorm p]
+  rw [hforward] at hu
+  change (extChartAt I.tangent
+      (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
+        ((diagExpIFT (I := I) g hEnorm p).symm
+          (extChartAt (I.prod I) (p, p) (diagExp (I := I) g hEnorm u))) = u
+  rw [hu, hinner]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

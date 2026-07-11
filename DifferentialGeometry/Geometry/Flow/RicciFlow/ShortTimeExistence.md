@@ -26,3 +26,102 @@ Verification passed for the checked source files in this audit and for the
 Hamilton consumer.  No target `.olean` refresh was run because the project lock
 script is absent in this checkout and an existing Lake server is active; the
 claim here is source-level focused verification.
+
+## 2026-07-10 upstream completion and merge audit
+
+Audited upstream `qinz1yang/differential-geometry` at
+`short-time-existence` tip `9c01f29f` against upstream `main`.
+
+### Theorem status
+
+- `ricci_flow_short_time_existence` is stated as a genuine existence theorem:
+  from a smooth initial Riemannian metric on a compact boundaryless manifold it
+  constructs `T > 0` and a metric family with `g 0 = g0`, jointly smooth
+  chart-Gram entries on `[0,T)`, and the Ricci-flow equation (as a right
+  derivative at `t = 0`).
+- The headline proof calls the concrete DeTurck solution producer
+  `deTurckRicci_solution_with_jointReg`, the jointly smooth conjugating-flow
+  producer, pullback naturality/regularity, and the endpoint derivative lemma.
+  It does not assume a Ricci-flow solution or a proposition definitionally
+  equivalent to its conclusion.
+- The short-time-specific source surface has no explicit `sorry`.  The
+  declaration has an embedded `#print axioms` audit intended to show only
+  `propext`, `Classical.choice`, and `Quot.sound`.
+- This does not make the whole branch sorry-free.  The tip still has six
+  explicit `sorry` bodies: four in `Tensor/Exterior/Basic.lean` and two in
+  `Tensor/RSTensor/Derivation/NablaOnTensors.lean`.  The latter module is in the
+  import closure, but the reported axiom audit says the headline does not use
+  those two declarations transitively.
+- GitHub records no CI/status checks for the tip.  An independent clean
+  targeted build in an isolated worktree produced 166 branch-local modules
+  without a Lean error before hitting the audit's 20-minute performance wall.
+  The headline import closure contains 1,331 local modules, so this is an
+  incomplete verification result, not a pass.  A completed clean build remains
+  the merge gate.
+
+Honest progress: the theorem on the upstream branch is source-complete (100% as
+a stated/proved theorem, pending the independent clean-build gate); its
+dedicated upstream machinery is approximately 100%.  The theorem on current
+`main` remains dependent on deferred inputs, so the completed theorem is 0%
+integrated into `main`.  Merge preparation is approximately 75% (source,
+soundness-shape, history, and conflict audits done, and the integration
+worktree created; clean verification and semantic replay remain).  The actual
+merge is 0%.
+
+### Merge audit
+
+- The upstream branch and current `main` have diverged substantially: the
+  branch has 1,244 unique commits and `main` has 58 unique commits from their
+  merge base.
+- The branch delta is 1,557 files (1,552 Lean files), approximately 304k added
+  and 129k deleted lines.  Much of this is library-wide comment/docstring
+  stripping and unrelated cleanup, not short-time-existence mathematics.
+- A synthetic merge into current `main` reports 47 conflicted paths, including
+  `ShortTimeExistence.lean` and most of the short-time/DeTurck/flow proof path.
+- PR #56 was closed unmerged shortly after creation and has no CI result.  Its
+  head predates the audited branch tip by one cleanup commit.
+- The local working branch is a different divergent history and contains
+  unrelated in-flight edits.  Do not merge or switch it in place.
+
+### Required integration route
+
+Do not raw-merge the upstream branch.  Create a clean integration worktree from
+current upstream `main`, preserve `main` versions by default, and replay the
+semantic short-time producer chain in dependency order.  In particular, reject
+the branch-wide comment stripping, unrelated theorem deletions, regenerated
+root-import churn, and the two unrelated tensor files that still contain
+`sorry`.  After each producer layer, run a narrow build; finish with the
+headline module, its embedded axiom audit, the root import, and a branch-wide
+`sorry` inventory before opening a draft merge PR.
+
+Replay in five layers: (1) calculus extensions and closed-slab/joint-smooth
+time-dependent flow; (2) the Sobolev/spectral/semigroup/maximal-regularity
+producers actually consumed by DeTurck; (3) the concrete DeTurck solution and
+joint chart regularity; (4) conjugating diffeomorphisms, pullback/naturality,
+the interior equation, and the `t = 0` endpoint; (5) the headline, axiom audit,
+consumers, root import, and documentation.  Stop rather than widening the patch
+if a layer requires an unrelated deletion, depends on one of the six residual
+`sorry` declarations, or cannot preserve the current `main` API.
+
+The documentation-preserving baseline is `62d33e61`, the parent of the
+library-wide comment-strip commit `2e920d67`.  It produces 19 synthetic merge
+conflicts against `main`, compared with 47 at the audited tip.  The completed
+proof still requires the later semantic work (481 commits follow the strip
+commit), so this baseline is not itself a completed theorem.  Use it only to
+preserve infrastructure and documentation, then replay or consolidate later
+proof changes while skipping `2e920d67` and the final library-wide cleanup
+commit `9c01f29f`.
+
+Comment-stripped/whitespace-normalized comparison reduces the apparent
+1,532-file post-baseline delta to 53 semantically modified files, 111 new files,
+and 20 deleted files.  Intersecting that set with the headline's 1,331-module
+local import closure leaves 154 relevant files: 46 modified and 108 new, with
+no relevant deletions.  The replay can therefore be zero-deletion.  Use
+`c3f8a482` (the parent of the final cleanup) as the completed proof source; the
+headline is unchanged by `9c01f29f`.
+
+Including the pre-baseline infrastructure absent from current `main`, the full
+normalized headline-closure delta is 344 files: 75 semantically modified and
+269 new, with no relevant deletions.  The 154-file count above is only the
+post-baseline portion.  The integration is therefore a layered medium-size
+port, not a single theorem patch.

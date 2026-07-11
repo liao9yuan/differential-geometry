@@ -170,3 +170,27 @@ order-1 proof; the ONLY changes are the ContDiffAt order on the inner symm and t
   all-order inverse domain is no longer a frontier; the next Step-C issue is
   uniform finite-hat/configuration containment in this domain and in the named
   realized-exponential radii.
+
+## 2026-07-10 - shared unipotent linearization
+
+- `unipotentCLE` is now a compatibility alias for
+  `PhaseFlow.freeDiagCLE`.  Existing derivative and IFT proofs continue to check,
+  while the quantitative phase endpoint and the qualitative `diagExpIFT` branch
+  now refer to the same continuous linear equivalence.
+- This alias does not yet identify the two inverse branches.  That still requires
+  the cross-model normal-coordinate endpoint theorem and branch compatibility.
+
+## 2026-07-10 - zero-section left inverse germ
+
+- `diagExpInv_diagExp` now exposes the missing source-side inverse identity:
+  near `⟨p, 0⟩`, applying `diagExp` and then the existing `diagExpInv` recovers
+  the original tangent vector.
+- The proof pulls `diagExpIFT.eventually_left_inverse` back through the
+  tangent-bundle chart.  Unlike the target-side right-inverse proof, it needs
+  only the tangent chart source germ; no product-chart injectivity argument is
+  required.
+- Focused verification passed without warnings or placeholders.
+- This is a pointwise germ, not a sequence-uniform quantitative radius.  It
+  identifies any transported quantitative branch with `diagExpInv` on their
+  common neighborhood, but a uniform `StepB1RawInput` domain still requires an
+  explicit uniform containment/refactoring argument.

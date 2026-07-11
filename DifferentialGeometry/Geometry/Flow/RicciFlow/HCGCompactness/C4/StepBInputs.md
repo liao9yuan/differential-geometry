@@ -175,8 +175,9 @@ former TangentSpace-instance/API blocker; it does not by itself produce `StepB1R
 
 `NormalCoordMetricBoundInput` honestly records uniform derivative constants
 `metricC`, but its normal-coordinate `radius k x` is only pointwise positive.
-There is no field giving a positive lower bound over `k` and the live centers,
-nor a compatibility relation with `decay` or `expMapC2Radius`.  In particular,
+There is no field giving a sequence-uniform *relative* lower bound
+`ratio * mu(distance) <= radius`, nor a compatible quantitative moving
+inverse-exponential branch.  In particular,
 the record remains satisfiable after shrinking the radius by a factor tending
 to zero with `k`; it therefore cannot justify the plan's former phrase
 "`normalBounds` uniform radius".
@@ -184,9 +185,43 @@ to zero with `k`; it therefore cannot justify the plan's former phrase
 This is an input/producer gap, not a local Lean proof failure.  The checked
 pointwise branch theorem `StepCSmoothness.exists_readoutEBall` and its local
 containment lemmas produce a radius for each fixed `(M, g, p)`, but do not
-upgrade it to a sequence-uniform radius.  If the current global
-`SigmaScaleField` design is retained, the smallest honest repair is a
-live-center uniform radius floor plus a quantitative normal-coordinate
-`chartedDiagExp` derivative-deviation/`ApproximatesLinearOn` producer.  The
-existing qualitative `diagExpIFT` is chosen in arbitrary extended charts, so
-its target radius cannot be read off from the present normal-coordinate bounds.
+upgrade it to a relative profile.  The correct quantifiers are a global
+`mu(distance)` ratio followed by fixed-`r`, live-slot, eventual consumption and
+a common-tail refinement; an absolute infimum over all centers is generally
+false.  The existing qualitative `diagExpIFT` is chosen in arbitrary extended
+charts, so its target radius cannot be read off from the present
+normal-coordinate bounds.
+
+## 2026-07-10: explicit sharp bound
+
+Added `NormalCoordMetricEquivOn.coercive` and `sharp_norm_le`.  The existing
+lower comparison `(1 / 2) * ||v||^2 <= g(v,v)` now produces a genuine coercive
+bilinear form and the explicit inverse bound
+`||g sharp xi|| <= 2 * ||xi||`, via the reusable lower-layer theorem
+`IsCoercive.symm_norm_le`.  Focused verification passed.
+
+This closes the inverse-metric norm factor needed before coefficient-level
+Christoffel estimates.  It does not state or prove the quantitative moving
+inverse theorem: that theorem remains 0%; its dedicated machinery is about
+50%, Step-B/B1 machinery about 64%, and whole-HCG machinery remains about 47%.
+
+## 2026-07-10: coordinate Koszul bound
+
+Added `NormalCoordMetricBoundInput.fderiv_apply_le`: the order-one
+`iteratedFDeriv` estimate now yields the explicit trilinear bound
+`||Dg(u,v,w)|| <= metricC 1 * ||u|| * ||v|| * ||w||`.  The proof evaluates the
+one-linear `iteratedFDeriv` directly, avoiding reliance on an accidental
+nested-Hom norm representation.
+
+Added `NormalCoordMetricBoundInput.koszulVec_norm_le`: combining that bound
+with the checked `1/2` coercivity gives
+`||g sharp Koszul(Dg)(v,w)|| <= 3 * metricC 1 * ||v|| * ||w||` on the named
+normal-coordinate ball.  The underlying structural algebra lives in
+`Metric/TensorInner/MetricKoszul.lean`; it is deliberately called a raised
+Koszul vector, not a geometric Christoffel symbol.  A realization theorem
+against the existing Levi-Civita connection remains necessary before this
+estimate can drive the geodesic phase flow.
+
+Focused verification passed.  The quantitative moving-inverse theorem itself
+remains unstated and unproved (0%); its dedicated machinery is now about 53%,
+Step-B/B1 machinery about 65%, and whole-HCG machinery remains about 47%.

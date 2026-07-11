@@ -276,10 +276,8 @@ topological interfaces.  In the current endpoint these include:
     \leanref{Ham3PinchTransfer};
   \item the scalar-positivity interface on the limit flow, currently packaged
     as \leanref{LimitScalarPos} inside the CGH limit output;
-  \item the final global/topological handoff
-    \leanref{limit_to_orig},
-    \leanref{ham3_space_box}, and
-    \leanref{spaceForm_const_metric}.
+  \item the final spherical-space-form handoff
+    \leanref{ham3_space_box}.
 \end{itemize}
 Thus the present document should be read as both a mathematical account of
 Hamilton's proof and a precise status report for the current Lean development.
@@ -3150,7 +3148,7 @@ satisfies
 R_{ijkl}
 =
 \frac R6
-\left(h_{ik}h_{j\ell}-h_{i\ell}h_{jk}\right),
+\left(h_{i\ell}h_{jk}-h_{ik}h_{j\ell}\right),
 \]
 so all sectional curvatures are equal to $R/6>0$.
 \end{proof}
@@ -3322,9 +3320,9 @@ If the Cheeger--Gromov--Hamilton limit is compact, the compact-limit
 identification argument compares the original manifold with the limit manifold
 for large indices: the convergence embeddings have open images by invariance of
 domain, compactness makes the images closed, and connectedness gives
-surjectivity.  The current endpoint records this global transfer through
-\leanref{limit_to_orig}.  This belongs to the remaining topological and
-CGH-transfer boundary, not to the local Ricci-flow calculation layers.
+surjectivity.  The current endpoint records this checked global transfer through
+\leanref{limit_to_orig}.  It is a compact-limit consumer over the supplied CGH
+data, not a remaining transfer frontier.
 
 \paragraph{Einstein limit and final topology.}
 The equation \(\Ric^\circ=0\), together with positive scalar curvature, gives
@@ -3338,10 +3336,11 @@ pinching-transfer, scalar-positivity, and limit-inheritance inputs described
 above.
 
 The final spherical-space-form statement remains a global Riemannian/topological
-handoff.  In the current endpoint this handoff is represented by
-\leanref{limit_to_orig}, \leanref{ham3_space_box}, and
-\leanref{spaceForm_const_metric}.  Consequently, \leanref{ham3_const_metric} is
-a theorem-shaped consumer over the remaining global analytic, compactness, transfer, and topological inputs, while
+handoff, represented in the current endpoint by \leanref{ham3_space_box}.  The
+reverse construction \leanref{spaceForm_const_metric}, from a spherical-space-form
+model to a constant-positive-sectional-curvature metric, is checked.
+Consequently, \leanref{ham3_const_metric} is a theorem-shaped consumer over the
+remaining global analytic, compactness, and transfer inputs, while
 \leanref{ham3_main} adds the spherical-space-form conclusion through the final
 topological interface.  The local tensor, component, Ricci-flow evolution,
 maximum-principle, three-dimensional algebra, and pinching calculations are the
@@ -3403,6 +3402,12 @@ or limit-flow interfaces have been supplied.
   \item \leanref{limit_tf_zero} and \leanref{limit_const_pos}, which are checked
   limit-flow consumers once scalar positivity and the Cheeger--Gromov--Hamilton
   transfer interfaces have been supplied.
+  \item \leanref{limit_to_orig} and \leanref{ham3_limit_const_metric}, which
+  give the checked compact-limit transfer and metric conclusion on the original
+  manifold once the structured CGH limit data have been supplied.
+  \item \leanref{spaceForm_const_metric}, which constructs a
+  constant-positive-sectional-curvature metric from a spherical-space-form
+  model.
 \end{itemize}
 
 \paragraph{Remaining global analytic and compactness inputs.}
@@ -3433,10 +3438,7 @@ and the global geometric or topological handoff.
   \leanref{Ham3RicNonnegTransfer}.
   \item Basepoint scalar convergence, \leanref{Ham3LimitBaseScalarConv}.
   \item Improved-pinching transfer, \leanref{Ham3PinchTransfer}.
-  \item The compact-limit transfer back to the original manifold,
-  \leanref{limit_to_orig}.
-  \item The spherical-space-form and constant-curvature handoff interfaces
-  \leanref{ham3_space_box} and \leanref{spaceForm_const_metric}.
+  \item The spherical-space-form handoff \leanref{ham3_space_box}.
 \end{itemize}
 
 Thus ``checked local infrastructure'' means Lean proof layers supplied by the
@@ -3477,10 +3479,11 @@ Metric constant-positive-curvature conclusion &
 \rffile{DimensionThree/HamiltonPositiveRicci.lean} &
 Checked blow-up assembly over the remaining analytic, compactness, transfer, and topological frontiers. \\
 
-Spherical-space-form handoff &
+Spherical-space-form directions &
 \leanref{ham3_space_box}; \leanref{spaceForm_const_metric} &
 Topological/global-geometry interface &
-Topological handoff; not a local Ricci-flow calculation. \\
+\leanref{spaceForm_const_metric} is checked; \leanref{ham3_space_box} remains
+the topological handoff frontier. \\
 
 Short-time raw existence and candidate package &
 \leanref{ricci_flow_short_time_existence}; \leanref{ham3_short_exists}; \leanref{ham3_short_solution_candidate} &
@@ -3640,12 +3643,13 @@ Checked limit-flow consumers once scalar positivity and pinching transfer are su
 Limit constant-positive-sectional curvature &
 \leanref{limit_const_pos}; \leanref{ham3_limit_const_metric} &
 \rffile{DimensionThree/HamiltonPositiveRicci.lean} &
-Checked limit-flow assembly; the metric conclusion on the original manifold still passes through \leanref{limit_to_orig}. \\
+Checked limit-flow and compact-limit transfer assembly; \leanref{limit_to_orig} is proved. \\
 
-Compact-limit/topological handoff &
+Compact-limit transfer and topological handoff &
 \leanref{limit_to_orig}; \leanref{ham3_space_box}; \leanref{spaceForm_const_metric} &
 \rffile{DimensionThree/HamiltonPositiveRicci.lean}; topological interface &
-Transfer/topological handoff from the constant-curvature limit back to the original manifold.
+\leanref{limit_to_orig} and \leanref{spaceForm_const_metric} are checked;
+\leanref{ham3_space_box} remains the final topological frontier.
 
 \end{longtable}
 }

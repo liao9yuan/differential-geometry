@@ -28,7 +28,7 @@ Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
 Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
-                    → Step B (local metrics/transitions/B1 machinery, ~63%;
+                    → Step B (local metrics/transitions/B1 machinery, ~73%;
                       origin-metric and transition branches run in parallel,
                       then merge on one further subsequence)
                     → Step C (center-of-mass averaging, ~3/4)
@@ -73,12 +73,12 @@ book-faithful; **FIXED** = the pre-audit statement was wrong and was corrected t
 | `PackingBound` | `lbl387` | **TRUE** | per-radius count `A(r)`; no uniformity trap. |
 | `VolumeComparisonInput` (A0') | Bishop–Gromov | **FIXED** | Uncapped-in-`r` multiplicity was **FALSE** (hyperbolic members: `r`-separated counts in `m·r`-balls grow like `e^{(n−1)(m−½)√C₀·r}`).  Now capped at containing scale `m * r ≤ r0`; consumers (`net_multiplicity`, `inter_count`) thread the needed Step-A ratio times `λ[0]` into the cap. |
 | `RealizesEdist` | — | plumbing | provable at instantiation from `ProperMetricOn`; not external math. |
-| `NormalCoordMetricBoundInput` | `lbl395` = [H6] Cor 4.12 | **TRUE pointwise; uniform floor not encoded** | `metricC` is `k`/center-uniform, but `radius k x` has only pointwise positivity and may tend to zero.  The record therefore does not by itself supply the uniform radius formerly attributed to `normalBounds`; a live-center radius floor and quantitative Jacobi/ODE bridge are still missing. |
+| `NormalCoordMetricBoundInput` / `NormalRadiusProfile` | `lbl395` = [H6] Cor 4.12 + CGT compatibility | **ENCODED** | `normalBounds.radius` remains pointwise, while the already bundled `MetricCompactnessInputs.normalRadius` supplies the correct relative floor `ratio * mu(distance)` for both the metric-control and named exponential radii.  `floor_le_radius`, `floor_le_exp`, and the `mul_lambda_lt_*` consumers are checked; do not add a second profile. |
 | `ExpInverseDerivBoundInput` (S6) | `lbl418` | **FIXED** | Uncapped chart-overlap quantification was **over-strong** (no scale control; junk-`z` outside the exp source not excluded; `d(exp_x)` grows exponentially in negatively curved members).  Now: `r₁` cap + exp-source guard + image-in-`r₁`-ball guard — exactly the book's `r₁ ≤ min{inj/4, c/√C₀}` regime.  Consumer `exists_transitionLimit_normalTransition` min-strengthened. |
 | `IsometryDerivBounds` (F8) | `lbl375` → [H6] §5 | **TRUE** (as hypothesis) | abstract per-map-sequence Prop; the polynomial recursion is the cited external content.  Bundle-v2 field shape gated on the B-loc brick. |
 | `Item3RadiusInput` | `lbl391/392` ("D large") | pointwise satisfiable; D6 producer missing | `expMapC2Radius_pos` gives pointwise positivity, but the current endpoint bundle does not imply the uniform lower bound needed to discharge the field by one choice of `D`. |
-| `Item3GpScaleInput` | `lbl383/427` | uniform producer missing | same family; choosing one `D` requires a radius floor not present in the current `normalBounds` record. |
-| `SigmaScaleField` | `lbl383` family | selected global route needs new producer | `k`-independent `σ` needs a positive radius infimum.  Fixed-index finite minima are valid locally, but replacing the global field requires an explicit diagonal/eventual redesign of the B/C producer. |
+| `Item3GpScaleInput` | `lbl383/427` | profile present; assembly wiring missing | `NormalRadiusProfile` supplies the relative `ratio * mu(distance)` bound and the checked `mul_lambda_lt_radius`/`mul_lambda_lt_exp` inequalities.  The remaining work is to consume these at the live-slot/fixed-exhaustion layer, not to invent a new radius hypothesis. |
+| `SigmaScaleField` | `lbl383` family | relative producer present; branch consumer missing | The intended scale is relative to the Step-A decay profile, not an absolute infimum over all centers.  The checked profile must now be threaded into the explicit quantitative moving-diagonal branch and then into the eventual live-slot assembly. |
 | `CmHessianInput` | `lbl413`-adjacent | **TRUE** at book scale | below the convexity radius `∂_z(exp⁻¹) ≈ −id`, Neumann-series invertibility; per-configuration honest input. |
 | `StrictDistInput` | `lbl416/417` | **TRUE** at book scale | strict convexity of `½d²` below `min{inj/3, π/(6√K)}`. |
 | endpoint `hconn` | book convention | added 2026-07-05 | connectedness is genuinely needed by the Hopf–Rinow proper realization (disconnected ⇒ emetric `⊤`); the book's manifolds are connected by convention. |
@@ -103,7 +103,7 @@ its docstring BEFORE consumers are built against it.
 ## 6. Honest progress (updated 2026-07-10)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
-  Step-B/B1 machinery ~63% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
+  Step-B/B1 machinery ~73% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
   sorry-free/axiom-clean 2026-07-05** — `exists_diffeo_of_injOn` construction +
   `BookApproxIsoPartialData` forward/reverse transport via `PreApproxIsoDataOn.congr`;
   **2026-07-09 statement repair:** the false P-only `stepB1_approxIso` and its `sorry`
@@ -132,7 +132,7 @@ its docstring BEFORE consumers are built against it.
   former velocity-`hderiv` API gap, and `normLowerOfSepExp` now derives the coordinate norm lower
   bound directly from named-exp-ball containment and Riemannian separation.  This improves the
   producer machinery but does not change theorem completion: the `StepB1RawInput` producer and
-  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 63%.
+  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 73%.
   **Later 2026-07-09:** `seqCenter_zero` / `seqCenter_edist_ge` and
   `seqChartNorm_ge` connect the actual ordered-net centers to that coordinate
   lower bound.  The former POU representation mismatch is now resolved:
@@ -195,11 +195,22 @@ its docstring BEFORE consumers are built against it.
   `exists_readoutEBall` extracts a finite positive radius per fixed base, while
   `centerPairs_lt_le` proves the local cage ledger `4 * lambda + 2 * r < δ` is
   sufficient for all readout pairs.  The missing scale is not local
-  containment but uniformity over `k`: the present `normalBounds.radius` has no
-  positive floor.  The remaining analytic/geometric producers are that
-  uniform quantitative inverse-exp bridge (or a complete fixed-index diagonal
-  redesign), reverse-chart and named-radius facts, and Hessian/Neumann
-  invertibility.
+  containment and relative-radius profiles are now checked:
+  `MetricCompactnessInputs.normalRadius` provides `floor_le_radius` / `floor_le_exp`,
+  while `NormalPhaseSym` constructs a common confined bilateral phase family and
+  its `ApproximatesLinearOn` estimate.  The arbitrary-velocity naturality chain
+  (`covAlong_natCrossAt`, `geodesicOn_mapLocal`, `normalGeo_map`) and interval
+  endpoint uniqueness (`geo_end_eq_intr`) are now checked.  Consequently
+  `NormalPhaseEndpoint.exists_normal_diag` packages one quantitative model branch,
+  its explicit positive target ball and radius formula, and the exact commutative
+  square with intrinsic `diagExp`.  `diagExpInv_diagExp` and `normal_inv_eq`
+  prove compatibility with the existing `diagExpInv` on every verified overlap.
+  The remaining scale issue is a genuine design gate, not a local proof: the
+  explicit uniform target ball is not known to lie in the pointwise qualitative
+  `diagExpIFT` germ underlying totalized `diagExpInv`.  It requires either an
+  explicit uniform containment theorem or a canonical-branch/readout refactor,
+  followed by reverse-chart/Hessian-Neumann assembly.  The focused architecture
+  prompt is `C4/NORMAL_BRANCH_RECONCILIATION_CONSULT.md`.
   The quantitative variant awaits the honest all-order lbl430 bounds; the
   `StepB1RawInput` producer must thread `stepCJoin`'s honest inputs.  B2–B6 open); Step C ~3/4
   (C1/C3/C4-shape done conditionally; C2
@@ -288,7 +299,7 @@ its docstring BEFORE consumers are built against it.
   **0% proved** because its body is still `sorry`; it now waits only on the
   concrete B/C producer and one-line consumption of the checked Step-D theorem.
   F-track ~95% (F4 is closed; F2-book wrapper remains).
-   Ch4 **machinery** overall ≈ **67%**;
+   Ch4 **machinery** overall ≈ **72%**;
   the conditional compactness endpoint and textbook B1 theorem remain **0%**.
 - Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
 - Ch3: Lemma 3.11 done (hShi hypothesis).  The canonical conditional assembly
@@ -343,7 +354,7 @@ its docstring BEFORE consumers are built against it.
   maximal-time interval.  Transfers are bound to the actual CGH witness rather
   than quantified over arbitrary limits.  This contract refactor is checked
   infrastructure, not completion of either producer.
-- **Whole HCG project — conservative MACHINERY estimate ≈ 47%** (this is infrastructure coverage,
+- **Whole HCG project — conservative MACHINERY estimate ≈ 49%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
   unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved.**  The separate
   conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes
@@ -351,8 +362,8 @@ its docstring BEFORE consumers are built against it.
   completion of the endpoint theorem.
   The riskiest open items (D3d metric transport RESOLVED 2026-07-07; D1a-(ii) naturality wall
   DISSOLVED 2026-07-07 — was a third walls-overcount, the restrictOpen/pullback stack pre-existed):
-  a sequence-uniform quantitative inverse-exp/readout branch scale (for the
-  selected global-sigma route), concrete Step-C instantiation of the checked
+  uniform reconciliation of the checked quantitative normal `diagExp` branch
+  with the existing totalized `diagExpInv`/readout branch, concrete Step-C instantiation of the checked
   local containment ledger, reverse-chart and named-radius
   smallness needed to instantiate the checked agreement/differentiability
   producers, Hessian/Neumann invertibility,

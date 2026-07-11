@@ -20,3 +20,15 @@ bounds whose constants do not depend on finite spectral support.
   the bundled section application.
 - Focused verification and targeted module verification passed without local
   warnings.
+
+## Intrinsic tensor bounds
+
+- Added `du_energy_le`, identifying the actual canonical one-form `duSec` with
+  the already controlled scalar gradient norm pointwise.
+- Added `hessSec_energy_le`, rewriting the actual canonical Levi-Civita Hessian
+  through `hessSec_normSq` before applying the support-independent chart
+  Hessian estimate.
+- Both constants are independent of the finite spectral support and its
+  cardinality. Focused verification passed without warnings.
+- These are complete fixed-metric producers. The geometric moving-Laplacian
+  `A2` theorem is still not stated or proved.

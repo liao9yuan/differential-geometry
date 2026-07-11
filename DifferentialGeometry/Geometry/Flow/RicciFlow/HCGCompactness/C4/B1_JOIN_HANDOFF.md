@@ -10,9 +10,9 @@ prefer focused checks, and do not force-release stale locks.
 - Textbook B1 theorem: 0%.
 - Concrete `StepB1RawInput` producer: 0%.
 - Checked conditional assemblies: `stepB1_of_raw`, `stepB1_of_bounds`.
-- Dedicated Step-B1 machinery: about 63%.
-- Chapter 4 machinery: about 67%.
-- Whole HCG compactness machinery: about 47%.
+- Dedicated Step-B1 machinery: about 73%.
+- Chapter 4 machinery: about 72%.
+- Whole HCG compactness machinery: about 49%.
 - Conditional/final compactness endpoints: 0%.
 
 Do not report a checked wrapper or local green module as completion of B1.
@@ -51,27 +51,34 @@ Do not report a checked wrapper or local green module as completion of B1.
   `diagInv_eq_normal_lt`: pointwise intrinsic/realized branch identification
   below a named radius.  Their finite-hat source/smallness hypotheses are not
   yet instantiated.
+- `NormalPhaseEndpoint.exists_normal_diag` now combines the bilateral normal
+  flow, quantitative inverse, explicit target-ball radius, and exact
+  commutative square with intrinsic `diagExp`.  `normal_inv_eq` proves equality
+  with the existing `diagExpInv` under concrete branch-domain identities and
+  two `expDiffeoRadius` smallness inequalities.
+- `DiagExpDerivative.diagExpInv_diagExp` supplies the source-side IFT germ, so
+  compatibility of the two branches on a verified overlap is no longer open.
 
 ## Next tasks, in order
 
-1. Resolve the branch-scale design gate.  The checked radius is pointwise in
-   `(M, g, p)`, while `NormalCoordMetricBoundInput.radius` has no uniform lower
-   bound over `k` and live centers.  If the selected global-sigma route is
-   retained, first produce a uniform normal-coordinate radius floor and a
-   quantitative `chartedDiagExp` derivative-deviation/`ApproximatesLinearOn`
-   theorem, then construct the existing inverse branch from its explicit
-   source/target sets.  Do not add a naked `branchRadius` field to
-   `SigmaScaleField`.
-2. Alternatively, justify a redesigned fixed-index local-radius route with an
-   explicit diagonal/eventual argument strong enough for `StepB1RawInput`;
-   taking finite minima at each fixed index alone is insufficient.
-3. Once one of those scale routes is proved, use `centerPairs_lt_le` to thread
+1. Consume the already bundled relative branch scale.  The endpoint's
+   `MetricCompactnessInputs.normalRadius : NormalRadiusProfile ...` supplies the
+   positive `ratio * mu(distance)` floor, with checked `floor_le_radius`,
+   `floor_le_exp`, and `mul_lambda_lt_*` consumers.  Feed those bounds to
+   `exists_normal_diag`; do not add another profile or a naked `branchRadius`
+   field.
+2. Resolve the branch-domain design gate.  Either prove an explicit
+   sequence-uniform containment theorem for the exact qualitative `diagExpIFT`
+   source/target, together with the two `expDiffeoRadius` inequalities, or
+   refactor the canonical/readout branch package to consume the transported
+   quantitative partial homeomorphism.  Pointwise openness and a fixed-index
+   finite minimum are insufficient for `StepB1RawInput`.  Consult
+   `NORMAL_BRANCH_RECONCILIATION_CONSULT.md` before choosing between these routes.
+3. Use `centerPairs_lt_le` to thread
    finite-hat configuration containment through the branch domain and
    `centerOfMass.eqnRadius`.  Instantiate the checked fixed-target
    `exists_halfSqDist_md` producer by proving reverse-chart source/smallness,
-   and put the inverse branch below the checked `expDiffeoRadius` so
-   `diagInv_eq_normal_lt` supplies intrinsic/realized agreement.  Then use
-   `centerReadout_zero` to discharge `hzero`.
+   then use `centerReadout_zero` to discharge `hzero`.
 4. Supply the book-scale Hessian/Neumann input, instantiate
    `existsCmExtension`, upgrade the ambient root with `cmExt_contDiffOn`, and
    compose it with the verified atom/weight/target limits.
@@ -85,16 +92,18 @@ now implemented and verified.  `centerReadout_zero` is a checked conditional
 producer for the selected center's root equation, but its finite-hat
 instantiation still depends on the named geometric hypotheses above.
 
-The qualitative all-order inverse/readout issue and the local containment
-ledger are closed by `exists_diagInvDom_inf`, `exists_readoutDom_inf`,
-`exists_readoutEBall`, and `centerPairs_lt_le`.  The precise failure is now
-sequence-uniform: the pointwise radii may tend to zero with `k`.
-`NormalCoordMetricBoundInput.metricC` is uniform, but its `radius` carries only
-`radius_pos`; hence the current records do not imply a positive infimum or
-containment in the target of the qualitative `diagExpIFT`.  Fixed-index finite
-minima are legitimate, but need a new diagonal/eventual construction if they
-are to replace the selected global `SigmaScaleField` route.  A second inverse
-branch would also require an equality proof with the existing `diagExpInv`.
+The qualitative all-order inverse/readout issue and local containment ledger
+are closed by `exists_diagInvDom_inf`, `exists_readoutDom_inf`,
+`exists_readoutEBall`, and `centerPairs_lt_le`.  The earlier claim that the
+relative profile was missing was stale: it is the checked
+`MetricCompactnessInputs.normalRadius` field.  The ODE-side uniform family,
+phase-box confinement, quantitative approximation, arbitrary-velocity
+cross-model naturality, endpoint uniqueness, explicit quantitative branch,
+and its exact `diagExp` commutative square are checked.  Branch uniqueness on
+overlap is also checked.  The current failure is architectural: the explicit
+uniform target ball is not known to lie in the pointwise qualitative
+`diagExpIFT` germ underlying totalized `diagExpInv`; the current API provides no
+uniform radius from openness alone.
 `halfSqDist` differentiability and
 intrinsic/realized-exp agreement now have checked pointwise producers
 (`exists_halfSqDist_md` and `diagInv_eq_normal_lt`); their concrete finite-hat
@@ -128,10 +137,10 @@ Hessian/Neumann producer remains independent and honest;
 
 - Reuse the checked fixed open inverse-exp/readout branch and local containment
   APIs; do not return to order-dependent neighborhoods.
-- Either construct a genuinely sequence-uniform quantitative branch radius
-  from strengthened producer data, or give a complete fixed-index
-  diagonal/eventual replacement for the global-sigma design.  A pointwise
-  positive radius or a finite minimum at one index does not meet this criterion.
+- Either prove explicit sequence-uniform containment in the exact existing IFT
+  source/target, or complete a canonical-branch/readout refactor using the
+  transported quantitative partial homeomorphism.  A pointwise positive radius
+  or a finite minimum at one index does not meet this criterion.
 - Then prove the concrete finite-hat configurations land in that domain and below
   `centerOfMass.eqnRadius`; prove the reverse fixed-target normal-chart facts
   needed by `exists_halfSqDist_md` and the `expDiffeoRadius` smallness needed by

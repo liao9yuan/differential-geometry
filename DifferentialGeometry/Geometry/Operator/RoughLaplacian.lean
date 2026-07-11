@@ -572,6 +572,147 @@ theorem metricTracePair0SAt_sq_le_card_mul_normSq0S
   rw [habs, hmetric, hA] at hcs
   exact hcs
 
+/-- The change of metric trace is controlled by the covariant metric
+difference and the traced two-tensor, measured in the reference metric. -/
+theorem trace_sub_le_c0
+    (g h : SmoothRiemannianMetric I M) (x : M)
+    {C : Real} (hC : 1 ≤ C)
+    (hequiv : ∀ v : TangentSpace I x,
+      C⁻¹ * g.inner x v v ≤ h.inner x v v ∧
+        h.inner x v v ≤ C * g.inner x v v)
+    (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 x) :
+    |metricTracePair0SAt (I := I) h A -
+        metricTracePair0SAt (I := I) g A| ≤
+      (Module.finrank Real (TangentSpace I x) : Real) * C *
+        Real.sqrt
+          (normSq0S (I := I) g x 2
+            (metricTensor0S (I := I) h x -
+              metricTensor0S (I := I) g x)) *
+        Real.sqrt (normSq0S (I := I) g x 2 A) := by
+  classical
+  obtain ⟨μ, basis, hginv, hhinv, hμ0, hμC⟩ :=
+    exists_diagInv_of_equiv (I := I) g h x hC hequiv
+  have hgON : ∀ i j, g.inner x (basis i) (basis j) =
+      if i = j then (1 : Real) else 0 := by
+    intro i j
+    have hsum :
+        (∑ k, identityInvMetric i k * g.inner x (basis k) (basis j)) =
+          g.inner x (basis i) (basis j) := by
+      rw [Finset.sum_eq_single i]
+      · rw [identityInvMetric_apply_self, one_mul]
+      · intro k _ hki
+        rw [show identityInvMetric i k = 0 from
+          diagonalInvMetric_eq_zero_of_ne hki.symm, zero_mul]
+      · intro hi
+        exact absurd (Finset.mem_univ i) hi
+    rw [← hsum]
+    exact (hginv i j).1
+  have htrace_g :
+      metricTracePair0SAt (I := I) g A =
+        ∑ i, A (vec2 (I := I) (basis i) (basis i)) := by
+    rw [metricTracePair0SAt_eq_sum_basis
+      (I := I) g basis identityInvMetric hginv]
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [Finset.sum_eq_single i]
+    · rw [identityInvMetric_apply_self, one_mul]
+    · intro j _ hji
+      rw [show identityInvMetric i j = 0 from
+        diagonalInvMetric_eq_zero_of_ne hji.symm, zero_mul]
+    · intro hi
+      exact absurd (Finset.mem_univ i) hi
+  have htrace_h :
+      metricTracePair0SAt (I := I) h A =
+        ∑ i, μ i * A (vec2 (I := I) (basis i) (basis i)) := by
+    rw [metricTracePair0SAt_eq_sum_basis
+      (I := I) h basis (diagonalInvMetric μ) hhinv]
+    apply Finset.sum_congr rfl
+    intro i _
+    rw [Finset.sum_eq_single i]
+    · rw [diagonalInvMetric_apply_self]
+    · intro j _ hji
+      rw [diagonalInvMetric_eq_zero_of_ne hji.symm, zero_mul]
+    · intro hi
+      exact absurd (Finset.mem_univ i) hi
+  have hμinv (i) :
+      μ i * h.inner x (basis i) (basis i) = 1 := by
+    have hsum :
+        (∑ k, diagonalInvMetric μ i k *
+            h.inner x (basis k) (basis i)) =
+          μ i * h.inner x (basis i) (basis i) := by
+      rw [Finset.sum_eq_single i]
+      · rw [diagonalInvMetric_apply_self]
+      · intro k _ hki
+        rw [diagonalInvMetric_eq_zero_of_ne hki.symm, zero_mul]
+      · intro hi
+        exact absurd (Finset.mem_univ i) hi
+    rw [← hsum]
+    simpa only [if_pos] using (hhinv i i).1
+  let c0 :=
+    Real.sqrt
+      (normSq0S (I := I) g x 2
+        (metricTensor0S (I := I) h x -
+          metricTensor0S (I := I) g x))
+  let a0 := Real.sqrt (normSq0S (I := I) g x 2 A)
+  have hmetricComp (i) :
+      |h.inner x (basis i) (basis i) - 1| ≤ c0 := by
+    have hb := abs_apply_le_sqrt_normSq0S
+      (I := I) g x 2 basis hgON
+      (metricTensor0S (I := I) h x -
+        metricTensor0S (I := I) g x)
+      (vec2 (I := I) (basis i) (basis i))
+    simpa [c0, metricTensor0S_apply, vec2, hgON] using hb
+  have hAComp (i) :
+      |A (vec2 (I := I) (basis i) (basis i))| ≤ a0 := by
+    have hb := abs_apply_le_sqrt_normSq0S
+      (I := I) g x 2 basis hgON A
+      (vec2 (I := I) (basis i) (basis i))
+    simpa [a0, vec2, hgON] using hb
+  have hC0 : 0 ≤ C := le_trans zero_le_one hC
+  have hμdiff (i) : |μ i - 1| ≤ C * c0 := by
+    have hid :
+        μ i - 1 =
+          μ i * (1 - h.inner x (basis i) (basis i)) := by
+      calc
+        μ i - 1 =
+            μ i - μ i * h.inner x (basis i) (basis i) := by
+              rw [hμinv i]
+        _ = μ i * (1 - h.inner x (basis i) (basis i)) := by
+              ring
+    rw [hid, abs_mul, abs_of_nonneg (hμ0 i), abs_sub_comm]
+    exact mul_le_mul (hμC i) (hmetricComp i) (abs_nonneg _) hC0
+  have htrace :
+      metricTracePair0SAt (I := I) h A -
+          metricTracePair0SAt (I := I) g A =
+        ∑ i, (μ i - 1) * A (vec2 (I := I) (basis i) (basis i)) := by
+    rw [htrace_h, htrace_g, ← Finset.sum_sub_distrib]
+    apply Finset.sum_congr rfl
+    intro i _
+    ring
+  rw [htrace]
+  calc
+    |∑ i, (μ i - 1) * A (vec2 (I := I) (basis i) (basis i))|
+        ≤ ∑ i, |(μ i - 1) *
+            A (vec2 (I := I) (basis i) (basis i))| :=
+      Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _i : Fin (Module.finrank Real (TangentSpace I x)),
+          C * c0 * a0 := by
+      apply Finset.sum_le_sum
+      intro i _
+      rw [abs_mul]
+      exact mul_le_mul (hμdiff i) (hAComp i) (abs_nonneg _)
+        (mul_nonneg hC0 (Real.sqrt_nonneg _))
+    _ = (Module.finrank Real (TangentSpace I x) : Real) * C * c0 * a0 := by
+      simp [mul_assoc]
+    _ = (Module.finrank Real (TangentSpace I x) : Real) * C *
+          Real.sqrt
+            (normSq0S (I := I) g x 2
+              (metricTensor0S (I := I) h x -
+                metricTensor0S (I := I) g x)) *
+          Real.sqrt (normSq0S (I := I) g x 2 A) := by
+      rfl
+
 /-- Divided form of the intrinsic trace/norm Cauchy-Schwarz inequality. -/
 theorem metricTracePair0SAt_sq_div_rank_le_normSq0S
     (g : SmoothRiemannianMetric I M)

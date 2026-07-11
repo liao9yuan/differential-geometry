@@ -40,6 +40,10 @@ Sequence-level external inputs, each TRUE under the Theorem 3.9 hypotheses
 * `normalBounds` — normal-coordinate metric `C^p` bounds (`lbl395`, [H6]
   Cor 4.12): per-center radius, `k`- and center-uniform constants (uniformity is
   genuine: the Jacobi-field ODE analysis depends only on the curvature bounds).
+* `normalRadius` — compatibility of the preceding radius with the CGT profile:
+  one fixed positive fraction of `mu (dist x O)` lies in every controlled
+  normal-coordinate ball.  This is the noncompact uniformity actually used by
+  the construction; an absolute radius floor over all base points would be false.
 * `expInvDeriv` — `exp⁻¹`-transition derivative bounds below the comparison
   scale `r₁` (`lbl418`), domain-capped to the book's `r₁ ≤ min{inj/4, c/√C₀}`
   regime.
@@ -50,10 +54,10 @@ Sequence-level external inputs, each TRUE under the Theorem 3.9 hypotheses
   `SigmaScaleField`, and the per-configuration `CmHessianInput` /
   `StrictDistInput`): these are parameterized by Step A's constructed nets and
   Step C's configurations, so they cannot appear at sequence level.  Each is a
-  "`D` large enough" consequence of `normalBounds` + `decay` (uniform positive
-  `C²`-radius at bounded distance ⇒ choose `D` so `4λ[0]` sits below it); the
-  D5 assembly must discharge them from the bundle, with one uniformity lemma
-  per input as the assembly bricks.
+  "`D` large enough" consequence of `normalBounds` + `decay` + `normalRadius`
+  (uniform positive `C²`-radius at bounded distance ⇒ choose `D` so the relevant
+  multiples of `λ` sit below it); the D5 assembly must discharge them from the
+  bundle, with one uniformity lemma per input as the assembly bricks.
 * **`IsometryDerivBounds`** (`lbl375`, [H6] §5): the isometry-derivative
   polynomial recursion is per-map-sequence; its bundle-v2 field shape is pinned
   by the B-loc bridge brick (see `CHAPTER4_PLAN.md`), not yet stated here.
@@ -76,6 +80,159 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable [I.Boundaryless]
 
+/-- Compatibility between the CGT injectivity profile and the source radius of
+the normal-coordinate metric estimates.
+
+The fixed positive ratio is global, while the actual lower bound is allowed to
+decay with basepoint distance.  The same floor lies both in the ball carrying
+the metric estimates and in the named smooth exponential-chart ball.  This is
+the H6-compatible noncompact substitute for an unjustified absolute radius
+floor. -/
+structure NormalRadiusProfile
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X)
+    (hb : NormalCoordMetricBoundInput (I := I) X) where
+  ratio : Real
+  ratio_pos : 0 < ratio
+  le_radius : ∀ k x,
+    ratio * hd.mu (hd.dist k x (X.obj k).basepoint) ≤ hb.radius k x
+  le_exp_radius : ∀ k x,
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+    ratio * hd.mu (hd.dist k x (X.obj k).basepoint) ≤
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x
+
+namespace NormalRadiusProfile
+
+/-- Reindex a normal-coordinate radius profile along a subsequence. -/
+def subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) (f : Nat → Nat) :
+    NormalRadiusProfile (hd.subseq f) (hb.subseq f) where
+  ratio := h.ratio
+  ratio_pos := h.ratio_pos
+  le_radius := by
+    intro k x
+    change h.ratio * hd.mu (hd.dist (f k) x (X.obj (f k)).basepoint) ≤
+      hb.radius (f k) x
+    exact h.le_radius (f k) x
+  le_exp_radius := by
+    intro k x
+    letI : TopologicalSpace (X.obj (f k)).M := (X.obj (f k)).topology
+    letI : ChartedSpace H (X.obj (f k)).M := (X.obj (f k)).charted
+    letI : IsManifold I ∞ (X.obj (f k)).M := (X.obj (f k)).smooth
+    letI : T2Space (TangentBundle I (X.obj (f k)).M) :=
+      (X.obj (f k)).t2TangentBundle
+    change h.ratio * hd.mu (hd.dist (f k) x (X.obj (f k)).basepoint) ≤
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj (f k)).metric x
+    exact h.le_exp_radius (f k) x
+
+/-- The profile gives a positive source-radius floor on each fixed
+basepoint-distance sublevel. -/
+theorem floor_pos
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) (R : Real) :
+    0 < h.ratio * hd.mu R :=
+  mul_pos h.ratio_pos (hd.mu_pos R)
+
+/-- On a fixed basepoint-distance sublevel, the profile floor lies inside the
+normal-coordinate control radius. -/
+theorem floor_le_radius
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) {k : Nat} {x : (X.obj k).M} {R : Real}
+    (hx : hd.dist k x (X.obj k).basepoint ≤ R) :
+    h.ratio * hd.mu R ≤ hb.radius k x := by
+  calc
+    h.ratio * hd.mu R ≤
+        h.ratio * hd.mu (hd.dist k x (X.obj k).basepoint) :=
+      mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
+    _ ≤ hb.radius k x := h.le_radius k x
+
+/-- On a fixed basepoint-distance sublevel, the profile floor also lies in the
+named smooth exponential-chart ball. -/
+theorem floor_le_exp
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) {k : Nat} {x : (X.obj k).M} {R : Real}
+    (hx : hd.dist k x (X.obj k).basepoint ≤ R) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+    h.ratio * hd.mu R ≤
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+  calc
+    h.ratio * hd.mu R ≤
+        h.ratio * hd.mu (hd.dist k x (X.obj k).basepoint) :=
+      mul_le_mul_of_nonneg_left (hd.mu_antitone hx) h.ratio_pos.le
+    _ ≤ Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x :=
+      h.le_exp_radius k x
+
+/-- Choosing the covering divisor larger than `c / ratio` places the scaled
+covering radius strictly below the profile floor. -/
+theorem mul_lambda_lt_floor
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) {D c R : Real}
+    (hD : 0 < D) (hc : c < h.ratio * D) :
+    c * hd.lambda D R < h.ratio * hd.mu R := by
+  rw [InjRadiusDecayInput.lambda]
+  calc
+    c * (hd.mu R / D) = (c / D) * hd.mu R := by ring
+    _ < h.ratio * hd.mu R :=
+      mul_lt_mul_of_pos_right ((div_lt_iff₀ hD).2 hc) (hd.mu_pos R)
+
+/-- On a fixed basepoint-distance sublevel, the same divisor choice places the
+scaled covering radius inside every controlled normal-coordinate ball. -/
+theorem mul_lambda_lt_radius
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) {D c R : Real}
+    (hD : 0 < D) (hc : c < h.ratio * D)
+    {k : Nat} {x : (X.obj k).M}
+    (hx : hd.dist k x (X.obj k).basepoint ≤ R) :
+    c * hd.lambda D R < hb.radius k x :=
+  (h.mul_lambda_lt_floor hD hc).trans_le (h.floor_le_radius hx)
+
+/-- On a fixed basepoint-distance sublevel, the same divisor choice places the
+scaled covering radius inside the named smooth exponential-chart ball. -/
+theorem mul_lambda_lt_exp
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) {D c R : Real}
+    (hD : 0 < D) (hc : c < h.ratio * D)
+    {k : Nat} {x : (X.obj k).M}
+    (hx : hd.dist k x (X.obj k).basepoint ≤ R) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+    c * hd.lambda D R <
+      Geometry.Riemannian.expMapC2Radius (I := I) (X.obj k).metric x := by
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) := (X.obj k).t2TangentBundle
+  exact (h.mul_lambda_lt_floor hD hc).trans_le (h.floor_le_exp hx)
+
+end NormalRadiusProfile
+
 /-- The bundled Chapter 4 book-external inputs for MSM135 Theorem 3.9.
 
 Every field is a theorem the book cites externally (Cheeger–Gromov–Taylor,
@@ -87,7 +244,7 @@ structure MetricCompactnessInputs
   /-- A0 (`lbl384`): Cheeger–Gromov–Taylor injectivity-radius decay. -/
   decay : InjRadiusDecayInput (I := I) X
   /-- The good-covering scale divisor (`λ = μ/D`); the assembly chooses it
-  large against `normalBounds`' uniform radius. -/
+  large against the relative normal-coordinate radius profile. -/
   D : Real
   hD : 0 < D
   /-- `lbl387`: Bishop–Gromov total packing count `A(r)`. -/
@@ -105,6 +262,9 @@ structure MetricCompactnessInputs
   realizes : decay.RealizesEdist
   /-- `lbl395` ([H6] Cor 4.12): normal-coordinate metric `C^p` bounds. -/
   normalBounds : NormalCoordMetricBoundInput (I := I) X
+  /-- H6/CGT compatibility: the controlled normal-coordinate radius contains a
+  fixed positive fraction of the injectivity profile. -/
+  normalRadius : NormalRadiusProfile decay normalBounds
   /-- S6 (`lbl418`): `exp⁻¹`-transition derivative bounds below scale `r₁`. -/
   expInvDeriv : ExpInverseDerivBoundInput (I := I) X
 
@@ -128,6 +288,7 @@ def ofUniformVolume
         decay.lambda D 0 ≤ vol.r0)
     (realizes : decay.RealizesEdist)
     (normalBounds : NormalCoordMetricBoundInput (I := I) X)
+    (normalRadius : NormalRadiusProfile decay normalBounds)
     (expInvDeriv : ExpInverseDerivBoundInput (I := I) X) :
     MetricCompactnessInputs (I := I) X where
   decay := decay
@@ -144,6 +305,7 @@ def ofUniformVolume
     exact stepA_cap_le
   realizes := realizes
   normalBounds := normalBounds
+  normalRadius := normalRadius
   expInvDeriv := expInvDeriv
 
 /-- Reindex the conditional compactness input bundle along a subsequence. -/
@@ -165,6 +327,7 @@ def subseq
       using inp.stepA_cap_le
   realizes := inp.realizes.subseq f
   normalBounds := inp.normalBounds.subseq f
+  normalRadius := inp.normalRadius.subseq f
   expInvDeriv := inp.expInvDeriv.subseq f
 
 /-- The Step A `m = 4` multiplicity cap extracted from the bundled maximum cap.

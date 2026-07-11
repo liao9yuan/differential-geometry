@@ -38,10 +38,16 @@ differentiability/agreement producers.
 off-diagonal inverse-exp/readout domain carrying all orders simultaneously,
 using the existing Route-A `diagExpInv` branch.  `exists_readoutEBall` extracts
 a positive finite radius for each fixed base, and `centerPairs_lt_le` closes the
-local cage-containment ledger.  The next design gate is sequence-uniform: the
-current `NormalCoordMetricBoundInput.radius` is only pointwise positive, so the
-records do not imply a positive branch-radius infimum compatible with the
-global `SigmaScaleField`.  Dedicated Step-B/B1 machinery is about 63%; the
+local cage-containment ledger.  The endpoint bundle contains the required
+sequence-relative floor as `MetricCompactnessInputs.normalRadius :
+NormalRadiusProfile ...`, including `floor_le_radius` and `floor_le_exp`.
+After the checked `exists_normal_diag` endpoint square and the overlap identities
+`diagExpInv_diagExp` / `normal_inv_eq`, the next design gate is uniform branch
+reconciliation.  The existing qualitative `diagExpIFT` germ carries no explicit
+uniform radius, so this requires either a new quantitative containment theorem or
+a canonical-branch/readout refactor; pointwise openness does not discharge it.
+The review prompt is `NORMAL_BRANCH_RECONCILIATION_CONSULT.md`.
+Dedicated Step-B/B1 machinery is about 73%; the
 `StepB1RawInput` producer and textbook B1 theorem remain 0%.
 
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
@@ -50,10 +56,12 @@ in `lbl387`, the Hessian comparison `lbl413`) — with one declared exception: t
 "`D` large enough" **scale-choice inputs** (`Item3RadiusInput`, `Item3GpScaleInput`,
 `SigmaScaleField`), which are book-internal choices deferred to the D6 assembly,
 where each must be DISCHARGED rather than survive to the endpoint.
-**2026-07-10 correction:** the current `normalBounds` record
-does not encode that uniform radius floor, so this discharge needs a new
-quantitative producer or a redesigned fixed-index diagonal route; it is not yet
-derivable from the bundle. Everything the book proves, we prove. Build via
+**2026-07-10 correction:** the relative `kappa * mu(distance)` lower profile is
+already encoded separately by the endpoint's `normalRadius` field and consumed by
+the checked `NormalRadiusProfile.floor_le_*` / `mul_lambda_lt_*` API.  The live
+discharge problem is threading that profile through the quantitative moving-diagonal
+branch and eventual live-slot assembly, not adding another radius record.
+Everything the book proves, we prove. Build via
 `& .\scripts\lake-locked.ps1 build +<Module>`; no
 `sorry`/admissions; `#print axioms`-clean.
 
@@ -415,24 +423,39 @@ USES Step C's averaging (`lbl434`). So B1 and C are NOT cleanly sequential; the 
 `B1→…→B6 → C` ordering is a labeling artifact. Actual structure:
 `lbl394 (J,J̄ limits, done) → lbl398/lbl399 (local maps F^α_{kℓ,β}=J̄∘J → id) → [C averaging] → lbl397`.
 
-**Precise next brick:** resolve the sequence-uniform branch-scale producer.
+**Precise next brick:** close uniform branch/configuration containment for the
+checked quantitative diagonal branch.
 The fixed-phase-ball forward theorem, common domains
 `exists_diagInvDom_inf` / `exists_readoutDom_inf`, pointwise numerical radius
 `exists_readoutEBall`, and local cage-containment bridge
-`centerPairs_lt_le` are checked.  They give `δ_{k,α} > 0`, not
-`inf_{k,α} δ_{k,α} > 0`.  The current `NormalCoordMetricBoundInput` cannot prove
-the latter because only `metricC` is uniform; its `radius` has no uniform floor.
-If the global `SigmaScaleField` route is retained, add the missing uniform
-normal-coordinate radius plus a quantitative `chartedDiagExp`
-derivative-deviation/`ApproximatesLinearOn` producer, and refactor the private
-IFT branch to use explicit source/target sets.  The alternative is a fully
-specified fixed-index local-radius diagonal/eventual construction; finite
-minima at one index alone do not reach `StepB1RawInput`.  Constructing a second
-sigma-box inverse would add a uniqueness proof, and a bare `branchRadius` input
-would only rename the gap.  After this scale step, the next concrete bricks are
-branch and configuration containment, reverse-chart source/smallness for the checked
-`exists_halfSqDist_md` producer, `expDiffeoRadius` smallness for the checked
-`diagInv_eq_normal_lt` producer, and the Hessian/Neumann producer.  Atom/weight
+`centerPairs_lt_le` are checked.  They give `δ_{k,α} > 0`; an absolute
+`inf_{k,α} δ_{k,α} > 0` is neither encoded nor the correct noncompact target.
+The selected global route already has one positive ratio through
+`MetricCompactnessInputs.normalRadius`; after fixing an exhaustion radius,
+`floor_le_radius` and `floor_le_exp` yield the common positive floor on precisely
+the consumed slots.  The quantitative ODE producer is also checked:
+`NormalPhaseSym.exists_normal_biflow` gives a confined bilateral family and
+`ApproximatesLinearOn`; `NormalPhaseSmallness` drives its error below the inverse
+threshold.  The former naturality frontier is now closed:
+`covAlong_natCrossAt` / `geodesicOn_mapLocal` handle arbitrary curve velocities,
+`normalGeo_map` transports through the quarter-ball pullback metric, and
+`geo_end_eq_intr` supplies interval endpoint uniqueness.  Consequently
+`NormalPhaseEndpoint.exists_normal_diag` now gives one common model branch, its
+explicit positive target ball and radius formula, and the exact commutative
+square with the intrinsic `diagExp`.  `normal_inv_eq` proves that this is not a
+second intrinsic inverse: under the existing `diagExpInv` branch identities and
+the two concrete `expDiffeoRadius` inequalities it equals `diagExpInv`.
+
+The unresolved choice is how to place the whole explicit target ball in the
+canonical readout branch.  `exists_diagInvDom_inf` is only a pointwise open germ;
+its current API does not imply a sequence-uniform radius.  Either prove an
+explicit quantitative containment theorem for that exact IFT source/target, or
+refactor the canonical/readout branch package to consume the transported
+quantitative partial homeomorphism.  A fixed-index finite-minimum route still
+does not reach `StepB1RawInput`, and a bare `branchRadius` input would only rename
+this obligation.  After this design gate, the next concrete bricks are
+reverse-chart source/smallness for the checked `exists_halfSqDist_md` producer
+and the independent Hessian/Neumann producer.  Atom/weight
 production and pinned gluing/agreement are no longer frontiers;
 `centerReadout_zero` remains the checked conditional consumer of these missing
 geometric facts rather than an already-instantiated finite-hat equation.
@@ -457,9 +480,10 @@ Honest-input boundary (total, restructured 2026-07-05 — see
   comparison scale `r₁` — the uncapped form was over-strong/unsatisfiable**).
 - **Construction-stage, DISCHARGED at D6 (may not survive to the endpoint):**
   `Item3RadiusInput` / `Item3GpScaleInput` / `SigmaScaleField` (the "`D` large enough"
-  choices; the intended uniform radius is **not encoded by the current
-  `normalBounds` record**, so their discharge awaits the quantitative producer
-  above or a proved local-radius redesign),
+  choices; the intended relative radius is encoded by the separate
+  `normalRadius : NormalRadiusProfile ...` endpoint field, so their discharge now
+  awaits consumption by the quantitative branch and live-slot assembly rather
+  than a new profile),
   `CmHessianInput` / `StrictDistInput` (per-configuration `lbl413`/`lbl416`
   consequences at book scale).
 - **Bundle-v2, gated on the B-loc bridge:** F8 `lbl375`/[H6] §5
