@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.L2Bound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebey
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedCurvatureCrossBound

@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.LeviCivita
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.MLieBracket
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PullbackConnection
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.MLieBracket
+import DifferentialGeometry.Geometry.Connection.LeviCivita.PullbackConnection
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 

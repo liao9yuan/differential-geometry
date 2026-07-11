@@ -3,7 +3,7 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ParsevalFrameDi
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Geometry.Operator.Gradient
-import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.BareSlot0CurryParseval
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.BareSlot0CurryParseval
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 
 noncomputable section

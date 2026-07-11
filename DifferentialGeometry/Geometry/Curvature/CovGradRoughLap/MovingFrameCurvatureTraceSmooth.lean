@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFieldSplit
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GenuineCurvatureField
+import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.GenuineCurvatureField
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
 

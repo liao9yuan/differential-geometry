@@ -13,7 +13,7 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformExistence
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
-import DifferentialGeometry.Geometry.Exponential.RadialSeminormFencing
+import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
 set_option linter.unusedSectionVars false

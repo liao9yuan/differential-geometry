@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
-import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLapGradientL2Bound
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapGradientL2Bound
 
 noncomputable section
 

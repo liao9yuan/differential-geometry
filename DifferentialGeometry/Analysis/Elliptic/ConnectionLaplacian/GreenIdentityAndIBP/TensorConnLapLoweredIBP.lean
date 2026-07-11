@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovariantIntegrationByParts
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovariantIntegrationByParts
 import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
 
 noncomputable section

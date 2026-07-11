@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 import DifferentialGeometry.Tensor.RSTensor.Derivation.Contract
-import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldEvaluationLeibniz
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldEvaluationLeibniz
 
 noncomputable section
 

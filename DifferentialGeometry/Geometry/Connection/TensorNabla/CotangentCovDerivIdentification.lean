@@ -2,7 +2,7 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivCommutation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetricCompatible
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.CotangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwise
 
 noncomputable section

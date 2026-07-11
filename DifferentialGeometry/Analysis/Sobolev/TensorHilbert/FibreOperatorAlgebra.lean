@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited
-import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.BanachAlgebraSmoothness
+import DifferentialGeometry.Tensor.Auxiliary.BanachAlgebraSmoothness
 
 noncomputable section
 

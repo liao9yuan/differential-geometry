@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCurve
 import DifferentialGeometry.Geometry.Geodesic.Equation
-import DifferentialGeometry.Geometry.Geodesic.ChartTransition
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 
 set_option linter.unusedSectionVars false
 

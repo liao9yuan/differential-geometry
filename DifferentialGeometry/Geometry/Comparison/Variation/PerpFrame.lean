@@ -1,7 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.AlongCurve
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.CovariantDerivativeAlong
-import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransport
-import DifferentialGeometry.Geometry.Comparison.Variation.ParallelTransportSmooth
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
+import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransportSmooth
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 

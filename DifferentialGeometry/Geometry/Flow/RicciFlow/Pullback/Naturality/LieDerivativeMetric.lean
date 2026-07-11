@@ -1,10 +1,10 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.LeviCivita
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.MLieBracket
+import DifferentialGeometry.Geometry.Metric.Defs
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
+import DifferentialGeometry.Geometry.Connection.MLieBracket
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivative
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivativePointwise
+import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 

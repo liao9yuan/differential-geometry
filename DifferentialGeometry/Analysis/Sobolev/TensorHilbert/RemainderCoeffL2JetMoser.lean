@@ -5,7 +5,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffPerOrde
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArm0CurvatureDifferenceJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureArm1KoszulTopSeparation
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureArm1KoszulTopSeparation
 
 noncomputable section
 

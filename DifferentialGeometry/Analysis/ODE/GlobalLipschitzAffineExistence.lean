@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
-import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.BallRetraction
+import DifferentialGeometry.Analysis.Calculus.BallRetraction
 import Mathlib.Analysis.ODE.Gronwall
 
 open Set Function Filter Metric Real

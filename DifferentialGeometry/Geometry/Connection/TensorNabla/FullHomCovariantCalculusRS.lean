@@ -1,6 +1,6 @@
-import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldCovariantCalculusRS
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle
-import DifferentialGeometry.Geometry.Connection.TensorNabla.HomTensorRSRiemannian
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomTensorRSRiemannian
 
 noncomputable section
 

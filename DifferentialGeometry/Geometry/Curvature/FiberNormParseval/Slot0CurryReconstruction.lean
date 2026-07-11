@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSplitParsevalBridge
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
 
 noncomputable section
 

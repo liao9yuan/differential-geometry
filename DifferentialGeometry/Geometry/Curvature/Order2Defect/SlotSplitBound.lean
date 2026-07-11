@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TraceDiscrepancyDecomposition
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
-import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSplitParsevalBridge
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
 
 noncomputable section
 

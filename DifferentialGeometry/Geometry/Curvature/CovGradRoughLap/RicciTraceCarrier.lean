@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FrozenFramePureRCurvatureTower
-import DifferentialGeometry.Geometry.Connection.TensorNabla.OperatorFieldContractionBound
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldContractionBound
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 

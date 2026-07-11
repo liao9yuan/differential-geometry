@@ -1,5 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.Inclusion
-import DifferentialGeometry.Analysis.Spectral.SmoothingConst
+import DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.SmoothingConst
 import DifferentialGeometry.Analysis.Heat.Semigroup.Defs
 import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Analysis.SpecialFunctions.Pow.Real

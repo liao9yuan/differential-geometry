@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Connection.MetricCompatibility.MovingFrameBracketDivergence
+import DifferentialGeometry.Analysis.Integration.L2.Pairing.MovingFrameBracketDivergence
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochnerFieldSplit
 
 noncomputable section

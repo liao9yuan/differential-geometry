@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Integration.Measure.TensorChartPulled
 import DifferentialGeometry.Analysis.Integration.Measure.PouDensityChartBound
 import DifferentialGeometry.Analysis.Integration.Measure.Family
-import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridge
+import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
 noncomputable section

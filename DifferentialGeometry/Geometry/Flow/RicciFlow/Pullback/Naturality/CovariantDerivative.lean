@@ -1,4 +1,4 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.LeviCivita
+import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

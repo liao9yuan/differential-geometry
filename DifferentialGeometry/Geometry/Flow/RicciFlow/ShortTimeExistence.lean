@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.Basic
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
-import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.QuasilinearMetricShortTimeExistence
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.QuasilinearMetricShortTimeExistence
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 import DifferentialGeometry.Analysis.Parabolic.StrictParabolicity
@@ -9,8 +9,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckShortTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckVFTimeFamily
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckSolutionC1
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.GlobalFlowOnClosed
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Defs
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.RicciTensor
+import DifferentialGeometry.Geometry.Metric.Defs
+import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciTensor
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import Mathlib.Analysis.Calculus.Deriv.Basic

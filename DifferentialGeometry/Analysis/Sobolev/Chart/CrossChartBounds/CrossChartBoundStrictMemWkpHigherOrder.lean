@@ -1,4 +1,4 @@
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkp
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.CrossChartBoundStrictMemWkp
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
 noncomputable section

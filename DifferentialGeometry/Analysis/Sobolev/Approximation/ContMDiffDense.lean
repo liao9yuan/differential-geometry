@@ -1,6 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
-import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrictMemWkp
+import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.CrossChartBoundStrictMemWkp
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.BanachManifold
 
 noncomputable section

@@ -1,6 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.IntegratedOrder2WeitzenbockCurvature
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 
 noncomputable section

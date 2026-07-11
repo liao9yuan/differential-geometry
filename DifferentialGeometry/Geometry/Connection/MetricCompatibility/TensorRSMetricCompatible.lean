@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetricCompatible
-import DifferentialGeometry.Tensor.Multilinear.MetricLowering
+import DifferentialGeometry.Geometry.Metric.PointwiseInner.MetricLowering
 
 noncomputable section
 

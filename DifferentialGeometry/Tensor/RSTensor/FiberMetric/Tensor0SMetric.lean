@@ -1,4 +1,4 @@
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.CotangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.LinearAlgebra.Trace

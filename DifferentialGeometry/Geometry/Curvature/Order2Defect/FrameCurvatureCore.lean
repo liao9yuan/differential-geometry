@@ -1,5 +1,5 @@
-import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrozenFrameTrace
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FiberNormSubadditivity
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FrozenFrameTrace
+import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 
 noncomputable section
 

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.MovingFrameRemainderCarrierSection
-import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.BracketDivergenceForm
+import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDivergenceForm
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDerivSecondOrderCommutation
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 

@@ -1,5 +1,5 @@
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
-import DifferentialGeometry.Tensor.RSTensor.FiberMetric.CotangentRiemannian
+import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Metric.ChartGram
