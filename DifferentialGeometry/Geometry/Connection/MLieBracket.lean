@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
 open Bundle

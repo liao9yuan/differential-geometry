@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.ChartLocalPicardRegular
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle Set

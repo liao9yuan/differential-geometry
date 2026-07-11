@@ -8,6 +8,8 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold

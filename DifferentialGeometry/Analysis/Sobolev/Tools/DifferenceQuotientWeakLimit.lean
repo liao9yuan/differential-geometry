@@ -5,6 +5,8 @@ import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.InnerProductSpace.Dual
 import Mathlib.MeasureTheory.Function.L2Space
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function

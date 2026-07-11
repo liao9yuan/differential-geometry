@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 

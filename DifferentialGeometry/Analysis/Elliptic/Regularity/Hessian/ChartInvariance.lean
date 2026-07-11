@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

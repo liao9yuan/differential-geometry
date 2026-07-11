@@ -6,6 +6,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SmoothParametricCoe
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 import Mathlib.Analysis.Calculus.ParametricIntegral
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

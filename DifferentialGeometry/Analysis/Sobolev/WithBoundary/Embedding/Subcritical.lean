@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevHalfSpace
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function

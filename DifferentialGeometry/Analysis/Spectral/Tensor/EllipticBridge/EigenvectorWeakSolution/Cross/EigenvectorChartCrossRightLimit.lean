@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossLimits
 import DifferentialGeometry.Geometry.Operator.Gradient
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

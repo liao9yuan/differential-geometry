@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorManifoldSobolevAggregate
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option synthInstance.maxHeartbeats 1600000

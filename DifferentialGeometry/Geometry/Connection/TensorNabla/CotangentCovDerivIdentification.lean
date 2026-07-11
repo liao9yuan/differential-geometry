@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetric
 import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwise
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set Filter FiberBundle Tensor0SBundle

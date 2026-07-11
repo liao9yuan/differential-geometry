@@ -11,6 +11,8 @@ import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function

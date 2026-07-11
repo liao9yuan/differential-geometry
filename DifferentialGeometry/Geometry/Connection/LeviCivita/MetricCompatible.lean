@@ -4,6 +4,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

@@ -6,6 +6,8 @@ import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 
+set_option linter.unusedSectionVars false
+
 namespace Tensor0SBundle
 noncomputable section
 

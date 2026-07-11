@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

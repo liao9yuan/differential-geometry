@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LinearizedVectorField
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function

@@ -11,6 +11,8 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.LinearAlgebra.Matrix.Adjugate
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory

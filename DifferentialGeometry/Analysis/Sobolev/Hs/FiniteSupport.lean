@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.SpectralDefs
 import DifferentialGeometry.Analysis.Sobolev.Hs.Inclusion
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

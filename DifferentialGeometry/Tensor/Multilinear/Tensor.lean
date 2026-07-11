@@ -8,6 +8,8 @@ import DifferentialGeometry.Tensor.Product.Bundle
 import DifferentialGeometry.Bundle.Section
 import Mathlib.RingTheory.TensorProduct.Finite
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

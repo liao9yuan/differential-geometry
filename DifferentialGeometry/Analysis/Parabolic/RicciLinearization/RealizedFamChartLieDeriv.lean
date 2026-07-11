@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRemainderOrderSplit
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option maxHeartbeats 2400000

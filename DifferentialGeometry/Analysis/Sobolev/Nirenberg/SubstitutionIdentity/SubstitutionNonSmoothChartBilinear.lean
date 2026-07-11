@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl_H
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.StandardNirenbergTest
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

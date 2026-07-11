@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

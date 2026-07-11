@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.WeakDerivatives
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter

@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrd
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Metric Function

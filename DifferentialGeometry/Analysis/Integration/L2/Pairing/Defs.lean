@@ -8,6 +8,8 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.Data.Real.Sqrt
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold MeasureTheory Set Filter Bundle Tensor0SBundle

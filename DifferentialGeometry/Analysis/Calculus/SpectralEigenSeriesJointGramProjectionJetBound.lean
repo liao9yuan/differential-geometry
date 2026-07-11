@@ -16,6 +16,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorA
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter Topology

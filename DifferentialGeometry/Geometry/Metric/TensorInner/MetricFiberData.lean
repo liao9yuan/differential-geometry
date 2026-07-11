@@ -5,6 +5,8 @@ import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
+set_option linter.unusedSectionVars false
+
 
 namespace Tensor0SBundle
 

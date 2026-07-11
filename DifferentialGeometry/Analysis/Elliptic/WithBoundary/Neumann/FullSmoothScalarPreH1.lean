@@ -9,6 +9,8 @@ import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

@@ -10,6 +10,8 @@ import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

@@ -8,6 +8,8 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorre
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle

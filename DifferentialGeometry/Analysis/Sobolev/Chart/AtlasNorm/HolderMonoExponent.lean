@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function

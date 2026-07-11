@@ -11,6 +11,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle

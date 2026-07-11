@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option synthInstance.maxHeartbeats 800000

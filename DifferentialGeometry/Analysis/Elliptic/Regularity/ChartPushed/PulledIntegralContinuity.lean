@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFr
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

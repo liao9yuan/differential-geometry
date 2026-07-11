@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothM
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalLimitAnyTest
 import Mathlib.Analysis.Normed.Operator.Extend
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Filter Topology

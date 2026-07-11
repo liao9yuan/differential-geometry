@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrd
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function

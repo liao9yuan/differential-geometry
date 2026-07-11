@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.VectorField
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

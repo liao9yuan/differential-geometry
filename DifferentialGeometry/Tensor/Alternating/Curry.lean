@@ -13,6 +13,8 @@ import Mathlib.LinearAlgebra.Alternating.DomCoprod
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
 import Mathlib.Tactic.Cases
 
+set_option linter.style.cases false
+
 namespace ContinuousAlternatingMap
 
 noncomputable section curry

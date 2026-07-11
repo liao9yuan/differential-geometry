@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.MulLp
 import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

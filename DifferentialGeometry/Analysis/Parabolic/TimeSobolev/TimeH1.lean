@@ -5,6 +5,8 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationTh
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.MeasureTheory.Covering.OneDim
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set MeasureTheory Filter intervalIntegral

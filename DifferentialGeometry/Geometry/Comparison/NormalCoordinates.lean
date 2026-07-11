@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Exponential.LocalDiffeomorphism
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

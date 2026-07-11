@@ -3,6 +3,8 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.LinearAlgebra.Basis.VectorSpace
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

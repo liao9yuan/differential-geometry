@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

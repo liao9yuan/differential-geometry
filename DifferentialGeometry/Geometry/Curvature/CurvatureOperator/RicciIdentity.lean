@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter

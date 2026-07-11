@@ -22,6 +22,8 @@ import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.EndpointContinuation
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

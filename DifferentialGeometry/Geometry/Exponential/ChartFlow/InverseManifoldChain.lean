@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Calculus.IteratedFDerivProductDifferenceBound
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set

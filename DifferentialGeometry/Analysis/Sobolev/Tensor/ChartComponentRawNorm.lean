@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.POUF
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

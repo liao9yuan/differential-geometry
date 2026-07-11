@@ -6,6 +6,8 @@ import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

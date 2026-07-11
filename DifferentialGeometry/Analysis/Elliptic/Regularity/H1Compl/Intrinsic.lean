@@ -3,6 +3,8 @@ import Mathlib.Analysis.InnerProductSpace.ProdL2
 import Mathlib.Analysis.Normed.Lp.WithLp
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Function

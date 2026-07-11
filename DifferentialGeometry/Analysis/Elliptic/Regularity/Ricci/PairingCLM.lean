@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Can
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.DualNorm
 import Mathlib.Analysis.Normed.Operator.Extend
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

@@ -6,6 +6,8 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set

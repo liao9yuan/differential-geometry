@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TraceDiscrepancyD
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option synthInstance.maxHeartbeats 800000

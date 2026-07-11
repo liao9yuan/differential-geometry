@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option maxHeartbeats 2400000

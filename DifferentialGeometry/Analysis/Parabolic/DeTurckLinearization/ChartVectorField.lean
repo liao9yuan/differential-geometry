@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbol
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function

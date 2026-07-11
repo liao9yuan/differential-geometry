@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology

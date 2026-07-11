@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorVariational
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

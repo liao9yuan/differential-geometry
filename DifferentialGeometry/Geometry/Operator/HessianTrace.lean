@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartDensityJacobiDerivative
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartInverseGramDerivative
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory

@@ -4,6 +4,8 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Topology.VectorBundle.Riemannian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

@@ -3,6 +3,8 @@ import Mathlib.Analysis.Calculus.FDeriv.Add
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 import Mathlib.Analysis.Calculus.FDeriv.Const
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function

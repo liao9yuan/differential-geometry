@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Boundary.OutwardNormal
 import DifferentialGeometry.Geometry.Operator.Hessian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Topology Bundle Manifold MeasureTheory

@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory

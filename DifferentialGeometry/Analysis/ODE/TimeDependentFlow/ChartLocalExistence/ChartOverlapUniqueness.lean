@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.UniformExistence
 import Mathlib.Analysis.ODE.Gronwall
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
 open Bundle

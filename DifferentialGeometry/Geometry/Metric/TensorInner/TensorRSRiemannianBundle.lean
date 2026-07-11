@@ -16,6 +16,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Riemannian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap Bornology

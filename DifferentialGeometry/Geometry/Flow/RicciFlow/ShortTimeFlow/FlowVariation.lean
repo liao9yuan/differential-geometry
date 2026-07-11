@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Manifold Bundle

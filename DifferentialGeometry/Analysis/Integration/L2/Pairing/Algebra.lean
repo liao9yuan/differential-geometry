@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold MeasureTheory Set Filter Bundle Tensor0SBundle

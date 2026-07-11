@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Topology.Order.Compact
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set Filter Topology

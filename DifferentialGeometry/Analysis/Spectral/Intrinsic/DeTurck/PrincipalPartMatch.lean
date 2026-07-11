@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open Bundle

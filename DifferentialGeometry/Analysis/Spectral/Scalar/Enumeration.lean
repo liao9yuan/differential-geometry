@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

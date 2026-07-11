@@ -18,6 +18,8 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Topology.UniformSpace.Cauchy
 import Mathlib.Topology.EMetricSpace.Lipschitz
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

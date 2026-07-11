@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLinearMapSmoothness
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real

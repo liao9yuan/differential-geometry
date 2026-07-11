@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option maxHeartbeats 1600000

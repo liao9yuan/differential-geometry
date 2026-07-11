@@ -5,6 +5,8 @@ import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Lemmas
 import Mathlib.Analysis.Normed.Operator.BoundedLinearMaps
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Function

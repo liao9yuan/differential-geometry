@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set Filter

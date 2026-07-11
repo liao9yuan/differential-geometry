@@ -7,6 +7,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Analysis.InnerProductSpace.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Bundle Manifold

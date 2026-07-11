@@ -3,6 +3,10 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
+set_option linter.unnecessarySimpa false
+
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry
 namespace PDE
 namespace RicciFlow

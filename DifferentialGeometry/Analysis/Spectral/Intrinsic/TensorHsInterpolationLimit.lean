@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Filter

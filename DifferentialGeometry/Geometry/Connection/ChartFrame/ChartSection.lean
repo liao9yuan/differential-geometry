@@ -6,6 +6,8 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

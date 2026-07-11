@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set Filter MeasureTheory Topology

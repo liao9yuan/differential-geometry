@@ -9,6 +9,8 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.Calculus.TangentCone.Basic
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set

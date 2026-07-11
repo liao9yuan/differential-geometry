@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 namespace DifferentialGeometry

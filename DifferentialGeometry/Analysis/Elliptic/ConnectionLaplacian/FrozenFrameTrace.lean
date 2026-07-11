@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace

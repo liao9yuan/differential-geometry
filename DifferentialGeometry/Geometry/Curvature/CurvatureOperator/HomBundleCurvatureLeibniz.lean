@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

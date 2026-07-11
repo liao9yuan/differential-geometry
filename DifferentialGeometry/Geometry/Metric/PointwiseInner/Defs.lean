@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Metric.PointwiseInner.DualMetric
 import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Data.Real.Sqrt
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold Set Filter Bundle Tensor0SBundle

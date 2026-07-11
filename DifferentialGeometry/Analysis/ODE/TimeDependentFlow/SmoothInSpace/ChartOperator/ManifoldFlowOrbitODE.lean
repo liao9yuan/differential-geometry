@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ManifoldFlowOrbitReduction
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE

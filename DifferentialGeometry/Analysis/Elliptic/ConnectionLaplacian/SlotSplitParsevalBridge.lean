@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option maxHeartbeats 1600000

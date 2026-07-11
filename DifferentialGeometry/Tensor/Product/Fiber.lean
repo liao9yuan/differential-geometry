@@ -4,6 +4,8 @@ Authors: Jack McCarthy
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import Mathlib.Topology.VectorBundle.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set

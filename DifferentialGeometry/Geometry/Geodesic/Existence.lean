@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

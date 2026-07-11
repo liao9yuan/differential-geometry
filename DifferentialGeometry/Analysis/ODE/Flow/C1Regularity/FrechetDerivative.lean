@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.VariationalSolutionOperator
 import Mathlib.Analysis.Calculus.MeanValue
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Metric Asymptotics Real

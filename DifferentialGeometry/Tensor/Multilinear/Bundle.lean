@@ -7,6 +7,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set

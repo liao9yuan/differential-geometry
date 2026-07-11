@@ -5,6 +5,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter

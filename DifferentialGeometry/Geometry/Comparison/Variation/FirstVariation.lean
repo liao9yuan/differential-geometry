@@ -20,6 +20,8 @@ import Mathlib.Topology.Compactness.Compact
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

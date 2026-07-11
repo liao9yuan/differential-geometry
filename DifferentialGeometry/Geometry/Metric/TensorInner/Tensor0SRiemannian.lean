@@ -22,6 +22,8 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap Bornology

@@ -5,6 +5,8 @@ import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic
 import Mathlib.Data.Fin.Tuple.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold Set Filter Bundle Tensor0SBundle

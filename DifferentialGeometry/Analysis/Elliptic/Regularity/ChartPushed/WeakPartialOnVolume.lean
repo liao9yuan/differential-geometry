@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientH1Lipsc
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

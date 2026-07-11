@@ -9,6 +9,8 @@ import Mathlib.Analysis.InnerProductSpace.Dual
 import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open scoped Manifold ContDiff

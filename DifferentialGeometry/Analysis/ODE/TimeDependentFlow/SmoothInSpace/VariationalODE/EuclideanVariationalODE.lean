@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.BanachIC
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 namespace DifferentialGeometry.Analysis.ODE.Flow

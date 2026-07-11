@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

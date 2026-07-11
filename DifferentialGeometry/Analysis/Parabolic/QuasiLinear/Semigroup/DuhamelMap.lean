@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Se
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Filter Topology MeasureTheory

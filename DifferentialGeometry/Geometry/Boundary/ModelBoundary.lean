@@ -8,6 +8,8 @@ import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Topology

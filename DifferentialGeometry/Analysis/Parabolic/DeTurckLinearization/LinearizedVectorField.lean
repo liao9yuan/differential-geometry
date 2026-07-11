@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChristoffelLinearization
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function

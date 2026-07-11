@@ -11,6 +11,8 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyRieszKern
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreySmoothHolderBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreySmoothInequality
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Metric Function

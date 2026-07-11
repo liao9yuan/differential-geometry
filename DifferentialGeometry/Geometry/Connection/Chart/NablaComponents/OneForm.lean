@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.Basic
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

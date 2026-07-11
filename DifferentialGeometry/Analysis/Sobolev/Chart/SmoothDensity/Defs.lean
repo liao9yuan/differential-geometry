@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.Completene
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function

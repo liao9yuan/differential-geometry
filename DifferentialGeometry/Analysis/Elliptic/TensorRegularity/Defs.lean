@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter

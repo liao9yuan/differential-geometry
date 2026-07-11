@@ -11,6 +11,8 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.LocallyConvex.Bounded
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Topology Bundle Manifold MeasureTheory Bornology

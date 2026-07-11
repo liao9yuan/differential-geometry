@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbolFormula
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function

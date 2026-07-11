@@ -12,6 +12,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.Topology.VectorBundle.FiniteDimensional
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Module

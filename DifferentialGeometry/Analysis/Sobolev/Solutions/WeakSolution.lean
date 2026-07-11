@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function

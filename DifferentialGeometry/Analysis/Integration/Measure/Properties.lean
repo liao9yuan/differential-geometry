@@ -11,6 +11,8 @@ import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Function

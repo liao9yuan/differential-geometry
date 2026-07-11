@@ -16,6 +16,8 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

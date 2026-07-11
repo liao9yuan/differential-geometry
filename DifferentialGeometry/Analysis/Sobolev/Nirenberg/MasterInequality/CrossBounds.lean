@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBou
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function

@@ -6,6 +6,8 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 import DifferentialGeometry.Bundle.Section
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

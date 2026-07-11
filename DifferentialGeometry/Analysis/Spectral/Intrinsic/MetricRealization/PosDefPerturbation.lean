@@ -6,6 +6,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap

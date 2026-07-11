@@ -18,6 +18,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Compactness.Compact
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

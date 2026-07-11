@@ -7,6 +7,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
+set_option linter.unusedSectionVars false
+
 namespace Tensor0SBundle
 noncomputable section
 

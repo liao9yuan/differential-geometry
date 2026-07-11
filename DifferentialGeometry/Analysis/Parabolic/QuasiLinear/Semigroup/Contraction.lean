@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.DuhamelMap
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Filter Topology MeasureTheory

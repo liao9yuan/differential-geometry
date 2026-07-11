@@ -4,6 +4,8 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.Compactness.SigmaCompact
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Topology

@@ -3,6 +3,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Riemannian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle

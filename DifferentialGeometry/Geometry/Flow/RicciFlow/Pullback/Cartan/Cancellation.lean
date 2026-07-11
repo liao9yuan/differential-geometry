@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 namespace DifferentialGeometry

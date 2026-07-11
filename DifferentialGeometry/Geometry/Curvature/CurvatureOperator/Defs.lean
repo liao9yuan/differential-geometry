@@ -9,6 +9,8 @@ import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Topology.FiberBundle.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace

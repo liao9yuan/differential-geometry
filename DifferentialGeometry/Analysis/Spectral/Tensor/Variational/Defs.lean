@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import Mathlib.Analysis.InnerProductSpace.LaxMilgram
 import Mathlib.Analysis.InnerProductSpace.Dual
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

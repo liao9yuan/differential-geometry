@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option maxHeartbeats 1600000

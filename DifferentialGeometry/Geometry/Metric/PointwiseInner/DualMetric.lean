@@ -6,6 +6,8 @@ import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Multilinear.Basis
 import Mathlib.Algebra.BigOperators.Ring.Finset
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold Set Filter Bundle Tensor0SBundle

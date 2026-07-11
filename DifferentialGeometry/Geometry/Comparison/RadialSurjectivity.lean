@@ -10,6 +10,8 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Analysis.Convex.Star
 import Mathlib.Analysis.Convex.PathConnected
 
+set_option linter.unusedSectionVars false
+
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace

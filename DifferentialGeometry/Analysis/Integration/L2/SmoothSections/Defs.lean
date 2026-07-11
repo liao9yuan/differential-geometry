@@ -4,6 +4,8 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Topology.Algebra.Support
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

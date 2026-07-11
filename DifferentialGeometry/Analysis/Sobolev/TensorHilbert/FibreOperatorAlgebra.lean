@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Inherited
 import DifferentialGeometry.Tensor.Auxiliary.BanachAlgebraSmoothness
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open scoped ContDiff Topology

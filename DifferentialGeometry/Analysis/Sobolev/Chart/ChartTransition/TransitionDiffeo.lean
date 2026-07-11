@@ -5,6 +5,8 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Data.Nat.Choose.Bounds
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold

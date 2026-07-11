@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Topology.Sequences
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

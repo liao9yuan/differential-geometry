@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransport
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

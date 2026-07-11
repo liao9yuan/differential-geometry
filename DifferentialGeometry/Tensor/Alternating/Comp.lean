@@ -10,6 +10,9 @@ import Mathlib.Analysis.Calculus.ContDiff.CPolynomial
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
+
 open ContinuousAlternatingMap
 
 noncomputable section Comp

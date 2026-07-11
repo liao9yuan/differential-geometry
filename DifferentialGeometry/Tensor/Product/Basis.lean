@@ -4,6 +4,8 @@ Authors: Jack McCarthy
 import DifferentialGeometry.Tensor.Product.Bundle
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open scoped TensorProduct

@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelCorrection
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.Analysis.Calculus.FDeriv.Congr
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace

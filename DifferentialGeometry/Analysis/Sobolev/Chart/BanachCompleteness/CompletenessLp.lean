@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.Embedding
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold

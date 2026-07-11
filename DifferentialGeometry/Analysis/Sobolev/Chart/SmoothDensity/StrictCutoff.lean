@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Topology Bundle Manifold Filter

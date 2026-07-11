@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCu
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

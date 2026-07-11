@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 set_option synthInstance.maxHeartbeats 800000
 set_option maxHeartbeats 1600000

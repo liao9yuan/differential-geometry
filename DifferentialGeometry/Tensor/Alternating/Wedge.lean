@@ -15,6 +15,8 @@ import DifferentialGeometry.Tensor.Product.Defs
 import DifferentialGeometry.Tensor.Alternating.Basis
 import DifferentialGeometry.Tensor.Auxiliary.Shuffle.Derivative
 
+set_option linter.flexible false
+
 noncomputable section
 
 namespace ContinuousAlternatingMap

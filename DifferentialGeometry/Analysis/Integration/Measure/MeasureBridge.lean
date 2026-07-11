@@ -10,6 +10,8 @@ import Mathlib.MeasureTheory.Measure.Map
 import Mathlib.MeasureTheory.Integral.Lebesgue.Map
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function

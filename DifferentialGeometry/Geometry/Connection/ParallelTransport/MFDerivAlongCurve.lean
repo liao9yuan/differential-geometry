@@ -5,6 +5,8 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Bundle

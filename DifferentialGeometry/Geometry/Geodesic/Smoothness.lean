@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import Mathlib.Analysis.ODE.PicardLindelof
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

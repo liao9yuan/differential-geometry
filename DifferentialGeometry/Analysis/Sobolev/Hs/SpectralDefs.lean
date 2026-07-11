@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Spectral.Scalar.EigenIdx
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

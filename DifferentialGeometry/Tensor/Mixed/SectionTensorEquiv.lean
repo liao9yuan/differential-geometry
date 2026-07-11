@@ -7,6 +7,8 @@ import DifferentialGeometry.Tensor.Mixed.Naturality
 import DifferentialGeometry.Tensor.Product.Section
 import DifferentialGeometry.Tensor.Product.HomEquiv
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set ContinuousLinearMap

@@ -8,6 +8,8 @@ import Mathlib.Analysis.LocallyConvex.Bounded
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set ContinuousLinearMap Bornology Metric

@@ -10,6 +10,8 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeL2Eige
 import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import Mathlib.Analysis.ODE.Gronwall
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

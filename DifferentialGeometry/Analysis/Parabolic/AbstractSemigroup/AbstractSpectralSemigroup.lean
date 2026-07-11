@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Se
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.SpecialFunctions.Exp
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Filter Topology

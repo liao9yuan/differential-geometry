@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSecondOrd
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function

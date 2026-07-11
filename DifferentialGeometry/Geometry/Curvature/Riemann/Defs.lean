@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Operator.Hessian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory

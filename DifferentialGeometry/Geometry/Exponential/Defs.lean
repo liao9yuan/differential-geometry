@@ -4,6 +4,8 @@ import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import Mathlib.Topology.Connected.Clopen
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

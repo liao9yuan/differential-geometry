@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Metric Bundle Manifold Real

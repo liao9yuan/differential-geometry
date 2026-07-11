@@ -19,6 +19,8 @@ import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Compactness.Compact
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

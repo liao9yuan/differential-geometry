@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifold
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

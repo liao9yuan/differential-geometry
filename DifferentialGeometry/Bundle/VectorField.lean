@@ -12,6 +12,8 @@ import Mathlib.Analysis.Normed.Module.Dual
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.LinearAlgebra.Multilinear.Basic
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry
 
 open scoped Manifold

@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

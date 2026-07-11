@@ -10,6 +10,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.LinearAlgebra.Trace
 
+set_option linter.unusedSectionVars false
+
 namespace Tensor0SBundle
 noncomputable section
 

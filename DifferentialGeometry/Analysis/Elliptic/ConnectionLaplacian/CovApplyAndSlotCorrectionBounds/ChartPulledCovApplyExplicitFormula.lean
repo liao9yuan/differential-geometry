@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
+set_option linter.unusedSectionVars false
+
 open DifferentialGeometry.Integral.L2 (SmoothCcTensor)
 
 noncomputable section

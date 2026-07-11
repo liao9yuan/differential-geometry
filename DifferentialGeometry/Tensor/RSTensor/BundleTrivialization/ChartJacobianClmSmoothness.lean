@@ -9,6 +9,8 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Basis.Defs
 import Mathlib.LinearAlgebra.Dimension.Free
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap

@@ -9,6 +9,9 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
+
 noncomputable section Comp
 
 namespace ContinuousLinearMap

@@ -8,6 +8,8 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.Algebra.Support
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold MeasureTheory Set Filter

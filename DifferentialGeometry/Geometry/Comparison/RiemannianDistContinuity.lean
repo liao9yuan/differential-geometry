@@ -5,6 +5,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Instances.ENNReal.Lemmas
 
+set_option linter.unusedSectionVars false
+
 open Set Function Filter Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
 

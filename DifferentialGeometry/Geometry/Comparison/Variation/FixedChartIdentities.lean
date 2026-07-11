@@ -11,6 +11,8 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Manifold Bundle

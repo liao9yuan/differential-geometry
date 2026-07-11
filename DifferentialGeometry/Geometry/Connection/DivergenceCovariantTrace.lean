@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Connection.ChartFrameNormGlobalSmoothCoordB
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.ChartInvariance
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

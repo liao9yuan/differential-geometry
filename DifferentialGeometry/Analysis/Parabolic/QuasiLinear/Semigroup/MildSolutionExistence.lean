@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.Contraction
 import Mathlib.Topology.MetricSpace.Contracting
 import Mathlib.Topology.ContinuousMap.Compact
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Filter Topology MeasureTheory

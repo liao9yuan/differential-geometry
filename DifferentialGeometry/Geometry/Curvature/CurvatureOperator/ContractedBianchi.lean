@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
 
+set_option linter.flexible false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle NormedSpace Filter

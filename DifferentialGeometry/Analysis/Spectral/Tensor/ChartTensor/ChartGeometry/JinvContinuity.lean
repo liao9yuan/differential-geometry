@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Operator.Bilinear
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Set IsManifold ContinuousLinearMap

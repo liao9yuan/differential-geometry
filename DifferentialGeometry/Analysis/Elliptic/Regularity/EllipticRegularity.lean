@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSo
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold

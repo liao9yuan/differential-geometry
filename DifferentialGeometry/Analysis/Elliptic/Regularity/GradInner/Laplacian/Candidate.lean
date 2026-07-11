@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.LpI
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.LpClass
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory Filter Topology Function

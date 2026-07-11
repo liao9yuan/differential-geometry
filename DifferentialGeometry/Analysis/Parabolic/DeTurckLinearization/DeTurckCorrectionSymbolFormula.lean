@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbolFormula
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function

@@ -5,6 +5,8 @@ import Mathlib.Geometry.Manifold.VectorBundle.Basic
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

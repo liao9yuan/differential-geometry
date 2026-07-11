@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry
 namespace PDE
 

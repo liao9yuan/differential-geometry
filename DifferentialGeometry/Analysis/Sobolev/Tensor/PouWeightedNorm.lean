@@ -1,6 +1,8 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

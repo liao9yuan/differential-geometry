@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetr
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

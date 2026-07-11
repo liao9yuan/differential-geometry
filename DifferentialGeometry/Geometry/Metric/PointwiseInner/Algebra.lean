@@ -8,6 +8,8 @@ import Mathlib.LinearAlgebra.Multilinear.Basis
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Data.Real.Sqrt
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold Set Filter Bundle Tensor0SBundle

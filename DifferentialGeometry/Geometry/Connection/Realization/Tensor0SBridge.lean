@@ -2,6 +2,8 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

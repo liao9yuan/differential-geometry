@@ -11,6 +11,8 @@ import Mathlib.LinearAlgebra.Matrix.Adjugate
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Data.Matrix.Mul
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

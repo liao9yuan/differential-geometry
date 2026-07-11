@@ -1,6 +1,8 @@
 import DifferentialGeometry.Tensor.RSTensor.Derivation.LieDerivative
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
+set_option linter.unusedSectionVars false
+
 namespace TensorLieDeriv
 
 noncomputable section

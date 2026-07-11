@@ -7,6 +7,8 @@ import DifferentialGeometry.Tensor.Multilinear.Bundle
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

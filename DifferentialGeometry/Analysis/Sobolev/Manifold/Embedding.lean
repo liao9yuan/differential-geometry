@@ -7,6 +7,8 @@ import Mathlib.MeasureTheory.Measure.OpenPos
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Topology.Bornology.BoundedOperation
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Bundle Manifold Function

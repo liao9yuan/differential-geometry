@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

@@ -2,6 +2,8 @@ import DifferentialGeometry.Geometry.Boundary.InducedMetric
 import DifferentialGeometry.Geometry.Boundary.SurfaceMeasure
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set MeasureTheory

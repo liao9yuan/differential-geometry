@@ -9,6 +9,8 @@ import Mathlib.MeasureTheory.Covering.DensityTheorem
 import Mathlib.MeasureTheory.Integral.Average
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyRieszKernel
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Set Filter Topology Metric Function

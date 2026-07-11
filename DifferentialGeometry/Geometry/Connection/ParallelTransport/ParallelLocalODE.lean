@@ -7,6 +7,8 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.ODE.Gronwall
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

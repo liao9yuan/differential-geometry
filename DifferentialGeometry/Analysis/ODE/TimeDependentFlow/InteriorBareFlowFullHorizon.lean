@@ -5,6 +5,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbit
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.FromZeroManifoldOrbitUniqueness
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.ForwardIntegralCurveUniqueness
 
+set_option linter.unusedSectionVars false
+
 open Set Function Filter Bundle
 open scoped Topology Manifold ContDiff NNReal
 

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Variational
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Metric Asymptotics

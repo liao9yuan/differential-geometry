@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Boundary.OutwardNormal
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Topology Bundle Manifold MeasureTheory

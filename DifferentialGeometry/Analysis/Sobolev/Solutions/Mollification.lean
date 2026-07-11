@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import Mathlib.Analysis.Calculus.BumpFunction.Convolution
 import Mathlib.Analysis.Calculus.ContDiff.Convolution
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function

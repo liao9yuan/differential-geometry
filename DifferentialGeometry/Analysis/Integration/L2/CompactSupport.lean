@@ -12,6 +12,8 @@ import Mathlib.MeasureTheory.Function.ContinuousMapDense
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Indicator
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Manifold Set Filter Bundle CovariantDerivative

@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import DifferentialGeometry.Geometry.Exponential.Defs
 import Mathlib.Analysis.ODE.Gronwall
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

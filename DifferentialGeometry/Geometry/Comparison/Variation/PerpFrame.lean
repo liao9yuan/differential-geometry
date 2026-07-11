@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.ParallelTransp
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Filter Bundle Manifold

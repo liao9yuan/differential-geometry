@@ -13,6 +13,8 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Function Topology Bundle Manifold MeasureTheory

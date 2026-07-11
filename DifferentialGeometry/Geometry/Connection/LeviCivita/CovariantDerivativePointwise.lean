@@ -6,6 +6,8 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.Covarian
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback

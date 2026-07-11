@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set FiberBundle

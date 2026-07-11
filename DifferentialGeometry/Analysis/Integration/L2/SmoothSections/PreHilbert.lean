@@ -8,6 +8,8 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false

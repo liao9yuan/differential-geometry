@@ -5,6 +5,8 @@ import Mathlib.LinearAlgebra.Trace
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
 
+set_option linter.unusedSectionVars false
+
 
 namespace Tensor0SBundle
 

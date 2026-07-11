@@ -6,6 +6,8 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.Normed.Group.Tannery
 import Mathlib.Analysis.Calculus.Deriv.Slope
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Set Filter Topology

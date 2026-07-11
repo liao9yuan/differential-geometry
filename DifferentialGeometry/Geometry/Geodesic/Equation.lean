@@ -3,6 +3,8 @@ import DifferentialGeometry.Geometry.Operator.HessianTrace
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

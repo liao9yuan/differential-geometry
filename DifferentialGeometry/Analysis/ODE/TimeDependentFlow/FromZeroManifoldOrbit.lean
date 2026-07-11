@@ -3,6 +3,8 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOp
 import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 
+set_option linter.unusedSectionVars false
+
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
 

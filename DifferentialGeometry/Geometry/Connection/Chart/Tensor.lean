@@ -1,6 +1,8 @@
 import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
+set_option linter.unusedSectionVars false
+
 
 namespace DifferentialGeometry
 namespace Coordinates

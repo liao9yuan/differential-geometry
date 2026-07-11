@@ -7,6 +7,8 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.UniformChartFlowBrid
 import DifferentialGeometry.Geometry.Exponential.Smoothness.ZeroSectionConstancy
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

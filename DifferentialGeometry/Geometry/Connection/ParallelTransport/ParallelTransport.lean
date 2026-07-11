@@ -12,6 +12,8 @@ import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.ODE.Gronwall
 import Mathlib.Analysis.Calculus.MeanValue
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

@@ -1,5 +1,7 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.FrechetKolmogorov
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open MeasureTheory Metric Filter Topology Set Function

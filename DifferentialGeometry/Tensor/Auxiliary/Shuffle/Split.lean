@@ -6,6 +6,11 @@ Authors: Jack McCarthy
 import Mathlib.GroupTheory.Perm.Option
 import Mathlib.LinearAlgebra.Alternating.DomCoprod
 
+set_option linter.flexible false
+
+set_option linter.unusedFintypeInType false
+set_option linter.unusedDecidableInType false
+
 namespace ShuffleSplit
 
 variable {α₀ : Type*} {β : Type*}

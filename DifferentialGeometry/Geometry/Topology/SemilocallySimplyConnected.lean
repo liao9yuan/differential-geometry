@@ -9,6 +9,8 @@ import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Topology.OpenPartialHomeomorph.Constructions
 
+set_option linter.unusedSectionVars false
+
 open Set Function Filter Metric Bundle Manifold
 open scoped Topology Manifold ContDiff
 

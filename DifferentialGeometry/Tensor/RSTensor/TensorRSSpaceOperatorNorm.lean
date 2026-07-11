@@ -1,5 +1,7 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 namespace Tensor0SBundle

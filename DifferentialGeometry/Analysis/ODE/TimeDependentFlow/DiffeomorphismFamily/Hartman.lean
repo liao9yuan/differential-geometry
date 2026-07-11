@@ -5,6 +5,8 @@ import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.UniformBijective
 
+set_option linter.unusedSectionVars false
+
 open scoped Manifold Topology ContDiff
 
 theorem time_dependent_vf_globalflow_diffeomorph

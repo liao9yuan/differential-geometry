@@ -1,6 +1,8 @@
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Topology.MetricSpace.Lipschitz
 
+set_option linter.unusedSectionVars false
+
 open scoped InnerProductSpace
 
 variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]

@@ -4,6 +4,8 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold MeasureTheory Set Filter

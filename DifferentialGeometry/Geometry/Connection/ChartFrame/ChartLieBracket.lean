@@ -1,6 +1,8 @@
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set Filter

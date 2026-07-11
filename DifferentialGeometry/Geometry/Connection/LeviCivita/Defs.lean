@@ -7,6 +7,8 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsio
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartMetric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 
+set_option linter.unusedSectionVars false
+
 noncomputable section
 
 open Bundle Manifold Set

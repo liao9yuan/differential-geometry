@@ -8,6 +8,8 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.TensorSectionL2Bo
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
+set_option linter.unusedSectionVars false
+
 namespace DifferentialGeometry.PDE.RicciFlow
 
 open Bundle Tensor0SBundle

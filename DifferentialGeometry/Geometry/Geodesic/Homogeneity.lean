@@ -1,5 +1,7 @@
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 

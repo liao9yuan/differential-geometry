@@ -5,6 +5,8 @@ import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Exponential.Smoothness.ChartFlowVelocitySlice
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
+set_option linter.unusedSectionVars false
+
 
 noncomputable section
 
