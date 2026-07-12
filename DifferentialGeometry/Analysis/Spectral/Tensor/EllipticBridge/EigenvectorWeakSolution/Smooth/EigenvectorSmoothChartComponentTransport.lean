@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.ChartTransitionTransportCLM
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.QuasiMeasurePreserving
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -61,6 +60,7 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
+set_option linter.unusedSectionVars false in
 lemma mem_chartOverlapEuclid_iff_of_mem_chartTargetEuclid
     (β γ : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) β) :
@@ -93,6 +93,7 @@ private def chartKernelCutoffPushed (γ : M) : EuclN → ℝ :=
   chartPushedRaw (I := I) (M := M) γ
     (fun x => ((chartKernelCutoff (I := I) (M := M) γ : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
+set_option linter.unusedSectionVars false in
 private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
     (γ : M) {y : EuclN}
     (hy : y ∈ chartPouKernel (I := I) (M := M) γ) :
@@ -114,6 +115,7 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) γ _ hy_target, hsymm]
   exact chartKernelCutoff_eqOn_one (I := I) (M := M) γ hw_supp
 
+set_option linter.unusedSectionVars false in
 private lemma chartKernelCutoffPushed_toEuclidean_extChartAt
     (γ : M) {z : M} (hz : z ∈ (chartAt H γ).source) :
     chartKernelCutoffPushed (I := I) (M := M) γ

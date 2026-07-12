@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapL2WtwokTwoBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ noncomputable def rawTensorConnLapSmooth
     (rawTensorConnLap_contMDiff (I := I) g r s (fun z : M => T.toSection z)
       T.toSection.contMDiff_toFun)
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma rawTensorConnLapSmooth_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (x : M) :
@@ -56,16 +56,19 @@ noncomputable def rawTensorConnLapIter
   | k + 1, T => rawTensorConnLapSmooth (I := I) g r s
                   (rawTensorConnLapIter g r s k T)
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem rawTensorConnLapIter_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     rawTensorConnLapIter (I := I) g r s 0 T = T := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem rawTensorConnLapIter_succ
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : SmoothCcTensor g r s) :
     rawTensorConnLapIter (I := I) g r s (k + 1) T =
       rawTensorConnLapSmooth (I := I) g r s
         (rawTensorConnLapIter (I := I) g r s k T) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma rawTensorConnLapIter_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     rawTensorConnLapIter (I := I) g r s 1 T =

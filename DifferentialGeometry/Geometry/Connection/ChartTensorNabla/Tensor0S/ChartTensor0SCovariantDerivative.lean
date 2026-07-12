@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Geometry.Metric.TensorInner.Tensor0SRiemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,10 +26,12 @@ def chartParallelExtend (α b : M) (v : TangentSpace I b) (b' : M) :
     TangentSpace I b' :=
   trivFromE (I := I) α b' (trivToE (I := I) α b v)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartParallelExtend_def (α b : M) (v : TangentSpace I b) (b' : M) :
     chartParallelExtend (I := I) α b v b' =
       trivFromE (I := I) α b' (trivToE (I := I) α b v) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_chartParallelExtend
     (α b : M) (v : TangentSpace I b) {b' : M}
     (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -51,6 +52,7 @@ def chartLeviCivitaParallelCLM
     (christoffelCorrection (I := I) g α b
       (trivToE (I := I) α b (X b)))
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartLeviCivitaParallelCLM_apply
     (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b') (v : TangentSpace I b) :
@@ -67,12 +69,14 @@ private def slotCLM (s : ℕ) {b : M}
     (i : Fin s) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private lemma slotCLM_self (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     slotCLM (I := I) s k Φ k = Φ := by
   unfold slotCLM
   simp
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private lemma slotCLM_other (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin s} (h : i ≠ k) :
@@ -88,6 +92,7 @@ def chartTensor0SSlotCorrection (s : ℕ) (g : SmoothRiemannianMetric I M)
     (show ContinuousMultilinearMap ℝ (fun _ : Fin s => TangentSpace I b) ℝ from T b)
     (slotCLM (I := I) s k (chartLeviCivitaParallelCLM (I := I) g α b X))
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_apply (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -119,6 +124,7 @@ def chartTensor0SCovariantDerivative :
         - ∑ k : Fin (s + 1),
             chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace 0 I b)
@@ -131,6 +137,7 @@ lemma chartTensor0SCovariantDerivative_zero
                   (fun _ : Fin 0 => TangentSpace I b') ℝ from T b')
               (fun i => Fin.elim0 i)) b (X b))) := rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -140,6 +147,7 @@ lemma chartTensor0SCovariantDerivative_succ (s : ℕ)
         - ∑ k : Fin (s + 1),
             chartTensor0SSlotCorrection (I := I) (s + 1) g α T X b k := rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace 0 I b)
@@ -155,6 +163,7 @@ lemma chartTensor0SCovariantDerivative_zero_apply
   rw [chartTensor0SCovariantDerivative_zero]
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ_apply (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -194,6 +203,7 @@ lemma chartTensor0SCovariantDerivative_succ_apply (s : ℕ)
         ∑ k : Fin (s + 1), Y k) m = _
   rw [ContinuousMultilinearMap.sum_apply]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b : M, Tensor0SSpace 0 I b)
@@ -254,6 +264,7 @@ lemma chartTensor0SCovariantDerivative_zero_add
   rw [mfderiv_add h₁ h₂]
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_zero_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b : M, Tensor0SSpace 0 I b)
@@ -297,6 +308,7 @@ lemma chartTensor0SCovariantDerivative_zero_smul
   rw [const_smul_mfderiv hT c]
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_add (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b' : M, Tensor0SSpace s I b')
@@ -319,6 +331,7 @@ lemma chartTensor0SSlotCorrection_add (s : ℕ)
   intro m
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_smul (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -338,6 +351,7 @@ lemma chartTensor0SSlotCorrection_smul (s : ℕ)
   intro m
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ_add (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -378,6 +392,7 @@ lemma chartTensor0SCovariantDerivative_succ_add (s : ℕ)
   rw [hsplit_slot]
   abel
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SCovariantDerivative_succ_smul (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)

@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotSwapPairingCalculus
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ private lemma cons_cons_comp_decomposeFin_double {α : Type*} {s : ℕ}
       simp only [Equiv.refl_apply, Fin.cons_succ]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add (s : ℕ) (S S' : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (S + S') x =
       unitModel (I := I) (M := M) g s S x + unitModel (I := I) (M := M) g s S' x := by
@@ -201,6 +201,7 @@ theorem rawTensorConnLapSmooth_domDomCongrSection {s : ℕ}
     (fun j => (v j : E))] at h2x
   exact h2x
 
+omit [BoundarylessManifold I M] in
 private lemma lambda_eq_of_fst_eq
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
     (h : i.1 = j.1) :
@@ -209,6 +210,7 @@ private lemma lambda_eq_of_fst_eq
   congrArg (fun μ : TensorNonzeroResolventEigenvalue (I := I) (M := M) g 0 2 =>
     tensorLaplacianEigenvalueOf μ.val) h
 
+omit [BoundarylessManifold I M] in
 private lemma fst_eq_of_lambda_eq
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
     (h : TensorEigenIdx.lambda (I := I) (M := M) i =
@@ -221,6 +223,7 @@ private lemma fst_eq_of_lambda_eq
   refine TensorNonzeroResolventEigenvalue.ext i.1 j.1 ?_
   linear_combination -h'
 
+set_option linter.unusedSectionVars false in
 private lemma tensorSobolevWeight_eq_of_fst_eq
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
     (h : i.1 = j.1) (σ : ℝ) :
@@ -229,6 +232,7 @@ private lemma tensorSobolevWeight_eq_of_fst_eq
   unfold tensorSobolevWeight
   rw [lambda_eq_of_fst_eq (I := I) (M := M) g h]
 
+omit [BoundarylessManifold I M] in
 private lemma eigenbasis_eq_toL2_eigenSmooth
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2) :
     tensorResolventHilbertEigenbasisSigma (I := I) (M := M)
@@ -239,6 +243,7 @@ private lemma eigenbasis_eq_toL2_eigenSmooth
     SmoothCcTensor.toL2_apply (eigenSmooth (I := I) (M := M) g i)]
   exact (eigenvectorSmooth_toL2 (I := I) (M := M) g 0 2 i).symm
 
+omit [BoundarylessManifold I M] in
 private lemma tensorL2_ext_of_coeff_eq {U V : TensorL2 0 2 g}
     (h : ∀ k, tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g) U k =
       tensorL2Coeff (I := I) (M := M) (hCompact (I := I) (M := M) g) V k) :
@@ -346,6 +351,7 @@ theorem orthonormal_toL2_swap_eigenSmooth :
 
 open scoped Classical in
 
+omit [BoundarylessManifold I M] in
 private lemma tensorL2Coeff_sum_smul_eigenbasis
     (S : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ)
@@ -381,6 +387,7 @@ private lemma tensorL2Coeff_sum_smul_eigenbasis
     intro j hj
     rw [if_neg (fun h => hkS (by rw [h]; exact hj))]
 
+set_option linter.unusedSectionVars false in
 private lemma eq_sum_of_tensorL2Coeff_support
     (S : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (U : TensorL2 0 2 g)

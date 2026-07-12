@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -26,6 +25,7 @@ variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
 def coframeOfBasis (basis : Module.Basis Idx Real V) (i : Idx) : V →L[Real] Real :=
   LinearMap.toContinuousLinearMap (basis.coord i)
 
+omit [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem coframeOfBasis_apply (basis : Module.Basis Idx Real V) (i : Idx) (v : V) :
     coframeOfBasis basis i v = basis.coord i v :=
@@ -37,6 +37,7 @@ def continuousMultilinearMapBasisElem
   (ContinuousMultilinearMap.mkPiRing Real (Fin s) (1 : Real)).compContinuousLinearMap
     (fun a => coframeOfBasis basis (slots a))
 
+omit [Fintype Idx] in
 @[simp]
 theorem continuousMultilinearMapBasisElem_apply
     (basis : Module.Basis Idx Real V) (s : Nat)
@@ -126,6 +127,7 @@ def component0S
     (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) : Real :=
   A (fun a => basis (slots a))
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_apply
     (basis : Module.Basis Idx Real (TangentSpace I x))

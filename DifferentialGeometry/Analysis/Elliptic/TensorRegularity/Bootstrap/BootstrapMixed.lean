@@ -164,6 +164,7 @@ theorem wkpNorm_finset_sum_le
           (Finset.sum_nonneg hκ_S),
         add_mul]
 
+omit [NeZero d] in
 theorem classicalPartial_memWkp_of_memWkp_succ
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -179,6 +180,7 @@ theorem classicalPartial_memWkp_of_memWkp_succ
   exact (MemWkp_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mp
     h_chosen_mem
 
+omit [NeZero d] in
 theorem wkpNorm_classicalPartial_le
     {k : ℕ} {Ω : Set EE} (hΩ : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)

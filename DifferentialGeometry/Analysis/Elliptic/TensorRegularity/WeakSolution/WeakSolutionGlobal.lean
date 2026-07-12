@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Cha
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.SourcePairing
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartIntegrationByParts
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -67,6 +66,7 @@ noncomputable def covLowerOrderRotationGradCoeff
               covDerivLowerOrderTerm (I := I) (M := M) g r s T α k P.1 P.2 y *
               covChartMetricGramInv (I := I) (M := M) g r s α y Q P₀
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covLowerOrderRotationGradCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -106,6 +106,7 @@ noncomputable def covLowerOrderRotationValueCoeff
                       lowerOrderRotationLOCoeff (I := I) (M := M)
                         g r s α P₀ l Q y)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covLowerOrderRotationValueCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -355,6 +356,7 @@ theorem covLowerOrderIntegrand_rotated_collapse
       rw [Finset.mul_sum, Finset.sum_mul]
     rw [hLHS, hRHS]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma euclidPartial_contDiffOn_target
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclN → ℝ}
@@ -480,6 +482,7 @@ noncomputable def covPrincipalRotationCoeff
                 euclidPartial (E := E) l
                   (gramInvEntry (I := I) (M := M) g r s α Q P₀) y
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covPrincipalRotationCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -498,6 +501,7 @@ lemma covPrincipalRotationCoeff_def
                   euclidPartial (E := E) l
                     (gramInvEntry (I := I) (M := M) g r s α Q P₀) y := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covPrincipalRotationRemainder_eq_coeff_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -565,6 +569,7 @@ noncomputable def weightedGradCoeff
   fun y => densityOnEuclid (I := I) g α y *
     covLowerOrderRotationGradCoeff (I := I) (M := M) g r s T α P₀ l y
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma weightedGradCoeff_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -606,6 +611,7 @@ noncomputable def tensorComponentWeakRHS
             (weightedGradCoeff (I := I) (M := M) g r s T α P₀ l) y
     else 0
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentWeakRHS_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -626,6 +632,7 @@ lemma tensorComponentWeakRHS_apply_of_mem
   unfold tensorComponentWeakRHS
   rw [if_pos hy]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentWeakRHS_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T F : SmoothCcTensor g r s) (α : M)
@@ -637,6 +644,7 @@ lemma tensorComponentWeakRHS_apply_of_notMem
   unfold tensorComponentWeakRHS
   rw [if_neg hy]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_of_contDiffOn_zero_off_closed_local
     {P : EuclN → ℝ} {U C : Set EuclN}
     (hU : IsOpen U) (hC : IsClosed C) (hCU : C ⊆ U)
@@ -652,6 +660,7 @@ private lemma contDiff_of_contDiffOn_zero_off_closed_local
     refine (contDiffAt_const (c := (0 : ℝ))).congr_of_eventuallyEq ?_
     filter_upwards [hy_nhds] with z hz using hzero z hz
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eq_zero_off_closed
     {u : EuclN → ℝ} {C : Set EuclN} (hC : IsClosed C)
     (hu : ∀ z, z ∉ C → u z = 0)
@@ -664,6 +673,7 @@ private lemma euclidPartial_eq_zero_off_closed
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eq_zero_of_open_zero
     {u : EuclN → ℝ} {U : Set EuclN} (hU : IsOpen U) {y : EuclN} (hy : y ∈ U)
     (hu : ∀ z ∈ U, u z = 0) (l : Fin (Module.finrank ℝ E)) :
@@ -674,6 +684,7 @@ private lemma euclidPartial_eq_zero_of_open_zero
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+omit [CompleteSpace E] in
 private lemma tensorComponentEuclid_eq_zero_off_image
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -692,6 +703,7 @@ private lemma tensorComponentEuclid_eq_zero_off_image
     exact (Set.image_mono (Set.image_mono hsub)) hmem
   · exact tensorComponentEuclid_apply_of_notMem (I := I) (M := M) g r s S α P hyT
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma image_tsupport_isCompact
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -707,6 +719,7 @@ private lemma image_tsupport_isCompact
     hTcompact.image_of_continuousOn hcontOn
   exact himg1.image (toEuclidean (E := E)).continuous
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma image_tsupport_subset_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

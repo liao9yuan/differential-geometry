@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.ZeroSectionConstancy
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MatchDataReduction
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowData
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -29,6 +28,7 @@ section UnconditionalDischarge
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem hasChartFlowGeodesicMatchData_unconditional
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasChartFlowGeodesicMatchData (I := I) g p := by
@@ -109,6 +109,7 @@ section TrulyUnconditional
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffAt 𝓘(ℝ, E) I 1

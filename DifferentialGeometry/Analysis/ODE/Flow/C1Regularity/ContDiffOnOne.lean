@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.JointFrechetDerivative
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -18,6 +17,7 @@ namespace IsLocalFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 lemma restrict_center
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {x₁ : E} {r' : ℝ≥0}
@@ -32,6 +32,7 @@ lemma restrict_center
     obtain ⟨L, hL⟩ := hΦ.exists_lipschitz
     exact ⟨L, fun t ht => (hL t ht).mono hsub⟩
 
+omit [CompleteSpace E] in
 lemma restrict_center_of_norm_le
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {x₁ : E} {r' : ℝ≥0}
@@ -84,6 +85,7 @@ section GronwallCompare
 
 variable {f : ℝ → E → E} {t₀ : ℝ}
 
+omit [CompleteSpace E] in
 theorem variationalSolution_compare_norm
     {α₁ α₂ : ℝ → E} {T M ε : ℝ}
     (hT : 0 < T) (hM : 0 ≤ M) (hε : 0 ≤ ε)
@@ -388,6 +390,7 @@ section JointContinuity
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 lemma continuousOn_fderiv_jointly
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -439,6 +442,7 @@ lemma differentiableOn_flow_of_isLocalFlow
   have h := hasFDerivAt_flow_jointly_at hΦ hf_C1 hT hM hMT hsub hr' hρρ' hA_bd hx_cb hp_t
   exact h.differentiableAt.differentiableWithinAt
 
+omit [CompleteSpace E] in
 lemma continuousOn_timePiece
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -459,6 +463,7 @@ lemma continuousOn_timePiece
       (Set.univ : Set (ℝ × E)) := fun _ _ => mem_univ _
   exact hf_cont.continuousOn.comp hmap hmt
 
+omit [CompleteSpace E] in
 lemma uniformly_close_fderiv_in_x
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))

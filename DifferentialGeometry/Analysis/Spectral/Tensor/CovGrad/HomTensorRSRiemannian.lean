@@ -5,7 +5,6 @@ import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.Order.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -193,6 +192,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma homTensorRS_riemannianFiberNormSq_clm_apply_le
     (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (v : TensorRSSpace r a I x) :
@@ -224,6 +224,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem continuous_homTensorRS_opNorm
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -248,6 +249,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem exists_uniform_homTensorRS_opNorm_sq
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -274,6 +276,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem exists_continuous_homTensorRS_opNorm_sq
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞

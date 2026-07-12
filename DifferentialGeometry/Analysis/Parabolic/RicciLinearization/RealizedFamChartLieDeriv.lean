@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRemainderOrderSplit
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -60,6 +59,7 @@ theorem hasDerivAt_realizedFam_chartLieDeTurckComp (g₀ : SmoothRiemannianMetri
   exact ((hjoint.comp s₀ ((contDiffAt_id).prodMk contDiffAt_const)).differentiableAt
     (by simp)).hasDerivAt
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_fderiv_comm_at' (Φ : ℝ × E → ℝ) (s₀ : ℝ) (y₀ : E) (v : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (s₀, y₀)) :
     HasDerivAt
@@ -122,6 +122,7 @@ private lemma hasDerivAt_fderiv_comm_at' (Φ : ℝ × E → ℝ) (s₀ : ℝ) (y
   rw [rhs_eq]
   exact h_sv'.congr_of_eventuallyEq lhs_eq
 
+set_option linter.unusedSectionVars false in
 private lemma hasDerivAt_partialDeriv_comm_at'
     (Φ : ℝ × E → ℝ) (p : Fin (Module.finrank ℝ E)) (s₀ : ℝ) (y₀ : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (s₀, y₀)) :

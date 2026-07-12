@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,12 +31,14 @@ private instance holderConjugate_conj (p : ℝ≥0∞) (hp : 1 ≤ p) :
     simp only [inv_one]
     exact conj_inv_add_inv_eq_one hp
 
+omit [NeZero d] in
 private lemma memLp_of_contDiff_hasCompactSupport
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ)
     (Ω : Set E) (q : ℝ≥0∞) :
     MemLp φ q (volume.restrict Ω) :=
   (hφ.continuous.memLp_of_hasCompactSupport hφ_supp).restrict _
 
+omit [NeZero d] in
 private lemma fderiv_apply_memLp
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (hφ_supp : HasCompactSupport φ)
     (v : E) (Ω : Set E) (q : ℝ≥0∞) :
@@ -49,6 +50,7 @@ private lemma fderiv_apply_memLp
     hφ_supp.fderiv_apply (𝕜 := ℝ) v
   exact (hcont.memLp_of_hasCompactSupport hcpt).restrict _
 
+omit [NeZero d] in
 private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
     {μ : Measure E} {f g : E → ℝ} {p q : ℝ≥0∞}
     [ENNReal.HolderConjugate p q]
@@ -84,6 +86,7 @@ private lemma abs_integral_mul_le_eLpNorm_mul_eLpNorm
     _ ≤ eLpNorm g q μ * eLpNorm f p μ := h_smul_bound
     _ = eLpNorm f p μ * eLpNorm g q μ := mul_comm _ _
 
+omit [NeZero d] in
 private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero
     {μ : Measure E} {p q : ℝ≥0∞}
     [ENNReal.HolderConjugate p q]
@@ -129,6 +132,7 @@ private lemma tendsto_integral_mul_of_eLpNorm_tendsto_zero
     exact squeeze_zero h_ge h_le_real h_rhs_real_tendsto
   exact (tendsto_zero_iff_abs_tendsto_zero _).2 h_abs_tendsto
 
+omit [NeZero d] in
 theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (_hp_top : p ≠ ∞)
     {Ω : Set E} (_hΩ_open : IsOpen Ω)
@@ -238,6 +242,7 @@ theorem hasWeakPartialDeriv_of_tendsto_eLpNorm
     -∫ x in Ω, g x * φ x
   simpa [dφ] using h_unique
 
+omit [NeZero d] in
 private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set E} (hΩ : IsOpen Ω)
@@ -284,6 +289,7 @@ private theorem memW1p_and_chosenWeakPartial_ae_of_tendsto
     (hg_lp i).locallyIntegrable hp_one
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ h_chosen_weak (h_weak_g i) h_chosen_loc hg_loc
 
+omit [NeZero d] in
 theorem MemWkp_of_iter_tendsto_eLpNorm
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω : Set E} (hΩ : IsOpen Ω)

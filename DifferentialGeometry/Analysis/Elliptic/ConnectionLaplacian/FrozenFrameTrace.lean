@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 theorem firstSlotHessMap_eq_secondCovDeriv_field
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (y : M) :
@@ -51,6 +51,7 @@ noncomputable def frozenFrameTrace
     tensorSecondCovDeriv (I := I) g r s
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma frozenFrameTrace_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x y : M) :
@@ -59,6 +60,7 @@ lemma frozenFrameTrace_def
         tensorSecondCovDeriv (I := I) g r s
           (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T y := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem frozenFrameTrace_self_eq_metricTrace2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -66,6 +68,7 @@ theorem frozenFrameTrace_self_eq_metricTrace2
       metricTrace2 (I := I) g r s (tensorSecondCovDeriv (I := I) g r s) T x := by
   rw [frozenFrameTrace_def, metricTrace2_def]
 
+set_option linter.unusedSectionVars false in
 theorem frozenFrameTrace_eq_gWeighted_of_mem_nbhd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) {y : M}

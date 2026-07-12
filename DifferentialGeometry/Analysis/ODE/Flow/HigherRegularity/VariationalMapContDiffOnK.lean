@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -19,6 +18,7 @@ section AugVFDefinition
 def augmentedVectorField (f : ℝ → E → E) : ℝ → (E × (E →L[ℝ] E)) → (E × (E →L[ℝ] E)) :=
   fun t p => (f t p.1, ((fderiv ℝ (f t) p.1).comp p.2))
 
+omit [CompleteSpace E] in
 @[simp]
 lemma augVF_apply (f : ℝ → E → E) (t : ℝ) (x : E) (Z : E →L[ℝ] E) :
     augmentedVectorField f t (x, Z) = (f t x, ((fderiv ℝ (f t) x).comp Z)) := rfl
@@ -29,6 +29,7 @@ section PartialFDerivSmoothness
 
 variable {f : ℝ → E → E}
 
+omit [CompleteSpace E] in
 lemma partial_fderiv_eq_comp_inr_on_univ
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E))) :
     ∀ p : ℝ × E, fderiv ℝ (f p.1) p.2
@@ -39,6 +40,7 @@ lemma partial_fderiv_eq_comp_inr_on_univ
     exact (hf.contDiffAt hp_open).differentiableAt one_ne_zero
   exact fderiv_eq_comp_inr hdiff_joint
 
+omit [CompleteSpace E] in
 theorem contDiffOn_partial_fderiv_of_succ
     {k : ℕ∞} (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContDiffOn ℝ k (fun p : ℝ × E => fderiv ℝ (f p.1) p.2) (Set.univ : Set (ℝ × E)) := by
@@ -77,6 +79,7 @@ section AugVFSmoothness
 
 variable {f : ℝ → E → E}
 
+omit [CompleteSpace E] in
 theorem augVF_uncurry_contDiff
     {k : ℕ∞} (hf_succ : ContDiffOn ℝ (k + 1) (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContDiffOn ℝ k (uncurry (augmentedVectorField f))
@@ -149,6 +152,7 @@ theorem augVF_uncurry_contDiff
   rw [heq_final] at hpair_final
   exact hpair_final
 
+omit [CompleteSpace E] in
 theorem augVF_uncurry_continuousOn_of_C1
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E))) :
     ContinuousOn (uncurry (augmentedVectorField f))
@@ -164,6 +168,7 @@ section NestingData
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 theorem continuousOn_fderiv_along_flow_joint
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -187,6 +192,7 @@ theorem continuousOn_fderiv_along_flow_joint
 
 variable [FiniteDimensional ℝ E]
 
+omit [CompleteSpace E] in
 theorem exists_norm_fderiv_le_along_flow_joint
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -206,6 +212,7 @@ theorem exists_norm_fderiv_le_along_flow_joint
   have hmem : ((x, τ) : E × ℝ) ∈ (closedBall x₀ ρ) ×ˢ (Icc tmin tmax) := ⟨hx, hτ⟩
   exact hp_max hmem
 
+omit [CompleteSpace E] in
 theorem exists_lipschitzOnWith_closedBall_of_C1
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (x₀ : E) (ρ : ℝ) (a b : ℝ) (hab : a ≤ b) :
@@ -249,6 +256,7 @@ theorem exists_lipschitzOnWith_closedBall_of_C1
     rw [hball]
     exact lipschitzOnWith_empty 0 (f t)
 
+omit [CompleteSpace E] in
 theorem exists_flow_nesting_data
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -325,6 +333,7 @@ structure IsVariationalFlowProjection
   fderiv_eq : ∀ q ∈ ((ball x₀ (ρ : ℝ)) ×ˢ Ioo (t₀ - T) (t₀ + T)),
     fderiv ℝ Φ q = (Y q).coprod (timePieceFn f Φ q)
 
+omit [CompleteSpace E] in
 lemma IsVariationalFlowProjection.of_le {hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ}
     {T : ℝ} {ρ : ℝ≥0} {Y : E × ℝ → (E →L[ℝ] E)} {k j : ℕ∞}
     (hY : IsVariationalFlowProjection hΦ T ρ Y k) (hjk : j ≤ k) :
@@ -420,6 +429,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
 def spatialPieceFn (Φ : E × ℝ → E) : E × ℝ → (E →L[ℝ] E) :=
   fun q => (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ)
 
+omit [CompleteSpace E] in
 @[simp]
 lemma spatialPieceFn_apply (Φ : E × ℝ → E) (q : E × ℝ) :
     spatialPieceFn Φ q = (fderiv ℝ Φ q).comp (ContinuousLinearMap.inl ℝ E ℝ) := rfl
@@ -530,11 +540,13 @@ def fromAugFlow (aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)) :
     E × ℝ → (E →L[ℝ] E) :=
   fun q => (aΦ ⟨(q.1, ContinuousLinearMap.id ℝ E), q.2⟩).2
 
+omit [CompleteSpace E] in
 @[simp]
 lemma fromAugFlow_apply (aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E))
     (x : E) (t : ℝ) :
     fromAugFlow aΦ (x, t) = (aΦ ⟨(x, ContinuousLinearMap.id ℝ E), t⟩).2 := rfl
 
+omit [CompleteSpace E] in
 theorem contDiffOn_fromAugFlow
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {k : ℕ∞} {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)} {U : Set (E × ℝ)}
@@ -652,6 +664,7 @@ section OperatorVariational
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
+omit [CompleteSpace E] in
 lemma hasDerivWithinAt_apply {Z Z' : ℝ → (E →L[ℝ] E)} {s : Set ℝ} {t : ℝ} {δ : E}
     (hZ : HasDerivWithinAt Z (Z' t) s t) :
     HasDerivWithinAt (fun τ => Z τ δ) ((Z' t) δ) s t := by
@@ -670,6 +683,7 @@ lemma hasDerivWithinAt_apply {Z Z' : ℝ → (E →L[ℝ] E)} {s : Set ℝ} {t :
   rw [hasDerivWithinAt_iff_hasFDerivWithinAt]
   exact happ_fd
 
+omit [CompleteSpace E] in
 theorem isVariationalSolutionOn_apply
     {T : ℝ}
     {Z : ℝ → E →L[ℝ] E}
@@ -783,6 +797,7 @@ section UniformContainment
 variable [FiniteDimensional ℝ E]
 variable {x₀ : E} {t₀ tmin tmax : ℝ}
 
+omit [CompleteSpace E] in
 theorem exists_uniform_time_containment
     {ρ₀ : ℝ} (Ψ : E × ℝ → E)
     (hΨ_cont : ContinuousOn Ψ (closedBall x₀ ρ₀ ×ˢ Icc tmin tmax))
@@ -843,6 +858,7 @@ section OrbitUniqueness
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 theorem orbit_unique_Ioo
     {a b : ℝ} {y₁ y₂ : ℝ → E} {K : ℝ≥0} {c : E} {ρ : ℝ}
     (ht₀ : t₀ ∈ Ioo a b)
@@ -860,6 +876,7 @@ theorem orbit_unique_Ioo
     (fun t ht => ⟨hy₂ t ht, hy₂_mem t ht⟩)
     hinit
 
+omit [CompleteSpace E] in
 theorem augFlow_fst_eq_flow
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ} {p₀ : E × (E →L[ℝ] E)}
@@ -917,6 +934,7 @@ section VariationalLinearMapCongr
 
 variable {f : ℝ → E → E} {α₁ α₂ : ℝ → E} {t₀ : ℝ}
 
+omit [CompleteSpace E] in
 theorem IsVariationalSolutionOn.congr_central
     {T : ℝ} {δ : E} {y : ℝ → E}
     (hαeq : EqOn α₁ α₂ (Icc (t₀ - T) (t₀ + T)))
@@ -1178,6 +1196,7 @@ section NeighbourhoodReconciliation
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [NormedSpace ℝ E] [CompleteSpace E] in
 theorem exists_basic_nhds_subset_aux {U : Set (E × ℝ)}
     (hU_open : IsOpen U) (hU_mem : (x₀, t₀) ∈ U) :
     ∃ ρ₁ > 0, ∃ T₁ > 0, ball x₀ ρ₁ ×ˢ Ioo (t₀ - T₁) (t₀ + T₁) ⊆ U := by
@@ -1192,6 +1211,7 @@ theorem exists_basic_nhds_subset_aux {U : Set (E × ℝ)}
   rw [Metric.mem_ball, Real.dist_eq, abs_lt]
   exact ⟨by linarith [hp2.1], by linarith [hp2.2]⟩
 
+omit [CompleteSpace E] in
 theorem exists_embed_caps_aux
     {Ω : Set ((E × (E →L[ℝ] E)) × ℝ)} (hΩ_open : IsOpen Ω)
     (hΩ_mem : ((x₀, ContinuousLinearMap.id ℝ E), t₀) ∈ Ω) :
@@ -1216,6 +1236,7 @@ theorem exists_embed_caps_aux
 
 variable [FiniteDimensional ℝ E]
 
+omit [CompleteSpace E] in
 theorem exists_flow_nesting_data_capped
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -1287,6 +1308,7 @@ theorem exists_flow_nesting_data_capped
     hM_nonneg, hMT_mid, hr'_pos, hρ_pos, hρ_lt_mid, hρ_mid_lt_out, hρρ', hρ_out_le_r,
     hρ_out_le_cap, hT_out_le_cap, hsub, hA_bd⟩
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem continuousOn_augFlow_fst
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {R : ℝ≥0} {tmin' tmax' : ℝ}

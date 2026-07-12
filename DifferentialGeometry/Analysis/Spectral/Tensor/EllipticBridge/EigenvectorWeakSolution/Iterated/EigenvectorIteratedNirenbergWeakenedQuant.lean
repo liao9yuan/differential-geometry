@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.TensorNonSmoothDiffQuotQuant
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -83,6 +82,7 @@ private lemma sqrt_geometricEnergy_le
     _ = C₂ * (A + B) := by
         rw [hC₂_def, Real.sqrt_sq (by linarith [hA, hB])]
 
+set_option linter.unusedSectionVars false in
 private lemma eLpNorm_volume_restrict_compact_le_weighted
     (g : SmoothRiemannianMetric I M) (α : M) (f : EuclN → ℝ)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -129,6 +129,7 @@ private lemma eLpNorm_volume_restrict_compact_le_weighted
   rw [h_smul, h_smul_eq] at h_mono
   exact h_mono
 
+set_option linter.unusedSectionVars false in
 private lemma eLpNorm_volume_restrict_compact_le_weighted_uniform
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)

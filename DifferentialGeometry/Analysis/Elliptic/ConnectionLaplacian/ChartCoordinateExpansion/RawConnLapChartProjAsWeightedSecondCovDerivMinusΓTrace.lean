@@ -30,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [I.Boundaryless] in
 private lemma covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -78,6 +79,7 @@ private lemma covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
   intro l _
   rw [Lcov.map_smul]
 
+omit [I.Boundaryless] in
 private lemma chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -142,6 +144,7 @@ private lemma chart_α_proj_covRS_covApply_B_i_T₀_at_B_i_eq_coord_sum_outer
   simp only [hL_def, ContinuousLinearMap.comp_apply, smul_eq_mul] at hApply
   exact hApply
 
+omit [I.Boundaryless] in
 theorem chartPushed_rawConnLap_chart_α_proj_eq_weighted_secondCovDeriv_minus_frameTraceΓ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

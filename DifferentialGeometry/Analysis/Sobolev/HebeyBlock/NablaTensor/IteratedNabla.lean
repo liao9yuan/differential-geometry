@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.GramTwist
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.UniformChartBounds
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
@@ -19,6 +18,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [I.Boundaryless] in
 theorem iterated_nabla_vs_iterated_partial_equivalence_H1
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :

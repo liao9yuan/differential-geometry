@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.FrechetKolmogorov
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.Rellich
 import DifferentialGeometry.Analysis.Sobolev.Tools.Mollifier
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -19,6 +18,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 theorem tsupport_convolution_subset_thickening
     {f η : E → ℝ} {δ : ℝ}
     (hη_supp : Function.support η ⊆ Metric.closedBall (0 : E) δ) :
@@ -50,6 +50,7 @@ theorem tsupport_convolution_subset_thickening
     Metric.isClosed_cthickening
   exact closure_minimal (hsupp_conv.trans (hsum_subset.trans hadd_subset)) hclosed
 
+omit [NeZero d] in
 theorem tsupport_convolution_mollifierEps_subset_thickening
     {f : E → ℝ}
     {ε : ℝ} (hε : 0 < ε) :
@@ -58,6 +59,7 @@ theorem tsupport_convolution_mollifierEps_subset_thickening
   tsupport_convolution_subset_thickening
     (mollifierEps_support_subset_closedBall_eps hε)
 
+omit [NeZero d] in
 theorem contDiff_convolution_mollifierEps
     {u : E → ℝ} (hu_loc : LocallyIntegrable u volume)
     {ε : ℝ} (hε : 0 < ε) :
@@ -68,6 +70,7 @@ theorem contDiff_convolution_mollifierEps
   exact h1.contDiff_convolution_right (L := ContinuousLinearMap.lsmul ℝ ℝ) hu_loc
     (mollifierEps_smooth hε)
 
+omit [NeZero d] in
 theorem hasCompactSupport_convolution_mollifierEps
     {u : E → ℝ} (hu_compact : HasCompactSupport u)
     {ε : ℝ} (hε : 0 < ε) :
@@ -87,6 +90,7 @@ theorem hasCompactSupport_convolution_mollifierEps
   by_contra h_nonzero
   exact hx (h_supp_subset (subset_tsupport _ (Function.mem_support.mpr h_nonzero)))
 
+omit [NeZero d] in
 theorem tsupport_convolution_mollifierEps_subset_of_small
     {Ω : Set E}
     {u : E → ℝ}
@@ -96,6 +100,7 @@ theorem tsupport_convolution_mollifierEps_subset_of_small
       mollifierEps (d := d) hδ) ⊆ Ω :=
   (tsupport_convolution_mollifierEps_subset_thickening (d := d) hδ).trans hδ_subset
 
+omit [NeZero d] in
 theorem exists_smooth_cutoff_with_neighborhood
     {K Ω : Set E} (hK : IsCompact K) (hΩ : IsOpen Ω) (hKΩ : K ⊆ Ω) :
     ∃ (δ : ℝ) (η : E → ℝ),
@@ -137,6 +142,7 @@ theorem exists_smooth_cutoff_with_neighborhood
   · rw [tsupport, hη_support]
     exact (Metric.closure_thickening_subset_cthickening δ K).trans hδΩ
 
+omit [NeZero d] in
 theorem fderiv_cutoff_apply_zero_on_cthickening
     {K : Set E} {δ : ℝ} (hδ : 0 < δ)
     {η : E → ℝ}
@@ -158,6 +164,7 @@ theorem fderiv_cutoff_apply_zero_on_cthickening
   rw [Filter.EventuallyEq.fderiv_eq hη_eq]
   simp
 
+omit [NeZero d] in
 theorem chosenWeakPartial'_ae_zero_on_sdiff_tsupport
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {u : E → ℝ} (hu : DeGiorgi.MemW1p p u Ω)
@@ -207,6 +214,7 @@ theorem chosenWeakPartial'_ae_zero_on_sdiff_tsupport
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
+omit [NeZero d] in
 theorem hasWeakPartialDeriv_indicator_chosenWeakPartial_univ
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {u : E → ℝ} (hu_W : DeGiorgi.MemW1p p u Ω)
@@ -348,6 +356,7 @@ theorem hasWeakPartialDeriv_indicator_chosenWeakPartial_univ
     _ = -∫ x : E, Ω.indicator g x * ψ x := by rw [hRHS_E]
 
 
+omit [NeZero d] in
 theorem MemWkp.extend_zero {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (_hp_top : p ≠ (⊤ : ℝ≥0∞))
     {Ω V : Set E} (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
     {u : E → ℝ} (hu : MemWkp (d := d) k p u Ω)
@@ -519,6 +528,7 @@ theorem MemWkp.extend_zero {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (_hp_top : 
         exact (MemWkp_congr_ae hp hV hg_mod_ae_eq_g_V).mp hg_mod_mem_V
       exact ⟨hu_W_V, hwp_V⟩
 
+omit [NeZero d] in
 theorem convolution_fderiv_eq_convolution_weakPartial_univ
     {u g : E → ℝ} {i : Fin d}
     (hweak : DeGiorgi.HasWeakPartialDeriv i g u Set.univ)
@@ -594,6 +604,7 @@ theorem convolution_fderiv_eq_convolution_weakPartial_univ
             smul_eq_mul, mul_comm] using
             (MeasureTheory.convolution_lsmul_swap (f := φ) (g := g) (x := x) (μ := volume)).symm
 
+omit [NeZero d] in
 theorem convolution_fderiv_eq_convolution_indicator_chosenWeakPartial
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {u : E → ℝ} (hu_W : DeGiorgi.MemW1p p u Ω)
@@ -616,16 +627,19 @@ noncomputable def iteratedZeroExtension (p : ℝ≥0∞) (Ω K : Set E) :
       iteratedZeroExtension p Ω K j (fun i : Fin j => β i.succ)
         (K.indicator (chosenWeakPartial' p (β 0) u Ω))
 
+omit [NeZero d] in
 @[simp] lemma iteratedZeroExtension_zero
     (p : ℝ≥0∞) (Ω K : Set E) (β : Fin 0 → Fin d) (u : E → ℝ) :
     iteratedZeroExtension (d := d) p Ω K 0 β u = u := rfl
 
+omit [NeZero d] in
 lemma iteratedZeroExtension_succ
     (p : ℝ≥0∞) (Ω K : Set E) (j : ℕ) (β : Fin (j + 1) → Fin d) (u : E → ℝ) :
     iteratedZeroExtension (d := d) p Ω K (j + 1) β u =
       iteratedZeroExtension p Ω K j (fun i : Fin j => β i.succ)
         (K.indicator (chosenWeakPartial' p (β 0) u Ω)) := rfl
 
+omit [NeZero d] in
 private lemma tsupport_indicator_chosenWeakPartial_subset
     {p : ℝ≥0∞} {Ω K : Set E} (hK_closed : IsClosed K)
     (v : E → ℝ) (i : Fin d) :
@@ -640,6 +654,7 @@ private lemma tsupport_indicator_chosenWeakPartial_subset
     exact hx h0
   exact (closure_minimal hsupp_subset hK_closed)
 
+omit [NeZero d] in
 theorem tsupport_iteratedZeroExtension_subset
     {p : ℝ≥0∞} {Ω K : Set E} (hK_closed : IsClosed K)
     {u : E → ℝ} (hu_supp : tsupport u ⊆ K)
@@ -653,6 +668,7 @@ theorem tsupport_iteratedZeroExtension_subset
       refine ih ?_ (fun i : Fin j => β i.succ)
       exact tsupport_indicator_chosenWeakPartial_subset (d := d) hK_closed _ _
 
+omit [NeZero d] in
 theorem hasCompactSupport_iteratedZeroExtension
     {p : ℝ≥0∞} {Ω K : Set E} (hK_compact : IsCompact K) (hK_closed : IsClosed K)
     {u : E → ℝ} (hu_supp : tsupport u ⊆ K)
@@ -661,6 +677,7 @@ theorem hasCompactSupport_iteratedZeroExtension
   hK_compact.of_isClosed_subset (isClosed_tsupport _)
     (tsupport_iteratedZeroExtension_subset (d := d) hK_closed hu_supp j β)
 
+omit [NeZero d] in
 private theorem indicator_chosenWeakPartial_ae_eq
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_closed : IsClosed K)
@@ -715,6 +732,7 @@ private theorem indicator_chosenWeakPartial_ae_eq
     (p := fun x => K.indicator (chosenWeakPartial' p i v Ω) x =
       chosenWeakPartial' p i v Ω x)).mpr ⟨h_on_K, h_off_K⟩
 
+omit [NeZero d] in
 theorem iteratedZeroExtension_memWkp_and_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_closed : IsClosed K) :
@@ -769,6 +787,7 @@ theorem iteratedZeroExtension_memWkp_and_ae
           iterWeakPartial_ae_congr (d := d) hp hΩ_open j _ h_ind_ae
         exact h_iter_ae.trans h_iter_congr
 
+omit [NeZero d] in
 theorem iteratedZeroExtension_memWkp
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_closed : IsClosed K)
@@ -778,6 +797,7 @@ theorem iteratedZeroExtension_memWkp
   (iteratedZeroExtension_memWkp_and_ae (d := d) hp hΩ_open hK_closed
     j k hjk β hu_W hu_supp).1
 
+omit [NeZero d] in
 theorem iteratedZeroExtension_ae_eq_iterWeakPartial
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_closed : IsClosed K)
@@ -788,6 +808,7 @@ theorem iteratedZeroExtension_ae_eq_iterWeakPartial
   (iteratedZeroExtension_memWkp_and_ae (d := d) hp hΩ_open hK_closed
     j k hjk β hu_W hu_supp).2
 
+omit [NeZero d] in
 lemma iteratedZeroExtension_one
     (p : ℝ≥0∞) (Ω K : Set E) (i : Fin d) (u : E → ℝ) :
     iteratedZeroExtension (d := d) p Ω K 1 (fun _ : Fin 1 => i) u =
@@ -802,15 +823,18 @@ noncomputable def iterClassicalPartial :
       iterClassicalPartial j (fun i : Fin j => β i.succ)
         (fun x => (fderiv ℝ f x) (EuclideanSpace.single (β 0) 1))
 
+omit [NeZero d] in
 @[simp] lemma iterClassicalPartial_zero (β : Fin 0 → Fin d) (f : E → ℝ) :
     iterClassicalPartial (d := d) 0 β f = f := rfl
 
+omit [NeZero d] in
 lemma iterClassicalPartial_succ
     (j : ℕ) (β : Fin (j + 1) → Fin d) (f : E → ℝ) :
     iterClassicalPartial (d := d) (j + 1) β f =
       iterClassicalPartial j (fun i : Fin j => β i.succ)
         (fun x => (fderiv ℝ f x) (EuclideanSpace.single (β 0) 1)) := rfl
 
+omit [NeZero d] in
 theorem contDiff_iterClassicalPartial :
     ∀ (j : ℕ) (β : Fin j → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f →
@@ -829,6 +853,7 @@ theorem contDiff_iterClassicalPartial :
           (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) + 1 ≤ ((⊤ : ℕ∞) : WithTop ℕ∞))
       exact hfd.clm_apply contDiff_const
 
+omit [NeZero d] in
 theorem hasCompactSupport_iterClassicalPartial :
     ∀ (j : ℕ) (β : Fin j → Fin d) {f : E → ℝ},
       HasCompactSupport f →
@@ -844,6 +869,7 @@ theorem hasCompactSupport_iterClassicalPartial :
       refine ih (fun i : Fin j => β i.succ) ?_
       exact hf_cpt.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single (β 0) 1)
 
+omit [NeZero d] in
 private theorem fderiv_convolution_eq_convolution_weakPartial_indicator
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {u : E → ℝ} (hu_W : DeGiorgi.MemW1p p u Ω)
@@ -925,6 +951,7 @@ private theorem fderiv_convolution_eq_convolution_weakPartial_indicator
   filter_upwards with t
   rw [smul_eq_mul, smul_eq_mul, mul_comm]
 
+omit [NeZero d] in
 private lemma convolution_lsmul_ae_eq
     {f g η : E → ℝ} (hfg : f =ᵐ[(volume : Measure E)] g) (x : E) :
     (f ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] η) x =
@@ -935,6 +962,7 @@ private lemma convolution_lsmul_ae_eq
   filter_upwards [hfg] with t ht
   rw [ht]
 
+omit [NeZero d] in
 private lemma K_indicator_ae_eq_Ω_indicator
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_closed : IsClosed K) (hKΩ : K ⊆ Ω)
@@ -995,6 +1023,7 @@ private lemma K_indicator_ae_eq_Ω_indicator
     (p := fun x => K.indicator (chosenWeakPartial' p i u Ω) x =
       Ω.indicator (chosenWeakPartial' p i u Ω) x)).mpr ⟨h_on_K, h_on_diff⟩
 
+omit [NeZero d] in
 private theorem fderiv_convolution_eq_convolution_K_indicator
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_closed : IsClosed K) (hKΩ : K ⊆ Ω)
@@ -1014,6 +1043,7 @@ private theorem fderiv_convolution_eq_convolution_K_indicator
     (K_indicator_ae_eq_Ω_indicator (d := d) hp hΩ_open hK_closed hKΩ
       hu_W hu_supp i) x).symm
 
+omit [NeZero d] in
 theorem iterClassicalPartial_convolution_eq_convolution_iteratedZeroExtension
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_compact : IsCompact K) (hK_closed : IsClosed K)
@@ -1075,6 +1105,7 @@ theorem iterClassicalPartial_convolution_eq_convolution_iteratedZeroExtension
       rw [h_ih_tail]
       rw [iteratedZeroExtension_succ]
 
+omit [NeZero d] in
 theorem tendsto_eLpNorm_translate_sub_of_memLp
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {f : E → ℝ} (hf : MemLp f p (volume : Measure E)) :
@@ -1229,6 +1260,7 @@ theorem tendsto_eLpNorm_translate_sub_of_memLp
       ENNReal.ofReal ‖h‖ * Cgrad +
         ENNReal.ofReal (εR / 4) + ENNReal.ofReal (εR / 4) by ring]
 
+omit [NeZero d] in
 private lemma convolution_lsmul_comm
     (f g : E → ℝ) (x : E) :
     (f ⋆[ContinuousLinearMap.lsmul ℝ ℝ, volume] g) x =
@@ -1238,6 +1270,7 @@ private lemma convolution_lsmul_comm
   filter_upwards with t
   rw [smul_eq_mul, smul_eq_mul, mul_comm]
 
+omit [NeZero d] in
 theorem chosenWeakPartial_smooth_ae_eq
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1262,6 +1295,7 @@ theorem chosenWeakPartial_smooth_ae_eq
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
     h_chosen_loc h_classical_loc
 
+omit [NeZero d] in
 theorem MemWkp_of_smooth_compactSupport
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -1308,6 +1342,7 @@ theorem MemWkp_of_smooth_compactSupport
       have h_ih_classical := ih h_classical_smooth h_classical_cpt h_classical_supp
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
+omit [NeZero d] in
 theorem iteratedZeroExtension_memLp_volume
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω K : Set E}
     (hΩ_open : IsOpen Ω) (hK_closed : IsClosed K) (hKΩ : K ⊆ Ω)
@@ -1335,6 +1370,7 @@ theorem iteratedZeroExtension_memLp_volume
   refine h_memLp_Ω.mono_measure ?_
   exact Measure.restrict_mono_set volume hKΩ
 
+omit [NeZero d] in
 theorem exists_eLpNorm_convolution_mollifierEps_sub_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {G : E → ℝ} (hG : MemLp G p (volume : Measure E))
@@ -1401,6 +1437,7 @@ theorem exists_eLpNorm_convolution_mollifierEps_sub_le
   rw [eLpNorm_congr_ae h_trans_conv]
   exact h_FK
 
+omit [NeZero d] in
 private theorem iterWeakPartial_sub_ae
     {j : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     (β : Fin j → Fin d) {u v : E → ℝ}
@@ -1433,6 +1470,7 @@ private theorem iterWeakPartial_sub_ae
   filter_upwards [h_neg] with x hx
   rw [hx]; ring
 
+omit [NeZero d] in
 theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : E → ℝ},
@@ -1469,6 +1507,7 @@ theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial
         (fun i : Fin j => β i.succ) h_ae
       exact h_iter_congr.trans h_ih
 
+omit [NeZero d] in
 theorem MemWkp.exists_smooth_compactSupport_approx
     {Ω : Set (EuclideanSpace ℝ (Fin d))} (hΩ_open : IsOpen Ω)
     (k : ℕ) (p : ℝ≥0∞) (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)

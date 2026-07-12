@@ -33,6 +33,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -65,6 +66,7 @@ theorem fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (u := tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx)
     hu_smooth hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fderiv_chartPushed_tensorChartComponentScalar_eventuallyEq_leibniz
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -97,6 +99,7 @@ theorem fderiv_chartPushed_tensorChartComponentScalar_eventuallyEq_leibniz
   exact fderiv_chartPushed_tensorChartComponentScalar_eq_leibniz_on_target
     (I := I) (M := M) g r s α S Idx Jdx hz
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fderiv_chartPushed_tensorChartComponentPou_eq_leibniz_on_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

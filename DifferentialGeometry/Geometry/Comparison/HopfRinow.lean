@@ -22,7 +22,6 @@ import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 import DifferentialGeometry.Geometry.Comparison.EndpointContinuation
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -56,6 +55,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_Iio_extend
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {b : ℝ}
     (hγ : IsGeodesicOn (I := I) g γ (Set.Iio b))
@@ -68,6 +68,7 @@ theorem isGeodesicOn_Iio_extend
     isGeodesicOn_extends_past_finite_endpoint (I := I) g hδ hγ hη hmatch
   exact ⟨γ', b + δ, by linarith, hgeo', hagree⟩
 
+set_option linter.unusedSectionVars false in
 private theorem hasGeodesicEquationAt_congr_of_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ γ' : ℝ → M} {t : ℝ}
     (heq : γ =ᶠ[nhds t] γ') (h : HasGeodesicEquationAt (I := I) g γ' t) :
@@ -76,6 +77,7 @@ private theorem hasGeodesicEquationAt_congr_of_eventuallyEq
   exact HasGeodesicEquationAt.congr_of_eventuallyEq_at (I := I) (g := g)
     (heq.eq_of_nhds) heq h
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_Ici_of_endpointContinuation
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
     (hγ₀ : IsGeodesicOn (I := I) g γ₀ (Set.Iio b₀))
@@ -183,6 +185,7 @@ theorem isGeodesicOn_Ici_of_endpointContinuation
     obtain ⟨a, ha, hab⟩ := hbS
     exact hΓ_geo_at a ha t (lt_of_lt_of_eq htb hab.symm)
 
+set_option linter.unusedSectionVars false in
 theorem chartCurve_contDiffAt_one_of_isGeodesicOn
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -238,6 +241,7 @@ theorem chartCurve_contDiffAt_one_of_isGeodesicOn
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_contMDiffAt_one
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -285,6 +289,7 @@ theorem isGeodesicOn_contMDiffAt_one
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_contMDiffOn_one
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
     (hs : IsOpen s)
@@ -295,6 +300,7 @@ theorem isGeodesicOn_contMDiffOn_one
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_Ici_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {b₀ : ℝ} (hb₀ : 0 < b₀)
@@ -320,6 +326,7 @@ theorem isGeodesicOn_Ici_of_complete
     hc_nonneg (hγ_smooth.mono hsub) (fun τ hτ => hSpeedBound τ (hsub hτ))
     (fun s hs => hSpeedSq s (hsub hs)) (hγ.mono hsub)
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_Ioo_extend
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a₀ b : ℝ} (ha₀b : a₀ < b)
     (hγ : IsGeodesicOn (I := I) g γ (Set.Ioo a₀ b))
@@ -390,6 +397,7 @@ theorem isGeodesicOn_Ioo_extend
   intro t ht
   simp only [hG_def, if_pos ht]
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_Ioi_of_endpointContinuation
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
     (ha₀ : a₀ < 0) (hb₀ : 0 < b₀)
@@ -531,6 +539,7 @@ theorem isGeodesicOn_Ioi_of_endpointContinuation
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_Ici_of_complete_Ioo
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ₀ : ℝ → M} {a₀ b₀ : ℝ}
@@ -572,6 +581,7 @@ section MinimiserExistence
 
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
+set_option linter.unusedSectionVars false in
 private theorem path_length_minimising_sequence
     (p q : M) (hd : riemannianEDist I p q ≠ ⊤) :
     ∃ γ : ℕ → ℝ → M,

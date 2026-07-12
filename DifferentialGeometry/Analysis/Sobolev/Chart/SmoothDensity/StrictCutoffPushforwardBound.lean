@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -735,6 +734,7 @@ private theorem cross_chart_strictCutoff_pushedRaw_joint
     ring
   exact h_K_eq ▸ le_refl _
 
+omit [FiniteDimensional ℝ E] [TopologicalSpace M] in
 theorem memWkp_finset_sum
     [NeZero (Module.finrank ℝ E)]
     (k : ℕ) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -769,6 +769,7 @@ theorem memWkp_finset_sum
       exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.add
         (d := Module.finrank ℝ E) hp_one hΩ hf_δ_mem h_sumT_mem
 
+omit [IsManifold I ∞ M] in
 theorem wkpNorm_finset_sum_le_chartTarget
     [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorTrivProj_eq_tensorRSChartE_section_repr
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -41,6 +41,7 @@ lemma tensorTrivProj_eq_tensorRSChartE_section_repr
   funext x
   rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem fderiv_tensorTrivProj_pullback_apply_eq_triv_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -76,6 +77,7 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_triv_intrinsic
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt_symmL
     (R := ℝ) hb_baseRS _).symm
 
+set_option linter.unusedSectionVars false in
 private lemma tensorRSIntrinsicChartCLM_apply_eq_cov
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -147,6 +149,7 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
       (I := I) (M := M) g r s α S.toSection X hb
   rw [hcov_eq]
 
+set_option linter.unusedSectionVars false in
 theorem mfderiv_tensorTrivProj_apply_eq_triv_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}

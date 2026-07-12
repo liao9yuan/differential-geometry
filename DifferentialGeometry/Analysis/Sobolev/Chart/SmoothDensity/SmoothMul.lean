@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -77,6 +76,7 @@ private lemma smoothExtensionScalar_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
+omit [IsManifold I ∞ M] in
 private lemma smoothExtensionScalar_apply_of_mem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -86,6 +86,7 @@ private lemma smoothExtensionScalar_apply_of_mem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
+omit [IsManifold I ∞ M] in
 private lemma smoothExtensionScalar_apply_of_notMem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -134,6 +135,7 @@ private lemma contDiffAt_smoothExtensionScalar_of_mem_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [smoothExtensionScalar_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
 
+omit [IsManifold I ∞ M] in
 private lemma smoothExtensionScalar_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt H α).source) {y : EuclN}
@@ -158,6 +160,7 @@ private lemma smoothExtensionScalar_eq_zero_off_image_tsupport
   · exact smoothExtensionScalar_apply_of_notMem_chartTargetEuclid
       (I := I) (M := M) α f hy_target
 
+omit [IsManifold I ∞ M] in
 private lemma image_extChartAt_tsupport_isCompact_local
     [CompactSpace M] {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -168,6 +171,7 @@ private lemma image_extChartAt_tsupport_isCompact_local
       (I := I) (M := M) (u := f) (α := α) hf_supp
   exact hKE.1.image (toEuclidean (E := E)).continuous
 
+omit [IsManifold I ∞ M] in
 private lemma image_extChartAt_tsupport_subset_chartTargetEuclid_local
     {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -204,6 +208,7 @@ lemma contDiff_smoothExtensionScalar
     exact smoothExtensionScalar_eq_zero_off_image_tsupport
       (I := I) (M := M) α (f := f) hf_supp hz
 
+omit [IsManifold I ∞ M] in
 private lemma hasCompactSupport_smoothExtensionScalar
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -220,6 +225,7 @@ private lemma hasCompactSupport_smoothExtensionScalar
   exact smoothExtensionScalar_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hyK
 
+omit [FiniteDimensional ℝ E] in
 private lemma iteratedFDeriv_uniformBound_of_compactSupport
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ ∞ ψ) (hψ_compact : HasCompactSupport ψ)
     (k : ℕ) :

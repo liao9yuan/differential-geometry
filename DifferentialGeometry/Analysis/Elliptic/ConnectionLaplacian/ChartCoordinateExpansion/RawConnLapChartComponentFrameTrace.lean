@@ -29,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [I.Boundaryless] in
 theorem tensorChartComponentRaw_rawTensorConnLap_eq_chart_frame_trace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

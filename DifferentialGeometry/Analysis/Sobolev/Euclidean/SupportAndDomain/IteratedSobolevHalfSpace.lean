@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Boundary.EuclideanHalfSpaceInstance
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ theorem closedHalfSpace_eq_union :
     · exact le_of_lt h
     · exact le_of_eq h.symm
 
+omit [NeZero d] in
 theorem isOpen_openHalfSpace [NeZero d] :
     IsOpen (openHalfSpace (d := d)) := by
   have hcont : Continuous (fun y : E => y 0) := PiLp.continuous_apply 2 _ 0
@@ -62,6 +62,7 @@ theorem isOpen_openHalfSpace [NeZero d] :
   rw [heq]
   exact hcont.isOpen_preimage _ isOpen_Ioi
 
+omit [NeZero d] in
 theorem isClosed_boundaryHyperplane [NeZero d] :
     IsClosed (boundaryHyperplane (d := d)) := by
   have hcont : Continuous (fun y : E => y 0) := PiLp.continuous_apply 2 _ 0
@@ -69,6 +70,7 @@ theorem isClosed_boundaryHyperplane [NeZero d] :
   rw [heq]
   exact isClosed_singleton.preimage hcont
 
+omit [NeZero d] in
 theorem volume_boundaryHyperplane_eq_zero [NeZero d] :
     (volume : Measure E) (boundaryHyperplane (d := d)) = 0 := by
   classical
@@ -152,6 +154,7 @@ theorem interiorHalfSpace_eq_inter_openHalfSpace
   · rintro ⟨hU, h_open⟩
     exact ⟨⟨hU, le_of_lt h_open⟩, h_open⟩
 
+omit [NeZero d] in
 theorem interiorHalfSpace_isOpen [NeZero d]
     {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω) :
     IsOpen (interiorHalfSpace (d := d) Ω) := by
@@ -170,6 +173,7 @@ theorem symmDiff_interiorHalfSpace_subset_boundaryHyperplane
   have h_ge : 0 ≤ y 0 := hΩ.subset_closedHalfSpace hy_in
   exact le_antisymm h_le h_ge
 
+omit [NeZero d] in
 theorem ae_eq_interiorHalfSpace [NeZero d]
     {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω) :
     Ω =ᵐ[(volume : Measure E)] interiorHalfSpace (d := d) Ω := by
@@ -188,6 +192,7 @@ theorem ae_eq_interiorHalfSpace [NeZero d]
     exact measure_empty
   exact (MeasureTheory.ae_eq_set).mpr ⟨h_diff1, h_diff2⟩
 
+omit [NeZero d] in
 theorem volume_restrict_interiorHalfSpace_eq [NeZero d]
     {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω) :
     (volume : Measure E).restrict Ω =
@@ -215,6 +220,7 @@ theorem MemWkpHalfSpace.zero_iff_memLp
       MemLp u p ((volume : Measure E).restrict (interiorHalfSpace Ω)) :=
   MemWkp.zero_iff_memLp
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace.zero_iff_memLp_of_relOpen [NeZero d]
     {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω) {u : E → ℝ} :
     MemWkpHalfSpace (d := d) 0 p u Ω ↔
@@ -240,6 +246,7 @@ theorem MemWkpHalfSpace.memLp
     MemLp u p ((volume : Measure E).restrict (interiorHalfSpace Ω)) :=
   MemWkp.memLp h
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace.memLp_of_relOpen [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
     {u : E → ℝ}
@@ -248,12 +255,14 @@ theorem MemWkpHalfSpace.memLp_of_relOpen [NeZero d]
   rw [volume_restrict_interiorHalfSpace_eq hΩ]
   exact h.memLp
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace_zero_fun [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω) :
     MemWkpHalfSpace (d := d) k p (fun _ : E => (0 : ℝ)) Ω :=
   MemWkp_zero_fun (d := d) hp (interiorHalfSpace_isOpen hΩ)
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace.add [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -263,6 +272,7 @@ theorem MemWkpHalfSpace.add [NeZero d]
     MemWkpHalfSpace (d := d) k p (fun x => u x + v x) Ω :=
   MemWkp.add (d := d) hp (interiorHalfSpace_isOpen hΩ) hu hv
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace.const_smul [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -271,6 +281,7 @@ theorem MemWkpHalfSpace.const_smul [NeZero d]
     MemWkpHalfSpace (d := d) k p (fun x => c * u x) Ω :=
   MemWkp.const_smul (d := d) hp (interiorHalfSpace_isOpen hΩ) hu c
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace.neg [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -279,6 +290,7 @@ theorem MemWkpHalfSpace.neg [NeZero d]
     MemWkpHalfSpace (d := d) k p (fun x => - u x) Ω :=
   MemWkp.neg (d := d) hp (interiorHalfSpace_isOpen hΩ) hu
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace.sub [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -288,6 +300,7 @@ theorem MemWkpHalfSpace.sub [NeZero d]
     MemWkpHalfSpace (d := d) k p (fun x => u x - v x) Ω :=
   MemWkp.sub (d := d) hp (interiorHalfSpace_isOpen hΩ) hu hv
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace_congr_ae [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -296,6 +309,7 @@ theorem MemWkpHalfSpace_congr_ae [NeZero d]
     MemWkpHalfSpace (d := d) k p u Ω ↔ MemWkpHalfSpace (d := d) k p v Ω :=
   MemWkp_congr_ae (d := d) hp (interiorHalfSpace_isOpen hΩ) huv
 
+omit [NeZero d] in
 theorem MemWkpHalfSpace_congr_ae_of_carrier [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -319,6 +333,7 @@ theorem wkpNormHalfSpace_zero
       eLpNorm u p ((volume : Measure E).restrict (interiorHalfSpace Ω)) :=
   wkpNorm_zero (d := d) p u (interiorHalfSpace Ω)
 
+omit [NeZero d] in
 theorem wkpNormHalfSpace_zero_of_relOpen [NeZero d]
     {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
     (u : E → ℝ) :
@@ -326,6 +341,7 @@ theorem wkpNormHalfSpace_zero_of_relOpen [NeZero d]
       eLpNorm u p ((volume : Measure E).restrict Ω) := by
   rw [wkpNormHalfSpace_zero, ← volume_restrict_interiorHalfSpace_eq hΩ]
 
+omit [NeZero d] in
 theorem wkpNormHalfSpace_zero_fun_zero [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω) :
@@ -338,6 +354,7 @@ theorem wkpNormHalfSpace_lt_top_of_memWkpHalfSpace
     wkpNormHalfSpace (d := d) k p u Ω < (⊤ : ℝ≥0∞) :=
   wkpNorm_lt_top_of_memWkp h
 
+omit [NeZero d] in
 theorem wkpNormHalfSpace_add_le [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -349,6 +366,7 @@ theorem wkpNormHalfSpace_add_le [NeZero d]
         wkpNormHalfSpace (d := d) k p v Ω :=
   wkpNorm_add_le (d := d) hp (interiorHalfSpace_isOpen hΩ) hu hv
 
+omit [NeZero d] in
 theorem wkpNormHalfSpace_const_smul [NeZero d]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E}
     (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
@@ -358,6 +376,7 @@ theorem wkpNormHalfSpace_const_smul [NeZero d]
       ‖c‖ₑ * wkpNormHalfSpace (d := d) k p u Ω :=
   wkpNorm_const_smul (d := d) hp (interiorHalfSpace_isOpen hΩ) hu c
 
+omit [NeZero d] in
 theorem fderiv_isWeakPartialDeriv_of_smooth_interiorHalfSpace [NeZero d]
     {Ω : Set E} (hΩ : IsHalfSpaceRelOpen (d := d) Ω)
     {u : E → ℝ} (hu_smooth : ContDiff ℝ 1 u) (i : Fin d) :

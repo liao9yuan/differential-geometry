@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.SlotCorrectionComponent
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ noncomputable def covDerivLowerOrderCoeff
           outputSlotCoeff (I := I) (M := M) g s α m l Jdx Jdx' y *
             (if Idx' = Idx then (1 : ℝ) else 0)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covDerivLowerOrderCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -99,6 +99,7 @@ noncomputable def wrappedComponentProj
     ((trivializationAt (TensorRSModel r s ℝ E)
         (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma wrappedComponentProj_apply
     (r s : ℕ) (α b : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -110,6 +111,7 @@ lemma wrappedComponentProj_apply
             (fun z : M => TensorRSSpace r s I z) α).continuousLinearMapAt ℝ b
           T) := rfl
 
+omit [CompleteSpace E] in
 private lemma wrappedComponentProj_intrinsic_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -173,6 +175,7 @@ private lemma wrappedComponentProj_outputSlot_eq
   exact chartTensorRSOutputSlotCorrection_component_eq
     (I := I) (M := M) g r s S α m l Idx Jdx hy
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma inputSlot_sum_reindex
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -200,6 +203,7 @@ private lemma inputSlot_sum_reindex
   · intro h
     exact absurd (Finset.mem_univ Jdx) h
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma outputSlot_sum_reindex
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -240,6 +244,7 @@ noncomputable def covDerivLowerOrderTerm
       tensorChartComponentRaw (I := I) (M := M) g r s S α p.1 p.2
         ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covDerivLowerOrderTerm_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -364,6 +369,7 @@ private lemma inputSlot_sub_outputSlot_eq_lowerOrderTerm
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [covDerivLowerOrderCoeff_def, ← sub_mul]
 
+set_option linter.unusedSectionVars false in
 private lemma wrappedComponentProj_covDeriv_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -470,6 +476,7 @@ theorem covDerivComponent_lowerOrder_contDiffOn
     ContDiffOn.sum (fun p _ => hsummand p)
   exact hsum
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covDerivComponent_lowerOrder_eq_linearCombination
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

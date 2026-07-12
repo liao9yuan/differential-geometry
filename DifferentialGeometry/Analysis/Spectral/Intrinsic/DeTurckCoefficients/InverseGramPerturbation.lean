@@ -4,7 +4,6 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Topology.Order.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -93,10 +92,12 @@ lemma abs_entry_le_matrixEntryL1 {n : ℕ} (A : Matrix (Fin n) (Fin n) ℝ)
 def chartGramDiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M) : ℝ :=
   matrixEntryL1 (chartGramMatrix g₁ α x - chartGramMatrix g₂ α x)
 
+omit [InnerProductSpace ℝ E] in
 lemma chartGramDiffSup_nonneg (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M) :
     0 ≤ chartGramDiffSup (I := I) (M := M) g₁ g₂ α x :=
   matrixEntryL1_nonneg _
 
+omit [InnerProductSpace ℝ E] in
 lemma chartGramMatrix_sub_entry_abs_le_gramDiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α x : M)
     (p q : Fin (Module.finrank ℝ E)) :
@@ -106,6 +107,7 @@ lemma chartGramMatrix_sub_entry_abs_le_gramDiffSup
     (chartGramMatrix g₁ α x - chartGramMatrix g₂ α x) p q
   rwa [Matrix.sub_apply] at h
 
+omit [InnerProductSpace ℝ E] in
 theorem chartInvGramMatrix_entry_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -146,6 +148,7 @@ theorem chartInvGramMatrix_entry_sub_abs_le
   unfold chartInvGramMatrix
   exact h
 
+omit [InnerProductSpace ℝ E] in
 theorem chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)

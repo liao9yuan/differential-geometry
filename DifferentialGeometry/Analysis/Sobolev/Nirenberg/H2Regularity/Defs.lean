@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotient
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.WeakDerivatives
 import DifferentialGeometry.External.DeGiorgi.EllipticCoefficients
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -90,6 +89,7 @@ theorem capLam_pos {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
 theorem capLam_nonneg {Ω : Set E} (B : SmoothEllipticBilinearForm d Ω) :
     0 ≤ B.capLam := B.capLam_pos.le
 
+omit [NeZero d] in
 theorem exists_cutoff
     {K Ω' : Set E} (hK : IsCompact K) (hΩ' : IsOpen Ω') (hKΩ' : K ⊆ Ω') :
     ∃ η : E → ℝ,
@@ -120,6 +120,7 @@ theorem exists_cutoff
   · rw [tsupport, hη_support]
     exact (Metric.closure_thickening_subset_cthickening δ K).trans hδΩ
 
+omit [NeZero d] in
 theorem exists_cutoff_with_fderiv_bound
     {K Ω' : Set E} (hK : IsCompact K) (hΩ' : IsOpen Ω') (hKΩ' : K ⊆ Ω') :
     ∃ η : E → ℝ,

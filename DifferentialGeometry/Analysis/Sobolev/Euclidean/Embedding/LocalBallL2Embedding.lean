@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -201,6 +200,7 @@ private theorem tower_to_supercritical_quant_uniform
         rw [ENNReal.ofReal_one, one_mul]
         exact wkpNorm_mono_order (d := d) (by omega) f Ω
 
+omit [NeZero d] in
 private theorem eLpNorm_iterWeakPartial_le_eLpNorm_iteratedFDeriv
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     (j : ℕ) (β : Fin j → Fin d) {ψ : EuN → ℝ}
@@ -242,6 +242,7 @@ private theorem wkpNorm_le_sum_eLpNorm_iteratedFDeriv
   exact eLpNorm_iterWeakPartial_le_eLpNorm_iteratedFDeriv (d := d) hΩ_open hp_one
     j β hψ_smooth hψ_cpt hψ_supp
 
+omit [NeZero d] in
 private theorem eLpNorm_le_eLpNorm_two_mul_rpow_ball
     {p' : ℝ} (hp'_one : 1 ≤ p') (hp'_two : p' ≤ 2)
     {x₀ : EuN} {R : ℝ} {g : EuN → ℝ} (hg : AEStronglyMeasurable g
@@ -261,6 +262,7 @@ private theorem eLpNorm_le_eLpNorm_two_mul_rpow_ball
   have h_toReal_two : ((2 : ℝ≥0∞)).toReal = (2 : ℝ) := by norm_num
   rwa [h_toReal_p', h_toReal_two] at h
 
+omit [NeZero d] in
 private theorem smooth_iteratedFDeriv_norm_eLpNorm_ball_ne_top
     {p : ℝ≥0∞} {x₀ : EuN} {R : ℝ} (j : ℕ)
     {u : EuN → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -287,6 +289,7 @@ private theorem smooth_iteratedFDeriv_norm_eLpNorm_ball_ne_top
     rw [norm_one, mul_one]
     exact hM z hz'
 
+omit [NeZero d] in
 private theorem eLpNorm_iteratedFDeriv_smul_le
     {x₀ : EuN} {R : ℝ}
     {χ f : EuN → ℝ} (hχ : ContDiff ℝ (⊤ : ℕ∞) χ) (hf : ContDiff ℝ (⊤ : ℕ∞) f)

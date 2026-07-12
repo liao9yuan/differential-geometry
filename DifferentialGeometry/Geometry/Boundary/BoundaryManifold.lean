@@ -4,7 +4,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.ChartedSpace
 import Mathlib.Topology.Compactness.SigmaCompact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -70,11 +69,13 @@ def boundaryChartTarget (x : BoundaryManifold I M) :
     Set hI.boundaryH :=
   hI.inclH ⁻¹' (chartAt H (x : M)).target
 
+set_option linter.unusedSectionVars false in
 theorem isOpen_boundaryChartSource (x : BoundaryManifold I M) :
     IsOpen (boundaryChartSource (I := I) x) := by
   unfold boundaryChartSource
   exact (chartAt H (x : M)).open_source.preimage continuous_subtype_val
 
+omit [IsManifold I ∞ M] in
 theorem isOpen_boundaryChartTarget (x : BoundaryManifold I M) :
     IsOpen (boundaryChartTarget (I := I) x) := by
   unfold boundaryChartTarget
@@ -93,6 +94,7 @@ def boundaryChartInvFun (x : BoundaryManifold I M)
   else
     x
 
+omit hI in
 theorem extChart_mem_frontier_of_mem_source
     {x y : BoundaryManifold I M}
     (hy : (y : M) ∈ (chartAt H (x : M)).source) :
@@ -313,6 +315,7 @@ theorem boundaryChart_symm_apply [Nonempty hI.boundaryH] (x : BoundaryManifold I
     (z : hI.boundaryH) :
     (boundaryChart (I := I) x).symm z = boundaryChartInvFun (I := I) x z := rfl
 
+set_option linter.unusedSectionVars false in
 theorem mem_boundaryChartSource_self (x : BoundaryManifold I M) :
     x ∈ boundaryChartSource (I := I) x := by
   unfold boundaryChartSource
@@ -325,6 +328,7 @@ theorem inclH_boundaryChart_apply [Nonempty hI.boundaryH]
   change hI.inclH (boundaryChartFun (I := I) x y) = chartAt H (x : M) (y : M)
   exact inclH_boundaryChartFun_apply (I := I) (x := x) (y := y) hy
 
+omit [IsManifold I ∞ M] in
 theorem isEmpty_of_isEmpty_boundaryH [IsEmpty hI.boundaryH] :
     IsEmpty (BoundaryManifold I M) := by
   refine ⟨fun y => ?_⟩
@@ -383,6 +387,7 @@ theorem chartedSpace_atlas :
     @atlas hI.boundaryH _ (BoundaryManifold I M) _ chartedSpace =
       Set.range (fun x : BoundaryManifold I M => defaultBoundaryChart (I := I) x) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem range_coe_eq_boundary :
     Set.range ((↑) : BoundaryManifold I M → M) = I.boundary M := by
   ext y

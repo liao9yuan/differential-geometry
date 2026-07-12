@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [BoundarylessManifold I M] in
 lemma covGrad_contMDiff_mk'
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 3 ℝ E)) ∞
@@ -115,6 +115,7 @@ lemma curry_covGrad_unit_eval_general
   simp only [Fin.cons_zero, Matrix.vecTail]
   rw [show (Fin.cons w m ∘ Fin.succ) = m from funext (fun j => by simp [Fin.cons_succ])]
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDeriv_unit_eval_eq
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 3 ℝ E, (fun y : M => TensorRSSpace 0 3 I y)⟯)
@@ -137,6 +138,7 @@ lemma covDeriv_unit_eval_eq
       (LeviCivita (I := I) g) x v]
   rw [map_zero, sub_zero]
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDeriv_unit_eval_eq_genVal
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯)
@@ -159,6 +161,7 @@ lemma covDeriv_unit_eval_eq_genVal
       (LeviCivita (I := I) g) x v]
   rw [map_zero, sub_zero]
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covApply_unit_eval_eq
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 3 ℝ E, (fun y : M => TensorRSSpace 0 3 I y)⟯)
@@ -242,6 +245,7 @@ lemma tensorSecondCovDeriv_covGrad_unit_eval
   · exact covDeriv_unit_eval_eq (I := I) (M := M) g
       (covGrad (I := I) (M := M) g 0 2 T₀).toSection x ((LeviCivita (I := I) g).toFun B x (B x))
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem curry_covDeriv_succ_eq_covDeriv_curriedSection_sub_connCorrection
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W : Π y : M, Tensor0SSpace (s + 1) I y)
@@ -346,6 +350,7 @@ lemma curry_unitGradFieldGen_eq (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [Tensor0SNabla.curriedSection_apply, unitGradFieldGen_apply]
   exact curry_covGrad_unit_eval_general (I := I) (M := M) g s S y w
 
+omit [BoundarylessManifold I M] in
 lemma covGrad_contMDiff_mk'_genVal
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 (s + 1) ℝ E)) ∞
@@ -380,6 +385,7 @@ noncomputable def covApplyCovGradSection_genVal
       covApply (tensorCov (I := I) g 0 (s + 1)) X
         (fun z : M => (covGrad (I := I) (M := M) g 0 s S).toSection z) y := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covApply_unit_eval_eq_genVal
     (g : SmoothRiemannianMetric I M) (t : ℕ)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 t ℝ E, (fun y : M => TensorRSSpace 0 t I y)⟯)

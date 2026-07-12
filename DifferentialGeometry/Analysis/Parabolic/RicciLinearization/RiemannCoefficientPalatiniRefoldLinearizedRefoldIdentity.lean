@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindow
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldCovDerivArmPairTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -142,6 +141,7 @@ private theorem bdLiePairTraceFamily_appCc_eq_familySecondGradient
       (realizedFam (I := I) g₀ T 0 hδ hδZ s) T (iteratedCovGrad (I := I) g₀ 0 2 2 T)
       ((q 2).trans (Equiv.swap (0 : Fin 4) 1))]
 
+set_option linter.unusedSectionVars false in
 private lemma lrRealizedFam_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -160,6 +160,7 @@ private lemma lrRealizedFam_zero (g₀ : SmoothRiemannianMetric I M)
   · rw [realizedFam, dif_neg h]
 
 
+omit [BoundarylessManifold I M] in
 private lemma lrKoszulCovec_congr {g g' : SmoothRiemannianMetric I M} (h : g = g')
     (S : SmoothCcTensor g 0 2) (S' : SmoothCcTensor g' 0 2)
     (hs : HEq S S') (x : M) (u ζ : TangentSpace I x) :
@@ -289,6 +290,7 @@ private lemma lrKT_unitModel (g₀ : SmoothRiemannianMetric I M)
     fin_cases i <;> rfl
   rw [h1, h2, h3]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma lrUnitEval_tsmdiffAt (g : SmoothRiemannianMetric I M) (n : ℕ)
     (W : SmoothCcTensor g 0 n) (x : M) :
     TensorSectionMDiffAt (I := I) n
@@ -323,6 +325,7 @@ private lemma lrUnitModel_covGrad_eval (g : SmoothRiemannianMetric I M) (n : ℕ
       (LeviCivita (I := I) g) x (v 0)]
   rw [map_zero, sub_zero]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lrExtDerivFun_apply_scalar (f : M → ℝ) {x : M} (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
@@ -1263,6 +1266,7 @@ private lemma lrVec2_upd_one {F : Type*} (a b z : F) :
   funext k
   fin_cases k <;> simp [Function.update]
 
+set_option linter.unusedSectionVars false in
 private lemma lrTensor0sClmExtUnit {s : ℕ} {x : M}
     {φ ψ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x}
     (h : φ (unitZeroSec (I := I) (M := M) x) = ψ (unitZeroSec (I := I) (M := M) x)) :
@@ -3414,6 +3418,7 @@ private theorem deTurckLieCovDerivArmDifferenceGridWindow (g₀ : SmoothRiemanni
     (appCcGdiag_nonneg (E := E) i)) ?_
   rw [← Finset.sum_mul, ← mul_assoc]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem lrJoint0S_add_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -3448,6 +3453,7 @@ private theorem lrJoint0S_add_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem lrJoint0S_smulFun_local {d : ℕ} {S : Set ℝ}
     {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     (A : ∀ p : M × ℝ, Tensor0SSpace d I p.1)

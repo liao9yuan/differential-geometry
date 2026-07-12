@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -124,6 +123,7 @@ lemma toEuclideanBasisSqSum_nonneg :
     (0 : ℝ) ≤ toEuclideanBasisSqSum (E := E) :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
+omit [IsManifold I ∞ M] in
 private lemma chartSmoothExt_toEuclidean_eq_scalarOnE
     (α : M) (f : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -140,6 +140,7 @@ private lemma chartSmoothExt_toEuclidean_eq_scalarOnE
   simp only [hsymm, hy, if_true]
   rfl
 
+omit [IsManifold I ∞ M] in
 lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
     [I.Boundaryless]
     (α : M) {f : M → ℝ}
@@ -297,6 +298,7 @@ lemma sq_partials_scalarOnE_le_chartSmoothExt_fderiv
   rw [← Finset.mul_sum]
   rw [mul_comm]
 
+omit [IsManifold I ∞ M] in
 lemma chartSmoothExt_eq_zero_off_image_tsupport_local
     (α : M) {f : M → ℝ} {y : EuclN_E}
     (hy_off : y ∉ (toEuclidean (E := E)) ''
@@ -326,6 +328,7 @@ lemma chartSmoothExt_eq_zero_off_image_tsupport_local
             else (0 : ℝ)) = 0
     rw [if_neg hy_target]
 
+omit [FiniteDimensional ℝ E] in
 private lemma euclN_norm_le_sum_components_norms_local (w : EuclN_E) :
     ‖w‖ ≤ ∑ i : Fin (Module.finrank ℝ E), ‖w i‖ := by
   classical
@@ -339,6 +342,7 @@ private lemma euclN_norm_le_sum_components_norms_local (w : EuclN_E) :
   intro i _
   simp
 
+omit [FiniteDimensional ℝ E] in
 private lemma norm_fderiv_le_sum_partials_local_local (ψ : EuclN_E → ℝ)
     (y : EuclN_E) :
     ‖fderiv ℝ ψ y‖ ≤
@@ -370,6 +374,7 @@ private lemma norm_fderiv_le_sum_partials_local_local (ψ : EuclN_E → ℝ)
   intro i _
   simp
 
+omit [FiniteDimensional ℝ E] in
 private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {μ : Measure EuclN_E}
     {ψ : EuclN_E → ℝ} (h_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -421,6 +426,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials_local
   intro i _
   rw [eLpNorm_norm]
 
+omit [FiniteDimensional ℝ E] in
 private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN_E} (hΩ_open : IsOpen Ω)
     {ψ : EuclN_E → ℝ} (h_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -464,6 +470,7 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_local_local
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
+omit [FiniteDimensional ℝ E] in
 lemma eLpNorm_norm_fderiv_le_d_mul_wkpNorm_local
     [NeZero (Module.finrank ℝ E)]
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN_E} (hΩ_open : IsOpen Ω)

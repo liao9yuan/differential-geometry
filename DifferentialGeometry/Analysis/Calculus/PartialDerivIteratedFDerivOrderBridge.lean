@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Calculus.IteratedFDerivProductDifferenceBound
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -20,6 +19,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
 
+omit [InnerProductSpace ℝ E] in
 lemma partialDeriv_contDiffOn_of_isOpen
     {u : E → ℝ} {s : Set E} (hs : IsOpen s) (hu : ContDiffOn ℝ ∞ u s)
     (i : Fin (Module.finrank ℝ E)) :
@@ -29,6 +29,7 @@ lemma partialDeriv_contDiffOn_of_isOpen
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
+omit [InnerProductSpace ℝ E] in
 lemma partialDeriv_sub_eqOn
     {u v : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (hv : ContDiffOn ℝ ∞ v s)
@@ -46,6 +47,7 @@ lemma partialDeriv_sub_eqOn
     simpa using this
   rw [hfd, ContinuousLinearMap.sub_apply]
 
+omit [InnerProductSpace ℝ E] in
 lemma partialDeriv_eqOn_fderivWithin_apply
     {u : E → ℝ} {s : Set E} (hs : IsOpen s) (i : Fin (Module.finrank ℝ E)) :
     EqOn (partialDeriv (E := E) i u)
@@ -53,6 +55,7 @@ lemma partialDeriv_eqOn_fderivWithin_apply
   intro y hy
   simp only [partialDeriv, fderivWithin_of_isOpen hs hy]
 
+omit [InnerProductSpace ℝ E] in
 theorem norm_iteratedFDerivWithin_partialDeriv_le
     {u : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (i : Fin (Module.finrank ℝ E))
@@ -77,6 +80,7 @@ theorem norm_iteratedFDerivWithin_partialDeriv_le
     norm_iteratedFDerivWithin_fderivWithin hs.uniqueDiffOn hy
   rw [heq]
 
+omit [InnerProductSpace ℝ E] in
 theorem iteratedFDerivSeminorm_partialDeriv_le
     {u : E → ℝ} {s : Set E} (hs : IsOpen s)
     (hu : ContDiffOn ℝ ∞ u s) (i : Fin (Module.finrank ℝ E))

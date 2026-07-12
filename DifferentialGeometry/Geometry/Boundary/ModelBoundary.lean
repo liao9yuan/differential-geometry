@@ -8,7 +8,6 @@ import Mathlib.MeasureTheory.Measure.Haar.OfBasis
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -213,6 +212,7 @@ theorem mem_range_I_inclH_iff (y : E) :
 theorem isClosed_range_I_inclH : IsClosed (Set.range (I ∘ hI.inclH)) :=
   hI.inclH_isClosed_image
 
+omit hI in
 theorem isClosed_frontier_range :
     IsClosed (frontier (Set.range I)) := isClosed_frontier
 

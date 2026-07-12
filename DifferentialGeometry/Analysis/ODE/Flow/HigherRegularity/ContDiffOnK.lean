@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.ContDiffOnOne
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -18,12 +17,14 @@ section TimePieceSmoothness
 
 variable {f : ℝ → E → E} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 lemma contDiffOn_graphMap_of_contDiffOn_flow
     {k : ℕ∞} {U : Set (E × ℝ)} (hΦ_Ck : ContDiffOn ℝ k Φ U) :
     ContDiffOn ℝ k (fun q : E × ℝ => ((q.2, Φ q) : ℝ × E)) U := by
   refine ContDiffOn.prodMk ?_ hΦ_Ck
   exact contDiff_snd.contDiffOn
 
+omit [CompleteSpace E] in
 theorem contDiffOn_orbit_composition
     {k : ℕ∞} {U : Set (E × ℝ)}
     (hf_Ck : ContDiffOn ℝ k (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -35,6 +36,7 @@ theorem contDiffOn_orbit_composition
   have hcomp : ContDiffOn ℝ k (uncurry f ∘ g) U := hf_Ck.comp hg hmaps
   convert hcomp using 1
 
+omit [CompleteSpace E] in
 theorem contDiffOn_timePiece_CLM
     {k : ℕ∞} {U : Set (E × ℝ)}
     (hf_Ck : ContDiffOn ℝ k (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -118,10 +120,12 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
 def timePieceFn (f : ℝ → E → E) (Φ : E × ℝ → E) : E × ℝ → (ℝ →L[ℝ] E) :=
   fun q => (ContinuousLinearMap.id ℝ ℝ).smulRight (f q.2 (Φ q))
 
+omit [CompleteSpace E] in
 @[simp]
 lemma timePieceFn_apply (f : ℝ → E → E) (Φ : E × ℝ → E) (q : E × ℝ) :
     timePieceFn f Φ q = (ContinuousLinearMap.id ℝ ℝ).smulRight (f q.2 (Φ q)) := rfl
 
+omit [CompleteSpace E] in
 theorem contDiffOn_timePieceFn
     {k : ℕ∞} {U : Set (E × ℝ)}
     (hf_Ck : ContDiffOn ℝ k (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -129,6 +133,7 @@ theorem contDiffOn_timePieceFn
     ContDiffOn ℝ k (timePieceFn f Φ) U :=
   contDiffOn_timePiece_CLM hf_Ck hΦ_Ck
 
+omit [CompleteSpace E] in
 theorem contDiffOn_succ_of_contDiffOn_fderiv
     {U : Set (E × ℝ)} (hU_open : IsOpen U) {j : ℕ∞}
     (hΦ_diff : DifferentiableOn ℝ Φ U)
@@ -139,6 +144,7 @@ theorem contDiffOn_succ_of_contDiffOn_fderiv
   intro h
   exact absurd h (by exact_mod_cast WithTop.coe_ne_top)
 
+omit [CompleteSpace E] in
 theorem contDiffOn_succ_of_fderiv_coprod_smooth
     {U : Set (E × ℝ)} (hU_open : IsOpen U) {k : ℕ∞}
     {Lsp : E × ℝ → (E →L[ℝ] E)}

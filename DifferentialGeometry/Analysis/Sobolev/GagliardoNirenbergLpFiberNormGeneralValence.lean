@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormKatoSe
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormWeightedCovIBP
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormSecondOrderInterp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -61,6 +60,7 @@ private noncomputable def lpFiberJetLadder_rs
             ((PDE.RicciFlow.iteratedCovGrad (I := I) g r s i u).toSection x)) ^ ((k : ℝ) / i)
         ∂(Integral.Measure.riemannianVolumeMeasure I M g)) ^ ((i : ℝ) / (2 * k))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 private theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : Integral.L2.SmoothCcTensor g r s) :
     Integral.L2.tensorL2Norm (I := I) (M := M) g r s S.toFun ^ 2 =

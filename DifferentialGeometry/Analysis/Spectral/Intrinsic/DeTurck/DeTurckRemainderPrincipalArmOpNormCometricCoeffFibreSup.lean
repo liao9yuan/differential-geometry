@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
@@ -71,6 +71,7 @@ private lemma kscr_g1_inner_injective (g₁ : SmoothRiemannianMetric I M) (x : M
     ring
   exact absurd hzero (ne_of_gt hpos)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
@@ -90,6 +91,7 @@ private lemma kscr_cometricLmodel_covectorOfCLM_inner_loc
       (fun _ : Fin 1 => (u : E)) = φ (u : E)
   rw [Tensor0SBundle.model_covectorOfCLM_apply]
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
@@ -470,6 +472,7 @@ private lemma riemannianFiberNormSq_deTurckPrincipalCometricCoeff_sub_le (g₀ g
       ≤ (n : ℝ) ^ 2 * ((n : ℝ) * r ^ 2) := mul_le_mul_of_nonneg_left hAB hn_nn
     _ = (Module.finrank ℝ E : ℝ) ^ 3 * r ^ 2 := by rw [← hnE]; ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
@@ -567,6 +570,7 @@ theorem reindexCoeffGen_map_sub (g₀ : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.sub_apply, reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     reindexCoeffFibGen_apply, ContinuousLinearMap.sub_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in
@@ -602,6 +606,7 @@ private theorem kscr_jointTotalSpaceRS_sub {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in

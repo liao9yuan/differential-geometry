@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartFiberFromModelOpNorm
 import DifferentialGeometry.Tensor.RSTensor.BundleTrivialization.TensorRSBundleLocalityIdentities
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
+set_option linter.unusedSectionVars false in
 theorem triv_eq_toModel_at_chartCenter
     (r s : ℕ) (b₀ : M) (T : TensorRSSpace r s I b₀) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -45,6 +45,7 @@ theorem triv_eq_toModel_at_chartCenter
   rfl
 
 
+set_option linter.unusedSectionVars false in
 theorem symmL_toModel_eq_self_at_chartCenter
     (r s : ℕ) (b₀ : M) (T : TensorRSSpace r s I b₀) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -64,6 +65,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem modelNorm_le_gNorm_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x₀ : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -88,6 +90,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem gNorm_le_modelNorm_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x₀ : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

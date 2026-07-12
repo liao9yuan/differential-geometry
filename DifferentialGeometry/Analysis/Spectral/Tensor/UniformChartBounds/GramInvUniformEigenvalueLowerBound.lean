@@ -5,7 +5,6 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 import Mathlib.Topology.Order.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] in
 private lemma sphere_isCompact :
     IsCompact {ξ : Fin (Module.finrank ℝ E) → ℝ |
       ∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2 = 1} := by
@@ -59,6 +59,7 @@ private lemma sphere_isCompact :
     exact habs
   exact (isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hbdd⟩)
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -237,6 +238,7 @@ theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_compact
         exact le_of_eq (hsum_empty _).symm
     · exact absurd ⟨b, hb⟩ hKα_ne
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartInvGramMatrix_quadForm_lower_bound_on_pouTsupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :

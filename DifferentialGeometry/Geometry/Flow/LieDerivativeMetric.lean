@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.VectorField
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ def chartLieDerivMetricMatrix (g : SmoothRiemannianMetric I M)
     chartLieMetricDeform (I := I) g W α i j x +
     chartLieMetricDeform (I := I) g W α j i x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartLieMetricConvective_def (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -52,6 +52,7 @@ def chartLieDerivMetricMatrix (g : SmoothRiemannianMetric I M)
           partialDeriv (E := E) k (chartGramOnE (I := I) g α i j)
             (extChartAt I α x) := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartLieMetricDeform_def (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -61,6 +62,7 @@ def chartLieDerivMetricMatrix (g : SmoothRiemannianMetric I M)
           partialDeriv (E := E) i (chartCoeffOnE (I := I) α W k)
             (extChartAt I α x) := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLieDerivMetricMatrix_def (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -87,6 +89,7 @@ theorem chartLieDerivMetricMatrix_def (g : SmoothRiemannianMetric I M)
     rw [chartGramMatrix_apply, chartGramMatrix_apply]
     exact g.symm x _ _]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartLieMetricConvective_symm (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -99,6 +102,7 @@ lemma chartLieMetricConvective_symm (g : SmoothRiemannianMetric I M)
     funext (fun y => chartGramOnE_symm (I := I) g α i j y)
   rw [hsym]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLieDerivMetricMatrix_symm (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -113,12 +117,14 @@ def lieDerivMetricMatrix (g : SmoothRiemannianMetric I M)
     (i j : Fin (Module.finrank ℝ E)) (x : M) : ℝ :=
   chartLieDerivMetricMatrix (I := I) g W x i j x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma lieDerivMetricMatrix_def_chart (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i j : Fin (Module.finrank ℝ E)) (x : M) :
     lieDerivMetricMatrix (I := I) g W i j x =
       chartLieDerivMetricMatrix (I := I) g W x i j x := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetricMatrix_def (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -137,6 +143,7 @@ theorem lieDerivMetricMatrix_def (g : SmoothRiemannianMetric I M)
               (extChartAt I x x)) := by
   rw [lieDerivMetricMatrix, chartLieDerivMetricMatrix_def]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetricMatrix_symm (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -202,6 +209,7 @@ def lieDerivMetric (g : SmoothRiemannianMetric I M)
       refine Finset.sum_congr rfl (fun j _ => ?_)
       ring)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma lieDerivMetric_apply (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (v w : TangentSpace I x) :
@@ -213,6 +221,7 @@ lemma lieDerivMetric_apply (g : SmoothRiemannianMetric I M)
             lieDerivMetricMatrix (I := I) g W i j x :=
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma lieDerivMetric_basis_apply (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -249,6 +258,7 @@ lemma lieDerivMetric_basis_apply (g : SmoothRiemannianMetric I M)
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetric_isPointwiseSymm (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     IsPointwiseSymm (lieDerivMetric (I := I) (M := M) g W) := by
@@ -260,6 +270,7 @@ theorem lieDerivMetric_isPointwiseSymm (g : SmoothRiemannianMetric I M)
   rw [lieDerivMetricMatrix_symm (I := I) g W j i]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeff_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     chartCoeff (I := I) α (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k x = 0 := by
@@ -275,6 +286,7 @@ private lemma chartCoeff_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)) {
   rw [hzero, map_zero]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeffOnE_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     chartCoeffOnE (I := I) α (0 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k y = 0 := by
@@ -285,6 +297,7 @@ private lemma chartCoeffOnE_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
   rwa [trivializationAt_baseSet_eq_chartAt_source]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem lieDerivMetricMatrix_zero [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (i j : Fin (Module.finrank ℝ E)) (x : M) :
@@ -337,6 +350,7 @@ private lemma chartCoeffOnE_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)
     hdeform (fun k => chartGramMatrix (I := I) g x x i k) j]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem lieDerivMetric_zero [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) :
     lieDerivMetric (I := I) (M := M) g
@@ -349,6 +363,7 @@ private lemma chartCoeffOnE_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)
   rw [lieDerivMetricMatrix_zero (I := I) g i j x]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeff_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
     (W₁ W₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -364,6 +379,7 @@ private lemma chartCoeff_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
   rw [chartCoeff_def, chartCoeff_def, chartCoeff_def, hadd,
     LinearEquiv.map_add, Finsupp.add_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeff_smul_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
     (c : ℝ) (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -378,6 +394,7 @@ private lemma chartCoeff_smul_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
   rw [chartCoeff_def, chartCoeff_def, hsmul, LinearEquiv.map_smul,
     Finsupp.smul_apply, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeffOnE_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
     (W₁ W₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -390,6 +407,7 @@ private lemma chartCoeffOnE_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
   rwa [trivializationAt_baseSet_eq_chartAt_source]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeffOnE_smul_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
     (c : ℝ) (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -402,6 +420,7 @@ private lemma chartCoeffOnE_smul_of_mem (α : M) (k : Fin (Module.finrank ℝ E)
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
   rwa [trivializationAt_baseSet_eq_chartAt_source]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetricMatrix_add_vectorField [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W₁ W₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -483,6 +502,7 @@ theorem lieDerivMetricMatrix_add_vectorField [I.Boundaryless]
     hdeform (fun k => chartGramMatrix (I := I) g x x i k) j]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetricMatrix_smul_vectorField [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -547,6 +567,7 @@ theorem lieDerivMetricMatrix_smul_vectorField [I.Boundaryless]
     hdeform (fun k => chartGramMatrix (I := I) g x x i k) j]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetric_add_vectorField [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W₁ W₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -562,6 +583,7 @@ theorem lieDerivMetric_add_vectorField [I.Boundaryless]
   rw [lieDerivMetricMatrix_add_vectorField (I := I) g W₁ W₂ i j x]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetric_smul_vectorField [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -576,6 +598,7 @@ theorem lieDerivMetric_smul_vectorField [I.Boundaryless]
   rw [lieDerivMetricMatrix_smul_vectorField (I := I) g c W i j x]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv_chartGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -594,6 +617,7 @@ private lemma partialDeriv_chartGramOnE_contDiffOn_interior
       (interior (extChartAt I α).target) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv_chartCoeffOnE_contDiffOn_interior
     (α : M) (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -612,6 +636,7 @@ private lemma partialDeriv_chartCoeffOnE_contDiffOn_interior
       (interior (extChartAt I α).target) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
+set_option linter.unusedSectionVars false in
 private lemma comp_extChartAt_contMDiffOn_source [I.Boundaryless]
     (α : M) {u : E → ℝ}
     (hu : ContDiffOn ℝ ∞ u (interior (extChartAt I α).target)) :
@@ -632,6 +657,7 @@ private lemma comp_extChartAt_contMDiffOn_source [I.Boundaryless]
     exact hxtgt
   exact huM.comp hchart hmaps
 
+set_option linter.unusedSectionVars false in
 private lemma chartLieMetricConvective_summand_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -650,6 +676,7 @@ private lemma chartLieMetricConvective_summand_contMDiffOn [I.Boundaryless]
   · exact comp_extChartAt_contMDiffOn_source (I := I) α
       (partialDeriv_chartGramOnE_contDiffOn_interior (I := I) g α i j k)
 
+set_option linter.unusedSectionVars false in
 private lemma chartLieMetricDeform_summand_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -669,6 +696,7 @@ private lemma chartLieMetricDeform_summand_contMDiffOn [I.Boundaryless]
   · exact comp_extChartAt_contMDiffOn_source (I := I) α
       (partialDeriv_chartCoeffOnE_contDiffOn_interior (I := I) α W i k)
 
+set_option linter.unusedSectionVars false in
 lemma chartLieMetricConvective_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -680,6 +708,7 @@ lemma chartLieMetricConvective_contMDiffOn [I.Boundaryless]
   exact contMDiffOn_finset_sum (fun k _ =>
     chartLieMetricConvective_summand_contMDiffOn (I := I) g W α i j k)
 
+set_option linter.unusedSectionVars false in
 lemma chartLieMetricDeform_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -691,6 +720,7 @@ lemma chartLieMetricDeform_contMDiffOn [I.Boundaryless]
   exact contMDiffOn_finset_sum (fun k _ =>
     chartLieMetricDeform_summand_contMDiffOn (I := I) g W α i j k)
 
+set_option linter.unusedSectionVars false in
 theorem chartLieDerivMetricMatrix_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

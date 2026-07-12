@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferen
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplViaH3
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -124,6 +123,7 @@ def IteratedDiffChartBilinearData.mk_from_hypotheses
 
 namespace IteratedDiffChartBilinearData
 
+set_option linter.unusedSectionVars false in
 private lemma m_zero_principal_integrand_eq
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g}
@@ -138,6 +138,7 @@ private lemma m_zero_principal_integrand_eq
   rw [chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_one_cons_eq_chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -148,6 +149,7 @@ private lemma chosenMthMixed_one_cons_eq_chartPushedChosenFirstPartial
   rw [chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenMthMixed_zero_elim0_eq_chartPushed
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -314,6 +316,7 @@ end IteratedDiffChartBilinearData
 
 namespace IteratedDiffChartBilinearData
 
+set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_two_cons_const_eq_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -325,6 +328,7 @@ private lemma chosenMthMixed_two_cons_const_eq_chosenSecond
   · rfl
   · rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_one_const_eq_chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -416,6 +420,7 @@ private lemma chosenMthMixed_three_cons_two_eq_chosenThird
   · rfl
   · rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_two_pair_eq_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

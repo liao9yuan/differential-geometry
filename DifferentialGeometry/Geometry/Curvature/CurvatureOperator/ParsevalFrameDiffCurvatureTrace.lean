@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedSlotwiseCurvature
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ private abbrev TensorSmooth (s : ℕ) (A : Π b : M, Tensor0SSpace s I b) : Prop
     (fun b => TotalSpace.mk' (Tensor0SModel s ℝ E)
       (E := fun z : M => Tensor0SSpace s I z) b (A b))
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_add_left
     (g : SmoothRiemannianMetric I M)
     (X X' Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -119,6 +119,7 @@ private lemma nablaCurvSec_add_left
   rw [h1, h2, h3, h4]
   abel
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_smul_left
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (X Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -196,6 +197,7 @@ private lemma nablaCurvSec_smul_left
   rw [h1, h2, h3, h4]
   simp only [smul_sub]
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_add_right
     (g : SmoothRiemannianMetric I M)
     (X Y Y' Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -292,6 +294,7 @@ private lemma nablaCurvSec_add_right
   rw [h1, h2, h3, h4]
   abel
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma extDerivFun_apply_smooth_aux
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {X : Π b : M, TangentSpace I b} (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
@@ -313,6 +316,7 @@ private lemma extDerivFun_apply_smooth_aux
   refine hresult.congr fun b => ?_
   simp [extDerivFun, tangentMap_snd, NormedSpace.fromTangentSpace]
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_smul_right
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (X Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -396,6 +400,7 @@ private lemma nablaCurvSec_smul_right
   simp only [hR]
   module
 
+omit [I.Boundaryless] in
 lemma nablaBaseSlotCurv_add_left
     (g : SmoothRiemannianMetric I M)
     (X X' Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -407,6 +412,7 @@ lemma nablaBaseSlotCurv_add_left
     (ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
       (smoothExtensionTangent_contMDiff (I := I) x u)) x
 
+omit [I.Boundaryless] in
 lemma nablaBaseSlotCurv_smul_left
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -421,6 +427,7 @@ lemma nablaBaseSlotCurv_smul_left
   rw [hcoe] at hsmul
   exact hsmul
 
+omit [I.Boundaryless] in
 lemma nablaBaseSlotCurv_smul_right
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -435,6 +442,7 @@ lemma nablaBaseSlotCurv_smul_right
   rw [hcoe] at hsmul
   exact hsmul
 
+omit [I.Boundaryless] in
 lemma nablaBaseSlotCurv_add_right
     (g : SmoothRiemannianMetric I M)
     (X Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -446,6 +454,7 @@ lemma nablaBaseSlotCurv_add_right
     (ContMDiffSection.mk (smoothExtensionTangent (I := I) x u)
       (smoothExtensionTangent_contMDiff (I := I) x u)) x
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_zero_right
     (g : SmoothRiemannianMetric I M)
     (X Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -462,6 +471,7 @@ private lemma nablaCurvSec_zero_right
   rw [hfun] at h
   exact add_eq_left.mp h.symm
 
+omit [I.Boundaryless] in
 lemma nablaCurvSec_finsetSum_right
     (g : SmoothRiemannianMetric I M) {ι : Type*} (s : Finset ι)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -485,6 +495,7 @@ lemma nablaCurvSec_finsetSum_right
       rw [hfun, nablaCurvSec_add_right (g := g) X (Y a) (∑ i ∈ t, Y i) Z W x, ih,
         Finset.sum_insert ha]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannSec_eq_of_X_eventuallyEq
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [FiniteDimensional ℝ F]
     {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
@@ -521,6 +532,7 @@ private lemma riemannSec_eq_of_X_eventuallyEq
     Filter.EventuallyEq.mlieBracket_vectorField_eq hXX' (Filter.EventuallyEq.refl _ Y)
   rw [hbr_x]
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_eq_of_Y_eventuallyEq
     (g : SmoothRiemannianMetric I M)
     {X Y Y' Z W : Π b : M, TangentSpace I b} {x : M}
@@ -588,6 +600,7 @@ private lemma nablaCurvSec_eq_of_Y_eventuallyEq
       (covApply_contMDiff (cov := cov) hX hW) hYY'
   rw [hT4]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma exists_global_smooth_eqOn_nhd_scalar
     {f : M → ℝ} {U : Set M} {x : M} (hU : IsOpen U) (hxU : x ∈ U)
     (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U) :
@@ -614,6 +627,7 @@ private lemma exists_global_smooth_eqOn_nhd_scalar
   · filter_upwards [χ.eventuallyEq_one] with b hb
     rw [hb, Pi.one_apply, one_mul]
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_vanish_secondSlot
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -683,6 +697,7 @@ private lemma nablaCurvSec_vanish_secondSlot
     simp only [hΔx, map_zero]
   rw [hfix, zero_smul]
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_eq_of_secondSlot_eq
     (g : SmoothRiemannianMetric I M)
     (X Y Y' Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -705,6 +720,7 @@ private lemma nablaCurvSec_eq_of_secondSlot_eq
     simp only [ContMDiffSection.coe_sub, Pi.sub_apply, hYY', sub_self]
   rw [hsplit, hvanish, add_zero]
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_eq_of_firstSlot_eq
     (g : SmoothRiemannianMetric I M)
     (X X' Y Z W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -754,6 +770,7 @@ private lemma nablaCurvSec_eq_of_firstSlot_eq
       hcov_eq W]
   rw [hT2, hT3, hT4]
 
+omit [I.Boundaryless] in
 lemma nablaBaseSlotCurv_eq_of_leftMid
     (g : SmoothRiemannianMetric I M)
     (X X' Y Y' Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)

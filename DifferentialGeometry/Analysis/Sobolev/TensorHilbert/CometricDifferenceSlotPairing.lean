@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Connection.ParsevalFrameField
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ variable
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+omit [FiniteDimensional ℝ E] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem g0_polarized_parseval
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -52,6 +52,7 @@ theorem g0_polarized_parseval
     _ = g₀.inner x v w := by rw [hexp]
 
 
+set_option linter.unusedSectionVars false in
 theorem multilinear_firstSlot_pairing_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) {s : ℕ}
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -136,6 +137,7 @@ theorem slotInsertEndoFib_bundle_eval (s : ℕ) (x : M)
   rfl
 
 
+set_option linter.unusedSectionVars false in
 theorem exists_orthoFrame_basis_E (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -300,6 +302,7 @@ theorem tensorInnerPointwise_gInvDiffSlot_le
     (fun v => gInvDiffRaisedEndo_inner_self_le (I := I) g₀ g₁ h htie hδ_lt hδ_nn hδ x v)
     W e bse hbse horth
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem tensorL2Inner_slotΛ_le
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {κ : ℝ}
     (Wfield Sfield : M → TensorRSModel 0 (s+1) ℝ E)

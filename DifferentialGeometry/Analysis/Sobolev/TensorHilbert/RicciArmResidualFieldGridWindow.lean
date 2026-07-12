@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnect
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindowGInvQuadResidual
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindowBgRefoldConversion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -46,6 +46,7 @@ private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s 
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_smul_value (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -1106,6 +1107,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
 variable (g₀ g₁ : SmoothRiemannianMetric I M)
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_vec3_slot1_sum_smul (_x : M)
     (Zm : Tensor0SModel 3 ℝ E) (d : ℕ) (t : Fin d → ℝ) (u : Fin d → E) (a b : E) :
     Zm ![a, ∑ c, t c • u c, b] = ∑ c, t c * Zm ![a, u c, b] := by
@@ -2342,6 +2344,7 @@ private lemma k4a_step_perm_val {m : ℕ} (τ : Equiv.Perm (Fin (m + 2))) (i : �
         unfold k4aArrVal
         split_ifs <;> omega
 
+omit [BoundarylessManifold I M] in
 private lemma k4a_covGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g r a) :
     covGrad (I := I) (M := M) g r b (castCcTensorRank g r h W) =
@@ -2596,6 +2599,7 @@ private lemma k4a_icg_refoldArgument_structure (g₀ : SmoothRiemannianMetric I 
         rw [← iteratedCovGrad_succ]
         rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4a_castRankCc_db_toModel (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g r a) (x : M) (D : Tensor0SSpace r I x)
     (w : Fin b → TangentSpace I x) :
@@ -2732,6 +2736,7 @@ private def k4a_slotExtendIterFib (g : SmoothRiemannianMetric I M) (b c : ℕ) (
   | (w + 1) => slotExtendPointwise (I := I) (M := M) g (b + w) (c + w) x
       (k4a_slotExtendIterFib g b c x A w)
 
+set_option linter.unusedSectionVars false in
 private lemma k4a_appCcLeibnizPsi_succ_succ_eq (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i j : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =
@@ -2827,6 +2832,7 @@ private def k4aTuple (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
   else if (k : ℕ) = i + 4 then ((u ⟨i, by omega⟩ : TangentSpace I x) : E)
   else ((u ⟨i + 1, by omega⟩ : TangentSpace I x) : E)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4aTuple_zero (g₁ : SmoothRiemannianMetric I M) (x : M)
     (u : Fin 2 → TangentSpace I x) (a b : Fin (Module.finrank ℝ E)) :
     k4aTuple (I := I) (M := M) g₁ x 0 u a b =
@@ -2838,6 +2844,7 @@ private lemma k4aTuple_zero (g₁ : SmoothRiemannianMetric I M) (x : M)
   funext k
   fin_cases k <;> rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4aTuple_succ (g₁ : SmoothRiemannianMetric I M) (x : M) (w : ℕ)
     (u : Fin (2 + (w + 1)) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E)) :
     k4aTuple (I := I) (M := M) g₁ x (w + 1) u a b =
@@ -3048,6 +3055,7 @@ private lemma k4a_W_absorption (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [← hnorm]
   exact k4a_W_op_bound (I := I) (M := M) g₀ g₁ P htie hδ₀ hδ_le hδ0 hbound x u
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma k4a_toModel_update_sum {m : ℕ} (Zm : Tensor0SModel m ℝ E)
     (w : Fin m → E) (t : Fin m) (d : ℕ) (c : Fin d → ℝ) (u : Fin d → E) :
     Zm (Function.update w t (∑ j, c j • u j)) =
@@ -3078,6 +3086,7 @@ private def k4aR (i : ℕ) {n : ℕ} (J : Fin (2 + i) → Fin n) (p q : Fin n) :
   else if (t : ℕ) = 2 + i then p
   else q
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4aTuple_apply_lt (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) < i) :
@@ -3086,6 +3095,7 @@ private lemma k4aTuple_apply_lt (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_pos h]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4aTuple_apply_fa (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) = i ∨ (t : ℕ) = i + 1) :
@@ -3094,6 +3104,7 @@ private lemma k4aTuple_apply_fa (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_neg (by omega), if_pos h]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4aTuple_apply_fb (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) = i + 2 ∨ (t : ℕ) = i + 3) :
@@ -3102,6 +3113,7 @@ private lemma k4aTuple_apply_fb (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_neg (by omega), if_neg (by omega), if_pos h]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4aTuple_apply_i4 (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : (t : ℕ) = i + 4) :
@@ -3110,6 +3122,7 @@ private lemma k4aTuple_apply_i4 (g₁ : SmoothRiemannianMetric I M) (x : M) (i :
   unfold k4aTuple
   rw [dif_neg (by omega), if_neg (by omega), if_neg (by omega), if_pos h]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4aTuple_apply_last (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     (u : Fin (2 + i) → TangentSpace I x) (a b : Fin (Module.finrank ℝ E))
     (t : Fin (6 + i)) (h : i + 5 ≤ (t : ℕ)) :
@@ -3118,6 +3131,7 @@ private lemma k4aTuple_apply_last (g₁ : SmoothRiemannianMetric I M) (x : M) (i
   unfold k4aTuple
   rw [dif_neg (by omega), if_neg (by omega), if_neg (by omega), if_neg (by omega)]
 
+set_option linter.unusedSectionVars false in
 private lemma k4a_mixTuple_eq_update (g₁ : SmoothRiemannianMetric I M) (x : M) (i : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin (2 + i) → Fin n)
     (a b : Fin (Module.finrank ℝ E)) :
@@ -3198,6 +3212,7 @@ private lemma k4a_mixTuple_eq_update (g₁ : SmoothRiemannianMetric I M) (x : M)
             (le_refl (i + 5))]
           exact congrArg e (congrArg J (Fin.ext hi1.symm))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma k4a_update_update_eq_R (x : M) (i : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin (2 + i) → Fin n) (p q : Fin n) :
     Function.update
@@ -3239,6 +3254,7 @@ private lemma k4aR_apply_q (i : ℕ) {n : ℕ} (J : Fin (2 + i) → Fin n) (p q 
   unfold k4aR
   rw [dif_neg h2, if_neg h3]
 
+omit [BoundarylessManifold I M] in
 private lemma k4a_rfns_icg_order_congr (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {m m' : ℕ} (h : m = m') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + m) x

@@ -10,7 +10,6 @@ import Mathlib.Analysis.Normed.Operator.Basic
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 import Mathlib.Geometry.Manifold.ContMDiff.Constructions
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,12 +40,14 @@ noncomputable def eval0SLinear (n : ℕ) :
     funext φ
     simp [ContinuousMultilinearMap.smul_apply]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma eval0SLinear_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     eval0SLinear (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma eval0SLinear_injective (n : ℕ) :
     Function.Injective (eval0SLinear (E := E) n) := by
   intro Φ₁ Φ₂ h
@@ -55,6 +56,7 @@ private lemma eval0SLinear_injective (n : ℕ) :
   intro v
   exact congr_fun h v
 
+set_option linter.unusedSectionVars false in
 private lemma finrank_tensor0SModel_loc (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) =
       (Module.finrank ℝ E) ^ n := by
@@ -77,12 +79,14 @@ private lemma finrank_tensor0SModel_loc (n : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] in
 private lemma finrank_basis_pi_loc (n : ℕ) :
     Module.finrank ℝ ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) =
       (Module.finrank ℝ E) ^ n := by
   rw [Module.finrank_pi, Fintype.card_pi]
   simp [Fintype.card_fin]
 
+set_option linter.unusedSectionVars false in
 private lemma eval0SLinear_bijective (n : ℕ) :
     Function.Bijective (eval0SLinear (E := E) n) := by
   have h_inj := eval0SLinear_injective (E := E) n
@@ -98,6 +102,7 @@ noncomputable def eval0SLinearEquiv (n : ℕ) :
   LinearEquiv.ofBijective (eval0SLinear (E := E) n)
     (eval0SLinear_bijective (E := E) n)
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma eval0SLinearEquiv_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
@@ -109,6 +114,7 @@ noncomputable def eval0SCLE (n : ℕ) :
       ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) :=
   (eval0SLinearEquiv (E := E) n).toContinuousLinearEquiv
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma eval0SCLE_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
@@ -129,6 +135,7 @@ noncomputable def evalAtBasisLinear_TensorRSModel (r s : ℕ) :
     funext p
     simp [ContinuousLinearMap.smul_apply, ContinuousMultilinearMap.smul_apply]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma evalAtBasisLinear_TensorRSModel_apply (r s : ℕ)
     (T : TensorRSModel r s ℝ E)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -137,6 +144,7 @@ noncomputable def evalAtBasisLinear_TensorRSModel (r s : ℕ) :
       (T ((eval0SCLE (E := E) r).symm (Pi.single Idx (1 : ℝ))))
         (fun k : Fin s => (chartModelBasis E) (Jdx k)) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma evalAtBasisLinear_TensorRSModel_injective (r s : ℕ) :
     Function.Injective (evalAtBasisLinear_TensorRSModel (E := E) r s) := by
   intro T₁ T₂ h
@@ -172,6 +180,7 @@ private lemma evalAtBasisLinear_TensorRSModel_injective (r s : ℕ) :
     exact h_pt Idx
   exact ContinuousLinearMap.coe_injective h_linear
 
+set_option linter.unusedSectionVars false in
 private lemma finrank_tensorRSModel_loc (r s : ℕ) :
     Module.finrank ℝ (TensorRSModel r s ℝ E) =
       (Module.finrank ℝ E) ^ (r + s) := by
@@ -189,6 +198,7 @@ private lemma finrank_tensorRSModel_loc (r s : ℕ) :
     finrank_tensor0SModel_loc (E := E) r,
     finrank_tensor0SModel_loc (E := E) s, ← pow_add]
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] in
 private lemma finrank_basis_pair_pi_loc (r s : ℕ) :
     Module.finrank ℝ
       (((Fin r → Fin (Module.finrank ℝ E)) ×
@@ -197,6 +207,7 @@ private lemma finrank_basis_pair_pi_loc (r s : ℕ) :
   rw [Module.finrank_pi, Fintype.card_prod, Fintype.card_pi, Fintype.card_pi]
   simp [Fintype.card_fin, pow_add]
 
+set_option linter.unusedSectionVars false in
 private lemma evalAtBasisLinear_TensorRSModel_bijective (r s : ℕ) :
     Function.Bijective (evalAtBasisLinear_TensorRSModel (E := E) r s) := by
   haveI : FiniteDimensional ℝ (TensorRSModel r s ℝ E) :=
@@ -219,6 +230,7 @@ noncomputable def evalAtBasisCLE_TensorRSModel (r s : ℕ) :
   (LinearEquiv.ofBijective (evalAtBasisLinear_TensorRSModel (E := E) r s)
     (evalAtBasisLinear_TensorRSModel_bijective (E := E) r s)).toContinuousLinearEquiv
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma evalAtBasisCLE_TensorRSModel_apply (r s : ℕ)
     (T : TensorRSModel r s ℝ E)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -231,6 +243,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
   [IsManifold I ∞ M]
 
+set_option linter.unusedSectionVars false in
 theorem contMDiffOn_into_tensorRSModel_of_eval_basis
     {r s : ℕ}
     {f : M → (ContinuousMultilinearMap ℝ (fun _ : Fin r => E) ℝ →L[ℝ]

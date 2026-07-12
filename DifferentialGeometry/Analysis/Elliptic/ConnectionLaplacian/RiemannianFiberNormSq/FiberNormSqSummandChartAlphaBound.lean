@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartGramMatrix_pou_uniform_entry_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -79,6 +79,7 @@ private lemma chartGramMatrix_pou_uniform_entry_bound
     hK_le (i, j) b hb
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma trivAt_cLMA_chartBasisVecFiber
     (α : M) (i : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -95,6 +96,7 @@ private lemma trivAt_cLMA_chartBasisVecFiber
     rw [Trivialization.symmL_apply]
   rw [hSymmL, Trivialization.continuousLinearMapAt_symmL T (b := b) hb]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma omega_eIdx_eq_sum_gram_compCLM
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -197,6 +199,7 @@ private lemma omega_eIdx_eq_sum_gram_compCLM
     dualCovariantCMM_apply, smul_eq_mul]
   rw [← Finset.prod_mul_distrib]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma section_compCLM_eval_eq_tensorChartComponentRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -295,6 +298,7 @@ private lemma section_compCLM_eval_eq_tensorChartComponentRaw
   unfold tensorTrivProj
   rw [hForward]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma section_omega_eIdx_apply_eq_sum_gram_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -391,6 +395,7 @@ private lemma sum_prod_gram_sq_le_uniform_const
         push_cast
         rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fiberNormSqSummand_chartAlpha_le_raw_components_sq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

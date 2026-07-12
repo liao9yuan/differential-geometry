@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmoothCross2
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.DiffQuotTestFunction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -133,6 +132,7 @@ private lemma pointwise_half_sum_f_v_test
   linarith
 
 
+omit [NeZero d] in
 theorem f_term_bound_nonsmooth_quantitative
     {Ω : Set E}
     {f : E → ℝ} (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →
@@ -366,6 +366,7 @@ theorem f_term_bound_nonsmooth_quantitative
   linarith
 
 
+omit [NeZero d] in
 theorem f_term_bound_nonsmooth
     {Ω : Set E}
     {f : E → ℝ} (hf_l2_loc : ∀ {Ω' : Set E}, IsCompact (closure Ω') →

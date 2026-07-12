@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.GenuineCurvatureField
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 theorem covGrad_finset_sum {ι : Type*} (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (t : Finset ι) (F : ι → SmoothCcTensor g r s) :
     covGrad (I := I) (M := M) g r s (∑ i ∈ t, F i) =
@@ -40,12 +40,14 @@ theorem covGrad_finset_sum {ι : Type*} (g : SmoothRiemannianMetric I M) (r s : 
   · intro a s ha ih
     rw [Finset.sum_insert ha, Finset.sum_insert ha, covGrad_add, ih]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem castRankCc_db_finset_sum {ι : Type*} {a b : ℕ} (g : SmoothRiemannianMetric I M)
     (r : ℕ) (h : a = b) (t : Finset ι) (F : ι → SmoothCcTensor g r a) :
     castCcTensorRank g r h (∑ i ∈ t, F i) =
       ∑ i ∈ t, castCcTensorRank g r h (F i) := by
   subst h; rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem castRankCc_db_heq {a b : ℕ} (g : SmoothRiemannianMetric I M) (r : ℕ)
     (h : a = b) (W : SmoothCcTensor g r a) : HEq (castCcTensorRank g r h W) W := by
   subst h; exact HEq.rfl
@@ -62,11 +64,13 @@ theorem appCc_castRankCc_db {a a' b b' : ℕ} (g : SmoothRiemannianMetric I M)
         (castCcTensorRank g 0 ha V) := by
   subst ha; subst hb; rfl
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 theorem covGrad_heq_congr' (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
     HEq (covGrad g r a Y) (covGrad g r b Z) := by
   subst h; rw [eq_of_heq hYZ]
 
+set_option linter.unusedSectionVars false in
 theorem iteratedCovGrad_covGrad_comm_heq' (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (X : SmoothCcTensor g r s) :
     HEq (iteratedCovGrad g r (s + 1) m (covGrad g r s X))

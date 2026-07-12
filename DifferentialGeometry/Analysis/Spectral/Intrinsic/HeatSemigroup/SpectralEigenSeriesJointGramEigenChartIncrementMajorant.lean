@@ -18,7 +18,6 @@ import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 import DifferentialGeometry.Analysis.Calculus.SpectralEigenSeriesJointGramProjectionJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.SpectralEigenSeriesJointGramRawComponentJetBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ def eigenChartIncrementMode
         (chartBasisVecFiber (I := I) α i' ((extChartAt I α).symm q.2))
         (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm q.2))
 
+omit [BoundarylessManifold I M] in
 theorem eigenChartIncrementMode_contDiffOn
     (g : SmoothRiemannianMetric I M) {T : ℝ}
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -151,6 +151,7 @@ private def eigenSpatialFactor
       (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm y))
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+set_option linter.unusedSectionVars false in
 private lemma eigenSpatialFactor_eqOn
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :

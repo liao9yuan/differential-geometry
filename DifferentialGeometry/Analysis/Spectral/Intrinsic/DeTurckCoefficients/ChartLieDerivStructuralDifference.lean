@@ -27,6 +27,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundar
 
 omit [I.Boundaryless] in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -48,6 +49,7 @@ theorem chartDeTurckVFComp_sub_eq
 
 omit [BoundarylessManifold I M] in
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem partialDeriv_chartDeTurckVFComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) {y : E}
@@ -149,6 +151,7 @@ theorem chartLieDeTurckCompJDerivTerm_sub_eq
 
 omit [BoundarylessManifold I M] in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem chartLieDeTurckComp_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :

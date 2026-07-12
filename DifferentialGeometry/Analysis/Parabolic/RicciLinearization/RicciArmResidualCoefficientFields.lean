@@ -52,6 +52,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option maxHeartbeats 3200000
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma foldMetricCcTensor_unitModel_apply (g₀ g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → E) :

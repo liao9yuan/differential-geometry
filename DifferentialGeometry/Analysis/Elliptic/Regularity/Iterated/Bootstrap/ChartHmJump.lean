@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.Char
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInterior.MixedPartials
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.DerivedDataConstructor
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -59,6 +58,7 @@ private noncomputable def padDirs {n : ℕ}
   fun j => if h : j < n then dirs ⟨j, h⟩ else
     ⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩
 
+omit [FiniteDimensional ℝ E] in
 @[simp] private lemma padDirs_at_lt {n : ℕ}
     (dirs : Fin n → Fin (Module.finrank ℝ E))
     {j : ℕ} (hj : j < n) :
@@ -70,11 +70,13 @@ private noncomputable def dirsOf {n : ℕ}
     Fin k → Fin (Module.finrank ℝ E) :=
   fun i => padDirs dirs i.val
 
+omit [FiniteDimensional ℝ E] in
 @[simp] private lemma dirsOf_zero {n : ℕ}
     (dirs : Fin n → Fin (Module.finrank ℝ E)) :
     dirsOf dirs 0 = Fin.elim0 := by
   funext i; exact i.elim0
 
+omit [FiniteDimensional ℝ E] in
 private lemma dirsOf_succ {n : ℕ}
     (dirs : Fin n → Fin (Module.finrank ℝ E)) (k : ℕ) :
     dirsOf dirs (k + 1) =
@@ -88,6 +90,7 @@ private lemma dirsOf_succ {n : ℕ}
     rw [Fin.snoc_last]
     rfl
 
+omit [FiniteDimensional ℝ E] in
 private lemma dirsOf_self {n : ℕ}
     (dirs : Fin n → Fin (Module.finrank ℝ E)) :
     dirsOf dirs n = dirs := by

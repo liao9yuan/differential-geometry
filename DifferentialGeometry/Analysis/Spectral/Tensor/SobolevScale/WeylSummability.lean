@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Defs
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.TensorHsInterpolationLimit
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.MercerProjectorTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -156,10 +155,12 @@ private theorem exists_growth_of_counting_bound
 
 def weylSobolevExp : ℕ := 2 * (2 * (Module.finrank ℝ E / 2 + 1))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma weylSobolevExp_gt_finrank :
     Module.finrank ℝ E < weylSobolevExp (E := E) := by
   unfold weylSobolevExp; omega
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma weylSobolevExp_eq_mercerSobolevExp :
     weylSobolevExp (E := E) = Spectral.Mercer.mercerSobolevExp (E := E) := rfl
 

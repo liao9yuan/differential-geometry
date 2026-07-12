@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.Proper
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -60,10 +59,12 @@ def LoweringIntertwiner (g : SmoothRiemannianMetric I M) (s : ℕ) : Prop :=
         (TensorRSSpace.toModel
           (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g) S x v))
 
+set_option linter.unusedSectionVars false in
 lemma loweringIntertwiner_two (g : SmoothRiemannianMetric I M) :
     LoweringIntertwiner (I := I) (M := M) g 2 :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g S x v
 
+set_option linter.unusedSectionVars false in
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_three
     (g : SmoothRiemannianMetric I M)
     (S : Cₛ^∞⟮I; TensorRSModel 0 3 ℝ E, (fun x : M => TensorRSSpace 0 3 I x)⟯)
@@ -123,6 +124,7 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_three
     exact congrArg u (Fin.ext (by simp))
   rw [hsec]
 
+set_option linter.unusedSectionVars false in
 lemma loweringIntertwiner_three (g : SmoothRiemannianMetric I M) :
     LoweringIntertwiner (I := I) (M := M) g 3 :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_three (I := I) (M := M) g S x v
@@ -135,6 +137,7 @@ def covDerivAlongVFrawGen
   covApply (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g))
     (fun y : M => B y) (fun y : M => T y)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma covDerivAlongVFrawGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -143,6 +146,7 @@ def covDerivAlongVFrawGen
       (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma covDerivAlongVFrawGen_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -179,6 +183,7 @@ def covDerivAlongVFSectionGen
     (fun y : M => covDerivAlongVFrawGen (I := I) (M := M) g s T B y)
     (covDerivAlongVFrawGen_contMDiff (I := I) (M := M) g s T B)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma covDerivAlongVFSectionGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -187,6 +192,7 @@ def covDerivAlongVFSectionGen
       (tensorRSCovariantDerivative I M 0 s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma covDerivAlongVFSectionGen_lowered_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -198,6 +204,7 @@ lemma covDerivAlongVFSectionGen_lowered_eq
   rw [hint T y (B y)]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma toModel_liftedTensorSection_covDerivAlongVFSectionGen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -210,6 +217,7 @@ lemma toModel_liftedTensorSection_covDerivAlongVFSectionGen
   rw [toModel_liftedTensorSection]
   exact covDerivAlongVFSectionGen_lowered_eq (I := I) (M := M) g s hint T B y
 
+set_option linter.unusedSectionVars false in
 lemma covDerivAlongGen_covDerivAlongVFSectionGen_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -254,6 +262,7 @@ def dirichletFormGen
     rw [hcov, TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left]
     rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma dirichletFormGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M)
     (X : TangentSpace I b) :
@@ -267,6 +276,7 @@ def dirichletVFGen
     TangentSpace I b :=
   metricSharp (I := I) g b (dirichletFormGen (I := I) (M := M) g s T v b)
 
+set_option linter.unusedSectionVars false in
 lemma inner_dirichletVFGen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M)
     (X : TangentSpace I b) :
@@ -275,6 +285,7 @@ lemma inner_dirichletVFGen
   rw [dirichletVFGen]
   exact inner_metricSharp (I := I) g b (dirichletFormGen (I := I) (M := M) g s T v b) X
 
+set_option linter.unusedSectionVars false in
 private lemma dirichletFormGen_chartBasis_component_contMDiffOn
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -326,6 +337,7 @@ private lemma dirichletFormGen_chartBasis_component_contMDiffOn
   intro b _
   rw [dirichletFormGen_apply]
 
+set_option linter.unusedSectionVars false in
 lemma dirichletVFGen_contMDiff
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -342,11 +354,13 @@ def dirichletVFSectionGen
     (fun b : M => dirichletVFGen (I := I) (M := M) g s T v b)
     (dirichletVFGen_contMDiff (I := I) (M := M) g s T v)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma dirichletVFSectionGen_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :
     dirichletVFSectionGen (I := I) (M := M) g s T v b =
       dirichletVFGen (I := I) (M := M) g s T v b := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma divergence_dirichletVFGen_summand_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -464,6 +478,7 @@ private lemma divergence_dirichletVFGen_summand_eq
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma tensorCovDerivPointwiseInnerGen_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g 0 s T v b =
@@ -529,6 +544,7 @@ private lemma tensorCovDerivPointwiseInnerGen_eq_smoothOrthoFrame_diag
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
 
+set_option linter.unusedSectionVars false in
 lemma divergence_dirichletVFGen_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -579,6 +595,7 @@ lemma divergence_dirichletVFGen_eq
         (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
         (fun y : M => T.toSection y) b) Finset.univ
 
+set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_general
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (hint : LoweringIntertwiner (I := I) (M := M) g s)
@@ -659,6 +676,7 @@ theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_general
     refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
     simp only [SmoothCcTensor.toFun_apply, rawTensorConnLapSmooth_toSection_apply]
 
+set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_three
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 3) :
     tensorL2Inner (I := I) (M := M) g 0 (3 + 1)
@@ -669,6 +687,7 @@ theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_three
   tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_general
     (I := I) (M := M) g 3 (loweringIntertwiner_three (I := I) (M := M) g) T v
 
+set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_two
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (2 + 1)

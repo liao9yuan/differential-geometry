@@ -12,7 +12,6 @@ import Mathlib.Topology.FiberBundle.Trivialization
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+set_option linter.unusedSectionVars false in
 theorem chartJ_apply_chartBasisVecFiber_continuousOn
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContinuousOn
@@ -55,6 +55,7 @@ theorem chartJ_apply_chartBasisVecFiber_continuousOn
   refine ContinuousOn.congr ?_ (fun b hb => heq b hb)
   exact continuousOn_const
 
+set_option linter.unusedSectionVars false in
 theorem metric_inner_chartBasisFibers_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -75,6 +76,7 @@ theorem metric_inner_chartBasisFibers_continuousOn
   intro b _
   exact (chartGramMatrix_apply g α b i j).symm
 
+set_option linter.unusedSectionVars false in
 theorem separableFormAt_chartBasisFibers_eval_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (r : ℕ)
     (Idx Jdx : Fin r → Fin (Module.finrank ℝ E)) :
@@ -98,6 +100,7 @@ theorem separableFormAt_chartBasisFibers_eval_continuousOn
   exact metric_inner_chartBasisFibers_continuousOn (I := I) (M := M) g α
     (Idx k) (Jdx k)
 
+omit [Module.Finite ℝ E] in
 theorem triv_symm_apply_const_continuousOn_baseSet
     (α : M) (v : E) :
     ContinuousOn
@@ -120,6 +123,7 @@ theorem triv_symm_apply_const_continuousOn_baseSet
     exact ⟨hb, Set.mem_univ _⟩
   exact hsymm.comp hcomp.continuousOn hmaps
 
+set_option linter.unusedSectionVars false in
 theorem chartBasisVec_continuousOn_baseSet
     (α : M) (k : Fin (Module.finrank ℝ E)) :
     ContinuousOn (chartBasisVec (I := I) α k)
@@ -130,6 +134,7 @@ theorem chartBasisVec_continuousOn_baseSet
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [Module.Finite ℝ E] in
 private lemma continuousOn_g_inner_aux
     (g : SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x} {s : Set M}
@@ -149,6 +154,7 @@ private lemma continuousOn_g_inner_aux
   intro b _
   rfl
 
+omit [Module.Finite ℝ E] in
 theorem metric_inner_sections_continuousOn
     (g : SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x} {s : Set M}
@@ -159,6 +165,7 @@ theorem metric_inner_sections_continuousOn
     ContinuousOn (fun b : M => g.inner b (v b) (w b)) s :=
   continuousOn_g_inner_aux (I := I) (M := M) g hv hw
 
+set_option linter.unusedSectionVars false in
 theorem metric_inner_chartBasisFiber_trivSymm_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (v : E) :
@@ -182,6 +189,7 @@ theorem metric_inner_chartBasisFiber_trivSymm_continuousOn
     (s := (trivializationAt E (TangentSpace I) α).baseSet) hX hY
   exact h
 
+omit [Module.Finite ℝ E] in
 theorem metric_inner_trivSymm_trivSymm_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v w : E) :
     ContinuousOn
@@ -210,6 +218,7 @@ section HeadlineNormComparison
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M}
@@ -313,6 +322,7 @@ lemma sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
       rw [div_eq_inv_mul]]
     exact (le_div_iff₀ hε).mpr (by linarith [h_mul])
 
+set_option linter.unusedSectionVars false in
 theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -331,6 +341,7 @@ theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_
   exact sq_norm_le_inv_eps_mul_chartTensorInnerPointwise_rs_model_on_compact
     (I := I) (M := M) g r s α hK_M_sub_baseSet hε_pos h_lb
 
+set_option linter.unusedSectionVars false in
 theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -345,6 +356,7 @@ theorem chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -369,6 +381,7 @@ theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_o
       (I := I) (M := M) g r s α hb_base T T] at h
   exact h
 
+set_option linter.unusedSectionVars false in
 theorem chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

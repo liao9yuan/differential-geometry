@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.Convolution
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ omit [NeZero d] in
 
 private lemma C_nonneg_of_pos {C : ℝ} (hC : 0 < C) : 0 ≤ C := hC.le
 
+omit [NeZero d] in
 theorem tendsto_subseq_of_uniformly_lipschitz_uniformly_bounded
     {K : Set E} (hK_compact : IsCompact K)
     {f : ℕ → E → ℝ}

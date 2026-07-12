@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionSmoothApprox
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_bilinear_identity_h1_0_smooth_seq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -152,6 +152,7 @@ theorem chart_bilinear_identity_h1_0_smooth_seq
     hψ_seq_smooth hψ_seq_cs hψ_seq_supp hψ_seq_l2 hψ_seq_grad_l2
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_at_v_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -226,6 +227,7 @@ theorem variational_identity_at_v_h
     h_v_seq_grad_l2
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_v_h_expanded
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -343,6 +345,7 @@ theorem variational_identity_v_h_expanded
   exact h_var_id_at_v_h
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_after_ibp
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -564,6 +567,7 @@ theorem variational_identity_after_ibp
   exact h_expanded
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem variational_identity_after_product_rule
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

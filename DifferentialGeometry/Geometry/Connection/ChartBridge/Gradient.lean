@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,18 +20,21 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 theorem gradFun_metricDual
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
     g.inner x (gradFun (I := I) g f x) v = mfderiv I 𝓘(ℝ, ℝ) f x v :=
   inner_gradFun (I := I) g f x v
 
+set_option linter.unusedSectionVars false in
 theorem gradFun_metricDual_right
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
     g.inner x v (gradFun (I := I) g f x) = mfderiv I 𝓘(ℝ, ℝ) f x v :=
   inner_gradFun_right (I := I) g f x v
 
+set_option linter.unusedSectionVars false in
 theorem metricFlatMap_gradFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     metricFlatMap (I := I) g x (gradFun (I := I) g f x) =
@@ -41,11 +43,13 @@ theorem metricFlatMap_gradFun
   rw [metricFlatMap_apply]
   exact gradFun_metricDual (I := I) g f x v
 
+set_option linter.unusedSectionVars false in
 lemma gradFun_eq_metricSharp_mfderiv
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     gradFun (I := I) g f x =
       metricSharp (I := I) g x (mfderiv I 𝓘(ℝ, ℝ) f x).toLinearMap := rfl
 
+set_option linter.unusedSectionVars false in
 theorem gradFun_unique
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) {x : M}
     {w : TangentSpace I x}
@@ -57,6 +61,7 @@ theorem gradFun_unique
   rw [hw v]
   exact (gradFun_metricDual (I := I) g f x v).symm
 
+set_option linter.unusedSectionVars false in
 theorem metricFlat_gradFun_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
@@ -65,6 +70,7 @@ theorem metricFlat_gradFun_apply
   change g.inner x (gradFun (I := I) g f x) v = _
   exact gradFun_metricDual (I := I) g f x v
 
+set_option linter.unusedSectionVars false in
 theorem metricFlat_gradFun_eq_extDerivFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     metricFlat g (fun y => gradFun (I := I) g f y) x = extDerivFun (I := I) f x := by
@@ -72,17 +78,20 @@ theorem metricFlat_gradFun_eq_extDerivFun
   rw [metricFlat_gradFun_apply (I := I) g f x v]
   rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma gradFun_const
     (g : SmoothRiemannianMetric I M) (c : ℝ) (x : M) :
     gradFun (I := I) g (fun _ : M => c) x = (0 : TangentSpace I x) := by
   apply gradFun_eq_zero_of_mfderiv_eq_zero (I := I) g (f := fun _ : M => c)
   exact mfderiv_const
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma gradFun_zero
     (g : SmoothRiemannianMetric I M) (x : M) :
     gradFun (I := I) g (fun _ : M => (0 : ℝ)) x = (0 : TangentSpace I x) :=
   gradFun_const (I := I) g 0 x
 
+set_option linter.unusedSectionVars false in
 lemma gradFun_metricDual_extDerivFun
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (v : TangentSpace I x) :
@@ -90,6 +99,7 @@ lemma gradFun_metricDual_extDerivFun
   rw [gradFun_metricDual (I := I) g f x v]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem gradFun_add
     (g : SmoothRiemannianMetric I M) {f h : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
@@ -114,6 +124,7 @@ theorem gradFun_add
     rw [hsum, extDerivFun_add hf hh, ContinuousLinearMap.add_apply]
   rw [h_left, ← h_right]
 
+set_option linter.unusedSectionVars false in
 theorem gradFun_const_smul
     (g : SmoothRiemannianMetric I M) (c : ℝ) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x) :
@@ -141,6 +152,7 @@ theorem gradFun_const_smul
     rfl
   rw [h_left, ← h_right]
 
+set_option linter.unusedSectionVars false in
 theorem gradFun_contMDiff_total_section [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

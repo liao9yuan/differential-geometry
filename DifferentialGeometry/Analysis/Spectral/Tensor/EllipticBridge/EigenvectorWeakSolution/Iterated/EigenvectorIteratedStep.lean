@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedDatum
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -52,6 +52,7 @@ private lemma contDiff_fderiv_apply_single
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -62,6 +63,7 @@ private lemma hasCompactSupport_fderiv_apply_single
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
@@ -71,6 +73,7 @@ private lemma tsupport_fderiv_apply_single_subset
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -157,6 +160,7 @@ private lemma density_mul_eigenvectorChartIteratedStep_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
+omit [CompleteSpace E] in
 private theorem ibp_density_fChartEffPrev
     (g : SmoothRiemannianMetric I M) (α : M)
     {fChartEffPrev : EuclN → ℝ}
@@ -362,6 +366,7 @@ private theorem ibp_inner_j_unconditional
 
 omit [CompleteSpace E] in
 
+set_option linter.unusedSectionVars false in
 private lemma integrable_triple_helper
     {α : M} {K : Set EuclN}
     (hK_compact : IsCompact K)

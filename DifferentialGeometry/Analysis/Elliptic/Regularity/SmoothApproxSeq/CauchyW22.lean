@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Bi
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Linearity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpThreeSmooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ private noncomputable def smoothScalarSub
   { toFun := fun x => v₁.toFun x - v₂.toFun x
     smooth := v₁.smooth.sub v₂.smooth }
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalarSub_toFun
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ : SmoothScalar g) :

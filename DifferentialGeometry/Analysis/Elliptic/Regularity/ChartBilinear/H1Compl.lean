@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.Smooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -83,6 +82,7 @@ structure ChartBilinearH1ComplData
         densityOnEuclid (I := I) g α y * f_chart y * ψ y
         ∂(volume : Measure EuclN)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_bilinear_identity_h1Compl
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -105,6 +105,7 @@ theorem chart_bilinear_identity_h1Compl
       ∂(volume : Measure EuclN) :=
   D.variational_identity ψ hψ hψ_cs hψ_supp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK : IsCompact K)
@@ -138,11 +139,13 @@ lemma densityOnEuclid_bounded_on_compact
   intro y hy
   refine ⟨h_min_eq hy, h_max_eq hy⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_continuousOn (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densityOnEuclid_contDiffOn (I := I) g α).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma volume_restrict_compact_le_chartPulledWeightedMeasure
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -195,6 +198,7 @@ lemma volume_restrict_compact_le_chartPulledWeightedMeasure
   gcongr
   exact le_trans (le_of_eq h_const_eval.symm) (h_pointwise_bd.trans h_setmono)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure
     [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}

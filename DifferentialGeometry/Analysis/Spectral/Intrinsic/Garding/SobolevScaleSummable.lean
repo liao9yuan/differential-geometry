@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Inclusion
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapGreenDivergenceIdentityAnySection
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothToL2
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ noncomputable def oneMinusConnLapSmooth
     SmoothCcTensor g r s :=
   T - rawTensorConnLapSmooth (I := I) g r s T
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma oneMinusConnLapSmooth_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (x : M) :
@@ -62,10 +62,12 @@ noncomputable def oneMinusConnLapSmoothIter
   | k + 1, T => oneMinusConnLapSmooth (I := I) g r s
                   (oneMinusConnLapSmoothIter g r s k T)
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem oneMinusConnLapSmoothIter_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s 0 T = T := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem oneMinusConnLapSmoothIter_succ
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s (k + 1) T =
@@ -153,6 +155,7 @@ theorem oneMinusConnLapSmooth_toL2_inner_eq_h1
   rw [h_lhs, h_split, h_l2_Tv, h_dir, h_green]
   ring
 
+omit [BoundarylessManifold I M] in
 theorem tensorParseval_l2Coeff_ofCompact_sq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -166,6 +169,7 @@ theorem tensorParseval_l2Coeff_ofCompact_sq
   rw [tensorL2Coeff_eq_inner (I := I) (M := M) h_compact u i,
     Real.norm_eq_abs, sq_abs]
 
+omit [BoundarylessManifold I M] in
 theorem tensorL2Coeff_ofCompact_summable_sq'
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator (tensorResolventL2
@@ -175,6 +179,7 @@ theorem tensorL2Coeff_ofCompact_summable_sq'
       (tensorL2Coeff (I := I) (M := M) h_compact u i) ^ 2) :=
   tensorL2Coeff_summable_sq (I := I) (M := M) h_compact u
 
+omit [BoundarylessManifold I M] in
 theorem summable_tensorSobolevWeight_of_even
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g r s → ℝ)

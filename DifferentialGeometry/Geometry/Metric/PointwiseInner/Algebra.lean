@@ -8,7 +8,6 @@ import Mathlib.LinearAlgebra.Multilinear.Basis
 import Mathlib.Algebra.BigOperators.Ring.Finset
 import Mathlib.Data.Real.Sqrt
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,6 +25,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S₁ S₂ T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -56,6 +56,7 @@ theorem tensorInnerPointwise_0s_add_left
       rw [hcurry, ih]
       ring
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T₁ T₂ : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -86,6 +87,7 @@ theorem tensorInnerPointwise_0s_add_right
       rw [hcurry, ih]
       ring
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (c : ℝ) (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -113,6 +115,7 @@ theorem tensorInnerPointwise_0s_smul_left
       rw [hcurry, ih]
       ring
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (c : ℝ) (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -140,6 +143,7 @@ theorem tensorInnerPointwise_0s_smul_right
       rw [hcurry, ih]
       ring
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_symm
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -164,6 +168,7 @@ theorem tensorInnerPointwise_0s_symm
         simpa [star_trivial] using this
       rw [ih, hG]
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -173,6 +178,7 @@ theorem tensorInnerPointwise_0s_zero_left
   rw [h₀] at h
   linarith
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_zero_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -180,6 +186,7 @@ theorem tensorInnerPointwise_0s_zero_right
   rw [tensorInnerPointwise_0s_symm]
   exact tensorInnerPointwise_0s_zero_left (I := I) (M := M) g x s S
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_zero_arity_nonneg
     (g : SmoothRiemannianMetric I M) (x : M)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
@@ -187,6 +194,7 @@ theorem tensorInnerPointwise_0s_zero_arity_nonneg
   change 0 ≤ S (fun i => Fin.elim0 i) * S (fun i => Fin.elim0 i)
   exact mul_self_nonneg _
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_zero_arity_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (x : M)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
@@ -207,6 +215,7 @@ theorem tensorInnerPointwise_0s_zero_arity_eq_zero_iff
     rw [h]
     simp
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_0s_sum_left
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι)
@@ -227,6 +236,7 @@ private lemma tensorInnerPointwise_0s_sum_left
           tensorInnerPointwise_0s_smul_left,
           ih, Finset.sum_insert hi]
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_0s_sum_right
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι : Type*} (A : Finset ι)
@@ -247,6 +257,7 @@ private lemma tensorInnerPointwise_0s_sum_right
           tensorInnerPointwise_0s_smul_right,
           ih, Finset.sum_insert hi]
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_0s_sum_sum
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {ι₁ ι₂ : Type*}
@@ -267,6 +278,7 @@ private lemma tensorInnerPointwise_0s_sum_sum
   intro j _
   ring
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -397,6 +409,7 @@ theorem tensorInnerPointwise_0s_nonneg
       refine mul_nonneg (hμ_nonneg k) ?_
       exact ih (∑ i : Fin n, U i k • Sfam i)
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -651,6 +664,7 @@ theorem tensorInnerPointwise_0s_eq_zero_iff
         exact tensorInnerPointwise_0s_zero_left
           (I := I) (M := M) g x (s + 1) 0
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :
@@ -659,6 +673,7 @@ theorem tensorInnerPointwise_symm
   unfold tensorInnerPointwise
   exact tensorInnerPointwise_0s_symm (I := I) (M := M) g x (r + s) _ _
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S₁ S₂ T : TensorRSModel r s ℝ E) :
@@ -669,6 +684,7 @@ theorem tensorInnerPointwise_add_left
   rw [ContinuousLinearMap.map_add]
   exact tensorInnerPointwise_0s_add_left (I := I) (M := M) g x (r + s) _ _ _
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_add_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T₁ T₂ : TensorRSModel r s ℝ E) :
@@ -679,6 +695,7 @@ theorem tensorInnerPointwise_add_right
   rw [ContinuousLinearMap.map_add]
   exact tensorInnerPointwise_0s_add_right (I := I) (M := M) g x (r + s) _ _ _
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (S T : TensorRSModel r s ℝ E) :
@@ -688,6 +705,7 @@ theorem tensorInnerPointwise_smul_left
   rw [ContinuousLinearMap.map_smul]
   exact tensorInnerPointwise_0s_smul_left (I := I) (M := M) g x (r + s) c _ _
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_smul_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (S T : TensorRSModel r s ℝ E) :
@@ -697,6 +715,7 @@ theorem tensorInnerPointwise_smul_right
   rw [ContinuousLinearMap.map_smul]
   exact tensorInnerPointwise_0s_smul_right (I := I) (M := M) g x (r + s) c _ _
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_zero_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -707,6 +726,7 @@ theorem tensorInnerPointwise_zero_left
   rw [h₀] at h
   linarith
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_zero_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -714,6 +734,7 @@ theorem tensorInnerPointwise_zero_right
   rw [tensorInnerPointwise_symm]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x S
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -721,6 +742,7 @@ theorem tensorInnerPointwise_nonneg
   unfold tensorInnerPointwise
   exact tensorInnerPointwise_0s_nonneg (I := I) (M := M) g x (r + s) _
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_eq_zero_iff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -732,6 +754,7 @@ theorem tensorInnerPointwise_eq_zero_iff
       (h.trans (map_zero _).symm)
   · rw [h, map_zero]
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_sq_le_mul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -808,6 +831,7 @@ theorem tensorInnerPointwise_0s_sq_le_mul
     rw [hb_zero, hc_eq, mul_zero]
     simp
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_sq_le_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :
@@ -817,6 +841,7 @@ theorem tensorInnerPointwise_sq_le_mul
   unfold tensorInnerPointwise
   exact tensorInnerPointwise_0s_sq_le_mul (I := I) (M := M) g (r + s) x _ _
 
+set_option linter.unusedSectionVars false in
 theorem abs_tensorInnerPointwise_le_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :

@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.MFDeriv.FDeriv
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -212,6 +211,7 @@ theorem mem_chartPullback_self {γ : ℝ → M} (t : ℝ) :
     t ∈ γ ⁻¹' (chartAt H (γ t)).source := by
   exact mem_chart_source H (γ t)
 
+omit [IsManifold I ∞ M] in
 theorem chartPullback_cover_compact
     {γ : ℝ → M} (_hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {s : Set ℝ} (_hs : IsCompact s) :
     s ⊆ ⋃ t₀ ∈ s, γ ⁻¹' (chartAt H (γ t₀)).source := by
@@ -220,6 +220,7 @@ theorem chartPullback_cover_compact
   refine mem_iUnion_of_mem ht ?_
   exact mem_chart_source H (γ t)
 
+omit [IsManifold I ∞ M] in
 theorem exists_finite_chartPullback_subcover
     {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     {s : Set ℝ} (hs : IsCompact s) :

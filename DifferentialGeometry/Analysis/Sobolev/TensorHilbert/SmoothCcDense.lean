@@ -26,6 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothCcTensor_denseRange_toHs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     DenseRange

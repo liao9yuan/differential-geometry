@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.ChartAlphaReprL2BoundOnPouTsupport
 import DifferentialGeometry.Analysis.Sobolev.Chart.CrossChartBounds.CrossChartBoundStrict
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,12 +42,14 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouInter_isCompact (α β : M) :
     IsCompact
       (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
        tsupport (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact.inter_right (isClosed_tsupport _)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouInter_subset_chartSourceα (α β : M) :
     (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
      tsupport (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) ⊆
@@ -56,6 +57,7 @@ private lemma pouInter_subset_chartSourceα (α β : M) :
   intro x hx
   exact (chartAtlasPOU_isSubordinate I M) α hx.1
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouInter_subset_chartSourceβ (α β : M) :
     (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∩
      tsupport (fun x : M => ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) ⊆
@@ -84,6 +86,7 @@ private lemma ofReal_sq_eq_enorm_sq (r : ℝ) :
     ENNReal.ofReal (r ^ 2) = (‖r‖ₑ : ℝ≥0∞) ^ 2 := by
   rw [Real.enorm_eq_ofReal_abs, ← ENNReal.ofReal_pow (abs_nonneg _), sq_abs]
 
+omit [BoundarylessManifold I M] in
 theorem chart_α_pou_α_pou_β_raw_β_sq_le_chart_β_wkpNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α β : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

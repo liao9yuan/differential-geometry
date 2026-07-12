@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowGeodesicLink
 import DifferentialGeometry.Geometry.Exponential.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -31,6 +30,7 @@ open DifferentialGeometry.Integral.Measure
 
 section ChartOfTM
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem extChartAt_tangent_apply_snd
     (q : TangentBundle I M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H q.proj).source) :
@@ -58,6 +58,7 @@ theorem extChartAt_tangent_apply_snd
   rw [← hcoe_at]
   rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem extChartAt_tangent_apply_fst
     (q : TangentBundle I M) {p : TangentBundle I M}
     (_hp : p.proj ∈ (chartAt H q.proj).source) :
@@ -73,6 +74,7 @@ theorem extChartAt_tangent_apply_fst
     TangentBundle.trivializationAt_fst _ _
   rw [hp1]
 
+set_option linter.unusedSectionVars false in
 theorem extChartAt_tangent_zero_apply
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -88,6 +90,7 @@ theorem extChartAt_tangent_zero_apply
       (q := (⟨α, (0 : E)⟩ : TangentBundle I M)) (p := p) (by exact hp)
     exact h
 
+set_option linter.unusedSectionVars false in
 theorem extChartAt_tangent_zero_apply_chartFiber
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -111,6 +114,7 @@ section ChartPushLiftDecomposition
 
 variable [I.Boundaryless]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem extChartAt_tangent_eq_at_proj
     (q : TangentBundle I M) :
     extChartAt I.tangent q =
@@ -118,6 +122,7 @@ theorem extChartAt_tangent_eq_at_proj
   classical
   rw [FiberBundle.extChartAt, FiberBundle.extChartAt]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushLift_eq_pair
     {f : ℝ → TangentBundle I M} (t₀ t : ℝ)
     (ht : (f t).proj ∈ (chartAt H (f t₀).proj).source) :
@@ -129,18 +134,21 @@ theorem chartPushLift_eq_pair
   rw [extChartAt_tangent_eq_at_proj (I := I) (f t₀)]
   exact extChartAt_tangent_zero_apply_chartFiber (I := I) (f t₀).proj ht
 
+set_option linter.unusedSectionVars false in
 theorem chartPushLift_fst
     {f : ℝ → TangentBundle I M} (t₀ t : ℝ)
     (ht : (f t).proj ∈ (chartAt H (f t₀).proj).source) :
     (chartPushLift (I := I) f t₀ t).1 = extChartAt I (f t₀).proj (f t).proj := by
   rw [chartPushLift_eq_pair (I := I) t₀ t ht]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushLift_snd
     {f : ℝ → TangentBundle I M} (t₀ t : ℝ)
     (ht : (f t).proj ∈ (chartAt H (f t₀).proj).source) :
     (chartPushLift (I := I) f t₀ t).2 = chartFiberCoord (I := I) (f t₀).proj (f t) := by
   rw [chartPushLift_eq_pair (I := I) t₀ t ht]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushLift_self_pair
     (f : ℝ → TangentBundle I M) (t₀ : ℝ) :
     chartPushLift (I := I) f t₀ t₀ =
@@ -150,6 +158,7 @@ theorem chartPushLift_self_pair
   apply chartPushLift_eq_pair
   exact mem_chart_source H (f t₀).proj
 
+set_option linter.unusedSectionVars false in
 theorem chartPushLift_self_apply_at_zero_section
     {f : ℝ → TangentBundle I M} {α : M} (t₀ : ℝ)
     (hf : f t₀ = (⟨α, (0 : E)⟩ : TangentBundle I M)) :
@@ -169,6 +178,7 @@ section HeadlineBridge
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedFlow_eq_lift_proj_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
     {f : ℝ → TangentBundle I M}
@@ -218,6 +228,7 @@ theorem chartPushedFlow_eq_lift_proj_eventually
     rw [extChartAt_source]; exact ht_src
   exact ((extChartAt I p).left_inv ht_src').symm
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedFlow_eq_witness_curve_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v_chart : E)
     {γ : ℝ → M}
@@ -296,6 +307,7 @@ theorem chartPushedFlow_eq_witness_curve_eventually
   rw [← hproj t]
   exact ht
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedFlow_eq_maximalGeodesicChosenCurve_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {t₁ : ℝ} (ht₁ : t₁ ∈ maximalGeodesicInterval (I := I) g p v)

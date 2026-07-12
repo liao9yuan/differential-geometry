@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightLimit
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply,
@@ -48,6 +48,7 @@ private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace
     LinearEquiv.coe_mk]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma covGradBundle_trivFibre_eq
     (r s : ℕ) (α : M) (b : M)
     (Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b) :
@@ -121,6 +122,7 @@ theorem tensorChartComponentRaw_prependCovGradSlot
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_scalarOnE_eq_euclidPartial
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -153,6 +155,7 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
+set_option linter.unusedSectionVars false in
 private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial
     (ζ : C^∞⟮I, M; ℝ⟯) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -201,6 +204,7 @@ private lemma tensorCovDerivAt_sum_smul_dir
   rw [map_smul]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma symm_mem_chartLeviCivitaGoodSet
     (α : M) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈
@@ -288,6 +292,7 @@ noncomputable def crossLeftTestCoeff
       covChartMetricGramInv (I := I) (M := M) g r s α y
         (Q.1, Matrix.vecTail Q.2) P₀
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma crossLeftTestCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r (s + 1)) (y : EuclN) :
@@ -368,6 +373,7 @@ noncomputable def gradChartCoeffEuclid
       chartInvGramEuclid (I := I) g α m j y *
         euclidPartial (E := E) j (chartPushedRaw I α ζ) y
 
+set_option linter.unusedSectionVars false in
 theorem gradChartCoeff_eq_gradChartCoeffEuclid
     (g : SmoothRiemannianMetric I M) (α : M) (ζ : M → ℝ)
     (m : Fin (Module.finrank ℝ E))
@@ -384,6 +390,7 @@ theorem gradChartCoeff_eq_gradChartCoeffEuclid
     rw [chartInvGramEuclid_def, chartInvGramOnE_def]]
   rw [partialDeriv_scalarOnE_eq_euclidPartial (I := I) (M := M) ζ α j hy]
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem gradChartCoeffEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {ζ : M → ℝ} (hζ : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ ζ (chartAt H α).source)
@@ -425,6 +432,7 @@ noncomputable def crossRightTestGradCoeff
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) l y *
       gramInvEntry (I := I) (M := M) g r s α Q P₀ y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma crossRightTestGradCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r s)
@@ -445,6 +453,7 @@ noncomputable def crossRightTestValueCoeff
             (gramInvEntry (I := I) (M := M) g r s α Q P₀) y +
           lowerOrderRotationLOCoeff (I := I) (M := M) g r s α P₀ m Q y)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma crossRightTestValueCoeff_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : CompIdx E r s) (Q : CompIdx E r s) (y : EuclN) :

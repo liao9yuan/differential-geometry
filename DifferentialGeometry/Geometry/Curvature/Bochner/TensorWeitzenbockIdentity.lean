@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvat
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ theorem riemannSec_tensorCov_baseSlot_eval
             (Function.update u k (baseSlotCurv (I := I) g X W x (u k))) :=
   riemannSec_tensor0SCov_apply_eval (I := I) (M := M) g s X W A hA x u
 
+omit [I.Boundaryless] in
 theorem smoothOrthoFrame_riemannOp_trace_eq_ricci
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     ∑ i : Fin (Module.finrank ℝ E),

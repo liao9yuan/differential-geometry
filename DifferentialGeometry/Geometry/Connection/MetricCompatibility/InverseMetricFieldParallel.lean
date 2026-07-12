@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ theorem inverseMetricSharp_covDeriv_eq (g : SmoothRiemannianMetric I M)
     ((cotangentCov (LeviCivita (I := I) g)).toFun (metricFlat (I := I) g X) x v) y]
   exact cotangentCov_metricDuality (I := I) g hX v y
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem metricFlat_inverseMetricSharpField_eq (g : SmoothRiemannianMetric I M)
     (β : Π b : M, Tensor0SSpace 1 I b) (b : M) :
     metricFlat (I := I) g (fun y : M => (inverseMetricSharpFib (I := I) g y) (β y)) b =
@@ -77,6 +77,7 @@ theorem inverseMetricSharpField_covGrad_eq_zero (g : SmoothRiemannianMetric I M)
   rw [inverseMetricSharpFib_apply]
   congr 1
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem dualToCotangent_add' {x : M}
     (a b : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (a + b) =

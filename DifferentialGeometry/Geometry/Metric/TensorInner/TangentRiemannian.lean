@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [Module.Finite ℝ E] in
 private lemma continuous_g_inner_aux
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x}
@@ -59,6 +59,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [Module.Finite ℝ E] in
 theorem continuous_g_inner_of_smooth_sections
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

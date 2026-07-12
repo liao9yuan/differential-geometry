@@ -23,7 +23,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldResidualFieldBallUniform
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldResidualFieldL2JetWindow
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -1084,6 +1083,7 @@ theorem exists_deTurckLieCovDerivArm_curvatureRefold_data
     positivity
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckVF_background_sub_eq_connDiff_trace
     (g₁ gA gB : SmoothRiemannianMetric I M) (x : M) :
     (PDE.DeTurck.deTurckVF (I := I) g₁ gA :

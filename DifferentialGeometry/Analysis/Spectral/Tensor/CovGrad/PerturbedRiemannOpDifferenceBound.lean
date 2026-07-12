@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPa
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovDerivConnDiffQuadraticBound
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma gNorm_self_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a + b) (a + b)) ≤
@@ -69,6 +69,7 @@ private lemma gNorm_self_triangle
   rw [hsq]
   linarith [hcs]
 
+set_option linter.unusedSectionVars false in
 private lemma gNorm_self_sub_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a - b) (a - b)) ≤

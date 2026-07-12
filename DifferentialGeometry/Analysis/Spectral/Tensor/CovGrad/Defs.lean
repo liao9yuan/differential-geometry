@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 import DifferentialGeometry.Tensor.RSTensor.Derivation.GradientBundleEquiv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,12 +43,14 @@ private noncomputable def covGradGradSection
   fun x => tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
     (fun y : M => w.toSection y) x
 
+set_option linter.unusedSectionVars false in
 private lemma covGradGradSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M) (v : E) :
     covGradGradSection (I := I) (M := M) g r s w x v =
       tensorCovDerivAt (I := I) (M := M) g r s w x v := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma covGradGradSection_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) :
@@ -118,6 +119,7 @@ private noncomputable def covGradSmoothSection
     Cₛ^∞⟮I; TensorRSModel r (s + 1) ℝ E,
       (fun x : M => TensorRSSpace r (s + 1) I x)⟯)
 
+set_option linter.unusedSectionVars false in
 private lemma covGradSmoothSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M) :
@@ -125,6 +127,7 @@ private lemma covGradSmoothSection_apply
       covGradBundleEquiv (I := I) (M := M) r s x
         (covGradGradSection (I := I) (M := M) g r s w x) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma covGradSmoothSection_toModel_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport w.toFun) :
@@ -137,6 +140,7 @@ private lemma covGradSmoothSection_toModel_eq_zero_off_tsupport
     exact tensorCovDerivAt_eq_zero_off_tsupport (I := I) (M := M) g r s w hx v
   rw [covGradSmoothSection_apply, hgrad_zero, map_zero, TensorRSSpace.toModel_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma covGradSmoothSection_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) :
@@ -158,12 +162,14 @@ noncomputable def covGrad (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       hasCompactSupport :=
         covGradSmoothSection_hasCompactSupport (I := I) (M := M) g r s w }
 
+set_option linter.unusedSectionVars false in
 lemma covGrad_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) :
     (covGrad (I := I) (M := M) g r s w).toSection =
       covGradSmoothSection (I := I) (M := M) g r s w := rfl
 
+set_option linter.unusedSectionVars false in
 theorem covGrad_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M) :
@@ -174,6 +180,7 @@ theorem covGrad_toSection_apply
   rw [covGrad_toSection, covGradSmoothSection_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem covGrad_toSection_apply_eval
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M)
@@ -190,6 +197,7 @@ theorem covGrad_toSection_apply_eval
     (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
       (fun y : M => w.toSection y) x) D v
 
+set_option linter.unusedSectionVars false in
 private lemma covGradGradSection_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w₁ w₂ : SmoothCcTensor g r s) (x : M) :
@@ -202,6 +210,7 @@ private lemma covGradGradSection_add
     covGradGradSection_apply, covGradGradSection_apply]
   exact tensorCovDerivAt_add (I := I) (M := M) g r s w₁ w₂ x v
 
+set_option linter.unusedSectionVars false in
 private lemma covGradGradSection_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) (x : M) :
@@ -213,6 +222,7 @@ private lemma covGradGradSection_smul
     covGradGradSection_apply]
   exact tensorCovDerivAt_smul (I := I) (M := M) g r s c w x v
 
+set_option linter.unusedSectionVars false in
 theorem covGrad_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w₁ w₂ : SmoothCcTensor g r s) :
@@ -238,6 +248,7 @@ theorem covGrad_add
       covGradGradSection (I := I) (M := M) g r s w₂ x from rfl,
     covGradGradSection_add (I := I) (M := M) g r s w₁ w₂ x, map_add]
 
+set_option linter.unusedSectionVars false in
 theorem covGrad_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
@@ -257,6 +268,7 @@ theorem covGrad_smul
       covGradGradSection (I := I) (M := M) g r s w x from rfl,
     covGradGradSection_smul (I := I) (M := M) g r s c w x, map_smul]
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem covGrad_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     covGrad (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) = 0 := by

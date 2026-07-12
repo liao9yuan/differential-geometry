@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLeibnizGrid
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,11 +29,13 @@ variable [CompleteSpace E]
 section RankCastRS
 
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private theorem covGrad_heq_congr_dbRS (g : SmoothRiemannianMetric I M) (c : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b} (hYZ : HEq Y Z) :
     HEq (covGrad g c a Y) (covGrad g c b Z) := by
   subst h; rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private theorem iteratedCovGrad_covGrad_comm_heq_dbRS (g : SmoothRiemannianMetric I M) (c s m : ℕ)
     (X : SmoothCcTensor g c s) :
     HEq (iteratedCovGrad g c (s + 1) m (covGrad g c s X))
@@ -47,6 +48,7 @@ private theorem iteratedCovGrad_covGrad_comm_heq_dbRS (g : SmoothRiemannianMetri
       exact covGrad_heq_congr_dbRS g c (by omega : (s + 1) + k = s + (k + 1)) ih
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
     (c : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g c a} {Z : SmoothCcTensor g c b}
     (hYZ : HEq Y Z) (x : M) :
@@ -54,6 +56,7 @@ private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
       riemannianFiberNormSq (I := I) (M := M) g c b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
+set_option linter.unusedSectionVars false in
 private theorem rfns_iteratedCovGrad_covGrad_comm_dbRS (g : SmoothRiemannianMetric I M)
     (c s m : ℕ) (W : SmoothCcTensor g c s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g c ((s + 1) + m) x

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -194,12 +193,14 @@ theorem exists_appFullSec_iteratedCovGrad_window_bound (g : SmoothRiemannianMetr
     _ = ((k + 1 : ℕ) : ℝ) * (∑ i ∈ Finset.range (k + 1), C k i) *
           ∑ i ∈ Finset.range (k + 1), a i := by ring
 
+omit [BoundarylessManifold I M] in
 private theorem covGrad_heq_congr_hw (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
     HEq (covGrad (I := I) (M := M) g r a Y) (covGrad (I := I) (M := M) g r b Z) := by
   subst h
   rw [eq_of_heq hYZ]
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_comp_heq (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (S : SmoothCcTensor g r s) (i : ℕ) :
     HEq (iteratedCovGrad g r (s + j) i (iteratedCovGrad g r s j S))
@@ -214,6 +215,7 @@ private theorem iteratedCovGrad_comp_heq (g : SmoothRiemannianMetric I M) (r s j
       exact covGrad_heq_congr_hw (I := I) (M := M) g r
         (by omega : (s + j) + i = s + (j + i)) ihi
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem riemannianFiberNormSq_congr_of_heq (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r a x (Y.toSection x) =
@@ -232,6 +234,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_comp (g : SmoothRiemannianMetric I
     (by omega : (s + j) + i = s + (j + i))
     (iteratedCovGrad_comp_heq (I := I) (M := M) g r s j S i) x
 
+omit [BoundarylessManifold I M] in
 private theorem riemannianFiberNormSq_iteratedCovGrad_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x

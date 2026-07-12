@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Scalar.EigenBasis
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ def nonzeroLaplacianEigenvalueSet (g : SmoothRiemannianMetric I M) : Set ℝ :=
   { lam : ℝ | ∃ μ : NonzeroResolventEigenvalue (I := I) (M := M) g,
       μ.val < 1 ∧ laplacianEigenvalueOf μ.val = lam }
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonzeroLaplacianEigenvalueSet_pos
     (g : SmoothRiemannianMetric I M) {lam : ℝ}
     (h : lam ∈ nonzeroLaplacianEigenvalueSet (I := I) (M := M) g) :
@@ -160,6 +160,7 @@ noncomputable def laplacianEigenvalueAscending
               Set.Ioi prev)
       else 0
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma laplacianEigenvalueAscending_zero
     (g : SmoothRiemannianMetric I M) :
     laplacianEigenvalueAscending (I := I) (M := M) g 0 =
@@ -168,6 +169,7 @@ lemma laplacianEigenvalueAscending_zero
          sInf (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g)
        else 0) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma laplacianEigenvalueAscending_succ
     (g : SmoothRiemannianMetric I M) (n : ℕ) :
     laplacianEigenvalueAscending (I := I) (M := M) g (n + 1) =
@@ -178,6 +180,7 @@ lemma laplacianEigenvalueAscending_succ
               Set.Ioi (laplacianEigenvalueAscending (I := I) (M := M) g n))
        else 0) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianEigenvalueAscending_zero_eq_sInf
     (g : SmoothRiemannianMetric I M)
     (h_nonempty : (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Nonempty) :
@@ -185,6 +188,7 @@ theorem laplacianEigenvalueAscending_zero_eq_sInf
       sInf (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g) := by
   rw [laplacianEigenvalueAscending_zero, if_pos h_nonempty]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianEigenvalueAscending_zero_of_empty
     (g : SmoothRiemannianMetric I M)
     (h_empty : ¬ (nonzeroLaplacianEigenvalueSet (I := I) (M := M) g).Nonempty) :

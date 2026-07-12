@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.GlobalExistence
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -16,6 +15,7 @@ section JointContinuity
 
 variable {G : Type*} [NormedAddCommGroup G] [NormedSpace ℝ G] [CompleteSpace G]
 
+omit [CompleteSpace G] in
 private theorem linearODE_apriori_bound
     {A : ℝ → (G →L[ℝ] G)} {a b α β c M : ℝ}
     (_hαβ : α ≤ β) (hα_lt : a < α) (hβ_lt : β < b)
@@ -129,6 +129,7 @@ private theorem linearODE_apriori_bound
       _ ≤ ‖Z c‖ * Real.exp (M * (β - α)) :=
           mul_le_mul_of_nonneg_left h_exp_mono (norm_nonneg _)
 
+omit [CompleteSpace G] in
 theorem linearODE_gronwall_forward
     {A₁ A₂ : ℝ → (G →L[ℝ] G)} {Z₁ Z₂ : ℝ → G} {h₀ β K η : ℝ}
     (_hh₀β : h₀ ≤ β) (hK_nn : 0 ≤ K)
@@ -174,6 +175,7 @@ theorem linearODE_gronwall_forward
   rw [zero_add] at this
   exact this
 
+omit [CompleteSpace G] in
 theorem linearODE_gronwall_backward
     {A₁ A₂ : ℝ → (G →L[ℝ] G)} {Z₁ Z₂ : ℝ → G} {α h₀ K η : ℝ}
     (hαh₀ : α ≤ h₀) (hK_nn : 0 ≤ K)

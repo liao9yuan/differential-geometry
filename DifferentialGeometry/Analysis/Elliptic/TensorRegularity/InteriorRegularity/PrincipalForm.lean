@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartLocalLaplacian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ open DifferentialGeometry.Analysis.Laplacian.MetricExtension
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem weightedInvGramEuclid_eq_weightedInvGramOnEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :

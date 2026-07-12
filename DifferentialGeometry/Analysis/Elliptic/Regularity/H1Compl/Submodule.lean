@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.H1Lp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ def H1Submodule [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryle
   zero_mem' := MemH1Lp.zero (I := I) (M := M) g
   smul_mem' c _ hu := MemH1Lp.const_smul (I := I) (M := M) g c hu
 
+set_option linter.unusedSectionVars false in
 @[simp]
 lemma mem_H1Submodule_iff
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]

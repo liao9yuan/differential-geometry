@@ -10,7 +10,6 @@ import Mathlib.MeasureTheory.Measure.Map
 import Mathlib.MeasureTheory.Integral.Lebesgue.Map
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ def chartPushedRaw (α : M) (u : M → ℝ) :
 
 variable {I}
 
+omit [IsManifold I ∞ M] in
 @[simp]
 lemma chartPushedRaw_apply_of_mem (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -53,6 +53,7 @@ lemma chartPushedRaw_apply_of_mem (α : M) (u : M → ℝ)
   classical
   unfold chartPushedRaw; simp [hy]
 
+omit [IsManifold I ∞ M] in
 @[simp]
 lemma chartPushedRaw_apply_of_notMem (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -61,12 +62,14 @@ lemma chartPushedRaw_apply_of_notMem (α : M) (u : M → ℝ)
   classical
   unfold chartPushedRaw; simp [hy]
 
+omit [IsManifold I ∞ M] in
 lemma chartPushedRaw_eq_zero_off_chartTargetEuclid (α : M) (u : M → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
     chartPushedRaw I α u y = 0 :=
   chartPushedRaw_apply_of_notMem α u hy
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAt_target_measurableSet (α : M) :
     MeasurableSet (extChartAt I α).target :=
   DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
@@ -79,6 +82,7 @@ private lemma toEuclidean_measurableEmbedding :
     MeasurableEmbedding (toEuclidean : E → EuclN E) :=
   (toEuclidean (E := E)).toHomeomorph.toMeasurableEquiv.measurableEmbedding
 
+omit [IsManifold I ∞ M] in
 lemma chartTargetEuclid_measurableSet (α : M) :
     MeasurableSet (chartTargetEuclid (I := I) (M := M) α) := by
   unfold chartTargetEuclid
@@ -86,6 +90,7 @@ lemma chartTargetEuclid_measurableSet (α : M) :
     extChartAt_target_measurableSet (I := I) (M := M) α
   exact (toEuclidean_measurableEmbedding (E := E)).measurableSet_image.mpr hT
 
+omit [IsManifold I ∞ M] in
 lemma chartTargetEuclid_eq_preimage_symm (α : M) :
     chartTargetEuclid (I := I) (M := M) α =
       (toEuclidean (E := E)).symm ⁻¹' (extChartAt I α).target := by
@@ -97,6 +102,7 @@ lemma chartTargetEuclid_eq_preimage_symm (α : M) :
     exact hx
   · exact (toEuclidean (E := E)).apply_symm_apply y
 
+omit [IsManifold I ∞ M] in
 lemma symm_toEuclidean_symm_mem_chartAtSource (α : M)
     {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -109,6 +115,7 @@ lemma symm_toEuclidean_symm_mem_chartAtSource (α : M)
   rwa [DifferentialGeometry.Integral.Measure.extChartAt_source_eq_chartAt_source
     (I := I) (M := M)] at hsource
 
+omit [IsManifold I ∞ M] in
 lemma continuousOn_symm_toEuclideanSymm (α : M) :
     ContinuousOn
       (fun y : EuclN E =>
@@ -196,6 +203,7 @@ private noncomputable def extChartAtSymmGlob (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAtSymmGlob_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmGlob (I := I) α y = (extChartAt I α).symm y := by
@@ -205,6 +213,7 @@ private lemma extChartAtSymmGlob_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAtSymmGlob_measurable (α : M) :
     Measurable (extChartAtSymmGlob (I := I) (M := M) α) := by
   classical
@@ -405,6 +414,7 @@ lemma exists_inf_chartDensity_on_compact
     chartDensity_pos_on_target (I := I) (M := M) g α (hK_sub hy₀_mem),
     fun y hy => hy₀_min hy⟩
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma image_extChartAt_tsupport_compact_subset_target
     [CompactSpace M] {u : M → ℝ} {α : M}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -426,6 +436,7 @@ lemma image_extChartAt_tsupport_compact_subset_target
       exact hu_supp hx
     exact (extChartAt I α).map_source hxsrc
 
+omit [IsManifold I ∞ M] in
 lemma image_toEuclidean_extChartAt_tsupport_compact
     [CompactSpace M] {u : M → ℝ} {α : M}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -434,6 +445,7 @@ lemma image_toEuclidean_extChartAt_tsupport_compact
   ((image_extChartAt_tsupport_compact_subset_target (I := I) (M := M)
     (u := u) (α := α) hu_supp).1).image (toEuclidean (E := E)).continuous
 
+omit [IsManifold I ∞ M] in
 lemma image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     {u : M → ℝ} {α : M}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :
@@ -450,6 +462,7 @@ lemma image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     exact hu_supp hx
   exact (extChartAt I α).map_source hxsrc
 
+omit [IsManifold I ∞ M] in
 lemma chartPushedRaw_eq_zero_off_image_tsupport
     {u : M → ℝ} (α : M)
     {y : EuclN E} (hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -1260,6 +1273,7 @@ private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmGlobal (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -1269,6 +1283,7 @@ private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAtSymmGlobal_measurable (α : M) :
     Measurable (extChartAtSymmGlobal (I := I) (M := M) α) := by
   classical
@@ -1278,6 +1293,7 @@ private lemma extChartAtSymmGlobal_measurable (α : M) :
     continuousOn_const
     (extChartAt_target_measurableSet (I := I) (M := M) α)
 
+omit [IsManifold I ∞ M] in
 lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
     (hF_meas : Measurable F) :
     Measurable (chartPushedRaw I α F) := by
@@ -1314,12 +1330,14 @@ lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
   rw [h_piecewise]
   exact Measurable.piecewise hCT_meas h_comp measurable_const
 
+omit [IsManifold I ∞ M] in
 private lemma toEuclidean_symm_target_of_mem (α : M) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushedRaw_sub_pointwise (α : M) (u v : M → ℝ)
     {y : EuclN E} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartPushedRaw I α (fun x => u x - v x) y =

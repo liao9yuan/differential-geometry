@@ -39,14 +39,17 @@ noncomputable def smoothCcTensorHsLinearEquiv
   map_add' S T := SmoothCcTensorHs.toCcTensor_add S T
   map_smul' c S := SmoothCcTensorHs.toCcTensor_smul c S
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma smoothCcTensorHsLinearEquiv_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensorHs g r s 0) :
     smoothCcTensorHsLinearEquiv (I := I) (M := M) g r s S = S.toCcTensor := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma smoothCcTensorHsLinearEquiv_symm_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     (smoothCcTensorHsLinearEquiv (I := I) (M := M) g r s).symm T = ⟨T⟩ := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothCcTensorHs_norm_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensorHs g r s 0) :

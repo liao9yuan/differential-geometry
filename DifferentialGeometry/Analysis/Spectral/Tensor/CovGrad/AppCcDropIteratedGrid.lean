@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RankRDiffBilinGrid
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculusRS
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem riemannianFiberNormSq_toSection_heq_congr_leibnizTower (g : SmoothRiemannianMetric I M)
     {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g 0 a} {Z : SmoothCcTensor g 0 b}
     (hYZ : HEq Y Z) (x : M) :
@@ -76,6 +76,7 @@ def appCcLeibnizTower (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ) (C : Sm
         castCcTensorRank g 0 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
           (appCcLeibnizTower g b₀ s₀ C p (w + 1) (covGrad (I := I) (M := M) g 0 (b₀ + w) W))
 
+set_option linter.unusedSectionVars false in
 theorem DropTower_covGrad_op (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) (W : SmoothCcTensor g 0 (b₀ + w)) :
     covGrad (I := I) (M := M) g 0 ((s₀ + w) + p)
@@ -248,6 +249,7 @@ theorem dropNormalForm_succ (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
       (iteratedCovGrad g 0 (b₀ + w) k W)) p]
   abel
 
+set_option linter.unusedSectionVars false in
 theorem dropNormalForm_zero (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (w : ℕ) :
     DropTowerNormalForm (I := I) (M := M) g b₀ s₀ C 0 w := by
@@ -284,6 +286,7 @@ def dropTowerPsi (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
                 (by omega : (s₀ + (w + 1)) + p = (s₀ + w) + (p + 1))
                 (dropTowerPsi g b₀ s₀ C p (w + 1) k)))
 
+set_option linter.unusedSectionVars false in
 theorem dropTowerPsi_zero (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (w : ℕ) :
     dropTowerPsi (I := I) (M := M) g b₀ s₀ C 0 w =
@@ -405,6 +408,7 @@ def dropFibreSup (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
   ⨆ x : M, riemannianFiberNormSq (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p) x
     ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x)
 
+set_option linter.unusedSectionVars false in
 private theorem dropFibreSup_bddAbove (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) :
     BddAbove (Set.range fun x : M =>
@@ -421,12 +425,14 @@ theorem dropFibreSup_fibre_le (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
       dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k :=
   le_ciSup (dropFibreSup_bddAbove (I := I) (M := M) g b₀ s₀ C p w k) x
 
+set_option linter.unusedSectionVars false in
 theorem dropFibreSup_nonneg (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) :
     0 ≤ dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k :=
   Real.iSup_nonneg fun x => riemannianFiberNormSq_nonneg (I := I) (M := M) g ((b₀ + w) + k)
     ((s₀ + w) + p) x ((dropTowerPsi (I := I) (M := M) g b₀ s₀ C p w k).toSection x)
 
+set_option linter.unusedSectionVars false in
 theorem dropFibreSup_le_of_fibreNormSup (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w k : ℕ) {K : ℝ} (hK_nonneg : 0 ≤ K)
     (hK : ∀ x : M, riemannianFiberNormSq (I := I) (M := M) g ((b₀ + w) + k) ((s₀ + w) + p) x
@@ -454,6 +460,7 @@ def dropKappa (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ) (C : SmoothCcTe
     ℕ → ℕ → ℝ :=
   fun p w => (p + 1 : ℝ) * ∑ k ∈ Finset.range (p + 1), dropFibreSup (I := I) (M := M) g b₀ s₀ C p w k
 
+set_option linter.unusedSectionVars false in
 theorem dropKappa_eq_explicit (g : SmoothRiemannianMetric I M) (b₀ s₀ : ℕ)
     (C : SmoothCcTensor g b₀ s₀) (p w : ℕ) :
     dropKappa (I := I) (M := M) g b₀ s₀ C p w =

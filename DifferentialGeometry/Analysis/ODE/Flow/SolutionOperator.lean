@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.VariationalLinearMapSmoothness
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -166,6 +165,7 @@ noncomputable def linearODESolution
     else
       fun _ => Z₀ x
 
+omit [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace G] in
 @[simp]
 theorem linearODESolution_init
     (A : F → ℝ → (G →L[ℝ] G)) (a b h₀ : ℝ) (Z₀ : F → G) (x : F) :
@@ -176,6 +176,7 @@ theorem linearODESolution_init
     exact (Classical.choose_spec h).1
   · simp only [dif_neg h]
 
+omit [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace G] in
 theorem linearODESolution_hasDerivAt_of_hasSolution
     (A : F → ℝ → (G →L[ℝ] G)) (a b h₀ : ℝ) (Z₀ : F → G)
     {x : F} (hx : HasLinearODESolution A a b h₀ Z₀ x) {t : ℝ} (ht : t ∈ Ioo a b) :

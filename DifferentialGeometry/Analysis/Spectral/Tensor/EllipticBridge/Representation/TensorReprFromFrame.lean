@@ -10,7 +10,6 @@ import Mathlib.Topology.UniformSpace.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.Normed.Operator.Extend
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -56,14 +55,17 @@ private def pouTsupportSet (α : M) : Set M :=
 private def pouChartKernel (α : M) : Set E :=
   (extChartAt I α) '' (pouTsupportSet (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 private lemma pouChartKernel_isCompact (α : M) :
     IsCompact (pouChartKernel (I := I) (M := M) α) :=
   chartImage_pouTsupport_isCompact (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 private lemma pouChartKernel_subset_target (α : M) :
     pouChartKernel (I := I) (M := M) α ⊆ (extChartAt I α).target :=
   chartImage_pouTsupport_subset_target (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_tsupport_subset_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -86,6 +88,7 @@ private lemma tensorChartComponentScalar_tsupport_subset_pouTsupport
     (f := fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
     (g := tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_tsupport_subset_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -98,6 +101,7 @@ private lemma tensorChartComponentScalar_tsupport_subset_chart_source
     (I := I) (M := M) g r s S α Idx Jdx).trans
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M α)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_chartImage_tsupport_subset_kernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -111,6 +115,7 @@ private lemma tensorChartComponentScalar_chartImage_tsupport_subset_kernel
     (tensorChartComponentScalar_tsupport_subset_pouTsupport
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorChartComponent_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -120,6 +125,7 @@ private lemma tensorChartComponent_continuous
   have h := tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx
   exact h.continuous
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorChartComponent_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -128,6 +134,7 @@ private lemma tensorChartComponent_measurable
     Measurable (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) :=
   (tensorChartComponent_continuous (I := I) (M := M) g r s S α Idx Jdx).measurable
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -138,6 +145,7 @@ private lemma tensorChartComponentScalar_continuous
   (tensorChartComponentScalar_contMDiff
     (I := I) (M := M) g r s S α Idx Jdx).continuous
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -148,6 +156,7 @@ private lemma tensorChartComponentScalar_measurable
   (tensorChartComponentScalar_continuous
     (I := I) (M := M) g r s S α Idx Jdx).measurable
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponent_eq_chartPushedRaw_scalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -384,11 +393,13 @@ def smoothToTensorL2 (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     SmoothCcTensor g r s →L[ℝ] TensorL2 r s g :=
   UniformSpace.Completion.toComplL
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma smoothToTensorL2_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     smoothToTensorL2 (I := I) (M := M) g r s S = (S : TensorL2 r s g) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma denseRange_smoothToTensorL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange (smoothToTensorL2 (I := I) (M := M) g r s) := by
@@ -399,6 +410,7 @@ private lemma denseRange_smoothToTensorL2
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma isUniformInducing_smoothToTensorL2
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsUniformInducing (smoothToTensorL2 (I := I) (M := M) g r s) := by

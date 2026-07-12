@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.VectorField
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_eq_chartParallelExtend_on_baseSet
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -46,6 +46,7 @@ lemma chartBasisVecFiber_eq_chartParallelExtend_on_baseSet
   rw [hround]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_eventuallyEq_chartParallelExtend
     (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -63,6 +64,7 @@ lemma chartBasisVecFiber_eventuallyEq_chartParallelExtend
   intro b' hb'
   exact chartBasisVecFiber_eq_chartParallelExtend_on_baseSet (I := I) α hb_base j b' hb'
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartBasisVecFiber_mdifferentiableAt
     (α : M) (j : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -162,6 +164,7 @@ lemma connDiff_chartBasis_pair_eq
   rw [LeviCivita_chartBasisVecFiber_eq (I := I) g' α hx j
         (chartBasisVecFiber (I := I) α k x)]
 
+set_option linter.unusedSectionVars false in
 lemma coord_christoffelCorrection_chartBasis_pair
     (g : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -218,6 +221,7 @@ lemma coord_christoffelCorrection_chartBasis_pair
   · intro h
     exact absurd (Finset.mem_univ k) h
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma tangent_vector_eq_chartBasisVecFiber_sum
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -242,6 +246,7 @@ private lemma tangent_vector_eq_chartBasisVecFiber_sum
   rw [ContinuousLinearMap.map_smul]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma trivFromE_eq_chartBasisVecFiber_sum
     (α : M) (x : M) (y : E) :
     trivFromE (I := I) α x y =

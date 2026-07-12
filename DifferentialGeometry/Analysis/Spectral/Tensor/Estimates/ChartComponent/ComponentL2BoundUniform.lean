@@ -11,7 +11,6 @@ import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.Analysis.SpecialFunctions.Pow.Real
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartTensorInner_tensorTrivProj_eq_tensorInner_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -84,10 +84,12 @@ noncomputable def chartComponentProjectionUniformBound (r s : ℕ) : ℝ :=
         (Fin s → Fin (Module.finrank ℝ E)),
     ‖tensorChartComponentProjection (E := E) r s p.1 p.2‖
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartComponentProjectionUniformBound_nonneg (r s : ℕ) :
     0 ≤ chartComponentProjectionUniformBound (E := E) r s :=
   Finset.sum_nonneg (fun _ _ => norm_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorChartComponentProjection_norm_le_uniform (r s : ℕ)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :

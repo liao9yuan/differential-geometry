@@ -7,7 +7,6 @@ import DifferentialGeometry.Tensor.Mixed.Naturality
 import DifferentialGeometry.Tensor.Product.Section
 import DifferentialGeometry.Tensor.Product.HomEquiv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -567,6 +566,7 @@ theorem tensorToMixed_triv_eq_bundle {r s : ℕ} (x₀ x : B)
 
 set_option maxHeartbeats 400000 in
 
+omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearHomTensorEquivAt_bundle_smooth {r s : ℕ} :
     ContMDiff
       (IB.prod 𝓘(𝕜,
@@ -620,6 +620,7 @@ theorem multilinearHomTensorEquivAt_bundle_smooth {r s : ℕ} :
 
 set_option maxHeartbeats 400000 in
 
+omit [ContMDiffVectorBundle n F E IB] in
 theorem multilinearHomTensorEquivAt_bundle_symm_smooth {r s : ℕ} :
     ContMDiff
       (IB.prod 𝓘(𝕜,
@@ -701,6 +702,7 @@ noncomputable def tensorBundleSectionToMixedSection {r s : ℕ}
               (𝕜 := 𝕜) (F := F) (E := E) r s x).symm (W x),
    ((multilinearHomTensorEquivAt_bundle_symm_smooth n).comp W.contMDiff).congr fun _ => rfl⟩
 
+omit [ContMDiffVectorBundle n F E IB] in
 @[simp]
 theorem tensorBundleSectionToMixedSection_mixedSectionToTensorBundleSection {r s : ℕ}
     (T : MixedSection 𝕜 F IB E n r s) :
@@ -708,6 +710,7 @@ theorem tensorBundleSectionToMixedSection_mixedSectionToTensorBundleSection {r s
   apply ContMDiffSection.ext; intro x
   exact LinearEquiv.symm_apply_apply _ _
 
+omit [ContMDiffVectorBundle n F E IB] in
 @[simp]
 theorem mixedSectionToTensorBundleSection_tensorBundleSectionToMixedSection {r s : ℕ}
     (W : DualTensorMultilinearSection (𝕜 := 𝕜) (F := F) (IB := IB) (E := E) (n := n) r s) :
@@ -715,6 +718,7 @@ theorem mixedSectionToTensorBundleSection_tensorBundleSectionToMixedSection {r s
   apply ContMDiffSection.ext; intro x
   exact LinearEquiv.apply_symm_apply _ _
 
+omit [ContMDiffVectorBundle n F E IB] in
 theorem mixedSectionToTensorBundleSection_add {r s : ℕ}
     (T₁ T₂ : MixedSection 𝕜 F IB E n r s) :
     mixedSectionToTensorBundleSection n (T₁ + T₂) =
@@ -723,6 +727,7 @@ theorem mixedSectionToTensorBundleSection_add {r s : ℕ}
   exact (Bundle.continuousMultilinearMap.multilinearHomTensorEquivAt_bundle
     (𝕜 := 𝕜) (F := F) (E := E) r s x).map_add (T₁ x) (T₂ x)
 
+omit [ContMDiffVectorBundle n F E IB] in
 theorem mixedSectionToTensorBundleSection_smul {r s : ℕ}
     (φ : C^n⟮IB, B; 𝕜⟯) (T : MixedSection 𝕜 F IB E n r s) :
     mixedSectionToTensorBundleSection n (φ • T) =

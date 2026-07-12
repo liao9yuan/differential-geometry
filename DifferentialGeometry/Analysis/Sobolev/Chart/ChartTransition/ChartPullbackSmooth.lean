@@ -19,6 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [IsManifold I ∞ M] in
 private lemma tsupport_chartPullback_subset
     [I.Boundaryless] [T2Space M]
     (α : M)
@@ -81,6 +82,7 @@ private lemma tsupport_chartPullback_subset
     closure_minimal hfun_support_subset hK_M_closed
   exact h_close hx
 
+omit [IsManifold I ∞ M] in
 private lemma tsupport_chartPullback_image_subset_chartAt_source
     [I.Boundaryless]
     (α : M)

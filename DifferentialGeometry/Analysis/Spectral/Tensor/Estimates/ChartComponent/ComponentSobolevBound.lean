@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ noncomputable def tensorChartComponentScalar
     M → ℝ :=
   tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma tensorChartComponentScalar_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -51,6 +51,7 @@ noncomputable def tensorChartComponentScalar
     tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx =
       tensorChartComponentPou (I := I) (M := M) g r s S α Idx Jdx := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComponentScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -60,6 +61,7 @@ theorem tensorChartComponentScalar_contMDiff
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) :=
   tensorChartComponentPou_contMDiff (I := I) (M := M) g r s S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentScalar_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -69,6 +71,7 @@ theorem tensorChartComponentScalar_hasCompactSupport
       (tensorChartComponentScalar (I := I) (M := M) g r s S α Idx Jdx) :=
   tensorChartComponentPou_hasCompactSupport (I := I) (M := M) g r s S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComponentScalar_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)
@@ -96,6 +99,7 @@ theorem tensorChartComponentScalar_add
     exact map_add _ _ _
   rw [hraw_add]; ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComponentScalar_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (c : ℝ) (S : SmoothCcTensor g r s) (α : M)
@@ -120,6 +124,7 @@ theorem tensorChartComponentScalar_smul
     rfl
   rw [hraw_smul]; ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponent_memWkpChart_one_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)
@@ -135,6 +140,7 @@ theorem tensorChartComponent_memWkpChart_one_two
   exact DifferentialGeometry.Analysis.Sobolev.Equivalence.MemWkpChart_of_contMDiff
     (I := I) (M := M) g hp hsmooth
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComponentScalar_wkpNormChart_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) (α : M)

@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Add
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -53,6 +52,7 @@ theorem lie_deriv_metric_neg_eq_pushforward_variation_sum
   rw [h_A_value, h_B_value]
   rw [neg_lieDerivMetric_eq_neg_killing_sum (I := I) g X y p q]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem pushforward_pairing_deriv_eq_neg_lieDerivMetric_of_sum
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

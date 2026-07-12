@@ -36,6 +36,7 @@ noncomputable def chartFrameNormGlobalSmoothCoordMatrix
         ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b) k
     else 0
 
+omit [I.Boundaryless] in
 private lemma chartFrameNormGlobalSmoothCoordMatrix_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -47,6 +48,7 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_of_mem
   unfold chartFrameNormGlobalSmoothCoordMatrix
   rw [dif_pos hb]
 
+omit [I.Boundaryless] in
 theorem chartFrameNormGlobalSmooth_eq_coordMatrix_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E))
@@ -83,10 +85,12 @@ private noncomputable def coordMatrix :
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of (fun i k => coordMatrixOf (I := I) (M := M) g α (b := b) i k)
 
+omit [I.Boundaryless] in
 @[simp] private lemma coordMatrix_apply (i k : Fin (Module.finrank ℝ E)) :
     coordMatrix (I := I) (M := M) g α (b := b) i k =
       chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k b := rfl
 
+omit [I.Boundaryless] in
 private lemma chartFrameNormGlobalSmooth_eq_coord_sum_of_mem
     (i : Fin (Module.finrank ℝ E))
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -105,6 +109,7 @@ private lemma chartFrameNormGlobalSmooth_eq_coord_sum_of_mem
   rw [h]
   rfl
 
+omit [I.Boundaryless] in
 private lemma gram_expand_coordBasis
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -149,6 +154,7 @@ private lemma gram_expand_coordBasis
   rw [chartGramMatrix_apply]
   ring
 
+omit [I.Boundaryless] in
 private lemma orthonormal_matrix_form_at
     (hb_pou : b ∈ tsupport (fun x : M =>
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
@@ -199,6 +205,7 @@ private lemma orthonormal_matrix_form_at
   intro k₀ _
   ring
 
+omit [I.Boundaryless] in
 private lemma orthonormal_matrix_inverse_at
     (hb_pou : b ∈ tsupport (fun x : M =>
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x))
@@ -228,6 +235,7 @@ private lemma orthonormal_matrix_inverse_at
 
 end LinearAlgebra
 
+omit [I.Boundaryless] in
 theorem chartFrameNormGlobalSmoothCoordMatrix_orthonormality
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M}

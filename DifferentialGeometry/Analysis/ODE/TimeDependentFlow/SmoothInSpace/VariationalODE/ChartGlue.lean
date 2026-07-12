@@ -1,7 +1,6 @@
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -14,6 +13,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem chart_glue_smooth_of_chart_local_smooth
     (f : M → M)
     (h : ∀ x : M, ContMDiffAt I I ∞ f x) :

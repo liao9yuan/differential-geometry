@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Elliptic.Operator.Variational
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -53,6 +52,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+set_option linter.unusedSectionVars false in
 lemma densityPsi_cont
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -77,6 +77,7 @@ lemma densityPsi_cont
     refine ContinuousAt.congr ?_ h_ev.symm
     exact continuousAt_const
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma densityPsi_cs
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ) :
@@ -86,6 +87,7 @@ lemma densityPsi_cs
   change densityOnEuclid (I := I) g α y * ψ y = 0
   rw [hψ_y, mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma densityPsi_supp
     {g : SmoothRiemannianMetric I M} {α : M}
     {ψ : EuclN → ℝ}
@@ -101,6 +103,7 @@ lemma densityPsi_supp
   change densityOnEuclid (I := I) g α y * ψ y = 0
   rw [hψ_y, mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothToLp_tendsto_H1ComplToLp_of_h1_tendsto
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl g} {v : ℕ → SmoothScalar g}
@@ -136,6 +139,7 @@ private noncomputable def gradInnerSmoothScalar
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x)
     rw [grad_g_apply, grad_g_apply]
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] private lemma gradInnerSmoothScalar_toFun
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     (gradInnerSmoothScalar (I := I) (M := M) g ρα v).toFun =
@@ -370,6 +374,7 @@ private lemma chartPulledIntegralCLM_smoothMulLp_oneSubLap_eq_lpInner
     (rhoOneSubLapSmoothScalar (I := I) (M := M) g
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) v)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma h1Inner_smoothToH1Compl_eq_lpInner_oneSubLap_of_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g)
@@ -497,6 +502,7 @@ private noncomputable def rhoChartWeightSmoothScalarOn
       refine (ContMDiffAt.congr_of_eventuallyEq ?_ h_eq_evt)
       exact contMDiffAt_const
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 @[simp] private lemma rhoChartWeightSmoothScalarOn_toFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ}
@@ -557,6 +563,7 @@ private lemma smoothMulLp_chartWeight_eq_smoothToLp_rhoWeightOn
   rw [hx_w, hx_rhs]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma densityPsi_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) :

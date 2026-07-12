@@ -5,7 +5,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Data.Nat.Choose.Bounds
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -316,6 +315,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private lemma SmoothDiffeoBoundedAtOrder.norm_iteratedFDeriv_comp_toFun_le_sum
     {kmax : ℕ} {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax)
@@ -339,6 +339,7 @@ private lemma SmoothDiffeoBoundedAtOrder.norm_iteratedFDeriv_comp_toFun_le_sum
   rw [h_rearrange] at h
   exact h
 
+omit [NeZero d] in
 private lemma SmoothDiffeoBoundedAtOrder.norm_iterClassicalPartial_comp_le_uniform
     {kmax : ℕ} {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ω Ω' kmax)
@@ -391,6 +392,7 @@ private lemma SmoothDiffeoBoundedAtOrder.norm_iterClassicalPartial_comp_le_unifo
     exact mul_nonneg h_kf_nn (pow_nonneg hD_nonneg k)
   exact mul_le_mul_of_nonneg_left h_inner_sum_le h_outer_nn
 
+omit [NeZero d] in
 private lemma SmoothDiffeoBoundedAtOrder.exists_cutoff_for_comp
     {kmax : ℕ} {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ωsource Ωtarget kmax) (hΩ_open : IsOpen Ωsource)
@@ -432,6 +434,7 @@ private lemma SmoothDiffeoBoundedAtOrder.exists_cutoff_for_comp
       image_eq_zero_of_notMem_tsupport h_φx_not_Ktarget
     rw [hψ_zero, mul_zero]
 
+omit [NeZero d] in
 private lemma iterClassicalPartial_eqOn_of_eqOn_local
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {g h : E → ℝ},
@@ -469,6 +472,7 @@ private lemma iterClassicalPartial_eqOn_of_eqOn_local
       exact ih (fun i : Fin j => β i.succ)
         h_inner_g_smooth h_inner_h_smooth h_partial_eqOn hx
 
+omit [NeZero d] in
 private theorem chosenWeakPartial_smooth_ae_local
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -493,6 +497,7 @@ private theorem chosenWeakPartial_smooth_ae_local
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
     h_chosen_loc h_classical_loc
 
+omit [NeZero d] in
 private theorem MemWkp_of_smooth_compactSupport_local'
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -540,6 +545,7 @@ private theorem MemWkp_of_smooth_compactSupport_local'
       have h_ih_classical := ih h_classical_smooth h_classical_cpt h_classical_supp
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
+omit [NeZero d] in
 private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_loc
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : E → ℝ},
@@ -578,6 +584,7 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_loc
         (fun i : Fin j => β i.succ) h_ae
       exact h_iter_congr.trans h_ih
 
+omit [NeZero d] in
 private theorem SmoothDiffeoBoundedAtOrder.comp_smooth_compactSupport_memWkp
     {kmax : ℕ} {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBoundedAtOrder d Ωsource Ωtarget kmax) (hΩ_open : IsOpen Ωsource)
@@ -605,6 +612,7 @@ private theorem SmoothDiffeoBoundedAtOrder.comp_smooth_compactSupport_memWkp
     rw [h_eq_on_Ω x hx]
   exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr hg_mem
 
+omit [NeZero d] in
 private theorem SmoothDiffeoBoundedAtOrder.iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
     {kmax : ℕ} {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -654,6 +662,7 @@ private theorem SmoothDiffeoBoundedAtOrder.iterWeakPartial_comp_smooth_ae_eq_ite
   intro x hx
   exact h_classical_eqOn hx
 
+omit [NeZero d] in
 private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iterWeakPartial_comp_le
     {kmax : ℕ}
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -729,6 +738,7 @@ private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iterWeakPartial_comp_le
   rw [h_pointwise_eq]
   exact eLpNorm_sum_le h_strong_meas hp_one
 
+omit [NeZero d] in
 private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iteratedFDeriv_comp_le
     {kmax : ℕ}
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ (⊤ : ℝ≥0∞))
@@ -743,6 +753,7 @@ private lemma SmoothDiffeoBoundedAtOrder.eLpNorm_iteratedFDeriv_comp_le
   Φ.eLpNorm_comp_toFun_le_const hp_one hp_top hΩ
     (fun y => ‖iteratedFDeriv ℝ n ψ y‖)
 
+omit [NeZero d] in
 private lemma iteratedFDeriv_clm_apply_basis_local
     {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : E → F →L[ℝ] ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
@@ -758,6 +769,7 @@ private lemma iteratedFDeriv_clm_apply_basis_local
     hg (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤))
   exact h.symm
 
+omit [NeZero d] in
 private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev_local :
     ∀ (n : ℕ) (β : Fin n → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ y : E,
@@ -801,6 +813,7 @@ private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev_local :
         rw [Fin.rev_zero]
       rw [h_index_eq, h_first_eq]
 
+omit [NeZero d] in
 private lemma eLpNorm_iteratedFDeriv_le_wkpNorm_local
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -1523,6 +1536,7 @@ def SmoothDiffeoBoundedAtOrder.mk_from_concrete
   jacobian_lower_bound_pos := jacobian_lower_bound_pos
   jacobian_lower := jacobian_lower
 
+omit [NeZero d] in
 theorem exists_iter_deriv_bound_of_smooth_compactSupport_atOrder
     {f : E → E} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
     (hf_cpt : HasCompactSupport f) (kmax : ℕ) :
@@ -1576,6 +1590,7 @@ theorem exists_iter_deriv_bound_of_smooth_compactSupport_atOrder
     have h2 : M_seq i ≤ Mf - 1 := hMf_ge i hi
     linarith
 
+omit [NeZero d] in
 theorem mk_smoothDiffeoBoundedAtOrder_of_per_order_bounds
     {kmax : ℕ} {Ω Ω' : Set E}
     {T Tinv : E → E}
@@ -1596,6 +1611,7 @@ theorem mk_smoothDiffeoBoundedAtOrder_of_per_order_bounds
     deriv_bound hbound_pos hT_iter_bound hTinv_iter_bound
     jacobian_lower_bound hj_pos hj_lower⟩
 
+omit [NeZero d] in
 theorem iter_deriv_bound_of_eq_const_offCompactSupport_atOrder
     {T : E → E} (hT_smooth : ContDiff ℝ (⊤ : ℕ∞) T)
     {y₀ : E} (hT_diff_cpt : HasCompactSupport (fun y => T y - y₀))

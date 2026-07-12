@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,23 +33,28 @@ private noncomputable def K (α : M) :
       (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
+omit [I.Boundaryless] in
 private lemma K_isCompact [CompactSpace M] (α : M) :
     IsCompact (K (I := I) (M := M) α) :=
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
     (I := I) (M := M) α).1
 
+omit [I.Boundaryless] in
 private lemma K_isClosed [CompactSpace M] (α : M) :
     IsClosed (K (I := I) (M := M) α) :=
   (K_isCompact (I := I) (M := M) α).isClosed
 
+omit [I.Boundaryless] in
 private lemma K_meas [CompactSpace M] (α : M) :
     MeasurableSet (K (I := I) (M := M) α) :=
   (K_isClosed (I := I) (M := M) α).measurableSet
 
+omit [I.Boundaryless] in
 private lemma K_volume_lt_top [CompactSpace M] (α : M) :
     MeasureTheory.volume (K (I := I) (M := M) α) ≠ ⊤ :=
   (K_isCompact (I := I) (M := M) α).measure_lt_top.ne
 
+omit [I.Boundaryless] in
 private lemma K_subset_target [CompactSpace M] (α : M) :
     K (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
@@ -62,10 +66,12 @@ private noncomputable def fRaw (α : M) (u : M → ℝ) :
     (fun x : M => (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
       : C^∞⟮I, M; ℝ⟯) x * u x)
 
+omit [I.Boundaryless] in
 private lemma fRaw_tsupport_subset_K [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (fRaw (I := I) (M := M) α u) ⊆ K (I := I) (M := M) α :=
   ChartTower.tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u
 
+omit [I.Boundaryless] in
 private lemma chartPushed_ae_eq_fRaw [CompactSpace M] (α : M) (u : M → ℝ) :
     chartPushed (I := I) (M := M)
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u

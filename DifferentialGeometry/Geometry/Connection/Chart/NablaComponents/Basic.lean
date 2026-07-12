@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 set_option linter.flexible false
 set_option linter.unnecessarySimpa false
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -32,6 +31,7 @@ def coordinateFrameAt_isLocalFrame_one (x₀ : M) :
   (coordinateTrivializationAt (I := I) x₀).isLocalFrameOn_localFrame_baseSet
     I (1 : WithTop ℕ∞) (Module.finBasis Real E)
 
+set_option linter.unusedSectionVars false in
 theorem coordinateFrameAt_toBasis_eq_finBasis (x₀ : M) :
     coordinateFrameAt_toBasis (I := I) x₀ = Module.finBasis Real E := by
   ext i
@@ -40,6 +40,7 @@ theorem coordinateFrameAt_toBasis_eq_finBasis (x₀ : M) :
   rw [mfderivWithin_range_extChartAt_symm]
   rfl
 
+set_option linter.unusedSectionVars false in
 private theorem tangentConstInChart_eq_coordinateFrame_eventually
     (x₀ : M) (i : CoordinateIdx E) :
     (tangentConstInChart (𝕜 := Real) (I := I) x₀ ((Module.finBasis Real E) i) :
@@ -55,6 +56,7 @@ private theorem tangentConstInChart_eq_coordinateFrame_eventually
   rw [coordinateFrameAt_apply_of_mem (I := I) (x₀ := x₀) (x := x) hx i]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem connCoeff_eq_christoffelAlong_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : (x : M) -> TangentSpace I x) (x₀ : M)
@@ -148,6 +150,7 @@ def ModelDerivEqCoordDeriv0SAt {s : ℕ}
     modelDeriv0SAt (I := I) X x₀ α slots =
       coordDeriv0SAt (I := I) (fun x => X x) x₀ α slots
 
+set_option linter.unusedSectionVars false in
 theorem tensor0SModelAt_coordComponent0SAt {s : ℕ} (x₀ : M)
     (A : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x₀)
     (slots : Fin s -> CoordinateIdx E) :
@@ -173,6 +176,7 @@ theorem tensor0SModelAt_coordComponent0SAt {s : ℕ} (x₀ : M)
   rw [mfderivWithin_range_extChartAt_symm]
   rfl
 
+set_option linter.unusedSectionVars false in
 private theorem model_component_eq_coord_component_comp_eventually {s : ℕ}
     (x₀ : M)
     (α : (x : M) -> Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) s x)
@@ -214,6 +218,7 @@ private theorem model_component_eq_coord_component_comp_eventually {s : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (x₀ : M)
@@ -331,6 +336,7 @@ theorem modelDeriv_eq_coordDeriv0SAt {s : ℕ}
   rw [hS]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem nabla0S_coordFrame_slots {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -399,6 +405,7 @@ theorem nabla0S_coordFrame_slots {s : ℕ}
     simp
   · simp [Function.update, hb]
 
+set_option linter.unusedSectionVars false in
 theorem nabla0S_coordFrame_slots_of_smooth {s : ℕ}
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

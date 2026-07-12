@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Parabolic.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry
 namespace PDE
@@ -60,6 +59,7 @@ def IsLinearTensorParabolicMildSolution
     ∀ t ∈ Set.Icc (0 : ℝ) T,
       u t = S t u₀ + ∫ τ in (0 : ℝ)..t, S (t - τ) (F τ)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem linear_tensor_parabolic_shortTime_exists
     [CompactSpace M]
     {X : Type*} [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]

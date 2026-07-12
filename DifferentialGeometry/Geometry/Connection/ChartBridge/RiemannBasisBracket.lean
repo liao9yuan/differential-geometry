@@ -6,7 +6,6 @@ import DifferentialGeometry.Bundle.Frame
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [FiniteDimensional ℝ E] in
 private lemma chartBasis_baseSet_eq_chartSource (x₀ : M) :
     (trivializationAt E (TangentSpace I) x₀).baseSet = (chartAt H x₀).source := by
   rfl
@@ -66,6 +66,7 @@ private lemma chartBasisVecFiber_pullback_eq_const (x₀ : M) (i : Fin (Module.f
     (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy)
     ((chartModelBasis E) i)
 
+omit [FiniteDimensional ℝ E] in
 private lemma lieBracketWithin_const_const {s : Set E} {x v w : E} :
     VectorField.lieBracketWithin ℝ (fun _ : E => v) (fun _ : E => w) s x = 0 := by
   simp [VectorField.lieBracketWithin]
@@ -94,6 +95,7 @@ theorem mlieBracket_chartBasisVec_self_eq_zero (x₀ : M)
   rw [lieBracketWithin_const_const]
   exact ContinuousLinearMap.map_zero _
 
+omit [FiniteDimensional ℝ E] in
 private lemma trivToE_self_eq_id (x : M) :
     (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) =
       ContinuousLinearMap.id ℝ (TangentSpace I x) := by
@@ -105,6 +107,7 @@ private lemma trivToE_self_eq_id (x : M) :
   rw [h]
   exact mfderiv_extChartAt_self (I := I) (x := x)
 
+omit [FiniteDimensional ℝ E] in
 private lemma trivFromE_self_apply (x : M) (w : E) :
     trivFromE (I := I) x x w = w := by
   classical
@@ -125,6 +128,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem exists_smooth_chartBasisExtension (x : M) :
     ∃ X : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b,
       (∀ i, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (X i))) ∧
@@ -186,6 +190,7 @@ theorem LeviCivita_chartBasisVec_neighborhood_formula
 
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartE_section_repr_chartBasisVec_baseSet
     (x : M) (i : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
@@ -358,6 +363,7 @@ private lemma chartE_section_repr_covApply_eventuallyEq
   rw [trivToE_trivFromE (I := I) x hb_base]
   rw [hb_def, (extChartAt I x).right_inv hy_tgt]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartChristoffel_differentiableAt_self
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -376,6 +382,7 @@ private lemma chartChristoffel_differentiableAt_self
   exact (hcd.differentiableOn (by norm_num)).differentiableAt
     (isOpen_interior.mem_nhds hxint)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma fderiv_christoffelSum_apply
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
@@ -522,6 +529,7 @@ private lemma LeviCivita_covApply_secondLayer
   congr 1
   exact trivFromE_self_apply (I := I) x ((chartModelBasis E) l)
 
+omit [FiniteDimensional ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma coord_sum_smul_basis
     {b : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E}
     (c : Fin (Module.finrank ℝ E) → ℝ) (l : Fin (Module.finrank ℝ E)) :

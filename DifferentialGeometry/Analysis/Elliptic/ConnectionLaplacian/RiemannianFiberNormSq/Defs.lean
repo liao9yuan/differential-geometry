@@ -4,7 +4,6 @@ import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ noncomputable def fiberNormSqSummand
         (fun k => g.inner b (e (K k))))
       (fun k => e (J k))) ^ 2
 
+omit [FiniteDimensional ℝ E] in
 lemma fiberNormSqSummand_nonneg
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (T : TensorRSSpace r s I b)
@@ -41,6 +41,7 @@ lemma fiberNormSqSummand_nonneg
   unfold fiberNormSqSummand
   exact sq_nonneg _
 
+omit [FiniteDimensional ℝ E] in
 private lemma fiberNormSqSummand_zero
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (n : ℕ) (e : Fin n → TangentSpace I b)

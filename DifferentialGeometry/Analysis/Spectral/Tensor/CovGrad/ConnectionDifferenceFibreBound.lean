@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma frame03_data
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -86,6 +86,7 @@ private lemma frame03_data
   · intro S
     rfl
 
+set_option linter.unusedSectionVars false in
 private lemma tensor03_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 3 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -220,6 +221,7 @@ theorem abs_tensor03_unit_eval_le_fibreNorm_mul_sqrt
     rw [Real.sqrt_mul (mul_nonneg haa_nn hbb_nn), Real.sqrt_mul haa_nn]
     ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma frame04_data
     (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
@@ -269,6 +271,7 @@ private lemma frame04_data
   · intro S
     rfl
 
+set_option linter.unusedSectionVars false in
 private lemma tensor04_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 4 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -871,6 +874,7 @@ theorem connDiff_gFibreNorm_le_iteratedCovGrad_of_lt_one
       (1 / (1 - δ₀)) * (3 / 2) * Gt * Nv * Nw := by ring
   rw [hfinal]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma fiberNormSqComponent_connDiffFib
     (g₁ g₀ : SmoothRiemannianMetric I M) (x : M) {n : ℕ}
     (e : Fin n → TangentSpace I x)

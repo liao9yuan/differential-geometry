@@ -34,6 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 lemma reprNorm_le_sum_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -72,6 +73,7 @@ lemma reprNorm_le_sum_components
     (tensorChartBasisElement_norm_le (E := E) r s Idx Jdx)
     (abs_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chart_pulled_component_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -118,6 +120,7 @@ lemma chart_pulled_component_differentiableAt
     hcdAt.differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open_target.mem_nhds hb_target)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma fderiv_repr_opNorm_le_sum_fderiv_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {b : M}

@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Flow.DeTurckVectorFieldL2JetBoundEndomorphi
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBoundDiagonalProductGridIntegralBound
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckVectorFieldL2JetBoundRaisedKoszulJetNorm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -459,6 +458,7 @@ private lemma sharpFlatEndoCc_eq_insert_fullRaised (g₀ g₁ : SmoothRiemannian
   rw [cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
   rw [g₀.symm x w (inverseMetricSharpFib (I := I) g₁ x om)]
 
+omit [BoundarylessManifold I M] in
 private lemma window_grid_le (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (n : ℕ) {Λw : ℝ}
     (hwin : ∀ j : ℕ, j ≤ n → ∀ x : M,
@@ -918,6 +918,7 @@ private lemma norm_iCG_connDiffLoweredCc_eq_connDiffSection
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact rfns_iCG_connDiffLoweredCc_eq_connDiffSection (I := I) (M := M) g₀ g₁ n x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_neg_local'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =

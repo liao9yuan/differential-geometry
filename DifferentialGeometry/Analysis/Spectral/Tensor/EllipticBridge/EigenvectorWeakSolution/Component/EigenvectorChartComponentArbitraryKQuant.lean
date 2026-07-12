@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedRegularityHigherQuant
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.EigenvectorPartialCompCutoffBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -47,7 +46,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-omit [CompleteSpace E] in
+set_option linter.unusedSectionVars false in
 private lemma chartTargetEuclid_eq_local (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid

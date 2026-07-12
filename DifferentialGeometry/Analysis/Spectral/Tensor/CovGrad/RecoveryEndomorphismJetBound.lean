@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCovariantJetTower
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -60,6 +60,7 @@ private lemma coframeS_one_eq_g0FlatCLM' (g₀ : SmoothRiemannianMetric I M) (x 
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_zero_toModel
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -169,23 +170,27 @@ private lemma rfns_cometricRaiseSlot0Field_eq
       (fun pr => by simp only [Fin.consEquiv, Equiv.coe_fn_mk])]
   rw [Fintype.sum_prod_type]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rfns_heq_congr_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g₀ r a} {Z : SmoothCcTensor g₀ r b} (hYZ : HEq Y Z) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r a x (Y.toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ r b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] in
 private theorem covGrad_heq_congr_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g₀ r a} {Z : SmoothCcTensor g₀ r b} (hYZ : HEq Y Z) :
     HEq (covGrad (I := I) (M := M) g₀ r a Y) (covGrad (I := I) (M := M) g₀ r b Z) := by
   subst h; rw [eq_of_heq hYZ]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rfns_castRankCc_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (Y : SmoothCcTensor g₀ r a) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r b x ((castRankCc g₀ r h Y).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ r a x (Y.toSection x) := by
   subst h; rfl
 
+omit [BoundarylessManifold I M] in
 private theorem covGrad_castRankCc_eq (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (Y : SmoothCcTensor g₀ r a) :
     covGrad (I := I) (M := M) g₀ r b (castRankCc g₀ r h Y) =
@@ -282,6 +287,7 @@ lemma riemannianFiberNormSq_iteratedCovGrad_cometricRaiseSlot0Field_eq
   rw [rfns_domDomCongrSection_eq]
   rw [rfns_castRankCc_rk]
 
+omit [BoundarylessManifold I M] in
 private lemma ccTensorBilinSymm_zero_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w = 0 := by
@@ -289,6 +295,7 @@ private lemma ccTensorBilinSymm_zero_apply (g₀ : SmoothRiemannianMetric I M) (
   rw [zero_smul, zero_mul] at key
   exact key
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma flatArmVec_self_eq_zero (g₀ : SmoothRiemannianMetric I M) (kind : Bool) (x : M)
     (om : Tensor0SSpace 1 I x) (v0 : TangentSpace I x) :
     flatArmVec (I := I) g₀ g₀ kind x om v0 = 0 := by
@@ -326,12 +333,14 @@ private lemma covGrad_sharpFlatEndoCc_self_eq_zero (g₀ : SmoothRiemannianMetri
   rw [covGrad_sharpFlatEndoCc_eq_arms (I := I) g₀ g₀]
   rw [flatArmCc_self_eq_zero, flatArmCc_self_eq_zero, add_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma iteratedCovGrad_zero_tensor (g₀ : SmoothRiemannianMetric I M) (r s m : ℕ) :
     iteratedCovGrad (I := I) g₀ r s m (0 : SmoothCcTensor g₀ r s) = 0 := by
   induction m with
   | zero => rw [iteratedCovGrad_zero]
   | succ m ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma unitModel_eq_ccTensorBilin_loc (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by

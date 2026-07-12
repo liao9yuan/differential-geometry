@@ -37,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -162,6 +163,7 @@ private lemma wkpNorm_coef_mul_factor_le
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
+set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -289,7 +291,7 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -320,6 +322,7 @@ private lemma memWkp_finset_sum
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -329,6 +332,7 @@ lemma one_div_densityOnEuclid_contDiffOn_chartTargetEuclid
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 private lemma layerA_coeff_contDiffOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (lₙ : Fin (Module.finrank ℝ E)) (a b : Fin (Module.finrank ℝ E)) :

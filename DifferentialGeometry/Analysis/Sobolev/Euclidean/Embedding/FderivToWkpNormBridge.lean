@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.ChartSobolevDensity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -18,6 +17,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private lemma euclN_norm_le_sum_components_norms (w : EuclN) :
     ‖w‖ ≤ ∑ i : Fin d, ‖w i‖ := by
   classical
@@ -31,6 +31,7 @@ private lemma euclN_norm_le_sum_components_norms (w : EuclN) :
   intro i _
   simp
 
+omit [NeZero d] in
 private lemma norm_fderiv_eq_norm_partials
     {ψ : EuclN → ℝ} (y : EuclN) :
     ‖fderiv ℝ ψ y‖ =
@@ -59,6 +60,7 @@ private lemma norm_fderiv_eq_norm_partials
               (fderiv ℝ ψ y) (EuclideanSpace.single j 1))) i := by simp
   rw [h_fderiv_norm_eq_v, h_v_eq_components]
 
+omit [NeZero d] in
 private lemma norm_fderiv_le_sum_partials
     (ψ : EuclN → ℝ) (y : EuclN) :
     ‖fderiv ℝ ψ y‖ ≤
@@ -70,6 +72,7 @@ private lemma norm_fderiv_le_sum_partials
   intro i _
   simp
 
+omit [NeZero d] in
 private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {μ : Measure EuclN}
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ) :
@@ -120,6 +123,7 @@ private lemma eLpNorm_norm_fderiv_le_sum_eLpNorm_partials
   intro i _
   rw [eLpNorm_norm]
 
+omit [NeZero d] in
 private lemma classical_partial_ae_eq_chosenWeakPartial
     {q : ℝ≥0∞} (hq_one : 1 ≤ q) {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -157,6 +161,7 @@ private lemma classical_partial_ae_eq_chosenWeakPartial
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
+omit [NeZero d] in
 private lemma wkpNorm_order_one_block_eq_sum_partials
     {q : ℝ≥0∞} (ψ : EuclN → ℝ) (Ω : Set EuclN) :
     (∑ β : Fin 1 → Fin d,
@@ -193,6 +198,7 @@ private lemma wkpNorm_order_one_block_eq_sum_partials
       eLpNorm (chosenWeakPartial' (d := d) q i ψ Ω) q (volume.restrict Ω))
     (fun _ => rfl)
 
+omit [NeZero d] in
 private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
     (Ω : Set EuclN) (ψ : EuclN → ℝ) :
     (∑ i : Fin d,
@@ -257,6 +263,7 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two
                   (volume.restrict Ω)) :=
           le_add_of_nonneg_right hJ2_nonneg
 
+omit [NeZero d] in
 theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_two
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -289,6 +296,7 @@ theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_two
     sum_eLpNorm_chosenWeakPartial_le_wkpNorm_two (d := d) Ω u
   exact h_grad_le.trans (le_of_eq h_step |>.trans h_le_wkp)
 
+omit [NeZero d] in
 private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
     (Ω : Set EuclN) (ψ : EuclN → ℝ) :
     (∑ i : Fin d,
@@ -326,6 +334,7 @@ private lemma sum_eLpNorm_chosenWeakPartial_le_wkpNorm_one_two
             (volume.restrict Ω)) := zero_le _
   exact le_add_of_nonneg_left hJ0_nonneg
 
+omit [NeZero d] in
 theorem chartTarget_fderiv_eLpNorm_le_wkpNorm_one_two
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)

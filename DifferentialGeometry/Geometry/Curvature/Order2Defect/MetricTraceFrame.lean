@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.L2Bound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpDualFrameParseval
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,6 +48,7 @@ noncomputable def metricTraceHessian
     tensorSecondCovDeriv (I := I) g r s
       (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma metricTraceHessian_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -57,6 +57,7 @@ lemma metricTraceHessian_def
         tensorSecondCovDeriv (I := I) g r s
           (smoothOrthoFrame (I := I) g x i) (smoothOrthoFrame (I := I) g x i) T x := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem rawTensorConnLap_eq_metricTraceHessian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -71,6 +72,7 @@ noncomputable def firstSlotHessMap
   (tensorCov (I := I) g r s).toFun (covApply (tensorCov (I := I) g r s) Y T) x -
     (tensorCov (I := I) g r s).toFun T x ∘L (LeviCivita (I := I) g).toFun Y x
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma firstSlotHessMap_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M)
@@ -81,6 +83,7 @@ noncomputable def firstSlotHessMap
   rw [firstSlotHessMap]
   simp [ContinuousLinearMap.sub_apply, ContinuousLinearMap.comp_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorSecondCovDeriv_eq_firstSlotHessMap
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : Π b : M, TangentSpace I b) (T : Π b : M, TensorRSSpace r s I b) (x : M) :
@@ -88,6 +91,7 @@ theorem tensorSecondCovDeriv_eq_firstSlotHessMap
       firstSlotHessMap (I := I) g r s Y T x (X x) := by
   rw [tensorSecondCovDeriv_def, firstSlotHessMap_apply]
 
+set_option linter.unusedSectionVars false in
 theorem metricTraceHessian_eq_gWeighted_firstSlot
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :

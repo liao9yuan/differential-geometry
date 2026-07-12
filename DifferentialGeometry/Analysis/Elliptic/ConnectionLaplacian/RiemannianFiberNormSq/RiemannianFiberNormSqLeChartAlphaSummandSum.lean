@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSqSummandChartAlphaBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sphere_isCompact_forward :
     IsCompact {ξ : Fin (Module.finrank ℝ E) → ℝ |
       ∑ i : Fin (Module.finrank ℝ E), ξ i ^ 2 = 1} := by
@@ -60,6 +60,7 @@ private lemma sphere_isCompact_forward :
     exact habs
   exact (isCompact_iff_isClosed_bounded.mpr ⟨hclosed, hbdd⟩)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_chartGramMatrix_quadForm_lower_bound_on_compact
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -235,6 +236,7 @@ private lemma exists_chartGramMatrix_quadForm_lower_bound_on_compact
         exact le_of_eq (hsum_empty _).symm
     · exact absurd ⟨b, hb⟩ hKα_ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -252,6 +254,7 @@ private lemma exists_chartGramMatrix_quadForm_lower_bound_on_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma riemannianFiberNormSq_eq_sum_witness_orthonormal
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
@@ -287,6 +290,7 @@ private lemma riemannianFiberNormSq_eq_sum_witness_orthonormal
     exact hite
   · rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sum_sq_repr_le_inv_c
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -321,6 +325,7 @@ private lemma sum_sq_repr_le_inv_c
   rw [h_simpl] at h_div
   exact h_div
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mkPiAlgebra_inner_eK_expand_repr
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (_hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -373,6 +378,7 @@ private lemma mkPiAlgebra_inner_eK_expand_repr
     ContinuousMultilinearMap.mkPiAlgebra_apply, smul_eq_mul]
   rw [← Finset.prod_mul_distrib]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensor0S_apply_eJ_expand_repr
     {b : M}
     (s : ℕ) {n : ℕ}
@@ -403,6 +409,7 @@ private lemma tensor0S_apply_eJ_expand_repr
   rw [ContinuousMultilinearMap.map_smul_univ]
   rw [smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) {b : M}
     (α : M)
@@ -646,9 +653,11 @@ private lemma fiberNormSqSummand_at_eg_le_chartAlpha_sum
   rw [hgoal_eq]
   exact h_CS
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma finrank_tangentSpace_eq (b : M) :
     Module.finrank ℝ (TangentSpace I b) = Module.finrank ℝ E := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem riemannianFiberNormSq_le_chartAlpha_summand_sum_on_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

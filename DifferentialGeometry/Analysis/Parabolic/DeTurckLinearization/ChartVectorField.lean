@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbol
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ def chartDeTurckVFComp (g g' : SmoothRiemannianMetric I M) (α : M)
       (chartChristoffel (I := I) g α a b k y -
         chartChristoffel (I := I) g' α a b k y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckVFComp_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -38,6 +38,7 @@ def chartDeTurckVFComp (g g' : SmoothRiemannianMetric I M) (α : M)
           (chartChristoffel (I := I) g α a b k y -
             chartChristoffel (I := I) g' α a b k y) := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem chartDeTurckVFComp_self
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -56,6 +57,7 @@ def chartDeTurckVFComp (g g' : SmoothRiemannianMetric I M) (α : M)
           rw [sub_self, mul_zero]
     _ = 0 := by simp
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_contDiffOn_interior
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -83,6 +85,7 @@ theorem chartDeTurckVFComp_contDiffOn_interior
       chartChristoffel_contDiffOn_interior (I := I) g' α a b k
     exact hg.sub hg'
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_differentiableOn_interior
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -91,6 +94,7 @@ theorem chartDeTurckVFComp_differentiableOn_interior
   (chartDeTurckVFComp_contDiffOn_interior (I := I) g g' α k).differentiableOn
     (by simp)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_differentiableAt_interior
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) {y : E}

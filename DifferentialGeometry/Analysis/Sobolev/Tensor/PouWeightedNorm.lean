@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 import Mathlib.Analysis.SpecialFunctions.Pow.NNReal
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -47,6 +46,7 @@ noncomputable def tensorPouSobolevNorm
           ∂(volume :
             Measure (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))) ^ (1 / 2 : ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevNorm_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -68,6 +68,7 @@ theorem tensorPouSobolevNorm_eq
                 Measure (EuclideanSpace ℝ
                   (Fin (Module.finrank ℝ E))))) ^ (1 / 2 : ℝ) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevNorm_nonneg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -183,6 +184,7 @@ theorem tensorPouSobolevNorm_zero_section
   rw [htsum]
   exact ENNReal.zero_rpow_of_pos (by norm_num)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorPouSobolevNorm_le_succ
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :

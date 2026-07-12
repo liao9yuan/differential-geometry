@@ -18,7 +18,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldCovDerivArmPairTrace
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLinearizedRefoldIdentity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -56,6 +55,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_add3_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M) (u v w : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (u + v + w) ≤
@@ -141,6 +141,7 @@ private lemma curvatureRefoldSlotPerm_natAdd (σ : Equiv.Perm (Fin 4)) (k : Fin 
   exact (by decide : ∀ k' : Fin 2,
     armPairTraceSlotPerm6 (Fin.natAdd 4 k') = (![0, 2] : Fin 2 → Fin 6) k') k
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
 private lemma slotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)

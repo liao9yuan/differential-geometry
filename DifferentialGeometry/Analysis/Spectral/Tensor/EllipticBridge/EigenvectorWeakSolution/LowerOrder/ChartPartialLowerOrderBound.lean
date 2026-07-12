@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrection.ChristoffelBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -164,6 +163,7 @@ private theorem exists_const_covDerivLowerOrderCoeff_bdd
   rw [add_mul]
   linarith
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_pou_mul_raw_eq_component
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -210,6 +210,7 @@ private lemma chartPushedRaw_pou_mul_lowerOrderTerm_eq
     chartPushedRaw_pou_mul_raw_eq_component (I := I) (M := M) g r s S α
       p.1 p.2 hy]
 
+set_option linter.unusedSectionVars false in
 private lemma tensorChartComponent_continuous'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -218,6 +219,7 @@ private lemma tensorChartComponent_continuous'
     Continuous (tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx) :=
   (tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx).continuous
 
+set_option linter.unusedSectionVars false in
 private lemma mem_pouTsupport_of_tensorChartComponent_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -250,6 +252,7 @@ private lemma mem_pouTsupport_of_tensorChartComponent_ne_zero
   exact subset_tsupport
     (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) hρ_ne
 
+omit [CompleteSpace E] in
 private lemma eLpNorm_coeff_mul_component_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

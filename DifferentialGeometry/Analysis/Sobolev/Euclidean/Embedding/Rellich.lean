@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.FrechetKolmogorov
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -82,6 +81,7 @@ private lemma fderiv_norm_le_sum_components
             rw [hcongr]
       _ = (∑ i : Fin d, |L (EuclideanSpace.single i 1)|) * ‖v‖ := by ring
 
+omit [NeZero d] in
 private lemma eLpNorm_fderiv_le_sum_components
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
@@ -193,6 +193,7 @@ private lemma eLpNorm_fderiv_le_sum_components
     exact (Real.norm_eq_abs _).symm
   rw [hcongr, eLpNorm_norm]
 
+omit [NeZero d] in
 private lemma eLpNorm_translate_sub_le_sum_components
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) (h : E) :
@@ -249,6 +250,7 @@ private lemma eLpNorm_grad_eq_restrict
     (μ := volume) (s := Ω) (p := p)
     (f := fun x => (fderiv ℝ φ x) (EuclideanSpace.single i 1)) hΩ_meas
 
+omit [NeZero d] in
 private lemma eLpNorm_phi_sub_indicator_eq
     {Ω : Set E} (hΩ_meas : MeasurableSet Ω)
     {φ u : E → ℝ}

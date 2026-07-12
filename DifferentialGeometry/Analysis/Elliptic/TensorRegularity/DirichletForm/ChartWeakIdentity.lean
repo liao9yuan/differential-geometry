@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.Rot
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.InteriorRegularity.PrincipalForm
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -68,6 +67,7 @@ theorem tensorCovDerivPointwiseInner_integral_chart_pull
   refine setIntegral_congr_fun hctE_meas (fun y hy => ?_)
   rw [tensorCovDerivPointwiseInner_chart_eq (I := I) (M := M) g r s S T α hy]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedRaw_bump_contDiffOn
     (α : M) {χ : M → ℝ}
     (hχs : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ χ (chartAt H α).source) :
@@ -99,6 +99,7 @@ theorem chartPushedRaw_bump_contDiffOn
   refine hcomp_eucl.congr (fun z hz => ?_)
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α χ hz
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_mul
     (l : Fin (Module.finrank ℝ E))
     {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -112,6 +113,7 @@ lemma euclidPartial_mul
     ContinuousLinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma euclidPartial_contDiffOn_chartTarget
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -196,6 +198,7 @@ noncomputable def covPrincipalRotationRemainder
                     (gramInvEntry (I := I) (M := M) g r s α Q P₀) y *
                   chartPushedRaw I α χ y)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covPrincipalRotationRemainder_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -525,6 +528,7 @@ theorem covPrincipalIntegrand_rotated_collapse
       exact absurd (Finset.mem_univ P₀) hP₀
   rw [hbump_collapse]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma weightedInvGramEuclid_eq_density_mul_invGram
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -534,6 +538,7 @@ private lemma weightedInvGramEuclid_eq_density_mul_invGram
         chartInvGramEuclid (I := I) g α k l y :=
   rfl
 
+omit [CompleteSpace E] [CompactSpace M] in
 theorem weightedInvGram_principalIntegrand_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}

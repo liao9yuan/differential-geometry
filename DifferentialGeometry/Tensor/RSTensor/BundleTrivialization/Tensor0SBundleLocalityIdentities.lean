@@ -5,7 +5,6 @@ import DifferentialGeometry.Tensor.Multilinear.Bundle
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ private lemma achart_eq_of_chartAt_eq {b b₀ : M}
     achart H b = achart H b₀ :=
   Subtype.ext h_chart
 
+omit [FiniteDimensional ℝ E] in
 private lemma tangent_trivb₀_symmL_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -43,6 +43,7 @@ private lemma tangent_trivb₀_symmL_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
+omit [FiniteDimensional ℝ E] in
 private lemma tangent_trivb₀_clmAt_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -56,6 +57,7 @@ private lemma tangent_trivb₀_clmAt_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
+omit [FiniteDimensional ℝ E] in
 private lemma tangent_trivializationAt_baseSet (b₀ : M) :
     (trivializationAt E (TangentSpace I) b₀).baseSet = (chartAt H b₀).source :=
   TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) b₀

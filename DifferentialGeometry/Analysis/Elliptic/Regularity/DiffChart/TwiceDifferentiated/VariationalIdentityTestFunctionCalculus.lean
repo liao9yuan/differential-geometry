@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoef
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -54,6 +53,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -66,6 +66,7 @@ lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -73,12 +74,14 @@ lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -120,6 +123,7 @@ lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma fderiv_zero_outside_tsupport
     (ψ : EuclN → ℝ) (x : EuclN) (hx : x ∉ tsupport ψ) :
     fderiv ℝ ψ x = 0 := by
@@ -130,6 +134,7 @@ lemma fderiv_zero_outside_tsupport
     exact image_eq_zero_of_notMem_tsupport hy
   rw [h_fderiv_eq]; simp
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma fderiv_partial_zero_outside_tsupport
     {ψ : EuclN → ℝ} (x : EuclN) (hx : x ∉ tsupport ψ)
     (l : Fin (Module.finrank ℝ E)) :

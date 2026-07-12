@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.Transition
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.ChainRule.CompChainRuleK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ lemma chartPushed_eq_zero_of_pou_zero
   rw [hρα_zero]
   ring
 
+omit [IsManifold I ∞ M] in
 lemma wkpNorm_chartPushed_eq_zero_of_pou_zero
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p)

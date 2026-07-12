@@ -52,6 +52,7 @@ private lemma chosenWeakPartial'_memLp_volume_unconditional
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 private lemma one_div_densityOnEuclid_contDiffOn'
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)

@@ -2,7 +2,6 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,9 +30,11 @@ noncomputable def tensor0Iso (x : M) :
 noncomputable def scalarFn (T : Π x : M, Tensor0SSpace 0 I x) : M → ℝ :=
   fun x => tensor0Iso I M x (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem scalarFn_apply (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     scalarFn I M T x = tensor0Iso I M x (T x) := rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_add (T₁ T₂ : Π x : M, Tensor0SSpace 0 I x) :
     scalarFn I M (T₁ + T₂) = scalarFn I M T₁ + scalarFn I M T₂ := by
   funext x
@@ -42,6 +43,7 @@ theorem scalarFn_add (T₁ T₂ : Π x : M, Tensor0SSpace 0 I x) :
   change tensor0Iso I M x (T₁ x + T₂ x) = _
   exact map_add (tensor0Iso I M x) (T₁ x) (T₂ x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_smul (g : M → ℝ) (T : Π x : M, Tensor0SSpace 0 I x) :
     scalarFn I M (g • T) = g • scalarFn I M T := by
   funext x
@@ -49,6 +51,7 @@ theorem scalarFn_smul (g : M → ℝ) (T : Π x : M, Tensor0SSpace 0 I x) :
   change tensor0Iso I M x (g x • T x) = _
   exact map_smul (tensor0Iso I M x) (g x) (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_zero :
     scalarFn I M (0 : Π x : M, Tensor0SSpace 0 I x) = 0 := by
   funext x
@@ -56,11 +59,13 @@ theorem scalarFn_zero :
   change tensor0Iso I M x (0 : Tensor0SSpace 0 I x) = 0
   exact map_zero (tensor0Iso I M x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem tensor0Iso_symm_scalarFn (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     (tensor0Iso I M x).symm ((scalarFn I M T) x) = T x := by
   change (tensor0Iso I M x).symm (tensor0Iso I M x (T x)) = T x
   exact (tensor0Iso I M x).symm_apply_apply (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor0Iso_symm_smul (T : Π x : M, Tensor0SSpace 0 I x)
     (a : ℝ) (x : M) :
     (tensor0Iso I M x).symm (a • scalarFn I M T x) = a • T x := by
@@ -71,10 +76,12 @@ noncomputable def curriedSection {s : ℕ} (T : Π x : M, Tensor0SSpace (s+1) I 
     Π x : M, TangentSpace I x →L[ℝ] Tensor0SSpace s I x :=
   fun x => tensor0S_curry (I := I) (M := M) s x (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] theorem curriedSection_apply {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x : M) :
     curriedSection I M T x = tensor0S_curry (I := I) (M := M) s x (T x) := rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curriedSection_add {s : ℕ} (T₁ T₂ : Π x : M, Tensor0SSpace (s+1) I x) :
     curriedSection I M (T₁ + T₂) = curriedSection I M T₁ + curriedSection I M T₂ := by
   funext x
@@ -84,6 +91,7 @@ theorem curriedSection_add {s : ℕ} (T₁ T₂ : Π x : M, Tensor0SSpace (s+1) 
   change tensor0S_curry (I := I) (M := M) s x (T₁ x + T₂ x) = _
   exact map_add (tensor0S_curry (I := I) (M := M) s x) (T₁ x) (T₂ x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curriedSection_smul {s : ℕ} (g : M → ℝ) (T : Π x : M, Tensor0SSpace (s+1) I x) :
     curriedSection I M (g • T) = g • curriedSection I M T := by
   funext x
@@ -92,6 +100,7 @@ theorem curriedSection_smul {s : ℕ} (g : M → ℝ) (T : Π x : M, Tensor0SSpa
   change tensor0S_curry (I := I) (M := M) s x (g x • T x) = _
   exact map_smul (tensor0S_curry (I := I) (M := M) s x) (g x) (T x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem curriedSection_zero {s : ℕ} :
     curriedSection I M (0 : Π x : M, Tensor0SSpace (s+1) I x) = 0 := by
   funext x
@@ -115,10 +124,12 @@ theorem compContinuousLinearMap_fin0
   congr 1
   exact Subsingleton.elim _ _
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem scalarFn_eq_apply_zero (T : Π x : M, Tensor0SSpace 0 I x) (x : M) :
     scalarFn I M T x = (T x) 0 := by
   rfl
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_MLF0_iff_scalar
     (f : M → ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) (x : M) :
     MDifferentiableAt I 𝓘(ℝ, ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) f x ↔
@@ -146,6 +157,7 @@ theorem mdifferentiableAt_MLF0_iff_scalar
     filter_upwards with y
     exact ((continuousMultilinearCurryFin0 ℝ E ℝ).symm_apply_apply (f y)).symm
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffAt_MLF0_iff_scalar
     (n : WithTop ℕ∞)
     (f : M → ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) (x : M) :
@@ -174,6 +186,7 @@ theorem contMDiffAt_MLF0_iff_scalar
     filter_upwards with y
     exact ((continuousMultilinearCurryFin0 ℝ E ℝ).symm_apply_apply (f y)).symm
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_tensor0SBundle_zero_eq_scalarFn
     (T : Π x : M, Tensor0SSpace 0 I x) (x₀ y : M) :
     (trivializationAt (Tensor0SModel 0 ℝ E)
@@ -185,6 +198,7 @@ private theorem trivializationAt_tensor0SBundle_zero_eq_scalarFn
   rw [compContinuousLinearMap_fin0]
   rfl
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiff_scalarFn_iff_section
     (T : Π x : M, Tensor0SSpace 0 I x) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (scalarFn I M T) ↔
@@ -222,6 +236,7 @@ theorem contMDiff_scalarFn_iff_section
     rw [trivializationAt_tensor0SBundle_zero_eq_scalarFn (I := I) (M := M) T x y]
     exact (continuousMultilinearCurryFin0 ℝ E ℝ).apply_symm_apply (scalarFn I M T y)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_scalarFn_iff_section
     (T : Π x : M, Tensor0SSpace 0 I x) {x : M} :
     MDifferentiableAt I 𝓘(ℝ, ℝ) (scalarFn I M T) x ↔
@@ -259,6 +274,7 @@ theorem mdifferentiableAt_scalarFn_iff_section
     rw [trivializationAt_tensor0SBundle_zero_eq_scalarFn (I := I) (M := M) T x y]
     exact (continuousMultilinearCurryFin0 ℝ E ℝ).apply_symm_apply (scalarFn I M T y)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_tensor0SBundle_succ_fiber_eq {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x₀ y : M) :
     (trivializationAt (Tensor0SModel (s+1) ℝ E)
@@ -266,6 +282,7 @@ private theorem trivializationAt_tensor0SBundle_succ_fiber_eq {s : ℕ}
     (T y).compContinuousLinearMap
       (fun _ : Fin (s+1) => (trivializationAt E (TangentSpace I) x₀).symmL ℝ y) := rfl
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_homBundle_curriedSection_fiber_eq {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x₀ y : M) :
     (trivializationAt (E →L[ℝ] Tensor0SModel s ℝ E)
@@ -276,6 +293,7 @@ private theorem trivializationAt_homBundle_curriedSection_fiber_eq {s : ℕ}
       ((curriedSection I M T y).comp
         ((trivializationAt E (TangentSpace I) x₀).symmL ℝ y)) := rfl
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem tensor0SBundle_linearMapAt_apply_of_mem {s : ℕ} (x₀ y : M)
     (hy : y ∈ (trivializationAt (Tensor0SModel s ℝ E)
       (fun x : M => Tensor0SSpace s I x) x₀).baseSet)
@@ -295,6 +313,7 @@ private theorem tensor0SBundle_linearMapAt_apply_of_mem {s : ℕ} (x₀ y : M)
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   rfl
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem trivializationAt_homBundle_curriedSection_eq_curry_of_mem {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) (x₀ y : M)
     (hy : y ∈ (trivializationAt (Tensor0SModel s ℝ E)
@@ -326,6 +345,7 @@ private theorem trivializationAt_homBundle_curriedSection_eq_curry_of_mem {s : �
   · intro k
     simp [Fin.cons_succ]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiff_curriedSection_iff_section {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (s+1) ℝ E)) ∞
@@ -386,6 +406,7 @@ theorem contMDiff_curriedSection_iff_section {s : ℕ}
     exact ((continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s+1) => E) ℝ
       ).symm_apply_apply _).symm
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem mdifferentiableAt_curriedSection_iff_section {s : ℕ}
     (T : Π x : M, Tensor0SSpace (s+1) I x) {x : M} :
     MDifferentiableAt I (I.prod 𝓘(ℝ, Tensor0SModel (s+1) ℝ E))

@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLieCovDerivFamily
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindowClosureAdditivity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -61,6 +60,7 @@ lemma bdICG_succ_cometricDT_zero (g₀ : SmoothRiemannianMetric I M) (s m : ℕ)
   | succ m' ih =>
       rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdRfns_zero_toSection (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r s x
       ((0 : SmoothCcTensor g₀ r s).toSection x) = 0 := by

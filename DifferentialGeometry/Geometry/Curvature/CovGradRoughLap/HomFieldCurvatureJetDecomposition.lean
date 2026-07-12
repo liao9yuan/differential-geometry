@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorRS_eq_of_toModel_eval_eq {r a : ℕ} {x : M}
     {T T' : TensorRSSpace r a I x}
     (h : ∀ (D : Tensor0SSpace r I x) (v : Fin a → TangentSpace I x),
@@ -54,6 +54,7 @@ private lemma vecTail_cons' {n : ℕ} {α : Type*} (a : α) (v : Fin n → α) :
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
@@ -74,6 +75,7 @@ private noncomputable def chooseCcThrough (g : SmoothRiemannianMetric I M) (r a 
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma chooseCcThrough_eq (g : SmoothRiemannianMetric I M) (r a : ℕ) (x : M)
     (T : TensorRSSpace r a I x) :
     (chooseCcThrough (I := I) (M := M) g r a x T).toSection x = T :=
@@ -94,6 +96,7 @@ private noncomputable def curryLastTwoTensorSlots (r t : ℕ) (x : M) (T : Tenso
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma twoSlotPeel_eval (r t : ℕ) (x : M) (T : TensorRSSpace r (t + 2) I x)
     (u w : TangentSpace I x) (D : Tensor0SSpace r I x) (m : Fin t → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -114,6 +117,7 @@ private lemma twoSlotPeel_eval (r t : ℕ) (x : M) (T : TensorRSSpace r (t + 2) 
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma twoSlotPeel_add (r t : ℕ) (x : M) (T T' : TensorRSSpace r (t + 2) I x) :
     curryLastTwoTensorSlots (I := I) (M := M) r t x (T + T') =
       curryLastTwoTensorSlots (I := I) (M := M) r t x T + curryLastTwoTensorSlots (I := I) (M := M) r t x T' := by
@@ -123,6 +127,7 @@ private lemma twoSlotPeel_add (r t : ℕ) (x : M) (T T' : TensorRSSpace r (t + 2
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma twoSlotPeel_smul (r t : ℕ) (x : M) (c : ℝ) (T : TensorRSSpace r (t + 2) I x) :
     curryLastTwoTensorSlots (I := I) (M := M) r t x (c • T) =
       c • curryLastTwoTensorSlots (I := I) (M := M) r t x T := by
@@ -383,6 +388,7 @@ private noncomputable def tangentBilinFlip {r t : ℕ} {x : M}
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tangentBilinFlip_apply {r t : ℕ} {x : M}
     (P : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TensorRSSpace r t I x)
     (a b : TangentSpace I x) :
@@ -390,6 +396,7 @@ private lemma tangentBilinFlip_apply {r t : ℕ} {x : M}
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 private lemma tangentBilinFlip_add {r t : ℕ} {x : M}
     (P P' : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TensorRSSpace r t I x) :
     tangentBilinFlip (I := I) (M := M) (P + P') =
@@ -405,6 +412,7 @@ private lemma tangentBilinFlip_add {r t : ℕ} {x : M}
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 private lemma tangentBilinFlip_smul {r t : ℕ} {x : M} (c : ℝ)
     (P : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TensorRSSpace r t I x) :
     tangentBilinFlip (I := I) (M := M) (c • P) =
@@ -649,6 +657,7 @@ private noncomputable def metricDoubleTraceFib (g : SmoothRiemannianMetric I M) 
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 private lemma metricDoubleTraceFib_apply (g : SmoothRiemannianMetric I M) (r t : ℕ) (x : M)
     (V : TensorRSSpace r (t + 2) I x) :
     metricDoubleTraceFib (I := I) (M := M) g r t x V =
@@ -689,6 +698,7 @@ private noncomputable def metricDoubleTraceFibFixedFrame (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 private lemma metricDoubleTraceFibFixedFrame_apply (r t : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (V : TensorRSSpace r (t + 2) I x) :
@@ -706,6 +716,7 @@ private lemma metricDoubleTraceFibFixedFrame_apply (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 private lemma metricDoubleTraceFib_eq_fixedFrame_moving (g : SmoothRiemannianMetric I M) (r t : ℕ)
     (x : M) :
     metricDoubleTraceFib (I := I) (M := M) g r t x =

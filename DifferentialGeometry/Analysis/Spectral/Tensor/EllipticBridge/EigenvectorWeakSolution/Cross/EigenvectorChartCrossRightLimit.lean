@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossLimits
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
@@ -55,6 +55,7 @@ private lemma tensorCovDerivAt_zero_dir
   rw [tensorCovDerivAt_def]
   exact ContinuousLinearMap.map_zero _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gradFun_eq_gramInv_sum
     (g : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; ℝ⟯) (x : M) :
     gradFun (I := I) g (ζ : M → ℝ) x =
@@ -142,12 +143,14 @@ private noncomputable def covDerivHomSection
   fun x => tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)
     (fun y : M => S.toSection y) x
 
+omit [CompactSpace M] in
 private lemma covDerivHomSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M) (v : E) :
     covDerivHomSection (I := I) (M := M) g r s S x v =
       tensorCovDerivAt (I := I) (M := M) g r s S x v := rfl
 
+omit [CompactSpace M] in
 private lemma covDerivHomSection_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -170,6 +173,7 @@ private lemma covDerivHomSection_contMDiff
   rw [← contMDiffOn_univ]
   exact hop
 
+omit [CompactSpace M] in
 private lemma covDerivAlong_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -213,6 +217,7 @@ private noncomputable def covDerivAlongSection
     Cₛ^∞⟮I; TensorRSModel r s ℝ E,
       (fun x : M => TensorRSSpace r s I x)⟯)
 
+omit [CompactSpace M] in
 private lemma covDerivAlongSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s)
@@ -336,6 +341,7 @@ private noncomputable def tensorInnerPointwiseRightHom
   map_zero' := tensorInnerPointwise_zero_right (I := I) (M := M) g r s x A
   map_add' := tensorInnerPointwise_add_right (I := I) (M := M) g r s x A
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorInnerPointwise_sum_sum_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : TensorRSModel r s ℝ E)

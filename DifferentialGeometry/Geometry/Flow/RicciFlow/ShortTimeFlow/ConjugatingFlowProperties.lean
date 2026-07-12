@@ -11,7 +11,6 @@ import DifferentialGeometry.Bundle.PartialMfderiv
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -1289,6 +1288,7 @@ theorem conjugating_flow_pullback_jointGram_data
         rw [(extChartAt I α).left_inv hsr0]
       rw [hgramEq]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem conjugating_flow_pullback_jointGram_onesided
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

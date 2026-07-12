@@ -9,7 +9,6 @@ import Mathlib.Analysis.InnerProductSpace.Dual
 import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ instance smoothSectionScalarTower :
     IsScalarTower ℝ C^∞⟮I, M; ℝ⟯ Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ where
   smul_assoc r f s := by ext x; exact mul_smul (r : ℝ) (f x : ℝ) (s x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private theorem two_smooth_eval (x : M) : (2 : C^∞⟮I, M; ℝ⟯) x = (2 : ℝ) := by
   have h2a : (2 : C^∞⟮I, M; ℝ⟯) * (1 : C^∞⟮I, M; ℝ⟯) = (2 : C^∞⟮I, M; ℝ⟯) := mul_one _
   have h_two_eq : (2 : C^∞⟮I, M; ℝ⟯) = (1 : C^∞⟮I, M; ℝ⟯) + (1 : C^∞⟮I, M; ℝ⟯) := by norm_num

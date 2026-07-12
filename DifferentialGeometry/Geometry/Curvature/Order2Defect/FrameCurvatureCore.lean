@@ -103,6 +103,7 @@ theorem exists_frame_offDiag_curvature_sum_fiberNormSq_bound
   refine ⟨(Module.finrank ℝ E : ℝ) ^ 2 * Cx, ?_, hbound⟩
   positivity
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem frozenFrameTrace_eq_rawTensorConnLap_fixedFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x y : M) :
@@ -112,6 +113,7 @@ theorem frozenFrameTrace_eq_rawTensorConnLap_fixedFrame
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [tensorSecondCovDeriv_def]
 
+set_option linter.unusedSectionVars false in
 theorem frozenFrameTrace_eq_rawTensorConnLap_of_mem_nbhd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)

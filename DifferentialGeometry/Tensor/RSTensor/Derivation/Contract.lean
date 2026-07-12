@@ -10,7 +10,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.LinearAlgebra.Trace
 
-set_option linter.unusedSectionVars false
 
 namespace Tensor0SBundle
 noncomputable section
@@ -42,6 +41,7 @@ noncomputable def model_interior_bilinear (𝕜 : Type*) [NontriviallyNormedFiel
     (continuousMultilinearCurryLeftEquiv 𝕜
       (fun _ : Fin (s + 1) => E) 𝕜).toContinuousLinearEquiv.toContinuousLinearMap
 
+set_option linter.unusedSectionVars false in
 theorem model_interior_bilinear_apply (s : ℕ) (v : E) (T : Tensor0SModel (s + 1) 𝕜 E) :
     model_interior_bilinear 𝕜 E s v T = model_interior_product s v T := rfl
 
@@ -109,6 +109,7 @@ noncomputable def model_tensorWithCovector_first_bilinear (r : ℕ) :
           smul_eq_mul, RingHom.id_apply]
         ring }
 
+set_option linter.unusedSectionVars false in
 theorem model_tensorWithCovector_first_bilinear_apply (r : ℕ)
     (α : Tensor0SModel 1 𝕜 E) (β : Tensor0SModel r 𝕜 E) :
     model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r α β =
@@ -122,6 +123,7 @@ noncomputable def model_contract_covariant_bilinear (r s : ℕ) :
       (Tensor0SModel s 𝕜 E)).comp
     (model_interior_bilinear 𝕜 E s)
 
+set_option linter.unusedSectionVars false in
 theorem model_contract_covariant_bilinear_apply (r s : ℕ) (v : E)
     (T : TensorRSModel r (s + 1) 𝕜 E) :
     model_contract_covariant_bilinear (𝕜 := 𝕜) (E := E) r s v T =
@@ -134,6 +136,7 @@ noncomputable def model_contract_contravariant_first_bilinear (r s : ℕ) :
         (Tensor0SModel r 𝕜 E) (Tensor0SModel (1 + r) 𝕜 E) (Tensor0SModel s 𝕜 E)).flip.comp
     (model_tensorWithCovector_first_bilinear (𝕜 := 𝕜) (E := E) r)
 
+set_option linter.unusedSectionVars false in
 theorem model_contract_contravariant_first_bilinear_apply (r s : ℕ)
     (α : Tensor0SModel 1 𝕜 E) (T : TensorRSModel (1 + r) s 𝕜 E) :
     model_contract_contravariant_first_bilinear (𝕜 := 𝕜) (E := E) r s α T =
@@ -223,6 +226,7 @@ noncomputable def model_covectorOfCLM :
     (E →L[𝕜] 𝕜) →L[𝕜] Tensor0SModel 1 𝕜 E :=
   (continuousMultilinearCurryFin1 𝕜 E 𝕜).symm.toContinuousLinearMap
 
+set_option linter.unusedSectionVars false in
 @[simp]
 theorem model_covectorOfCLM_apply (α : E →L[𝕜] 𝕜) (v : Fin 1 → E) :
     model_covectorOfCLM (𝕜 := 𝕜) (E := E) α v = α (v 0) := by
@@ -240,6 +244,7 @@ noncomputable def model_contract_trace (r s : ℕ) :
         (𝕜 := 𝕜) (E := E) r (s + 1)
         (model_covectorOfCLM (𝕜 := 𝕜) (E := E) (b i)))
 
+set_option linter.unusedSectionVars false in
 theorem model_contract_trace_apply (r s : ℕ)
     (T : TensorRSModel (1 + r) (s + 1) 𝕜 E) :
     model_contract_trace (𝕜 := 𝕜) (E := E) r s T =
@@ -259,6 +264,7 @@ noncomputable def contract_trace (r s : ℕ) (x : M) :
     ((model_contract_trace (𝕜 := 𝕜) (E := E) r s).comp
       (tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x).toContinuousLinearMap)
 
+set_option linter.unusedSectionVars false in
 theorem contract_trace_apply (r s : ℕ) (x : M)
     (T : TensorRSSpace (1 + r) (s + 1) I x) :
     contract_trace (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s x T =
@@ -267,6 +273,7 @@ theorem contract_trace_apply (r s : ℕ) (x : M)
           (tensorRSSpace_continuousLinearEquiv (I := I) (1 + r) (s + 1) x T)) := by
   rfl
 
+set_option linter.unusedSectionVars false in
 private theorem trace_bilinear_change_frame_coord
     (L K : E →L[𝕜] E) (hKL : ∀ z, K (L z) = z)
     (F : (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜) :
@@ -339,6 +346,7 @@ private theorem trace_bilinear_change_frame_coord
           refine Finset.sum_congr rfl fun j _ => ?_
           rw [h_cov j]
 
+set_option linter.unusedSectionVars false in
 private theorem trace_bilinear_change_frame_cdual
     (L K : E →L[𝕜] E) (hKL : ∀ z, K (L z) = z)
     (F : (E →L[𝕜] 𝕜) →L[𝕜] E →L[𝕜] 𝕜) :
@@ -371,6 +379,7 @@ private noncomputable def model_trace_pairing_first (r s : ℕ)
     ((ContinuousLinearMap.compL 𝕜 E (Tensor0SModel s 𝕜 E) 𝕜) evalTail).comp curry
   outputToPair.comp covToOutput
 
+set_option linter.unusedSectionVars false in
 private theorem model_trace_pairing_first_apply (r s : ℕ)
     (T : TensorRSModel (1 + r) (s + 1) 𝕜 E)
     (β : Tensor0SModel r 𝕜 E) (tail : Fin s → E)
@@ -382,6 +391,7 @@ private theorem model_trace_pairing_first_apply (r s : ℕ)
   simp [model_trace_pairing_first, model_tensorWithCovector_first_bilinear_apply,
     model_interior_product]
 
+set_option linter.unusedSectionVars false in
 private theorem trace_bilinear_basis_coord
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -448,6 +458,7 @@ private theorem trace_bilinear_basis_coord
           rw [h_cov j]
 
 
+set_option linter.unusedSectionVars false in
 theorem model_contract_trace_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E) (r s : ℕ)
@@ -498,6 +509,7 @@ noncomputable def model_covariantChange (k : ℕ) (L : E →L[𝕜] E) :
     Tensor0SModel k 𝕜 E →L[𝕜] Tensor0SModel k 𝕜 E :=
   ContinuousMultilinearMap.compContinuousLinearMapL (fun _ : Fin k => L)
 
+set_option linter.unusedSectionVars false in
 @[simp]
 theorem model_covariantChange_apply (k : ℕ) (L : E →L[𝕜] E)
     (T : Tensor0SModel k 𝕜 E) (v : Fin k → E) :
@@ -505,6 +517,7 @@ theorem model_covariantChange_apply (k : ℕ) (L : E →L[𝕜] E)
       T (fun i => L (v i)) := by
   rfl
 
+set_option linter.unusedSectionVars false in
 private theorem model_interior_product_covariantChange_apply (s : ℕ)
     (L : E →L[𝕜] E) (X : E) (U : Tensor0SModel (s + 1) 𝕜 E)
     (v : Fin s → E) :
@@ -522,6 +535,7 @@ private theorem model_interior_product_covariantChange_apply (s : ℕ)
   · intro j
     rfl
 
+set_option linter.unusedSectionVars false in
 private theorem model_covariantChange_tensorWithCovector_first (r : ℕ)
     (L : E →L[𝕜] E) (α : E →L[𝕜] 𝕜) (β : Tensor0SModel r 𝕜 E) :
     model_covariantChange (𝕜 := 𝕜) (E := E) (1 + r) L
@@ -541,6 +555,7 @@ private theorem model_covariantChange_tensorWithCovector_first (r : ℕ)
   congr 1
 
 
+set_option linter.unusedSectionVars false in
 theorem model_contract_trace_naturality
     (r s : ℕ) (L Linv : E →L[𝕜] E)
     (hL : L.comp Linv = ContinuousLinearMap.id 𝕜 E)
@@ -612,6 +627,7 @@ theorem model_contract_trace_naturality
           rfl
 
 
+set_option linter.unusedSectionVars false in
 theorem contract_trace_trivialization_eq
     {r s : ℕ} {x₀ x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)

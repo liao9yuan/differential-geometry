@@ -20,7 +20,6 @@ import Mathlib.Topology.Compactness.Compact
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -193,6 +192,7 @@ lemma metric_compat_hasDerivAt_inner_of_chartCurveDeriv
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma metric_compat_hasDerivAt_inner
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
@@ -216,6 +216,7 @@ lemma metric_compat_hasDerivAt_inner
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma commute_ds_dt_intrinsic
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -302,6 +303,7 @@ lemma commute_ds_dt_intrinsic
 omit [T2Space M] [SigmaCompactSpace M] in
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [I.Boundaryless] in
 theorem covDerivAlong_commute_transverse_longitudinal_of_variation
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hF2 : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f 0 t) (f p.1 p.2)) (0, t))
@@ -381,6 +383,7 @@ theorem covDerivAlong_commute_transverse_longitudinal_of_variation
   rw [hchartL, hchartR]
   rw [hcommute']
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPulled_contDiffAt_infty
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (α : M) (s₀ t₀ : ℝ)
     (hsrc : f s₀ t₀ ∈ (chartAt H α).source) :
@@ -395,6 +398,7 @@ lemma chartPulled_contDiffAt_infty
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma variationField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -457,6 +461,7 @@ lemma variationField_chartRep_differentiableAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma velocityField_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t₀ : ℝ) :
@@ -508,6 +513,7 @@ lemma velocityField_chartRep_differentiableAt
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_along_curve_contMDiff
     {n : WithTop ℕ∞} [ENat.LEInfty n] (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)}
@@ -524,6 +530,7 @@ private lemma g_inner_along_curve_contMDiff
     refine hinner.congr (fun t => ?_); rfl
   rw [← contMDiff_iff_contDiff]; exact hcm
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem first_variation_of_arcLength_fixed_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -720,6 +727,7 @@ theorem first_variation_of_arcLength_fixed_endpoints
   rw [hAB] at hS2A
   exact hS2A
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem first_variation_of_arcLength_free_endpoints
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)
@@ -907,6 +915,7 @@ theorem first_variation_of_arcLength_free_endpoints
   rw [hAB] at hS2A
   exact hS2A
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem first_variation_vanishes_for_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (f : ℝ → ℝ → M) (L : ℝ)
     (hf : IsSmoothVariation (I := I) f) (hL : 0 < L)

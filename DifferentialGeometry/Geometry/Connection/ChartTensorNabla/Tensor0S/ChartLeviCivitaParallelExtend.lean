@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 lemma chartParallelExtend_repr_eventuallyEq_const
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :
@@ -58,6 +58,7 @@ lemma chartParallelExtend_repr_eventuallyEq_const
       ((extChartAt I α).symm y) = trivToE (I := I) α b v
   exact chartE_section_repr_chartParallelExtend (I := I) α b v hy_U
 
+set_option linter.unusedSectionVars false in
 lemma chartParallelExtend_repr_pullback_fderiv_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :
@@ -70,6 +71,7 @@ lemma chartParallelExtend_repr_pullback_fderiv_eq_zero
   rw [Filter.EventuallyEq.fderiv_eq hev]
   exact fderiv_const_apply _
 
+set_option linter.unusedSectionVars false in
 lemma chartParallelExtend_repr_pullback_fderiv_apply_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) (w : E) :
@@ -79,6 +81,7 @@ lemma chartParallelExtend_repr_pullback_fderiv_apply_eq_zero
   rw [chartParallelExtend_repr_pullback_fderiv_eq_zero (I := I) α hb v]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem chartLeviCivita_chartParallelExtend
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -120,6 +123,7 @@ theorem chartLeviCivita_chartParallelExtend_symm
   congr 1
   exact (christoffelCorrection_symm_cancel (I := I) g α b v (X b)).symm
 
+set_option linter.unusedSectionVars false in
 lemma chartParallelExtend_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (v : TangentSpace I b) :

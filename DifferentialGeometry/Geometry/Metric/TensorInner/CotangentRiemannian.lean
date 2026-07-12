@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.LinearAlgebra.Dual.Basis
 
-set_option linter.unusedSectionVars false
 
 
 namespace Tensor0SBundle
@@ -24,6 +23,7 @@ def cotangentToDual {x : M} (α : Tensor0SSpace 1 I x) :
     Module.Dual Real (TangentSpace I x) :=
   (cotangentToCLM (I := I) α).toLinearMap
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem cotangentToDual_apply {x : M}
     (α : Tensor0SSpace 1 I x) (X : TangentSpace I x) :
     cotangentToDual (I := I) α X = α (fun _ : Fin 1 => X) := by
@@ -42,11 +42,13 @@ def cotangentToDualLinear {x : M} :
     ext X
     rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem cotangentToDualLinear_apply {x : M}
     (α : Tensor0SSpace 1 I x) :
     cotangentToDualLinear (I := I) α = cotangentToDual (I := I) α := by
   rfl
 
+omit [FiniteDimensional ℝ E] in
 theorem cotangentToDualLinear_injective {x : M} :
     Function.Injective (cotangentToDualLinear (I := I) (x := x)) := by
   intro α β h
@@ -271,6 +273,7 @@ theorem cotangentSharp_inner
       cotangentToDual (I := I) α X
   exact h
 
+omit [FiniteDimensional ℝ E] in
 theorem eq_of_inner_basis_eq
     {Idx : Type*} [Finite Idx]
     (g : SmoothMetric I M) (x : M)

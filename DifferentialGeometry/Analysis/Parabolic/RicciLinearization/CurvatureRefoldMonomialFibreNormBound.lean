@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -65,6 +64,7 @@ private lemma sum_fun_fin_four_eval_zero_one {n : ℕ} (F : Fin n → Fin n → 
   rw [Finset.sum_congr rfl (fun k _ => h2 k), ← Finset.mul_sum]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
     (u : TangentSpace I x) {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) :
     g.inner x u (∑ b, c b • v b) = ∑ b, c b * g.inner x u (v b) := by
@@ -72,6 +72,7 @@ private lemma metric_inner_right_sum (g : SmoothRiemannianMetric I M) (x : M)
   exact Finset.sum_congr rfl (fun b _ => by rw [map_smul, smul_eq_mul])
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (c : Fin d → ℝ) (v : Fin d → TangentSpace I x) (u : TangentSpace I x) :
     g.inner x (∑ a, c a • v a) u = ∑ a, c a * g.inner x (v a) u := by
@@ -83,6 +84,7 @@ private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul])
 
 
+set_option linter.unusedSectionVars false in
 private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (B : Fin d → TangentSpace I x)
     (hB : ∀ a b, g₁.inner x (B a) (B b) = if a = b then (1 : ℝ) else 0)
@@ -236,6 +238,7 @@ private lemma weight_row_g0norm_le
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =

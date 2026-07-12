@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNor
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.SimpLemmas
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJetRealizePathJointSmoothness
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpaceRS_sub {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞

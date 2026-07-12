@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -241,6 +240,7 @@ variable {𝕜 B F : Type*} {E : B → Type*} (s : ℕ)
 local notation "MLF" => ContinuousMultilinearMap 𝕜 (fun _ : Fin s => F) 𝕜
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
 theorem contMDiffOn_continuousMultilinearMapCoordChange
     [ContMDiffVectorBundle n F E IB]
     [MemTrivializationAtlas e] [MemTrivializationAtlas e'] :

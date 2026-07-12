@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -71,6 +70,7 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq'
   rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
+set_option linter.unusedSectionVars false in
 private lemma hsNorm_zero_summand_eq_sq_eLpNorm_chartPushedSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -129,6 +129,7 @@ private lemma hsNorm_zero_summand_eq_sq_eLpNorm_chartPushedSqrtPou
     rw [sq_abs, sq_abs, hw_sq]
   · rw [Set.indicator_of_notMem hy, Set.indicator_of_notMem hy]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma support_sqrt_pou_eq' (α : M) :
     Function.support
         (fun b : M => Real.sqrt
@@ -144,6 +145,7 @@ private lemma support_sqrt_pou_eq' (α : M) :
       (chartAtlasPOU I M).nonneg α b
     exact hb (le_antisymm hle hρ_nn)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma tsupport_sqrtPou_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -163,6 +165,7 @@ private lemma tsupport_sqrtPou_subset
   unfold tsupport
   rw [support_sqrt_pou_eq' (I := I) (M := M) α]
 
+set_option linter.unusedSectionVars false in
 private lemma continuous_sqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)

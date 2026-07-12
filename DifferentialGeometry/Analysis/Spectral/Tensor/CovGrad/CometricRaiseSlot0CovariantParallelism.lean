@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulCometri
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.InverseMetricFieldParallel
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentCovDerivIdentification
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -45,6 +45,7 @@ private lemma interior_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
   rw [h1]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma interior_product_eq_tensor0S_curry (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) :
     Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x v D =

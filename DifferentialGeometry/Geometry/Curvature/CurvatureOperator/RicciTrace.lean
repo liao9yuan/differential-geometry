@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import Mathlib.LinearAlgebra.Trace
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
@@ -24,6 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 private lemma infty_ne_zero_ricci : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma pushforward_eval_at_image
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) (x : M) :
     Diffeomorph.pushforward Φ Y (Φ x) = mfderiv I I (⇑Φ) x (Y x) := by
@@ -36,12 +36,14 @@ private lemma pushforward_eval_at_image
     ((mfderiv I I (⇑Φ) (Φ.symm (Φ x))) (Y (Φ.symm (Φ x))))).trans ?_
   rw [hbase]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma pushforward_eval
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) (b : M) :
     Diffeomorph.pushforward Φ Y b = mfderiv I I (⇑Φ) (Φ.symm b) (Y (Φ.symm b)) := by
   conv_lhs => rw [show b = Φ (Φ.symm b) from (Φ.apply_symm_apply b).symm]
   exact pushforward_eval_at_image (I := I) Φ Y (Φ.symm b)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_symm_compose
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (v : TangentSpace I x) :
     mfderiv I I (⇑Φ.symm) (Φ x) (mfderiv I I (⇑Φ) x v) = v := by
@@ -55,6 +57,7 @@ private lemma mfderiv_symm_compose
   have := congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I x => f v) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma mfderiv_compose_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (w : TangentSpace I (Φ x)) :
     mfderiv I I (⇑Φ) x (mfderiv I I (⇑Φ.symm) (Φ x) w) = w := by
@@ -73,6 +76,7 @@ private lemma mfderiv_compose_symm
   have := congrArg (fun f : TangentSpace I (Φ x) →L[ℝ] TangentSpace I (Φ x) => f w) hchain.symm
   simpa [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using this
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma pushforward_eq_mpullback_symm_global
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
     (Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x)
@@ -109,6 +113,7 @@ private lemma pushforward_eq_mpullback_symm_global
   exact eqRec_heq (φ := fun w => TangentSpace I w) (Φ.apply_symm_apply z)
     ((mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z)))
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma pushforward_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ M) {Y : ∀ x : M, TangentSpace I x}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y)) :

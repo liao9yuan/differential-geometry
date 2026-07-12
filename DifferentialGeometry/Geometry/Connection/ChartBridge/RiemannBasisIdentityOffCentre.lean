@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
     (α : M) {gE : E → ℝ} {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -64,6 +64,7 @@ lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
     (fderiv ℝ gE (extChartAt I α x)) ((chartModelBasis E) a)
   rw [hscalar_eq.fderiv_eq]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartChristoffel_contDiffAt_alpha
     (g : SmoothRiemannianMetric I M) (α : M)
     (b i m : Fin (Module.finrank ℝ E)) {x : M}

@@ -34,6 +34,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPou_mul_chart_christoffel_correction_sum_sq_le_const_mul_tensorInnerPointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b')

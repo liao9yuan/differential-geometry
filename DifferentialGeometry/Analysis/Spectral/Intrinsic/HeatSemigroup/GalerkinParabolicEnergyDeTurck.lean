@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.ODE.GlobalLipschitzAffineExistence
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Plancherel
 import Mathlib.Analysis.InnerProductSpace.PiL2
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -110,6 +109,7 @@ noncomputable def galerkinCoordEmbed
   (galerkinCoordEmbedLM (I := I) (M := M) g₀ a S).toContinuousLinearMap
 
 open scoped Classical in
+set_option linter.unusedSectionVars false in
 @[simp] lemma galerkinCoordEmbed_coeff
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))
@@ -789,6 +789,7 @@ section
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (ccTensor02Symm symmS_smul domDomCongrSection)
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization (smoothCcTensorBilinForm)
 
+omit [BoundarylessManifold I M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in

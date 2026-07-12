@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Se
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.Basic
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ private noncomputable def duhamelKernelClipped (S : BoundedC0Semigroup X)
     (F : ℝ → X) (t τ : ℝ) : X :=
   S (max 0 (t - τ)) (F τ)
 
+omit [CompleteSpace X] in
 private lemma continuous_duhamelKernelClipped (S : BoundedC0Semigroup X)
     {F : ℝ → X} (hF : Continuous F) :
     Continuous (Function.uncurry (duhamelKernelClipped S F)) := by
@@ -39,6 +39,7 @@ private lemma continuous_duhamelKernelClipped (S : BoundedC0Semigroup X)
     (S.continuousOn_uncurry).comp_continuous h_inner h_maps
   exact h_comp
 
+omit [CompleteSpace X] in
 theorem duhamel_zero (S : BoundedC0Semigroup X) (u₀ : X) (F : ℝ → X) :
     duhamel S u₀ F 0 = u₀ := by
   unfold duhamel
@@ -46,6 +47,7 @@ theorem duhamel_zero (S : BoundedC0Semigroup X) (u₀ : X) (F : ℝ → X) :
   rw [S.apply_zero]
   rfl
 
+omit [CompleteSpace X] in
 theorem duhamel_integrable (S : BoundedC0Semigroup X) {F : ℝ → X}
     (hF : Continuous F) {t : ℝ} (ht : 0 ≤ t) :
     IntervalIntegrable (fun τ => S (t - τ) (F τ))
@@ -66,6 +68,7 @@ theorem duhamel_integrable (S : BoundedC0Semigroup X) {F : ℝ → X}
   unfold duhamelKernelClipped
   rw [max_eq_right h_nn]
 
+omit [CompleteSpace X] in
 theorem duhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
     {F : ℝ → X} (hF : Continuous F) :
     ContinuousOn (duhamel S u₀ F) (Set.Ici 0) := by

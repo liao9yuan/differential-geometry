@@ -10,7 +10,6 @@ import Mathlib.Geometry.Manifold.Riemannian.PathELength
 import Mathlib.Analysis.Convex.Star
 import Mathlib.Analysis.Convex.PathConnected
 
-set_option linter.unusedSectionVars false
 
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
@@ -45,6 +44,7 @@ def gBall (g : SmoothRiemannianMetric I M) (p : M) (R : ℝ) :
     Set (TangentSpace I p) :=
   {v : TangentSpace I p | Real.sqrt (g.inner p v v) ≤ R}
 
+set_option linter.unusedSectionVars false in
 lemma gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
     (b : ℝ) (v : TangentSpace I p) :
     g.inner p (b • v) (b • v) = b ^ 2 * g.inner p v v := by
@@ -60,6 +60,7 @@ lemma sqrt_gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
   rw [gInner_smul_self (I := I) g p b v, Real.sqrt_mul (sq_nonneg b),
     Real.sqrt_sq hb]
 
+set_option linter.unusedSectionVars false in
 lemma zero_mem_gBall (g : SmoothRiemannianMetric I M) (p : M) {R : ℝ}
     (hR : 0 ≤ R) : (0 : TangentSpace I p) ∈ gBall (I := I) g p R := by
   have h0 : g.inner p (0 : TangentSpace I p) (0 : TangentSpace I p) = 0 := by
@@ -95,6 +96,7 @@ def radialMinSet (g : SmoothRiemannianMetric I M) (p : M) : Set M :=
     expMap (I := I) g p v = q ∧
       ENNReal.ofReal (Real.sqrt (g.inner p v v)) = riemannianEDist I p q}
 
+set_option linter.unusedSectionVars false in
 theorem p_mem_radialMinSet (g : SmoothRiemannianMetric I M) (p : M) :
     p ∈ radialMinSet (I := I) g p := by
   refine ⟨(0 : TangentSpace I p), expMap_zero (I := I) g p, ?_⟩
@@ -102,12 +104,14 @@ theorem p_mem_radialMinSet (g : SmoothRiemannianMetric I M) (p : M) :
     simp
   rw [h0, Real.sqrt_zero, ENNReal.ofReal_zero, riemannianEDist_self]
 
+set_option linter.unusedSectionVars false in
 private lemma gInner_self_nonneg (g : SmoothRiemannianMetric I M) (p : M)
     (v : TangentSpace I p) : 0 ≤ g.inner p v v := by
   rcases eq_or_ne v 0 with hv | hv
   · subst hv; simp
   · exact (g.pos p v hv).le
 
+set_option linter.unusedSectionVars false in
 private lemma continuous_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (fun v : TangentSpace I p => g.inner p v v) :=
   (g.inner p).continuous.clm_apply continuous_id
@@ -169,6 +173,7 @@ private lemma isCompact_gBall (g : SmoothRiemannianMetric I M) (p : M)
   exact Metric.isCompact_of_isClosed_isBounded
     (isClosed_gBall (I := I) g p R) (isBounded_gBall (I := I) g p R)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [ConnectedSpace M] [PseudoEMetricSpace M] [T2Space (TangentBundle I M)] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma continuous_riemannianEDist_ambient
     (p : M) : Continuous (fun q : M => riemannianEDist I p q) := by
   haveI : LocallyCompactSpace M :=

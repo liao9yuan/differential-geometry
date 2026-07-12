@@ -4,7 +4,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -17,6 +16,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_chart_local_picard_with_lipschitz
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hCont :

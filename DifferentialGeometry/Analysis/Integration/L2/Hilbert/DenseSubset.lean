@@ -8,7 +8,6 @@ import Mathlib.Analysis.Normed.Group.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.InnerProductSpace.Completion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ def toL2 : SmoothCcTensor g r s →L[ℝ] TensorL2 r s g :=
   UniformSpace.Completion.toComplL
 
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem toL2_apply (S : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s) S : TensorL2 r s g) =
       (S : UniformSpace.Completion (SmoothCcTensor g r s)) := by
@@ -56,6 +56,7 @@ def toL2 : SmoothCcTensor g r s →L[ℝ] TensorL2 r s g :=
   rw [UniformSpace.Completion.coe_toComplL]
 
 
+set_option linter.unusedSectionVars false in
 theorem denseRange_toL2 :
     DenseRange (toL2 (g := g) (r := r) (s := s)) := by
   have hcoe : (toL2 (g := g) (r := r) (s := s) :
@@ -68,6 +69,7 @@ theorem denseRange_toL2 :
   exact UniformSpace.Completion.denseRange_coe
 
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem norm_toL2 (S : SmoothCcTensor g r s) :
     ‖toL2 (g := g) (r := r) (s := s) S‖ = ‖S‖ := by
   have h := toL2_apply (g := g) (r := r) (s := s) S
@@ -77,6 +79,7 @@ theorem denseRange_toL2 :
   exact UniformSpace.Completion.norm_coe S
 
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem inner_toL2 (S T : SmoothCcTensor g r s) :
     ⟪toL2 (g := g) (r := r) (s := s) S,
         toL2 (g := g) (r := r) (s := s) T⟫_ℝ = ⟪S, T⟫_ℝ := by
@@ -90,6 +93,7 @@ theorem denseRange_toL2 :
   exact UniformSpace.Completion.inner_coe S T
 
 
+set_option linter.unusedSectionVars false in
 theorem smoothCcTensor_eq_of_toL2_eq (S T : SmoothCcTensor g r s)
     (h : toL2 (g := g) (r := r) (s := s) S =
       toL2 (g := g) (r := r) (s := s) T) : S = T := by

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorRSCovariantDerivative_zeroS_unit_eval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun y : M => TensorRSSpace 0 s I y)⟯)
@@ -64,6 +64,7 @@ noncomputable def unitScalarRSLift {s : ℕ} (x : M) (T : Tensor0SSpace s I x) :
     (ContinuousLinearMap.smulRight
       (tensor0Iso (I := I) M x).toContinuousLinearMap T)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem unitScalarRSLift_apply {s : ℕ} (x : M) (T : Tensor0SSpace s I x)
     (D : Tensor0SSpace 0 I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
@@ -71,6 +72,7 @@ noncomputable def unitScalarRSLift {s : ℕ} (x : M) (T : Tensor0SSpace s I x) :
       (tensor0Iso (I := I) M x D) • T := by
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem unitScalarRSLift_apply_unit {s : ℕ} (x : M) (T : Tensor0SSpace s I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from
         unitScalarRSLift (I := I) (M := M) x T)
@@ -86,11 +88,13 @@ noncomputable def unitScalarRSLiftSection {s : ℕ} (S : Π y : M, Tensor0SSpace
     Π y : M, TensorRSSpace 0 s I y :=
   fun y => unitScalarRSLift (I := I) (M := M) y (S y)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem unitScalarRSLiftSection_apply {s : ℕ}
     (S : Π y : M, Tensor0SSpace s I y) (y : M) :
     unitScalarRSLiftSection (I := I) (M := M) S y =
       unitScalarRSLift (I := I) (M := M) y (S y) := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem unitScalarRSLiftSection_apply_unit {s : ℕ}
     (S : Π y : M, Tensor0SSpace s I y) (y : M) :
     (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace s I y from
@@ -98,6 +102,7 @@ noncomputable def unitScalarRSLiftSection {s : ℕ} (S : Π y : M, Tensor0SSpace
         (unitZeroSec (I := I) (M := M) y) = S y := by
   rw [unitScalarRSLiftSection_apply, unitScalarRSLift_apply_unit]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem unitScalarRSLiftSection_apply_at_section {s : ℕ}
     (S : Π y : M, Tensor0SSpace s I y)
     (Y : Π y : M, Tensor0SSpace 0 I y) (y : M) :
@@ -107,6 +112,7 @@ theorem unitScalarRSLiftSection_apply_at_section {s : ℕ}
   rw [unitScalarRSLiftSection_apply, unitScalarRSLift_apply]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem contMDiff_unitScalarRSLiftSection {s : ℕ}
     (S : Π y : M, Tensor0SSpace s I y)
     (hS : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞
@@ -147,11 +153,13 @@ noncomputable def unitScalarRSLiftCₛ {s : ℕ}
   ⟨fun y : M => unitScalarRSLiftSection (I := I) (M := M) (fun z => S z) y,
    contMDiff_unitScalarRSLiftSection (I := I) (M := M) (fun z => S z) S.contMDiff⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 @[simp] theorem unitScalarRSLiftCₛ_apply {s : ℕ}
     (S : Cₛ^∞⟮I; Tensor0SModel s ℝ E, (fun y : M => Tensor0SSpace s I y)⟯) (y : M) :
     unitScalarRSLiftCₛ (I := I) (M := M) S y =
       unitScalarRSLiftSection (I := I) (M := M) (fun z => S z) y := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensor0SCovariantDerivative_eq_tensorRSCovariantDerivative
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; Tensor0SModel s ℝ E, (fun y : M => Tensor0SSpace s I y)⟯)

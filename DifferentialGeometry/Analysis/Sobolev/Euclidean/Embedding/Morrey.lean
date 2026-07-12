@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyRieszKern
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreySmoothHolderBound
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreySmoothInequality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,6 +25,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private theorem exists_smooth_cutoff_ball
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R) :
     ∃ η : EuclideanSpace ℝ (Fin d) → ℝ,
@@ -75,6 +75,7 @@ private theorem exists_smooth_cutoff_ball
   · intro x hx
     exact (hη_one_iff x).1 hx
 
+omit [NeZero d] in
 private lemma cutoff_norm_le_one {η : EuclideanSpace ℝ (Fin d) → ℝ}
     (hη_range : Set.range η ⊆ Set.Icc (0 : ℝ) 1) (x : EuclideanSpace ℝ (Fin d)) :
     |η x| ≤ 1 := by
@@ -83,6 +84,7 @@ private lemma cutoff_norm_le_one {η : EuclideanSpace ℝ (Fin d) → ℝ}
   rw [abs_of_nonneg h0]
   exact h1
 
+omit [NeZero d] in
 private lemma exists_grad_bound_of_smooth_compactSupport
     {η : EuclideanSpace ℝ (Fin d) → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_compact : HasCompactSupport η) :
@@ -121,10 +123,12 @@ private lemma exists_grad_bound_of_smooth_compactSupport
       rw [hx]
   exact ⟨M, hM_nn, hM⟩
 
+omit [NeZero d] in
 private lemma euclideanBasis_norm_one (i : Fin d) :
     ‖(EuclideanSpace.single i (1 : ℝ) : EuclideanSpace ℝ (Fin d))‖ = 1 := by
   simp
 
+omit [NeZero d] in
 private lemma partial_deriv_norm_le_fderiv
     (f : EuclideanSpace ℝ (Fin d) → ℝ) (x : EuclideanSpace ℝ (Fin d)) (i : Fin d) :
     |(fderiv ℝ f x) (EuclideanSpace.single i (1 : ℝ))| ≤ ‖fderiv ℝ f x‖ := by
@@ -132,10 +136,12 @@ private lemma partial_deriv_norm_le_fderiv
   rw [euclideanBasis_norm_one, mul_one] at h
   rwa [Real.norm_eq_abs] at h
 
+omit [NeZero d] in
 private lemma euclidean_norm_le_sum_abs (v : EuclideanSpace ℝ (Fin d)) :
     ‖v‖ ≤ ∑ i : Fin d, |v i| := by
   exact euclidean_norm_le_sum_norms v
 
+omit [NeZero d] in
 private lemma norm_fderiv_eq_partial_norm
     {f : EuclideanSpace ℝ (Fin d) → ℝ} (x : EuclideanSpace ℝ (Fin d)) :
     ‖fderiv ℝ f x‖ =
@@ -283,6 +289,7 @@ private noncomputable def cutoffWitness
     (Classical.choose_spec
       (exists_grad_bound_of_smooth_compactSupport (d := d) hη hη_compact)).2
 
+omit [NeZero d] in
 private lemma tsupport_smul_subset_left'
     {η u : E → ℝ} :
     tsupport (fun x => η x * u x) ⊆ tsupport η := by
@@ -352,6 +359,7 @@ private theorem exists_smooth_cutoff_approx
     ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩
   exact ⟨φ, hφ_smooth, hφ_compact, hφ_sub, hφ_fun, hφ_grad⟩
 
+omit [NeZero d] in
 private lemma eLpNorm_one_le_eLpNorm_p_finite_measure
     {p : ℝ} (hp : 1 < p) {μ : Measure E} [IsFiniteMeasure μ]
     {f : E → ℝ} (hf : MemLp f (ENNReal.ofReal p) μ) :
@@ -369,6 +377,7 @@ private lemma eLpNorm_one_le_eLpNorm_p_finite_measure
   rw [h_exp_eq] at h
   exact h
 
+omit [NeZero d] in
 private lemma tendsto_eLpNorm_one_of_tendsto_eLpNorm_p
     {p : ℝ} (hp : 1 < p) {μ : Measure E} [IsFiniteMeasure μ]
     {F : ℕ → E → ℝ} (hF : ∀ n, MemLp (F n) (ENNReal.ofReal p) μ)
@@ -393,6 +402,7 @@ private lemma tendsto_eLpNorm_one_of_tendsto_eLpNorm_p
   intro n
   exact eLpNorm_one_le_eLpNorm_p_finite_measure (d := d) hp (hF n)
 
+omit [NeZero d] in
 private lemma tendsto_setIntegral_of_eLpNorm_p_to_zero
     {p : ℝ} (hp : 1 < p) {Ω : Set E} (_hΩ : MeasurableSet Ω)
     (hΩ_finite : volume Ω ≠ ⊤)
@@ -444,6 +454,7 @@ private lemma tendsto_setIntegral_of_eLpNorm_p_to_zero
   rw [show ∫ x in Ω, g x ∂volume = ∫ x, g x ∂(volume.restrict Ω) from hg_eq_setInt.symm]
   exact h_int_tendsto
 
+omit [NeZero d] in
 private lemma tendsto_setAverage_of_eLpNorm_p_to_zero
     {p : ℝ} (hp : 1 < p) {z : E} {r : ℝ} (hr : 0 < r)
     {g : E → ℝ} {F : ℕ → E → ℝ}
@@ -479,6 +490,7 @@ private lemma tendsto_setAverage_of_eLpNorm_p_to_zero
   rw [h_avg_g_eq]
   exact h_inv_tendsto
 
+omit [NeZero d] in
 private lemma eLpNorm_sub_le_eLpNorm_diff_real
     {p : ℝ≥0∞} (hp : 1 ≤ p) {μ : Measure E} {f g : E → ℝ}
     (hf : MemLp f p μ) (hg : MemLp g p μ) :
@@ -524,6 +536,7 @@ private lemma eLpNorm_sub_le_eLpNorm_diff_real
   rw [abs_sub_le_iff]
   exact ⟨by linarith, by linarith⟩
 
+omit [NeZero d] in
 private lemma tendsto_eLpNorm_toReal_of_diff_tendsto_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {μ : Measure E} {g : E → ℝ} {F : ℕ → E → ℝ}
     (hg : MemLp g p μ) (hF : ∀ n, MemLp (F n) p μ)
@@ -681,6 +694,7 @@ private lemma smooth_avg_diff_pointwise_bound
     _ = Cval := by
         field_simp
 
+omit [NeZero d] in
 private lemma eLpNorm_fderiv_norm_le_sum_components
     {p : ℝ} (hp : 1 < p) {z : E} {r : ℝ}
     {φ : E → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
@@ -745,6 +759,7 @@ private lemma eLpNorm_fderiv_norm_le_sum_components
   refine Finset.sum_congr rfl ?_
   intro i _; exact h_comp_eq i
 
+omit [NeZero d] in
 private lemma cutoffWitness_weakGrad_eq_on_open
     {p : ℝ} (hp_one : 1 ≤ p)
     {Ω : Set E} (hΩ_open : IsOpen Ω)
@@ -1425,6 +1440,7 @@ theorem mean_value_inequality_W1p
       C * (dist x y) ^ (1 - (d : ℝ) / p) * N
     exact h_final
 
+omit [NeZero d] in
 private theorem exists_smooth_cutoff_inner
     {x₀ : EuclideanSpace ℝ (Fin d)} {R : ℝ} (hR : 0 < R) :
     ∃ χ : EuclideanSpace ℝ (Fin d) → ℝ,
@@ -1468,6 +1484,7 @@ private theorem exists_smooth_cutoff_inner
   · intro x hx
     exact (hχ_one_iff x).1 hx
 
+omit [NeZero d] in
 private lemma eLpNorm_diff_real_bound
     {p : ℝ} (hp_one : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p)
     {μ : Measure E}
@@ -1511,6 +1528,7 @@ private lemma eLpNorm_diff_real_bound
   rw [← ENNReal.toReal_add h_finite_n h_finite_m]
   exact ENNReal.toReal_mono h_sum_finite h_le_enn
 
+omit [NeZero d] in
 private lemma eLpNorm_grad_norm_le_sum_components_real
     {p : ℝ} (hp_one : 1 < p) {z : E} {r : ℝ}
     {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)

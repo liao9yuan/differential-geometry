@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevSupportPromotion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -16,6 +15,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 theorem wkpNorm_succ_le
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     iteratedWeakSobolevNorm (d := d) (k + 1) p u Ω ≤
@@ -24,6 +24,7 @@ theorem wkpNorm_succ_le
         iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω :=
   le_of_eq (wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u)
 
+omit [NeZero d] in
 theorem wkpNorm_le_wkpNorm_succ_sum
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     eLpNorm u p (volume.restrict Ω) +
@@ -32,6 +33,7 @@ theorem wkpNorm_le_wkpNorm_succ_sum
       iteratedWeakSobolevNorm (d := d) (k + 1) p u Ω :=
   le_of_eq (wkpNorm_succ_eq_eLpNorm_add_sum_partial (d := d) k p Ω u).symm
 
+omit [NeZero d] in
 theorem wkpNorm_succ_le_wkpNorm_add_sum_partial
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     iteratedWeakSobolevNorm (d := d) (k + 1) p u Ω ≤
@@ -45,6 +47,7 @@ theorem wkpNorm_succ_le_wkpNorm_add_sum_partial
     wkpNorm_mono_order (d := d) (Nat.zero_le k) u Ω
   rwa [wkpNorm_zero (d := d) p u Ω] at h0
 
+omit [NeZero d] in
 theorem eLpNorm_le_wkpNorm
     (k : ℕ) (p : ℝ≥0∞) (Ω : Set E) (u : E → ℝ) :
     eLpNorm u p (volume.restrict Ω) ≤ iteratedWeakSobolevNorm (d := d) k p u Ω := by
@@ -52,12 +55,14 @@ theorem eLpNorm_le_wkpNorm
     wkpNorm_mono_order (d := d) (Nat.zero_le k) u Ω
   rwa [wkpNorm_zero (d := d) p u Ω] at h0
 
+omit [NeZero d] in
 theorem wkpNorm_chosenWeakPartial_le
     (k : ℕ) {p : ℝ≥0∞} {Ω : Set E} (hΩ : IsOpen Ω) (u : E → ℝ) (i : Fin d) :
     iteratedWeakSobolevNorm (d := d) k p (chosenWeakPartial' (d := d) p i u Ω) Ω ≤
       iteratedWeakSobolevNorm (d := d) (k + 1) p u Ω :=
   wkpNorm_chosenWeakPartial_le_wkpNorm_succ (d := d) k hΩ u i
 
+omit [NeZero d] in
 private theorem memWkp_finset_sum
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {ι : Type*} (s : Finset ι) (f : ι → E → ℝ)
@@ -75,6 +80,7 @@ private theorem memWkp_finset_sum
       refine MemWkp.add (d := d) hp hΩ (hf a (Finset.mem_insert_self a t)) ?_
       exact iht (fun i hi => hf i (Finset.mem_insert_of_mem hi))
 
+omit [NeZero d] in
 theorem wkpNorm_sum_le
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {ι : Type*} (s : Finset ι) (f : ι → E → ℝ)
@@ -103,6 +109,7 @@ theorem wkpNorm_sum_le
         wkpNorm_add_le (d := d) hp hΩ ha_mem h_sum_mem
       exact h_triangle.trans (add_le_add (le_refl _) (ih hs_mem))
 
+omit [NeZero d] in
 private theorem chosenWeakPartial'_extend_zero_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤) {Ω V : Set E}
     (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
@@ -166,6 +173,7 @@ private theorem chosenWeakPartial'_extend_zero_ae
   exact (ae_restrict_union_iff Ω (V \ Ω) (fun x => g_V x = Ω.indicator g_Ω x)).mpr
     ⟨h_on_Ω, h_on_diff⟩
 
+omit [NeZero d] in
 private theorem chosenWeakPartial'_indicator_aux
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ : IsOpen Ω)
     {u : E → ℝ} (hu : DeGiorgi.MemW1p (d := d) p u Ω)
@@ -218,6 +226,7 @@ private theorem chosenWeakPartial'_indicator_aux
     exact (ae_restrict_union_iff (tsupport u) (Ω \ tsupport u)
       (fun x => g_mod x = g_Ω x)).mpr ⟨h_ae_tsupp, h_ae_diff⟩
 
+omit [NeZero d] in
 private theorem indicator_ae_congr_of_ae_restrict
     {Ω V : Set E} (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
     {f g : E → ℝ} (hfg : f =ᵐ[volume.restrict Ω] g) :
@@ -250,6 +259,7 @@ private theorem indicator_ae_congr_of_ae_restrict
   exact (ae_restrict_union_iff Ω (V \ Ω)
     (fun x => Ω.indicator f x = Ω.indicator g x)).mpr ⟨h_on_Ω, h_on_diff⟩
 
+omit [NeZero d] in
 private theorem iterWeakPartial_extend_zero_ae
     {j : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤) {Ω V : Set E}
     (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)
@@ -334,6 +344,7 @@ private theorem iterWeakPartial_extend_zero_ae
         indicator_ae_congr_of_ae_restrict hΩ hV hΩV h_iter_wΩ
       exact (h_iter_input.trans h_iter_w).trans h_ind_iter
 
+omit [NeZero d] in
 theorem wkpNorm_extend_zero
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤) {Ω V : Set E}
     (hΩ : IsOpen Ω) (hV : IsOpen V) (hΩV : Ω ⊆ V)

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Comparison.NormalCoordinates
 import Mathlib.Data.ENNReal.Real
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -34,18 +33,21 @@ def injRadiusSet (g : SmoothRiemannianMetric I M) (p : M) : Set ℝ≥0∞ :=
 def injRadius (g : SmoothRiemannianMetric I M) (p : M) : ℝ≥0∞ :=
   sSup (injRadiusSet (I := I) g p)
 
+set_option linter.unusedSectionVars false in
 lemma mem_injRadiusSet_iff (g : SmoothRiemannianMetric I M) (p : M)
     {r : ℝ≥0∞} :
     r ∈ injRadiusSet (I := I) g p ↔
       InjOn (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
         (Metric.eball (0 : E) r) := Iff.rfl
 
+set_option linter.unusedSectionVars false in
 lemma injRadiusSet_downward_closed (g : SmoothRiemannianMetric I M) (p : M)
     {r r' : ℝ≥0∞} (h : r' ≤ r) (hr : r ∈ injRadiusSet (I := I) g p) :
     r' ∈ injRadiusSet (I := I) g p := by
   refine InjOn.mono ?_ hr
   exact Metric.eball_subset_eball h
 
+set_option linter.unusedSectionVars false in
 lemma zero_mem_injRadiusSet (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : ℝ≥0∞) ∈ injRadiusSet (I := I) g p := by
   classical
@@ -53,15 +55,18 @@ lemma zero_mem_injRadiusSet (g : SmoothRiemannianMetric I M) (p : M) :
   rw [Metric.eball_zero]
   exact Set.injOn_empty _
 
+set_option linter.unusedSectionVars false in
 lemma injRadiusSet_nonempty (g : SmoothRiemannianMetric I M) (p : M) :
     (injRadiusSet (I := I) g p).Nonempty :=
   ⟨0, zero_mem_injRadiusSet (I := I) g p⟩
 
+set_option linter.unusedSectionVars false in
 lemma le_injRadius_of_mem (g : SmoothRiemannianMetric I M) (p : M)
     {r : ℝ≥0∞} (hr : r ∈ injRadiusSet (I := I) g p) :
     r ≤ injRadius (I := I) g p :=
   le_sSup hr
 
+set_option linter.unusedSectionVars false in
 lemma exists_metric_ball_subset_expMapDiffeo_source
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r₀ : ℝ, 0 < r₀ ∧
@@ -73,6 +78,7 @@ lemma exists_metric_ball_subset_expMapDiffeo_source
     zero_mem_expMapDiffeo_source (I := I) g p
   exact Metric.isOpen_iff.mp h_open (0 : E) h_mem
 
+set_option linter.unusedSectionVars false in
 lemma injOn_expMap_on_expMapDiffeo_source
     (g : SmoothRiemannianMetric I M) (p : M) :
     InjOn (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
@@ -87,6 +93,7 @@ lemma injOn_expMap_on_expMapDiffeo_source
       expMapDiffeo_apply_eq (I := I) g p hw]
   exact hvw
 
+set_option linter.unusedSectionVars false in
 lemma exists_pos_injOn_metric_ball
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r₀ : ℝ, 0 < r₀ ∧
@@ -98,6 +105,7 @@ lemma exists_pos_injOn_metric_ball
   refine ⟨r₀, hr₀_pos, ?_⟩
   exact (injOn_expMap_on_expMapDiffeo_source (I := I) g p).mono hr₀_sub
 
+set_option linter.unusedSectionVars false in
 lemma exists_pos_mem_injRadiusSet (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ r : ℝ≥0∞, 0 < r ∧ r ∈ injRadiusSet (I := I) g p := by
   classical
@@ -109,15 +117,18 @@ lemma exists_pos_mem_injRadiusSet (g : SmoothRiemannianMetric I M) (p : M) :
     rw [Metric.eball_ofReal]
     exact hr₀_inj
 
+set_option linter.unusedSectionVars false in
 theorem injRadius_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < injRadius (I := I) g p := by
   classical
   obtain ⟨r, hr_pos, hr_mem⟩ := exists_pos_mem_injRadiusSet (I := I) g p
   exact lt_of_lt_of_le hr_pos (le_injRadius_of_mem (I := I) g p hr_mem)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma injRadius_eq_sSup (g : SmoothRiemannianMetric I M) (p : M) :
     injRadius (I := I) g p = sSup (injRadiusSet (I := I) g p) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem injOn_expMap_eball_of_lt_injRadius
     (g : SmoothRiemannianMetric I M) (p : M) {r : ℝ≥0∞}
     (hr : r < injRadius (I := I) g p) :
@@ -129,6 +140,7 @@ theorem injOn_expMap_eball_of_lt_injRadius
   exact (mem_injRadiusSet_iff (I := I) g p).mp hr'_mem |>.mono
     (Metric.eball_subset_eball hr_le_r')
 
+set_option linter.unusedSectionVars false in
 theorem injOn_expMap_ball_of_ofReal_lt_injRadius
     (g : SmoothRiemannianMetric I M) (p : M) {r₀ : ℝ}
     (hr : ENNReal.ofReal r₀ < injRadius (I := I) g p) :
@@ -138,6 +150,7 @@ theorem injOn_expMap_ball_of_ofReal_lt_injRadius
   have h := injOn_expMap_eball_of_lt_injRadius (I := I) g p hr
   rwa [Metric.eball_ofReal] at h
 
+set_option linter.unusedSectionVars false in
 theorem injRadius_iInf_pos_of_compact_of_lowerSemicontinuous
     (g : SmoothRiemannianMetric I M) [CompactSpace M] [Nonempty M]
     (h_lsc : LowerSemicontinuous (fun p : M => injRadius (I := I) g p)) :
@@ -157,6 +170,7 @@ theorem injRadius_iInf_pos_of_compact_of_lowerSemicontinuous
   rw [h_iInf_eq]
   exact injRadius_pos (I := I) g p₀
 
+set_option linter.unusedSectionVars false in
 theorem exists_uniform_injectivity_radius_of_lowerSemicontinuous
     (g : SmoothRiemannianMetric I M) [CompactSpace M] [Nonempty M]
     (h_lsc : LowerSemicontinuous (fun p : M => injRadius (I := I) g p)) :

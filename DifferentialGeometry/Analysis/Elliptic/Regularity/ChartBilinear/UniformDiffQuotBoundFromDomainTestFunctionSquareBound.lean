@@ -46,6 +46,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 set_option maxHeartbeats 1200000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_v_test_sq_discharge
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

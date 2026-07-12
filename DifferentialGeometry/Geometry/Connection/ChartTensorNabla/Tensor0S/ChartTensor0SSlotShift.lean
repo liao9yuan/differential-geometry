@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,12 +27,14 @@ def localSlotCLM (s : ℕ) {b : M}
     (i : Fin s) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma localSlotCLM_self (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     localSlotCLM (I := I) s k Φ k = Φ := by
   unfold localSlotCLM
   simp
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 lemma localSlotCLM_other (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin s} (h : i ≠ k) :
@@ -41,6 +42,7 @@ lemma localSlotCLM_other (s : ℕ) {b : M}
   unfold localSlotCLM
   simp [h]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_eq_localSlotCLM_compose (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -53,6 +55,7 @@ lemma chartTensor0SSlotCorrection_eq_localSlotCLM_compose (s : ℕ)
           (chartLeviCivitaParallelCLM (I := I) g α b X)) := by
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SSlotCorrection_apply_localSlotCLM (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, Tensor0SSpace s I b')
@@ -70,6 +73,7 @@ lemma chartTensor0SSlotCorrection_apply_localSlotCLM (s : ℕ)
     (I := I) s g α T X b k]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma tensor0SPartialEval_apply_tangent (s : ℕ)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')
     (Y : Π b' : M, TangentSpace I b') (b : M)
@@ -90,6 +94,7 @@ lemma tensor0SPartialEval_apply_tangent (s : ℕ)
   exact TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := T b) (v0 := Y b) (vs := vs)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
     (k : Fin s) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (w : TangentSpace I b) (m : Fin s → TangentSpace I b) :
@@ -141,6 +146,7 @@ private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
         simp [hjk, hsucc_ne]
     rw [hCLM_eq]
 
+set_option linter.unusedSectionVars false in
 theorem chartTensor0SSlotCorrection_succ_eq_partialEval
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')
@@ -171,6 +177,7 @@ theorem chartTensor0SSlotCorrection_succ_eq_partialEval
   congr 1
   exact slot_shift_tuple_eq (I := I) s k Φ w m
 
+set_option linter.unusedSectionVars false in
 theorem chartTensor0SSlotCorrection_succ_eq_partialEval_of_mem
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')

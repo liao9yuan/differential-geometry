@@ -15,6 +15,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 theorem MemWkp_of_memWkp_precompact_of_ae_zero_off_compact
     {k : ℕ} {p : ℝ≥0∞} (hp : 1 ≤ p) (hp_top : p ≠ ⊤)
     {Ω Ω' K : Set E} {u : E → ℝ}

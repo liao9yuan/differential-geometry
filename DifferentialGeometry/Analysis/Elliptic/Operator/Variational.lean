@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.L2Inclu
 import Mathlib.Analysis.InnerProductSpace.LaxMilgram
 import Mathlib.Analysis.InnerProductSpace.Dual
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,10 +31,12 @@ noncomputable def H1ComplBilin (g : SmoothRiemannianMetric I M) :
     H1Compl g →L[ℝ] H1Compl g →L[ℝ] ℝ :=
   innerSL ℝ
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma H1ComplBilin_apply (g : SmoothRiemannianMetric I M)
     (u v : H1Compl g) :
     H1ComplBilin (I := I) (M := M) g u v = ⟪u, v⟫_ℝ := rfl
 
+set_option linter.unusedSectionVars false in
 lemma H1ComplBilin_isCoercive (g : SmoothRiemannianMetric I M) :
     IsCoercive (H1ComplBilin (I := I) (M := M) g) := by
   refine ⟨1, zero_lt_one, ?_⟩
@@ -59,6 +60,7 @@ noncomputable def lpFunctionalCLM (g : SmoothRiemannianMetric I M) :
     (innerSL ℝ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ]
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) →L[ℝ] ℝ)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma lpFunctionalCLM_apply (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
     (v : H1Compl g) :
@@ -74,6 +76,7 @@ noncomputable def H1ComplLaxMilgramEquiv (g : SmoothRiemannianMetric I M) :
   IsCoercive.continuousLinearEquivOfBilin
     (H1ComplBilin_isCoercive (I := I) (M := M) g)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma H1ComplLaxMilgramEquiv_apply
     (g : SmoothRiemannianMetric I M) (u w : H1Compl g) :
     ⟪H1ComplLaxMilgramEquiv (I := I) (M := M) g u, w⟫_ℝ = ⟪u, w⟫_ℝ :=
@@ -96,6 +99,7 @@ noncomputable def H1ComplRieszRepr (g : SmoothRiemannianMetric I M) :
       rw [one_mul]
       exact le_of_eq ((InnerProductSpace.toDual ℝ (H1Compl g)).symm.norm_map φ))
 
+set_option linter.unusedSectionVars false in
 lemma H1ComplRieszRepr_inner (g : SmoothRiemannianMetric I M)
     (φ : H1Compl g →L[ℝ] ℝ) (w : H1Compl g) :
     ⟪H1ComplRieszRepr (I := I) (M := M) g φ, w⟫_ℝ = φ w := by
@@ -107,6 +111,7 @@ noncomputable def resolvent (g : SmoothRiemannianMetric I M) :
   (H1ComplRieszRepr (I := I) (M := M) g).comp
     (lpFunctionalCLM (I := I) (M := M) g)
 
+set_option linter.unusedSectionVars false in
 theorem resolvent_inner_eq_lpFunctional
     (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))
@@ -117,6 +122,7 @@ theorem resolvent_inner_eq_lpFunctional
   rw [ContinuousLinearMap.comp_apply, H1ComplRieszRepr_inner,
     lpFunctionalCLM_apply]
 
+set_option linter.unusedSectionVars false in
 theorem resolvent_bilin_eq_lpFunctional
     (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g))

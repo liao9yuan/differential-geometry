@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.WeakPartial.ComponentSobolevBoundDerivBridge
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceReverse
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartSmoothExt
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (k : Fin (Module.finrank ℝ E)) :
@@ -56,6 +56,7 @@ theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartSmoothExt
   exact DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.chosenWeakPartial_chartPushed_ae_eq_fderiv
     (I := I) (M := M) α hp_one hu k
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem chartPushed_eq_chartSmoothExt_on_target
     (α : M) (u : M → ℝ) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -66,6 +67,7 @@ theorem chartPushed_eq_chartSmoothExt_on_target
   (DifferentialGeometry.Analysis.Sobolev.EquivalenceReverse.chartSmoothExt_eq_chartPushed_pou_on_target
     (I := I) (M := M) α u hy).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem fderiv_chartPushed_eq_fderiv_chartSmoothExt_on_target
     (α : M) (u : M → ℝ) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -87,6 +89,7 @@ theorem fderiv_chartPushed_eq_fderiv_chartSmoothExt_on_target
     exact chartPushed_eq_chartSmoothExt_on_target (I := I) (M := M) α u hz
   exact Filter.EventuallyEq.fderiv_eq h_eventually
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartPushed
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (k : Fin (Module.finrank ℝ E)) :
@@ -123,6 +126,7 @@ theorem chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartPushed
       (I := I) (M := M) α u hy]
   exact h_smooth_form.trans h_fderiv_eq_ae
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenWeakPartial'_chartPushed_tensorChartComponentScalar_ae_eq_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
@@ -150,6 +154,7 @@ theorem chosenWeakPartial'_chartPushed_tensorChartComponentScalar_ae_eq_fderiv_c
     (tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s S α Idx Jdx) k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenWeakPartial'_chartPushed_tensorChartComponentScalar_ae_eq_fderiv_chartPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
@@ -175,6 +180,7 @@ theorem chosenWeakPartial'_chartPushed_tensorChartComponentScalar_ae_eq_fderiv_c
     (tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s S α Idx Jdx) k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_eq_eLpNorm_fderiv_chartSmoothExt
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (k : Fin (Module.finrank ℝ E)) :
@@ -195,6 +201,7 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_eq_eLpNorm_fderiv_chartSmoothExt
     (chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartSmoothExt
       (I := I) (M := M) (α := α) (u := u) hu k)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_eq_eLpNorm_fderiv_chartPushed
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (k : Fin (Module.finrank ℝ E)) :
@@ -213,6 +220,7 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_eq_eLpNorm_fderiv_chartPushed
     (chosenWeakPartial'_chartPushed_ae_eq_fderiv_chartPushed
       (I := I) (M := M) (α := α) (u := u) hu k)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_eq_eLpNorm_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
@@ -242,6 +250,7 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_eq_eLp
     (tensorChartComponentScalar_contMDiff
       (I := I) (M := M) g r s S α Idx Jdx) k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_eq_eLpNorm_fderiv_chartPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)

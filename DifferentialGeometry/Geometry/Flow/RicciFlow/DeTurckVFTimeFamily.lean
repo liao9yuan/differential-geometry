@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Flow.VectorFieldSmooth
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.DeTurckVectorFieldContinuousInMetric
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -23,6 +22,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] in
 theorem deturck_vf_time_family_smoothness
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)

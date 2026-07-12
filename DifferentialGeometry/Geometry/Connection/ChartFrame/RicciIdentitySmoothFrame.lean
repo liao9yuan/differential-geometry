@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 import Mathlib.Geometry.Manifold.BumpFunction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ private noncomputable def chartFrameRawFiber
         chartFrameNormFiber (I := I) g α b
           ⟨j.val, lt_trans j.isLt i.isLt⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartFrameNormFiber_eq
     (g : SmoothRiemannianMetric I M) (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -66,6 +66,7 @@ private lemma chartFrameNormFiber_eq
   unfold chartFrameNormFiber chartFrameRawFiber
   rfl
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartFrameRawFiber_at_zero
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     chartFrameRawFiber (I := I) g α b ⟨0, NeZero.pos _⟩ =
@@ -73,6 +74,7 @@ private lemma chartFrameRawFiber_at_zero
   unfold chartFrameRawFiber
   simp
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartFrameNormFiber_at_zero
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     chartFrameNormFiber (I := I) g α b ⟨0, NeZero.pos _⟩ =
@@ -83,6 +85,7 @@ private lemma chartFrameNormFiber_at_zero
         chartBasisVecFiber (I := I) α ⟨0, NeZero.pos _⟩ b := by
   rw [chartFrameNormFiber_eq, chartFrameRawFiber_at_zero]
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartFrameNormFiber_at_zero_norm
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -133,17 +136,20 @@ noncomputable def smoothOrthoFrame
 noncomputable def smoothOrthoFrameNbhd (α : M) : Set M :=
   {b : M | (chartBumpAt (I := I) (M := M) α : M → ℝ) b = 1}
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma smoothOrthoFrameNbhd_mem_nhds (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ∈ 𝓝 α := by
   classical
   exact (chartBumpAt (I := I) (M := M) α).eventuallyEq_one
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma mem_smoothOrthoFrameNbhd_self (α : M) :
     α ∈ smoothOrthoFrameNbhd (I := I) (M := M) α := by
   classical
   change (chartBumpAt (I := I) (M := M) α : M → ℝ) α = 1
   exact (chartBumpAt (I := I) (M := M) α).eq_one
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma smoothOrthoFrame_eq_on_nbhd
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {b : M}
@@ -155,6 +161,7 @@ lemma smoothOrthoFrame_eq_on_nbhd
   have hb1 : (chartBumpAt (I := I) (M := M) α : M → ℝ) b = 1 := hb
   rw [hb1, one_smul]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma smoothOrthoFrameNbhd_subset_chartAt_source (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ⊆ (chartAt H α).source := by
   classical
@@ -165,6 +172,7 @@ lemma smoothOrthoFrameNbhd_subset_chartAt_source (α : M) :
     rw [hb1]; exact one_ne_zero
   exact (chartBumpAt (I := I) (M := M) α).support_subset_source hsupp
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma smoothOrthoFrameNbhd_subset_baseSet (α : M) :
     smoothOrthoFrameNbhd (I := I) (M := M) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -172,6 +180,7 @@ lemma smoothOrthoFrameNbhd_subset_baseSet (α : M) :
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact smoothOrthoFrameNbhd_subset_chartAt_source (I := I) (M := M) α hb
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem smoothOrthoFrame_orthonormal_of_chartFrameNorm
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ smoothOrthoFrameNbhd (I := I) (M := M) α)
@@ -186,6 +195,7 @@ theorem smoothOrthoFrame_orthonormal_of_chartFrameNorm
       smoothOrthoFrame_eq_on_nbhd (I := I) g α j hb]
   exact hOrth
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartFrameNorm_at_zero_norm_one
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -195,6 +205,7 @@ theorem chartFrameNorm_at_zero_norm_one
   unfold chartFrameNorm
   exact chartFrameNormFiber_at_zero_norm (I := I) g α hb
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartBasisVecFiber_eq_of_chartAt_eq
     {α₁ α₂ : M} (h : chartAt H α₁ = chartAt H α₂)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -211,6 +222,7 @@ theorem chartBasisVecFiber_eq_of_chartAt_eq
     exact h
   rw [h_triv]
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem chartFrame_eq_of_chartAt_eq_strong
     (g : SmoothRiemannianMetric I M) {α₁ α₂ : M}
     (h : chartAt H α₁ = chartAt H α₂) (b : M) :
@@ -256,6 +268,7 @@ private theorem chartFrame_eq_of_chartAt_eq_strong
       refine ⟨h_raw, ?_⟩
       rw [chartFrameNormFiber_eq, chartFrameNormFiber_eq, h_raw]
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartFrameNorm_eq_of_chartAt_eq
     (g : SmoothRiemannianMetric I M) {α₁ α₂ : M}
     (h : chartAt H α₁ = chartAt H α₂)
@@ -265,6 +278,7 @@ theorem chartFrameNorm_eq_of_chartAt_eq
   unfold chartFrameNorm
   exact (chartFrame_eq_of_chartAt_eq_strong (I := I) g h b i.val i (le_refl _)).2
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma g_inner_sum_right
     (g : SmoothRiemannianMetric I M) (b : M)
     (v : TangentSpace I b)
@@ -283,6 +297,7 @@ private lemma g_inner_sum_right
       rw [map_smul]; rfl]
     rw [ih]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma g_inner_sum_left
     (g : SmoothRiemannianMetric I M) (b : M)
     {ι : Type*} (s : Finset ι) (v : ι → TangentSpace I b)
@@ -303,6 +318,7 @@ private lemma g_inner_sum_left
 
 set_option maxHeartbeats 4000000 in
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem chartFrameNormFiber_orth_strong_aux
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -615,6 +631,7 @@ private theorem chartFrameNormFiber_orth_strong_aux
         rw [h1, hs_sq]
         exact inv_mul_cancel₀ (ne_of_gt hgpos)
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartFrameNormFiber_orthonormal
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -642,6 +659,7 @@ theorem chartFrameNormFiber_orthonormal
     rw [g.symm]
     exact horth_ji
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartFrameNorm_orthonormal
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -653,6 +671,7 @@ theorem chartFrameNorm_orthonormal
   unfold chartFrameNorm
   exact chartFrameNormFiber_orthonormal (I := I) g α hb i j
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem smoothOrthoFrame_orthonormal
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ smoothOrthoFrameNbhd (I := I) (M := M) α)
@@ -685,6 +704,7 @@ theorem bochner_identity_smoothOrthoFrame_of_inner_form [I.Boundaryless]
   localConnLap_vector_eq_bochnerFormula_of_inner_form (I := I) g hf
     (smoothOrthoFrame (I := I) g x) hSmooth x hInner
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem smoothOrthoFrame_orthonormal_at_center
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -695,6 +715,7 @@ theorem smoothOrthoFrame_orthonormal_at_center
   smoothOrthoFrame_orthonormal (I := I) g x
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x) i j
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma g_inner_contMDiffOn_of_sections
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b} {s : Set M}
@@ -719,6 +740,7 @@ private lemma g_inner_contMDiffOn_of_sections
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartBasisVec_contMDiffOn_section
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -730,6 +752,7 @@ private lemma chartBasisVec_contMDiffOn_section
 
 set_option maxHeartbeats 4000000 in
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem chartFrameNormFiber_contMDiffOn_strong
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ k : ℕ, ∀ i : Fin (Module.finrank ℝ E), i.val ≤ k →
@@ -1037,6 +1060,7 @@ private theorem chartFrameNormFiber_contMDiffOn_strong
         exact h_smul
       exact ⟨h_raw_section, h_norm_section⟩
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartFrameNorm_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -1046,6 +1070,7 @@ lemma chartFrameNorm_contMDiffOn
   unfold chartFrameNorm
   exact (chartFrameNormFiber_contMDiffOn_strong (I := I) g α i.val i (le_refl _)).2
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem smoothOrthoFrame_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

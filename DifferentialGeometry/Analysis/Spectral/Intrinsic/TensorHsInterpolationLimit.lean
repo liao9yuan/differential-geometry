@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -100,6 +99,7 @@ namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompleteSpace E] in
 lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -110,6 +110,7 @@ lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
     tensorSobolevWeight_nonneg (I := I) (M := M) j σ
   positivity
 
+omit [CompleteSpace E] in
 lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
     (d : ℕ → tensorHs (I := I) (M := M) g r s σ)
     (hd : Tendsto (fun n => ‖d n‖) atTop (𝓝 0))
@@ -355,6 +356,7 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
   rwa [abs_of_nonneg hnn]
 
+omit [CompleteSpace E] in
 private lemma norm_le_sqrt_of_weightedMass_le
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ'' : ℝ}
     (T : tensorHs (I := I) (M := M) g r s σ'') {B : ℝ}

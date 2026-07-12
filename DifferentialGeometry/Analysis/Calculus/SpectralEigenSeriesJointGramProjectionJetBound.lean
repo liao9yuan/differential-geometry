@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorA
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 import DifferentialGeometry.Analysis.Calculus.AnisotropicJointContDiff
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -67,6 +66,7 @@ private lemma norm_iteratedFDeriv_clm_le
       simp
     rw [hz]; positivity
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma norm_iteratedFDerivWithin_compFst_le
     (f : ℝ → ℝ) (hf : ContDiff ℝ ∞ f) {a bb : ℝ} {B : Set E}
     (hUD : UniqueDiffOn ℝ (Set.Icc a bb ×ˢ B)) (hab : a < bb)
@@ -101,6 +101,7 @@ lemma norm_iteratedFDerivWithin_compFst_le
   rw [hcomp] at hbound
   exact hbound
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma norm_iteratedFDerivWithin_compSnd_le
     (spatial : E → ℝ) {O : Set E} (hO_open : IsOpen O)
     (hspatial : ContDiffOn ℝ ∞ spatial O)

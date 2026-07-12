@@ -37,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_memWkpChart_two
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -62,6 +63,7 @@ theorem laplacianDomain_memWkpChart_two
       (laplacianDomain.lpRep (I := I) (M := M) g u_h) α := h_witness
   exact memWkpChart_two_of_laplacianDomain_canonical (I := I) (M := M) g u_h hu_h h_witness'
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_laplacianDomain_memWkpChart_two
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -81,6 +83,7 @@ theorem exists_laplacianDomain_memWkpChart_two
   · exact (laplacianDomain_memWkpChart_two (I := I) (M := M) g hu_h h_witness).1
   · exact (laplacianDomain_memWkpChart_two (I := I) (M := M) g hu_h h_witness).2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_memWkpChart_two_bridgeData
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -100,6 +103,7 @@ theorem laplacianDomain_memWkpChart_two_bridgeData
     (((H1ComplToLp (I := I) (M := M) g u_h :
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ)) h_bridge
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_memWkpChart_one
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

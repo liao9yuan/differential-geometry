@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace s I x}
     (h : ∀ v : Fin s → E, Tensor0SSpace.toModel T v = Tensor0SSpace.toModel T' v) : T = T' := by
   have hM : Tensor0SSpace.toModel T = Tensor0SSpace.toModel T' :=
@@ -38,6 +38,7 @@ private lemma tensor0S_eq_of_toModel_eq {s : ℕ} {x : M} {T T' : Tensor0SSpace 
   exact Tensor0SSpace.toModel_injective hM
 
 
+set_option linter.unusedSectionVars false in
 private lemma tensor0S_toModel_sum {s : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace s I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) = ∑ i ∈ t, Tensor0SSpace.toModel (f i) := by
@@ -68,6 +69,7 @@ def slotInsertEndoFib (s : ℕ) (k : Fin s) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma slotInsertEndoFib_apply (s : ℕ) (k : Fin s) (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace s I x) :
     slotInsertEndoFib (I := I) (M := M) s k x Λ A =

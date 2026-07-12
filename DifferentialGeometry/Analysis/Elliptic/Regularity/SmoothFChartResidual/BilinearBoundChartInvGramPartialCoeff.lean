@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -54,6 +53,7 @@ private noncomputable def coefIJ_M
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
         (extChartAt I α x)
 
+set_option linter.unusedSectionVars false in
 private lemma coefIJ_M_apply (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (x : M) :
     coefIJ_M (I := I) (M := M) g α i j x =
@@ -64,6 +64,7 @@ private lemma coefIJ_M_apply (g : SmoothRiemannianMetric I M) (α : M)
             ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
           (extChartAt I α x) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma coefIJ_M_eq_zero_off_tsupport_chartStrictCutoff
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}
@@ -73,6 +74,7 @@ private lemma coefIJ_M_eq_zero_off_tsupport_chartStrictCutoff
   rw [hx]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma coefIJ_M_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -172,6 +174,7 @@ private lemma coefIJ_M_smooth
         (fun _ : M => (0 : ℝ)) := h_ev_zero_coef
     exact h_const.congr_of_eventuallyEq h_evEq
 
+set_option linter.unusedSectionVars false in
 private lemma tsupport_coefIJ_M_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -192,6 +195,7 @@ private lemma tsupport_coefIJ_M_subset
       (isClosed_tsupport _)
   exact h_tsupp_subset.trans (chartStrictCutoff_tsupport_subset (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_coefIJ_M_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}

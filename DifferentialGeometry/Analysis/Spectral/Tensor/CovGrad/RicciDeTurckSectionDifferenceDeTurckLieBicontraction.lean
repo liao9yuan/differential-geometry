@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceReindexingArmSplitting
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceRiemannFrameFixedBicontraction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -60,6 +59,7 @@ noncomputable def deTurckVFCovDeriv (g₁ g_bg : SmoothRiemannianMetric I M)
   (LeviCivita (I := I) g₁).toFun
     (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b) x (X x)
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem connDiffOp_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E)) ∞
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)
@@ -76,6 +76,7 @@ theorem connDiffOp_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
   intro Z
   exact PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g_bg Y.contMDiff Z.contMDiff
 
+set_option linter.unusedSectionVars false in
 theorem connDiffOp_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E))
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)
@@ -307,12 +308,14 @@ theorem dLaCovKernel_apply_field (g₁ g_bg : SmoothRiemannianMetric I M) (x : M
       (smoothExtensionTangent (I := I) x v0) Y x hY)
     (σ := V_field) (τ := W_field) hV hW
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckLieCovDerivA_X_congr (g₁ g_bg : SmoothRiemannianMetric I M)
     (X X' Y Z : Π b : M, TangentSpace I b) (x : M) (hXX : X x = X' x) :
     deTurckConnDiffCovDeriv (I := I) g₁ g_bg X Y Z x =
       deTurckConnDiffCovDeriv (I := I) g₁ g_bg X' Y Z x := by
   rw [deTurckConnDiffCovDeriv, deTurckConnDiffCovDeriv, hXX]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckLieCovDerivA_X_add (g₁ g_bg : SmoothRiemannianMetric I M)
     (X X' Y Z : Π b : M, TangentSpace I b) (x : M) :
     deTurckConnDiffCovDeriv (I := I) g₁ g_bg (X + X') Y Z x =
@@ -324,6 +327,7 @@ theorem deTurckLieCovDerivA_X_add (g₁ g_bg : SmoothRiemannianMetric I M)
   simp only [map_add, ContinuousLinearMap.add_apply]
   abel
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckLieCovDerivA_X_smul (g₁ g_bg : SmoothRiemannianMetric I M)
     (X Y Z cX : Π b : M, TangentSpace I b) (c : ℝ) (x : M) (hcX : cX x = c • X x) :
     deTurckConnDiffCovDeriv (I := I) g₁ g_bg cX Y Z x =
@@ -438,6 +442,7 @@ theorem dLaBiContrFibFixedFrame_toModel (g₁ g_bg : SmoothRiemannianMetric I M)
   rw [Tensor0SSpace.toModelL_apply, dLaSummandFib_toModel]
   ring
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckLieCovDerivA_section_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
     (V0 p q : Π b : M, TangentSpace I b)
     (hV0 : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% V0))
@@ -733,12 +738,14 @@ def deTurckLieWEndo (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
   (LeviCivita (I := I) g₁).toFun
     (fun b : M => (PDE.DeTurck.deTurckVF (I := I) g₁ g_bg : Π b : M, TangentSpace I b) b) x
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckLieWEndo_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ g_bg x v =
       deTurckVFCovDeriv (I := I) g₁ g_bg (smoothExtensionTangent (I := I) x v) x := by
   rw [deTurckLieWEndo, deTurckVFCovDeriv, smoothExtensionTangent_eq]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckLieWEndo_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)

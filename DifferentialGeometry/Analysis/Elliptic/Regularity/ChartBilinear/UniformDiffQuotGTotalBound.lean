@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -75,6 +74,7 @@ private lemma integral_sq_eq_eLpNorm_two_toReal_sq
   rw [ENNReal.toReal_ofReal h_int_nn] at h_toReal
   exact h_toReal
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sq_cutoffPartial_le
     {χ : EuclN → ℝ} {u w : EuclN → ℝ}
     {M_χ M_dχ : ℝ} {l : Fin (Module.finrank ℝ E)}
@@ -472,6 +472,7 @@ noncomputable def chartDensitySup
     (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) : ℝ :=
   sSup ((fun x => |densityOnEuclid (I := I) g α x|) '' closure Ω')
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartDensitySup_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) (Ω' : Set EuclN) :
     0 ≤ chartDensitySup (I := I) (M := M) g α Ω' := by
@@ -480,6 +481,7 @@ lemma chartDensitySup_nonneg
   rintro y ⟨x, _, rfl⟩
   exact abs_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma abs_densityOnEuclid_le_chartDensitySup
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))
@@ -498,6 +500,7 @@ lemma abs_densityOnEuclid_le_chartDensitySup
     hΩ'_closure_compact.bddAbove_image h_abs_contOn
   exact le_csSup h_bddAbove (Set.mem_image_of_mem _ hx)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityWeightedSource_memLp
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))
@@ -531,6 +534,7 @@ lemma densityWeightedSource_memLp
   exact MemLp.mono (hf.const_mul Mden)
     (h_dens_aesm.mul hf.aestronglyMeasurable) h_pt_le
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityWeightedSource_eLpNorm_sq_le
     {g : SmoothRiemannianMetric I M} {α : M} {Ω' : Set EuclN}
     (hΩ'_closure_compact : IsCompact (closure Ω'))

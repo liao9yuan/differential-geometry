@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.NablaComponents.TwoTensor
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.IntegralCurve.Transform
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -30,6 +29,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+set_option linter.unusedSectionVars false in
 theorem chartChristoffelContraction_smul_left_right
     (g : SmoothRiemannianMetric I M) (α : M) (a : ℝ) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α (a • v) (a • w) y
@@ -60,6 +60,7 @@ theorem chartChristoffelContraction_smul_left_right
         intro j _
         ring
 
+set_option linter.unusedSectionVars false in
 theorem chartFiberCoord_fiberScale
     (α : M) (c : ℝ) {q : TangentBundle I M}
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -91,6 +92,7 @@ theorem chartFiberCoord_fiberScale
 
 section ChartCoordBridges
 
+set_option linter.unusedSectionVars false in
 theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ} {t : ℝ}
@@ -132,6 +134,7 @@ theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
     ContinuousLinearMap.toSpanSingleton_apply, one_smul]
   exact hval
 
+set_option linter.unusedSectionVars false in
 theorem hasMFDerivWithinAt_of_chartPhase_at_zero_section
     (α : M) {c : ℝ → TangentBundle I M} {S' : Set ℝ} {s₀ : ℝ} {w : E × E}
     (hcont : ContinuousWithinAt c S' s₀)
@@ -204,6 +207,7 @@ theorem hasMFDerivWithinAt_of_chartPhase_at_zero_section
 
 end ChartCoordBridges
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem hasMFDerivWithinAt_of_chartDeriv_self
     {c : ℝ → TangentBundle I M} {S' : Set ℝ} {s₀ : ℝ} {w : E × E}
     (hcont : ContinuousWithinAt c S' s₀)
@@ -217,6 +221,7 @@ theorem hasMFDerivWithinAt_of_chartDeriv_self
   simp only [mfld_simps] at hd ⊢
   convert hd using 1
 
+set_option linter.unusedSectionVars false in
 theorem geodesicVectorFieldChart_eq_zero_of_notMem_source
     (g : SmoothRiemannianMetric I M) (α : M) (p : TangentBundle I M)
     (hp : p.proj ∉ (chartAt H α).source) :
@@ -228,6 +233,7 @@ theorem geodesicVectorFieldChart_eq_zero_of_notMem_source
     exact fun hh => hp (proj_mem_chartAt_source_of_mem_geodesicChartDomain (I := I) hh)
   rw [Bundle.Trivialization.symm_apply_of_notMem _ hbase]
 
+set_option linter.unusedSectionVars false in
 theorem extChartAt_tangent_zero_fiberScale (β : M) (c : ℝ) {q : TangentBundle I M}
     (hq : q.proj ∈ (chartAt H β).source) :
     extChartAt I.tangent (⟨β, (0 : E)⟩ : TangentBundle I M)
@@ -240,6 +246,7 @@ theorem extChartAt_tangent_zero_fiberScale (β : M) (c : ℝ) {q : TangentBundle
       rescaleChartOrbit_apply]
   exact Prod.ext rfl (chartFiberCoord_fiberScale (I := I) β c hq)
 
+set_option linter.unusedSectionVars false in
 theorem tangentCoordChange_zero_section_geodesicVF
     (g : SmoothRiemannianMetric I M) (α : M) (q : TangentBundle I M)
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -256,6 +263,7 @@ theorem tangentCoordChange_zero_section_geodesicVF
       exact (mem_chartAt_modelProd_zero_source_iff (I := I) α q).mpr hq
     exact ⟨⟨hself, hα⟩, hself⟩
 
+set_option linter.unusedSectionVars false in
 theorem chartPhaseVF_extChartAt_zero_section
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : TangentBundle I M} (hp : p.proj ∈ (chartAt H α).source) :
@@ -274,6 +282,7 @@ private theorem hasDerivAt_affine (c d s₀ : ℝ) :
 private noncomputable def fiberRescaleCLM (c : ℝ) : (E × E) →L[ℝ] (E × E) :=
   (ContinuousLinearMap.id ℝ E).prodMap (c • (ContinuousLinearMap.id ℝ E))
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem fiberRescaleCLM_apply (c : ℝ) (y : E × E) :
     fiberRescaleCLM (E := E) c y = (y.1, c • y.2) := by
   change ((ContinuousLinearMap.id ℝ E) y.1, (c • (ContinuousLinearMap.id ℝ E)) y.2) = _
@@ -281,6 +290,7 @@ private theorem fiberRescaleCLM_apply (c : ℝ) (y : E × E) :
   change (c • (ContinuousLinearMap.id ℝ E)) y.2 = c • y.2
   rw [ContinuousLinearMap.smul_apply]; rfl
 
+set_option linter.unusedSectionVars false in
 private theorem inchart_rescaledLift_chartPhase
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -381,6 +391,7 @@ private theorem inchart_rescaledLift_chartPhase
     rw [extChartAt_tangent_zero_fiberScale (I := I) α c hssrc, fiberRescaleCLM_apply,
       rescaleChartOrbit_apply]
 
+set_option linter.unusedSectionVars false in
 private theorem offchart_rescaledLift_chartDeriv_self
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -450,6 +461,7 @@ private theorem offchart_rescaledLift_chartDeriv_self
     rw [← hpe, extChartAt_tangent_zero_fiberScale (I := I) β c hssrc, fiberRescaleCLM_apply,
       rescaleChartOrbit_apply]
 
+set_option linter.unusedSectionVars false in
 private theorem rescaledLift_continuousWithinAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -484,6 +496,7 @@ private theorem rescaledLift_continuousWithinAt
   exact chartFiberCoord_fiberScale (I := I) (L s₀).proj c (q := f (aff s₀))
     (mem_chart_source H (L s₀).proj)
 
+set_option linter.unusedSectionVars false in
 theorem scaledTangentLift_transport
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -534,6 +547,7 @@ open Manifold
 
 variable [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
+set_option linter.unusedSectionVars false in
 theorem pathELength_comp_affineHomeo
     (γ : ℝ → M) {a b : ℝ} (c d : ℝ) (hab : a ≤ b) (hc : 0 < c)
     (hγ : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Icc a b)) :

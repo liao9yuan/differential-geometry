@@ -45,6 +45,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinearFK_diffQuot_u_discharge
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

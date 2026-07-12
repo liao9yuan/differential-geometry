@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsSharpGradientKoszul
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsRicciFold
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -58,6 +57,7 @@ def ccTensorRank4EvalAtUnitZeroSec (g : SmoothRiemannianMetric I M)
     (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 4 I y from G.toSection y)
       (unitZeroSec (I := I) (M := M) y)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ccTensorFourUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (G : SmoothCcTensor g 0 4) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
@@ -85,6 +85,7 @@ private def refoldKernelArgumentPairEvalCLM (x : M) (v : Fin 2 → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma refoldKernelArgumentPairEvalCLM_apply (x : M) (v : Fin 2 → E)
     (D : Tensor0SSpace 2 I x) :
     refoldKernelArgumentPairEvalCLM (I := I) (M := M) x v D =
@@ -267,6 +268,7 @@ private def kcInnerPairBilin (x : M)
       map_add' := fun Y Y' => by rw [map_add, add_smul]
       map_smul' := fun c Y => by rw [map_smul, smul_eq_mul, RingHom.id_apply, mul_smul] }
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma kcInnerPairBilin_apply (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X Y Y' : TangentSpace I x) :
@@ -303,6 +305,7 @@ private def kcOuterPairBilin (g : SmoothRiemannianMetric I M) (x : M)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma kcOuterPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     kcOuterPairBilin (I := I) g x K L X X' =
@@ -316,6 +319,7 @@ private lemma kcOuterPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+set_option linter.unusedSectionVars false in
 private theorem kc_double_frame_bilin_trace_eq_fixed
     (g : SmoothRiemannianMetric I M) (x : M)
     (K L : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -365,6 +369,7 @@ private def kcToModelEvalCLM (s : ℕ) (x : M) (v : Fin s → E) :
         rw [Tensor0SSpace.toModel_smul]
         rfl }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma kcToModelEvalCLM_apply (s : ℕ) (x : M) (v : Fin s → E)
     (D : Tensor0SSpace s I x) :
     kcToModelEvalCLM (I := I) (M := M) s x v D = Tensor0SSpace.toModel (𝕜 := ℝ) D v := rfl
@@ -384,6 +389,7 @@ private def kcPairFeedScalarCLM (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           map_smul] }
 
+set_option linter.unusedSectionVars false in
 private lemma kcPairFeedScalarCLM_apply (s : ℕ) (x : M) (G : Tensor0SSpace (s + 2) I x)
     (v : Fin s → E) (p q : TangentSpace I x) :
     kcPairFeedScalarCLM (I := I) (M := M) s x G v p q =
@@ -682,6 +688,7 @@ theorem refoldKernelContractionField_zero_argument (g₀ g₁ : SmoothRiemannian
   rw [refoldKernelContractionField, hmono σ₁, hmono σ₂, hmono σ₃, hmono σ₄]
   rw [show (0 : SmoothCcTensor g₀ 2 2) + 0 - 0 - 0 = 0 from by abel, smul_zero]
 
+set_option linter.unusedSectionVars false in
 private theorem foldIteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =

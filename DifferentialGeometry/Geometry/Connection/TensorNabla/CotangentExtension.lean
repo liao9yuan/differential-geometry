@@ -9,7 +9,6 @@ import DifferentialGeometry.Bundle.Equiv
 import DifferentialGeometry.Bundle.Frame
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,6 +48,7 @@ def cotangentScalar
     (X Y : Π x : M, TangentSpace I x) : ℝ :=
   extDerivFun (I := I) (fun b => θ b (Y b)) x (X x) - θ x (cov Y x (X x))
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma cotangentScalar_def
     (cov : (Π x : M, TangentSpace I x) →
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -57,6 +57,7 @@ lemma cotangentScalar_def
     cotangentScalar cov θ x X Y =
       extDerivFun (I := I) (fun b => θ b (Y b)) x (X x) - θ x (cov Y x (X x)) := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma extDerivFun_mul_apply
     {p q : M → ℝ} {x : M}
     (hp : MDifferentiableAt I 𝓘(ℝ, ℝ) p x) (hq : MDifferentiableAt I 𝓘(ℝ, ℝ) q x)
@@ -76,6 +77,7 @@ lemma extDerivFun_mul_apply
   rw [hmf_v]
   rw [smul_eq_mul, smul_eq_mul]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mdifferentiableAt_pairing
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ}
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -93,6 +95,7 @@ lemma mdifferentiableAt_pairing
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentScalar_tensorialAt_X
     (_covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -117,6 +120,7 @@ lemma cotangentScalar_tensorialAt_X
     rw [hXX', map_add, ContinuousLinearMap.map_add, map_add]
     abel
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentScalar_tensorialAt_Y
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -191,6 +195,7 @@ def cotangentCovAt
       (fun X hX => cotangentScalar_tensorialAt_Y cov.isCovariantDerivativeOnUniv hθ X hX)
   · exact 0
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentCovAt_apply_of_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -203,6 +208,7 @@ lemma cotangentCovAt_apply_of_diff
   rw [dif_pos hθ]
   exact TensorialAt.mkHom₂_apply _ _ hX hY
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cotangentCovAt_of_not_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -218,11 +224,13 @@ def cotangentCovFun
       (Π x : M, TangentSpace I x →L[ℝ] (TangentSpace I x →L[ℝ] ℝ)) :=
   fun θ x => cotangentCovAt cov θ x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cotangentCovFun_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (θ : Π x : M, TangentSpace I x →L[ℝ] ℝ) (x : M) :
     cotangentCovFun cov θ x = cotangentCovAt cov θ x := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cotangentCovFun_isCovariantDerivativeOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     IsCovariantDerivativeOn (V := (fun x : M => TangentSpace I x →L[ℝ] ℝ))
@@ -333,10 +341,12 @@ def cotangentCov
   toFun := cotangentCovFun cov
   isCovariantDerivativeOnUniv := cotangentCovFun_isCovariantDerivativeOn cov
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma cotangentCov_toFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (cotangentCov cov).toFun = cotangentCovFun cov := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem cotangentCov_dualPairing
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -363,11 +373,13 @@ def metricFlat (g : SmoothRiemannianMetric I M) (X : Π x : M, TangentSpace I x)
     Π x : M, TangentSpace I x →L[ℝ] ℝ :=
   fun b => g.inner b (X b)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma metricFlat_apply
     (g : SmoothRiemannianMetric I M) (X : Π x : M, TangentSpace I x)
     (b : M) (Y : TangentSpace I b) :
     metricFlat g X b Y = g.inner b (X b) Y := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricFlat_mdiff_total
     (g : SmoothRiemannianMetric I M) {X : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) :
@@ -386,6 +398,7 @@ lemma metricFlat_mdiff_total
     (b := fun b : M => b)
     (ϕ := fun b => g.inner b) (v := fun b => X b) hg hX
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricFlat_mdiff
     (g : SmoothRiemannianMetric I M) {X : Π x : M, TangentSpace I x} {x : M}
     (hX : MDiffAt (T% X) x) :
@@ -418,6 +431,7 @@ theorem cotangentCov_metricDuality
   rw [hYx] at heq
   exact add_right_cancel heq
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_clmSection_smooth_aux
     {F₂ : Type*} [NormedAddCommGroup F₂] [NormedSpace ℝ F₂] [FiniteDimensional ℝ F₂]
     {V₂ : M → Type*} [∀ x, AddCommGroup (V₂ x)] [∀ x, Module ℝ (V₂ x)]
@@ -489,6 +503,7 @@ theorem cotangentCov_clmSection_smooth_aux
   rw [show ⇑(e₂.continuousLinearMapAt ℝ x) = ⇑(e₂.linearMapAt ℝ x) from rfl,
     e₂.coe_linearMapAt_of_mem hx₂]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_extDerivFun_smooth
     {h : M → ℝ} (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
@@ -516,6 +531,7 @@ theorem cotangentCov_extDerivFun_smooth
     ContinuousLinearMap.coe_id', id_eq]
   rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_pairing_contMDiff
     {θ : Π x : M, TangentSpace I x →L[ℝ] ℝ}
     (hθ : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
@@ -535,6 +551,7 @@ theorem cotangentCov_pairing_contMDiff
   intro x
   exact (contMDiffAt_section (F := ℝ) (E := Bundle.Trivial M ℝ) x).mp (hap x)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem cotangentCov_covApply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -552,6 +569,7 @@ theorem cotangentCov_covApply_smooth
   intro x
   exact (hres x (Set.mem_univ x)).contMDiffAt Filter.univ_mem
 
+set_option linter.unusedSectionVars false in
 theorem cotangentCov_double_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

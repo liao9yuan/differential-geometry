@@ -930,6 +930,7 @@ theorem deTurckLieArm1Coeff_realizedFam_jetL2_perOrder_ballUniform
   have h14 := hcd (Equiv.refl (Fin 4)) lieArm1RhoSlot0
   linarith [htri1, htri2, htri3, hblock1, hblock2]
 
+set_option linter.unusedSectionVars false in
 private theorem lieArm1_rfns_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (a - b) ≤

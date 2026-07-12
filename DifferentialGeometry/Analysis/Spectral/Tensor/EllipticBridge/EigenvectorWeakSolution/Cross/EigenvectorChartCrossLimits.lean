@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradCrossBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradL2
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -149,6 +148,7 @@ theorem tensorCovDerivCrossLeft_integral_eq_chartPull
     (prependCovGradSlot_tsupport_subset (I := I) (M := M) g r s
       (chartAtlasPOU I M α) S)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma gramMatrixAt_inv_symm
     (g : SmoothRiemannianMetric I M) (x : M)
     (k l : Fin (Module.finrank ℝ E)) :

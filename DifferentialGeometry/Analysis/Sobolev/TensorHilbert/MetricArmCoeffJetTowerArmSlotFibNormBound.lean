@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 open TensorMultilinear
 
+set_option linter.unusedSectionVars false in
 private lemma curry_symm_smul_aux (s : ℕ) (x : M) (c : ℝ)
     (a : TangentSpace I x →L[ℝ] Tensor0SSpace (s+1) I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm (c • a) =
@@ -58,6 +58,7 @@ private lemma curry_symm_smul_aux (s : ℕ) (x : M) (c : ℝ)
   rw [← tensor0S_curry_apply_eval (T := (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm a)]
   simp only [ContinuousLinearEquiv.apply_symm_apply]
 
+set_option linter.unusedSectionVars false in
 private lemma curry_symm_add_aux (s : ℕ) (x : M)
     (a b : TangentSpace I x →L[ℝ] Tensor0SSpace (s+1) I x) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) (s + 1) x).symm (a + b) =

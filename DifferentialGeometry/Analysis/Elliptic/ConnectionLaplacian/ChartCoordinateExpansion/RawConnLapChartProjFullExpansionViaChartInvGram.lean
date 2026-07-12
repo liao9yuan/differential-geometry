@@ -95,6 +95,7 @@ noncomputable def chartFrameTraceΓCorrection
             (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
             ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))))
 
+omit [I.Boundaryless] in
 lemma chartInvGramPrincipal_plus_LeibnizRemainder_eq_frameWeighted
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -109,6 +110,7 @@ lemma chartInvGramPrincipal_plus_LeibnizRemainder_eq_frameWeighted
   unfold chartLeibnizRemainder
   ring
 
+omit [I.Boundaryless] in
 theorem chartPushed_rawConnLap_chart_α_proj_eq_chartInvGram_secondCovDeriv_plus_corrections
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

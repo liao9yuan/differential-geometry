@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import Mathlib.Data.Nat.Choose.Bounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 theorem norm_iterClassicalPartial_le_iteratedFDeriv :
     ∀ (j : ℕ) (β : Fin j → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ x : E,
@@ -50,6 +50,7 @@ theorem norm_iterClassicalPartial_le_iteratedFDeriv :
         norm_iteratedFDeriv_partial_le (d := d) (η := f) hf (β 0) j x
       exact h_ih.trans h_step
 
+omit [NeZero d] in
 private theorem chosenWeakPartial_smooth_ae
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -74,6 +75,7 @@ private theorem chosenWeakPartial_smooth_ae
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq hΩ_open h_chosen h_classical
     h_chosen_loc h_classical_loc
 
+omit [NeZero d] in
 private theorem MemWkp_of_smooth_compactSupport_local
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {ψ : E → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -121,6 +123,7 @@ private theorem MemWkp_of_smooth_compactSupport_local
       have h_ih_classical := ih h_classical_smooth h_classical_cpt h_classical_supp
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
+omit [NeZero d] in
 private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : E → ℝ},
@@ -159,6 +162,7 @@ private theorem iterWeakPartial_smooth_ae_eq_iterClassicalPartial_local
         (fun i : Fin j => β i.succ) h_ae
       exact h_iter_congr.trans h_ih
 
+omit [NeZero d] in
 lemma exists_iter_deriv_bound_of_smooth_compactSupport
     {η : E → ℝ} (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     (hη_cpt : HasCompactSupport η) (k : ℕ) :
@@ -201,6 +205,7 @@ lemma exists_iter_deriv_bound_of_smooth_compactSupport
   · intro i hi y
     exact (hM_spec i hi y).trans (hMη_ge i hi)
 
+omit [NeZero d] in
 private lemma exists_cutoff_for_comp
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget) (hΩ_open : IsOpen Ωsource)
@@ -242,6 +247,7 @@ private lemma exists_cutoff_for_comp
       image_eq_zero_of_notMem_tsupport h_φx_not_Ktarget
     rw [hψ_zero, mul_zero]
 
+omit [NeZero d] in
 private theorem comp_smooth_compactSupport_memWkp
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget) (hΩ_open : IsOpen Ωsource)
@@ -269,6 +275,7 @@ private theorem comp_smooth_compactSupport_memWkp
     rw [h_eq_on_Ω x hx]
   exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr hg_mem
 
+omit [NeZero d] in
 private lemma norm_iteratedFDeriv_comp_toFun_le_sum
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget)
@@ -293,6 +300,7 @@ private lemma norm_iteratedFDeriv_comp_toFun_le_sum
   rw [h_rearrange] at h
   exact h
 
+omit [NeZero d] in
 private lemma norm_iteratedFDeriv_cutoff_comp_le
     {Ωsource Ωtarget : Set E}
     (Φ : SmoothDiffeoBounded d Ωsource Ωtarget)
@@ -458,6 +466,7 @@ private lemma norm_iteratedFDeriv_cutoff_comp_le
     nlinarith
   exact h_mul.trans (h_sum_le.trans (h_factor_choose_le.trans h_align))
 
+omit [NeZero d] in
 private lemma euclidean_coord_le_norm
     (v : EuclideanSpace ℝ (Fin d)) (i : Fin d) :
     |v i| ≤ ‖v‖ := by
@@ -474,6 +483,7 @@ private lemma euclidean_coord_le_norm
   rw [show ‖v‖ = Real.sqrt (‖v‖^2) from (Real.sqrt_sq hv_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sq
 
+omit [NeZero d] in
 private lemma continuousMultilinearMap_norm_le_sum_basis
     {n : ℕ}
     (f : ContinuousMultilinearMap ℝ
@@ -548,6 +558,7 @@ private lemma continuousMultilinearMap_norm_le_sum_basis
   rw [h_factor]
   exact le_of_eq (mul_comm _ _)
 
+omit [NeZero d] in
 private lemma norm_iteratedFDeriv_le_sum_basis
     (n : ℕ) {ψ : E → ℝ} (y : E) :
     ‖iteratedFDeriv ℝ n ψ y‖ ≤
@@ -556,6 +567,7 @@ private lemma norm_iteratedFDeriv_le_sum_basis
           (fun i : Fin n => EuclideanSpace.single (β i) (1 : ℝ))| :=
   continuousMultilinearMap_norm_le_sum_basis (d := d) (iteratedFDeriv ℝ n ψ y)
 
+omit [NeZero d] in
 private lemma iteratedFDeriv_clm_apply_basis
     {n : ℕ} {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : E → F →L[ℝ] ℝ} (hg : ContDiff ℝ (⊤ : ℕ∞) g)
@@ -571,6 +583,7 @@ private lemma iteratedFDeriv_clm_apply_basis
     hg (by exact_mod_cast (le_top : (n : ℕ∞) ≤ ⊤))
   exact h.symm
 
+omit [NeZero d] in
 private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
     ∀ (n : ℕ) (β : Fin n → Fin d) {f : E → ℝ},
       ContDiff ℝ (⊤ : ℕ∞) f → ∀ y : E,
@@ -614,6 +627,7 @@ private lemma iteratedFDeriv_basis_eq_iterClassicalPartial_rev :
         rw [Fin.rev_zero]
       rw [h_index_eq, h_first_eq]
 
+omit [NeZero d] in
 private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
     (n : ℕ) {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f) (y : E) :
     ‖iteratedFDeriv ℝ n f y‖ ≤
@@ -659,6 +673,7 @@ private lemma norm_iteratedFDeriv_le_sum_iterClassicalPartial
   rw [h_equiv] at h1
   exact h1
 
+omit [NeZero d] in
 private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
     (n : ℕ) {p : ℝ≥0∞} (hp : 1 ≤ p)
     {f : E → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -721,6 +736,7 @@ private lemma eLpNorm_iteratedFDeriv_le_sum_iterClassicalPartial
   rw [Real.norm_eq_abs, abs_abs]
   exact le_of_eq rfl
 
+omit [NeZero d] in
 lemma eLpNorm_iteratedFDeriv_le_wkpNorm
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
@@ -766,6 +782,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private lemma jacobian_lower_pointwise_bound
     {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω') {q : ℝ}
@@ -779,6 +796,7 @@ private lemma jacobian_lower_pointwise_bound
     ENNReal.ofReal_le_ofReal (Φ.jacobian_lower x hx)
   exact mul_le_mul_of_nonneg_right h_le (zero_le _)
 
+omit [NeZero d] in
 private lemma lintegral_rpow_enorm_comp_le
     {p : ℝ≥0∞}
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -807,6 +825,7 @@ private lemma lintegral_rpow_enorm_comp_le
   have hchg := Φ.lintegral_image_eq hΩ (fun y => ‖f y‖ₑ ^ q)
   rw [← hchg]
 
+omit [NeZero d] in
 theorem eLpNorm_comp_toFun_le_const
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -867,6 +886,7 @@ theorem eLpNorm_comp_toFun_le_const
         (by positivity : (0 : ℝ) < 1 / Φ.jacobian_lower_bound)] at h_pow_le
   exact h_pow_le
 
+omit [NeZero d] in
 private lemma iterClassicalPartial_eqOn_of_eqOn
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {g h : E → ℝ},
@@ -904,6 +924,7 @@ private lemma iterClassicalPartial_eqOn_of_eqOn
       exact ih (fun i : Fin j => β i.succ)
         h_inner_g_smooth h_inner_h_smooth h_partial_eqOn hx
 
+omit [NeZero d] in
 private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -953,6 +974,7 @@ private theorem iterWeakPartial_comp_smooth_ae_eq_iterClassicalPartial
   intro x hx
   exact h_classical_eqOn hx
 
+omit [NeZero d] in
 private lemma norm_iterClassicalPartial_comp_le_uniform
     {Ω Ω' : Set E}
     (Φ : SmoothDiffeoBounded d Ω Ω')
@@ -1005,6 +1027,7 @@ private lemma norm_iterClassicalPartial_comp_le_uniform
     exact mul_nonneg h_kf_nn (pow_nonneg hD_nonneg k)
   exact mul_le_mul_of_nonneg_left h_inner_sum_le h_outer_nn
 
+omit [NeZero d] in
 private lemma eLpNorm_iterWeakPartial_comp_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)
@@ -1079,6 +1102,7 @@ private lemma eLpNorm_iterWeakPartial_comp_le
   rw [h_pointwise_eq]
   exact eLpNorm_sum_le h_strong_meas hp_one
 
+omit [NeZero d] in
 private lemma eLpNorm_iteratedFDeriv_comp_le
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {Ω Ω' : Set E} (hΩ : IsOpen Ω)

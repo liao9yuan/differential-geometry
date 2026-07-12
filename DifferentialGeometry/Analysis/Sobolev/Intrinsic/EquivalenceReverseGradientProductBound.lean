@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 local notation "EuclN_E" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] in
 lemma g_inner_cauchy_schwarz_sq
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
@@ -116,6 +116,7 @@ lemma g_inner_cauchy_schwarz_sq
     rw [div_le_iff₀ h_w_pos] at h_step
     linarith
 
+omit [FiniteDimensional ℝ E] in
 lemma abs_g_inner_le_sqrt_mul_sqrt
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :

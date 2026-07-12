@@ -22,7 +22,6 @@ import Mathlib.Topology.Algebra.Support
 import Mathlib.Topology.Compactness.LocallyFinite
 import Mathlib.Topology.Compactness.LocallyCompact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
@@ -58,6 +58,7 @@ noncomputable def chartBoundaryFaceIntegral
   ∫ x, localDivergenceWithin (I := I) g α X x * f x
     ∂(chartLocalMeasure (I := I) g α)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartBoundaryFaceIntegral_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -66,6 +67,7 @@ noncomputable def chartBoundaryFaceIntegral
       ∫ x, localDivergenceWithin (I := I) g α X x * f x
         ∂(chartLocalMeasure (I := I) g α) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem chart_local_stokes_within
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -74,6 +76,7 @@ theorem chart_local_stokes_within
         ∂(chartLocalMeasure (I := I) g α) =
       chartBoundaryFaceIntegral (I := I) g α X f := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem chartBoundaryFaceIntegral_zero_weight
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -84,6 +87,7 @@ theorem chart_local_stokes_within
     funext x; rw [mul_zero]
   rw [h, integral_zero]
 
+set_option linter.unusedSectionVars false in
 theorem chartBoundaryFaceIntegral_eq_neg_tangentSectionAction_of_interior_support
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -101,6 +105,7 @@ section StokesGlobal
 
 variable [hI : HasSmoothBoundary E H I]
 
+set_option linter.unusedSectionVars false in
 private lemma extChartAt_mem_frontier_range_of_mem_chartSource_inter_boundary
     (α : M) {x : M}
     (hx_chart : x ∈ (chartAt H α).source)
@@ -138,6 +143,7 @@ private lemma extChartAt_mem_frontier_range_of_mem_chartSource_inter_boundary
         (s := (extChartAt I α).target)).le_bot
       ⟨hx_target_int, hx_frontier⟩
 
+set_option linter.unusedSectionVars false in
 private lemma symm_preimage_chart_boundary_inter_target_subset_frontier
     (α : M) :
     (extChartAt I α).symm ⁻¹' ((chartAt H α).source ∩ I.boundary M)
@@ -156,6 +162,7 @@ private lemma symm_preimage_chart_boundary_inter_target_subset_frontier
   rw [h_right] at h_front
   exact h_front
 
+set_option linter.unusedSectionVars false in
 lemma chartLocalMeasure_chart_boundary_zero
     (g : SmoothRiemannianMetric I M) (α : M) :
     chartLocalMeasure (I := I) g α
@@ -208,6 +215,7 @@ lemma chartLocalMeasure_chart_boundary_zero
     rw [h_eq, MeasureTheory.Measure.smul_apply, h_fb, smul_zero]
   exact MeasureTheory.measure_mono_null hsub h_mh_zero
 
+set_option linter.unusedSectionVars false in
 private lemma divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -233,6 +241,7 @@ private lemma divergence_g_with_boundary_eq_localDivergenceWithin_ae_chartLocal
     rw [← I.compl_interior]
     exact hx_int
 
+set_option linter.unusedSectionVars false in
 private lemma chartLocal_integral_divergence_eq_localDivergenceWithin
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -253,6 +262,7 @@ private lemma chartLocal_integral_divergence_eq_localDivergenceWithin
       exact hx_nots (subset_tsupport _ hne)
     rw [hρ_zero, mul_zero, mul_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma chartLocalMeasure_boundary_zero_of_total
     [T2Space M] (g : SmoothRiemannianMetric I M) (α : M) :
     chartLocalMeasure (I := I) g α (I.boundary M) = 0 := by
@@ -282,6 +292,7 @@ private lemma chartLocalMeasure_boundary_zero_of_total
       chartLocalMeasure_apply_of_disjoint_source (I := I) g α hdiff_meas hdiff_disj]
   simp
 
+set_option linter.unusedSectionVars false in
 private lemma integrable_chartLocalMeasure_of_cs_chartSource
     [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -322,6 +333,7 @@ private lemma integrable_chartLocalMeasure_of_cs_chartSource
           simp
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
+set_option linter.unusedSectionVars false in
 theorem stokes_compact_via_pou
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

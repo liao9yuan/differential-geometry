@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder1Ta
 
 set_option linter.flexible false
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -143,6 +142,7 @@ theorem connDiffContrInsertionInnerField_eq_reindex_slotExtend
     fin_cases j <;> rfl
   exact hL.trans hR.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cDualBasis_eq_coord' (B : Module.Basis (Fin (Module.finrank ℝ E)) ℝ E)
     (k : Fin (Module.finrank ℝ E)) :
     B.cDualBasis k = LinearMap.toContinuousLinearMap (B.coord k) := by
@@ -543,6 +543,7 @@ private theorem armOuter23_rfns_eq (g₀ : SmoothRiemannianMetric I M)
         ((show Tensor0SSpace 2 I y →L[ℝ] Tensor0SSpace 3 I y from W.toSection y) d) := rfl
   rw [hy, slotPermCLM_apply, Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
 
+set_option linter.unusedSectionVars false in
 private lemma o0IteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -551,6 +552,7 @@ private lemma o0IteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : �
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma o0Rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -652,6 +654,7 @@ private theorem quadArm_rfns_windowGrid_le (g₀ : SmoothRiemannianMetric I M)
   rw [← Finset.sum_mul]
   exact le_of_eq (by ring)
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rfns_eightArm_cascade (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v1 v2 v3 v4 v5 v6 v7 v8 : TensorRSSpace r s I x) {Q L w : ℝ}
     (h1 : riemannianFiberNormSq (I := I) (M := M) g r s x v1 ≤ Q * w)

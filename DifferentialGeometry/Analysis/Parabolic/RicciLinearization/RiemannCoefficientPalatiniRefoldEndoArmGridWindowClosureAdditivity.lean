@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualField
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldFamilyJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLieCovDerivFamily
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -69,6 +68,7 @@ theorem endoArmField_eq_dLbCoeffField
   rfl
 
 
+set_option linter.unusedSectionVars false in
 theorem threeArmHjoint_add_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (A B : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
     (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ'))
@@ -86,6 +86,7 @@ theorem threeArmHjoint_add_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
 
+set_option linter.unusedSectionVars false in
 theorem threeArmHjoint_sub_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (A B : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
     (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ'))
@@ -159,6 +160,7 @@ theorem endoArmField_realizedFam_threeArmHjoint
   rw [hsplit, SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply]
 
 
+set_option linter.unusedSectionVars false in
 theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =
@@ -167,6 +169,7 @@ theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   | zero => simp only [iteratedCovGrad_zero]
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
+omit [BoundarylessManifold I M] in
 theorem bdExists_fixedField_rfns_jet (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (F : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ j, 0 ≤ c j) ∧ ∀ (j : ℕ) (x : M),
@@ -180,6 +183,7 @@ theorem bdExists_fixedField_rfns_jet (g₀ : SmoothRiemannianMetric I M)
   choose c hc_nn hc using hex
   exact ⟨c, hc_nn, fun j x => hc j x⟩
 
+set_option linter.unusedSectionVars false in
 lemma bdRfns_iCG_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ) (j : ℕ)
     (A B : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
@@ -240,6 +244,7 @@ private def bdVFSec (g₁ gA gB : SmoothRiemannianMetric I M) :
   (PDE.DeTurck.deTurckVF (I := I) g₁ gA : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) -
     (PDE.DeTurck.deTurckVF (I := I) g₁ gB : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bdVFSec_apply (g₁ gA gB : SmoothRiemannianMetric I M) (b : M) :
     bdVFSec (I := I) (M := M) g₁ gA gB b =
       (PDE.DeTurck.deTurckVF (I := I) g₁ gA :
@@ -267,6 +272,7 @@ private lemma bdOmega_eq_sub (g₀ g₁ g_bg : SmoothRiemannianMetric I M) :
   rw [bdXiFix]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdUnitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (A - B) x =
@@ -275,6 +281,7 @@ lemma bdUnitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContinuousLinearMap.sub_apply, Tensor0SSpace.toModel_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdUnitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (A + B) x =
@@ -426,6 +433,7 @@ def bdAlphaB (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀
 def bdAlpha (g₀ g₁ g_bg : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 :=
   bdAlphaA (I := I) (M := M) g₀ g₁ g_bg + bdAlphaB (I := I) (M := M) g₀ g₁ g_bg
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bdTensor0SCovDeriv01_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 1 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 1 V x)
@@ -583,6 +591,7 @@ private lemma bdAlphaA_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric 
   rw [hYx]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdInterior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -636,6 +645,7 @@ private lemma bdAlphaB_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric 
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bdLeviCivita_toFun_sub (g₀ : SmoothRiemannianMetric I M)
     (A B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (w : TangentSpace I x) :
     (LeviCivita (I := I) g₀).toFun (fun b => A b - B b) x w =
@@ -659,6 +669,7 @@ private lemma bdLeviCivita_toFun_sub (g₀ : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply, neg_one_smul,
     sub_eq_add_neg]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma bdWEndo_eq_covDeriv_add_connDiff (g₀ g₁ gc : SmoothRiemannianMetric I M)
     (x : M) (w : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ gc x w =
@@ -680,6 +691,7 @@ private lemma bdWEndo_eq_covDeriv_add_connDiff (g₀ g₁ gc : SmoothRiemannianM
   rw [hEndo, hcd]
   abel
 
+set_option linter.unusedSectionVars false in
 private lemma bdWEndo_sub_eq (g₀ g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (w : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ g_bg x w - deTurckLieWEndo (I := I) g₁ g₀ x w =

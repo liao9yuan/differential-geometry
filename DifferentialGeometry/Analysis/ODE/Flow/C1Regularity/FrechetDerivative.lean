@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.Flow.C1Regularity.VariationalSolutionOperator
 import Mathlib.Analysis.Calculus.MeanValue
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -54,6 +53,7 @@ section ResidualEstimate
 
 variable {f : ℝ → E → E}
 
+omit [CompleteSpace E] in
 lemma norm_residual_le_of_diffOn
     (t : ℝ) (x v : E) {S : Set E} (hS : Convex ℝ S)
     (hf_diff : ∀ z ∈ S, DifferentiableAt ℝ (f t) z)
@@ -77,6 +77,7 @@ section UniformPartial
 
 variable {f : ℝ → E → E}
 
+omit [CompleteSpace E] in
 lemma exists_uniform_partial_fderiv_of_contDiffOn_univ
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     {a b : ℝ} (α : ℝ → E) (hα : ContinuousOn α (Icc a b))

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Topology.Order.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 def chartTargetEuclid (α : M) : Set EuclN :=
   toEuclidean '' (extChartAt I α).target
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma chartTargetEuclid_isOpen [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) := by
   unfold chartTargetEuclid
@@ -42,6 +42,7 @@ lemma chartTargetEuclid_isOpen [I.Boundaryless] (α : M) :
     isOpen_extChartAt_target (I := I) α
   exact toEuclidean.toHomeomorph.isOpenMap _ hOpenE
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma toEuclidean_symm_mem_target {α : M} {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target := by
@@ -69,6 +70,7 @@ def weightedInvGramOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   densityOnEuclid (I := I) g α y * invGramOnEuclid (I := I) g α i j y
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma contMDiffOn_chart_symm (α : M) :
     ContMDiffOn 𝓘(ℝ, EuclN) I ∞
       (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
@@ -88,6 +90,7 @@ lemma contMDiffOn_chart_symm (α : M) :
     exact toEuclidean_symm_mem_target (I := I) hy
   exact h_outer.comp h_inner.contMDiffOn h_maps
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mapsTo_chart_symm_baseSet (α : M) :
     MapsTo (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y))
       (chartTargetEuclid (I := I) (M := M) α)
@@ -101,6 +104,7 @@ private lemma mapsTo_chart_symm_baseSet (α : M) :
     (extChartAt I α).map_target h_tgt
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at h_src
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gramOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -121,6 +125,7 @@ lemma gramOnEuclid_contDiffOn
     h_g.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma invGramOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -141,6 +146,7 @@ lemma invGramOnEuclid_contDiffOn
     h_g.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (densityOnEuclid (I := I) g α)
@@ -160,6 +166,7 @@ lemma densityOnEuclid_contDiffOn
     h_dens.comp h_chart h_maps
   exact (contMDiffOn_iff_contDiffOn).mp h_comp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (weightedInvGramOnEuclid (I := I) g α i j)
@@ -168,6 +175,7 @@ lemma weightedInvGramOnEuclid_contDiffOn
   exact (densityOnEuclid_contDiffOn (I := I) g α).mul
     (invGramOnEuclid_contDiffOn (I := I) g α i j)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma invGramOnEuclid_symm_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -193,6 +201,7 @@ lemma invGramOnEuclid_symm_of_mem
   rw [star_trivial] at h_apply
   exact h_apply.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_symm_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -202,6 +211,7 @@ lemma weightedInvGramOnEuclid_symm_of_mem
   unfold weightedInvGramOnEuclid
   rw [invGramOnEuclid_symm_of_mem (I := I) g α i j hy]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_pos
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -216,6 +226,7 @@ lemma densityOnEuclid_pos
     rwa [extChartAt_source_eq_chartAt_source (I := I)] at h_src
   exact chartDensity_pos (I := I) g α h_base
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma invGramOnEuclid_posDef
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -242,6 +253,7 @@ lemma invGramOnEuclid_posDef
   rw [hmat_eq]
   exact hGinv
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weighted_quadForm_pos_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -309,6 +321,7 @@ private def rayleighInt
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
         weightedInvGramOnEuclid (I := I) g α i j y)) ξ⟫_ℝ
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rayleighInt_eq_sum
     (g : SmoothRiemannianMetric I M) (α : M) (y ξ : EuclN) :
     rayleighInt (I := I) g α y ξ =
@@ -335,6 +348,7 @@ private lemma rayleighInt_eq_sum
   intro j _
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma rayleighInt_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (fun p : EuclN × EuclN =>
@@ -506,10 +520,12 @@ lemma exists_unif_lower_bound_on_compact
 
 private def kronDelta (i j : Fin (Module.finrank ℝ E)) : ℝ := if i = j then 1 else 0
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma kronDelta_self (i : Fin (Module.finrank ℝ E)) :
     kronDelta (E := E) i i = 1 := by
   simp [kronDelta]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma kronDelta_symm (i j : Fin (Module.finrank ℝ E)) :
     kronDelta (E := E) i j = kronDelta (E := E) j i := by
   by_cases h : i = j
@@ -522,6 +538,7 @@ def extendedMatrix
   χ y * weightedInvGramOnEuclid (I := I) g α i j y +
     (1 - χ y) * kronDelta (E := E) i j
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_symm_of_mem
     (g : SmoothRiemannianMetric I M) (α : M) (χ : EuclN → ℝ)
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -532,6 +549,7 @@ lemma extendedMatrix_symm_of_mem
   rw [weightedInvGramOnEuclid_symm_of_mem (I := I) g α i j hy]
   rw [kronDelta_symm (E := E) i j]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_symm_off_tsupport
     (g : SmoothRiemannianMetric I M) (α : M) {χ : EuclN → ℝ}
     (i j : Fin (Module.finrank ℝ E)) {y : EuclN} (hy : y ∉ tsupport χ) :
@@ -546,6 +564,7 @@ lemma extendedMatrix_symm_off_tsupport
     rw [hχ_zero]; ring
   rw [h_lhs, h_rhs, kronDelta_symm]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_symm
     (g : SmoothRiemannianMetric I M) (α : M) {χ : EuclN → ℝ}
     (hχ_supp : tsupport χ ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -556,6 +575,7 @@ lemma extendedMatrix_symm
   · exact extendedMatrix_symm_of_mem (I := I) g α χ i j (hχ_supp hy)
   · exact extendedMatrix_symm_off_tsupport (I := I) g α i j hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_contDiff
     (g : SmoothRiemannianMetric I M) (α : M) [I.Boundaryless]
     {χ : EuclN → ℝ} (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ)
@@ -597,6 +617,7 @@ lemma extendedMatrix_contDiff
     exact h_const_smooth.congr (fun y hy => hf_eq_const y hy)
   exact contDiff_of_contDiffOn_union_of_isOpen hf_on_s hf_on_t hcov hs_open ht_open
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_quad_decomp
     (g : SmoothRiemannianMetric I M) (α : M)
     (χ : EuclN → ℝ) (y : EuclN) (ξ : EuclN) :
@@ -691,6 +712,7 @@ lemma extendedMatrix_quad_decomp
     · intro h_not_mem
       exact absurd (Finset.mem_univ i) h_not_mem
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_coercive_on_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {χ : EuclN → ℝ}
@@ -739,6 +761,7 @@ lemma extendedMatrix_coercive_on_chart
       χ y * (lamK * ‖ξ‖ ^ 2) + (1 - χ y) * ‖ξ‖ ^ 2 := by ring
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_eq_kronDelta_off_tsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     {χ : EuclN → ℝ}
@@ -749,6 +772,7 @@ lemma extendedMatrix_eq_kronDelta_off_tsupport
   rw [hχ_zero]
   ring
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma kronDelta_quad_eq_norm_sq (ξ : EuclN) :
     ⟪ξ, DeGiorgi.matMulE
       (Matrix.of (fun i j : Fin (Module.finrank ℝ E) =>
@@ -770,6 +794,7 @@ lemma kronDelta_quad_eq_norm_sq (ξ : EuclN) :
   rw [hmul1]
   rw [real_inner_self_eq_norm_sq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma extendedMatrix_coercive
     (g : SmoothRiemannianMetric I M) (α : M)
     {χ : EuclN → ℝ}

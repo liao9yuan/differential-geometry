@@ -21,6 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_frame_component_norm_bound
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

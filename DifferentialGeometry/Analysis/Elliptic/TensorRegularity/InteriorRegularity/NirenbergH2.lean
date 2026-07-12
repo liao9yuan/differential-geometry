@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionHeadline
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [NeZero (Module.finrank ℝ E)] in
 
+omit [FiniteDimensional ℝ E] in
 private lemma memLp_two_contDiff_hasCompactSupport_restrict
     {f : EuclN → ℝ} (hf_cd : ContDiff ℝ ∞ f) (hf_cs : HasCompactSupport f)
     (Ω' : Set EuclN) :

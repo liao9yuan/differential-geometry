@@ -18,6 +18,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartTrivRepr_fderiv_eq_rawFderiv_add_movingTriv
     (α : M) (X : Π y : M, TangentSpace I y) (w : E)
     (hR : DifferentiableAt ℝ (chartRawRepr (I := I) α X) (extChartAt I α α))
@@ -27,6 +28,7 @@ theorem chartTrivRepr_fderiv_eq_rawFderiv_add_movingTriv
         + movingTrivCorrection (I := I) α X w := by
   rw [chartTrivRepr_fderiv_eq (I := I) α X w hR hC, movingTrivCorrection]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem flatLinearization_eq_rawFderiv_add_movingTriv
     (α : M) (X : Π y : M, TangentSpace I y) (w : E)
     (hR : DifferentiableAt ℝ (chartRawRepr (I := I) α X) (extChartAt I α α))
@@ -47,6 +49,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem hcov_of_flatTrivPart_and_movingTrivResidual
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

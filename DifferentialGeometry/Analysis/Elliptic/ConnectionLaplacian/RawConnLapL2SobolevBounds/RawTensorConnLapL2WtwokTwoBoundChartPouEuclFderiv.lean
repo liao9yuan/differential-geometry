@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.TensorChartTransition
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartFderivBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -54,6 +53,7 @@ noncomputable def chartPouEucl (α : M) : EuclN → ℝ := by
           ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartPouEucl_apply_of_mem (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartPouEucl (I := I) (M := M) α y =
@@ -62,12 +62,14 @@ private lemma chartPouEucl_apply_of_mem (α : M) {y : EuclN}
   classical
   unfold chartPouEucl; exact if_pos hy
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartPouEucl_apply_of_notMem (α : M) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
     chartPouEucl (I := I) (M := M) α y = 0 := by
   classical
   unfold chartPouEucl; exact if_neg hy
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma chartPouEucl_contDiff (α : M) :
     ContDiff ℝ ∞ (chartPouEucl (I := I) (M := M) α) := by
   classical
@@ -161,6 +163,7 @@ lemma chartPouEucl_contDiff (α : M) :
       refine ⟨w, ⟨(extChartAt I α).symm w, hin_supp, hext_right⟩, hwz⟩
     · exact chartPouEucl_apply_of_notMem (I := I) (M := M) α hz_target
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma chartPouEucl_hasCompactSupport (α : M) :
     HasCompactSupport (chartPouEucl (I := I) (M := M) α) := by
   classical
@@ -201,6 +204,7 @@ lemma chartPouEucl_hasCompactSupport (α : M) :
     refine ⟨w, ⟨(extChartAt I α).symm w, hin_supp, hext_right⟩, hwy⟩
   · exact chartPouEucl_apply_of_notMem (I := I) (M := M) α hy_target
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma exists_chartPouEucl_fderiv_uniform_bound (α : M) :
     ∃ K_pou : ℝ, 0 ≤ K_pou ∧
       ∀ y : EuclN, ‖fderiv ℝ (chartPouEucl (I := I) (M := M) α) y‖ ≤ K_pou := by
@@ -221,6 +225,7 @@ private lemma exists_chartPouEucl_fderiv_uniform_bound (α : M) :
   intro y
   exact le_trans (hK_bound y) (le_max_left _ _)
 
+set_option linter.unusedSectionVars false in
 lemma tensorChartComponentRaw_symm_contDiffOn_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -246,6 +251,7 @@ lemma tensorChartComponentRaw_symm_contDiffOn_target
     hsmooth_on.comp hsymm hmaps
   exact hcomp.contDiffOn
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma chartAtlasPOU_symm_contDiffOn_target (α : M) :
     ContDiffOn ℝ ∞
       ((fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ∘
@@ -257,6 +263,7 @@ lemma chartAtlasPOU_symm_contDiffOn_target (α : M) :
   exact DifferentialGeometry.Integral.DivergenceTheorem.scalarOnE_contDiffOn
     (I := I) α hf_smooth
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 lemma chartAtlasPOU_symm_differentiableAt
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     DifferentiableAt ℝ
@@ -270,6 +277,7 @@ lemma chartAtlasPOU_symm_differentiableAt
     (hcd _ he).differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open.mem_nhds he)
 
+omit [BoundarylessManifold I M] in
 lemma tensorChartComponentRaw_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -288,6 +296,7 @@ lemma tensorChartComponentRaw_symm_differentiableAt
     (hcd _ he).differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open.mem_nhds he)
 
+set_option linter.unusedSectionVars false in
 private lemma tensorChartComp_eq_pou_mul_raw_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -303,6 +312,7 @@ private lemma tensorChartComp_eq_pou_mul_raw_pulled
   unfold tensorChartComponentPou
   rfl
 
+omit [BoundarylessManifold I M] in
 private lemma tensorChartComp_toEuclidean_eq_pou_mul_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -322,6 +332,7 @@ private lemma tensorChartComp_toEuclidean_eq_pou_mul_raw
   rw [tensorChartComp_eq_pou_mul_raw_pulled
     (I := I) (M := M) g r s T α Idx Jdx hy, h_eq]
 
+omit [BoundarylessManifold I M] in
 private lemma pou_mul_raw_eq_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -337,6 +348,7 @@ private lemma pou_mul_raw_eq_tensorChartComp_toEuclidean
   (tensorChartComp_toEuclidean_eq_pou_mul_raw
     (I := I) (M := M) g r s T α Idx Jdx he).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma chartPouEucl_toEuclidean_eq_pou_symm
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     chartPouEucl (I := I) (M := M) α ((toEuclidean (E := E)) e) =
@@ -348,6 +360,7 @@ private lemma chartPouEucl_toEuclidean_eq_pou_symm
     (toEuclidean (E := E)).symm_apply_apply e
   rw [chartPouEucl_apply_of_mem (I := I) (M := M) α hy, h_eq]
 
+omit [BoundarylessManifold I M] in
 private lemma pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -367,6 +380,7 @@ private lemma pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
   exact pou_mul_raw_eq_tensorChartComp_toEuclidean
     (I := I) (M := M) g r s T α Idx Jdx he'
 
+omit [BoundarylessManifold I M] in
 lemma fderiv_pou_mul_raw_symm_eq_fderiv_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -385,6 +399,7 @@ lemma fderiv_pou_mul_raw_symm_eq_fderiv_tensorChartComp_toEuclidean
   (pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (I := I) (M := M) g r s T α Idx Jdx he).fderiv_eq
 
+set_option linter.unusedSectionVars false in
 lemma fderiv_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -419,6 +434,7 @@ lemma fderiv_tensorChartComp_toEuclidean
   congr 1
   exact (toEuclidean (E := E)).fderiv
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma fderiv_chartPouEucl_toEuclidean (α : M) (e : E) :
     fderiv ℝ
         (fun e' : E => chartPouEucl (I := I) (M := M) α
@@ -448,6 +464,7 @@ private lemma fderiv_chartPouEucl_toEuclidean (α : M) (e : E) :
   congr 1
   exact (toEuclidean (E := E)).fderiv
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 lemma pou_symm_eventuallyEq_chartPouEucl_toEuclidean
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     (fun e' : E => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)
@@ -459,6 +476,7 @@ lemma pou_symm_eventuallyEq_chartPouEucl_toEuclidean
   filter_upwards [h_open.mem_nhds he] with e' he'
   exact (chartPouEucl_toEuclidean_eq_pou_symm (I := I) (M := M) α he').symm
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma fderiv_pou_symm_eq
     (α : M) {e : E} (he : e ∈ (extChartAt I α).target) :
     fderiv ℝ
@@ -471,6 +489,7 @@ private lemma fderiv_pou_symm_eq
     (I := I) (M := M) α he).fderiv_eq]
   exact fderiv_chartPouEucl_toEuclidean (I := I) (M := M) α e
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 lemma exists_pou_symm_fderiv_uniform_bound (α : M) :
     ∃ K_pou : ℝ, 0 ≤ K_pou ∧
       ∀ e ∈ (extChartAt I α).target,

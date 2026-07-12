@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceRiemannFrameFixedBicontraction
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceDeTurckLieBicontraction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -101,6 +100,7 @@ def connDiffBiKernelBilin (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x :
     ((PDE.DeTurck.connDiff (I := I) gj g₀ x)
       (PDE.DeTurck.connDiff (I := I) g₁ g₁' x p q))
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem connDiffBiKernelBilin_apply (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (p q v0 v1 : TangentSpace I x) :
     connDiffBiKernelBilin (I := I) gj g₀ g₁ g₁' x p q v0 v1 =
@@ -123,6 +123,7 @@ def connDiffBiSummandFib (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : 
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem connDiffBiSummandFib_toModel (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (connDiffBiSummandFib (I := I) gj g₀ g₁ g₁' x p q D) v =
@@ -140,6 +141,7 @@ def connDiffBiContrFibFixedFrame (gj g₀ g₁ g₁' : SmoothRiemannianMetric I 
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     connDiffBiSummandFib (I := I) gj g₀ g₁ g₁' x (B a x) (B b x)
 
+set_option linter.unusedSectionVars false in
 theorem connDiffBiContrFibFixedFrame_toModel (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -158,6 +160,7 @@ theorem connDiffBiContrFibFixedFrame_toModel (gj g₀ g₁ g₁' : SmoothRiemann
   rw [Tensor0SSpace.toModelL_apply, connDiffBiSummandFib_toModel]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem connDiffBiKernelBilin_homSection_contMDiff (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
@@ -317,6 +320,7 @@ def frameConnDiffBiKernel (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x :
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           RingHom.id_apply, (PDE.DeTurck.connDiff (I := I) g₁ g₁' x).map_smul c p, map_smul] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem frameConnDiffBiKernel_apply (gj g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 p q : TangentSpace I x) :
     frameConnDiffBiKernel (I := I) gj g₀ g₁ g₁' x v0 v1 p q =

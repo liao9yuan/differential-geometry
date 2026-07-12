@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnect
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffPieceConnDiffFeed
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffKappaPsiBFeed
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,6 +48,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SBundle.Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -63,6 +63,7 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
   rfl
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SBundle.Tensor0SSpace 1 I x) (w : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -371,6 +372,7 @@ private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRieman
   exact deTurckLieArm1CoreFib_toModel_eval (I := I) g₀ g₁ g_bg x D (w 0) (w 1)
 
 
+set_option linter.unusedSectionVars false in
 private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -385,6 +387,7 @@ private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMet
     (by funext i; fin_cases i <;> rfl)
 
 
+set_option linter.unusedSectionVars false in
 private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -418,6 +421,7 @@ private lemma deTurckLieArm1_koszulZero_eval (g₀ g₁ : SmoothRiemannianMetric
 
 open DifferentialGeometry.Integral.DivergenceTheorem (chartInvGramMatrix)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1_omega_eval (g₁ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
     om (fun _ : Fin 1 => w) =
@@ -484,6 +488,7 @@ private def lieArm1PsiBKernel (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
       (show E →L[ℝ] ℝ from
         (g₁.inner x v).comp (PDE.DeTurck.connDiff (I := I) g_bg g₁ x w)))
 
+set_option linter.unusedSectionVars false in
 private lemma lieArm1PsiBKernel_inner (g₁ g_bg : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     g₁.inner x (lieArm1PsiBKernel (I := I) (M := M) g₁ g_bg x v w) u =
@@ -901,6 +906,7 @@ private lemma lieArm1_slot0_vf_trace (g₁ gB : SmoothRiemannianMetric I M) (x :
             c₁, c₂] :=
         (congrArg (fun t : Fin 3 → E => Tensor0SSpace.toModel D t) (hupd _)).symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma lieArm1_neg_double_sum (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → ℝ) :
     (∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), -(f k l)) =
       -∑ k : Fin (Module.finrank ℝ E), ∑ l : Fin (Module.finrank ℝ E), f k l := by

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma rfns_repr_of_orthoFrame_cb
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (S : TensorRSSpace 0 t I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -151,6 +151,7 @@ lemma rfns_repr_of_orthoFrame_cb
   · intro h; exact absurd (Finset.mem_univ (fun k : Fin 0 => k.elim0)) h
 
 
+set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_comp_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φx : TensorRSSpace r s I x) (Wx : TensorRSSpace 0 r I x)

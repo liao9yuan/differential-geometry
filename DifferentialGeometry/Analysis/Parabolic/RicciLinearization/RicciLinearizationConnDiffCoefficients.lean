@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLineariza
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficientsFieldSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficientsLichnerowiczVelocityIdentity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -76,6 +75,7 @@ private lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_empty_eq_iso {y : M} (T : Tensor0SBundle.Tensor0SSpace 0 I y)
     (m : Fin 0 → TangentSpace I y) :
     Tensor0SBundle.Tensor0SSpace.toModel T m = Tensor0SNabla.tensor0Iso I M y T := by
@@ -85,6 +85,7 @@ lemma toModel_empty_eq_iso {y : M} (T : Tensor0SBundle.Tensor0SSpace 0 I y)
   rw [h0, continuousMultilinearCurryFin0_apply]
   exact congrArg _ (funext fun i => i.elim0)
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma curried_tsmdiffAt (n : ℕ)
     (W : Π y : M, Tensor0SBundle.Tensor0SSpace (n + 1) I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (n + 1) W x)
@@ -105,6 +106,7 @@ lemma curried_tsmdiffAt (n : ℕ)
     (b := id) (ϕ := fun y : M => Tensor0SNabla.curriedSection I M W y)
     (v := fun y : M => Y y) hCurried hY
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma deriv0_eq_extDeriv (g : SmoothRiemannianMetric I M)
     (sc : Π y : M, Tensor0SBundle.Tensor0SSpace 0 I y) (x : M) (v : TangentSpace I x) :
     Tensor0SNabla.tensor0Iso I M x
@@ -113,6 +115,7 @@ lemma deriv0_eq_extDeriv (g : SmoothRiemannianMetric I M)
   rw [Tensor0SNabla.tensor0SCovariantDerivative_apply_zero]
   exact (Tensor0SNabla.tensor0Iso I M x).apply_symm_apply _
 
+set_option linter.unusedSectionVars false in
 lemma curried2_toModel_eval
     (W : Π y : M, Tensor0SBundle.Tensor0SSpace 2 I y)
     (Yf Zf : Cₛ^(⊤ : ℕ∞)⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -136,6 +139,7 @@ lemma curried2_toModel_eval
     (T := W y) (v0 := Yf y) (vs := Fin.cons (Zf y) (fun i : Fin 0 => i.elim0))]
   exact congrArg _ (funext fun i => by fin_cases i <;> rfl)
 
+set_option linter.unusedSectionVars false in
 lemma curried3_toModel_eval
     (W : Π y : M, Tensor0SBundle.Tensor0SSpace 3 I y)
     (Bf Cf Df : Cₛ^(⊤ : ℕ∞)⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -167,6 +171,7 @@ lemma curried3_toModel_eval
     (T := W y) (v0 := Bf y)]
   exact congrArg _ (funext fun i => by fin_cases i <;> rfl)
 
+set_option linter.unusedSectionVars false in
 lemma peel2_core (g : SmoothRiemannianMetric I M)
     (W : Π y : M, Tensor0SBundle.Tensor0SSpace 2 I y) {x : M}
     (hW : TensorSectionMDiffAt (I := I) 2 W x)
@@ -346,6 +351,7 @@ lemma bridge02_eval (gA gB : SmoothRiemannianMetric I M)
   rw [hA, hB, hsplitY, hsplitZ]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 lemma exists_covector_section_eq (x : M) (β : Tensor0SBundle.Tensor0SSpace 1 I x) :
     ∃ om : Cₛ^(⊤ : ℕ∞)⟮I; Tensor0SBundle.Tensor0SModel 1 ℝ E,
         (fun z : M => Tensor0SBundle.Tensor0SSpace 1 I z)⟯, om x = β := by
@@ -361,6 +367,7 @@ lemma exists_covector_section_eq (x : M) (β : Tensor0SBundle.Tensor0SSpace 1 I 
     Tensor0SBundle.tensor0SBundle_smooth _ 1
   exact ContMDiffSection.exists_eq_at x β
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDerivConnDiff_expand (g₁ g₀ : SmoothRiemannianMetric I M)
     (Xf Yf Zf : Cₛ^(⊤ : ℕ∞)⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (LeviCivita (I := I) g₀).toFun
@@ -381,6 +388,7 @@ lemma covDerivConnDiff_expand (g₁ g₀ : SmoothRiemannianMetric I M)
   rw [hexpand]
   abel
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDerivConnDiff_symm23 (g₁ g₀ : SmoothRiemannianMetric I M)
     (Xf Yf Zf : Cₛ^(⊤ : ℕ∞)⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     covDerivConnDiff (I := I) g₀ g₁ (fun y => Xf y) (fun y => Zf y) (fun y => Yf y) x =
@@ -419,11 +427,13 @@ def connDiffVecField (g₁ g₀ : SmoothRiemannianMetric I M)
   ⟨fun y : M => PDE.DeTurck.connDiff (I := I) g₁ g₀ y (Yf y) (Zf y),
     PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g₀ Yf.contMDiff Zf.contMDiff⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma connDiffVecField_apply (g₁ g₀ : SmoothRiemannianMetric I M)
     (Yf Zf : Cₛ^(⊤ : ℕ∞)⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
     connDiffVecField (I := I) (M := M) g₁ g₀ Yf Zf y =
       PDE.DeTurck.connDiff (I := I) g₁ g₀ y (Yf y) (Zf y) := rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma extDerivFun_sub' {f g : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ) f x) (hg : MDifferentiableAt I 𝓘(ℝ) g x) :
     extDerivFun (I := I) (f - g) x = extDerivFun (I := I) f x - extDerivFun (I := I) g x := by
@@ -431,6 +441,7 @@ lemma extDerivFun_sub' {f g : M → ℝ} {x : M}
   rw [sub_add_cancel] at h
   exact eq_sub_of_add_eq h.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma modelTensorWithCovectorFirst_zero_unit
     (α : Tensor0SBundle.Tensor0SModel 1 ℝ E) :
     Tensor0SBundle.model_tensorWithCovector_first (𝕜 := ℝ) (E := E) 0 α
@@ -443,6 +454,7 @@ lemma modelTensorWithCovectorFirst_zero_unit
     ContinuousMultilinearMap.constOfIsEmpty_apply, mul_one]
   exact congrArg α (funext fun j => rfl)
 
+set_option linter.unusedSectionVars false in
 lemma connContrCLM_toModel_apply (m k : ℕ) (x : M)
     (B : Tensor0SBundle.TensorRSSpace 1 (k + 1) I x)
     (D : Tensor0SBundle.Tensor0SSpace (m + 1) I x) (u : Fin (m + 1 + k) → E) :
@@ -513,6 +525,7 @@ lemma connContrCLM_toModel_apply (m k : ℕ) (x : M)
         ((Module.finBasis ℝ E).cDualBasis i)))
     (Fin.cons ((Module.finBasis ℝ E) i) u)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma sum_cons_coeff_collapse {n : ℕ} {x : M}
     (D : Tensor0SBundle.Tensor0SSpace (n + 1) I x)
     (w : Fin n → E) (c : Fin (Module.finrank ℝ E) → ℝ) :
@@ -542,6 +555,7 @@ lemma sum_cons_coeff_collapse {n : ℕ} {x : M}
   rw [← hupd ((Module.finBasis ℝ E) i)]
   rw [smul_eq_mul, mul_comm]
 
+set_option linter.unusedSectionVars false in
 lemma sum_cons_cDual_collapse {n : ℕ} {x : M}
     (D : Tensor0SBundle.Tensor0SSpace (n + 1) I x) (w : Fin n → E) (V : E) :
     (∑ i : Fin (Module.finrank ℝ E),
@@ -565,6 +579,7 @@ lemma sum_cons_cDual_collapse {n : ℕ} {x : M}
   rw [sum_cons_coeff_collapse (I := I) (M := M) D w
     (fun i => ((Module.finBasis ℝ E).cDualBasis i) V), hV]
 
+set_option linter.unusedSectionVars false in
 lemma connDiff_model_coeff (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (i : Fin (Module.finrank ℝ E)) (w : Fin 2 → E) :
     (Tensor0SBundle.TensorRSSpace.toModel
@@ -610,31 +625,37 @@ lemma connDiff_model_coeff (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
   rw [Tensor0SBundle.Tensor0SSpace.toModel_ofModel]
   rw [hβdef, Tensor0SBundle.model_covectorOfCLM_apply]
 
+omit [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma consCast21 (z : E) (u : Fin 4 → E) :
     (Fin.cons z u ∘ Fin.castAdd 2 : Fin 3 → E) = ![z, u 0, u 1] := by
   funext j
   fin_cases j <;> rfl
 
+omit [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma consNat21 (z : E) (u : Fin 4 → E) :
     (Fin.cons z u ∘ Fin.natAdd 3 : Fin 2 → E) = ![u 2, u 3] := by
   funext j
   fin_cases j <;> rfl
 
+omit [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma consCast11 (z : E) (u : Fin 3 → E) :
     (Fin.cons z u ∘ Fin.castAdd 2 : Fin 2 → E) = ![z, u 0] := by
   funext j
   fin_cases j <;> rfl
 
+omit [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma consNat11 (z : E) (u : Fin 3 → E) :
     (Fin.cons z u ∘ Fin.natAdd 2 : Fin 2 → E) = ![u 1, u 2] := by
   funext j
   fin_cases j <;> rfl
 
+omit [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma consCast12 (z : E) (u : Fin 4 → E) :
     (Fin.cons z u ∘ Fin.castAdd 3 : Fin 2 → E) = ![z, u 0] := by
   funext j
   fin_cases j <;> rfl
 
+omit [NormedAddCommGroup E] [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma consNat12 (z : E) (u : Fin 4 → E) :
     (Fin.cons z u ∘ Fin.natAdd 2 : Fin 3 → E) = ![u 1, u 2, u 3] := by
   funext j
@@ -823,6 +844,7 @@ lemma rs13ContrVec_covGrad_eq (g₁ g₀ : SmoothRiemannianMetric I M)
   rw [Finset.sum_congr rfl (fun i _ => by rw [hci i])]
   exact (Module.finBasis ℝ E).sum_repr _
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_0312_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_0312 x D) ![a, b, c, d] =
@@ -831,6 +853,7 @@ private lemma slotPerm4_0312_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_0213_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_0213 x D) ![a, b, c, d] =
@@ -839,6 +862,7 @@ private lemma slotPerm4_0213_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_2301_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_2301 x D) ![a, b, c, d] =
@@ -847,6 +871,7 @@ private lemma slotPerm4_2301_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_1302_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_1302 x D) ![a, b, c, d] =
@@ -855,6 +880,7 @@ private lemma slotPerm4_1302_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_1203_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_1203 x D) ![a, b, c, d] =
@@ -863,6 +889,7 @@ private lemma slotPerm4_1203_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_3201_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_3201 x D) ![a, b, c, d] =
@@ -871,6 +898,7 @@ private lemma slotPerm4_3201_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_3102_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_3102 x D) ![a, b, c, d] =
@@ -879,6 +907,7 @@ private lemma slotPerm4_3102_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_2103_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_2103 x D) ![a, b, c, d] =
@@ -887,6 +916,7 @@ private lemma slotPerm4_2103_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_3012_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_3012 x D) ![a, b, c, d] =
@@ -895,6 +925,7 @@ private lemma slotPerm4_3012_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_2013_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_2013 x D) ![a, b, c, d] =
@@ -903,6 +934,7 @@ private lemma slotPerm4_2013_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_0231_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_0231 x D) ![a, b, c, d] =
@@ -911,6 +943,7 @@ private lemma slotPerm4_0231_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm4_0321_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4 I x)
     (a b c d : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm4_0321 x D) ![a, b, c, d] =
@@ -919,6 +952,7 @@ private lemma slotPerm4_0321_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 4
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm3_102_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
     (a b c : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm3_102 x D) ![a, b, c] =
@@ -927,6 +961,7 @@ private lemma slotPerm3_102_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm3_120_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x)
     (a b c : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm3_120 x D) ![a, b, c] =
@@ -935,6 +970,7 @@ private lemma slotPerm3_120_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma slotPerm2_10_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I x)
     (a b : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (slotPermCLM (I := I) perm2_10 x D) ![a, b] =
@@ -1253,6 +1289,7 @@ private lemma w2Fibre_toModel_eval (g₀ : SmoothRiemannianMetric I M)
   conv_lhs => rw [hm]
   exact h
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel3_add_slot0 {x : M} (T : Tensor0SBundle.Tensor0SSpace 3 I x)
     (p p' q r : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel T ![p + p', q, r] =
@@ -1266,6 +1303,7 @@ lemma toModel3_add_slot0 {x : M} (T : Tensor0SBundle.Tensor0SSpace 3 I x)
   rw [hupd (p + p'), hupd p, hupd p']
   exact ContinuousMultilinearMap.map_update_add _ _ 0 _ _
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel3_add_slot1 {x : M} (T : Tensor0SBundle.Tensor0SSpace 3 I x)
     (p q q' r : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel T ![p, q + q', r] =
@@ -1279,6 +1317,7 @@ lemma toModel3_add_slot1 {x : M} (T : Tensor0SBundle.Tensor0SSpace 3 I x)
   rw [hupd (q + q'), hupd q, hupd q']
   exact ContinuousMultilinearMap.map_update_add _ _ 1 _ _
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel3_add_slot2 {x : M} (T : Tensor0SBundle.Tensor0SSpace 3 I x)
     (p q r r' : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel T ![p, q, r + r'] =
@@ -1292,6 +1331,7 @@ lemma toModel3_add_slot2 {x : M} (T : Tensor0SBundle.Tensor0SSpace 3 I x)
   rw [hupd (r + r'), hupd r, hupd r']
   exact ContinuousMultilinearMap.map_update_add _ _ 2 _ _
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel2_add_slot0 {x : M} (T : Tensor0SBundle.Tensor0SSpace 2 I x)
     (p p' q : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel T ![p + p', q] =
@@ -1305,6 +1345,7 @@ lemma toModel2_add_slot0 {x : M} (T : Tensor0SBundle.Tensor0SSpace 2 I x)
   rw [hupd (p + p'), hupd p, hupd p']
   exact ContinuousMultilinearMap.map_update_add _ _ 0 _ _
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel2_add_slot1 {x : M} (T : Tensor0SBundle.Tensor0SSpace 2 I x)
     (p q q' : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel T ![p, q + q'] =

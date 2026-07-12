@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Realization.Embedding
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Torsion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ noncomputable def concreteConn
 
     exact ContMDiff.clm_bundle_apply (b := id) hcov_global hX_smooth
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp]
 theorem concreteConn_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
@@ -53,6 +53,7 @@ theorem concreteConn_apply
     concreteConn I M cov X Y x = cov Y x (X x) := by
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem concreteConn_add_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -67,6 +68,7 @@ theorem concreteConn_add_right
     cov.isCovariantDerivativeOn.add hY hZ]
   simp [ContinuousLinearMap.add_apply]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem concreteConn_add_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -76,6 +78,7 @@ theorem concreteConn_add_left
   change cov Z x (X x + Y x) = cov Z x (X x) + cov Z x (Y x)
   exact ContinuousLinearMap.map_add (cov Z x) (X x) (Y x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem concreteConn_smul_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -86,6 +89,7 @@ theorem concreteConn_smul_left
   change cov Z x (f x • X x) = f x • cov Z x (X x)
   exact ContinuousLinearMap.map_smul (cov Z x) (f x) (X x)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem concreteConn_leibniz
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]

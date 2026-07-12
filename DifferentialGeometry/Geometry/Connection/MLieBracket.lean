@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
@@ -17,6 +16,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma mfderiv_symm_comp_self
     (Φ : M ≃ₘ⟮I, I⟯ M) (y : M) :
     (mfderiv I I (⇑Φ.symm) (Φ y)).comp (mfderiv I I (⇑Φ) y)
@@ -30,6 +30,7 @@ private lemma mfderiv_symm_comp_self
   rw [mfderiv_id] at hchain
   exact hchain.symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma mfderiv_self_comp_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (y : M) :
     (mfderiv I I (⇑Φ) (Φ.symm y)).comp (mfderiv I I (⇑Φ.symm) y)

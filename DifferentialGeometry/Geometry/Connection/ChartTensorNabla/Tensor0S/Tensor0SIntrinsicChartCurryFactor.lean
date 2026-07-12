@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.Tensor0SPartialEval
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Tensor.Multilinear.BundleSmoothEval
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ noncomputable def curryLeftEvalCLM (s : ℕ) (w : E) :
     (continuousMultilinearCurryLeftEquiv ℝ (fun _ : Fin (s + 1) => E)
         ℝ).toContinuousLinearEquiv.toContinuousLinearMap
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] in
 @[simp] lemma curryLeftEvalCLM_apply (s : ℕ) (w : E)
     (F : Tensor0SModel (s + 1) ℝ E) (m : Fin s → E) :
     (curryLeftEvalCLM (E := E) s w F) m = F (Fin.cons w m) := by
@@ -40,6 +40,7 @@ noncomputable def curryLeftEvalCLM (s : ℕ) (w : E) :
   simp [ContinuousLinearMap.comp_apply, ContinuousLinearMap.apply_apply,
     continuousMultilinearCurryLeftEquiv_apply]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SChartE_section_repr_apply_tuple {n : ℕ} (α : M)
     (T : Π b : M, Tensor0SSpace n I b) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -65,6 +66,7 @@ theorem tensor0SChartE_section_repr_apply_tuple {n : ℕ} (α : M)
       congrFun hcoe (T b)]
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SBundle_symmL_apply_eq_compContinuousLinearMap {n : ℕ}
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -93,6 +95,7 @@ theorem tensor0SBundle_symmL_apply_eq_compContinuousLinearMap {n : ℕ}
             (trivializationAt E (TangentSpace I) α)).symm b D) from rfl]
   exact h
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SChartE_section_repr_cons_eq_partialEval (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b) {b : M} (v : TangentSpace I b)
     {b' : M} (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -134,6 +137,7 @@ theorem tensor0SChartE_section_repr_cons_eq_partialEval (s : ℕ) (α : M)
   · simp only [Fin.cons_zero]; rfl
   · intro k; simp only [Fin.cons_succ]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SChartE_section_repr_partialEval_eq_curryLeftEval (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b) {b : M} (v : TangentSpace I b)
     {b' : M} (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -149,6 +153,7 @@ theorem tensor0SChartE_section_repr_partialEval_eq_curryLeftEval (s : ℕ) (α :
   exact (tensor0SChartE_section_repr_cons_eq_partialEval (I := I) (M := M) s α T
     (b := b) v (b' := b') hb' m).symm
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem partialEval_chartPullback_eventually_eq_curryLeftEval_chartPullback
     (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace (s + 1) I b)
     {b : M} (v : TangentSpace I b)
@@ -181,6 +186,7 @@ theorem partialEval_chartPullback_eventually_eq_curryLeftEval_chartPullback
   exact tensor0SChartE_section_repr_partialEval_eq_curryLeftEval
     (I := I) (M := M) s α T (b := b) v (b' := φ.symm y) hyBase
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem fderiv_partialEval_chartPullback_eq_comp_curryLeftEval (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
     {b : M} (v : TangentSpace I b)
@@ -210,6 +216,7 @@ theorem fderiv_partialEval_chartPullback_eq_comp_curryLeftEval (s : ℕ) (α : M
         (extChartAt I α).symm) (extChartAt I α b))).comp
     (extChartAt I α b) hT.hasFDerivAt).fderiv
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensor0SIntrinsicChartCLM_factor_via_partialEval
     (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace (s + 1) I b)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

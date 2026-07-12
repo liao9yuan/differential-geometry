@@ -6,7 +6,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.L2Space
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_smooth_approx_seq
     (g : SmoothRiemannianMetric I M) (u_h : H1Compl g) :
     ∃ v : ℕ → SmoothScalar g,
@@ -60,6 +60,7 @@ theorem exists_smooth_approx_seq
   rw [h_eq]
   exact hs_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_smooth_approx_seq_lp
     (g : SmoothRiemannianMetric I M)
     (f_h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :

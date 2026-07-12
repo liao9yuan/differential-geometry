@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorDifferentiatedRHS
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -137,6 +136,7 @@ section MainBoundUniform
 
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 
+omit [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma eLpNorm_volume_restrict_contDiffOn_mul_le_uniform
     (α : M)
     {c : EuclN → ℝ}
@@ -234,6 +234,7 @@ section SharpAtomBounds
 
 omit [CompleteSpace E] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chosenWp_memLp_volume_restrict
     (b : Fin (Module.finrank ℝ E)) (w : EuclN → ℝ) {Ω K : Set EuclN}
     (hK_meas : MeasurableSet K) (hK_in : K ⊆ Ω) :

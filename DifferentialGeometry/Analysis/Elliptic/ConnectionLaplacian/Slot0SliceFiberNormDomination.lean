@@ -21,6 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -54,6 +55,7 @@ theorem riemannianFiberNormSq_succ_eq_sum_slot0Curry_of_frame
   refine Finset.sum_congr rfl (fun J' _ => ?_)
   rw [fiberNormSqComponent_slot0Curry (I := I) (M := M) g x s e K₀ T a J']
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem riemannianFiberNormSq_slot0Curry_le_of_frame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -78,6 +80,7 @@ theorem riemannianFiberNormSq_slot0Curry_le_of_frame
     (fun b _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _)
     (Finset.mem_univ a)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem riemannianFiberNormSq_slot0Curry_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x) :
@@ -98,6 +101,7 @@ theorem riemannianFiberNormSq_slot0Curry_le
     (fun b _ => riemannianFiberNormSq_nonneg (I := I) (M := M) g 0 s x _)
     (Finset.mem_univ a)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem exists_riemannianFiberNormSq_slot0Curry_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x) :

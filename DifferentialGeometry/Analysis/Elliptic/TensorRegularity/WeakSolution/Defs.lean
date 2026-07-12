@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.ChartWeakIdentity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ noncomputable def tensorComponentEuclid
   chartPushedRaw I α
     (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -54,6 +54,7 @@ lemma tensorComponentEuclid_def
       chartPushedRaw I α
         (tensorChartComponentRaw (I := I) (M := M) g r s T α P₀.1 P₀.2) := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -65,6 +66,7 @@ lemma tensorComponentEuclid_apply_of_mem
   rw [tensorComponentEuclid_def]
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorComponentEuclid_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -74,6 +76,7 @@ lemma tensorComponentEuclid_apply_of_notMem
   rw [tensorComponentEuclid_def]
   exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy
 
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -83,6 +86,7 @@ theorem tensorComponentEuclid_contDiffOn
   chartPushedRaw_tensorChartComponentRaw_contDiffOn (I := I) (M := M)
     g r s T α P₀.1 P₀.2
 
+set_option linter.unusedSectionVars false in
 private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -95,6 +99,7 @@ private lemma tensorChartComponentRaw_eq_zero_of_section_eq_zero
   unfold tensorTrivProj
   rw [hx, map_zero, map_zero]
 
+omit [CompleteSpace E] in
 lemma tensorChartComponentRaw_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -116,6 +121,7 @@ lemma tensorChartComponentRaw_tsupport_subset
   exact hx (tensorChartComponentRaw_eq_zero_of_section_eq_zero
     (I := I) (M := M) g r s T α Idx Jdx hsec)
 
+omit [CompleteSpace E] in
 private lemma tensorChartComponentRaw_tsupport_subset_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -127,6 +133,7 @@ private lemma tensorChartComponentRaw_tsupport_subset_chart_source
   (tensorChartComponentRaw_tsupport_subset (I := I) (M := M) g r s T α Idx Jdx).trans
     hT_supp
 
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -172,6 +179,7 @@ theorem tensorComponentEuclid_contDiff
     · exact tensorComponentEuclid_apply_of_notMem
         (I := I) (M := M) g r s T α P₀ hzT
 
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -213,6 +221,7 @@ theorem tensorComponentEuclid_tsupport_subset
         (I := I) (M := M) g r s T α P₀ hyT)
   exact (closure_minimal hsupp hK_compact.isClosed).trans hK_target
 
+omit [CompleteSpace E] in
 theorem tensorComponentEuclid_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -253,6 +262,7 @@ theorem tensorComponentEuclid_hasCompactSupport
         (I := I) (M := M) g r s T α P₀ hyT)
   exact HasCompactSupport.of_support_subset_isCompact hK_compact hsupp
 
+omit [CompleteSpace E] in
 theorem tensorComponent_isSmoothWeakSolution_of_chartIdentity
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

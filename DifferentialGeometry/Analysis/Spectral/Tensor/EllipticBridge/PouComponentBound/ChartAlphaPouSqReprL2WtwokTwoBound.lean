@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.ChartAlphaPouAlphaPouBetaCovBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapL2WtwokTwoBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -128,6 +128,7 @@ private lemma sum_wkpNorm_sq_α_le_wtwokTwoNorm_sq
     _ = (S α) ^ 2 := by rw [hSα_eq]
     _ ≤ (wtwokTwoNorm (I := I) (M := M) g 0 T) ^ 2 := h_Sα_sq_le_wt_sq
 
+omit [BoundarylessManifold I M] in
 theorem chart_α_pou_sq_repr_L2_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

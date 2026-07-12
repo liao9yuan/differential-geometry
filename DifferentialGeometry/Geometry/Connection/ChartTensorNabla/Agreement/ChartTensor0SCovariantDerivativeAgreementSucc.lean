@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartLeviCivitaParallelExtend
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 open Tensor0SPartialEval
 
+set_option linter.unusedSectionVars false in
 private lemma tensor0S_curry_symm_apply_cons (s : ℕ) {b : M}
     (Φ : TangentSpace I b →L[ℝ] Tensor0SSpace s I b)
     (v : TangentSpace I b) (m : Fin s → TangentSpace I b) :

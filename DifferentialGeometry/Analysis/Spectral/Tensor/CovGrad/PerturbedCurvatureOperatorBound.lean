@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFr
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PerturbedInnerUpperBound
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem gZeroInner_self_le_of_g1_self_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {δ : ℝ}
@@ -55,6 +55,7 @@ theorem gZeroInner_self_le_of_g1_self_le
   rw [← htie x v v] at hlb
   linarith
 
+set_option linter.unusedSectionVars false in
 theorem gZeroInner_self_le_neumann_of_g1_unit
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -75,6 +76,7 @@ private lemma inv_le_inv_of_le_of_pos {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
   have ha : 0 < a := lt_of_lt_of_le hb hab
   rw [inv_le_inv₀ ha hb]; exact hab
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma gNorm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a + b) (a + b)) ≤
@@ -109,6 +111,7 @@ private lemma gNorm_triangle
   rw [hsq]
   linarith [hcs]
 
+set_option linter.unusedSectionVars false in
 private lemma gNorm_sq_sub_eq_self_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x)
     {Ka Cb : ℝ} (hKa : 0 ≤ Ka) (hCb : 0 ≤ Cb) {p : ℝ} (hp : 0 ≤ p)

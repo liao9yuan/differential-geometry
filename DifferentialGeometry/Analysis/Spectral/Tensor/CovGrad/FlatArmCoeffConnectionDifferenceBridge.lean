@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RecoveryEndomorphismJetBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -68,11 +67,13 @@ def connDiffLoweredCovec (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
         exact ((g₀.inner x).continuous.comp hconn).clm_apply (continuous_apply 2) }
     : Tensor0SSpace 3 I x)
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma connDiffLoweredCovec_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 3 → TangentSpace I x) :
     connDiffLoweredCovec (I := I) g₀ g₁ x m =
       g₀.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (m 0) (m 1)) (m 2) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma connDiffLoweredScalar_contMDiffAt (g₀ g₁ : SmoothRiemannianMetric I M)
     (V0 V1 V2 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x₀ : M) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
@@ -92,6 +93,7 @@ private lemma connDiffLoweredScalar_contMDiffAt (g₀ g₁ : SmoothRiemannianMet
   rw [Bundle.contMDiffAt_totalSpace] at h_total
   exact h_total.2
 
+set_option linter.unusedSectionVars false in
 theorem connDiffLoweredCovec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 3 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 3 ℝ E)
@@ -161,6 +163,7 @@ private lemma connDiffLoweredCc_unitModel_apply (g₀ g₁ : SmoothRiemannianMet
   rw [connDiffLoweredCc_unitModel]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -173,6 +176,7 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
   rw [h1]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem riemannianFiberNormSq_neg_value
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =

@@ -11,7 +11,6 @@ import Mathlib.LinearAlgebra.Matrix.Adjugate
 import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.Data.Matrix.Mul
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,17 +42,20 @@ def boundaryChartBasisVec (α₀ : BoundaryManifold I M)
       TotalSpace hI.boundaryE (TangentSpace hI.boundaryI : BoundaryManifold I M → Type _) :=
   fun α => TotalSpace.mk' hI.boundaryE α (boundaryChartBasisVecFiber α₀ i α)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryChartBasisVec_proj
     (α₀ : BoundaryManifold I M) (i : Fin (Module.finrank ℝ hI.boundaryE))
     (α : BoundaryManifold I M) :
     (boundaryChartBasisVec (M := M) α₀ i α).proj = α := rfl
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryChartBasisVec_snd
     (α₀ : BoundaryManifold I M) (i : Fin (Module.finrank ℝ hI.boundaryE))
     (α : BoundaryManifold I M) :
     (boundaryChartBasisVec (M := M) α₀ i α).2 =
       boundaryChartBasisVecFiber (M := M) α₀ i α := rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma trivializationAt_boundaryChartBasisVec_snd
     (α₀ : BoundaryManifold I M) (i : Fin (Module.finrank ℝ hI.boundaryE))
     {α : BoundaryManifold I M}
@@ -65,6 +67,7 @@ lemma trivializationAt_boundaryChartBasisVec_snd
     ((Module.finBasis ℝ hI.boundaryE) i)
   simpa [boundaryChartBasisVecFiber] using congrArg Prod.snd h
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryChartBasisVec_contMDiffOn
     (α₀ : BoundaryManifold I M) (i : Fin (Module.finrank ℝ hI.boundaryE)) :
     ContMDiffOn hI.boundaryI (hI.boundaryI.prod 𝓘(ℝ, hI.boundaryE)) ∞
@@ -91,6 +94,7 @@ def boundaryChartBasisFamily (α₀ : BoundaryManifold I M) {α : BoundaryManifo
       ((trivializationAt hI.boundaryE
         (TangentSpace hI.boundaryI) α₀).continuousLinearEquivAt ℝ α hα).symm)
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryChartBasisFamily_apply
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
     (hα : α ∈ (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet)
@@ -101,6 +105,7 @@ lemma boundaryChartBasisFamily_apply
   rw [Module.Basis.map_apply]
   rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryChartBasisFamily_linearIndependent
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
     (hα : α ∈ (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet) :
@@ -126,6 +131,7 @@ def boundaryGramMatrix (g : SmoothRiemannianMetric I M)
       (boundaryChartBasisVecFiber (M := M) α₀ i α)
       (boundaryChartBasisVecFiber (M := M) α₀ j α)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryGramMatrix_apply
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) (α : BoundaryManifold I M)
@@ -135,6 +141,7 @@ def boundaryGramMatrix (g : SmoothRiemannianMetric I M)
         (boundaryChartBasisVecFiber (M := M) α₀ i α)
         (boundaryChartBasisVecFiber (M := M) α₀ j α) := rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryGramMatrix_isHermitian
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) (α : BoundaryManifold I M) :
@@ -148,6 +155,7 @@ lemma boundaryGramMatrix_isHermitian
     (boundaryChartBasisVecFiber (M := M) α₀ j α)
     (boundaryChartBasisVecFiber (M := M) α₀ i α)
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryGramMatrix_dotProduct_mulVec
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) (α : BoundaryManifold I M)
@@ -205,6 +213,7 @@ lemma boundaryGramMatrix_dotProduct_mulVec
   intro j _
   ring
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryGramMatrix_posDef
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -225,6 +234,7 @@ lemma boundaryGramMatrix_posDef
     exact hc this
   exact inducedMetricInner_pos (M := M) g α w hwnz
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryGramMatrix_det_pos
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -232,6 +242,7 @@ lemma boundaryGramMatrix_det_pos
     0 < (boundaryGramMatrix (M := M) g α₀ α).det :=
   (boundaryGramMatrix_posDef (M := M) g α₀ hα).det_pos
 
+set_option linter.unusedSectionVars false in
 theorem boundaryGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)
@@ -264,6 +275,7 @@ theorem boundaryGramMatrix_entry_contMDiffOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpα
   exact hpα.2
 
+set_option linter.unusedSectionVars false in
 lemma boundaryGramMatrix_det_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) :
@@ -293,6 +305,7 @@ def boundaryInvGramMatrix (g : SmoothRiemannianMetric I M)
       (Fin (Module.finrank ℝ hI.boundaryE)) ℝ :=
   (boundaryGramMatrix (M := M) g α₀ α)⁻¹
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryInvGramMatrix_mul_boundaryGramMatrix
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -305,6 +318,7 @@ lemma boundaryInvGramMatrix_mul_boundaryGramMatrix
   unfold boundaryInvGramMatrix
   exact Matrix.nonsing_inv_mul _ hdet_unit
 
+omit [FiniteDimensional ℝ E] in
 lemma boundaryGramMatrix_mul_boundaryInvGramMatrix
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) {α : BoundaryManifold I M}
@@ -317,6 +331,7 @@ lemma boundaryGramMatrix_mul_boundaryInvGramMatrix
   unfold boundaryInvGramMatrix
   exact Matrix.mul_nonsing_inv _ hdet_unit
 
+set_option linter.unusedSectionVars false in
 lemma boundaryGramMatrix_adjugate_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)
@@ -370,6 +385,7 @@ lemma boundaryGramMatrix_adjugate_entry_contMDiffOn
     rw [heq]
     exact boundaryGramMatrix_entry_contMDiffOn (M := M) g α₀ (σ k) k
 
+set_option linter.unusedSectionVars false in
 theorem boundaryInvGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)

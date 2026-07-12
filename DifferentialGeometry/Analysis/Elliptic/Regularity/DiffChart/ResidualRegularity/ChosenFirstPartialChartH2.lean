@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ noncomputable def chosenMixedSecondPartial
     (chartPushedChosenFirstPartial (I := I) (M := M) g α u_h l)
     (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem target_iff_per_direction
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (l : Fin (Module.finrank ℝ E)) :
@@ -85,6 +85,7 @@ theorem target_iff_per_direction
     rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
     exact h_second i
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMixedSecondPartial_memW1p_of_chartPushed_memWkp_three
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -134,6 +135,7 @@ theorem chartPushedChosenFirstPartial_memWkp_two_of_chartPushed_memWkp_three
   exact chosenMixedSecondPartial_memW1p_of_chartPushed_memWkp_three
     (I := I) (M := M) g α u_h h_chartPushed_memWkp_three l i
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushed_chosenFirstPartial_memWkp_two_two_of_laplacianDomainPow_two_via_chartPushed_memWkp_three
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     [NeZero (Module.finrank ℝ E)]

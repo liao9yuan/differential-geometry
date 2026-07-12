@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckMetricA
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gen_joint_partialDeriv
     (Ψ : ℝ → E → ℝ) (q : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E}
     (hΨ : ContDiffAt ℝ ∞ (fun r : ℝ × E => Ψ r.1 r.2) (s₀, y₀)) :
@@ -68,6 +68,7 @@ def ChartGramFamilyJointSmoothNondegenerate (S : Set ℝ) : Prop :=
       ∀ {x : M}, x ∈ (trivializationAt E (TangentSpace I) α).baseSet →
       0 < (chartGramMatrix (I := I) (gfam s₀) α x).det)
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartInvGramOnE_contDiffAt_joint {S : Set ℝ} (hG : ChartGramFamilyJointSmoothNondegenerate (I := I) gfam α S)
     (k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -148,6 +149,7 @@ lemma chartInvGramOnE_contDiffAt_joint {S : Set ℝ} (hG : ChartGramFamilyJointS
   rw [hcongr]
   exact ((contDiffAt_inv _ hdet_ne).comp (s₀, y₀) hdet).mul (hadj k l)
 
+set_option linter.unusedSectionVars false in
 lemma gen_joint_gramBracket {S : Set ℝ} (hG : ChartGramFamilyJointSmoothNondegenerate (I := I) gfam α S)
     (i j l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :
@@ -167,6 +169,7 @@ lemma gen_joint_gramBracket {S : Set ℝ} (hG : ChartGramFamilyJointSmoothNondeg
     (gen_joint_partialDeriv (fun s y => chartGramOnE (I := I) (gfam s) α i j y) l
       (hG.1 i j hs hy))
 
+set_option linter.unusedSectionVars false in
 lemma gen_joint_christoffel {S : Set ℝ} (hG : ChartGramFamilyJointSmoothNondegenerate (I := I) gfam α S)
     (i j k : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)
     (hy : y₀ ∈ interior (extChartAt I α).target) :

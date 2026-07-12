@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.IntrinsicComponent
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,6 +48,7 @@ private lemma sq_add_three_le_three_mul_sum_sq (a b c : ℝ) :
     (a + b + c) ^ 2 ≤ 3 * (a ^ 2 + b ^ 2 + c ^ 2) := by
   nlinarith [sq_nonneg (a - b), sq_nonneg (b - c), sq_nonneg (a - c)]
 
+omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -137,6 +137,7 @@ private lemma reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
+omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fderiv_reprT_differentiableAt_chart_point
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) {b : M}
@@ -173,6 +174,7 @@ private lemma fderiv_reprT_differentiableAt_chart_point
     (hfd_cd.differentiableOn hne) (extChartAt I α b) hx_mem
   exact hwithin.differentiableAt (hU_open.mem_nhds hx_mem)
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameNormGlobalSmooth_fderiv_repr_bound
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

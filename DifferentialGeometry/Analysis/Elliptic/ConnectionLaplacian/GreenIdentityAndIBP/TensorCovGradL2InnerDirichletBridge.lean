@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradMetricBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_covGrad_eq_integral_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T v : SmoothCcTensor g r s) :

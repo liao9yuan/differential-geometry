@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -25,6 +24,7 @@ def chartTransitionEuclidRestr (γ α : M) : EuclN → EuclN := by
     (chartTransitionEuclid (I := I) (M := M) γ α)
     (fun _ : EuclN => 0)
 
+omit [IsManifold I ∞ M] in
 lemma chartTransitionEuclidRestr_eqOn_overlap (γ α : M) :
     Set.EqOn (chartTransitionEuclidRestr (I := I) (M := M) γ α)
       (chartTransitionEuclid (I := I) (M := M) γ α)
@@ -35,6 +35,7 @@ lemma chartTransitionEuclidRestr_eqOn_overlap (γ α : M) :
     (chartTransitionEuclid (I := I) (M := M) γ α) (fun _ : EuclN => 0) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
+omit [IsManifold I ∞ M] in
 lemma chartTransitionEuclidRestr_ae_eq_restrict
     [I.Boundaryless] (γ α : M) :
     chartTransitionEuclidRestr (I := I) (M := M) γ α
@@ -62,6 +63,7 @@ lemma chartTransitionEuclidRestr_measurable
   exact ContinuousOn.measurable_piecewise h_cont_on h_const_on
     h_overlap_open.measurableSet
 
+omit [IsManifold I ∞ M] in
 lemma chartTransitionEuclid_preimage_inter_overlap
     [I.Boundaryless] (γ α : M) (s : Set EuclN) :
     chartTransitionEuclid (I := I) (M := M) γ α ⁻¹' s ∩

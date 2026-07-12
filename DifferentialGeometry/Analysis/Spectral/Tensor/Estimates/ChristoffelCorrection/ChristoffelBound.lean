@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Topology.Order.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,6 +25,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartImage_pouTsupport_isCompact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] (α : M) :
     IsCompact ((extChartAt I α) ''
@@ -54,6 +54,7 @@ theorem chartImage_pouTsupport_isCompact
     (continuousOn_extChartAt α).mono h_tsupp_sub_extSrc
   exact h_tsupp_compact.image_of_continuousOn h_cont
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartImage_pouTsupport_subset_target
     [T2Space M] [SigmaCompactSpace M] (α : M) :
     (extChartAt I α) ''
@@ -72,6 +73,7 @@ theorem chartImage_pouTsupport_subset_target
     exact h_tsupp_sub_src hx
   exact (extChartAt I α).map_source hx_src
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartImage_pouTsupport_subset_interior_target
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] (α : M) :
     (extChartAt I α) ''

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionLe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformProportionalCurvatureSup
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldEvaluationLeibniz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 theorem exists_proportional_recCurvDiffOp
     (g : SmoothRiemannianMetric I M)
     (op : ∀ (p r : ℕ), SmoothCcTensor g 0 r → SmoothCcTensor g 0 (r + p))

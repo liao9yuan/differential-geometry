@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ noncomputable def perturbedInner
     TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   g.inner x + h x
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 @[simp] lemma perturbedInner_apply
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -49,6 +49,7 @@ noncomputable def perturbedInner
     perturbedInner g h x v w = g.inner x v w + h x v w := by
   simp only [perturbedInner, ContinuousLinearMap.add_apply]
 
+set_option linter.unusedSectionVars false in
 theorem perturbedInner_symm
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -57,6 +58,7 @@ theorem perturbedInner_symm
     perturbedInner g h x v w = perturbedInner g h x w v := by
   rw [perturbedInner_apply, perturbedInner_apply, g.symm x v w, hsymm x v w]
 
+set_option linter.unusedSectionVars false in
 private lemma abs_h_diag_le
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -72,6 +74,7 @@ private lemma abs_h_diag_le
     _ = δ * (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x v v)) := by ring
     _ = δ * g.inner x v v := by rw [hsq]
 
+set_option linter.unusedSectionVars false in
 theorem perturbedInner_self_lower_bound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -84,6 +87,7 @@ theorem perturbedInner_self_lower_bound
   rw [perturbedInner_apply]
   nlinarith [hge]
 
+set_option linter.unusedSectionVars false in
 theorem perturbedInner_pos_of_metricCauchySchwarzBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -96,6 +100,7 @@ theorem perturbedInner_pos_of_metricCauchySchwarzBound
   have : 0 < (1 - δ) * g.inner x v v := mul_pos hcoeff hg_pos
   linarith
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma gSublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (x : M) {r : ℝ} (hr : 0 < r) :
     Bornology.IsVonNBounded ℝ
@@ -145,6 +150,7 @@ private lemma gSublevel_isVonNBounded
   rw [hset_eq]
   exact himg
 
+set_option linter.unusedSectionVars false in
 theorem perturbedInner_isVonNBounded
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -166,6 +172,7 @@ theorem perturbedInner_isVonNBounded
     exact h1
   exact (gSublevel_isVonNBounded (I := I) (M := M) g x hr_pos).subset hsub
 
+set_option linter.unusedSectionVars false in
 theorem perturbedInner_contMDiff
     [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
@@ -261,6 +268,7 @@ noncomputable def perturbedMetric
   isVonNBounded x := perturbedInner_isVonNBounded (I := I) (M := M) g h hδ_lt hδ x
   contMDiff := perturbedInner_contMDiff (I := I) (M := M) g h hsmooth
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma perturbedMetric_inner
     [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M)
@@ -275,6 +283,7 @@ noncomputable def perturbedMetric
     (perturbedMetric g h hsymm hsmooth hδ_lt hδ).inner x = perturbedInner g h x :=
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem exists_posDef_perturbation_radius
     [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]

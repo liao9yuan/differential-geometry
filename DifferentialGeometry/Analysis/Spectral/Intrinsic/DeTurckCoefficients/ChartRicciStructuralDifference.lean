@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Chri
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RicciDiffAffine
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+set_option linter.unusedSectionVars false in
 theorem invGramOnE_sub_eq
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) {y : E}
@@ -89,6 +89,7 @@ theorem invGramOnE_sub_eq
     show chartGramOnE (I := I) g₁ α p q y = chartGramMatrix (I := I) g₁ α x p q from rfl,
     Matrix.sub_apply]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem gramBracket_sub_eq
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) (y : E) :
@@ -102,6 +103,7 @@ theorem gramBracket_sub_eq
   unfold gramBracket
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem gramBracketDeriv_sub_eq
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (m i j l : Fin (Module.finrank ℝ E)) (y : E) :
@@ -159,6 +161,7 @@ theorem partialDeriv_chartChristoffel_sub_eq
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderTerm_sub_eq_christoffelDerivDiff
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -174,6 +177,7 @@ theorem chartRicciSecondOrderTerm_sub_eq_christoffelDerivDiff
   refine Finset.sum_congr rfl (fun j _ => ?_)
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciFirstOrderTerm_sub_eq_christoffelDiff
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :

@@ -4,7 +4,6 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.RingTheory.Derivation.Lie
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -50,10 +49,12 @@ noncomputable def vectorFieldActionSmooth
       trivializationAt_model_space_apply]
     rfl⟩
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiffMap_mdifferentiableAt (f : C^∞⟮I, M; ℝ⟯) (x : M) :
     MDifferentiableAt I 𝓘(ℝ, ℝ) f x :=
   f.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem vectorFieldActionSmooth_add
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (f g : C^∞⟮I, M; ℝ⟯) :
@@ -68,6 +69,7 @@ theorem vectorFieldActionSmooth_add
     (contMDiffMap_mdifferentiableAt I M g x)]
   simp [ContinuousLinearMap.add_apply]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem vectorFieldActionSmooth_smul
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (c : ℝ) (f : C^∞⟮I, M; ℝ⟯) :
@@ -90,6 +92,7 @@ theorem vectorFieldActionSmooth_smul
   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
   exact smul_eq_mul c _
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem vectorFieldActionSmooth_leibniz
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (f g : C^∞⟮I, M; ℝ⟯) :
@@ -116,6 +119,7 @@ theorem vectorFieldActionSmooth_leibniz
     simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
     ring)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem vectorFieldActionSmooth_map_one_eq_zero
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     vectorFieldActionSmooth I M X 1 = 0 := by
@@ -146,6 +150,7 @@ noncomputable def embedDeriv
     change vectorFieldActionSmooth I M X 1 = 0
     exact vectorFieldActionSmooth_map_one_eq_zero I M X
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem embedDeriv_add
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     embedDeriv I M (X + Y) = embedDeriv I M X + embedDeriv I M Y := by
@@ -155,6 +160,7 @@ theorem embedDeriv_add
   simp only [vectorFieldAction, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.map_add]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem embedDeriv_smul
     (φ : C^∞⟮I, M; ℝ⟯)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -180,6 +186,7 @@ noncomputable def embedLinearMap :
   map_add' := embedDeriv_add I M
   map_smul' := embedDeriv_smul I M
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mfderiv_extChartAt_ne_zero
     {x₀ : M} (v : TangentSpace I x₀) (hv : v ≠ 0) :
     mfderiv I 𝓘(ℝ, E) (extChartAt I x₀) x₀ v ≠ 0 := by
@@ -190,6 +197,7 @@ private theorem mfderiv_extChartAt_ne_zero
   apply hinv.injective
   rw [h, map_zero]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem embedLinearMap_injective :
     Function.Injective (embedLinearMap I M) := by
   intro X Y hXY
@@ -319,6 +327,7 @@ noncomputable def mlieBracketSection
         show ((⊤ : ℕ∞) + 1 : WithTop ℕ∞) ≤ ∞
         simp)⟩
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem embedDeriv_mlieBracket
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (f : C^∞⟮I, M; ℝ⟯) :
@@ -517,6 +526,7 @@ theorem embedDeriv_mlieBracket
     (by rw [minSmoothness_of_isRCLikeNormedField]; norm_cast)
     huniq hy₀_closure hy₀s hW'_diff hV'_diff
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem embed_bracket_closed
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ∃ Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯,

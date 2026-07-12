@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 private theorem tensorL2Inner_eq_tsum_l2Coeff_cross
     (g₀ : SmoothRiemannianMetric I M) (A B : SmoothCcTensor g₀ 0 2) :
     tensorL2Inner (I := I) (M := M) g₀ 0 2 A.toFun B.toFun =
@@ -339,6 +339,7 @@ private theorem norm_iteratedCovGrad_comp_local
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
+omit [BoundarylessManifold I M] in
 private theorem norm_iteratedCovGrad_order_eq_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {n n' : ℕ} (h : n = n')
     (S : SmoothCcTensor g₀ 0 s) :
@@ -346,6 +347,7 @@ private theorem norm_iteratedCovGrad_order_eq_local
   subst h
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma contract_eq_covGradBundleEquiv_symm_local
     (s : ℕ) (x : M) (v : TangentSpace I x) (A : TensorRSSpace 0 (s + 1) I x) :
     Tensor0SBundle.contract_covariant 0 s x v A =

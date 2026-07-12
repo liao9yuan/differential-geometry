@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.Bootstr
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.RotatedTestSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -88,6 +87,7 @@ def eigenvectorPouApprox
     (eigenvectorSmoothApprox (I := I) (M := M)
       g r s i n).toCcTensor
 
+set_option linter.unusedSectionVars false in
 lemma euclidPartial_zero_off_tsupport
     {u : EuclN → ℝ} (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ tsupport u) :
@@ -100,6 +100,7 @@ lemma euclidPartial_zero_off_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+set_option linter.unusedSectionVars false in
 lemma densityOnEuclid_mul_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
@@ -115,6 +116,7 @@ lemma densityOnEuclid_mul_test_memLp
   rw [chartL2Measure]
   exact (h_cd.continuous.memLp_of_hasCompactSupport h_cs).restrict _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma test_memLp
     (α : M) {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ) :
     MemLp ψ 2 (chartL2Measure (I := I) (M := M) α) := by
@@ -128,6 +130,7 @@ private def principalSymbolTest
     weightedInvGramOnEuclid (I := I) g α i' j y *
       (fderiv ℝ ψ y) (EuclideanSpace.single j 1)
 
+set_option linter.unusedSectionVars false in
 private lemma principalSymbolTest_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ ∞ ψ) (hψ_cs : HasCompactSupport ψ)
@@ -188,6 +191,7 @@ private lemma principalSymbolTest_memLp
     exact hcd.continuous.memLp_of_hasCompactSupport hcs
   exact hsum_memLp.restrict _
 
+set_option linter.unusedSectionVars false in
 lemma density_coeff_test_memLp
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -211,6 +215,7 @@ lemma density_coeff_test_memLp
   rw [chartL2Measure]
   exact (hcd.continuous.memLp_of_hasCompactSupport hcs).restrict _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma pouSmul_eq_scalarSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -286,6 +291,7 @@ lemma eigenvectorPouApprox_component_tsupport_subset
   exact tensorChartComponent_tsupport_subset_chartPouKernel (I := I) (M := M)
     g r s _ α P₀.1 P₀.2
 
+omit [CompleteSpace E] in
 lemma eigenvectorPouApprox_tsupport_subset_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -294,6 +300,7 @@ lemma eigenvectorPouApprox_tsupport_subset_source
         g r s i α n).toFun ⊆ (chartAt H α).source :=
   pouSmul_tsupport_subset_chartSource (I := I) (M := M) g r s α _
 
+set_option linter.unusedSectionVars false in
 private lemma eigenvectorPouApprox_component_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

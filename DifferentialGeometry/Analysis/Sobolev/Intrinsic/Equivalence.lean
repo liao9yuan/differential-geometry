@@ -10,7 +10,6 @@ import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ private def chartPushedExt (α : M) (f : M → ℝ) : EuclN E → ℝ := by
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_apply_of_mem_target
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : (toEuclidean (E := E)).symm y ∈ (extChartAt I α).target) :
@@ -57,6 +57,7 @@ private lemma chartPushedExt_apply_of_mem_target
     else 0) = f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
   rw [if_pos hy]
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_apply_of_notMem_target
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : (toEuclidean (E := E)).symm y ∉ (extChartAt I α).target) :
@@ -67,6 +68,7 @@ private lemma chartPushedExt_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_apply_of_mem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -77,6 +79,7 @@ private lemma chartPushedExt_apply_of_mem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_apply_of_notMem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN E}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -86,6 +89,7 @@ private lemma chartPushedExt_apply_of_notMem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_eq_chartPushed_on_target
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (α : M) (u : M → ℝ) {y : EuclN E}
@@ -98,6 +102,7 @@ private lemma chartPushedExt_eq_chartPushed_on_target
   unfold chartPushed
   rfl
 
+omit [IsManifold I ∞ M] in
 private lemma image_toEuclidean_chart_tsupport_isCompact
     [CompactSpace M] {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -107,6 +112,7 @@ private lemma image_toEuclidean_chart_tsupport_isCompact
     (I := I) (M := M) (u := f) (α := α) hf_supp
   exact hKE.1.image (toEuclidean (E := E)).continuous
 
+omit [IsManifold I ∞ M] in
 private lemma image_toEuclidean_chart_tsupport_subset_chartTargetEuclid
     {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -116,6 +122,7 @@ private lemma image_toEuclidean_chart_tsupport_subset_chartTargetEuclid
   image_toEuclidean_extChartAt_tsupport_subset_chartTargetEuclid
     (I := I) (M := M) (u := f) (α := α) hf_supp
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushedExt_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt H α).source) {y : EuclN E}
@@ -141,6 +148,7 @@ private lemma chartPushedExt_eq_zero_off_image_tsupport
     refine ⟨z, ⟨(extChartAt I α).symm z, hsymm_in_supp, hz_eq⟩, hzy⟩
   · exact chartPushedExt_apply_of_notMem_chartTargetEuclid (I := I) (M := M) α f hy_target
 
+omit [IsManifold I ∞ M] in
 private lemma hasCompactSupport_chartPushedExt
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -199,6 +207,7 @@ private lemma contDiffAt_chartPushedExt_of_mem_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [chartPushedExt_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
 
+omit [IsManifold I ∞ M] in
 private lemma contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
     (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source)
@@ -247,6 +256,7 @@ private lemma contDiff_chartPushedExt
     exact contDiffAt_chartPushedExt_of_notMem_image_tsupport_compact
       (I := I) (M := M) α (f := f) hf_supp hf_compact hy_off
 
+omit [IsManifold I ∞ M] in
 private lemma chartTargetEuclid_isOpen' [I.Boundaryless] (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import Mathlib.Geometry.Manifold.VectorField.Pullback
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -18,11 +17,13 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] in
 theorem flowFamily_contMDiff_fixed_time
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (s : ℝ) :
     ContMDiff I I ∞ (Φ_fam s : M → M) :=
   (Φ_fam s).contMDiff
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] in
 theorem flowFamily_mdifferentiableAt_fixed_time
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (s : ℝ) (x : M) :
     MDifferentiableAt I I (Φ_fam s : M → M) x := by
@@ -43,6 +44,7 @@ open DifferentialGeometry.PDE.RicciFlow.Pullback
 
 private lemma pushforward_infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma flowFamily_pushforward_eq_mpullback_symm
     (Φ : M ≃ₘ⟮I, I⟯ M) (Y : ∀ x : M, TangentSpace I x) :
     (Diffeomorph.pushforward Φ Y : ∀ x : M, TangentSpace I x)
@@ -79,6 +81,7 @@ private lemma flowFamily_pushforward_eq_mpullback_symm
   exact eqRec_heq (φ := fun w => TangentSpace I w) (Φ.apply_symm_apply z)
     ((mfderiv I I (⇑Φ) (Φ.symm z)) (Y (Φ.symm z)))
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem flowFamily_pushforward_contMDiff
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (s : ℝ)
     {Y : ∀ x : M, TangentSpace I x}
@@ -117,6 +120,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
 theorem flowFamily_hasMFDerivWithinAt_time
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -128,6 +132,7 @@ theorem flowFamily_hasMFDerivWithinAt_time
       ((1 : ℝ →L[ℝ] ℝ).smulRight (X s (Φ_fam s x))) :=
   hbare s hs hsT x
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
 theorem flowFamily_continuousWithinAt_time
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -150,6 +155,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
+set_option linter.unusedSectionVars false in
 theorem flowFamily_regularity_package
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

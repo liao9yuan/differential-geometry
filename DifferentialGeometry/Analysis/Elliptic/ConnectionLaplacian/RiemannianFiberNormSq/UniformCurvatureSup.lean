@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFi
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ def curvatureContraction
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [I.Boundaryless] in
 @[simp] lemma curvatureContraction_toSection_eq_riemannSec
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 s)
@@ -55,6 +55,7 @@ def curvatureContraction
       riemannSec (tensorCov (I := I) g 0 s) X Y (fun y : M => Z.toSection y) x := rfl
 
 
+omit [I.Boundaryless] in
 theorem curvatureContraction_toSection_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : SmoothCcTensor g 0 s)

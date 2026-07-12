@@ -9,7 +9,6 @@ import Mathlib.Analysis.Matrix.PosDef
 import Mathlib.LinearAlgebra.Matrix.PosDef
 import Mathlib.Topology.Order.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -184,6 +183,7 @@ private lemma deriv_deriv_nonpos_of_isLocalMax_at_zero
   have ht_lt : g 0 < g t := hMono (left_mem_Icc.mpr (le_of_lt hε_pos)) ht_in_Icc ht_pos
   linarith
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sndFDeriv_apply_self_nonpos_of_isLocalMax
     {ftilde : E → ℝ} {y₀ : E} (hf_max : IsLocalMax ftilde y₀)
     (hf_C2 : ContDiffAt ℝ 2 ftilde y₀) (v : E) :
@@ -273,6 +273,7 @@ private lemma sndFDeriv_apply_self_nonpos_of_isLocalMax
   rw [h_deriv_deriv_g_eq, h_chain.deriv] at h_g_2nd
   exact h_g_2nd
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma sndFDeriv_apply_self_eq_sum_of_basis
     {ftilde : E → ℝ} {y₀ : E} (hf_diff : DifferentiableAt ℝ (fderiv ℝ ftilde) y₀)
     (v : E) :

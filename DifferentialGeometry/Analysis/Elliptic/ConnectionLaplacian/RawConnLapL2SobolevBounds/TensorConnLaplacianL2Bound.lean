@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawTensorConnLapPerChartL2Bound
 import DifferentialGeometry.Analysis.Integration.Measure.ManifoldL2NormChartTargetBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -53,6 +52,7 @@ noncomputable def chartSobolevRawNorm
           y)
       ∂(volume : Measure EuclN)
 
+omit [I.Boundaryless] in
 @[simp] lemma chartSobolevRawNorm_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     chartSobolevRawNorm (I := I) (M := M) g r s T =
@@ -66,6 +66,7 @@ noncomputable def chartSobolevRawNorm
               y)
           ∂(volume : Measure EuclN) := rfl
 
+omit [I.Boundaryless] in
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -95,6 +96,7 @@ theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm
   rw [chartSobolevRawNorm_def]
   exact hbound
 
+omit [I.Boundaryless] in
 theorem rawTensorConnLap_L2NormSq_le_chartSobolevRawNorm_of_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

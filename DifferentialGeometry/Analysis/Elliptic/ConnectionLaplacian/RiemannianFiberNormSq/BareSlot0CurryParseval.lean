@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ noncomputable def tensor0SToTensorRS {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
   (tensor00Scalar (I := I) (M := M) x).smulRight C
 
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma tensor0SAsRS_apply {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
     (τ : Tensor0SSpace 0 I x) :
     (tensor0SToTensorRS (I := I) (M := M) x C :
@@ -38,6 +38,7 @@ lemma tensor0SAsRS_apply {s : ℕ} (x : M) (C : Tensor0SSpace s I x)
   rw [ContinuousLinearMap.smulRight_apply]
 
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma coframeS_zero_eq_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) :
@@ -53,6 +54,7 @@ lemma coframeS_zero_eq_unitZeroSec
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -68,6 +70,7 @@ lemma slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec
       coframeS (I := I) (M := M) g x 0 e K₀ from rfl]
   rw [coframeS_zero_eq_unitZeroSec (I := I) (M := M) g x e K₀]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x) :
@@ -88,6 +91,7 @@ theorem riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry
   refine Finset.sum_congr rfl (fun a _ => ?_)
   rw [slot0Curry_eq_tensor0SToTensorRS_curry_unitZeroSec (I := I) (M := M) g x s e K₀ T a]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem riemannianFiberNormSq_three_eq_sum_bareSlot0Curry
     (g : SmoothRiemannianMetric I M) (x : M)
     (T : TensorRSSpace 0 3 I x) :

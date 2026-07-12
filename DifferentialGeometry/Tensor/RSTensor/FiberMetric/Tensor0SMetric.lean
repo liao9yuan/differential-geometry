@@ -5,7 +5,6 @@ import Mathlib.LinearAlgebra.Trace
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 import Mathlib.Topology.Algebra.Module.LinearMap
 
-set_option linter.unusedSectionVars false
 
 
 namespace Tensor0SBundle
@@ -440,6 +439,7 @@ def tensor0SComponent {Idx : Type*} {s : Nat} {x : M}
     (slots : Fin s -> Idx) : Real :=
   A (fun a => frame (slots a))
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tensor0SComponent_apply {Idx : Type*} {s : Nat} {x : M}
     (A : Tensor0SSpace s I x)
     (frame : Idx -> TangentSpace I x)
@@ -499,6 +499,7 @@ private theorem sum_fin_one_fun {Idx : Type*} [Fintype Idx]
   funext a
   simpa [Equiv.funUnique] using congrArg I0 (Subsingleton.elim a (0 : Fin 1))
 
+omit [FiniteDimensional ℝ E] in
 private theorem basis_repr_eq_sum_inv_inner
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric I M) (x : M)
@@ -704,6 +705,7 @@ private theorem homCLM_inner_eq_basis
         gInv i j * D.inner (A (basis i)) (B (basis j)) := by
   exact hom_inner_eq_basis (I := I) g x basis gInv hinv D A.toLinearMap B.toLinearMap
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_one_apply
     {x : M} (A : Tensor0SSpace 2 I x)
     (X Y : TangentSpace I x) :
@@ -723,6 +725,7 @@ private theorem tensor0S_curry_one_apply
   funext a
   fin_cases a <;> simp [Fin.cons_zero]
 
+omit [FiniteDimensional ℝ E] in
 private theorem tensor0S_curry_apply_cons
     {x : M} (s : Nat) (A : Tensor0SSpace (s + 1) I x)
     (X : TangentSpace I x) (tail : Fin s -> TangentSpace I x) :
@@ -977,6 +980,7 @@ private theorem inner0S_zero_eq
   simp [tensor0SSpace_continuousLinearEquiv]
   congr
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_zero_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -990,6 +994,7 @@ private theorem coordInner0S_zero_eq
     Finset.sum_singleton]
   congr <;> funext a <;> exact Fin.elim0 a
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_one_eq
     {Idx : Type*} [Fintype Idx] {x : M}
     (gInv : Idx -> Idx -> Real)
@@ -1082,6 +1087,7 @@ private theorem tensor0SMetricStep_inner_eq_coordStep
   intro j _
   rfl
 
+omit [FiniteDimensional ℝ E] in
 private theorem coordInner0S_succ_summand_eq
     {Idx : Type*}  {x : M} (s : Nat)
     (gInv : Idx -> Idx -> Real)
@@ -1117,6 +1123,7 @@ private theorem coordInner0S_succ_summand_eq
   rw [hA, hB]
   simp [Fin.cons_zero, Fin.cons_succ]
 
+omit [FiniteDimensional ℝ E] in
 set_option maxHeartbeats 800000 in
 private theorem coordInner0S_succ_eq
     {Idx : Type*} [Fintype Idx] {x : M} (s : Nat)

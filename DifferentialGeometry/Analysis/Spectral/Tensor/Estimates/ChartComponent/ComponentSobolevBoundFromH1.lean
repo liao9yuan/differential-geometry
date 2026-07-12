@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma abs_pou_mul_le_abs_local
     (β : M) (u : M → ℝ) (x : M) :
     |((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M β
@@ -57,6 +57,7 @@ private lemma abs_pou_mul_le_abs_local
       ≤ 1 * |u x| := by gcongr
     _ = |u x| := one_mul _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem eLpNorm_chartPushed_le_const_mul_eLpNorm_riemannianVolumeMeasure_uniform
     (g : SmoothRiemannianMetric I M) (β : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -118,6 +119,7 @@ private lemma coe_nnnorm_eq_ofReal_norm {X : Type*} [SeminormedAddCommGroup X]
   rw [show ((‖x‖₊ : ℝ≥0∞)) = ‖x‖ₑ from (enorm_eq_nnnorm x).symm,
     ← ofReal_norm_eq_enorm x]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma ofReal_tensorL2Norm_toFun_eq_nnnorm_toCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :

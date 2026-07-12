@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 import DifferentialGeometry.Tensor.RSTensor.Derivation.NablaOnTensors
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem unitModelProdField_contMDiff (g : SmoothRiemannianMetric I M) {p q : ℕ}
     (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (p + q) ℝ E)) ∞
@@ -106,6 +106,7 @@ noncomputable def unitModelProdSection (g : SmoothRiemannianMetric I M) {p q : �
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem unitModelProdSection_unitModel (g : SmoothRiemannianMetric I M) {p q : ℕ}
     (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M) :
     unitModel (I := I) (M := M) g (p + q) (unitModelProdSection (I := I) g S T) x =
@@ -131,6 +132,7 @@ private def prodUnitEval (g : SmoothRiemannianMetric I M) {p q : ℕ}
   fun b => (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace (p + q) I b from
     (unitModelProdSection (I := I) g S T).toSection b) (unitTensor (I := I) (M := M) b)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma prodUnitEval_toModel (g : SmoothRiemannianMetric I M) {p q : ℕ}
     (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (b : M) :
     Tensor0SSpace.toModel (prodUnitEval (I := I) g S T b) =
@@ -140,6 +142,7 @@ private lemma prodUnitEval_toModel (g : SmoothRiemannianMetric I M) {p q : ℕ}
   rw [unitModel] at this
   exact this
 
+set_option linter.unusedSectionVars false in
 private lemma prodUnitEval_eq_ofModel (g : SmoothRiemannianMetric I M) {p q : ℕ}
     (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (b : M) :
     prodUnitEval (I := I) g S T b =
@@ -153,11 +156,13 @@ private def factorUnitEval (g : SmoothRiemannianMetric I M) {p : ℕ}
   fun b => (show Tensor0SSpace 0 I b →L[ℝ] Tensor0SSpace p I b from S.toSection b)
     (unitTensor (I := I) (M := M) b)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma factorUnitEval_toModel (g : SmoothRiemannianMetric I M) {p : ℕ}
     (S : SmoothCcTensor g 0 p) (b : M) :
     Tensor0SSpace.toModel (factorUnitEval (I := I) g S b) =
       unitModel (I := I) (M := M) g p S b := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma modelProduct_compContinuousLinearMap_uniform (p q : ℕ)
     (f : Tensor0SModel p ℝ E) (h : Tensor0SModel q ℝ E) (φ : E →L[ℝ] E) :
     (Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) p q f h).compContinuousLinearMap
@@ -175,6 +180,7 @@ private lemma modelProduct_compContinuousLinearMap_uniform (p q : ℕ)
     ContinuousMultilinearMap.compContinuousLinearMap_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartE_section_repr_ofModel {n : ℕ} (α : M) (f : M → Tensor0SModel n ℝ E)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     tensor0SChartE_section_repr (I := I) n α (fun y => Tensor0SSpace.ofModel (f y)) b =
@@ -266,6 +272,7 @@ private lemma fderiv_prodUnitEval_chartPullback (g : SmoothRiemannianMetric I M)
   exact (Bundle.continuousMultilinearMap.hasFDerivAt_modelProduct (𝕜 := ℝ) (F := E) p q
     hS.hasFDerivAt hT.hasFDerivAt).fderiv
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_tensor0SChartFiberFromModel_self (s : ℕ) (x : M)
     (m : Tensor0SModel s ℝ E) :
     Tensor0SSpace.toModel (tensor0SChartFiberFromModel (I := I) s x x m) = m := by
@@ -280,6 +287,7 @@ private lemma toModel_tensor0SChartFiberFromModel_self (s : ℕ) (x : M)
       from rfl, tensor0SSpace_continuousLinearEquiv_apply]
   exact hcoe
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma factor_chartPullback_self (g : SmoothRiemannianMetric I M) {p : ℕ}
     (S : SmoothCcTensor g 0 p) (x : M) :
     (tensor0SChartE_section_repr (I := I) p x (factorUnitEval (I := I) g S) ∘
@@ -301,6 +309,7 @@ private lemma factor_chartPullback_self (g : SmoothRiemannianMetric I M) {p : �
     tensor0SSpace_continuousLinearEquiv_apply]
   exact hcoe
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_tensor0SIntrinsicChartCLM_self (s : ℕ) (x : M)
     (T : Π b : M, Tensor0SSpace s I b) (v : TangentSpace I x) :
     Tensor0SSpace.toModel (tensor0SIntrinsicChartCLM (I := I) s x T x v) =
@@ -312,6 +321,7 @@ private lemma toModel_tensor0SIntrinsicChartCLM_self (s : ℕ) (x : M)
     rw [trivToE_self_eq_id (I := I) x]; rfl]
   rw [toModel_tensor0SChartFiberFromModel_self (I := I) s x]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma factorUnitEval_tensorSectionMDiffAt (g : SmoothRiemannianMetric I M) {p : ℕ}
     (S : SmoothCcTensor g 0 p) (x : M) :
     TensorSectionMDiffAt (I := I) p (factorUnitEval (I := I) g S) x := by
@@ -327,6 +337,7 @@ private lemma factorUnitEval_tensorSectionMDiffAt (g : SmoothRiemannianMetric I 
     (contMDiff_unitZeroSection (I := I) (M := M)).contMDiffAt.mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHom hv
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma prodUnitEval_tensorSectionMDiffAt (g : SmoothRiemannianMetric I M) {p q : ℕ}
     (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (x : M) :
     TensorSectionMDiffAt (I := I) (p + q) (prodUnitEval (I := I) g S T) x := by
@@ -382,6 +393,7 @@ private lemma fin_castAdd_ne_natAdd (p q : ℕ) (j : Fin p) (k : Fin q) :
   simp only [Fin.castAdd, Fin.castLE, Fin.natAdd] at hv
   omega
 
+set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_castAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin p)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin p) :
     localSlotCLM (I := I) (p + q) (Fin.castAdd q k₀) Φ (Fin.castAdd q j) =
@@ -393,6 +405,7 @@ private lemma localSlotCLM_castAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin p)
         (by intro h; exact hj (Fin.castAdd_injective p q h)),
       localSlotCLM_other (I := I) p k₀ Φ hj]
 
+set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_castAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin p)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin q) :
     localSlotCLM (I := I) (p + q) (Fin.castAdd q k₀) Φ (Fin.natAdd p j) =
@@ -401,6 +414,7 @@ private lemma localSlotCLM_castAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin p)
   intro h
   exact absurd h.symm (fin_castAdd_ne_natAdd p q k₀ j)
 
+set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_natAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin q)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin p) :
     localSlotCLM (I := I) (p + q) (Fin.natAdd p k₀) Φ (Fin.castAdd q j) =
@@ -409,6 +423,7 @@ private lemma localSlotCLM_natAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin q)
   intro h
   exact absurd h (fin_castAdd_ne_natAdd p q j k₀)
 
+set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_natAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin q)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin q) :
     localSlotCLM (I := I) (p + q) (Fin.natAdd p k₀) Φ (Fin.natAdd p j) =
@@ -420,6 +435,7 @@ private lemma localSlotCLM_natAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin q)
         (by intro h; exact hj (Fin.natAdd_injective q p h)),
       localSlotCLM_other (I := I) q k₀ Φ hj]
 
+set_option linter.unusedSectionVars false in
 private lemma toModel_chartTensor0SSlotCorrection_prodUnitEval_apply (g : SmoothRiemannianMetric I M)
     {p q : ℕ} (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q)
     (X : Π b' : M, TangentSpace I b') (x : M) (k : Fin (p + q))
@@ -448,6 +464,7 @@ private lemma toModel_chartTensor0SSlotCorrection_prodUnitEval_apply (g : Smooth
         rw [Tensor0SSpace.toModel, tensor0SSpace_continuousLinearEquiv_apply]; rfl
     _ = _ := by rw [prodUnitEval_toModel (I := I) g S T x]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_chartTensor0SSlotCorrection_factorUnitEval_apply
     (g : SmoothRiemannianMetric I M) {p : ℕ} (S : SmoothCcTensor g 0 p)
     (X : Π b' : M, TangentSpace I b') (x : M) (k : Fin p) (m : Fin p → TangentSpace I x) :
@@ -552,6 +569,7 @@ private lemma toModel_chartTensor0SSlotCorrection_sum_prodUnitEval (g : SmoothRi
     rw [hSarg, hTarg]
     simp only [Function.comp_def]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum
     (g : SmoothRiemannianMetric I M) {n : ℕ} (Y : Π b' : M, Tensor0SSpace n I b')
     (X : Π b' : M, TangentSpace I b') (x : M) (hY : TensorSectionMDiffAt (I := I) n Y x) :
@@ -589,6 +607,7 @@ private lemma toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum
               (fun i : Fin 0 => Fin.elim0 i) from rfl]
       rw [tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv (I := I) x Y hx_good hY (X x)]
 
+set_option linter.unusedSectionVars false in
 private lemma toModel_chartTensor0SCovariantDerivative_factor_succ (g : SmoothRiemannianMetric I M)
     {s : ℕ} (S : SmoothCcTensor g 0 (s + 1)) (X : Π b' : M, TangentSpace I b') (x : M) :
     Tensor0SSpace.toModel
@@ -756,6 +775,7 @@ private lemma toModel_chartTensor0SCovariantDerivative_prodUnitEval
     rw [map_sub]]
   abel
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartTensor0SCovariantDerivative_eq_abstract_gen
     (g : SmoothRiemannianMetric I M) {n : ℕ} (Y : Π b' : M, Tensor0SSpace n I b')
     (X : Π b' : M, TangentSpace I b') (x : M)
@@ -772,6 +792,7 @@ private lemma chartTensor0SCovariantDerivative_eq_abstract_gen
   | zero =>
       exact chartTensor0SCovariantDerivative_eq_abstract_zero (I := I) (M := M) g x Y X hx_good
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma toModel_tensor0SCovariantDerivative_factorUnitEval_frame
     (g : SmoothRiemannianMetric I M) {s : ℕ} (W : SmoothCcTensor g 0 (s + 1))
     (X : Π b' : M, TangentSpace I b') (x : M)
@@ -826,6 +847,7 @@ private lemma covDerivUnitModel_prodUnitEval_frame (g : SmoothRiemannianMetric I
   rw [toModel_tensor0SCovariantDerivative_factorUnitEval_frame (I := I) g S Xf x hX_at,
     toModel_tensor0SCovariantDerivative_factorUnitEval_frame (I := I) g T Xf x hX_at]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma toModel_tensor0SCovariantDerivative_factorUnitEval_frame_gen
     (g : SmoothRiemannianMetric I M) {s : ℕ} (W : SmoothCcTensor g 0 s)
     (X : Π b' : M, TangentSpace I b') (x : M)
@@ -896,6 +918,7 @@ private lemma unitModel_covGrad_eq_tensor0SCovariantDerivative (g : SmoothRieman
     W.toSection x (v 0)]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma modelProduct_finsum_smul_left {n m d : ℕ} (c : Fin d → ℝ)
     (A : Fin d → Tensor0SModel n ℝ E) (B : Tensor0SModel m ℝ E) :
     Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) n m (∑ i, c i • A i) B =
@@ -905,6 +928,7 @@ private lemma modelProduct_finsum_smul_left {n m d : ℕ} (c : Fin d → ℝ)
   simp only [map_smul, ContinuousLinearMap.coe_sum', ContinuousLinearMap.coe_smul',
     Finset.sum_apply, Pi.smul_apply, Bundle.continuousMultilinearMap.modelProductL_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma modelProduct_finsum_smul_right {n m d : ℕ} (c : Fin d → ℝ)
     (A : Tensor0SModel m ℝ E) (B : Fin d → Tensor0SModel n ℝ E) :
     Bundle.continuousMultilinearMap.modelProduct (𝕜 := ℝ) (F := E) m n A (∑ i, c i • B i) =

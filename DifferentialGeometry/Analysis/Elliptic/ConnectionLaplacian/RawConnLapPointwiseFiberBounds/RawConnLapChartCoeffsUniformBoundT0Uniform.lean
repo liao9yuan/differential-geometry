@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapChartCoeffsUniformBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPointwiseFiberBounds.RawConnLapRiemannianFiberNormSqLeChartData
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_sq_le_fderiv_sq
     {f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}

@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciComm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformRiemannOperatorNormBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,12 +35,14 @@ private instance tensor0SModelNormedSpace_local {s : ℕ} :
 private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metric_inner_self_nonneg' (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) : 0 ≤ g.inner x v v := by
   rcases eq_or_ne v 0 with hv0 | hv0
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
+set_option linter.unusedSectionVars false in
 private lemma exists_smooth_tensor0S_section_eq (t : ℕ) (x : M) (T₀ : Tensor0SSpace t I x) :
     ∃ A : Π b : M, Tensor0SSpace t I b, A x = T₀ ∧
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel t ℝ E)) ∞
@@ -60,6 +61,7 @@ private lemma exists_smooth_tensor0S_section_eq (t : ℕ) (x : M) (T₀ : Tensor
     smoothExtensionFiber_contMDiff (I := I) (F := Tensor0SModel t ℝ E)
       (V := fun b => Tensor0SSpace t I b) x T₀⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma tensorRSCov_toFun_unitEval (g : SmoothRiemannianMetric I M) (t : ℕ)
     (τ : Π y : M, TensorRSSpace 0 t I y) (x : M) (v : TangentSpace I x)
     (hτ : MDifferentiableAt I (I.prod 𝓘(ℝ, TensorRSModel 0 t ℝ E))
@@ -90,6 +92,7 @@ private lemma tensorRSCov_toFun_unitEval (g : SmoothRiemannianMetric I M) (t : �
       (LeviCivita (I := I) g) x v]
   rw [map_zero, sub_zero]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma riemannSec_tensorRSCov_unitEval (g : SmoothRiemannianMetric I M) (t : ℕ)
     (X W : Π y : M, TangentSpace I y)
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -230,6 +233,7 @@ theorem riemannOp_tensorCov_unitScalarRSLift_unitEval
     hX_smooth hW_smooth hA_smooth]
   rw [hXx, hWx, hAx]
 
+set_option linter.unusedSectionVars false in
 theorem riemannOp_tensor0SCov_coframeS_apply_eval
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (v w : TangentSpace I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin t → Fin n)
@@ -292,6 +296,7 @@ theorem riemannOp_tensor0SCov_coframeS_apply_eval
   refine Finset.prod_congr rfl (fun s _ => ?_)
   rw [hbase]
 
+set_option linter.unusedSectionVars false in
 theorem abs_toModel_riemannOp_tensor0SCov_coframeS_le
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (v w : TangentSpace I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin t → Fin n)

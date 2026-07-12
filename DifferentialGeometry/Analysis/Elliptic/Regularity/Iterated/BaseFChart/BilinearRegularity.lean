@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.StrictCutoffPus
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -597,6 +596,7 @@ private lemma wkpNorm_chartPushedRaw_gradInnerPiece_le
   refine ENNReal.ofReal_le_ofReal ?_
   rw [hCfinal_def]; linarith [mul_nonneg hsumK_nn hC_partial_pos.le]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma wkpNormChart_le_of_le
     (g : SmoothRiemannianMetric I M) (j k : ℕ) (hjk : j ≤ k)
     (p : ℝ≥0∞) (u : M → ℝ) :

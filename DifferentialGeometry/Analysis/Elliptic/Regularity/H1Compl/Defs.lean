@@ -5,7 +5,6 @@ import Mathlib.Analysis.Normed.Group.Completion
 import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.InnerProductSpace.Completion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ noncomputable def smoothToH1Compl (g : SmoothRiemannianMetric I M) :
     SmoothScalar g →L[ℝ] H1Compl g :=
   UniformSpace.Completion.toComplL
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma smoothToH1Compl_apply (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) :
     smoothToH1Compl (I := I) (M := M) g f = (f : H1Compl g) :=

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartForm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -60,6 +59,7 @@ noncomputable def covLowerOrderIntegrand
                       covDerivLowerOrderTerm (I := I) (M := M)
                         g r s T α l Q.1 Q.2 y)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covLowerOrderIntegrand_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -115,6 +115,7 @@ theorem tensorCovDerivPointwiseInner_chart_eq
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -163,6 +164,7 @@ theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hz
 
+omit [CompleteSpace E] in
 theorem euclidPartial_chartPushedRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -382,6 +384,7 @@ theorem covLowerOrderIntegrand_eqOn
   rw [h]
   ring
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covLowerOrderIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private noncomputable def chartModelBasisProj (k : Fin (Module.finrank ℝ E)) :
     (((LinearMap.proj k).comp ((chartModelBasis E).equivFun.toLinearMap)) :
       E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartModelBasisProj_apply (k : Fin (Module.finrank ℝ E))
     (v : E) :
     chartModelBasisProj (E := E) k v =
@@ -48,6 +48,7 @@ private noncomputable def chartModelBasisProj (k : Fin (Module.finrank ℝ E)) :
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
+set_option linter.unusedSectionVars false in
 private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -70,6 +71,7 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
   exact congrArg (fun (f : TangentSpace I b → E) => f
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) h
 
+omit [BoundarylessManifold I M] in
 lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -144,6 +146,7 @@ lemma chartFrameNormGlobalSmoothCoordMatrix_contMDiffOn
   exact chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
     (I := I) (M := M) g α i k hb
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameNormGlobalSmoothCoordMatrix_mdiffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -165,6 +168,7 @@ private lemma chartFrameNormGlobalSmoothCoordMatrix_mdiffAt
     (h_contMDiffOn b hb_base).contMDiffAt (h_open.mem_nhds hb_base)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
+omit [I.Boundaryless] in
 private lemma covApply_frameVec_eq_coord_sum_on_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -211,6 +215,7 @@ private lemma covApply_frameVec_eq_coord_sum_on_goodSet
   intro k _
   rw [L.map_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasisVecFiber_mdiffAt
     (α : M) (k : Fin (Module.finrank ℝ E))
     {b : M}
@@ -227,6 +232,7 @@ private lemma chartBasisVecFiber_mdiffAt
     (h_contMDiffOn b hb).contMDiffAt (h_open.mem_nhds hb)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -271,6 +277,7 @@ private lemma covApply_chartBasisVecFiber_T₀_mdiffAt
     ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma finsum_smul_section_mdiffAt
     {ι : Type*} (s_finset : Finset ι)
     (r s : ℕ) (f : ι → M → ℝ)
@@ -330,6 +337,7 @@ private lemma finsum_smul_section_mdiffAt
       exact this
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetric
 import DifferentialGeometry.Geometry.Metric.TensorInner.CotangentRiemannian
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwise
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ def ccTensorOneForm (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1)
   fun b => cotangentToCLM (I := I)
     (unitEvalSection (I := I) (M := M) g 1 σ b)
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma tensorCovDerivAt_unitEval
     (g : SmoothRiemannianMetric I M) (σ : SmoothCcTensor g 0 1)
     (x : M) (v : TangentSpace I x) :
@@ -57,6 +57,7 @@ lemma tensorCovDerivAt_unitEval
   exact tensor0SCovariantDerivative_unitZero_eq_zero (I := I) (M := M)
     (LeviCivita (I := I) g) x v
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma tensor0SCovariantDerivative_one_cotangentToCLM
     (g : SmoothRiemannianMetric I M)
     (α : Π b : M, Tensor0SSpace 1 I b) {x : M}

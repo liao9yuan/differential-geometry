@@ -9,7 +9,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Basis.Defs
 import Mathlib.LinearAlgebra.Dimension.Free
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [Module.Finite ℝ E] in
 theorem contMDiffAt_tangentTrivialization_coordChangeL_alpha_to_b0
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞
@@ -154,6 +154,7 @@ theorem contMDiffAt_tangentTrivialization_coordChangeL_alpha_to_b0
   rw [hsrc_id, hmfderiv_eq, htarget_eq, ContinuousLinearMap.comp_id]
   rfl
 
+omit [Module.Finite ℝ E] in
 theorem contMDiffAt_tangentTrivialization_coordChangeL_b0_to_alpha
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E) ∞

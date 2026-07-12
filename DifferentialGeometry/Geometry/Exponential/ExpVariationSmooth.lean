@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.OffZero
 import DifferentialGeometry.Geometry.Exponential.IntrinsicExp
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -40,6 +39,7 @@ private def chartVelocityLift (α : M) (Γ : ℝ → M) : ℝ → TangentBundle 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 private theorem chartVelocityLift_isMIntegralCurveOn
     [CompleteSpace E] [T2Space (TangentBundle I M)]
     (g : SmoothRiemannianMetric I M) (α : M) {Γ : ℝ → M} {O : Set ℝ}
@@ -154,6 +154,7 @@ private theorem chartVelocityLift_isMIntegralCurveOn
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 private theorem chartVelocityLift_proj
     (α : M) {Γ : ℝ → M} {s : ℝ} (hs : Γ s ∈ (chartAt H α).source) :
     (chartVelocityLift (I := I) α Γ s).proj = Γ s := by
@@ -178,6 +179,7 @@ private theorem chartVelocityLift_proj
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem expMapIntrinsic_eq_chartFlow_proj_residual
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -581,6 +583,7 @@ def chartFlowVelCoordMap
         (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
           ((p.1 / c) • (V₀ p.2).snd)))
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartFlowVelCoordMap_apply
     (α : M) (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M) (c : ℝ) (p : ℝ × ℝ) :
     chartFlowVelCoordMap (I := I) α γ V₀ c p =
@@ -589,6 +592,7 @@ def chartFlowVelCoordMap
           (TotalSpace.mk' E (E := (TangentSpace I : M → Type _)) (γ p.2)
             ((p.1 / c) • (V₀ p.2).snd))) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma rescaledSection_fiberCoord_contMDiffAt
     (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M) (c : ℝ)
     (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
@@ -630,6 +634,7 @@ private lemma rescaledSection_fiberCoord_contMDiffAt
   rw [hV₀eq]
   exact hlin
 
+set_option linter.unusedSectionVars false in
 private lemma chartFlowVelCoordMap_contMDiffAt
     (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M) (c : ℝ)
     (hV₀ : ContMDiff 𝓘(ℝ, ℝ) I.tangent ∞ V₀)
@@ -661,6 +666,7 @@ section Headline
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem expMapIntrinsic_variation_contMDiff
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -758,6 +764,7 @@ theorem expMapIntrinsic_variation_contMDiff
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem expMapIntrinsic_variation_contMDiffAt
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]
@@ -791,6 +798,7 @@ theorem expMapIntrinsic_variation_contMDiffAt
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem expMapIntrinsic_variation_smallField_phaseBall
     (γ : ℝ → M) (V₀ : ℝ → TangentBundle I M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
@@ -860,6 +868,7 @@ theorem expMapIntrinsic_variation_smallField_phaseBall
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem expMapIntrinsic_variation_contMDiffAt_of_smallField
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [T2Space (TangentBundle I M)]

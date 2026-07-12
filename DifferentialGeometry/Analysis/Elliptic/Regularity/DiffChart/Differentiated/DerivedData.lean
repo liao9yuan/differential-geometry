@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiate
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.VariationalIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.CrossTermIBP
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -56,6 +56,7 @@ private lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -63,12 +64,14 @@ private lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_fderiv_apply_single_subset_ψ
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma mixed_smooth_classical_partial_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (i l : Fin (Module.finrank ℝ E)) (x : EuclN) :
@@ -183,6 +186,7 @@ private lemma integral_chosenSecondPartial_mul_eq_integral_chartPushed_mixed
       ∫ y in Ω, g_i y * ψl y ∂(volume : Measure EuclN) := rfl
   linarith [h_ibp_outer, h_ibp_inner, hA_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma integral_chartPushed_mixed_partial_swap
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

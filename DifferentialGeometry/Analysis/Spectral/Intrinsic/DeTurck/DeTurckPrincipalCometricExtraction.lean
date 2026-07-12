@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.KoszulSectionParallelRaise
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqSmoothCcUniformBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma g1_inner_injective (g₁ : SmoothRiemannianMetric I M) (x : M)
     {a b : TangentSpace I x} (hab : ∀ u : TangentSpace I x, g₁.inner x a u = g₁.inner x b u) :
     a = b := by
@@ -55,6 +55,7 @@ private lemma g1_inner_injective (g₁ : SmoothRiemannianMetric I M) (x : M)
   exact absurd hzero (ne_of_gt hpos)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma cometricLmodel_covectorOfCLM_inner_loc (g₁ : SmoothRiemannianMetric I M) (y : M)
     (φ : E →L[ℝ] ℝ) (u : TangentSpace I y) :
     g₁.inner y (cometricLmodel (I := I) g₁ y
@@ -325,6 +326,7 @@ lemma deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo
   rfl
 
 
+set_option linter.unusedSectionVars false in
 private lemma cometricLmodel_covOf_g0flat_eq (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     cometricLmodel (I := I) g₀ x
@@ -634,6 +636,7 @@ theorem riemannianFiberNormSq_deTurckPrincipalCometricArm_le
   exact mul_le_mul_of_nonneg_right hcoeff hW_nn
 
 
+set_option linter.unusedSectionVars false in
 private lemma iteratedCovGrad_smul_local (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -643,6 +646,7 @@ private lemma iteratedCovGrad_smul_local (g : SmoothRiemannianMetric I M) (r s j
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_smul_local (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -654,6 +658,7 @@ private lemma riemannianFiberNormSq_smul_local (g : SmoothRiemannianMetric I M) 
   ring
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma combinedTrace42Model_apply_symbolic
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :

@@ -22,7 +22,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import Mathlib.Analysis.MeanInequalities
 import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -503,6 +502,7 @@ def riemannMixedKernelBilin (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
           ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, map_smul,
           RingHom.id_apply] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem riemannMixedKernelBilin_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q v0 v1 : TangentSpace I x) :
     riemannMixedKernelBilin (I := I) g₀ g₁ x p q v0 v1 =
@@ -525,6 +525,7 @@ def riemannMixedSummandFib (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem riemannMixedSummandFib_toModel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (riemannMixedSummandFib (I := I) g₀ g₁ x p q D) v =
@@ -541,6 +542,7 @@ def riemannMixedBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
   (2 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     riemannMixedSummandFib (I := I) g₀ g₁ x (B a x) (B b x)
 
+set_option linter.unusedSectionVars false in
 theorem riemannMixedBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -561,6 +563,7 @@ theorem riemannMixedBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMe
   rw [Tensor0SSpace.toModelL_apply, riemannMixedSummandFib_toModel]
   ring
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem mixedKernelScalar_global (g₀ g₁ : SmoothRiemannianMetric I M)
     {Y W p q : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
@@ -583,6 +586,7 @@ theorem mixedKernelScalar_global (g₀ g₁ : SmoothRiemannianMetric I M)
   exact contMDiff_g_inner_of_smooth_sections (I := I) g₀
     ⟨fun b => riemannSec (LeviCivita (I := I) g₁) Y p q b, hRsec⟩ ⟨fun b => W b, hW⟩
 
+set_option linter.unusedSectionVars false in
 theorem riemannMixedKernelBilin_homSection_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
@@ -729,6 +733,7 @@ def frameRiemannMixedKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           RingHom.id_apply, (riemannOp (LeviCivita (I := I) g₁) x v0).map_smul c p, map_smul] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem frameRiemannMixedKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 p q : TangentSpace I x) :
     frameRiemannMixedKernel (I := I) g₀ g₁ x v0 v1 p q =

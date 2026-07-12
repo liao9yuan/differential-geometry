@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorThirdOrderWeitzenbock
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapSecondGradientL2Bound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ noncomputable def unitZeroSec :
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)),
     contMDiff_unitZeroSection (I := I) (M := M)⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma unitZeroSec_apply (y : M) :
     unitZeroSec (I := I) (M := M) y =
       Tensor0SSpace.ofModel

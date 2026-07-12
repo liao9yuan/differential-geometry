@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.CovariantIntegrationByParts
 import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ def loweredCovDerivAlongVFraw
     Π y : M, Tensor0SSpace (r + s) I y :=
   fun y => loweredCovDerivAt (I := I) (M := M) g r s S y (X y)
 
+set_option linter.unusedSectionVars false in
 lemma loweredCovDerivAlongVFraw_eq_covApply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -52,6 +52,7 @@ lemma loweredCovDerivAlongVFraw_eq_covApply
   funext y
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma loweredCovDerivAlongVFraw_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -83,6 +84,7 @@ lemma loweredCovDerivAlongVFraw_contMDiff
   rw [← contMDiffOn_univ]
   exact hOn
 
+set_option linter.unusedSectionVars false in
 lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -143,6 +145,7 @@ lemma loweredCovDerivAlongVFraw_eq_zero_off_tsupport
   rw [hcov_zero]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma loweredCovDerivAlongVFraw_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -168,6 +171,7 @@ def loweredCovDerivAlongVF
     (fun y : M => loweredCovDerivAlongVFraw (I := I) (M := M) g r s S X y)
     (loweredCovDerivAlongVFraw_contMDiff (I := I) (M := M) g r s S X)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma loweredCovDerivAlongVF_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -175,6 +179,7 @@ def loweredCovDerivAlongVF
     loweredCovDerivAlongVF (I := I) (M := M) g r s S X y =
       loweredCovDerivAt (I := I) (M := M) g r s S y (X y) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma tensorInnerScalar_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯) :
@@ -183,6 +188,7 @@ lemma tensorInnerScalar_contMDiff
   DifferentialGeometry.Tensor.tensorInnerPointwise_contMDiff_of_mdiff
     (I := I) (M := M) g r s W S
 
+set_option linter.unusedSectionVars false in
 theorem integral_tensorInner_covDeriv_combined_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -204,6 +210,7 @@ theorem integral_tensorInner_covDeriv_combined_eq_zero
     (I := I) (M := M) g r s W S V
     (tensorInnerScalar_contMDiff (I := I) (M := M) g r s W S)
 
+set_option linter.unusedSectionVars false in
 theorem integral_tensorInner_covDeriv_split_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

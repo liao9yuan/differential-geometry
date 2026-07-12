@@ -14,7 +14,6 @@ import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 import Mathlib.LinearAlgebra.Matrix.Trace
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ def chartCoeff (α : M) (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯
   fun x => (chartModelBasis E).repr
     ((trivializationAt E (TangentSpace I) α) ⟨x, X x⟩).2 i
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartCoeff_def (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -44,6 +44,7 @@ def chartCoeff (α : M) (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯
       (chartModelBasis E).repr
         ((trivializationAt E (TangentSpace I) α) ⟨x, X x⟩).2 i := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartCoeff_recompose (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {x : M} (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -69,6 +70,7 @@ lemma chartCoeff_recompose (α : M)
   simp only [chartCoeff_def, chartBasisVecFiber]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartCoeff_contMDiffOn (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) :
@@ -117,6 +119,7 @@ def localDivergence (g : SmoothRiemannianMetric I M)
         (extChartAt I α x))
     / chartDensity (I := I) g α x
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma localDivergence_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -128,6 +131,7 @@ def localDivergence (g : SmoothRiemannianMetric I M)
             (extChartAt I α x))
         / chartDensity (I := I) g α x := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -137,6 +141,7 @@ private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
   rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
   exact hsource
 
+set_option linter.unusedSectionVars false in
 lemma chartCoeffOnE_contDiffOn (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) :
@@ -155,6 +160,7 @@ lemma chartCoeffOnE_contDiffOn (α : M)
       (extChartAt I α).target := hbase.comp hsymm hsubset
   exact hcomp.contDiffOn
 
+set_option linter.unusedSectionVars false in
 lemma chartDensityOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (chartDensityOnE (I := I) g α) (extChartAt I α).target := by
@@ -172,6 +178,7 @@ lemma chartDensityOnE_contDiffOn
       (extChartAt I α).target := hbase.comp hsymm hsubset
   exact hcomp.contDiffOn
 
+set_option linter.unusedSectionVars false in
 lemma chartCoeffOnE_mul_chartDensityOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -183,6 +190,7 @@ lemma chartCoeffOnE_mul_chartDensityOnE_contDiffOn
   (chartCoeffOnE_contDiffOn (I := I) α X i).mul
     (chartDensityOnE_contDiffOn (I := I) g α)
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_contDiffOn_interior
     (i : Fin (Module.finrank ℝ E)) {u : E → ℝ} {s : Set E}
     (hu : ContDiffOn ℝ ∞ u s) :
@@ -195,6 +203,7 @@ private lemma partialDeriv_contDiffOn_interior
       (interior s) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartCoeffOnE_mul_chartDensityOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -213,6 +222,7 @@ private def localDivergenceDomain (α : M) : Set M :=
   (extChartAt I α).source ∩
     (extChartAt I α) ⁻¹' interior (extChartAt I α).target
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma localDivergenceDomain_subset_baseSet (α : M) :
     localDivergenceDomain (I := I) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -221,6 +231,7 @@ private lemma localDivergenceDomain_subset_baseSet (α : M) :
   rw [← extChartAt_source_eq_chartAt_source (I := I)]
   exact hx.1
 
+set_option linter.unusedSectionVars false in
 private lemma localDivergence_summand_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -262,6 +273,7 @@ private lemma localDivergence_summand_contMDiffOn
     fun _ hx => hx.2
   exact hpartialM.comp hchart' hsubset
 
+set_option linter.unusedSectionVars false in
 private lemma chartDensity_contMDiffOn_localDivergenceDomain
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffOn I 𝓘(ℝ) ∞ (chartDensity (I := I) g α)
@@ -269,6 +281,7 @@ private lemma chartDensity_contMDiffOn_localDivergenceDomain
   (chartDensity_contMDiffOn (I := I) g α).mono
     (localDivergenceDomain_subset_baseSet (I := I) α)
 
+set_option linter.unusedSectionVars false in
 private lemma chartDensity_ne_zero_on_localDivergenceDomain
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ x ∈ localDivergenceDomain (I := I) α, chartDensity (I := I) g α x ≠ 0 :=
@@ -276,6 +289,7 @@ private lemma chartDensity_ne_zero_on_localDivergenceDomain
     (chartDensity_pos (I := I) g α
       (localDivergenceDomain_subset_baseSet (I := I) α hx))
 
+set_option linter.unusedSectionVars false in
 theorem localDivergence_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -304,6 +318,7 @@ def divergence_g (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
   fun x => localDivergence (I := I) g x X x
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma divergence_g_def
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

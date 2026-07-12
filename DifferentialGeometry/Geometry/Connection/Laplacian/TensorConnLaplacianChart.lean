@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSSecondCovariantDerivative
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private noncomputable def smoothOrthoFrameAsSection
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨smoothOrthoFrame (I := I) g y i, smoothOrthoFrame_smooth (I := I) g y i⟩
 
+set_option linter.unusedSectionVars false in
 @[simp]
 private lemma smoothOrthoFrameAsSection_toFun
     (g : SmoothRiemannianMetric I M) (y : M)

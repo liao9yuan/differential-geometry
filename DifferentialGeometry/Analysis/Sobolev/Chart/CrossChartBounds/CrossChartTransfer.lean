@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Calculus.IteratedCompBound
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ private lemma contMDiffOn_extChartSymm_toEuclideanSymm (α : M) :
     exact hy
   exact h_outer.comp h_inner.contMDiffOn h_maps
 
+omit [FiniteDimensional ℝ E] in
 private theorem norm_iteratedFDerivWithin_comp_le_sumDeriv
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     {g : F → ℝ} {f : E → F} {n : ℕ} {N : WithTop ℕ∞}
@@ -69,6 +69,7 @@ def pouCoeffPushed
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (β : M) : EuclN → ℝ :=
   chartPushedRaw I β (fun x => (ρ β : C^∞⟮I, M; ℝ⟯) x)
 
+omit [IsManifold I ∞ M] in
 theorem crossChart_pushed_eq_pou_mul_comp_on_overlap
     [I.Boundaryless]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (β α : M) (u : M → ℝ)

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 import Mathlib.Analysis.Calculus.Deriv.Slope
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ def ccTensorRetagMetric (g' : SmoothRiemannianMetric I M) {g : SmoothRiemannianM
   { toSection := S.toSection
     hasCompactSupport := S.hasCompactSupport }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ccTensorBilin_ccTensorRetagMetric (g' : SmoothRiemannianMetric I M)
     {g : SmoothRiemannianMetric I M} (S : SmoothCcTensor g 0 2) (b : M)
     (u w : TangentSpace I b) :
@@ -75,6 +75,7 @@ private lemma vec3_update_two {F : Type*} (a b c z : F) :
   funext k
   fin_cases k <;> simp [Function.update]
 
+omit [BoundarylessManifold I M] in
 lemma linearizedKoszulCovec_apply (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g' 0 2)
     (x : M) (u ζ z : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u ζ z =
@@ -102,6 +103,7 @@ lemma linearizedKoszulCovec_apply (g' : SmoothRiemannianMetric I M) (S : SmoothC
   rw [LinearMap.smul_apply, LinearMap.sub_apply, LinearMap.add_apply, h1, h2, h3]
   rw [smul_eq_mul]
 
+set_option linter.unusedSectionVars false in
 private lemma continuous_linearizedKoszulCovec_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (ζ z : TangentSpace I x) :
     Continuous (fun u : TangentSpace I x =>
@@ -134,6 +136,7 @@ def linearizedConnSharp (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g'
     (x : M) (u ζ : TangentSpace I x) : TangentSpace I x :=
   metricSharp (I := I) g' x (linearizedKoszulCovec (I := I) g' S x u ζ)
 
+omit [BoundarylessManifold I M] in
 lemma inner_linearizedConnSharp (g' : SmoothRiemannianMetric I M) (S : SmoothCcTensor g' 0 2)
     (x : M) (u ζ z : TangentSpace I x) :
     g'.inner x (linearizedConnSharp (I := I) g' S x u ζ) z =
@@ -199,6 +202,7 @@ lemma one_mem_realizedSmallSet {δ δ' : ℝ} (hδ_lt : δ < 1) :
   rw [sub_self, abs_zero, abs_one, zero_mul, one_mul, zero_add]
   exact hδ_lt
 
+omit [BoundarylessManifold I M] in
 lemma realizedFam_inner_affine
     {δ : ℝ} (hδ_lt : δ < 1)
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -530,6 +534,7 @@ private lemma sharpPsiField_jointContMDiffOn
         (realizedVelocityCc (I := I) g₀ T T' hδ hδ' s₀) b (Z b) (Y b))
     realizedSmallSet_isOpen hinv hcv
 
+omit [CompactSpace M] in
 private lemma continuousAt_leviCivita_toFun_slice
     (g' : SmoothRiemannianMetric I M) {S : Set ℝ} (hSopen : IsOpen S) {s₀ : ℝ} (hs₀S : s₀ ∈ S)
     (Φ : ∀ p : M × ℝ, TangentSpace I p.1)
@@ -663,6 +668,7 @@ private lemma continuousAt_leviCivita_toFun_slice
     exact ((trivFromE (I := I) x x).continuous.tendsto _).comp (tfd.add tch)
   exact hRHS.congr (Filter.EventuallyEq.symm hkey)
 
+omit [BoundarylessManifold I M] in
 private lemma continuousOn_realizedFam_invGram_slice
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -678,6 +684,7 @@ private lemma continuousOn_realizedFam_invGram_slice
     (fun s hs => ⟨mem_chart_source H x, hs⟩)
   exact hcomp.continuousOn
 
+omit [BoundarylessManifold I M] in
 private lemma metricSharp_realizedFam_eq_invGram_sum
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -695,6 +702,7 @@ private lemma metricSharp_realizedFam_eq_invGram_sum
   rw [← h, metricSharpChartLocal]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma tendsto_metricSharp_realizedFam_fixed
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -724,6 +732,7 @@ private lemma tendsto_metricSharp_realizedFam_fixed
     exact (hcont.continuousAt (realizedSmallSet_isOpen.mem_nhds hs₀)).tendsto
   exact hinv.mul tendsto_const_nhds
 
+set_option linter.unusedSectionVars false in
 private lemma tendsto_metricSharp_realizedFam_varying
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')

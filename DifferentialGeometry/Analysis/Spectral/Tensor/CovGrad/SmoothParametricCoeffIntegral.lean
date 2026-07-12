@@ -3,7 +3,6 @@ import Mathlib.Analysis.Calculus.ParametricIntegral
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ private theorem tube_bound {W : Type*} [NormedAddCommGroup W] (Φ : H × ℝ →
                   using hC ⟨(y,t), ⟨hyK, uIoc_subset_uIcc ht⟩, rfl⟩⟩
 
 
+omit [NormedSpace ℝ H] [FiniteDimensional ℝ H] in
 private theorem slice_continuousOn {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (G : H × ℝ → F) (U : Set H) (hU : IsOpen U) (S : Set ℝ) (hS : IsOpen S)
     (hGc : ContinuousOn G (U ×ˢ S)) (y' : H) (hy' : y' ∈ U) :
@@ -50,6 +50,7 @@ private theorem slice_continuousOn {F : Type u} [NormedAddCommGroup F] [NormedSp
   exact (continuousWithinAt_const.prodMk continuousWithinAt_id)
 
 
+omit [FiniteDimensional ℝ H] in
 private theorem fderiv_fst_contDiffOn {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (G : H × ℝ → F) (U : Set H) (hU : IsOpen U) (S : Set ℝ) (hS : IsOpen S)
     (hG : ContDiffOn ℝ ∞ G (U ×ˢ S)) :
@@ -143,6 +144,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem contMDiffAt_manifold_param {F : Type u} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [CompleteSpace F] (g : M × ℝ → F) (a b : ℝ) (S : Set ℝ) (hS : IsOpen S)
     (hSI : Set.uIcc a b ⊆ S) (V : Set M) (hV : IsOpen V) (x₀ : M) (hx₀ : x₀ ∈ V)
@@ -183,12 +185,14 @@ def pathIntegralFib (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
   TensorRSSpace.ofModel (∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)))
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma pathIntegralFib_toModel (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (x : M) :
     TensorRSSpace.toModel (pathIntegralFib (I := I) (M := M) g₀ r s Φ x) =
       ∫ t in (0 : ℝ)..1, (TensorRSSpace.toModel ((Φ t).toSection x)) := by
   rw [pathIntegralFib, TensorRSSpace.toModel_ofModel]
 
+set_option linter.unusedSectionVars false in
 theorem contMDiff_pathIntegralFib_of_jointContMDiff
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S) (hSI : Set.uIcc (0:ℝ) 1 ⊆ S)

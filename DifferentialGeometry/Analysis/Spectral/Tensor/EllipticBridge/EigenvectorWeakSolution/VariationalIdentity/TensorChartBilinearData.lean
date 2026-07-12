@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.Representation.TensorReprFromFrame
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -59,21 +58,25 @@ def weak_partial {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     Fin (Module.finrank ℝ E) → EuclN → ℝ :=
   D.toChartData.weak_partial
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma u_chart_eq {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀) :
     D.u_chart = D.toChartData.u_chart := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma f_chart_eq {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀) :
     D.f_chart = D.toChartData.f_chart := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma weak_partial_eq {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀) :
     D.weak_partial = D.toChartData.weak_partial := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma u_chart_memLp_weighted {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀) :
@@ -82,6 +85,7 @@ lemma u_chart_memLp_weighted {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : 
         (chartTargetEuclid (I := I) (M := M) α)) :=
   D.toChartData.u_chart_memLp_weighted
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma f_chart_memLp_weighted {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀) :
@@ -90,6 +94,7 @@ lemma f_chart_memLp_weighted {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : 
         (chartTargetEuclid (I := I) (M := M) α)) :=
   D.toChartData.f_chart_memLp_weighted
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weak_partial_locally_memLp {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {α : M} {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀)
@@ -98,6 +103,7 @@ lemma weak_partial_locally_memLp {g : SmoothRiemannianMetric I M} {r s : ℕ}
     MemLp (D.weak_partial i) 2 ((volume : Measure EuclN).restrict K) :=
   D.toChartData.weak_partial_locally_memLp i K hK hK_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weak_partial_isWeakPartial {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {α : M} {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀)
@@ -107,6 +113,7 @@ lemma weak_partial_isWeakPartial {g : SmoothRiemannianMetric I M} {r s : ℕ}
       (chartTargetEuclid (I := I) (M := M) α) :=
   D.toChartData.weak_partial_isWeakPartial i
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma variational_identity {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
     {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀)
@@ -127,6 +134,7 @@ lemma variational_identity {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}
       ∂(volume : Measure EuclN) :=
   D.toChartData.variational_identity ψ hψ hψ_cs hψ_supp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma memLp_volume_restrict_u_chart {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {α : M} {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀)
@@ -136,6 +144,7 @@ lemma memLp_volume_restrict_u_chart {g : SmoothRiemannianMetric I M} {r s : ℕ}
   memLp_volume_restrict_of_memLp_chartPulledWeightedMeasure (I := I) (M := M)
     D.u_chart_memLp_weighted hK_compact hK_meas hK_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma memLp_volume_restrict_f_chart {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {α : M} {P₀ : TensorCompIdx (E := E) r s}
     (D : TensorChartBilinearH1ComplData (I := I) (M := M) g r s α P₀)
@@ -147,6 +156,7 @@ lemma memLp_volume_restrict_f_chart {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 end TensorChartBilinearH1ComplData
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensor_chart_bilinear_identity_h1Compl
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {α : M}

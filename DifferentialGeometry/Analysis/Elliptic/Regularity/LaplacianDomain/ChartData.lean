@@ -14,7 +14,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -65,7 +64,7 @@ private noncomputable def extChartAtSymmGlobal (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-omit [I.Boundaryless] [CompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmGlobal (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -75,7 +74,7 @@ private lemma extChartAtSymmGlobal_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-omit [I.Boundaryless] [CompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma extChartAtSymmGlobal_measurable (α : M) :
     Measurable (extChartAtSymmGlobal (I := I) (M := M) α) := by
   classical
@@ -86,7 +85,7 @@ private lemma extChartAtSymmGlobal_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
-omit [I.Boundaryless] [CompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
     (hF_meas : Measurable F) :
     Measurable (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α F) := by
@@ -130,7 +129,7 @@ private lemma chartPushedRaw_measurable (α : M) {F : M → ℝ}
   rw [h_piecewise]
   exact Measurable.piecewise hCT_meas h_comp measurable_const
 
-omit [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
@@ -175,6 +174,7 @@ private lemma lintegral_chartLocalMeasure_le_lintegral_riemannianVolumeMeasure
   · rw [hFtilde_def, Set.indicator_of_mem hx]
   · rw [hFtilde_def, Set.indicator_of_notMem hx]; exact zero_le _
 
+set_option linter.unusedSectionVars false in
 private lemma lintegral_density_chartPushedRaw_pow_le
     (g : SmoothRiemannianMetric I M) (α : M)
     {F : M → ℝ} (hF_meas : Measurable F) {p : ℝ} (_hp_pos : 0 < p) :

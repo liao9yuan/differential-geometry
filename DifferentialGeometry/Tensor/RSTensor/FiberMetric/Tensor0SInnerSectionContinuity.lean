@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -114,6 +113,7 @@ lemma continuousAt_bilin_of_basis_continuousAt
     (u := u) (x₀ := x₀) h_inner_each
 
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0sCLM_continuousAt_of_baseSet
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {b₀ : M} (hb₀ : b₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -147,6 +147,7 @@ lemma chartTensorInnerPointwise_0sCLM_continuousAt_of_baseSet
   exact hCont.continuousAt (hOpen.mem_nhds hb₀)
 
 
+set_option linter.unusedSectionVars false in
 lemma innerBundleCLM_inCoordinates_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -243,6 +244,7 @@ lemma innerBundleCLM_inCoordinates_apply
   rw [hcomp v, hcomp w]
 
 
+set_option linter.unusedSectionVars false in
 theorem innerBundleCLM_continuousOn (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M) :
     ContinuousOn (fun b : M =>
       TotalSpace.mk' (Tensor0SModel s ℝ E →L[ℝ] Tensor0SModel s ℝ E →L[ℝ] ℝ) b
@@ -288,6 +290,7 @@ theorem innerBundleCLM_continuousOn (g : SmoothRiemannianMetric I M) (s : ℕ) (
   exact (innerBundleCLM_inCoordinates_apply (I := I) (M := M) g s b₀ hx v w).symm
 
 
+set_option linter.unusedSectionVars false in
 theorem innerBundleCLM_continuous (g : SmoothRiemannianMetric I M) (s : ℕ) :
     Continuous (fun b : M =>
       TotalSpace.mk' (Tensor0SModel s ℝ E →L[ℝ] Tensor0SModel s ℝ E →L[ℝ] ℝ) b
@@ -319,6 +322,7 @@ noncomputable def tensor0SContinuousRiemannianMetric
     convert h using 0
 
 
+set_option linter.unusedSectionVars false in
 theorem isContinuousRiemannianBundle_data
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ (γ : Π b : M,

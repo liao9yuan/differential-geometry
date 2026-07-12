@@ -37,11 +37,13 @@ abbrev EigenIdx.lambda {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) : ℝ :=
   laplacianEigenvalueOf i.1.val
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lambda_nonneg {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) :
     0 ≤ EigenIdx.lambda (I := I) (M := M) i :=
   laplacianEigenvalueOf_nonneg (I := I) (M := M) i.1
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heat_coeff_mem_unit_interval {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) {t : ℝ} (ht : 0 ≤ t) :
     0 < Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) ∧
@@ -52,6 +54,7 @@ theorem heat_coeff_mem_unit_interval {g : SmoothRiemannianMetric I M}
     lambda_nonneg (I := I) (M := M) i
   nlinarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma heat_coeff_sq_le_one {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) {t : ℝ} (ht : 0 ≤ t) :
     (Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t)) ^ 2 ≤ 1 := by

@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.TensorChartTransition
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartFderivBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [BoundarylessManifold I M] in
 theorem reprNormSq_le_sum_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (b : M) :
@@ -165,6 +165,7 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
+omit [BoundarylessManifold I M] in
 theorem chartTargetPouWeightedL2NormSq_repr_le_sum_chartComp_L2NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

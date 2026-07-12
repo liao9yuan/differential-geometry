@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import Mathlib.Analysis.MeanInequalities
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
   (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem
     Icc_subset_realizedSmallSet realizedSmallSet)
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -760,6 +760,7 @@ theorem gInvDiffSlotCoeff_realizedFam_perOrder_l2_ballUniform
   exact hK (realizedFam (I := I) g₀ T T' hδ hδ' s) (convexPerturbation (I := I) g₀ T T' s)
     hδP_le hδP htie hPball i hi
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem continuous_rfns_arm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
@@ -769,6 +770,7 @@ private theorem continuous_rfns_arm
   rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r s x (S.toSection x),
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem real_holder_two_nonneg_arm
     (g : SmoothRiemannianMetric I M) (φ ψ : M → ℝ)
     (hφc : Continuous φ) (hψc : Continuous ψ)

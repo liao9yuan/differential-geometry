@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartDeTurckRemainderPolynomial
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -61,6 +60,7 @@ def realizeMetricAt (g_bg : SmoothRiemannianMetric I M) {σ : ℝ}
     g_bg
 
 
+omit [BoundarylessManifold I M] in
 theorem realizeMetricAt_inner_of_realizable (g_bg : SmoothRiemannianMetric I M)
     {σ : ℝ} (u : tensorHs (I := I) (M := M) g_bg 0 2 σ)
     (hu_fs : (Function.support u.coeff).Finite)
@@ -76,6 +76,7 @@ theorem realizeMetricAt_inner_of_realizable (g_bg : SmoothRiemannianMetric I M)
   rfl
 
 
+omit [BoundarylessManifold I M] in
 theorem realizeMetricAt_of_not_realizable (g_bg : SmoothRiemannianMetric I M)
     {σ : ℝ} (u : tensorHs (I := I) (M := M) g_bg 0 2 σ)
     (hu : ¬ isRealizableMetricPerturbationAt (I := I) g_bg u) :
@@ -147,6 +148,7 @@ open DifferentialGeometry.PDE.RicciFlow
 open TensorMultilinear Tensor0SBundle
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
     (trivializationAt E (TangentSpace I) α).symmL ℝ x (chartModelBasis E i)
@@ -154,6 +156,7 @@ private lemma chartFrameVec_eq_chartBasisVecFiber_helper (α : M)
   rw [chartBasisVecFiber, Trivialization.symmL_apply]
 
 
+omit [BoundarylessManifold I M] in
 theorem realizedFam_chartDeTurckRicciRHS_jointContMDiffOn
     (g_bg g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -311,6 +314,7 @@ theorem deTurckRHSField_realizeMetric_jointContMDiffOn
     exact (Bb.equivFun.symm_apply_apply _).symm
 
 
+set_option linter.unusedSectionVars false in
 private theorem smoothCcChartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -374,6 +378,7 @@ private theorem smoothCcChartRepr_jointContMDiffOn
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
 
+set_option linter.unusedSectionVars false in
 private theorem smoothCcChartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -784,6 +789,7 @@ private theorem smoothCcCovApplySection_jointContMDiffOn
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
 
+set_option linter.unusedSectionVars false in
 private theorem genChartRepr_jointContMDiffOn
     (S : Set ℝ) (α : M)
     (Tfam : ℝ → Cₛ^∞⟮I; Tensor0SBundle.TensorRSModel 0 2 ℝ E,
@@ -852,6 +858,7 @@ private def toSmoothCcTensor
   hasCompactSupport :=
     IsCompact.of_isClosed_subset isCompact_univ (isClosed_tsupport _) (Set.subset_univ _)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] private lemma toSmoothCcTensor_toSection
     (g₀ : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; Tensor0SBundle.TensorRSModel 0 2 ℝ E,
@@ -892,6 +899,7 @@ private def covApplySection
   contMDiff_toFun :=
     covApplyRS_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] private lemma covApplySection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -913,6 +921,7 @@ private def christoffelSelfField
     intro b
     exact hOn.contMDiffAt (Filter.univ_mem)
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] private lemma christoffelSelfField_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -979,6 +988,7 @@ private def iteratedCovApplySection
   contMDiff_toFun :=
     covApply_covApply_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma iteratedCovApplySection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1001,6 +1011,7 @@ private def covApplyChristoffelSection
   contMDiff_toFun :=
     covApply_christoffel_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma covApplyChristoffelSection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

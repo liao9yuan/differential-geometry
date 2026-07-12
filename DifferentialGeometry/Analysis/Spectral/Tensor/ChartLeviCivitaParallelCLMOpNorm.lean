@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartJUn
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartLeviCivitaParallelCLM_general_opNorm_le_factors
     (g : SmoothRiemannianMetric I M) (α b : M)
     (X : Π b' : M, TangentSpace I b')

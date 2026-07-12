@@ -114,6 +114,7 @@ variable {𝒱 : M → Type*} [∀ x, AddCommGroup (𝒱 x)] [∀ x, Module ℝ 
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [FiniteDimensional ℝ F] [ContMDiffVectorBundle ∞ F 𝒱 I] in
 lemma thirdOrder_commutation_abstract
     (g : SmoothRiemannianMetric I M)
     (cov : CovariantDerivative I F 𝒱)
@@ -191,6 +192,7 @@ end AbstractThirdOrder
 
 section Reductions
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covGrad_covDeriv_innerSlot_secondOrder_eq_abstract
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s)
     {B w : Π b : M, TangentSpace I b}

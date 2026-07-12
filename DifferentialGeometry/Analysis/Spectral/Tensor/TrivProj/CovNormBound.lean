@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormCompariso
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerCovDiagonalBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerPointwiseUpperBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -72,6 +72,7 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_compact
   rw [h_bridge, h_round] at h_T
   exact h_T
 
+set_option linter.unusedSectionVars false in
 theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -130,6 +131,7 @@ theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointw
     _ = (K * C') *
           tensorCovDerivPointwiseInner (I := I) (M := M) g r s S S b := h_assoc
 
+set_option linter.unusedSectionVars false in
 theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧
@@ -143,6 +145,7 @@ theorem chartRSTwistInv_sq_norm_le_const_mul_tensorInnerPointwise_on_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_subset_baseSet (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 theorem exists_sum_chartRSTwistInv_cov_sq_norm_le_const_mul_tensorCovDerivPointwiseInner_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

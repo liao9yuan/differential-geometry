@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -98,6 +97,7 @@ lemma etaEuclid_apply_of_notMem (α : M) (η_M : M → ℝ)
   unfold chartCutoffEuclidean
   simp [hy]
 
+omit [IsManifold I ∞ M] in
 lemma chartImage_isCompact_of_compact_in_source (α : M)
     {S : Set M} (hS_compact : IsCompact S)
     (hS_chart : S ⊆ (chartAt H α).source) :
@@ -124,6 +124,7 @@ lemma chartImage_isCompact_of_compact_in_source (α : M)
       exact ⟨extChartAt I α x, ⟨x, hxS, rfl⟩, hxy⟩
   rw [← hset_eq]; exact h_img
 
+omit [IsManifold I ∞ M] in
 lemma chartImage_tsupport_subset_chartTargetEuclid (α : M) (η_M : M → ℝ)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
     (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
@@ -138,6 +139,7 @@ lemma chartImage_tsupport_subset_chartTargetEuclid (α : M) (η_M : M → ℝ)
   rw [← hxy]
   exact ⟨extChartAt I α x, h_target, rfl⟩
 
+omit [IsManifold I ∞ M] in
 lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
     {y : EuclN}
     (hy_off : y ∉ (fun x : M => (toEuclidean (E := E)) (extChartAt I α x)) ''
@@ -162,6 +164,7 @@ lemma etaEuclid_zero_off_chartImage_tsupport (α : M) (η_M : M → ℝ)
     exact ⟨z, hz_tsupp, hy_eq⟩
   · exact etaEuclid_apply_of_notMem (I := I) (M := M) α η_M hy_target
 
+omit [IsManifold I ∞ M] in
 lemma tsupport_etaEuclid_subset_chartImage (α : M) (η_M : M → ℝ)
     (h_tsupp_compact : IsCompact (tsupport η_M))
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :
@@ -342,6 +345,7 @@ lemma etaEuclid_eq_one_of_eta_eq_one
   rw [hz_eq_x]
   exact hη_one x hx_supp
 
+omit [IsManifold I ∞ M] in
 lemma hasCompactSupport_etaEuclid [T2Space M] (α : M) (η_M : M → ℝ)
     (hη_cpt : HasCompactSupport η_M)
     (h_tsupp_chart : tsupport η_M ⊆ (chartAt H α).source) :

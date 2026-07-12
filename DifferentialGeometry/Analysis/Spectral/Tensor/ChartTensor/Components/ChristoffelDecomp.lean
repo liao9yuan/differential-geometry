@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 import Mathlib.Analysis.Calculus.FDeriv.Comp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorTrivProj_contMDiffOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -72,6 +72,7 @@ lemma tensorTrivProj_contMDiffOn_chart_source
       (fun y : M => TensorRSSpace r s I y) α).linearMapAt ℝ x (S.toSection x) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hx_base]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma mdifferentiableAt_tensorTrivProj
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -85,6 +86,7 @@ lemma mdifferentiableAt_tensorTrivProj
     hcontMDiff.contMDiffAt ((chartAt H α).open_source.mem_nhds hb_chart)
   exact hAt.mdifferentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma differentiableAt_tensorTrivProj_pullback
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -123,6 +125,7 @@ lemma differentiableAt_tensorTrivProj_pullback
   rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
   exact hwithin.differentiableAt hrange_nhds
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem mfderiv_tensorTrivProj_eq_chart_fderiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -188,6 +191,7 @@ theorem mfderiv_tensorTrivProj_eq_chart_fderiv
   rw [htriv_eq]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorTrivProj_chart_pullback_hasFDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) {b : M}
@@ -203,6 +207,7 @@ theorem tensorTrivProj_chart_pullback_hasFDerivAt
   (differentiableAt_tensorTrivProj_pullback (I := I) (M := M) g r s S α
     hb_chart hb_int).hasFDerivAt
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_pullback_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -215,6 +220,7 @@ private lemma tensorChartComponentRaw_pullback_eq
   funext y
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_chart_pullback_hasFDerivAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -246,6 +252,7 @@ theorem tensorChartComponentRaw_chart_pullback_hasFDerivAt
     (tensorChartComponentProjection (E := E) r s Idx Jdx).hasFDerivAt
   exact HasFDerivAt.comp (extChartAt I α b) hCLM_hasFDeriv htriv
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_chart_pullback_fderiv
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -265,6 +272,7 @@ theorem tensorChartComponentRaw_chart_pullback_fderiv
   (tensorChartComponentRaw_chart_pullback_hasFDerivAt
     (I := I) (M := M) g r s S α Idx Jdx hb_chart hb_int).fderiv
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_partial_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -287,6 +295,7 @@ theorem tensorChartComponentRaw_partial_decomp
     (I := I) (M := M) g r s S α Idx Jdx hb_chart hb_int]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_mfderiv_decomp
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -330,6 +339,7 @@ theorem tensorChartComponentRaw_mfderiv_decomp
   rw [hP_eq, hP_fderiv]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorChartComponentRaw_chartBasis_partial
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}

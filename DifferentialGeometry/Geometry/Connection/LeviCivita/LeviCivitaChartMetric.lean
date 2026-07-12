@@ -4,7 +4,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Mul
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ def chartInnerOnE (g : SmoothRiemannianMetric I M) (α : M)
           (chartE_section_repr (I := I) α Z ((extChartAt I α).symm y))) j *
         chartGramOnE (I := I) g α i j y
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartInnerOnE_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (Y Z : Π x : M, TangentSpace I x) (y : E) :
@@ -76,6 +76,7 @@ lemma chartInnerOnE_eq_g_inner
   rw [hG i j]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma differentiableAt_repr_comp
     {f : E → E} {y : E} (hf : DifferentiableAt ℝ f y)
     (i : Fin (Module.finrank ℝ E)) :
@@ -123,6 +124,7 @@ private def chartReprComp
   ((chartModelBasis E).repr
       (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartReprComp_apply
     (α : M) (Y : Π x : M, TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -130,6 +132,7 @@ private def chartReprComp
       ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartReprComp_differentiableAt
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -143,6 +146,7 @@ private lemma chartReprComp_differentiableAt
     differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hY
   exact differentiableAt_repr_comp hY_pull i
 
+set_option linter.unusedSectionVars false in
 private lemma chartReprComp_fderiv_apply
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -352,6 +356,7 @@ private lemma mfderiv_g_inner_eq_chartInnerOnE_fderiv
     rw [(extChartAt I α).right_inv hy_tgt]
   rw [Filter.EventuallyEq.fderiv_eq hev_pull]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -375,6 +380,7 @@ private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
   rw [map_smul, smul_eq_mul]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma christoffelCorrection_repr_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y : E)
     (v : TangentSpace I x) (i : Fin (Module.finrank ℝ E)) :

@@ -17,7 +17,6 @@ import Mathlib.Analysis.Calculus.TangentCone.Prod
 import Mathlib.Analysis.Calculus.TangentCone.Real
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -47,6 +46,7 @@ def JointChartGramSmooth (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M) :
         Integral.Measure.chartGramMatrix (I := I) (g_DT p.1) α p.2 i j)
       (Set.Icc 0 T ×ˢ (trivializationAt E (TangentSpace I) α).baseSet)
 
+set_option linter.unusedSectionVars false in
 private theorem jointScalar_manifold_to_euclidean
     (F : ℝ → M → ℝ) (α : M) (T : ℝ)
     (h : ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
@@ -84,6 +84,7 @@ private theorem jointScalar_manifold_to_euclidean
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem param_spatial_jet_continuity_closed
     (G : ℝ × E → ℝ) (T : ℝ) (V : Set E) (hV : IsOpen V)
     (hG : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ V)) (k : ℕ) :
@@ -164,6 +165,7 @@ private theorem param_spatial_jet_continuity_closed
         ← iteratedFDerivWithin_of_isOpen k hV hy]
     exact hspatial_within_eq_joint t ht hT_pos y hy
 
+set_option linter.unusedSectionVars false in
 theorem deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) :
@@ -207,6 +209,7 @@ theorem deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
   rintro ⟨t, x⟩ _
   simp only [Function.comp, hslice_eq]
 
+set_option linter.unusedSectionVars false in
 private lemma symm_of_interior_target_mem_baseSet (α : M) {y : E}
     (hy : y ∈ interior (extChartAt I α).target) :
     (extChartAt I α).symm y ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -216,6 +219,7 @@ private lemma symm_of_interior_target_mem_baseSet (α : M) {y : E}
   rw [Integral.Measure.trivializationAt_baseSet_eq_chartAt_source (I := I)]
   exact hsource
 
+set_option linter.unusedSectionVars false in
 private lemma jointGramEntry_euclidean_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -226,6 +230,7 @@ private lemma jointGramEntry_euclidean_contDiffOn
   jointScalar_manifold_to_euclidean
     (fun t x => Integral.Measure.chartGramMatrix (I := I) (g_DT t) α x l j) α T (hJ α l j)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasFDerivAt_prodMk_const_left (t : ℝ) (y : E) :
     HasFDerivAt (𝕜 := ℝ) (fun y' : E => (t, y'))
       (ContinuousLinearMap.inr ℝ ℝ E) y := by
@@ -238,6 +243,7 @@ private lemma hasFDerivAt_prodMk_const_left (t : ℝ) (y : E) :
   simp only [add_zero] at h
   exact h
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderivWithin_spatial_slice_eq
     (G : ℝ × E → ℝ) (t : ℝ) (y : E)
     {V : Set E} (hVopen : IsOpen V) (hy : y ∈ V)
@@ -255,6 +261,7 @@ private lemma fderivWithin_spatial_slice_eq
 private lemma infty_ne_zero_withTop : (∞ : WithTop ℕ∞) ≠ 0 :=
   WithTop.coe_ne_zero.mpr ENat.top_ne_zero
 
+set_option linter.unusedSectionVars false in
 private lemma jointGramDet_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M) :
@@ -277,6 +284,7 @@ private lemma jointGramDet_contDiffOn
     contDiffOn_const.mul
       (contDiffOn_prod (fun k _ => jointGramEntry_euclidean_contDiffOn T g_DT hJ α (σ k) k)))
 
+set_option linter.unusedSectionVars false in
 private lemma jointGramAdjugate_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -321,6 +329,7 @@ private lemma jointGramAdjugate_contDiffOn
         funext q; rw [Matrix.updateRow_ne hσk]
     rw [heq]; exact jointGramEntry_euclidean_contDiffOn T g_DT hJ α (σ k) k
 
+set_option linter.unusedSectionVars false in
 private lemma gramOnE_partialDeriv_joint_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -624,6 +633,7 @@ theorem deTurckRicci_chartRegularity_of_jointChartGramSmooth
   · exact deTurckChartGramOnE_iteratedFDeriv_jointContinuousOn_of_jointChartGram
       (I := I) T g_DT hJ
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma param_spatial_partialDeriv_contDiffOn
     (G : ℝ × E → ℝ) (T : ℝ) (V : Set E) (hVopen : IsOpen V)
     (hG : ContDiffOn ℝ ∞ G (Set.Icc 0 T ×ˢ V)) (m : Fin (Module.finrank ℝ E)) :
@@ -720,6 +730,7 @@ private lemma jointChartRicci_contDiffOn
   rw [hexp]
   exact ContDiffOn.sum (fun j _ => jointChartRiemann_contDiffOn T g_DT hJ α i j k j)
 
+set_option linter.unusedSectionVars false in
 private lemma jointChartGramOnE_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)
@@ -745,6 +756,7 @@ private lemma jointChartDeTurckVFComp_partialDeriv_contDiffOn
     T (interior (extChartAt I α).target) isOpen_interior hbase m).congr
     (fun ⟨t, y⟩ _ => rfl)
 
+set_option linter.unusedSectionVars false in
 private lemma jointChartGramOnE_partialDeriv_contDiffOn
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
     (hJ : JointChartGramSmooth (I := I) T g_DT) (α : M)

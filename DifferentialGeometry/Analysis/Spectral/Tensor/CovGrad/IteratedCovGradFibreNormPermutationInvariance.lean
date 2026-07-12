@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
+omit [CompleteSpace E] in
 theorem exists_iteratedCovGrad_rs_toModel_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)
@@ -97,6 +97,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
   rw [hsec]
   exact riemannianFiberNormSq_domDomCongr_covariant (I := I) (M := M) g r (s + i) x τ _
 
+omit [CompleteSpace E] in
 theorem riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g r s) (σ' : Equiv.Perm (Fin r)) (i : ℕ) (x : M) :

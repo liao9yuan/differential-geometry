@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.WeakSolutionGlobal
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ local notation "chartHaar" =>
 def euclTestLift (α : M) (φ : EuclN → ℝ) : Set M :=
   (extChartAt I α).symm '' ((toEuclidean (E := E)).symm '' tsupport φ)
 
+set_option linter.unusedSectionVars false in
 lemma euclTestLift_isCompact (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -65,6 +65,7 @@ lemma euclTestLift_isCompact (α : M)
     (continuousOn_extChartAt_symm (I := I) α).mono hmaps
   exact h1.image_of_continuousOn hcontOn
 
+set_option linter.unusedSectionVars false in
 lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
     euclTestLift (I := I) (M := M) α φ ⊆ (chartAt H α).source := by
@@ -81,6 +82,7 @@ lemma euclTestLift_subset_source (α : M) (φ : EuclN → ℝ)
     rw [← hz_eq]; exact (extChartAt I α).map_target hz_target
   rwa [extChartAt_source_eq_chartAt_source (I := I)] at hx_in_source
 
+set_option linter.unusedSectionVars false in
 lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
     Function.support (chartTestPullback (I := I) (M := M) α φ) ⊆
       euclTestLift (I := I) (M := M) α φ := by
@@ -98,6 +100,7 @@ lemma chartTestPullback_support_subset (α : M) (φ : EuclN → ℝ) :
   · rw [chartTestPullback_apply_of_notMem (I := I) α φ hx_src] at hx
     exact (hx rfl).elim
 
+set_option linter.unusedSectionVars false in
 lemma chartTestPullback_tsupport_subset_source (α : M)
     {φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ)
     (hφ_supp : tsupport φ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -106,6 +109,7 @@ lemma chartTestPullback_tsupport_subset_source (α : M)
     (euclTestLift_isCompact (I := I) (M := M) α hφ_cs hφ_supp).isClosed).trans
     (euclTestLift_subset_source (I := I) (M := M) α φ hφ_supp)
 
+set_option linter.unusedSectionVars false in
 lemma chartTestPullback_contMDiffOn (α : M)
     {φ : EuclN → ℝ} (hφ : ContDiff ℝ (⊤ : ℕ∞) φ) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞ (chartTestPullback (I := I) (M := M) α φ)
@@ -129,6 +133,7 @@ lemma chartTestPullback_contMDiffOn (α : M)
   refine hcompose.congr (fun x hx => ?_)
   exact chartTestPullback_apply_of_mem (I := I) α φ hx
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma contDiff_of_contDiffOn_chartTarget_zero_off
     (α : M) {P : EuclN → ℝ} {C : Set EuclN}
     (hC : IsClosed C) (hC_target : C ⊆ chartTargetEuclid (I := I) (M := M) α)
@@ -147,6 +152,7 @@ lemma contDiff_of_contDiffOn_chartTarget_zero_off
     refine (contDiffAt_const (c := (0 : ℝ))).congr_of_eventuallyEq ?_
     filter_upwards [hC.isOpen_compl.mem_nhds hyC] with z hz using hzero z hz
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma contDiff_mul_chartTest
     (α : M) {h φ : EuclN → ℝ}
     (hh : ContDiffOn ℝ ∞ h (chartTargetEuclid (I := I) (M := M) α))
@@ -158,11 +164,13 @@ lemma contDiff_mul_chartTest
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma hasCompactSupport_mul_chartTest
     {h φ : EuclN → ℝ} (hφ_cs : HasCompactSupport φ) :
     HasCompactSupport (fun y => h y * φ y) :=
   hφ_cs.mul_left
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma euclidPartial_contDiffOn_chartTarget
     (α : M) (l : Fin (Module.finrank ℝ E))
     {u : EuclN → ℝ}
@@ -193,11 +201,13 @@ lemma euclidPartial_contDiffOn_chartTarget
   refine hcomp.congr (fun z _ => ?_)
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma integrable_of_contDiff_hasCompactSupport
     {P : EuclN → ℝ} (hP : ContDiff ℝ ∞ P) (hP_cs : HasCompactSupport P) :
     Integrable P (volume : Measure EuclN) :=
   hP.continuous.integrable_of_hasCompactSupport hP_cs
 
+set_option linter.unusedSectionVars false in
 lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     Set.EqOn (chartPushedRaw I α (chartTestPullback (I := I) (M := M) α φ)) φ
       (chartTargetEuclid (I := I) (M := M) α) := by
@@ -215,6 +225,7 @@ lemma chartPushedRaw_chartTestPullback_eqOn (α : M) (φ : EuclN → ℝ) :
     rw [(extChartAt I α).right_inv hy', ContinuousLinearEquiv.apply_symm_apply]
   rw [hb_eq]
 
+set_option linter.unusedSectionVars false in
 lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
     (α : M) (φ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     Set.EqOn
@@ -231,6 +242,7 @@ lemma euclidPartial_chartPushedRaw_chartTestPullback_eqOn
       (Filter.eventuallyEq_of_mem (hopen.mem_nhds hy)
         (chartPushedRaw_chartTestPullback_eqOn (I := I) (M := M) α φ))]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eq_zero_of_notMem_tsupport
     {u : EuclN → ℝ} (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ tsupport u) :
@@ -243,6 +255,7 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hu_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+omit [CompleteSpace E] [CompactSpace M] in
 lemma density_scalarPrincipal_eq_principalIntegrand
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK : IsCompact K)

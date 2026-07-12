@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.PartialMetricTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorSecondCovDeriv_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {X Y : Π b : M, TangentSpace I b} {T T' : Π b : M, TensorRSSpace r s I b} {x : M}
@@ -97,6 +97,7 @@ theorem tensorSecondCovDeriv_add
   simp only [ContinuousLinearMap.add_apply]
   abel
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem metricTrace2_secondCovDeriv_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T T' : Π b : M, TensorRSSpace r s I b} (x : M)

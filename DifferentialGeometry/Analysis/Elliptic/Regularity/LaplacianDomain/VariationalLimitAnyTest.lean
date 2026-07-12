@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.POUReduction
 import DifferentialGeometry.Geometry.Operator.Laplacian
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 theorem gradFun_smul_smooth_eq_pointwise
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -102,6 +102,7 @@ theorem gradFun_smul_smooth_eq_pointwise
     rw [hd_φ_def]
     exact inner_gradFun (I := I) g φ x w]
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma grad_g_smul_smooth_section_eq
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -126,6 +127,7 @@ private lemma grad_g_smul_smooth_section_eq
   rw [grad_g_apply, grad_g_apply]
   exact gradFun_smul_smooth_eq_pointwise (I := I) (M := M) g hφ hv x
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma tangentSectionAction_grad_g_eq_inner_grad
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -141,6 +143,7 @@ private lemma tangentSectionAction_grad_g_eq_inner_grad
         gradFun (I := I) g v x from grad_g_apply (I := I) g hv x]
   exact (inner_gradFun (I := I) g φ x _).symm
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [CompactSpace M] in
 theorem Δ_g_smul_eq
     (g : SmoothRiemannianMetric I M)
     {φ v : M → ℝ}
@@ -168,6 +171,7 @@ theorem Δ_g_smul_eq
   rw [h_symm]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem pouScalar_oneSubLapClassical_pointwise_leibniz
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) (x : M) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun x =

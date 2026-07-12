@@ -7,7 +7,6 @@ import Mathlib.Analysis.Convex.Mul
 import Mathlib.Analysis.Seminorm
 import Mathlib.MeasureTheory.Integral.Prod
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_add_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S T : TensorRSModel r s ℝ E) :
@@ -67,6 +67,7 @@ theorem tensorPointwiseNorm_add_le
   rw [hsq]
   nlinarith [hqST_le]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a : ℝ) (S : TensorRSModel r s ℝ E) :
@@ -80,6 +81,7 @@ theorem tensorPointwiseNorm_smul
       a ^ 2 * tensorInnerPointwise (I := I) (M := M) g r s x S S from by ring]
   rw [Real.sqrt_mul (sq_nonneg a), Real.sqrt_sq_eq_abs]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -94,12 +96,14 @@ def tensorPointwiseSeminorm
     (fun a S => by
       rw [tensorPointwiseNorm_smul (I := I) (M := M) g r s x a S, Real.norm_eq_abs])
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem tensorPointwiseSeminorm_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
     tensorPointwiseSeminorm (I := I) (M := M) g r s x S =
       tensorPointwiseNorm (I := I) (M := M) g r s x S := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorPointwiseNorm_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     Continuous (tensorPointwiseNorm (I := I) (M := M) g r s x) := by
@@ -131,6 +135,7 @@ theorem tensorPointwiseNorm_continuous
   unfold tensorPointwiseNorm
   exact Real.continuous_sqrt.comp hdiag
 
+set_option linter.unusedSectionVars false in
 theorem tensorPointwiseNorm_intervalIntegral_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (f : ℝ → TensorRSModel r s ℝ E)

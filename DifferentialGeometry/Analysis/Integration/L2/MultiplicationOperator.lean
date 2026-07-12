@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Hilbert.Operators
 import DifferentialGeometry.Geometry.Connection.TensorNabla.FullHomCovariantCalculusRS
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ section SmoothSide
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 
+set_option linter.unusedSectionVars false in
 theorem norm_appFullRS_sq_eq_integral
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -61,6 +61,7 @@ theorem norm_appFullRS_sq_eq_integral
   simp only [appFullRS_toSection (I := I) (M := M) g r s s Ψ hΨ W]
 
 
+set_option linter.unusedSectionVars false in
 theorem integrable_riemannianFiberNormSq_appFullRS
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -79,6 +80,7 @@ theorem integrable_riemannianFiberNormSq_appFullRS
     (Ψ x (W.toSection x))).symm
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem integrable_riemannianFiberNormSq_toSection
     (W : SmoothCcTensor g r s) :
     Integrable

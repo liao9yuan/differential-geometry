@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,6 +25,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (x : Tensor0SSpace n I b) :
@@ -82,6 +82,7 @@ lemma tensorSlotSubstCLM_apply_norm_le (n : ℕ) (b : M)
       (I := I) (M := M) n b x] at hCLM_le'
   exact hCLM_le'
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     (i : Fin n) :
@@ -95,6 +96,7 @@ lemma tangentSlotCLM_factor_norm_le (n : ℕ) (b : M)
       ContinuousLinearMap.norm_id_le
     exact h_id.trans (le_max_right _ _)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 lemma tangentSlotCLM_prod_norm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     (∏ i : Fin n, ‖tangentSlotCLM (I := I) n k Φ i‖) ≤
@@ -112,6 +114,7 @@ def tensorSlotSubstCLMRS (n : ℕ) (b : M)
     TensorRSSpace n n I b :=
   tensorSlotSubstCLM (I := I) n b Φ
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma tensorSlotSubstCLMRS_apply (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (x : Tensor0SSpace n I b) :
@@ -119,11 +122,13 @@ def tensorSlotSubstCLMRS (n : ℕ) (b : M)
       tensorSlotSubstCLMRS (I := I) n b Φ) x =
       tensorSlotSubstCLM (I := I) n b Φ x := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 private lemma slotSubstCLM_factor_prod_nonneg (n : ℕ) {b : M}
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     0 ≤ ∏ i : Fin n, ‖Φ i‖ :=
   Finset.prod_nonneg (fun _ _ => norm_nonneg _)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorSlotSubstCLM_opNorm_le (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b)) :
     ‖tensorSlotSubstCLMRS (I := I) n b Φ‖ ≤ ∏ i : Fin n, ‖Φ i‖ := by
@@ -133,6 +138,7 @@ theorem tensorSlotSubstCLM_opNorm_le (n : ℕ) (b : M)
   intro x
   exact tensorSlotSubstCLM_apply_norm_le (I := I) n b Φ x
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (n : ℕ) (b : M)
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     ‖tensorSlotSubstCLMRS (I := I) n b
@@ -141,6 +147,7 @@ theorem tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (n : ℕ) (b : M)
       (tangentSlotCLM (I := I) n k Φ)).trans
     (tangentSlotCLM_prod_norm_le (I := I) n b k Φ)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorSlotSubstCLM_inputSlotChartCLM_opNorm_le (r : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') (b : M) (k : Fin r) :
@@ -150,6 +157,7 @@ theorem tensorSlotSubstCLM_inputSlotChartCLM_opNorm_le (r : ℕ)
       (max ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ 1) ^ r :=
   tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (I := I) r b k _
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem tensorSlotSubstCLM_outputSlotChartCLM_opNorm_le (s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') (b : M) (l : Fin s) :
@@ -159,6 +167,7 @@ theorem tensorSlotSubstCLM_outputSlotChartCLM_opNorm_le (s : ℕ)
       (max ‖chartLeviCivitaParallelCLM (I := I) g α b X‖ 1) ^ s :=
   tensorSlotSubstCLM_tangentSlotCLM_opNorm_le (I := I) s b l _
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem chartTensorRSInputSlotCorrection_opNorm_le (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -227,6 +236,7 @@ theorem chartTensorRSInputSlotCorrection_opNorm_le (r s : ℕ)
   rw [h_rearrange] at hChain2
   exact hChain2
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem chartTensorRSOutputSlotCorrection_opNorm_le (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')

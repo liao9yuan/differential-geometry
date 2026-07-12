@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedInvGramJetLipschitz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ structure HasChartJetLip
       C * chartGramJetDiffSeminormSum (I := I) (M := M) (N + d) g₁ g₂ α
         (interior (extChartAt I α).target) y
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.congr
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F F' : SmoothRiemannianMetric I M → E → ℝ} {d : ℕ}
@@ -50,6 +50,7 @@ theorem HasChartJetLip.congr
   have hrw : F' = F := by funext g; exact (hFF' g).symm
   rw [hrw]; exact hF
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.of_le
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d d' : ℕ} (hd : d ≤ d')
@@ -61,6 +62,7 @@ theorem HasChartJetLip.of_le
   refine mul_le_mul_of_nonneg_left ?_ hC_pos.le
   exact chartGramJetDiffSeminormSum_mono (I := I) (M := M) (by omega) g₁ g₂ α _ y
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.const_smul
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -115,6 +117,7 @@ theorem HasChartJetLip.const_smul
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + d) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.add
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -171,6 +174,7 @@ theorem HasChartJetLip.add
     refine (add_le_add (hCF y hy) (hCG y hy)).trans ?_
     rw [← add_mul]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.seminorm_le
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d : ℕ}
@@ -201,6 +205,7 @@ theorem HasChartJetLip.seminorm_le
       chartGramJetDiffSeminormSum_mono (I := I) (M := M) (by omega) g₁ g₂ α s y
     exact mul_le_mul_of_nonneg_left hmono (hCl_pos l).le
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.uniformBound
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     {F : SmoothRiemannianMetric I M → E → ℝ} {d : ℕ}
@@ -214,6 +219,7 @@ theorem HasChartJetLip.uniformBound
   · exact (hB y hy m hm).1
   · exact (hB y hy m hm).2
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.mul
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -305,6 +311,7 @@ theorem HasChartJetLip.mul
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + max dF dG) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.partialDeriv
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)
@@ -356,6 +363,7 @@ theorem HasChartJetLip.partialDeriv
             chartGramJetDiffSeminormSum (I := I) (M := M) (N + (d + 1)) g₁ g₂ α s y := by
           refine mul_le_mul_of_nonneg_right ?_ hsem_nn; linarith
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem hasChartJetLip_const
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -381,6 +389,7 @@ theorem hasChartJetLip_const
     exact mul_nonneg one_pos.le
       (chartGramJetDiffSeminormSum_nonneg (I := I) (M := M) (N + 0) g₁ g₂ α s y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem HasChartJetLip.sum
     {g₁ g₂ : SmoothRiemannianMetric I M} {α : M} {K : Set E}
     (hKsub : K ⊆ interior (extChartAt I α).target)

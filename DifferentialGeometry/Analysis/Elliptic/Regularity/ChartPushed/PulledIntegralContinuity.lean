@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1ComplFr
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartMeasureEquiv
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -47,6 +46,7 @@ private def chartSrcPreimage (α : M) (θ : EuclN → ℝ) : Set M :=
   (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y)) ''
     (tsupport θ)
 
+set_option linter.unusedSectionVars false in
 private lemma chartSrcPreimage_isCompact
     (α : M) {θ : EuclN → ℝ} (hθ_cs : HasCompactSupport θ)
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -56,6 +56,7 @@ private lemma chartSrcPreimage_isCompact
   exact (hθ_cs : IsCompact (tsupport θ)).image_of_continuousOn
     ((continuousOn_symm_toEuclideanSymm (I := I) (M := M) α).mono hθ_supp)
 
+set_option linter.unusedSectionVars false in
 private lemma chartSrcPreimage_subset_chartSource
     (α : M) {θ : EuclN → ℝ}
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -75,6 +76,7 @@ noncomputable def chartPulledIntegralWeight
       θ ((toEuclidean (E := E)) ((extChartAt I α) x)) / chartDensity g α x
     else 0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma chartPulledIntegralWeight_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -84,6 +86,7 @@ lemma chartPulledIntegralWeight_apply_of_mem
   unfold chartPulledIntegralWeight
   exact dif_pos hx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) {x : M}
     (hx : x ∉ (chartAt H α).source) :
@@ -92,6 +95,7 @@ private lemma chartPulledIntegralWeight_apply_of_notMem
   unfold chartPulledIntegralWeight
   exact dif_neg hx
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_apply_zero_off_preimage
     (g : SmoothRiemannianMetric I M) (α : M) {θ : EuclN → ℝ} {x : M}
     (hx_src : x ∈ (chartAt H α).source)
@@ -118,6 +122,7 @@ private lemma chartPulledIntegralWeight_apply_zero_off_preimage
     image_eq_zero_of_notMem_tsupport hTx_not_in
   rw [hθ_zero, zero_div]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledIntegralWeight_support_subset
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) :
     Function.support (chartPulledIntegralWeight (I := I) (M := M) g α θ) ⊆
@@ -164,6 +169,7 @@ private lemma chartPulledIntegralWeight_tsupport_subset_chartSource
       hθ_cs hθ_supp).trans
     (chartSrcPreimage_subset_chartSource (I := I) (M := M) α hθ_supp)
 
+set_option linter.unusedSectionVars false in
 private lemma chart_map_continuousOn (α : M) :
     ContinuousOn (fun x : M => (toEuclidean (E := E)) ((extChartAt I α) x))
       (chartAt H α).source := by
@@ -174,6 +180,7 @@ private lemma chart_map_continuousOn (α : M) :
     rw [h_src]; exact continuousOn_extChartAt α
   exact (toEuclidean (E := E)).continuous.continuousOn.comp h_ext (Set.mapsTo_univ _ _)
 
+set_option linter.unusedSectionVars false in
 private lemma chartPulledIntegralWeight_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) :
@@ -299,6 +306,7 @@ private lemma weight_smul_tsupport_subset_chartSource
   exact chartPulledIntegralWeight_tsupport_subset_chartSource
     (I := I) (M := M) g α hθ_cs hθ_supp
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma density_mul_weight_eq_theta
     (g : SmoothRiemannianMetric I M) (α : M) (θ : EuclN → ℝ) {x : M}
     (hx : x ∈ (chartAt H α).source) :

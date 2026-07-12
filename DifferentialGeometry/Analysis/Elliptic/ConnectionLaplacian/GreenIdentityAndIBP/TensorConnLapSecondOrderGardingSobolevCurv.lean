@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorConnLapSecondOrderGardingL2Bound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+set_option linter.unusedSectionVars false in
 theorem secondCovGrad_l2NormSq_le_rawConnLap_gen
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (Curv : SmoothCcTensor g 0 3) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)

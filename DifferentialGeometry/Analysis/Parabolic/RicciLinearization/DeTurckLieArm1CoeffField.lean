@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutio
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.DeTurckLieArm2TraceCoeff
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLoweredTrilinear
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -103,6 +102,7 @@ noncomputable def deTurckLieArm1Fib (g₀ g₁ g_bg : SmoothRiemannianMetric I M
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensor0SProd_section_contMDiff {p q : ℕ}
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace p I x)
     (K : ∀ x : M, Tensor0SBundle.Tensor0SSpace q I x)

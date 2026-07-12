@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,11 +30,13 @@ variable [CompleteSpace E]
 section RankCast
 
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private theorem covGrad_heq_congr_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
     HEq (covGrad g r a Y) (covGrad g r b Z) := by
   subst h; rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private theorem iteratedCovGrad_covGrad_comm_heq_db (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (X : SmoothCcTensor g r s) :
     HEq (iteratedCovGrad g r (s + 1) m (covGrad g r s X))
@@ -48,6 +49,7 @@ private theorem iteratedCovGrad_covGrad_comm_heq_db (g : SmoothRiemannianMetric 
       exact covGrad_heq_congr_db g r (by omega : (s + 1) + k = s + (k + 1)) ih
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem riemannianFiberNormSq_toSection_heq_congr (g : SmoothRiemannianMetric I M)
     (r : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
     (hYZ : HEq Y Z) (x : M) :
@@ -55,6 +57,7 @@ private theorem riemannianFiberNormSq_toSection_heq_congr (g : SmoothRiemannianM
       riemannianFiberNormSq (I := I) (M := M) g r b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
+set_option linter.unusedSectionVars false in
 private theorem rfns_iteratedCovGrad_covGrad_comm_db (g : SmoothRiemannianMetric I M)
     (r s m : ℕ) (W : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r ((s + 1) + m) x
@@ -69,6 +72,7 @@ def castCcTensorRank (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h :
   h ▸ W
 
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 theorem riemannianFiberNormSq_iteratedCovGrad_castCcTensorRank (g : SmoothRiemannianMetric I M) (r : ℕ)
     {a b : ℕ} (h : a = b) (W : SmoothCcTensor g r a) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (b + j) x

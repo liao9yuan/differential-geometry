@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ParallelTransport.MFDerivAlongCu
 import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -29,10 +28,12 @@ namespace CovariantDerivativeAlong
 def chartRepAt (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) : ℝ → E :=
   fun s => (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt ℝ (γ s) (V s)
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartRepAt_apply (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t s : ℝ) :
     chartRepAt (I := I) γ V t s =
       (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt ℝ (γ s) (V s) := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma symmL_chartRepAt_self (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
         (chartRepAt (I := I) γ V t t) = V t := by
@@ -41,6 +42,7 @@ lemma symmL_chartRepAt_self (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) 
   exact (trivializationAt E (TangentSpace I) (γ t)).symmL_continuousLinearMapAt
     (R := ℝ) hmem (V t)
 
+set_option linter.unusedSectionVars false in
 theorem sectionAlongCurve_continuousWithinAt_totalSpace
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ} {x₀ : ℝ}
     (hx₀ : x₀ ∈ s)
@@ -68,6 +70,7 @@ theorem sectionAlongCurve_continuousWithinAt_totalSpace
     hV.continuousAt.continuousWithinAt
   exact hcont.congr_of_eventuallyEq heq (heq.eq_of_nhdsWithin hx₀)
 
+set_option linter.unusedSectionVars false in
 theorem sectionAlongCurve_continuousOn_totalSpace
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
     (hγ : ContinuousOn γ s)
@@ -78,6 +81,7 @@ theorem sectionAlongCurve_continuousOn_totalSpace
   exact sectionAlongCurve_continuousWithinAt_totalSpace (I := I) γ V hx₀
     (hγ x₀ hx₀) (hV x₀ hx₀)
 
+set_option linter.unusedSectionVars false in
 theorem sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
     (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s)
@@ -91,12 +95,14 @@ def covDerivAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
     (chartCovDerivAlong (I := I) g (γ t) γ (chartRepAt (I := I) γ V t) t)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma covDerivAlong_def (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ V t =
       (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
         (chartCovDerivAlong (I := I) g (γ t) γ (chartRepAt (I := I) γ V t) t) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma covDerivAlong_chartCoord (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt ℝ (γ t)
@@ -108,6 +114,7 @@ lemma covDerivAlong_chartCoord (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   exact (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt_symmL
     (R := ℝ) hmem _
 
+set_option linter.unusedSectionVars false in
 lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ V t = 0 ↔
@@ -120,6 +127,7 @@ lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M
   · intro h
     rw [covDerivAlong_def, h, map_zero]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma covDerivAlong_zero (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ) :
     covDerivAlong (I := I) g γ (fun s => (0 : TangentSpace I (γ s))) t = 0 := by
   have hrep : chartRepAt (I := I) γ (fun s => (0 : TangentSpace I (γ s))) t = fun _ => (0 : E) := by
@@ -131,24 +139,28 @@ lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M
   rw [deriv_const', add_zero]
   exact map_zero _
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartRepAt_add (γ : ℝ → M) (V W : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => V s + W s) t =
       fun s => chartRepAt (I := I) γ V t s + chartRepAt (I := I) γ W t s := by
   funext s
   simp [chartRepAt, map_add]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartRepAt_smul (γ : ℝ → M) (c : ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => c • V s) t =
       fun s => c • chartRepAt (I := I) γ V t s := by
   funext s
   simp [chartRepAt, map_smul]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartRepAt_smulFun (γ : ℝ → M) (f : ℝ → ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => f s • V s) t =
       fun s => f s • chartRepAt (I := I) γ V t s := by
   funext s
   simp [chartRepAt, map_smul]
 
+set_option linter.unusedSectionVars false in
 theorem covDerivAlong_add (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t : ℝ)
     (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
@@ -164,6 +176,7 @@ theorem covDerivAlong_add (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_add_right]
   abel
 
+set_option linter.unusedSectionVars false in
 theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (c : ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ (fun s => c • V s) t =
@@ -177,6 +190,7 @@ theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_smul_right]
   rw [smul_add]
 
+set_option linter.unusedSectionVars false in
 theorem covDerivAlong_smulFun (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (f : ℝ → ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ)
     (hf : DifferentiableAt ℝ f t)
@@ -201,19 +215,23 @@ theorem covDerivAlong_smulFun (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
 private def chartTime (I : ModelWithCorners ℝ E H) (γ : ℝ → M) (t : ℝ) : Set ℝ :=
   γ ⁻¹' (extChartAt I (γ t)).source
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTime_isOpen {γ : ℝ → M} (hγ : Continuous γ) (t : ℝ) :
     IsOpen (chartTime I γ t) := by
   have hsrc : IsOpen (extChartAt I (γ t)).source := isOpen_extChartAt_source (I := I) (γ t)
   exact hγ.isOpen_preimage _ hsrc
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma mem_chartTime_self (γ : ℝ → M) (t : ℝ) : t ∈ chartTime I γ t := by
   rw [chartTime, mem_preimage, extChartAt_source]
   exact mem_chart_source H (γ t)
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartTime_eq_chartSource (γ : ℝ → M) (t : ℝ) :
     chartTime I γ t = γ ⁻¹' (chartAt H (γ t)).source := by
   rw [chartTime, extChartAt_source]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma contDiffOn_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ : ℝ → M}
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (t : ℝ) :
     ContDiffOn ℝ n (chartCurve (I := I) (γ t) γ) (chartTime I γ t) := by
@@ -231,12 +249,14 @@ private lemma contDiffOn_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ 
   rw [hfun]
   exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
 
+set_option linter.unusedSectionVars false in
 lemma contDiffAt_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ : ℝ → M}
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (t : ℝ) :
     ContDiffAt ℝ n (chartCurve (I := I) (γ t) γ) t :=
   (contDiffOn_chartCurve (I := I) hγ t).contDiffAt
     ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
+set_option linter.unusedSectionVars false in
 private lemma velocity_chartRep_eqOn {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     EqOn (chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t)
       (deriv (chartCurve (I := I) (γ t) γ)) (chartTime I γ t) := by
@@ -249,12 +269,14 @@ private lemma velocity_chartRep_eqOn {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ,
     (γ := γ) hγ (γ t) (t := s) hs']
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma velocity_chartRep_eventuallyEq {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t
       =ᶠ[𝓝 t] deriv (chartCurve (I := I) (γ t) γ) :=
   (velocity_chartRep_eqOn (I := I) hγ t).eventuallyEq_of_mem
     ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
+set_option linter.unusedSectionVars false in
 theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) :
@@ -318,6 +340,7 @@ theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
     rw [← hv_eq, ← ha_eq]
     exact hid
 
+set_option linter.unusedSectionVars false in
 theorem covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ)
     (hγ2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t)
@@ -397,14 +420,17 @@ theorem covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
 def chartRepAtBase (β : M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) : ℝ → E :=
   fun s => (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s) (V s)
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartRepAtBase_apply (β : M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (s : ℝ) :
     chartRepAtBase (I := I) β γ V s =
       (trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ (γ s) (V s) := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartRepAtBase_foot (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAtBase (I := I) (γ t) γ V = chartRepAt (I := I) γ V t := rfl
 
+set_option linter.unusedSectionVars false in
 private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
     (α β : M) {b : M}
     (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
@@ -433,6 +459,7 @@ private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
   rw [← hcc]
   exact hcomp
 
+set_option linter.unusedSectionVars false in
 theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
@@ -598,6 +625,7 @@ theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
   abel
 
 
+set_option linter.unusedSectionVars false in
 theorem chartRepAtBase_differentiableAt [I.Boundaryless]
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (_g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))

@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseTensorCurvatureRS
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -73,6 +72,7 @@ private theorem iteratedCovGrad_jointContMDiffOn
     exact covGrad_step_jointContMDiffOn (I := I) (M := M) g₀ r (sIdx + j)
       (fun t => iteratedCovGrad (I := I) g₀ r sIdx j (Φ t)) S ih
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in

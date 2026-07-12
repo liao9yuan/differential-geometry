@@ -22,6 +22,7 @@ def movingTrivCorrection (α : M) (X : Π y : M, TangentSpace I y) (w : E) : E :
   (fderiv ℝ (fun z => chartMovingTriv (I := I) α z) (extChartAt I α α) w)
     (chartRawRepr (I := I) α X (extChartAt I α α))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLeviCivitaInnerCLM_basepoint_eq_rawFderiv_add_corrections
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π y : M, TangentSpace I y) (w : E)
@@ -55,6 +56,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem hQinner_of_flat_value_and_corrections
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

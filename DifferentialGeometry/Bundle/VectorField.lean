@@ -12,7 +12,6 @@ import Mathlib.Analysis.Normed.Module.Dual
 import Mathlib.Geometry.Manifold.BumpFunction
 import Mathlib.LinearAlgebra.Multilinear.Basic
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry
 
@@ -82,6 +81,7 @@ noncomputable instance :
   zero_smul V    := DFunLike.ext _ _ fun x => zero_smul 𝕜 (V x)
   smul_zero f    := DFunLike.ext _ _ fun x => smul_zero (f x)
 
+omit [IsRCLikeNormedField 𝕜] in
 theorem VectorField.action_leibniz
     (V : VectorField (I := I) (M := M)) (f g : ScalarField (I := I) (M := M)) :
     V.action (f * g) = f * V.action g + g * V.action f := by

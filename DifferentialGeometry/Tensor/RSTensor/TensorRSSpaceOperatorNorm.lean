@@ -1,6 +1,5 @@
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -16,12 +15,14 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M]
 variable {r s : ℕ}
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem tensor0SSpace_continuousLinearEquiv_norm_apply (s : ℕ) (b : M)
     (T : Tensor0SSpace s I b) :
     ‖tensor0SSpace_continuousLinearEquiv (𝕜 := 𝕜) (E := E) (I := I) (M := M) s b T‖
       = ‖T‖ := rfl
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem tensor0SSpace_continuousLinearEquiv_symm_norm_apply (s : ℕ) (b : M)
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :
@@ -94,6 +95,7 @@ theorem tensorRSSpace_norm_eq_carrier_opNorm {b : M} (T : TensorRSSpace r s I b)
   rw [hT_def, hUnfold, hnorm_def]
   exact congrArg sInf hSetEq
 
+omit [FiniteDimensional 𝕜 E] in
 private lemma _bounds_bddBelow_carrier {b : M} (T : TensorRSSpace r s I b) :
     BddBelow {c : ℝ | 0 ≤ c ∧
       ∀ x : Tensor0SSpace r I b,

@@ -40,6 +40,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 local notation "chartHaar" =>
   MeasureTheory.Measure.map (toEuclidean : E → EuclN) (modelHaar (E := E))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eq_zero_of_notMem_tsupport
     {u : EuclN → ℝ} (l : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ tsupport u) :

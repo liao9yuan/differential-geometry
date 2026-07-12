@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Analysis.Calculus.ContDiff.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -28,7 +27,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-omit [IsManifold I ∞ M] in
+set_option linter.unusedSectionVars false in
 private lemma fderivWithin_range_I_eq_fderiv' [I.Boundaryless]
     (f : E → E) (y : E) :
     fderivWithin ℝ f (Set.range I) y = fderiv ℝ f y := by
@@ -36,6 +35,7 @@ private lemma fderivWithin_range_I_eq_fderiv' [I.Boundaryless]
     ModelWithCorners.Boundaryless.range_eq_univ (I := I)
   rw [h, fderivWithin_univ]
 
+set_option linter.unusedSectionVars false in
 private lemma tangentCoordChange_eq_chartTransitionAt' [I.Boundaryless]
     (α β : M) (p : M) :
     tangentCoordChange I α β p =
@@ -46,6 +46,7 @@ private lemma tangentCoordChange_eq_chartTransitionAt' [I.Boundaryless]
   exact fderivWithin_range_I_eq_fderiv' (I := I)
     (extChartAt I β ∘ (extChartAt I α).symm) (extChartAt I α p)
 
+set_option linter.unusedSectionVars false in
 private theorem chartGramOnE_eq_sum_chartTransition' [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (x : E)
     (hx : x ∈ (extChartAt I α) ''
@@ -117,6 +118,7 @@ private def invGramPullbackCandidate [NeZero (Module.finrank ℝ E)]
         (chartTransitionMap (I := I) α β (extChartAt I α p)) j b *
       chartInvGramMatrix (I := I) g β p a b
 
+set_option linter.unusedSectionVars false in
 private theorem chartGramMatrix_mul_invGramPullbackCandidate [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -287,6 +289,7 @@ private theorem chartGramMatrix_mul_invGramPullbackCandidate [I.Boundaryless]
         · rw [if_pos h, if_pos h.symm]
         · rw [if_neg h, if_neg (fun hh : l = k => h hh.symm)]
 
+set_option linter.unusedSectionVars false in
 theorem chartInvGramMatrix_eq_sum_chartTransition [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -309,6 +312,7 @@ theorem chartInvGramMatrix_eq_sum_chartTransition [I.Boundaryless]
   rw [hentry]
   rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma mem_overlap_image_of_mem_chartTransitionSource
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
     y ∈ (extChartAt I α) ''
@@ -326,6 +330,7 @@ lemma mem_overlap_image_of_mem_chartTransitionSource
   rw [hp_def]
   exact (extChartAt I α).right_inv hy_tgt
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_eq_sum_chartTransition_on_source [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) {y : E}
     (hy : y ∈ chartTransitionSource (I := I) α β)
@@ -339,6 +344,7 @@ lemma chartGramOnE_eq_sum_chartTransition_on_source [I.Boundaryless]
   chartGramOnE_eq_sum_chartTransition' (I := I) g α β y
     (mem_overlap_image_of_mem_chartTransitionSource (I := I) α β hy) i j
 
+set_option linter.unusedSectionVars false in
 lemma chartTransitionJacEntry_contDiffOn [I.Boundaryless]
     (α β : M) (a i : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
@@ -359,6 +365,7 @@ lemma chartTransitionJacEntry_contDiffOn [I.Boundaryless]
   rw [hfun]
   exact evalCoord.contDiff.comp_contDiffOn (chartTransitionAt_smooth (I := I) α β)
 
+set_option linter.unusedSectionVars false in
 lemma chartTransitionJacEntry_differentiableAt [I.Boundaryless]
     (α β : M) (a i : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ chartTransitionSource (I := I) α β) :
@@ -372,6 +379,7 @@ lemma chartTransitionJacEntry_differentiableAt [I.Boundaryless]
     chartTransitionJacEntry_contDiffOn (I := I) α β a i
   exact (hcd.contDiffAt (h_open.mem_nhds hy)).differentiableAt (by simp)
 
+set_option linter.unusedSectionVars false in
 lemma chartTransitionMap_mem_interior_target [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
     chartTransitionMap (I := I) α β y ∈ interior (extChartAt I β).target := by
@@ -382,6 +390,7 @@ lemma chartTransitionMap_mem_interior_target [I.Boundaryless]
   rw [(isOpen_extChartAt_target (I := I) β).interior_eq]
   exact hTy_tgt
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartGramOnE_comp_chartTransitionMap [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -437,6 +446,7 @@ lemma partialDeriv_chartGramOnE_comp_chartTransitionMap [I.Boundaryless]
 
 omit [IsManifold I ∞ M] in
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_mul (k : Fin (Module.finrank ℝ E)) (u v : E → ℝ) {y : E}
     (hu : DifferentiableAt ℝ u y) (hv : DifferentiableAt ℝ v y) :
     partialDeriv (E := E) k (fun z => u z * v z) y =
@@ -449,6 +459,7 @@ lemma partialDeriv_mul (k : Fin (Module.finrank ℝ E)) (u v : E → ℝ) {y : E
     smul_eq_mul]
   ring
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartTransition_pullback_summand [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -503,6 +514,7 @@ lemma partialDeriv_chartTransition_pullback_summand [I.Boundaryless]
 
 omit [IsManifold I ∞ M] in
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_finset_sum {ι : Type*} (s : Finset ι)
     (k : Fin (Module.finrank ℝ E)) (f : ι → E → ℝ) {y : E}
     (hf : ∀ i ∈ s, DifferentiableAt ℝ (f i) y) :
@@ -514,6 +526,7 @@ lemma partialDeriv_finset_sum {ι : Type*} (s : Finset ι)
 
 omit [IsManifold I ∞ M] in
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_double_finset_sum {ι κ : Type*} (s : Finset ι) (t : Finset κ)
     (k : Fin (Module.finrank ℝ E)) (f : ι → κ → E → ℝ) {y : E}
     (hf : ∀ a ∈ s, ∀ b ∈ t, DifferentiableAt ℝ (f a b) y) :
@@ -525,6 +538,7 @@ lemma partialDeriv_double_finset_sum {ι κ : Type*} (s : Finset ι) (t : Finset
   intro a ha
   exact partialDeriv_finset_sum t k (fun b z => f a b z) (fun b hb => hf a ha b hb)
 
+set_option linter.unusedSectionVars false in
 theorem partialDeriv_chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -611,6 +625,7 @@ theorem partialDeriv_chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
   rw [partialDeriv_chartTransition_pullback_summand (I := I) g α β a b i j k hy]
   rw [partialDeriv_chartGramOnE_comp_chartTransitionMap (I := I) g α β a b k hy]
 
+set_option linter.unusedSectionVars false in
 lemma chartCoord_chartTransitionAt (α β : M) (x : E) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) a (chartTransitionAt (I := I) α β x v) =
@@ -644,6 +659,7 @@ def chartTransitionSecondDerivCorrection (α β : M) (v w : E) (x : E) : E :=
             chartCoord (E := E) i v * chartCoord (E := E) j w)) •
       chartModelBasis E k
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartTransitionSecondDerivCorrection_def
     (α β : M) (v w : E) (x : E) :
     chartTransitionSecondDerivCorrection (I := I) α β v w x =
@@ -657,6 +673,7 @@ def chartTransitionSecondDerivCorrection (α β : M) (v w : E) (x : E) : E :=
                 chartCoord (E := E) i v * chartCoord (E := E) j w)) •
           chartModelBasis E k := rfl
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartTransitionJacEntry_swap [I.Boundaryless]
     (α β : M) (a i l : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ chartTransitionSource (I := I) α β) :
@@ -705,6 +722,7 @@ lemma partialDeriv_chartTransitionJacEntry_swap [I.Boundaryless]
   rw [hkey i l, hkey l i]
   rw [hsymm ((chartModelBasis E) i) ((chartModelBasis E) l)]
 
+set_option linter.unusedSectionVars false in
 lemma chartTransitionMap_extChartAt_symm
     (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source) :
@@ -715,6 +733,7 @@ lemma chartTransitionMap_extChartAt_symm
     rw [extChartAt_source (I := I)]; exact hp_β
   exact (extChartAt I β).left_inv hp_β_src
 
+set_option linter.unusedSectionVars false in
 lemma chartInvGramBeta_mul_chartGramOnE_diag
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -744,6 +763,7 @@ lemma chartInvGramBeta_mul_chartGramOnE_diag
   rw [Matrix.mul_apply] at this
   rw [this, Matrix.one_apply]
 
+set_option linter.unusedSectionVars false in
 lemma chartChristoffelNumerator_transitionIdentity [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -1045,6 +1065,7 @@ lemma chartChristoffelNumerator_transitionIdentity [I.Boundaryless]
       2 * BB from rfl]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem chartChristoffel_transform [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -1240,6 +1261,7 @@ theorem chartChristoffel_transform [I.Boundaryless]
     rw [← Finset.sum_add_distrib]
     refine Finset.sum_congr rfl ?_; intro c _; ring]
 
+set_option linter.unusedSectionVars false in
 lemma chartCoord_chartChristoffelContraction
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α : M) (v w y : E)
@@ -1384,6 +1406,7 @@ private lemma chartTransitionContractionReorderCorr
   rw [hLHS, hRHS]
   exact sum3_reorder (fun c i j => K c * (D c i j * vi i * wj j))
 
+set_option linter.unusedSectionVars false in
 theorem chartChristoffelContraction_transform [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}
@@ -1511,6 +1534,7 @@ theorem chartChristoffelContraction_transform [I.Boundaryless]
         refine Finset.sum_congr rfl (fun j _ => ?_)
         ring
 
+set_option linter.unusedSectionVars false in
 lemma fderiv_chartTransitionJacEntry_eq_sum_partialDeriv
     (α β : M) (a i : Fin (Module.finrank ℝ E)) (y v : E) :
     fderiv ℝ (fun z => chartTransitionJacEntry (I := I) α β z a i) y v =
@@ -1529,6 +1553,7 @@ lemma fderiv_chartTransitionJacEntry_eq_sum_partialDeriv
   rw [map_smul, smul_eq_mul]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem chartTransitionJacEntry_comp_hasDerivAt [I.Boundaryless]
     (α β : M) (a i : Fin (Module.finrank ℝ E))
     {cE : ℝ → E} {cE' : ℝ → E} {t : ℝ}
@@ -1551,6 +1576,7 @@ theorem chartTransitionJacEntry_comp_hasDerivAt [I.Boundaryless]
   rw [fderiv_chartTransitionJacEntry_eq_sum_partialDeriv (I := I) α β a i] at hchain
   exact hchain
 
+set_option linter.unusedSectionVars false in
 theorem chartCoord_chartTransitionAt_comp_hasDerivAt [I.Boundaryless]
     (α β : M) (a : Fin (Module.finrank ℝ E)) (v : E)
     {cE : ℝ → E} {cE' : ℝ → E} {t : ℝ}
@@ -1582,6 +1608,7 @@ theorem chartCoord_chartTransitionAt_comp_hasDerivAt [I.Boundaryless]
     chartTransitionJacEntry_comp_hasDerivAt (I := I) α β a i hc hmem
   simpa using hJ.mul_const (chartCoord (E := E) i v)
 
+set_option linter.unusedSectionVars false in
 lemma chartCoord_fderiv_chartTransitionAt_general [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β)
     (a : Fin (Module.finrank ℝ E)) (v w : E) :
@@ -1659,6 +1686,7 @@ lemma chartCoord_fderiv_chartTransitionAt_general [I.Boundaryless]
   rw [hLHS_expand]
   rw [Finset.sum_comm]
 
+set_option linter.unusedSectionVars false in
 lemma fderiv_chartTransitionAt_apply_eq_pushCorrection [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) (v w : E) :
     (fderiv ℝ (fun z => chartTransitionAt (I := I) α β z) x v) w =

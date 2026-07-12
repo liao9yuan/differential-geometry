@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartJetLipschitzClosure
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieSummandLipschitz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [I.Boundaryless]
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem hasChartJetLip_gramBracket
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -54,6 +54,7 @@ theorem hasChartJetLip_gramBracket
   simp only [gramBracket]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem hasChartJetLip_chartChristoffel
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -78,6 +79,7 @@ theorem hasChartJetLip_chartChristoffel
   funext z
   rw [chartChristoffel_eq_sum_invGramOnE_bracket]
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem hasChartJetLip_chartDeTurckVFComp
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -131,6 +133,7 @@ theorem hasChartJetLip_chartDeTurckVFComp
   funext z
   rw [chartDeTurckVFComp_def]
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem hasChartJetLip_chartRiemannTensor
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -187,6 +190,7 @@ theorem hasChartJetLip_chartRiemannTensor
     refine Finset.sum_congr rfl (fun m _ => by ring)]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem hasChartJetLip_chartRicciTensor
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -201,6 +205,7 @@ theorem hasChartJetLip_chartRicciTensor
   funext z
   rw [chartRicciTensor_def]
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem hasChartJetLip_chartLieDeTurckComp
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -256,6 +261,7 @@ theorem hasChartJetLip_chartLieDeTurckComp
   funext z
   rw [chartLieDeTurckComp_def]
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem exists_chartRicciTensor_iteratedFDeriv_lipschitz_on_compact
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)
@@ -289,6 +295,7 @@ theorem exists_chartRicciTensor_iteratedFDeriv_lipschitz_on_compact
       (chartGramJetDiffSeminormSum_nonneg (I := I) (M := M) (N + 2) g₁ g₂ α _ y)
     exact Finset.le_sup' (fun p => Cik p.1 p.2) (Finset.mem_univ (i, k))
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem exists_chartLieDeTurckComp_iteratedFDeriv_lipschitz_on_compact
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K)

@@ -15,7 +15,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,16 +40,19 @@ def extChartAtExt (α : M) : M → E := by
   classical
   exact fun x => if x ∈ (chartAt H α).source then extChartAt I α x else 0
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma extChartAtExt_apply_of_mem (α : M)
     {x : M} (hx : x ∈ (chartAt H α).source) :
     extChartAtExt (I := I) α x = extChartAt I α x := by
   unfold extChartAtExt; simp [hx]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma extChartAtExt_apply_of_notMem (α : M)
     {x : M} (hx : x ∉ (chartAt H α).source) :
     extChartAtExt (I := I) α x = 0 := by
   unfold extChartAtExt; simp [hx]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma extChartAtExt_measurable (α : M) :
     Measurable (extChartAtExt (I := I) (M := M) α) := by
   classical
@@ -84,6 +86,7 @@ def pullbackToManifold (α : M)
       v ((toEuclidean (E := E)) ((extChartAt I α) x))
     else 0
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToManifold_apply_of_mem (α : M)
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -91,12 +94,14 @@ lemma pullbackToManifold_apply_of_mem (α : M)
       v ((toEuclidean (E := E)) ((extChartAt I α) x)) := by
   unfold pullbackToManifold; simp [hx]
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToManifold_apply_of_notMem (α : M)
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∉ (chartAt H α).source) :
     pullbackToManifold (I := I) α v x = 0 := by
   unfold pullbackToManifold; simp [hx]
 
+omit [IsManifold I ∞ M] in
 private lemma pullbackToManifold_eq_indicator (α : M)
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     pullbackToManifold (I := I) α v =
@@ -110,6 +115,7 @@ private lemma pullbackToManifold_eq_indicator (α : M)
   · simp [hx, extChartAtExt_apply_of_mem (I := I) (α := α) hx]
   · simp [hx]
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToManifold_measurable (α : M)
     {v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hv : Measurable v) :
@@ -128,6 +134,7 @@ lemma pullbackToManifold_measurable (α : M)
     hv.comp (h_toEuclidean_meas.comp h_extChart_meas)
   exact h_comp_meas.indicator h_src_meas
 
+omit [IsManifold I ∞ M] in
 lemma support_pullbackToManifold_subset (α : M)
     (v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     Function.support (pullbackToManifold (I := I) α v) ⊆

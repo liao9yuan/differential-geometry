@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.ConnDiffCovGradBr
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -98,6 +97,7 @@ noncomputable def slotPermCLM {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x : M) :
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) d x).toContinuousLinearMap)
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem slotPermCLM_apply {d : ℕ} (ρ : Equiv.Perm (Fin d)) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace d I x) :
     slotPermCLM (I := I) ρ x D =
@@ -119,6 +119,7 @@ noncomputable def tensorProdWithCLM (m k : ℕ) (x : M)
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) k x).toContinuousLinearMap)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorProdWithCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) (Q : Tensor0SBundle.Tensor0SSpace k I x) :
     tensorProdWithCLM (I := I) m k x P Q =
@@ -176,6 +177,7 @@ noncomputable def tensorProdPairCLM (m k : ℕ) (x : M) :
           ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (m + k) x).symm) c _ }
 
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem tensorProdPairCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) :
     tensorProdPairCLM (I := I) m k x P = tensorProdWithCLM (I := I) m k x P := rfl

@@ -9,7 +9,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.Calculus.TangentCone.Basic
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ def partialDerivWithin (s : Set E) (i : Fin (Module.finrank ℝ E))
     (u : E → ℝ) (y : E) : ℝ :=
   fderivWithin ℝ u s y ((chartModelBasis E) i)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma partialDerivWithin_def (s : Set E)
     (i : Fin (Module.finrank ℝ E)) (u : E → ℝ) (y : E) :
     partialDerivWithin (E := E) s i u y =
@@ -39,12 +39,14 @@ section ComparisonWithFDeriv
 
 variable {s : Set E} {i : Fin (Module.finrank ℝ E)} {u : E → ℝ} {y : E}
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_eq_partialDeriv_of_isOpen
     (hs : IsOpen s) (hy : y ∈ s) :
     partialDerivWithin (E := E) s i u y = partialDeriv (E := E) i u y := by
   unfold partialDerivWithin partialDeriv
   rw [fderivWithin_of_isOpen hs hy]
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_eq_partialDeriv_of_mem_interior
     (hy : y ∈ interior s) :
     partialDerivWithin (E := E) s i u y = partialDeriv (E := E) i u y := by
@@ -53,6 +55,7 @@ lemma partialDerivWithin_eq_partialDeriv_of_mem_interior
   unfold partialDerivWithin partialDeriv
   rw [fderivWithin_of_mem_nhds hnhds]
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_congr {u v : E → ℝ}
     (huv : EqOn u v s) (hy : u y = v y) :
     partialDerivWithin (E := E) s i u y =
@@ -60,6 +63,7 @@ lemma partialDerivWithin_congr {u v : E → ℝ}
   unfold partialDerivWithin
   rw [fderivWithin_congr huv hy]
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_congr_of_eqOn_of_mem {u v : E → ℝ}
     (huv : EqOn u v s) (hy : y ∈ s) :
     partialDerivWithin (E := E) s i u y =
@@ -73,6 +77,7 @@ section Smoothness
 variable {m n : WithTop ℕ∞} {s : Set E} {u : E → ℝ}
   {i : Fin (Module.finrank ℝ E)}
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_contDiffOn_of_uniqueDiffOn
     (hu : ContDiffOn ℝ n u s) (hs : UniqueDiffOn ℝ s) (hmn : m + 1 ≤ n) :
     ContDiffOn ℝ m (partialDerivWithin (E := E) s i u) s := by
@@ -82,17 +87,20 @@ lemma partialDerivWithin_contDiffOn_of_uniqueDiffOn
       (fun _ : E => (chartModelBasis E) i) s := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_contDiffOn_top_of_uniqueDiffOn
     (hu : ContDiffOn ℝ ∞ u s) (hs : UniqueDiffOn ℝ s) :
     ContDiffOn ℝ ∞ (partialDerivWithin (E := E) s i u) s :=
   partialDerivWithin_contDiffOn_of_uniqueDiffOn (n := ∞) (m := ∞) hu hs
     (by rw [ENat.coe_top_add_one])
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_contDiffOn_of_isOpen
     (hu : ContDiffOn ℝ n u s) (hs : IsOpen s) (hmn : m + 1 ≤ n) :
     ContDiffOn ℝ m (partialDerivWithin (E := E) s i u) s :=
   partialDerivWithin_contDiffOn_of_uniqueDiffOn hu hs.uniqueDiffOn hmn
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_contDiffOn_top_of_isOpen
     (hu : ContDiffOn ℝ ∞ u s) (hs : IsOpen s) :
     ContDiffOn ℝ ∞ (partialDerivWithin (E := E) s i u) s :=
@@ -105,6 +113,7 @@ section LeibnizIdentities
 
 variable {s : Set E} {y : E} {i : Fin (Module.finrank ℝ E)}
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_add (u v : E → ℝ)
     (hs : UniqueDiffWithinAt ℝ s y)
     (hu : DifferentiableWithinAt ℝ u s y)
@@ -116,6 +125,7 @@ lemma partialDerivWithin_add (u v : E → ℝ)
   rw [fderivWithin_fun_add hs hu hv]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_smul (c : E → ℝ) (u : E → ℝ)
     (hs : UniqueDiffWithinAt ℝ s y)
     (hc : DifferentiableWithinAt ℝ c s y)
@@ -127,6 +137,7 @@ lemma partialDerivWithin_smul (c : E → ℝ) (u : E → ℝ)
   rw [fderivWithin_fun_smul hs hc hu]
   simp [ContinuousLinearMap.smulRight_apply, smul_eq_mul, mul_comm]
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivWithin_mul (u v : E → ℝ)
     (hs : UniqueDiffWithinAt ℝ s y)
     (hu : DifferentiableWithinAt ℝ u s y)
@@ -146,11 +157,13 @@ section ChartTarget
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma uniqueDiffOn_extChartAt_target_apply (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     UniqueDiffWithinAt ℝ (extChartAt I α).target y :=
   uniqueDiffOn_extChartAt_target α y hy
 
+set_option linter.unusedSectionVars false in
 theorem partialDerivWithin_extChartAt_target_eq_partialDeriv
     (α : M) (i : Fin (Module.finrank ℝ E)) (u : E → ℝ)
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :

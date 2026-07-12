@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Can
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.DualNorm
 import Mathlib.Analysis.Normed.Operator.Extend
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -58,6 +57,7 @@ lemma ricciPairingSmooth_coeFn
           (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)) :=
   smoothRicciPairingLp_coeFn (I := I) (M := M) g φ v
 
+omit [CompactSpace M] in
 lemma ricciPairingSmooth_pt_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) (b : M) :
@@ -157,6 +157,7 @@ noncomputable def ricciPairingCLMOnSmoothOfBound
     ricciPairingCLMOnSmoothOfBound (I := I) (M := M) g φ C hC_nn hC_bound v =
       ricciPairingSmooth (I := I) (M := M) g φ v := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     DenseRange (UniformSpace.Completion.toComplL :
@@ -166,6 +167,7 @@ private lemma denseRange_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing
@@ -208,6 +210,7 @@ lemma ricciPairingSmooth_norm_nonneg
     0 ≤ ‖ricciPairingSmooth (I := I) (M := M) g φ v‖ :=
   norm_nonneg _
 
+omit [CompactSpace M] in
 lemma smoothRicciPairing_continuous
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -249,6 +252,7 @@ lemma ricciPairingSmooth_norm_sq
   rw [integral_congr_ae hae] at h
   exact h.symm
 
+omit [CompactSpace M] in
 lemma ricciPairing_sq_le_C_mul_grad
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {C : ℝ} (hC_bound : ∀ b : M,

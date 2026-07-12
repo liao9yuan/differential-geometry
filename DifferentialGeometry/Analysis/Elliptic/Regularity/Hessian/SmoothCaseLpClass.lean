@@ -144,6 +144,7 @@ theorem perChartAeTransferableSmoothCase_holds
   intro α _hα
   exact perChartAeTransferable_smoothCase (I := I) (M := M) g φ v α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessPairingMOnLapDom_aeEq_pou_weighted_euclid_pairing_smoothCase_of_transferable
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_transfer : perChartAeTransferableSmoothCase (I := I) (M := M) g φ v) :

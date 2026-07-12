@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorBochner
 import DifferentialGeometry.Analysis.Integration.L2.Pairing.Algebra
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem tensorL2Inner_eq_zero_of_pointwise_inner_eq_divergence
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (W Y : SmoothCcTensor g 0 (s + 1))

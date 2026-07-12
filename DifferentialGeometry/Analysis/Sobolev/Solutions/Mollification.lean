@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.FriedrichsCommutator
 import Mathlib.Analysis.Calculus.BumpFunction.Convolution
 import Mathlib.Analysis.Calculus.ContDiff.Convolution
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,6 +20,7 @@ def mollifyEps {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) : E → ℝ :=
   DifferentialGeometry.Analysis.Sobolev.mollifierEps (d := d) hε ⋆[
     ContinuousLinearMap.lsmul ℝ ℝ, (volume : Measure E)] u
 
+omit [NeZero d] in
 theorem mollifyEps_contDiff {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_loc : LocallyIntegrable u (volume : Measure E)) :
     ContDiff ℝ (⊤ : ℕ∞) (mollifyEps (d := d) hε u) := by
@@ -31,11 +31,13 @@ theorem mollifyEps_contDiff {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (DifferentialGeometry.Analysis.Sobolev.mollifierEps_smooth hε)
     hu_loc
 
+omit [NeZero d] in
 theorem mollifyEps_continuous {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_loc : LocallyIntegrable u (volume : Measure E)) :
     Continuous (mollifyEps (d := d) hε u) :=
   (mollifyEps_contDiff (d := d) hε hu_loc).continuous
 
+omit [NeZero d] in
 lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
     mollifyEps (d := d) hε u x =
       ∫ t,
@@ -44,6 +46,7 @@ lemma mollifyEps_apply {ε : ℝ} (hε : 0 < ε) (u : E → ℝ) (x : E) :
   simp [mollifyEps, MeasureTheory.convolution_def,
     ContinuousLinearMap.lsmul_apply, smul_eq_mul]
 
+omit [NeZero d] in
 theorem mollifyEps_hasCompactSupport {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu_supp : HasCompactSupport u) :
     HasCompactSupport (mollifyEps (d := d) hε u) :=
@@ -52,6 +55,7 @@ theorem mollifyEps_hasCompactSupport {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (DifferentialGeometry.Analysis.Sobolev.mollifierEps_compactSupport hε)
     hu_supp
 
+omit [NeZero d] in
 theorem mollifyEps_memLp_two_of_hasCompactSupport {ε : ℝ} (hε : 0 < ε)
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     (hu_supp : HasCompactSupport u) :
@@ -64,6 +68,7 @@ theorem mollifyEps_memLp_two_of_hasCompactSupport {ε : ℝ} (hε : 0 < ε)
     mollifyEps_hasCompactSupport (d := d) hε hu_supp
   exact h_cont.memLp_of_hasCompactSupport h_supp
 
+omit [NeZero d] in
 theorem tendsto_mollifyEps_of_continuous {ι : Type*} {l : Filter ι}
     {ε : ι → ℝ} (hε : ∀ i, 0 < ε i) (hε_tendsto : Tendsto ε l (𝓝 0))
     {u : E → ℝ} (hu : Continuous u) (x₀ : E) :
@@ -108,6 +113,7 @@ theorem tendsto_mollifyEps_of_continuous {ι : Type*} {l : Filter ι}
   refine h_conv_tendsto.congr ?_
   intro i; exact h_fn_eq i
 
+omit [NeZero d] in
 theorem ae_tendsto_mollifyEps_of_locallyIntegrable {ι : Type*} {l : Filter ι}
     {ε : ι → ℝ} (hε : ∀ i, 0 < ε i) (hε_tendsto : Tendsto ε l (𝓝 0))
     {u : E → ℝ} (hu_loc : LocallyIntegrable u (volume : Measure E)) :

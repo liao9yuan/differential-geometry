@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.ArzelaAscoli
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -414,6 +413,7 @@ private lemma volume_lt_top_of_compact
     (volume : Measure E) K < ∞ :=
   hK_compact.measure_lt_top
 
+omit [NeZero d] in
 theorem tendsto_lp_of_tendstoUniformlyOn_compact
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {K : Set E} (hK_compact : IsCompact K)
@@ -677,6 +677,7 @@ private lemma lintegral_of_nonneg_eta_eq_one
   rw [hη_int_eq_one]
   simp
 
+omit [NeZero d] in
 theorem tendsto_subseq_of_uniform_translation_in_Lp
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (hp_top : p ≠ ∞)
     {K : Set E} (hK_compact : IsCompact K)

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Calculus.IteratedFDerivSeminormCalculus
 import DifferentialGeometry.Analysis.Calculus.PartialDerivIteratedFDerivOrderBridge
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartRicciStructuralDifference
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,12 +31,14 @@ def chartGramJetDiffSeminormSum (N : ℕ) (g₁ g₂ : SmoothRiemannianMetric I 
     iteratedFDerivSeminorm N
       (fun z => chartGramOnE (I := I) g₁ α a b z - chartGramOnE (I := I) g₂ α a b z) s y
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartGramJetDiffSeminormSum_nonneg (N : ℕ)
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E) :
     0 ≤ chartGramJetDiffSeminormSum (I := I) (M := M) N g₁ g₂ α s y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ =>
     iteratedFDerivSeminorm_nonneg _ _ _ _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartGramJetDiffSeminormSum_mono {N N' : ℕ} (hN : N ≤ N')
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E) :
     chartGramJetDiffSeminormSum (I := I) (M := M) N g₁ g₂ α s y ≤
@@ -47,6 +48,7 @@ lemma chartGramJetDiffSeminormSum_mono {N N' : ℕ} (hN : N ≤ N')
   refine Finset.sum_le_sum fun a _ => Finset.sum_le_sum fun b _ => ?_
   exact iteratedFDerivSeminorm_mono hN _ _ _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma iteratedFDerivSeminorm_gramDiff_le_sum (N : ℕ)
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (s : Set E) (y : E)
     (a b : Fin (Module.finrank ℝ E)) :

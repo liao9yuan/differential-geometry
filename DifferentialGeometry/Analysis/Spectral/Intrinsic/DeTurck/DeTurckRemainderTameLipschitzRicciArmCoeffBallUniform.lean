@@ -37,7 +37,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGra
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmConnLapJetBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_sub_local (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S S' : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (S - S') x =
@@ -80,6 +80,7 @@ lemma unitModel_sub_local (g : SmoothRiemannianMetric I M) (s : ℕ)
     rw [hsec]; rfl]
   rw [Tensor0SSpace.toModel_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_add_local (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S S' : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (S + S') x =
@@ -96,6 +97,7 @@ lemma unitModel_add_local (g : SmoothRiemannianMetric I M) (s : ℕ)
     rw [hsec]; rfl]
   rw [Tensor0SSpace.toModel_add]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma threeArmCoeffSum_rfns_le (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
     (R L : SmoothCcTensor g₀ r s) (ΛR ΛL : ℝ) (x : M)
     (hR : riemannianFiberNormSq (I := I) (M := M) g₀ r s x (R.toSection x) ≤ ΛR ^ 2)
@@ -118,6 +120,7 @@ lemma threeArmCoeffSum_rfns_le (g₀ : SmoothRiemannianMetric I M) {r s : ℕ}
 private local instance instCompleteSpaceE_tame : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_smul_value_tame
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (c : ℝ)
     (v : TensorRSSpace r s I x) :
@@ -129,6 +132,7 @@ lemma riemannianFiberNormSq_smul_value_tame
     tensorInnerPointwise_smul_right]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_smul_tame (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (c • T) x =
@@ -168,6 +172,7 @@ lemma unitModel_appCc_smul_left_apply_tame (g : SmoothRiemannianMetric I M) (r :
       c * unitModel (I := I) (M := M) g 2 (operatorFieldApply (I := I) (M := M) g r 2 Φ W) x v := by
   rw [appCc_smul_left_tame, unitModel_smul_tame, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
+set_option linter.unusedSectionVars false in
 lemma unitModel_add2_apply_tame (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
@@ -626,6 +631,7 @@ private theorem traceHessianCoeff_realizedFam_perOrder_rfns_ballUniform
   DifferentialGeometry.Integral.Connection.traceHessianCoeff_realizedFam_jetL2_perOrder_ballUniform
     (I := I) (M := M) g₀ a ha_super hR hδ₀
 
+set_option linter.unusedSectionVars false in
 private lemma normSq_iteratedCovGrad_add_le_tame
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A B : SmoothCcTensor g₀ r s) (PA PB : ℝ)
@@ -641,6 +647,7 @@ private lemma normSq_iteratedCovGrad_add_le_tame
     norm_nonneg (iteratedCovGrad (I := I) g₀ r s i A + iteratedCovGrad (I := I) g₀ r s i B),
     sq_nonneg (‖iteratedCovGrad (I := I) g₀ r s i A‖ - ‖iteratedCovGrad (I := I) g₀ r s i B‖)]
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_smul_tame (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =

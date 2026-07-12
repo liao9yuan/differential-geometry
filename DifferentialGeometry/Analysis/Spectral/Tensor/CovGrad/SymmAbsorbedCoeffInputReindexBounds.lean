@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma ofModel_domDomCongr_toModel_eq {r : ℕ} {x : M} (σ' : Equiv.Perm (Fin r))
     (d : Tensor0SSpace r I x) :
     (Tensor0SSpace.ofModel (ContinuousMultilinearMap.domDomCongr σ'
@@ -53,6 +53,7 @@ private lemma domDomCongr_perm_fin0_apply {A : Type*} [NormedAddCommGroup A] [No
   funext k
   exact k.elim0
 
+set_option linter.unusedSectionVars false in
 private lemma reindexCoeffFibGen_fin0 {s : ℕ} {x : M} (σ' : Equiv.Perm (Fin 0))
     (A : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) :
     reindexCoeffFibGen (I := I) 0 s σ' x A = A := by
@@ -98,12 +99,14 @@ private def reindexInputSection {r : ℕ} (σ' : Equiv.Perm (Fin r))
       rw [ContinuousMultilinearMap.domDomCongr_apply]
       rfl)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma reindexInputSection_apply {r : ℕ} (σ' : Equiv.Perm (Fin r))
     (w : Cₛ^∞⟮I; Tensor0SModel r ℝ E, (fun y : M => Tensor0SSpace r I y)⟯) (y : M) :
     (reindexInputSection (I := I) (M := M) σ' w) y =
       Tensor0SSpace.ofModel
         (ContinuousMultilinearMap.domDomCongr σ' (Tensor0SSpace.toModel (w y))) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma section_tensorSectionMDiffAt {n : ℕ}
     (w : Cₛ^∞⟮I; Tensor0SModel n ℝ E, (fun y : M => Tensor0SSpace n I y)⟯) (x : M) :
     DifferentialGeometry.Integral.Connection.TensorSectionMDiffAt (I := I) n (fun y => w y) x :=
@@ -220,6 +223,7 @@ lemma iteratedCovGrad_reindexCoeffGen (g : SmoothRiemannianMetric I M) (r s : �
     rw [iteratedCovGrad_succ, ih, covGrad_reindexCoeffGen]
     rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma domDomCongr_compMkPiAlgebra_eq (g : SmoothRiemannianMetric I M) (r : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin r → Fin n) (σ' : Equiv.Perm (Fin r)) :
     ContinuousMultilinearMap.domDomCongr σ'
@@ -241,6 +245,7 @@ private lemma domDomCongr_compMkPiAlgebra_eq (g : SmoothRiemannianMetric I M) (r
   refine Finset.prod_congr rfl (fun k _ => ?_)
   rw [Equiv.symm_apply_apply]
 
+set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_reindexCoeffFibGen (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) (σ' : Equiv.Perm (Fin r))
@@ -302,6 +307,7 @@ lemma norm_reindexCoeffGen_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
   unfold tensorL2Norm tensorL2Inner
   simp_rw [hpt]
 
+set_option linter.unusedSectionVars false in
 private lemma iteratedCovGrad_smul_aux (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by

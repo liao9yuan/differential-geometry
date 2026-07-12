@@ -104,6 +104,7 @@ variable [CompleteSpace E]
 
 omit [CompleteSpace E] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartMovingTriv_basepoint_isUnit (α : M) :
     IsUnit (chartMovingTriv (I := I) α (extChartAt I α α)) := by
   have h1 : chartMovingTriv (I := I) α (extChartAt I α α) = (1 : E →L[ℝ] E) := by
@@ -115,6 +116,7 @@ theorem chartMovingTriv_basepoint_isUnit (α : M) :
 omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] in
 theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (s : ℝ)
     (hsrc : (Φ_fam s : M → M) x ∈ (chartAt H α).source) :
@@ -155,6 +157,7 @@ theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     _ = chartCloseTriv (I := I) Φ_fam α x s := by
           rw [Ring.inverse_mul_cancel _ hunit, one_mul]
 
+set_option linter.unusedSectionVars false in
 theorem chartCloseTriv_hasDerivAt_of_movingTriv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) {g' : E →L[ℝ] E}
     (hg : HasDerivAt

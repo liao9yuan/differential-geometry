@@ -21,7 +21,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 import DifferentialGeometry.Geometry.Comparison.Variation.SpeedDerivative
 import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -48,6 +47,7 @@ open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
@@ -65,6 +65,7 @@ private lemma chartCoord_covDerivAlong_eq_chartCovDerivAlong_chartRepAtBase
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma slice_velocityField_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (u t₀ : ℝ) :
@@ -84,6 +85,7 @@ private lemma slice_velocityField_chartRep_differentiableAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma slice_longitudinalField_transverse_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (v : ℝ) :
@@ -138,6 +140,7 @@ lemma slice_longitudinalField_transverse_chartRep_differentiableAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartCoord_longitudinalVelocity_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
     ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
@@ -196,6 +199,7 @@ private lemma chartCoord_longitudinalVelocity_contDiffAt
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma slice_secondCovDeriv_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -309,6 +313,7 @@ lemma slice_secondCovDeriv_chartRep_differentiableAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartCoord_transverseVelocity_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
     ContDiffAt ℝ 2 (fun p : ℝ × ℝ =>
@@ -366,6 +371,7 @@ private lemma chartCoord_transverseVelocity_contDiffAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (s t₀ : ℝ) :
@@ -424,6 +430,7 @@ private lemma slice_transverseField_longitudinal_chartRep_differentiableAt
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma slice_transverseVelocity_chartRep_differentiableAt
     (_g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (v : ℝ) :
@@ -847,6 +854,7 @@ private theorem commute_ds_dt_curvature
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covDerivAlong_const_add_shift
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ s : ℝ, TangentSpace I (γ s)) (c : ℝ) :
@@ -876,6 +884,7 @@ lemma covDerivAlong_const_add_shift
 
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong in
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma commute_ds_dt_intrinsic_shifted
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -945,6 +954,7 @@ lemma commute_ds_dt_intrinsic_shifted
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma slice_secondCovDeriv_central_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -1048,6 +1058,7 @@ lemma slice_secondCovDeriv_central_chartRep_differentiableAt
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma variationField_covDeriv_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :

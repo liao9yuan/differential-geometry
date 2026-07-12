@@ -11,7 +11,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Comp
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Analysis.LocallyConvex.Bounded
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ def boundaryInclusion (I : ModelWithCorners ℝ E H) (M : Type*)
     BoundaryManifold I M → M :=
   Subtype.val
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma boundaryInclusion_apply (x : BoundaryManifold I M) :
     boundaryInclusion I M x = (x : M) := rfl
 
@@ -40,14 +40,17 @@ private def Phi (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I] :
     hI.boundaryE → E :=
   (I : H → E) ∘ hI.inclH ∘ hI.boundaryI.symm
 
+omit [FiniteDimensional ℝ E] in
 private lemma Phi_eq (I : ModelWithCorners ℝ E H) [hI : HasSmoothBoundary E H I] :
     Phi I = (I : H → E) ∘ hI.inclH ∘ hI.boundaryI.symm := rfl
 
+omit [FiniteDimensional ℝ E] in
 private lemma Phi_contDiff (I : ModelWithCorners ℝ E H)
     [hI : HasSmoothBoundary E H I] :
     ContDiff ℝ ∞ (Phi I) :=
   hI.I_inclH_boundaryI_symm_contDiff
 
+omit [FiniteDimensional ℝ E] in
 private lemma projE_comp_Phi (I : ModelWithCorners ℝ E H)
     [hI : HasSmoothBoundary E H I] :
     hI.projE ∘ Phi I = id := by
@@ -69,6 +72,7 @@ private lemma infty_ne_zero_withTopENat : (∞ : WithTop ℕ∞) ≠ 0 := by
   have h' : ((⊤ : ℕ∞) : WithTop ℕ∞) = ((0 : ℕ∞) : WithTop ℕ∞) := h
   exact ENat.top_ne_zero (WithTop.coe_eq_coe.mp h')
 
+omit [FiniteDimensional ℝ E] in
 theorem boundaryInclusion_contMDiff
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M] :
     ContMDiff hI.boundaryI I ∞ (boundaryInclusion I M) := by
@@ -141,15 +145,18 @@ noncomputable def boundaryInclusionMfderiv (x : BoundaryManifold I M) :
     hI.boundaryE →L[ℝ] E :=
   mfderiv hI.boundaryI I (boundaryInclusion I M) x
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma dincl_eq (x : BoundaryManifold I M) :
     (boundaryInclusionMfderiv x : hI.boundaryE →L[ℝ] E) =
       mfderiv hI.boundaryI I (boundaryInclusion I M) x := rfl
 
+omit [FiniteDimensional ℝ E] in
 private lemma boundaryInclusion_mdifferentiableAt (x : BoundaryManifold I M) :
     MDifferentiableAt hI.boundaryI I (boundaryInclusion I M) x :=
   (boundaryInclusion_contMDiff (I := I) (M := M)).mdifferentiableAt
     infty_ne_zero_withTopENat
 
+omit [FiniteDimensional ℝ E] in
 private lemma dincl_eq_fderiv_Phi (x : BoundaryManifold I M)
     [Nonempty hI.boundaryH] :
     (boundaryInclusionMfderiv x : hI.boundaryE →L[ℝ] E) =
@@ -192,6 +199,7 @@ private lemma dincl_eq_fderiv_Phi (x : BoundaryManifold I M)
     rfl
   rw [Filter.EventuallyEq.fderiv_eq h_eq]
 
+omit [FiniteDimensional ℝ E] in
 private lemma fderiv_Phi_injective (e : hI.boundaryE) :
     Function.Injective (fderiv ℝ (Phi I) e) := by
   have h_proj_phi : hI.projE ∘ Phi I = id := projE_comp_Phi I
@@ -216,6 +224,7 @@ private lemma fderiv_Phi_injective (e : hI.boundaryE) :
   rw [h_comp_id] at h_apply
   simpa using h_apply
 
+omit [FiniteDimensional ℝ E] in
 lemma dincl_injective (x : BoundaryManifold I M) :
     Function.Injective (boundaryInclusionMfderiv x) := by
   by_cases hN : Nonempty hI.boundaryH
@@ -231,6 +240,7 @@ private noncomputable def innerOnE
     (g : Measure.SmoothRiemannianMetric I M) (y : M) :
     E →L[ℝ] E →L[ℝ] ℝ := g.inner y
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma innerOnE_apply
     (g : Measure.SmoothRiemannianMetric I M) (y : M) (u v : E) :
     innerOnE g y u v = g.inner y u v := rfl
@@ -240,12 +250,14 @@ noncomputable def inducedMetricInner
     hI.boundaryE →L[ℝ] hI.boundaryE →L[ℝ] ℝ :=
   (innerOnE g (x : M)).bilinearComp (boundaryInclusionMfderiv x) (boundaryInclusionMfderiv x)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma inducedMetricInner_apply
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v w : hI.boundaryE) :
     inducedMetricInner g x v w = g.inner (x : M) (boundaryInclusionMfderiv x v) (boundaryInclusionMfderiv x w) :=
   ContinuousLinearMap.bilinearComp_apply _ _ _ _ _
 
+omit [FiniteDimensional ℝ E] in
 lemma inducedMetricInner_symm
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v w : hI.boundaryE) :
@@ -253,6 +265,7 @@ lemma inducedMetricInner_symm
   rw [inducedMetricInner_apply, inducedMetricInner_apply]
   exact g.symm (x : M) (boundaryInclusionMfderiv x v) (boundaryInclusionMfderiv x w)
 
+omit [FiniteDimensional ℝ E] in
 lemma inducedMetricInner_pos
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (v : hI.boundaryE) (hv : v ≠ 0) :
@@ -326,6 +339,7 @@ private lemma exists_coercive_of_posDef
     rw [h_simplify] at h_step
     exact h_step
 
+omit [FiniteDimensional ℝ E] in
 lemma inducedMetricInner_isVonNBounded
     (g : Measure.SmoothRiemannianMetric I M) (x : BoundaryManifold I M) :
     IsVonNBounded ℝ {v : hI.boundaryE | inducedMetricInner g x v v < 1} := by
@@ -353,6 +367,7 @@ private noncomputable def inducedMetricInnerLocal
     (innerOnE g ((extChartAt I (x₀ : M)).symm (Phi I e))).bilinearComp
       (fderiv ℝ (Phi I) e) (fderiv ℝ (Phi I) e)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] private lemma inducedMetricInnerLocal_apply
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M)
     (e : hI.boundaryE) (v w : hI.boundaryE) :
@@ -362,6 +377,7 @@ private noncomputable def inducedMetricInnerLocal
   change (innerOnE g _).bilinearComp _ _ v w = _
   exact ContinuousLinearMap.bilinearComp_apply _ _ _ _ _
 
+omit [FiniteDimensional ℝ E] in
 private lemma fderiv_Phi_contDiff :
     ContDiff ℝ ∞ (fun e : hI.boundaryE => fderiv ℝ (Phi I) e) :=
   (Phi_contDiff I).fderiv_right (m := ∞) le_rfl
@@ -411,6 +427,7 @@ private noncomputable def gInnerCharted
       (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x₀)
     ⟨b, g.inner b⟩).2
 
+set_option linter.unusedSectionVars false in
 private lemma gInnerCharted_contMDiffAt
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : M) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
@@ -424,6 +441,7 @@ private lemma gInnerCharted_contMDiffAt
   exact ((trivializationAt _ _ x₀).contMDiffAt_section_iff h_x₀).mp
     h_section.contMDiffAt
 
+set_option linter.unusedSectionVars false in
 private lemma gInnerCharted_along_inclusion_contMDiffAt
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
@@ -436,6 +454,7 @@ private lemma gInnerCharted_along_inclusion_contMDiffAt
     gInnerCharted_contMDiffAt g (x₀ : M)
   exact h_at.comp x₀ h_inclusion_at
 
+set_option linter.unusedSectionVars false in
 private lemma gInnerCharted_eval
     (g : Measure.SmoothRiemannianMetric I M) (x₀ b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) (v w : E) :
@@ -453,6 +472,7 @@ private lemma gInnerCharted_eval
   rw [Bundle.Trivial.linearMapAt_trivialization (𝕜 := ℝ) (B := M) (F := ℝ) b]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma inducedMetricInner_chart_eval
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M)
     (b : BoundaryManifold I M)
@@ -501,6 +521,7 @@ private lemma inducedMetricInner_chart_eval
     simpa using this
   rw [hM_v, hM_w]
 
+omit [FiniteDimensional ℝ E] in
 private lemma dincl_chart_conjugated_contMDiffAt
     (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, hI.boundaryE →L[ℝ] E) ∞
@@ -560,6 +581,7 @@ private lemma dincl_chart_conjugated_contMDiffAt
     rfl
   exact h_mfderiv.congr_of_eventuallyEq h_nhds
 
+set_option linter.unusedSectionVars false in
 theorem inducedMetricInner_contMDiff
     (g : Measure.SmoothRiemannianMetric I M) :
     ContMDiff hI.boundaryI
@@ -635,10 +657,12 @@ noncomputable def inducedMetric
   isVonNBounded := inducedMetricInner_isVonNBounded g
   contMDiff := inducedMetricInner_contMDiff g
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma inducedMetric_inner
     (g : Measure.SmoothRiemannianMetric I M) (b : BoundaryManifold I M) :
     (inducedMetric g).inner b = inducedMetricInner g b := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma inducedMetric_inner_apply
     (g : Measure.SmoothRiemannianMetric I M) (b : BoundaryManifold I M)
     (v w : hI.boundaryE) :

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.Order2Defect.FrameCurvatureCore
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.FrozenFrameTrace
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem covApply_covApply_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -55,6 +55,7 @@ theorem covApply_covApply_section_contMDiff
   have hOuter := covApplyRS_contMDiff (I := I) g r s hInner hB
   exact hOuter
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem covApply_christoffel_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -78,6 +79,7 @@ theorem covApply_christoffel_section_contMDiff
     exact hOn.contMDiffAt (Filter.univ_mem)
   exact covApplyRS_contMDiff (I := I) g r s hT hChristoffel
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorSecondCovDeriv_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -106,6 +108,7 @@ theorem tensorSecondCovDeriv_section_contMDiff
   rw [hpt]
   exact hSub
 
+set_option linter.unusedSectionVars false in
 theorem frozenFrameTrace_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -143,6 +146,7 @@ theorem frozenFrameTrace_section_contMDiff
   rw [hpt]
   exact hsum
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorCov_toFun_finset_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {ι : Type*} (t : Finset ι) (σ : ι → Π b : M, TensorRSSpace r s I b) {x : M}
@@ -177,6 +181,7 @@ theorem tensorCov_toFun_finset_sum
     rw [hsection, hadd, Finset.sum_insert ha]
     rw [ih]
 
+set_option linter.unusedSectionVars false in
 theorem covDeriv_frozenFrameTrace_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}

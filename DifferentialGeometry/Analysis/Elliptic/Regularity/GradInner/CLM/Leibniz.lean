@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.L2Inclu
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartData
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,11 +44,13 @@ noncomputable def gradRhoSqSmooth
   ⟨normGradSqFun (I := I) g (ρα : M → ℝ),
     normGradSqFun_contMDiff (I := I) g ρα.contMDiff⟩
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma gradRhoSqSmooth_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (x : M) :
     (gradRhoSqSmooth (I := I) (M := M) g ρα : M → ℝ) x =
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g ρα x) := rfl
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInner_leibniz_pointwise
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -177,6 +178,7 @@ private lemma leibnizCLM_agree_on_smooth
     H1ComplToLp_smoothToH1Compl]
   exact gradInner_leibniz_smooth_Lp (I := I) (M := M) g ρα v
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_smoothToH1Compl_aux
     (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToH1Compl (I := I) (M := M) g) := by
@@ -229,6 +231,7 @@ theorem gradInner_leibniz_H1Compl
 
 variable [NeZero (Module.finrank ℝ E)]
 
+set_option linter.unusedSectionVars false in
 lemma chartPushedRawLpFromLp_coeFn_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (F G : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -289,6 +292,7 @@ lemma chartPushedRawLpFromLp_coeFn_sub
   rw [hy_FG, hy_chart, h_chartPushedRaw_diff_pointwise y]
   rw [← hy_F, ← hy_G]
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (F : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -354,6 +358,7 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
   rw [hy_smoothMul, hy_chart, h_pointwise y]
   rw [← hy_F]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) :
@@ -393,6 +398,7 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     with y hy_sub hy_smooth
   rw [hy_sub, hy_smooth]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :

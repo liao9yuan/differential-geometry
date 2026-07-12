@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionIBPExpand
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionChartBilinear
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma principalTerm_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -69,6 +69,7 @@ private lemma principalTerm_chartBilinear_zero_h
   rw [h_eq]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cross_1_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -98,6 +99,7 @@ private lemma cross_1_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cross_2_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -126,6 +128,7 @@ private lemma cross_2_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma cross_3_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -154,6 +157,7 @@ private lemma cross_3_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma c_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -176,6 +180,7 @@ private lemma c_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma f_term_chartBilinear_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -198,6 +203,7 @@ private lemma f_term_chartBilinear_zero_h
   rw [h_eq]
   simp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartBilinear_substitution_identity_zero_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -212,6 +218,7 @@ private lemma chartBilinear_substitution_identity_zero_h
     f_term_chartBilinear_zero_h, c_term_chartBilinear_zero_h]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartBilinear_substitution_identity_K_0_empty
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -251,6 +258,7 @@ private lemma chartBilinear_substitution_identity_K_0_empty
   simp [Measure.restrict_empty, integral_zero_measure]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_substitution_identity_holds_composite
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -276,6 +284,7 @@ theorem chartBilinear_substitution_identity_holds_composite
         D hK_0_empty η hη_supp_in_K_0 k h
     · exact h_substitution_identity_holds hh hK_0_empty
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_substitution_identity_zero_h_unconditional
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -286,6 +295,7 @@ theorem chartBilinear_substitution_identity_zero_h_unconditional
     chartBilinear_RHS (I := I) (M := M) D K_0 η k 0 :=
   chartBilinear_substitution_identity_zero_h (I := I) (M := M) D K_0 η k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartBilinear_substitution_identity_K_0_empty_unconditional
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

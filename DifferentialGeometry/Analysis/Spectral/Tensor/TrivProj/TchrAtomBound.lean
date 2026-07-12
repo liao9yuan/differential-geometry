@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.CovNormBound
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pouTsupport_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆

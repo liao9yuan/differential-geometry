@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ noncomputable def tensorRSChartE_section_repr (r s : ℕ) (α : M)
   (trivializationAt (TensorRSModel r s ℝ E)
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma tensorRSChartE_section_repr_apply (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) (b : M) :
     tensorRSChartE_section_repr (I := I) r s α T b =
@@ -40,6 +40,7 @@ noncomputable def tensorRSChartE_section_repr (r s : ℕ) (α : M)
           (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b (T b) :=
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensorRSChartE_section_repr_add (r s : ℕ) (α : M)
     (T₁ T₂ : Π b : M, TensorRSSpace r s I b) :
     tensorRSChartE_section_repr (I := I) r s α (T₁ + T₂) =
@@ -55,6 +56,7 @@ lemma tensorRSChartE_section_repr_add (r s : ℕ) (α : M)
         (T₁ b + T₂ b) = _
   exact map_add _ (T₁ b) (T₂ b)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensorRSChartE_section_repr_smul (r s : ℕ) (α : M) (c : ℝ)
     (T : Π b : M, TensorRSSpace r s I b) :
     tensorRSChartE_section_repr (I := I) r s α (c • T) =
@@ -83,6 +85,7 @@ noncomputable def tensorRSIntrinsicChartCLM (r s : ℕ) (α : M)
         (extChartAt I α b)).comp
       (trivToE (I := I) α b))
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensorRSIntrinsicChartCLM_apply (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b) (b : M) (v : TangentSpace I b) :
     tensorRSIntrinsicChartCLM (I := I) r s α T b v =
@@ -94,6 +97,7 @@ lemma tensorRSIntrinsicChartCLM_apply (r s : ℕ) (α : M)
   unfold tensorRSIntrinsicChartCLM
   rw [ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensorRSIntrinsicChartCLM_add_section (r s : ℕ) (α : M)
     (T₁ T₂ : Π b : M, TensorRSSpace r s I b) (b : M)
     (h₁ : DifferentiableAt ℝ
@@ -136,6 +140,7 @@ lemma tensorRSIntrinsicChartCLM_add_section (r s : ℕ) (α : M)
     ContinuousLinearMap.comp_apply, ContinuousLinearMap.comp_apply]
   rw [ContinuousLinearMap.add_apply, map_add]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensorRSIntrinsicChartCLM_smul_section (r s : ℕ) (α : M)
     (c : ℝ) (T : Π b : M, TensorRSSpace r s I b) (b : M)
     (hT : DifferentiableAt ℝ
@@ -173,12 +178,14 @@ def tangentSlotCLM (n : ℕ) {b : M}
     (i : Fin n) : TangentSpace I b →L[ℝ] TangentSpace I b :=
   if i = k then Φ else ContinuousLinearMap.id ℝ (TangentSpace I b)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 lemma tangentSlotCLM_self (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) :
     tangentSlotCLM (I := I) n k Φ k = Φ := by
   unfold tangentSlotCLM
   simp
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 lemma tangentSlotCLM_other (n : ℕ) {b : M}
     (k : Fin n) (Φ : TangentSpace I b →L[ℝ] TangentSpace I b)
     {i : Fin n} (h : i ≠ k) :
@@ -205,6 +212,7 @@ noncomputable def tensorSlotSubstCLM (n : ℕ) (b : M)
           : Tensor0SSpace n I b →L[ℝ]
             ContinuousMultilinearMap ℝ (fun _ : Fin n => E) ℝ))
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma tensorSlotSubstCLM_apply (n : ℕ) (b : M)
     (Φ : Fin n → (TangentSpace I b →L[ℝ] TangentSpace I b))
     (τ : Tensor0SSpace n I b) (m : Fin n → TangentSpace I b) :
@@ -228,6 +236,7 @@ noncomputable def chartTensorRSInputSlotCorrection (r s : ℕ)
       (tangentSlotCLM (I := I) r k
         (chartLeviCivitaParallelCLM (I := I) g α b X)))
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSInputSlotCorrection_apply (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -248,6 +257,7 @@ lemma chartTensorRSInputSlotCorrection_apply (r s : ℕ)
   unfold chartTensorRSInputSlotCorrection
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSInputSlotCorrection_add (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b' : M, TensorRSSpace r s I b')
@@ -264,6 +274,7 @@ lemma chartTensorRSInputSlotCorrection_add (r s : ℕ)
   rw [hT_add]
   exact ContinuousLinearMap.add_comp _ _ _
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSInputSlotCorrection_smul (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -288,6 +299,7 @@ noncomputable def chartTensorRSOutputSlotCorrection (r s : ℕ)
         (chartLeviCivitaParallelCLM (I := I) g α b X))).comp
     (show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSOutputSlotCorrection_apply (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -312,6 +324,7 @@ lemma chartTensorRSOutputSlotCorrection_apply (r s : ℕ)
       (chartLeviCivitaParallelCLM (I := I) g α b X))
     ((show Tensor0SSpace r I b →L[ℝ] Tensor0SSpace s I b from T b) α_input) m
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSOutputSlotCorrection_add (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b' : M, TensorRSSpace r s I b')
@@ -328,6 +341,7 @@ lemma chartTensorRSOutputSlotCorrection_add (r s : ℕ)
   rw [hT_add]
   exact ContinuousLinearMap.comp_add _ _ _
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSOutputSlotCorrection_smul (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -352,6 +366,7 @@ noncomputable def chartTensorRSCovariantDerivative (r s : ℕ)
     - (∑ l : Fin s,
         chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSCovariantDerivative_def (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -363,6 +378,7 @@ lemma chartTensorRSCovariantDerivative_def (r s : ℕ)
         - (∑ l : Fin s,
             chartTensorRSOutputSlotCorrection (I := I) r s g α T X b l) := rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSCovariantDerivative_apply (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -443,6 +459,7 @@ lemma chartTensorRSCovariantDerivative_apply (r s : ℕ)
     rw [ContinuousLinearMap.sum_apply, ContinuousMultilinearMap.sum_apply]
   rw [hBeval, hCeval]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSCovariantDerivative_add (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
     (T₁ T₂ : Π b : M, TensorRSSpace r s I b)
@@ -494,6 +511,7 @@ lemma chartTensorRSCovariantDerivative_add (r s : ℕ)
   rw [hsplit_output]
   abel
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensorRSCovariantDerivative_smul (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (T : Π b : M, TensorRSSpace r s I b)

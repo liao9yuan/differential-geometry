@@ -9,7 +9,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.Algebra.Support
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -41,6 +41,7 @@ lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact hf.integrable_of_hasCompactSupport hcs
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem tangentSectionAction_mul
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f h : M → ℝ}
@@ -67,6 +68,7 @@ theorem tangentSectionAction_mul
   rw [smul_eq_mul, smul_eq_mul]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -147,6 +149,7 @@ theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence
     rw [← h_int_split, ← h_div_Y_split]; exact h_div_Y_zero
   linarith [h_sum_zero]
 
+set_option linter.unusedSectionVars false in
 theorem integral_tangentSectionAction_mul_add_eq_neg
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

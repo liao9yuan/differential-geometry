@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import Mathlib.Analysis.Normed.Operator.Compact
 import Mathlib.Topology.Sequences
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
   [NeZero (Module.finrank ℝ E)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_smoothScalar_le_norm_smoothScalar
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     eLpNorm s.toFun 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -65,6 +65,7 @@ private lemma eLpNorm_smoothScalar_le_norm_smoothScalar
   rw [h_re]
   exact ENNReal.ofReal_le_ofReal h_real
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma SmoothScalar.sqrt_g_inner_grad_memLp_two
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     MemLp (fun x : M => Real.sqrt
@@ -84,6 +85,7 @@ private lemma SmoothScalar.sqrt_g_inner_grad_memLp_two
   exact h_cont.memLp_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
     {g : SmoothRiemannianMetric I M} (s : SmoothScalar g) :
     eLpNorm (fun x : M => Real.sqrt
@@ -178,6 +180,7 @@ private lemma eLpNorm_sqrt_g_inner_grad_le_norm_smoothScalar
   rw [h_re]
   exact ENNReal.ofReal_le_ofReal h_real
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smooth_close_to_H1 (g : SmoothRiemannianMetric I M)
     (v : H1Compl g) {δ : ℝ} (hδ : 0 < δ) :
     ∃ s : SmoothScalar g, ‖v - smoothToH1Compl (I := I) (M := M) g s‖ < δ := by

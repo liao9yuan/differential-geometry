@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Geodesic.Equation
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartGramChristoffel
 import Mathlib.Analysis.ODE.Gronwall
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -33,50 +32,65 @@ namespace SectionAlongCurve
 
 variable {γ : ℝ → M}
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma toFun_def (X : SectionAlongCurve I M γ) (t : ℝ) :
     X.toFun t = X.toFun t := rfl
 
+set_option linter.unusedSectionVars false in
 def zero : SectionAlongCurve I M γ := ⟨fun _ => 0⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma zero_toFun (t : ℝ) : (zero : SectionAlongCurve I M γ).toFun t = 0 := rfl
 
+set_option linter.unusedSectionVars false in
 def add (X Y : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => X.toFun t + Y.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma add_toFun (X Y : SectionAlongCurve I M γ) (t : ℝ) :
     (add X Y).toFun t = X.toFun t + Y.toFun t := rfl
 
+set_option linter.unusedSectionVars false in
 def neg (X : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => - X.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma neg_toFun (X : SectionAlongCurve I M γ) (t : ℝ) :
     (neg X).toFun t = - X.toFun t := rfl
 
 def sub (X Y : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => X.toFun t - Y.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma sub_toFun (X Y : SectionAlongCurve I M γ) (t : ℝ) :
     (sub X Y).toFun t = X.toFun t - Y.toFun t := rfl
 
+set_option linter.unusedSectionVars false in
 def smul (a : ℝ) (X : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => a • X.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smul_toFun (a : ℝ) (X : SectionAlongCurve I M γ) (t : ℝ) :
     (smul a X).toFun t = a • X.toFun t := rfl
 
+omit [Module.Finite ℝ E] in
 def smulFun (f : ℝ → ℝ) (X : SectionAlongCurve I M γ) : SectionAlongCurve I M γ :=
   ⟨fun t => f t • X.toFun t⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smulFun_toFun (f : ℝ → ℝ) (X : SectionAlongCurve I M γ) (t : ℝ) :
     (smulFun f X).toFun t = f t • X.toFun t := rfl
 
 instance : CoeFun (SectionAlongCurve I M γ) (fun _ => ℝ → E) := ⟨toFun⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma coe_zero : ((zero : SectionAlongCurve I M γ) : ℝ → E) = fun _ => 0 := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma coe_add (X Y : SectionAlongCurve I M γ) :
     ((add X Y : SectionAlongCurve I M γ) : ℝ → E) = fun t => X.toFun t + Y.toFun t := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma coe_smul (a : ℝ) (X : SectionAlongCurve I M γ) :
     ((smul a X : SectionAlongCurve I M γ) : ℝ → E) = fun t => a • X.toFun t := rfl
 
@@ -92,22 +106,27 @@ def DifferentiableOnAlong (X : SectionAlongCurve I M γ) (s : Set ℝ) : Prop :=
 def DifferentiableAtAlong (X : SectionAlongCurve I M γ) (t : ℝ) : Prop :=
   DifferentiableAt ℝ X.toFun t
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma contMDiffOnInChart_def (n : WithTop ℕ∞) (X : SectionAlongCurve I M γ) (s : Set ℝ) :
     ContMDiffOnInChart (I := I) (M := M) n X s = ContDiffOn ℝ n X.toFun s := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma contMDiffAtInChart_def (n : WithTop ℕ∞) (X : SectionAlongCurve I M γ) (t : ℝ) :
     ContMDiffAtInChart (I := I) (M := M) n X t = ContDiffAt ℝ n X.toFun t := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma zero_contMDiffOnInChart (n : WithTop ℕ∞) (s : Set ℝ) :
     ContMDiffOnInChart (I := I) (M := M) (γ := γ) n zero s := by
   unfold ContMDiffOnInChart
   exact contDiffOn_const
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma zero_contMDiffAtInChart (n : WithTop ℕ∞) (t : ℝ) :
     ContMDiffAtInChart (I := I) (M := M) (γ := γ) n zero t := by
   unfold ContMDiffAtInChart
   exact contDiffAt_const
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma add_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s)
     (hY : ContMDiffOnInChart (I := I) (M := M) n Y s) :
@@ -115,6 +134,7 @@ lemma add_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M �
   unfold ContMDiffOnInChart at *
   exact hX.add hY
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma add_contMDiffAtInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M γ} {t : ℝ}
     (hX : ContMDiffAtInChart (I := I) (M := M) n X t)
     (hY : ContMDiffAtInChart (I := I) (M := M) n Y t) :
@@ -122,12 +142,14 @@ lemma add_contMDiffAtInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M �
   unfold ContMDiffAtInChart at *
   exact hX.add hY
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma neg_contMDiffOnInChart {n : WithTop ℕ∞} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s) :
     ContMDiffOnInChart (I := I) (M := M) n (neg X) s := by
   unfold ContMDiffOnInChart at *
   exact hX.neg
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma sub_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s)
     (hY : ContMDiffOnInChart (I := I) (M := M) n Y s) :
@@ -135,12 +157,14 @@ lemma sub_contMDiffOnInChart {n : WithTop ℕ∞} {X Y : SectionAlongCurve I M �
   unfold ContMDiffOnInChart at *
   exact hX.sub hY
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smul_contMDiffOnInChart {n : WithTop ℕ∞} {a : ℝ} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : ContMDiffOnInChart (I := I) (M := M) n X s) :
     ContMDiffOnInChart (I := I) (M := M) n (smul a X) s := by
   unfold ContMDiffOnInChart at *
   exact hX.const_smul a
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smulFun_contMDiffOnInChart {n : WithTop ℕ∞} {f : ℝ → ℝ}
     {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hf : ContDiffOn ℝ n f s)
@@ -149,6 +173,7 @@ lemma smulFun_contMDiffOnInChart {n : WithTop ℕ∞} {f : ℝ → ℝ}
   unfold ContMDiffOnInChart at *
   exact hf.smul hX
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma add_differentiableOnAlong {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : DifferentiableOnAlong (I := I) (M := M) X s)
     (hY : DifferentiableOnAlong (I := I) (M := M) Y s) :
@@ -156,12 +181,14 @@ lemma add_differentiableOnAlong {X Y : SectionAlongCurve I M γ} {s : Set ℝ}
   unfold DifferentiableOnAlong at *
   exact hX.add hY
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smul_differentiableOnAlong {a : ℝ} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hX : DifferentiableOnAlong (I := I) (M := M) X s) :
     DifferentiableOnAlong (I := I) (M := M) (smul a X) s := by
   unfold DifferentiableOnAlong at *
   exact hX.const_smul a
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma smulFun_differentiableOnAlong {f : ℝ → ℝ} {X : SectionAlongCurve I M γ} {s : Set ℝ}
     (hf : DifferentiableOn ℝ f s)
     (hX : DifferentiableOnAlong (I := I) (M := M) X s) :
@@ -174,6 +201,7 @@ end SectionAlongCurve
 def chartCurve (α : M) (γ : ℝ → M) : ℝ → E :=
   fun t => extChartAt I α (γ t)
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartCurve_def (α : M) (γ : ℝ → M) (t : ℝ) :
     chartCurve (I := I) α γ t = extChartAt I α (γ t) := rfl
 
@@ -184,6 +212,7 @@ def chartCovDerivAlong (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M
       (deriv (chartCurve (I := I) α γ) t) (X t)
       (chartCurve (I := I) α γ t)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartCovDerivAlong_def
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (X : ℝ → E) (t : ℝ) :
@@ -197,6 +226,7 @@ namespace ChartChristoffel
 
 variable {g : SmoothRiemannianMetric I M} {α : M} {y : E}
 
+set_option linter.unusedSectionVars false in
 lemma contraction_add_right (v w₁ w₂ : E) :
     chartChristoffelContraction (I := I) g α v (w₁ + w₂) y =
       chartChristoffelContraction (I := I) g α v w₁ y +
@@ -216,6 +246,7 @@ lemma contraction_add_right (v w₁ w₂ : E) :
     unfold chartCoord; simp]
   ring
 
+set_option linter.unusedSectionVars false in
 lemma contraction_add_left (v₁ v₂ w : E) :
     chartChristoffelContraction (I := I) g α (v₁ + v₂) w y =
       chartChristoffelContraction (I := I) g α v₁ w y +
@@ -224,6 +255,7 @@ lemma contraction_add_left (v₁ v₂ w : E) :
     chartChristoffelContraction_symm (v := v₁) (w := w),
     chartChristoffelContraction_symm (v := v₂) (w := w)]
 
+set_option linter.unusedSectionVars false in
 lemma contraction_smul_right (a : ℝ) (v w : E) :
     chartChristoffelContraction (I := I) g α v (a • w) y =
       a • chartChristoffelContraction (I := I) g α v w y := by
@@ -240,12 +272,14 @@ lemma contraction_smul_right (a : ℝ) (v w : E) :
   rw [chartCoord_smul]
   ring
 
+set_option linter.unusedSectionVars false in
 lemma contraction_smul_left (a : ℝ) (v w : E) :
     chartChristoffelContraction (I := I) g α (a • v) w y =
       a • chartChristoffelContraction (I := I) g α v w y := by
   rw [chartChristoffelContraction_symm, contraction_smul_right,
     chartChristoffelContraction_symm (v := v) (w := w)]
 
+set_option linter.unusedSectionVars false in
 lemma contraction_zero_right (v : E) :
     chartChristoffelContraction (I := I) g α v (0 : E) y = 0 := by
   rw [chartChristoffelContraction_symm, chartChristoffelContraction_zero_left]
@@ -259,11 +293,13 @@ def chartChristoffelContractionRightCLM
       map_add' := fun w₁ w₂ => ChartChristoffel.contraction_add_right v w₁ w₂
       map_smul' := fun a w => ChartChristoffel.contraction_smul_right a v w }
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartChristoffelContractionRightCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M) (v : E) (y : E) (w : E) :
     chartChristoffelContractionRightCLM (I := I) g α v y w =
       chartChristoffelContraction (I := I) g α v w y := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartCovDerivAlong_eq_add_clm
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (X : ℝ → E) (t : ℝ) :
@@ -280,6 +316,7 @@ def IsCovDerivAlongChart (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ →
       (W t - chartChristoffelContraction (I := I) g α (uPrime t) (Y t)
           (chartCurve (I := I) α γ t)) t
 
+set_option linter.unusedSectionVars false in
 lemma IsCovDerivAlongChart.hasDerivAt_eq
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y W : ℝ → E} {s : Set ℝ}
     (h : IsCovDerivAlongChart (I := I) g α γ uPrime Y W s) {t : ℝ} (ht : t ∈ s) :
@@ -288,6 +325,7 @@ lemma IsCovDerivAlongChart.hasDerivAt_eq
           (chartCurve (I := I) α γ t)) t :=
   h.2 t ht
 
+set_option linter.unusedSectionVars false in
 theorem IsCovDerivAlongChart.add
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y₁ Y₂ W₁ W₂ : ℝ → E} {s : Set ℝ}
@@ -311,6 +349,7 @@ theorem IsCovDerivAlongChart.add
   convert hadd using 1
   rw [hΓadd]; module
 
+set_option linter.unusedSectionVars false in
 theorem IsCovDerivAlongChart.smul
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y W : ℝ → E} {s : Set ℝ}
@@ -330,6 +369,7 @@ theorem IsCovDerivAlongChart.smul
   convert hcY using 1
   rw [hΓsmul, smul_sub]
 
+set_option linter.unusedSectionVars false in
 theorem IsCovDerivAlongChart.neg
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y W : ℝ → E} {s : Set ℝ}
@@ -344,6 +384,7 @@ theorem IsCovDerivAlongChart.neg
   rw [hYeq, hWeq] at hsmul
   exact hsmul
 
+set_option linter.unusedSectionVars false in
 theorem IsCovDerivAlongChart.zero
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (uPrime : ℝ → E) (s : Set ℝ)
     (hu : ∀ t ∈ s, HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t) :
@@ -355,6 +396,7 @@ theorem IsCovDerivAlongChart.zero
     ChartChristoffel.contraction_zero_right (uPrime t)
   rw [hΓ0]; simpa using (hasDerivAt_const t (0 : E))
 
+set_option linter.unusedSectionVars false in
 theorem IsCovDerivAlongChart.smulFun
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime : ℝ → E}
     {Y W : ℝ → E} {s : Set ℝ}
@@ -382,6 +424,7 @@ def IsParallelChart (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (Y : ℝ → E) (s : Set ℝ) : Prop :=
   IsCovDerivAlongChart (I := I) g α γ uPrime Y (fun _ => (0 : E)) s
 
+set_option linter.unusedSectionVars false in
 lemma IsParallelChart.hasDerivAt
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y : ℝ → E} {s : Set ℝ}
     (h : IsParallelChart (I := I) g α γ uPrime Y s) {t : ℝ} (ht : t ∈ s) :
@@ -391,12 +434,14 @@ lemma IsParallelChart.hasDerivAt
   have := h.2 t ht
   simpa using this
 
+set_option linter.unusedSectionVars false in
 lemma IsParallelChart.chartCurve_hasDerivAt
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y : ℝ → E} {s : Set ℝ}
     (h : IsParallelChart (I := I) g α γ uPrime Y s) {t : ℝ} (ht : t ∈ s) :
     HasDerivAt (chartCurve (I := I) α γ) (uPrime t) t :=
   h.1 t ht
 
+set_option linter.unusedSectionVars false in
 theorem IsParallelChart.smul
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y : ℝ → E} {s : Set ℝ}
     (h : IsParallelChart (I := I) g α γ uPrime Y s) (c : ℝ) :
@@ -408,6 +453,7 @@ theorem IsParallelChart.smul
   convert hsmul using 1
   exact hzero.symm
 
+set_option linter.unusedSectionVars false in
 theorem IsParallelChart.add
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E} {s : Set ℝ}
     (h₁ : IsParallelChart (I := I) g α γ uPrime Y₁ s)
@@ -426,6 +472,7 @@ def ParallelTransportLipschitzBound (g : SmoothRiemannianMetric I M) (α : M) (�
     ‖chartChristoffelContractionRightCLM (I := I) g α (uPrime t)
         (chartCurve (I := I) α γ t)‖₊ ≤ K
 
+set_option linter.unusedSectionVars false in
 theorem IsParallelChart.unique_of_initial
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {a b t₀ : ℝ} {K : NNReal}
@@ -471,6 +518,7 @@ theorem IsParallelChart.unique_of_initial
     exact h₂.hasDerivAt ht
   exact ODE_solution_unique_of_mem_Ioo hLip ht₀ hY₁ hY₂ hinit
 
+set_option linter.unusedSectionVars false in
 theorem IsParallelChart.unique_eventually
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {t₀ : ℝ} {K : NNReal}
@@ -505,6 +553,7 @@ def HasParallelTransportChart (g : SmoothRiemannianMetric I M) (α : M) (γ : �
     (uPrime : ℝ → E) (t₀ : ℝ) (v₀ : E) (Y : ℝ → E) (s : Set ℝ) : Prop :=
   IsParallelChart (I := I) g α γ uPrime Y s ∧ Y t₀ = v₀
 
+set_option linter.unusedSectionVars false in
 theorem HasParallelTransportChart.unique_of_lipschitz
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {a b t₀ : ℝ} {v₀ : E} {K : NNReal}
@@ -516,6 +565,7 @@ theorem HasParallelTransportChart.unique_of_lipschitz
   IsParallelChart.unique_of_initial h₁.1 h₂.1 hK ht₀
     (h₁.2.trans h₂.2.symm)
 
+set_option linter.unusedSectionVars false in
 theorem HasParallelTransportChart.zero
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (uPrime : ℝ → E)
     (t₀ : ℝ) (s : Set ℝ)
@@ -524,6 +574,7 @@ theorem HasParallelTransportChart.zero
   refine ⟨?_, rfl⟩
   exact IsCovDerivAlongChart.zero g α γ uPrime s hu
 
+set_option linter.unusedSectionVars false in
 theorem HasParallelTransportChart.linear_combination
     {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M} {uPrime Y₁ Y₂ : ℝ → E}
     {t₀ : ℝ} {v₁ v₂ : E} (a c : ℝ) {s : Set ℝ}
@@ -546,6 +597,7 @@ variable {g : SmoothRiemannianMetric I M} {α : M} {γ : ℝ → M}
 def chartSectionCoord (X : ℝ → E) (i : Fin (Module.finrank ℝ E)) : ℝ → ℝ :=
   fun t => chartCoord (E := E) i (X t)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartSectionCoord_def (X : ℝ → E) (i : Fin (Module.finrank ℝ E)) (t : ℝ) :
     chartSectionCoord (E := E) X i t = chartCoord (E := E) i (X t) := rfl
 
@@ -555,6 +607,7 @@ def chartGramAlongCurve (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → 
     chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
       chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartGramAlongCurve_def
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E) (t : ℝ) :
     chartGramAlongCurve (I := I) g α γ V W t =
@@ -562,6 +615,7 @@ def chartGramAlongCurve (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → 
         chartGramOnE (I := I) g α i j (chartCurve (I := I) α γ t) *
           chartCoord (E := E) i (V t) * chartCoord (E := E) j (W t) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma symmL_eq_sum_chartBasisVecFiber
     (α : M) {x : M}
     (v : E) :
@@ -579,6 +633,7 @@ lemma symmL_eq_sum_chartBasisVecFiber
   rw [map_smul]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem inner_eq_chartGramOnE_bilinear_on_baseSet
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (V W : E) :
@@ -607,6 +662,7 @@ theorem inner_eq_chartGramOnE_bilinear_on_baseSet
   rw [map_smul, smul_eq_mul, hvfib, chartGramMatrix_apply]
   ring
 
+set_option linter.unusedSectionVars false in
 lemma chartSectionCoord_hasDerivAt
     {X : ℝ → E} {Xprime : ℝ → E} {t : ℝ} (i : Fin (Module.finrank ℝ E))
     (hX : HasDerivAt X (Xprime t) t) :
@@ -626,6 +682,7 @@ lemma chartSectionCoord_hasDerivAt
   rw [hfun, hLapply] at hcomp
   exact hcomp
 
+set_option linter.unusedSectionVars false in
 lemma fderiv_chartGramOnE_eq_sum_partialDeriv
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y v : E) :
@@ -644,6 +701,7 @@ lemma fderiv_chartGramOnE_eq_sum_partialDeriv
   rw [map_smul, smul_eq_mul]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_comp_chartCurve_hasDerivAt
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (i j : Fin (Module.finrank ℝ E)) {uPrime : ℝ → E} {t : ℝ}
@@ -672,6 +730,7 @@ lemma chartGramOnE_comp_chartCurve_hasDerivAt
   rw [fderiv_chartGramOnE_eq_sum_partialDeriv (I := I) g α i j] at hchain
   exact hchain
 
+set_option linter.unusedSectionVars false in
 theorem chartGramAlongCurve_hasDerivAt
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E)
     {uPrime Vprime Wprime : ℝ → E} {t : ℝ}
@@ -745,6 +804,7 @@ theorem chartGramAlongCurve_hasDerivAt
   rw [hfun] at hsum
   exact hsum
 
+set_option linter.unusedSectionVars false in
 lemma chartCoord_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (α : M) (v w y : E)
     (l : Fin (Module.finrank ℝ E)) :
@@ -813,6 +873,7 @@ private lemma sum3_swap_outer_inner {ι : Type*} [Fintype ι]
     Finset.sum_congr rfl (fun c _ => Finset.sum_comm)
   exact e1.trans (e2.trans e3)
 
+set_option linter.unusedSectionVars false in
 theorem chartGramAlongCurve_hasDerivAt_covariant
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) (V W : ℝ → E)
     {uPrime Vprime Wprime : ℝ → E} {t : ℝ}

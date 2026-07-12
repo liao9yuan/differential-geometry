@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingChart
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Ricci.PairingCLM
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -320,6 +319,7 @@ theorem gradInnerCLM_smoothToH1Compl_eq_resolventL2_smoothCandidate
   rw [gradInnerCLM_smoothToH1Compl_eq_H1ComplToLp_resolvent_smoothCandidate]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem hessPairingChart_polar
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) (b : M) :
     4 * hessPairingChart (I := I) g φ v b =
@@ -328,6 +328,7 @@ theorem hessPairingChart_polar
   rw [hessPairingChart_def]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessFrobeniusSq_polar_eq_hessPairing
     (g : SmoothRiemannianMetric I M) (φ v : C^∞⟮I, M; ℝ⟯) (b : M) :
     chartHessFrobeniusSq (I := I) g (fun x : M => φ x + v x) b -
@@ -335,6 +336,7 @@ theorem chartHessFrobeniusSq_polar_eq_hessPairing
       4 * hessPairingChart (I := I) g φ v b :=
   (hessPairingChart_polar (I := I) (M := M) g φ v b).symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem g_inner_polar
     (g : SmoothRiemannianMetric I M) (b : M) (u w : TangentSpace I b) :
     g.inner b (u + w) (u + w) - g.inner b (u - w) (u - w) =
@@ -356,6 +358,7 @@ theorem g_inner_polar
   rw [hp1, hp2, h_inner_sym]
   ring
 
+omit [CompactSpace M] in
 theorem ricciTensor_polar
     (g : SmoothRiemannianMetric I M) (b : M) (u w : TangentSpace I b) :
     ricciTensor (I := I) g b (u + w) (u + w) -

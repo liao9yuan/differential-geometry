@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Slot0CurryReconstruction
 import Mathlib.Algebra.Order.BigOperators.Ring.Finset
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 private lemma coframeS_zero_eq_unitZeroSec
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n) :
@@ -60,6 +60,7 @@ private lemma coframeS_zero_eq_unitZeroSec
     rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
   rw [hL, hR]
 
+set_option linter.unusedSectionVars false in
 private theorem riemannianFiberNormSq_twoSlotUnitEval_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : Tensor0SBundle.TensorRSSpace 0 (s + 1 + 1) I x)
@@ -313,6 +314,7 @@ private theorem riemannianFiberNormSq_twoSlotUnitEval_le
         refine Finset.sum_congr rfl (fun a _ => ?_)
         rw [Finset.sum_comm]
 
+set_option linter.unusedSectionVars false in
 private theorem secondCovDeriv_unit_frame_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : Integral.L2.SmoothCcTensor g 0 s) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -339,6 +341,7 @@ private theorem secondCovDeriv_unit_frame_fiberNormSq_le
     (Y := smoothOrthoFrame (I := I) g x i)
     (smoothOrthoFrame_smooth (I := I) g x i) (smoothOrthoFrame_smooth (I := I) g x i) x m).symm
 
+set_option linter.unusedSectionVars false in
 theorem rawConnLap_fiberNormSq_le_secondCovGrad
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : Integral.L2.SmoothCcTensor g 0 s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g 0 s x
@@ -418,6 +421,7 @@ theorem rawConnLap_fiberNormSq_le_secondCovGrad
     _ ≤ (n : ℝ) * ((n : ℝ) * rhs) := mul_le_mul_of_nonneg_left hsum_le hn_nn
     _ = (n : ℝ) ^ 2 * rhs := by ring
 
+set_option linter.unusedSectionVars false in
 theorem exists_rawConnLap_l2Norm_le_secondCovGrad_l2Norm_gen
     (g : SmoothRiemannianMetric I M) :
     ∃ K : ℝ, 1 ≤ K ∧

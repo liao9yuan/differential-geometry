@@ -6,7 +6,6 @@ import Mathlib.Analysis.Calculus.Deriv.Add
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,6 +48,7 @@ theorem trilinear_eval_hasDerivAt
   have step2 := step1.clm_apply hb
   convert step2 using 1
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem pullback_eval_form_hasDerivAt_of_slots
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -71,6 +71,7 @@ theorem pullback_eval_form_hasDerivAt_of_slots
         + ((g_fam t).inner (Φ_fam t x)) (mfderiv I I (Φ_fam t : M → M) x v) b') t :=
   trilinear_eval_hasDerivAt hB ha hb
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem pullback_eval_form_hasDerivWithinAt_of_slots
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -93,6 +94,7 @@ theorem pullback_eval_form_hasDerivWithinAt_of_slots
         + ((g_fam t).inner (Φ_fam t x)) (mfderiv I I (Φ_fam t : M → M) x v) b') S t :=
   trilinear_eval_hasDerivWithinAt hB ha hb
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem pullback_eval_form_total_hasDerivAt
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -121,6 +123,7 @@ theorem pullback_eval_form_total_hasDerivAt
   rw [hG', hA', hB_val]
   exact pullback_eval_form_hasDerivAt_of_slots g_fam Φ_fam t x v w B' a' b' hB ha hb
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem pullback_eval_form_chain_hasDerivAt
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -155,6 +158,7 @@ theorem pullback_eval_form_chain_hasDerivAt
     rw [hG', hL']; ring
   rwa [hval] at hkey
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullback_metric_chain_rule_of_slots
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -182,6 +186,7 @@ theorem pullback_metric_chain_rule_of_slots
     (pullback_eval_form_chain_hasDerivAt g_fam Φ_fam t x v w B' a' b' G' L'
       hB ha hb hG' hL')
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullback_metric_chain_rule_of_slots_total
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

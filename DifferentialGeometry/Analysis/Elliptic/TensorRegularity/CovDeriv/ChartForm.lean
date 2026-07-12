@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Inner.InnerBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.PreHilbert
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ noncomputable def covChartMetricGram
       (tensorChartBasisElement (E := E) r s P.1 P.2)
       (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covChartMetricGram_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -56,6 +56,7 @@ lemma covChartMetricGram_def
         (tensorChartBasisElement (E := E) r s P.1 P.2)
         (tensorChartBasisElement (E := E) r s Q.1 Q.2) := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covChartMetricGram_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -69,6 +70,7 @@ theorem covChartMetricGram_symm
     (tensorChartBasisElement (E := E) r s P.1 P.2)
     (tensorChartBasisElement (E := E) r s Q.1 Q.2)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     Set.MapsTo (extChartAt I α).symm (extChartAt I α).target
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -78,6 +80,7 @@ private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     (extChartAt I α).map_target hy
   rwa [extChartAt_source] at hsrc
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covChartMetricGram_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P Q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -128,6 +131,7 @@ theorem covChartMetricGram_contDiffOn
       exact hy
   exact hcomp_eucl
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (X Y : TensorRSModel r s ℝ E) :
@@ -222,6 +226,7 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         rw [chartTensorInnerPointwise_rs_model_add_left,
           chartTensorInnerPointwise_rs_model_smul_left, ih]
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_toModel_eq_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -249,6 +254,7 @@ private lemma tensorInnerPointwise_toModel_eq_chart
   rw [chartRSTwist_chartRSTwistInv (I := I) (M := M) α hb_base r s
     (TensorRSSpace.toModel Y)]
 
+omit [CompleteSpace E] in
 lemma tensorInnerPointwise_toModel_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -276,6 +282,7 @@ lemma tensorInnerPointwise_toModel_eq_component_sum
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   rw [wrappedComponentProj_apply, wrappedComponentProj_apply]
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensorRSCovariantDerivative_locality
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -359,6 +366,7 @@ noncomputable def covPrincipalIntegrand
                     (tensorChartComponentRaw (I := I) (M := M)
                       g r s T α Q.1 Q.2)) y
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma covPrincipalIntegrand_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)
@@ -381,6 +389,7 @@ lemma covPrincipalIntegrand_def
                       (tensorChartComponentRaw (I := I) (M := M)
                         g r s T α Q.1 Q.2)) y := rfl
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covPrincipalIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (α : M)

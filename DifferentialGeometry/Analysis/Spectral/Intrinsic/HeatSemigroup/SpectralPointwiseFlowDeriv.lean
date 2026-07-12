@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerMode
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -66,6 +65,7 @@ theorem hasDerivWithinAt_tsum {α : Type*} {f : α → ℝ → ℝ} {f' : α →
     simp [ContinuousLinearMap.apply_apply, ContinuousLinearMap.toSpanSingleton_apply]
   rwa [heval] at hderiv
 
+omit [BoundarylessManifold I M] in
 theorem allHs_of_weighted_summable_pub
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hsum : ∀ σ : ℝ, 0 ≤ σ →
@@ -94,6 +94,7 @@ theorem allHs_of_weighted_summable_pub
   have hrhs : (b.repr u) i = tensorL2Coeff (I := I) (M := M) hc u i := rfl
   rw [hlhs, hrhs, tensorHsToL2_tensorL2Coeff]
 
+set_option linter.unusedSectionVars false in
 theorem ccTensorBilinSymm_toSection_congr
     {g₁ g₂ : SmoothRiemannianMetric I M}
     (S₁ : SmoothCcTensor g₁ 0 2) (S₂ : SmoothCcTensor g₂ 0 2)
@@ -148,6 +149,7 @@ theorem abs_eigenBilinScalar_le (g : SmoothRiemannianMetric I M) (m : ℕ)
     _ = C * Real.sqrt (tensorSobolevWeight (I := I) (M := M) i (m : ℝ)) *
           (Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w)) := by ring
 
+set_option linter.unusedSectionVars false in
 theorem ccTensorBilinSymm_finiteEigenCombo_eq_sum_eigenBilinScalar
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))

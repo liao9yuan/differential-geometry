@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Instances.ENNReal.Lemmas
 
-set_option linter.unusedSectionVars false
 
 open Set Function Filter Bundle Manifold
 open scoped Topology Manifold ContDiff ENNReal
@@ -24,6 +23,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M]
 
+omit [InnerProductSpace ℝ E] in
 theorem continuous_riemannianEDist
     (g : SmoothRiemannianMetric I M) (p : M) :
     letI : RiemannianBundle (fun (x : M) ↦ TangentSpace I x) :=
@@ -41,6 +41,7 @@ theorem continuous_riemannianEDist
   letI : PseudoEMetricSpace M := PseudoEMetricSpace.ofRiemannianMetric I M
   exact (continuous_const.edist continuous_id)
 
+omit [InnerProductSpace ℝ E] in
 theorem continuousOn_riemannianEDist_toReal_on_finite
     (g : SmoothRiemannianMetric I M) (p : M) :
     letI : RiemannianBundle (fun (x : M) ↦ TangentSpace I x) :=

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.Smoothness.MfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem mfderiv_expMapIntrinsic_at_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [CompleteSpace E]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

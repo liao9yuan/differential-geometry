@@ -61,6 +61,7 @@ theorem deTurckRicciRHS_chartBasisVecFiber_eq_chartDeTurckRicciRHS
 
 omit [BoundarylessManifold I M] in
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem chartDeTurckRicciRHS_sub_eq
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -118,6 +119,7 @@ theorem chartDeTurckRicciRHS_sub_eq
 
 omit [BoundarylessManifold I M] in
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 theorem chartDeTurckRicciRHS_sub_eq_principalSymbol_add_lowerOrder
     (g₁ g₂ g_bg : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :

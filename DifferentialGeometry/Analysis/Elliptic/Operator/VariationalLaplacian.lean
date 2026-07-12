@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothDenseLp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+set_option linter.unusedSectionVars false in
 theorem resolvent_injective (g : SmoothRiemannianMetric I M) :
     Function.Injective (resolvent (I := I) (M := M) g) := by
   rw [injective_iff_map_eq_zero]
@@ -72,6 +72,7 @@ def laplacianDomain (g : SmoothRiemannianMetric I M) :
     Submodule ℝ (H1Compl g) :=
   LinearMap.range (resolvent (I := I) (M := M) g).toLinearMap
 
+set_option linter.unusedSectionVars false in
 lemma laplacianDomain_mem_iff (g : SmoothRiemannianMetric I M) {u : H1Compl g} :
     u ∈ laplacianDomain (I := I) (M := M) g ↔
       ∃ f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g),
@@ -87,6 +88,7 @@ def laplacianDomain.preimage (g : SmoothRiemannianMetric I M)
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   Classical.choose ((laplacianDomain_mem_iff (I := I) (M := M) g).mp u.2)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma resolvent_laplacianDomain_preimage_eq
     (g : SmoothRiemannianMetric I M)
     (u : laplacianDomain (I := I) (M := M) g) :
@@ -95,6 +97,7 @@ def laplacianDomain.preimage (g : SmoothRiemannianMetric I M)
       (u : H1Compl g) :=
   (Classical.choose_spec ((laplacianDomain_mem_iff (I := I) (M := M) g).mp u.2)).symm
 
+set_option linter.unusedSectionVars false in
 lemma laplacianDomain_preimage_zero (g : SmoothRiemannianMetric I M) :
     laplacianDomain.preimage (I := I) (M := M) g
         (0 : laplacianDomain (I := I) (M := M) g) = 0 := by
@@ -103,6 +106,7 @@ lemma laplacianDomain_preimage_zero (g : SmoothRiemannianMetric I M) :
   rw [(resolvent (I := I) (M := M) g).map_zero]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma laplacianDomain_preimage_add (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :
     laplacianDomain.preimage (I := I) (M := M) g (u + v) =
@@ -114,6 +118,7 @@ lemma laplacianDomain_preimage_add (g : SmoothRiemannianMetric I M)
   rw [resolvent_laplacianDomain_preimage_eq, resolvent_laplacianDomain_preimage_eq]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma laplacianDomain_preimage_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (u : laplacianDomain (I := I) (M := M) g) :
     laplacianDomain.preimage (I := I) (M := M) g (c • u) =
@@ -138,6 +143,7 @@ def laplacianOp (g : SmoothRiemannianMetric I M) :
     (laplacianDomain (I := I) (M := M) g).subtype) -
   laplacianDomain.preimageLin (I := I) (M := M) g
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma laplacianOp_apply (g : SmoothRiemannianMetric I M)
     (u : laplacianDomain (I := I) (M := M) g) :
     laplacianOp (I := I) (M := M) g u =
@@ -147,6 +153,7 @@ def laplacianOp (g : SmoothRiemannianMetric I M) :
   rw [LinearMap.sub_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem laplacianOp_resolvent (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     laplacianOp (I := I) (M := M) g
@@ -162,6 +169,7 @@ theorem laplacianOp_resolvent (g : SmoothRiemannianMetric I M)
     rw [resolvent_laplacianDomain_preimage_eq]
   rw [h_preimage_eq]
 
+set_option linter.unusedSectionVars false in
 lemma smoothToH1Compl_mem_laplacianDomain
     {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
     smoothToH1Compl (I := I) (M := M) g u ∈
@@ -170,6 +178,7 @@ lemma smoothToH1Compl_mem_laplacianDomain
   refine ⟨smoothToLp (I := I) (M := M) g u.oneSubLapClassical, ?_⟩
   exact smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) u
 
+set_option linter.unusedSectionVars false in
 theorem laplacianOp_smoothToH1Compl
     {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
     laplacianOp (I := I) (M := M) g
@@ -201,6 +210,7 @@ example (g : SmoothRiemannianMetric I M) :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   laplacianOp (I := I) (M := M) g
 
+set_option linter.unusedSectionVars false in
 private lemma h1Inner_eq_lpInner_with_preimage
     (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :
@@ -214,6 +224,7 @@ private lemma h1Inner_eq_lpInner_with_preimage
   exact resolvent_inner_eq_lpFunctional (I := I) (M := M) g
     (laplacianDomain.preimage (I := I) (M := M) g u) (v : H1Compl g)
 
+set_option linter.unusedSectionVars false in
 private lemma lpInner_preimage_swap
     (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :
@@ -225,6 +236,7 @@ private lemma lpInner_preimage_swap
   rw [← h1Inner_eq_lpInner_with_preimage (I := I) (M := M) g v u]
   exact real_inner_comm _ _
 
+set_option linter.unusedSectionVars false in
 theorem laplacianOp_symmetric (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :
     ⟪H1ComplToLp (I := I) (M := M) g (u : H1Compl g),
@@ -242,6 +254,7 @@ theorem laplacianOp_symmetric (g : SmoothRiemannianMetric I M)
     rw [h_swap, real_inner_comm]
   linarith [h_swap_inner]
 
+set_option linter.unusedSectionVars false in
 theorem h1Inner_symmetric_on_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     (u v : laplacianDomain (I := I) (M := M) g) :

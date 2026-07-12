@@ -9,7 +9,6 @@ import Mathlib.Topology.VectorBundle.Basic
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,10 +28,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_baseSet_eq (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
   TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) α
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_clmAt_self_eq_id (α : M) :
     (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α =
       (1 : E →L[ℝ] E) := by
@@ -42,6 +43,7 @@ private lemma tangent_clmAt_self_eq_id (α : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H α) v
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_symmL_self_eq_id (α : M) :
     (trivializationAt E (TangentSpace I) α).symmL ℝ α =
       (1 : E →L[ℝ] E) := by
@@ -51,6 +53,7 @@ private lemma tangent_symmL_self_eq_id (α : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H α) v
 
+omit [Module.Finite ℝ E] in
 private lemma continuousOn_coordChangeL_apply
     (α β : M) (v : E) :
     ContinuousOn (fun b : M =>
@@ -65,6 +68,7 @@ private lemma continuousOn_coordChangeL_apply
   rw [tangent_baseSet_eq, tangent_baseSet_eq] at hcont
   exact hcont.clm_apply continuousOn_const
 
+omit [Module.Finite ℝ E] in
 private lemma continuousOn_symm_coordChangeL_apply
     (α β : M) (v : E) :
     ContinuousOn (fun b : M =>
@@ -79,6 +83,7 @@ private lemma continuousOn_symm_coordChangeL_apply
   rw [tangent_baseSet_eq, tangent_baseSet_eq] at hcont
   exact hcont.clm_apply continuousOn_const
 
+omit [Module.Finite ℝ E] in
 private lemma triv_alpha_clmAt_at_symmL_beta_eq_coordChangeL
     (α β : M) {b : M}
     (hbβ : b ∈ (chartAt H β).source) (hbα : b ∈ (chartAt H α).source) (v : E) :

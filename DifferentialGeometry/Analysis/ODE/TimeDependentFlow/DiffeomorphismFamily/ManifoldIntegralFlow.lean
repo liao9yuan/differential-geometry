@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Analysis.Calculus.MeanValue
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -75,6 +74,7 @@ theorem hasDerivAt_one_eq_self_on_Ioo (φ : ℝ → ℝ) {a b : ℝ}
     · exact h0mem
   simp only at hkey; rw [hval] at hkey; linarith
 
+omit [FiniteDimensional ℝ E] [T2Space M] in
 theorem time_dependent_vf_local_integral_flow_bare [CompleteSpace E]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ∀ p : ℝ × M,
@@ -121,6 +121,7 @@ theorem time_dependent_vf_local_integral_flow_bare [CompleteSpace E]
 
 variable [CompactSpace M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_manifold_integral_flow_family
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (_hT : 0 < T) (Φ : ℝ → M → M)

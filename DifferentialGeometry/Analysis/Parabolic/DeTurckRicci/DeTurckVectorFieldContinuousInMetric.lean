@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -20,6 +19,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartGramOnE_det_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -48,6 +48,7 @@ theorem chartGramOnE_det_continuous_in_metric_at
   intro t _
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartGramOnE_adjugate_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -100,6 +101,7 @@ theorem chartGramOnE_adjugate_continuous_in_metric_at
     intro t _
     rfl
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartInvGramOnE_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -153,6 +155,7 @@ theorem chartInvGramOnE_continuous_in_metric_at
     exact ne_of_gt hpos
   · exact chartGramOnE_adjugate_continuous_in_metric_at (I := I) g_DT α y s h_entry i j
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartChristoffel_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ)
@@ -192,6 +195,7 @@ theorem chartChristoffel_continuous_in_metric_at
       · exact h_partial b l a
     · exact h_partial l a b
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_continuous_in_metric_at
     (g' : SmoothRiemannianMetric I M) (α : M) (y : E)
     (s : Set ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)

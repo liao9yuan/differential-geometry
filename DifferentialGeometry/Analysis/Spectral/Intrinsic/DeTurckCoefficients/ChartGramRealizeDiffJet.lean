@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedInvGramJetLipschitz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,6 +25,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 theorem chartGramOnE_realize_delta_irrel
     (g_bg : SmoothRiemannianMetric I M) (T : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -72,6 +72,7 @@ def tensorChartComponentOnModel (g : SmoothRiemannianMetric I M) (S : SmoothCcTe
 
 open DifferentialGeometry.Analysis.Sobolev.Chart in
 
+omit [BoundarylessManifold I M] in
 lemma rawCompOnE_contDiffOn (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
@@ -101,6 +102,7 @@ def chartComponentJetSeminormSum (g : SmoothRiemannianMetric I M) (S : SmoothCcT
       ‖iteratedFDerivWithin ℝ m (tensorChartComponentOnModel (I := I) (M := M) g S α Jdx)
         (interior (extChartAt I α).target) y‖
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bareChartJetContentOnE_nonneg (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     (α : M) (N : ℕ) (y : E) :
     0 ≤ chartComponentJetSeminormSum (I := I) (M := M) g S α N y :=

@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PerturbedInnerUpperBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ private lemma inv_le_inv_of_le_of_pos {a b : ℝ} (hb : 0 < b) (hab : b ≤ a) :
   have ha : 0 < a := lt_of_lt_of_le hb hab
   rw [inv_le_inv₀ ha hb]; exact hab
 
+omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem orthoFrame_to_basis
     (g : SmoothRiemannianMetric I M) (x : M)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -74,6 +74,7 @@ private theorem orthoFrame_to_basis
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+set_option linter.unusedSectionVars false in
 private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (x : M) (S : TensorRSSpace 2 2 I x)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -95,6 +96,7 @@ private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+set_option linter.unusedSectionVars false in
 private theorem riemannianFiberNormSq_le_of_componentSlice_sq_sum_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (S : TensorRSSpace 2 2 I x) (C : ℝ)
     (_hC : 0 ≤ C)
@@ -165,6 +167,7 @@ private lemma riemannBiContr_fiberComponent_expand
   rw [coframeS_apply, Fin.prod_univ_two]
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_off_frame_le
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -593,6 +596,7 @@ private lemma ricciArm_fiberComponent_eq
   · rw [show (Finset.univ.erase (1 : Fin 2)) = {0} from by decide]
     rw [Finset.prod_singleton]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma ricciArm_component_abs_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)

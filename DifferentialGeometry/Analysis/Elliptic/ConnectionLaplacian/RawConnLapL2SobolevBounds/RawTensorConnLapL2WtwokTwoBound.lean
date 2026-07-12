@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapL2WtwokTwoBoundChartPouEuclFderiv
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapL2WtwokTwoBoundFderivReprL2Data
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -71,6 +70,7 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma scalar_iteratedFDeriv_two_mul_norm_le
     (f g : E → ℝ) {x : E}
     (hf : ContDiffAt ℝ 2 f x) (hg : ContDiffAt ℝ 2 g x) :
@@ -209,6 +209,7 @@ private lemma scalar_iteratedFDeriv_two_mul_norm_le
     mul_nonneg (norm_nonneg (fderiv ℝ f x)) (norm_nonneg (fderiv ℝ g x)),
     mul_nonneg (norm_nonneg (fderiv ℝ g x)) (norm_nonneg (fderiv ℝ f x))]
 
+set_option linter.unusedSectionVars false in
 lemma iteratedFDeriv_two_repr_opNormSq_le_sum_iteratedFDeriv_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {e : E}
@@ -388,6 +389,7 @@ lemma iteratedFDeriv_two_repr_opNormSq_le_sum_iteratedFDeriv_components_sq
   rw [h_pair_to_nest] at h_combined
   exact h_combined
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma exists_chartPouEucl_iteratedFDeriv_two_uniform_bound (α : M) :
     ∃ K_pou2 : ℝ, 0 ≤ K_pou2 ∧
       ∀ y : EuclN, ‖iteratedFDeriv ℝ 2 (chartPouEucl (I := I) (M := M) α) y‖ ≤ K_pou2 := by
@@ -411,6 +413,7 @@ private lemma exists_chartPouEucl_iteratedFDeriv_two_uniform_bound (α : M) :
   intro y
   exact le_trans (hK_bound y) (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma exists_pou_symm_iteratedFDeriv_two_uniform_bound (α : M) :
     ∃ K_pou2 : ℝ, 0 ≤ K_pou2 ∧
       ∀ e ∈ (extChartAt I α).target,
@@ -466,6 +469,7 @@ private lemma exists_pou_symm_iteratedFDeriv_two_uniform_bound (α : M) :
       ≤ K_eucl * NtoE ^ 2 :=
         mul_le_mul_of_nonneg_right hK_eval (sq_nonneg _)
 
+omit [BoundarylessManifold I M] in
 lemma pou_sq_iteratedFDeriv_two_repr_sq_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1414,11 +1418,13 @@ theorem chartTargetPouWeightedL2NormSq_iteratedFDeriv_two_repr_le_sum_chartComp_
               ∫⁻ y in chartTargetEuclid (I := I) (M := M) α,
                   rIntegrand Idx Jdx y ∂(volume : Measure EuclN))) := by rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma extChartAt_eq_of_chartAt_eq
     {α β : M} (h_eq : chartAt H α = chartAt H β) :
     extChartAt I α = extChartAt I β := by
   simp only [extChartAt, h_eq]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_eq_of_chartAt_eq
     {α β : M} (h_eq : chartAt H α = chartAt H β) :
     chartTargetEuclid (I := I) (M := M) α =
@@ -1463,6 +1469,7 @@ private lemma tsum_sq_le_sq_tsum_ennreal
     _ = S * S := by rw [← hS_def]
     _ = S ^ 2 := (sq S).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma wkpNorm_zero_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1529,6 +1536,7 @@ private lemma wkpNorm_zero_sq_le_wtwokTwoNorm_sq
       wtwokTwoNorm (I := I) (M := M) g 1 T := h01.trans h_α
   exact pow_le_pow_left' h_combined 2
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma finset_sum_wkpNorm_zero_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -1596,6 +1604,7 @@ private lemma finset_sum_wkpNorm_zero_sq_le_wtwokTwoNorm_sq
           ((Finset.univ : Finset (Fin s → Fin (Module.finrank ℝ E))).card : ℝ≥0∞) *
             W from by ring]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma wkpNorm_one_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1655,6 +1664,7 @@ private lemma wkpNorm_one_sq_le_wtwokTwoNorm_sq
     exact ENNReal.le_tsum α
   exact pow_le_pow_left' (h12.trans h_α) 2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma wkpNorm_two_sq_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -1708,6 +1718,7 @@ private lemma wkpNorm_two_sq_le_wtwokTwoNorm_sq
     exact ENNReal.le_tsum α
   exact pow_le_pow_left' h_α 2
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tangent_continuousLinearMapAt_eq_of_chartAt_eq
     {α β : M} (h_chart : chartAt H α = chartAt H β) (b : M)
     (hb_α : b ∈ (chartAt H α).source) :
@@ -1731,6 +1742,7 @@ private lemma finset_sum_sq_le_card_mul_sum_sq
   rw [h_sum_one] at hbase
   exact hbase
 
+set_option linter.unusedSectionVars false in
 private lemma tensorChartComponentRaw_chartTransition_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α β b : M)
@@ -1758,6 +1770,7 @@ private lemma tensorChartComponentRaw_chartTransition_eq
   exact tensorChartComponentRaw_eq_transitionCoeff_sum
     (E := E) (I := I) (M := M) g r s T β α ⟨Idx, Jdx⟩ ⟨hb_β_src, hb_α_src⟩
 
+omit [BoundarylessManifold I M] in
 private lemma tensorChartComponentRaw_sq_chartTransition_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (K : ℝ)
@@ -1843,6 +1856,7 @@ private lemma tensorChartComponentRaw_sq_chartTransition_bound
                 (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by
             ring
 
+set_option linter.unusedSectionVars false in
 private lemma iteratedFDeriv_two_pou_raw_symm_sq_le_iteratedFDeriv_two_chartComp_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -1922,6 +1936,7 @@ private lemma iteratedFDeriv_two_pou_raw_symm_sq_le_iteratedFDeriv_two_chartComp
   refine h_sq_le.trans (le_of_eq ?_)
   ring
 
+omit [CompactSpace M] [BoundarylessManifold I M] in
 private lemma symm_mem_pou_inter_goodSet
     (α : M) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (h_pou_pos :
@@ -1948,6 +1963,7 @@ private lemma symm_mem_pou_inter_goodSet
     rw [h_goodSet_eq]; exact hb_extSrc
   exact ⟨hb_tsupp, hb_good⟩
 
+omit [CompactSpace M] [BoundarylessManifold I M] in
 private lemma mem_pouImage_of_pou_pos
     (α : M) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (h_pou_pos :
@@ -1972,6 +1988,7 @@ private lemma mem_pouImage_of_pou_pos
     exact (extChartAt I α).right_inv hb_target
   · exact (toEuclidean (E := E)).apply_symm_apply y
 
+omit [BoundarylessManifold I M] in
 private lemma int_fderiv_tensorChartComp_β_sq_le_wkpNorm_two_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α β : M)
@@ -2062,6 +2079,7 @@ private lemma int_fderiv_tensorChartComp_β_sq_le_wkpNorm_two_sq
       h_β_open h_smooth h_cc h_supp_β
   exact pow_le_pow_left' h_bridge 2
 
+omit [BoundarylessManifold I M] in
 private lemma int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α β : M)
@@ -2153,6 +2171,7 @@ private lemma int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq
       h_β_open h_smooth h_cc h_supp_β
   exact pow_le_pow_left' h_bridge 2
 
+omit [BoundarylessManifold I M] in
 private lemma int_iteratedFDeriv_two_pou_raw_α_symm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -2220,6 +2239,7 @@ private lemma int_iteratedFDeriv_two_pou_raw_α_symm_sq_le
   exact int_iteratedFDeriv_two_tensorChartComp_β_sq_le_wkpNorm_two_sq
     (I := I) (M := M) g r s T α α Idx Jdx
 
+omit [BoundarylessManifold I M] in
 private lemma per_alpha_V_int_le_wtwokTwoNorm_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ K : ℝ, 0 ≤ K ∧

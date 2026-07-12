@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.FlatArmCoeffConnectionDifferenceBridge
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieArm1CoeffPieceConnDiffFeed
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -135,6 +134,7 @@ private lemma lieArm1_PbLow_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   exact ccBilinConnDiffLoweredFib_toModel (I := I) g₀ P gA gB x m
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ s (A + B) x m =
@@ -150,6 +150,7 @@ private lemma lieArm1_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ
           (unitTensor (I := I) (M := M) x) from rfl]
   rw [Tensor0SSpace.toModel_add, ContinuousMultilinearMap.add_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1_unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ s (A - B) x m =
@@ -165,6 +166,7 @@ private lemma lieArm1_unitModel_sub (g₀ : SmoothRiemannianMetric I M) (s : ℕ
           (unitTensor (I := I) (M := M) x) from rfl]
   rw [Tensor0SSpace.toModel_sub, ContinuousMultilinearMap.sub_apply]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma lieArm1_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gA x u v = 0 := by
@@ -176,6 +178,7 @@ private lemma lieArm1_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : 
     exact h.symm
   exact add_left_cancel h2
 
+set_option linter.unusedSectionVars false in
 lemma lieArm1_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v =
@@ -244,6 +247,7 @@ private theorem lieArm1_kappa_add_decomp (g₀ g₁ g_bg : SmoothRiemannianMetri
   rw [hκval, hSval]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm1_interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel

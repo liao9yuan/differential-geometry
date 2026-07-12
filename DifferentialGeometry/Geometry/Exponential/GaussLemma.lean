@@ -16,7 +16,6 @@ import DifferentialGeometry.Geometry.Exponential.GaussLemmaPullback
 import DifferentialGeometry.Analysis.ODE.RadialSeminormFencing
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -47,6 +46,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 section LengthBookkeeping
 
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem subArc_of_minimizer_is_minimizer
     {γ : ℝ → M} {a b s t : ℝ}
     (hγ : CMDiff[Icc a b] 1 γ)
@@ -124,6 +124,7 @@ section RadialUniqueMinimizer
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 private theorem radialDist_endpoint_le_pathELength
     (g : SmoothRiemannianMetric I M) (p : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -353,6 +354,7 @@ private theorem radialDist_endpoint_le_pathELength
         ≤ ENNReal.ofReal (∫ t in a..b, φ t) := ENNReal.ofReal_le_ofReal hftc
     _ ≤ pathELength I γ a b := hpath
 
+set_option linter.unusedSectionVars false in
 private theorem mfderiv_expMap_injective_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {u : E}
     (hu : ‖u‖ < expMapC2Radius (I := I) g p) :
@@ -410,6 +412,7 @@ private theorem mfderiv_expMap_injective_of_norm_lt_radius
   exact hΦinj
 
 
+set_option linter.unusedSectionVars false in
 theorem normalBall_radial_length_le_riemannianEDist
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -672,6 +675,7 @@ theorem normalBall_radial_length_le_riemannianEDist
       _ ≤ pathELength I γ (0:ℝ) 1 := hpath_mono
       _ < r := hγ_len
 
+set_option linter.unusedSectionVars false in
 private theorem minimizer_confined_to_C2_ball
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -796,6 +800,7 @@ private theorem minimizer_confined_to_C2_ball
   have hδS' : δ ≤ S := (ENNReal.ofReal_le_ofReal_iff hS_nn).mp hδS
   exact absurd hδS' (not_le.mpr hSδ)
 
+set_option linter.unusedSectionVars false in
 private theorem radial_minimizer_radiality
     (g : SmoothRiemannianMetric I M) (p : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1208,6 +1213,7 @@ private theorem radial_minimizer_radiality
 
 set_option maxHeartbeats 1600000 in
 
+set_option linter.unusedSectionVars false in
 theorem normalBall_radial_minimizer_equality
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1426,6 +1432,7 @@ section LocalRadialIdentification
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 private lemma radialCurve_contMDiffOn_Icc
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
@@ -1442,6 +1449,7 @@ private lemma radialCurve_contMDiffOn_Icc
   exact ((radialCurve_contMDiffAt2 (I := I) g p a t hnorm).of_le
     (by norm_num)).contMDiffWithinAt
 
+set_option linter.unusedSectionVars false in
 private lemma radialCurve_pathELength_eq
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1466,6 +1474,7 @@ private lemma radialCurve_pathELength_eq
   rw [MeasureTheory.setLIntegral_const, Real.volume_Ioo, sub_zero,
     ENNReal.ofReal_one, mul_one]
 
+set_option linter.unusedSectionVars false in
 private theorem radial_riemannianEDist_eq_radius
     (g : SmoothRiemannianMetric I M) (p : M) {a : E}
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1500,6 +1509,7 @@ private theorem radial_riemannianEDist_eq_radius
     rw [radialCurve_pathELength_eq (I := I) g p a hEnorm ha_eucl]
   exact le_antisymm hle hge
 
+set_option linter.unusedSectionVars false in
 private theorem exists_forward_confinement_to_smallBall
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ} {t₀ : ℝ}
     (hγ : CMDiff[Set.Icc a b] 1 γ) (ht₀ : t₀ ∈ Set.Ioo a b)
@@ -1586,6 +1596,7 @@ private theorem exists_forward_confinement_to_smallBall
   · intro t ht; exact (hmemS t ht).1
   · intro t ht; exact (hmemS t ht).2
 
+set_option linter.unusedSectionVars false in
 theorem local_radial_identification_of_minimizer
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1660,6 +1671,7 @@ theorem local_radial_identification_of_minimizer
     have := hφ_eq (t₀ + s) hs'
     rw [hq_def]; exact this
 
+set_option linter.unusedSectionVars false in
 private lemma norm_le_sqrt_inner_div_sqrt_coercive
     (g : SmoothRiemannianMetric I M) (c : M) (x : E) :
     ‖x‖ ≤ Real.sqrt (g.inner c x x) / Real.sqrt (metricCoerciveConst (I := I) g c) := by
@@ -1677,6 +1689,7 @@ private lemma norm_le_sqrt_inner_div_sqrt_coercive
   rw [le_div_iff₀ hsc_pos, mul_comm]
   exact hkey
 
+set_option linter.unusedSectionVars false in
 private theorem path_confined_to_normalBall
     (g : SmoothRiemannianMetric I M) (c : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -1932,6 +1945,7 @@ private theorem path_confined_to_normalBall
     exact absurd (le_csSup hSbdd ht₁S) (not_le.mpr ht₁_gt)
   rw [← ht₀_eq_one]; exact ht₀S
 
+set_option linter.unusedSectionVars false in
 theorem metricBall_subset_normalBall
     (g : SmoothRiemannianMetric I M) (c : M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

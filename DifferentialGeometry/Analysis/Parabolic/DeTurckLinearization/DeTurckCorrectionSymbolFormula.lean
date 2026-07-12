@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionPrincipalSymbolRemainder
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciSymbolFormula
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -25,12 +24,14 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section GramBridge
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartGramOnE_extChartAt_self (g : SmoothRiemannianMetric I M) (x : M)
     (k j : Fin (Module.finrank ℝ E)) :
     chartGramOnE (I := I) g x k j (extChartAt I x x) =
       chartGramMatrix (I := I) g x x k j := by
   rw [chartGramOnE_def, extChartAt_to_inv]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma sum_chartGram_mul_chartInvGram_self (g : SmoothRiemannianMetric I M) (x : M)
     (j l : Fin (Module.finrank ℝ E)) :
     ∑ k : Fin (Module.finrank ℝ E),
@@ -83,6 +84,7 @@ def deTurckCorrSymbolComp (g _g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
                   (chartModelBasis E).repr ξ j * (chartModelBasis E).repr ξ l *
                     formComp (I := I) x t a b)))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma deTurckCorrSymbolComp_def (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -116,6 +118,7 @@ end SymbolComponent
 
 section ClosedForm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma block_term_a (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (d m : Fin (Module.finrank ℝ E)) :
@@ -143,6 +146,7 @@ private lemma block_term_a (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
           raisedFormContractionSnd (I := I) g x ξ t m := by
         rw [raisedFormContractionSnd_def, Finset.mul_sum]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma block_term_b (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (d m : Fin (Module.finrank ℝ E)) :
@@ -168,6 +172,7 @@ private lemma block_term_b (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
           raisedFormContractionSnd (I := I) g x ξ t m := by
         rw [raisedFormContractionSnd_def, Finset.mul_sum]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma block_term_trace (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (d m : Fin (Module.finrank ℝ E)) :
@@ -183,6 +188,7 @@ private lemma block_term_trace (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (d m : Fin (Module.finrank ℝ E)) :
@@ -393,6 +399,7 @@ private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x 
           block_term_trace (I := I) g x ξ t d m]
         ring
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrSymbolComp_eq_closedForm (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -474,6 +481,7 @@ end ClosedForm
 
 section Linearity
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrSymbolComp_add (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -486,6 +494,7 @@ theorem deTurckCorrSymbolComp_add (g g' : SmoothRiemannianMetric I M) (x : M) (�
     raisedFormContractionSnd_add, raisedFormContractionSnd_add, formMetricTrace_add]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrSymbolComp_smul (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (a : ℝ) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -496,6 +505,7 @@ theorem deTurckCorrSymbolComp_smul (g g' : SmoothRiemannianMetric I M) (x : M) (
     raisedFormContractionSnd_smul, raisedFormContractionSnd_smul, formMetricTrace_smul]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem deTurckCorrSymbolComp_zero (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (i j : Fin (Module.finrank ℝ E)) :
     deTurckCorrSymbolComp (I := I) g g' x ξ
@@ -508,6 +518,7 @@ end Linearity
 
 section Symmetry
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrSymbolComp_symm (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -521,6 +532,7 @@ end Symmetry
 
 section BackgroundIndependence
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem deTurckCorrSymbolComp_background_independent
     (g g'₁ g'₂ : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)

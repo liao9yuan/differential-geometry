@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothScalar.MulLp
 import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ noncomputable def laplacianOfChartPOU (g : SmoothRiemannianMetric I M) (α : M) 
   ⟨Δ_g (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff,
     Δ_g_contMDiff (I := I) g (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff⟩
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma laplacianOfChartPOU_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x =
@@ -52,6 +52,7 @@ noncomputable def leibnizCompensatedSource (g : SmoothRiemannianMetric I M) (α 
         (laplacianOfChartPOU (I := I) (M := M) g α)
         (H1ComplToLp (I := I) (M := M) g u_h)
 
+set_option linter.unusedSectionVars false in
 lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl g) (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :
     leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h =
@@ -64,6 +65,7 @@ lemma fHLeibniz_def (g : SmoothRiemannianMetric I M) (α : M)
             (laplacianOfChartPOU (I := I) (M := M) g α)
             (H1ComplToLp (I := I) (M := M) g u_h) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem fHLeibniz_smoothToH1Compl (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     leibnizCompensatedSource (I := I) (M := M) g α

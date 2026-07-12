@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Bochner.PolarisedLpSmooth
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.VariationalIdentity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_injOn_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {w₁ w₂ : H1Compl (I := I) (M := M) g}
@@ -86,6 +86,7 @@ theorem H1ComplToLp_injOn_laplacianDomain
   have h_sub_zero : w₁ - w₂ = 0 := norm_eq_zero.mp h_norm_zero
   exact sub_eq_zero.mp h_sub_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem preimageLift_smoothCase
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :
     preimageLift (I := I) (M := M) g
@@ -145,6 +146,7 @@ theorem gradInnerLapU_smoothCase
   rw [preimageLift_smoothCase]
   rw [gradInnerCLM_smoothToH1Compl_eq_smoothToLp]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem v_sub_oneSubLap_eq_lap
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) (x : M) :
     v.toFun x - v.oneSubLapClassical.toFun x = Δ_g (I := I) g v.smooth x := by
@@ -196,11 +198,13 @@ noncomputable def smoothLaplacianAsScalar
   toFun := Δ_g (I := I) g φ.contMDiff
   smooth := Δ_g_contMDiff (I := I) g φ.contMDiff
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 @[simp] lemma smoothLaplacianAsScalar_toFun
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     (smoothLaplacianAsScalar (I := I) (M := M) g φ).toFun =
       Δ_g (I := I) g φ.contMDiff := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [SigmaCompactSpace M] in
 lemma smoothLaplacianBundle_toFun_eq_smoothLaplacianAsScalar
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ((smoothLaplacianBundle (I := I) (M := M) g φ) : M → ℝ) =

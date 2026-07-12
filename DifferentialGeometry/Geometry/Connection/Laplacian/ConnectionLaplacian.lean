@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartFrame.RicciIdentitySmoothFrame
 import DifferentialGeometry.Geometry.Operator.HessianTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ def connLaplacian_function [I.Boundaryless]
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) : M → ℝ :=
   Δ_g (I := I) g hf
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp] lemma connLaplacian_function_def [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
@@ -72,11 +72,13 @@ def connLaplacian_oneForm
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem connLaplacian_function_eq_laplaceBeltrami [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     connLaplacian_function (I := I) g hf = Δ_g (I := I) g hf := rfl
 
+omit [BoundarylessManifold I M] in
 theorem connLaplacian_function_eq_chartHessTrace [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
@@ -85,12 +87,14 @@ theorem connLaplacian_function_eq_chartHessTrace [I.Boundaryless]
   exact (chartHessTrace_eq_laplacian_pointwise_of_boundaryless
     (I := I) g hf x).symm
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem connLaplacian_function_contMDiff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (connLaplacian_function (I := I) g hf) :=
   Δ_g_contMDiff (I := I) g hf
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem connLaplacian_function_add [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}
@@ -102,6 +106,7 @@ theorem connLaplacian_function_add [I.Boundaryless]
       connLaplacian_function_def]
   exact Δ_g_add (I := I) g hf hh x
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp] theorem connLaplacian_function_const [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (c : ℝ) (x : M) :
     connLaplacian_function (I := I) g
@@ -231,6 +236,7 @@ theorem connLaplacian_grad_curvature_term [I.Boundaryless]
           (riemannSec (LeviCivita (I := I) g) B w B x) :=
   inner_riemannSec_gradFun_skew_symm (I := I) g hf hB hw
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem smoothOrthoFrame_orthonormal_center
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -240,6 +246,7 @@ theorem smoothOrthoFrame_orthonormal_center
       if i = j then 1 else 0 :=
   smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem smoothOrthoFrame_isSmooth
     (g : SmoothRiemannianMetric I M) (x : M)
     (i : Fin (Module.finrank ℝ E)) :

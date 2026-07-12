@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.AbstractRoughLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tensor0SRSCovariantDerivativeAgreement
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma zeroTensor_eq_smul_unit (x : M) (D : Tensor0SSpace 0 I x) :
     D = (tensor0Iso (I := I) M x D) • unitZeroSec (I := I) (M := M) x := by
   classical
@@ -47,6 +47,7 @@ lemma zeroTensor_eq_smul_unit (x : M) (D : Tensor0SSpace 0 I x) :
   apply (tensor0Iso (I := I) M x).injective
   rw [map_smul, hunit, smul_eq_mul, mul_one]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensor03_ext_unit {x : M}
     {φ ψ : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 3 I x}
     (h : φ (unitZeroSec (I := I) (M := M) x) = ψ (unitZeroSec (I := I) (M := M) x)) :

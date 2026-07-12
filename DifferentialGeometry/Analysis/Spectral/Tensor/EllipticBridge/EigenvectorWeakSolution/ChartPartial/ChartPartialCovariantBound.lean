@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 import Mathlib.MeasureTheory.Function.LpSeminorm.SMul
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasePoint_mem_goodSet
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -53,6 +53,7 @@ private lemma chartBasePoint_mem_goodSet
     extChartAt_source]
   exact hsrc
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorRS_baseSet_eq_chart_source (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -67,10 +68,12 @@ private lemma tensorRS_baseSet_eq_chart_source (α : M) (r s : ℕ) :
   rw [Set.inter_self]
   rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tangent_baseSet_eq_chart_source (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
   rfl
 
+omit [CompleteSpace E] in
 private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -113,6 +116,7 @@ private noncomputable def covNormSumFun
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
 
+omit [CompleteSpace E] in
 private lemma covNormSqSum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -136,6 +140,7 @@ private lemma covNormSqSum_continuousOn_chart_source
       g r s S α i).continuousOn
   exact (hcov.norm).pow 2
 
+omit [CompleteSpace E] in
 private lemma covNormSumFun_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -171,12 +176,14 @@ private lemma covNormSumFun_continuous
     hw_contOn.continuousAt ((chartAt H α).open_source.mem_nhds hx_src)
   exact hρ_contAt.smul hw_contAt
 
+omit [CompleteSpace E] in
 private lemma covNormSumFun_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
     Measurable (covNormSumFun (I := I) (M := M) g r s S α) :=
   (covNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
 
+omit [CompleteSpace E] [CompactSpace M] in
 private lemma covNormSumFun_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :

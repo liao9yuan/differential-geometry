@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 import Mathlib.Analysis.SpecialFunctions.Sqrt
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ private lemma sum_sq_le_sq_sum_of_nonneg (V F I2 : ℝ)
     V ^ 2 + F ^ 2 + I2 ^ 2 ≤ (V + F + I2) ^ 2 := by
   nlinarith [mul_nonneg hV hF, mul_nonneg hV hI2, mul_nonneg hF hI2]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma V_eq_iteratedFDeriv_zero_norm
     (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) {b : M}
@@ -61,6 +61,7 @@ private lemma V_eq_iteratedFDeriv_zero_norm
       ((extChartAt I α).symm (extChartAt I α b))‖
   rw [hsymm_eq]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma F_eq_iteratedFDeriv_one_norm
     (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) (b : M) :
@@ -74,6 +75,7 @@ private lemma F_eq_iteratedFDeriv_one_norm
         (extChartAt I α b)‖ := by
   rw [norm_iteratedFDeriv_one]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sum_VFI2_eq_finSum
     (r s : ℕ) (α : M)
     (S : Π b : M, TensorRSSpace r s I b) {b : M}

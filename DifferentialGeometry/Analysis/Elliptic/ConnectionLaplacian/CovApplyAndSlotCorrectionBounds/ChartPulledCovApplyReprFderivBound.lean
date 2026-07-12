@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.ChartPulledCovApplyExplicitFormula
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -119,6 +119,7 @@ private lemma reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma uB_contDiffOn_goodSet
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContDiffOn ℝ ∞
@@ -133,6 +134,7 @@ private lemma uB_contDiffOn_goodSet
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma intrinsicPiece_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -336,6 +338,7 @@ private lemma outputSlotPiece_differentiableAt
     exact h_factor
   exact (h_evt.differentiableAt_iff).mpr h_clm_diff
 
+omit [CompactSpace M] in
 private lemma chart_pulled_covApply_repr_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

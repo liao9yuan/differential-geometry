@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariation
 import Mathlib.Topology.Order.Compact
 import Mathlib.Geometry.Manifold.Riemannian.PathELength
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -35,6 +34,7 @@ variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
     (b : ℝ) (v : TangentSpace I p) :
     g.inner p (b • v) (b • v) = b ^ 2 * g.inner p v v := by
@@ -46,6 +46,7 @@ lemma gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma sqrt_gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
     {b : ℝ} (hb : 0 ≤ b) (v : TangentSpace I p) :
     Real.sqrt (g.inner p (b • v) (b • v)) = b * Real.sqrt (g.inner p v v) := by
@@ -55,6 +56,7 @@ lemma sqrt_gInner_smul_self (g : SmoothRiemannianMetric I M) (p : M)
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma gInner_self_nonneg (g : SmoothRiemannianMetric I M) (p : M)
     (v : TangentSpace I p) : 0 ≤ g.inner p v v := by
   rcases eq_or_ne v 0 with hv | hv
@@ -64,6 +66,7 @@ lemma gInner_self_nonneg (g : SmoothRiemannianMetric I M) (p : M)
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [T2Space (TangentBundle I M)] [SigmaCompactSpace M] [ConnectedSpace M] in
 lemma continuous_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (fun v : TangentSpace I p => g.inner p v v) :=
   (g.inner p).continuous.clm_apply continuous_id
@@ -71,6 +74,7 @@ lemma continuous_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma continuous_sqrt_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
     Continuous (fun v : TangentSpace I p => Real.sqrt (g.inner p v v)) :=
   Real.continuous_sqrt.comp (continuous_gInner_self (I := I) g p)
@@ -78,6 +82,7 @@ lemma continuous_sqrt_gInner_self (g : SmoothRiemannianMetric I M) (p : M) :
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma gUnitSphere_isClosed (g : SmoothRiemannianMetric I M) (p : M) :
     IsClosed {w : TangentSpace I p | g.inner p w w = 1} :=
   isClosed_eq (continuous_gInner_self (I := I) g p) continuous_const
@@ -85,6 +90,7 @@ lemma gUnitSphere_isClosed (g : SmoothRiemannianMetric I M) (p : M) :
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma gUnitSphere_isBounded (g : SmoothRiemannianMetric I M) (p : M) :
     Bornology.IsBounded {w : TangentSpace I p | g.inner p w w = 1} := by
   obtain ⟨r, hr⟩ :=
@@ -107,6 +113,7 @@ lemma gUnitSphere_isBounded (g : SmoothRiemannianMetric I M) (p : M) :
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma gUnitSphere_isCompact (g : SmoothRiemannianMetric I M) (p : M) :
     IsCompact {w : TangentSpace I p | g.inner p w w = 1} := by
   haveI : ProperSpace (TangentSpace I p) :=
@@ -117,6 +124,7 @@ lemma gUnitSphere_isCompact (g : SmoothRiemannianMetric I M) (p : M) :
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma continuous_riemannianEDist_to
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (q : M) :
@@ -130,6 +138,7 @@ lemma continuous_riemannianEDist_to
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem radialRay_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -148,6 +157,7 @@ theorem radialRay_continuous
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem riemannianEDist_ne_top
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (p q : M) : riemannianEDist I p q ≠ (⊤ : ℝ≥0∞) := by
@@ -201,6 +211,7 @@ theorem riemannianEDist_ne_top
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem radialDistToReal_continuous
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -225,6 +236,7 @@ theorem radialDistToReal_continuous
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem propagationSet_isClosed
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -261,6 +273,7 @@ theorem propagationSet_isClosed
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem riemannianEDist_eq_zero_imp_eq
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -276,6 +289,7 @@ theorem riemannianEDist_eq_zero_imp_eq
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem intrinsicGeodesic_speedSq_eq
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -304,6 +318,7 @@ theorem intrinsicGeodesic_speedSq_eq
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem intrinsicGeodesic_velocity_enorm_le
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -329,6 +344,7 @@ theorem intrinsicGeodesic_velocity_enorm_le
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem intrinsicGeodesic_riemannianEDist_le
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -377,6 +393,7 @@ theorem intrinsicGeodesic_riemannianEDist_le
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem expMapIntrinsic_zero
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -403,6 +420,7 @@ theorem expMapIntrinsic_zero
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem exists_expMapIntrinsic_eq_expMap_radius
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -428,6 +446,7 @@ theorem exists_expMapIntrinsic_eq_expMap_radius
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem radial_riemannianEDist_eq_of_small
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -487,6 +506,7 @@ theorem radial_riemannianEDist_eq_of_small
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem radial_riemannianEDist_eq_of_small'
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -528,6 +548,7 @@ theorem radial_riemannianEDist_eq_of_small'
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem expMapIntrinsic_local_surjective
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -576,6 +597,7 @@ theorem expMapIntrinsic_local_surjective
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem chartCurve_contDiffAt_top_of_isGeodesicOn
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -683,6 +705,7 @@ theorem chartCurve_contDiffAt_top_of_isGeodesicOn
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_contMDiffAt_top
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ} {t : ℝ}
     (hs : IsOpen s) (ht : t ∈ s)
@@ -735,6 +758,7 @@ theorem isGeodesicOn_contMDiffAt_top
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_contMDiffOn_top
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {s : Set ℝ}
     (hs : IsOpen s)
@@ -747,6 +771,7 @@ theorem isGeodesicOn_contMDiffOn_top
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesic_contMDiff
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M}
@@ -760,6 +785,7 @@ theorem isGeodesic_contMDiff
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem exists_geodesicSphere_point_edist_eq_sub_delta
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -948,6 +974,7 @@ theorem exists_geodesicSphere_point_edist_eq_sub_delta
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 
+set_option linter.unusedSectionVars false in
 private lemma chartSlice_mfderiv_value
     (c : M) (y₀ c₀ : E) (ηf : ℝ → ℝ)
     (hη_smooth : ContDiff ℝ ∞ ηf) (hη0 : ηf 0 = 0) (hη'0 : HasDerivAt ηf 1 0)
@@ -989,6 +1016,7 @@ private lemma chartSlice_mfderiv_value
   rw [fderiv_apply_one_eq_deriv]
   exact hderiv.deriv
 
+set_option linter.unusedSectionVars false in
 private lemma isSmoothVariation_of_chartGlue
     (c : M) (ξ : ℝ → M) (βf ηf : ℝ → ℝ) (w : E)
     (hξ : ContMDiff 𝓘(ℝ, ℝ) I ∞ ξ)
@@ -1042,6 +1070,7 @@ private lemma isSmoothVariation_of_chartGlue
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 private lemma broken_piece_firstVariation
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M)
@@ -1218,6 +1247,7 @@ private lemma broken_piece_firstVariation
     exact riemannianEDist_le_pathELength (I := I) (γ := fun t : ℝ => Fξ s t)
       (a := 0) (b := len) hC1 rfl rfl hlen.le
 
+set_option linter.unusedSectionVars false in
 private lemma exists_broken_bump
     (c : M) {ξ : ℝ → M} {jt fe : ℝ} (hjtfe : jt ≠ fe) (hjtc : ξ jt = c)
     (hξsmooth : ContMDiff (𝓘(ℝ, ℝ)) I ∞ ξ) :
@@ -1277,6 +1307,7 @@ private lemma exists_broken_bump
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem broken_minimizer_velocity_match
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1539,6 +1570,7 @@ theorem broken_minimizer_velocity_match
   change (mfderiv (𝓘(ℝ, ℝ)) I γ ℓ₁ (1 : ℝ) : E) = (mfderiv (𝓘(ℝ, ℝ)) I σ 0 (1 : ℝ) : E)
   rw [← hTminus_def, ← hTplus_def]; exact hTeq.symm
 
+set_option linter.unusedSectionVars false in
 private lemma hasGeodesicEquationAt_comp_add_const
     (g : SmoothRiemannianMetric I M) {η : ℝ → M} (T t : ℝ)
     (h : DifferentialGeometry.Geometry.Riemannian.Geodesic.HasGeodesicEquationAt
@@ -1583,6 +1615,7 @@ private lemma hasGeodesicEquationAt_comp_add_const
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem intrinsicGeodesic_continuation
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1646,6 +1679,7 @@ theorem intrinsicGeodesic_continuation
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem hopf_rinow_expMapIntrinsic_surjective_minimizing
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]

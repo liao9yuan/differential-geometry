@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance parallelGeneral_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 private lemma chartE_section_repr_contMDiffOn_chartSource
     (α : M) {X : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
@@ -59,6 +59,7 @@ private lemma chartE_section_repr_contMDiffOn_chartSource
   have h := (contMDiffAt_section_iff_chartE I α X (k := (⊤ : ℕ∞)) hb_base).mp hX_at
   exact h.contMDiffWithinAt
 
+set_option linter.unusedSectionVars false in
 private lemma chartE_section_repr_basis_component_contMDiffOn_chartSource
     (α : M) {X : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))
@@ -76,6 +77,7 @@ private lemma chartE_section_repr_basis_component_contMDiffOn_chartSource
   intro b hb
   exact (hcoord_clm.contMDiffAt).comp_contMDiffWithinAt b (hbase b hb)
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private lemma chartChristoffel_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -105,6 +107,7 @@ private lemma chartChristoffel_contMDiffOn_chartSource
     hΓ_on.contDiffAt (isOpen_interior.mem_nhds hxφ_int)
   exact (hΓ_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
+set_option linter.unusedSectionVars false in
 private lemma christoffelCorrectionCLM_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {X : Π b : M, TangentSpace I b}
@@ -134,6 +137,7 @@ private lemma christoffelCorrectionCLM_contMDiffOn_chartSource
     contMDiffOn_const
   exact hscalar.smul hblock_const
 
+set_option linter.unusedSectionVars false in
 private lemma chartLeviCivitaParallelCLM_trivImage_eq_christoffelCorrectionCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b : M, TangentSpace I b) {b : M}
@@ -206,6 +210,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance parallelChartBasis_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma chartE_section_repr_chartBasisVec_eq_const_on_chart_source
     (α : M) (j : Fin (Module.finrank ℝ E)) :
     ∀ b ∈ (chartAt H α).source,
@@ -230,6 +235,7 @@ private lemma chartE_section_repr_chartBasisVec_eq_const_on_chart_source
     (R := ℝ) hb_base]
   exact h2
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 private lemma chartE_section_repr_chartBasisVec_basis_component_contMDiffOn_chartSource
     (α : M) (j : Fin (Module.finrank ℝ E))
     (j' : Fin (Module.finrank ℝ E)) :
@@ -267,6 +273,7 @@ private lemma chartE_section_repr_chartBasisVec_basis_component_contMDiffOn_char
   intro b hb
   exact h_const_on b hb
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private lemma chartChristoffel_contMDiffOn_chartSource'
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j' k : Fin (Module.finrank ℝ E)) :
@@ -296,6 +303,7 @@ private lemma chartChristoffel_contMDiffOn_chartSource'
     hΓ_on.contDiffAt (isOpen_interior.mem_nhds hxφ_int)
   exact (hΓ_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
+omit [SigmaCompactSpace M] [T2Space M] in
 private lemma christoffelCorrectionCLM_chartBasisVec_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -327,6 +335,7 @@ private lemma christoffelCorrectionCLM_chartBasisVec_contMDiffOn_chartSource
     contMDiffOn_const
   exact hscalar.smul hblock_const
 
+omit [SigmaCompactSpace M] [T2Space M] in
 theorem chartLeviCivitaParallelCLM_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -397,6 +406,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance slotSubst_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 private lemma chartLeviCivitaParallelCLM_chartBasisVec_matrixEntry_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -454,6 +464,7 @@ private lemma chartLeviCivitaParallelCLM_chartBasisVec_matrixEntry_contMDiffOn_c
     hcoord_smooth.comp_contMDiffOn hΦv_smooth
   exact hfinal
 
+set_option linter.unusedSectionVars false in
 private lemma chartJ_chartJinv_on_chartSource
     (α : M) {b : M} (hb : b ∈ (chartAt H α).source) (v : E) :
     chartTrivializationLinearMap (I := I) (M := M) α b
@@ -462,6 +473,7 @@ private lemma chartJ_chartJinv_on_chartSource
   have hbase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   exact chartJ_chartJinv (I := I) (M := M) α hbase v
 
+set_option linter.unusedSectionVars false in
 private lemma chartJinv_chartJ_self_on_chartSource
     (α : M) {b : M} (hb : b ∈ (chartAt H α).source) (v : E) :
     chartTrivializationLinearMapSymm (I := I) (M := M) α b
@@ -470,6 +482,7 @@ private lemma chartJinv_chartJ_self_on_chartSource
   have hbase : b ∈ (trivializationAt E (TangentSpace I) α).baseSet := hb
   exact chartJinv_chartJ_self (I := I) (M := M) α hbase v
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eval0SCLE_symm_pi_single_at_basis_tuple
     (r : ℕ) (Idx : Fin r → Fin (Module.finrank ℝ E))
     (φ : Fin r → Fin (Module.finrank ℝ E)) :
@@ -483,6 +496,7 @@ private lemma eval0SCLE_symm_pi_single_at_basis_tuple
   have h' := congr_fun h φ
   simpa [eval0SCLE_apply] using h'
 
+set_option linter.unusedSectionVars false in
 private lemma slotSubst_trivProj_entry_closedForm
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) (k : Fin r)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -853,6 +867,7 @@ private lemma slotSubst_trivProj_entry_closedForm
     rw [hphi_zero a]
     simp
 
+set_option linter.unusedSectionVars false in
 theorem tensorSlotSubstCLM_chartLeviCivita_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E)) (k : Fin r) :
@@ -960,6 +975,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance slotCorrection_complete_E : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
 private lemma triv_compInput_eq_trivT_compL_trivS
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source)
     (Tb : TensorRSSpace r s I b) (Sb : TensorRSSpace r r I b) :
@@ -1106,6 +1122,7 @@ private lemma triv_compInput_eq_trivT_compL_trivS
       (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i))
   rw [hinner_round_trip]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] [CompactSpace M] in
 private lemma triv_compOutput_eq_trivS_compL_trivT
     (r s : ℕ) (α : M) {b : M} (hb : b ∈ (chartAt H α).source)
     (Tb : TensorRSSpace r s I b) (Sb : TensorRSSpace s s I b) :
@@ -1250,6 +1267,7 @@ private lemma triv_compOutput_eq_trivS_compL_trivT
       (fun i => chartTrivializationLinearMapSymm (I := I) (M := M) α b (w i))
   rw [hround]
 
+set_option linter.unusedSectionVars false in
 theorem chartTensorRSInputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)
@@ -1363,6 +1381,7 @@ theorem chartTensorRSInputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_cha
   intro b hb
   exact hbridge b hb
 
+set_option linter.unusedSectionVars false in
 theorem chartTensorRSOutputSlotCorrection_chartBasisVec_trivImage_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b : M, TensorRSSpace r s I b)

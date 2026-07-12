@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2RegularitySuccessor
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -72,6 +71,7 @@ theorem chosenFirstPartial_memWkp_one_two
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p]
   exact chartPushedChosenFirstPartial_memW1p_two (I := I) (M := M) g α hu_h i
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_three_two_iff
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -136,6 +136,7 @@ theorem chartPushed_memWkp_three_two_of_chosen_partials_memWkp_two_two
   exact ⟨chartPushed_memW1p_two_of_laplacianDomainPow_two
     (I := I) (M := M) g α hu_h, h_chosen_partials_memWkp_two_two⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosen_partials_memWkp_two_two_of_chartPushed_memWkp_three_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -163,6 +164,7 @@ theorem chosen_partials_memWkp_two_two_of_chartPushed_memWkp_three_two
         (I := I) (M := M) α) :=
   h_chartPushed_memWkp_three_two.chosenWeakPartial_mem i
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_three_two_of_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

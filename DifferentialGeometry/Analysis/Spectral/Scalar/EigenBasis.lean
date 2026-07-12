@@ -3,7 +3,6 @@ import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.InnerProductSpace.PiL2
 import Mathlib.Analysis.InnerProductSpace.Spectrum
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem resolventL2_injective (g : SmoothRiemannianMetric I M) :
     Function.Injective (resolventL2 (I := I) (M := M) g) := by
   rw [injective_iff_map_eq_zero]
@@ -55,6 +55,7 @@ theorem resolventL2_injective (g : SmoothRiemannianMetric I M) :
   rw [(resolvent (I := I) (M := M) g).map_zero]
   exact h_resolvent_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem resolventEigenspace_zero_eq_bot (g : SmoothRiemannianMetric I M) :
     resolventEigenspace (I := I) (M := M) g 0 = ⊥ := by
   unfold resolventEigenspace
@@ -72,19 +73,23 @@ variable {g : SmoothRiemannianMetric I M}
 
 def val (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) : ℝ := μ.1
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma val_ne_zero (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
     μ.val ≠ 0 := μ.2.1
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma hasEigenvalue (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
     Module.End.HasEigenvalue
       ((resolventL2 (I := I) (M := M) g).toLinearMap) μ.val :=
   μ.2.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[ext] lemma ext (μ ν : NonzeroResolventEigenvalue (I := I) (M := M) g)
     (h : μ.val = ν.val) : μ = ν := Subtype.ext h
 
 end NonzeroResolventEigenvalue
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma nonzero_resolvent_eigenvalues_set_eq_iUnion
     (g : SmoothRiemannianMetric I M) :
     { μ : ℝ | μ ≠ 0 ∧
@@ -134,6 +139,7 @@ noncomputable instance NonzeroResolventEigenvalue.instEncodable
     Encodable (NonzeroResolventEigenvalue (I := I) (M := M) g) :=
   Encodable.ofCountable _
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonzeroResolventEigenvalue_pos
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -145,6 +151,7 @@ theorem nonzeroResolventEigenvalue_pos
   have h_ne : μ.val ≠ 0 := μ.val_ne_zero
   exact lt_of_le_of_ne h_nn (Ne.symm h_ne)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem nonzeroResolventEigenvalue_le_one
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -153,6 +160,7 @@ theorem nonzeroResolventEigenvalue_le_one
   have hu_in : u ∈ resolventEigenspace (I := I) (M := M) g μ.val := hu_mem
   exact resolvent_eigenvalue_le_one (I := I) (M := M) g hu_in hu_ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianEigenvalueOf_nonneg
     {g : SmoothRiemannianMetric I M}
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g) :
@@ -179,6 +187,7 @@ noncomputable def resolventEigenspaceONB
       ℝ (resolventEigenspace (I := I) (M := M) g μ.val) :=
   stdOrthonormalBasis ℝ (resolventEigenspace (I := I) (M := M) g μ.val)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem resolventEigenspace_orthogonalFamily_nonzero
     (g : SmoothRiemannianMetric I M) :
     OrthogonalFamily ℝ

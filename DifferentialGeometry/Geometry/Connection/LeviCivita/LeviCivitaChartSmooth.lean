@@ -3,7 +3,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Add
 import Mathlib.Analysis.Calculus.FDeriv.Mul
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 lemma chartLeviCivitaGoodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
@@ -69,6 +69,7 @@ def christoffelCorrectionCLM (g : SmoothRiemannianMetric I M)
             chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
           christoffelBlockCLM (E := E) i k)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma christoffelCorrectionCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) (x : M) (w : E) :
@@ -103,6 +104,7 @@ lemma christoffelCorrectionCLM_apply
   congr 1
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma christoffelCorrection_eq_christoffelCorrectionCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) {x : M}
@@ -122,6 +124,7 @@ lemma christoffelCorrection_eq_christoffelCorrectionCLM
     trivToE_trivFromE (I := I) α hx w
   rw [hround]
 
+set_option linter.unusedSectionVars false in
 lemma chartE_pullback_contDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -166,6 +169,7 @@ lemma chartE_pullback_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
+set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_contMDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -185,6 +189,7 @@ lemma chartE_section_repr_contMDiffOn_goodSet
   have h := (contMDiffAt_section_iff_chartE I α σ (k := (⊤ : ℕ∞)) hx_base).mp hσ_at
   exact h.contMDiffWithinAt
 
+set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_basis_component_contMDiffOn
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -258,6 +263,7 @@ lemma christoffelCorrectionCLM_contMDiffOn
     contMDiffOn_const
   exact hscalar.smul hblock_const
 
+set_option linter.unusedSectionVars false in
 lemma fderiv_chartE_pullback_contDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -275,6 +281,7 @@ lemma fderiv_chartE_pullback_contDiffOn_goodSet
     rw [ENat.coe_top_add_one]
   exact hpull.fderiv_of_isOpen himg_open h_le
 
+set_option linter.unusedSectionVars false in
 lemma fderiv_chartE_pullback_contMDiffOn
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -298,6 +305,7 @@ lemma fderiv_chartE_pullback_contMDiffOn
     h_fd_on.contDiffAt (himg_open.mem_nhds (Set.mem_image_of_mem _ hx))
   exact (hfd_chart.comp_contMDiffAt hφ_at).contMDiffWithinAt
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma inCoordinates_chartLeviCivita_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) {x : M}

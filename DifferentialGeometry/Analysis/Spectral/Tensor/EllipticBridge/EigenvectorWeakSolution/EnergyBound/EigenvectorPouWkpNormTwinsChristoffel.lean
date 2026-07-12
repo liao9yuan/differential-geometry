@@ -67,6 +67,7 @@ private lemma memWkp_finset_sum
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi_mem hsum
 
+set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -203,6 +204,7 @@ private lemma eigenIdx_val_pos
   exact (tensorResolvent_eigenvalue_mem_unit_interval
     (I := I) (M := M) g r s hu_in hu_ne).1
 
+set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (K : ℕ) (α : M) {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef

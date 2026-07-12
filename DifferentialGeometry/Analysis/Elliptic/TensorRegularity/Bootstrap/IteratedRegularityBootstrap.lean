@@ -41,6 +41,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private theorem wkpNorm_assembly_le
     (m : ℕ) {Ω : Set EE} (hΩ : IsOpen Ω) :
     ∃ N : ℝ≥0∞, N ≠ (⊤ : ℝ≥0∞) ∧
@@ -456,6 +457,7 @@ private theorem wkpNorm_iteratedPerturbedSource_zero_le
             rw [ENNReal.ofReal_add hKmax_nn (by norm_num : (0 : ℝ) ≤ 1),
               ENNReal.ofReal_one]
 
+omit [NeZero d] in
 theorem tsupport_iterClassicalPartial_subset (m : ℕ) :
     ∀ (idx : Fin m → Fin d) {h : EE → ℝ} {S : Set EE}, IsClosed S →
       tsupport h ⊆ S → tsupport (iterClassicalPartial (d := d) m idx h) ⊆ S := by
@@ -471,6 +473,7 @@ theorem tsupport_iterClassicalPartial_subset (m : ℕ) :
       exact (tsupport_fderiv_apply_subset ℝ
         (EuclideanSpace.single (idx 0) 1)).trans hh_S
 
+omit [NeZero d] in
 private theorem wkpNorm_iterClassicalPartial_le
     {Ω : Set EE} (hΩ : IsOpen Ω) (k : ℕ) :
     ∀ (m : ℕ) (idx : Fin m → Fin d) {u : EE → ℝ},

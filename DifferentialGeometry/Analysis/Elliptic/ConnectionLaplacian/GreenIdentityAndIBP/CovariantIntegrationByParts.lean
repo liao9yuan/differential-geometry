@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorRSMetricCompatible
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.IntegrationByParts
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ def tensorInnerScalar
   fun y => tensorInnerPointwise (I := I) (M := M) g r s y
     (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y))
 
+set_option linter.unusedSectionVars false in
 @[simp]
 lemma tensorInnerScalar_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -49,6 +49,7 @@ lemma tensorInnerScalar_apply
       tensorInnerPointwise (I := I) (M := M) g r s y
         (TensorRSSpace.toModel (W y)) (TensorRSSpace.toModel (S y)) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma tangentSectionAction_tensorInnerScalar
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -69,6 +70,7 @@ lemma tangentSectionAction_tensorInnerScalar
   exact tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (I := I) (M := M) g r s W S x (V x)
 
+set_option linter.unusedSectionVars false in
 theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -189,6 +191,7 @@ theorem integral_tensorInner_tangentAction_add_smul_divergence_eq_zero
   rw [integral_add hAB_int hC_int, hsum]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem integral_tensorInner_covDeriv_integrationByParts
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

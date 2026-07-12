@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseOr
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.NormComparison
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [BoundarylessManifold I M] in
 lemma exists_lowerOrderCoeff_uniform_bound_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (N : ℕ)
     {K : Set EuclN} (hK : IsCompact K) (hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -73,6 +73,7 @@ lemma exists_lowerOrderCoeff_uniform_bound_on_compact
     exact (hCw ⟨m, Idx, Jdx', p⟩ l hl y hy).trans
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
+set_option linter.unusedSectionVars false in
 lemma exists_christoffel_bound_valence_range_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P N : ℕ)
     {K : Set EuclN} (hK : IsCompact K) (hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -413,6 +414,7 @@ lemma iteratedFDeriv_rawPullR_le_zeroContent_sum_on_compact
         refine le_trans h_final ?_
         apply mul_le_mul_of_nonneg_right (le_max_right _ _) hRHSsum_nn
 
+omit [BoundarylessManifold I M] in
 lemma tensorChartComponentRaw_sq_le_const_mul_tensorInner_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M : IsCompact K_M)
@@ -491,6 +493,7 @@ set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma exists_zeroContentR_le_fiberNorm_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M : IsCompact K_M)

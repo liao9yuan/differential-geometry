@@ -9,7 +9,6 @@ import Mathlib.MeasureTheory.Covering.DensityTheorem
 import Mathlib.MeasureTheory.Integral.Average
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyRieszKernel
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -25,10 +24,12 @@ variable {d : ℕ} [NeZero d]
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
 
+omit [NeZero d] in
 private lemma continuous_norm_fderiv {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
     Continuous (fun y : E => ‖fderiv ℝ u y‖) :=
   continuous_norm.comp (hu.continuous_fderiv (by simp : ((⊤ : ℕ∞) : WithTop ℕ∞) ≠ 0))
 
+omit [NeZero d] in
 theorem smooth_grad_memLp_on_ball
     {p : ℝ} (_hp : 0 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -682,6 +683,7 @@ theorem smooth_pointwise_holder_bound_explicit
             (ENNReal.toReal_rpow _ _).symm]
         rw [ENNReal.toReal_ofReal hIint_nn]
 
+omit [NeZero d] in
 lemma norm_fderiv_eq_norm_partials_local
     {ψ : E → ℝ} (y : E) :
     ‖fderiv ℝ ψ y‖ =
@@ -707,6 +709,7 @@ lemma norm_fderiv_eq_norm_partials_local
             (fun j : Fin d => (fderiv ℝ ψ y) (EuclideanSpace.single j 1))) i := by simp
   rw [h_fderiv_norm_eq_v, h_v_eq_components]
 
+omit [NeZero d] in
 lemma euclidean_norm_le_sum_norms (v : E) :
     ‖v‖ ≤ ∑ i : Fin d, ‖v i‖ := by
   classical
@@ -937,6 +940,7 @@ private theorem smooth_pair_holder_bound_unit_ball
   rw [h_first] at hpt_diff_bound
   linarith [hpt_diff_bound, hbound_final]
 
+omit [NeZero d] in
 lemma smooth_grad_eLpNorm_le_of_ball_subset
     {p : ℝ} (hp_pos : 0 < p) {x₀ z : E} {R r : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -961,6 +965,7 @@ lemma smooth_grad_eLpNorm_le_of_ball_subset
     (smooth_grad_memLp_on_ball (d := d) hp_pos hR hu).eLpNorm_ne_top
   exact ENNReal.toReal_mono h_eLp_ne_top h_eLp_le
 
+omit [NeZero d] in
 private theorem smooth_memLp_on_ball
     {p : ℝ} (_hp_pos : 0 < p) {x₀ : E} {R : ℝ} (_hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -981,6 +986,7 @@ private theorem smooth_memLp_on_ball
     rw [norm_one, mul_one]
     exact h_at_y
 
+omit [NeZero d] in
 private lemma smooth_setIntegral_norm_le_eLpNorm
     {p : ℝ} (hp_one : 1 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -1039,6 +1045,7 @@ private lemma smooth_setIntegral_norm_le_eLpNorm
   rw [hμ_def, Measure.restrict_apply_univ] at h_le_real
   exact h_le_real
 
+omit [NeZero d] in
 lemma smooth_norm_average_le
     {p : ℝ} (hp_one : 1 < p) {x₀ : E} {R : ℝ} (hR : 0 < R)
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) :

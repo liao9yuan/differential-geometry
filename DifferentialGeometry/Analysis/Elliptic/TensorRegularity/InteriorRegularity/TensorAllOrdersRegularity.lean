@@ -27,6 +27,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 theorem memWkp_succ_of_classicalPartial_memWkp
     (k : ℕ) {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {u : EE → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -49,6 +50,7 @@ theorem memWkp_succ_of_classicalPartial_memWkp
   exact (MemWkp_congr_ae (d := d) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr
     (h_partial i)
 
+omit [NeZero d] in
 theorem memWkp_of_iterClassicalPartial_memWkp_two
     (m : ℕ) {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {u : EE → ℝ} (hu_smooth : ContDiff ℝ (⊤ : ℕ∞) u)

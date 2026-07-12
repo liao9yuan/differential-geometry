@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.Analysis.Calculus.Deriv.Mul
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
@@ -22,6 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullback_metric_evaluation_formula
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
@@ -32,6 +32,7 @@ theorem pullback_metric_evaluation_formula
   unfold Diffeomorph.pullbackInner
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem mfderiv_time_derivative_along_flow
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
     (t : ℝ) (x : M) (v : TangentSpace I x)
@@ -42,6 +43,7 @@ theorem mfderiv_time_derivative_along_flow
     HasDerivAt (fun s => mfderiv I I (Φ_fam s : M → M) x v) V' t :=
   h_deriv.congr_of_eventuallyEq h_eq.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullback_metric_derivative_decomposition
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -72,6 +74,7 @@ theorem pullback_metric_derivative_decomposition
   let _ := h_G; let _ := h_A; let _ := h_B
   exact pullbackMetric_inner_hasDerivAt_of_eval g_fam Φ_fam x v w h_total_eval
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem combine_pullback_derivative_pieces
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -87,6 +90,7 @@ theorem combine_pullback_derivative_pieces
       (G' + L') t :=
   pullbackMetric_inner_hasDerivAt_of_eval g_fam Φ_fam x v w h_chain_eval
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullback_time_derivative_chain_rule
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

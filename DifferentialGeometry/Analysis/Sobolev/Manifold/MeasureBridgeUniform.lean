@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -22,6 +21,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma image_extChartAt_compact_subset_target_of_subset
     {K : Set M} {α : M}
     (hK_compact : IsCompact K) (hK_sub : K ⊆ (chartAt H α).source) :
@@ -43,6 +43,7 @@ lemma image_extChartAt_compact_subset_target_of_subset
       exact hK_sub hx
     exact (extChartAt I α).map_source hxsrc
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma image_extChartAt_tsupport_subset_image_K
     {u : M → ℝ} {K : Set M} {α : M}
     (hu_supp : tsupport u ⊆ K) :

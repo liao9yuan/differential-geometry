@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactResolvent
 import DifferentialGeometry.Geometry.Flow.RicciFlow.DeTurckRHS
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalPartMatch
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -97,6 +96,7 @@ theorem firstOrderRemainder_lands_in_Ha
             (norm_nonneg _)
       _ = ‖R‖ := one_mul _
 
+omit [CompactSpace M] in
 theorem deTurckNonlinearitySpectral_principalPart_cancels
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)

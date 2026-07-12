@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 import Mathlib.Topology.Order.Compact
 import Mathlib.Topology.Separation.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,12 +34,14 @@ def chartInvGramMatrix_l1Sum
   ∑ ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E),
     |chartInvGramMatrix (I := I) g α x ij.1 ij.2|
 
+set_option linter.unusedSectionVars false in
 lemma chartInvGramMatrix_l1Sum_nonneg
     (g : SmoothRiemannianMetric I M) (α x : M) :
     0 ≤ chartInvGramMatrix_l1Sum (I := I) (M := M) g α x := by
   unfold chartInvGramMatrix_l1Sum
   exact Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
+set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_entry_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -56,6 +57,7 @@ private lemma chartGramMatrix_entry_continuousOn_chartSource
   rw [h_set_eq] at hsmooth
   exact hsmooth.continuousOn
 
+set_option linter.unusedSectionVars false in
 private lemma chartInvGramMatrix_entry_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -71,6 +73,7 @@ private lemma chartInvGramMatrix_entry_continuousOn_chartSource
   rw [h_set_eq] at hsmooth
   exact hsmooth.continuousOn
 
+set_option linter.unusedSectionVars false in
 private lemma chartInvGramMatrix_l1Sum_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (chartInvGramMatrix_l1Sum (I := I) (M := M) g α)
@@ -81,6 +84,7 @@ private lemma chartInvGramMatrix_l1Sum_continuousOn_chartSource
   exact (chartInvGramMatrix_entry_continuousOn_chartSource
     (I := I) (M := M) g α ij.1 ij.2).abs
 
+omit [T2Space M] in
 private lemma exists_bound_on_compact_of_continuousOn
     (α : M) (f : M → ℝ)
     (h_cont : ContinuousOn f (chartAt H α).source)
@@ -100,6 +104,7 @@ private lemma exists_bound_on_compact_of_continuousOn
   have h2 : C ≤ max C 0 := le_max_left _ _
   linarith
 
+set_option linter.unusedSectionVars false in
 theorem chartGramMatrix_entry_isBounded_on_compact
 (g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E))
@@ -111,6 +116,7 @@ theorem chartGramMatrix_entry_isBounded_on_compact
     (chartGramMatrix_entry_continuousOn_chartSource (I := I) (M := M) g α i j).abs
   exact exists_bound_on_compact_of_continuousOn (α := α) _ h_cont hK hKsub
 
+set_option linter.unusedSectionVars false in
 theorem chartInvGramMatrix_entry_isBounded_on_compact
 (g : SmoothRiemannianMetric I M)
     (α : M) (i j : Fin (Module.finrank ℝ E))
@@ -124,6 +130,7 @@ theorem chartInvGramMatrix_entry_isBounded_on_compact
       (I := I) (M := M) g α i j).abs
   exact exists_bound_on_compact_of_continuousOn (α := α) _ h_cont hK hKsub
 
+set_option linter.unusedSectionVars false in
 theorem chartInvGramMatrix_l1Sum_isBounded_on_compact
 (g : SmoothRiemannianMetric I M)
     (α : M) {K : Set M} (hK : IsCompact K)
@@ -134,6 +141,7 @@ theorem chartInvGramMatrix_l1Sum_isBounded_on_compact
     (I := I) (M := M) g α
   exact exists_bound_on_compact_of_continuousOn (α := α) _ h_cont hK hKsub
 
+set_option linter.unusedSectionVars false in
 theorem chartInvGramMatrix_l1Sum_isBounded_on_pouTsupport
     [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :

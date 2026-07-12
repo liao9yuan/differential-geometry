@@ -33,6 +33,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -87,6 +88,7 @@ lemma iteratedFDeriv_tensorChartComponentRaw_comp_symm_continuousOn
     (f := (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx) ∘
       (extChartAt I α).symm) j hopen hy).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma comp_extChartAt_continuousOn_chart_source
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -118,6 +120,7 @@ private lemma comp_extChartAt_continuousOn_chart_source
     exact (extChartAt I α).map_source hb'
   exact hcont_target.comp hext_cont hmaps
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma comp_extChartAtExt_continuousOn_chart_source
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -141,6 +144,7 @@ private lemma comp_extChartAtExt_continuousOn_chart_source
     extChartAtExt_apply_of_mem (I := I) (α := α) hb
   rw [h_eq]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem measurable_tensorChartComponentRaw_iteratedFDeriv_normSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -39,6 +38,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem pullbackMetric_hasDerivWithinAt_ricciFlow_interior
     (g_bg : SmoothRiemannianMetric I M)
     (g_DT : ℝ → SmoothRiemannianMetric I M) (T : ℝ)

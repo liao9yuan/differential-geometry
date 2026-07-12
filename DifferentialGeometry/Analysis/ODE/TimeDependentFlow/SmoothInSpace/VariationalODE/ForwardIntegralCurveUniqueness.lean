@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Analysis.ODE.Gronwall
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -16,6 +15,7 @@ variable {HN : Type*} [TopologicalSpace HN] {IN : ModelWithCorners ℝ EN HN}
 variable {N : Type*} [TopologicalSpace N] [ChartedSpace HN N] [IsManifold IN 1 N]
   [T2Space N]
 
+omit [T2Space N] in
 theorem isMIntegralCurveOn_forward_eqOn_Icc_of_contMDiffAt [BoundarylessManifold IN N]
     {v : (x : N) → TangentSpace IN x} {γ γ' : ℝ → N} {t₁ b : ℝ} (ht₁b : t₁ < b)
     (hv : ContMDiffAt IN IN.tangent 1 (fun x ↦ (⟨x, v x⟩ : TangentBundle IN N)) (γ t₁))
@@ -236,6 +236,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
+omit [FiniteDimensional ℝ E] in
 theorem bare_forward_flow_eqOn_of_jointC1 [CompleteSpace E]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : AutonomizedFieldJointC1 (I := I) X)

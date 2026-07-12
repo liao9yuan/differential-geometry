@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem metric_compat_coord_identity
     (g : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -40,6 +40,7 @@ theorem metric_compat_coord_identity
   exact
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cartan_trivToE_self_apply (x : M) (v : TangentSpace I x) :
     trivToE (I := I) x x v = v := by
   classical
@@ -53,6 +54,7 @@ private lemma cartan_trivToE_self_apply (x : M) (v : TangentSpace I x) :
   rw [show trivToE (I := I) x x v = (trivToE (I := I) x x : TangentSpace I x →L[ℝ] E) v
         from rfl, h2]; rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cartan_trivFromE_self_apply (x : M) (w : E) :
     trivFromE (I := I) x x w = w := by
   classical

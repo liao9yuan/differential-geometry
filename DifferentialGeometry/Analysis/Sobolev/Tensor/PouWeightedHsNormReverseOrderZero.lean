@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.Co
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.IntrinsicL2Bridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ noncomputable def tensorChartComponentSqrtPou
     Real.sqrt (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) *
       tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma tensorChartComponentSqrtPou_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -55,6 +55,7 @@ noncomputable def tensorChartComponentSqrtPou
       Real.sqrt (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) *
         tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx b := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComponentSqrtPou_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -326,6 +327,7 @@ theorem eLpNorm_tensorChartComponentSqrtPou_le_uniform
     ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLpNorm_le
   exact h_eLpNorm_le
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma support_sqrt_pou_eq
     (α : M) :
     Function.support
@@ -342,6 +344,7 @@ private lemma support_sqrt_pou_eq
       (chartAtlasPOU I M).nonneg α b
     exact hb (le_antisymm hle hρ_nn)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tsupport_tensorChartComponentSqrtPou_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -361,6 +364,7 @@ private lemma tsupport_tensorChartComponentSqrtPou_subset
   unfold tsupport
   rw [support_sqrt_pou_eq (I := I) (M := M) α]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma continuous_tensorChartComponentSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -406,6 +410,7 @@ private lemma continuous_tensorChartComponentSqrtPou
       by_contra hne; exact hy_notsupp hne
     exact hzero.symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma measurable_tensorChartComponentSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -416,6 +421,7 @@ private lemma measurable_tensorChartComponentSqrtPou
   (continuous_tensorChartComponentSqrtPou (I := I) (M := M)
     g r s S α Idx Jdx).measurable
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma hsNorm_zero_integrand_eq_sq_eLpNorm_chartPushedRaw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

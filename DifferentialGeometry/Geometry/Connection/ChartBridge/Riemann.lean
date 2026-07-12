@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -241,6 +240,7 @@ def chartRiemannLin (g : SmoothRiemannianMetric I M) (x : M) :
               chartRiemannTensor (I := I) g x i j k l (extChartAt I x x)) from by ring]
     exact mul_smul _ _ _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartRiemannLin_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannLin (I := I) g x v w u =
@@ -280,11 +280,13 @@ def chartRiemannCLM (g : SmoothRiemannianMetric I M) (x : M) :
         rw [map_smul]; rfl }
   LinearMap.toContinuousLinearMap outer
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem chartRiemannCLM_apply_eq_chartRiemannLin
     (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v w u = chartRiemannLin (I := I) g x v w u := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v w u =
@@ -299,11 +301,13 @@ theorem chartRiemannCLM_apply (g : SmoothRiemannianMetric I M) (x : M)
                 ((chartModelBasis E) l : TangentSpace I x) :=
   chartRiemannLin_apply (I := I) g x v w u
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma repr_basis_eq_kron (a b' : Fin (Module.finrank ℝ E)) :
     ((chartModelBasis E).repr ((chartModelBasis E) a)) b' =
       (if a = b' then (1 : ℝ) else 0) :=
   Module.Basis.repr_self_apply _ _ _
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     chartRiemannCLM (I := I) g x
@@ -361,6 +365,7 @@ theorem chartRiemannCLM_basis_apply (g : SmoothRiemannianMetric I M) (x : M)
     simp [hii']
   · intro hi; exact absurd (Finset.mem_univ _) hi
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_repr_basis (g : SmoothRiemannianMetric I M) (x : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
     ((chartModelBasis E).repr
@@ -383,6 +388,7 @@ theorem chartRiemannCLM_repr_basis (g : SmoothRiemannianMetric I M) (x : M)
     rw [if_neg h_neg, mul_zero]
   · intro hl; exact absurd (Finset.mem_univ _) hl
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     (v w u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v w u = - chartRiemannCLM (I := I) g x w v u := by
@@ -521,6 +527,7 @@ theorem chartRiemannCLM_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
   rw [hRHS_to_neg_LHS]
   abel
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : M)
     (i j k : Fin (Module.finrank ℝ E)) :
     chartRiemannCLM (I := I) g x
@@ -532,6 +539,7 @@ theorem chartRiemannCLM_basis_antisymm_jk (g : SmoothRiemannianMetric I M) (x : 
   chartRiemannCLM_antisymm_jk (I := I) g x
     ((chartModelBasis E) j) ((chartModelBasis E) k) ((chartModelBasis E) i)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRiemannCLM_diag (g : SmoothRiemannianMetric I M) (x : M)
     (v u : TangentSpace I x) :
     chartRiemannCLM (I := I) g x v v u = 0 := by

@@ -8,7 +8,6 @@ import Mathlib.Analysis.LocallyConvex.Bounded
 import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -68,6 +67,7 @@ theorem posDef_isVonNBounded (g : E →L[ℝ] E →L[ℝ] ℝ)
 def euclForm (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E] :
     E →L[ℝ] E →L[ℝ] ℝ := innerSL ℝ
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma euclForm_apply (v w : E) : euclForm E v w = inner ℝ v w := rfl
 
 private def tangentTrivializationContinuousLinearMapAt (x₀ x : M) : E →L[ℝ] E :=
@@ -77,14 +77,17 @@ private def localFiber (x₀ x : M) : TangentSpace I x →L[ℝ] TangentSpace I 
   (((euclForm E).bilinearComp (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x)) :
     E →L[ℝ] E →L[ℝ] ℝ)
 
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_apply (x₀ x : M) (v w : TangentSpace I x) :
     localFiber (I := I) x₀ x v w =
       inner ℝ (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x v) (tangentTrivializationContinuousLinearMapAt (I := I) x₀ x w) := rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_symm (x₀ x : M) (v w : TangentSpace I x) :
     localFiber (I := I) x₀ x v w = localFiber (I := I) x₀ x w v := by
   rw [localFiber_apply, localFiber_apply, real_inner_comm]
 
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_pos (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (v : TangentSpace I x) (hv : v ≠ 0) :
@@ -100,6 +103,7 @@ lemma localFiber_pos (x₀ : M) {x : M}
       ℝ x hx).map_ne_zero_iff.mpr hv
   positivity
 
+omit [FiniteDimensional ℝ E] in
 private lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (φ : TangentSpace I x →L[ℝ] ℝ) :
@@ -121,6 +125,7 @@ private lemma oneForm_continuousLinearMapAt (x₀ : M) {x : M}
       Bundle.Trivialization.coe_linearMapAt_of_mem _ hxR]
   rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma inCoordinates_localFiber (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     inCoordinates E (TangentSpace I) (E →L[ℝ] ℝ) (fun y => TangentSpace I y →L[ℝ] ℝ)
@@ -136,6 +141,7 @@ lemma inCoordinates_localFiber (x₀ : M) {x : M}
   rw [show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x v) = v from e₁.continuousLinearMapAt_symmL hx v,
       show tangentTrivializationContinuousLinearMapAt (I := I) x₀ x (e₁.symmL ℝ x w) = w from e₁.continuousLinearMapAt_symmL hx w]
 
+omit [FiniteDimensional ℝ E] in
 private lemma coord_localFiber (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     (trivializationAt (E →L[ℝ] E →L[ℝ] ℝ)
@@ -150,6 +156,7 @@ private lemma coord_localFiber (x₀ : M) {x : M}
 set_option maxHeartbeats 1000000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
+omit [FiniteDimensional ℝ E] in
 lemma localFiber_contMDiffOn (x₀ : M) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) (⊤ : ℕ∞)
       (fun x => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) x (localFiber (I := I) x₀ x))
@@ -173,6 +180,7 @@ lemma localFiber_contMDiffOn (x₀ : M) :
 private def posDefForms (x : M) : Set (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) :=
   {φ | (∀ v w, φ v w = φ w v) ∧ (∀ v, v ≠ 0 → 0 < φ v v)}
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 lemma convex_posDefForms (x : M) : Convex ℝ (posDefForms (I := I) x) := by
   intro φ hφ ψ hψ a b ha hb hab
   refine ⟨?_, ?_⟩

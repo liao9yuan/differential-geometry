@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Embedding.MorreyManifold
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuant
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -192,7 +191,7 @@ private noncomputable def chartPullbackZeroExtend (α : M) (f : M → ℝ) :
       f ((extChartAt I_hs α).symm y)
     else 0
 
-omit [IsManifold I_hs ∞ M] in
+set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_local_apply_of_mem_target
     (α : M) (f : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ (extChartAt I_hs α).target) :
@@ -204,7 +203,7 @@ private lemma chartSmoothExt_local_apply_of_mem_target
     else 0) = f ((extChartAt I_hs α).symm y)
   rw [if_pos hy]
 
-omit [IsManifold I_hs ∞ M] in
+set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_local_apply_of_notMem_target
     (α : M) (f : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∉ (extChartAt I_hs α).target) :
@@ -228,7 +227,7 @@ private lemma chartSmoothExt_local_eq_chartPushed_on_target
   unfold chartPushed
   rfl
 
-omit [IsManifold I_hs ∞ M] in
+set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_local_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
@@ -252,6 +251,7 @@ private def chartSmoothExtInteriorSupport_local
   (extChartAt I_hs α) '' (tsupport f) ⊆
     DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace (d := n)
 
+set_option linter.unusedSectionVars false in
 private lemma chartSmoothExtInteriorSupport_image_subset_interior_local
     {β : M} {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) β).source)
@@ -286,6 +286,7 @@ private lemma pou_mul_subset_chart_source_local
         I_hs M β : C^∞⟮I_hs, M; ℝ⟯) : M → ℝ) x) (g := u)
   exact h1.trans (DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I_hs M β)
 
+omit [T2Space M] [SigmaCompactSpace M] in
 private lemma contDiffOn_chartSmoothExt_local_formula
     (α : M) {f : M → ℝ} (hf : ContMDiff I_hs 𝓘(ℝ, ℝ) ∞ f) :
     ContDiffOn ℝ ∞
@@ -327,6 +328,7 @@ private lemma contDiffAt_chartSmoothExt_local_of_mem_interior_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [chartSmoothExt_local_apply_of_mem_target (n := n) (M := M) α f hz.1]
 
+set_option linter.unusedSectionVars false in
 private lemma contDiffAt_chartSmoothExt_local_of_notMem_image_tsupport
     (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
@@ -376,6 +378,7 @@ private lemma contDiff_chartSmoothExt_local
     exact contDiffAt_chartSmoothExt_local_of_notMem_image_tsupport
       (n := n) (M := M) α hf_supp hf_compact hyK
 
+set_option linter.unusedSectionVars false in
 private lemma image_extChartAt_tsupport_compact_local
     {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) :
@@ -444,6 +447,7 @@ private lemma chartSmoothExt_ae_eq_chartPushed_interior_local
   intro y hy
   exact chartSmoothExt_local_eq_chartPushed_on_target α u hy.1
 
+omit [CompactSpace M] in
 theorem wkpNormChart_eq_finset_sum_withBoundary
     [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
@@ -491,6 +495,7 @@ theorem wkpNormChart_eq_finset_sum_withBoundary
       (chartTargetEuclid_isHalfSpaceRelOpen (n := n) (M := M) α)
   rw [tsum_eq_sum hf_zero_off]
 
+omit [CompactSpace M] in
 theorem mul_smooth_chart_bound_explicit_form_withBoundary_of_per_chart
     [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
@@ -613,6 +618,7 @@ theorem mul_smooth_chart_bound_explicit_form_withBoundary_of_per_chart
     ring
   rw [h_factor]
 
+omit [CompactSpace M] in
 theorem mul_smooth_chart_bound_withBoundary_interior_of_per_chart
     [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
@@ -733,6 +739,7 @@ theorem mul_smooth_chart_bound_withBoundary_interior_of_per_chart
   rw [h_LHS_eq]
   exact mul_le_mul' (mul_le_mul' h_sum_le (le_refl _)) (le_refl _)
 
+omit [CompactSpace M] in
 theorem MemWkpChart_of_contMDiff_AllChartsInteriorSupport
     [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
@@ -790,6 +797,7 @@ theorem MemWkpChart_of_contMDiff_AllChartsInteriorSupport
   exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp_congr_ae
     (d := n) hp hΩ_open h_ae).mp hext_β_W1p
 
+omit [CompactSpace M] in
 theorem mul_smooth_chart_bound_withBoundary_interior
     [CompactSpace M]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I_hs M)
@@ -853,6 +861,7 @@ private noncomputable def chartLifted_local (α : M) (v : M → ℝ) :
   exact fun y =>
     if y ∈ (extChartAt I_hs α).target then v ((extChartAt I_hs α).symm y) else 0
 
+omit [IsManifold (𝓡∂ n) ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartLifted_local_apply_of_mem_target
     (α : M) (v : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ (extChartAt I_hs α).target) :
@@ -862,6 +871,7 @@ private lemma chartLifted_local_apply_of_mem_target
     else 0) = v ((extChartAt I_hs α).symm y)
   rw [if_pos hy]
 
+omit [IsManifold (𝓡∂ n) ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartLifted_local_apply_of_notMem_target
     (α : M) (v : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∉ (extChartAt I_hs α).target) :
@@ -871,6 +881,7 @@ private lemma chartLifted_local_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
+omit [CompactSpace M] in
 private lemma chartPushed_eq_chartPushed_mul_chartLifted_local
     (α : M) (u v : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ (extChartAt I_hs α).target) :
@@ -885,6 +896,7 @@ private lemma chartPushed_eq_chartPushed_mul_chartLifted_local
   unfold chartPushed
   ring
 
+omit [IsManifold (𝓡∂ n) ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartLifted_local_apply_norm_le
     (α : M) (v : M → ℝ) {vMax : ℝ}
     (hv_bound : ∀ x : M, ‖v x‖ ≤ vMax) (hvMax_nn : 0 ≤ vMax)
@@ -897,12 +909,14 @@ private lemma chartLifted_local_apply_norm_le
   · rw [chartLifted_local_apply_of_notMem_target (n := n) (M := M) α v hy, norm_zero]
     exact hvMax_nn
 
+omit [IsManifold (𝓡∂ n) ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartLifted_local_eq_chartSmoothExt_local
     (α : M) (v : M → ℝ) :
     chartLifted_local (n := n) (M := M) α v =
       chartPullbackZeroExtend (n := n) (M := M) α v := by
   funext y; rfl
 
+omit [CompactSpace M] in
 private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted_local_ae
     (α : M) (u v : M → ℝ) :
     (fun y : EuclideanSpace ℝ (Fin n) => chartPushed (n := n) (M := M)
@@ -925,6 +939,7 @@ private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted_local_ae
   exact chartPushed_eq_chartPushed_mul_chartLifted_local
     (n := n) (M := M) α u v hy.1
 
+omit [CompactSpace M] in
 private lemma eLpNorm_chartPushed_mul_le_vMax_eLpNorm_chartPushed_u
     (α : M) {u v : M → ℝ} {vMax : ℝ}
     (hv_bound : ∀ x : M, ‖v x‖ ≤ vMax) (_hvMax_nn : 0 ≤ vMax)

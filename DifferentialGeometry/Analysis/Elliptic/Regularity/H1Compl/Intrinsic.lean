@@ -3,7 +3,6 @@ import Mathlib.Analysis.InnerProductSpace.ProdL2
 import Mathlib.Analysis.Normed.Lp.WithLp
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,37 +28,44 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_zero_left
     (g : SmoothRiemannianMetric I M) (x : M) (y : TangentSpace I x) :
     g.inner x (0 : TangentSpace I x) y = 0 := by
   rw [map_zero, ContinuousLinearMap.zero_apply]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_zero_right
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     g.inner x v (0 : TangentSpace I x) = 0 := by
   rw [ContinuousLinearMap.map_zero]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_add_left
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : TangentSpace I x) :
     g.inner x (v + w) y = g.inner x v y + g.inner x w y := by
   rw [map_add (g.inner x), ContinuousLinearMap.add_apply]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_add_right
     (g : SmoothRiemannianMetric I M) (x : M) (v y w : TangentSpace I x) :
     g.inner x v (y + w) = g.inner x v y + g.inner x v w :=
   ContinuousLinearMap.map_add (g.inner x v) y w
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_smul_left
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v y : TangentSpace I x) :
     g.inner x (c • v) y = c * g.inner x v y := by
   rw [map_smul (g.inner x), ContinuousLinearMap.smul_apply, smul_eq_mul]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_inner_smul_right
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) (c : ℝ)
     (y : TangentSpace I x) :
     g.inner x v (c • y) = c * g.inner x v y := by
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
+set_option linter.unusedSectionVars false in
 private lemma g_inner_add_diag
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     g.inner x (v + w) (v + w) =
@@ -69,6 +75,7 @@ private lemma g_inner_add_diag
   have hsymm : g.inner x w v = g.inner x v w := g.symm x w v
   rw [hsymm]; ring
 
+set_option linter.unusedSectionVars false in
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -146,6 +153,7 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
+set_option linter.unusedSectionVars false in
 private lemma g_norm_const_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (c • v) (c • v)) =
@@ -173,6 +181,7 @@ namespace IsH1Pair
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 theorem zero (g : SmoothRiemannianMetric I M) :
     IsH1Pair (I := I) (M := M) g
       (0 : Lp ℝ 2 (riemannianVolumeMeasure I M g))
@@ -218,6 +227,7 @@ theorem zero (g : SmoothRiemannianMetric I M) :
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h0G.symm
       (PairAEMeasurable.zero (I := I) (M := M) g)
 
+set_option linter.unusedSectionVars false in
 theorem add (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     {G G' : Lp E 2 (riemannianVolumeMeasure I M g)}
@@ -343,6 +353,7 @@ theorem add (g : SmoothRiemannianMetric I M)
       PairAEMeasurable.add (I := I) (M := M) (g := g) hG_pair hG'_pair
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_sum_G.symm hsum_pair
 
+set_option linter.unusedSectionVars false in
 theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     {G : Lp E 2 (riemannianVolumeMeasure I M g)}
@@ -478,11 +489,13 @@ def gradL2 (g : SmoothRiemannianMetric I M) :
       simp
     rw [h]; rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma toLp_apply (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     toLp (I := I) (M := M) g u =
       (WithLp.ofLp (u : H1Bundle (I := I) (M := M) g)).1 := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma gradL2_apply (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     gradL2 (I := I) (M := M) g u =

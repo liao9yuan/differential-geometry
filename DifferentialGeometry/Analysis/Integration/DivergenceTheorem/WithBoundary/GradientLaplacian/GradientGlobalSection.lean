@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+set_option linter.unusedSectionVars false in
 private lemma partialDerivWithin_scalarOnE_contMDiffOn_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -43,10 +43,12 @@ private lemma partialDerivWithin_scalarOnE_contMDiffOn_target
     partialDerivWithin_contDiffOn_top_of_uniqueDiffOn (i := j) hbase hUD
   exact hpartial.contMDiffOn
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma extChartAt_contMDiffOn_chart_source (α : M) :
     ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E) (chartAt H α).source :=
   contMDiffOn_extChartAt
 
+set_option linter.unusedSectionVars false in
 private lemma chart_source_subset_preimage_target (α : M) :
     (chartAt H α).source ⊆
       (extChartAt I α : M → E) ⁻¹' (extChartAt I α).target := by
@@ -55,6 +57,7 @@ private lemma chart_source_subset_preimage_target (α : M) :
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   exact (extChartAt I α).map_source hxsrc
 
+set_option linter.unusedSectionVars false in
 lemma gradChartCoeffWithin_contMDiffOn_full
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -85,6 +88,7 @@ lemma gradChartCoeffWithin_contMDiffOn_full
       chart_source_subset_preimage_target (I := I) α
     exact hpartialM.comp hchart hsubset
 
+set_option linter.unusedSectionVars false in
 lemma gradChartLocalWithin_contMDiffOn_total_full
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -113,6 +117,7 @@ lemma gradChartLocalWithin_contMDiffOn_total_full
     exact (hcoeff i).smul_section (hbasis i)
   exact ContMDiffOn.sum_section (fun i _ => hsmul i)
 
+set_option linter.unusedSectionVars false in
 private lemma gradFun_eq_gradChartLocalWithin_on_chart_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -121,6 +126,7 @@ private lemma gradFun_eq_gradChartLocalWithin_on_chart_source
   intro y hy
   exact (gradChartLocalWithin_eq_gradFun (I := I) g α hf hy).symm
 
+set_option linter.unusedSectionVars false in
 lemma gradFun_contMDiffOn_chart_source_full
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -138,6 +144,7 @@ lemma gradFun_contMDiffOn_chart_source_full
     TotalSpace.mk' E y (gradChartLocalWithin (I := I) g α f y)
   rw [h]
 
+set_option linter.unusedSectionVars false in
 theorem gradFun_contMDiff_total_full
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

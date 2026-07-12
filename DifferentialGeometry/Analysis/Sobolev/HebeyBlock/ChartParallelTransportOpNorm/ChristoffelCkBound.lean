@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartLocal
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.FDerivDecomp
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
@@ -22,6 +21,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 set_option maxHeartbeats 800000 in
 
+omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem christoffel_Ck_bound_from_metric_Ck1 [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (k : ℕ) (α : M)
     {K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}

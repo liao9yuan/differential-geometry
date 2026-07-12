@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Variational
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,9 +28,11 @@ namespace IsLocalFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 lemma t₀_mem_Icc (h : IsLocalFlow f t₀ x₀ r tmin tmax Φ) : t₀ ∈ Icc tmin tmax :=
   ⟨h.htmin_le, h.ht₀_le⟩
 
+omit [CompleteSpace E] in
 lemma orbit_continuousOn (h : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (x : E) (hx : x ∈ closedBall x₀ r) :
     ContinuousOn (fun t : ℝ => Φ ⟨x, t⟩) (Icc tmin tmax) :=
@@ -39,6 +40,7 @@ lemma orbit_continuousOn (h : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
 
 end IsLocalFlow
 
+omit [CompleteSpace E] in
 lemma exists_isPicardLindelof_of_contDiffOn_univ
     (f : ℝ → E → E) (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
     (t₀ : ℝ) (x₀ : E) :
@@ -200,6 +202,7 @@ namespace IsLocalFlow
 
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 lemma continuousOn_fderiv_along_orbit
     (hflow : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -217,6 +220,7 @@ lemma continuousOn_fderiv_along_orbit
     fun _ _ => mem_univ _
   exact hpartial.comp horbit hmaps
 
+omit [CompleteSpace E] in
 lemma exists_norm_fderiv_le_along_orbit
     (hflow : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))

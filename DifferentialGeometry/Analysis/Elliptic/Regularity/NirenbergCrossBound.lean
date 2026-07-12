@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.StandardNire
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotient
 import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_diffQuot_restrict_le_of_cthickening
     {Ω'' K : Set EuclN} (hΩ''_open : IsOpen Ω'')
     (_hΩ''_compact_closure : IsCompact (closure Ω''))

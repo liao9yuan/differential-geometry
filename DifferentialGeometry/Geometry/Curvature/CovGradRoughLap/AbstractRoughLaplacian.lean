@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -93,6 +92,7 @@ theorem rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap
     smoothOrthoFrame_smooth (I := I) g x i
   exact tensorSecondCovDeriv_covGrad_unit_eval (I := I) (M := M) g T₀ hB x
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem abstract_succ_covDeriv_unfold_at
     (g : SmoothRiemannianMetric I M)
     (W : Π y : M, Tensor0SSpace 3 I y)

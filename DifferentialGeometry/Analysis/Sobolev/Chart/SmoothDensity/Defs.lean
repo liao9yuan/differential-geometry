@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.Completene
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -106,6 +105,7 @@ lemma support_chartPullback_subset_chartAt_source (α : M)
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 lemma tsupport_pou_mul_subset_tsupport_pou
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x : M =>
@@ -144,6 +144,7 @@ lemma hasCompactSupport_chartAtlasPOU_mul
     (isClosed_tsupport _).isCompact
   exact h_compact.of_isClosed_subset (isClosed_tsupport _) h_subset
 
+omit [IsManifold I ∞ M] in
 lemma chartPushed_chartPullback_apply_of_mem
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)

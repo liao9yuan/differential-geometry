@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.FChartResidual.Residual
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Analysis.Distribution.AEEqOfIntegralContDiff
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -56,25 +55,31 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 private abbrev K_α (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma K_α_compact (α : M) : IsCompact (K_α (I := I) (M := M) α) :=
   chartImagePOUTsupport_isCompact (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma K_α_meas (α : M) : MeasurableSet (K_α (I := I) (M := M) α) :=
   (K_α_compact (I := I) (M := M) α).isClosed.measurableSet
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma K_α_subset_target (α : M) :
     K_α (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTarget_diff_K_α_isOpen (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α) :=
   (chartTargetEuclid_isOpen (I := I) (M := M) α).sdiff
     (K_α_compact (I := I) (M := M) α).isClosed
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartTarget_diff_K_α_subset_target (α : M) :
     chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := fun _ hy => hy.1
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma weakPartial_ae_zero_on_open_of_ae_zero_on_open
     {Ω U : Set EuclN} (hΩ_open : IsOpen Ω) (hU_open : IsOpen U)
     (hU_sub : U ⊆ Ω)
@@ -129,6 +134,7 @@ private lemma weakPartial_ae_zero_on_open_of_ae_zero_on_open
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma vol_restrict_complement_absCont_chartTarget (α : M) :
     (volume : Measure EuclN).restrict
       (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α) ≪
@@ -208,6 +214,7 @@ private lemma base_u_chart_ae_zero_off_K_α
     hy_diff.1 hy_diff.2
 
 
+set_option linter.unusedSectionVars false in
 private lemma locallyIntegrableOn_of_memLp_two_global
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -250,6 +257,7 @@ private lemma locallyIntegrableOn_of_memLp_two_global
   exact Metric.ball_subset_closedBall
 
 
+set_option linter.unusedSectionVars false in
 private lemma locallyIntegrableOn_of_locally_memLp_two
     (α : M) {f : EuclN → ℝ}
     (hf : ∀ K' : Set EuclN, IsCompact K' →
@@ -285,6 +293,7 @@ private lemma locallyIntegrableOn_of_locally_memLp_two
   exact Metric.ball_subset_closedBall
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma memLp_top_of_continuousOn_on_compact
     (α : M) {f : EuclN → ℝ}
     (hf_contOn : ContinuousOn f (chartTargetEuclid (I := I) (M := M) α))

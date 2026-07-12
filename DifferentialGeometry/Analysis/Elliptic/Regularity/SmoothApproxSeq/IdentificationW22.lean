@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothApproxSeq.CauchyW
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothApproxSeq.H1ComplTendsto
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma wkpNormChart_one_le_three
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) :
     wkpNormChart (I := I) (M := M) g 1 2 u ≤
@@ -452,6 +452,7 @@ theorem smoothApproxSeqWkpThree_tendsto_h1Compl
     ((denseRange_smoothToH1Compl (I := I) (M := M) g).equalizer
       hL_cont hR_cont hLR_smooth) w
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_le_wkpNorm_two_two
     (u : EuclN → ℝ) (Ω : Set EuclN) :
     eLpNorm u 2 ((volume : Measure EuclN).restrict Ω) ≤
@@ -470,6 +471,7 @@ private lemma eLpNorm_le_wkpNorm_two_two
   rw [h_iter_eq] at h_zero_le
   exact h_zero_le
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_tendsto_zero_of_wkpNorm_two_two_tendsto_zero
     {u : ℕ → EuclN → ℝ} {F_lim : EuclN → ℝ} {Ω : Set EuclN}
     (h_tendsto : Tendsto (fun n =>
@@ -491,6 +493,7 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_two_two_tendsto_zero
     (fun _ => zero_le _)
     (fun n => eLpNorm_le_wkpNorm_two_two (fun y => u n y - F_lim y) Ω)
 
+set_option linter.unusedSectionVars false in
 private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict

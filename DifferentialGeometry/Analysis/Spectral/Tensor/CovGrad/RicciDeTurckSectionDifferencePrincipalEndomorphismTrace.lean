@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceKoszulSecondCovGrad
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem trace_eq_basis_repr_sum (G : E →ₗ[ℝ] E) :
     ∑ i : Fin (Module.finrank ℝ E),
         (chartModelBasis E).repr (G ((chartModelBasis E) i)) i =
@@ -51,6 +51,7 @@ theorem trace_eq_basis_repr_sum (G : E →ₗ[ℝ] E) :
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Matrix.diag_apply, LinearMap.toMatrix_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem cometricLmodel_finBasis_inner_eq_kronecker (g₁ : SmoothRiemannianMetric I M) (x : M)
     (j k : Fin (Module.finrank ℝ E)) :
     g₁.inner x
@@ -83,6 +84,7 @@ private theorem cometricLmodel_finBasis_inner_eq_kronecker (g₁ : SmoothRiemann
   rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply, Module.Basis.repr_self]
   rw [Finsupp.single_apply]
 
+set_option linter.unusedSectionVars false in
 theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) (x : M) (G : E →ₗ[ℝ] E) :
     ∑ k : Fin (Module.finrank ℝ E),
         g₁.inner x
@@ -137,6 +139,7 @@ theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) 
   rw [hrepr, hε]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α + β)
       = dualToCotangent (I := I) (x := x) α + dualToCotangent (I := I) (x := x) β := by
@@ -145,6 +148,7 @@ lemma dualToCotangent_addC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) 
     cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (c • α)
       = c • dualToCotangent (I := I) (x := x) α := by
@@ -152,6 +156,7 @@ lemma dualToCotangent_smulC {x : M} (c : ℝ) (α : Module.Dual ℝ (TangentSpac
   rw [map_smul, cotangentToDualLinear_apply, cotangentToDualLinear_apply,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma dualToCotangent_subC {x : M} (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α - β)
       = dualToCotangent (I := I) (x := x) α - dualToCotangent (I := I) (x := x) β := by
@@ -228,6 +233,7 @@ private def alignedPrincipalCorrectionVec (g₀ g₁ : SmoothRiemannianMetric I 
               c • PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v from by rw [map_smul]; rfl]
             rw [map_smul]; rfl } : TangentSpace I x →L[ℝ] ℝ)))
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma alignedPrincipalEndoC_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     alignedPrincipalEndo (I := I) (M := M) g₀ g₁ Z Y x v =
@@ -521,6 +527,7 @@ noncomputable def combinedTrace42ModelZSlot
             koszulZSlotPerm3).toContinuousLinearEquiv.toContinuousLinearMap))
 
 
+set_option linter.unusedSectionVars false in
 theorem combinedTrace42ModelZ_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -596,6 +603,7 @@ noncomputable def ricciArmPrincipalCoeffZSlotFib (g₁ : SmoothRiemannianMetric 
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem ricciArmPrincipalCoeffZFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciArmPrincipalCoeffZSlotFib (I := I) g₁ x D) =
@@ -820,6 +828,7 @@ private def secondCovGradZSlotCovec (g₀ : SmoothRiemannianMetric I M) (S : Smo
         ring }
 
 
+omit [BoundarylessManifold I M] in
 private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e ζ : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x e ζ =
@@ -829,6 +838,7 @@ private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : Smo
           - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]) := rfl
 
 
+set_option linter.unusedSectionVars false in
 private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e e' : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x (e + e') =
@@ -873,6 +883,7 @@ private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : Smoot
   rw [h1, h2, h3]; ring
 
 
+set_option linter.unusedSectionVars false in
 private lemma zPrincipalCovec_smul (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (e : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x (c • e) =

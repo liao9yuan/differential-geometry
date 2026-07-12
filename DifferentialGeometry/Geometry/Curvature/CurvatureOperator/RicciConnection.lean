@@ -7,7 +7,6 @@ import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 
 set_option linter.unnecessarySimpa false
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -267,6 +266,7 @@ section MetricSkewSection
 
 variable [CompleteSpace E]
 
+omit [CompleteSpace E] in
 private lemma covApply_smooth_section
     {Y : Π b : M, TangentSpace I b} {Z : Π b : M, TangentSpace I b}
     (g : SmoothRiemannianMetric I M)
@@ -278,6 +278,7 @@ private lemma covApply_smooth_section
   exact (covApply_contMDiffOn (cov := LeviCivita (I := I) g) hY hZ_le).contMDiffAt
     (Filter.univ_mem)
 
+set_option linter.unusedSectionVars false in
 private lemma inner_smooth_scalar
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -298,6 +299,7 @@ private lemma inner_smooth_scalar
       (ϕ := fun b => g.inner b) (v := fun b => Y b) hg hY
   exact cotangentCov_pairing_contMDiff hgY hZ
 
+set_option linter.unusedSectionVars false in
 private lemma inner_mdiffAt_scalar
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -306,6 +308,7 @@ private lemma inner_mdiffAt_scalar
     MDifferentiableAt I 𝓘(ℝ, ℝ) (fun b => g.inner b (Y b) (Z b)) x :=
   ((inner_smooth_scalar g hY hZ) x).mdifferentiableAt (by simp)
 
+omit [CompleteSpace E] in
 private lemma metric_compat_one
     (g : SmoothRiemannianMetric I M)
     {Y Z W : Π b : M, TangentSpace I b} {x : M}
@@ -322,6 +325,7 @@ private lemma metric_compat_one
   rw [hext_eq, hmc]
   rfl
 
+omit [CompleteSpace E] in
 private lemma extDerivFun_inner_eq_globally
     (g : SmoothRiemannianMetric I M)
     {Y Z W : Π b : M, TangentSpace I b}
@@ -334,6 +338,7 @@ private lemma extDerivFun_inner_eq_globally
   funext b
   exact metric_compat_one g (hY_glob b) (hZ_glob b) (hW_glob b)
 
+omit [CompleteSpace E] in
 private lemma metric_compat_two
     (g : SmoothRiemannianMetric I M)
     {X Y Z W : Π b : M, TangentSpace I b} {x : M}
@@ -623,10 +628,12 @@ private def gFlat (g : SmoothRiemannianMetric I M) (x : M) :
     rw [(g.inner x).map_smul c v]
     rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
 @[simp] private lemma gFlat_apply
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     (gFlat (I := I) g x v) w = g.inner x v w := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma gFlat_injective (g : SmoothRiemannianMetric I M) (x : M) :
     Function.Injective (gFlat (I := I) g x) := by
   intro v v' hvv'
@@ -806,6 +813,7 @@ theorem ricciTensor_add_self
   rw [hexpand, ricciTensor_symm (I := I) g x w v]
   ring
 
+omit [CompleteSpace E] in
 theorem ricciTensor_add_neg
     (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     ricciTensor (I := I) g x (v + w) (-u) =
@@ -813,6 +821,7 @@ theorem ricciTensor_add_neg
   simp only [map_add, ContinuousLinearMap.add_apply, map_neg]
   ring
 
+omit [CompleteSpace E] in
 theorem ricciTensor_sub_neg
     (g : SmoothRiemannianMetric I M) (x : M) (v w u : TangentSpace I x) :
     ricciTensor (I := I) g x (v - w) (-u) =
@@ -931,6 +940,7 @@ theorem riemannOp_section_continuous (g : SmoothRiemannianMetric I M) :
         b (riemannOp (LeviCivita (I := I) g) b)) :=
   (riemannOp_section_contMDiff g).continuous
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma trace_eq_chart_sum
     (x : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I : M → Type _) x).baseSet)
@@ -975,6 +985,7 @@ private noncomputable def localFrameSmoothExtension
   have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (chartModelBasis E)
   exact (hframe.exists_contMDiffSection_eqOn_nhd e.open_baseSet he).choose
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma localFrameSmoothExtension_eqOn_nhd (x : M) :
     let e := trivializationAt E (TangentSpace I : M → Type _) x
     ∀ᶠ b in 𝓝 x, ∀ i, (localFrameSmoothExtension (I := I) x i) b =
@@ -985,6 +996,7 @@ private lemma localFrameSmoothExtension_eqOn_nhd (x : M) :
   have hframe := e.isLocalFrameOn_localFrame_baseSet I (⊤ : ℕ∞) (chartModelBasis E)
   exact (hframe.exists_contMDiffSection_eqOn_nhd e.open_baseSet he).choose_spec
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma localFrameSmoothExtension_contMDiff (x : M)
     (i : Fin (Module.finrank ℝ E)) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -998,6 +1010,7 @@ private noncomputable def finBasisReprAt (i : Fin (Module.finrank ℝ E)) :
   LinearMap.toContinuousLinearMap
     (((LinearMap.proj i).comp ((chartModelBasis E).equivFun.toLinearMap)) : E →ₗ[ℝ] ℝ)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 @[simp] private lemma finBasisReprAt_apply (i : Fin (Module.finrank ℝ E)) (v : E) :
     finBasisReprAt (E := E) i v = ((chartModelBasis E).repr v) i := by
   classical

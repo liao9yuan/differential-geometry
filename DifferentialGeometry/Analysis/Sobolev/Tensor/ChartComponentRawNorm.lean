@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.POUF
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ def chartComponentRawSobolevNorm
             (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))
           (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem wkpNormChartRaw_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -54,12 +54,14 @@ theorem wkpNormChartRaw_def
                 (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx))
               (chartTargetEuclid (I := I) (M := M) α) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem wkpNormChartRaw_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (T : SmoothCcTensor g r s) :
     0 ≤ chartComponentRawSobolevNorm (I := I) (M := M) g r s k T :=
   zero_le _
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChartRaw_zero_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) :
     chartComponentRawSobolevNorm (I := I) (M := M) g r s k (0 : SmoothCcTensor g r s) = 0 := by
@@ -96,6 +98,7 @@ theorem wkpNormChartRaw_zero_section
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     (α : M) (ρ u : M → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
@@ -120,6 +123,7 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α u hy]
     rw [mul_zero]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw_funext
     (α : M) (ρ u : M → ℝ) :
     (chartPushedRaw (I := I) (M := M) α (fun x : M => ρ x * u x)) =
@@ -130,6 +134,7 @@ theorem chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw_funext
   exact chartPushedRaw_mul_eq_chartSmoothExt_mul_chartPushedRaw
     (I := I) (M := M) α ρ u y
 
+set_option linter.unusedSectionVars false in
 theorem tensorChartComp_eq_chartSmoothExt_mul_chartPushedRaw_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -153,6 +158,7 @@ theorem tensorChartComp_eq_chartSmoothExt_mul_chartPushedRaw_raw
     (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ))
     (tensorChartComponentRaw (I := I) (M := M) g r s T α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s)
@@ -180,6 +186,7 @@ theorem tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
   · rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNorm_tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ)
     (T : SmoothCcTensor g r s)
@@ -195,6 +202,7 @@ theorem wkpNorm_tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
     (by norm_num : (1 : ℝ≥0∞) ≤ 2)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNorm_eq_finsum_chartAtlasPOU
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -216,18 +224,21 @@ theorem wtwokTwoNorm_eq_finsum_chartAtlasPOU
   exact wkpNorm_tensorChartComp_eq_zero_of_notMem_chartAtlasPOU_finset
     (I := I) (M := M) g r s k T hα Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartSmoothExt_chartAtlasPOU_contDiff (α : M) :
     ContDiff ℝ (⊤ : ℕ∞)
       (chartSmoothExt (I := I) (M := M) α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   contDiff_chartSmoothExt_chartAtlasPOU (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 theorem chartSmoothExt_chartAtlasPOU_hasCompactSupport (α : M) :
     HasCompactSupport
       (chartSmoothExt (I := I) (M := M) α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ)) :=
   hasCompactSupport_chartSmoothExt_chartAtlasPOU (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 theorem exists_iteratedFDeriv_bound_chartSmoothExt_chartAtlasPOU
     (α : M) (m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

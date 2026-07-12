@@ -40,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma cutoffComponentEuclid_eq_cutoff_mul_rawPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -107,6 +108,7 @@ def cutoffLowerOrderTerm
         (⇑(chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯)) y *
       covDerivLowerOrderTerm (I := I) (M := M) g r s S α k Idx Jdx y
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -125,6 +127,7 @@ private lemma chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent
     cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma cutoffLowerOrderTerm_eq_linearCombination
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

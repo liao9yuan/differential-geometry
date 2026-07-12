@@ -6,7 +6,6 @@ import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -118,6 +117,7 @@ variable {EB : Type*} [NormedAddCommGroup EB] [NormedSpace 𝕜 EB]
   (n : WithTop ℕ∞) [ContMDiffVectorBundle n F E IB]
 
 
+omit [ContMDiffVectorBundle n F E IB] in
 theorem contMDiff_multilinearSection_iff_coord {d : ℕ}
     (b : Module.Basis (Fin d) 𝕜 F) {s : ℕ}
     (f : ∀ x : B, Bundle.continuousMultilinearMap 𝕜 s F E x) :

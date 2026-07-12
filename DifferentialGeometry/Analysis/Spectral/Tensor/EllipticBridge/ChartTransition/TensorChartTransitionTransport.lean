@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.ChartTransition.ChartTransitionTransportCLM
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma coeFn_finsetSum_chartL2
     (α : M) {ι : Type*} (s : Finset ι)
     (G : ι → Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -51,6 +51,7 @@ lemma coeFn_finsetSum_chartL2
       filter_upwards [ih] with y hy
       rw [Pi.add_apply, hy, Finset.sum_insert ha]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportChartCenters_finite (α : M) :
     {β : M |
         (Function.support
@@ -73,6 +74,7 @@ private lemma transportChartCenters_finite (α : M) :
 def transportChartCenters (α : M) : Finset M :=
   (transportChartCenters_finite (I := I) (M := M) α).toFinset
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma mem_transportChartCenters (α β : M) :
     β ∈ transportChartCenters (I := I) (M := M) α ↔
       (Function.support
@@ -84,6 +86,7 @@ lemma mem_transportChartCenters (α β : M) :
   rw [Set.Finite.mem_toFinset]
   rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma mem_transportChartCenters_of_pou_cutoff_ne
     (α β : M) {x : M}
     (hβ : ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x ≠ 0)
@@ -92,6 +95,7 @@ lemma mem_transportChartCenters_of_pou_cutoff_ne
   rw [mem_transportChartCenters]
   exact ⟨x, hβ, subset_tsupport _ hα⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sum_chartAtlasPOU_transportChartCenters_eq_one
     (α : M) {x : M}
     (hα : ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x ≠ 0) :
@@ -107,6 +111,7 @@ private lemma sum_chartAtlasPOU_transportChartCenters_eq_one
       (I := I) (M := M) α β hβ hα
   exact (chartAtlasPOU I M).sum_finsupport' x (Set.mem_univ x) hsubset
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pou_smul_raw_eq_transition_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (β α : M)
@@ -143,6 +148,7 @@ private lemma pou_smul_raw_eq_transition_sum
     rw [hχβ]
     ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentScalar_eq_pou_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -207,6 +213,7 @@ private lemma cutoffComponentScalar_eq_pou_transport_sum
       sum_chartAtlasPOU_transportChartCenters_eq_one (I := I) (M := M) α hχα,
       one_mul]
 
+set_option linter.unusedSectionVars false in
 lemma chartPushedRaw_finsetSum
     (α : M) {ι : Type*} (s : Finset ι) (F : ι → M → ℝ) (y : EuclN) :
     chartPushedRaw I α (fun x : M => ∑ a ∈ s, F a x) y =
@@ -257,6 +264,7 @@ private lemma cutoffComponentEuclid_eq_pou_transport_sum
     (fun Q x => transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x *
       tensorChartComponentPou (I := I) (M := M) g r s S β Q.1 Q.2 x) y
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma finsetSum_ae_eq
     (α : M) {ι : Type*} (s : Finset ι) {f h : ι → EuclN → ℝ}
     (hfh : ∀ a ∈ s,
@@ -337,6 +345,7 @@ private lemma tensorL2ChartComponentCutoff_smooth_eq_transport_sum
   rw [h_pointwise]
   exact h_rhs_coeFn.symm
 
+omit [CompleteSpace E] in
 private lemma continuous_transport_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s) :

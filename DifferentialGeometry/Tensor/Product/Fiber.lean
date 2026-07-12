@@ -4,7 +4,6 @@ Authors: Jack McCarthy
 import DifferentialGeometry.Tensor.Product.HomEquiv
 import Mathlib.Topology.VectorBundle.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -104,31 +103,37 @@ variable {E₂ : B → Type*} [∀ x, AddCommGroup (E₂ x)] [∀ x, Module 𝕜
   [TopologicalSpace (TotalSpace F₂ E₂)] [∀ x, TopologicalSpace (E₂ x)]
   [FiberBundle F₂ E₂] [VectorBundle 𝕜 F₂ E₂]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 @[simp]
 theorem toModel_add {x : B} (t₁ t₂ : E₁ x ⊗[𝕜] E₂ x) :
     toModel F₁ F₂ (t₁ + t₂) = toModel F₁ F₂ t₁ + toModel F₁ F₂ t₂ :=
   map_add (trivEquiv 𝕜 F₁ F₂ E₁ E₂ x) t₁ t₂
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 @[simp]
 theorem toModel_smul {x : B} (c : 𝕜) (t : E₁ x ⊗[𝕜] E₂ x) :
     toModel F₁ F₂ (c • t) = c • toModel F₁ F₂ t :=
   map_smul (trivEquiv 𝕜 F₁ F₂ E₁ E₂ x) c t
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 @[simp]
 theorem toModel_zero {x : B} :
     toModel F₁ F₂ (0 : E₁ x ⊗[𝕜] E₂ x) = 0 :=
   map_zero (trivEquiv 𝕜 F₁ F₂ E₁ E₂ x)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 @[simp]
 theorem fromModel_toModel {x : B} (t : E₁ x ⊗[𝕜] E₂ x) :
     fromModel F₁ F₂ (toModel F₁ F₂ t) = t :=
   (trivEquiv 𝕜 F₁ F₂ E₁ E₂ x).symm_apply_apply t
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 @[simp]
 theorem toModel_fromModel {x : B} (f : F₁ ⊗[𝕜] F₂) :
     toModel F₁ F₂ (fromModel F₁ F₂ (x := x) f : E₁ x ⊗[𝕜] E₂ x) = f :=
   (trivEquiv 𝕜 F₁ F₂ E₁ E₂ x).apply_symm_apply f
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 theorem toModel_injective {x : B} :
     Function.Injective (fun t : E₁ x ⊗[𝕜] E₂ x => toModel F₁ F₂ t) :=
   (trivEquiv 𝕜 F₁ F₂ E₁ E₂ x).injective

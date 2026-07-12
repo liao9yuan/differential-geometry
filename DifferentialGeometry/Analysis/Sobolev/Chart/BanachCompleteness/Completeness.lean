@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Completeness.IteratedSobo
 import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ section
 
 variable [NeZero (Module.finrank ℝ E)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem wkpNormChart_cauchy_of_seminormCauchySeq
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -59,6 +59,7 @@ private theorem wkpNormChart_cauchy_of_seminormCauchySeq
   rw [← ENNReal.ofReal_toReal h_ne_top]
   exact ENNReal.ofReal_le_ofReal hdist.le
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -153,6 +154,7 @@ private theorem exists_chart_limit
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     k p hp_one hp_top h_chart_mem h_chart_cauchy
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chartPushed_tendstoInMeasure
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -217,6 +219,7 @@ private theorem chartPushed_tendstoInMeasure
   exact tendstoInMeasure_of_tendsto_eLpNorm_of_ne_top hp_zero hp_top
     h_aesm_seq h_aesm_lim h_eLp
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem exists_subseq_chartPushed_ae_tendsto
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}

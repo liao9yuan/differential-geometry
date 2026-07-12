@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 
 namespace DifferentialGeometry
@@ -33,6 +32,7 @@ def coframeInFrame
     (x : M) (i : Idx) : TangentSpace I x →ₗ[Real] Real :=
   hframe.coeff i x
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem coframeInFrame_apply
     (frame : Idx -> (x : M) -> TangentSpace I x)
     (hframe : IsLocalFrameOn I E 1 frame u)
@@ -48,6 +48,7 @@ def tensor0SComponentInFrame {s : Nat}
     (vectorSlots : Fin s -> Idx) : Real :=
   T x (fun a => frame (vectorSlots a) x)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tensor0SComponentInFrame_eval {s : Nat}
     (T : FrameTensor0SField (I := I) (M := M) s)
     (frame : Idx -> (x : M) -> TangentSpace I x)
@@ -67,6 +68,7 @@ def tensorRSComponentFromCovariantInputInFrame {r s : Nat}
     (vectorSlots : Fin s -> Idx) : Real :=
   (T x (input x)) (fun a => frame (vectorSlots a) x)
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tensorRSComponentFromCovariantInputInFrame_eval {r s : Nat}
     (T : FrameTensorRSField (I := I) (M := M) r s)
     (input : (x : M) -> Tensor0SBundle.Tensor0SSpace (𝕜 := Real) r I x)

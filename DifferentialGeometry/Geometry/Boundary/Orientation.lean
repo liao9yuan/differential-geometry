@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Boundary.OutwardNormal
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ theorem inwardCoord_chart_consistent
         Set.range (boundaryInclusionMfderiv (M := M) y).toLinearMap :=
   HasOrientableBoundary.inwardCoord_chart_consistent α₀ α₁ y hα₀ hα₁
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem inwardCoord_chart_consistent_self (α : BoundaryManifold I M)
     (y : BoundaryManifold I M) :
     ∃ c : ℝ, 0 < c ∧

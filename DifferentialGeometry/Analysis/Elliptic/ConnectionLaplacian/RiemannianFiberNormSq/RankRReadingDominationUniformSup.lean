@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorCurvatureUnitEvalBridge
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorSlotwiseCurvatureRS
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberNormSqComponent_covGradBundleEquivSymm_slice_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)
@@ -54,6 +54,7 @@ private lemma fiberNormSqComponent_covGradBundleEquivSymm_slice_eq
   congr 1
   exact (Fin.comp_cons e a J).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -68,6 +69,7 @@ private lemma riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_basis
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_covGradBundleEquiv_symm_slice_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x)

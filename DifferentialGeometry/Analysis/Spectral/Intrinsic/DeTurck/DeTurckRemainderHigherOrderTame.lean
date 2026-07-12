@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDr
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseHebeyToHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorFiberNormBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem mixed_continuous_rfns
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) :
@@ -41,6 +41,7 @@ private theorem mixed_continuous_rfns
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem mixed_real_holder_two_nonneg
     (g : SmoothRiemannianMetric I M) (φ ψ : M → ℝ)
     (hφc : Continuous φ) (hψc : Continuous ψ)

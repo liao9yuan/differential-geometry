@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDroppi
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Smooth.EigenvectorSmoothChartComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.PouCutoffComponentBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,6 +50,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [BoundarylessManifold I M] in
 theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -137,6 +137,7 @@ theorem exists_zeroContentR_le_fiberNorm_on_pouKernel
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 private theorem exists_iteratedFDeriv_chartComponent_le_fiberNorm_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P : TensorCompIdx (E := E) r s) (j : ℕ) :
@@ -959,6 +960,7 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact ht.nullMeasurableSet
 
+set_option linter.unusedSectionVars false in
 private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
     transportChartCenters (I := I) (M := M) β ⊆
       chartAtlasPOU_finset (I := I) (M := M) := by
@@ -967,6 +969,7 @@ private lemma transportChartCenters_subset_chartAtlasPOU_finset' (β : M) :
   rw [chartAtlasPOU_finset_mem]
   exact hγ.mono Set.inter_subset_left
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedPouWeight_toEuclidean_extChartAt'
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartPushedPouWeight (I := I) (M := M) α
@@ -981,6 +984,7 @@ private def chartKernelCutoffPushed' (α : M) : EuclN → ℝ :=
   chartPushedRaw (I := I) (M := M) α
     (fun x => ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
 
+set_option linter.unusedSectionVars false in
 private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel'
     (α : M) {y : EuclN} (hy : y ∈ chartPouKernel (I := I) (M := M) α) :
     chartKernelCutoffPushed' (I := I) (M := M) α y = 1 := by
@@ -1001,6 +1005,7 @@ private lemma chartKernelCutoffPushed_eq_one_on_chartPouKernel'
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy_target, hsymm]
   exact chartKernelCutoff_eqOn_one (I := I) (M := M) α hw_supp
 
+set_option linter.unusedSectionVars false in
 private lemma chartKernelCutoffPushed_toEuclidean_extChartAt'
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartKernelCutoffPushed' (I := I) (M := M) α
@@ -1011,6 +1016,7 @@ private lemma chartKernelCutoffPushed_toEuclidean_extChartAt'
       (toEuclidean_extChartAt_mem_chartTargetEuclid (I := I) (M := M) α hz),
     symm_toEuclidean_symm_toEuclidean_extChartAt (I := I) (M := M) α hz]
 
+set_option linter.unusedSectionVars false in
 private lemma tensorL2ChartComponentU_ae_eq_chartKernelCutoffPushed_mul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (Q : TensorCompIdx (E := E) r s) :
@@ -1029,6 +1035,7 @@ private lemma tensorL2ChartComponentU_ae_eq_chartKernelCutoffPushed_mul
       one_mul]
   · rw [hy hk, mul_zero]
 
+omit [BoundarylessManifold I M] in
 private lemma tensorL2ChartComponentU_ae_zero_where_chartPushedPouWeight_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (u : TensorL2 r s g) (α : M) (Q : TensorCompIdx (E := E) r s) :
@@ -1366,6 +1373,7 @@ private lemma chartLimitSection_tensorL2ChartComponent_eq_transport_sum
   funext y
   rw [Finset.mul_sum]
 
+set_option linter.unusedSectionVars false in
 private lemma transportSum_u_ae_zero_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u : TensorL2 r s g)
     (α β : M) (P₀ : TensorCompIdx (E := E) r s)

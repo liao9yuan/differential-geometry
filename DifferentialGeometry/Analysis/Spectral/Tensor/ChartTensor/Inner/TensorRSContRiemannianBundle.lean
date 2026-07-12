@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Hom
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -62,6 +61,7 @@ private def chartInnerRSBilin
         (I := I) (M := M) g r s α b c T S
       simpa using this)
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma chartInnerRSBilin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T S : TensorRSModel r s ℝ E) :
@@ -102,6 +102,7 @@ def chartTensorInnerRSCLM
   LinearMap.toContinuousLinearMap
     (chartInnerRSLinearOuter (I := I) (M := M) g r s α b)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartTensorInnerRSCLM_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T S : TensorRSModel r s ℝ E) :
@@ -110,6 +111,7 @@ def chartTensorInnerRSCLM
         (I := I) (M := M) g r s α b T S := rfl
 
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerRSCLM_continuousAt_of_baseSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {b₀ : M} (hb₀ : b₀ ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -142,6 +144,7 @@ lemma chartTensorInnerRSCLM_continuousAt_of_baseSet
   exact hCont.continuousAt (hOpen.mem_nhds hb₀)
 
 
+set_option linter.unusedSectionVars false in
 private lemma toModel_trivAt_symm_eq_chartRSTwist
     (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -245,6 +248,7 @@ private lemma toModel_trivAt_symm_eq_chartRSTwist
   rw [h_lhs_simplify, chartRSTwist_apply]
 
 
+set_option linter.unusedSectionVars false in
 private lemma tensorRSRiemannianInnerCLM_at_trivAt_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -263,6 +267,7 @@ private lemma tensorRSRiemannianInnerCLM_at_trivAt_symm
     (I := I) (M := M) g r s α hb v w).symm
 
 
+set_option linter.unusedSectionVars false in
 lemma tensorRSRiemannianInnerCLM_inCoordinates_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -307,6 +312,7 @@ lemma tensorRSRiemannianInnerCLM_inCoordinates_apply
   rfl
 
 
+set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ContinuousOn (fun b : M =>
@@ -342,6 +348,7 @@ theorem tensorRSRiemannianInnerCLM_continuousOn
     (I := I) (M := M) g r s b₀ hx v w).symm
 
 
+set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     Continuous (fun b : M =>

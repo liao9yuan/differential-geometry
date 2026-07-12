@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.IsManifold.Basic
 import Mathlib.Geometry.Manifold.IsManifold.ExtChartAt
 import Mathlib.Topology.OpenPartialHomeomorph.Constructions
 
-set_option linter.unusedSectionVars false
 
 open Set Function Filter Metric Bundle Manifold
 open scoped Topology Manifold ContDiff
@@ -54,6 +53,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 include I in
 
+omit [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
 theorem manifold_exists_contractible_open_nhd (x : M) :
     ∃ U : Set M, IsOpen U ∧ x ∈ U ∧ ContractibleSpace U := by
   set e : OpenPartialHomeomorph M E :=
@@ -92,6 +92,7 @@ theorem manifold_exists_contractible_open_nhd (x : M) :
 
 include I in
 
+omit [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
 theorem manifold_semilocallySimplyConnectedSpace :
     SemilocallySimplyConnectedSpace M := ⟨by
   intro x

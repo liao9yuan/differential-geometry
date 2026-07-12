@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Analysis.InnerProductSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor0SBundle_enorm_eq_riemannianBundle_enorm
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (x : M) (v : TangentSpace I x) :

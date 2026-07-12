@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovari
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SecondOrderHomBundle
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomTensorRSRiemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ def homTensorRSApplyFib (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem appFullRSFib_contMDiff (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -67,6 +67,7 @@ def homTensorRSApply (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma appFullRS_toSection (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -119,6 +120,7 @@ theorem appFullRS_smul_right (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem appFullRSFib_add_left (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ₁ Ψ₂ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (W : SmoothCcTensor g r a) (x : M) :
@@ -150,6 +152,7 @@ noncomputable def slotInsertHomTensorRSFib (_g : SmoothRiemannianMetric I M) (r 
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma slotExtendFullFib_apply (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
     (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (D : TensorRSSpace r (a + 1) I x) :
     slotInsertHomTensorRSFib (I := I) (M := M) g r a c x A D =
@@ -159,6 +162,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 lemma slotExtendFullFib_apply_eval (g : SmoothRiemannianMetric I M) (r a c : ℕ) (x : M)
     (A : TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (D : TensorRSSpace r (a + 1) I x)
     (Dlow : Tensor0SSpace r I x) (v0 : TangentSpace I x) (vs : Fin c → TangentSpace I x) :
@@ -178,6 +182,7 @@ lemma slotExtendFullFib_apply_eval (g : SmoothRiemannianMetric I M) (r a c : ℕ
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem slotExtendFullFib_contMDiff (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r a ℝ E →L[ℝ] TensorRSModel r c ℝ E)) ∞
@@ -256,6 +261,7 @@ def homTensorRSDirCovDeriv (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma homTensorRSCovDirHom_continuous (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) :
     Continuous (fun v : TangentSpace I x => homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x v) :=
@@ -263,6 +269,7 @@ lemma homTensorRSCovDirHom_continuous (g : SmoothRiemannianMetric I M) (r a c : 
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma homTensorRSCovDirHom_add (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) (v v' : TangentSpace I x) :
     homTensorRSDirCovDeriv (I := I) (M := M) g r a c Ψ x (v + v') =
@@ -273,6 +280,7 @@ lemma homTensorRSCovDirHom_add (g : SmoothRiemannianMetric I M) (r a c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma homTensorRSCovDirHom_smul (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M) (k : ℝ)
     (v : TangentSpace I x) :
@@ -297,6 +305,7 @@ noncomputable def homTensorRSCovGradDirCLM (g : SmoothRiemannianMetric I M) (r a
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma homTensorRSCovGradDirCLM_apply (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Ψ : Π x : M, TensorRSSpace r a I x →L[ℝ] TensorRSSpace r c I x) (x : M)
     (d : TensorRSSpace r a I x) (v : TangentSpace I x) :
@@ -489,6 +498,7 @@ theorem tensorCovDerivAt_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a c : 
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [BoundarylessManifold I M] in
 theorem covGradBundleEquiv_symm_covGrad_appFullRS_eq (g : SmoothRiemannianMetric I M) (r a : ℕ)
     (W : SmoothCcTensor g r a) (x : M) (v0 : TangentSpace I x) :
     (covGradBundleEquiv (I := I) (M := M) r a x).symm
@@ -649,6 +659,7 @@ noncomputable def homTensorRSFieldApply (g : SmoothRiemannianMetric I M) (r a c 
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma appFullSec_toSection (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (W : SmoothCcTensor g r a) (x : M) :
     (homTensorRSFieldApply (I := I) (M := M) g r a c Q W).toSection x =
@@ -738,6 +749,7 @@ noncomputable def slotExtendFullSec (g : SmoothRiemannianMetric I M) (r a c : �
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma slotExtendFullSec_apply (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (x : M) :
     (show TensorRSSpace r (a + 1) I x →L[ℝ] TensorRSSpace r (c + 1) I x from
@@ -768,6 +780,7 @@ def castHomTensorRSFieldSrc {a a' : ℕ} (r c : ℕ) (h : a = a')
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem appFullSec_castRankCc_db {a a' c c' : ℕ} (g : SmoothRiemannianMetric I M) (r : ℕ)
     (ha : a = a') (hc : c = c')
     (Q : HomTensorRSField (E := E) (M := M) r a c I) (V : SmoothCcTensor g r a) :
@@ -787,6 +800,7 @@ def NormalFormFull (g : SmoothRiemannianMetric I M) (r d : ℕ)
           homTensorRSFieldApply (I := I) (M := M) g r (rr + k) (rr + d + p) (Q k) (iteratedCovGrad g r rr k W)
 
 
+set_option linter.unusedSectionVars false in
 theorem normalForm_zeroFull (g : SmoothRiemannianMetric I M) (r d : ℕ)
     (op : ∀ (p rr : ℕ), SmoothCcTensor g r rr → SmoothCcTensor g r (rr + d + p))
     (rr : ℕ) (Q₀ : HomTensorRSField (E := E) (M := M) r (rr + 0) (rr + d + 0) I)
@@ -1042,6 +1056,7 @@ private noncomputable def chooseSecAtFull
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma chooseSecAtFull_eq
     (g : SmoothRiemannianMetric I M) (r a : ℕ) (x : M) (v : TensorRSSpace r a I x) :
     (chooseSecAtFull (I := I) (M := M) g r a x v).toSection x = v :=
@@ -1090,6 +1105,7 @@ set_option backward.isDefEq.respectTransparency false in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 private lemma valueLocalLinearHomFib_apply
     (g : SmoothRiemannianMetric I M) (r a c : ℕ)
     (F : SmoothCcTensor g r a → SmoothCcTensor g r c)

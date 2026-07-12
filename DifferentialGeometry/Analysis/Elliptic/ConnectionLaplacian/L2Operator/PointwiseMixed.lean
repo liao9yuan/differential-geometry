@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacian
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ def connLaplacianMixed (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rawTensorConnLap (I := I) g r s (fun b : M => T b) x
 
 
+omit [CompactSpace M] in
 @[simp] lemma connLaplacianMixed_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -58,6 +58,7 @@ def connLaplacianMixedSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
   fun _ x => connLaplacianMixed (I := I) g r s T x
 
 
+omit [CompactSpace M] in
 theorem connLaplacianMixed_scalar_eq_function
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 0 ℝ E,

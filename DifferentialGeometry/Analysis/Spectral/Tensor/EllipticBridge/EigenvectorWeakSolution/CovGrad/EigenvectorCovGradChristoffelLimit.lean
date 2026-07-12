@@ -34,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+set_option linter.unusedSectionVars false in
 private lemma covDerivLowerOrderTerm_pouSmul_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

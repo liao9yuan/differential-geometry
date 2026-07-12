@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+set_option linter.unusedSectionVars false in
 theorem exists_pou_chartDensity_bound_on_chartTarget
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.G
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,11 +30,13 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [ChartedSpace H M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma locallyCompactSpace_M (I : ModelWithCorners ℝ E H)
     [ChartedSpace H M] : LocallyCompactSpace M := by
   haveI : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
 
+set_option linter.unusedSectionVars false in
 private lemma regularSpace_M (I : ModelWithCorners ℝ E H)
     [ChartedSpace H M] [T2Space M] : RegularSpace M := by
   haveI : LocallyCompactSpace M := locallyCompactSpace_M (E := E) (H := H) (M := M) I
@@ -43,12 +44,14 @@ private lemma regularSpace_M (I : ModelWithCorners ℝ E H)
   haveI : R1Space M := T2Space.r1Space
   infer_instance
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pouTsupport_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       (chartAt H α).source :=
   (chartAtlasPOU_isSubordinate I M) α
 
+omit [ChartedSpace H M] [T2Space M] in
 private lemma exists_open_closure_subset_open_of_isCompact
     (I : ModelWithCorners ℝ E H) [ChartedSpace H M] [T2Space M]
     {K U : Set M} (hK : IsCompact K) (hU_open : IsOpen U)
@@ -58,6 +61,7 @@ private lemma exists_open_closure_subset_open_of_isCompact
   have hU_nhdsSet : U ∈ 𝓝ˢ K := hU_open.mem_nhdsSet.mpr hKU
   exact hK.exists_isOpen_closure_subset hU_nhdsSet
 
+omit [ChartedSpace H M] [T2Space M] in
 private lemma exists_open_closure_open_closure_subset_open_of_isCompact
     (I : ModelWithCorners ℝ E H) [ChartedSpace H M] [T2Space M]
     {K U : Set M} (hK : IsCompact K) (hU_open : IsOpen U)
@@ -73,6 +77,7 @@ private lemma exists_open_closure_open_closure_subset_open_of_isCompact
       (M := M) I hclos_V₁_compact hU_open hclos_V₁_U
   refine ⟨V₁, V₂, hV₁_open, hV₂_open, hKV₁, hclos_V₁_V₂, hclos_V₂_U⟩
 
+omit [I.Boundaryless] in
 private lemma exists_globalBump_data (α : M) :
     ∃ V₁ V₂ : Set M, ∃ ψ : M → ℝ,
       IsOpen V₁ ∧ IsOpen V₂ ∧
@@ -130,6 +135,7 @@ private noncomputable def globalBumpψ (α : M) : M → ℝ :=
   Classical.choose (Classical.choose_spec
     (Classical.choose_spec (exists_globalBump_data (I := I) (M := M) α)))
 
+omit [I.Boundaryless] in
 private lemma globalBumpData_spec (α : M) :
     IsOpen (globalBumpV₁ (I := I) (M := M) α) ∧
       IsOpen (globalBumpV₂ (I := I) (M := M) α) ∧
@@ -151,34 +157,41 @@ private lemma globalBumpData_spec (α : M) :
     (Classical.choose_spec
       (Classical.choose_spec (exists_globalBump_data (I := I) (M := M) α)))
 
+omit [I.Boundaryless] in
 private lemma globalBumpV₁_isOpen (α : M) :
     IsOpen (globalBumpV₁ (I := I) (M := M) α) :=
   (globalBumpData_spec (I := I) (M := M) α).1
 
+omit [I.Boundaryless] in
 private lemma pouTsupport_subset_globalBumpV₁ (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
       globalBumpV₁ (I := I) (M := M) α :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.1
 
+omit [I.Boundaryless] in
 private lemma closure_globalBumpV₁_subset_globalBumpV₂ (α : M) :
     closure (globalBumpV₁ (I := I) (M := M) α) ⊆
       globalBumpV₂ (I := I) (M := M) α :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.1
 
+omit [I.Boundaryless] in
 private lemma closure_globalBumpV₂_subset_chartAt_source (α : M) :
     closure (globalBumpV₂ (I := I) (M := M) α) ⊆ (chartAt H α).source :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.2.1
 
+omit [I.Boundaryless] in
 private lemma globalBumpψ_contMDiff (α : M) :
     ContMDiff I 𝓘(ℝ) ∞ (globalBumpψ (I := I) (M := M) α) :=
   (globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.1
 
+omit [I.Boundaryless] in
 private lemma globalBumpψ_eq_one_on_closure_V₁ (α : M) {b : M}
     (hb : b ∈ closure (globalBumpV₁ (I := I) (M := M) α)) :
     globalBumpψ (I := I) (M := M) α b = 1 :=
   ((globalBumpData_spec (I := I) (M := M) α).2.2.2.2.2.2.2.1 b).mp hb
 
+omit [I.Boundaryless] in
 private lemma globalBumpψ_eq_zero_off_V₂ (α : M) {b : M}
     (hb : b ∈ (globalBumpV₂ (I := I) (M := M) α)ᶜ) :
     globalBumpψ (I := I) (M := M) α b = 0 :=
@@ -219,6 +232,7 @@ noncomputable def chartFrameNormGlobalSmooth
     globalBumpψ (I := I) (M := M) α b • chartFrameNorm (I := I) g α i b, ?_⟩
   exact h
 
+omit [I.Boundaryless] in
 private lemma chartFrameNormGlobalSmooth_toFun_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (b : M) :
@@ -228,6 +242,7 @@ private lemma chartFrameNormGlobalSmooth_toFun_apply
   unfold chartFrameNormGlobalSmooth
   rfl
 
+omit [I.Boundaryless] in
 theorem chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -252,6 +267,7 @@ theorem chartFrameNormGlobalSmooth_eq_chartFrameNorm_on_pouTsupportNbhd
       globalBumpψ_eq_one_on_closure_V₁ (I := I) (M := M) α (subset_closure hb)
     rw [chartFrameNormGlobalSmooth_toFun_apply, hψ, one_smul]
 
+omit [I.Boundaryless] in
 theorem chartFrameNormGlobalSmooth_orthonormal_on_pouTsupportGoodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M}

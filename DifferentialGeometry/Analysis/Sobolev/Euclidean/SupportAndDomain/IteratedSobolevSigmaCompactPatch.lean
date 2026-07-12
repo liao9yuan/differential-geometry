@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -17,6 +16,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 lemma exists_monotone_precompact_open_exhaustion
     {Ω : Set E} (hΩ_open : IsOpen Ω) :
     ∃ Ω_seq : ℕ → Set E,
@@ -123,6 +123,7 @@ def patchedFunction
   exact fun x =>
     if h : ∃ n, x ∈ Ω_seq n then g_seq (Nat.find h) x else 0
 
+omit [NeZero d] in
 lemma patchedFunction_ae_eq_on_each
     {Ω_seq : ℕ → Set E}
     (hΩ_seq_open : ∀ n, IsOpen (Ω_seq n))
@@ -184,6 +185,7 @@ lemma patchedFunction_ae_eq_on_each
       rw [ae_restrict_union_eq]
       exact ⟨h_ae_on_left, h_ae_on_right⟩
 
+omit [NeZero d] in
 lemma exists_global_of_ae_coherent_monotone
     {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ ⊤)
     {Ω : Set E} (_hΩ_open : IsOpen Ω)
@@ -274,6 +276,7 @@ lemma exists_global_of_ae_coherent_monotone
         h_bound_eventually h_indicator_aem h_indicator_tendsto
     exact ⟨h_g_aem_Ω, lt_of_le_of_lt h_eLpNorm_g_le_C hC_lt_top⟩
 
+omit [NeZero d] in
 theorem MemWkp_of_sigma_compact_cover_and_globalLp_zero
     {p : ℝ≥0∞} (_hp_one : 1 ≤ p) (_hp_top : p ≠ ⊤)
     {Ω : Set E} (_hΩ_open : IsOpen Ω) {u : E → ℝ}

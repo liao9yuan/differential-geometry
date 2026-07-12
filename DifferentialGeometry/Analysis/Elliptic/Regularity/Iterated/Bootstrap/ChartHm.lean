@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedSectionVars false in
 theorem MemWkp_extend_via_cutoff_poly
     (k : ℕ)
     {Ω Ω' K : Set EuclN}
@@ -141,6 +141,7 @@ theorem MemWkp_extend_via_cutoff_poly
     (d := Module.finrank ℝ E) (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open
     h_eta_u_ae_eq_u).mp h_eta_u_in_Ω
 
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -180,6 +181,7 @@ private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
   rw [h_succ_eq] at h_next
   exact h_next
 
+set_option linter.unusedSectionVars false in
 theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -305,6 +307,7 @@ theorem chartPushed_memWkp_m_plus_two_step
   exact chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
     (I := I) (M := M) g α u_h m h_intermediate_w1p h_top_memWkp_two
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_m_plus_two_of_chartPushed_memWkp_m_plus_two
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)

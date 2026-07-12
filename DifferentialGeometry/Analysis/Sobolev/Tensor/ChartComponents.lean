@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ noncomputable def tensorChartComp
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma tensorChartComp_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -43,6 +43,7 @@ noncomputable def tensorChartComp
     tensorChartComp (I := I) (M := M) g r s S α Idx Jdx =
       tensorChartComponent (I := I) (M := M) g r s S α Idx Jdx := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComp_apply_of_mem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -56,6 +57,7 @@ lemma tensorChartComp_apply_of_mem
   rw [tensorChartComp_def, tensorChartComponent_def]
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComp_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -140,6 +142,7 @@ noncomputable def tensorChartCompₗ
     tensorChartCompₗ (I := I) (M := M) g r s α Idx Jdx S =
       tensorChartComp (I := I) (M := M) g r s S α Idx Jdx := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComp_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -151,6 +154,7 @@ theorem tensorChartComp_contMDiff
   rw [tensorChartComp_def]
   exact tensorChartComponent_contMDiff (I := I) (M := M) g r s S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComp_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -160,6 +164,7 @@ theorem tensorChartComp_contDiff
   have h := tensorChartComp_contMDiff (I := I) (M := M) g r s S α Idx Jdx
   rwa [contMDiff_iff_contDiff] at h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComp_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -169,6 +174,7 @@ theorem tensorChartComp_contDiffOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (tensorChartComp_contDiff (I := I) (M := M) g r s S α Idx Jdx).contDiffOn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComp_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -178,6 +184,7 @@ theorem tensorChartComp_hasCompactSupport
   rw [tensorChartComp_def]
   exact tensorChartComponent_hasCompactSupport (I := I) (M := M) g r s S α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorChartComp_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -193,6 +200,7 @@ noncomputable def tensorChartPushed
     TensorRSModel r s ℝ E :=
   tensorChartPushedRawModel (I := I) (M := M) g r s S α y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma tensorChartPushed_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -200,6 +208,7 @@ noncomputable def tensorChartPushed
     tensorChartPushed (I := I) (M := M) g r s S α y =
       tensorChartPushedRawModel (I := I) (M := M) g r s S α y := rfl
 
+set_option linter.unusedSectionVars false in
 theorem tensorChartPushed_eq_sum_tensorChartComp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -213,6 +222,7 @@ theorem tensorChartPushed_eq_sum_tensorChartComp
   exact chartPushedRaw_eq_sum_tensorChartComponent
     (I := I) (M := M) g r s S α y
 
+set_option linter.unusedSectionVars false in
 theorem tensorChartPushed_eq_zero_of_tensorChartComp_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -238,6 +248,7 @@ theorem tensorChartComp_eq_zero_of_section_eq_zero
   rw [hS]
   exact tensorChartComp_zero (I := I) (M := M) g r s α Idx Jdx
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem card_tensorChartComp_index (r s : ℕ) :
     Fintype.card
         ((Fin r → Fin (Module.finrank ℝ E)) ×

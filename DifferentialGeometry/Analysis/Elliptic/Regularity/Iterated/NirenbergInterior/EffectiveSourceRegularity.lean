@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIde
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChart.PolymorphicRegularity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.ChartHm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,10 +44,12 @@ private def dirsOf (dirs_seq : ℕ → Fin (Module.finrank ℝ E)) (m : ℕ) :
     Fin m → Fin (Module.finrank ℝ E) :=
   fun i => dirs_seq i.val
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma dirsOf_zero (dirs_seq : ℕ → Fin (Module.finrank ℝ E)) :
     dirsOf dirs_seq 0 = Fin.elim0 := by
   funext i; exact i.elim0
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma dirsOf_succ (dirs_seq : ℕ → Fin (Module.finrank ℝ E)) (m : ℕ) :
     dirsOf dirs_seq (m + 1) = Fin.snoc (dirsOf dirs_seq m) (dirs_seq m) := by
   funext i

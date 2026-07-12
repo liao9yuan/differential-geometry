@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -20,6 +19,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+set_option linter.unusedSectionVars false in
 theorem perturbedInner_self_upper_bound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -39,6 +39,7 @@ theorem perturbedInner_self_upper_bound
   rw [perturbedInner_apply]
   nlinarith [hle]
 
+set_option linter.unusedSectionVars false in
 theorem gInner_self_le_of_gFibreOpBound
     (g : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)

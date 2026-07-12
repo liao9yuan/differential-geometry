@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH4Bridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2Regularity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ def ChartSideH2kBridge (_g : SmoothRiemannianMetric I M) (k : ℕ) (u : M → �
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
         (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem memWkpChart_2k_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (k : ℕ) {u : M → ℝ}
     (h_bridge : ChartSideH2kBridge (I := I) (M := M) g k u) :
@@ -50,6 +50,7 @@ theorem memWkpChart_2k_of_chartSideH2kBridge
   intro α
   exact h_bridge α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_2k_lt_top_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (k : ℕ) {u : M → ℝ}
     (h_bridge : ChartSideH2kBridge (I := I) (M := M) g k u) :
@@ -59,6 +60,7 @@ theorem wkpNormChart_2k_lt_top_of_chartSideH2kBridge
     (I := I) (M := M) g (k := 2 * k) (p := 2) (by norm_num)
     (memWkpChart_2k_of_chartSideH2kBridge (I := I) (M := M) g k h_bridge)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -80,6 +82,7 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
   · exact wkpNormChart_2k_lt_top_of_chartSideH2kBridge
       (I := I) (M := M) g k h_bridge
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -101,6 +104,7 @@ theorem exists_laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
   · exact (laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge
       (I := I) (M := M) g k hu_h h_bridge).2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_2k_two_sided_of_chartSideBridges
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -200,6 +204,7 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH2kBridge_one
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) < ⊤ :=
   iteratedH2Regularity_one (I := I) (M := M) g hu_h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem chartSideH4Bridge_iff_chartSideH2kBridge_two
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.ChartSideH4Bridge
@@ -210,6 +215,7 @@ theorem chartSideH4Bridge_iff_chartSideH2kBridge_two
   have h_eq : (2 : ℕ) * 2 = 4 := by norm_num
   rw [h_eq]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem chartSideH2kBridge_two_of_chartSideH4Bridge
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h : DifferentialGeometry.Analysis.Laplacian.LaplacianDomainPowH4Bridge.ChartSideH4Bridge
@@ -217,6 +223,7 @@ theorem chartSideH2kBridge_two_of_chartSideH4Bridge
     ChartSideH2kBridge (I := I) (M := M) g 2 u :=
   (chartSideH4Bridge_iff_chartSideH2kBridge_two (I := I) (M := M) g u).mp h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem chartSideH4Bridge_of_chartSideH2kBridge_two
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h : ChartSideH2kBridge (I := I) (M := M) g 2 u) :
@@ -224,6 +231,7 @@ theorem chartSideH4Bridge_of_chartSideH2kBridge_two
       (I := I) (M := M) g u :=
   (chartSideH4Bridge_iff_chartSideH2kBridge_two (I := I) (M := M) g u).mpr h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH4Bridge
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -248,6 +256,7 @@ theorem laplacianDomainPow_memWkpChart_2k_of_chartSideH4Bridge
   rw [h_eq] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem chartSideH2kBridge_le_of_le
     (g : SmoothRiemannianMetric I M)
     {k j : ℕ} (hkj : j ≤ k) {u : M → ℝ}
@@ -257,6 +266,7 @@ theorem chartSideH2kBridge_le_of_le
   have h_le : 2 * j ≤ 2 * k := Nat.mul_le_mul_left 2 hkj
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le h_le (h α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem chartSideH2kBridge_pred
     (g : SmoothRiemannianMetric I M)
     (k : ℕ) {u : M → ℝ}
@@ -264,6 +274,7 @@ theorem chartSideH2kBridge_pred
     ChartSideH2kBridge (I := I) (M := M) g k u :=
   chartSideH2kBridge_le_of_le (I := I) (M := M) g (Nat.le_succ k) h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem chartSideH2kBridge_add
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u v : M → ℝ}
@@ -277,6 +288,7 @@ theorem chartSideH2kBridge_add
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (hu α) (hv α)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem chartSideH2kBridge_const_smul
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     (c : ℝ) {u : M → ℝ}
@@ -289,6 +301,7 @@ theorem chartSideH2kBridge_const_smul
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (hu α) c
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem chartSideH2kBridge_neg
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u : M → ℝ}
@@ -300,6 +313,7 @@ theorem chartSideH2kBridge_neg
   rw [hEq] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem chartSideH2kBridge_sub
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u v : M → ℝ}
@@ -313,6 +327,7 @@ theorem chartSideH2kBridge_sub
   rw [hEq] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem memWkpChart_2j_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M)
     {k j : ℕ} (hkj : j ≤ k) {u : M → ℝ}
@@ -324,6 +339,7 @@ theorem memWkpChart_2j_of_chartSideH2kBridge
   exact DifferentialGeometry.Analysis.Sobolev.Chart.MemWkpChart.le_of_le
     (Nat.mul_le_mul_left 2 hkj) h_full
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_2j_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M)
     {k j : ℕ} (hkj : j ≤ k)
@@ -338,6 +354,7 @@ theorem laplacianDomainPow_memWkpChart_2j_of_chartSideH2kBridge
         Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
   memWkpChart_2j_of_chartSideH2kBridge (I := I) (M := M) g hkj h_bridge
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_2k_unified
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

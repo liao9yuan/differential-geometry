@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.JointContinuity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,11 +22,13 @@ noncomputable def inhomogAugmentedCoeff
   (((A x t).comp (ContinuousLinearMap.fst ℝ G ℝ)) +
     ((ContinuousLinearMap.snd ℝ G ℝ).smulRight (b x t))).prod 0
 
+omit [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace G] in
 @[simp] lemma inhomogAugmentedCoeff_apply
     (A : F → ℝ → (G →L[ℝ] G)) (b : F → ℝ → G) (x : F) (t : ℝ) (gc : G × ℝ) :
     inhomogAugmentedCoeff A b x t gc = (A x t gc.1 + gc.2 • b x t, 0) := by
   simp [inhomogAugmentedCoeff]
 
+omit [NormedSpace ℝ F] [CompleteSpace G] in
 private lemma inhomogAugmentedCoeff_continuousOn
     {A : F → ℝ → (G →L[ℝ] G)} {b : F → ℝ → G}
     {U : Set F} {a b' : ℝ}
@@ -87,6 +88,7 @@ noncomputable def inhomogLinearODESolution
     (linearODESolution (inhomogAugmentedCoeff A b) a b' h₀
       (fun y => (Z₀ y, (1 : ℝ))) x t).1
 
+omit [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace G] in
 theorem inhomogLinearODESolution_init
     (A : F → ℝ → (G →L[ℝ] G)) (b : F → ℝ → G)
     (a b' h₀ : ℝ) (Z₀ : F → G) (x : F) :

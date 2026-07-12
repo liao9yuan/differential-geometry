@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciDeTurckArm0Curva
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalCometricExtraction
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureArm1KoszulTopSeparation
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -728,6 +728,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
     Icc_subset_realizedSmallSet)
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (covGrad)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsmRfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -738,6 +739,7 @@ private lemma tsmRfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     tensorInnerPointwise_smul_right]
   ring
 
+omit [BoundarylessManifold I M] in
 private lemma tsmRfns_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
@@ -771,6 +773,7 @@ private lemma tsmAppCcRS_coeffCorner_split (g₀ : SmoothRiemannianMetric I M) (
   rw [hf0]
   exact add_comm _ _
 
+set_option linter.unusedSectionVars false in
 private lemma tsmNormSq_eq_integral (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (C : SmoothCcTensor g r s) :
     ‖C‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g r s x (C.toSection x)

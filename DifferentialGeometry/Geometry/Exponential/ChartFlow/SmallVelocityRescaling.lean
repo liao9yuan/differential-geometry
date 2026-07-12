@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformExistence
 import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.MaximalRescaling
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -28,6 +27,7 @@ section UniformSmallRescaling
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 private theorem maximalGeodesic_rescaled_eq_orbit_proj
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {T t' : ℝ} (ht'_pos : 0 < t')
@@ -56,6 +56,7 @@ private theorem maximalGeodesic_rescaled_eq_orbit_proj
     chartFlowOrbitLiftRescaled_proj (I := I) p v t' (Φ := Φ) s hΦ_target_ts
   rw [← h_proj_eq, h_proj]
 
+set_option linter.unusedSectionVars false in
 theorem foot_in_source_throughout
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -112,6 +113,7 @@ theorem foot_in_source_throughout
   rw [chartFlowOrbitLiftRescaled_proj (I := I) p vb t' t hΦ_target_tt] at hsrc
   exact hsrc
 
+set_option linter.unusedSectionVars false in
 theorem maximalGeodesic_rescale_at_one_of_small
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧

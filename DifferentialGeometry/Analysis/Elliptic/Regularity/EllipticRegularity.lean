@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSo
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -62,25 +61,30 @@ def chartLocalEuclideanForm
     rw [h_id_action]
     rw [one_mul, real_inner_self_eq_norm_mul_norm, sq]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma chartLocalEuclideanForm_a_apply
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
     (chartLocalEuclideanForm (E := E) Ω).a x =
       (1 : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ) := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma chartLocalEuclideanForm_c_apply
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (x : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
     (chartLocalEuclideanForm (E := E) Ω).c x = 0 := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma chartLocalEuclideanForm_lam
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) :
     (chartLocalEuclideanForm (E := E) Ω).lam = 1 := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 @[simp] lemma chartLocalEuclideanForm_capLam
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))) :
     (chartLocalEuclideanForm (E := E) Ω).capLam = 1 := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem chartLocalEuclideanForm_principalIntegrand
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
@@ -104,6 +108,7 @@ theorem chartLocalEuclideanForm_principalIntegrand
   · intro hk
     exact absurd (Finset.mem_univ i) hk
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem chartLocalEuclideanForm_principalIntegrand_self
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
@@ -117,6 +122,7 @@ theorem chartLocalEuclideanForm_principalIntegrand_self
   intro i _
   rw [sq]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem chartLocalEuclideanForm_principalIntegrand_self_eq_gradient_sq
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
@@ -128,6 +134,7 @@ theorem chartLocalEuclideanForm_principalIntegrand_self_eq_gradient_sq
   rw [chartLocalEuclideanForm_principalIntegrand_self]
   rw [DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.SmoothEllipticBilinearForm.gradientVec_norm_sq_eq_sum]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 theorem chartLocalEuclideanForm_bilin
     (Ω : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (u v : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :

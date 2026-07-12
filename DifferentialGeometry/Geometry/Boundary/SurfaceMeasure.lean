@@ -33,6 +33,7 @@ noncomputable def surfaceMeasure
   Measure.riemannianVolumeMeasure
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
+set_option linter.unusedSectionVars false in
 lemma surfaceMeasure_def
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -41,6 +42,7 @@ lemma surfaceMeasure_def
       Measure.riemannianVolumeMeasure
         (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem surfaceMeasure_isOpenPosMeasure
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -50,6 +52,7 @@ theorem surfaceMeasure_isOpenPosMeasure
   exact Measure.riemannianVolumeMeasure_isOpenPosMeasure
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
+set_option linter.unusedSectionVars false in
 theorem surfaceMeasure_sigmaFinite
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -59,6 +62,7 @@ theorem surfaceMeasure_sigmaFinite
   exact Measure.riemannianVolumeMeasure_sigmaFinite
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
+set_option linter.unusedSectionVars false in
 theorem surfaceMeasure_isLocallyFiniteMeasure
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -68,6 +72,7 @@ theorem surfaceMeasure_isLocallyFiniteMeasure
   exact Measure.riemannianVolumeMeasure_isLocallyFiniteMeasure
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
+set_option linter.unusedSectionVars false in
 theorem surfaceMeasure_isFiniteMeasureOnCompacts
     [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]
@@ -77,6 +82,7 @@ theorem surfaceMeasure_isFiniteMeasureOnCompacts
   exact Measure.riemannianVolumeMeasure_isFiniteMeasureOnCompacts
     (I := hI.boundaryI) (M := BoundaryManifold I M) (inducedMetric g)
 
+set_option linter.unusedSectionVars false in
 theorem surfaceMeasure_eq_zero_of_boundaryless
     [I.Boundaryless] [hI : HasSmoothBoundary E H I] [IsManifold I ∞ M]
     [T2Space M] [SigmaCompactSpace M]

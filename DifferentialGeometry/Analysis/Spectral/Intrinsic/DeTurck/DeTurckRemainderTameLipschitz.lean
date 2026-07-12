@@ -45,7 +45,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmOneAllOrderTameEnvelope
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzKernelRefoldTopSeparatedBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -327,6 +326,7 @@ private theorem lc0w_lieCorr0_add_endoArmBase_decomp (g₀ g₁ g_bg : SmoothRie
         deTurckLieEndoArmField (I := I) (M := M) g₀ g₁ g₀ from h6.symm]
   abel
 
+omit [BoundarylessManifold I M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 private lemma one_le_l2JetWindow (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -338,6 +338,7 @@ private lemma one_le_l2JetWindow (g₀ : SmoothRiemannianMetric I M) (P : Smooth
     Finset.sum_nonneg fun _ _ => sq_nonneg _
   linarith
 
+omit [BoundarylessManifold I M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 private lemma l2JetWindow_mono (g₀ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -2217,6 +2218,7 @@ set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
 
+omit [BoundarylessManifold I M] in
 private theorem sum_range_shift_two_sq_le (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
     (T₀ : SmoothCcTensor g₀ 0 2) :
     ∑ q ∈ Finset.range (i + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 (q + 2) T₀‖ ^ 2 ≤

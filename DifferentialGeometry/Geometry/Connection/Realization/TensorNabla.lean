@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Realization.SmoothSections
 import DifferentialGeometry.Geometry.Connection.Realization.Connection
 import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private abbrev MDiffAtVec
   MDifferentiableAt I (I.prod 𝓘(ℝ, E))
     (fun y => TotalSpace.mk' E (E := TangentSpace I) y (Y y)) x
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem mdiffAt_pairing
     {α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x}
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -53,6 +53,7 @@ private def Psi
     (V Y : Π x : M, TangentSpace I x) (x : M) : ℝ :=
   extDerivFun (fun y => α y (Y y)) x (V x) - (α x) (cov Y x (V x))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_add_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -62,6 +63,7 @@ private theorem Psi_add_left
   simp only [Psi, h_add, ContinuousLinearMap.map_add]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_smul_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -71,6 +73,7 @@ private theorem Psi_smul_left
   simp only [Psi, h_smul, ContinuousLinearMap.map_smul, smul_eq_mul]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_add_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -97,6 +100,7 @@ private theorem Psi_add_right
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_smul_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -137,6 +141,7 @@ private theorem Psi_smul_right
   rw [h_eq2, h_eq3]
   ring
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_tensorialAt_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -145,6 +150,7 @@ private theorem Psi_tensorialAt_left
   smul := fun _ _ => Psi_smul_left I M cov α
   add := fun _ _ => Psi_add_left I M cov α
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem Psi_tensorialAt_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -153,11 +159,13 @@ private theorem Psi_tensorialAt_right
   smul := fun hf hY => Psi_smul_right I M cov α hα hf hY
   add := fun hY hY' => Psi_add_right I M cov α hα hY hY'
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem dual_section_mdiff
     (α : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯)
     (x : M) : MDiffAtDual I M (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x) x :=
   α.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem vec_section_mdiff
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     MDiffAtVec I M (Y : Π x : M, TangentSpace I x) x :=
@@ -177,6 +185,7 @@ noncomputable def dualCovariantDerivativeFun
       (fun V _ => Psi_tensorialAt_right I M cov α hα V)
   · exact 0
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem dualCovariantDerivativeFun_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -191,6 +200,7 @@ private theorem dualCovariantDerivativeFun_apply
     (fun Y _ => Psi_tensorialAt_left I M cov α Y)
     (fun V _ => Psi_tensorialAt_right I M cov α hα V) hV hY
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private theorem dualCovariantDerivativeFun_of_not_mdiff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Π x : M, (Bundle.dual ℝ (TangentSpace I : M → Type _)) x)
@@ -199,6 +209,7 @@ private theorem dualCovariantDerivativeFun_of_not_mdiff
   unfold dualCovariantDerivativeFun
   rw [dif_neg hα]
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private theorem dualCovariantDerivativeFun_isCovOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     IsCovariantDerivativeOn (E →L[ℝ] ℝ)
@@ -296,6 +307,7 @@ noncomputable def dualCovariantDerivative
   toFun := dualCovariantDerivativeFun I M cov
   isCovariantDerivativeOnUniv := dualCovariantDerivativeFun_isCovOn I M cov
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 private theorem dualCov_section_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -385,6 +397,7 @@ noncomputable instance dualCovariantDerivative_contMDiff
       exact dualCov_section_smooth I M cov α_section Y
   }
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem dualCovariantDerivative_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (α : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯)

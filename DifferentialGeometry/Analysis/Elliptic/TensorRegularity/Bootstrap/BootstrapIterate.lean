@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.IteratedRegularityBootstrap
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ private lemma chain_step_le
       rw [ENNReal.ofReal_add (by norm_num : (0 : ℝ) ≤ 1) hc, ENNReal.ofReal_one],
     ← ENNReal.ofReal_mul ha]
 
+omit [NeZero dimE] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma sum_componentNorm_mono_order
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (F : SmoothCcTensor g r s)
     (α : M) {Ω'' : Set EuclN} {n n' : ℕ} (hn : n ≤ n') :

@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private abbrev EuclN (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] := EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushed_eq_mul
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     chartPushed (I := I) (M := M) ρ α u =
@@ -52,6 +52,7 @@ private lemma chartPushed_eq_mul
   funext y
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memW1p_two_of_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -64,6 +65,7 @@ theorem chartPushed_memW1p_two_of_contMDiff
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenWeakPartial'_chartPushed_memLp_two_of_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -80,6 +82,7 @@ theorem chosenWeakPartial'_chartPushed_memLp_two_of_contMDiff
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     (d := Module.finrank ℝ E) hW k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_lt_top_of_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
@@ -94,6 +97,7 @@ theorem eLpNorm_chosenWeakPartial'_chartPushed_lt_top_of_contMDiff
   (chosenWeakPartial'_chartPushed_memLp_two_of_contMDiff
     (I := I) (M := M) g α hu k).eLpNorm_lt_top
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_tensorChartComponentScalar_memW1p_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
@@ -109,6 +113,7 @@ theorem chartPushed_tensorChartComponentScalar_memW1p_two
   exact chartPushed_memW1p_two_of_contMDiff
     (I := I) (M := M) g β hsmooth
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α β : M)
@@ -267,6 +272,7 @@ theorem sum_eLpNorm_chosenWeakPartial'_chartPushed_tensorChartComponentScalar_le
     rw [ENNReal.ofReal_sum_of_nonneg (fun k _ => hCk_nn k)]
   exact mul_le_mul_of_nonneg_right hENN (by exact zero_le _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNorm_one_two_decomposition
     (u : EuclN E → ℝ) (Ω : Set (EuclN E)) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.iteratedWeakSobolevNorm

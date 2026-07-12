@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiate
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -57,6 +57,7 @@ private lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -64,12 +65,14 @@ private lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :

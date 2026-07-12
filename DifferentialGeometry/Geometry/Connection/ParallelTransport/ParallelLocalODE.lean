@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.ODE.PicardLindelof
 import Mathlib.Analysis.ODE.Gronwall
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -30,6 +29,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
+set_option linter.unusedSectionVars false in
 theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ}
@@ -99,6 +99,7 @@ theorem chart_christoffel_clm_continuous_on_compact [I.Boundaryless]
   · exact ((hcoord i).comp_continuousOn hu)
   · exact continuousOn_const
 
+set_option linter.unusedSectionVars false in
 theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b : ℝ} (hab : a ≤ b)
@@ -125,12 +126,14 @@ theorem parallel_lipschitz_bound_on_compact [I.Boundaryless]
   exact htmax_max ht
 
 
+omit [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] in
 private theorem parallel_picard_lindelof_data
     (_α : M) (_γ : ℝ → M)
     (_uPrime : ℝ → E) {_a _b : ℝ} :
     True := trivial
 
 
+set_option linter.unusedSectionVars false in
 private theorem parallel_local_existence_step [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {aa bb : ℝ}
@@ -251,6 +254,7 @@ private theorem parallel_local_existence_step [I.Boundaryless]
     change Y t_in = w₀; exact this
 
 
+set_option linter.unusedSectionVars false in
 theorem parallel_local_existence_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
@@ -754,6 +758,7 @@ theorem parallel_local_existence_on_Icc [I.Boundaryless]
   · change (if t₀ ≤ t₀ then Y_L t₀ else Y_R t₀) = v₀
     rw [if_pos (le_refl _)]; exact hY_L_init
 
+set_option linter.unusedSectionVars false in
 theorem parallel_local_uniqueness_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)

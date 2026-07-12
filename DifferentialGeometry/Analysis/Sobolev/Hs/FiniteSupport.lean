@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Hs.SpectralDefs
 import DifferentialGeometry.Analysis.Sobolev.Hs.Inclusion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ def ofFiniteSupport (g : SmoothRiemannianMetric I M) (σ : ℝ)
     rw [hfi]
     ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ofFiniteSupport_coeff (g : SmoothRiemannianMetric I M)
     (σ : ℝ) (f : EigenIdx (I := I) (M := M) g → ℝ)
     (hf : (Function.support f).Finite) :
@@ -68,6 +68,7 @@ def basisVec (g : SmoothRiemannianMetric I M) (σ : ℝ)
       simpa using hj)
 
 open scoped Classical in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma basisVec_coeff (g : SmoothRiemannianMetric I M) (σ : ℝ)
     (i j : EigenIdx (I := I) (M := M) g) :
     (basisVec (I := I) (M := M) g σ i).coeff j =
@@ -99,11 +100,13 @@ def finiteSupportSubmodule (g : SmoothRiemannianMetric I M) (σ : ℝ) :
     intro hcon
     exact hi (by rw [hcon, mul_zero])
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma mem_finiteSupportSubmodule
     (T : scalarHs (I := I) (M := M) g σ) :
     T ∈ finiteSupportSubmodule (I := I) (M := M) g σ ↔
       (Function.support T.coeff).Finite := Iff.rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasSum_smul_basisVec_of_finite
     (T : scalarHs (I := I) (M := M) g σ)
     (hT : T ∈ finiteSupportSubmodule (I := I) (M := M) g σ) :
@@ -137,6 +140,7 @@ theorem hasSum_smul_basisVec_of_finite
 
 open scoped Classical in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma rescaleEquivL2_smul_basisVec
     (T : scalarHs (I := I) (M := M) g σ)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -154,6 +158,7 @@ lemma rescaleEquivL2_smul_basisVec
   · subst h; simp
   · simp [h]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasSum_smul_basisVec
     (T : scalarHs (I := I) (M := M) g σ) :
     HasSum (fun i : EigenIdx (I := I) (M := M) g =>
@@ -179,6 +184,7 @@ theorem hasSum_smul_basisVec
   rw [LinearIsometryEquiv.coe_toContinuousLinearEquiv,
     rescaleEquivL2_smul_basisVec]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mem_closure_finiteSupportSubmodule
     (T : scalarHs (I := I) (M := M) g σ) :
     T ∈ closure
@@ -199,6 +205,7 @@ theorem mem_closure_finiteSupportSubmodule
 
 end scalarHs
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarHs.finiteSupportSubmodule_topologicalClosure_eq_top
     {g : SmoothRiemannianMetric I M} {σ : ℝ} :
     (scalarHs.finiteSupportSubmodule (I := I) (M := M)
@@ -208,6 +215,7 @@ theorem scalarHs.finiteSupportSubmodule_topologicalClosure_eq_top
   rw [← SetLike.mem_coe, Submodule.topologicalClosure_coe]
   exact scalarHs.mem_closure_finiteSupportSubmodule (I := I) (M := M) T
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem scalarHs.finiteSupportSubmodule_dense
     {g : SmoothRiemannianMetric I M} {σ : ℝ} :
     Dense (scalarHs.finiteSupportSubmodule (I := I) (M := M) g σ :

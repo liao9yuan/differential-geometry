@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDi
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartHk.H2NonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -206,18 +205,21 @@ theorem chosenMthMixedPartialChartPushedU_cons_eq_chosenWeakPartial_chosenMthMix
               (chosenMthMixedPartialChartPushedU (I := I) (M := M) g α u_h
                 (m + 1) dirs) Ω := h_final
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTarget_diff_chartImagePOUTsupport_isOpen_aux (α : M) :
     IsOpen ((chartTargetEuclid (I := I) (M := M) α) \
       chartImagePOUTsupport (I := I) (M := M) α) :=
   (chartTargetEuclid_isOpen (I := I) (M := M) α).sdiff
     (chartImagePOUTsupport_isCompact (I := I) (M := M) α).isClosed
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartTarget_diff_chartImagePOUTsupport_subset_aux (α : M) :
     (chartTargetEuclid (I := I) (M := M) α) \
         chartImagePOUTsupport (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α :=
   Set.diff_subset
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_ae_zero_off_chartImagePOUTsupport_aux
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -237,6 +239,7 @@ private lemma chartPushed_ae_zero_off_chartImagePOUTsupport_aux
   exact chartPushed_eq_zero_off_chartImagePOUTsupport (I := I) (M := M) α _
     hy.1 hy.2
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrableOn_of_memLp_two_chartTarget_aux
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2
@@ -285,6 +288,7 @@ private lemma locallyIntegrableOn_of_memLp_two_chartTarget_aux
   apply Filter.mem_of_superset (Metric.ball_mem_nhds x (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma weakPartial_ae_zero_off_inline_aux
     {Ω U : Set EuclN} (hΩ_open : IsOpen Ω) (hU_open : IsOpen U)
     (hU_sub : U ⊆ Ω)
@@ -339,6 +343,7 @@ private lemma weakPartial_ae_zero_off_inline_aux
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
+set_option linter.unusedSectionVars false in
 lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -405,6 +410,7 @@ lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
       exact weakPartial_ae_zero_off_inline_aux hΩ_open hU_open hU_sub
         (i := dirs (Fin.last m)) h_isWeak hw_li h_ih_zero
 
+set_option linter.unusedSectionVars false in
 private lemma chartPulledWeighted_le_volume_on_compact_aux
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)

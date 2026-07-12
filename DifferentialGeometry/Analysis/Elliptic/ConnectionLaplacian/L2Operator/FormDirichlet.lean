@@ -40,6 +40,7 @@ def dirichletForm (g : SmoothRiemannianMetric I M) (r s : ℕ) :
       (SmoothCcTensor.toL2 (g := g) (r := r) (s := s) S))
 
 
+omit [CompactSpace M] in
 theorem dirichletForm_eq_neg_inner_laplacian
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : SmoothCcTensor g r s)

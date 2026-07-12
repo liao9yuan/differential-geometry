@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import Mathlib.Analysis.MeanInequalities
 import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -896,6 +895,7 @@ lemma tWindow_mul_antidiagonalTupleGrid_le (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ 
     _ = tWindowMulConst j l * tWindow b (j + l) := by
         rw [tWindowMulConst, ← Finset.sum_mul]
 
+omit [BoundarylessManifold I M] in
 lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (i : ℕ) :
     tWindow (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x
@@ -907,6 +907,7 @@ lemma tWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
               riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
                 ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
+omit [BoundarylessManifold I M] in
 lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (l : ℕ) :
     Combinatorics.antidiagonalTupleGrid
@@ -918,6 +919,7 @@ lemma antidiagonalTupleGrid_eq_doubleSum (g₀ : SmoothRiemannianMetric I M)
             riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + e m) x
               ((iteratedCovGrad (I := I) g₀ 0 2 (e m) T).toSection x) := rfl
 
+omit [BoundarylessManifold I M] in
 theorem exists_iteratedCovGrad_fiberNormSq_bound (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),

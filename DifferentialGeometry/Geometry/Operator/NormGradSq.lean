@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 import DifferentialGeometry.Geometry.Metric.TensorInner.TangentRiemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,11 +23,13 @@ open DifferentialGeometry.Integral.Measure
 def normGradSqFun (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) : ℝ :=
   g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g f x)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma normGradSqFun_def
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     normGradSqFun (I := I) g f x =
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g f x) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma normGradSqFun_nonneg
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     0 ≤ normGradSqFun (I := I) g f x := by
@@ -47,6 +48,7 @@ namespace BochnerInternal
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contMDiff_g_inner_aux
     (g : SmoothRiemannianMetric I M)
     {v w : ∀ x : M, TangentSpace I x}
@@ -67,6 +69,7 @@ private lemma contMDiff_g_inner_aux
 
 end BochnerInternal
 
+set_option linter.unusedSectionVars false in
 theorem contMDiff_g_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -79,6 +82,7 @@ theorem contMDiff_g_inner_of_smooth_sections
         (E := (TangentSpace I : M → Type _)) x (Y x)) := Y.contMDiff
   exact BochnerInternal.contMDiff_g_inner_aux (I := I) (M := M) g hX hY
 
+set_option linter.unusedSectionVars false in
 theorem normGradSqFun_continuous [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -96,6 +100,7 @@ theorem normGradSqFun_continuous [I.Boundaryless]
   rw [grad_g_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem normGradSqFun_contMDiff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

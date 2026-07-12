@@ -35,6 +35,7 @@ def heatCoeffFun {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) (t : ℝ) (c : ℝ) : ℝ :=
   Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) * c
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma heatHk_weight_term_le {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g)
     (a b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ) :
@@ -123,6 +124,7 @@ namespace scalarHs
 
 variable {g : SmoothRiemannianMetric I M}
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma heatHk_weighted_summable {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (T : scalarHs (I := I) (M := M) g a) :
     Summable (fun i : EigenIdx (I := I) (M := M) g =>
@@ -146,6 +148,7 @@ def heatHkFun {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     T.coeff i
   weighted_summable := heatHk_weighted_summable (I := I) (M := M) b ht T
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma heatHkFun_coeff {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (T : scalarHs (I := I) (M := M) g a)
     (i : EigenIdx (I := I) (M := M) g) :
@@ -153,6 +156,7 @@ def heatHkFun {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) *
         T.coeff i := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma heatHkFun_add {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
     (S T : scalarHs (I := I) (M := M) g a) :
     heatHkFun (I := I) (M := M) b ht (S + T) =
@@ -162,6 +166,7 @@ lemma heatHkFun_add {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t)
   simp only [heatHkFun_coeff, add_coeff]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma heatHkFun_smul {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ)
     (T : scalarHs (I := I) (M := M) g a) :
     heatHkFun (I := I) (M := M) b ht (c • T) =
@@ -170,6 +175,7 @@ lemma heatHkFun_smul {a : ℝ} (b : ℝ) {t : ℝ} (ht : 0 < t) (c : ℝ)
   simp only [heatHkFun_coeff, smul_coeff]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_heatHkFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     (ht : 0 < t) (ht1 : t ≤ 1)
     (T : scalarHs (I := I) (M := M) g a) :
@@ -318,6 +324,7 @@ lemma norm_heatHkFun_le_smoothing {a b : ℝ} (hab : a ≤ b) {t : ℝ}
     positivity
   nlinarith [h_final_sq, h_lhs_nn, h_rhs_nn]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_heatHkFun_le_self {a : ℝ} {t : ℝ} (ht : 0 < t)
     (T : scalarHs (I := I) (M := M) g a) :
     ‖heatHkFun (I := I) (M := M) a ht T‖ ≤ ‖T‖ := by
@@ -474,12 +481,14 @@ def heatSemigroupHs {g : SmoothRiemannianMetric I M}
           h_norm_le_sqrt
         _ ≤ K * ‖T‖ := mul_le_mul_of_nonneg_right h_sqrtK_le_K h2)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma heatSemigroupHs_apply {g : SmoothRiemannianMetric I M}
     {t : ℝ} (ht : 0 < t) {a b : ℝ}
     (T : scalarHs (I := I) (M := M) g a) :
     heatSemigroupHs (I := I) (M := M) (g := g) ht (a := a) (b := b) T =
       scalarHs.heatHkFun (I := I) (M := M) b ht T := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem heatSemigroupHs_coeff {g : SmoothRiemannianMetric I M}
     {t : ℝ} (ht : 0 < t) {a b : ℝ}
     (T : scalarHs (I := I) (M := M) g a)
@@ -489,6 +498,7 @@ def heatSemigroupHs {g : SmoothRiemannianMetric I M}
       Real.exp (-(EigenIdx.lambda (I := I) (M := M) i) * t) *
         T.coeff i := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHs_opNorm_le {g : SmoothRiemannianMetric I M}
     {a b : ℝ} (hab : a ≤ b) {t : ℝ} (ht : 0 < t) (ht1 : t ≤ 1) :
     ‖heatSemigroupHs (I := I) (M := M) (g := g) ht (a := a) (b := b)‖ ≤
@@ -505,6 +515,7 @@ theorem heatSemigroupHs_opNorm_le {g : SmoothRiemannianMetric I M}
   rw [heatSemigroupHs_apply]
   exact scalarHs.norm_heatHkFun_le_smoothing (I := I) (M := M) hab ht ht1 T
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
     {a : ℝ} {t : ℝ} (ht : 0 < t) :
     ‖heatSemigroupHs (I := I) (M := M) (g := g) ht (a := a) (b := a)‖ ≤ 1 := by
@@ -512,6 +523,7 @@ theorem heatSemigroupHs_opNorm_le_one {g : SmoothRiemannianMetric I M}
   rw [heatSemigroupHs_apply, one_mul]
   exact scalarHs.norm_heatHkFun_le_self (I := I) (M := M) ht T
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem heatSemigroupHs_add {g : SmoothRiemannianMetric I M}
     {t s : ℝ} (ht : 0 < t) (hs : 0 < s) {a : ℝ} :
     heatSemigroupHs (I := I) (M := M) (g := g)

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -74,6 +73,7 @@ private lemma smoothExtension_apply_of_notMem_target
     else 0) = 0
   rw [if_neg hy]
 
+omit [IsManifold I ∞ M] in
 lemma smoothExtension_apply_of_mem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -83,6 +83,7 @@ lemma smoothExtension_apply_of_mem_chartTargetEuclid
   rw [chartTargetEuclid_eq_preimage_symm (I := I) (M := M)] at hy
   exact hy
 
+omit [IsManifold I ∞ M] in
 private lemma smoothExtension_apply_of_notMem_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -131,6 +132,7 @@ private lemma contDiffAt_smoothExtension_of_mem_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [smoothExtension_apply_of_mem_chartTargetEuclid (I := I) (M := M) α f hz]
 
+omit [IsManifold I ∞ M] in
 private lemma smoothExtension_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt H α).source) {y : EuclN}
@@ -155,6 +157,7 @@ private lemma smoothExtension_eq_zero_off_image_tsupport
   · exact smoothExtension_apply_of_notMem_chartTargetEuclid
       (I := I) (M := M) α f hy_target
 
+omit [IsManifold I ∞ M] in
 lemma image_extChartAt_tsupport_isCompact
     [CompactSpace M] {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -164,6 +167,7 @@ lemma image_extChartAt_tsupport_isCompact
     (I := I) (M := M) (u := f) (α := α) hf_supp
   exact hKE.1.image (toEuclidean (E := E)).continuous
 
+omit [IsManifold I ∞ M] in
 private lemma image_extChartAt_tsupport_subset_chartTarget
     {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -200,6 +204,7 @@ lemma contDiff_smoothExtension
     exact smoothExtension_eq_zero_off_image_tsupport
       (I := I) (M := M) α (f := f) hf_supp hz
 
+omit [IsManifold I ∞ M] in
 lemma hasCompactSupport_smoothExtension
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -216,6 +221,7 @@ lemma hasCompactSupport_smoothExtension
   exact smoothExtension_eq_zero_off_image_tsupport
     (I := I) (M := M) α (f := f) hf_supp hyK
 
+omit [FiniteDimensional ℝ E] in
 lemma iteratedFDeriv_bound_of_compactSupport
     {ψ : EuclN → ℝ} (hψ_smooth : ContDiff ℝ ∞ ψ) (hψ_compact : HasCompactSupport ψ)
     (k : ℕ) :
@@ -251,6 +257,7 @@ lemma smoothExtension_first_order_bound
   · exact (hM0 y).trans (le_max_left _ _)
   · exact (hM1 y).trans (le_max_right _ _)
 
+omit [IsManifold I ∞ M] in
 lemma smoothExtension_mul_eq
     (α : M) (f g : M → ℝ) :
     (fun y : EuclN => smoothExtension (I := I) (M := M) α f y *
@@ -323,6 +330,7 @@ private lemma smoothExtension_three_factor_symm
     have hb_x : b x = 1 := hb_one x hx_supp
     rw [hb_x]; ring
 
+omit [IsManifold I ∞ M] in
 lemma tsupport_smoothExtension_subset_image
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -344,6 +352,7 @@ lemma tsupport_smoothExtension_subset_image
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
+omit [IsManifold I ∞ M] in
 lemma image_tsupport_subset_chartTarget
     {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -352,6 +361,7 @@ lemma image_tsupport_subset_chartTarget
       chartTargetEuclid (I := I) (M := M) α :=
   image_extChartAt_tsupport_subset_chartTarget (I := I) (M := M) (f := f) (α := α) hf_supp
 
+omit [IsManifold I ∞ M] in
 lemma tsupport_smoothExtension_subset_chartTarget
     [CompactSpace M] (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :

@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Integration.L2.Pairing.Defs
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ abbrev MIdxC (E : Type*) [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 noncomputable def midxPairCard (r s : ℕ) : ℝ :=
   ((Finset.univ : Finset (MIdxC E r × MIdxC E s)).card : ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma midxPairCard_nonneg (r s : ℕ) :
     0 ≤ midxPairCard (E := E) r s := Nat.cast_nonneg _
 
@@ -56,11 +56,13 @@ private noncomputable def sumScalarSq
     (tensorChartComponentScalar (I := I) (M := M)
         g r s S α Idx Jdx b) ^ 2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma sumScalarSq_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α b : M) :
     0 ≤ sumScalarSq g r s S α b :=
   Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _))
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorRSModel_norm_sq_le_sum_projection_sq (r s : ℕ)
     (T : TensorRSModel r s ℝ E) :
     ‖T‖ ^ 2 ≤
@@ -236,6 +238,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (S : SmoothCcTensor g r s) (α : M)
   (Idx : MIdxC E r) (Jdx : MIdxC E s)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_memLp_two :
     MemLp (tensorChartComponentScalar g r s S α Idx Jdx) 2
       (riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -247,6 +250,7 @@ private lemma tensorChartComponentScalar_memLp_two :
       g r s S α Idx Jdx).continuous.memLp_of_hasCompactSupport (p := 2)
     (tensorChartComponentScalar_hasCompactSupport g r s S α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_sq_integrable :
     Integrable (fun b : M =>
       (tensorChartComponentScalar g r s S α Idx Jdx b) ^ 2)
@@ -260,6 +264,7 @@ private lemma tensorChartComponentScalar_sq_integrable :
     ((tensorChartComponentScalar_hasCompactSupport g r s S α Idx Jdx).comp_left
       (g := fun y : ℝ => y ^ 2) (by simp))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentScalar_integral_sq_eq_eLpNorm_toReal_sq :
     ∫ b, (tensorChartComponentScalar g r s S α Idx Jdx b) ^ 2
         ∂(riemannianVolumeMeasure (I := I) (M := M) g) =

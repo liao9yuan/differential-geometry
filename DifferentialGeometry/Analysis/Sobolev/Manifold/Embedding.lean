@@ -7,7 +7,6 @@ import Mathlib.MeasureTheory.Measure.OpenPos
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 import Mathlib.Topology.Bornology.BoundedOperation
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -94,12 +93,14 @@ theorem eLpNorm_chartPushed_p_le_wkpNorm_one
     exact ENNReal.le_tsum α
   exact h_per_α.trans h_le_tsum
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem tsupport_pou_isCompact
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     IsCompact (tsupport (ρ α : M → ℝ)) :=
   (isClosed_tsupport _).isCompact
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private theorem image_extChartAt_tsupport_pou_isCompact
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
@@ -114,6 +115,7 @@ private theorem image_extChartAt_tsupport_pou_isCompact
     (continuousOn_extChartAt α).mono hsub
   exact (tsupport_pou_isCompact ρ α).image_of_continuousOn hcont
 
+omit [IsManifold I ∞ M] in
 private theorem image_chartPOU_subset_chartTargetEuclid
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun β : M => (chartAt H β).source))
@@ -131,6 +133,7 @@ private theorem image_chartPOU_subset_chartTargetEuclid
     exact (extChartAt I α).map_source hx_source
   exact ⟨z, hz_target, hzy⟩
 
+omit [IsManifold I ∞ M] in
 private theorem chartImage_tsupport_isCompact_toEuclidean
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
@@ -140,6 +143,7 @@ private theorem chartImage_tsupport_isCompact_toEuclidean
   (image_extChartAt_tsupport_pou_isCompact (I := I) (M := M) ρ hρ α).image
     toEuclidean.continuous
 
+omit [IsManifold I ∞ M] in
 private theorem chartPushed_eq_zero_off_image_tsupport
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (α : M) (u : M → ℝ) {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -181,6 +185,7 @@ theorem chartPushed_support_subset_compact_in_target
   exact chartPushed_eq_zero_off_image_tsupport (I := I) (M := M)
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u hy_target hy_off
 
+omit [IsManifold I ∞ M] in
 theorem volume_chartImage_tsupport_lt_top
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ)

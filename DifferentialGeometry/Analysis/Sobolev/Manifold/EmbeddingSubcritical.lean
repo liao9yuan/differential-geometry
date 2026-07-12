@@ -12,7 +12,6 @@ import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,12 +39,14 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private lemma eq_zero_off_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN} (hf_supp : tsupport f ⊆ Ω)
     {x : EuN} (hx : x ∉ Ω) : f x = 0 := by
   have hx_notsupp : x ∉ tsupport f := fun h => hx (hf_supp h)
   exact image_eq_zero_of_notMem_tsupport hx_notsupp
 
+omit [NeZero d] in
 private lemma fderiv_eq_zero_off_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN}
     (hf_supp : tsupport f ⊆ Ω)
@@ -60,6 +61,7 @@ private lemma fderiv_eq_zero_off_of_tsupport_subset
   rw [Filter.EventuallyEq.fderiv_eq hf_zero]
   simp
 
+omit [NeZero d] in
 private lemma eLpNorm_eq_eLpNorm_restrict_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN} (hΩ_meas : MeasurableSet Ω)
     (hf_supp : tsupport f ⊆ Ω) (p : ℝ≥0∞) :
@@ -75,6 +77,7 @@ private lemma eLpNorm_eq_eLpNorm_restrict_of_tsupport_subset
     _ = eLpNorm f p (volume.restrict Ω) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
+omit [NeZero d] in
 private lemma eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset
     {f : EuN → ℝ} {Ω : Set EuN}
     (hΩ_meas : MeasurableSet Ω) (hf_supp : tsupport f ⊆ Ω) (p : ℝ≥0∞) :
@@ -90,6 +93,7 @@ private lemma eLpNorm_fderiv_eq_eLpNorm_fderiv_restrict_of_tsupport_subset
     _ = eLpNorm (fderiv ℝ f) p (volume.restrict Ω) :=
         eLpNorm_indicator_eq_eLpNorm_restrict hΩ_meas
 
+omit [NeZero d] in
 private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -126,6 +130,7 @@ private lemma classical_partial_ae_eq_chosenWeakPartial_of_smooth
   exact DeGiorgi.HasWeakPartialDeriv.ae_eq (Ω := Ω) hΩ_open
     h_classical_isWeak h_chosen_isWeak h_classical_loc h_chosen_loc
 
+omit [NeZero d] in
 private lemma norm_fderiv_le_sum_norm_partials
     (f : EuN → ℝ) (x : EuN) :
     ‖fderiv ℝ f x‖ ≤ ∑ i : Fin d, ‖(fderiv ℝ f x) (EuclideanSpace.single i 1)‖ := by
@@ -156,6 +161,7 @@ private lemma norm_fderiv_le_sum_norm_partials
   intro i _
   simp
 
+omit [NeZero d] in
 private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {μ : Measure EuN}
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f) :
@@ -202,6 +208,7 @@ private lemma eLpNorm_fderiv_le_sum_eLpNorm_partials
   intro i _
   rw [eLpNorm_norm]
 
+omit [NeZero d] in
 private lemma eLpNorm_classical_partial_eq_chosen
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {f : EuN → ℝ} (hf_smooth : ContDiff ℝ (⊤ : ℕ∞) f)
@@ -569,6 +576,7 @@ theorem eLpNorm_p_star_le_const_mul_wkpNorm_of_memWkp
 
 end EuclideanSubcritical
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma tsupport_pou_mul_subset_tsupport_pou_subcrit
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
@@ -580,6 +588,7 @@ private lemma tsupport_pou_mul_subset_tsupport_pou_subcrit
   exact tsupport_smul_subset_left
     (f := fun x : M => ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) (g := u)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma measurable_pou_mul_subcrit
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     {u : M → ℝ} (hu : Measurable u) :

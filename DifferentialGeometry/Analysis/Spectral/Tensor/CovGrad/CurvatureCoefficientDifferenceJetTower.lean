@@ -25,7 +25,6 @@ import DifferentialGeometry.Analysis.Sobolev.BoundedFactorProductGrid
 import Mathlib.Analysis.MeanInequalities
 import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -61,9 +60,11 @@ section TopSeparatedTransportMirrors
 
 set_option backward.isDefEq.respectTransparency false
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsCastRankCc_db_refl (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a : ℕ} (h : a = a)
     (W : SmoothCcTensor g₀ r a) : castCcTensorRank g₀ r h W = W := rfl
 
+omit [BoundarylessManifold I M] in
 private lemma tsCovGrad_castRankCc_db (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g₀ r a) :
     covGrad (I := I) (M := M) g₀ r b (castCcTensorRank g₀ r h W) =
@@ -71,17 +72,20 @@ private lemma tsCovGrad_castRankCc_db (g₀ : SmoothRiemannianMetric I M) (r : �
         (covGrad (I := I) (M := M) g₀ r a W) := by
   subst h; rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsCastRankCc_db_trans (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b c : ℕ}
     (h₁ : a = b) (h₂ : b = c) (W : SmoothCcTensor g₀ r a) :
     castCcTensorRank g₀ r h₂ (castCcTensorRank g₀ r h₁ W) =
       castCcTensorRank g₀ r (h₁.trans h₂) W := by
   subst h₁; subst h₂; rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsCastRankCc_db_sub (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W W' : SmoothCcTensor g₀ r a) :
     castCcTensorRank g₀ r h (W - W') = castCcTensorRank g₀ r h W - castCcTensorRank g₀ r h W' := by
   subst h; rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsCastRankCc_db_add (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W W' : SmoothCcTensor g₀ r a) :
     castCcTensorRank g₀ r h (W + W') = castCcTensorRank g₀ r h W + castCcTensorRank g₀ r h W' := by
@@ -177,6 +181,7 @@ private lemma tsDomDomCongrSection_add (g₀ : SmoothRiemannianMetric I M) {s : 
   intro v
   simp only [ContinuousMultilinearMap.add_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
+set_option linter.unusedSectionVars false in
 private lemma tsIteratedCovGrad_covGrad_eq_cast (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g₀ r s) (i : ℕ) :
     iteratedCovGrad (I := I) g₀ r (s + 1) i (covGrad (I := I) (M := M) g₀ r s W) =
@@ -260,10 +265,12 @@ private def tsMetricCovec (g₀ : SmoothRiemannianMetric I M) (x : M) : Tensor0S
         (continuous_apply 1) }
     : Tensor0SSpace 2 I x)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] private lemma tsMetricCovec_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → TangentSpace I x) :
     tsMetricCovec (I := I) g₀ x m = g₀.inner x (m 0) (m 1) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 private theorem tsMetricCovec_section_contMDiff (g₀ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -306,6 +313,7 @@ private def tsMetricCc (g₀ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀
       (E := (TangentSpace I : M → Type _)) ∞ (tsMetricField (I := I) g₀)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma tsMetricCc_unitModel (g₀ : SmoothRiemannianMetric I M) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (tsMetricCc (I := I) (M := M) g₀) x =
@@ -321,6 +329,7 @@ private lemma tsMetricCc_unitModel (g₀ : SmoothRiemannianMetric I M) (x : M) :
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma tsToModel_om_single (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel om (fun k => (m k : E)) =
@@ -409,6 +418,7 @@ private lemma tsLoweredSlot0_unitModel_apply (g₀ : SmoothRiemannianMetric I M)
     rfl]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsInteriorProduct_toModel_eval (s : ℕ) (x : M) (vv : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -490,6 +500,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 
 set_option backward.isDefEq.respectTransparency false
 
+omit [BoundarylessManifold I M] in
 private lemma tsRfns_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
@@ -508,6 +519,7 @@ private lemma tsRfns_domDomCongrSection_zero (g₀ : SmoothRiemannianMetric I M)
   rw [iteratedCovGrad_zero, iteratedCovGrad_zero] at h
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma tsRfns_castRankCc_db_zero (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (W : SmoothCcTensor g₀ r a) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r b x
@@ -575,6 +587,7 @@ private lemma tsAppCc_sub_left (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_sub]; rfl]
   rw [ContinuousLinearMap.sub_comp]
 
+set_option linter.unusedSectionVars false in
 private lemma tsRsDomDomCongr_sub {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T T' : TensorRSSpace r s I x) :
     tensorRS_domDomCongr (I := I) (M := M) σ (T - T') =

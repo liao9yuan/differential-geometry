@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Real
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcFibreNormBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcArmReadoutCovDeriv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -72,6 +71,7 @@ lemma appCc_smul_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.smul_comp]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_smul_local (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (c • T) x =
@@ -81,6 +81,7 @@ lemma unitModel_smul_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add2_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x =
@@ -90,6 +91,7 @@ private lemma unitModel_add2_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
 
+set_option linter.unusedSectionVars false in
 lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
@@ -97,6 +99,7 @@ lemma unitModel_add2_apply (g₀ : SmoothRiemannianMetric I M)
   rw [unitModel_add2_local, ContinuousMultilinearMap.add_apply]
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma continuousBilinearMap_basis_expand
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 2 => E) ℝ)
     (v : Fin 2 → E) :
@@ -155,6 +158,7 @@ lemma continuousBilinearMap_basis_expand
   rw [hbasis, hprod]
 
 
+set_option linter.unusedSectionVars false in
 lemma unitModel_basis_expand_two (g₀ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     (∑ i : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
@@ -251,6 +255,7 @@ theorem traceHessianCoeff_realizedFam_jointContMDiff (g₀ : SmoothRiemannianMet
   change traceHessianFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) p.1 (Y p.1) = _
   rw [traceHessianFib, ContinuousLinearMap.comp_apply, domDomCongrFib_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpace_const_smul_local {d : ℕ} {S : Set ℝ} (a : ℝ)
     (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -305,6 +310,7 @@ theorem linearizedRicci_arm2Field_jointSmooth (g₀ : SmoothRiemannianMetric I M
   rw [linearizedRicciArm2Field, SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul,
     Pi.smul_apply, ricciArmPrincipalCoeffPure_toSection]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpaceRS_sub_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -337,6 +343,7 @@ private theorem jointTotalSpaceRS_sub_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -369,6 +376,7 @@ private theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpaceRS_const_smul_local {r s : ℕ} {S : Set ℝ} (a : ℝ)
     (A : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -396,6 +404,7 @@ private theorem jointTotalSpaceRS_const_smul_local {r s : ℕ} {S : Set ℝ} (a 
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       a (A p₀)
 
+omit [BoundarylessManifold I M] in
 theorem realizedFam_chartRiemannTensor_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -432,6 +441,7 @@ theorem realizedFam_chartRiemannTensor_jointContMDiffOn
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
     (fun q _ => rfl) rfl
 
+omit [BoundarylessManifold I M] in
 theorem realizedFam_chartChristoffel_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -497,6 +507,7 @@ private noncomputable def outerPairBilinChartα (g : SmoothRiemannianMetric I M)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma outerPairBilinChartα_apply (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     outerPairBilinChartα (I := I) g α K Dd X X' =
@@ -511,6 +522,7 @@ private lemma outerPairBilinChartα_apply (g : SmoothRiemannianMetric I M) (α :
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma double_frame_bilin_trace_chartα
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -581,6 +593,7 @@ private lemma riemannBiContrFib_toModel_chartα
       (chartBasisVecFiber (I := I) α n x) (chartBasisVecFiber (I := I) α l x)]
   rfl
 
+omit [BoundarylessManifold I M] in
 private lemma realizedFam_chartGramMatrix_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -871,6 +884,7 @@ private lemma raisedKoszulVec_realizedFam_chartα
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [g_inner_eq_chartGramMatrix_basis (I := I) g₁ α x q l]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma genJointGram_const_g0
     (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
     ChartGramFamilyJointSmoothNondegenerate (I := I) (fun _ : ℝ => g₀) α S := by
@@ -882,6 +896,7 @@ private lemma genJointGram_const_g0
   · intro s₀ _ x hx
     exact chartGramMatrix_det_pos (I := I) g₀ α hx
 
+set_option linter.unusedSectionVars false in
 private lemma chartChristoffel_g0_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (α : M) (i j k : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -912,6 +927,7 @@ private lemma chartChristoffel_g0_jointContMDiffOn
     exact hm
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr (fun q _ => rfl) rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartInvGramMatrix_g0_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -946,6 +962,7 @@ private lemma chartInvGramMatrix_g0_jointContMDiffOn
     rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hqx]
   · rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc]
 
+set_option linter.unusedSectionVars false in
 private lemma omAppChartBasisVec_jointContMDiffOn
     (om : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 1 ℝ E, fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x⟯)
     (α : M) (p : Fin (Module.finrank ℝ E)) {S : Set ℝ} :

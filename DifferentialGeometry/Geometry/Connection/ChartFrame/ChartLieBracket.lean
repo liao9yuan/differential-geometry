@@ -1,7 +1,6 @@
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -16,6 +15,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [FiniteDimension
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [FiniteDimensional ℝ E] in
 private lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
     {x : M} (V : Π y : M, TangentSpace I y) {y : E}
     (hy : y ∈ (extChartAt I x).target) :
@@ -48,6 +48,7 @@ private lemma mpullbackWithin_extChartAt_symm_eq_chartE_repr_symm
         (𝕜 := ℝ) (I := I) (x₀ := x) (x := φ.symm y) hsymm_chart]
   rfl
 
+omit [FiniteDimensional ℝ E] in
 private lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
     {x : M} (V : Π y : M, TangentSpace I y)
     (hxint : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E)) :
@@ -61,6 +62,7 @@ private lemma mpullbackWithin_extChartAt_symm_eventuallyEq_chartE_repr_symm
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [FiniteDimensional ℝ E] in
 theorem mlieBracket_eq_chart_fderiv_diff
     (x : M) (X Y : Π y : M, TangentSpace I y)
     (hxint : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
@@ -295,6 +297,7 @@ theorem mlieBracket_eq_chart_fderiv_diff_general
     trivFromE_trivToE (I := I) α hx_base _
   rw [← hround, hkey]
 
+omit [FiniteDimensional ℝ E] in
 private lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
     (x : M) (f : M → ℝ) (Y : Π b : M, TangentSpace I b)
     (hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
@@ -331,6 +334,7 @@ private lemma mfderiv_scalar_along_eventuallyEq_chart_fderiv
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [FiniteDimensional ℝ E] in
 theorem mfderiv_scalar_along_eq_chart_fderiv
     {x : M} {X Y : Π b : M, TangentSpace I b}
     (hx_int : extChartAt I x x ∈ interior ((extChartAt I x).target : Set E))
@@ -393,6 +397,7 @@ theorem mfderiv_scalar_along_eq_chart_fderiv
   rfl
 
 
+omit [FiniteDimensional ℝ E] in
 theorem extDerivFun_apply_mlieBracket
     {x : M} {X Y : Π b : M, TangentSpace I b}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)

@@ -31,6 +31,7 @@ private lemma mollifyEps_eq_convolution_swap
   filter_upwards with t
   rw [smul_eq_mul, smul_eq_mul, mul_comm]
 
+omit [NeZero d] in
 theorem mollifyEps_partial_eq_mollifyEps_weakPartial
     {ε : ℝ} (hε : 0 < ε)
     {u g : E → ℝ} {j : Fin d}
@@ -93,6 +94,7 @@ theorem mollifyEps_partial_eq_mollifyEps_weakPartial
   rw [h_ibp]
   rfl
 
+omit [NeZero d] in
 theorem eLpNorm_mollifyEps_le
     {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu : MemLp u 2 (volume : Measure E)) :
@@ -363,6 +365,7 @@ theorem eLpNorm_mollifyEps_le
   · exact integral_nonneg fun _ => Real.rpow_nonneg (norm_nonneg _) _
   · exact inv_nonneg.mpr (by norm_num : (0 : ℝ) ≤ 2)
 
+omit [NeZero d] in
 theorem eLpNorm_partial_mollifyEps_le_of_weakPartial_univ
     {ε : ℝ} (hε : 0 < ε)
     {u g : E → ℝ} {j : Fin d}
@@ -403,6 +406,7 @@ structure H1WeakSolutionData
       (mollifyEps (d := d) (show (0 : ℝ) < 1 / ((n : ℝ) + 2) by positivity) u))
       2 (volume : Measure E) ≤ ENNReal.ofReal fseq_l2_bound
 
+omit [NeZero d] in
 private lemma contDiff_mollifyEps_of_memLp_two
     {ε : ℝ} (hε : 0 < ε) {u : E → ℝ}
     (hu : MemLp u 2 (volume : Measure E)) :

@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Sobolev.Tensor.PouWeightedNorm
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -197,6 +196,7 @@ private noncomputable def tensorPouSobolevNormSqAgg
                   ((toEuclidean (E := E)).symm y)‖ ^ 2)
           ∂(volume : Measure EuclN)
 
+set_option linter.unusedSectionVars false in
 private lemma tensorPouSobolevNorm_one_sq_eq_agg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) :
@@ -226,6 +226,7 @@ private lemma tensorPouSobolevNorm_one_sq_eq_agg
     rw [h1]; exact ENNReal.rpow_one BigSum
   rw [h_pow, hBigSum_eq]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma tensorPouSobolevNormSqAgg_eq_finset_sum
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) :
@@ -333,13 +334,16 @@ private noncomputable def chainLmax : ℝ :=
   max 1 (‖((toEuclidean (E := E)).symm :
       EuclN ≃L[ℝ] E).toContinuousLinearMap‖ ^ 4)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chainLmax_nonneg : (0 : ℝ) ≤ chainLmax (E := E) := by
   unfold chainLmax
   exact le_trans (by linarith : (0 : ℝ) ≤ 1) (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma one_le_chainLmax : (1 : ℝ) ≤ chainLmax (E := E) := by
   unfold chainLmax; exact le_max_left _ _
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chain_Lop_two_le_Lmax :
     ‖((toEuclidean (E := E)).symm :
         EuclN ≃L[ℝ] E).toContinuousLinearMap‖ ^ 2 ≤ chainLmax (E := E) := by
@@ -358,6 +362,7 @@ private lemma chain_Lop_two_le_Lmax :
     unfold chainLmax
     exact le_trans h_Lop2_le_Lop4 (le_max_right _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chain_Lop_four_le_Lmax :
     ‖((toEuclidean (E := E)).symm :
         EuclN ≃L[ℝ] E).toContinuousLinearMap‖ ^ 4 ≤ chainLmax (E := E) := by
@@ -975,6 +980,7 @@ theorem tensorChartComp_rawConnLap_sq_le_pou_pouSobolev_summand
     _ ≤ K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := h_step3
     _ = K_max * Lmax * 3 * (ρ * RHS_pouSobolev) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma pouWeightedSummand_aemeasurable_on_chartTarget
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M)
@@ -1361,6 +1367,7 @@ private lemma sq_eLpNorm_tensorChartComp_le_pou_summand
       (I := I) (M := M) g r s T α IJ' j
   rw [h_swap_j]
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem wtwokTwoNorm_zero_rawTensorConnLap_le_tensorPouSobolevNorm_one
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :

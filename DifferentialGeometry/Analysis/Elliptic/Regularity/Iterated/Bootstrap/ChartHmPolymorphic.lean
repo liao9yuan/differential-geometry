@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2Re
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.PowH2kBridge
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.MemWkpFour
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -92,6 +91,7 @@ theorem memWkpChart_unconditional_of_laplacianDomainPow_le_two
   exact chartPushed_memWkp_unconditional_of_laplacianDomainPow_le_two
     (I := I) (M := M) g α hk hu_h
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_unconditional_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -107,6 +107,7 @@ theorem chartPushed_memWkp_unconditional_of_laplacianDomainPow
       (chartTargetEuclid (I := I) (M := M) α) :=
   h_bridge α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_j_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (α : M) {k j : ℕ} (hjk : j ≤ 2 * k)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -148,6 +149,7 @@ theorem chartPushed_memWkp_succ_step
   chartPushed_memWkp_m_plus_two_step (I := I) (M := M) g α u_h m
     h_chart_H_m_plus_1 h_top_memWkp_two
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_2k_of_chartSideH2kBridge_polymorphic
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -196,6 +198,7 @@ theorem chartPushed_memWkp_two_sided_succ_le_two
       rw [h_eq]
       exact h.2 α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_memWkp_of_laplacianDomainPow_via_bridge
     (g : SmoothRiemannianMetric I M) (α : M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

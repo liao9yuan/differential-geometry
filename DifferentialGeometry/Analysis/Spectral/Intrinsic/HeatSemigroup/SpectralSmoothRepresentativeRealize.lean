@@ -174,6 +174,7 @@ private lemma weightedPartial_term_nonneg (u : TensorL2 0 2 g) (k : ℕ)
 
 open scoped Classical in
 
+set_option linter.unusedSectionVars false in
 private lemma toHs_spectralPartialSum_sub (u : TensorL2 0 2 g) (k : ℕ) {m n : ℕ}
     (hmn : n ≤ m) :
     SmoothCcTensor.toHs (g := g) (r := 0) (s := 2) k

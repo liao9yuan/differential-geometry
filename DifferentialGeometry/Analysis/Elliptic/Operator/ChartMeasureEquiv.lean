@@ -108,6 +108,7 @@ private lemma toEuclidean_mem_chartTargetEuclid_iff
     rw [hyz]; exact hz_target
   · exact ⟨y, hy, rfl⟩
 
+omit [IsManifold I ∞ M] in
 private lemma chartTargetEuclid_measurableSet (α : M) :
     MeasurableSet (chartTargetEuclid (I := I) (M := M) α) := by
   have htarget_meas : MeasurableSet (extChartAt I α).target :=

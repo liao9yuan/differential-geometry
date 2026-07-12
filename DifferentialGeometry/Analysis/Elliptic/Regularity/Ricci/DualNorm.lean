@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.Candidate
 import DifferentialGeometry.Geometry.Operator.Gradient
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -571,11 +570,13 @@ section GlobalBound
 
 variable [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tsupport_chartAtlasPOU_compact (α : M) :
     IsCompact (tsupport (fun x : M =>
       (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x)) :=
   isClosed_tsupport _ |>.isCompact
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma tsupport_chartAtlasPOU_subset_baseSet (α : M) :
     tsupport (fun x : M => (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) x) ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by

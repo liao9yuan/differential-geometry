@@ -75,6 +75,7 @@ noncomputable def smoothCcTensorHs2LinearEquiv
   map_add' S T := SmoothCcTensorHs.toCcTensor_add S T
   map_smul' c S := SmoothCcTensorHs.toCcTensor_smul c S
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothCcTensorHs2_norm_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S : SmoothCcTensorHs g r s 2) :

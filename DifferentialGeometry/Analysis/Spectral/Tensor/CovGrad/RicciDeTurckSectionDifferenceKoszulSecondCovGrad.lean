@@ -8,7 +8,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnDiffPa
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatureOperatorField
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -92,6 +91,7 @@ def koszulCovGradCovec (g₀ g₁ : SmoothRiemannianMetric I M)
     ((g₁.inner x (PDE.DeTurck.connDiff (I := I) g₁ g₀ x (Y x) (X x))).toLinearMap)
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem koszulCovGradCovec_dual_apply
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (ζ : TangentSpace I x) :
@@ -117,6 +117,7 @@ theorem koszulCovGradCovec_dual_apply_covGrad
   linarith [h]
 
 
+set_option linter.unusedSectionVars false in
 theorem connDiff_eq_appCc_invGram_covGrad
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -132,6 +133,7 @@ theorem connDiff_eq_appCc_invGram_covGrad
       koszulCovGradCovec_dual_apply (I := I) (M := M) g₀ g₁ X Y x ζ]
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem cotangentCov_leviCivita_diff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     {θ : Π b : M, TangentSpace I b →L[ℝ] ℝ} {x : M}
@@ -171,6 +173,7 @@ theorem cotangentCov_leviCivita_diff
   ring
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem cotangentToCLM_koszulCovGradCovec
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -186,6 +189,7 @@ theorem cotangentToCLM_koszulCovGradCovec
         cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b) w)
 
 
+set_option linter.unusedSectionVars false in
 theorem koszulCovGradCovecCLM_mdiffAtCotangent
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -366,6 +370,7 @@ noncomputable def ricciPrincipalCoeffDoubleTraceModel
       - modelDoubleTrace (E := E) 2 L)
 
 
+set_option linter.unusedSectionVars false in
 theorem ricciPrincipalCoeffDoubleTraceModel_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -448,6 +453,7 @@ noncomputable def ricciDeTurckPrincipalCoeffAtPoint (g₁ : SmoothRiemannianMetr
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] theorem ricciArmPrincipalCoeffFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (ricciDeTurckPrincipalCoeffAtPoint (I := I) g₁ x D) =
@@ -678,6 +684,7 @@ private def trilinearSectionEvalFn (V : Π b : M, Tensor0SSpace 3 I b)
   fun b => Tensor0SSpace.toModel (V b) (Fin.cons (A b) (Fin.cons (B b) ![C b]))
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma triMDiffAt_curried
     (s : ℕ) (W : Π x : M, Tensor0SSpace (s + 1) I x) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -699,6 +706,7 @@ private lemma triMDiffAt_curried
     (v := fun y : M => Y y) hCurried hY
 
 
+set_option linter.unusedSectionVars false in
 private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 3 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 3 V x)

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -84,6 +83,7 @@ theorem contDiff_classicalApply
     exact h_outer_partial i
   · exact B.smooth_c.mul hv
 
+omit [NeZero d] in
 private lemma ibp_smooth_against_test_inner
     {f : E → ℝ} (hf : ContDiff ℝ (⊤ : ℕ∞) f)
     {Ω : Set E} (hΩ : IsOpen Ω)

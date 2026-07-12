@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorF
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpVWFactorBound
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,10 +43,12 @@ def mercerHalfOrder : ℕ := Module.finrank ℝ E / 2 + 1
 
 def mercerSobolevExp : ℕ := 2 * (2 * (Module.finrank ℝ E / 2 + 1))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mercerSobolevExp_gt_finrank :
     Module.finrank ℝ E < mercerSobolevExp (E := E) := by
   unfold mercerSobolevExp; omega
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma two_mul_mercerHalfOrder_gt_finrank :
     2 * mercerHalfOrder (E := E) > Module.finrank ℝ E := by
   unfold mercerHalfOrder; omega
@@ -56,6 +57,7 @@ def eigenSubLevel (g : SmoothRiemannianMetric I M) (Λ : ℝ) :
     Finset (TensorEigenIdx (I := I) (M := M) g 0 2) :=
   (tensorEigenIdx_one_add_lambda_lt_finite (I := I) (M := M) g 0 2 Λ).toFinset
 
+omit [BoundarylessManifold I M] in
 lemma mem_eigenSubLevel (g : SmoothRiemannianMetric I M) (Λ : ℝ)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
     i ∈ eigenSubLevel (I := I) (M := M) g Λ ↔
@@ -64,6 +66,7 @@ lemma mem_eigenSubLevel (g : SmoothRiemannianMetric I M) (Λ : ℝ)
   rw [Set.Finite.mem_toFinset]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma finiteEigenCombo_toSection_apply (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (x : M) :
@@ -324,6 +327,7 @@ theorem eigenProjector_diagonal_le (g : SmoothRiemannianMetric I M) :
         have hpow_nn : (0 : ℝ) ≤ (1 + Λ) ^ (2 * (2 * k₂)) := pow_nonneg (by linarith) _
         nlinarith [hpow_nn]
 
+omit [BoundarylessManifold I M] in
 private theorem eigenSmooth_toL2_norm_eq_one (g : SmoothRiemannianMetric I M)
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :
     ‖(eigenSmooth (I := I) (M := M) g i : TensorL2 0 2 g)‖ = 1 := by

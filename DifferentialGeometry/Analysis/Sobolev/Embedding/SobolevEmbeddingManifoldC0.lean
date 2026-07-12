@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Algebra.Order.Chebyshev
 import Mathlib.Topology.MetricSpace.Pseudo.Lemmas
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+set_option linter.unusedSectionVars false in
 private theorem hsNorm_sq_toReal_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -43,6 +43,7 @@ private theorem hsNorm_sq_toReal_eq
       ((tensorPouSobolevHsNorm (I := I) (M := M) g k T) ^ 2).toReal := by
   rw [tensorPouSobolevHilbert_norm_eq, ← ENNReal.toReal_pow]
 
+set_option linter.unusedSectionVars false in
 theorem hsBlock_le_hsNorm_sq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) (α₀ : M)
@@ -122,6 +123,7 @@ theorem hsBlock_le_hsNorm_sq
     rw [hS_def]; exact ENNReal.le_tsum α₀
   exact le_trans h_order (le_trans h_comp h_tsum)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclN_coord_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
     |v i| ≤ ‖v‖ := by
   classical
@@ -134,6 +136,7 @@ private lemma euclN_coord_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
     show ‖v‖ = Real.sqrt (‖v‖ ^ 2) from (Real.sqrt_sq hv_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sq
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem continuousMultilinearMap_norm_le_sum_abs_basis_apply
     {j : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin j => EuclN) ℝ) :
@@ -201,6 +204,7 @@ private theorem continuousMultilinearMap_norm_le_sum_abs_basis_apply
       (∏ i : Fin j, ‖m i‖) * Mb := by rw [← Finset.mul_sum]
   rw [h_factor]; exact le_of_eq (mul_comm _ _)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun_sq
     {j : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin j => EuclN) ℝ) :
@@ -225,6 +229,7 @@ private theorem continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun
   rw [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin] at hcs
   exact hcs
 
+set_option linter.unusedSectionVars false in
 private theorem rawPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -269,6 +274,7 @@ private theorem rawPull_contDiffOn
     exact hy
   exact h_raw_pull_contDiffOn.comp h_toEucl_symm_smooth.contDiffOn h_maps
 
+omit [BoundarylessManifold I M] in
 theorem exists_global_smooth_eqOn_ball_of_rawPull
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -318,6 +324,7 @@ theorem exists_global_smooth_eqOn_ball_of_rawPull
     have hη_y : η y = 1 := hη_one y (Metric.self_subset_cthickening _ hy)
     simp only [hη_y, one_mul, hrp_def]
 
+omit [BoundarylessManifold I M] in
 private theorem hsIntegrandReal_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -380,6 +387,7 @@ private theorem hsIntegrandReal_continuousOn
     exact h_apply.comp_continuousOn h_iter_contOn
   exact hPOU_pull_cont.mul ((h_eval_contOn.abs).pow 2)
 
+omit [BoundarylessManifold I M] in
 theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -542,6 +550,7 @@ theorem eLpNorm_sq_iteratedFDeriv_le_hsBlock
   refine Finset.sum_le_sum (fun b _ => ?_)
   exact lintegral_mono_set hball_sub
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem smooth_eLpNorm_iteratedFDeriv_ball_ne_top
     {y₀ : EuclN} {R : ℝ} (j : ℕ) {u : EuclN → ℝ}
     (hu : ContDiff ℝ (⊤ : ℕ∞) u) :
@@ -779,6 +788,7 @@ private theorem uniformRawPull_le_hsNorm
       ≤ Cfun yi * hsn := h_bound
     _ ≤ Dmax * hsn := mul_le_mul_of_nonneg_right hCyi_le hhsn_nn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem superlevel_compact_subset_source
     (α : M) {c : ℝ} (hc_pos : 0 < c) :
     IsCompact {x : M | c ≤ (chartAtlasPOU I M α : M → ℝ) x} ∧

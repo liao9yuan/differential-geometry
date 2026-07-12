@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturba
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -50,6 +49,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] in
 theorem corrField_realizedFam_chartRiemannTensor_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -86,6 +86,7 @@ theorem corrField_realizedFam_chartRiemannTensor_jointContMDiffOn
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
     (fun q _ => rfl) rfl
 
+omit [BoundarylessManifold I M] in
 theorem corrField_realizedFam_chartChristoffel_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -122,6 +123,7 @@ theorem corrField_realizedFam_chartChristoffel_jointContMDiffOn
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr
     (fun q _ => rfl) rfl
 
+omit [BoundarylessManifold I M] in
 private lemma corrField_realizedFam_chartGramMatrix_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -160,6 +162,7 @@ private lemma corrField_realizedFam_chartGramMatrix_jointContMDiffOn
     rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hqx]
   · rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hxsrc]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma corrField_genJointGram_const_g0
     (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
     ChartGramFamilyJointSmoothNondegenerate (I := I) (fun _ : ℝ => g₀) α S := by
@@ -171,6 +174,7 @@ private lemma corrField_genJointGram_const_g0
   · intro s₀ _ x hx
     exact chartGramMatrix_det_pos (I := I) g₀ α hx
 
+set_option linter.unusedSectionVars false in
 private lemma corrField_chartChristoffel_g0_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (α : M) (i j k : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -201,6 +205,7 @@ private lemma corrField_chartChristoffel_g0_jointContMDiffOn
     exact hm
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr (fun q _ => rfl) rfl
 
+set_option linter.unusedSectionVars false in
 private lemma corrField_chartInvGramMatrix_g0_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -235,6 +240,7 @@ private lemma corrField_chartInvGramMatrix_g0_jointContMDiffOn
     rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hqx]
   · rw [Function.comp_apply, chartInvGramOnE_def, (extChartAt I α).left_inv hxsrc]
 
+set_option linter.unusedSectionVars false in
 private lemma omAppChartBasisVec_jointContMDiffOn
     (om : Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel 1 ℝ E, fun x : M => Tensor0SBundle.Tensor0SSpace 1 I x⟯)
     (α : M) (p : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
@@ -307,6 +313,7 @@ private noncomputable def corrField_outerPairBilinChartα (g : SmoothRiemannianM
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma corrField_outerPairBilinChartα_apply (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     corrField_outerPairBilinChartα (I := I) g α K Dd X X' =
@@ -322,6 +329,7 @@ private lemma corrField_outerPairBilinChartα_apply (g : SmoothRiemannianMetric 
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma corrField_double_frame_bilin_trace_chartα
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hxbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)

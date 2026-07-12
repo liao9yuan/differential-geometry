@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.ChartBridge.RiemannBasisIdentityOffCentre
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ def nablaChartRiemannCoeff (g : SmoothRiemannianMetric I M) (α : M)
             chartRiemannTensor (I := I) g α m q r l y)
 
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior ((extChartAt I α).target : Set E)))
@@ -61,6 +61,7 @@ private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
   exact hfderiv.clm_apply contDiffOn_const
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartRiemannTensor_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E)) :
@@ -99,6 +100,7 @@ private lemma chartRiemannTensor_contDiffOn_interior
   exact (hdΓ1.sub hdΓ2).add hΓΓ
 
 
+omit [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem nablaChartRiemannCoeff_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s l : Fin (Module.finrank ℝ E)) :

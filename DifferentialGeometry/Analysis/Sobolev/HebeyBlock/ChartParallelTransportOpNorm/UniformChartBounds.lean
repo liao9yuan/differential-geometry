@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.ChartFrameNorm
 import DifferentialGeometry.Tensor.Multilinear.HsBoundOp
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.HebeyBlock
 
@@ -21,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toEucl_symm_preimage_target (α : M) :
     ((toEuclidean (E := E)).symm) ⁻¹' (extChartAt I α).target =
       chartTargetEuclid (I := I) (M := M) α := by
@@ -33,6 +33,7 @@ private lemma toEucl_symm_preimage_target (α : M) :
       rw [← hz_eq]; exact (toEuclidean (E := E)).symm_apply_apply z
     rw [Set.mem_preimage, h_eq]; exact hz_tgt
 
+set_option linter.unusedSectionVars false in
 private lemma raw_pull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -81,6 +82,7 @@ private lemma raw_pull_contDiffOn
   exact h_raw_pull_contDiffOn.comp
     h_toEucl_symm_smooth.contDiffOn h_maps
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma iteratedFDeriv_chain_rule
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -135,6 +137,7 @@ private lemma iteratedFDeriv_chain_rule
   rw [h_swap_left, h_swap_right] at h_chain
   exact h_chain
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma opNorm_sq_le_basis_sum_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -239,6 +242,7 @@ private lemma opNorm_sq_le_basis_sum_sq
             |B (fun k => EuclideanSpace.basisFun
               (Fin (Module.finrank ℝ E)) ℝ (idx k))| ^ 2) := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouPull_contOn (α : M) :
     ContinuousOn
       (fun y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) =>
@@ -267,6 +271,7 @@ private lemma pouPull_contOn (α : M) :
     exact hz_tgt
   exact hPOU_cont.comp_continuousOn' h_inner
 
+omit [BoundarylessManifold I M] in
 private lemma iteratedFDeriv_basisEval_contOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -308,6 +313,7 @@ private lemma iteratedFDeriv_basisEval_contOn
     continuous_eval_const _
   exact h_apply.comp_continuousOn h_iter_contOn
 
+omit [BoundarylessManifold I M] in
 private lemma hsIntegrand_real_contOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -331,6 +337,7 @@ private lemma hsIntegrand_real_contOn
     (I := I) (M := M) g r s T α Idx Jdx j basisIdx
   exact h_pou.mul (h_eval.abs.pow 2)
 
+omit [BoundarylessManifold I M] in
 private lemma hsIntegrand_real_aestronglyMeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -357,6 +364,7 @@ private lemma hsIntegrand_real_aestronglyMeasurable
     (chartTargetEuclid_isOpen (I := I) (M := M) α).measurableSet
   exact h_cont.aestronglyMeasurable h_meas
 
+omit [BoundarylessManifold I M] in
 private lemma hsIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -382,6 +390,7 @@ private lemma hsIntegrand_aemeasurable
     (hsIntegrand_real_aestronglyMeasurable
       (I := I) (M := M) g r s T α Idx Jdx j basisIdx).aemeasurable
 
+omit [BoundarylessManifold I M] in
 private lemma per_alpha_j_integral_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -609,6 +618,7 @@ private lemma per_alpha_j_integral_bound
     _ = _ := h_pull_const
     _ = _ := by rw [h_swap_sum]
 
+omit [BoundarylessManifold I M] in
 theorem uniform_chart_bounds_from_compactness
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

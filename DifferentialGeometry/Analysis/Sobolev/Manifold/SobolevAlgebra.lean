@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.SobolevAlgebraSmoothExtens
 import DifferentialGeometry.Analysis.Sobolev.Manifold.SobolevAlgebraSmoothMultiplierWkpBound
 import DifferentialGeometry.Analysis.Sobolev.Manifold.SobolevAlgebraChartSmoothFactors
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -252,6 +251,7 @@ theorem mul_smooth_chart_bound_C1
   refine h_step1.trans ?_
   rw [← Finset.mul_sum]
 
+omit [FiniteDimensional ℝ E] in
 private lemma eLpNorm_restrict_le_ofReal_mul_volume_pow
     {p : ℝ≥0∞} {Ω : Set EuclN}
     {K : Set EuclN} (hK_meas : MeasurableSet K)

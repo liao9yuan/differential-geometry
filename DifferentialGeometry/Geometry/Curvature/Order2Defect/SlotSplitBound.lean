@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.TraceDiscrepancyD
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.SlotSplitParsevalBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_three_eq_sum_slot0Curry
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n),
@@ -50,6 +50,7 @@ theorem riemannianFiberNormSq_three_eq_sum_slot0Curry
     ((covGradRoughLapCurv (I := I) (M := M) g T₀).toSection x)
 
 
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_three_le_of_slot0_bound
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K₀ : Fin 0 → Fin n)
@@ -86,6 +87,7 @@ private noncomputable def secondCovGradEnergyBudget
       ((covGrad (I := I) (M := M) g 0 3
         (covGrad (I := I) (M := M) g 0 2 T₀)).toSection x)
 
+set_option linter.unusedSectionVars false in
 private lemma rfnsBudget_nonneg
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2) (x : M) :
     0 ≤ secondCovGradEnergyBudget (I := I) (M := M) g T₀ x := by
@@ -98,6 +100,7 @@ private lemma rfnsBudget_nonneg
   linarith
 
 
+set_option linter.unusedSectionVars false in
 theorem covGradRoughLapCurv_hpt_of_slot0_budget
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (D₀ : ℝ)

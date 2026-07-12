@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl_H
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.StandardNirenbergTest
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.SubstitutionNonSmooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma standardNirenbergTest_tsupport_in_thickening
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) {η : EuclN → ℝ}
     (hη_cs : HasCompactSupport η)
@@ -66,6 +66,7 @@ lemma standardNirenbergTest_tsupport_in_thickening
     refine Metric.mem_cthickening_of_dist_le _ _ |h| K_0 hy_K_0 ?_
     exact h_dist
 
+set_option linter.unusedSectionVars false in
 lemma standardNirenbergTest_tsupport_in_chartTarget
     [I.Boundaryless]
     {α : M}
@@ -80,6 +81,7 @@ lemma standardNirenbergTest_tsupport_in_chartTarget
   (standardNirenbergTest_tsupport_in_thickening (E := E) k h hη_cs hη_supp_in_K_0
       u).trans h_thick
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -107,6 +109,7 @@ lemma weightedInvGramOnEuclid_bounded_on_compact
   intro y hy
   exact h_max_eq hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_bounded_above_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -133,6 +136,7 @@ lemma densityOnEuclid_bounded_above_on_compact
   intro y hy
   exact h_max_eq hy
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cthickening_compact_of_compact
     {h : ℝ} {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0)
     {R₀ : ℝ} (_hh_le : |h| ≤ R₀) :
@@ -144,6 +148,7 @@ lemma cthickening_compact_of_compact
     Metric.isClosed_cthickening
   exact (Metric.isCompact_iff_isClosed_bounded).mpr ⟨h_closed, h_bdd⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma uChart_memLp_volume_restrict_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -155,6 +160,7 @@ lemma uChart_memLp_volume_restrict_K_0
     (D.u_chart_memLp_weighted) hK_0_compact
     hK_0_compact.isClosed.measurableSet hK_0_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fChart_memLp_volume_restrict_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -166,6 +172,7 @@ lemma fChart_memLp_volume_restrict_K_0
     (D.f_chart_memLp_weighted) hK_0_compact
     hK_0_compact.isClosed.measurableSet hK_0_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weakPartial_memLp_volume_restrict_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -176,6 +183,7 @@ lemma weakPartial_memLp_volume_restrict_compact
     MemLp (D.weak_partial i) 2 ((volume : Measure EuclN).restrict K) :=
   D.weak_partial_locally_memLp i K hK_compact hK_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weakPartial_memLp_volume_restrict_cthickening
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -190,6 +198,7 @@ lemma weakPartial_memLp_volume_restrict_cthickening
   D.weak_partial_locally_memLp i (Metric.cthickening |h| K_0)
     (cthickening_compact_of_compact (E := E) hK_0_compact hh_le) h_thick
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_bounded_on_cthickening
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -204,6 +213,7 @@ lemma weightedInvGramOnEuclid_bounded_on_cthickening
   weightedInvGramOnEuclid_bounded_on_compact (I := I) (M := M) g α i j
     (cthickening_compact_of_compact (E := E) hK_0_compact hh_le) h_thick
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_bounded_above_on_cthickening
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -216,6 +226,7 @@ lemma densityOnEuclid_bounded_above_on_cthickening
   densityOnEuclid_bounded_above_on_compact (I := I) (M := M) g α
     (cthickening_compact_of_compact (E := E) hK_0_compact hh_le) h_thick
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma translate_weightedInvGramOnEuclid_bounded_on_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} (α : M)
@@ -352,6 +363,7 @@ def f_term_chartBilinear
         (d := Module.finrank ℝ E) k h η D.u_chart x
   ∂(volume : Measure EuclN)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma substitution_identity_explicit_eq_symbolic
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -420,6 +432,7 @@ lemma substitution_identity_explicit_eq_symbolic
       + f_term_chartBilinear (I := I) (M := M) D K_0 η k h) := by
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma substitution_identity_RHS_explicit_eq_symbolic
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -434,16 +447,19 @@ lemma substitution_identity_RHS_explicit_eq_symbolic
     c_term_chartBilinear (I := I) (M := M) D K_0 η k h := by
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma K_0_measurableSet
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0) :
     MeasurableSet K_0 :=
   hK_0_compact.isClosed.measurableSet
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cthickening_measurableSet
     {h : ℝ} {K_0 : Set EuclN} :
     MeasurableSet (Metric.cthickening |h| K_0) :=
   Metric.isClosed_cthickening.measurableSet
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weakPartial_aestronglyMeasurable_restrict
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -456,6 +472,7 @@ lemma weakPartial_aestronglyMeasurable_restrict
   (weakPartial_memLp_volume_restrict_compact (I := I) (M := M) D i
     hK_compact hK_in).aestronglyMeasurable
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma uChart_aestronglyMeasurable_restrict_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -466,6 +483,7 @@ lemma uChart_aestronglyMeasurable_restrict_K_0
   (uChart_memLp_volume_restrict_K_0 (I := I) (M := M) D
     hK_0_compact hK_0_in).aestronglyMeasurable
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fChart_aestronglyMeasurable_restrict_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -476,12 +494,14 @@ lemma fChart_aestronglyMeasurable_restrict_K_0
   (fChart_memLp_volume_restrict_K_0 (I := I) (M := M) D
     hK_0_compact hK_0_in).aestronglyMeasurable
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_continuousOn_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (densityOnEuclid (I := I) g α)
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densityOnEuclid_contDiffOn (I := I) g α).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_continuousOn_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -489,6 +509,7 @@ lemma weightedInvGramOnEuclid_continuousOn_chartTarget
       (chartTargetEuclid (I := I) (M := M) α) :=
   (weightedInvGramOnEuclid_contDiffOn (I := I) g α i j).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_continuousOn_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -496,6 +517,7 @@ lemma densityOnEuclid_continuousOn_K_0
     ContinuousOn (densityOnEuclid (I := I) g α) K_0 :=
   (densityOnEuclid_continuousOn_chartTarget (I := I) g α).mono hK_0_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_continuousOn_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -504,6 +526,7 @@ lemma weightedInvGramOnEuclid_continuousOn_K_0
     ContinuousOn (weightedInvGramOnEuclid (I := I) g α i j) K_0 :=
   (weightedInvGramOnEuclid_continuousOn_chartTarget (I := I) g α i j).mono hK_0_in
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityOnEuclid_aestronglyMeasurable_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -514,6 +537,7 @@ lemma densityOnEuclid_aestronglyMeasurable_K_0
   (densityOnEuclid_continuousOn_K_0 (I := I) g α hK_0_in).aestronglyMeasurable
     (K_0_measurableSet (E := E) hK_0_compact)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramOnEuclid_aestronglyMeasurable_K_0
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -525,6 +549,7 @@ lemma weightedInvGramOnEuclid_aestronglyMeasurable_K_0
   (weightedInvGramOnEuclid_continuousOn_K_0 (I := I) g α i j hK_0_in).aestronglyMeasurable
     (K_0_measurableSet (E := E) hK_0_compact)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma standardNirenbergTest_hasCompactSupport_uChart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -536,6 +561,7 @@ lemma standardNirenbergTest_hasCompactSupport_uChart
   standardNirenbergTest_hasCompactSupport
     (d := Module.finrank ℝ E) k h hη_cs D.u_chart
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma cthickening_K_0_isCompact
     {K_0 : Set EuclN} (hK_0_compact : IsCompact K_0) {h : ℝ}
     {R₀ : ℝ} (_hh_le : |h| ≤ R₀) :
@@ -547,6 +573,7 @@ lemma cthickening_K_0_isCompact
     Metric.isClosed_cthickening
   exact (Metric.isCompact_iff_isClosed_bounded).mpr ⟨h_closed, h_bdd⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma substitution_identity_compact_form_symbolic
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -567,6 +594,7 @@ lemma substitution_identity_compact_form_symbolic
       = c_term_chartBilinear (I := I) (M := M) D K_0 η k h) :=
   Iff.rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma five_terms_sum_eq_c_term_iff_substitution_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -589,6 +617,7 @@ lemma five_terms_sum_eq_c_term_iff_substitution_identity
   · exact fun h => h.symm
   · exact fun h => h.symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma standardNirenbergTest_zero_h_uChart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -597,6 +626,7 @@ lemma standardNirenbergTest_zero_h_uChart
     standardNirenbergTest (d := Module.finrank ℝ E) k 0 η D.u_chart = 0 :=
   standardNirenbergTest_zero_h (d := Module.finrank ℝ E) k η D.u_chart
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma diffQuot_zero_h_uChart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -627,6 +657,7 @@ def chartBilinear_RHS
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) : ℝ :=
   c_term_chartBilinear (I := I) (M := M) D K_0 η k h
 
+set_option linter.unusedSectionVars false in
 lemma standardNirenbergTest_smooth_admissible
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -715,6 +746,7 @@ lemma standardNirenbergTest_smooth_admissible
   · exact standardNirenbergTest_tsupport_in_chartTarget (E := E) (I := I) (M := M)
       (α := α) k h hη_supp hη_supp_in_K_0 h_thick D.u_chart
 
+set_option linter.unusedSectionVars false in
 lemma variational_identity_at_standardNirenbergTest_smooth_uChart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -751,6 +783,7 @@ lemma variational_identity_at_standardNirenbergTest_smooth_uChart
   exact D.variational_identity (standardNirenbergTest
     (d := Module.finrank ℝ E) k h η D.u_chart) h_v_smooth h_v_supp h_v_tsupp
 
+set_option linter.unusedSectionVars false in
 lemma smooth_uChart_variational_lhs_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -786,6 +819,7 @@ lemma smooth_uChart_variational_lhs_identity
     hη_supp_in_K_0 k h h_thick
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma standardNirenbergTest_eq_diffQuot_neg_h
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

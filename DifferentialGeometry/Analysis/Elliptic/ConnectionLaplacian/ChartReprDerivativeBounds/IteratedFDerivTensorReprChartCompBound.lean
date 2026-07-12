@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.ChartPulledTensorReprChartCompBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma tensorRepr_chart_pulled_component_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -71,6 +71,7 @@ lemma tensorRepr_chart_pulled_component_contDiffAt
     WithTop.coe_le_coe.mpr (le_top : (2 : ℕ∞) ≤ ⊤)
   exact hcd_at_inf.of_le h2_le
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedFDeriv_two_smul_const_norm_le
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     (f : E → ℝ) (v : F) {y : E}
@@ -89,6 +90,7 @@ private lemma iteratedFDeriv_two_smul_const_norm_le
             ContinuousLinearMap.norm_id, one_mul]
     _ = ‖iteratedFDeriv ℝ 2 f y‖ * ‖v‖ := by rw [mul_comm]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {b : M}
@@ -169,6 +171,7 @@ lemma iteratedFDeriv_two_tensorRepr_opNorm_le_sum_iteratedFDeriv_components
   intro Jdx _
   exact iteratedFDeriv_two_smul_const_norm_le _ _ (hcd_each Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem iteratedFDeriv_two_tensorRSChartE_section_repr_opNorm_le_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :

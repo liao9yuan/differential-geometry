@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.LpI
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.LpClass
 import DifferentialGeometry.Geometry.Curvature.Bochner.BochnerConcrete
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] in
 lemma smoothRicciPairing_contMDiff
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M =>
@@ -70,6 +70,7 @@ noncomputable def smoothRicciPairingBundle
     (gradFun (I := I) g φ b) (gradFun (I := I) g v.toFun b)
   smooth := smoothRicciPairing_contMDiff (I := I) (M := M) g φ v
 
+omit [CompactSpace M] in
 @[simp] lemma smoothRicciPairingBundle_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (b : M) :

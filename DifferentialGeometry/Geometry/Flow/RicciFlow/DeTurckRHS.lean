@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
 set_option linter.unnecessarySimpa false
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry
 namespace PDE
@@ -50,6 +49,7 @@ private noncomputable def lieDerivMetricClmAux
       simpa [LinearMap.smul_apply, ContinuousLinearMap.smul_apply,
              LinearMap.coe_toContinuousLinearMap', smul_eq_mul] using happ }
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] private lemma lieDerivMetricClmAux_apply
     (g : Integral.Measure.SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -66,6 +66,7 @@ noncomputable def lieDerivMetricClm
   LinearMap.toContinuousLinearMap
     (lieDerivMetricClmAux (I := I) (smoothRiemannianMetricToInfty (I := I) g) W x)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem lieDerivMetricClm_apply
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

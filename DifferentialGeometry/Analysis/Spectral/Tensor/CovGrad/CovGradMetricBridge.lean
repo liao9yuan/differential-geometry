@@ -4,7 +4,6 @@ import Mathlib.Data.Fin.Tuple.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Logic.Equiv.Fin.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 private lemma tensorRSSpace_toModel_apply
     (r s : ℕ) (x : M) (T : TensorRSSpace r s I x)
     (Dm : Tensor0SModel r ℝ E) :
@@ -49,6 +49,7 @@ private lemma tensorRSSpace_toModel_apply
           (Tensor0SSpace.ofModel Dm)) :=
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma covGrad_toModel_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -100,6 +101,7 @@ private lemma diffSlot_succAbove_natAdd (r s : ℕ) (a : Fin s) :
   simp only [Fin.val_succ, Fin.val_natAdd]
   omega
 
+set_option linter.unusedSectionVars false in
 private lemma lower_covGrad_insertNth_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -143,6 +145,7 @@ private lemma lower_covGrad_insertNth_basis
         (fun j : Fin (s + 1) => (chartModelBasis E) (I' (Fin.natAdd r j)))]
   rw [hdir, hupper, hcov]
 
+set_option linter.unusedSectionVars false in
 private lemma gramInv_prod_insertNth_split
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     (k l : Fin (Module.finrank ℝ E))
@@ -179,6 +182,7 @@ private lemma gramInv_prod_insertNth_split
   refine Finset.prod_congr rfl (fun a _ => ?_)
   rw [Fin.insertNth_apply_succAbove, Fin.insertNth_apply_succAbove]
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sum_reindex_diffSlot (r s : ℕ)
     (F : (Fin (r + (s + 1)) → Fin (Module.finrank ℝ E)) → ℝ) :
     ∑ I' : Fin (r + (s + 1)) → Fin (Module.finrank ℝ E), F I' =
@@ -194,6 +198,7 @@ private lemma sum_reindex_diffSlot (r s : ℕ)
         (diffSlot r s)) F).symm
   rw [h1, Fintype.sum_prod_type]
 
+set_option linter.unusedSectionVars false in
 theorem tensorCovDerivPointwiseInner_eq_tensorInnerPointwise_grad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) (x : M) :

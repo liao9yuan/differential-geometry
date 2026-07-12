@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.MetricExtension
 import DifferentialGeometry.Geometry.Operator.Gradient
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,12 +44,14 @@ def partialDerivOnEuclid (α : M) (i : Fin (Module.finrank ℝ E)) (u : M → �
     EuclN → ℝ := fun y =>
   partialDeriv (E := E) i (scalarOnE (I := I) α u) ((toEuclidean (E := E)).symm y)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma partialDerivOnEuclid_def (α : M) (i : Fin (Module.finrank ℝ E))
     (u : M → ℝ) (y : EuclN) :
     partialDerivOnEuclid (I := I) (M := M) α i u y =
       partialDeriv (E := E) i (scalarOnE (I := I) α u)
         ((toEuclidean (E := E)).symm y) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem gradInner_eq_chart_formula
     (g : SmoothRiemannianMetric I M) (α : M)
     {ρα u : M → ℝ}
@@ -103,6 +104,7 @@ theorem gradInner_eq_chart_formula
   intro j _
   rw [h_partial i ρα, h_partial j u, h_invGram i j]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_gradInnerSmooth_pointwise
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) {y : EuclN}
@@ -118,6 +120,7 @@ theorem chartPushedRaw_gradInnerSmooth_pointwise
           partialDerivOnEuclid (I := I) (M := M) α j v.toFun y :=
   gradInner_eq_chart_formula (I := I) (M := M) g α ρα.contMDiff v.smooth hy
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivOnEuclid_contDiffOn (α : M) (i : Fin (Module.finrank ℝ E))
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ContDiffOn ℝ ∞ (partialDerivOnEuclid (I := I) (M := M) α i u)
@@ -152,6 +155,7 @@ lemma partialDerivOnEuclid_contDiffOn (α : M) (i : Fin (Module.finrank ℝ E))
     h_pd.comp h_symm_smooth.contDiffOn h_maps
   exact h_comp
 
+set_option linter.unusedSectionVars false in
 lemma partialDerivOnEuclid_continuousOn (α : M) (i : Fin (Module.finrank ℝ E))
     {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
     ContinuousOn (partialDerivOnEuclid (I := I) (M := M) α i u)
@@ -165,6 +169,7 @@ def chartFormulaRhsSmooth (g : SmoothRiemannianMetric I M) (α : M)
       partialDerivOnEuclid (I := I) (M := M) α i ρα y *
       partialDerivOnEuclid (I := I) (M := M) α j u y
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma chartFormulaRhsSmooth_def (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (u : M → ℝ) (y : EuclN) :
     chartFormulaRhsSmooth (I := I) (M := M) g α ρα u y =
@@ -173,6 +178,7 @@ def chartFormulaRhsSmooth (g : SmoothRiemannianMetric I M) (α : M)
           partialDerivOnEuclid (I := I) (M := M) α i ρα y *
           partialDerivOnEuclid (I := I) (M := M) α j u y := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartFormulaRhsSmooth_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -188,6 +194,7 @@ lemma chartFormulaRhsSmooth_contDiffOn
     · exact partialDerivOnEuclid_contDiffOn (I := I) (M := M) α i ρα.contMDiff
   · exact partialDerivOnEuclid_contDiffOn (I := I) (M := M) α j hu
 
+set_option linter.unusedSectionVars false in
 lemma chartFormulaRhsSmooth_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -195,6 +202,7 @@ lemma chartFormulaRhsSmooth_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (chartFormulaRhsSmooth_contDiffOn (I := I) (M := M) g α ρα hu).continuousOn
 
+set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_gradInner_eq_rhs_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) {y : EuclN}
@@ -216,6 +224,7 @@ noncomputable def chartFormulaRhsSmoothExt (g : SmoothRiemannianMetric I M) (α 
       chartFormulaRhsSmooth (I := I) (M := M) g α ρα u y
     else 0
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma chartFormulaRhsSmoothExt_apply_of_mem (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (u : M → ℝ) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -227,6 +236,7 @@ lemma chartFormulaRhsSmoothExt_apply_of_mem (g : SmoothRiemannianMetric I M) (α
       else 0) = _
   rw [if_pos hy]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma chartFormulaRhsSmoothExt_apply_of_notMem (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) (u : M → ℝ) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -237,6 +247,7 @@ lemma chartFormulaRhsSmoothExt_apply_of_notMem (g : SmoothRiemannianMetric I M) 
       else 0) = 0
   rw [if_neg hy]
 
+set_option linter.unusedSectionVars false in
 lemma chartFormulaRhsSmoothExt_measurable
     (g : SmoothRiemannianMetric I M) (α : M)
     (ρα : C^∞⟮I, M; ℝ⟯) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :

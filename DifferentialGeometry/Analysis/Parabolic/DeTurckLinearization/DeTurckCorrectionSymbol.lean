@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbolFormula
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Output
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartModelBasis_repr_apply_add (v₁ v₂ : E)
     (i : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr (v₁ + v₂) i =
@@ -31,6 +31,7 @@ private lemma chartModelBasis_repr_apply_add (v₁ v₂ : E)
   rw [← Module.Basis.coord_apply, ← Module.Basis.coord_apply, ← Module.Basis.coord_apply,
     map_add]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartModelBasis_repr_apply_smul (a : ℝ) (v : E)
     (i : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr (a • v) i = a * (chartModelBasis E).repr v i := by
@@ -79,6 +80,7 @@ def deTurckCorrectionSymbolOutput (g g' : SmoothRiemannianMetric I M) (x : M) (�
       ring) :
     E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma deTurckCorrectionSymbolOutput_apply_apply (g g' : SmoothRiemannianMetric I M)
     (x : M) (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (v w : TangentSpace I x) :

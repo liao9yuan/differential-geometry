@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -20,6 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_scalarOnE_contDiffOn_interior
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -37,6 +37,7 @@ private lemma partialDeriv_scalarOnE_contDiffOn_interior
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
+set_option linter.unusedSectionVars false in
 lemma chartInvGramOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -63,6 +64,7 @@ lemma chartInvGramOnE_contDiffOn
       (extChartAt I α).target := hbase.comp hsymm hsubset
   exact hcomp.contDiffOn
 
+set_option linter.unusedSectionVars false in
 lemma gradChartCoeffOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -76,6 +78,7 @@ lemma gradChartCoeffOnE_contDiffOn_interior
   · exact (chartInvGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
   · exact partialDeriv_scalarOnE_contDiffOn_interior (I := I) α hf j
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_gradChartCoeffOnE_expand
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -165,6 +168,7 @@ lemma partialDeriv_gradChartCoeffOnE_expand
           ((chartModelBasis E) i))
   ring
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -191,6 +195,7 @@ lemma chartGramOnE_contDiffOn
       (extChartAt I α).target := hbase.comp hsymm hsubset
   exact hcomp.contDiffOn
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -204,6 +209,7 @@ lemma chartGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
+set_option linter.unusedSectionVars false in
 theorem chartChristoffel_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -273,6 +279,7 @@ theorem chartChristoffel_contDiffOn_interior
       exact (hi.add hj).sub hl
   exact (contDiffOn_const (c := (1 / 2 : ℝ))).mul hsum_smooth
 
+set_option linter.unusedSectionVars false in
 lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -286,6 +293,7 @@ lemma chartInvGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
+set_option linter.unusedSectionVars false in
 lemma chartDensityOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :
@@ -298,6 +306,7 @@ lemma chartDensityOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_chartGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j a b : Fin (Module.finrank ℝ E)) :
@@ -315,6 +324,7 @@ private lemma partialDeriv_chartGramOnE_contDiffOn_interior
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j a b : Fin (Module.finrank ℝ E))
@@ -329,6 +339,7 @@ lemma partialDeriv_chartGramOnE_differentiableAt_interior
   have hy_nhd : interior (extChartAt I α).target ∈ 𝓝 y := hop_int.mem_nhds hy
   exact (hcd_int.contDiffAt hy_nhd).differentiableAt (by simp)
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_chartInvGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j k l : Fin (Module.finrank ℝ E)) :
@@ -346,6 +357,7 @@ private lemma partialDeriv_chartInvGramOnE_contDiffOn_interior
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (j k l : Fin (Module.finrank ℝ E))

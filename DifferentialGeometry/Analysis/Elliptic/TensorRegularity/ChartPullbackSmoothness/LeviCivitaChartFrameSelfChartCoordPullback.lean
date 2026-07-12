@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoo
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.CovApplyFrameToCoordExpansion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private noncomputable def chartModelBasisProj (m : Fin (Module.finrank ℝ E)) :
     (((LinearMap.proj m).comp ((chartModelBasis E).equivFun.toLinearMap)) :
       E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartModelBasisProj_apply (m : Fin (Module.finrank ℝ E))
     (v : E) :
     chartModelBasisProj (E := E) m v =

@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SlotFreeCurvatu
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceKoszulSecondCovGrad
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferencePrincipalEndomorphismTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ noncomputable def ccTensor02Symm (g₀ : SmoothRiemannianMetric I M) (T : Smooth
   (1 / 2 : ℝ) • (T + domDomCongrSection (I := I) g₀ (Equiv.swap (0 : Fin 2) 1) T)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x =
@@ -57,6 +57,7 @@ lemma unitModel_add2 (g₀ : SmoothRiemannianMetric I M)
     ContinuousLinearMap.add_apply, Tensor0SSpace.toModel_add]
 
 
+set_option linter.unusedSectionVars false in
 private lemma unitModel_eq_ccTensorBilin (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -94,6 +95,7 @@ lemma ccTensorBilin_add (g₀ : SmoothRiemannianMetric I M)
   rw [unitModel_add2 (I := I) (M := M) g₀ S T b, ContinuousMultilinearMap.add_apply]
 
 
+omit [BoundarylessManifold I M] in
 lemma ccTensorBilin_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     smoothCcTensorBilinForm (I := I) g₀ (c • S) b u w =
@@ -157,6 +159,7 @@ private lemma unitModel_domDomCongrSection_swap_smul (g₀ : SmoothRiemannianMet
     ContinuousMultilinearMap.smul_apply, ContinuousMultilinearMap.domDomCongr_apply]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g₀ 0 2) (x : M) :
     unitModel (I := I) (M := M) g₀ 2 (c • T) x =
@@ -228,6 +231,7 @@ private def alignedPrincipalEndoCrossMetric (g₀ gop gcov : SmoothRiemannianMet
     rw [dualToCotangent_smulC]
     rw [map_smul]; rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma alignedPrincipalEndoCcross_apply (g₀ gop gcov : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     alignedPrincipalEndoCrossMetric (I := I) (M := M) g₀ gop gcov Z Y x v =
@@ -736,6 +740,7 @@ noncomputable def reindexCoeffFib (σ' : Equiv.Perm (Fin 4)) (x : M)
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap))
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
@@ -748,6 +753,7 @@ theorem reindexCoeffFib_apply (σ' : Equiv.Perm (Fin 4)) (x : M)
   congr 1
 
 
+set_option linter.unusedSectionVars false in
 private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
     (A B : Tensor0SBundle.Tensor0SSpace 4 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace 2 I x)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
@@ -758,6 +764,7 @@ private theorem reindexCoeffFib_add (σ' : Equiv.Perm (Fin 4)) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem reindexCoeffFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (R : SmoothCcTensor g₀ 4 2) (σ' : Equiv.Perm (Fin 4)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 4 2 ℝ E)) ∞

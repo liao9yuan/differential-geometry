@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -50,6 +49,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_fderiv_apply_single_aux
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -62,6 +62,7 @@ private lemma contDiff_fderiv_apply_single_aux
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_fderiv_apply_single_aux
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -69,12 +70,14 @@ private lemma hasCompactSupport_fderiv_apply_single_aux
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_fderiv_apply_single_subset_aux
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma mixed_smooth_classical_partial_swap_aux
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (i l : Fin (Module.finrank ℝ E)) (x : EuclN) :
@@ -124,6 +127,7 @@ private lemma mixed_smooth_classical_partial_swap_aux
   simp only [ContinuousLinearMap.apply_apply]
   exact h_symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma integral_chosenSecond_mul_eq_integral_u_mixed_aux
     {u : EuclN → ℝ} {Ω : Set EuclN} (_hΩ_open : IsOpen Ω)
     (hu : MemWkp (d := Module.finrank ℝ E) 2 2 u Ω)
@@ -171,6 +175,7 @@ private lemma integral_chosenSecond_mul_eq_integral_u_mixed_aux
       ∫ y in Ω, g_i y * ψj y ∂(volume : Measure EuclN) := rfl
   linarith [h_ibp_outer, h_ibp_inner, hA_eq]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma integral_u_mixed_partial_swap_aux
     {u : EuclN → ℝ} {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (i j : Fin (Module.finrank ℝ E))
@@ -191,6 +196,7 @@ private lemma integral_u_mixed_partial_swap_aux
   refine setIntegral_congr_fun hΩ_open.measurableSet (fun y _hy => ?_)
   rw [mixed_smooth_classical_partial_swap_aux (ψ := ψ) hψ_smooth i j y]
 
+set_option linter.unusedSectionVars false in
 private lemma integral_chosenSecond_mul_swap_aux
     {u : EuclN → ℝ} {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (hu : MemWkp (d := Module.finrank ℝ E) 2 2 u Ω)
@@ -213,6 +219,7 @@ private lemma integral_chosenSecond_mul_swap_aux
   rw [← integral_chosenSecond_mul_eq_integral_u_mixed_aux hΩ_open hu j i
       hψ_smooth hψ_cs hψ_supp]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chosenSecond_locallyIntegrableOn_of_memWkp_two
     {u : EuclN → ℝ} {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (hu : MemWkp (d := Module.finrank ℝ E) 2 2 u Ω)
@@ -568,6 +575,7 @@ theorem chosenWeakPartial_chosenSecondPartialChartPushedU_eq_chosenThirdMixedPar
           (chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁) Ω :=
         h_congr
 
+set_option linter.unusedSectionVars false in
 private lemma chartPulledWeighted_le_volume_on_compact
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -603,12 +611,14 @@ private lemma chartPulledWeighted_le_volume_on_compact
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTarget_diff_chartImagePOUTsupport_isOpen (α : M) :
     IsOpen ((chartTargetEuclid (I := I) (M := M) α) \
       chartImagePOUTsupport (I := I) (M := M) α) :=
   (chartTargetEuclid_isOpen (I := I) (M := M) α).sdiff
     (chartImagePOUTsupport_isCompact (I := I) (M := M) α).isClosed
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartTarget_diff_chartImagePOUTsupport_subset
     (α : M) :
     (chartTargetEuclid (I := I) (M := M) α) \
@@ -616,6 +626,7 @@ private lemma chartTarget_diff_chartImagePOUTsupport_subset
       chartTargetEuclid (I := I) (M := M) α :=
   Set.diff_subset
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma weakPartial_ae_zero_off_inline
     {Ω U : Set EuclN} (hΩ_open : IsOpen Ω) (hU_open : IsOpen U)
     (hU_sub : U ⊆ Ω)
@@ -670,6 +681,7 @@ private lemma weakPartial_ae_zero_off_inline
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrableOn_of_memLp_two_chartTarget_inline
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2
@@ -720,6 +732,7 @@ private lemma locallyIntegrableOn_of_memLp_two_chartTarget_inline
   apply Filter.mem_of_superset (Metric.ball_mem_nhds x (by linarith : 0 < r / 2))
   exact Metric.ball_subset_closedBall
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :

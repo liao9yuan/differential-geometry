@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RemainderShortTimeExistence
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.DeTurckGeometricNonlinearity
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -25,6 +24,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem deTurckRicciRHS_symm
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     deTurckRicciRHS (I := I) g_bg g x v w =
@@ -42,6 +42,7 @@ noncomputable def deTurckRHSSectionBg (g_bg g : SmoothRiemannianMetric I M) :
   toSection := (deTurckRHSSection (I := I) g_bg g).toSection
   hasCompactSupport := (deTurckRHSSection (I := I) g_bg g).hasCompactSupport
 
+omit [BoundarylessManifold I M] in
 @[simp] theorem deTurckRHSSectionBg_toSection
     (g_bg g : SmoothRiemannianMetric I M) :
     (deTurckRHSSectionBg (I := I) g_bg g).toSection =

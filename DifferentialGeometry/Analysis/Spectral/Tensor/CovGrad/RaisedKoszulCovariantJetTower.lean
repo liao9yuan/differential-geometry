@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenc
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RaisedKoszulParallelRaiseJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricRaiseSlot0CovariantParallelism
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ noncomputable def raisedKoszulComponentBound (R δ : ℝ) (i : ℕ) : ℝ :=
 noncomputable def raisedKoszulJetBound (R δ : ℝ) (i : ℕ) : ℝ :=
   (Module.finrank ℝ E : ℝ) ^ (3 + i) * raisedKoszulComponentBound (E := E) R δ i
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma raisedKoszulJetBase_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) :
     0 ≤ raisedKoszulJetBase (E := E) R δ := by
   have h1 : 0 < 1 - δ := by linarith
@@ -54,6 +54,7 @@ lemma raisedKoszulJetBase_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) :
     · linarith
   · exact div_nonneg zero_le_one h1.le
 
+set_option linter.unusedSectionVars false in
 lemma raisedKoszulComponentBound_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) (i : ℕ) :
     0 ≤ raisedKoszulComponentBound (E := E) R δ i := by
   unfold raisedKoszulComponentBound
@@ -65,6 +66,7 @@ lemma raisedKoszulJetBound_nonneg (R δ : ℝ) (hR : 0 ≤ R) (hδ1 : δ < 1) (i
   exact mul_nonneg (pow_nonneg (Nat.cast_nonneg _) _)
     (raisedKoszulComponentBound_nonneg R δ hR hδ1 i)
 
+omit [FiniteDimensional ℝ E] in
 lemma ten_R_sq_le_raisedKoszulComponentBound {R : ℝ} (hR : 0 ≤ R) {δ : ℝ}
     (hδ0 : 0 ≤ δ) (hδ1 : δ < 1) (i : ℕ) :
     10 * R ^ 2 ≤ raisedKoszulComponentBound (E := E) R δ i := by
@@ -98,6 +100,7 @@ lemma ten_R_sq_le_raisedKoszulComponentBound {R : ℝ} (hR : 0 ≤ R) {δ : ℝ}
     _ ≤ raisedKoszulJetBase (E := E) R δ ^ 2 := hbase_sq
     _ ≤ raisedKoszulJetBase (E := E) R δ ^ (2 * (i + 1) ^ 2) := hpow
 
+set_option linter.unusedSectionVars false in
 private lemma rfns_eq_sum_componentSq_of_horth
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -148,6 +151,7 @@ private lemma fiberNormSqComponent_sq_le_rfns
         Finset.single_le_sum
           (fun K' _ => Finset.sum_nonneg (fun J' _ => sq_nonneg _)) (Finset.mem_univ K)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -174,6 +178,7 @@ private lemma coframeS_one_eq_g0FlatCLM' (g₀ : SmoothRiemannianMetric I M) (x 
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_zero_toModel
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -346,23 +351,27 @@ lemma raisedKoszul_eq_cometricRaiseSlot0Field_koszulCovecCc
   rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ T htie x (YZ 0) (YZ 1) u]
   rw [symmSCovGrad3]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rfns_heq_congr_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g₀ r a} {Z : SmoothCcTensor g₀ r b} (hYZ : HEq Y Z) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r a x (Y.toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ r b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] in
 private theorem covGrad_heq_congr_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g₀ r a} {Z : SmoothCcTensor g₀ r b} (hYZ : HEq Y Z) :
     HEq (covGrad (I := I) (M := M) g₀ r a Y) (covGrad (I := I) (M := M) g₀ r b Z) := by
   subst h; rw [eq_of_heq hYZ]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rfns_castRankCc_rk (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (Y : SmoothCcTensor g₀ r a) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g₀ r b x ((castRankCc g₀ r h Y).toSection x) =
       riemannianFiberNormSq (I := I) (M := M) g₀ r a x (Y.toSection x) := by
   subst h; rfl
 
+omit [BoundarylessManifold I M] in
 private theorem covGrad_castRankCc_eq (g₀ : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) (Y : SmoothCcTensor g₀ r a) :
     covGrad (I := I) (M := M) g₀ r b (castRankCc g₀ r h Y) =

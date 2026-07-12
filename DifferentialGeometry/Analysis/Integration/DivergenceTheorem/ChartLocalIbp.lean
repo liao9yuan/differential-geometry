@@ -10,7 +10,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Topology.Algebra.Support
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 private def chartImageOfTsupport (α : M) (φ : M → ℝ) : Set E :=
   (extChartAt I α) '' tsupport φ
 
+set_option linter.unusedSectionVars false in
 private lemma chartImageOfTsupport_isCompact
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -49,6 +49,7 @@ private lemma chartImageOfTsupport_isCompact
     exact hφ_supp hx
   exact (hφ_compactSupp : IsCompact (tsupport φ)).image_of_continuousOn hcontOn
 
+set_option linter.unusedSectionVars false in
 private lemma chartImageOfTsupport_subset_target
     (α : M) {φ : M → ℝ}
     (hφ_supp : tsupport φ ⊆ (chartAt H α).source) :
@@ -62,6 +63,7 @@ private lemma chartImageOfTsupport_subset_target
     (extChartAt I α).map_source hxsrc
   rwa [hxy] at this
 
+set_option linter.unusedSectionVars false in
 private lemma chartImageOfTsupport_isClosed
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -76,6 +78,7 @@ private def vwIntegrandOnE
   fun y => (extChartAt I α).target.indicator
     (fun z => chartCoeffOnE (I := I) α X i z * chartDensityOnE (I := I) g α z) y
 
+set_option linter.unusedSectionVars false in
 private lemma vwIntegrandOnE_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -85,6 +88,7 @@ private lemma vwIntegrandOnE_apply_of_mem
       chartCoeffOnE (I := I) α X i y * chartDensityOnE (I := I) g α y :=
   Set.indicator_of_mem hy _
 
+set_option linter.unusedSectionVars false in
 private lemma vwIntegrandOnE_apply_of_notMem
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -93,6 +97,7 @@ private lemma vwIntegrandOnE_apply_of_notMem
     vwIntegrandOnE (I := I) g α X i y = 0 :=
   Set.indicator_of_notMem hy _
 
+set_option linter.unusedSectionVars false in
 private lemma vwIntegrandOnE_contDiffOn_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -110,16 +115,19 @@ private def phiOnE (α : M) (φ : M → ℝ) : E → ℝ :=
   fun y => (extChartAt I α).target.indicator
     (fun z => φ ((extChartAt I α).symm z)) y
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_mem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = φ ((extChartAt I α).symm y) :=
   Set.indicator_of_mem hy _
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma phiOnE_apply_of_notMem (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∉ (extChartAt I α).target) :
     phiOnE (I := I) α φ y = 0 :=
   Set.indicator_of_notMem hy _
 
+set_option linter.unusedSectionVars false in
 private lemma phiOnE_eq_scalarOnE_on_target
     (α : M) (φ : M → ℝ) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -127,6 +135,7 @@ private lemma phiOnE_eq_scalarOnE_on_target
   rw [phiOnE_apply_of_mem (I := I) α φ hy]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma phiOnE_contDiffOn_target [I.Boundaryless]
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ) :
     ContDiffOn ℝ ∞ (phiOnE (I := I) α φ) (extChartAt I α).target := by
@@ -137,6 +146,7 @@ private lemma phiOnE_contDiffOn_target [I.Boundaryless]
   intro y hy
   exact phiOnE_eq_scalarOnE_on_target (I := I) α φ hy
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma contDiff_of_smooth_on_open_zero_outside
     {U : Set E} (hU : IsOpen U) {K : Set E} (hK : IsClosed K)
     (hKU : K ⊆ U) {f : E → ℝ}
@@ -156,6 +166,7 @@ private lemma contDiff_of_smooth_on_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
+set_option linter.unusedSectionVars false in
 private lemma phiOnE_support_subset_chartImage
     (α : M) (φ : M → ℝ) :
     Function.support (phiOnE (I := I) α φ) ⊆ chartImageOfTsupport (I := I) α φ := by
@@ -169,6 +180,7 @@ private lemma phiOnE_support_subset_chartImage
   · rw [phiOnE_apply_of_notMem (I := I) α φ hyT] at hy
     exact (hy rfl).elim
 
+set_option linter.unusedSectionVars false in
 private lemma phiOnE_tsupport_subset_chartImage
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -177,6 +189,7 @@ private lemma phiOnE_tsupport_subset_chartImage
   refine closure_minimal (phiOnE_support_subset_chartImage (I := I) α φ) ?_
   exact chartImageOfTsupport_isClosed (I := I) α hφ_compactSupp hφ_supp
 
+set_option linter.unusedSectionVars false in
 private lemma phiOnE_hasCompactSupport [I.Boundaryless]
     (α : M) {φ : M → ℝ}
     (hφ_compactSupp : HasCompactSupport φ)
@@ -194,6 +207,7 @@ private lemma phiOnE_hasCompactSupport [I.Boundaryless]
     exact hy this
   · exact phiOnE_apply_of_notMem (I := I) α φ hyT
 
+set_option linter.unusedSectionVars false in
 private lemma phiOnE_contDiff [I.Boundaryless]
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (hφ_compactSupp : HasCompactSupport φ)
@@ -215,6 +229,7 @@ private lemma phiOnE_contDiff [I.Boundaryless]
       exact hy this
     · exact phiOnE_apply_of_notMem (I := I) α φ hyT
 
+set_option linter.unusedSectionVars false in
 private lemma vwIntegrandOnE_differentiableOn_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -228,6 +243,7 @@ private lemma vwIntegrandOnE_differentiableOn_target [I.Boundaryless]
     vwIntegrandOnE_contDiffOn_target (I := I) g α X i y hy
   exact ((h_at.contDiffAt (hOpen.mem_nhds hy)).differentiableAt (by simp))
 
+set_option linter.unusedSectionVars false in
 private lemma fderiv_phiOnE_eq_fderiv_scalarOnE [I.Boundaryless]
     (α : M) (φ : M → ℝ)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -239,6 +255,7 @@ private lemma fderiv_phiOnE_eq_fderiv_scalarOnE [I.Boundaryless]
     exact phiOnE_eq_scalarOnE_on_target (I := I) α φ hz
   exact Filter.EventuallyEq.fderiv_eq h_eq
 
+set_option linter.unusedSectionVars false in
 private theorem ibp_per_index [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -417,6 +434,7 @@ private theorem ibp_per_index [I.Boundaryless]
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hf'g_int hfg'_int hfg_int
     hvw_diff_tsupp_phi hphi_diff_tsupp_vw
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_vwIntegrandOnE_eq_on_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -433,6 +451,7 @@ private lemma partialDeriv_vwIntegrandOnE_eq_on_target [I.Boundaryless]
     exact vwIntegrandOnE_apply_of_mem (I := I) g α X i hz
   rw [h_eq.fderiv_eq]
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_phiOnE_eq_on_target [I.Boundaryless]
     (α : M) (φ : M → ℝ) (i : Fin (Module.finrank ℝ E)) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
@@ -441,6 +460,7 @@ private lemma partialDeriv_phiOnE_eq_on_target [I.Boundaryless]
   unfold partialDeriv
   rw [fderiv_phiOnE_eq_fderiv_scalarOnE (I := I) α φ hy]
 
+set_option linter.unusedSectionVars false in
 private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {y : E}
@@ -468,6 +488,7 @@ private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryles
   intro i _
   exact (partialDeriv_vwIntegrandOnE_eq_on_target (I := I) g α X i hy).symm
 
+set_option linter.unusedSectionVars false in
 private lemma tangentSectionAction_chart_target_apply [I.Boundaryless]
     (α : M) (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -488,6 +509,7 @@ private lemma tangentSectionAction_chart_target_apply [I.Boundaryless]
   intro i _
   rw [(extChartAt I α).right_inv hy]
 
+set_option linter.unusedSectionVars false in
 lemma localDivergence_continuousOn_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -514,6 +536,7 @@ lemma localDivergence_continuousOn_baseSet [I.Boundaryless]
   rw [← hdomain_eq]
   exact hsmooth.continuousOn
 
+set_option linter.unusedSectionVars false in
 lemma localDivergence_mul_phi_measurable [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -552,6 +575,7 @@ lemma localDivergence_mul_phi_measurable [I.Boundaryless]
   rw [h_eq]
   exact hpiecewise_meas
 
+set_option linter.unusedSectionVars false in
 private lemma lhs_chart_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -584,6 +608,7 @@ private lemma lhs_chart_target [I.Boundaryless]
   rw [hρ_localDiv]
   rw [← phiOnE_apply_of_mem (I := I) α φ hy]
 
+set_option linter.unusedSectionVars false in
 private lemma rhs_chart_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -608,6 +633,7 @@ private lemma rhs_chart_target [I.Boundaryless]
   rw [htsa_eq]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma summand_int [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -656,6 +682,7 @@ private lemma summand_int [I.Boundaryless]
     hphi_compactSupp.mul_left
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
+set_option linter.unusedSectionVars false in
 private lemma summand_int' [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -732,6 +759,7 @@ private lemma summand_int' [I.Boundaryless]
     rw [hpartial_zero, mul_zero]
   exact hI_smooth.continuous.integrable_of_hasCompactSupport hI_compactSupp
 
+set_option linter.unusedSectionVars false in
 theorem chart_local_ibp [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

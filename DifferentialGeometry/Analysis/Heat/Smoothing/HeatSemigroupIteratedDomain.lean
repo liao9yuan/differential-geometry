@@ -28,6 +28,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma mul_one_add_lambda_eq_one
     (g : SmoothRiemannianMetric I M) (i : EigenIdx (I := I) (M := M) g) :
     i.1.val * (1 + EigenIdx.lambda (I := I) (M := M) i) = 1 := by

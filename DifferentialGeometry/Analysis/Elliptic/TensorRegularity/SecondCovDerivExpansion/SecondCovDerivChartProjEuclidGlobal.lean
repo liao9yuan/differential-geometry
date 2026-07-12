@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.ChartProjectionSecondCovDerivViaSkExt
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentEuclidSkExtExpansion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -141,6 +140,7 @@ private def packageAsCcG
   toSection := S
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma packageAsCcG_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -418,6 +418,7 @@ private lemma LHS_eq_covDerivComponentEuclid_S_k_packed
     (extChartAt I α).left_inv hb_src
   rw [hsymm_te, hleft_inv]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eqOn_of_eqOn_openG
     (V : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E))))
     (hV_open : IsOpen V)

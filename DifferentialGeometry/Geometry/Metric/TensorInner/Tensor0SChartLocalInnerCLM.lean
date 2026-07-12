@@ -18,7 +18,6 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -61,6 +60,7 @@ def chartTensorInnerPointwise_0sBilin
     (fun c S T =>
       chartTensorInnerPointwise_0s_smul_right (I := I) (M := M) g α b s c S T)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartTensorInnerPointwise_0sBilin_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α b : M)
     (S T : Tensor0SModel s ℝ E) :
@@ -90,6 +90,7 @@ noncomputable def chartTensorInnerPointwise_0sCLM
         rw [chartTensorInnerPointwise_0s_smul_left]
         rfl }
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartTensorInnerPointwise_0sCLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α b : M)
     (S T : Tensor0SModel s ℝ E) :
@@ -123,6 +124,7 @@ noncomputable def curryLeftAtCLM (s : ℕ) (v : E) :
             ≤ ‖S‖ * ‖v‖ * ∏ i, ‖m i‖ := this
           _ = ‖S‖ * ‖v‖ * ∏ i, ‖m i‖ := rfl)
 
+set_option linter.unusedSectionVars false in
 lemma curryLeftAtCLM_apply (s : ℕ) (v : E)
     (S : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ) :
     curryLeftAtCLM (E := E) s v S = S.curryLeft v := rfl
@@ -144,6 +146,7 @@ private noncomputable def composeCurryAtIJ (s : ℕ)
       (Tensor0SModel s ℝ E) ℝ).flip CLj
   postCompCLj.comp (B.comp CLi)
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma composeCurryAtIJ_apply (s : ℕ)
     (i j : Fin (Module.finrank ℝ E))
     (B : Tensor0SModel s ℝ E →L[ℝ]
@@ -154,6 +157,7 @@ private noncomputable def composeCurryAtIJ (s : ℕ)
         (T.curryLeft ((chartModelBasis E) j)) := by
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerPointwise_0sCLM_succ_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α b : M) :
     chartTensorInnerPointwise_0sCLM (I := I) (M := M) g (s + 1) α b

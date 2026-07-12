@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.SmoothViaDensity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.DensityExtension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     (g : SmoothRiemannianMetric I M)
     {w_lift : H1Compl (I := I) (M := M) g}
@@ -94,6 +94,7 @@ theorem lpInner_gradInner_smooth_oneSubLap_eq_lpInner_smooth_preimage
   exact lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     (I := I) (M := M) g hw_lift w
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
     (g : SmoothRiemannianMetric I M)
     {w_lift : H1Compl (I := I) (M := M) g}
@@ -475,6 +476,7 @@ theorem integral_gradInner_oneSubLap_contMDiffMap_eq_integral_preimage
   exact integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
     (I := I) (M := M) g φ hw_lift h_witness ⟨(w : M → ℝ), w.contMDiff⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem weak_oneSubLap_holds_of_image_in_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {A : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)}

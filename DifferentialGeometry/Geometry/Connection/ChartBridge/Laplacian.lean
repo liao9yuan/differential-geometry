@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.Laplacian.ConnectionLaplacian
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -22,11 +21,13 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 theorem connLaplacian_function_eq_chartLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     connLaplacian_function (I := I) g hf x = Δ_g (I := I) g hf x := rfl
 
+set_option linter.unusedSectionVars false in
 theorem traceFun_abstractHessian_eq_laplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)
@@ -48,6 +49,7 @@ theorem traceFun_abstractHessian_eq_laplacian [I.Boundaryless]
     chartHessTrace_eq_laplacian_pointwise_of_boundaryless (I := I) g hf x
   rw [← h1, h2, h3]
 
+set_option linter.unusedSectionVars false in
 theorem traceFun_abstractHessian_eq_connLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)

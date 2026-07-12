@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.LieS
 import DifferentialGeometry.Geometry.Flow.DeTurckVFChartCoord
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 lemma chartCoeff_eq_repr_trivToE (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (k : Fin (Module.finrank ℝ E)) {x : M}
@@ -39,6 +39,7 @@ lemma chartCoeff_eq_repr_trivToE (α : M)
     (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_apply ℝ,
     (trivializationAt E (TangentSpace I) α).coe_linearMapAt_of_mem hx]
 
+omit [I.Boundaryless] in
 theorem chartCoeff_deTurckVF_eq_chartDeTurckVFComp
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) {x : M}
@@ -76,6 +77,7 @@ theorem chartCoeff_deTurckVF_eq_chartDeTurckVFComp
     (fun p => chartDeTurckVFComp (I := I) g g_bg α p (extChartAt I α x))]
   rw [if_pos (Finset.mem_univ k)]
 
+omit [I.Boundaryless] in
 theorem chartCoeffOnE_deTurckVF_eqOn_goodSet_image
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -88,6 +90,7 @@ theorem chartCoeffOnE_deTurckVF_eqOn_goodSet_image
   rw [chartCoeffOnE, (extChartAt I α).left_inv hb_src]
   exact chartCoeff_deTurckVF_eq_chartDeTurckVFComp (I := I) g g_bg α k hb_good
 
+omit [I.Boundaryless] in
 theorem partialDeriv_chartCoeffOnE_deTurckVF_eq
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (m k : Fin (Module.finrank ℝ E)) {x : M}
@@ -107,6 +110,7 @@ theorem partialDeriv_chartCoeffOnE_deTurckVF_eq
     heqOn.eventuallyEq_of_mem (hU_open.mem_nhds hx_mem)
   rw [partialDeriv, partialDeriv, heventually.fderiv_eq]
 
+omit [I.Boundaryless] in
 theorem chartLieDerivMetricMatrix_deTurckVF_eq_chartLieDeTurckComp
     (g g_bg : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}

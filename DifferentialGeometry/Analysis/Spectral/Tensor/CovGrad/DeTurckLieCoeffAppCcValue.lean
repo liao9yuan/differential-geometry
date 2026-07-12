@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrd
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifference
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -53,6 +52,7 @@ private lemma appCc_sub_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [ContinuousLinearMap.sub_comp]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
@@ -63,6 +63,7 @@ private lemma unitModel_add2_apply_local (g₀ : SmoothRiemannianMetric I M)
     ContinuousMultilinearMap.add_apply]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_sub2_apply_local (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S - S') x v =
@@ -153,6 +154,7 @@ theorem deTurckLieArm2PrincipalCoeff_apply_eq (g₀ g₁ g_bg : SmoothRiemannian
       (by funext i; fin_cases i <;> rfl)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SBundle.Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -167,6 +169,7 @@ private lemma interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace 
   rfl
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma connDiffFib_toModel_eval (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SBundle.Tensor0SSpace 1 I x) (w : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -475,6 +478,7 @@ private lemma deTurckLieArm1CoreFib_toModel_eval' (g₀ g₁ g_bg : SmoothRieman
   exact deTurckLieArm1CoreFib_toModel_eval (I := I) g₀ g₁ g_bg x D (w 0) (w 1)
 
 
+set_option linter.unusedSectionVars false in
 private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -489,6 +493,7 @@ private lemma deTurckLieArm1_swapCore_eval (g₀ g₁ g_bg : SmoothRiemannianMet
     (by funext i; fin_cases i <;> rfl)
 
 
+set_option linter.unusedSectionVars false in
 private lemma deTurckLieArm1_interiorProduct_eval (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (D : Tensor0SBundle.Tensor0SSpace 3 I x) (v : Fin 2 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -811,6 +816,7 @@ theorem deTurckLieDLbCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetri
     fin_cases j <;> simp
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma christoffelCorrection_chartModelBasis_pair_self
     (g : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E)) :
     christoffelCorrection (I := I) g x x ((chartModelBasis E) j) ((chartModelBasis E) i) =
@@ -837,6 +843,7 @@ private lemma christoffelCorrection_chartModelBasis_pair_self
     exact absurd (Finset.mem_univ i) h
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma leviCivita_toFun_chartBasis_eval_of_localComponents
     (g₁ : SmoothRiemannianMetric I M) (x : M)
     (σ : Π b : M, TangentSpace I b)
@@ -952,6 +959,7 @@ private lemma leviCivita_toFun_chartBasis_eval_of_localComponents
 
 
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization in
+set_option linter.unusedSectionVars false in
 theorem deTurckLieCovDerivW_chartBasis_eq (g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (i : Fin (Module.finrank ℝ E)) :
     deTurckVFCovDeriv (I := I) g₁ g_bg

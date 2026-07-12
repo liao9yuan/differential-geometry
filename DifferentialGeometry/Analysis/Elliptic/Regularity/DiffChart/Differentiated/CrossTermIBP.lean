@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -57,6 +56,7 @@ theorem chosenSecondPartialChartPushedU_isWeakPartial_of_chartPushedWeakPartialL
   hasWeakPartialDeriv_chosenSecond_of_chartPushedWeakPartialLp
     (I := I) (M := M) g α hu_h i l
 
+set_option linter.unusedSectionVars false in
 lemma exists_smooth_global_extension
     {φ : EuclN → ℝ} (α : M)
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ (chartTargetEuclid (I := I) (M := M) α))
@@ -100,6 +100,7 @@ lemma exists_smooth_global_extension
     rw [hη_one y hy]
     ring
 
+set_option linter.unusedSectionVars false in
 private lemma weightedInvGramDerivOnEuclid_contDiffOn_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) :

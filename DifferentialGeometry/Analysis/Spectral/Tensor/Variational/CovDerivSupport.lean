@@ -16,7 +16,6 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.ContinuousOn
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -52,6 +51,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (x : M)
@@ -82,6 +82,7 @@ private lemma tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
   rw [hcongr, hcov_zero]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma tensorCovDerivAt_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) (v : E) :
@@ -109,6 +110,7 @@ lemma tensorCovDerivAt_eq_zero_off_tsupport
   exact tensorCovDerivAt_eq_zero_of_eventuallyEq_zero
     (I := I) (M := M) g r s S x hev v
 
+set_option linter.unusedSectionVars false in
 private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -125,6 +127,7 @@ private lemma tensorCovDerivPointwiseInner_eq_zero_off_tsupport
   rw [hSi, TensorRSSpace.toModel_zero, tensorInnerPointwise_zero_left]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem tensorCovDerivPointwiseInner_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -137,6 +140,7 @@ theorem tensorCovDerivPointwiseInner_hasCompactSupport
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
+set_option linter.unusedSectionVars false in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :
@@ -148,6 +152,7 @@ theorem tensorCovDerivPointwiseInner_tsupport_subset_left
   exact hx (tensorCovDerivPointwiseInner_eq_zero_off_tsupport
     (I := I) (M := M) g r s S T hx_notsupp)
 
+set_option linter.unusedSectionVars false in
 theorem tensorCovDerivPointwiseInner_tsupport_subset_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

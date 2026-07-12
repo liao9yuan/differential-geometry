@@ -12,7 +12,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 import Mathlib.Topology.Compactness.LocallyFinite
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ section CleanVolumeVariation
 
 variable {g_fam : ℝ → SmoothRiemannianMetric I M}
 
+set_option linter.unusedSectionVars false in
 lemma per_chart_integrand_hasDerivAt
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -115,6 +115,7 @@ lemma per_chart_integrand_hasDerivAt
   rw [← halgebra]
   exact hprod
 
+set_option linter.unusedSectionVars false in
 theorem chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ)
@@ -157,6 +158,7 @@ theorem chartLocal_weighted_finset_sum_eq_riemannianMeasure_integral
     funext x; exact hsmul x
   rw [hswap, hintegrand_eq]
 
+set_option linter.unusedSectionVars false in
 theorem volume_variation_formula_clean_of_chart_derivs
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -200,6 +202,7 @@ theorem volume_variation_formula_clean_of_chart_derivs
 
 section TraceTimeDerivMetricContinuous
 
+set_option linter.unusedSectionVars false in
 lemma continuousOn_traceTimeDerivMetric_on_base
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -357,6 +360,7 @@ lemma continuousOn_traceTimeDerivMetric_on_base
   rw [hfun]
   refine continuousOn_finset_sum _ (fun i _ => h_prod_cont i i)
 
+set_option linter.unusedSectionVars false in
 lemma traceTimeDerivMetric_continuous
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) :
@@ -406,6 +410,7 @@ lemma traceTimeDerivMetric_continuous
   refine ContinuousAt.congr ?_ hev.symm
   exact h_slice.continuousAt (hα_base_open.mem_nhds hx₀_base)
 
+set_option linter.unusedSectionVars false in
 lemma continuousOn_traceTimeDerivMetric_of_base
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M) :
@@ -426,6 +431,7 @@ lemma continuousOn_traceTimeDerivMetric_of_base
       (I := I) (M := M) (t := p.1) (hreg.at_any p.1) α hp.2
   exact h_base.congr h_eq
 
+set_option linter.unusedSectionVars false in
 lemma continuousOn_chartDensity_family
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M) :
@@ -463,6 +469,7 @@ lemma continuousOn_chartDensity_family
   refine h_sqrtdet_cont.congr ?_
   intro p _; rfl
 
+set_option linter.unusedSectionVars false in
 lemma continuousOn_chartTrace_form_of_base_pullback
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (α : M)
@@ -492,6 +499,7 @@ section PerChartHasDerivAt
 
 variable {g_fam : ℝ → SmoothRiemannianMetric I M}
 
+set_option linter.unusedSectionVars false in
 private lemma chartDensity_nonneg_of_base
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     0 ≤ chartDensity (I := I) g α x := by
@@ -500,6 +508,7 @@ private lemma chartDensity_nonneg_of_base
 
 set_option maxHeartbeats 16000000 in
 
+set_option linter.unusedSectionVars false in
 lemma per_chart_hasDerivAt
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M} {f : ℝ → M → ℝ} {t : ℝ}
@@ -998,6 +1007,7 @@ section CleanTheorem
 
 variable {g_fam : ℝ → SmoothRiemannianMetric I M}
 
+set_option linter.unusedSectionVars false in
 theorem first_variation_of_volume
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M}

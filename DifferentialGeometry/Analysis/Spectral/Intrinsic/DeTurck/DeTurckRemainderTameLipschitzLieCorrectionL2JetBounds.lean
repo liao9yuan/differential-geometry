@@ -44,7 +44,6 @@ set_option linter.unnecessarySeqFocus false
 set_option linter.unreachableTactic false
 set_option linter.unusedTactic false
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -141,6 +140,7 @@ private theorem lc0b_fn_of_bounded (N : ℕ) (Q : ℕ → ℝ → Prop)
       · rw [Function.update_of_ne hkN]
         exact hf k (by omega)
 
+set_option linter.unusedSectionVars false in
 theorem lc0b_icg_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -149,6 +149,7 @@ theorem lc0b_icg_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [BoundarylessManifold I M] in
 private theorem lc0b_covGrad_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     covGrad (I := I) (M := M) g r s (0 : SmoothCcTensor g r s) = 0 := by
   have h := DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul
@@ -156,6 +157,7 @@ private theorem lc0b_covGrad_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
   rw [zero_smul, zero_smul] at h
   exact h
 
+set_option linter.unusedSectionVars false in
 theorem lc0b_normSq_icg_add_le (g : SmoothRiemannianMetric I M) (r s q : ℕ)
     (A B : SmoothCcTensor g r s) :
     ‖iteratedCovGrad (I := I) g r s q (A + B)‖ ^ 2 ≤
@@ -170,6 +172,7 @@ theorem lc0b_normSq_icg_add_le (g : SmoothRiemannianMetric I M) (r s q : ℕ)
     norm_nonneg (iteratedCovGrad (I := I) g r s q B),
     sq_nonneg (‖iteratedCovGrad (I := I) g r s q A‖ - ‖iteratedCovGrad (I := I) g r s q B‖)]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem lc0b_rfns_toSection_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r s x ((A + B).toSection x) ≤
@@ -179,6 +182,7 @@ theorem lc0b_rfns_toSection_add_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [SmoothCcTensor.toSection_add]; rfl]
   exact riemannianFiberNormSq_add_le (I := I) (M := M) g r s x _ _
 
+set_option linter.unusedSectionVars false in
 theorem lc0b_normSq_eq_integral (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W : SmoothCcTensor g r s) :
     ‖W‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g r s x (W.toSection x)
@@ -186,6 +190,7 @@ theorem lc0b_normSq_eq_integral (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [SmoothCcTensor.norm_def]
   exact tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq_rs (I := I) (M := M) g r s W
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem lc0b_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -508,6 +513,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricRaise
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lc0b_interior_product_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -619,6 +625,7 @@ private lemma lc0b_connDiffLowered_unitModel_apply (g₀ g₁ : SmoothRiemannian
     ContinuousMultilinearMap.constOfIsEmpty_apply, one_smul]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lc0b_unitModel_add (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ s (A + B) x m =
@@ -940,6 +947,7 @@ open DifferentialGeometry.Analysis.Sobolev.TensorHilbert (metricComparisonEndo g
   gInvRaisedEndo_eq_diff_add_id inverseMetricSharpFib_g0FlatCLM cotangentToDual_g0FlatCLM
   g0FlatCLM metricComparisonDiffEndo)
 
+set_option linter.unusedSectionVars false in
 private lemma lc0b_toModel_om_single (x : M) (om : Tensor0SSpace 1 I x) (m : Fin 1 → E) :
     Tensor0SSpace.toModel om m = cotangentToDual (I := I) (x := x) om (m 0) := by
   rw [cotangentToDual_apply]
@@ -1422,6 +1430,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricDoubl
   cometricDoubleTraceField_covGrad_eq_zero modelDoubleTrace_apply cometricLmodel
   cometric_dualTrace_eq_orthoFrame_diag)
 
+omit [BoundarylessManifold I M] in
 theorem lc0b_fixedField_rfns_jet (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (F : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ j, 0 ≤ c j) ∧ ∀ (j : ℕ) (x : M),
@@ -1457,6 +1466,7 @@ private lemma lc0b_icg_succ_cometricDT_zero (g₀ : SmoothRiemannianMetric I M) 
   | succ m' ih =>
       rw [iteratedCovGrad_succ, ih, lc0b_covGrad_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lc0b_toModel_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -1489,6 +1499,7 @@ private lemma lc0b_toModel_cons_sum_smul (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lc0b_toModel_cons_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -1523,6 +1534,7 @@ private lemma lc0b_toModel_cons_cons_sum_smul (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+set_option linter.unusedSectionVars false in
 private lemma lc0b_orthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
@@ -1936,11 +1948,13 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (modelDoubleTrace_apply
   cometricLmodel)
 
+set_option linter.unusedSectionVars false in
 private lemma lc0b_unitTensor_toModel (x : M) (m : Fin 0 → E) :
     Tensor0SSpace.toModel (unitTensor (I := I) (M := M) x) m = 1 := by
   rw [unitTensor, Tensor0SSpace.toModel_ofModel]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma lc0b_curry_zero (x : M) (D : Tensor0SSpace 1 I x) (v0 : E) :
     tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) 0 x D v0 =
       (Tensor0SSpace.toModel D (fun _ : Fin 1 => v0)) • unitTensor (I := I) (M := M) x := by
@@ -1961,6 +1975,7 @@ private lemma lc0b_curry_zero (x : M) (D : Tensor0SSpace 1 I x) (v0 : E) :
   refine Fin.cases ?_ (fun j => j.elim0) k
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lc0b_clm_unit_smul (x : M) (s : ℕ)
     (A : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) (c : ℝ) :
     A (c • unitTensor (I := I) (M := M) x) = c • A (unitTensor (I := I) (M := M) x) :=
@@ -2946,6 +2961,7 @@ section LieCorr0BoundsF1
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lc0b_rfns_neg (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =
@@ -2958,6 +2974,7 @@ private lemma lc0b_rfns_neg (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma lc0b_icg_sub (g : SmoothRiemannianMetric I M) (r s q : ℕ)
     (A B : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s q (A - B) =
@@ -2974,6 +2991,7 @@ lemma lc0b_normSq_icg_sub_le (g : SmoothRiemannianMetric I M) (r s q : ℕ)
   rw [iteratedCovGrad_neg, norm_neg] at h
   exact h
 
+set_option linter.unusedSectionVars false in
 private lemma lc0b_rfns_toSection_sub_le (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r s x ((A - B).toSection x) ≤
@@ -3711,6 +3729,7 @@ lemma lc0b_normSq_icg_bothCongr_eq (g₀ : SmoothRiemannianMetric I M) (r s : �
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact rfns_iteratedCovGrad_rsDomDomCongr_both_eq (I := I) (M := M) g₀ r s σ' σ R q x
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma lc0b_gFibreOpBound_mono (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     {δ δ' : ℝ} (hle : δ ≤ δ')

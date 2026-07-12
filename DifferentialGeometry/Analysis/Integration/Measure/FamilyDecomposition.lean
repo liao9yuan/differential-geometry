@@ -12,7 +12,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Set
 import Mathlib.MeasureTheory.Integral.Bochner.SumMeasure
 import Mathlib.Topology.Compactness.LocallyFinite
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 theorem integral_chartLocalMeasure
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (h : M → ℝ) (hh_meas : Measurable h) :
@@ -101,6 +101,7 @@ theorem integral_chartLocalMeasure
   refine setIntegral_congr_fun htarget_meas (fun y hy => ?_)
   rw [hw_toReal y hy, smul_eq_mul]
 
+set_option linter.unusedSectionVars false in
 lemma chartAtlasPOU_finite_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] :
     {α : M | (Function.support ((chartAtlasPOU I M) α)).Nonempty}.Finite :=
@@ -111,6 +112,7 @@ noncomputable def chartAtlasPOU_finset
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] : Finset M :=
   (chartAtlasPOU_finite_support (I := I) (M := M)).toFinset
 
+set_option linter.unusedSectionVars false in
 lemma chartAtlasPOU_finset_mem
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M] {α : M} :
     α ∈ chartAtlasPOU_finset (I := I) (M := M) ↔
@@ -119,6 +121,7 @@ lemma chartAtlasPOU_finset_mem
   rw [Set.Finite.mem_toFinset]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartAtlasPOU_weight_zero_of_notMem
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M} (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M)) (x : M) :
@@ -130,6 +133,7 @@ lemma chartAtlasPOU_weight_zero_of_notMem
   rw [hα] at hx
   exact (Set.notMem_empty _) hx
 
+set_option linter.unusedSectionVars false in
 lemma chartAtlasPOU_withDensity_zero_of_notMem
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -142,6 +146,7 @@ lemma chartAtlasPOU_withDensity_zero_of_notMem
     simp
   rw [hzero, MeasureTheory.withDensity_zero]
 
+set_option linter.unusedSectionVars false in
 theorem hasDerivAt_setIntegral_model
     (target : Set E) (_htarget_meas : MeasurableSet target)
     {F : ℝ → E → ℝ} (F' : ℝ → E → ℝ) {b : E → ℝ}
@@ -173,6 +178,7 @@ theorem hasDerivAt_setIntegral_model
   rw [← hfun, ← hfun']
   exact this.2
 
+set_option linter.unusedSectionVars false in
 lemma hasDerivAt_chartGramMatrix_entry
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t₀ : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t₀)
@@ -185,6 +191,7 @@ lemma hasDerivAt_chartGramMatrix_entry
 
 section ChartInvarianceOfTraceTimeDeriv
 
+set_option linter.unusedSectionVars false in
 lemma deriv_chartGramMatrix_pullback
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -247,6 +254,7 @@ lemma deriv_chartGramMatrix_pullback
   refine Finset.sum_congr rfl (fun q _ => ?_)
   ring
 
+set_option linter.unusedSectionVars false in
 lemma transitionMatrix_mul_reverse
     (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -317,6 +325,7 @@ lemma transitionMatrix_mul_reverse
   refine Finset.sum_congr rfl (fun k _ => ?_)
   exact mul_comm _ _
 
+set_option linter.unusedSectionVars false in
 lemma transitionMatrix_isUnit
     (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -331,6 +340,7 @@ lemma transitionMatrix_isUnit
   exact (Matrix.isUnit_iff_isUnit_det _).mpr
     (IsUnit.of_mul_eq_one _ hdet)
 
+set_option linter.unusedSectionVars false in
 lemma trace_chartGramMatrix_inv_deriv_chart_independent
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -395,6 +405,7 @@ lemma trace_chartGramMatrix_inv_deriv_chart_independent
 
 end ChartInvarianceOfTraceTimeDeriv
 
+set_option linter.unusedSectionVars false in
 lemma traceTimeDerivMetric_eq_trace_chartGramMatrix
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t)
@@ -411,6 +422,7 @@ lemma traceTimeDerivMetric_eq_trace_chartGramMatrix
   exact trace_chartGramMatrix_inv_deriv_chart_independent
     (I := I) (M := M) hreg x α hxx hxα
 
+set_option linter.unusedSectionVars false in
 theorem riemannianVolumeMeasure_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -438,6 +450,7 @@ theorem riemannianVolumeMeasure_eq_finset_sum
   rw [← hsplit, hcompl, add_zero]
   exact MeasureTheory.Measure.sum_coe_finset S f
 
+set_option linter.unusedSectionVars false in
 theorem integral_riemannianVolumeMeasure_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -476,6 +489,7 @@ theorem integral_riemannianVolumeMeasure_eq_finset_sum
   conv_lhs => rw [hVol_eq]
   exact integral_finset_sum_measure hsummand_int
 
+set_option linter.unusedSectionVars false in
 theorem volume_variation_formula_from_chart_derivs
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -498,6 +512,7 @@ theorem volume_variation_formula_from_chart_derivs
   rw [← hα_sum_val]
   exact HasDerivAt.fun_sum hα_deriv
 
+set_option linter.unusedSectionVars false in
 theorem integral_riemannianMeasureFamily_eq_finset_sum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -512,6 +527,7 @@ theorem integral_riemannianMeasureFamily_eq_finset_sum
   exact integral_riemannianVolumeMeasure_eq_finset_sum (I := I) (M := M)
     (g_fam t) (f t) hf_cont
 
+set_option linter.unusedSectionVars false in
 theorem volume_variation_formula
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)

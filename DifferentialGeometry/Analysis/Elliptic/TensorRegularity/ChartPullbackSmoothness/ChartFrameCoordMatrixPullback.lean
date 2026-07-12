@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.TangentAction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -100,6 +99,7 @@ private lemma coordMatrixOnEuclid_contDiffOn
   chartFrameNormGlobalSmoothCoordMatrix_pullback_contDiffOn_chartTarget
     (I := I) (M := M) g α i k
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma extDerivFun_apply_scalar
     (f : M → ℝ) {x : M} (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
@@ -109,6 +109,7 @@ private lemma extDerivFun_apply_scalar
     LinearEquiv.coe_mk]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma partialDeriv_scalarOnE_eq_euclidPartial_pulled
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
@@ -147,6 +148,7 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial_pulled
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial_of_mdiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))

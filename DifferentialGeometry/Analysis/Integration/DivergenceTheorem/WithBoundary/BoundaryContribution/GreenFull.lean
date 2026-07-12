@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -69,6 +68,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance instMeasurableSpaceE : MeasurableSpace E := borel E
 private local instance instBorelSpaceE : @BorelSpace E _ (borel E) := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 private lemma integrable_divergence_g_with_boundary
     [hI : HasSmoothBoundary E H I]
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.EnergyBound.WeightedCoeffMulENormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDiv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -163,6 +162,7 @@ end PerSummandBound
 section MeasurabilityTransfer
 
 
+set_option linter.unusedSectionVars false in
 private lemma aestronglyMeasurable_weighted_of_chartL2
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ}
@@ -179,6 +179,7 @@ end MeasurabilityTransfer
 section UniformConstant
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_uniform_eLpNorm_bound
     {ι : Type*} [Finite ι]
     {μ : Measure EuclN} {f : ι → EuclN → ℝ} {a : ι → ℝ≥0∞}

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Tools.StrictStrongSupport
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] in
 private lemma wkpNorm_eta_target_le_split
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) (_hp_top : p ≠ (⊤ : ℝ≥0∞))
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)

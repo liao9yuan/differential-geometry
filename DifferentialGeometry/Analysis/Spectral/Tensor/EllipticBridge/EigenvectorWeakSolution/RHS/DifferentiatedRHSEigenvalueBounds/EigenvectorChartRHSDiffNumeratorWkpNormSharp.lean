@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorArbitraryKRegularity
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+set_option linter.unusedSectionVars false in
 lemma sharp_wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -197,6 +197,7 @@ lemma sharp_wkpNorm_coef_mul_factor_le_uniform
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 private lemma sharp_memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -226,6 +227,7 @@ private lemma sharp_memWkp_finset_sum
 
 omit [CompleteSpace E] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sharp_wkpNorm_sub_le
     {K : ℕ} {Ω : Set EuclN}
     (hΩ : IsOpen Ω) {u v : EuclN → ℝ}
@@ -251,6 +253,7 @@ private lemma sharp_wkpNorm_sub_le
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 private lemma sharp_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))

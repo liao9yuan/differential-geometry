@@ -24,6 +24,7 @@ variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma sum_tensorChartComponentRaw_sq_continuousOn_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -55,6 +56,7 @@ lemma sum_tensorChartComponentRaw_sq_continuousOn_pouTsupport
       (I := I) (M := M) g r s S α Idx Jdx).continuousOn
   exact h_raw.pow 2
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma exists_uniform_bound_sum_tensorChartComponentRaw_sq_on_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -92,6 +94,7 @@ lemma exists_uniform_bound_sum_tensorChartComponentRaw_sq_on_pouTsupport
     intro b hb
     exact hb₀_max hb
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -167,6 +170,7 @@ theorem exists_bound_riemannianFiberNormSq_smoothCcTensor_on_pouTsupport
             refine mul_le_mul_of_nonneg_left ?_ hNpair_nonneg
             exact mul_le_mul_of_nonneg_left hC hC₂_nonneg
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_bound_riemannianFiberNormSq_smoothCcTensor
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

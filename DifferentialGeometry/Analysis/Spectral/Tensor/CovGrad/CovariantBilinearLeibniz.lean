@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLine
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SingleSlotOperatorFiberNormBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,12 +27,14 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 private theorem covGrad_heq_congr (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
     {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
     HEq (covGrad g r a Y) (covGrad g r b Z) := by
   subst h
   rw [eq_of_heq hYZ]
 
+omit [BoundarylessManifold I M] in
 private theorem iteratedCovGrad_covGrad_comm_heq (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (X : SmoothCcTensor g r s) :
     HEq (iteratedCovGrad g r (s + 1) m (covGrad g r s X))
@@ -47,12 +48,14 @@ private theorem iteratedCovGrad_covGrad_comm_heq (g : SmoothRiemannianMetric I M
       rw [iteratedCovGrad_succ (g := g) (r := r) (s := s) (j := k + 1) X]
       exact covGrad_heq_congr g r (by omega : (s + 1) + k = s + (k + 1)) ih
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem norm_toSection_heq_congr (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) (x : M) :
     ‖Y.toSection x‖ = ‖Z.toSection x‖ := by
   subst h
   rw [eq_of_heq hYZ]
 
+set_option linter.unusedSectionVars false in
 theorem norm_toSection_iteratedCovGrad_covGrad_comm (g : SmoothRiemannianMetric I M)
     (r s m : ℕ) (X : SmoothCcTensor g r s) (x : M) :
     ‖(iteratedCovGrad g r (s + 1) m (covGrad g r s X)).toSection x‖ =
@@ -64,6 +67,7 @@ def castRankCc (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b
     (Y : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
   h ▸ Y
 
+omit [BoundarylessManifold I M] in
 theorem norm_toSection_iteratedCovGrad_castRankCc (g : SmoothRiemannianMetric I M) (r : ℕ)
     {a b : ℕ} (h : a = b) (Y : SmoothCcTensor g r a) (j : ℕ) (x : M) :
     ‖(iteratedCovGrad g r b j (castRankCc g r h Y)).toSection x‖ =
@@ -99,6 +103,7 @@ variable {g : SmoothRiemannianMetric I M} {r₁ s₁ r₂ s₂ r₀ s₀ : ℕ}
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem eq_zero_of_riemannianFiberNormSq_eq_zero (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (z : Tensor0SBundle.TensorRSSpace r s I x)
     (hz : riemannianFiberNormSq (I := I) (M := M) g r s x z = 0) : z = 0 := by
@@ -109,6 +114,7 @@ private theorem eq_zero_of_riemannianFiberNormSq_eq_zero (g : SmoothRiemannianMe
   have hnorm : ‖z‖ = 0 := by nlinarith [norm_nonneg z, hnorm_sq]
   exact norm_eq_zero.mp hnorm
 
+set_option linter.unusedSectionVars false in
 theorem prod_zero_left (Φ : ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s₀) {a b : ℕ}
     (T : SmoothCcTensor g r₂ (s₂ + b)) :
     Φ.prod (0 : SmoothCcTensor g r₁ (s₁ + a)) T = 0 := by
@@ -126,6 +132,7 @@ theorem prod_zero_left (Φ : ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s�
     rw [SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero]; rfl]
   exact hval
 
+set_option linter.unusedSectionVars false in
 theorem prod_zero_right (Φ : ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s₀) {a b : ℕ}
     (S : SmoothCcTensor g r₁ (s₁ + a)) :
     Φ.prod S (0 : SmoothCcTensor g r₂ (s₂ + b)) = 0 := by

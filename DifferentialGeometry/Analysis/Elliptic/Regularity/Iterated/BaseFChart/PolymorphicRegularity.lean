@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.BaseFChart.MemWkpTwoTwo
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseHigherOrder
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,11 +50,13 @@ private noncomputable def smoothScalarSub
   { toFun := fun x => v₁.toFun x - v₂.toFun x
     smooth := v₁.smooth.sub v₂.smooth }
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalarSub_toFun
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ : SmoothScalar g) :
     (smoothScalarSub v₁ v₂).toFun = fun x => v₁.toFun x - v₂.toFun x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma wkpNormChart_one_le_succ
     (g : SmoothRiemannianMetric I M) (m : ℕ) (u : M → ℝ) :
     wkpNormChart (I := I) (M := M) g 1 2 u ≤
@@ -708,6 +709,7 @@ theorem smoothApproxSeqWkpM_tendsto_h1Compl
     ((denseRange_smoothToH1Compl (I := I) (M := M) g).equalizer
       hL_cont hR_cont hLR_smooth) w
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_le_wkpNorm_m_two
     (m : ℕ) (u : EuclN → ℝ) (Ω : Set EuclN) :
     eLpNorm u 2 ((volume : Measure EuclN).restrict Ω) ≤
@@ -726,6 +728,7 @@ private lemma eLpNorm_le_wkpNorm_m_two
   rw [h_iter_eq] at h_zero_le
   exact h_zero_le
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_tendsto_zero_of_wkpNorm_m_two_tendsto_zero
     (m : ℕ) {u : ℕ → EuclN → ℝ} {F_lim : EuclN → ℝ} {Ω : Set EuclN}
     (h_tendsto : Tendsto (fun n =>
@@ -747,6 +750,7 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_m_two_tendsto_zero
     (fun _ => zero_le _)
     (fun n => eLpNorm_le_wkpNorm_m_two m (fun y => u n y - F_lim y) Ω)
 
+set_option linter.unusedSectionVars false in
 private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict
@@ -1239,6 +1243,7 @@ lemma base_f_chart_ae_eq_piecePreimage_add_residual_general
     (base_f_chart_ae_eq_piecePreimage_add_residual_general_weighted
       (I := I) (M := M) g α hu_h_lapdom)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma fChartPiecePreimageGeneral_memWkp_of_memWkpChart
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

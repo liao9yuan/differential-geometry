@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Chart.Basic
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Components
 import Mathlib.Geometry.Manifold.VectorField.LieBracket
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -35,10 +34,12 @@ def coordinateFrameAt (x₀ : M) :
 def coordinateFrameSet (x₀ : M) : Set M :=
   (coordinateTrivializationAt (I := I) x₀).baseSet
 
+omit [FiniteDimensional ℝ E] in
 theorem coordinateFrameSet_open (x₀ : M) :
     IsOpen (coordinateFrameSet (I := I) x₀) :=
   (coordinateTrivializationAt (I := I) x₀).open_baseSet
 
+omit [FiniteDimensional ℝ E] in
 theorem coordinateFrameAt_mem (x₀ : M) :
     x₀ ∈ coordinateFrameSet (I := I) x₀ :=
   mem_baseSet_trivializationAt E (TangentSpace I : M -> Type _) x₀
@@ -112,6 +113,7 @@ private theorem coordinateFrame_pullback_eq_const (x₀ : M) (i : CoordinateIdx 
     (isInvertible_mfderivWithin_extChartAt_symm (I := I) hy)
     ((Module.finBasis Real E) i)
 
+omit [FiniteDimensional ℝ E] in
 private theorem lieBracketWithin_const_const {s : Set E} {x v w : E} :
     VectorField.lieBracketWithin Real (fun _ : E => v) (fun _ : E => w) s x = 0 := by
   simp [VectorField.lieBracketWithin]

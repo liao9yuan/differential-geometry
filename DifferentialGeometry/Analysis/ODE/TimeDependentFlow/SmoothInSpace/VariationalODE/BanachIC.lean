@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.C
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.UniformExistence
 import DifferentialGeometry.Analysis.ODE.Flow.HigherRegularity.ContDiffOnTop
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -139,6 +138,7 @@ open scoped NNReal Topology
 
 variable [CompleteSpace E]
 
+omit [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem ChartLocalPicardData.contDiffOn_top
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hper : ChartLocalPicardData X α)

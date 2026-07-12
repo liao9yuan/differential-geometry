@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingReverseOr
 import DifferentialGeometry.Analysis.Spectral.Tensor.SmoothSection.SmoothTensorAllOrderCompleteness
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,11 +38,13 @@ def bareChartJetContent (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∑ m ∈ Finset.range (N + 1),
       ‖iteratedFDeriv ℝ m (tensorComponentEuclideanChart (I := I) (M := M) g r s X α q'.1 q'.2) y‖
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bareChartJetContent_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) (N : ℕ) (y : EuclN) :
     0 ≤ bareChartJetContent (I := I) (M := M) g r s X α N y :=
   Finset.sum_nonneg fun _ _ => Finset.sum_nonneg fun _ _ => norm_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma iteratedFDeriv_rawPullR_le_bareChartJetContent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M)
@@ -70,6 +71,7 @@ lemma iteratedFDeriv_rawPullR_le_bareChartJetContent
   refine hbig.trans (le_of_eq ?_)
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bareChartJetContent_mono (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (X : SmoothCcTensor g r s) (α : M) {N N' : ℕ} (hN : N ≤ N') (y : EuclN) :
     bareChartJetContent (I := I) (M := M) g r s X α N y ≤
@@ -81,6 +83,7 @@ lemma bareChartJetContent_mono (g : SmoothRiemannianMetric I M) (r s : ℕ)
   refine Finset.sum_le_sum (fun q' _ => ?_)
   exact Finset.sum_le_sum_of_subset_of_nonneg hsub (fun m _ _ => norm_nonneg _)
 
+set_option linter.unusedSectionVars false in
 lemma iteratedFDeriv_euclidPartial_norm_le
     {u : EuclN → ℝ} {O : Set EuclN} (hO : IsOpen O) (hu : ContDiffOn ℝ ∞ u O)
     (m : Fin (Module.finrank ℝ E)) (l : ℕ) {y : EuclN} (hy : y ∈ O) :
@@ -113,6 +116,7 @@ lemma iteratedFDeriv_euclidPartial_norm_le
         rw [h_single_norm, one_mul]
     _ = ‖iteratedFDeriv ℝ (l + 1) u y‖ := h_fderiv_iter
 
+set_option linter.unusedSectionVars false in
 lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -409,6 +413,7 @@ lemma iteratedFDeriv_rawPullR_iteratedCovGrad_le_bareChartJetContent
       (I := I) (M := M) g r s α P
   exact ⟨C, hC_nn, fun p l hlP Idx Jdx y hy => hC X p l hlP Idx Jdx y hy⟩
 
+set_option linter.unusedSectionVars false in
 lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (D : SmoothCcTensor g r s) (α : M) (N : ℕ) :

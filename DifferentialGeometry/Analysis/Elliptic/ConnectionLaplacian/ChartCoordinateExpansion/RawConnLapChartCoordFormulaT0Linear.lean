@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoo
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoothness.ChartFrameCoordMatrixPullback
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.DirichletForm.FinsetSumSwap
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -65,6 +64,7 @@ private noncomputable def secondCovDeriv_GlobalCorr0
       (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
         (I := I) (M := M) g r s α Idx Jdx k l)) I' J'
 
+omit [BoundarylessManifold I M] in
 private lemma secondCovDeriv_GlobalCorr_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -81,6 +81,7 @@ private lemma secondCovDeriv_GlobalCorr_contDiffOn
         (secondCovDeriv_chartα_proj_eq_iteratedFDeriv_T₀_eqOn
           (I := I) (M := M) g r s α Idx Jdx k l))).1 I' J' m
 
+omit [BoundarylessManifold I M] in
 private lemma secondCovDeriv_GlobalCorr0_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -226,6 +227,7 @@ private noncomputable def invGramPull
   fun y => chartInvGramMatrix (I := I) g α
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) k l
 
+set_option linter.unusedSectionVars false in
 private lemma invGramPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -241,6 +243,7 @@ private noncomputable def chartFrameCoordPull
   fun y => chartFrameNormGlobalSmoothCoordMatrix (I := I) (M := M) g α i k
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameCoordPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -259,6 +262,7 @@ private noncomputable def chartFrameCoordDirDerivPull
     (chartBasisVecFiber (I := I) α l
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))
 
+omit [BoundarylessManifold I M] in
 private lemma chartFrameCoordDirDerivPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k l : Fin (Module.finrank ℝ E)) :
@@ -267,6 +271,7 @@ private lemma chartFrameCoordDirDerivPull_contDiffOn
   chartFrameNormGlobalSmoothCoordMatrix_dirDeriv_pullback_contDiffOn_chartTarget
     (I := I) (M := M) g α i k l
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma invGramPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -285,6 +290,7 @@ private lemma invGramPull_at_b_eq
   unfold invGramPull
   rw [hsymm, hleft_inv]
 
+set_option linter.unusedSectionVars false in
 private lemma chartFrameCoordPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -303,6 +309,7 @@ private lemma chartFrameCoordPull_at_b_eq
   unfold chartFrameCoordPull
   rw [hsymm, hleft_inv]
 
+set_option linter.unusedSectionVars false in
 private lemma chartFrameCoordDirDerivPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k l : Fin (Module.finrank ℝ E))
@@ -329,6 +336,7 @@ private noncomputable def C_2_principal
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   invGramPull (I := I) (M := M) g α k l
 
+omit [BoundarylessManifold I M] in
 private lemma C_2_principal_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :

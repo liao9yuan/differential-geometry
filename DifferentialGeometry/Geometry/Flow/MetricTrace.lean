@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.ConnectionDifference
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ lemma deTurckChartLocal_def (g g' : SmoothRiemannianMetric I M) (α : M) (x : M)
             (chartBasisVecFiber (I := I) α j x)
             (chartBasisVecFiber (I := I) α k x) := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma clm_bilinear_expand_two_sums_vector
     {x : M}
     (B : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -60,6 +60,7 @@ private lemma clm_bilinear_expand_two_sums_vector
   intro q _
   rw [map_smul, smul_smul]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma clm_bilinear_expand_two_sums_scalar
     (g : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (a b : Fin n → ℝ) (u w : Fin n → TangentSpace I x) :
@@ -88,6 +89,7 @@ private def deTurckCobMatrix (α : M) (x : M) :
     (chartModelBasis E).repr
       ((chartBasisVecFiber (I := I) α i x : TangentSpace I x)) k
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartBasisVecFiber_eq_sum_model (α : M) (x : M)
     (i : Fin (Module.finrank ℝ E)) :
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x) =
@@ -100,6 +102,7 @@ private lemma chartBasisVecFiber_eq_sum_model (α : M) (x : M)
   exact (((chartModelBasis E).sum_repr
     (chartBasisVecFiber (I := I) α i x : TangentSpace I x))).symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma deTurckCobMatrix_eq_toMatrix_transpose (α : M) (x : M) :
     deTurckCobMatrix (I := I) α x =
       ((chartModelBasis E).toMatrix
@@ -110,6 +113,7 @@ private lemma deTurckCobMatrix_eq_toMatrix_transpose (α : M) (x : M) :
   ext i k
   rw [Matrix.transpose_apply, Module.Basis.toMatrix_apply, Matrix.of_apply]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma deTurckCobMatrix_isUnit (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     IsUnit (deTurckCobMatrix (I := I) α x) := by

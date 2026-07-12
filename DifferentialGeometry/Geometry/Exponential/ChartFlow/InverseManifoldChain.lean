@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
 import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -29,6 +28,7 @@ variable [I.Boundaryless]
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem eventually_hasDerivAt_chartPhaseVF_at_zero_section
     {g : SmoothRiemannianMetric I M} {α : M} {s₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -81,6 +81,7 @@ section LocalLiftAtsZero
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 private lemma exists_local_lift_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {q : TangentBundle I M}
@@ -105,6 +106,7 @@ private lemma exists_local_lift_at
       (v := geodesicVectorFieldChart (I := I) g α)
       (t₀ := s₀) (x₀ := q) hsmooth1
 
+set_option linter.unusedSectionVars false in
 private lemma local_lift_eventuallyEq_chartFlowOrbitLift
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E} {s₀ : ℝ}
@@ -277,6 +279,7 @@ section IntegralCurveOnIoo
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_isMIntegralCurveAt_of_mem_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) {T : ℝ}
     {Φ : (E × E) × ℝ → E × E}
@@ -320,6 +323,7 @@ theorem chartFlowOrbitLift_isMIntegralCurveAt_of_mem_Ioo
   filter_upwards [hs_eq_nhds] with x hx
   exact hx.symm
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_isMIntegralCurveOn_Ioo
     (g : SmoothRiemannianMetric I M) (p : M) (v : E) {T : ℝ}
     {Φ : (E × E) × ℝ → E × E}
@@ -343,6 +347,7 @@ section HeadlineRD3a
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartFlowOrbitLift_isMIntegralCurveOn_Ioo_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

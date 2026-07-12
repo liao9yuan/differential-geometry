@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffUniformBoundsSlotPermutations
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -183,6 +182,7 @@ def fibPointwiseBound (g₀ : SmoothRiemannianMetric I M) (x : M) (d : ℕ) (c :
       c * ∏ j, Real.sqrt (g₀.inner x (w j) (w j))
 
 
+set_option linter.unusedSectionVars false in
 lemma fibPointwiseBound_coframe (g₀ : SmoothRiemannianMetric I M) (x : M) (d : ℕ)
     {n : ℕ} (e : Fin n → TangentSpace I x)
     (horth : ∀ a b : Fin n, g₀.inner x (e a) (e b) = if a = b then (1 : ℝ) else 0)
@@ -201,6 +201,7 @@ lemma fibPointwiseBound_coframe (g₀ : SmoothRiemannianMetric I M) (x : M) (d :
   exact hcs
 
 
+set_option linter.unusedSectionVars false in
 private lemma fibPointwiseBound_slotPerm (g₀ : SmoothRiemannianMetric I M) (x : M) {d : ℕ}
     (ρ : Equiv.Perm (Fin d)) {c : ℝ} {Z : Tensor0SBundle.Tensor0SSpace d I x}
     (hZ : fibPointwiseBound (I := I) g₀ x d c Z) :
@@ -219,6 +220,7 @@ private lemma fibPointwiseBound_slotPerm (g₀ : SmoothRiemannianMetric I M) (x 
   exact Equiv.prod_comp ρ (fun j => Real.sqrt (g₀.inner x (w j) (w j)))
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fibPointwiseBound_prod_nonneg (g₀ : SmoothRiemannianMetric I M) (x : M) {d : ℕ}
     (w : Fin d → TangentSpace I x) :
     0 ≤ ∏ j, Real.sqrt (g₀.inner x (w j) (w j)) :=

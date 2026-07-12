@@ -53,6 +53,7 @@ noncomputable def covPrincipalRotationCoeffLimit
               (partialLpLimit (I := I) (M := M) g r s i α P k :
                 EuclN → ℝ) y
 
+set_option linter.unusedSectionVars false in
 private lemma covPrincipalRotationCoeff_pouSmul_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

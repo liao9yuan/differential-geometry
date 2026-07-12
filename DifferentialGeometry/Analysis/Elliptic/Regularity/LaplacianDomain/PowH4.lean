@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2Re
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ManifoldH2.NonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ structure ChartH4NonSmoothPOUWitness
 
 namespace ChartH4NonSmoothPOUWitness
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem mk' {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 4 2
@@ -55,6 +55,7 @@ theorem mk' {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α :=
   ⟨h⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem memWkp_four_eq {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -65,6 +66,7 @@ theorem memWkp_four_eq {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
         (I := I) (M := M) α) :=
   h.memWkp_four
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem memWkp_three {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -75,6 +77,7 @@ theorem memWkp_three {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
         (I := I) (M := M) α) :=
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_succ h.memWkp_four
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem memWkp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -86,6 +89,7 @@ theorem memWkp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
     (by norm_num : (2 : ℕ) ≤ 4) h.memWkp_four
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 theorem memWkp_one {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -97,6 +101,7 @@ theorem memWkp_one {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
     (by norm_num : (1 : ℕ) ≤ 4) h.memWkp_four
 
+set_option linter.unusedSectionVars false in
 theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     MemLp
@@ -107,6 +112,7 @@ theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
           (I := I) (M := M) α)) :=
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.memLp h.memWkp_four
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem toH2 {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Laplacian.ManifoldH2NonSmooth.ChartH2NonSmoothPOUWitness
@@ -115,6 +121,7 @@ theorem toH2 {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
 
 end ChartH4NonSmoothPOUWitness
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem memWkpChart_four_of_chartPOUWitnesses
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h_witness : ∀ α : M, ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
@@ -123,6 +130,7 @@ theorem memWkpChart_four_of_chartPOUWitnesses
   intro α
   exact (h_witness α).memWkp_four
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem memWkpChart_three_of_chartPOUWitnesses
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h_witness : ∀ α : M, ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
@@ -130,6 +138,7 @@ theorem memWkpChart_three_of_chartPOUWitnesses
       (I := I) (M := M) g 3 2 u :=
   (memWkpChart_four_of_chartPOUWitnesses (I := I) (M := M) g h_witness).le_succ
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem memWkpChart_two_of_chartH4POUWitnesses
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h_witness : ∀ α : M, ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
@@ -139,6 +148,7 @@ theorem memWkpChart_two_of_chartH4POUWitnesses
     (by norm_num : (2 : ℕ) ≤ 4)
     (memWkpChart_four_of_chartPOUWitnesses (I := I) (M := M) g h_witness)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_four_lt_top_of_chartPOUWitnesses
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
     (h_witness : ∀ α : M, ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
@@ -148,6 +158,7 @@ theorem wkpNormChart_four_lt_top_of_chartPOUWitnesses
     (I := I) (M := M) g (k := 4) (p := 2) (by norm_num)
     (memWkpChart_four_of_chartPOUWitnesses (I := I) (M := M) g h_witness)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_four
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -169,6 +180,7 @@ theorem laplacianDomainPow_memWkpChart_four
   · exact wkpNormChart_four_lt_top_of_chartPOUWitnesses
       (I := I) (M := M) g h_witness
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_laplacianDomainPow_memWkpChart_four
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -188,6 +200,7 @@ theorem exists_laplacianDomainPow_memWkpChart_four
   · exact (laplacianDomainPow_memWkpChart_four (I := I) (M := M) g hu_h h_witness).1
   · exact (laplacianDomainPow_memWkpChart_four (I := I) (M := M) g hu_h h_witness).2
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainPow_memWkpChart_four_two_sided
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -224,6 +237,7 @@ theorem laplacianDomainPow_memWkpChart_four_two_sided
   refine ⟨memWkpChart_four_of_chartPOUWitnesses (I := I) (M := M) g h_witness_rhs, ?_⟩
   exact wkpNormChart_four_lt_top_of_chartPOUWitnesses (I := I) (M := M) g h_witness_rhs
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_h4_witnesses_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}

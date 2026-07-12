@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCc
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -110,12 +109,14 @@ def quadrilinearMapSlotBilinearAt
         rw [Function.update_comm hij c v base, Function.update_comm hij (r • c) v base]
         rw [f.map_update_smul (Function.update base j v) i r c] }
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma unitModel4SlotBilin_apply
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin 4 => E) ℝ)
     (i j : Fin 4) (hij : i ≠ j) (base : Fin 4 → E) (c v : E) :
     quadrilinearMapSlotBilinearAt (E := E) f i j hij base c v =
       f (Function.update (Function.update base i c) j v) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_scalarOnE_eq_euclidPartial_local
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -152,6 +153,7 @@ lemma partialDeriv_scalarOnE_eq_euclidPartial_local
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
+set_option linter.unusedSectionVars false in
 lemma euclidPartial2_chartPushedRaw_eq_partialDeriv2_scalarOnE
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m₁ m₂ : Fin (Module.finrank ℝ E)) (a b : Fin (Module.finrank ℝ E)) :
@@ -250,6 +252,7 @@ lemma realizedGramDeriv_eventuallyEq_symm_scalarOnE_raw
     (I := I) g₀ T T' hδ_lt hδ hδ'_lt hδ' x a b y hp]
   rw [scalarOnE_def, scalarOnE_def]
 
+omit [BoundarylessManifold I M] in
 private lemma scalarOnE_contDiffOn_tensorChartComponentRaw
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -275,6 +278,7 @@ private lemma scalarOnE_contDiffOn_tensorChartComponentRaw
   rw [(toEuclidean (E := E)).symm_apply_apply]
   rw [scalarOnE_def]
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_scalarOnE_tensorChartComponentRaw_differentiableAt
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m : Fin (Module.finrank ℝ E)) (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
@@ -390,6 +394,7 @@ lemma partialDeriv2_realizedGramDeriv_eq_half_sum_euclidPartial2
   rw [partialDeriv_add Pab Pba hPab_diff hPba_diff]
   ring
 
+omit [BoundarylessManifold I M] in
 lemma euclidPartial_swap_chartPushedRaw_tensorChartComponentRaw
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -532,6 +537,7 @@ private lemma sum_pi_fin_succ' {n : ℕ} {β : Type*} [AddCommMonoid β]
   rw [Fintype.sum_prod_type]
   rfl
 
+omit [BoundarylessManifold I M] in
 lemma covDerivLowerOrderTerm02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m p q : Fin (Module.finrank ℝ E)) :
@@ -652,6 +658,7 @@ lemma covDerivLowerOrderTerm02_center_eq
     exact absurd (Subsingleton.elim b ![]) hb
   · intro h; exact absurd (Finset.mem_univ _) h
 
+omit [BoundarylessManifold I M] in
 lemma covDerivLowerOrderTerm03_center_hout
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m b c d : Fin (Module.finrank ℝ E))
@@ -696,6 +703,7 @@ lemma covDerivLowerOrderTerm03_center_hout
     chartChristoffel_symm (I := I) g₀ x c m (J' 1) (extChartAt I x x),
     chartChristoffel_symm (I := I) g₀ x d m (J' 2) (extChartAt I x x)]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sum_fin3_collapse_gen
     (F : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) →
       Fin (Module.finrank ℝ E) → ℝ) :
@@ -714,6 +722,7 @@ private lemma sum_fin3_collapse_gen
     show ((1 : Fin 2) = (Fin.succ 0)) from rfl, Fin.cons_succ]
   rw [show (default : Fin 1) = (0 : Fin 1) from rfl]
 
+set_option linter.unusedSectionVars false in
 lemma covDerivLowerOrderTerm03_center_eq
     (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3) (x : M)
     (m b c d : Fin (Module.finrank ℝ E)) :
@@ -831,6 +840,7 @@ lemma covDerivLowerOrderTerm03_center_eq
     exact absurd (Subsingleton.elim b' ![]) hb'
   · intro h; exact absurd (Finset.mem_univ _) h
 
+omit [BoundarylessManifold I M] in
 lemma euclidPartial_covDerivLowerOrderTerm02_center_eq_sum
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :

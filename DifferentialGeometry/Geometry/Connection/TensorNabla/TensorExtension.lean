@@ -10,7 +10,6 @@ import DifferentialGeometry.Bundle.Frame
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -59,6 +58,7 @@ def tensor02Scalar
     - T x (cov Y x (X x)) (Z x)
     - T x (Y x) (cov Z x (X x))
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma tensor02Scalar_def
     (cov : (Π x : M, TangentSpace I x) →
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x))
@@ -69,6 +69,7 @@ lemma tensor02Scalar_def
         - T x (cov Y x (X x)) (Z x)
         - T x (Y x) (cov Z x (X x)) := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mdifferentiableAt_tensor02_apply_one
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -82,6 +83,7 @@ lemma mdifferentiableAt_tensor02_apply_one
     (b := fun b : M => b)
     (ϕ := fun b => T b) (v := fun b => Y b) hT hY
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mdifferentiableAt_tensor02_pairing
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -100,6 +102,7 @@ lemma mdifferentiableAt_tensor02_pairing
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor02Scalar_tensorialAt_X
     (_covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -129,6 +132,7 @@ lemma tensor02Scalar_tensorialAt_X
         ContinuousLinearMap.map_add]
     abel
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor02Scalar_tensorialAt_Y
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -200,6 +204,7 @@ lemma tensor02Scalar_tensorialAt_Y
     rw [h_YY', ContinuousLinearMap.map_add, ContinuousLinearMap.add_apply]
     abel
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor02Scalar_tensorialAt_Z
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -286,6 +291,7 @@ private noncomputable def tensor02BilinAt
       tensor02Scalar_tensorialAt_Z cov.isCovariantDerivativeOnUniv hT
         X (mdifferentiableAt_extend ..) Y hY)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tensor02BilinAt_apply_extend
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -367,6 +373,7 @@ def tensor02CovAt
   · exact LinearMap.toContinuousLinearMap (tensor02XSlot cov hT)
   · exact 0
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor02CovAt_apply_of_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -377,6 +384,7 @@ lemma tensor02CovAt_apply_of_diff
   rw [dif_pos hT]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor02CovAt_apply_of_diff_extend
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -392,6 +400,7 @@ lemma tensor02CovAt_apply_of_diff_extend
     FiberBundle.extend_apply_self E (X x)
   rw [hext]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensor02CovAt_of_not_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -408,6 +417,7 @@ def tensor02CovFun
         (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)) :=
   fun T x => tensor02CovAt cov T x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensor02CovFun_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (x : M) :
@@ -415,6 +425,7 @@ def tensor02CovFun
 
 set_option maxHeartbeats 800000 in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor02CovFun_isCovariantDerivativeOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     IsCovariantDerivativeOn (V := (fun x : M =>
@@ -556,10 +567,12 @@ def tensor02Cov
   toFun := tensor02CovFun cov
   isCovariantDerivativeOnUniv := tensor02CovFun_isCovariantDerivativeOn cov
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor02Cov_toFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (tensor02Cov cov).toFun = tensor02CovFun cov := by rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor02Cov_pairing
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ} {x : M}
@@ -589,10 +602,12 @@ def metricTensor02 (g : SmoothRiemannianMetric I M) :
     Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ :=
   fun x => g.inner x
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma metricTensor02_apply
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     metricTensor02 g x v w = g.inner x v w := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma metricTensor02_mdiff
     (g : SmoothRiemannianMetric I M) (x : M) :
     MDiffAtTensor02 (metricTensor02 (I := I) g) x := by
@@ -645,6 +660,7 @@ def abstractHessian
       ((cotangentCov (LeviCivita (I := I) g)).toFun
         (extDerivFun (I := I) f) x v) w := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02Cov_apply_one_contMDiff
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hT : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -662,6 +678,7 @@ private theorem tensor02Cov_apply_one_contMDiff
     (b := fun b : M => b)
     (ϕ := fun b => T b) (v := fun b => Y b) hT hY
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem tensor02Cov_pairing_contMDiff
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     (hT : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -675,6 +692,7 @@ private theorem tensor02Cov_pairing_contMDiff
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => T b (Y b) (Z b)) :=
   cotangentCov_pairing_contMDiff (tensor02Cov_apply_one_contMDiff hT hY) hZ
 
+set_option linter.unusedSectionVars false in
 private theorem tensor02Cov_triple_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

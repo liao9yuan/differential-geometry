@@ -4,7 +4,6 @@ Authors: Jack McCarthy
 import DifferentialGeometry.Tensor.Multilinear.Basis
 import DifferentialGeometry.Tensor.Multilinear.Fiber
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,6 +50,7 @@ def smulByFun {s : ℕ}
     MultilinearSection 𝕜 F IB E n s :=
   ⟨fun x => φ x • α x, hφ.smul_section α.contMDiff⟩
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
 @[simp]
 theorem smulByFun_apply {s : ℕ}
     (φ : B → 𝕜) (hφ : ContMDiff IB 𝓘(𝕜) n φ)
@@ -127,6 +127,7 @@ theorem fromScalarField_toScalarField
   rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
   exact congrArg (α.toFun x) (Subsingleton.elim Fin.elim0 v)
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
 @[simp]
 theorem toScalarField_add
     (α β : MultilinearSection 𝕜 F IB E n 0) :
@@ -137,6 +138,7 @@ theorem toScalarField_add
   rw [show (α + β).toFun x = α.toFun x + β.toFun x from rfl]
   exact ContinuousMultilinearMap.add_apply _ _ _
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F] in
 @[simp]
 theorem toScalarField_smulByFun
     (φ : B → 𝕜) (hφ : ContMDiff IB 𝓘(𝕜) n φ)

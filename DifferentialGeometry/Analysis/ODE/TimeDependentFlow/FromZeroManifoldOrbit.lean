@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOp
 import DifferentialGeometry.Analysis.ODE.ForwardVariationalFromZero
 import Mathlib.Geometry.Manifold.IntegralCurve.Basic
 
-set_option linter.unusedSectionVars false
 
 open Set Function Filter Metric Bundle
 open scoped Topology NNReal ContDiff Manifold
@@ -22,12 +21,14 @@ noncomputable def fromZeroChartField (X : ℝ → ∀ x : M, TangentSpace I x) (
     ((trivializationAt E (TangentSpace I) α)
       (TotalSpace.mk' E ((extChartAt I α).symm c) (X s ((extChartAt I α).symm c)))).2
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
 lemma fromZeroChartField_eq_tangentCoordChange
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (s : ℝ) (c : E) :
     fromZeroChartField (I := I) X α s c
       = tangentCoordChange I ((extChartAt I α).symm c) α ((extChartAt I α).symm c)
           (X s ((extChartAt I α).symm c)) := rfl
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
 theorem fromZeroChartField_jointContDiffOn_Ioo
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -85,6 +86,7 @@ theorem fromZeroChartField_jointContDiffOn_Ioo
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
 theorem fromZeroChartField_continuousOn_time_from_zero
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) {T δ : ℝ} (hδT : δ ≤ T)
     (hcont0 : ContinuousOn
@@ -111,6 +113,7 @@ theorem fromZeroChartField_continuousOn_time_from_zero
     exact hcomp.mono (Set.Icc_subset_Icc_right hδT)
   exact T₀.continuous.comp_continuousOn hXy
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 private theorem fromZero_orbit_confined
     {f : ℝ → E → E} {x₀ : E} {a L : ℝ} {δ : ℝ} (hL : 0 ≤ L)
     (γ : ℝ → E) (hγ_init : γ 0 = x₀)
@@ -218,6 +221,7 @@ private theorem fromZero_orbit_confined
     rw [hsδ]; exact hLδ
   · exact le_of_lt (hbound_to_openball s ⟨hs.1, hsδ⟩ (hmain hs))
 
+set_option linter.unusedSectionVars false in
 theorem fromZero_manifold_orbit_of_lipschitz
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     {a r : ℝ≥0} {K L : ℝ≥0} {δ : ℝ} (hδ : 0 < δ)
@@ -368,6 +372,7 @@ private theorem fromZero_orbit_of_window
     (fun c _ => fromZeroChartField_continuousOn_time_from_zero (I := I) X α hδw_le hcont0 c)
     hnorm hstrict' hr_pos
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] in
 private lemma fromZeroChartField_center_eq
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M) (t : ℝ) :
     fromZeroChartField (I := I) X α t (extChartAt I α α) = (X t α : TangentSpace I α) := by

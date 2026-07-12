@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ComponentEuclidSkExtExpansion
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,6 +50,7 @@ private noncomputable def principalSecondDerivSum
             (chartPushedRaw I α
               (tensorChartComponentRaw (I := I) (M := M) g r s T₀ α Idx Jdx))) y
 
+omit [BoundarylessManifold I M] in
 private lemma principalSecondDerivSum_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -182,6 +182,7 @@ private lemma lowerOrderCorrection_contDiffOn
     Idx Jdx).sub
     (principalSecondDerivSum_contDiffOn (I := I) (M := M) g r s α T₀ Idx Jdx)
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushed_rawConnLapComponent_eq_principal_add_LO
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -194,6 +195,7 @@ private lemma chartPushed_rawConnLapComponent_eq_principal_add_LO
   unfold lowerOrderCorrection
   ring
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushed_rawConnLapComponent_apply_of_good
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

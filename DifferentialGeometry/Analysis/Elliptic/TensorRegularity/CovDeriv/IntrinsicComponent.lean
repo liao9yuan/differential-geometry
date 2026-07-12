@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartT
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.ChristoffelDecomp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorRSChartE_section_repr_eq_tensorTrivProj
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -38,6 +38,7 @@ theorem tensorRSChartE_section_repr_eq_tensorTrivProj
       tensorTrivProj (I := I) (M := M) g r s S α :=
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem tensorRSIntrinsicChartCLM_proj_eq_fderiv_component
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -74,6 +75,7 @@ theorem tensorRSIntrinsicChartCLM_proj_eq_fderiv_component
   rw [tensorChartComponentRaw_partial_decomp (I := I) (M := M) g r s α S
     hb_chart hb_int Idx Jdx (trivToE (I := I) α b v)]
 
+omit [CompleteSpace E] in
 theorem tensorRSIntrinsicChartCLM_component_eq_euclidPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

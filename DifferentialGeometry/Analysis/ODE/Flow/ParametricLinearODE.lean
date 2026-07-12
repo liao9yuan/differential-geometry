@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Inhomogeneous
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ noncomputable def variationalSolution
   inhomogLinearODESolution A (fun y t => variationalForcing A a b' h₀ Z₀ y v t)
     a b' h₀ (fun y => (fderiv ℝ Z₀ y) v) x
 
+omit [CompleteSpace G] in
 theorem variationalW_init
     (A : F → ℝ → (G →L[ℝ] G)) (a b' h₀ : ℝ) (Z₀ : F → G) (x : F) (v : F) :
     variationalSolution A a b' h₀ Z₀ x v h₀ = (fderiv ℝ Z₀ x) v := by
@@ -1684,6 +1684,7 @@ private theorem linearODESolution_contDiffOn_one
     exact (linearODESolution_hasFDerivAt_joint hab_lt h₀_mem hU hA_cont hDA_cont
       hA_diff hZ₀_cont hDZ₀_cont hZ₀_diff hx ht).fderiv
 
+omit [CompleteSpace G] in
 private theorem inhomogAugmentedCoeff_contDiffOn
     {n : ℕ∞}
     {A : F → ℝ → (G →L[ℝ] G)} {b : F → ℝ → G}
@@ -1721,6 +1722,7 @@ private theorem inhomogAugmentedCoeff_contDiffOn
       (U ×ˢ Set.Ioo a b') := h_sum.prodMk contDiffOn_const
   exact h_prodL.comp_contDiffOn h_pair
 
+omit [CompleteSpace G] in
 private theorem extract_C1_hypotheses
     {A : F → ℝ → (G →L[ℝ] G)} {Z₀ : F → G}
     {a b' : ℝ} {n : ℕ}
@@ -1776,6 +1778,7 @@ private theorem extract_C1_hypotheses
     exact ((hZ₀_ge1.differentiableOn (by norm_num : (1 : WithTop ℕ∞) ≠ 0) y hy).differentiableAt
       (hU.mem_nhds hy)).hasFDerivAt
 
+omit [CompleteSpace G] in
 private theorem variationalForcing_contDiffOn_of_Z_contDiffOn
     {n : ℕ∞}
     {A : F → ℝ → (G →L[ℝ] G)} {a b' : ℝ} {h₀ : ℝ} {Z₀ : F → G}

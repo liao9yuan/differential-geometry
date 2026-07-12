@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.BasepointMotion
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -41,6 +40,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_jointFDerivWithinAt_evalForm_pullbackPart
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -70,6 +70,7 @@ theorem exists_jointFDerivWithinAt_evalForm_pullbackPart
   let _ := hΦ
   exact ⟨_, ((hclm t ht x).clm_apply (hpush_v t ht x v)).clm_apply (hpush_w t ht x w)⟩
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_jointFDerivWithinAt_evalFormTwoVar
     (g_DT : ℝ → SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -207,6 +208,7 @@ theorem evalForm_pullbackPart_hasDerivWithinAt_neg_lieDerivMetric_deTurckVF
   rw [hsum] at hdiag
   exact hdiag
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem evalFormTwoVar_diag_hasDerivWithinAt_deTurckRicciRHS_chainRule
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

@@ -8,7 +8,6 @@ import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Analysis.Calculus.BumpFunction.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 open Set Function Filter Metric Bundle
@@ -24,6 +23,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [BoundarylessManifold I M] [T2Space M]
 
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem manifoldFlow_contMDiffOn_of_jointContDiffOn
     (p₀ : M) (Φ_E : E × ℝ → E) {ρ T t₀ : ℝ}
     (U : Set M) (_hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H p₀).source)
@@ -69,6 +69,7 @@ theorem manifoldFlow_contMDiffOn_of_jointContDiffOn
     exact htgt q.2 hq.2 q.1 hq.1
   exact hsymm.comp hΦh hsubtgt
 
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem chart_pushforward_field_jointContDiff
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -127,6 +128,7 @@ theorem chart_pushforward_field_jointContDiff
   rw [← contMDiffOn_iff_contDiffOn, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcomp
 
+omit [BoundarylessManifold I M] [T2Space M] in
 theorem chart_pushforward_field_cutoff_globalContDiff [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -191,6 +193,7 @@ theorem chart_pushforward_field_cutoff_globalContDiff [I.Boundaryless]
     change (b c) • F s c = F s c
     rw [hb1, one_smul]
 
+omit [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] in
 theorem chartflow_confined_to_agreementBall
     (p₀ : M) (Φ_E : E × ℝ → E) {ρ ρ' T t₀ : ℝ} (hρ' : 0 < ρ') (hρ'_le : ρ' ≤ ρ)
     (hT : 0 < T)
@@ -259,6 +262,7 @@ theorem chartflow_confined_to_agreementBall
   have hcs_O : (c, s) ∈ O := huv_sub (Set.mk_mem_prod hc_u hs_v)
   exact hcs_O.2
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] in
 theorem chartODE_genuineF_on_Ioo
     (p₀ : M) (G F : ℝ → E → E) (Φ_E : E × ℝ → E) {ρ'' ρ' T' t₀ : ℝ} (r : ℝ≥0) {tmin tmax : ℝ}
     (hρ''_le : ρ'' ≤ ρ')
@@ -285,6 +289,7 @@ theorem chartODE_genuineF_on_Ioo
     hGF t (Φ_E (c, t)) (hconf c hc t ht)
   exact hGF_pt ▸ hderiv_Ioo
 
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem field_form_identity_trivreading_eq_chartvelocity
     (X : ℝ → ∀ x : M, TangentSpace I x) (p₀ : M) (s : ℝ) (c : E) :
     ((trivializationAt E (TangentSpace I) p₀)
@@ -352,6 +357,7 @@ theorem pushforward_velocity_cancellation (p₀ q : M)
   have hv := congrArg (fun L => L v) hid
   simpa only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.id_apply] using hv
 
+omit [FiniteDimensional ℝ E] [BoundarylessManifold I M] [T2Space M] in
 theorem chartflow_eq_bareflow_on_U
     (X : ℝ → ∀ x : M, TangentSpace I x) (p₀ : M)
     (F : ℝ → E → E) (ΦE : E × ℝ → E) (U : Set M) {a b : ℝ}
@@ -403,6 +409,7 @@ theorem chartflow_eq_bareflow_on_U
   rw [← hvel]
   exact hbridge
 
+omit [BoundarylessManifold I M] [T2Space M] in
 theorem local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -548,6 +555,7 @@ theorem local_flow_jointSmooth_and_integralCurve [CompleteSpace E] [I.Boundaryle
     exact (extChartAt I p₀).left_inv (hU_src hp)
   exact ⟨U, hU_open, hp₀_U, T', hT'_pos, Φ, hΦinit, hContMDiffOn', hbare⟩
 
+omit [BoundarylessManifold I M] [T2Space M] in
 theorem local_flow_chartIsLocalFlow_and_realisation [CompleteSpace E] [I.Boundaryless]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

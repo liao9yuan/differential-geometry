@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOp
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.FiberNorm.FiberNormRiemannianBridge
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartKernel
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 private lemma tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -51,6 +51,7 @@ private lemma tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
   rw [h_r, h_s, Set.inter_self,
     DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
 
+set_option linter.unusedSectionVars false in
 private lemma slotConjFactor_self_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -76,6 +77,7 @@ private lemma slotConjFactor_self_apply
           (trivFromE (I := I) α b w))) = _
   rw [trivToE_trivFromE (I := I) α hb_base]
 
+set_option linter.unusedSectionVars false in
 private lemma slotConjFactor_basis_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -138,6 +140,7 @@ private lemma slotConjFactor_basis_norm_le_on_pouTsupport
   exact ContinuousLinearMap.opNorm_le_bound _
     (mul_nonneg hCχ_nn hCvec_nn) hpt
 
+set_option linter.unusedSectionVars false in
 private lemma slotInputConjCLM_prod_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -171,6 +174,7 @@ private lemma slotInputConjCLM_prod_norm_le_on_pouTsupport
         Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
     _ = (max C₀ 1) ^ r := by rw [Finset.prod_const]; simp
 
+set_option linter.unusedSectionVars false in
 private lemma slotOutputConjCLM_prod_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -204,6 +208,7 @@ private lemma slotOutputConjCLM_prod_norm_le_on_pouTsupport
         Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
     _ = (max C₀ 1) ^ s := by rw [Finset.prod_const]; simp
 
+set_option linter.unusedSectionVars false in
 private lemma inputSlotChartKernel_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b') (i : Fin r) (b : M)
@@ -224,6 +229,7 @@ private lemma inputSlotChartKernel_apply_norm_le
     _ = (∏ j : Fin r, ‖slotInputConjCLM (I := I) g r α X i b j‖) * ‖S‖ := by
         ring
 
+set_option linter.unusedSectionVars false in
 private lemma outputSlotChartKernel_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b') (l : Fin s) (b : M)
@@ -248,6 +254,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -344,6 +351,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

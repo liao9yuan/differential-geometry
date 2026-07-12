@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.ChartPullbackSmoo
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.MetricTraceFrame
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem rawConnLap_chartα_minus_invGramPrincipalSum_eq_christoffelTrace
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -209,6 +209,7 @@ private noncomputable def wTraceCoordPullback
         chartInvGramEuclid (I := I) g α k l y *
           chartChristoffelEuclid (I := I) g α l k m y
 
+set_option linter.unusedSectionVars false in
 private lemma wTraceCoordPullback_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (wTraceCoordPullback (I := I) (M := M) g α m)
@@ -219,6 +220,7 @@ private lemma wTraceCoordPullback_contDiffOn
   exact (chartInvGramEuclid_contDiffOn (I := I) g α k l).mul
     (chartChristoffelEuclid_contDiffOn (I := I) g α l k m)
 
+omit [CompactSpace M] in
 private lemma christoffelTrace_proj_eq_wCoord_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)
@@ -408,6 +410,7 @@ private noncomputable def christoffelTracePrincipalCoeff
     (if I' = Idx ∧ J' = Jdx then (1 : ℝ) else 0) *
       (- wTraceCoordPullback (I := I) (M := M) g α m y)
 
+omit [BoundarylessManifold I M] in
 private lemma christoffelTracePrincipalCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -434,6 +437,7 @@ private noncomputable def christoffelTraceZerothCoeff
       (- wTraceCoordPullback (I := I) (M := M) g α m y) *
         covDerivLowerOrderCoeff (I := I) (M := M) g r s α m Idx I' Jdx J' y
 
+omit [BoundarylessManifold I M] in
 private lemma christoffelTraceZerothCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))

@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.Embedding
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [IsManifold I ∞ M] in
 lemma chartPushed_eq_chartPushedRaw_pou_mul_on_target
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -41,6 +41,7 @@ lemma chartPushed_eq_chartPushedRaw_pou_mul_on_target
   unfold chartPushed
   rfl
 
+omit [IsManifold I ∞ M] in
 lemma chartPushedRaw_pou_mul_ae_eq_chartPushed_on_target
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     (fun y => chartPushedRaw I α
@@ -56,6 +57,7 @@ lemma chartPushedRaw_pou_mul_ae_eq_chartPushed_on_target
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 lemma support_pou_mul_fun_subset
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     Function.support (fun x => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
@@ -68,12 +70,14 @@ lemma support_pou_mul_fun_subset
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 lemma tsupport_pou_mul_fun_subset
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
       tsupport ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
   closure_mono (support_pou_mul_fun_subset (I := I) (M := M) ρ α u)
 
+set_option linter.unusedSectionVars false in
 lemma tsupport_pou_mul_fun_subset_chartAt_source
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
@@ -83,15 +87,18 @@ lemma tsupport_pou_mul_fun_subset_chartAt_source
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 lemma pou_continuous (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     Continuous ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) := (ρ α).contMDiff.continuous
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 lemma pou_measurable (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
     Measurable ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
   (pou_continuous (I := I) (M := M) ρ α).measurable
 
+omit [IsManifold I ∞ M] in
 lemma eLpNorm_chartPushed_eq_eLpNorm_chartPushedRaw_pou_mul
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ)
     (p : ℝ≥0∞) :
@@ -124,6 +131,7 @@ lemma fun_eq_finset_sum_pou_mul
     rw [Finset.sum_mul]
   rw [h_eq, hsum, one_mul]
 
+omit [IsManifold I ∞ M] in
 lemma eLpNorm_chartPushed_le_wkpNorm_chartPushed
     {k : ℕ} {p : ℝ≥0∞} (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     (u : M → ℝ) :

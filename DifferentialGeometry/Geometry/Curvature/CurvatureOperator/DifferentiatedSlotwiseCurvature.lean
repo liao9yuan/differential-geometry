@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -319,6 +318,7 @@ def nablaTensor0SCurv
     (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
     (fun b => X b) (fun b => Y b) (fun b => Z b) A x
 
+set_option linter.unusedSectionVars false in
 lemma nablaTensor0SCurv_def
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -624,6 +624,7 @@ theorem nablaTensorCov_baseSlot_eval
             (Function.update u k (nablaBaseSlotCurv (I := I) g X Y Z x (u k))) :=
   nablaTensor0SCurv_apply_eval (I := I) g s X Y Z A hA x u
 
+omit [CompleteSpace E] [I.Boundaryless] in
 lemma nablaBaseSlotCurv_eq_nablaCurvSec
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -631,6 +632,7 @@ lemma nablaBaseSlotCurv_eq_nablaCurvSec
       nablaCurvSec (LeviCivita (I := I) g) (fun b => X b) (fun b => Y b) (fun b => Z b)
         (fun b => smoothExtensionTangent (I := I) x u b) x := rfl
 
+omit [CompleteSpace E] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_cyclic_eq_zero
     (g : SmoothRiemannianMetric I M)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -679,6 +681,7 @@ theorem nablaTensor0SCurv_cyclic_eq_zero
   rw [← neg_add, ← neg_add, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
   rw [Finset.sum_eq_zero (fun k _ => hkey k), neg_zero]
 
+set_option linter.unusedSectionVars false in
 theorem nablaTensorCurv_frame_trace_eq_nablaRicci
     (g : SmoothRiemannianMetric I M)
     {X V : Π b : M, TangentSpace I b} {x : M}
@@ -717,6 +720,7 @@ theorem frame_sum_nablaTensor0SCurv_baseSlot_eval
       (smoothOrthoFrame_smooth (I := I) g x i)) Z A hA x u)]
   rw [Finset.sum_neg_distrib, Finset.sum_comm]
 
+omit [CompleteSpace E] [I.Boundaryless] in
 theorem nablaCurvSec_diag_frame_trace_eq_nablaRicci_sub
     (g : SmoothRiemannianMetric I M)
     {Y W U : Π b : M, TangentSpace I b} {x : M}

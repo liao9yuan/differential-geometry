@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFi
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqTensorInnerBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem riemannSec_covApply_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X Y : Π b : M, TangentSpace I b} (x : M)
@@ -60,6 +60,7 @@ theorem riemannSec_covApply_fiberNormSq_le
   rw [riemannSec_eq_riemannOp_smooth (cov := tensorCov (I := I) g 0 2) hX hY hZ]
   exact hbound (X x) (Y x) _
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem riemannSec_orthoFrame_covApply_fiberNormSq_le
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -84,6 +85,7 @@ theorem riemannSec_orthoFrame_covApply_fiberNormSq_le
   rw [hortho] at hbound
   simpa using hbound
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem orthoFrame_pair_covApply_commutator
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (i a : Fin (Module.finrank ℝ E)) :

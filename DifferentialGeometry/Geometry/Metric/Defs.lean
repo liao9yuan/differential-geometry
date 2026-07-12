@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 import Mathlib.Analysis.InnerProductSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.Pullback
 
@@ -31,6 +30,7 @@ noncomputable def Diffeomorph.pullbackInner
     ContinuousLinearMap.precomp ℝ (mfderiv I I Φ x)
   precompOp.comp step1
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem Diffeomorph.pullbackInner_symm
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
@@ -40,6 +40,7 @@ theorem Diffeomorph.pullbackInner_symm
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
   exact g.symm (Φ x) _ _
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem Diffeomorph.pullbackInner_pos
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v : TangentSpace I x) (hv : v ≠ 0) :
@@ -59,12 +60,14 @@ theorem Diffeomorph.pullbackInner_pos
     rw [← h2]; exact fun h => h1 (by simpa [hcoe] using h)
   exact g.pos (Φ x) _ hvImg
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem inner_comp_smooth_along_diffeo
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
       ((fun b ↦ TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ) b (g.inner b)) ∘ (Φ : M → M)) :=
   g.contMDiff.comp Φ.contMDiff
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem pullbackInner_eval
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M)
     (x : M) (v w : TangentSpace I x) :
@@ -73,6 +76,7 @@ private theorem pullbackInner_eval
   unfold Diffeomorph.pullbackInner
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private theorem mfderiv_eq_mfderivCLE_apply
     (Φ : M ≃ₘ⟮I, I⟯ M) (x : M) (v : TangentSpace I x) :
     Diffeomorph.mfderivToContinuousLinearEquiv Φ infty_ne_zero x v
@@ -80,6 +84,7 @@ private theorem mfderiv_eq_mfderivCLE_apply
   have h := Diffeomorph.mfderivToContinuousLinearEquiv_coe (Φ := Φ) (x := x) infty_ne_zero
   exact congrArg (fun f : TangentSpace I x →L[ℝ] TangentSpace I (Φ x) => f v) h
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem Diffeomorph.pullbackInner_isVonNBounded
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ∀ x : M, Bornology.IsVonNBounded ℝ
@@ -115,6 +120,7 @@ theorem Diffeomorph.pullbackInner_isVonNBounded
   rw [hseteq]
   exact himg
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem mfderiv_apply_section_smooth_along_diffeo
     (Φ : M ≃ₘ⟮I, I⟯ M)
     (Y : ∀ x : M, TangentSpace I x)
@@ -193,12 +199,14 @@ noncomputable def Diffeomorph.pullbackMetric
         ⟨y, Diffeomorph.pullbackInner g Φ y (Y y) (W y)⟩).2
     rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem diffeomorph_pullback_metric_exists
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
     ∃ g' : SmoothRiemannianMetric I M, g' = Diffeomorph.pullbackMetric g Φ :=
   ⟨Diffeomorph.pullbackMetric g Φ, rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem Diffeomorph.pullbackMetric_refl
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) :
@@ -228,6 +236,7 @@ theorem Diffeomorph.pullbackMetric_refl
   unfold Diffeomorph.pullbackMetric
   congr 1
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem Diffeomorph.pullbackInner_contMDiff
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (Φ : M ≃ₘ⟮I, I⟯ M) :
@@ -236,11 +245,13 @@ theorem Diffeomorph.pullbackInner_contMDiff
         ((Diffeomorph.pullbackInner g Φ x : E →L[ℝ] E →L[ℝ] ℝ))) :=
   (Diffeomorph.pullbackMetric g Φ).contMDiff
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem Diffeomorph.mfderiv_contMDiff
     (Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff I I ∞ (Φ : M → M) :=
   Φ.contMDiff
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem bilinear_pullback_bundle_smooth
     (_Φ : M ≃ₘ⟮I, I⟯ M) :
     ContMDiff

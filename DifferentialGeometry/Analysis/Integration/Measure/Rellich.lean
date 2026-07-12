@@ -10,7 +10,6 @@ import DifferentialGeometry.External.DeGiorgi.LpFunctionToolkit
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 import Mathlib.Analysis.InnerProductSpace.EuclideanDist
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -175,6 +174,7 @@ def pullbackToM
       w (toEuclidean (extChartAt I α x))
     else 0
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToM_apply_of_mem (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∈ (chartAt H α).source) :
@@ -183,6 +183,7 @@ lemma pullbackToM_apply_of_mem (α : M)
   classical
   unfold pullbackToM; simp [hx]
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToM_apply_of_notMem (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∉ (chartAt H α).source) :
@@ -190,6 +191,7 @@ lemma pullbackToM_apply_of_notMem (α : M)
   classical
   unfold pullbackToM; simp [hx]
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToM_support_subset_source (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     Function.support (pullbackToM (M := M) I α w) ⊆ (chartAt H α).source := by
@@ -198,12 +200,14 @@ lemma pullbackToM_support_subset_source (α : M)
   apply hx
   exact pullbackToM_apply_of_notMem (M := M) (I := I) α w h
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToM_zero_of_notMem_source (α : M)
     (w : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     {x : M} (hx : x ∉ (chartAt H α).source) :
     pullbackToM (M := M) I α w x = 0 :=
   pullbackToM_apply_of_notMem (M := M) (I := I) α w hx
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToM_add (α : M)
     (w₁ w₂ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     pullbackToM (M := M) I α (fun y => w₁ y + w₂ y) =
@@ -216,6 +220,7 @@ lemma pullbackToM_add (α : M)
   · simp [hx]
   · simp [hx]
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToM_sub (α : M)
     (w₁ w₂ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     pullbackToM (M := M) I α (fun y => w₁ y - w₂ y) =
@@ -228,6 +233,7 @@ lemma pullbackToM_sub (α : M)
   · simp [hx]
   · simp [hx]
 
+omit [IsManifold I ∞ M] in
 lemma pullbackToM_chartPushed
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))

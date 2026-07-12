@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Real
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcFibreNormBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcArmReadoutCovDeriv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -58,6 +57,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
+omit [BoundarylessManifold I M] in
 private lemma jetEnvelope_covGrad_one_le (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (x : M) (B : ℝ)
     (henv : (∑ j ∈ Finset.range 3,

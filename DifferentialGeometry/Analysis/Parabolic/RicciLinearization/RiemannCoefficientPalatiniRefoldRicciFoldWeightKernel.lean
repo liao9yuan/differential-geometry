@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLinearizedRefoldIdentity
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldMonomialRefoldL2JetWindow
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_addsub4_le (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M) (u v w z : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (u + v - w - z) ≤
@@ -102,6 +102,7 @@ theorem riemannPalatiniRefoldC2Family_eq_symmS_kernel
   rw [← h0, ← h1, ← h2, ← h3]
   module
 
+omit [BoundarylessManifold I M] in
 lemma ccTensorBilin_smul_local (g₀ : SmoothRiemannianMetric I M)
     (c : ℝ) (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     smoothCcTensorBilinForm (I := I) g₀ (c • S) b u w =
@@ -140,6 +141,7 @@ lemma symmS_eq_self_of_symm (g₀ : SmoothRiemannianMetric I M)
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem threeArmHjoint_const_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (F : SmoothCcTensor g₀ r 2) {δ δ' : ℝ} :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r
@@ -147,6 +149,7 @@ theorem threeArmHjoint_const_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
   rw [linearizedRicciThreeArmHjoint]
   exact (F.toSection.contMDiff.comp contMDiff_fst).contMDiffOn
 
+set_option linter.unusedSectionVars false in
 theorem threeArmHjoint_const_smul_local (g₀ : SmoothRiemannianMetric I M) {r : ℕ}
     (c : ℝ) (A : ℝ → SmoothCcTensor g₀ r 2) {δ δ' : ℝ}
     (hA : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ r A (δ := δ) (δ' := δ')) :
@@ -160,6 +163,7 @@ theorem threeArmHjoint_const_smul_local (g₀ : SmoothRiemannianMetric I M) {r :
     (E := fun z : M => Tensor0SBundle.TensorRSSpace r 2 I z) p.1 t) ?_
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma norm_add_sq_le_local (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (A B : SmoothCcTensor g r s) :
     ‖A + B‖ ^ 2 ≤ 2 * ‖A‖ ^ 2 + 2 * ‖B‖ ^ 2 := by
@@ -340,6 +344,7 @@ def palatiniRicciFoldWeightBPerm : Equiv.Perm (Fin 6) :=
    fun i => (![1, 3, 2, 5, 4, 0] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
+set_option linter.unusedSectionVars false in
 private theorem bdOrthoFrameBasis_at_center (g₀ : SmoothRiemannianMetric I M) (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
       ∀ i, bse i = smoothOrthoFrame (I := I) g₀ x i x := by
@@ -371,6 +376,7 @@ private theorem bdOrthoFrameBasis_at_center (g₀ : SmoothRiemannianMetric I M) 
   exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
+set_option linter.unusedSectionVars false in
 private theorem bdOrthoFrame_expansion_at_center (g₀ : SmoothRiemannianMetric I M)
     (x : M) (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -927,6 +933,7 @@ lemma bdRicciFoldXi_smul (g₀ : SmoothRiemannianMetric I M)
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem bdJointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
     {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     (A : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
@@ -961,6 +968,7 @@ theorem bdJointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       (f p₀.2) (A p₀)
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma connDiffQuadraticMonomial_chartBasis_eq (g₀ g₁ : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
     (j k u v : Fin (Module.finrank ℝ E)) :
@@ -999,6 +1007,7 @@ private lemma connDiffQuadraticMonomial_chartBasis_eq (g₀ g₁ : SmoothRiemann
   rw [map_smul, ContinuousLinearMap.smul_apply, map_smul, ContinuousLinearMap.smul_apply,
     smul_eq_mul, houter c]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma palatiniRefoldGenJointGram_const_g0
     (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
     ChartGramFamilyJointSmoothNondegenerate (I := I) (fun _ : ℝ => g₀) α S := by
@@ -1010,6 +1019,7 @@ private lemma palatiniRefoldGenJointGram_const_g0
   · intro s₀ _ x hx
     exact chartGramMatrix_det_pos (I := I) g₀ α hx
 
+set_option linter.unusedSectionVars false in
 private lemma bdChartChristoffel_g0_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (α : M) (i j k : Fin (Module.finrank ℝ E)) {S : Set ℝ} :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ) ∞
@@ -1040,6 +1050,7 @@ private lemma bdChartChristoffel_g0_jointContMDiffOn
     exact hm
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr (fun q _ => rfl) rfl
 
+omit [BoundarylessManifold I M] in
 private lemma bdRealizedFam_chartGramMatrix_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)

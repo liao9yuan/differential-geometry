@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.SmoothM
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Bootstrap.H2RegularitySuccessor
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -92,6 +91,7 @@ noncomputable def preimageLift
     H1Compl (I := I) (M := M) g :=
   Classical.choose (laplacianDomainPow_two_preimage_eq (I := I) (M := M) g hu_h)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma preimageLift_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -101,6 +101,7 @@ lemma preimageLift_mem_laplacianDomain
   (Classical.choose_spec (laplacianDomainPow_two_preimage_eq
     (I := I) (M := M) g hu_h)).1
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma H1ComplToLp_preimageLift
     (g : SmoothRiemannianMetric I M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -284,6 +285,7 @@ noncomputable def gradInnerSmoothBundle
         g.inner x (gradFun (I := I) g φ x) (gradFun (I := I) g v.toFun x)
     rw [grad_g_apply, grad_g_apply]
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma gradInnerSmoothBundle_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -316,6 +318,7 @@ theorem gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     rw [gradInnerCLM_smoothToH1Compl]
     rw [gradInnerSmooth_eq_smoothToLp_bundle]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem smoothToH1Compl_mem_laplacianDomainPow_two
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :
     smoothToH1Compl (I := I) (M := M) g v ∈

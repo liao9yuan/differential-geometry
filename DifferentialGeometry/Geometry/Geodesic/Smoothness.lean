@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import Mathlib.Analysis.ODE.PicardLindelof
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -25,6 +24,7 @@ open DifferentialGeometry.Integral.Measure
 
 section LiftContinuity
 
+set_option linter.unusedSectionVars false in
 lemma IsMIntegralCurveAt.continuousAt_lift
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -32,6 +32,7 @@ lemma IsMIntegralCurveAt.continuousAt_lift
     ContinuousAt f t₀ :=
   hf.continuousAt
 
+set_option linter.unusedSectionVars false in
 lemma IsMIntegralCurve.continuous_lift
     {g : SmoothRiemannianMetric I M} {α : M}
     {f : ℝ → TangentBundle I M}
@@ -43,10 +44,12 @@ end LiftContinuity
 
 section BaseContinuity
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma continuous_tangentBundle_proj :
     Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
   FiberBundle.continuous_proj E (TangentSpace I)
 
+set_option linter.unusedSectionVars false in
 theorem IsGeodesicAt.continuousAt
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀) :
@@ -70,6 +73,7 @@ variable [I.Boundaryless]
 def chartPushLift (f : ℝ → TangentBundle I M) (t₀ : ℝ) :
     ℝ → E × E := fun t => extChartAt I.tangent (f t₀) (f t)
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma chartPushLift_apply (f : ℝ → TangentBundle I M) (t₀ t : ℝ) :
     chartPushLift (I := I) f t₀ t = extChartAt I.tangent (f t₀) (f t) := rfl
 
@@ -78,6 +82,7 @@ def chartPushVF (g : SmoothRiemannianMetric I M) (α : M)
   tangentCoordChange I.tangent (f t) (f t₀) (f t)
     (geodesicVectorFieldChart (I := I) g α (f t))
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartPushVF_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : ℝ → TangentBundle I M) (t₀ t : ℝ) :
@@ -85,6 +90,7 @@ def chartPushVF (g : SmoothRiemannianMetric I M) (α : M)
       tangentCoordChange I.tangent (f t) (f t₀) (f t)
         (geodesicVectorFieldChart (I := I) g α (f t)) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem chartPushLift_eventually_hasDerivAt
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -95,6 +101,7 @@ theorem chartPushLift_eventually_hasDerivAt
   filter_upwards [h] with t ht
   exact ht
 
+set_option linter.unusedSectionVars false in
 lemma chartPushLift_eventually_differentiableAt
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -104,6 +111,7 @@ lemma chartPushLift_eventually_differentiableAt
     (g := g) (α := α) (t₀ := t₀) hf] with t ht
   exact ht.differentiableAt
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPushLift_continuousAt
     {f : ℝ → TangentBundle I M} {t₀ : ℝ}
     (hf_cont : ContinuousAt f t₀) :
@@ -112,6 +120,7 @@ lemma chartPushLift_continuousAt
     continuousAt_extChartAt (I := I.tangent) (f t₀)
   exact hchart_cont.comp hf_cont
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma chartPushLift_self
     (f : ℝ → TangentBundle I M) (t₀ : ℝ) :
     chartPushLift (I := I) f t₀ t₀ = extChartAt I.tangent (f t₀) (f t₀) := rfl
@@ -122,6 +131,7 @@ section IsGeodesicAtChartPush
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem IsGeodesicAt.exists_chartPushLift_hasDerivAt
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀) :

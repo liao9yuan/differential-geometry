@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoef
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_partial
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -51,6 +51,7 @@ private lemma contDiff_partial
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_partial
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -58,12 +59,14 @@ private lemma hasCompactSupport_partial
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_partial_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partial_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -105,6 +108,7 @@ private lemma partial_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma memLp_restrict_of_memLp_restrict
     {Ω : Set EuclN} {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict Ω))
@@ -119,6 +123,7 @@ private lemma memLp_restrict_of_memLp_restrict
   rw [← h_eq]
   exact hf.restrict K
 
+set_option linter.unusedSectionVars false in
 private lemma exists_smooth_global_extension
     {φ : EuclN → ℝ} (α : M)
     (hφ_chart : ContDiffOn ℝ (⊤ : ℕ∞) φ
@@ -156,6 +161,7 @@ private lemma exists_smooth_global_extension
     change η y * φ y = φ y
     rw [hη_one y hy, one_mul]
 
+set_option linter.unusedSectionVars false in
 theorem generic_per_pair_ibp
     (α : M)
     {v : EuclN → ℝ}
@@ -289,6 +295,7 @@ def diffVariationalSource
       chosenWeakPartial' (d := Module.finrank ℝ E) 2 l D.f_chart
         (chartTargetEuclid (I := I) (M := M) α) y
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma integrable_triple
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {a : EuclN → ℝ} (ha : ContinuousOn a Ω)

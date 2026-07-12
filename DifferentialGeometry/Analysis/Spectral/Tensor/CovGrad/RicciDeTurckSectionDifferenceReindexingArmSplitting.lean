@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferencePrincipalEndomorphismTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceSymmetrizedReindexedCoeff
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -150,6 +150,7 @@ noncomputable def reindexCoeffFibGen (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x :
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) r x).toContinuousLinearMap))
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem reindexCoeffFibGen_apply (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x : M)
     (A : Tensor0SBundle.Tensor0SSpace r I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x)
     (D : Tensor0SBundle.Tensor0SSpace r I x) :
@@ -163,6 +164,7 @@ theorem reindexCoeffFibGen_apply (r s : ℕ) (σ' : Equiv.Perm (Fin r)) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem reindexCoeffFibGen_contMDiff (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (R : SmoothCcTensor g₀ r s) (σ' : Equiv.Perm (Fin r)) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -333,6 +335,7 @@ theorem symmAbsorbedCoeff_appCc_eq (g₀ : SmoothRiemannianMetric I M) (i : ℕ)
   rw [symmAbsorbedCoeff, hLHS, hRHS]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem inverseMetricSharpFib_sub_inner_g1
     (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (α : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
@@ -377,6 +380,7 @@ theorem inverseMetricSharpFib_sub_inner_g1_realize
   rw [hsub]; ring
 
 
+set_option linter.unusedSectionVars false in
 theorem cotangentCov_leviCivita_diff_endpoint
     (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     {θ : Π b : M, TangentSpace I b →L[ℝ] ℝ} {x : M}
@@ -404,6 +408,7 @@ theorem cotangentCov_leviCivita_diff_endpoint
   linarith [h1, h1']
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem oArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (dir : TangentSpace I x) :
     inverseMetricSharpFib (I := I) g₁ x
@@ -463,6 +468,7 @@ theorem oArm_leg_eq_connDiff (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
   exact hbridge
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (w v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v
@@ -479,6 +485,7 @@ theorem connDiff_endpoint_cocycle (g₀ g₁ g₁' : SmoothRiemannianMetric I M)
   rw [e1, e2, e3]; abel
 
 
+set_option linter.unusedSectionVars false in
 theorem connDiff_bilinear_diff_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (a a' dir : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x a dir
@@ -490,6 +497,7 @@ theorem connDiff_bilinear_diff_split (g₀ g₁ g₁' : SmoothRiemannianMetric I
   abel
 
 
+set_option linter.unusedSectionVars false in
 theorem quadArm_split (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (q q' dir : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x q dir
@@ -1052,6 +1060,7 @@ def lowerFlatCLM (g₁' : SmoothRiemannianMetric I M) (x : M) :
           ext w; simp [map_smul]
         rw [h, dualToCotangent_smulC]; rfl }
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma lowerFlatCLM_apply (g₁' : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     lowerFlatCLM (I := I) g₁' x v =
       dualToCotangent (I := I) (x := x) (g₁'.inner x v).toLinearMap := by
@@ -1107,6 +1116,7 @@ def combinedLowerRaisedEndo0 (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
   (inverseMetricSharpFib (I := I) g₁ x).comp (lowerFlatCLM (I := I) g₁' x)
     - ContinuousLinearMap.id ℝ (TangentSpace I x)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma combinedLowerRaisedEndo0_apply (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     combinedLowerRaisedEndo0 (I := I) g₁ g₁' x v =
@@ -1143,6 +1153,7 @@ lemma combinedLowerRaisedEndo0_eq_metricSharp_flatDiff
   rw [hsharp_sub, hv]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem metricFlat_chartComponent_contMDiffOn_local (g : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (γ : M) (j : Fin (Module.finrank ℝ E)) :
@@ -1168,6 +1179,7 @@ theorem metricFlat_chartComponent_contMDiffOn_local (g : SmoothRiemannianMetric 
   exact hpb.2
 
 
+set_option linter.unusedSectionVars false in
 theorem metricFlatDiff_chartComponent_contMDiffOn_local (g₁ g₁' : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (γ : M) (j : Fin (Module.finrank ℝ E)) :
@@ -1227,6 +1239,7 @@ def lowerSlotInsert0Fib (x : M) (Λ : TangentSpace I x →L[ℝ] TangentSpace I 
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma lowerSlotInsert0Fib_apply_eval (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace 2 I x) (m : Fin 2 → E) :
     Tensor0SSpace.toModel (lowerSlotInsert0Fib (I := I) (M := M) x Λ A) m =
@@ -1248,6 +1261,7 @@ lemma lowerSlotInsert0Fib_apply_eval (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 lemma lowerSlotInsert0Fib_curry (x : M)
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (A : Tensor0SSpace 2 I x) :
     lowerSlotInsert0Fib (I := I) (M := M) x Λ A =
@@ -1274,6 +1288,7 @@ def combinedLowerCoeff0Fib (g₁ g₁' : SmoothRiemannianMetric I M) (x : M) :
   lowerSlotInsert0Fib (I := I) (M := M) x (combinedLowerRaisedEndo0 (I := I) g₁ g₁' x)
 
 
+set_option linter.unusedSectionVars false in
 lemma combinedLowerCoeff0Fib_apply_eval (g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (A : Tensor0SSpace 2 I x) (m : Fin 2 → E) :
     Tensor0SSpace.toModel (combinedLowerCoeff0Fib (I := I) g₁ g₁' x A) m =

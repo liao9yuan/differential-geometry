@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.NormedSpace
 import Mathlib.Topology.FiberBundle.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -82,6 +81,7 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
 
 variable {cov : CovariantDerivative I F V}
 
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_add_left
     {X X' Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hX : MDiffAt (T% X) x) (hX' : MDiffAt (T% X') x)
@@ -112,6 +112,7 @@ lemma riemannSec_add_left
   rw [h1, h2, h3]
   abel
 
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_add_right
     {X Y Y' : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hY : MDiffAt (T% Y) x) (hY' : MDiffAt (T% Y') x)
@@ -123,6 +124,7 @@ lemma riemannSec_add_right
       riemannSec_swap (cov := cov) (X := Y') (Y := X) (Z := Z)]
   abel
 
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_smul_left
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hf : MDiffAt f x) (hX : MDiffAt (T% X) x)
@@ -157,6 +159,7 @@ lemma riemannSec_smul_left
   rw [smul_sub, smul_sub]
   module
 
+omit [VectorBundle ℝ F V] in
 lemma riemannSec_smul_right
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hf : MDiffAt f x) (hY : MDiffAt (T% Y) x)
@@ -294,6 +297,7 @@ variable {V : M → Type*} [TopologicalSpace (TotalSpace F V)]
 
 variable {cov : CovariantDerivative I F V}
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
 lemma riemannSec_add_third
     {X Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
     (hZnhd : ∀ᶠ b in 𝓝 x, MDiffAt (T% Z) b)
@@ -344,6 +348,7 @@ lemma riemannSec_add_third
   abel
 
 
+set_option linter.unusedSectionVars false in
 lemma riemannSec_smul_third
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)
@@ -434,6 +439,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 open DifferentialGeometry.Integral.Measure
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma covApply_sub_eventuallyEq_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) (htor : cov.torsion = 0)
     {A B : Π b : M, TangentSpace I b} {x : M}
@@ -444,6 +450,7 @@ private lemma covApply_sub_eventuallyEq_mlieBracket
   filter_upwards [hAnhd, hBnhd] with b hAb hBb
   exact (CovariantDerivative.torsion_eq_zero_iff (cov := cov)).mp htor hAb hBb
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma cov_covApply_sub_eq_cov_mlieBracket
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) (htor : cov.torsion = 0)
     {A B : Π b : M, TangentSpace I b} {x : M}
@@ -685,6 +692,7 @@ noncomputable def smoothExtensionFiber (x : M) (u : V x) :
   fun b => ((ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := F) (V := V) x u).choose : Cₛ^(⊤ : ℕ∞)⟮I; F, V⟯) b
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 @[simp]
 lemma smoothExtensionTangent_eq (x : M) (v : TangentSpace I x) :
     smoothExtensionTangent (I := I) x v x = v := by
@@ -692,6 +700,7 @@ lemma smoothExtensionTangent_eq (x : M) (v : TangentSpace I x) :
   exact (ContMDiffSection.exists_eq_at (I := I) (n := (⊤ : ℕ∞))
     (F := E) (V := (TangentSpace I : M → Type _)) x v).choose_spec
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
 @[simp]
 lemma smoothExtensionFiber_eq (x : M) (u : V x) :
     smoothExtensionFiber (I := I) (F := F) (V := V) x u x = u := by
@@ -707,6 +716,7 @@ noncomputable def riemannOpFun (cov : CovariantDerivative I F V) (x : M) :
       (smoothExtensionTangent (I := I) x w)
       (smoothExtensionFiber (I := I) (F := F) (V := V) x u) x
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 theorem riemannOpFun_def (cov : CovariantDerivative I F V) (x : M)
     (v w : TangentSpace I x) (u : V x) :
     riemannOpFun cov x v w u =

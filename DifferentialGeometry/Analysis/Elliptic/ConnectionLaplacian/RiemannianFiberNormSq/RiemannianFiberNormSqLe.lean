@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Tensor.RSTensor.TensorRSSpaceOperatorNorm
 import Mathlib.Analysis.Normed.Module.Multilinear.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ noncomputable def orthoBasisSumNormSq
   let e : OrthonormalBasis (Fin n) ℝ (TangentSpace I b) := stdOrthonormalBasis ℝ _
   exact ∑ i : Fin n, ‖e i‖ ^ 2
 
+set_option linter.unusedSectionVars false in
 lemma orthoBasisSumNormSq_nonneg
     (g : SmoothRiemannianMetric I M) (b : M) :
     0 ≤ orthoBasisSumNormSq (I := I) (M := M) g b := by
@@ -55,6 +55,7 @@ noncomputable def pointwiseBoundScalar
   1 + metricInnerOpNorm (I := I) (M := M) g b +
     orthoBasisSumNormSq (I := I) (M := M) g b
 
+set_option linter.unusedSectionVars false in
 lemma pointwiseBoundScalar_nonneg
     (g : SmoothRiemannianMetric I M) (b : M) :
     0 ≤ pointwiseBoundScalar (I := I) (M := M) g b := by
@@ -63,6 +64,7 @@ lemma pointwiseBoundScalar_nonneg
   have h3 := orthoBasisSumNormSq_nonneg (I := I) (M := M) g b
   linarith
 
+set_option linter.unusedSectionVars false in
 lemma pointwiseBoundScalar_one_le
     (g : SmoothRiemannianMetric I M) (b : M) :
     1 ≤ pointwiseBoundScalar (I := I) (M := M) g b := by
@@ -71,6 +73,7 @@ lemma pointwiseBoundScalar_one_le
   have h3 := orthoBasisSumNormSq_nonneg (I := I) (M := M) g b
   linarith
 
+set_option linter.unusedSectionVars false in
 lemma metricInnerOpNorm_le_pointwiseBoundScalar
     (g : SmoothRiemannianMetric I M) (b : M) :
     metricInnerOpNorm (I := I) (M := M) g b ≤
@@ -79,6 +82,7 @@ lemma metricInnerOpNorm_le_pointwiseBoundScalar
   have h3 := orthoBasisSumNormSq_nonneg (I := I) (M := M) g b
   linarith
 
+set_option linter.unusedSectionVars false in
 lemma orthoBasisSumNormSq_le_pointwiseBoundScalar
     (g : SmoothRiemannianMetric I M) (b : M) :
     orthoBasisSumNormSq (I := I) (M := M) g b ≤
@@ -87,12 +91,14 @@ lemma orthoBasisSumNormSq_le_pointwiseBoundScalar
   have h2 : 0 ≤ metricInnerOpNorm (I := I) (M := M) g b := norm_nonneg _
   linarith
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] in
 private lemma metric_inner_apply_opNorm_le
     (g : SmoothRiemannianMetric I M) (b : M) (v : TangentSpace I b) :
     ‖g.inner b v‖ ≤ metricInnerOpNorm (I := I) (M := M) g b * ‖v‖ := by
   unfold metricInnerOpNorm
   exact (g.inner b).le_opNorm v
 
+set_option linter.unusedSectionVars false in
 private lemma omegaK_opNorm_le
     (g : SmoothRiemannianMetric I M) (b : M) (r : ℕ) (n : ℕ)
     (e : Fin n → TangentSpace I b) (K : Fin r → Fin n) :
@@ -124,6 +130,7 @@ private lemma omegaK_opNorm_le
     rw [Finset.prod_mul_distrib]; simp [Finset.prod_const, Finset.card_univ]
   exact hprod_le.trans (le_of_eq hprod_eq)
 
+set_option linter.unusedSectionVars false in
 lemma fiberNormSqSummand_le_pointwise_bound
     (g : SmoothRiemannianMetric I M) (b : M) (r s : ℕ)
     (T : TensorRSSpace r s I b)
@@ -220,11 +227,13 @@ noncomputable def ambientFrameNormSq
     (b : M) (n : ℕ) (e : Fin n → TangentSpace I b) : ℝ :=
   ∑ i : Fin n, ‖e i‖ ^ 2
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
 lemma ambientFrameNormSq_nonneg
     (b : M) (n : ℕ) (e : Fin n → TangentSpace I b) :
     0 ≤ ambientFrameNormSq (I := I) (M := M) b n e :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [IsManifold I ∞ M] in
 private lemma sum_prod_norm_sq_eq_pow
     {b : M} (n : ℕ) (e : Fin n → TangentSpace I b) (r : ℕ) :
     (∑ K : Fin r → Fin n, ∏ k : Fin r, ‖e (K k)‖ ^ 2) =
@@ -232,6 +241,7 @@ private lemma sum_prod_norm_sq_eq_pow
   classical
   rw [Fintype.sum_pow (f := fun (i : Fin n) => ‖e i‖ ^ 2) r]
 
+set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_sum_le_pointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b)
@@ -308,6 +318,7 @@ lemma riemannianFiberNormSq_sum_le_pointwise
   unfold ambientFrameNormSq
   rw [pow_add]
 
+set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_eq_sum_witness
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
@@ -332,6 +343,7 @@ lemma riemannianFiberNormSq_eq_sum_witness
   refine ⟨n, fun i => e i, rfl, ?_⟩
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_le_pointwise_witness
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :

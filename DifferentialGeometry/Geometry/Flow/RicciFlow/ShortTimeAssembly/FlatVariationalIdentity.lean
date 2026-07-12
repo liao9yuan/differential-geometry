@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Glob
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.FlowRealisation.LocalChart
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairedResidual
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -41,6 +40,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedSectionVars false in
 theorem flatVariationalIdentity_eq_rawFderiv_add_movingTrivCorrection
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)
@@ -72,6 +72,7 @@ theorem flatVariationalIdentity_eq_rawFderiv_add_movingTrivCorrection
   exact flatLinearization_eq_rawFderiv_add_movingTriv (I := I) (Φ_fam t x)
     (X : ∀ y : M, TangentSpace I y) (mfderiv I I (Φ_fam t : M → M) x v) hRdiff hCdiff
 
+omit [CompactSpace M] in
 theorem flat_raw_variational_identity
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
     (X : ℝ → ∀ x : M, TangentSpace I x)
@@ -108,6 +109,7 @@ theorem flat_raw_variational_identity
   choose! Tv Pv hTv using hpoint
   exact ⟨Tv, Pv, fun t ht x v => hTv t ht x v⟩
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem flat_christoffel_correction_eqn
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))
@@ -158,6 +160,7 @@ theorem flat_christoffel_correction_eqn
   rw [hjet t ht x v, negCovariantSlotValue, hbridge]
   abel
 
+set_option linter.unusedSectionVars false in
 theorem flat_value_jet_identity
     (X : Cₛ^∞⟮I; E, (TangentSpace I)⟯)
     (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M)) (t : ℝ) (x : M) (v : TangentSpace I x)

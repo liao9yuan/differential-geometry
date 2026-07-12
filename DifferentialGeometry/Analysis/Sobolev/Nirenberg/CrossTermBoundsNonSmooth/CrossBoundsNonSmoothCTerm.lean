@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBou
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.CrossTermBoundsNonSmooth.CrossBoundsNonSmooth
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.TestFunction.DiffQuotTestFunction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private lemma two_abs_mul_le_eps_sq_add_cterm (a b ε : ℝ) (hε : 0 < ε) :
     _ ≤ u^2 + v^2 := two_mul_le_add_sq u v
     _ = ε * a^2 + (1/ε) * b^2 := by rw [hu_sq, hv_sq]
 
+omit [NeZero d] in
 private lemma memLp_two_v_test
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -64,6 +64,7 @@ private lemma memLp_two_v_test
   rw [h_v_eq]
   exact memLp_diffQuot_two k (-h) h_gFun_l2
 
+omit [NeZero d] in
 private lemma aestronglyMeasurable_v_test
     {u : E → ℝ} (hu_l2 : MemLp u 2 (volume : Measure E))
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.H2
 import DifferentialGeometry.Analysis.Sobolev.Approximation.SmoothDensity
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -60,6 +59,7 @@ private lemma self_subset_thickening_of_pos
     K ⊆ Metric.thickening r K :=
   Metric.self_subset_thickening hr_pos K
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_pou_zero_off_KApha
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (α : M) (u : M → ℝ) :

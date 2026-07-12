@@ -40,6 +40,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentScalar_eLpNorm_two_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -63,6 +64,7 @@ theorem tensorChartComponentScalar_eLpNorm_two_lt_top
   exact (hcont.memLp_of_hasCompactSupport
       (μ := riemannianVolumeMeasure (I := I) (M := M) g) (p := 2) hcc).eLpNorm_lt_top
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentScalar_eLpNorm_le_per_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -109,6 +111,7 @@ theorem tensorChartComponentScalar_eLpNorm_le_per_section
             mul_le_mul_of_nonneg_left h_one_le (by exact zero_le _)
   exact h1.trans h2
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComponentScalar_eLpNorm_le_l2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M)

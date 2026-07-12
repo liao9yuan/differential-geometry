@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.MetricTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,6 +20,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 private lemma exists_bump_tsupport_subset {U : Set M} (hU : IsOpen U) {x₀ : M}
     (hx₀ : x₀ ∈ U) :
     ∃ χ : SmoothBumpFunction I x₀, tsupport (χ : M → ℝ) ⊆ U := by
@@ -99,6 +99,7 @@ private lemma connDiff_chartBasis_contMDiffOn (g g' : SmoothRiemannianMetric I M
     exact h
   exact connDiff_contMDiffOn_local (I := I) g g' hopen (hframe j) (hframe k)
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartInvGramMatrix_entry_contMDiffOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     (j k : Fin (Module.finrank ℝ E)) :

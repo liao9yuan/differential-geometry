@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotSwapPairingCalculus
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -57,11 +56,13 @@ private lemma armResidual_vecTail_cons {α : Type*} {n : ℕ} (a : α) (w : Fin 
   funext j
   simp [Matrix.vecTail, Fin.cons_succ]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_toModel_sum {s : ℕ} (b : M) {ι : Type*} (fs : Finset ι)
     (f : ι → Tensor0SSpace s I b) :
     Tensor0SSpace.toModel (∑ i ∈ fs, f i) = ∑ i ∈ fs, Tensor0SSpace.toModel (f i) :=
   map_sum (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (𝕜 := ℝ) (I := I) s b) f fs
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma armResidual_model_slot0_linear {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1) ℝ E) (c : ι → ℝ) (f : ι → E)
     (rest : Fin s → E) :
@@ -74,6 +75,7 @@ private lemma armResidual_model_slot0_linear {s : ℕ} {ι : Type*} (fs : Finset
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
 
+set_option linter.unusedSectionVars false in
 private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset ι)
     (T : Tensor0SBundle.Tensor0SModel (s + 1 + 1) ℝ E) (a : E) (c : ι → ℝ) (f : ι → E)
     (rest : Fin s → E) :
@@ -90,6 +92,7 @@ private lemma armResidual_model_slot1_linear {s : ℕ} {ι : Type*} (fs : Finset
       c f rest]
   exact Finset.sum_congr rfl fun j _ => by rw [hcur]
 
+set_option linter.unusedSectionVars false in
 private lemma armResidual_orthoFrame_expansion (g₀ : SmoothRiemannianMetric I M) (b : M)
     (u : TangentSpace I b) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -142,6 +145,7 @@ private lemma armResidual_orthoFrame_expansion (g₀ : SmoothRiemannianMetric I 
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma armResidual_toModel_contract_covariant (s : ℕ) (b : M) (v : TangentSpace I b)
     (A : TensorRSSpace 0 (s + 1) I b) (D : Tensor0SSpace 0 I b) (m : Fin s → E) :
     Tensor0SSpace.toModel
@@ -244,6 +248,7 @@ private lemma armResidual_slot01_transpose (g₀ g₁ : SmoothRiemannianMetric I
     rw [hadj (e j) (e i), g₀.symm b (e j) (Λ (e i))]
   rw [hco]
 
+omit [BoundarylessManifold I M] in
 private lemma armResidual_covGrad_eval (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (W : SmoothCcTensor g₀ 0 s) (b : M) (D : Tensor0SSpace 0 I b)
     (v0 : E) (vs : Fin s → E) :

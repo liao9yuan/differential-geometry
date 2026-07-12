@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.H1Compl
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientEpNormPerAlpha
 import Mathlib.Topology.Compactness.LocallyFinite
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ noncomputable def chartAtlasPOU_activeFinset
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] : Finset M :=
   ((chartAtlasPOU I M).locallyFinite.finite_nonempty_of_compact).toFinset
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma mem_chartAtlasPOU_activeFinset_iff (α : M) :
     α ∈ chartAtlasPOU_activeFinset I M ↔
       (Function.support (fun x : M =>
@@ -53,6 +53,7 @@ lemma mem_chartAtlasPOU_activeFinset_iff (α : M) :
   unfold chartAtlasPOU_activeFinset
   exact Set.Finite.mem_toFinset _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M) :
     ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0 := by
@@ -67,6 +68,7 @@ lemma chartAtlasPOU_eq_zero_of_notMem_activeFinset
   have := congrFun h_empty x
   simpa using this
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma tensorChartComponentScalar_eq_zero_of_pou_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (h_zero : ∀ x : M, ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0)
@@ -82,6 +84,7 @@ lemma tensorChartComponentScalar_eq_zero_of_pou_zero
     (0 : M → ℝ) x
   rw [h_zero x, zero_mul]; rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_tensorChartComponentScalar_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -314,6 +317,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma sqrt_g_inner_gradFun_eq_zero_of_scalar_zero
     (g : SmoothRiemannianMetric I M)
     {u : M → ℝ} (h_u_zero : u = 0) :
@@ -334,6 +338,7 @@ private lemma sqrt_g_inner_gradFun_eq_zero_of_scalar_zero
     (0 : M → ℝ) b
   simp
 
+set_option linter.unusedSectionVars false in
 private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)
@@ -385,6 +390,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)

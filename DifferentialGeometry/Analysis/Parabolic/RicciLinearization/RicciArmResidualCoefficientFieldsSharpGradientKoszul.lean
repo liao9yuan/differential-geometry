@@ -60,6 +60,7 @@ private lemma vec3_upd_two {F : Type*} (a b c z : F) :
   fin_cases k <;> simp [Function.update]
 
 
+set_option linter.unusedSectionVars false in
 lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u u' ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x (u + u') ζ =
@@ -83,6 +84,7 @@ lemma linearizedKoszulCovec_add_fst (g' : SmoothRiemannianMetric I M)
   ring
 
 
+set_option linter.unusedSectionVars false in
 lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x (c • u) ζ =
@@ -105,6 +107,7 @@ lemma linearizedKoszulCovec_smul_fst (g' : SmoothRiemannianMetric I M)
   ring
 
 
+set_option linter.unusedSectionVars false in
 lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (u ζ ζ' : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u (ζ + ζ') =
@@ -128,6 +131,7 @@ lemma linearizedKoszulCovec_add_snd (g' : SmoothRiemannianMetric I M)
   ring
 
 
+set_option linter.unusedSectionVars false in
 lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (c : ℝ) (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' S x u (c • ζ) =
@@ -150,6 +154,7 @@ lemma linearizedKoszulCovec_smul_snd (g' : SmoothRiemannianMetric I M)
   ring
 
 
+set_option linter.unusedSectionVars false in
 lemma linearizedKoszulCovec_zero_weight (g' : SmoothRiemannianMetric I M) (x : M)
     (u ζ : TangentSpace I x) :
     linearizedKoszulCovec (I := I) g' (0 : SmoothCcTensor g' 0 2) x u ζ = 0 := by

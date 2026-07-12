@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ noncomputable def chartTensor0SParallelExtend
       ((trivializationAt (Tensor0SModel r ℝ E)
           (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt ℝ b T₀)
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SParallelExtend_apply
     (r : ℕ) (α b : M) (T₀ : Tensor0SSpace r I b) (b' : M) :
     chartTensor0SParallelExtend (I := I) r α b T₀ b' =
@@ -44,6 +44,7 @@ lemma chartTensor0SParallelExtend_apply
         ((trivializationAt (Tensor0SModel r ℝ E)
             (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt ℝ b T₀) := rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 lemma chartTensor0SE_section_repr_chartTensor0SParallelExtend
     (r : ℕ) (α b : M) (T₀ : Tensor0SSpace r I b) {b' : M}
     (hb' : b' ∈ (trivializationAt (Tensor0SModel r ℝ E)
@@ -60,6 +61,7 @@ lemma chartTensor0SE_section_repr_chartTensor0SParallelExtend
       (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt_symmL
     (R := ℝ) hb' _
 
+set_option linter.unusedSectionVars false in
 lemma chartLeviCivitaGoodSet_mem_tensor0S_baseSet
     {α x : M} (r : ℕ)
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -69,6 +71,7 @@ lemma chartLeviCivitaGoodSet_mem_tensor0S_baseSet
   change x ∈ (trivializationAt E (TangentSpace I) α).baseSet
   exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
 
+set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_repr_eventuallyEq_const
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -109,6 +112,7 @@ lemma chartTensor0SParallelExtend_repr_eventuallyEq_const
   exact chartTensor0SE_section_repr_chartTensor0SParallelExtend
     (I := I) r α b T₀ hy_U
 
+set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -122,6 +126,7 @@ lemma chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero
   rw [Filter.EventuallyEq.fderiv_eq hev]
   exact fderiv_const_apply _
 
+set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_repr_pullback_fderiv_apply_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) (w : E) :
@@ -133,6 +138,7 @@ lemma chartTensor0SParallelExtend_repr_pullback_fderiv_apply_eq_zero
         (I := I) r α hb T₀]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_mdifferentiableAt
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :

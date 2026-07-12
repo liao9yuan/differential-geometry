@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplResidual
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.CLM.Leibniz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedSectionVars false in
 private lemma smoothScalar_eq_sub_of_toFun_eq
     {g : SmoothRiemannianMetric I M}
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -47,6 +47,7 @@ private lemma smoothScalar_eq_sub_of_toFun_eq
   rw [h_diff]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma smoothToH1Compl_eq_sub
     (g : SmoothRiemannianMetric I M)
     (v₁ v₂ v_diff : SmoothScalar g)
@@ -94,6 +95,7 @@ private lemma fHLeibnizResidualLp_sub
   rw [smul_sub, neg_sub]
   abel
 
+set_option linter.unusedSectionVars false in
 private lemma volume_restrict_absolutelyContinuous_chartPulledWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict

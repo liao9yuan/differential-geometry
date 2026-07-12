@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 lemma metric_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -29,6 +29,7 @@ lemma metric_inner_self_nonneg
     rw [heq]
   · exact (g.pos x v hv0).le
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 lemma metric_inner_cauchy_schwarz_sq
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     (g.inner x v w) ^ 2 ≤ g.inner x v v * g.inner x w w := by
@@ -98,6 +99,7 @@ lemma metric_inner_cauchy_schwarz_sq
     rw [hc_eq, ha_eq]
     simp
 
+set_option linter.unusedSectionVars false in
 lemma abs_metric_inner_le_sqrt_metric_quadratic
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |g.inner x v w| ≤ Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by
@@ -121,6 +123,7 @@ noncomputable def metricInnerOpNorm
     (g : SmoothRiemannianMetric I M) (x : M) : ℝ :=
   ‖g.inner x‖
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 lemma abs_metric_inner_le_metricInnerOpNorm
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |g.inner x v w| ≤ metricInnerOpNorm (I := I) (M := M) g x * ‖v‖ * ‖w‖ := by

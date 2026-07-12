@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tensoriality
 import DifferentialGeometry.Bundle.Equiv
 import DifferentialGeometry.Bundle.Frame
 
-set_option linter.unusedSectionVars false
 
 
 open scoped Manifold ContDiff
@@ -387,10 +386,12 @@ noncomputable def ContMDiffVectorBundleHom.ofLinearMapSection
 
   exact ⟨_root_.id, fun p => ⟨p.proj, φ p.proj p.2⟩, Φ_smooth, φ, fun _ _ => rfl⟩
 
+omit [SigmaCompactSpace M] [FiniteDimensional ℝ F₂] [ContMDiffVectorBundle (↑n) F₂ E₂ I] in
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_baseMap
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) :
     (ofLinearMapSection F).baseMap = _root_.id := rfl
 
+omit [SigmaCompactSpace M] [FiniteDimensional ℝ F₂] [ContMDiffVectorBundle (↑n) F₂ E₂ I] in
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_spec
     (F : Cₛ^n⟮I; F₁, E₁⟯ →ₗ[C^n⟮I, M; ℝ⟯] Cₛ^n⟮I; F₂, E₂⟯) (σ) :
     F σ = (ofLinearMapSection F).mapSection (ofLinearMapSection_baseMap F) σ := by
@@ -401,6 +402,7 @@ theorem ContMDiffVectorBundleHom.ofLinearMapSection_spec
 
 omit h1n in
 
+omit [SigmaCompactSpace M] [FiniteDimensional ℝ F₂] [ContMDiffVectorBundle (↑n) F₂ E₂ I] in
 theorem ContMDiffVectorBundleHom.ofLinearMapSection_mapSection
     (Φ Ψ : ContMDiffVectorBundleHom ℝ I n F₁ E₁ F₂ E₂)
     (hΦ : Φ.baseMap = _root_.id) (hΨ : Ψ.baseMap = _root_.id)

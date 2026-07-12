@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSCovariantDerivativeCongrLocally
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.SecondCovDerivExpansion.SkExtChartComponentEqCovDerivEuclid
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ private def packageAsCc
   toSection := S
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma packageAsCc_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,

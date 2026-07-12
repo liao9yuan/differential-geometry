@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrd
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,6 +20,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private theorem exists_cutoff_ball
     {x₀ : EuN} {R : ℝ} (hR : 0 < R) :
     ∃ χ : EuN → ℝ,
@@ -67,6 +67,7 @@ private theorem exists_cutoff_ball
   · intro x hx
     exact (hχ_one_iff x).1 hx
 
+omit [NeZero d] in
 private lemma exists_uniform_iteratedFDeriv_bound
     {χ : EuN → ℝ} (hχ : ContDiff ℝ (⊤ : ℕ∞) χ) (hχ_compact : HasCompactSupport χ)
     (m : ℕ) :
@@ -96,6 +97,7 @@ private lemma exists_uniform_iteratedFDeriv_bound
   exact le_trans (hCj_bound j x)
     (hC_ge j (Finset.mem_range.mpr (Nat.lt_succ_of_le hj)))
 
+omit [NeZero d] in
 private lemma cutoff_memWkp_two
     {x₀ : EuN} {R : ℝ} (hR : 0 < R)
     {χ : EuN → ℝ} (hχ : ContDiff ℝ (⊤ : ℕ∞) χ) (hχ_compact : HasCompactSupport χ)

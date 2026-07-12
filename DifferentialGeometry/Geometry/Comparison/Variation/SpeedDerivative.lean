@@ -19,7 +19,6 @@ import Mathlib.Topology.VectorBundle.Riemannian
 import Mathlib.Topology.Compactness.Compact
 import DifferentialGeometry.Geometry.Comparison.Variation.ArcLength
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -44,6 +43,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem speedSq_hasDerivAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (t : ℝ)
     (hf : IsSmoothVariation (I := I) f) :
@@ -286,6 +286,7 @@ theorem speedSq_hasDerivAt
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma speedSq_contDiff
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) :
@@ -305,6 +306,7 @@ lemma speedSq_contDiff
   rw [← contMDiff_iff_contDiff, modelWithCornersSelf_prod, ← chartedSpaceSelf_prod]
   exact hcm
 
+omit [T2Space M] [SigmaCompactSpace M] in
 theorem speedIntegral_hasDerivAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (L : ℝ)
     (_hf : IsSmoothVariation (I := I) f) (_hL : 0 < L)

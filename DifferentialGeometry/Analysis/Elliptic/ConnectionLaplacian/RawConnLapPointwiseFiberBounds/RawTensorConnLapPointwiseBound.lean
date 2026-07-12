@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.Laplacian.TensorConnLaplacianCha
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.ChartTensorRSCovariantDerivativeOpNorm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.RawTensorConnLap2ndApplicationOpNorm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ noncomputable def chartFrameData
           (LeviCivita (I := I) g))
           (smoothOrthoFrame (I := I) g y i) T₀ y‖)
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma chartFrameData_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)
@@ -94,6 +94,7 @@ noncomputable def secondAppChartData
         (smoothOrthoFrame (I := I) g y i y)‖
       + ‖T₀ y‖)
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma secondAppChartData_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Π b : M, TensorRSSpace r s I b)

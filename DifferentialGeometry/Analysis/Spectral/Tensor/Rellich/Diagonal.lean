@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChartComponent.ComponentSobolevBoundPerSection
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichOnM
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensorChartComponentScalar_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -118,6 +118,7 @@ private lemma single_triple_extraction
     rw [h_vol, ← h2_eq]
     exact h_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma tendsto_eLpNorm_diff_comp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M)

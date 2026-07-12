@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 variable (g : SmoothRiemannianMetric I M)
 
+omit [BoundarylessManifold I M] in
 lemma norm_finiteEigenComboHs_self_le (σ : ℝ)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
@@ -72,11 +72,13 @@ def spatialEigenProj (σ : ℝ) (N : ℕ) :
     exact norm_finiteEigenComboHs_self_le (I := I) (M := M) g σ
       (eigenIdxFinset (I := I) (M := M) g N) W)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma spatialEigenProj_apply (σ : ℝ) (N : ℕ) (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     spatialEigenProj (I := I) (M := M) g σ N W =
       finiteEigenComboHs (I := I) (M := M) g (eigenIdxFinset (I := I) (M := M) g N) W.coeff σ :=
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma norm_spatialEigenProj_le_one (σ : ℝ) (N : ℕ) :
     ‖spatialEigenProj (I := I) (M := M) g σ N‖ ≤ 1 := by
   unfold spatialEigenProj
@@ -89,6 +91,7 @@ lemma norm_spatialEigenProj_apply_le (σ : ℝ) (N : ℕ)
   exact norm_finiteEigenComboHs_self_le (I := I) (M := M) g σ
     (eigenIdxFinset (I := I) (M := M) g N) W
 
+set_option linter.unusedSectionVars false in
 private lemma normSq_spatialEigenProj_sub_add (σ : ℝ) (N : ℕ)
     (W : tensorHs (I := I) (M := M) g 0 2 σ) :
     (∑ i ∈ eigenIdxFinset (I := I) (M := M) g N,

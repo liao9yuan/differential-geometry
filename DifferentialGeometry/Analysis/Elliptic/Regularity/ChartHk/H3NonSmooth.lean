@@ -33,6 +33,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_loc_of_diff_data_and_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -68,6 +69,7 @@ theorem chart_loc_of_diff_data_and_uniform_bound
     (g := g) (α := α) D_deriv
     hΩ''_open hΩ''_compact_closure hh₀ h_room hM_nn h_uniform_bd i k
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chart_loc_weak_partial_deriv_of_diff_data_and_uniform_bound
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

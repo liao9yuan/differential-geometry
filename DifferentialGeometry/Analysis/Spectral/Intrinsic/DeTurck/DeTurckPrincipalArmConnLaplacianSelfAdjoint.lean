@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotSwapPairingCalculus
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -67,6 +66,7 @@ theorem rawConnLap_selfAdjoint (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (rawTensorConnLapSmooth (I := I) g r s v).toFun T.toFun
   rw [hsymm1, hvT] at hTv; rw [← hsymm2]; linarith [hTv]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s (S₁.toFun - S₂.toFun) T.toFun =
@@ -96,6 +96,7 @@ theorem tensorL2Inner_sub_left_smoothCc (g : SmoothRiemannianMetric I M) (r s : 
     tensorL2Inner_smul_left]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem tensorL2Inner_sub_right_smoothCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T₁ T₂ : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s S.toFun (T₁.toFun - T₂.toFun) =
@@ -165,6 +166,7 @@ theorem oneMinusConnLapSmooth_l2Inner_eq_add_covGrad
     hgreen]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) (v : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s k (oneMinusConnLapSmooth (I := I) g r s v) =
@@ -189,6 +191,7 @@ theorem oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (g : SmoothRiemannianMetri
     rw [ih (oneMinusConnLapSmooth (I := I) g r s v),
       oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm]
 
+set_option linter.unusedSectionVars false in
 theorem oneMinusConnLapSmoothIter_add (g : SmoothRiemannianMetric I M) (r s : ℕ) (a b : ℕ)
     (T : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s (a + b) T =

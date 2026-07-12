@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Atlas
 import Mathlib.Geometry.Manifold.ContMDiff.Atlas
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,17 +25,20 @@ open DifferentialGeometry.Integral.Measure
 def chartE_section_repr (α : M) (σ : Π x : M, TangentSpace I x) (x : M) : E :=
   (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x (σ x)
 
+omit [FiniteDimensional ℝ E] in
 lemma chartE_section_repr_def (α : M) (σ : Π x : M, TangentSpace I x) :
     chartE_section_repr (I := I) α σ =
       fun x : M =>
         (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x (σ x) :=
   rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma chartE_section_repr_apply
     (α : M) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α σ x =
       (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x (σ x) := rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma chartE_section_repr_eq_trivialization_snd
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -55,6 +57,7 @@ lemma chartE_section_repr_eq_trivialization_snd
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem mdifferentiableWithinAt_section_iff_chartE
     (α : M) (σ : Π x : M, TangentSpace I x) {u : Set M} {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -81,6 +84,7 @@ theorem mdifferentiableWithinAt_section_iff_chartE
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem mdifferentiableAt_section_iff_chartE
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -89,12 +93,14 @@ theorem mdifferentiableAt_section_iff_chartE
   rw [← mdifferentiableWithinAt_univ, ← mdifferentiableWithinAt_univ]
   exact mdifferentiableWithinAt_section_iff_chartE I α σ hx
 
+omit [FiniteDimensional ℝ E] in
 private lemma mdifferentiableAt_iff_pullback_of_mem_source
     (α : M) (f : M → E) {x : M} (hx : x ∈ (chartAt H α).source) :
     MDiffAt f x ↔
       MDiffAt[range I] (f ∘ (extChartAt I α).symm) (extChartAt I α x) :=
   mdifferentiableAt_iff_source_of_mem_source (x := α) (x' := x) hx
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma mdifferentiableWithinAt_range_iff_differentiableAt_of_interior
     {α : M} {f : E → E} {y : E}
     (hy_int : y ∈ interior ((extChartAt I α).target : Set E)) :
@@ -110,6 +116,7 @@ private lemma mdifferentiableWithinAt_range_iff_differentiableAt_of_interior
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem mdifferentiableAt_section_iff_chartE_fderiv
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx_src : x ∈ (chartAt H α).source)
@@ -127,6 +134,7 @@ theorem mdifferentiableAt_section_iff_chartE_fderiv
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem contMDiffWithinAt_section_iff_chartE
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x) {u : Set M} {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -155,6 +163,7 @@ theorem contMDiffWithinAt_section_iff_chartE
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem contMDiffAt_section_iff_chartE
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -166,6 +175,7 @@ theorem contMDiffAt_section_iff_chartE
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem mfderiv_section_eq_chartE_fderiv
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx_src : x ∈ (chartAt H α).source)
@@ -223,6 +233,7 @@ theorem mfderiv_section_eq_chartE_fderiv
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem contDiffOn_chartE_pullback_of_contMDiff_section
     {k : ℕ∞} (α : M) (σ : Π x : M, TangentSpace I x)
     (hσ : ContMDiff I (I.prod 𝓘(ℝ, E)) k (T% σ)) :
@@ -268,6 +279,7 @@ abbrev trivFromE (α x : M) : E →L[ℝ] TangentSpace I x :=
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma trivFromE_trivToE
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -277,6 +289,7 @@ variable (I) in
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma trivToE_trivFromE
     (α : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -284,10 +297,12 @@ variable (I) in
     trivToE (I := I) α x (trivFromE (I := I) α x w) = w :=
   (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL (R := ℝ) hx w
 
+omit [FiniteDimensional ℝ E] in
 @[simp] lemma chartE_section_repr_eq_trivToE
     (α : M) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α σ x = trivToE (I := I) α x (σ x) := rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma chartE_section_repr_add
     (α : M) (σ τ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α (σ + τ) x =
@@ -296,6 +311,7 @@ lemma chartE_section_repr_add
   unfold chartE_section_repr
   rw [Pi.add_apply, map_add]
 
+omit [FiniteDimensional ℝ E] in
 lemma chartE_section_repr_smul
     (α : M) (c : ℝ) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α (c • σ) x = c • chartE_section_repr (I := I) α σ x := by
@@ -303,6 +319,7 @@ lemma chartE_section_repr_smul
   unfold chartE_section_repr
   rw [Pi.smul_apply, map_smul]
 
+omit [FiniteDimensional ℝ E] in
 lemma chartE_section_repr_smul_function
     (α : M) (f : M → ℝ) (σ : Π x : M, TangentSpace I x) (x : M) :
     chartE_section_repr (I := I) α (fun y => f y • σ y) x =
@@ -311,6 +328,7 @@ lemma chartE_section_repr_smul_function
   unfold chartE_section_repr
   rw [map_smul]
 
+omit [FiniteDimensional ℝ E] in
 lemma chartE_section_repr_zero (α : M) (x : M) :
     chartE_section_repr (I := I) α (fun _ => (0 : TangentSpace I _)) x = 0 := by
   classical
@@ -319,6 +337,7 @@ lemma chartE_section_repr_zero (α : M) (x : M) :
 
 variable (I) in
 
+omit [FiniteDimensional ℝ E] in
 theorem mfderiv_scalar_eq_chart_fderiv
     (α : M) (f : M → ℝ) {x : M}
     (hx_src : x ∈ (chartAt H α).source)

@@ -42,7 +42,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzLieCorrectionL2JetBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmDiffL2TameBallUniform
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -74,6 +73,7 @@ private local instance instCompleteSpaceE_tame : CompleteSpace E :=
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck (cometricLmodel)
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -238,6 +238,7 @@ private lemma deTurckPhiMetTotal_realizedFam_eq_lieArm2PrincipalCoeff_sub_twoLic
   rw [hgrp, hhalf]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -273,6 +274,7 @@ theorem jointTotalSpaceRS_sub_fw {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -414,6 +416,7 @@ private lemma symmS_eq_self_of_symm_fw (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensor02Symm, hswap, ← two_smul ℝ S, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -1332,6 +1335,7 @@ theorem reindexCoeffGen_sub_fw (g₀ : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.sub_apply, reindexCoeffFibGen_apply, reindexCoeffFibGen_apply,
     reindexCoeffFibGen_apply, ContinuousLinearMap.sub_apply]
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -1349,6 +1353,7 @@ theorem normSq_icg_sub_le_fw (g : SmoothRiemannianMetric I M) (r s q : ℕ)
     norm_nonneg (iteratedCovGrad (I := I) g r s q B),
     sq_nonneg (‖iteratedCovGrad (I := I) g r s q A‖ - ‖iteratedCovGrad (I := I) g r s q B‖)]
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -1374,6 +1379,7 @@ theorem normSq_icg_reindex_eq_fw (g₀ : SmoothRiemannianMetric I M)
   refine MeasureTheory.integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
   exact riemannianFiberNormSq_iteratedCovGrad_reindexCoeffGen_eq (I := I) (M := M) g₀ 4 2 R ρ i x
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -1392,6 +1398,7 @@ theorem gFibreOpBound_mono_fw (g₀ : SmoothRiemannianMetric I M)
         mul_le_mul_of_nonneg_right hle hnn
     _ = δ' * Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) := by ring
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Variati
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.VariationalFlow
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -19,6 +18,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem hasDerivAt_clm_pre_post
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
     (hA : HasDerivAt A A' t) (Q : E →L[ℝ] E) (d : E) :
@@ -29,6 +29,7 @@ theorem hasDerivAt_clm_pre_post
   have := Q.hasFDerivAt.comp_hasDerivAt t hEval
   simpa using this
 
+set_option linter.unusedSectionVars false in
 theorem hasDerivAt_mfderiv_flow_of_chart
     (Fam : ℝ → (M → M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (Q : E →L[ℝ] E) (d : E)

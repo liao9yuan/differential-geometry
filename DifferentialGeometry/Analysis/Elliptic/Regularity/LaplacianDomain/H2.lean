@@ -88,6 +88,7 @@ theorem chartH2_localBound_of_laplacianDomain
       hM_nn h_uniform_bd
   exact ⟨M_bound, hM_nn, h_h2⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain_memWkpChart_two_chartBilinearRoute
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

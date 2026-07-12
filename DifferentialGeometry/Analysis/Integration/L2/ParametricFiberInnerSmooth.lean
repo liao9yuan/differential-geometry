@@ -10,7 +10,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Deriv
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Analysis.Normed.Group.Bounded
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -126,6 +125,7 @@ theorem contDiff_integral_of_jointContMDiff
           simpa [hFd] using this
         exact ih Fd hFd_joint
 
+omit [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [MeasurableSpace M] [OpensMeasurableSpace M] in
 private theorem fiber_contDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ}
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
@@ -140,6 +140,7 @@ private theorem fiber_contDiffOn_Icc
   rw [contMDiffOn_iff_contDiffOn] at hcomp
   exact hcomp
 
+omit [CompactSpace M] [T2Space M] [MeasurableSpace M] [OpensMeasurableSpace M] in
 theorem partialSnd_contMDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ}
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
@@ -356,6 +357,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+set_option linter.unusedSectionVars false in
 theorem contDiff_integral_fiberInner_of_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (b : SmoothCcTensor g₀ 0 2)
@@ -382,6 +384,7 @@ theorem contDiff_integral_fiberInner_of_jointContMDiffOn
     (fun x t => tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x (b.toFun x) ((R t).toFun x))
     h_integrand_joint
 
+set_option linter.unusedSectionVars false in
 theorem contDiffOn_integral_fiberInner_of_jointContMDiffOn_Icc
     (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (b : SmoothCcTensor g₀ 0 2)

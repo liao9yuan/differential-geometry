@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLinearization
 import DifferentialGeometry.Geometry.Connection.TensorNabla.SlotInsertCovariantNaturality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -77,6 +76,7 @@ def cometricRaiseSlot0Field (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 2) I x from S.toSection x)
           (unitTensor (I := I) (M := M) x)) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma cometricRaiseSlot0Fib_clm_apply (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 2) I x) (om : Tensor0SSpace 1 I x) :
     (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace (s + 1) I x from

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChristoffelPerturbation
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -32,6 +31,7 @@ private lemma abs_sub_le_abs_add_abs (a b : ℝ) : |a - b| ≤ |a| + |b| := by
     _ ≤ |a| + |(-b)| := abs_add_le _ _
     _ = |a| + |b| := by rw [abs_neg]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_bound_of_contDiffOn_int
     {f : E → ℝ} (α : M)
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -47,6 +47,7 @@ private lemma exists_bound_of_contDiffOn_int
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_uniform_bound_of_int_family
     {ι : Type*} [Fintype ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
@@ -63,6 +64,7 @@ private lemma exists_uniform_bound_of_int_family
   · intro y hy i
     exact (hC_bd i y hy).trans (Finset.le_sup' C (Finset.mem_univ i))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma partialDeriv_contDiffOn_int_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -189,6 +191,7 @@ def ricciDiffPrincipalSymbol (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
           (gramBracketDeriv (I := I) g₁ α k i j l y -
             gramBracketDeriv (I := I) g₂ α k i j l y))
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma ricciDiffPrincipalSymbol_def
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -203,6 +206,7 @@ def ricciDiffPrincipalSymbol (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
               (gramBracketDeriv (I := I) g₁ α k i j l y -
                 gramBracketDeriv (I := I) g₂ α k i j l y)) := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem ricciDiffPrincipalSymbol_eq_invGram_weighted_d2_gram_diff
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -257,6 +261,7 @@ def chartRicciDiffFirstOrderRemainder (g₁ g₂ : SmoothRiemannianMetric I M) (
       chartRicciSecondOrderTerm (I := I) g₂ α i k y) -
     ricciDiffPrincipalSymbol (I := I) g₁ g₂ α i k y
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderTerm_sub_eq_principalSymbol_add_remainder
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -322,6 +327,7 @@ private lemma exists_chartChristoffel_bound_on_compact
       hsmooth hK hKsub
   exact ⟨C, hC_nn, fun y hy i j k => hC y hy ((i, j), k)⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciSecondOrderTerm_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     {Cdiff : ℝ}
@@ -364,6 +370,7 @@ theorem chartRicciSecondOrderTerm_sub_abs_le
     rw [show 2 * (Module.finrank ℝ E : ℝ) * Cdiff * jet2 =
           (Module.finrank ℝ E : ℝ) * (2 * Cdiff * jet2) by ring]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRicciFirstOrderTerm_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) {y : E}
     {Clip Mg : ℝ} (hClip_nn : 0 ≤ Clip) (hMg_nn : 0 ≤ Mg)

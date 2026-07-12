@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.ChartInvariance
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] in
 theorem chartAlphaMatrixIdentity_holds_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -40,6 +40,7 @@ theorem chartAlphaMatrixIdentity_holds_chartSource
   intro i j
   exact chartAlphaMatrixIdentity_holds (I := I) g α hf hx i j
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartAlpha_swap_aux_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     (f f' : M → ℝ) (x : M) :

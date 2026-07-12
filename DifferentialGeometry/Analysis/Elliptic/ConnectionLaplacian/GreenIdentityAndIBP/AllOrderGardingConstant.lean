@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionItera
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
 import DifferentialGeometry.Geometry.Curvature.Bochner.PointwiseTensorCurvFirstOrderSection
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+set_option linter.unusedSectionVars false in
 theorem exists_secondCovGrad_l2NormSq_le_rawConnLap_rankGen
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ Cg : ℝ, 0 ≤ Cg ∧
@@ -59,6 +59,7 @@ theorem exists_secondCovGrad_l2NormSq_le_rawConnLap_rankGen
   refine ⟨2 + 2 * Ccross, by positivity, fun S => ?_⟩
   exact secondCovGrad_l2NormSq_le_of_cross_bound (I := I) (M := M) g s S Ccross hCcross (hcross S)
 
+set_option linter.unusedSectionVars false in
 private theorem norm_iteratedCovGrad_comp
     (g : SmoothRiemannianMetric I M) (s j i : ℕ) (S : SmoothCcTensor g 0 s) :
     ‖iteratedCovGrad g 0 (s + j) i (iteratedCovGrad g 0 s j S)‖ =
@@ -79,6 +80,7 @@ private theorem norm_iteratedCovGrad_comp
   have h2 : 0 ≤ ‖iteratedCovGrad g 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
+set_option linter.unusedSectionVars false in
 theorem exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ K : ℕ → ℝ, (∀ p, 0 ≤ K p) ∧
@@ -194,6 +196,7 @@ theorem exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le
   simpa only using hL2
 
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedRoughLapGrad_commutator_l2Norm_le_aux
     (g : SmoothRiemannianMetric I M) (m : ℕ) :
     ∀ s : ℕ, ∃ Cfun : ℕ → ℝ, (∀ p, 0 ≤ Cfun p) ∧
@@ -326,6 +329,7 @@ private theorem iteratedRoughLapGrad_commutator_l2Norm_le_aux
         ≤ K p * fullSum + Cm (p + 1) * fullSum := add_le_add harm1 harm2
       _ = (K p + Cm (p + 1)) * fullSum := hfinal
 
+set_option linter.unusedSectionVars false in
 theorem exists_iteratedRoughLapGrad_commutator_l2Norm_le
     (g : SmoothRiemannianMetric I M) (s m : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -339,6 +343,7 @@ theorem exists_iteratedRoughLapGrad_commutator_l2Norm_le
   have h := hbound 0 S
   simpa only [iteratedCovGrad_zero, Nat.add_zero, Nat.add_zero] using h
 
+set_option linter.unusedSectionVars false in
 private theorem rawTensorConnLapIter_rawTensorConnLapSmooth
     (g : SmoothRiemannianMetric I M) (s : ℕ) (i : ℕ) (S : SmoothCcTensor g 0 s) :
     rawTensorConnLapIter (I := I) g 0 s i (rawTensorConnLapSmooth (I := I) g 0 s S) =
@@ -351,6 +356,7 @@ private theorem rawTensorConnLapIter_rawTensorConnLapSmooth
         ih, rawTensorConnLapIter_succ (I := I) g 0 s (n + 1) S]
 
 
+set_option linter.unusedSectionVars false in
 private theorem exists_iteratedCovGrad_rawConnLap_l2Norm_le
     (g : SmoothRiemannianMetric I M) (a : ℕ) :
     ∀ s : ℕ, ∃ C : ℝ, 0 ≤ C ∧
@@ -426,6 +432,7 @@ private theorem exists_iteratedCovGrad_rawConnLap_l2Norm_le
     _ = (K + Cfun 0) * FULL := by ring
 
 
+set_option linter.unusedSectionVars false in
 theorem exists_iteratedCovGrad_rawConnLapIter_l2Norm_le
     (g : SmoothRiemannianMetric I M) (i : ℕ) :
     ∀ s : ℕ, ∃ Cfun : ℕ → ℝ, (∀ p, 0 ≤ Cfun p) ∧
@@ -489,6 +496,7 @@ theorem exists_iteratedCovGrad_rawConnLapIter_l2Norm_le
         _ = (Cfun p * ∑ a ∈ Finset.range (2 * i + p + 1), coef a) * FULL := by ring
 
 
+set_option linter.unusedSectionVars false in
 private theorem exists_rawConnLapIter_covGrad_commutator_l2Norm_le_aux
     (g : SmoothRiemannianMetric I M) (s : ℕ) (i : ℕ) :
     ∃ Cfun : ℕ → ℝ, (∀ p, 0 ≤ Cfun p) ∧
@@ -645,6 +653,7 @@ private theorem exists_rawConnLapIter_covGrad_commutator_l2Norm_le_aux
               coefB p * (∑ q ∈ Finset.range (p + 3), Cfun q)) * FULL := by ring
 
 
+set_option linter.unusedSectionVars false in
 theorem exists_rawConnLapIter_covGrad_commutator_l2Norm_le
     (g : SmoothRiemannianMetric I M) (s i : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -658,6 +667,7 @@ theorem exists_rawConnLapIter_covGrad_commutator_l2Norm_le
   have h := hbound 0 S
   simpa only [iteratedCovGrad_zero, Nat.add_zero] using h
 
+set_option linter.unusedSectionVars false in
 private theorem covGrad_norm_sq_le_rawConnLap_mul_self
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     ‖covGrad (I := I) (M := M) g 0 s S‖ ^ 2 ≤
@@ -667,6 +677,7 @@ private theorem covGrad_norm_sq_le_rawConnLap_mul_self
     tensorL2Norm_toFun_eq_norm (I := I) (M := M) g (rawTensorConnLapSmooth (I := I) g 0 s S),
     tensorL2Norm_toFun_eq_norm (I := I) (M := M) g S] at h
 
+set_option linter.unusedSectionVars false in
 private theorem exists_secondCovGrad_norm_sq_le_rawConnLap
     (g : SmoothRiemannianMetric I M) (s : ℕ) :
     ∃ Cg : ℝ, 0 ≤ Cg ∧
@@ -681,17 +692,20 @@ private theorem exists_secondCovGrad_norm_sq_le_rawConnLap
       tensorL2Norm_toFun_eq_norm (I := I) (M := M) g (rawTensorConnLapSmooth (I := I) g 0 s S),
       tensorL2Norm_toFun_eq_norm (I := I) (M := M) g S] at h
 
+set_option linter.unusedSectionVars false in
 private theorem covGrad_covGrad_eq_iteratedCovGrad_two
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     covGrad (I := I) (M := M) g 0 (s + 1) (covGrad (I := I) (M := M) g 0 s S) =
       iteratedCovGrad g 0 s 2 S := rfl
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_add_two
     (g : SmoothRiemannianMetric I M) (s j : ℕ) (S : SmoothCcTensor g 0 s) :
     iteratedCovGrad g 0 s (j + 2) S =
       covGrad (I := I) (M := M) g 0 (s + j + 1)
         (covGrad (I := I) (M := M) g 0 (s + j) (iteratedCovGrad g 0 s j S)) := rfl
 
+set_option linter.unusedSectionVars false in
 private theorem rawConnLap_iteratedCovGrad_eq_iteratedCovGrad_rawConnLap_add_comm
     (g : SmoothRiemannianMetric I M) (s m : ℕ) (S : SmoothCcTensor g 0 s) :
     rawTensorConnLapSmooth (I := I) g 0 (s + m) (iteratedCovGrad g 0 s m S) =
@@ -700,6 +714,7 @@ private theorem rawConnLap_iteratedCovGrad_eq_iteratedCovGrad_rawConnLap_add_com
           iteratedCovGrad g 0 s m (rawTensorConnLapSmooth (I := I) g 0 s S)) := by
   abel
 
+set_option linter.unusedSectionVars false in
 theorem exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter
     (g : SmoothRiemannianMetric I M) (s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -931,6 +946,7 @@ theorem exists_iteratedCovGrad_l2Norm_le_sum_rawConnLapIter
               simp only [hlapSum_def]
 
 
+set_option linter.unusedSectionVars false in
 theorem exists_tensorPouSobolevHsNorm_k_le_sum_rawConnLapIter
     (g : SmoothRiemannianMetric I M) (s k : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

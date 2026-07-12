@@ -4,7 +4,6 @@ Authors: Jack McCarthy
 import DifferentialGeometry.Tensor.Product.Bundle
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -19,6 +18,7 @@ noncomputable instance tensorProduct_finiteDimensional :
   Module.Finite.tensorProduct 𝕜 F₁ F₂
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 theorem finrank_tensorProduct' :
     Module.finrank 𝕜 (F₁ ⊗[𝕜] F₂) = Module.finrank 𝕜 F₁ * Module.finrank 𝕜 F₂ :=
   Module.finrank_tensorProduct
@@ -29,6 +29,7 @@ noncomputable def tensorProduct_basis {d₁ d₂ : ℕ}
   b₁.tensorProduct b₂
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 @[simp]
 theorem tensorProduct_basis_apply {d₁ d₂ : ℕ}
     (b₁ : Module.Basis (Fin d₁) 𝕜 F₁) (b₂ : Module.Basis (Fin d₂) 𝕜 F₂)
@@ -37,6 +38,7 @@ theorem tensorProduct_basis_apply {d₁ d₂ : ℕ}
   Module.Basis.tensorProduct_apply b₁ b₂ i j
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 theorem tensorProduct_basis_apply' {d₁ d₂ : ℕ}
     (b₁ : Module.Basis (Fin d₁) 𝕜 F₁) (b₂ : Module.Basis (Fin d₂) 𝕜 F₂)
     (p : Fin d₁ × Fin d₂) :
@@ -44,6 +46,7 @@ theorem tensorProduct_basis_apply' {d₁ d₂ : ℕ}
   Module.Basis.tensorProduct_apply' b₁ b₂ p
 
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 F₁] [FiniteDimensional 𝕜 F₂] in
 theorem tensorProduct_basis_repr_tmul {d₁ d₂ : ℕ}
     (b₁ : Module.Basis (Fin d₁) 𝕜 F₁) (b₂ : Module.Basis (Fin d₂) 𝕜 F₂)
     (v : F₁) (w : F₂) (i : Fin d₁) (j : Fin d₂) :
@@ -78,6 +81,7 @@ variable (n : WithTop ℕ∞)
 variable [ContMDiffVectorBundle n F₁ E₁ IB] [ContMDiffVectorBundle n F₂ E₂ IB]
 
 
+omit [ContMDiffVectorBundle n F₁ E₁ IB] [ContMDiffVectorBundle n F₂ E₂ IB] in
 theorem contMDiff_tensorProductSection_iff_coord
     {d₁ d₂ : ℕ}
     (b₁ : Module.Basis (Fin d₁) 𝕜 F₁)

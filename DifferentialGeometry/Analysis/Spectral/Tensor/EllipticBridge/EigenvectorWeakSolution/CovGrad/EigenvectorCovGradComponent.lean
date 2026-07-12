@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.PouComponentBound.CutoffChartComponentMemWkp
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapSource
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_of_hasWeakPartialDeriv
     {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     {k : Fin (Module.finrank ℝ E)} {gfun u : EuclN → ℝ}
@@ -66,6 +66,7 @@ private lemma memWkp_of_hasWeakPartialDeriv
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mpr h_chosen_memWkp
 
+set_option linter.unusedSectionVars false in
 private lemma memWkp_coef_mul_factor
     (β : M) (K : ℕ)
     {coef factor : EuclN → ℝ}

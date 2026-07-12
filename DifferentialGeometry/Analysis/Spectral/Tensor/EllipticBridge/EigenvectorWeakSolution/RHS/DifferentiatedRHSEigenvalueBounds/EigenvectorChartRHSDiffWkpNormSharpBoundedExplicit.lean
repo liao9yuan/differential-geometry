@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHSEigenvalueBounds.EigenvectorChartRHSDiffWkpNormSharpBounded
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -42,6 +41,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sharpDiffExplicit_wkpNorm_sub_le
     {K : ℕ} {Ω : Set EuclN}
     (hΩ : IsOpen Ω) {u v : EuclN → ℝ}
@@ -67,6 +67,7 @@ private lemma sharpDiffExplicit_wkpNorm_sub_le
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 private lemma sharpDiffExplicit_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))

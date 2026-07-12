@@ -14,6 +14,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_flow_smooth_in_space
     (_X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)

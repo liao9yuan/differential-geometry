@@ -24,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 private lemma arm1NormSq_eq_integral (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (C : SmoothCcTensor g r s) :
     ‖C‖ ^ 2 = ∫ x, riemannianFiberNormSq (I := I) (M := M) g r s x (C.toSection x)

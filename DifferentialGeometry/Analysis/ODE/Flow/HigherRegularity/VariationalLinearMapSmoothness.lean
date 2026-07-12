@@ -20,6 +20,7 @@ variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax 
 
 set_option maxHeartbeats 2400000 in
 
+omit [CompleteSpace E] in
 theorem orbit_eq_of_augFlow_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf_C1 : ContDiffOn ℝ 1 (uncurry f) (Set.univ : Set (ℝ × E)))
@@ -160,6 +161,7 @@ section SmoothnessInheritance
 
 variable {f : ℝ → E → E} {x₀ : E} {t₀ : ℝ}
 
+omit [CompleteSpace E] in
 theorem contDiffOn_fromAugFlow_inherits
     {aΦ : (E × (E →L[ℝ] E)) × ℝ → E × (E →L[ℝ] E)}
     {ρ_a ρ : ℝ≥0} {T_a T : ℝ}
@@ -196,6 +198,7 @@ section OrbitEqualityIcc
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ}
   {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 theorem orbit_eq_Icc_of_augFlow_isLocalFlow
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {R_aug : ℝ≥0} {tmin_a tmax_a : ℝ}

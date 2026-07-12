@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSStrictParabolic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.Linearization
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
@@ -29,12 +28,14 @@ theorem deTurckRicciRHS_principalSymbol_eq_roughLaplacianSymbol [I.Boundaryless]
         g₀ σ :=
   deturck_ricci_rhs_linearization_at_g0 (I := I) g_bg g₀
 
+set_option linter.unusedSectionVars false in
 theorem deTurckRicciRHS_symbolCoeff_eq_covectorNormSq
     (g₀ : SmoothRiemannianMetric I M) (x : M) (ξ : E) :
     DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀ x ξ =
       -DifferentialGeometry.PDE.DeTurck.metricCovectorNormSq (I := I) g₀ x ξ :=
   DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff_apply (I := I) g₀ x ξ
 
+set_option linter.unusedSectionVars false in
 theorem deTurckRicciRHS_principalSymbol_apply_eq_smul
     (g₀ : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) :

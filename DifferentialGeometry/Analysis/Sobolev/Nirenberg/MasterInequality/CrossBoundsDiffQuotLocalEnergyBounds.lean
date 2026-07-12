@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -246,6 +245,7 @@ theorem integral_sq_diffQuot_le_local
     (Filter.Eventually.of_forall hRHS_nonneg) h_thick_int.aestronglyMeasurable]
   exact ENNReal.toReal_mono hRHS_fin h_lintegral_real
 
+omit [NeZero d] in
 private theorem integral_diffQuot_sq_on_tsupport_le
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     (η : E → ℝ)
@@ -332,6 +332,7 @@ private lemma gradL2sqOn_nonneg (Ω' : Set E) (u : E → ℝ) :
   intro x
   exact Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
+omit [NeZero d] in
 theorem integral_diffQuot_sq_on_tsupport_le_gradL2sqOn
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u) (k : Fin d) {h : ℝ} (hh : h ≠ 0)
     (η : E → ℝ)

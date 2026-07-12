@@ -4,7 +4,6 @@ import Mathlib.Analysis.Calculus.FDeriv.Mul
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartSection
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ def chartLeviCivitaGoodSet (α : M) : Set M :=
     (trivializationAt E (TangentSpace I) α).baseSet ∩
     (extChartAt I α) ⁻¹' interior ((extChartAt I α).target : Set E)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_isOpen (α : M) :
     IsOpen (chartLeviCivitaGoodSet (I := I) α) := by
   classical
@@ -53,6 +53,7 @@ lemma chartLeviCivitaGoodSet_isOpen (α : M) :
   rw [heq]
   exact hcap_open.inter hS₂
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma mem_chartLeviCivitaGoodSet_iff {α x : M} :
     x ∈ chartLeviCivitaGoodSet (I := I) α ↔
       x ∈ (extChartAt I α).source ∧
@@ -62,22 +63,26 @@ lemma mem_chartLeviCivitaGoodSet_iff {α x : M} :
   rw [Set.mem_inter_iff, Set.mem_inter_iff, and_assoc]
   rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_mem_extChartAt_source {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     x ∈ (extChartAt I α).source :=
   ((mem_chartLeviCivitaGoodSet_iff.mp hx)).1
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_mem_chartAt_source {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     x ∈ (chartAt H α).source := by
   have := chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
   simpa using this
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_mem_baseSet {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     x ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
   ((mem_chartLeviCivitaGoodSet_iff.mp hx)).2.1
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma chartLeviCivitaGoodSet_extChartAt_mem_interior {α x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
     extChartAt I α x ∈ interior ((extChartAt I α).target : Set E) :=
@@ -95,6 +100,7 @@ def christoffelCorrection (g : SmoothRiemannianMetric I M)
               chartChristoffel (I := I) g α i j k (extChartAt I α x)) •
             (chartModelBasis E) k)
 
+omit [InnerProductSpace ℝ E] in
 lemma christoffelCorrection_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y : E)
     (v : TangentSpace I x) :
@@ -123,6 +129,7 @@ lemma christoffelCorrection_apply
   rw [hcoord]
   rw [smul_smul, ← mul_assoc]
 
+omit [InnerProductSpace ℝ E] in
 lemma christoffelCorrection_add
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y Y' : E)
     (v : TangentSpace I x) :
@@ -154,6 +161,7 @@ lemma christoffelCorrection_add
           chartChristoffel (I := I) g α i j k (extChartAt I α x) by ring]
   rw [add_smul]
 
+omit [InnerProductSpace ℝ E] in
 lemma christoffelCorrection_smul
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (c : ℝ) (Y : E)
     (v : TangentSpace I x) :
@@ -186,6 +194,7 @@ def chartLeviCivitaInnerCLM (g : SmoothRiemannianMetric I M)
       (extChartAt I α x)).comp (trivToE (I := I) α x) +
   christoffelCorrection (I := I) g α x (chartE_section_repr (I := I) α σ x)
 
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivitaInnerCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) (x : M) (v : TangentSpace I x) :
@@ -209,6 +218,7 @@ def chartLeviCivita (g : SmoothRiemannianMetric I M) (α : M) :
         (chartLeviCivitaInnerCLM (I := I) g α σ x)
     else 0
 
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_eq_of_mem (g : SmoothRiemannianMetric I M) (α : M)
     (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -218,6 +228,7 @@ lemma chartLeviCivita_eq_of_mem (g : SmoothRiemannianMetric I M) (α : M)
   classical
   simp only [chartLeviCivita, if_pos hx]
 
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_apply (g : SmoothRiemannianMetric I M)
     (α : M) (σ : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) (v : TangentSpace I x) :
@@ -232,6 +243,7 @@ lemma chartLeviCivita_apply (g : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.comp_apply]
   rw [chartLeviCivitaInnerCLM_apply]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] in
 lemma differentiableAt_chartE_pullback_of_MDiff
     (α : M) {σ : Π x : M, TangentSpace I x} {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -244,6 +256,7 @@ lemma differentiableAt_chartE_pullback_of_MDiff
     (chartLeviCivitaGoodSet_mem_baseSet (I := I) hx)
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx)).mp hσ
 
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
     {σ σ' : Π x : M, TangentSpace I x} {x : M}
     (hσ : MDiffAt (T% σ) x) (hσ' : MDiffAt (T% σ') x)
@@ -301,6 +314,7 @@ lemma chartLeviCivita_add (g : SmoothRiemannianMetric I M) (α : M)
   rw [ContinuousLinearMap.add_apply]
   abel
 
+omit [InnerProductSpace ℝ E] in
 lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
     {σ : Π x : M, TangentSpace I x} {f : M → ℝ} {x : M}
     (hσ : MDiffAt (T% σ) x) (hf : MDiffAt f x)
@@ -463,6 +477,7 @@ lemma chartLeviCivita_leibniz (g : SmoothRiemannianMetric I M) (α : M)
   rw [htriv_round]
   rw [← hmf_to_fderiv, ← hextDeriv]
 
+omit [InnerProductSpace ℝ E] in
 theorem chartLeviCivita_isCovariantDerivativeOn (g : SmoothRiemannianMetric I M)
     (α : M) :
     IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E

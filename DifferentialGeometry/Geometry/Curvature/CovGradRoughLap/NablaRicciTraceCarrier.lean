@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.RicciTraceCarrier
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.DifferentiatedRicciEndomorphism
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 theorem nablaRicci_contMDiff
     (g : SmoothRiemannianMetric I M)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -77,6 +77,7 @@ theorem nablaRicci_contMDiff
   exact (hterm1.sub hterm2).sub hterm3
 
 
+omit [CompactSpace M] in
 theorem nablaRicciBilin_chartBasis_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -126,6 +127,7 @@ theorem nablaRicciBilin_chartBasis_contMDiffOn
   exact hAt.contMDiffWithinAt
 
 
+set_option linter.unusedSectionVars false in
 theorem nablaRicciEndo_contMDiff
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -175,6 +177,7 @@ def nablaRicSlotOpFib (g : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] in
 @[simp] lemma nablaRicSlotOpFib_apply (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) :
@@ -187,6 +190,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 lemma nablaRicSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) (v0 : E) (vs : Fin s → E) :

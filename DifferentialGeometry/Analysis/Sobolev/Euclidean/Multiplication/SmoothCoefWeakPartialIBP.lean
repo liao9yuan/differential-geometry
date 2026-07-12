@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Setup
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -16,6 +15,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 theorem integral_smul_weak_partial_eq
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {φ : E → ℝ}

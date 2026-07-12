@@ -35,6 +35,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem tensorFiberNorm_sq_le_chartAlphaComponents_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :

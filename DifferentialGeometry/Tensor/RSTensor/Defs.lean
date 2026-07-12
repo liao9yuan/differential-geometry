@@ -7,7 +7,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.LinearAlgebra.Multilinear.FiniteDimensional
 
-set_option linter.unusedSectionVars false
 
 namespace Tensor0SBundle
 noncomputable section
@@ -84,6 +83,7 @@ instance tensor0SSpace_instFunLike (s : ℕ) (x : M) :
   inferInstanceAs (FunLike
     (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I) x) _ _)
 
+omit [FiniteDimensional 𝕜 E] in
 @[ext]
 theorem tensor0SSpace_ext (s : ℕ) (x : M)
     {T T' : Tensor0SSpace s I x}
@@ -149,6 +149,7 @@ def TensorRSSpace.toCLM {r s : ℕ} {x : M} (T : TensorRSSpace r s I x) :
 def TensorRSSpace.ofCLM {r s : ℕ} {x : M}
     (T : Tensor0SSpace r I x →L[𝕜] Tensor0SSpace s I x) : TensorRSSpace r s I x := T
 
+omit [FiniteDimensional 𝕜 E] in
 @[ext]
 theorem tensorRSSpace_ext (r s : ℕ) (x : M)
     {T T' : TensorRSSpace r s I x}
@@ -319,6 +320,7 @@ def ofModel {s : ℕ} {x : M}
     Tensor0SSpace s I x :=
   (tensor0SSpace_continuousLinearEquiv s x).symm f
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModelL_apply {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     toModelL s x T = toModel T := rfl
@@ -329,21 +331,25 @@ theorem toModel_add {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x) :
     toModel (T₁ + T₂) = toModel T₁ + toModel T₂ :=
   map_add (tensor0SSpace_continuousLinearEquiv s x) T₁ T₂
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_smul {s : ℕ} {x : M} (c : 𝕜) (T : Tensor0SSpace s I x) :
     toModel (c • T) = c • toModel T :=
   map_smul (tensor0SSpace_continuousLinearEquiv s x) c T
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_zero {s : ℕ} {x : M} :
     toModel (0 : Tensor0SSpace s I x) = 0 :=
   map_zero (tensor0SSpace_continuousLinearEquiv s x)
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_neg {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     toModel (-T) = -toModel T :=
   map_neg (tensor0SSpace_continuousLinearEquiv s x) T
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_sub {s : ℕ} {x : M} (T₁ T₂ : Tensor0SSpace s I x) :
     toModel (T₁ - T₂) = toModel T₁ - toModel T₂ :=
@@ -355,6 +361,7 @@ theorem ofModel_toModel {s : ℕ} {x : M} (T : Tensor0SSpace s I x) :
     ofModel (toModel T) = T :=
   (tensor0SSpace_continuousLinearEquiv s x).symm_apply_apply T
 
+omit [FiniteDimensional 𝕜 E] in
 @[simp]
 theorem toModel_ofModel {s : ℕ} {x : M}
     (f : ContinuousMultilinearMap 𝕜 (fun _ : Fin s => E) 𝕜) :

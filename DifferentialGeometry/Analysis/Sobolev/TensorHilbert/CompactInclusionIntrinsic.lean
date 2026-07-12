@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.CompactInclusion
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.TensorChartComponentSobolev.TensorChartComponentSobolevIntrinsic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+omit [CompleteSpace E] in
 private lemma exists_smooth_close_to_TensorH1_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (v : TensorH1Compl g r s) {δ : ℝ} (hδ : 0 < δ) :

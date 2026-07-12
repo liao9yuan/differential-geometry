@@ -44,7 +44,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzDegenerateOneDimensionalVanishing
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -1381,6 +1380,7 @@ theorem pAO_connDiffSection_jetL2_tame (g₀ : SmoothRiemannianMetric I M) (a : 
       (pAO_range_subset hk2) (fun _ _ _ => sq_nonneg _)
   linarith
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma pAO_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gA x u v = 0 := by
@@ -1392,6 +1392,7 @@ private lemma pAO_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : M)
     exact h.symm
   exact add_left_cancel h2
 
+set_option linter.unusedSectionVars false in
 private lemma pAO_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v =
@@ -2995,6 +2996,7 @@ theorem linearizedRicciArm1CorrField_allOrder_tameEnvelope_interface
         - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s from hid s]
   exact hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i s hs
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3005,6 +3007,7 @@ lemma rfns_tl_icg_zero (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
   exact (add_left_cancel (a := iteratedCovGrad (I := I) g r s j 0)
     (by rw [← h, add_zero])).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3018,6 +3021,7 @@ lemma rfns_tl_toSection_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M
   exact (add_left_cancel (a := (0 : SmoothCcTensor g r s).toSection x)
     (by rw [← h, add_zero])).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3068,6 +3072,7 @@ lemma rfns_tl_young_sq (u v θ : ℝ) (hθ : 0 < θ) :
     nlinarith [mul_pos hθ hθ]
   nlinarith [hkey]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3142,6 +3147,7 @@ lemma rfns_tl_budgetDualCap (n : ℕ) (hn : 2 ≤ n) {δ₀ : ℝ}
     nlinarith [hfge, hs2, hs2lb, hs2ub, hf0, sq_nonneg (f - 2 * Real.sqrt 2)]
   nlinarith [hcore, hf0, mul_nonneg hc0 hf0, hfge, hs2lb, hs2]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3201,6 +3207,7 @@ lemma b1_rfns_icg_symmS_le (g₀ : SmoothRiemannianMetric I M)
   have hsq : Real.sqrt A ^ 2 = A := Real.sq_sqrt hA0
   nlinarith [Real.sqrt_nonneg A]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3272,6 +3279,7 @@ private theorem b1_symmS_eq_self (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3492,6 +3500,7 @@ private lemma b1_sqrt_add_le (x y : ℝ) (hx : 0 ≤ x) (hy : 0 ≤ y) :
     _ = Real.sqrt x + Real.sqrt y :=
         Real.sqrt_sq (add_nonneg (Real.sqrt_nonneg x) (Real.sqrt_nonneg y))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3501,6 +3510,7 @@ lemma b1_toSection_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [SmoothCcTensor.toSection_add]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3510,6 +3520,7 @@ lemma b1_toSection_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [SmoothCcTensor.toSection_sub]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3519,6 +3530,7 @@ lemma b1_toSection_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [SmoothCcTensor.toSection_smul]
   rfl
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3532,6 +3544,7 @@ theorem b1_iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [BoundarylessManifold I M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3710,6 +3723,7 @@ theorem riemannianFiberNormSq_iteratedCovGrad_bgRDiffRefoldRemainderField_bounde
     hCR g₁ P htie hδ_le hδ0 hbound i x
   nlinarith [hsplit2, hA, hS, hR, hw_nn]
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in

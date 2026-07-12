@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MeasureBridgeUniform
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private noncomputable def chartCompactM (α : M) :
       (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
+omit [I.Boundaryless] in
 private lemma extChartAt_image_tsupport_pou_compact_subset_target_aux (α : M) :
     IsCompact ((extChartAt I α) ''
         (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -53,12 +53,14 @@ private lemma extChartAt_image_tsupport_pou_compact_subset_target_aux (α : M) :
       : M → ℝ))
     (α := α) hsupp_sub
 
+omit [I.Boundaryless] in
 private lemma chartCompactM_isCompact (α : M) :
     IsCompact (chartCompactM (I := I) (M := M) α) := by
   unfold chartCompactM
   exact (extChartAt_image_tsupport_pou_compact_subset_target_aux
     (I := I) (M := M) α).1.image (toEuclidean (E := E)).continuous
 
+omit [I.Boundaryless] in
 private lemma chartCompactM_subset_chartTargetEuclid (α : M) :
     chartCompactM (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α := by
   unfold chartCompactM chartTargetEuclid
@@ -109,6 +111,7 @@ private lemma chartCompactM_subset_chartNbhdM (α : M) :
     (chartThickeningRadiusM_pos (I := I) (M := M) α)
     (chartCompactM (I := I) (M := M) α)
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_eq_zero_off_chartCompactM
     (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -175,6 +178,7 @@ private lemma chartPushedRaw_pou_mul_tsupport_subset_chartNbhdM
     exact h_compact_closed.closure_subset_iff.mpr h_supp_sub
   exact h_tsupp_sub.trans (chartCompactM_subset_chartNbhdM (I := I) (M := M) α)
 
+omit [I.Boundaryless] in
 private lemma chartPushedRaw_pou_mul_hasCompactSupport_aux
     (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
@@ -613,7 +617,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-omit [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma chartAtlasPOU_measurable_aux (α : M) :
     Measurable
       ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
@@ -621,14 +625,14 @@ private lemma chartAtlasPOU_measurable_aux (α : M) :
   ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
     : C^∞⟮I, M; ℝ⟯).contMDiff.continuous).measurable
 
-omit [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma pou_mul_measurable_aux (α : M) {u : M → ℝ} (hu : Measurable u) :
     Measurable (fun x : M =>
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) x * u x) :=
   (chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu
 
-omit [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
     (hu : Measurable u) (hv : Measurable v) :
     Measurable (fun x : M =>
@@ -639,7 +643,7 @@ private lemma pou_mul_sub_measurable_aux (α : M) {u v : M → ℝ}
   ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hu).sub
     ((chartAtlasPOU_measurable_aux (I := I) (M := M) α).mul hv)
 
-omit [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma tsupport_pou_mul_subset_tsupport_pou_aux
     (α : M) (u : M → ℝ) :
     tsupport (fun x : M =>
@@ -657,7 +661,7 @@ private lemma tsupport_pou_mul_subset_tsupport_pou_aux
   rw [h_eq]
   exact tsupport_smul_subset_left _ _
 
-omit [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma tsupport_pou_mul_sub_subset_tsupport_pou_aux
     (α : M) (u v : M → ℝ) :
     tsupport (fun x : M =>
@@ -759,6 +763,7 @@ private lemma memLp_pou_mul_riemannianMeasure_aux
   apply ENNReal.mul_lt_top ENNReal.ofReal_lt_top
   exact h_raw_memLp.2
 
+set_option linter.unusedSectionVars false in
 private lemma eLpNorm_pou_mul_diff_riemannianMeasure_le
     [NeZero (Module.finrank ℝ E)]
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)

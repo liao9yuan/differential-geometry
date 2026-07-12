@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.ChristoffelCorrec
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.ChartFormLowerOrder
 import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.BilinearBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -71,6 +70,7 @@ noncomputable def cutoffCovNormSumFun
                 (tensorCovDerivAt (I := I) (M := M) g r s S b
                   (chartBasisVecFiber (I := I) α i b)))‖ ^ 2)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorRS_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -85,6 +85,7 @@ private lemma tensorRS_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
   rw [Set.inter_self]
   rfl
 
+omit [CompleteSpace E] in
 private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -116,6 +117,7 @@ private lemma chartRSTwistInv_tensorCovDeriv_contMDiffOn'
         (chartBasisVecFiber (I := I) α i b)) = _
   rw [Bundle.Trivialization.linearMapAt_apply, if_pos hb_base]
 
+set_option linter.unusedSectionVars false in
 private lemma cutoffCovNormSqSum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) :
@@ -180,6 +182,7 @@ lemma cutoffCovNormSumFun_measurable
     Measurable (cutoffCovNormSumFun (I := I) (M := M) g r s S α) :=
   (cutoffCovNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartBasePoint_mem_goodSet'
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :

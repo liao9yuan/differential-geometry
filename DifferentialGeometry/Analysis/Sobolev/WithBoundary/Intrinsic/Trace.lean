@@ -5,7 +5,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Integral.IntervalIntegral.FundThmCalculus
 import Mathlib.MeasureTheory.Integral.Lebesgue.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,23 +36,28 @@ def boundaryRestrict (u : M → ℝ) :
     BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M → ℝ :=
   fun x => u (x : M)
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryRestrict_apply (u : M → ℝ)
     (x : BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) :
     boundaryRestrict (n := n) (M := M) u x = u (x : M) := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryRestrict_add (u v : M → ℝ) :
     boundaryRestrict (n := n) (M := M) (fun x => u x + v x) =
       fun x => boundaryRestrict (n := n) (M := M) u x +
         boundaryRestrict (n := n) (M := M) v x := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryRestrict_const_smul (c : ℝ) (u : M → ℝ) :
     boundaryRestrict (n := n) (M := M) (fun x => c * u x) =
       fun x => c * boundaryRestrict (n := n) (M := M) u x := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryRestrict_zero :
     boundaryRestrict (n := n) (M := M) (fun _ : M => (0 : ℝ)) =
       fun _ => (0 : ℝ) := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 theorem boundaryRestrict_continuous {u : M → ℝ} (hu : Continuous u) :
     Continuous (boundaryRestrict (n := n) (M := M) u) :=
   hu.comp continuous_subtype_val
@@ -190,29 +194,35 @@ def boundaryTrace (u : M → ℝ) :
     BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M → ℝ :=
   boundaryRestrict (n := n) (M := M) u
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryTrace_apply (u : M → ℝ)
     (x : BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M) :
     boundaryTrace (n := n) (M := M) u x = u (x : M) := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryTrace_eq_boundaryRestrict (u : M → ℝ) :
     boundaryTrace (n := n) (M := M) u =
       boundaryRestrict (n := n) (M := M) u := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 theorem boundaryTrace_eq_restrict_of_continuous
     {u : M → ℝ} (_hu : Continuous u) :
     boundaryTrace (n := n) (M := M) u =
       fun x : BoundaryManifold (modelWithCornersEuclideanHalfSpace n) M =>
         u (x : M) := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryTrace_add (u v : M → ℝ) :
     boundaryTrace (n := n) (M := M) (fun x => u x + v x) =
       fun x => boundaryTrace (n := n) (M := M) u x +
         boundaryTrace (n := n) (M := M) v x := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryTrace_const_smul (c : ℝ) (u : M → ℝ) :
     boundaryTrace (n := n) (M := M) (fun x => c * u x) =
       fun x => c * boundaryTrace (n := n) (M := M) u x := rfl
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 @[simp] lemma boundaryTrace_zero :
     boundaryTrace (n := n) (M := M) (fun _ : M => (0 : ℝ)) =
       fun _ => (0 : ℝ) := rfl
@@ -253,6 +263,7 @@ theorem boundaryTrace_eLpNorm_le_of_bound
         ENNReal.ofReal C :=
   boundaryRestrict_eLpNorm_le_of_bound (n := n) (M := M) g p hC
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 theorem boundaryTrace_eq_restrict_of_contMDiff
     {u : M → ℝ}
     (hu : ContMDiff (modelWithCornersEuclideanHalfSpace n)

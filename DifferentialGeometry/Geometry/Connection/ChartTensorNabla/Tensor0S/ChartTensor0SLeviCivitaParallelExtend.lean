@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartTensor0SCovariantDerivative
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SIntrinsicChartRank0
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) :
@@ -93,6 +93,7 @@ private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
         (chartTensor0SParallelExtend (I := I) 0 α b T₀) b' =
       e.continuousLinearMapAt ℝ b T₀ from hy_repr]
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_apply
     (α : M) {b b' : M} (T₀ : Tensor0SSpace 0 I b)
     (hb' : b' ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
@@ -129,6 +130,7 @@ private lemma chartTensor0SParallelExtend_zero_scalar_apply
       (fun i : Fin 0 => Fin.elim0 i)
   rw [hrepr]
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) :
@@ -157,6 +159,7 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
       (I := I) α (b := b) (b' := b') T₀ hb'_U
   exact (mdifferentiableAt_const).congr_of_eventuallyEq hev
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) (v : TangentSpace I b) :
@@ -195,6 +198,7 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
   rw [hkey, hFderiv]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -227,6 +231,7 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
   exact chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     (I := I) α hb T₀ (X b)
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 private lemma tensor0SIntrinsicChartCLM_chartTensor0SParallelExtend_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -239,6 +244,7 @@ private lemma tensor0SIntrinsicChartCLM_chartTensor0SParallelExtend_eq_zero
   ext v
   simp
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -260,6 +266,7 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
   rw [hintr]
   rw [zero_sub]
 
+set_option linter.unusedSectionVars false in
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.ChartTransition
 import DifferentialGeometry.Analysis.Integration.Measure.Invariance
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -28,6 +27,7 @@ def chartTransitionAtEntry (α β : M) (x : E)
   (chartModelBasis E).repr
     (chartTransitionAt (I := I) α β x ((chartModelBasis E) a)) i
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartTransitionAtEntry_def (α β : M) (x : E)
     (i a : Fin (Module.finrank ℝ E)) :
     chartTransitionAtEntry (I := I) α β x i a =
@@ -35,7 +35,7 @@ def chartTransitionAtEntry (α β : M) (x : E)
         (chartTransitionAt (I := I) α β x
           ((chartModelBasis E) a)) i := rfl
 
-omit [IsManifold I ∞ M] in
+set_option linter.unusedSectionVars false in
 private lemma fderivWithin_range_I_eq_fderiv [I.Boundaryless]
     (f : E → E) (y : E) :
     fderivWithin ℝ f (Set.range I) y = fderiv ℝ f y := by
@@ -43,6 +43,7 @@ private lemma fderivWithin_range_I_eq_fderiv [I.Boundaryless]
     ModelWithCorners.Boundaryless.range_eq_univ (I := I)
   rw [h, fderivWithin_univ]
 
+set_option linter.unusedSectionVars false in
 lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
     (α β : M) (p : M) :
     tangentCoordChange I α β p =
@@ -53,6 +54,7 @@ lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
   exact fderivWithin_range_I_eq_fderiv (I := I)
     (extChartAt I β ∘ (extChartAt I α).symm) (extChartAt I α p)
 
+set_option linter.unusedSectionVars false in
 theorem chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (x : E)
     (hx : x ∈ (extChartAt I α) ''
@@ -112,6 +114,7 @@ theorem chartGramOnE_eq_sum_chartTransition [I.Boundaryless]
     rw [tangentCoordChange_eq_chartTransitionAt (I := I) α β p]
     simp only [chartTransitionAtEntry_def, hx_eq]
 
+set_option linter.unusedSectionVars false in
 theorem chartGramOnE_pullback_under_chartTransition [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (x : E)
     (hx : x ∈ (extChartAt I α) ''

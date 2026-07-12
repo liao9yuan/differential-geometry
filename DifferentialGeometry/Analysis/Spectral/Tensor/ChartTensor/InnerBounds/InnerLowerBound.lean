@@ -5,7 +5,6 @@ import Mathlib.Analysis.Normed.Module.FiniteDimension
 import Mathlib.Topology.MetricSpace.ProperSpace
 import Mathlib.Topology.Order.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ noncomputable def chartRSTwistInv
       ((ContinuousMultilinearMap.compContinuousLinearMapL
         (fun _ : Fin r => chartTrivializationLinearMap (I := I) (M := M) α b)))
 
+set_option linter.unusedSectionVars false in
 @[simp]
 lemma chartRSTwistInv_apply
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E)
@@ -53,6 +53,7 @@ lemma chartRSTwistInv_apply
         (fun _ : Fin s => chartTrivializationLinearMapSymm (I := I) (M := M) α b) := by
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartRSTwistInv_chartRSTwist
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -83,6 +84,7 @@ lemma chartRSTwistInv_chartRSTwist
   funext k
   exact chartJ_chartJinv (I := I) (M := M) α hb (w k)
 
+set_option linter.unusedSectionVars false in
 lemma chartRSTwist_chartRSTwistInv
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -113,6 +115,7 @@ lemma chartRSTwist_chartRSTwistInv
   funext k
   exact chartJinv_chartJ_self (I := I) (M := M) α hb (w k)
 
+set_option linter.unusedSectionVars false in
 lemma chartRSTwist_injective
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -124,6 +127,7 @@ lemma chartRSTwist_injective
   have h1 := chartRSTwistInv_chartRSTwist (I := I) (M := M) α hb r s T₁
   rw [← h0, ← h1, h]
 
+set_option linter.unusedSectionVars false in
 lemma chartRSTwist_ne_zero
     (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -161,6 +165,7 @@ section Positivity
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_rs_model_pos_of_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -190,12 +195,14 @@ section Compactness
 
 variable [CompactSpace M]
 
+set_option linter.unusedSectionVars false in
 lemma pouTsupport_isCompact
     [T2Space M] [SigmaCompactSpace M] (α : M) :
     IsCompact (tsupport (fun x : M =>
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).isCompact
 
+set_option linter.unusedSectionVars false in
 lemma pouTsupport_subset_baseSet
     [T2Space M] [SigmaCompactSpace M] (α : M) :
     tsupport (fun x : M =>
@@ -212,6 +219,7 @@ section LowerBound
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M_compact : IsCompact K_M)
@@ -282,6 +290,7 @@ theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_compact
     have hp_mem : (b, T) ∈ K := ⟨hb, hT_mem⟩
     exact absurd ⟨(b, T), hp_mem⟩ hK_ne
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartTensorInnerPointwise_rs_model_lower_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ ε : ℝ, 0 < ε ∧

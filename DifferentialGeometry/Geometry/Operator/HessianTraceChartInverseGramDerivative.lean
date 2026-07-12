@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartInvGramOnE_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -302,6 +302,7 @@ lemma partialDeriv_chartInvGramOnE_eq
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv2_chartInvGramOnE_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (i j : Fin (Module.finrank ℝ E))
@@ -713,6 +714,7 @@ lemma partialDeriv2_chartInvGramOnE_eq
     rw [hsymm l s]]
   ring
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_symm_fun
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -720,6 +722,7 @@ lemma chartGramOnE_symm_fun
   funext y
   exact chartGramOnE_symm (I := I) g α i j y
 
+set_option linter.unusedSectionVars false in
 lemma chartInvGramOnE_symm_pointwise
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :

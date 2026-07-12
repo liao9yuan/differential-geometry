@@ -10,7 +10,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.Basis.Defs
 import Mathlib.LinearAlgebra.Dimension.Free
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,10 +26,12 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_baseSet_eq (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source :=
   TangentBundle.trivializationAt_baseSet (𝕜 := ℝ) (I := I) α
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_symmL_self_eq_one (α : M) :
     (trivializationAt E (TangentSpace I) α).symmL ℝ α = (1 : E →L[ℝ] E) := by
   rw [TangentBundle.symmL_trivializationAt_eq_core
@@ -39,6 +40,7 @@ private lemma tangent_symmL_self_eq_one (α : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H α) v
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_clmAt_self_eq_one (α : M) :
     (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ α =
       (1 : E →L[ℝ] E) := by
@@ -48,6 +50,7 @@ private lemma tangent_clmAt_self_eq_one (α : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H α) v
 
+omit [Module.Finite ℝ E] in
 private lemma contMDiffOn_coordChangeL_tangent (α β : M) :
     ContMDiffOn I 𝓘(ℝ, E →L[ℝ] E) ∞
       (fun b : M => ((trivializationAt E (TangentSpace I) α).coordChangeL ℝ
@@ -60,6 +63,7 @@ private lemma contMDiffOn_coordChangeL_tangent (α β : M) :
   rw [tangent_baseSet_eq, tangent_baseSet_eq] at h
   exact h
 
+omit [Module.Finite ℝ E] in
 private lemma coordChangeL_apply_eq_clmAt_symmL
     (α β : M) {b : M}
     (hbα : b ∈ (chartAt H α).source) (hbβ : b ∈ (chartAt H β).source) (v : E) :
@@ -83,9 +87,11 @@ private lemma coordChangeL_apply_eq_clmAt_symmL
 private noncomputable def basisCoordCLM (j : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   ((Module.finBasis ℝ E).coord j).toContinuousLinearMap
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma basisCoordCLM_apply (j : Fin (Module.finrank ℝ E)) (v : E) :
     basisCoordCLM (E := E) j v = (Module.finBasis ℝ E).coord j v := rfl
 
+set_option linter.unusedSectionVars false in
 theorem tangentCoordChangeL_entry_contMDiffOn
     (α β : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -119,6 +125,7 @@ theorem tangentCoordChangeL_entry_contMDiffOn
     (coordChangeL_apply_eq_clmAt_symmL (I := I) α β hbα hbβ
       ((Module.finBasis ℝ E) i))).symm
 
+set_option linter.unusedSectionVars false in
 theorem tangentCoordChangeL_entry_contMDiffOn_swap
     (α β : M) (i j : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
@@ -133,6 +140,7 @@ theorem tangentCoordChangeL_entry_contMDiffOn_swap
   rw [Set.inter_comm] at h
   exact h
 
+set_option linter.unusedSectionVars false in
 theorem tangentCoordChangeL_entry_contMDiffAt
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
@@ -149,6 +157,7 @@ theorem tangentCoordChangeL_entry_contMDiffAt
     ⟨hb₀, mem_chart_source H b₀⟩
   exact (hwrapped _ hb₀mem).contMDiffAt (hOpen.mem_nhds hb₀mem)
 
+set_option linter.unusedSectionVars false in
 theorem tangentCoordChangeL_entry_eq_symmL_entry_self
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (_hb₀ : b₀ ∈ (chartAt H α).source) :
@@ -163,6 +172,7 @@ theorem tangentCoordChangeL_entry_eq_symmL_entry_self
   rw [h]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem tangentCoordChangeL_entry_contMDiffAt_swap
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
@@ -179,6 +189,7 @@ theorem tangentCoordChangeL_entry_contMDiffAt_swap
     ⟨hb₀, mem_chart_source H b₀⟩
   exact (hwrapped _ hb₀mem).contMDiffAt (hOpen.mem_nhds hb₀mem)
 
+set_option linter.unusedSectionVars false in
 theorem tangentCoordChangeL_entry_eq_continuousLinearMapAt_entry_self
     (α : M) (i j : Fin (Module.finrank ℝ E))
     {b₀ : M} (_hb₀ : b₀ ∈ (chartAt H α).source) :

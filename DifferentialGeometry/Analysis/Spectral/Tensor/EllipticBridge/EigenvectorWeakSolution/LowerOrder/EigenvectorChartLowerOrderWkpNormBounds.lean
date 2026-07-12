@@ -44,6 +44,7 @@ section LowerOrderWkpNormBoundsUniform
 
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
+set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ) {coef : EuclN → ℝ}
     (hcoef_chart : ContDiffOn ℝ (⊤ : ℕ∞) coef

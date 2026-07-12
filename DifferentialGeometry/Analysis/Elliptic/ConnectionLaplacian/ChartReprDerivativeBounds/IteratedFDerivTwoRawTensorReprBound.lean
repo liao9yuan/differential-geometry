@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTrivialisationOpNorm.TensorRSChartReprNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.Components.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] in
 private lemma raw_reprT_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -141,6 +141,7 @@ private lemma raw_reprT_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
+omit [CompactSpace M] in
 theorem rawTensorRepr_chart_pulled_contDiffOn_goodSet_image
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -152,6 +153,7 @@ theorem rawTensorRepr_chart_pulled_contDiffOn_goodSet_image
       ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
   raw_reprT_contDiffOn_goodSet (I := I) (M := M) g r s α T
 
+omit [CompactSpace M] in
 theorem rawTensorRepr_chart_pulled_contDiffAt_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) (N : ℕ) {b : M}

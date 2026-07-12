@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import DifferentialGeometry.Analysis.Integration.Measure.MeasureBridge
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ noncomputable def chartHessianPhiOnEuclid
   chartHessianTensor (I := I) g α (φ : M → ℝ) i j
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartHessianPhiOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -98,6 +98,7 @@ omit [NeZero (Module.finrank ℝ E)] in
                 chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
                 laplacianDomainHessianChart (I := I) (M := M) g α hu_h k l y := rfl
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianPhiOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -545,6 +546,7 @@ private noncomputable def hessPairingChartLocalMExt
   hessPairingChartLocal (I := I) (M := M) g α φ hu_h
     ((toEuclidean (E := E)) (extChartAt I α x))
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma hessPairingChartLocalMExt_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -560,6 +562,7 @@ noncomputable def hessPairingMChartContribution
   (chartAtlasPOU I M α : M → ℝ) x *
     hessPairingChartLocalMExt (I := I) (M := M) g φ α hu_h x
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma hessPairingMChartContribution_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -568,6 +571,7 @@ noncomputable def hessPairingMChartContribution
       (chartAtlasPOU I M α : M → ℝ) x *
         hessPairingChartLocalMExt (I := I) (M := M) g φ α hu_h x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma hessPairingMChartContribution_zero_off_tsupport
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -586,6 +590,7 @@ noncomputable def hessPairingMOnLapDom
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
     hessPairingMChartContribution (I := I) (M := M) g φ α hu_h x
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma hessPairingMOnLapDom_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -653,10 +658,12 @@ private lemma chartContribSurrogate_def
         DifferentialGeometry.Analysis.Sobolev.Chart.pullbackToManifold (I := I) α
           (hessPairingChartLocalRep (I := I) (M := M) g α φ hu_h) x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartAtlasPOU_continuous (α : M) :
     Continuous fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartAtlasPOU_measurable (α : M) :
     Measurable fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU_continuous (I := I) (M := M) α).measurable
@@ -729,6 +736,7 @@ private lemma chartContribSurrogate_eq_on_source
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.pullbackToManifold_apply_of_mem
     (I := I) α _ hx]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessPairingMChartContribution_eq_on_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -741,6 +749,7 @@ theorem hessPairingMChartContribution_eq_on_source
   unfold hessPairingMChartContribution hessPairingChartLocalMExt
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessPairingMChartContribution_zero_off_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -786,6 +795,7 @@ private lemma hessPairingChartLocalRep_exists_null_superset
     by_contra h_ne
     exact hy_not_bad h_ne
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem riemannianVolumeMeasure_pullback_null
     (g : SmoothRiemannianMetric I M) (α : M)
     {N : Set EuclN} (hN_meas : MeasurableSet N)

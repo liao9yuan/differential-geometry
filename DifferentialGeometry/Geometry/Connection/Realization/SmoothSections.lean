@@ -5,7 +5,6 @@ import DifferentialGeometry.Bundle.Equiv
 import Mathlib.Geometry.Manifold.VectorBundle.Hom
 import Mathlib.Geometry.Manifold.ContMDiffMFDeriv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable
   (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiff_dual_apply_section
     (α : Cₛ^∞⟮I; E →L[ℝ] ℝ, (Bundle.dual ℝ (TangentSpace I : M → Type _))⟯)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -40,6 +40,7 @@ theorem contMDiff_dual_apply_section
   intro y
   exact (contMDiffAt_section (F := ℝ) (E := Bundle.Trivial M ℝ) y).mp (hap y)
 
+omit [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 theorem contMDiff_extDerivFun_section (h : C^∞⟮I, M; ℝ⟯) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] ℝ)) ∞
       (fun x => TotalSpace.mk' (E →L[ℝ] ℝ)
@@ -74,6 +75,7 @@ theorem contMDiff_extDerivFun_section (h : C^∞⟮I, M; ℝ⟯) :
 
   rfl
 
+omit [CompleteSpace E] [SigmaCompactSpace M] in
 theorem contMDiff_clm_section_of_pointwise
     {F₁ : Type*} [NormedAddCommGroup F₁] [NormedSpace ℝ F₁] [FiniteDimensional ℝ F₁]
     {V₁ : M → Type*} [∀ x, AddCommGroup (V₁ x)] [∀ x, Module ℝ (V₁ x)]

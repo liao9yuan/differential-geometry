@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.ChartVectorField
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChristoffelLinearization
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ def chartLinearizedDeTurckVFPrincipal (g _g' : SmoothRiemannianMetric I M) (α :
     chartInvGramOnE (I := I) g α a b y *
       chartLinearizedChristoffelPrincipal (I := I) g α h a b k y
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartLinearizedDeTurckVFPrincipal_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -38,12 +38,14 @@ def chartLinearizedDeTurckVFPrincipal (g _g' : SmoothRiemannianMetric I M) (α :
         chartInvGramOnE (I := I) g α a b y *
           chartLinearizedChristoffelPrincipal (I := I) g α h a b k y := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedDeTurckVFPrincipal_background_indep
     (g g' g'' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) :
     chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y =
       chartLinearizedDeTurckVFPrincipal (I := I) g g'' α h k y := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem chartLinearizedDeTurckVFPrincipal_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -63,6 +65,7 @@ theorem chartLinearizedDeTurckVFPrincipal_background_indep
           rw [chartLinearizedChristoffelPrincipal_zero, mul_zero]
     _ = 0 := by simp
 
+set_option linter.unusedSectionVars false in
 theorem chartLinearizedDeTurckVFPrincipal_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -79,6 +82,7 @@ theorem chartLinearizedDeTurckVFPrincipal_add
   rw [chartLinearizedChristoffelPrincipal_add]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem chartLinearizedDeTurckVFPrincipal_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -94,6 +98,7 @@ theorem chartLinearizedDeTurckVFPrincipal_smul
   rw [chartLinearizedChristoffelPrincipal_smul, smul_eq_mul]
   ring
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedDeTurckVFPrincipal_contDiffOn_interior
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) :
@@ -115,6 +120,7 @@ theorem chartLinearizedDeTurckVFPrincipal_contDiffOn_interior
   · exact (chartLinearizedChristoffelPrincipal_contDiffOn (I := I) g α h a b k).mono
       interior_subset
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedDeTurckVFPrincipal_differentiableOn_interior
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) :
@@ -123,6 +129,7 @@ theorem chartLinearizedDeTurckVFPrincipal_differentiableOn_interior
   (chartLinearizedDeTurckVFPrincipal_contDiffOn_interior (I := I) g g' α h k).differentiableOn
     (by simp)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedDeTurckVFPrincipal_differentiableAt_interior
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) {y : E}

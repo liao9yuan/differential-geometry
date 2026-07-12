@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.TensorChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.MeasurablePullback
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -677,6 +676,7 @@ omit [NeZero (Module.finrank ℝ E)] in
       (chartAtlasPOU I M α : M → ℝ) x *
         chartTensorPairingLocalMExt (I := I) (M := M) g φ α hu_h x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorHessPairingMChartContribution_zero_off_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -696,6 +696,7 @@ lemma tensorHessPairingMChartContribution_zero_off_source
   rw [hρ_zero]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma tensorHessPairingMChartContribution_eq_on_source
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -1057,6 +1058,7 @@ omit [NeZero (Module.finrank ℝ E)] in
           hessPairingChart (I := I) g φ
             (smoothScalarToContMDiffMap (I := I) (g := g) v) x := Iff.rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorHessPairingFunc_aeEq_pou_weighted_chartLocal_smoothCase
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     tensorHessPairingFunc (I := I) (M := M) g φ

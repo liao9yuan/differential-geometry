@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 import Mathlib.MeasureTheory.Function.LpSeminorm.CompareExp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushed_eq_chartPushedRaw_pou_mul_on_target'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -41,6 +41,7 @@ private lemma chartPushed_eq_chartPushedRaw_pou_mul_on_target'
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α
     (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) hy]
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushed_eq_chartPushedRaw_pou_ae'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     chartPushed (I := I) (M := M) ρ α u
@@ -55,6 +56,7 @@ private lemma chartPushed_eq_chartPushedRaw_pou_ae'
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 private lemma tsupport_pou_mul_subset_tsupport_pou'
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (ρ α : C^∞⟮I, M; ℝ⟯) x * u x) ⊆
@@ -68,6 +70,7 @@ private lemma tsupport_pou_mul_subset_tsupport_pou'
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 private lemma measurable_pou_mul
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M)
     {u : M → ℝ} (hu : Measurable u) :

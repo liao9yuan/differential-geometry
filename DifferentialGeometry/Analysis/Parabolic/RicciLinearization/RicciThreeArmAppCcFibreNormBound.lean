@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.InverseMetricPerturba
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamCurvatureJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RealizeMetricChartGramDifference
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_smul_value_appCc
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (c : ℝ)
     (v : Tensor0SBundle.TensorRSSpace r s I x) :
@@ -66,6 +66,7 @@ lemma riemannianFiberNormSq_smul_value_appCc
     tensorInnerPointwise_smul_right]
   ring
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma gFibreOpBound_mono_local
     (g₀ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -79,6 +80,7 @@ lemma gFibreOpBound_mono_local
     mul_nonneg hsv hsw
   nlinarith [hle, hprod]
 
+set_option linter.unusedSectionVars false in
 private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -113,6 +115,7 @@ private theorem exists_orthoFrame_basis_local (g : SmoothRiemannianMetric I M) (
   refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
+set_option linter.unusedSectionVars false in
 private theorem riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     (C : ℝ)
@@ -137,6 +140,7 @@ private theorem riemannianFiberNormSq_le_of_orthonormalFrame_componentSumSq_le
         simp only [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, nsmul_eq_mul,
           Nat.cast_pow]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma metricInner_injective_local (g₁ : SmoothRiemannianMetric I M) (x : M)
     {a b : TangentSpace I x}
     (hab : ∀ w : TangentSpace I x, g₁.inner x a w = g₁.inner x b w) : a = b := by
@@ -359,6 +363,7 @@ private lemma ricciArm_indicatorSum_le {nn : ℕ} (K : Fin 4 → Fin nn) (R : �
   have hfinal : (9 / 4 : ℝ) * R ^ 2 = (3 / 4 : ℝ) * R ^ 2 * 3 := by ring
   rw [hfinal]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma ricciArm_dim1_compSq_le {A C R : ℝ} (hAbound : |A| ≤ R)
     (hAeqC : A = C)
     (hfr : Module.finrank ℝ E = 1) (K : Fin 4 → Fin (Module.finrank ℝ E)) :

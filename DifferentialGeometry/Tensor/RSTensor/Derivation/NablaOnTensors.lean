@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Derivation.LieDerivative
 import Mathlib.Geometry.Manifold.VectorBundle.CovariantDerivative.Basic
 
-set_option linter.unusedSectionVars false
 
 namespace TensorLieDeriv
 
@@ -88,6 +87,7 @@ def connectionEndomorphismCoeff
     (j k : Idx) : 𝕜 :=
   basis.coord k (ΓX (basis j))
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SModel_eval_update_basis_sum {s : ℕ}
     (basis : Module.Basis Idx 𝕜 E)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
@@ -113,6 +113,7 @@ private theorem tensor0SModel_eval_update_basis_sum {s : ℕ}
       rw [α.map_update_smul]
       simp [smul_eq_mul]
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SModel_one_eval_basis_sum
     (basis : Module.Basis Idx 𝕜 E)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) 1) (v : E) :
@@ -128,6 +129,7 @@ private theorem tensor0SModel_one_eval_basis_sum
     (fun _ : Fin 1 => v) (0 : Fin 1) v
   simpa [hupdate] using h
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SModel_two_eval_first_basis_sum
     (basis : Module.Basis Idx 𝕜 E)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) 2) (v w : E) :
@@ -146,6 +148,7 @@ private theorem tensor0SModel_two_eval_first_basis_sum
     fin_cases q <;> simp [base]
   simpa [hbase, hupdate] using h
 
+omit [CompleteSpace 𝕜] in
 private theorem tensor0SModel_two_eval_second_basis_sum
     (basis : Module.Basis Idx 𝕜 E)
     (α : Tensor0SModel (𝕜 := 𝕜) (E := E) 2) (v w : E) :
@@ -164,6 +167,7 @@ private theorem tensor0SModel_two_eval_second_basis_sum
     fin_cases q <;> simp [base]
   simpa [hbase, hupdate] using h
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelAt_apply_basis_slots {s : ℕ}
     (basis : Module.Basis Idx 𝕜 E)
     (dα_X : Tensor0SModel (𝕜 := 𝕜) (E := E) s)
@@ -197,6 +201,7 @@ theorem covariantDeriv_tensor0SModelAt_apply_basis_slots {s : ℕ}
   exact tensor0SModel_eval_update_basis_sum basis α
     (fun b : Fin s => basis (slots b)) a (ΓX (basis (slots a)))
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelWithin_apply_basis_slots {s : ℕ}
     (basis : Module.Basis Idx 𝕜 E)
     (X : E → E) (ΓX : E → E →L[𝕜] E)
@@ -212,6 +217,7 @@ theorem covariantDeriv_tensor0SModelWithin_apply_basis_slots {s : ℕ}
   exact covariantDeriv_tensor0SModelAt_apply_basis_slots (𝕜 := 𝕜) (E := E)
     basis (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x) slots
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelAt_one_apply_basis
     (basis : Module.Basis Idx 𝕜 E)
     (dα_X : Tensor0SModel (𝕜 := 𝕜) (E := E) 1)
@@ -239,6 +245,7 @@ theorem covariantDeriv_tensor0SModelAt_one_apply_basis
   rw [hcorr]
   rw [tensor0SModel_one_eval_basis_sum basis α (ΓX (basis j))]
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelAt_two_apply_basis
     (basis : Module.Basis Idx 𝕜 E)
     (dA_X : Tensor0SModel (𝕜 := 𝕜) (E := E) 2)
@@ -276,6 +283,7 @@ theorem covariantDeriv_tensor0SModelAt_two_apply_basis
   rw [tensor0SModel_two_eval_second_basis_sum basis A (basis j) (ΓX (basis l))]
   abel
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelWithin_one_apply_basis
     (basis : Module.Basis Idx 𝕜 E)
     (X : E → E) (ΓX : E → E →L[𝕜] E)
@@ -290,6 +298,7 @@ theorem covariantDeriv_tensor0SModelWithin_one_apply_basis
   exact covariantDeriv_tensor0SModelAt_one_apply_basis (𝕜 := 𝕜) (E := E)
     basis (fderivWithin 𝕜 α u x (X x)) (ΓX x) (α x) j
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelWithin_two_apply_basis
     (basis : Module.Basis Idx 𝕜 E)
     (X : E → E) (ΓX : E → E →L[𝕜] E)
@@ -307,6 +316,7 @@ theorem covariantDeriv_tensor0SModelWithin_two_apply_basis
   exact covariantDeriv_tensor0SModelAt_two_apply_basis (𝕜 := 𝕜) (E := E)
     basis (fderivWithin 𝕜 A u x (X x)) (ΓX x) (A x) j l
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelWithin_one_apply_basis_clm
     (basis : Module.Basis Idx 𝕜 E)
     (X : E → E) (ΓX : E → E →L[𝕜] E)
@@ -320,6 +330,7 @@ theorem covariantDeriv_tensor0SModelWithin_one_apply_basis_clm
   exact covariantDeriv_tensor0SModelWithin_one_apply_basis (𝕜 := 𝕜) (E := E)
     basis X ΓX α u x j
 
+omit [CompleteSpace 𝕜] in
 theorem covariantDeriv_tensor0SModelWithin_two_apply_basis_clm
     (basis : Module.Basis Idx 𝕜 E)
     (X : E → E) (ΓX : E → E →L[𝕜] E)
@@ -557,6 +568,7 @@ noncomputable def tensor0SModelAt (s : ℕ) (x₀ x : M)
       (Bundle.continuousMultilinearMap 𝕜 s E (TangentSpace I : M → Type _)) x₀)
     ⟨x, A⟩).2
 
+omit [CompleteSpace 𝕜] in
 theorem tensor0SModelAt_trivializationAt_symm (s : ℕ) (x₀ : M)
     (T : Tensor0SModel (𝕜 := 𝕜) (E := E) s) :
     tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
@@ -579,6 +591,7 @@ noncomputable def tensor0SModelInChart (s : ℕ) (x₀ : M)
   tensor0SModelAt (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     s x₀ ((extChartAt I x₀).symm y) (A ((extChartAt I x₀).symm y))
 
+omit [IsManifold I n M] [CompleteSpace 𝕜] [IsManifold I (n + 1) M] in
 theorem tensor0SModelInChart_contMDiffWithinAt (s : ℕ) (x₀ : M)
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       (n := n) s) :
@@ -631,6 +644,7 @@ noncomputable def mcovariantDeriv_tensor0SWithin (s : ℕ)
         ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
         (extChartAt I x₀ x₀))
 
+set_option linter.unusedSectionVars false in
 theorem mcovariantDeriv_tensor0SWithin_one_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -665,6 +679,7 @@ theorem mcovariantDeriv_tensor0SWithin_one_apply_basis
   rw [extChartAt_to_inv]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem mcovariantDeriv_tensor0SWithin_two_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -703,6 +718,7 @@ theorem mcovariantDeriv_tensor0SWithin_two_apply_basis
   rw [extChartAt_to_inv]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem mcovariantDeriv_tensor0SWithin_apply_basis_slots
     {Idx : Type*} [Fintype Idx] {s : ℕ}
     (basis : Module.Basis Idx 𝕜 E)
@@ -847,6 +863,7 @@ noncomputable def nablaRSFun (r s : ℕ)
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     (n := (⊤ : WithTop ℕ∞)) r s cov X T x
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem nabla0SFun_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -858,6 +875,7 @@ noncomputable def nablaRSFun (r s : ℕ)
         (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         (n := (⊤ : WithTop ℕ∞)) s cov X α x := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem nablaRSFun_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -917,6 +935,7 @@ noncomputable def nablaRS (r s : ℕ)
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   ⟨nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T, hreg⟩
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem nabla0S_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -928,6 +947,7 @@ noncomputable def nablaRS (r s : ℕ)
     nabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α hreg x =
       nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem nablaRS_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))

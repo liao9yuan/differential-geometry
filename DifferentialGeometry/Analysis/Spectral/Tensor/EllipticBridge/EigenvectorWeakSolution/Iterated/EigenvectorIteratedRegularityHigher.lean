@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedDatum
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiated.DerivedData
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fin_cons_last_succ
     {a : Fin (Module.finrank ℝ E)} {m : ℕ}
     (dirs : Fin (m + 1) → Fin (Module.finrank ℝ E)) :
@@ -49,6 +49,7 @@ private lemma fin_cons_last_succ
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fin_init_cons
     {a : Fin (Module.finrank ℝ E)} {m : ℕ}
     (dirs : Fin (m + 1) → Fin (Module.finrank ℝ E)) :

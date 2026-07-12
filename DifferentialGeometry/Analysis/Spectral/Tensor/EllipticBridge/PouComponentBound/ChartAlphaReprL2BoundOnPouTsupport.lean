@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Tensor.Auxiliary.DetOpNormBound
 import DifferentialGeometry.Analysis.Sobolev.Tensor.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K_swap : ℝ, 0 ≤ K_swap ∧
@@ -222,6 +222,7 @@ theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
           ∑ Q ∈ V,
             (tensorChartComponentRaw (I := I) (M := M) g r s T β Q.1 Q.2 b) ^ 2 := by ring
 
+omit [BoundarylessManifold I M] in
 theorem pointwise_α_repr_le_sum_β_componentPou_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K_pt : ℝ, 0 ≤ K_pt ∧

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.SmoothFChartResidual.Bi
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
+set_option linter.unusedSectionVars false in
 private lemma tsupport_chartPushedRaw_subset_chartImage
     (α : M) {u : M → ℝ}
     (hu_supp : tsupport u ⊆ (chartAt H α).source) :

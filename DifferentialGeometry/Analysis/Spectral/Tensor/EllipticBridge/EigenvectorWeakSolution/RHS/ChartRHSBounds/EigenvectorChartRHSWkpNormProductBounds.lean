@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDivWkpNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorDifferentiatedRHS
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 section SmoothCoefBound
 
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -173,6 +173,7 @@ lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le
   exact hKc_bd hfactor_memWkp
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma memWkpFinsetSum
     {k : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (f : ι → EuclN → ℝ)
@@ -196,6 +197,7 @@ lemma memWkpFinsetSum
 end SmoothCoefBound
 
 
+set_option linter.unusedSectionVars false in
 lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -206,6 +208,7 @@ lemma one_div_densityOnEuclid_contDiffOn
 section Aggregation
 
 
+set_option linter.unusedSectionVars false in
 lemma wkpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → EuclN → ℝ) (A : ℝ≥0∞)
@@ -303,6 +306,7 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (α : M) (P₀ : TensorCompIdx (E := E) r s) (K : ℕ)
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma wkpNorm_sub_le
     {Ω : Set EuclN} (hΩ : IsOpen Ω) {u v : EuclN → ℝ}
     (hu : MemWkp (d := Module.finrank ℝ E) K 2 u Ω)
@@ -332,6 +336,7 @@ end BracketBound
 section UniformBounds
 
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -459,6 +464,7 @@ lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 
+set_option linter.unusedSectionVars false in
 lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {δ : Type*} {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → δ → EuclN → ℝ) (A : δ → ℝ≥0∞)

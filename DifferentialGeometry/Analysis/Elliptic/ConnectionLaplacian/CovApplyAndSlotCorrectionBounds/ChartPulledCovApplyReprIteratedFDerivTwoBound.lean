@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.ChartPulledCovApplyReprFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartReprDerivativeBounds.IteratedFDerivFourTensorReprChartCompBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma intrinsicPiece_contDiffAt_two
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)
@@ -284,6 +284,7 @@ private lemma outputSlotPiece_contDiffAt_two
       (by rw [hx'_inv]; exact hx'_src) l
   exact h_kernel_F_at.congr_of_eventuallyEq h_evt
 
+omit [CompactSpace M] in
 private lemma chart_pulled_covApply_repr_eventuallyEq'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s)

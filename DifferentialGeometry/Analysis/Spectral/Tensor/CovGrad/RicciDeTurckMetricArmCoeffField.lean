@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricContractionTowerGrid
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ theorem gInvDiffMetricArm_iteratedCovGrad_singleSum_le
     (gInvDiffMetricArmCoeffField (I := I) g₀ g₁) x₀ 2 W a
 
 
+omit [CompleteSpace E] in
 theorem exists_gInvDiffMetricArm_neumannFibreBound (g₀ : SmoothRiemannianMetric I M) :
     ∃ Cnorm : ℝ, 0 ≤ Cnorm ∧
       ∀ (g₁ : SmoothRiemannianMetric I M)

@@ -14,6 +14,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_eq_inner_mfderiv
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -29,6 +30,7 @@ theorem pullbackMetric_inner_eq_inner_mfderiv
   unfold Diffeomorph.pullbackInner
   simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.precomp_apply]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_funext
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -40,6 +42,7 @@ theorem pullbackMetric_inner_funext
   funext s
   exact pullbackMetric_inner_eq_inner_mfderiv g_fam Φ_fam x v w s
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivWithinAt_of_eval
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -58,6 +61,7 @@ theorem pullbackMetric_inner_hasDerivWithinAt_of_eval
     exact (pullbackMetric_inner_eq_inner_mfderiv g_fam Φ_fam x v w u).symm
   · exact (pullbackMetric_inner_eq_inner_mfderiv g_fam Φ_fam x v w t).symm
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivWithinAt_to_eval
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -76,6 +80,7 @@ theorem pullbackMetric_inner_hasDerivWithinAt_to_eval
     exact pullbackMetric_inner_eq_inner_mfderiv g_fam Φ_fam x v w u
   · exact pullbackMetric_inner_eq_inner_mfderiv g_fam Φ_fam x v w t
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivWithinAt_iff
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -92,6 +97,7 @@ theorem pullbackMetric_inner_hasDerivWithinAt_iff
   ⟨pullbackMetric_inner_hasDerivWithinAt_to_eval g_fam Φ_fam x v w,
     pullbackMetric_inner_hasDerivWithinAt_of_eval g_fam Φ_fam x v w⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivAt_of_eval
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -108,6 +114,7 @@ theorem pullbackMetric_inner_hasDerivAt_of_eval
   rw [← hasDerivWithinAt_univ] at h_eval ⊢
   exact pullbackMetric_inner_hasDerivWithinAt_of_eval g_fam Φ_fam x v w h_eval
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivAt_to_eval
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -124,6 +131,7 @@ theorem pullbackMetric_inner_hasDerivAt_to_eval
   rw [← hasDerivWithinAt_univ] at h_pullback ⊢
   exact pullbackMetric_inner_hasDerivWithinAt_to_eval g_fam Φ_fam x v w h_pullback
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivAt_iff
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -140,6 +148,7 @@ theorem pullbackMetric_inner_hasDerivAt_iff
   ⟨pullbackMetric_inner_hasDerivAt_to_eval g_fam Φ_fam x v w,
     pullbackMetric_inner_hasDerivAt_of_eval g_fam Φ_fam x v w⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivWithinAt_product_rule
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)
@@ -155,6 +164,7 @@ theorem pullbackMetric_inner_hasDerivWithinAt_product_rule
       (G' + A' + B') s t :=
   pullbackMetric_inner_hasDerivWithinAt_of_eval g_fam Φ_fam x v w h_total
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem pullbackMetric_inner_hasDerivWithinAt_sum
     (g_fam : ℝ → SmoothRiemannianMetric I M)
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M)

@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.TimeL2Eige
 import DifferentialGeometry.Analysis.ProjectedContractionFixedPoint
 import Mathlib.Analysis.ODE.Gronwall
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -282,6 +281,7 @@ theorem unifIntegrable_of_uniform_norm_bound {α β : Type*} {m : MeasurableSpac
   rw [eLpNorm_congr_ae hzero, eLpNorm_zero]
   exact zero_le _
 
+omit [BoundarylessManifold I M] in
 private theorem tensorHs_norm_tendsto_zero_of_coeff_tendsto_of_uniform
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
     (hσ'σ'' : σ' < σ'')

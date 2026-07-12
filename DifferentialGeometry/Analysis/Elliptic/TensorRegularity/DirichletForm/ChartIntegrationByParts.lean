@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.WeakDerivatives
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : MeasurableSpace E := borel E
 private local instance : BorelSpace E := ⟨rfl⟩
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_of_contDiffOn_zero_off_closed
     {P : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     {U K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
@@ -47,6 +47,7 @@ private lemma contDiff_of_contDiffOn_zero_off_closed
     exact (contDiffAt_const : ContDiffAt ℝ ∞ (fun _ => (0 : ℝ)) y).congr_of_eventuallyEq
       hP_zero_evt
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eq_zero_of_notMem_tsupport
     {g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (l : Fin (Module.finrank ℝ E))
@@ -62,6 +63,7 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hg_zero_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+set_option linter.unusedSectionVars false in
 private lemma contDiff_of_contDiffOn_chartTarget
     (α : M)
     {g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -73,6 +75,7 @@ private lemma contDiff_of_contDiffOn_chartTarget
     (isClosed_tsupport g) hg_tsub hg
     (fun _ hy => image_eq_zero_of_notMem_tsupport hy)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma euclidPartial_contDiffOn_chartTarget
     (α : M)
     {f : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -100,6 +103,7 @@ private lemma euclidPartial_contDiffOn_chartTarget
       (EuclideanSpace.single l 1)).contDiff.contDiffAt.comp x hfd
   exact hat.contDiffWithinAt
 
+set_option linter.unusedSectionVars false in
 private lemma contDiff_coeff_mul_test
     (α : M)
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -113,6 +117,7 @@ private lemma contDiff_coeff_mul_test
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma contDiff_coeff_mul_partial_test
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -127,6 +132,7 @@ private lemma contDiff_coeff_mul_partial_test
   intro y hy
   rw [euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hy, mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma contDiff_partial_coeff_mul_test
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -141,12 +147,14 @@ lemma contDiff_partial_coeff_mul_test
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_coeff_mul_test
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hg_supp : HasCompactSupport g) :
     HasCompactSupport (fun y => f y * g y) :=
   hg_supp.mul_left
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_coeff_mul_partial_test
     (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -161,6 +169,7 @@ private lemma hasCompactSupport_coeff_mul_partial_test
     exact hy (euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hy')
   exact hpartial_supp.mul_left
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma hasCompactSupport_partial_coeff_mul_test
     (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}

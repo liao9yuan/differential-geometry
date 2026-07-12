@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.EigenvectorChartTestDecoupling
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cross.EigenvectorChartCrossRightDiv
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -80,6 +79,7 @@ noncomputable def eigenvectorChartRHS
             crossRightGradCoeffDivLimit (I := I) (M := M)
               g r s i α P₀ y)
 
+set_option linter.unusedSectionVars false in
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -87,6 +87,7 @@ private lemma one_div_densityOnEuclid_contDiffOn
   contDiffOn_const.div (densityOnEuclid_contDiffOn (I := I) g α)
     (fun _ hy => (densityOnEuclid_pos (I := I) g α hy).ne')
 
+omit [CompleteSpace E] in
 lemma crossRightGradCoeffDivLimit_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

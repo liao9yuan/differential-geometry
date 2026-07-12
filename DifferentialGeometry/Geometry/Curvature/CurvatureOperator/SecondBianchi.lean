@@ -69,6 +69,7 @@ lemma nablaCurvSec_def (cov : CovariantDerivative I E (TangentSpace I : M → Ty
         - riemannSec cov Y (covApply cov X Z) W x
         - riemannSec cov Y Z (covApply cov X W) x := rfl
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma covApply_riemannSec_section_distrib
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -125,6 +126,7 @@ lemma covApply_torsionFree_inner_section_eq_zero
   simp only [covApply_apply]
   abel
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma covApply_outer_torsionFree_collapse
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -169,6 +171,7 @@ lemma covApply_outer_torsionFree_collapse
   have := congrFun (congrArg DFunLike.coe hd.symm) (a x)
   simpa [ContinuousLinearMap.sub_apply] using this
 
+omit [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma nablaCurvSec_flat
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -252,6 +255,7 @@ lemma mlieBracket_covApply_pair
   rw [VectorField.mlieBracket_add_left hcBA hbrAB]
   abel
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma bianchi_bracket_jacobi_sum_eq_zero
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -341,6 +345,7 @@ lemma bianchi_bracket_jacobi_sum_eq_zero
         rw [p1, p2, p3]
     _ = 0 := hJac_cyc
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem second_bianchi_levi_civita
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

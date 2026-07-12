@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputSlotSymmetrization
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -69,10 +68,12 @@ def metricCcTensorFib (g : SmoothRiemannianMetric I M) (x : M) : Tensor0SSpace 2
         (continuous_apply 1) }
     : Tensor0SSpace 2 I x)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma metricCcTensorFib_apply (g : SmoothRiemannianMetric I M) (x : M)
     (m : Fin 2 → TangentSpace I x) :
     metricCcTensorFib (I := I) g x m = g.inner x (m 0) (m 1) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 theorem metricCcTensorFib_section_contMDiff (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
@@ -117,6 +118,7 @@ def metricCcTensor (g₀ g : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0
 def metricDifferenceCcTensor (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g₀ 0 2 :=
   metricCcTensor (I := I) (M := M) g₀ g₁ - metricCcTensor (I := I) (M := M) g₀ g₀
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem metricDifferenceCcTensor_self (g₀ : SmoothRiemannianMetric I M) :
     metricDifferenceCcTensor (I := I) (M := M) g₀ g₀ = 0 :=
   sub_self _
@@ -127,6 +129,7 @@ def ccTensorUnitValueSection (g : SmoothRiemannianMetric I M) (T : SmoothCcTenso
     (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 2 I y from T.toSection y)
       (unitZeroSec (I := I) (M := M) y)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
@@ -143,6 +146,7 @@ theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     (v := fun y : M => unitZeroSec (I := I) (M := M) y)
     T.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
 
+set_option linter.unusedSectionVars false in
 private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =

@@ -1,7 +1,6 @@
 import Mathlib.Analysis.InnerProductSpace.Basic
 import Mathlib.Topology.MetricSpace.Lipschitz
 
-set_option linter.unusedSectionVars false
 
 open scoped InnerProductSpace
 
@@ -9,10 +8,12 @@ variable {X : Type*} [NormedAddCommGroup X] [InnerProductSpace ℝ X]
 
 noncomputable def ballRetraction (R : ℝ) (x : X) : X := (min 1 (R / ‖x‖)) • x
 
+omit [InnerProductSpace ℝ X] in
 private theorem ballRetraction_factor_nonneg {R : ℝ} (hR : 0 ≤ R) (x : X) :
     0 ≤ min 1 (R / ‖x‖) :=
   le_min zero_le_one (div_nonneg hR (norm_nonneg x))
 
+omit [InnerProductSpace ℝ X] in
 private theorem ballRetraction_factor_mul_norm {R : ℝ} (hR : 0 ≤ R) (x : X) :
     (min 1 (R / ‖x‖)) * ‖x‖ = min ‖x‖ R := by
   rcases eq_or_lt_of_le (norm_nonneg x) with hx | hx

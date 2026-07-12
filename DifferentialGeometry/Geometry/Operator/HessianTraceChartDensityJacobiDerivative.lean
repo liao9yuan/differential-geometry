@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Operator.VossWeyl
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Geometry.Operator.HessianTraceChartGramRegularity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ open DifferentialGeometry.Integral.Measure
 private noncomputable def basisDirectionLine (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
     ℝ → E := fun s => y₀ + s • (chartModelBasis E) l
 
+set_option linter.unusedSectionVars false in
 private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
     (s : ℝ) :
     HasDerivAt (basisDirectionLine (E := E) y₀ l) ((chartModelBasis E) l) s := by
@@ -52,6 +52,7 @@ private lemma hasDerivAt_jacobiLine (y₀ : E) (l : Fin (Module.finrank ℝ E))
   rw [← hfun_eq]
   exact h'
 
+set_option linter.unusedSectionVars false in
 private lemma hasDerivAt_comp_jacobiLine
     {y₀ : E} {l : Fin (Module.finrank ℝ E)} {F : E → ℝ}
     (hF : DifferentiableAt ℝ F y₀) :
@@ -73,6 +74,7 @@ private noncomputable def gramJacobiFamily
   fun s => Matrix.of fun i j =>
     chartGramOnE (I := I) g α i j (basisDirectionLine (E := E) y₀ l s)
 
+set_option linter.unusedSectionVars false in
 private lemma gramJacobiFamily_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E)) :
@@ -82,6 +84,7 @@ private lemma gramJacobiFamily_zero
   ext i j
   simp [zero_smul, add_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma gramAtY_eq_chartGramMatrix
     (g : SmoothRiemannianMetric I M) (α : M) (y₀ : E) :
     (Matrix.of fun i j => chartGramOnE (I := I) g α i j y₀) =
@@ -89,6 +92,7 @@ private lemma gramAtY_eq_chartGramMatrix
   ext i j
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma hasDerivAt_gramJacobiFamily_entry
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -103,6 +107,7 @@ private lemma hasDerivAt_gramJacobiFamily_entry
   simp only [Matrix.of_apply]
   exact h
 
+set_option linter.unusedSectionVars false in
 private lemma gramJacobiFamily_det_pos
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -118,6 +123,7 @@ private lemma gramJacobiFamily_det_pos
     exact hsource
   exact chartGramMatrix_det_pos (I := I) g α hbase
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_det_chartGramOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))
@@ -191,6 +197,7 @@ private lemma partialDeriv_det_chartGramOnE
   rw [hGf_zero_eq] at heq
   exact heq.symm
 
+set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartDensityOnE
     (g : SmoothRiemannianMetric I M) (α : M)
     (y₀ : E) (l : Fin (Module.finrank ℝ E))

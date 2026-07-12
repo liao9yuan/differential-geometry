@@ -25,6 +25,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 private lemma covApply_covRS_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}

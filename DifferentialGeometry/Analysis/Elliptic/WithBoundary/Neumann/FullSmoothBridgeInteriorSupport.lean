@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorSmoothScalarP
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenWithBoundary
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.GradientLaplacian.Green
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -73,6 +72,7 @@ private theorem boundaryFaceSum_smoothSmul_grad_eq_zero_of_h_interior_support
   rw [h_div_Y_zero] at h_stokes
   exact h_stokes.symm
 
+omit [SigmaCompactSpace M] [CompactSpace M] in
 lemma FullSmoothScalar.oneSubLap_continuous_of_interior_support
     {g : SmoothRiemannianMetric (I_half n) M} (u : FullSmoothScalar g)
     (hu_int : tsupport u.toFun ⊆ (I_half n).interior M) :

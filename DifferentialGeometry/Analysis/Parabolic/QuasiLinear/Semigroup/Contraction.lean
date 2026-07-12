@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.DuhamelMap
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -19,11 +18,13 @@ noncomputable def nlDuhamel (S : BoundedC0Semigroup X) (u₀ : X)
     (N : X → X) (u : ℝ → X) (t : ℝ) : X :=
   duhamel S u₀ (fun τ => N (u τ)) t
 
+omit [CompleteSpace X] in
 theorem nlDuhamel_zero (S : BoundedC0Semigroup X) (u₀ : X) (N : X → X)
     (u : ℝ → X) : nlDuhamel S u₀ N u 0 = u₀ := by
   unfold nlDuhamel
   exact duhamel_zero S u₀ (fun τ => N (u τ))
 
+omit [CompleteSpace X] in
 theorem nlDuhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {u : ℝ → X}
     (hu : Continuous u) :
@@ -31,6 +32,7 @@ theorem nlDuhamel_continuousOn (S : BoundedC0Semigroup X) (u₀ : X)
   unfold nlDuhamel
   exact duhamel_continuousOn S u₀ (hN.continuous.comp hu)
 
+omit [CompleteSpace X] in
 private lemma continuousOn_semigroup_apply (S : BoundedC0Semigroup X)
     {w : ℝ → X} (hw : Continuous w) {t : ℝ} (ht : 0 ≤ t) :
     ContinuousOn (fun τ : ℝ => S (t - τ) (w τ)) (Set.uIcc 0 t) := by
@@ -52,12 +54,14 @@ private lemma continuousOn_semigroup_apply (S : BoundedC0Semigroup X)
   change S (t - τ) (w τ) = S (max 0 (t - τ)) (w τ)
   rw [max_eq_right h_nn]
 
+omit [CompleteSpace X] in
 private lemma intervalIntegrable_semigroup_apply (S : BoundedC0Semigroup X)
     {w : ℝ → X} (hw : Continuous w) {t : ℝ} (ht : 0 ≤ t) :
     IntervalIntegrable (fun τ => S (t - τ) (w τ))
       MeasureTheory.volume 0 t :=
   (continuousOn_semigroup_apply S hw ht).intervalIntegrable
 
+omit [CompleteSpace X] in
 theorem nlDuhamel_dist_le (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {u v : ℝ → X}
     (hu : Continuous u) (hv : Continuous v) {t : ℝ} (ht : 0 ≤ t)

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolevQuant
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 section OffKernelCoefBound
 
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma wkpNorm_offKernelSmoothCoef_mul_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -107,6 +107,7 @@ end OffKernelCoefBound
 section MemWkpFinsetSum
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_finset_sum_iota
     {k : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     {ι : Type*} (S : Finset ι) (f : ι → EuclN → ℝ)
@@ -132,6 +133,7 @@ end MemWkpFinsetSum
 section UniformConstant
 
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_uniform_wkpNorm_bound
     {ι : Type*} [Finite ι] {K : ℕ}
     {Ω : Set EuclN} {f : ι → EuclN → ℝ} {a : ι → ℝ≥0∞}
@@ -153,6 +155,7 @@ end UniformConstant
 section OffKernelCoefBoundUniform
 
 
+omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma wkpNorm_offKernelSmoothCoef_mul_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}

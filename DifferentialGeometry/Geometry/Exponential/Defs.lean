@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Geodesic.MaximalInterval
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 import Mathlib.Topology.Connected.Clopen
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -28,6 +27,7 @@ open DifferentialGeometry.Integral.Measure
 def expMap (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) : M :=
   maximalGeodesic (I := I) g p v 1
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma expMap_def (g : SmoothRiemannianMetric I M) (p : M)
     (v : TangentSpace I p) :
     expMap (I := I) g p v = maximalGeodesic (I := I) g p v 1 := rfl
@@ -35,6 +35,7 @@ def expMap (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) : M :
 def expDomain (g : SmoothRiemannianMetric I M) (p : M) : Set (TangentSpace I p) :=
   {v | (1 : ℝ) ∈ maximalGeodesicInterval (I := I) g p v}
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma mem_expDomain_iff
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p} :
     v ∈ expDomain (I := I) g p ↔
@@ -44,6 +45,7 @@ section StationaryWitness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem maximalGeodesicWitness_zero_all_times
     (g : SmoothRiemannianMetric I M) (p : M) (t : ℝ) :
     MaximalGeodesicWitness (I := I) g p (0 : TangentSpace I p) t := by
@@ -57,10 +59,12 @@ theorem maximalGeodesicWitness_zero_all_times
       geodesicVectorFieldChart_zero_section (I := I) g p
     exact (isMIntegralCurve_const hvf_zero).isMIntegralCurveOn Set.univ
 
+set_option linter.unusedSectionVars false in
 theorem zero_mem_expDomain (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : TangentSpace I p) ∈ expDomain (I := I) g p :=
   maximalGeodesicWitness_zero_all_times (I := I) g p 1
 
+set_option linter.unusedSectionVars false in
 theorem expDomain_nonempty (g : SmoothRiemannianMetric I M) (p : M) :
     (expDomain (I := I) g p).Nonempty :=
   ⟨0, zero_mem_expDomain (I := I) g p⟩
@@ -71,6 +75,7 @@ section JunkValue
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem expMap_of_not_mem_expDomain
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
     (hv : v ∉ expDomain (I := I) g p) :
@@ -84,6 +89,7 @@ section ExpMapZeroWitnessLevel
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem maximalGeodesicChosenCurve_zero_start_eq
     (g : SmoothRiemannianMetric I M) (p : M) :
     maximalGeodesicChosenCurve (I := I) g p (0 : TangentSpace I p)
@@ -100,12 +106,14 @@ section ZeroVelocityPropagation
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 private lemma isMIntegralCurve_const_zero_section
     (g : SmoothRiemannianMetric I M) (p : M) :
     IsMIntegralCurve (fun _ : ℝ => (⟨p, (0 : E)⟩ : TangentBundle I M))
       (geodesicVectorFieldChart (I := I) g p) :=
   isMIntegralCurve_const (geodesicVectorFieldChart_zero_section (I := I) g p)
 
+set_option linter.unusedSectionVars false in
 theorem isMIntegralCurveOn_zero_section_eq_const
     (g : SmoothRiemannianMetric I M) (p : M)
     {f : ℝ → TangentBundle I M} {J : Set ℝ}
@@ -185,6 +193,7 @@ section ExpMapZero
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem maximalGeodesicWitness_zero_curve_eq_p
     {g : SmoothRiemannianMetric I M} {p : M}
     {γ : ℝ → M} {J : Set ℝ}
@@ -200,6 +209,7 @@ theorem maximalGeodesicWitness_zero_curve_eq_p
   rw [hf_eq] at this
   exact this.symm
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem expMap_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     expMap (I := I) g p (0 : TangentSpace I p) = p := by

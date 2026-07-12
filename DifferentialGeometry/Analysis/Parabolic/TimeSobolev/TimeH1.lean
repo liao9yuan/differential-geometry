@@ -5,7 +5,6 @@ import Mathlib.MeasureTheory.Integral.IntervalIntegral.LebesgueDifferentiationTh
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
 import Mathlib.MeasureTheory.Covering.OneDim
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,17 +22,20 @@ open IsUnifLocDoublingMeasure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 
+omit [CompleteSpace E] in
 private theorem average_Icc_eq {f : ℝ → E} {a b : ℝ} (hab : a ≤ b) :
     (⨍ t in Icc a b, f t) = (b - a)⁻¹ • ∫ t in Icc a b, f t := by
   rw [setAverage_eq, measureReal_def, Real.volume_Icc,
     ENNReal.toReal_ofReal (by linarith)]
 
+omit [CompleteSpace E] in
 private theorem slope_integral_eq_average_right {f : ℝ → E}
     (hg : ∀ a b : ℝ, IntervalIntegrable f volume a b) (c x y : ℝ) (hxy : x ≤ y) :
     slope (fun u => ∫ t in c..u, f t) x y = ⨍ t in Icc x y, f t := by
   rw [average_Icc_eq hxy, slope_def_module, integral_interval_sub_left (hg c y) (hg c x),
     integral_of_le hxy, integral_Icc_eq_integral_Ioc]
 
+omit [CompleteSpace E] in
 private theorem slope_integral_eq_average_left {f : ℝ → E}
     (hg : ∀ a b : ℝ, IntervalIntegrable f volume a b) (c x y : ℝ) (hyx : y ≤ x) :
     slope (fun u => ∫ t in c..u, f t) x y = ⨍ t in Icc y x, f t := by

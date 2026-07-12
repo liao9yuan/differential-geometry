@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.RHS.DifferentiatedRHS.EigenvectorDifferentiatedRHS
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorArbitraryKRegularity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -50,6 +49,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 section MainBound
 
 
+omit [CompleteSpace E] in
 private lemma eigenIdx_val_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :
@@ -61,6 +61,7 @@ private lemma eigenIdx_val_pos
     (I := I) (M := M) g r s hu_in hu_ne).1
 
 
+omit [CompleteSpace E] in
 private lemma eigenIdx_val_le_one
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) :

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNor
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -194,6 +193,7 @@ private theorem norm_iteratedCovGrad_comp
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
+omit [BoundarylessManifold I M] in
 private theorem norm_iteratedCovGrad_order_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {n n' : ℕ} (h : n = n')
     (S : SmoothCcTensor g₀ 0 s) :

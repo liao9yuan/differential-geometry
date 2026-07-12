@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegula
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularitySpectralPath
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.ForcingFiniteOrderTimeRegularityEigenPairingBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -348,6 +347,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.Analysis.Sobolev.Chart
 open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma iteratedFDerivWithin_isOpen_eq_of_isOpen
     {O₁ O₂ : Set E} (h₁ : IsOpen O₁) (h₂ : IsOpen O₂) (n : ℕ) (f : E → ℝ) {z : E}
     (hz₁ : z ∈ O₁) (hz₂ : z ∈ O₂) :
@@ -1110,6 +1110,7 @@ section IterLaplacianInduction
 
 open DifferentialGeometry.Analysis.Laplacian.TensorRegularity
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1133,6 +1134,7 @@ private lemma tensorChartComponentRaw_congr_toSection
         ℝ x (S₂.toSection x))
   rw [h x]
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -1182,6 +1184,7 @@ private lemma reconFO_raw_eq_chartRHS
       g_bg (tensorSectionRealizeMetric (I := I) g₀ S hδ_lt hδS) α hgood ![] Jdx,
     chartDeTurckRicciRHS_def]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma pouRegion_open (α : M) :
     IsOpen ((toEuclidean (E := E)) '' ((extChartAt I α) ''
       {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x})) := by
@@ -1205,6 +1208,7 @@ private lemma pouRegion_open (α : M) :
       (isOpen_extChartAt_target (I := I) α) hU_open
   exact (toEuclidean (E := E)).isOpenMap _ himg_open
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pouRegion_subset_chartTargetEuclid (α : M) :
     (toEuclidean (E := E)) '' ((extChartAt I α) ''
       {x : M | 0 < ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x}) ⊆
@@ -1216,6 +1220,7 @@ private lemma pouRegion_subset_chartTargetEuclid (α : M) :
     exact subset_tsupport _ (Function.mem_support.mpr (ne_of_gt hx))
   exact ⟨extChartAt I α x, (extChartAt I α).map_source hx_src, rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pouRegion_mem_facts (α : M)
     {ŷ : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
     (hŷ : ŷ ∈ (toEuclidean (E := E)) '' ((extChartAt I α) ''
@@ -1245,6 +1250,7 @@ private lemma pouRegion_mem_facts (α : M)
   · rw [hsymm_te, hround]
   · rw [hsymm_te, hround]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_eq_pdDir (i : Fin (Module.finrank ℝ E))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ) :
     euclidPartial (E := E) i u

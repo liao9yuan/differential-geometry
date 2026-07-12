@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.BanachIC
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -14,6 +13,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E
   [FiniteDimensional ℝ E]
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem hasDerivAt_line (x δ : E) :
     HasDerivAt (fun rr : ℝ => x + rr • δ) δ 0 := by
   have h1 : HasDerivAt (fun rr : ℝ => rr • δ) δ 0 := by
@@ -22,6 +22,7 @@ private theorem hasDerivAt_line (x δ : E) :
     (hasDerivAt_const (0 : ℝ) x).add h1
   simpa using h2
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem partial_spatial_fderiv_eq_comp_inl
     {x : E} {s : ℝ} (hΦdiff : DifferentiableAt ℝ Φ (x, s)) :
     fderiv ℝ (fun y => Φ (y, s)) x
@@ -31,6 +32,7 @@ theorem partial_spatial_fderiv_eq_comp_inl
     hΦdiff.hasFDerivAt.comp x (hasFDerivAt_prodMk_left x s)
   exact hslice.fderiv
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem flow_joint_fderiv_inr_eq
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     {x : E} {s : ℝ} (hx : x ∈ closedBall x₀ r) (hs : s ∈ Ioo tmin tmax)
@@ -48,6 +50,7 @@ theorem flow_joint_fderiv_inr_eq
     exact hwithin.hasDerivAt (Icc_mem_nhds hs.1 hs.2)
   exact hcurve.unique hflow
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 private theorem contDiffAt_of_mem {U : Set (E × ℝ)} (hUopen : IsOpen U)
     (hΦsmooth : ContDiffOn ℝ ∞ Φ U) {q : E × ℝ} (hq : q ∈ U) :
     ContDiffAt ℝ ∞ Φ q :=
@@ -62,6 +65,7 @@ variable (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
 
 include hΦ hf hUopen hΦsmooth in
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem IsLocalFlow.hasDerivAt_partial_spatial_fderiv_apply
     {x : E} {s : ℝ} (hxsU : (x, s) ∈ U)
     (hx : x ∈ ball x₀ r) (hs : s ∈ Ioo tmin tmax) (δ : E) :
@@ -155,6 +159,7 @@ theorem IsLocalFlow.hasDerivAt_partial_spatial_fderiv_apply
 
 end PerDirection
 
+omit [CompleteSpace E] [FiniteDimensional ℝ E] in
 theorem IsLocalFlow.hasDerivAt_partial_spatial_fderiv
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
     (hf : ContDiff ℝ ∞ (uncurry f))

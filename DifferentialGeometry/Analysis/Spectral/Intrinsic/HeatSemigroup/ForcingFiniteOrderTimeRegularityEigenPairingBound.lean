@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.PerModeL2
 import DifferentialGeometry.Analysis.Calculus.ContDiffExtendInterval
 import DifferentialGeometry.Analysis.Integration.L2.ForcingFiniteOrderTimeRegularityParametricIntegral
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,6 +48,7 @@ private local instance tensorRSModelNormedSpace_local :
   Tensor0SBundle.tensorRSModel_normedSpace 0 2
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -114,6 +114,7 @@ open DifferentialGeometry.Tensor.TensorRSRiemannian
 open DifferentialGeometry.Tensor.Tensor0SRiemannian
 open DifferentialGeometry.Integral.Connection
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -181,6 +182,7 @@ private theorem partialSnd_set_contMDiffOn_Icc_finiteOrder
       (fun q hq => hq.2) hUM
   simpa [inTangentCoordinates_model_space] using h_apply
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -292,6 +294,7 @@ private theorem vec_iteratedPartialSnd_set_contMDiffOn_Icc_finiteOrder
   rw [hcomm]
   exact (A.symm_apply_apply _).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -332,6 +335,7 @@ private theorem contMDiff_constOfIsEmpty_tensor0S_section_local :
     Tensor0SBundle.Tensor0SSpace.toModel_ofModel,
     ContinuousMultilinearMap.constOfIsEmpty_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -394,6 +398,7 @@ private theorem contMDiffWithinAt_curriedSection_prod_ofOrder_local {N : WithTop
           (fun y : M => Tensor0SBundle.Tensor0SSpace (n + 1) I y) p₀.1 ⟨p₀.1, T p₀⟩).2)
     exact hpt
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -492,6 +497,7 @@ private theorem contMDiffWithinAt_section_apply_prod_ofOrder_local {N : WithTop 
       · simp [Fin.cons_zero]
       · intro k; simp [Fin.cons_succ]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -656,6 +662,7 @@ private theorem loweredCompose_zero_basis_eval_jointContMDiffOn_ofOrder_local
     (fun j p => chartBasisVecFiber (I := I) α (φ (Fin.natAdd 0 j)) p.1)
     (fun j => (hv j p hp).of_le hN)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in

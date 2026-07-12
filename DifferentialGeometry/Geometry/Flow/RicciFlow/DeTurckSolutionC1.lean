@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.TimeH1
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -21,6 +20,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] in
 theorem maxreg_solution_in_c1_via_sobolev_embedding
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)
@@ -37,6 +37,7 @@ theorem maxreg_solution_in_c1_via_sobolev_embedding
     (hderiv t ht x v w).continuousWithinAt
   exact hcont_within_Ici.mono Set.Ico_subset_Ici_self
 
+omit [CompactSpace M] in
 theorem c1_norm_time_continuous_from_h1_time_derivative
     (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (g_DT : ℝ → SmoothRiemannianMetric I M)

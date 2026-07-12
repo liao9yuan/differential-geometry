@@ -551,6 +551,7 @@ theorem eLpNorm_commutatorPointwise_le
   rw [hRHS] at h_root
   exact h_root
 
+omit [NeZero d] in
 private lemma mollifierEps_props {ε : ℝ} (hε : 0 < ε) :
     Continuous (mollifierEps (d := d) hε)
       ∧ HasCompactSupport (mollifierEps (d := d) hε)
@@ -573,6 +574,7 @@ private lemma mollifierEps_props {ε : ℝ} (hε : 0 < ε) :
     rw [← this]
     simp
 
+omit [NeZero d] in
 theorem friedrichsCommutator_tendsto_zero
     {a : E → ℝ} (ha_smooth : ContDiff ℝ ⊤ a)
     {Λ : ℝ} (hΛ_nn : 0 ≤ Λ)

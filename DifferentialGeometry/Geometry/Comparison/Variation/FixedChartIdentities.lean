@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Defs
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ def IsSmoothVariation
     (f : ℝ → ℝ → M) : Prop :=
   ContMDiff (𝓘(ℝ, ℝ).prod 𝓘(ℝ, ℝ)) I (8 : ℕ) (fun p : ℝ × ℝ => f p.1 p.2)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partial_snd_apply_one (G : ℝ × ℝ → E) (u t : ℝ)
     (h : DifferentiableAt ℝ G (u, t)) :
     fderiv ℝ (fun v : ℝ => G (u, v)) t (1 : ℝ) = fderiv ℝ G (u, t) (0, 1) := by
@@ -51,6 +51,7 @@ private lemma partial_snd_apply_one (G : ℝ × ℝ → E) (u t : ℝ)
   rw [hcomp, hch.fderiv]
   simp [ContinuousLinearMap.inr]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partial_fst_apply_one (G : ℝ × ℝ → E) (s v : ℝ)
     (h : DifferentiableAt ℝ G (s, v)) :
     fderiv ℝ (fun u : ℝ => G (u, v)) s (1 : ℝ) = fderiv ℝ G (s, v) (1, 0) := by
@@ -62,6 +63,7 @@ private lemma partial_fst_apply_one (G : ℝ × ℝ → E) (s v : ℝ)
   rw [hcomp, hch.fderiv]
   simp [ContinuousLinearMap.inl]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_jointFderiv_snd (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     deriv (fun u : ℝ => fderiv ℝ G (u, t) (0, 1)) s
@@ -86,6 +88,7 @@ private lemma deriv_jointFderiv_snd (G : ℝ × ℝ → E) (s t : ℝ)
   rw [hderiv.deriv]
   simp [hL, ContinuousLinearMap.inl]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_jointFderiv_fst (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     deriv (fun v : ℝ => fderiv ℝ G (s, v) (1, 0)) t
@@ -110,6 +113,7 @@ private lemma deriv_jointFderiv_fst (G : ℝ × ℝ → E) (s t : ℝ)
   rw [hderiv.deriv]
   simp [hL, ContinuousLinearMap.inr]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eventually_diff_along_fst (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     ∀ᶠ u in nhds s, DifferentiableAt ℝ G (u, t) := by
@@ -121,6 +125,7 @@ private lemma eventually_diff_along_fst (G : ℝ × ℝ → E) (s t : ℝ)
     simpa using hcont.continuousAt (x := s)
   exact h2.eventually hdiffG
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eventually_diff_along_snd (G : ℝ × ℝ → E) (s t : ℝ)
     (hG : ContDiffAt ℝ 2 G (s, t)) :
     ∀ᶠ v in nhds t, DifferentiableAt ℝ G (s, v) := by
@@ -132,6 +137,7 @@ private lemma eventually_diff_along_snd (G : ℝ × ℝ → E) (s t : ℝ)
     simpa using hcont.continuousAt (x := t)
   exact h2.eventually hdiffG
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_partialFderiv_snd (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     deriv (fun u : ℝ => fderiv ℝ (fun v : ℝ => F u v) t (1 : ℝ)) s
@@ -145,6 +151,7 @@ private lemma deriv_partialFderiv_snd (F : ℝ → ℝ → E) (s t : ℝ)
   rw [hev.deriv_eq]
   exact deriv_jointFderiv_snd G s t hF
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma deriv_partialFderiv_fst (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     deriv (fun v : ℝ => fderiv ℝ (fun u : ℝ => F u v) s (1 : ℝ)) t
@@ -158,6 +165,7 @@ private lemma deriv_partialFderiv_fst (F : ℝ → ℝ → E) (s t : ℝ)
   rw [hev.deriv_eq]
   exact deriv_jointFderiv_fst G s t hF
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma mixed_partialFderiv_comm (F : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => F p.1 p.2) (s, t)) :
     deriv (fun u : ℝ => fderiv ℝ (fun v : ℝ => F u v) t (1 : ℝ)) s
@@ -168,6 +176,7 @@ private lemma mixed_partialFderiv_comm (F : ℝ → ℝ → E) (s t : ℝ)
     rw [minSmoothness_of_isRCLikeNormedField]
   exact hsymm (1, 0) (0, 1)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPulled_contDiffAt
     (f : ℝ → ℝ → M) (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :
     ContDiffAt ℝ 2
@@ -185,6 +194,7 @@ private lemma chartPulled_contDiffAt
 
 omit [T2Space M] [SigmaCompactSpace M] in
 
+omit [I.Boundaryless] in
 theorem commute_ds_dt_fixed_chart_C2
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (s t : ℝ)
@@ -229,6 +239,7 @@ theorem commute_ds_dt_fixed_chart_C2
       (fderiv ℝ (fun v : ℝ => F s v) t (1 : ℝ)) (F s t)
   rw [hsec, hChristoffel]
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem commute_ds_dt_fixed_chart
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f)
@@ -246,15 +257,18 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 def chartCoordCLM (i : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
   (chartModelBasis E).coord i |>.toContinuousLinearMap
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartCoordCLM_apply (i : Fin (Module.finrank ℝ E)) (v : E) :
     chartCoordCLM (E := E) i v = chartCoord (E := E) i v := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma hasDerivAt_chartCoord {P : ℝ → E} {P' : E} {s : ℝ} (hP : HasDerivAt P P' s)
     (i : Fin (Module.finrank ℝ E)) :
     HasDerivAt (fun u => chartCoord (E := E) i (P u)) (chartCoord (E := E) i P') s := by
   have := (chartCoordCLM (E := E) i).hasFDerivAt.comp_hasDerivAt s hP
   simpa using this
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma hasDerivAt_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (α : M)
     {P Q R : ℝ → E} {P' Q' R' : E} {s : ℝ}
@@ -459,6 +473,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma chartChristoffel_differentiableAt_self
     (g : SmoothRiemannianMetric I M) (α : M) (i j k : Fin (Module.finrank ℝ E)) :
     DifferentiableAt ℝ (chartChristoffel (I := I) g α i j k) (extChartAt I α α) := by
@@ -490,6 +505,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma innerW_eq (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (t : ℝ) :
     (fun u => chartCovDerivAlong (I := I) g α (fun v : ℝ => f u v) (fun v : ℝ => Y u v) t)
       = fun u => fderiv ℝ (fun v : ℝ => Y u v) t (1 : ℝ)
@@ -501,6 +517,7 @@ lemma innerW_eq (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M
   rw [chartCovDerivAlong_def]
   rfl
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma hasDerivAt_innerW
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s, t))
@@ -543,6 +560,7 @@ lemma hasDerivAt_innerW
   have hterm2 := hasDerivAt_chartChristoffelContraction (I := I) g α hP hQ hR hΓ'
   exact hterm1.add hterm2
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma nabla_s_nabla_t_eq
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ) :
     chartCovDerivAlong (I := I) g α (fun u : ℝ => f u t)
@@ -556,6 +574,7 @@ lemma nabla_s_nabla_t_eq
   rw [chartCovDerivAlong_def]
   rfl
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma hasDerivAt_innerW_snd
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I α (f p.1 p.2)) (s, t))
@@ -605,6 +624,7 @@ lemma hasDerivAt_innerW_snd
   have hterm2 := hasDerivAt_chartChristoffelContraction (I := I) g α hP hQ hR hΓ'
   exact hterm1.add hterm2
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma nabla_t_nabla_s_eq
     (g : SmoothRiemannianMetric I M) (α : M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ) :
     chartCovDerivAlong (I := I) g α (fun v : ℝ => f s v)
@@ -628,6 +648,7 @@ open scoped Manifold ContDiff Topology
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma fderiv_eq_sum_partialDeriv (u : E → ℝ) (y v : E) :
     fderiv ℝ u y v =
       ∑ k : Fin (Module.finrank ℝ E),
@@ -643,10 +664,12 @@ lemma fderiv_eq_sum_partialDeriv (u : E → ℝ) (y v : E) :
   rw [map_smul, smul_eq_mul]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartCoord_basis (b s : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) s (chartModelBasis E b) = if b = s then 1 else 0 := by
   rw [chartCoord]; exact (chartModelBasis E).repr_self_apply b s
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartCoord_sum_smul_basis (c : Fin (Module.finrank ℝ E) → ℝ)
     (s : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) s (∑ m, c m • chartModelBasis E m) = c s := by
@@ -674,6 +697,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M]
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma chartCoord_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (x : M) (v w y : E) (l : Fin (Module.finrank ℝ E)) :
     chartCoord (E := E) l (chartChristoffelContraction (I := I) g x v w y)
@@ -686,6 +710,7 @@ lemma chartCoord_chartChristoffelContraction
       (fun l => ∑ i, ∑ j, chartChristoffel (I := I) g x i j l y *
         chartCoord (E := E) i v * chartCoord (E := E) j w) l]
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma partialDeriv_chartChristoffel_symm
     (g : SmoothRiemannianMetric I M) (x : M) (i j l d : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) d (chartChristoffel (I := I) g x i j l) y
@@ -694,6 +719,7 @@ lemma partialDeriv_chartChristoffel_symm
     funext y'; exact chartChristoffel_symm (I := I) g x i j l y'
   rw [hfun]
 
+omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma curvPart_eq_chartRiemannCLM
     (g : SmoothRiemannianMetric I M) (x : M) (D₁ D₂ Yv : E) :
     (∑ k : Fin (Module.finrank ℝ E),
@@ -954,6 +980,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H} [I.Boun
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [T2Space M] [SigmaCompactSpace M] in
 lemma commutator_eq_chartRiemannCLM
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M) (Y : ℝ → ℝ → E) (s t : ℝ)
     (hF : ContDiffAt ℝ 2 (fun p : ℝ × ℝ => extChartAt I (f s t) (f p.1 p.2)) (s, t))

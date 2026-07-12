@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.Iteration
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -161,6 +160,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private theorem memW1p_of_smooth_compactSupport_anyOpen
     {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -182,6 +182,7 @@ private theorem memW1p_of_smooth_compactSupport_anyOpen
   · exact DeGiorgi.HasWeakPartialDeriv.of_contDiff hΩ_open
       (hψ_smooth.of_le (by norm_cast))
 
+omit [NeZero d] in
 theorem memWkp_of_smooth_compactSupport_anyOpen
     {Ω : Set EE} (hΩ_open : IsOpen Ω)
     {ψ : EE → ℝ} (hψ_smooth : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -212,6 +213,7 @@ theorem memWkp_of_smooth_compactSupport_anyOpen
       have h_ih_classical := ih h_classical_smooth h_classical_cpt
       exact (MemWkp_congr_ae (d := d) hp hΩ_open h_ae).mpr h_ih_classical
 
+omit [NeZero d] in
 private theorem iterWeakPartial_smooth_ae_eq_iterClassical_anyOpen
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω : Set EE} (hΩ_open : IsOpen Ω) :
     ∀ (j : ℕ) (β : Fin j → Fin d) {ψ : EE → ℝ},

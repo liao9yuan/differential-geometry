@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Approximation.H1WeakSolutionApprox
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -288,6 +287,7 @@ private lemma tendsto_eLpNorm_restrict_of_tendstoUniformlyOn
   filter_upwards [h_eventual_bound ε₀ hε₀_pos] with i hi
   exact hi.trans hε₀_le
 
+omit [NeZero d] in
 private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -328,6 +328,7 @@ private lemma tendstoUniformlyOn_mollifyEps_of_uniformContinuous
   rw [dist_comm]
   exact lt_of_le_of_lt h_bound h_half_lt
 
+omit [NeZero d] in
 private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_continuous_compactSupport
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -358,6 +359,7 @@ private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_continuous_compactSuppo
       hφ_cont hφ_uc
   exact tendsto_eLpNorm_restrict_of_tendstoUniformlyOn hK_meas hK_volume_finite h_unif
 
+omit [NeZero d] in
 private lemma mollifyEps_sub_eq_mollifyEps_sub
     {ε : ℝ} (hε : 0 < ε) {f g : EuclN → ℝ}
     (hf_loc : LocallyIntegrable f (volume : Measure EuclN))
@@ -395,6 +397,7 @@ private lemma mollifyEps_sub_eq_mollifyEps_sub
   simp [Pi.sub_apply]
   ring
 
+omit [NeZero d] in
 private lemma tendsto_eLpNorm_restrict_sub_mollifyEps_of_memLp
     {ι : Type*} {l : Filter ι}
     {εFn : ι → ℝ} (hε_pos : ∀ i, 0 < εFn i) (hε_tendsto : Tendsto εFn l (𝓝 0))
@@ -565,6 +568,7 @@ private lemma lintegral_enorm_sq_eq_eLpNorm_sq
   rw [← ENNReal.rpow_mul]
   norm_num
 
+omit [NeZero d] in
 private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
@@ -845,6 +849,7 @@ private theorem lintegral_enorm_sq_diffQuot_le_lintegral_enorm_sq_weakPartial
             h_lint_eq_eLpNorm_sq_g.symm
     _ ≤ ∫⁻ y in Ω', (‖g_k y‖ₑ : ℝ≥0∞) ^ 2 ∂(volume : Measure EuclN) := h_K_to_Ω'
 
+omit [NeZero d] in
 theorem eLpNorm_diffQuot_le_eLpNorm_weakPartial
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
@@ -881,6 +886,7 @@ theorem eLpNorm_diffQuot_le_eLpNorm_weakPartial
     rw [h_LHS_sq, h_RHS_sq]; exact h_lint
   exact (ENNReal.pow_le_pow_left_iff (by norm_num : 2 ≠ 0)).mp h_sq_le
 
+omit [NeZero d] in
 theorem integral_sq_diffQuot_le_integral_sq_weakPartial_meas
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))
@@ -946,6 +952,7 @@ theorem integral_sq_diffQuot_le_integral_sq_weakPartial_meas
   rw [h_LHS_eq, h_RHS_eq]
   exact ENNReal.toReal_mono h_RHS_lint_lt_top.ne h_lint
 
+omit [NeZero d] in
 theorem integral_sq_diffQuot_le_integral_sq_weakPartial
     {u g_k : EuclN → ℝ}
     (hu_l2 : MemLp u 2 (volume : Measure EuclN))

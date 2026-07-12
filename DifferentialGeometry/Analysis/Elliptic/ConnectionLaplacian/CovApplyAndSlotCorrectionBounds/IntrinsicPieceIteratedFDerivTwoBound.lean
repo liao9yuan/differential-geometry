@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.IntrinsicPieceFderivBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.CovApplyAndSlotCorrectionBounds.SlotCorrectionChartFderivBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma c_contDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : SmoothCcTensor g r s) :
@@ -49,6 +49,7 @@ private lemma c_contDiffOn_goodSet
   have h_le : (∞ : WithTop ℕ∞) + 1 ≤ ∞ := by rw [ENat.coe_top_add_one]
   exact hF_cd.fderiv_of_isOpen hU_open h_le
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma u_contDiffOn_goodSet'
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     ContDiffOn ℝ ∞
@@ -63,6 +64,7 @@ private lemma u_contDiffOn_goodSet'
       (chartLeviCivitaGoodSet (I := I) α) := hB_total.contMDiffOn
   exact chartE_pullback_contDiffOn_goodSet (I := I) α hB_on
 
+omit [CompactSpace M] in
 private lemma pouTsupport_subset_goodSet' (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -74,6 +76,7 @@ private lemma pouTsupport_subset_goodSet' (α : M) :
   rw [h_eq, extChartAt_source_eq_chartAt_source (I := I)]
   exact (chartAtlasPOU_isSubordinate I M) α hb
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma iteratedFDeriv_u_continuousOn
     (α : M) (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (k : ℕ) :

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Embedding.MorreyHigherOrder
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -176,6 +175,7 @@ variable [NeZero (Module.finrank ℝ E)]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompactSpace M] [SigmaCompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 lemma chartPullback_contMDiff_of_contDiff_finite
     (α : M) (m : ℕ)
     {ψ : EuclN → ℝ}
@@ -453,6 +453,7 @@ variable [NeZero (Module.finrank ℝ E)]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_apply_toE_extChartAt
     (α : M) (u : M → ℝ) {x : M} (hx : x ∈ (chartAt H α).source) :
     chartPushed (I := I) (M := M)
@@ -471,6 +472,7 @@ private lemma chartPushed_apply_toE_extChartAt
     exact (extChartAt I α).left_inv h_x_src
   rw [h_inv]
 
+omit [CompactSpace M] [I.Boundaryless] [NeZero (Module.finrank ℝ E)] in
 private lemma continuousOn_chartPushed_of_continuous
     (α : M) {ũ : M → ℝ} (hũ_cont : Continuous ũ) :
     ContinuousOn (chartPushed (I := I) (M := M)
@@ -489,6 +491,7 @@ private lemma continuousOn_chartPushed_of_continuous
     (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α).contMDiff.continuous
   exact (hρ_cont.comp_continuousOn h_inv_cont).mul (hũ_cont.comp_continuousOn h_inv_cont)
 
+omit [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_ball_subset_chartTargetEuclid
     (α : M) {y₀ : EuclN} (hy₀ : y₀ ∈ chartTargetEuclid (I := I) (M := M) α) :
     ∃ R : ℝ, 0 < R ∧ Metric.ball y₀ R ⊆ chartTargetEuclid (I := I) (M := M) α := by

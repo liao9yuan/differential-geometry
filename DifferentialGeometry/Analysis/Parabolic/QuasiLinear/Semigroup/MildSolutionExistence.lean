@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.Contraction
 import Mathlib.Topology.MetricSpace.Contracting
 import Mathlib.Topology.ContinuousMap.Compact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,10 +25,12 @@ private def pathOfCM {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
     (u : C(↑(Set.Icc (0 : ℝ) T), X)) : ℝ → X :=
   Set.IccExtend hT0 u
 
+omit [NormedSpace ℝ X] [CompleteSpace X] in
 private theorem continuous_pathOfCM {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
     (u : C(↑(Set.Icc (0 : ℝ) T), X)) : Continuous (pathOfCM hT0 u) :=
   Continuous.Icc_extend' u.continuous
 
+omit [NormedSpace ℝ X] [CompleteSpace X] in
 private theorem pathOfCM_apply_mem {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
     (u : C(↑(Set.Icc (0 : ℝ) T), X)) {τ : ℝ}
     (hτ : τ ∈ Set.Icc (0 : ℝ) T) :
@@ -49,6 +50,7 @@ def duhamelCM (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X} {L : ℝ≥0}
           Set.Icc_subset_Ici_self
         exact (h_on.mono h_sub).restrict⟩
 
+omit [CompleteSpace X] in
 @[simp]
 theorem duhamelCM_apply (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X}
     {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ} (hT0 : (0 : ℝ) ≤ T)
@@ -57,6 +59,7 @@ theorem duhamelCM_apply (S : BoundedC0Semigroup X) (u₀ : X) {N : X → X}
       nlDuhamel S u₀ N (pathOfCM hT0 u) (t : ℝ) :=
   rfl
 
+omit [CompleteSpace X] in
 private theorem duhamelCM_dist_apply_le (S : BoundedC0Semigroup X)
     (u₀ : X) {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) (u v : C(↑(Set.Icc (0 : ℝ) T), X))
@@ -93,6 +96,7 @@ private theorem duhamelCM_dist_apply_le (S : BoundedC0Semigroup X)
     _ ≤ (L : ℝ) * t * dist u v := h_t_le
     _ ≤ (L : ℝ) * T * dist u v := h_mono
 
+omit [CompleteSpace X] in
 private theorem duhamelCM_dist_le (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) (hTL_nn : (0 : ℝ) ≤ (L : ℝ) * T)
@@ -104,6 +108,7 @@ private theorem duhamelCM_dist_le (S : BoundedC0Semigroup X) (u₀ : X)
   · intro t
     exact duhamelCM_dist_apply_le S u₀ hN hT0 u v t
 
+omit [CompleteSpace X] in
 theorem duhamelCM_contractingWith (S : BoundedC0Semigroup X) (u₀ : X)
     {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) (hTL : (L : ℝ) * T < 1) :
@@ -163,6 +168,7 @@ theorem semilinear_mild_solution_existence (S : BoundedC0Semigroup X)
     unfold nlDuhamel duhamel
     rfl
 
+omit [CompleteSpace X] in
 private theorem duhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
     {F₁ F₂ : ℝ → X} {t : ℝ} (ht : 0 ≤ t)
     (hF : Set.EqOn F₁ F₂ (Set.Icc 0 t)) :
@@ -175,6 +181,7 @@ private theorem duhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
   change S (t - τ) (F₁ τ) = S (t - τ) (F₂ τ)
   rw [hF hτ]
 
+omit [CompleteSpace X] in
 private theorem nlDuhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
     (N : X → X) {u₁ u₂ : ℝ → X} {t : ℝ} (ht : 0 ≤ t)
     (hu : Set.EqOn u₁ u₂ (Set.Icc 0 t)) :
@@ -185,6 +192,7 @@ private theorem nlDuhamel_congr (S : BoundedC0Semigroup X) (u₀ : X)
   change N (u₁ τ) = N (u₂ τ)
   rw [hu hτ]
 
+omit [CompleteSpace X] in
 private theorem isFixedPt_of_duhamel_solution (S : BoundedC0Semigroup X)
     (u₀ : X) {N : X → X} {L : ℝ≥0} (hN : LipschitzWith L N) {T : ℝ}
     (hT0 : (0 : ℝ) ≤ T) {u : ℝ → X}

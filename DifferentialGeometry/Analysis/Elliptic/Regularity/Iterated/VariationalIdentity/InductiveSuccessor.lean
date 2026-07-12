@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIdentity.SuccessorSource
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -53,6 +53,7 @@ private lemma contDiff_fderiv_apply_single
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.comp h_fderiv
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_fderiv_apply_single
     {ψ : EuclN → ℝ} (hψ_cs : HasCompactSupport ψ)
     (l : Fin (Module.finrank ℝ E)) :
@@ -60,12 +61,14 @@ private lemma hasCompactSupport_fderiv_apply_single
       (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) :=
   hψ_cs.fderiv_apply (𝕜 := ℝ) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_fderiv_apply_single_subset
     (ψ : EuclN → ℝ) (l : Fin (Module.finrank ℝ E)) :
     tsupport (fun y : EuclN => (fderiv ℝ ψ y) (EuclideanSpace.single l 1)) ⊆
       tsupport ψ :=
   tsupport_fderiv_apply_subset ℝ (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_apply_single_swap
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ) (y : EuclN)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -107,6 +110,7 @@ private lemma fderiv_apply_single_swap
   rw [ContinuousLinearMap.flip_apply, ContinuousLinearMap.flip_apply]
   exact h_symm (EuclideanSpace.single j 1) (EuclideanSpace.single l 1)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -166,6 +170,7 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_u_h_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -186,6 +191,7 @@ private lemma chartPushed_u_h_ae_zero_off_chartImagePOUTsupport
   exact chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
 
+set_option linter.unusedSectionVars false in
 private lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ) :
@@ -565,6 +571,7 @@ private theorem ibp_inner_j
   rw [h_snoc_cons] at h_ibp
   exact h_ibp
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma integrable_triple_helper
     {α : M} {K : Set EuclN}
     (hK_compact : IsCompact K)

@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2Jet
 import DifferentialGeometry.Tensor.Auxiliary.DeTurckLieKernelL2JetBoundGridWindow
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBoundCometricTraceFrame
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -293,6 +292,7 @@ private noncomputable def dLaPerturbSharpEndoFib (g₀ : SmoothRiemannianMetric 
           h, map_smul]
         rfl }
 
+set_option linter.unusedSectionVars false in
 private lemma dLaPerturbSharpEndoFib_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v : TangentSpace I x) :
     dLaPerturbSharpEndoFib (I := I) (M := M) g₀ T x v =
@@ -300,6 +300,7 @@ private lemma dLaPerturbSharpEndoFib_apply (g₀ : SmoothRiemannianMetric I M)
   rw [dLaPerturbSharpEndoFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma inner_dLaPerturbSharpEndoFib (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v w : TangentSpace I x) :
     g₀.inner x (dLaPerturbSharpEndoFib (I := I) (M := M) g₀ T x v) w =
@@ -308,6 +309,7 @@ private lemma inner_dLaPerturbSharpEndoFib (g₀ : SmoothRiemannianMetric I M)
   exact inner_metricSharp (I := I) g₀ x
     (ccTensorBilinSymm (I := I) g₀ T x v).toLinearMap w
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private theorem dLaPerturbSharpEndoFib_contMDiff (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) :
@@ -365,6 +367,7 @@ private noncomputable def dLaPerturbSharpEndoField (g₀ : SmoothRiemannianMetri
   toFun := fun x : M => dLaPerturbSharpEndoFib (I := I) (M := M) g₀ T x
   contMDiff_toFun := dLaPerturbSharpEndoFib_contMDiff (I := I) (M := M) g₀ T
 
+set_option linter.unusedSectionVars false in
 private lemma unitModel_eq_ccTensorBilin_dla (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -461,6 +464,7 @@ private noncomputable def dLaLoweredG1Cc (g₀ : SmoothRiemannianMetric I M)
   dLaLoweredCc (I := I) (M := M) g₀ g₁ g_bg +
     dLaLoweredPerturbCc (I := I) (M := M) g₀ T g₁ g_bg
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add_dla (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) (x : M) (m : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ s (A + B) x m =
@@ -531,6 +535,7 @@ private lemma dLaLoweredPerturbCc_unitModel_apply (g₀ : SmoothRiemannianMetric
   exact ccTensorBilinSymm_symm (I := I) g₀ T x (m 0)
     (connDiffCovDerivOp (I := I) g₁ g_bg x (m 1) (m 2) (m 3))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rfns_neg_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =
@@ -543,6 +548,7 @@ private lemma rfns_neg_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rfns_smul_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -552,6 +558,7 @@ private lemma rfns_smul_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
   rw [TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left, tensorInnerPointwise_smul_right]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma rfns_iCG_sub_le_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (j : ℕ)
     (A B : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
@@ -574,6 +581,7 @@ private lemma rfns_iCG_sub_le_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (
   refine le_trans (riemannianFiberNormSq_add_le (I := I) (M := M) g r (s + j) x _ _) ?_
   rw [rfns_neg_dla (I := I) (M := M) g r (s + j) x]
 
+set_option linter.unusedSectionVars false in
 private lemma rfns_iCG_add_le_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (j : ℕ)
     (A B : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + j) x
@@ -590,6 +598,7 @@ private lemma rfns_iCG_add_le_dla (g : SmoothRiemannianMetric I M) (r s : ℕ) (
   rw [hsec]
   exact riemannianFiberNormSq_add_le (I := I) (M := M) g r (s + j) x _ _
 
+omit [BoundarylessManifold I M] in
 private theorem exists_fixedField_rfns_jet_dla (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (F : SmoothCcTensor g₀ r s) :
     ∃ c : ℕ → ℝ, (∀ j, 0 ≤ c j) ∧ ∀ (j : ℕ) (x : M),

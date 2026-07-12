@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLineari
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDivergenceForm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma interiorProduct_toModel_eval_dla (s : ℕ) (x : M) (vv : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) (w : Fin s → TangentSpace I x) :
     Tensor0SSpace.toModel
@@ -76,6 +76,7 @@ lemma interiorProduct_toModel_eval_dla (s : ℕ) (x : M) (vv : TangentSpace I x)
   rw [h1]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma toModel_om_single_eq_cotangentToDual_dla (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel om (fun k => (m k : E)) =
@@ -85,6 +86,7 @@ lemma toModel_om_single_eq_cotangentToDual_dla (x : M) (om : Tensor0SSpace 1 I x
   rw [cotangentToDual_apply]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma cotangentToDual_eq_inner_sharp_dla (g₀ : SmoothRiemannianMetric I M) (x : M)
     (om : Tensor0SSpace 1 I x) (ww : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) om ww =
@@ -95,6 +97,7 @@ lemma cotangentToDual_eq_inner_sharp_dla (g₀ : SmoothRiemannianMetric I M) (x 
     rw [← inverseMetricSharpFib_inner (I := I) g₀ x om ww]]
   rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma cotangentToDual_map_sub_dla (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) om (a - b) =
@@ -103,6 +106,7 @@ lemma cotangentToDual_map_sub_dla (x : M) (om : Tensor0SSpace 1 I x)
       cotangentToDualLinear (I := I) (x := x) om v from fun v => rfl]
   exact map_sub _ a b
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma cotangentToDual_map_add_dla (x : M) (om : Tensor0SSpace 1 I x)
     (a b : TangentSpace I x) :
     cotangentToDual (I := I) (x := x) om (a + b) =

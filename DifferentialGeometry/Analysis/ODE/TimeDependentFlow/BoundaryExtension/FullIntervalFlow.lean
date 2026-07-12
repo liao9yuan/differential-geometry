@@ -12,6 +12,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [FiniteDimensional ℝ E] in
 theorem flowValid_chain_step
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hXC1 : AutonomizedFieldJointC1 (I := I) X)
@@ -270,6 +271,7 @@ private theorem trivialLine_isMIntegralCurveOn
 
 omit [CompactSpace M] in
 
+omit [BoundarylessManifold I M] [T2Space M] in
 private theorem autonomized_localUniform_curve
     (Xt : ℝ → ∀ x : M, TangentSpace I x)
     (hXt : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -296,6 +298,7 @@ private theorem autonomized_localUniform_curve
 
 omit [CompactSpace M] in
 
+omit [BoundarylessManifold I M] [T2Space M] in
 private theorem autonomized_localUniform_jointSmooth
     (Xt : ℝ → ∀ x : M, TangentSpace I x)
     (hXt : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -324,6 +327,7 @@ private theorem autonomized_localUniform_jointSmooth
     rw [hwin]; exact hΨsm
   · exact (hΨbare q hq t (by simpa using ht)).hasMFDerivWithinAt
 
+omit [BoundarylessManifold I M] [T2Space M] in
 private theorem autonomized_uniform_jointSmoothWindow
     (Xt : ℝ → ∀ x : M, TangentSpace I x)
     (hXt : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -365,6 +369,7 @@ private theorem autonomized_uniform_jointSmoothWindow
   · exact (hΨsm pti).mono (Set.prod_mono hwin_sub (subset_refl _))
   · exact (hΨcurve pti q hq).mono hwin_sub
 
+omit [BoundarylessManifold I M] [T2Space M] in
 private theorem autonomized_uniform_localExistence
     (Xt : ℝ → ∀ x : M, TangentSpace I x)
     (hXt : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

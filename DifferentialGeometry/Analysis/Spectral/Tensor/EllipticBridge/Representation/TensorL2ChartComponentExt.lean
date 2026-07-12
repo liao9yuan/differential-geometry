@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChartPull
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -58,6 +57,7 @@ private def smoothFnSmul
       show TensorRSSpace.toModel (S.toSection x) = S.toFun x from rfl, hS_zero,
       smul_zero]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma smoothFnSmul_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (φ : M → ℝ) (hφ : ContMDiff I (𝓘(ℝ, ℝ)) ∞ φ)
@@ -65,6 +65,7 @@ private lemma smoothFnSmul_toSection_apply
     (smoothFnSmul (I := I) (M := M) g r s φ hφ S).toSection x =
       φ x • S.toSection x := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartAtlasPOU_finset_sum_eq_one (x : M) :
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
         ((chartAtlasPOU I M) α x) = 1 := by
@@ -83,6 +84,7 @@ private def pouSq (x : M) : ℝ :=
   ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
     ((chartAtlasPOU I M) α x) * ((chartAtlasPOU I M) α x)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma contMDiff_pouSq :
     ContMDiff I (𝓘(ℝ, ℝ)) ∞ (pouSq (I := I) (M := M)) := by
   classical
@@ -90,6 +92,7 @@ private lemma contMDiff_pouSq :
   exact ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff).mul
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pouSq_pos (x : M) : 0 < pouSq (I := I) (M := M) x := by
   classical
   have h_sum := chartAtlasPOU_finset_sum_eq_one (I := I) (M := M) x
@@ -107,11 +110,13 @@ private lemma pouSq_pos (x : M) : 0 < pouSq (I := I) (M := M) x := by
     ((chartAtlasPOU I M) α x) * ((chartAtlasPOU I M) α x))
     (fun α hα => mul_nonneg (h_nonneg α hα) (h_nonneg α hα)) hα₀_mem
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pouSq_ne_zero (x : M) : pouSq (I := I) (M := M) x ≠ 0 :=
   (pouSq_pos (I := I) (M := M) x).ne'
 
 private def pouSqRecip (x : M) : ℝ := (pouSq (I := I) (M := M) x)⁻¹
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma contMDiff_pouSqRecip :
     ContMDiff I (𝓘(ℝ, ℝ)) ∞ (pouSqRecip (I := I) (M := M)) :=
   (contMDiff_pouSq (I := I) (M := M)).inv₀ (pouSq_ne_zero (I := I) (M := M))
@@ -122,6 +127,7 @@ private def reconSeed
   smoothFnSmul (I := I) (M := M) g r s
     (pouSqRecip (I := I) (M := M)) (contMDiff_pouSqRecip (I := I) (M := M)) T
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma sum_pouSmul_pouSmul_reconSeed_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -188,6 +194,7 @@ private lemma sum_pouSmul_pouSmul_reconSeed_eq
     exact mul_inv_cancel₀ (pouSq_ne_zero (I := I) (M := M) x)
   rw [h_weight, one_smul]
 
+omit [CompleteSpace E] in
 private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s)
@@ -255,6 +262,7 @@ private lemma inner_pouSmul_eq_zero_of_chartComponent_eq_zero
     ((ae_restrict_iff' hctE_meas).mp h_integrand_ae)]
   exact integral_zero EuclN ℝ
 
+omit [CompleteSpace E] in
 private lemma tensorL2_eq_zero_of_chartComponent_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (w : TensorL2 r s g)
     (hw : ∀ (α : M) (Q : CompIdx E r s),
@@ -306,6 +314,7 @@ private lemma tensorL2_eq_zero_of_chartComponent_eq_zero
       exact h_on_smooth T
   exact congrFun h_zero w
 
+omit [CompleteSpace E] in
 theorem tensorL2_eq_of_chartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (u v : TensorL2 r s g)
     (h : ∀ (α : M) (P₀ : TensorCompIdx (E := E) r s),

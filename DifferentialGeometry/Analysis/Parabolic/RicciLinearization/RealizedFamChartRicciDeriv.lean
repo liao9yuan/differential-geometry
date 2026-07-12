@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ private lemma hasDerivAt_of_shift {f : ℝ → ℝ} {f' s₀ : ℝ}
   have heq : (fun s : ℝ => f (s₀ + (s - s₀))) = f := by funext s; congr 1; ring
   rwa [heq] at hcomp
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasDerivAt_fderiv_comm_at (Φ : ℝ × E → ℝ) (s₀ : ℝ) (y₀ : E) (v : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (s₀, y₀)) :
     HasDerivAt
@@ -101,6 +101,7 @@ private lemma hasDerivAt_fderiv_comm_at (Φ : ℝ × E → ℝ) (s₀ : ℝ) (y�
   rw [rhs_eq]
   exact h_sv'.congr_of_eventuallyEq lhs_eq
 
+set_option linter.unusedSectionVars false in
 private lemma hasDerivAt_partialDeriv_comm_at
     (Φ : ℝ × E → ℝ) (p : Fin (Module.finrank ℝ E)) (s₀ : ℝ) (y₀ : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (s₀, y₀)) :

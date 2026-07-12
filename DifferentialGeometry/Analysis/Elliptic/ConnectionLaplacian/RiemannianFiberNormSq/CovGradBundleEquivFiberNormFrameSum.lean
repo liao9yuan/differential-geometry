@@ -28,6 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : TensorRSSpace 0 s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -152,6 +153,7 @@ lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x)
@@ -215,6 +217,7 @@ lemma riemannianFiberNormSq_slot0Curry_covGradBundleEquiv_eq
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x)
@@ -239,6 +242,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 s I x) (b : ℝ)
@@ -297,6 +301,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_le_card_mul
 
 omit [CompactSpace M] [I.Boundaryless] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x)
@@ -354,6 +359,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_eq_slot0Curry
     (T := (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (s + 1) I x from T) ωK)
     (v0 := e a) (vs := fun k => e (J k))]
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x)
@@ -387,6 +393,7 @@ lemma riemannianFiberNormSq_covGradBundleEquiv_symm_reading_le
   exact riemannianFiberNormSq_slot0Curry_le_of_frame (I := I) (M := M) g s x eC K₀
     hreprS hreprSucc T i
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma riemannianFiberNormSq_succ_eq_sum_bareSlot0Curry_of_orthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TensorRSSpace 0 (s + 1) I x)

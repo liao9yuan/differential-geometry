@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCmOrderDropping
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclN_basis_expansion (v : EuclN) :
     v = ∑ j : Fin (Module.finrank ℝ E), v j • EuclideanSpace.single j (1 : ℝ) := by
   classical
@@ -67,16 +67,19 @@ private def basisTupleE {m : ℕ} (α : Fin m → Fin (Module.finrank ℝ E)) :
     Fin m → EuclN :=
   fun i => EuclideanSpace.single (α i) (1 : ℝ)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma basisTupleE_norm_one {m : ℕ}
     (α : Fin m → Fin (Module.finrank ℝ E)) (i : Fin m) :
     ‖basisTupleE (E := E) α i‖ = 1 := by
   simp only [basisTupleE, PiLp.norm_single]; simp
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma basisTupleE_prod_norms {m : ℕ}
     (α : Fin m → Fin (Module.finrank ℝ E)) :
     (∏ i : Fin m, ‖basisTupleE (E := E) α i‖) = 1 :=
   Finset.prod_eq_one (fun i _ => basisTupleE_norm_one (E := E) α i)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclN_coord_abs_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E)) :
     |v i| ≤ ‖v‖ := by
   classical
@@ -94,6 +97,7 @@ private lemma euclN_coord_abs_le_norm (v : EuclN) (i : Fin (Module.finrank ℝ E
   rw [h_norm_eq, ← Real.sqrt_sq_eq_abs]
   exact Real.sqrt_le_sqrt h_sq
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem opNorm_le_sum_basisE {m : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ) :
     ‖f‖ ≤ ∑ α : Fin m → Fin (Module.finrank ℝ E), |f (basisTupleE (E := E) α)| := by
@@ -150,6 +154,7 @@ private theorem opNorm_le_sum_basisE {m : ℕ}
   refine le_trans (Finset.sum_le_sum (fun α _ => h_each α)) ?_
   rw [← Finset.sum_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma abs_apply_basisTupleE_le_opNorm {m : ℕ}
     (f : ContinuousMultilinearMap ℝ (fun _ : Fin m => EuclN) ℝ)
     (α : Fin m → Fin (Module.finrank ℝ E)) :
@@ -166,6 +171,7 @@ def tensorComponentEuclideanChart (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -175,6 +181,7 @@ lemma rawPullR_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
         ∘ (toEuclidean (E := E)).symm) =
       tensorComponentEuclideanChart (I := I) (M := M) g r s S α Idx Jdx := rfl
 
+omit [BoundarylessManifold I M] in
 lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -185,6 +192,7 @@ lemma rawPullR_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     g r s S α Idx Jdx).congr (fun y hy => ?_)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]; rfl
 
+omit [BoundarylessManifold I M] in
 lemma rawPullR_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -194,6 +202,7 @@ lemma rawPullR_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (rawPullR_contDiffOn (I := I) (M := M) g r s S α Idx Jdx).contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_eventuallyEq_rawPullR (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -211,11 +220,13 @@ def tensorComponentAbsSum (g : SmoothRiemannianMetric I M) (r s : ℕ)
         (Fin s → Fin (Module.finrank ℝ E)),
     |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y|
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma zeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ tensorComponentAbsSum (I := I) (M := M) g r s S α y :=
   Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -230,6 +241,7 @@ lemma abs_rawPullR_le_zeroContentR (g : SmoothRiemannianMetric I M)
     Finset.single_le_sum (f := f) (fun q _ => abs_nonneg _) (Finset.mem_univ _)
   simpa [tensorComponentAbsSum, hf] using h
 
+omit [BoundarylessManifold I M] in
 lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -269,6 +281,7 @@ lemma fderiv_rawPullR_single_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [hform, h_fderiv_eq]
   linarith [hform']
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma exists_iteratedFDeriv_norm_bound_on_compactR
     {f : EuclN → ℝ} {s : Set EuclN} (hf : ContDiffOn ℝ ∞ f s) (hs : IsOpen s)
     {K : Set EuclN} (hK : IsCompact K) (hKs : K ⊆ s) (N : ℕ) :
@@ -300,6 +313,7 @@ lemma exists_iteratedFDeriv_norm_bound_on_compactR
     exact (hCl l y hy).trans
       (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
 
+omit [BoundarylessManifold I M] in
 lemma exists_lowerOrderCoeff_uniform_boundR
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -345,6 +359,7 @@ lemma exists_lowerOrderCoeff_uniform_boundR
     exact (hCw ⟨m, Idx, Jdx', p⟩ l hl y hy).trans
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma iteratedFDeriv_succ_norm_le_sum_euclidPartial
     {u : EuclN → ℝ} {O : Set EuclN} (hO : IsOpen O) (hu : ContDiffOn ℝ ∞ u O)
     (j : ℕ) {y : EuclN} (hy : y ∈ O) :
@@ -438,6 +453,7 @@ lemma iteratedFDeriv_succ_norm_le_sum_euclidPartial
         push_cast
         exact le_refl _
 
+omit [BoundarylessManifold I M] in
 lemma lowerOrderTerm_iteratedFDeriv_norm_leR
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M) (m : Fin (Module.finrank ℝ E))
@@ -508,6 +524,7 @@ lemma lowerOrderTerm_iteratedFDeriv_norm_leR
       iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
         (f := tensorComponentEuclideanChart (I := I) (M := M) g r s S α p.1 p.2) (j - l) h_open hy]
 
+omit [BoundarylessManifold I M] in
 lemma exists_christoffel_bound_valence_range
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P N : ℕ) :
     ∃ Γ : ℝ, 0 ≤ Γ ∧ ∀ p ≤ P,
@@ -540,6 +557,7 @@ lemma exists_christoffel_bound_valence_range
     exact (hΓf p m Idx Jdx' q l hl y hy).trans
       (Finset.le_sup' Γf (Finset.mem_range.mpr (by omega)))
 
+omit [BoundarylessManifold I M] in
 lemma iteratedFDeriv_rawPullR_le_zeroContent_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P : ℕ) :
@@ -849,11 +867,13 @@ private def tensorComponentSqSum (g : SmoothRiemannianMetric I M) (r s : ℕ)
         (Fin s → Fin (Module.finrank ℝ E)),
     |tensorComponentEuclideanChart (I := I) (M := M) g r s S α q.1 q.2 y| ^ 2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma hsZeroContentR_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ tensorComponentSqSum (I := I) (M := M) g r s S α y :=
   Finset.sum_nonneg (fun _ _ => sq_nonneg _)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma zeroContentR_sq_le_card_mul_hsZeroContentR
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M) (y : EuclN) :
@@ -878,6 +898,7 @@ private lemma zeroContentR_sq_le_card_mul_hsZeroContentR
   rw [Finset.card_univ] at hcs
   exact hcs
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouPull_eq_zero_off_kernelR (α : M) (y : EuclN)
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (hy_off : y ∉ chartImagePOUTsupport (I := I) (M := M) α) :
@@ -897,6 +918,7 @@ private lemma pouPull_eq_zero_off_kernelR (α : M) (y : EuclN)
   refine ⟨(extChartAt I α) b, ⟨b, hb_supp, rfl⟩, ?_⟩
   rw [h_round]; simp
 
+omit [BoundarylessManifold I M] in
 private lemma reverse_pointwise_integrand_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : SmoothCcTensor g r s) {y : EuclN},
@@ -1119,6 +1141,7 @@ private lemma reverse_pointwise_integrand_le
       pouPull_eq_zero_off_kernelR (I := I) (M := M) α y hy hyK
     rw [hρ0]; simp
 
+omit [BoundarylessManifold I M] in
 private lemma rawPullRIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -1173,6 +1196,7 @@ private lemma rawPullRIntegrand_aemeasurable
   exact ENNReal.measurable_ofReal.comp_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
+omit [BoundarylessManifold I M] in
 private lemma sumIntegrals_eq_integral_sumR
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :
@@ -1368,6 +1392,7 @@ private lemma sumIntegrals_eq_integral_sumR
         rw [Finset.mul_sum,
           ENNReal.ofReal_sum_of_nonneg (fun bIdx _ => mul_nonneg hρ_nn (sq_nonneg _))]
 
+set_option linter.unusedSectionVars false in
 private lemma rhsInner_eq_integral_hsZeroContent
     (g : SmoothRiemannianMetric I M) (r s i : ℕ) (T : SmoothCcTensor g r s)
     (α : M) :

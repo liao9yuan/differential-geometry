@@ -17,7 +17,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinear
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistenceRemainderDiffBallUniform
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistenceSymmetrizationNormBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -614,6 +613,7 @@ theorem smoothCcToTensorHs_smul (g₀ : SmoothRiemannianMetric I M) (σ : ℝ) (
   rw [show SmoothCcTensor.toL2 (c • T) = c • SmoothCcTensor.toL2 T from map_smul _ _ _,
     tensorL2Coeff_smul]
 
+omit [BoundarylessManifold I M] in
 theorem tensorHs_norm_smul (g₀ : SmoothRiemannianMetric I M) {σ : ℝ} (c : ℝ)
     (x : tensorHs (I := I) (M := M) g₀ 0 2 σ) :
     ‖c • x‖ = |c| * ‖x‖ := by

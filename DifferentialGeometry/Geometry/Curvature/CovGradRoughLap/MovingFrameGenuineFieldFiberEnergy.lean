@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.UniformCurvatureSup
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.Slot0SliceFiberNormDomination
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma g_inner_self_nonneg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     0 ≤ g.inner x v v := by
@@ -40,6 +40,7 @@ private lemma g_inner_self_nonneg
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
+set_option linter.unusedSectionVars false in
 private lemma riemannianFiberNormSq_eq_sum_toModel_sq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (Tr : TensorRSSpace 0 s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -125,6 +126,7 @@ private lemma riemannianFiberNormSq_eq_sum_toModel_sq
     rw [this]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma orthoWeighted_frame_sum_collapse
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x)

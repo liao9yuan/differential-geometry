@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -18,11 +17,13 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 lemma continuous_diffQuot_smooth
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     Continuous (diffQuot k h v) :=
   (contDiff_diffQuot_of_contDiff (d := d) hv k hh).continuous
 
+omit [NeZero d] in
 private lemma continuous_diffQuot_sq_smooth
     {v : E → ℝ} (hv : ContDiff ℝ (⊤ : ℕ∞) v) (k : Fin d) {h : ℝ} (hh : h ≠ 0) :
     Continuous (fun x : E => (diffQuot k h v x)^2) :=
@@ -87,6 +88,7 @@ private lemma cross_1_summand_compactSupport
     h_step2.mul_right
   exact h_step3.mul_right
 
+omit [NeZero d] in
 private lemma continuous_diffQuot_partial_u
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     (i k : Fin d) {h : ℝ} (hh : h ≠ 0) :
@@ -111,6 +113,7 @@ lemma continuous_partial_u
   have hu_C1 : ContDiff ℝ 1 u := hu.of_le (by norm_cast)
   exact (hu_C1.continuous_fderiv (by norm_num)).clm_apply continuous_const
 
+omit [NeZero d] in
 lemma integrable_eta_sq_diffQuot_sum
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -156,6 +159,7 @@ lemma integrable_cross_1_summand
   have h_supp := cross_1_summand_compactSupport (d := d) B u hη_supp i j k h
   exact h_cont.integrable_of_hasCompactSupport h_supp
 
+omit [NeZero d] in
 lemma integrable_eta_sq_diffQuot_partial_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -181,6 +185,7 @@ lemma integrable_eta_sq_diffQuot_partial_sq
     h_eta_sq_supp.mul_right
   exact h_cont.integrable_of_hasCompactSupport h_supp
 
+omit [NeZero d] in
 lemma integrable_const_eta_sq_diffQuot_partial_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -198,6 +203,7 @@ lemma integrable_const_eta_sq_diffQuot_partial_sq
   rw [h_eq]
   exact h_base.const_mul c
 
+omit [NeZero d] in
 lemma integrable_const_indicator_diffQuot_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη_supp : HasCompactSupport η)
@@ -286,6 +292,7 @@ lemma integrable_cross_2_summand
   (cross_2_summand_continuous (d := d) B hu hη i j k hh).integrable_of_hasCompactSupport
     (cross_2_summand_compactSupport (d := d) B u hη_supp i j k h)
 
+omit [NeZero d] in
 lemma integrable_const_eta_sq_indicator_partial_sq
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -385,6 +392,7 @@ lemma integrable_cross_3_summand
   (cross_3_summand_continuous (d := d) B hu hη i j k hh).integrable_of_hasCompactSupport
     (cross_3_summand_compactSupport (d := d) B u hη_supp i j k h)
 
+omit [NeZero d] in
 lemma v_test_supported_in_Ω'
     {u : E → ℝ}
     {η : E → ℝ}
@@ -398,6 +406,7 @@ lemma v_test_supported_in_Ω'
   (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.tsupport_nirenbergTestFunction_subset
     (d := d) η u k h).trans (hh_supp_in_Ω' hh_le)
 
+omit [NeZero d] in
 lemma continuous_v_test
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -407,6 +416,7 @@ lemma continuous_v_test
   (DifferentialGeometry.Analysis.Sobolev.NirenbergTestFunction.contDiff_nirenbergTestFunction
     hη hu k hh).continuous
 
+omit [NeZero d] in
 lemma hasCompactSupport_v_test
     {u : E → ℝ} {η : E → ℝ} (hη_supp : HasCompactSupport η)
     (k : Fin d) (h : ℝ) :

@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorCompone
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientL2AtomsCovariantRiemannian
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorComponentGradientL2AtomsChristoffelSlotNormBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -462,6 +462,7 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem exists_eLpNorm_sq_pou_mul_sqrt_sum_christoffel_correction_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (j : Fin (Module.finrank ℝ E)) :

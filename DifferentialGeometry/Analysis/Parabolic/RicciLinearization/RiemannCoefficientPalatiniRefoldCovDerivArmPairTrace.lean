@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldLieCovDerivFamily
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldEndoArmGridWindow
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,6 +50,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdDelta_nonneg (g₀ : SmoothRiemannianMetric I M) (x₀ : M)
     (P : SmoothCcTensor g₀ 0 2) {δ : ℝ}
     (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ P) δ) :
@@ -73,6 +73,7 @@ lemma bdDelta_nonneg (g₀ : SmoothRiemannianMetric I M) (x₀ : M)
     exact mul_neg_of_neg_of_pos h1 hsqrt_pos
   linarith [le_trans habs_nn hbound]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma bdNorm_zero_of_isEmpty [IsEmpty M] (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (V : SmoothCcTensor g₀ r s) : ‖V‖ = 0 := by
   rw [SmoothCcTensor.norm_def, tensorL2Norm_def, tensorL2Inner,
@@ -83,6 +84,7 @@ def armPairTraceSlotPerm6 : Equiv.Perm (Fin 6) :=
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
+set_option linter.unusedSectionVars false in
 lemma bdTensor0S_zero_rank_decomp (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) • unitTensor (I := I) (M := M) x := by
   apply Tensor0SSpace.toModel_injective
@@ -98,6 +100,7 @@ lemma bdTensor0S_zero_rank_decomp (x : M) (t : Tensor0SSpace 0 I x) :
     rfl]
   rw [smul_eq_mul, mul_one]
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 lemma bdSlotExtendIter_two_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x)
@@ -184,6 +187,7 @@ def cometricDoubleTraceCc (g₀ g₁ : SmoothRiemannianMetric I M) (s : ℕ) :
       contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₁ s }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdToModel_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -216,6 +220,7 @@ lemma bdToModel_cons_sum_smul (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma bdToModel_cons_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -250,6 +255,7 @@ private lemma bdToModel_cons_cons_sum_smul (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+set_option linter.unusedSectionVars false in
 lemma bdOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
@@ -1779,6 +1785,7 @@ private lemma bdQuadLowCc_unitModel_apply (g₀ gArm gOut : SmoothRiemannianMetr
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons]
 
+set_option linter.unusedSectionVars false in
 lemma bdConnDiff_self_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₀ g₀ x u v = 0 := by
@@ -1889,6 +1896,7 @@ private def dLaCovKernelDiffLoweredCc (g₀ g₁ g_bg : SmoothRiemannianMetric I
     + domDomCongrSection (I := I) g₀ bdSigma3 (connDiffQuadraticLoweredCc (I := I) (M := M) g₀ g₁ g_bg)
     + domDomCongrSection (I := I) g₀ bdSigma4 (connDiffQuadraticLoweredCc (I := I) (M := M) g₀ g₁ g_bg)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma bdUnitModel_smul (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (A : SmoothCcTensor g₀ 0 s) (x : M) :
     unitModel (I := I) (M := M) g₀ s (c • A) x =
@@ -2204,6 +2212,7 @@ private theorem bdCovDerivArmDiff_eq_pairTrace
     rw [hXval a b]
     ring
   linear_combination hS
+set_option linter.unusedSectionVars false in
 lemma bdRfns_neg (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =

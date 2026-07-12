@@ -23,6 +23,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem tensorInnerPointwise_succ_eq_sum_slot0Curry
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (A B : TensorRSSpace 0 (s + 1) I x) :

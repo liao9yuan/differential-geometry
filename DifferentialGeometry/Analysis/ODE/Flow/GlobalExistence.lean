@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.SolutionOperator
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ theorem exists_linearODE_solution_of_short_at
   exists_linearODE_solution_of_short (A := A) (h₀ := c) (T := T) (M := M)
     hT hM hMT hA_cont hA_bd Y_c
 
+omit [CompleteSpace G] in
 private theorem hasDerivWithinAt_glue_Icc_at_pt
     {f g : ℝ → G} {A : ℝ → (G →L[ℝ] G)} {α t₁ β : ℝ}
     (hα_le : α ≤ t₁) (hβ_ge : t₁ ≤ β)

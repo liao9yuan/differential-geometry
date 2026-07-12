@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.MorreyManifoldHigherOrder
 import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,10 +45,12 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 noncomputable def etaTimesV (α : M) (v : M → ℝ) : M → ℝ :=
   fun x => chartStrictCutoff (I := I) (M := M) α x * v x
 
+set_option linter.unusedSectionVars false in
 lemma etaTimesV_apply (α : M) (v : M → ℝ) (x : M) :
     etaTimesV (I := I) (M := M) α v x =
       chartStrictCutoff (I := I) (M := M) α x * v x := rfl
 
+set_option linter.unusedSectionVars false in
 lemma etaTimesV_smooth (α : M) {v : M → ℝ}
     (hv : ContMDiff I 𝓘(ℝ, ℝ) ∞ v) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (etaTimesV (I := I) (M := M) α v) := by
@@ -62,11 +63,13 @@ noncomputable def etaTimesVScalar
   toFun := etaTimesV (I := I) (M := M) α v.toFun
   smooth := etaTimesV_smooth (I := I) (M := M) α v.smooth
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma etaTimesVScalar_toFun (g : SmoothRiemannianMetric I M)
     (α : M) (v : SmoothScalar g) :
     (etaTimesVScalar (I := I) (M := M) g α v).toFun =
       etaTimesV (I := I) (M := M) α v.toFun := rfl
 
+set_option linter.unusedSectionVars false in
 lemma tsupport_etaTimesV_subset (α : M) (v : M → ℝ) :
     tsupport (etaTimesV (I := I) (M := M) α v) ⊆ (chartAt H α).source := by
   have h_supp_subset : Function.support (etaTimesV (I := I) (M := M) α v) ⊆
@@ -92,6 +95,7 @@ noncomputable def smoothRep
       (gradFun (I := I) g v.toFun x)) -
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma smoothRep_apply (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) (x : M) :
     smoothRep (I := I) (M := M) g α v x =
@@ -138,6 +142,7 @@ private lemma smoothRep_eq_zero_off_tsupport_chartAtlasPOU
   rw [smoothRep_apply, h_grad_zero, h_lap_zero]
   simp
 
+set_option linter.unusedSectionVars false in
 private lemma gradFun_eq_gradFun_etaTimesV_of_eventuallyOne
     (g : SmoothRiemannianMetric I M) (α : M) {v : M → ℝ} {x : M}
     (h_one : chartStrictCutoff (I := I) (M := M) α =ᶠ[𝓝 x]
@@ -153,6 +158,7 @@ private lemma gradFun_eq_gradFun_etaTimesV_of_eventuallyOne
   unfold gradFun
   rw [h_mfderiv]
 
+set_option linter.unusedSectionVars false in
 private lemma etaTimesV_eq_of_eventuallyOne
     (α : M) {v : M → ℝ} {x : M}
     (h_one : chartStrictCutoff (I := I) (M := M) α =ᶠ[𝓝 x]
@@ -224,6 +230,7 @@ noncomputable def gradInnerPiece
       (gradFun (I := I) g ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)
       (gradFun (I := I) g (etaTimesV (I := I) (M := M) α v) x)
 
+set_option linter.unusedSectionVars false in
 lemma gradInnerPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
     (v : M → ℝ) (x : M) :
     gradInnerPiece (I := I) (M := M) g α v x =
@@ -236,6 +243,7 @@ noncomputable def lapPiece
   fun x => (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x *
     etaTimesV (I := I) (M := M) α v x
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma lapPiece_apply (g : SmoothRiemannianMetric I M) (α : M)
     (v : M → ℝ) (x : M) :
     lapPiece (I := I) (M := M) g α v x =
@@ -277,6 +285,7 @@ lemma gradInnerPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
         DifferentialGeometry.Integral.DivergenceTheorem.grad_g_apply]
   exact (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (2 : ℝ))).mul h_inner
 
+set_option linter.unusedSectionVars false in
 lemma lapPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
@@ -285,6 +294,7 @@ lemma lapPiece_smooth (g : SmoothRiemannianMetric I M) (α : M)
   exact (laplacianOfChartPOU (I := I) (M := M) g α).contMDiff.mul
     (etaTimesV_smooth (I := I) (M := M) α v.smooth)
 
+set_option linter.unusedSectionVars false in
 private lemma tsupport_gradInnerPiece_subset
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
     tsupport (gradInnerPiece (I := I) (M := M) g α v) ⊆
@@ -311,12 +321,14 @@ private lemma tsupport_gradInnerPiece_subset
     simp
   exact closure_minimal h_supp_subset (isClosed_tsupport _)
 
+set_option linter.unusedSectionVars false in
 lemma tsupport_gradInnerPiece_subset_source
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
     tsupport (gradInnerPiece (I := I) (M := M) g α v) ⊆ (chartAt H α).source :=
   (tsupport_gradInnerPiece_subset (I := I) (M := M) g α v).trans
     (chartAtlasPOU_isSubordinate I M α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tsupport_lapPiece_subset
     (g : SmoothRiemannianMetric I M) (α : M) (v : M → ℝ) :
     tsupport (lapPiece (I := I) (M := M) g α v) ⊆

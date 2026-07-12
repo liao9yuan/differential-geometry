@@ -32,6 +32,7 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 set_option maxHeartbeats 6400000 in
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem H1ComplToLp_inj_on_laplacianDomain
     (g : SmoothRiemannianMetric I M)
     {u v : laplacianDomain (I := I) (M := M) g}
@@ -261,6 +262,7 @@ theorem laplacianEigenfunction_smooth_representative
   · intro x
     exact congrFun h_Δf_eq_neg_lam_f x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma laplacianEigenvalueOf_pos_of_lt_one
     (g : SmoothRiemannianMetric I M)
     (μ : NonzeroResolventEigenvalue (I := I) (M := M) g)

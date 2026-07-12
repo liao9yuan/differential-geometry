@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.ChartDa
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -47,6 +46,7 @@ noncomputable def chartPushedRawPartial
     (fderiv ℝ (DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw I α v.toFun) y)
       (EuclideanSpace.single j 1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma chartPushedRawPartial_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) (v : SmoothScalar g) (y : EuclN) :
@@ -95,6 +95,7 @@ noncomputable def chartPushedRawPartialLp
       (chartTargetEuclid (I := I) (M := M) α)) :=
   (hLip.memLp v).toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartPushedRawPartialLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -109,6 +110,7 @@ noncomputable def chartPushedRawPartialLp
   unfold chartPushedRawPartialLp
   exact MeasureTheory.MemLp.coeFn_toLp _
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_chartPushedRawPartialLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -159,6 +161,7 @@ noncomputable def chartPushedRawPartialLpLin
         Lp ℝ 2 _) y = c * chartPushedRawPartial (I := I) (M := M) g α j v y
     rw [hy_smul, Pi.smul_apply, hy_v, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPushedRawPartialLpLin_apply
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -166,6 +169,7 @@ lemma chartPushedRawPartialLpLin_apply
     chartPushedRawPartialLpLin (I := I) (M := M) g α j hLip v =
       chartPushedRawPartialLp (I := I) (M := M) g α j hLip v := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_chartPushedRawPartialLpLin
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -204,6 +208,7 @@ noncomputable def chartPushedRawPartialCLM
       have h_toReal := (ENNReal.toReal_le_toReal h_lhs_finite ENNReal.ofReal_ne_top).mpr h_bd
       rwa [ENNReal.toReal_ofReal (mul_nonneg h_nn h_norm_nn)] at h_toReal)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartPushedRawPartialCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -211,6 +216,7 @@ noncomputable def chartPushedRawPartialCLM
     chartPushedRawPartialCLM (I := I) (M := M) g α j hLip v =
       chartPushedRawPartialLp (I := I) (M := M) g α j hLip v := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_smoothToH1Compl_local
     (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToH1Compl (I := I) (M := M) g) := by
@@ -220,6 +226,7 @@ private lemma denseRange_smoothToH1Compl_local
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_smoothToH1Compl_local
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing (smoothToH1Compl (I := I) (M := M) g) := by
@@ -239,6 +246,7 @@ noncomputable def H1ComplRawPartialCLM
     (chartPushedRawPartialCLM (I := I) (M := M) g α j hLip)
     (smoothToH1Compl (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma H1ComplRawPartialCLM_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -261,6 +269,7 @@ noncomputable def chartPushedRawWeakPartialLp
       (chartTargetEuclid (I := I) (M := M) α)) :=
   H1ComplRawPartialCLM (I := I) (M := M) g α j hLip u_h
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem chartPushedRawWeakPartialLp_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)
@@ -272,6 +281,7 @@ noncomputable def chartPushedRawWeakPartialLp
   rw [H1ComplRawPartialCLM_smoothToH1Compl]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedRawWeakPartialLp_continuous
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j) :
@@ -279,6 +289,7 @@ theorem chartPushedRawWeakPartialLp_continuous
   unfold chartPushedRawWeakPartialLp
   exact (H1ComplRawPartialCLM (I := I) (M := M) g α j hLip).continuous
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedRawWeakPartialLp_smoothToH1Compl_coeFn
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (hLip : ChartPushedRawPartialLipschitz (I := I) (M := M) g α j)

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.CovariantChainRule
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.SecondVariationMinimiser
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma covDerivAlong_locality
     (g : SmoothRiemannianMetric I M) (γ₁ γ₂ : ℝ → M)
     (V₁ : ∀ s, TangentSpace I (γ₁ s)) (V₂ : ∀ s, TangentSpace I (γ₂ s)) (t : ℝ)
@@ -149,6 +149,7 @@ private lemma flowTimeRetract_mem_Ioo (t T δ w : ℝ) (hδ : 0 ≤ δ) (hw : 0 
 private noncomputable def chartLineCurve (x : M) (v : TangentSpace I x) (δ : ℝ) : ℝ → M :=
   fun r => (extChartAt I x).symm (extChartAt I x x + (reparam δ r) • (show E from v))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma exists_chartLineCurve_global
     (x : M) (v : TangentSpace I x) :
     ∃ δ : ℝ, 0 < δ ∧
@@ -223,6 +224,7 @@ private lemma exists_chartLineCurve_global
     rw [ContinuousLinearMap.id_comp] at hcomp'
     simpa [chartLineCurve, hφ] using hcomp'
 
+set_option linter.unusedSectionVars false in
 theorem conjugating_flow_covariant_variational_eq
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

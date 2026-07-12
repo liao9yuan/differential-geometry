@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiate
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplFromDomainPow
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ def densitySecondDerivOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
   (fderiv ℝ (densityDerivOnEuclid (I := I) g α l₁) y)
     (EuclideanSpace.single l₂ 1)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramSecondDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -68,6 +68,7 @@ lemma weightedInvGramSecondDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l₂ (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densitySecondDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -90,6 +91,7 @@ lemma densitySecondDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l₂ (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramSecondDerivOnEuclid_continuousOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -98,6 +100,7 @@ lemma weightedInvGramSecondDerivOnEuclid_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (weightedInvGramSecondDerivOnEuclid_contDiffOn (I := I) g α i j l₁ l₂).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densitySecondDerivOnEuclid_continuousOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -106,6 +109,7 @@ lemma densitySecondDerivOnEuclid_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densitySecondDerivOnEuclid_contDiffOn (I := I) g α l₁ l₂).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramSecondDerivOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -133,6 +137,7 @@ lemma weightedInvGramSecondDerivOnEuclid_bounded_on_compact
   intro y hy
   exact h_max hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densitySecondDerivOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -311,6 +316,7 @@ abbrev direction1
     (D : DiffTwiceChartBilinearH1ComplData (I := I) (M := M) g α) :
     Fin (Module.finrank ℝ E) := D.base1.direction
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem twice_differentiated_chart_bilinear_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -381,6 +387,7 @@ theorem twice_differentiated_chart_bilinear_identity
       ∂(volume : Measure EuclN)) :=
   D.twice_differentiated_variational_identity ψ hψ hψ_cs hψ_supp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem differentiated_chart_bilinear_identity_via_base1
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -418,6 +425,7 @@ theorem differentiated_chart_bilinear_identity_via_base1
       ∂(volume : Measure EuclN)) :=
   D.base1.differentiated_variational_identity ψ hψ hψ_cs hψ_supp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem base_chart_bilinear_identity_via_base1
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -440,6 +448,7 @@ theorem base_chart_bilinear_identity_via_base1
       ∂(volume : Measure EuclN) :=
   D.base1.base.variational_identity ψ hψ hψ_cs hψ_supp
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem u_chart_second_deriv_isMixedWeakPartial
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -453,6 +462,7 @@ theorem u_chart_second_deriv_isMixedWeakPartial
   ⟨D.u_chart_second_deriv_isWeakPartial,
    D.base1.u_chart_deriv_isWeakPartial⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem weak_partial_second_deriv_isMixedWeakPartial
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -493,6 +503,7 @@ noncomputable def chosenSecondPartialWeakPartialDeriv
     (d := Module.finrank ℝ E) 2 l₂ (D₁.weak_partial_deriv i)
     (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenSecondPartialUChartDeriv_isWeakPartial
     {g : SmoothRiemannianMetric I M} {α : M}
     {D₁ : DiffChartBilinearH1ComplData (I := I) (M := M) g α}
@@ -507,6 +518,7 @@ private lemma chosenSecondPartialUChartDeriv_isWeakPartial
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
     h_memW1p l₂
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenSecondPartialFChartDeriv_isWeakPartial
     {g : SmoothRiemannianMetric I M} {α : M}
     {D₁ : DiffChartBilinearH1ComplData (I := I) (M := M) g α}
@@ -521,6 +533,7 @@ private lemma chosenSecondPartialFChartDeriv_isWeakPartial
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
     h_memW1p l₂
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenSecondPartialWeakPartialDeriv_isWeakPartial
     {g : SmoothRiemannianMetric I M} {α : M}
     {D₁ : DiffChartBilinearH1ComplData (I := I) (M := M) g α}
@@ -536,6 +549,7 @@ private lemma chosenSecondPartialWeakPartialDeriv_isWeakPartial
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
     h_memW1p l₂
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenSecondPartialUChartDeriv_memLp
     {g : SmoothRiemannianMetric I M} {α : M}
     {D₁ : DiffChartBilinearH1ComplData (I := I) (M := M) g α}
@@ -549,6 +563,7 @@ private lemma chosenSecondPartialUChartDeriv_memLp
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     h_memW1p l₂
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenSecondPartialFChartDeriv_memLp
     {g : SmoothRiemannianMetric I M} {α : M}
     {D₁ : DiffChartBilinearH1ComplData (I := I) (M := M) g α}
@@ -562,6 +577,7 @@ private lemma chosenSecondPartialFChartDeriv_memLp
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     h_memW1p l₂
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chosenSecondPartialWeakPartialDeriv_memLp
     {g : SmoothRiemannianMetric I M} {α : M}
     {D₁ : DiffChartBilinearH1ComplData (I := I) (M := M) g α}
@@ -576,6 +592,7 @@ private lemma chosenSecondPartialWeakPartialDeriv_memLp
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_memLp_of_mem
     h_memW1p l₂
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma memLp_restrict_of_memLp_chartTarget
     (α : M)
     {f : EuclN → ℝ}

@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.ChartFlowVelocitySli
 import DifferentialGeometry.Geometry.Exponential.Smoothness.UniformChartFlowBridge
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -36,11 +35,13 @@ def chartFlowOrbitRescaled (Φ : (E × E) × ℝ → E × E) (x₀ : E) (v : E) 
     ℝ → E × E :=
   fun s => rescaleChartOrbit (E := E) t' (Φ (((x₀, v) : E × E), t' * s))
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartFlowOrbitRescaled_apply
     (Φ : (E × E) × ℝ → E × E) (x₀ v : E) (t' s : ℝ) :
     chartFlowOrbitRescaled (E := E) Φ x₀ v t' s =
       rescaleChartOrbit (E := E) t' (Φ (((x₀, v) : E × E), t' * s)) := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartFlowOrbitRescaled_zero
     {Φ : (E × E) × ℝ → E × E} {x₀ v : E} {t' : ℝ}
     (hinit : Φ (((x₀, v) : E × E), 0) = (x₀, v)) :
@@ -49,6 +50,7 @@ lemma chartFlowOrbitRescaled_zero
   rw [mul_zero, hinit]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartFlowOrbitRescaled_hasDerivAt_chartPhaseVF
     {g : SmoothRiemannianMetric I M} {p : M}
     {Φ : (E × E) × ℝ → E × E} {x₀ v : E} {t' s₀ : ℝ}
@@ -68,6 +70,7 @@ section ZeroSectionOrbit
 
 variable [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 lemma chartPhaseVF_zero_section
     (g : SmoothRiemannianMetric I M) (p : M) :
     chartPhaseVF (I := I) g p
@@ -87,6 +90,7 @@ section FlowZeroSectionConstancy
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 lemma chartFlow_zero_section_eventually_const
     {g : SmoothRiemannianMetric I M} {p : M}
     {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump
@@ -195,6 +199,7 @@ section FlowAtZeroEval
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 lemma chartFlow_zero_section_apply_eventually_eq_origin
     {g : SmoothRiemannianMetric I M} {p : M}
     {Φ : (E × E) × ℝ → E × E} {b : ContDiffBump
@@ -218,6 +223,7 @@ section CandidateSliceSmoothness
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 lemma extChartAt_symm_comp_chartFlowCandidate_at_zero_general
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -249,6 +255,7 @@ lemma extChartAt_symm_comp_chartFlowCandidate_at_zero_general
   simp only [chartFlowCandidate_apply]
   exact (extChartAt I p).right_inv hv
 
+set_option linter.unusedSectionVars false in
 lemma chartFlowCandidate_chart_contDiffAt_zero_at_general_time
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ}
     (hρ : 0 < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -291,6 +298,7 @@ section ConditionalDischarge
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem uniformChartFlowBridge_of_match
     (g : SmoothRiemannianMetric I M) (p : M)
     {Φ : (E × E) × ℝ → E × E} {ρ T t' ρ' : ℝ}
@@ -362,6 +370,7 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAt_zero_of_chartFlowGeodesicMatch
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' ρ' : ℝ),

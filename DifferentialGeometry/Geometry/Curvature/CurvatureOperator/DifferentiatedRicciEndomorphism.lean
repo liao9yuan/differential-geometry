@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.BareSlot0CurryParseval
 import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.FrameInvariance
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 private local instance : NormedSpace ℝ E := InnerProductSpace.toNormedSpace
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma extDerivFunApply_contMDiff
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {X : Π b : M, TangentSpace I b} (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) :
@@ -57,6 +57,7 @@ lemma extDerivFunApply_contMDiff
   refine hresult.congr fun b => ?_
   simp [extDerivFun, tangentMap_snd, NormedSpace.fromTangentSpace]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma exists_globalSmoothScalar_eqOn_nhd
     {f : M → ℝ} {U : Set M} {x : M} (hU : IsOpen U) (hxU : x ∈ U)
     (hf : ContMDiffOn I 𝓘(ℝ, ℝ) ∞ f U) :
@@ -83,6 +84,7 @@ private lemma exists_globalSmoothScalar_eqOn_nhd
   · filter_upwards [χ.eventuallyEq_one] with b hb
     rw [hb, Pi.one_apply, one_mul]
 
+set_option linter.unusedSectionVars false in
 private lemma riemannSec_add_acted_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -112,6 +114,7 @@ private lemma riemannSec_add_acted_smooth
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZ'_le)
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZsum_le)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannSec_smul_acted_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -187,6 +190,7 @@ private lemma riemannSec_smul_acted_smooth
     hZ_at hcXZ_at hcYZ_at hcXfZ_at hcYfZ_at hYf_at hXf_at
     hf_smul_cYZ_at hf_smul_cXZ_at hYf_smul_Z_at hXf_smul_Z_at hx_int
 
+set_option linter.unusedSectionVars false in
 private lemma nablaCurvSec_add_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -340,6 +344,7 @@ private lemma nablaCurvSec_smul_acted
   simp only [smul_sub]
   abel
 
+set_option linter.unusedSectionVars false in
 private lemma nablaCurvSec_finsetSum_acted
     (g : SmoothRiemannianMetric I M) {ι : Type*} (s : Finset ι)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -371,6 +376,7 @@ private lemma nablaCurvSec_finsetSum_acted
       rw [hfun, nablaCurvSec_add_acted (g := g) X Y Z (W a) (∑ i ∈ t, W i) x, ih,
         Finset.sum_insert ha]
 
+omit [I.Boundaryless] in
 private lemma nablaCurvSec_acted_eventuallyEq
     (g : SmoothRiemannianMetric I M)
     {X Y Z W W' : Π b : M, TangentSpace I b} {x : M}
@@ -633,6 +639,7 @@ noncomputable def nablaBaseSlotCurvFrameSumCLM
     nablaBaseSlotCurvFrameSumCLM (I := I) g B Vb x w =
       ∑ i : ι, nablaBaseSlotCurv (I := I) g (B i) (B i) Vb x w := rfl
 
+omit [I.Boundaryless] in
 theorem nablaRicci_symm
     (g : SmoothRiemannianMetric I M)
     (X V W : Π b : M, TangentSpace I b) (x : M) :
@@ -647,6 +654,7 @@ theorem nablaRicci_symm
     ricciTensor_symm (I := I) g x (V x) ((LeviCivita (I := I) g).toFun W x (X x))]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma nablaRicci_add_right_raw
     (g : SmoothRiemannianMetric I M)
     (X V W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -743,6 +751,7 @@ lemma nablaRicci_eq_of_VW_eq
   rw [nablaRicci_eq_of_V_eq_raw (g := g) X V V₀ W x hVV₀,
     nablaRicci_eq_of_W_eq_raw (g := g) X V₀ W W₀ x hWW₀]
 
+set_option linter.unusedSectionVars false in
 private lemma nablaRicci_add_left_raw
     (g : SmoothRiemannianMetric I M)
     (X V V' W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -880,6 +889,7 @@ lemma inner_nablaRicciEndo_smooth
       (smoothExtensionTangent_contMDiff (I := I) x (W x))) W x
     (smoothExtensionTangent_eq (I := I) x (V x)) (smoothExtensionTangent_eq (I := I) x (W x))
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem tensorInnerPointwise_slotSubst_sum
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (T : TangentSpace I x →L[ℝ] TangentSpace I x)

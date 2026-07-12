@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovGradL2InnerDirichletBridge
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweringParallel
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,6 +35,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 lemma toModel_liftedTensorSection_zero_eq_apply_unit_reindex
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -54,6 +54,7 @@ lemma toModel_liftedTensorSection_zero_eq_apply_unit_reindex
       (ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) (1 : ℝ)))]
   rw [Tensor0SSpace.toModel_ofModel]
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
     (g : SmoothRiemannianMetric I M)
     (W S : SmoothCcTensor g 0 2) (x : M) (a b : TangentSpace I x) :
@@ -81,6 +82,7 @@ theorem tensorInnerPointwise_covDeriv_eq_tensorInnerPointwise_0s_lowered_two
         (loweredCovDerivAt (I := I) (M := M) g 0 2 S.toSection x b) from
     (loweredCovDerivAt_eq_lower_tensorCovDerivAt (I := I) (M := M) g S.toSection x b).symm]
 
+set_option linter.unusedSectionVars false in
 theorem tensorCovDerivPointwiseInner_eq_lowered_orthoFrame_diag_sum_two
     (g : SmoothRiemannianMetric I M)
     (T v : SmoothCcTensor g 0 2) (b : M)

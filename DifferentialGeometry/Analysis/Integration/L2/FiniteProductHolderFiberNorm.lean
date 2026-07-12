@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import Mathlib.MeasureTheory.Integral.MeanInequalities
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -86,6 +85,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+set_option linter.unusedSectionVars false in
 theorem holder_integral_prod_riemannianFiberNormSq_le
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (r s : ι → ℕ) (S : ∀ m, SmoothCcTensor g (r m) (s m)) (θ : ι → ℝ)
@@ -149,6 +149,7 @@ theorem holder_integral_prod_riemannianFiberNormSq_le
           θ hF_int hF_nn (fun m hm => (hθ m hm).le) hθ1
 
 
+set_option linter.unusedSectionVars false in
 theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} [DecidableEq ι]
     (t t₀ : Finset ι) (ht₀ : t₀ ⊆ t)
@@ -211,6 +212,7 @@ theorem holder_integral_prod_riemannianFiberNormSq_le_of_sup_bound
     (Finset.prod_nonneg hΛ_nn)
 
 
+set_option linter.unusedSectionVars false in
 theorem holder_integral_prod_riemannianFiberNormSq_natWeight_le_of_sup_bound
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (r s : ι → ℕ) (S : ∀ m, SmoothCcTensor g (r m) (s m))

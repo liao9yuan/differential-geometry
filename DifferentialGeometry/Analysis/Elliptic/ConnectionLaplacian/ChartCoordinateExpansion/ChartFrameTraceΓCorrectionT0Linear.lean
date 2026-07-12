@@ -65,6 +65,7 @@ private noncomputable def leviCivitaFrameSelfCoord
           ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b)) m
     else 0
 
+omit [I.Boundaryless] in
 private lemma lcFrameSelfCoord_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
@@ -78,6 +79,7 @@ private lemma lcFrameSelfCoord_of_mem
   unfold leviCivitaFrameSelfCoord
   rw [dif_pos hb]
 
+omit [I.Boundaryless] in
 private lemma lcFrameSelfCoord_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i m : Fin (Module.finrank ℝ E)) {b : M}
@@ -102,6 +104,7 @@ private lemma lcFrameSelfCoord_eq_clmAt_proj
       (chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b
       ((chartFrameNormGlobalSmooth (I := I) (M := M) g α i).toFun b))) h
 
+omit [I.Boundaryless] in
 private lemma lcFrameSelf_eq_lcFrameSelfCoord_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E))
@@ -209,6 +212,7 @@ private lemma chartFrameTraceΓZerothCoeff_contDiffOn
   exact (lcFrameSelfCoordPullback_contDiffOn (I := I) (M := M) g α i m).mul
     (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx I' Jdx J')
 
+omit [I.Boundaryless] in
 private lemma chart_α_proj_lcFrameSelfTraceSummand_eq_coord_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s)

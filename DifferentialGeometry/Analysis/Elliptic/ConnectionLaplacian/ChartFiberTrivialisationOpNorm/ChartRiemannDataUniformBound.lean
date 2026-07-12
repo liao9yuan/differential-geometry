@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapPoin
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Defs
 import DifferentialGeometry.Geometry.Curvature.Riemann.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ def chartRiemannEuclid (g : SmoothRiemannianMetric I M) (α : M)
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   fun y => chartRiemannTensor (I := I) g α i j k l (toEuclidean.symm y)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartRiemannEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k l : Fin (Module.finrank ℝ E))
@@ -41,6 +41,7 @@ def chartRiemannEuclid (g : SmoothRiemannianMetric I M) (α : M)
     chartRiemannEuclid (I := I) g α i j k l y =
       chartRiemannTensor (I := I) g α i j k l (toEuclidean.symm y) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior ((extChartAt I α).target : Set E)))

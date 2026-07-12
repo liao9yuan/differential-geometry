@@ -6,7 +6,6 @@ import DifferentialGeometry.Geometry.Geodesic.Existence
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -35,6 +34,7 @@ def chartFlowOrbitLift (Φ : (E × E) × ℝ → E × E) (p : M) (v : E) :
   fun s => (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).symm
     (Φ (((extChartAt I p p, v) : E × E), s))
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartFlowOrbitLift_apply
     (Φ : (E × E) × ℝ → E × E) (p : M) (v : E) (s : ℝ) :
     chartFlowOrbitLift (I := I) Φ p v s =
@@ -47,6 +47,7 @@ section InverseChart
 
 variable [I.Boundaryless]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma mem_extChartAt_tangent_zero_target
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -65,6 +66,7 @@ lemma mem_extChartAt_tangent_zero_target
       (extChartAt I p).map_target hz1_target
     rwa [extChartAt_source] at hz1_src
 
+set_option linter.unusedSectionVars false in
 lemma extChartAt_tangent_zero_symm_proj
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -98,6 +100,7 @@ lemma extChartAt_tangent_zero_symm_proj
     (extChartAt I p).left_inv hq_extsrc_base
   rw [h_z1, hinv]
 
+set_option linter.unusedSectionVars false in
 lemma extChartAt_tangent_zero_apply_symm
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -106,6 +109,7 @@ lemma extChartAt_tangent_zero_apply_symm
   (extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)).right_inv
     (mem_extChartAt_tangent_zero_target (I := I) (p := p) hz)
 
+set_option linter.unusedSectionVars false in
 lemma chartAt_source_of_extChartAt_tangent_zero_symm
     (p : M) {z : E × E}
     (hz : z ∈ (interior (extChartAt I p).target) ×ˢ (Set.univ : Set E)) :
@@ -129,6 +133,7 @@ section InitialValue
 
 variable [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_zero
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E}
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -193,6 +198,7 @@ section ProjectionIdentity
 
 variable [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_proj
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), s) ∈
@@ -202,6 +208,7 @@ theorem chartFlowOrbitLift_proj
   unfold chartFlowOrbitLift
   exact extChartAt_tangent_zero_symm_proj (I := I) p hΦ_target
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_proj_mem_chartAt_source
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_target : Φ (((extChartAt I p p, v) : E × E), s) ∈
@@ -216,6 +223,7 @@ section ChartPushLiftIdentification
 
 variable [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_chartPushLift_eq
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} (s : ℝ)
     (hΦ_init : Φ (((extChartAt I p p, v) : E × E), 0) =
@@ -243,6 +251,7 @@ section Continuity
 
 variable [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_continuousOn
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E} {T : ℝ}
     (hΦ_cont : ContinuousOn (fun s : ℝ => Φ (((extChartAt I p p, v) : E × E), s))
@@ -271,6 +280,7 @@ section IntegralCurveAtZero
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -382,6 +392,7 @@ theorem exists_chartFlowOrbitLift_eventuallyEq_isMIntegralCurveAt_zero
   rw [← hs_eq]
   exact hleft.symm
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_isMIntegralCurveAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -412,6 +423,7 @@ section HeadlineUniform
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartFlowOrbitLift_data_uniform
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

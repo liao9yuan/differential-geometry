@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedDiffOpPropo
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldDifferentiatedTowerNormalForm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,12 +36,14 @@ variable [CompleteSpace E]
 section RankCast
 
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private theorem covGrad_heq_congr_lg (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
     (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b} (hYZ : HEq Y Z) :
     HEq (covGrad g r a Y) (covGrad g r b Z) := by
   subst h
   rw [eq_of_heq hYZ]
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_covGrad_comm_heq_lg (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (X : SmoothCcTensor g r s) :
     HEq (iteratedCovGrad g r (s + 1) m (covGrad g r s X))
@@ -57,6 +58,7 @@ private theorem iteratedCovGrad_covGrad_comm_heq_lg (g : SmoothRiemannianMetric 
       exact covGrad_heq_congr_lg g r (by omega : (s + 1) + k = s + (k + 1)) ih
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem rfns_toSection_heq_congr_lg (g : SmoothRiemannianMetric I M)
     (r : ℕ) {a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
     (hYZ : HEq Y Z) (x : M) :
@@ -79,6 +81,7 @@ private def castRankCc_lg (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ}
   h ▸ W
 
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private theorem rfns_iteratedCovGrad_castRankCc_lg (g : SmoothRiemannianMetric I M) (r : ℕ)
     {a b : ℕ} (h : a = b) (W : SmoothCcTensor g r a) (j : ℕ) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (b + j) x
@@ -157,6 +160,7 @@ noncomputable def diffCurvPhi0Fib (g : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem diffCurvPhi0Fib_contMDiff (g : SmoothRiemannianMetric I M)
     {X Y : Π b : M, TangentSpace I b}
     (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X))

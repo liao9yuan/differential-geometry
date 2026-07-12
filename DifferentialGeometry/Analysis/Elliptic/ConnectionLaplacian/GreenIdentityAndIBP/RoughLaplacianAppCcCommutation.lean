@@ -65,6 +65,7 @@ theorem cometricDoubleTraceFib_eq_sum_curry (g₀ : SmoothRiemannianMetric I M) 
         ((Module.finBasis ℝ E).cDualBasis k)))
     (vs := Fin.cons ((Module.finBasis ℝ E) k) m)]
 
+set_option linter.unusedSectionVars false in
 theorem toModel_slotExtend_two_apply (g₀ : SmoothRiemannianMetric I M) (b s : ℕ)
     (Φ : SmoothCcTensor g₀ b s) (x : M) (D : Tensor0SSpace (b + 2) I x) (a c : E)
     (m : Fin s → E) :

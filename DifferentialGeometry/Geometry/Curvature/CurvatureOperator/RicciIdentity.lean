@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Connection.ChartBridge.Gradient
 import DifferentialGeometry.Geometry.Operator.Laplacian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem ricci_identity_vector
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X Y V : Π b : M, TangentSpace I b) (x : M) :
@@ -258,6 +258,7 @@ noncomputable def localConnLap_vector
     (cov.toFun (covApply cov (B i) V) x (B i x) -
       cov.toFun V x (cov.toFun (B i) x (B i x)))
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma localConnLap_vector_def
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -484,6 +485,7 @@ theorem inner_riemannSec_gradFun_skew_symm [I.Boundaryless]
     (gradFun_contMDiff_total_section (I := I) g hf) hB
   linarith
 
+set_option linter.unusedSectionVars false in
 lemma vector_eq_iff_inner_eq
     (g : SmoothRiemannianMetric I M) (x : M)
     (LHS RHS : TangentSpace I x) :

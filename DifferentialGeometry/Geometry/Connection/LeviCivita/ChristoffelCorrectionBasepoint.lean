@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartTorsion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -19,6 +18,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma trivToE_basepoint (α : M) (v : TangentSpace I α) :
     trivToE (I := I) α α v = v := by
   classical
@@ -30,6 +30,7 @@ lemma trivToE_basepoint (α : M) (v : TangentSpace I α) :
   exact (tangentBundleCore I M).coordChange_self (achart H α) α
     (by rw [tangentBundleCore_baseSet]; exact mem_chart_source H α) v
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem christoffelCorrection_basepoint_apply
     (g : SmoothRiemannianMetric I M) (α : M) (Y : E) (w : TangentSpace I α) :
     christoffelCorrection (I := I) g α α Y w =

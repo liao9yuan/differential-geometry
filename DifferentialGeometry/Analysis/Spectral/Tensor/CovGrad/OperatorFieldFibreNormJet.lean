@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionItera
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SlotExtendCovariantParallelism
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RankRReadingDominationUniformSup
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 variable [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 private lemma exists_orthoFrame_basis (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),
@@ -66,6 +66,7 @@ private lemma exists_orthoFrame_basis (g : SmoothRiemannianMetric I M) (x : M) :
   refine ⟨e, basisOfLinearIndependentOfCardEqFinrank he_li hcard, fun i => ?_, horth⟩
   rw [coe_basisOfLinearIndependentOfCardEqFinrank]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_eq_sum_componentSq_of_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -80,6 +81,7 @@ theorem riemannianFiberNormSq_eq_sum_componentSq_of_basis
   refine Finset.sum_congr rfl (fun K _ => Finset.sum_congr rfl (fun J _ => ?_))
   rw [pow_two]
 
+set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_slotExtendFib_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x)
@@ -426,6 +428,7 @@ def tensorRS_domDomCongr {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
           ((tensor0SSpace_continuousLinearEquiv s x).toContinuousLinearMap))).comp
       (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from T))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma toModel_rsDomDomCongr_apply {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) :
     Tensor0SSpace.toModel
@@ -441,6 +444,7 @@ lemma toModel_rsDomDomCongr_apply {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     LinearIsometryEquiv.coe_toContinuousLinearEquiv]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma rsDomDomCongr_apply_eval {r s : ℕ} {x : M} (σ : Equiv.Perm (Fin s))
     (T : TensorRSSpace r s I x) (d : Tensor0SSpace r I x) (v : Fin s → TangentSpace I x) :
     (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from tensorRS_domDomCongr σ T) d v =
@@ -502,6 +506,7 @@ theorem riemannianFiberNormSq_domDomCongr_covariant
   rw [fiberNormSqComponent_rsDomDomCongr (I := I) (M := M) g x σ T e K J]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private theorem rfns_toSection_heq_congr_rs (g : SmoothRiemannianMetric I M)
     {r a b : ℕ} (h : a = b) {Y : SmoothCcTensor g r a} {Z : SmoothCcTensor g r b}
     (hYZ : HEq Y Z) (x : M) :
@@ -588,6 +593,7 @@ private lemma covGrad_slotExtend_toSection_rsDomDomCongr
       exact fun h => Fin.succ_ne_zero _ (Fin.succ_injective _ h)
   rw [hdir, htail]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma covGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a = b)
     (W : SmoothCcTensor g r a) :
     covGrad (I := I) (M := M) g r b
@@ -736,6 +742,7 @@ theorem rfns_iteratedCovGrad_slotExtend_le (g : SmoothRiemannianMetric I M) (r s
 def diagonalGridGrowthFactor (j : ℕ) : ℝ := (2 * ((Module.finrank ℝ E : ℝ) + 1)) ^ j
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 theorem appCcGdiag_nonneg (j : ℕ) : 0 ≤ diagonalGridGrowthFactor (E := E) j := by
   rw [diagonalGridGrowthFactor]; positivity
 
@@ -942,6 +949,7 @@ private lemma sum_consEquiv {N t : ℕ} (F : (Fin (t + 1) → Fin N) → ℝ) :
   rw [Fintype.sum_prod_type]
 
 
+set_option linter.unusedSectionVars false in
 private lemma tensor00Scalar_coframe0_eq_one (g : SmoothRiemannianMetric I M) (x : M)
     {N : ℕ} (e : Fin N → TangentSpace I x) (K : Fin 0 → Fin N) :
     tensor00Scalar (I := I) (M := M) x (coframeS (I := I) (M := M) g x 0 e K) = 1 := by
@@ -950,6 +958,7 @@ private lemma tensor00Scalar_coframe0_eq_one (g : SmoothRiemannianMetric I M) (x
   simp
 
 
+set_option linter.unusedSectionVars false in
 private lemma rfns_zero_eq_sum_componentSq
     (g : SmoothRiemannianMetric I M) (x : M) (m : ℕ) (S : TensorRSSpace 0 m I x)
     {N : ℕ} (e : Fin N → TangentSpace I x)
@@ -972,6 +981,7 @@ private noncomputable def appCcSlice (g : SmoothRiemannianMetric I M) (r : ℕ) 
       (show E from e j0))
 
 
+set_option linter.unusedSectionVars false in
 private lemma appCcSlice_apply_coframe0 (g : SmoothRiemannianMetric I M) (r : ℕ) (x : M)
     {N : ℕ} (e : Fin N → TangentSpace I x) (W : SmoothCcTensor g 0 (r + 1))
     (j0 : Fin N) (K : Fin 0 → Fin N) :
@@ -985,6 +995,7 @@ private lemma appCcSlice_apply_coframe0 (g : SmoothRiemannianMetric I M) (r : �
     tensor00Scalar_coframe0_eq_one (I := I) (M := M) g x e K, one_smul]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 private lemma fiberNormSqComponent_zero_eq_toModel
     (g : SmoothRiemannianMetric I M) (x : M) (m : ℕ) (S : TensorRSSpace 0 m I x)
     {N : ℕ} (e : Fin N → TangentSpace I x) (K : Fin 0 → Fin N) (J : Fin m → Fin N) :
@@ -1159,6 +1170,7 @@ theorem riemannianFiberNormSq_comp_slotExtend_le (g : SmoothRiemannianMetric I M
           riemannianFiberNormSq (I := I) (M := M) g 0 (r + 1) x (W.toSection x) := by
         rw [hsum]
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 private lemma rfns_iteratedCovGrad_order_congr (g : SmoothRiemannianMetric I M)
     (r s : ℕ) {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g r s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g r (s + n) x
@@ -1167,6 +1179,7 @@ private lemma rfns_iteratedCovGrad_order_congr (g : SmoothRiemannianMetric I M)
         ((iteratedCovGrad (I := I) g r s n' S).toSection x) := by
   subst h; rfl
 
+set_option linter.unusedSectionVars false in
 private lemma iteratedCovGrad_zero_arg (g : SmoothRiemannianMetric I M) (r s m : ℕ) :
     iteratedCovGrad (I := I) g r s m (0 : SmoothCcTensor g r s) = 0 := by
   induction m with
@@ -1174,6 +1187,7 @@ private lemma iteratedCovGrad_zero_arg (g : SmoothRiemannianMetric I M) (r s m :
   | succ m ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma one_le_appCcGdiag (j : ℕ) : (1 : ℝ) ≤ diagonalGridGrowthFactor (E := E) j := by
   have hbase : (1 : ℝ) ≤ 2 * ((Module.finrank ℝ E : ℝ) + 1) := by
     have h0 : (0 : ℝ) ≤ (Module.finrank ℝ E : ℝ) := Nat.cast_nonneg _
@@ -1184,6 +1198,7 @@ private lemma one_le_appCcGdiag (j : ℕ) : (1 : ℝ) ≤ diagonalGridGrowthFact
     _ = diagonalGridGrowthFactor (E := E) j := by rw [diagonalGridGrowthFactor]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma appCcGdiag_succ_eq (j : ℕ) :
     diagonalGridGrowthFactor (E := E) (j + 1) =
       2 * ((Module.finrank ℝ E : ℝ) + 1) * diagonalGridGrowthFactor (E := E) j := by
@@ -1191,6 +1206,7 @@ private lemma appCcGdiag_succ_eq (j : ℕ) :
   ring
 
 
+set_option linter.unusedSectionVars false in
 theorem appCcLeibnizPsi_zero_right_eq (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0 =
@@ -1205,6 +1221,7 @@ theorem appCcLeibnizPsi_zero_right_eq (g : SmoothRiemannianMetric I M) (b c : �
       rfl
 
 
+set_option linter.unusedSectionVars false in
 private lemma appCcLeibnizPsi_succ_succ_eq (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i j : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =
@@ -1456,6 +1473,7 @@ private def slotExtendIterFib (g : SmoothRiemannianMetric I M) (b c : ℕ) (x : 
       (slotExtendIterFib g b c x A w)
 
 
+set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_comp_eq
     (g : SmoothRiemannianMetric I M) (p a c : ℕ) (x : M)
     (Φx : TensorRSSpace a c I x) (Wx : TensorRSSpace p a I x)

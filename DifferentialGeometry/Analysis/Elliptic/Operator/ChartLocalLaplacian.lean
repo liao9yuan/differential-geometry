@@ -7,7 +7,6 @@ import Mathlib.Analysis.Calculus.ContDiff.Basic
 import Mathlib.Analysis.Calculus.FDeriv.Basic
 import Mathlib.Topology.Algebra.Support
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,12 +39,14 @@ def chartPullback (α : M) (f : M → ℝ) : EuclN → ℝ :=
   fun y => (chartTargetEuclid (I := I) (M := M) α).indicator
     (fun z => f ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))) y
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartPullback_apply_of_mem (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     chartPullback (I := I) α f y =
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) :=
   Set.indicator_of_mem hy _
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartPullback_apply_of_notMem (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
     chartPullback (I := I) α f y = 0 :=
@@ -54,6 +55,7 @@ def chartPullback (α : M) (f : M → ℝ) : EuclN → ℝ :=
 def euclideanChartImageOfTsupport (α : M) (f : M → ℝ) : Set EuclN :=
   (toEuclidean (E := E)) '' ((extChartAt I α) '' tsupport f)
 
+set_option linter.unusedSectionVars false in
 lemma euclideanChartImageOfTsupport_isCompact
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -70,12 +72,14 @@ lemma euclideanChartImageOfTsupport_isCompact
     (toEuclidean (E := E)).continuous
   exact hImage1.image hcont_toE
 
+set_option linter.unusedSectionVars false in
 lemma euclideanChartImageOfTsupport_isClosed
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     IsClosed (euclideanChartImageOfTsupport (I := I) (M := M) α f) :=
   (euclideanChartImageOfTsupport_isCompact (I := I) (M := M) α hf_cs hf_supp).isClosed
 
+set_option linter.unusedSectionVars false in
 lemma euclideanChartImageOfTsupport_subset_chartTargetEuclid
     (α : M) {f : M → ℝ} (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     euclideanChartImageOfTsupport (I := I) (M := M) α f ⊆
@@ -90,6 +94,7 @@ lemma euclideanChartImageOfTsupport_subset_chartTargetEuclid
     exact hf_supp hx_supp
   exact (extChartAt I α).map_source hxsrc
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma chartPullback_support_subset
     (α : M) (f : M → ℝ) :
     Function.support (chartPullback (I := I) α f) ⊆
@@ -112,6 +117,7 @@ lemma chartPullback_support_subset
   · rw [chartPullback_apply_of_notMem (I := I) α f hyT] at hy
     exact (hy rfl).elim
 
+set_option linter.unusedSectionVars false in
 lemma chartPullback_tsupport_subset
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -120,6 +126,7 @@ lemma chartPullback_tsupport_subset
   refine closure_minimal (chartPullback_support_subset (I := I) α f) ?_
   exact euclideanChartImageOfTsupport_isClosed (I := I) (M := M) α hf_cs hf_supp
 
+set_option linter.unusedSectionVars false in
 lemma chartPullback_tsupport_subset_chartTargetEuclid
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -128,6 +135,7 @@ lemma chartPullback_tsupport_subset_chartTargetEuclid
   (chartPullback_tsupport_subset (I := I) α hf_cs hf_supp).trans
     (euclideanChartImageOfTsupport_subset_chartTargetEuclid (I := I) (M := M) α hf_supp)
 
+set_option linter.unusedSectionVars false in
 lemma chartPullback_hasCompactSupport
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -136,6 +144,7 @@ lemma chartPullback_hasCompactSupport
     (euclideanChartImageOfTsupport_isCompact (I := I) (M := M) α hf_cs hf_supp)
     (chartPullback_support_subset (I := I) α f)
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma chartPullback_eq_compose_on_chartTargetEuclid
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -144,6 +153,7 @@ private lemma chartPullback_eq_compose_on_chartTargetEuclid
   rw [chartPullback_apply_of_mem (I := I) α f hy]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma chartPullback_contDiffOn_chartTargetEuclid [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContDiffOn ℝ ∞ (chartPullback (I := I) α f)
@@ -170,6 +180,7 @@ lemma chartPullback_contDiffOn_chartTargetEuclid [I.Boundaryless]
   intro y hy
   exact chartPullback_eq_compose_on_chartTargetEuclid (I := I) α f hy
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contDiff_of_smooth_on_open_zero_outside
     {U : Set EuclN} (hU : IsOpen U) {K : Set EuclN} (hK : IsClosed K)
     (hKU : K ⊆ U) {f : EuclN → ℝ}
@@ -189,6 +200,7 @@ private lemma contDiff_of_smooth_on_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
+set_option linter.unusedSectionVars false in
 lemma chartPullback_contDiff [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (hf_cs : HasCompactSupport f)
@@ -228,6 +240,7 @@ def negDensityLaplacianPullback [I.Boundaryless] [T2Space M]
       (Δ_g (I := I) g hf) ((extChartAt I α).symm
         ((toEuclidean (E := E)).symm z))) y
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma negDensityLaplacianPullback_apply_of_mem [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (α : M) {y : EuclN}
@@ -238,6 +251,7 @@ def negDensityLaplacianPullback [I.Boundaryless] [T2Space M]
           ((toEuclidean (E := E)).symm y)) :=
   Set.indicator_of_mem hy _
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma negDensityLaplacianPullback_apply_of_notMem [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (α : M) {y : EuclN}
@@ -281,12 +295,14 @@ def chartTestPullback (α : M) (ψ : EuclN → ℝ) : M → ℝ :=
   fun x => (chartAt H α).source.indicator
     (fun y => ψ (toEuclidean (E := E) ((extChartAt I α) y))) x
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartTestPullback_apply_of_mem
     (α : M) (ψ : EuclN → ℝ) {x : M} (hx : x ∈ (chartAt H α).source) :
     chartTestPullback (I := I) α ψ x =
       ψ (toEuclidean (E := E) ((extChartAt I α) x)) :=
   Set.indicator_of_mem hx _
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 @[simp] lemma chartTestPullback_apply_of_notMem
     (α : M) (ψ : EuclN → ℝ) {x : M} (hx : x ∉ (chartAt H α).source) :
     chartTestPullback (I := I) α ψ x = 0 :=

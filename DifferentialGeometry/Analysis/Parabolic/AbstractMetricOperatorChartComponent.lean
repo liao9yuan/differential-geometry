@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.QuasilinearMetricShor
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -22,6 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+set_option linter.unusedSectionVars false in
 theorem F_canonical_chart_component_smooth
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))
@@ -37,6 +37,7 @@ theorem F_canonical_chart_component_smooth
       (chartAt H α).source :=
   hF.1 g α i j
 
+set_option linter.unusedSectionVars false in
 theorem F_chart_component_symmetric
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))

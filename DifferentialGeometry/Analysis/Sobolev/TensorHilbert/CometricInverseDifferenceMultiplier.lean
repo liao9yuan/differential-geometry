@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.InverseMetricField
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomTensorRSRiemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma dualToCotangent_add {x : M}
     (α β : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (α + β)
@@ -43,6 +43,7 @@ private lemma dualToCotangent_add {x : M}
     cotangentToDualLinear_apply, cotangentToDual_dualToCotangent,
     cotangentToDual_dualToCotangent, cotangentToDual_dualToCotangent]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma dualToCotangent_smul {x : M} (c : ℝ)
     (α : Module.Dual ℝ (TangentSpace I x)) :
     dualToCotangent (I := I) (x := x) (c • α)
@@ -66,6 +67,7 @@ def g0FlatCLM (g₀ : SmoothRiemannianMetric I M) (x : M) :
           ext w; simp [map_smul]
         rw [h, dualToCotangent_smul]; rfl }
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma g0FlatCLM_apply (g₀ : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     g0FlatCLM (I := I) g₀ x v = dualToCotangent (I := I) (x := x) (g₀.inner x v).toLinearMap := by
   rw [g0FlatCLM, LinearMap.coe_toContinuousLinearMap']; rfl
@@ -84,6 +86,7 @@ lemma inverseMetricSharpFib_g0FlatCLM_eq_metricSharp (g₀ g' : SmoothRiemannian
     cotangentToDual (I := I) (x := x) (g0FlatCLM (I := I) g₀ x v) w = g₀.inner x v w := by
   rw [g0FlatCLM_apply, cotangentToDual_dualToCotangent]; rfl
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma metricInner_injective (g₀ : SmoothRiemannianMetric I M) (x : M) :
     Function.Injective
       (fun u : TangentSpace I x => (g₀.inner x u : TangentSpace I x →L[ℝ] ℝ)) := by
@@ -117,6 +120,7 @@ def metricComparisonDiffEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
   (inverseMetricSharpFib (I := I) g₁ x).comp (g0FlatCLM (I := I) g₀ x)
     - ContinuousLinearMap.id ℝ (TangentSpace I x)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma gInvDiffRaisedEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     metricComparisonDiffEndo (I := I) g₀ g₁ x v =
@@ -144,6 +148,7 @@ lemma inner_g1_gInvDiffRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : 
   rw [gInvDiffRaisedEndo_apply, map_sub, ContinuousLinearMap.sub_apply]
   rw [inverseMetricSharpFib_inner, cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma g1_self_lower_bound
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (h : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
@@ -292,6 +297,7 @@ theorem abs_sum_g0_inner_gInvDiffRaisedEndo_le
 
 omit [CompactSpace M] in
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem metricFlat_chartComponent_contMDiffOn (g₀ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (γ : M) (j : Fin (Module.finrank ℝ E)) :
@@ -334,6 +340,7 @@ lemma gInvDiffRaisedEndo_eq_metricSharp_flatDiff (g₀ g₁ : SmoothRiemannianMe
 
 omit [CompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 theorem metricFlatDiff_chartComponent_contMDiffOn (g₀ g₁ : SmoothRiemannianMetric I M)
     (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (γ : M) (j : Fin (Module.finrank ℝ E)) :
@@ -411,6 +418,7 @@ def metricComparisonDiffFibreEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : 
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma gInvDiffFibreEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TensorRSSpace 0 2 I x) :
     metricComparisonDiffFibreEndo (I := I) g₀ g₁ x v =
@@ -466,6 +474,7 @@ theorem gInvDiffFibreEndo_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     rw [gInvDiffFibreEndo_apply, ContinuousLinearMap.comp_apply]]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma exists_orthonormalFrame_fiberNormSq_rank22_repr (g₀ : SmoothRiemannianMetric I M) (x : M) :
     ∃ (n : ℕ) (e : Fin n → TangentSpace I x),
       n = Module.finrank ℝ (TangentSpace I x) ∧
@@ -736,6 +745,7 @@ def metricComparisonEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     TangentSpace I x →L[ℝ] TangentSpace I x :=
   (inverseMetricSharpFib (I := I) g₁ x).comp (g0FlatCLM (I := I) g₀ x)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma gInvRaisedEndo_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     metricComparisonEndo (I := I) g₀ g₁ x v =

@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.CovDeriv.Componen
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.TensorRS.ChartTensorRSCovariantDerivativeAgreement
 import DifferentialGeometry.Tensor.RSTensor.Defs
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -75,6 +74,7 @@ private noncomputable def centredOrthoFrameCoordMatrix
         (smoothOrthoFrame (I := I) g c i b) k
     else 0
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma centredOrthoFrameCoordMatrix_of_mem
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -86,6 +86,7 @@ private lemma centredOrthoFrameCoordMatrix_of_mem
   unfold centredOrthoFrameCoordMatrix
   rw [dif_pos hb]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i : Fin (Module.finrank ℝ E)) {b : M}
@@ -103,6 +104,7 @@ private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
   rw [centredOrthoFrameCoordMatrix_of_mem (I := I) (M := M) g α c i k hb]
   rw [chartBasisFamily_apply (I := I) α hb k]
 
+set_option linter.unusedSectionVars false in
 private lemma centredFrame_gram_expand
     (g : SmoothRiemannianMetric I M) (α c : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -226,6 +228,7 @@ private noncomputable def modelBasisProj (k : Fin (Module.finrank ℝ E)) : E �
   LinearMap.toContinuousLinearMap
     (((LinearMap.proj k).comp ((chartModelBasis E).equivFun.toLinearMap)) : E →ₗ[ℝ] ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma modelBasisProj_apply (k : Fin (Module.finrank ℝ E)) (v : E) :
     modelBasisProj (E := E) k v = ((chartModelBasis E).repr v) k := by
   classical
@@ -234,6 +237,7 @@ private noncomputable def modelBasisProj (k : Fin (Module.finrank ℝ E)) : E �
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
+set_option linter.unusedSectionVars false in
 private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -255,6 +259,7 @@ private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
   exact congrArg (fun (f : TangentSpace I b → E) => f
       (smoothOrthoFrame (I := I) g c i b)) h
 
+set_option linter.unusedSectionVars false in
 private lemma centredOrthoFrameCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -324,6 +329,7 @@ private lemma centredOrthoFrameCoordMatrix_contMDiffOn
   intro b hb
   exact centredOrthoFrameCoordMatrix_eq_clmAt_proj (I := I) (M := M) g α c i k hb
 
+set_option linter.unusedSectionVars false in
 private lemma centredOrthoFrameCoordMatrix_mdiffAt
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -342,6 +348,7 @@ private lemma centredOrthoFrameCoordMatrix_mdiffAt
     (h_contMDiffOn b hb_base).contMDiffAt (h_open.mem_nhds hb_base)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma centred_chartBasisVecFiber_mdiffAt
     (α : M) (k : Fin (Module.finrank ℝ E)) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -357,6 +364,7 @@ private lemma centred_chartBasisVecFiber_mdiffAt
     (h_contMDiffOn b hb).contMDiffAt (h_open.mem_nhds hb)
   exact h_contMDiffAt.mdifferentiableAt (by simp)
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -400,6 +408,7 @@ private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
     ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
 
+set_option linter.unusedSectionVars false in
 private lemma centred_covApply_frameVec_eq_coord_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -435,6 +444,7 @@ private lemma centred_covApply_frameVec_eq_coord_sum
   intro k _
   rw [L.map_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma centred_finsum_smul_section_mdiffAt
     {ι : Type*} (s_finset : Finset ι)
     (r s : ℕ) (f : ι → M → ℝ)
@@ -493,6 +503,7 @@ private lemma centred_finsum_smul_section_mdiffAt
       exact this
     exact mdifferentiableAt_add_section hf_k₀_σ hrest
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma centred_cov_RS_finsum_smul_section_leibniz_apply
     {ι : Type*} (s_finset : Finset ι)
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -752,6 +763,7 @@ private noncomputable def chartProjCLM (r s : ℕ) (α : M)
     ((trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] private lemma chartProjCLM_apply (r s : ℕ) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) (b : M)
@@ -761,6 +773,7 @@ private noncomputable def chartProjCLM (r s : ℕ) (α : M)
         ((trivializationAt (TensorRSModel r s ℝ E)
             (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt ℝ b w) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_rawConnLap_eq_chartProjCLM
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -774,6 +787,7 @@ private lemma tensorChartComponentRaw_rawConnLap_eq_chartProjCLM
   rw [rawTensorConnLapSmooth_toSection_apply (I := I) g r s T₀ b]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma rawConnLap_chartα_proj_eq_centredFrame_trace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)

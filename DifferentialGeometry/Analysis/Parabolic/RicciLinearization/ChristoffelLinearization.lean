@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -30,6 +29,7 @@ instance : Add (ChartMetricPerturbation E) :=
         simp only [ChartMetricPerturbation.symm h₁ i j y, ChartMetricPerturbation.symm h₂ i j y]
       smooth' := fun i j => (h₁.smooth i j).add (h₂.smooth i j) }⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma add_apply (h₁ h₂ : ChartMetricPerturbation E)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (h₁ + h₂) i j y = h₁ i j y + h₂ i j y := rfl
@@ -41,6 +41,7 @@ instance : SMul ℝ (ChartMetricPerturbation E) :=
         simp only [ChartMetricPerturbation.symm h i j y]
       smooth' := fun i j => (h.smooth i j).const_smul c }⟩
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma smul_apply (c : ℝ) (h : ChartMetricPerturbation E)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
     (c • h) i j y = c • h i j y := rfl
@@ -55,6 +56,7 @@ def chartLinearizedChristoffelPrincipal (g : SmoothRiemannianMetric I M) (α : M
        partialDeriv (E := E) j (h l i) y -
        partialDeriv (E := E) l (h i j) y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartLinearizedChristoffelPrincipal_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -65,6 +67,7 @@ def chartLinearizedChristoffelPrincipal (g : SmoothRiemannianMetric I M) (α : M
            partialDeriv (E := E) j (h l i) y -
            partialDeriv (E := E) l (h i j) y) := rfl
 
+set_option linter.unusedSectionVars false in
 theorem chartLinearizedChristoffelPrincipal_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -79,6 +82,7 @@ theorem chartLinearizedChristoffelPrincipal_symm
         partialDeriv (E := E) l (h j i) y from by rw [h.symm_fun i j]]
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartLinearizedChristoffelPrincipal_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -99,6 +103,7 @@ theorem chartLinearizedChristoffelPrincipal_symm
     ring
   rw [Finset.sum_congr rfl (fun l _ => hzero l), Finset.sum_const_zero, mul_zero]
 
+set_option linter.unusedSectionVars false in
 theorem chartLinearizedChristoffelPrincipal_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -126,6 +131,7 @@ theorem chartLinearizedChristoffelPrincipal_add
   rw [hi, hj, hl]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem chartLinearizedChristoffelPrincipal_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -161,6 +167,7 @@ theorem chartLinearizedChristoffelPrincipal_smul
   rw [Finset.sum_congr rfl (fun l _ => hsummand l), ← Finset.mul_sum]
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_contDiff_of_contDiff
     {u : E → ℝ} (hu : ContDiff ℝ ∞ u) (i : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i u) := by
@@ -169,11 +176,13 @@ private lemma partialDeriv_contDiff_of_contDiff
   unfold partialDeriv
   exact hfderiv.clm_apply contDiff_const
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma partialDeriv_perturbation_contDiff
     (h : ChartMetricPerturbation E) (i a b : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (partialDeriv (E := E) i (h a b)) :=
   partialDeriv_contDiff_of_contDiff (h.smooth a b) i
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedChristoffelPrincipal_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) :

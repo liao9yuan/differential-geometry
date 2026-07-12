@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.NirenbergInter
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.CrossTermIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,21 +48,26 @@ private abbrev Kα (α : M) : Set EuclN :=
 private abbrev Ωα (α : M) : Set EuclN :=
   chartTargetEuclid (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_compact (α : M) :
     IsCompact (Kα (I := I) (M := M) α) :=
   chartImagePOUTsupport_isCompact (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_meas (α : M) :
     MeasurableSet (Kα (I := I) (M := M) α) :=
   (Kα_compact (I := I) (M := M) α).isClosed.measurableSet
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma Kα_subset_Ωα (α : M) :
     Kα (I := I) (M := M) α ⊆ Ωα (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushed_u_h_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -81,6 +85,7 @@ private lemma chartPushed_u_h_ae_zero_off_Kα
   exact chartPushed_eq_zero_off_chartImagePOUTsupport
     (I := I) (M := M) α _ hy.1 hy.2
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chosenWeakPartial'_ae_zero_on_open_sub_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -140,6 +145,7 @@ private lemma chosenWeakPartial'_ae_zero_on_open_sub_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
+set_option linter.unusedSectionVars false in
 lemma chosenMthMixed_ae_zero_off_Kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ) :
@@ -229,6 +235,7 @@ private structure ChartCutoff (α : M) where
   η_one_on_cthick : ∀ y ∈ Metric.cthickening δ (Kα (I := I) (M := M) α), η y = 1
   η_tsupp_in_target : tsupport η ⊆ Ωα (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_chartCutoff_nonempty (α : M) :
     Nonempty (ChartCutoff (I := I) (M := M) α) := by
   obtain ⟨δ, η, hδ_pos, hδ_in, hη_smooth, hη_cs, _hη_range, hη_one, hη_tsupp⟩ :=
@@ -238,6 +245,7 @@ private lemma exists_chartCutoff_nonempty (α : M) :
       (Kα_subset_Ωα (I := I) (M := M) α)
   exact ⟨⟨δ, η, hδ_pos, hδ_in, hη_smooth, hη_cs, hη_one, hη_tsupp⟩⟩
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma memWkp_finset_sum_univ
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -965,6 +973,7 @@ private lemma fChartEffStepNumerator_ae_zero_off_Kα
           (Ωα (I := I) (M := M) α) y) = 0
   rw [hA, hB, hC, hD, hE]; ring
 
+set_option linter.unusedSectionVars false in
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞)

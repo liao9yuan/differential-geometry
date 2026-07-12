@@ -26,6 +26,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M]
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [SigmaCompactSpace M] [T2Space M] in
 private lemma tensorRSIntrinsicChartCLM_pointwise_opNorm_le_factors
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b') (b : M)
     {C_fib C_J : ℝ}

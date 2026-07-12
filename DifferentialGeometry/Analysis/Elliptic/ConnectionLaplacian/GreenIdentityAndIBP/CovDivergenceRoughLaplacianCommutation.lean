@@ -10,7 +10,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciComm
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.HomFieldActionL2JetBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -71,6 +70,7 @@ theorem covGrad_covGrad_appCc_cometricDoubleTrace_eq (g₀ : SmoothRiemannianMet
     (covGrad (I := I) (M := M) g₀ 0 (p + 2) W)]
   rw [zero_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma unitModel_eq_toModel_unitEval_gen
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (W : SmoothCcTensor g₀ 0 s) (x : M)
     (v : Fin s → TangentSpace I x) :
@@ -175,6 +175,7 @@ theorem rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace_of_rank
     (mem_smoothOrthoFrameNbhd_self (I := I) (M := M) x)
     (unitModel (I := I) (M := M) g₀ (t + 2) (iteratedCovGrad (I := I) g₀ 0 t 2 W) x) v).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_contract_covariant_eval (s : ℕ) (b : M) (v : TangentSpace I b)
     (A : TensorRSSpace 0 (s + 1) I b) (D : Tensor0SSpace 0 I b) (m : Fin s → E) :
     Tensor0SSpace.toModel
@@ -262,6 +263,7 @@ theorem covDivergence_eq_cometricDoubleTrace_apply_covGrad
   simp only [vecTail_cons_eq, Fin.cons_zero]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem l2Inner_sub_left_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s (S₁.toFun - S₂.toFun) T.toFun =
@@ -289,6 +291,7 @@ private theorem l2Inner_sub_left_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     tensorL2Inner_smul_left]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private theorem l2Inner_sub_right_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T₁ T₂ : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s S.toFun (T₁.toFun - T₂.toFun) =

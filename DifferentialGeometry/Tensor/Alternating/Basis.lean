@@ -11,7 +11,6 @@ import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Dimension.Free
 import Mathlib.Topology.Algebra.Module.FiniteDimension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -170,6 +169,7 @@ section ElementaryCovectorBasis
 variable
   [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E]
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem elementaryCovector_linearIndependent
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))
@@ -202,6 +202,7 @@ theorem elementaryCovector_linearIndependent
     ite_true] at heval
   rwa [smul_eq_mul, mul_one] at heval
 
+omit [CompleteSpace 𝕜] [FiniteDimensional 𝕜 E] in
 theorem elementaryCovector_span
     (B : Module.Basis (Fin n) 𝕜 E)
     (b : Module.Basis (Fin n) 𝕜 (E →L[𝕜] 𝕜))

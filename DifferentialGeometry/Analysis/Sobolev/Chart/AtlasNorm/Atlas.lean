@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Chart.BanachCompleteness.Banach
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -58,6 +57,7 @@ theorem wkpNormChartGen_chartAtlasPOU
         (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) u =
       wkpNormChart (I := I) (M := M) g k p u := rfl
 
+omit [IsManifold I ∞ M] in
 theorem chartPushed_congr_of_pointwise_eq
     (ρ ρ' : SmoothPartitionOfUnity M I M Set.univ)
     (h : ∀ α : M, ∀ x : M, (ρ α : C^∞⟮I, M; ℝ⟯) x = (ρ' α : C^∞⟮I, M; ℝ⟯) x)
@@ -344,12 +344,14 @@ theorem wkpNormChartGen_lt_top_of_memWkpChartGen
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.wkpNorm_lt_top_of_memWkp
     (d := Module.finrank ℝ E) (hu α)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem support_set_finite_of_compactSpace
     [CompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) :
     {α : M | (Function.support (ρ α : M → ℝ)).Nonempty}.Finite :=
   ρ.locallyFinite.finite_nonempty_of_compact
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem fintsupport_finite
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (x₀ : M) :
     {α : M | x₀ ∈ tsupport (ρ α : M → ℝ)}.Finite :=
@@ -357,6 +359,7 @@ theorem fintsupport_finite
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 theorem support_pou_mul_subset
     (ρ ρ' : SmoothPartitionOfUnity M I M Set.univ) (α β : M) :
     Function.support (fun x : M => (ρ α : M → ℝ) x * (ρ' β : M → ℝ) x) ⊆
@@ -368,6 +371,7 @@ theorem support_pou_mul_subset
 
 omit [IsManifold I ∞ M] in
 
+omit [FiniteDimensional ℝ E] in
 theorem tsupport_pou_mul_subset
     (ρ ρ' : SmoothPartitionOfUnity M I M Set.univ) (α β : M) :
     tsupport (fun x : M => (ρ α : M → ℝ) x * (ρ' β : M → ℝ) x) ⊆
@@ -384,12 +388,14 @@ theorem tsupport_pou_mul_subset
     simp only [Function.mem_support]
     intro h; exact hx (by rw [h]; ring)
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem tsupport_subset_chartAt_source
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
     (α : M) :
     tsupport (ρ α : M → ℝ) ⊆ (chartAt H α).source := hρ α
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem support_subset_chartAt_source
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))
@@ -397,6 +403,7 @@ theorem support_subset_chartAt_source
     Function.support (ρ α : M → ℝ) ⊆ (chartAt H α).source :=
   (subset_tsupport _).trans (tsupport_subset_chartAt_source ρ hρ α)
 
+omit [IsManifold I ∞ M] in
 theorem chartPushed_pointwise_bound
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) (u : M → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
@@ -488,6 +495,7 @@ def chartTransitionFinset
     (ρ : SmoothPartitionOfUnity M I M Set.univ) : Finset M :=
   (support_set_finite_of_compactSpace (I := I) (M := M) ρ).toFinset
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 theorem mem_chartTransitionFinset_iff
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M Set.univ) (α : M) :
@@ -497,6 +505,7 @@ theorem mem_chartTransitionFinset_iff
   rw [Set.Finite.mem_toFinset]
   rfl
 
+omit [FiniteDimensional ℝ E] in
 theorem chartAt_transition_hasFDerivWithinAt_overlap
     [I.Boundaryless] (α β : M) :
     ∀ y ∈ (extChartAt I α) ''

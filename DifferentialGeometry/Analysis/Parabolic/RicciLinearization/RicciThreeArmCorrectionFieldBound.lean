@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreN
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ConvexPerturbationPointwiseC2
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.FiberNormSubadditivity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -338,6 +337,7 @@ def backgroundRiemannKernelBilin (g₀ : SmoothRiemannianMetric I M) (x : M)
       (((bilinFormToModel (TangentSpace I x)).symm (Tensor0SSpace.toModel D)).flip p)).comp
     (riemannOp (LeviCivita (I := I) g₀) x p)
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem backgroundRiemannKernelBilin_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v0 v1 : TangentSpace I x) :
     backgroundRiemannKernelBilin (I := I) g₀ x p D v0 v1 =
@@ -348,6 +348,7 @@ def backgroundRiemannKernelBilin (g₀ : SmoothRiemannianMetric I M) (x : M)
   exact bilinFormToModel_symm_apply (TangentSpace I x) (Tensor0SSpace.toModel D)
     (riemannOp (LeviCivita (I := I) g₀) x p v0 v1) p
 
+set_option linter.unusedSectionVars false in
 theorem backgroundRiemannKernelBilin_add_right (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (D D' : Tensor0SSpace 2 I x) :
     backgroundRiemannKernelBilin (I := I) g₀ x p (D + D') =
@@ -358,6 +359,7 @@ theorem backgroundRiemannKernelBilin_add_right (g₀ : SmoothRiemannianMetric I 
     backgroundRiemannKernelBilin_apply, backgroundRiemannKernelBilin_apply, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
+set_option linter.unusedSectionVars false in
 theorem backgroundRiemannKernelBilin_smul_right (g₀ : SmoothRiemannianMetric I M) (x : M)
     (p : TangentSpace I x) (c : ℝ) (D : Tensor0SSpace 2 I x) :
     backgroundRiemannKernelBilin (I := I) g₀ x p (c • D) = c • backgroundRiemannKernelBilin (I := I) g₀ x p D := by
@@ -420,6 +422,7 @@ theorem backgroundRiemannBiContrFibFixedFrame_toModel (g₀ : SmoothRiemannianMe
   refine Finset.sum_congr rfl (fun c _ => ?_)
   rw [Tensor0SSpace.toModelL_apply, backgroundRiemannSummandFib_toModel]
 
+set_option linter.unusedSectionVars false in
 theorem backgroundRiemannKernelBilin_homSection_contMDiff (g₀ : SmoothRiemannianMetric I M)
     {p : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
@@ -551,6 +554,7 @@ def backgroundRiemannTraceKernel (g₀ : SmoothRiemannianMetric I M) (x : M)
             ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
         rw [hr, map_smul, RingHom.id_apply] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem backgroundRiemannTraceKernel_apply (g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SSpace 2 I x) (v0 v1 p q : TangentSpace I x) :
     backgroundRiemannTraceKernel (I := I) g₀ x D v0 v1 p q =

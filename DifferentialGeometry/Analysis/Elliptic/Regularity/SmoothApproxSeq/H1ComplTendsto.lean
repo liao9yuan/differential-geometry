@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.H2
 import DifferentialGeometry.Analysis.Elliptic.Operator.SmoothBridge
 import DifferentialGeometry.Analysis.Sobolev.Intrinsic.EquivalenceForward
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,6 +50,7 @@ private lemma wkpNorm_succ_ge
     omega
   · intro _ _ _; exact zero_le _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 lemma wkpNormChart_le_succ
     (g : SmoothRiemannianMetric I M)
     (k : ℕ) (p : ℝ≥0∞) (u : M → ℝ) :
@@ -61,6 +61,7 @@ lemma wkpNormChart_le_succ
   refine ENNReal.tsum_le_tsum (fun α => ?_)
   exact wkpNorm_succ_ge (d := Module.finrank ℝ E) k p _ _
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 lemma wkpNormChart_one_le_two
     (g : SmoothRiemannianMetric I M)
     (p : ℝ≥0∞) (u : M → ℝ) :
@@ -68,6 +69,7 @@ lemma wkpNormChart_one_le_two
       wkpNormChart (I := I) (M := M) g 2 p u := by
   exact wkpNormChart_le_succ (I := I) (M := M) g 1 p u
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_smoothScalar_le_const_mul_wkpNormChart_one
     (g : SmoothRiemannianMetric I M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -103,6 +105,7 @@ private lemma eLpNorm_gNormGrad_smoothScalar_le_const_mul_wkpNormChart_one
   intro f
   exact hbound f.smooth
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_sq_toReal_eq_integral_sq
     (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :
     (eLpNorm f.toFun 2
@@ -118,6 +121,7 @@ private lemma eLpNorm_sq_toReal_eq_integral_sq
   rw [← h_norm]
   exact h
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_gNormGrad_sq_toReal_eq_integral_inner_grad
     (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :
     (eLpNorm (fun x : M => Real.sqrt
@@ -276,6 +280,7 @@ lemma norm_smoothScalar_le_const_mul_wkpNormChart_one
     _ ≤ C₀ * N + C₁ * N := add_le_add h_L_le_C0N h_Gnorm_le_C1N
     _ = (C₀ + C₁) * N := by ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma wkpNormChart_one_two_smoothScalar_diff_ne_top
     (g : SmoothRiemannianMetric I M)
     (v w : SmoothScalar g) :
@@ -600,6 +605,7 @@ private theorem smoothToLp_smoothApproxSeq_tendsto
     exact this
   linarith
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
     (g : SmoothRiemannianMetric I M) (v f : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) v f =
@@ -608,6 +614,7 @@ lemma smoothScalarH1Inner_eq_lpInner_oneSubLap_right
   rw [smoothScalarH1Inner_symm]
   exact smoothScalarH1Inner_eq_lpInner_oneSubLap f v
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma inner_h1Compl_smoothToH1Compl_eq_lpInner
     (g : SmoothRiemannianMetric I M)
     (u_h : H1Compl (I := I) (M := M) g) (f : SmoothScalar g) :

@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 private lemma ladder_weight_natCast (g₀ : SmoothRiemannianMetric I M)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) (n : ℕ) :
@@ -39,6 +39,7 @@ private lemma ladder_weight_natCast (g₀ : SmoothRiemannianMetric I M)
   unfold tensorSobolevWeight
   rw [Real.rpow_natCast]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma tensorL2Inner_self_eq_norm_toL2_sq (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (X : SmoothCcTensor g₀ r s) :
     tensorL2Inner (I := I) (M := M) g₀ r s X.toFun X.toFun =

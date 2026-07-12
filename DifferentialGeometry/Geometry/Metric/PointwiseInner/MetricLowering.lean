@@ -13,7 +13,6 @@ import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.FreeModule.Finite.Matrix
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,12 +48,14 @@ private noncomputable def evalAtBasisLinear (n : ℕ) :
     funext φ
     simp [ContinuousMultilinearMap.smul_apply]
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma evalAtBasisLinear_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     evalAtBasisLinear (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma evalAtBasisLinear_injective (n : ℕ) :
     Function.Injective (evalAtBasisLinear (E := E) n) := by
   intro Φ₁ Φ₂ h
@@ -63,6 +64,7 @@ private lemma evalAtBasisLinear_injective (n : ℕ) :
   intro v
   exact congr_fun h v
 
+set_option linter.unusedSectionVars false in
 private lemma finrank_tensor0SModel (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) =
       (Module.finrank ℝ E) ^ n := by
@@ -85,12 +87,14 @@ private lemma finrank_tensor0SModel (n : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] in
 private lemma finrank_basis_pi (n : ℕ) :
     Module.finrank ℝ ((Fin n → Fin (Module.finrank ℝ E)) → ℝ) =
       (Module.finrank ℝ E) ^ n := by
   rw [Module.finrank_pi, Fintype.card_pi]
   simp [Fintype.card_fin]
 
+set_option linter.unusedSectionVars false in
 private lemma evalAtBasisLinear_bijective (n : ℕ) :
     Function.Bijective (evalAtBasisLinear (E := E) n) := by
   have h_inj := evalAtBasisLinear_injective (E := E) n
@@ -106,12 +110,14 @@ private noncomputable def evalAtBasisCLE (n : ℕ) :
   (LinearEquiv.ofBijective (evalAtBasisLinear (E := E) n)
     (evalAtBasisLinear_bijective (E := E) n)).toContinuousLinearEquiv
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma evalAtBasisCLE_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     evalAtBasisCLE (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma continuousOn_into_tensor0SModel_of_eval_basis
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -128,6 +134,7 @@ private lemma continuousOn_into_tensor0SModel_of_eval_basis
   intro b _
   exact ((evalAtBasisCLE (E := E) n).symm_apply_apply (Φ b)).symm
 
+set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_into_tensor0SModel_of_eval_basis
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -149,6 +156,7 @@ private lemma contMDiffOn_into_tensor0SModel_of_eval_basis
   intro b _
   exact ((evalAtBasisCLE (E := E) n).symm_apply_apply (Φ b)).symm
 
+set_option linter.unusedSectionVars false in
 private lemma loweredCompose_at_basis_tuple
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T : TensorRSModel r s ℝ E)
@@ -161,6 +169,7 @@ private lemma loweredCompose_at_basis_tuple
   rw [loweredCompose_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 private theorem trivializationAt_lowered_section_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T : TensorRSModel r s ℝ E) :
@@ -185,6 +194,7 @@ private noncomputable def separableFormBundleSection
       (separableFormAt (I := I) (M := M) g b r
         (fun k : Fin r => chartBasisVecFiber (I := I) α (φ_first k) b)))
 
+set_option linter.unusedSectionVars false in
 private theorem trivializationAt_separableFormBundleSection_eq
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) (b : M) :
@@ -197,6 +207,7 @@ private theorem trivializationAt_separableFormBundleSection_eq
   unfold separableFormBundleSection
   rfl
 
+set_option linter.unusedSectionVars false in
 private theorem trivializationAt_separableFormBundleSection_eval_basis
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) {b : M}
@@ -218,6 +229,7 @@ private theorem trivializationAt_separableFormBundleSection_eval_basis
 
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_separableFormBundleSection
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) :
@@ -254,6 +266,7 @@ private lemma contMDiffOn_separableFormBundleSection
   exact trivializationAt_separableFormBundleSection_eval_basis
     (I := I) (M := M) g r α φ_first hb ψ
 
+set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_lower_at_chartBasis_aux_general
     (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -339,6 +352,7 @@ private lemma contMDiffOn_lower_at_chartBasis_aux_general
   rw [lowerAllUpperIndices_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_lower_at_chartBasis_aux
     (r s : ℕ)
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -356,6 +370,7 @@ private lemma contMDiffOn_lower_at_chartBasis_aux
     (S.contMDiff.contMDiffOn)
     φ
 
+set_option linter.unusedSectionVars false in
 theorem contMDiffOn_loweredCompose
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -372,6 +387,7 @@ theorem contMDiffOn_loweredCompose
       (TensorRSSpace.toModel (S b)) φ).symm)
   exact contMDiffOn_lower_at_chartBasis_aux r s g α S φ
 
+set_option linter.unusedSectionVars false in
 theorem contMDiffOn_loweredCompose_of_section_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : ∀ b : M, TensorRSSpace r s I b) (α : M)
@@ -390,6 +406,7 @@ theorem contMDiffOn_loweredCompose_of_section_contMDiffOn
       (TensorRSSpace.toModel (S b)) φ).symm)
   exact contMDiffOn_lower_at_chartBasis_aux_general (I := I) (M := M) r s g α S hS φ
 
+set_option linter.unusedSectionVars false in
 theorem continuous_loweredCompose
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -401,6 +418,7 @@ theorem continuous_loweredCompose
       (trivializationAt E (TangentSpace I) α).baseSet :=
   (contMDiffOn_loweredCompose (I := I) (M := M) g r s S α).continuousOn
 
+set_option linter.unusedSectionVars false in
 theorem contMDiff_lifted_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -421,6 +439,7 @@ theorem contMDiff_lifted_section
   exact (trivializationAt_lowered_section_eq (I := I) (M := M) g r s x₀ b
     (TensorRSSpace.toModel (S b))).symm
 
+set_option linter.unusedSectionVars false in
 theorem continuous_lifted_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,

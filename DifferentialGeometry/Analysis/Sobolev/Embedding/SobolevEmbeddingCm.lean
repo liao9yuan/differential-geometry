@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingManifoldC0
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,10 +32,12 @@ noncomputable def iteratedCovGrad
       covGrad (I := I) (M := M) g r (s + j)
         (iteratedCovGrad g r s j T)
 
+omit [BoundarylessManifold I M] in
 @[simp] lemma iteratedCovGrad_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGrad g r s 0 T = T := rfl
 
+omit [BoundarylessManifold I M] in
 @[simp] lemma iteratedCovGrad_succ
     (g : SmoothRiemannianMetric I M) (r s j : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGrad g r s (j + 1) T =

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.ChartBilinearDischarge.SubstitutionSmoothApprox
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_standardNirenbergTest_apply
     {η u : EuclN → ℝ}
     (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hu : ContDiff ℝ (⊤ : ℕ∞) u)
@@ -64,6 +64,7 @@ private lemma fderiv_standardNirenbergTest_apply
   exact NirenbergTestFunction.fderiv_nirenbergTestFunction_apply
     (d := Module.finrank ℝ E) hη hu k j hh x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma diffQuot_chi_sub_one_uChart_vanishes
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -116,6 +117,7 @@ private lemma diffQuot_chi_sub_one_uChart_vanishes
           (χ z - 1) * D.u_chart z) / h) = 0
     rw [h1, h2, sub_zero, zero_div, mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma diffQuot_dx_chi_uChart_vanishes
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -189,6 +191,7 @@ private lemma diffQuot_dx_chi_uChart_vanishes
             (χ z - 1) * D.weak_partial j z)) / h) = 0
     rw [h1, h2, sub_zero, zero_div, mul_zero]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_translate_eq_local
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (F : EuclN → ℝ) :
     eLpNorm (DifferentialGeometry.Analysis.Sobolev.translate
@@ -209,6 +212,7 @@ private lemma eLpNorm_translate_eq_local
       eLpNorm F 2 (Measure.map τ volume) from by rw [hMP.map_eq]]
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_diffQuot_le_local
     (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -272,6 +276,7 @@ private lemma eLpNorm_diffQuot_le_local
         congr 1
         rw [ENNReal.div_eq_inv_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_mul_bounded
     (M : ℝ) (hM_nn : 0 ≤ M) {f g : EuclN → ℝ}
     (hf_bound : ∀ x, |f x| ≤ M) :
@@ -365,6 +370,7 @@ private lemma eLpNorm_mul_bounded
     rw [h_calc, ENNReal.rpow_one]
   rw [h_sqrt_M2]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem standardNirenbergTest_seq_grad_tendsto_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

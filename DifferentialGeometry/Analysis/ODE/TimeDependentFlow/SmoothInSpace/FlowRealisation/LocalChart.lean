@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.Mani
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFromJointC1
 import DifferentialGeometry.Analysis.ODE.Flow.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ private def Φ_euclLocal (ΦE : E × ℝ → E) (Φ_fam : ℝ → M ≃ₘ⟮I, 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [I.Boundaryless] in
 theorem precompMap_chartPoint
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α x : M)
     (hx_src : x ∈ (extChartAt I α).source) :
@@ -43,6 +43,7 @@ theorem precompMap_chartPoint
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 
+set_option linter.unusedSectionVars false in
 theorem hagree_of_cocycle_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ) (ΦE : E × ℝ → E)
     (hrealΨ : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
@@ -63,6 +64,7 @@ theorem hagree_of_cocycle_realisation
 omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [CompleteSpace E] in
 theorem hasDerivAt_clm_comp_right_local
     {A : ℝ → (E →L[ℝ] E)} {A' : E →L[ℝ] E} {t : ℝ}
     (hA : HasDerivAt A A' t) (R : E →L[ℝ] E) :
@@ -75,6 +77,7 @@ theorem hasDerivAt_clm_comp_right_local
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [I.Boundaryless] in
 theorem spatial_fderiv_precomp_factor
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α : M) (t s : ℝ) (ΦE : E × ℝ → E) (z₀ : E)
     (hΦE_diff : DifferentiableAt ℝ (fun w => ΦE (w, s)) (precompMap (I := I) Φ_fam t α z₀))
@@ -88,6 +91,7 @@ theorem spatial_fderiv_precomp_factor
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
+set_option linter.unusedSectionVars false in
 theorem chartPrecomp_spatialFderiv_hasDerivAt
     {f : ℝ → E → E} {t : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {ΦE : E × ℝ → E}
     (hΦE : IsLocalFlow f t x₀ r tmin tmax ΦE)
@@ -131,6 +135,7 @@ theorem chartPrecomp_spatialFderiv_hasDerivAt
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [BoundarylessManifold I M] in
 theorem precompMap_differentiableAt
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (α x : M)
     (hx_src : x ∈ (extChartAt I α).source)
@@ -265,6 +270,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] in
 theorem exists_chartPicard_and_cocycle_realisation
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : ContMDiff (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

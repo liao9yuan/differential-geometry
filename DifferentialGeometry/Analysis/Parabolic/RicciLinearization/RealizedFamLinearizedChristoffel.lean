@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartRicciDeriv
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.ChristoffelLinearization
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -60,6 +59,7 @@ def realizedChristoffelNonPrincipal (g₀ : SmoothRiemannianMetric I M)
           chartInvGramOnE (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x q l y)) *
       gramBracket (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' s₀) x i j l y
 
+omit [BoundarylessManifold I M] in
 theorem linearizedChristoffel_eq_principal_add_nonPrincipal
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -81,6 +81,7 @@ theorem linearizedChristoffel_eq_principal_add_nonPrincipal
   refine congrArg (HMul.hMul (1 / 2 : ℝ)) (Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
+set_option linter.unusedSectionVars false in
 theorem realizedLinearizedChristoffelPrincipal_eq_chartLinearizedPrincipal
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -111,6 +112,7 @@ theorem realizedLinearizedChristoffelPrincipal_eq_chartLinearizedPrincipal
     rw [hEv.fderiv_eq]
   rw [hpd i l j, hpd j l i, hpd l i j]
 
+omit [BoundarylessManifold I M] in
 theorem realizedGramDeriv_self_eq_zero (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -119,6 +121,7 @@ theorem realizedGramDeriv_self_eq_zero (g₀ : SmoothRiemannianMetric I M)
     realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ α i j y = 0 := by
   rw [realizedGramDeriv, sub_self]
 
+set_option linter.unusedSectionVars false in
 theorem realizedLinearizedChristoffelPrincipal_self_eq_zero
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

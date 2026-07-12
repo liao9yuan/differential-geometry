@@ -5,7 +5,6 @@ import Mathlib.Geometry.Manifold.Diffeomorph
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Bijective.UniformBijective
 
-set_option linter.unusedSectionVars false
 
 open scoped Manifold Topology ContDiff
 
@@ -44,6 +43,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem picard_data_flow_initial_value_manifold
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hper : ChartLocalPicardData X α)
@@ -59,12 +59,14 @@ theorem picard_data_flow_initial_value_manifold
   rw [hinit, I.left_inv]
   exact (chartAt H α).left_inv hx_source
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chart_coord_roundtrip
     (α x : M) (hx : x ∈ (chartAt H α).source) :
     (chartAt H α).symm (I.symm (I ((chartAt H α) x))) = x := by
   rw [I.left_inv]
   exact (chartAt H α).left_inv hx
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem picard_data_chart_coord_in_closedBall
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     (hper : ChartLocalPicardData X α)

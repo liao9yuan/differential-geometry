@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.Order2Defect.GradientSlotLeibniz
 import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradParallelNaturality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem tensor0S_curry_covGradBundleEquiv_unit
     (x : M) (Φ : TangentSpace I x →L[ℝ] TensorRSSpace 0 2 I x)
     (v : TangentSpace I x) :
@@ -70,6 +70,7 @@ theorem tensor0S_curry_covGradBundleEquiv_unit
     funext k; rw [Matrix.vecTail, Function.comp_apply, Fin.cons_succ]
   rw [hzero, htail]
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem covGradBundleEquiv_tensorCov_unit_curry_eq_abstractCovDeriv
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun y : M => TensorRSSpace 0 2 I y)⟯)

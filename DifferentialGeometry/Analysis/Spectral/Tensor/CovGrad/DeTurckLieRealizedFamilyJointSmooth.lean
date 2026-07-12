@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianc
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutionFiberNormBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLoweredTrilinear
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -39,6 +38,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem jointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -71,6 +71,7 @@ theorem jointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem jointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -103,6 +104,7 @@ theorem jointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem jointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
     {f : ℝ → ℝ} (hf : ContDiff ℝ ∞ f)
     (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
@@ -136,6 +138,7 @@ theorem jointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       (f p₀.2) (A p₀)
 
+set_option linter.unusedSectionVars false in
 theorem jointTensor0SProd_local {p q : ℕ} {S : Set ℝ}
     (A : ∀ pp : M × ℝ, Tensor0SBundle.Tensor0SSpace p I pp.1)
     (B : ∀ pp : M × ℝ, Tensor0SBundle.Tensor0SSpace q I pp.1)
@@ -209,6 +212,7 @@ theorem jointTensor0SProd_local {p q : ℕ} {S : Set ℝ}
     rw [Bundle.continuousMultilinearMap.modelProduct_apply]
     rfl
 
+omit [BoundarylessManifold I M] in
 private theorem realizedFam_chartDeTurckVFComp_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -244,6 +248,7 @@ private theorem realizedFam_chartDeTurckVFComp_jointContMDiffOn
     exact hm
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr (fun q _ => rfl) rfl
 
+set_option linter.unusedSectionVars false in
 private theorem deTurckVFChartLocal_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
@@ -426,6 +431,7 @@ private theorem covGradSymmSValueFam_jointContMDiffOn (g₀ : SmoothRiemannianMe
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace 3 I z) p.1 t) ?_
   rw [covGradSymmSValue_convexPerturbation]
 
+omit [CompactSpace M] [I.Boundaryless] in
 private theorem connDiff_split_middle (gA gC gB : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v =

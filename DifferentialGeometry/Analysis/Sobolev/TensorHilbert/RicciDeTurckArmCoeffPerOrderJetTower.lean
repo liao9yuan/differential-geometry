@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationArmFields
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ noncomputable def coeffPerOrderJetBound (R δ₀ : ℝ) (curvWeight : ℕ) (i : 
   (Module.finrank ℝ E : ℝ) ^ (curvWeight + 2) * (1 + R) ^ (2 * i + 6) *
     (1 / (1 - δ₀)) ^ (4 * i + 12)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem coeffPerOrderJetBound_nonneg (R δ₀ : ℝ) (hR : 0 ≤ R) (hδ₀ : δ₀ < 1)
     (curvWeight i : ℕ) : 0 ≤ coeffPerOrderJetBound (E := E) R δ₀ curvWeight i := by
   have hpos : 0 < 1 - δ₀ := by linarith

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 import DifferentialGeometry.Geometry.Geodesic.Smoothness
 import DifferentialGeometry.Geometry.Geodesic.Uniqueness
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -27,6 +26,7 @@ open DifferentialGeometry.Integral.Measure
 
 section ChartPushedDecomp
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartPushLift_fst_eq
     (f : ℝ → TangentBundle I M) (t₀ t : ℝ) :
     (chartPushLift (I := I) f t₀ t).1 =
@@ -38,6 +38,7 @@ lemma chartPushLift_fst_eq
   simp only [PartialEquiv.trans_apply, PartialEquiv.prod_coe]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartPushLift_fst_eq_chartLocalCurve
     {f : ℝ → TangentBundle I M} {γ : ℝ → M}
     (hproj : ∀ t, (f t).proj = γ t) (t₀ t : ℝ) :
@@ -49,6 +50,7 @@ end ChartPushedDecomp
 
 section ChartPushVFSelf
 
+set_option linter.unusedSectionVars false in
 lemma chartPushVF_self
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : ℝ → TangentBundle I M) (t₀ : ℝ) :
@@ -67,6 +69,7 @@ section ChartCenteredLift
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 lemma exists_chartCenteredLift_at
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (t₀ : ℝ) :
     ∃ f : ℝ → TangentBundle I M,
@@ -90,6 +93,7 @@ section FirstDerivative
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem hasDerivAt_chartLocalCurve_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -118,6 +122,7 @@ theorem hasDerivAt_chartLocalCurve_of_chartCentered
   rw [hfst_eq] at hfst
   exact hfst
 
+set_option linter.unusedSectionVars false in
 theorem eventually_hasDerivAt_chartLocalCurve_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -153,6 +158,7 @@ section ConditionalHeadline
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem hasGeodesicEquationAt_of_chartCentered_of_phase_identity
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -262,6 +268,7 @@ open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -294,6 +301,7 @@ theorem chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
   exact chartPushVF_eq_chartPhaseVF_at (I := I) g (γ t₀)
     (f := f) (t₀ := t₀) hft₀_proj s hs
 
+set_option linter.unusedSectionVars false in
 theorem hasGeodesicEquationAt_of_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -306,6 +314,7 @@ theorem hasGeodesicEquationAt_of_chartCentered
     (chartPushVF_eventually_eq_chartPhaseVF_of_chartCentered
       (g := g) (γ := γ) (t₀ := t₀) (f := f) hproj hf)
 
+set_option linter.unusedSectionVars false in
 theorem hasGeodesicEquationAt_of_exists_chartCentered_lift
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (h : ∃ f : ℝ → TangentBundle I M,
@@ -317,6 +326,7 @@ theorem hasGeodesicEquationAt_of_exists_chartCentered_lift
   exact hasGeodesicEquationAt_of_chartCentered
     (g := g) (γ := γ) (t₀ := t₀) (f := f) hproj hf
 
+set_option linter.unusedSectionVars false in
 theorem IsGeodesicAt.hasGeodesicEquationAt_chartCentered
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀)
@@ -334,6 +344,7 @@ section CrossVFReduction
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
     {g : SmoothRiemannianMetric I M} {γ γ' : ℝ → M} {t₀ : ℝ}
     (hγt₀ : γ t₀ = γ' t₀)
@@ -366,6 +377,7 @@ theorem HasGeodesicEquationAt.congr_of_eventuallyEq_at
   · rw [hγt₀]
     exact halg
 
+set_option linter.unusedSectionVars false in
 lemma exists_chartCenteredLift_at_lift_eq
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -378,6 +390,7 @@ lemma exists_chartCenteredLift_at_lift_eq
   refine ⟨f₁, ?_, hf₁⟩
   rw [hf₁_init, ← hproj_t₀]
 
+set_option linter.unusedSectionVars false in
 theorem IsGeodesicAt.hasGeodesicEquationAt_of_chartCentered_lift_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (_hγ : IsGeodesicAt (I := I) g γ t₀)

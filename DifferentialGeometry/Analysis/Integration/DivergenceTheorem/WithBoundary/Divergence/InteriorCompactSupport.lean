@@ -21,7 +21,6 @@ import Mathlib.Topology.Algebra.Support
 import Mathlib.Topology.Compactness.LocallyFinite
 import Mathlib.Topology.Compactness.LocallyCompact
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,10 +44,12 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
+set_option linter.unusedSectionVars false in
 private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -126,6 +127,7 @@ private lemma localDivergenceWithin_zero_of_eventuallyEq_zero
     exact hsum_zero i]
   rw [zero_div]
 
+set_option linter.unusedSectionVars false in
 lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -136,6 +138,7 @@ lemma divergence_g_with_boundary_zero_of_eventuallyEq_zero
     (mem_chart_source H x) hev
 
 
+set_option linter.unusedSectionVars false in
 lemma support_divergence_g_with_boundary_subset_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -153,6 +156,7 @@ lemma support_divergence_g_with_boundary_subset_of_interior_support
     exact hy (subset_tsupport _ hyS)
   exact hx (divergence_g_with_boundary_zero_of_eventuallyEq_zero (I := I) g X hev)
 
+set_option linter.unusedSectionVars false in
 lemma tsupport_divergence_g_with_boundary_subset_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -163,6 +167,7 @@ lemma tsupport_divergence_g_with_boundary_subset_of_interior_support
     (support_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int) (isClosed_tsupport _)
 
+set_option linter.unusedSectionVars false in
 lemma hasCompactSupport_divergence_g_with_boundary
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -173,6 +178,7 @@ lemma hasCompactSupport_divergence_g_with_boundary
     (support_divergence_g_with_boundary_subset_of_interior_support
       (I := I) g X hX_int)
 
+set_option linter.unusedSectionVars false in
 private lemma tangentSectionAction_continuous_of_interior_support
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
@@ -218,6 +224,7 @@ private lemma tangentSectionAction_continuous_of_interior_support
       rw [hmfderiv_zero]; rfl
     exact (continuous_const.continuousAt.congr hev_action.symm)
 
+set_option linter.unusedSectionVars false in
 private lemma exists_smooth_interior_cutoff
     [T2Space M] [SigmaCompactSpace M]
     {K : Set M} (hK_compact : IsCompact K) (hK_sub : K ⊆ I.interior M) :
@@ -245,6 +252,7 @@ private lemma exists_smooth_interior_cutoff
     by_contra hyL
     exact hy (hf_zero y hyL)
 
+set_option linter.unusedSectionVars false in
 private lemma integrable_cLM_of_cs_chartSource
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -290,6 +298,7 @@ private lemma integrable_cLM_of_cs_chartSource
           rw [setLIntegral_const, one_mul]
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
+set_option linter.unusedSectionVars false in
 private lemma withDensity_pou_restrict_zero_of_disjoint
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -316,6 +325,7 @@ private lemma withDensity_pou_restrict_zero_of_disjoint
   rw [hρα_zero]
   simp
 
+set_option linter.unusedSectionVars false in
 private lemma riemannianVolumeMeasure_restrict_finset_sum
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -372,6 +382,7 @@ private lemma riemannianVolumeMeasure_restrict_finset_sum
         (fun x : M => ENNReal.ofReal (ρ α x))).restrict K from rfl]
     rw [ih, ← Measure.restrict_add]
 
+set_option linter.unusedSectionVars false in
 private lemma integral_riemannianVolume_compactSupport_finset_sum
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -440,6 +451,7 @@ private lemma integral_riemannianVolume_compactSupport_finset_sum
   change (ENNReal.ofReal ((ρ α : M → ℝ) x)).toReal • h x = h x * ((ρ α : M → ℝ) x)
   rw [ENNReal.toReal_ofReal (ρ.nonneg α x), smul_eq_mul, mul_comm]
 
+set_option linter.unusedSectionVars false in
 private lemma integral_riemannianVolume_eq_chartLocal_of_support_in_chart
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -515,6 +527,7 @@ private lemma integral_riemannianVolume_eq_chartLocal_of_support_in_chart
     exact ρ.sum_finsupport' x (mem_univ x) hfins
   rw [hsum_one, mul_one]
 
+set_option linter.unusedSectionVars false in
 private lemma integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -590,6 +603,7 @@ private lemma integral_riemannianVolume_eq_chartLocal_of_compactSupport_in_chart
       exact hxK (subset_tsupport _ hne)
     rw [hh_zero, zero_mul]
 
+set_option linter.unusedSectionVars false in
 theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -845,6 +859,7 @@ theorem integral_divergence_with_boundary_eq_zero_of_compact_of_interior_support
       = (fun _ : M => (0 : ℝ)) from funext h_pt]
   rw [integral_zero, neg_zero]
 
+set_option linter.unusedSectionVars false in
 theorem integral_divergence_with_boundary_eq_zero_of_hasCompactSupport_of_interior_support
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

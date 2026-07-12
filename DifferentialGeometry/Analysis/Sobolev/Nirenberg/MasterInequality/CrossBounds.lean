@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBou
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsSummandContinuityIntegrability
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.CrossBoundsPointwiseProductBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -21,6 +20,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "E" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private lemma integral_const_indicator_eq
     {u : E → ℝ} (k : Fin d) (h : ℝ) (η : E → ℝ) (c : ℝ) :
     ∫ x, c * (Set.indicator (tsupport η) (fun _ : E => (1 : ℝ)) x) *
@@ -1221,6 +1221,7 @@ theorem coeff_diffQuot_cutoff_deriv_cross_bound
 
 set_option maxHeartbeats 800000 in
 
+omit [NeZero d] in
 private theorem nirenbergTestFunction_sq_integral_le
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
@@ -1663,6 +1664,7 @@ theorem c_term_bound
   linarith
 
 
+omit [NeZero d] in
 theorem f_term_bound
     {Ω : Set E}
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)

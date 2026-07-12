@@ -6,7 +6,6 @@ import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import DifferentialGeometry.Geometry.Connection.LeviCivita.MetricCompatible
 import DifferentialGeometry.Bundle.Section
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 lemma SmoothRiemannianMetric.eq_of_inner_eq
     (g : Measure.SmoothRiemannianMetric I M) {x : M} {v w : TangentSpace I x}
     (h : ∀ ζ : TangentSpace I x, g.inner x v ζ = g.inner x w ζ) : v = w := by
@@ -44,9 +44,11 @@ variable
 @[reducible] def directionalDeriv (f : M → ℝ) (x : M) (v : TangentSpace I x) : ℝ :=
   (mfderiv I 𝓘(ℝ) f x) v
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] in
 @[simp] lemma directionalDeriv_eq (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     directionalDeriv (I := I) f x v = (mfderiv I 𝓘(ℝ) f x) v := rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszul_identity_on
     {s : Set M}
     (hMC : IsMetricCompatibleOn cov g s)
@@ -106,6 +108,7 @@ theorem koszul_identity_on
   rw [eq1, eq2, eq3, step_XY, step_XZ, step_YZ]
   ring
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] [T2Space M] in
 theorem koszul_identity
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor : cov.torsion = 0)
@@ -126,6 +129,7 @@ theorem koszul_identity
     exact (CovariantDerivative.torsion_eq_zero_iff cov).mp htor hA hB
   exact koszul_identity_on (s := Set.univ) hMC hTF hX hY hZ trivial
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem koszul_local_uniqueness
     {s : Set M}
     {cov₁ cov₂ : (Π x : M, TangentSpace I x) →
@@ -154,6 +158,7 @@ theorem koszul_local_uniqueness
     (by norm_num : (2 : ℝ) ≠ 0) hrhs
   simpa [hZx] using hcancel
 
+omit [InnerProductSpace ℝ E] [SigmaCompactSpace M] in
 theorem koszul_levi_civita_unique_of_torsionFree_metricCompatible
     (cov₁ cov₂ : CovariantDerivative I E (TangentSpace I : M → Type _))
     (htor₁ : cov₁.torsion = 0) (htor₂ : cov₂.torsion = 0)

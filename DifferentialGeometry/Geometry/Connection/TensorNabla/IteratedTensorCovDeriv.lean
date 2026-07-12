@@ -11,7 +11,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.TensorNabla.CotangentExtension
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorExtension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -134,6 +133,7 @@ noncomputable def mkHom₃
     (VectorBundle.continuousLinearEquivAt ℝ F₁ V₁ x).continuousSMul
   LinearMap.toContinuousLinearMap (mkHom₃FirstSlot Φ x hΦ₁ hΦ₂ hΦ₃)
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem mkHom₃_apply
     {Φ : (Π x : M, V₁ x) → (Π x : M, V₂ x) → (Π x : M, V₃ x) → ℝ} {x : M}
     (hΦ₁ : ∀ σ₂ σ₃, MDiffAt (T% σ₂) x → MDiffAt (T% σ₃) x →
@@ -194,6 +194,7 @@ def tensor03Scalar
     - T x (Y x) (cov Z x (X x)) (W x)
     - T x (Y x) (Z x) (cov W x (X x))
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mdifferentiableAt_tensor03_apply_one
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -207,6 +208,7 @@ lemma mdifferentiableAt_tensor03_apply_one
     (b := fun b : M => b)
     (ϕ := fun b => T b) (v := fun b => Y b) hT hY
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mdifferentiableAt_tensor03_apply_two
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y Z : Π x : M, TangentSpace I x} {x : M}
@@ -221,6 +223,7 @@ lemma mdifferentiableAt_tensor03_apply_two
     (ϕ := fun b => T b (Y b)) (v := fun b => Z b)
     (mdifferentiableAt_tensor03_apply_one hT hY) hZ
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mdifferentiableAt_tensor03_pairing
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
     {Y Z W : Π x : M, TangentSpace I x} {x : M}
@@ -240,6 +243,7 @@ lemma mdifferentiableAt_tensor03_pairing
 
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03Scalar_tensorialAt_X
     (_covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -270,6 +274,7 @@ lemma tensor03Scalar_tensorialAt_X
         ContinuousLinearMap.map_add]
     abel
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03Scalar_tensorialAt_Y
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -344,6 +349,7 @@ lemma tensor03Scalar_tensorialAt_Y
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03Scalar_tensorialAt_Z
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -416,6 +422,7 @@ lemma tensor03Scalar_tensorialAt_Z
     simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.map_add]
     abel
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03Scalar_tensorialAt_W
     (covOn : IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E
       (cov : (Π x : M, TangentSpace I x) →
@@ -504,6 +511,7 @@ private noncomputable def tensor03TrilinAt
       tensor03Scalar_tensorialAt_W cov.isCovariantDerivativeOnUniv hT
         (FiberBundle.extend E v) (mdifferentiableAt_extend ..) Y Z hY hZ)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma tensor03TrilinAt_apply_extend
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -597,6 +605,7 @@ def tensor03CovAt
   · exact LinearMap.toContinuousLinearMap (tensor03XSlot cov hT)
   · exact 0
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03CovAt_apply_of_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -607,6 +616,7 @@ lemma tensor03CovAt_apply_of_diff
   rw [dif_pos hT]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03CovAt_apply_of_diff_extend
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -623,6 +633,7 @@ lemma tensor03CovAt_apply_of_diff_extend
     FiberBundle.extend_apply_self E (X x)
   rw [hext]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensor03CovAt_of_not_diff
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -639,6 +650,7 @@ def tensor03CovFun
         (TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)) :=
   fun T x => tensor03CovAt cov T x
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensor03CovFun_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -648,6 +660,7 @@ def tensor03CovFun
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03CovFun_isCovariantDerivativeOn
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     IsCovariantDerivativeOn (V := (fun x : M =>
@@ -812,10 +825,12 @@ def tensor03Cov
   toFun := tensor03CovFun cov
   isCovariantDerivativeOnUniv := tensor03CovFun_isCovariantDerivativeOn cov
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma tensor03Cov_toFun
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _)) :
     (tensor03Cov cov).toFun = tensor03CovFun cov := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor03Cov_pairing
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -845,6 +860,7 @@ def tensor02CovIterate
         TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)) :=
   fun T => (tensor03Cov cov).toFun ((tensor02Cov cov).toFun T)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma tensor02CovIterate_apply
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (x : M) :
@@ -854,6 +870,7 @@ def tensor02CovIterate
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor03Cov_add
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T T' : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -866,6 +883,7 @@ theorem tensor03Cov_add
 set_option maxHeartbeats 800000 in
 set_option synthInstance.maxHeartbeats 400000 in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor03Cov_smul
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}
@@ -878,6 +896,7 @@ set_option maxHeartbeats 2000000 in
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option backward.isDefEq.respectTransparency false in
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tensor03Cov_sub
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     {T T' : Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ}

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.Smoothness.MatchDataReduction
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.UniformExistence
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -31,6 +30,7 @@ section UnifiedPackaging
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem exists_unified_chartFlow_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),

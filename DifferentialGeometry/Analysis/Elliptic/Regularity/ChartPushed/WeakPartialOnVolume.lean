@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.H1Compl.GradientH1Lipsc
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,7 +47,7 @@ private noncomputable def extChartAtSymmExt (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-omit [I.Boundaryless] [CompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmExt (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -58,7 +57,7 @@ private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-omit [I.Boundaryless] [CompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma extChartAtSymmExt_measurable (α : M) :
     Measurable (extChartAtSymmExt (I := I) (M := M) α) := by
   classical
@@ -69,6 +68,7 @@ private lemma extChartAtSymmExt_measurable (α : M) :
     (DifferentialGeometry.Integral.Measure.measurableSet_extChartAt_target
       (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 private lemma exists_density_inf_pos_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -89,6 +89,7 @@ private lemma exists_density_inf_pos_on_compact
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
+set_option linter.unusedSectionVars false in
 private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -135,6 +136,7 @@ private lemma volume_restrict_le_smul_chartPulledWeightedMeasure_on_compact
           ∫⁻ y in A ∩ K, ENNReal.ofReal (densityOnEuclid (I := I) g α y)
             ∂(volume : Measure EuclN) := by gcongr
 
+set_option linter.unusedSectionVars false in
 theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -185,6 +187,7 @@ theorem eLpNorm_volume_restrict_le_eLpNorm_chartPulledWeighted_compact
   rw [h_pow_eq, smul_eq_mul]
   exact mul_le_mul' (le_refl _) h_mono_target
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedWeakPartialLp_smoothToH1Compl_eq_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -202,6 +205,7 @@ theorem chartPushedWeakPartialLp_smoothToH1Compl_eq_partial
   unfold chartPushedPartialLp
   exact MeasureTheory.MemLp.coeFn_toLp _
 
+set_option linter.unusedSectionVars false in
 private lemma memLp_of_chartPulledWeighted_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -242,6 +246,7 @@ theorem chartPushedWeakPartialLp_locally_memLp
   exact memLp_of_chartPulledWeighted_on_compact (I := I) (M := M) g α
     hK_compact hK_in hf_strong.aestronglyMeasurable hf_memLp_weighted
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma exists_smoothApprox_seq
     (g : SmoothRiemannianMetric I M) (u_h : H1Compl g) :
     ∃ v : ℕ → SmoothScalar g,
@@ -386,6 +391,7 @@ private lemma chartPushed_lp_tendsto_of_smoothApprox
   exact chartPushed_tendsto_chartPulledWeightedMeasure (I := I) (M := M) g α
     hu_meas hu_lim_meas h_diff_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -597,6 +603,7 @@ private lemma chartPushedWeakPartial_lp_tendsto_of_smoothApprox
     funext h_eLpNorm_funeq
   rw [← h_funeq2]; exact h_lp_eLpNorm_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma chartPushed_eqOn_chartTarget_smoothChartExt
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     Set.EqOn (chartPushed (I := I) (M := M) (chartAtlasPOU I M) α v.toFun)
@@ -613,6 +620,7 @@ private lemma chartPushed_eqOn_chartTarget_smoothChartExt
   unfold chartPushed
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_chartPushedPartial_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))

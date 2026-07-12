@@ -16,7 +16,6 @@ import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Integral.Bochner.Set
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -66,16 +65,19 @@ noncomputable def pouScalar
   smooth :=
     ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff).mul v.smooth
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma pouScalar_toFun
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).toFun =
       fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x * v.toFun x := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma pouScalar_hasCompactSupport
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     HasCompactSupport (pouScalar (I := I) (M := M) α v).toFun :=
   HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 private lemma pouScalar_tsupport_subset_chartSource
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     tsupport (pouScalar (I := I) (M := M) α v).toFun ⊆ (chartAt H α).source := by
@@ -98,6 +100,7 @@ private lemma pouScalar_tsupport_subset_chartSource
   exact h_tsupp_sub.trans
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α)
 
+set_option linter.unusedSectionVars false in
 private lemma chartPullback_pouScalar_eq_chartPushed
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -328,6 +331,7 @@ private theorem smooth_principal_identity
       exact h_negDens_eq y hy
   rw [← h_LHS_final, h_bilin, h_RHS_final]
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushed_v_eq_chartPullback_pouScalar_on_chartTarget
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -335,12 +339,14 @@ private lemma chartPushed_v_eq_chartPullback_pouScalar_on_chartTarget
       chartPullback (I := I) α (pouScalar (I := I) (M := M) α v).toFun y :=
   (chartPullback_pouScalar_eq_chartPushed (I := I) (M := M) α v hy).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 lemma pouScalar_oneSubLapClassical_eq
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g) :
     (pouScalar (I := I) (M := M) α v).oneSubLapClassical.toFun =
       (pouScalar (I := I) (M := M) α v).toFun -
         Δ_g (I := I) g (pouScalar (I := I) (M := M) α v).smooth := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma integrable_density_pull_mul_test
     {g : SmoothRiemannianMetric I M} (α : M)
     {h : M → ℝ} (hh_cont : Continuous h)
@@ -553,6 +559,7 @@ private theorem smooth_full_identity
   rw [h_RHS_split]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma exists_bound_for_invGram_mul_fderiv_psi
     {g : SmoothRiemannianMetric I M} (α : M) (i j : Fin (Module.finrank ℝ E))
     {ψ : EuclN → ℝ} (hψ_cd : ContDiff ℝ (⊤ : ℕ∞) ψ)

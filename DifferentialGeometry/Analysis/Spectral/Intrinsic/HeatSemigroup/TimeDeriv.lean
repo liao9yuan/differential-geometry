@@ -6,7 +6,6 @@ import Mathlib.Analysis.Calculus.MeanValue
 import Mathlib.Analysis.Normed.Group.Tannery
 import Mathlib.Analysis.Calculus.Deriv.Slope
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -140,6 +139,7 @@ def abstractSpectralSemigroupDeriv (b : HilbertBasis ι ℝ X) (lam : ι → ℝ
     (t : ℝ) (v : X) : X :=
   ∑' i : ι, heatDerivCoeff lam t i • ⟪b i, v⟫_ℝ • b i
 
+omit [CompleteSpace X] in
 lemma abstractSpectralSemigroupDeriv_def (b : HilbertBasis ι ℝ X) (lam : ι → ℝ)
     (t : ℝ) (v : X) :
     abstractSpectralSemigroupDeriv b lam t v =

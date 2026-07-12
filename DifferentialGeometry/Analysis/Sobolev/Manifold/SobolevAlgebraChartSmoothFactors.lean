@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Manifold.IteratedSobolevEmbedding
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDenseLemmas
 import DifferentialGeometry.Analysis.Sobolev.Manifold.SobolevAlgebraSmoothExtension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 private def chartLifted (α : M) (v : M → ℝ) : EuclN → ℝ :=
   fun y => v ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [IsManifold I ∞ M] in
 private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (α : M) (u v : M → ℝ) (y : EuclN) :
@@ -41,6 +41,7 @@ private lemma chartPushed_mul_eq_chartPushed_mul_chartLifted
   unfold chartPushed chartLifted
   ring
 
+omit [IsManifold I ∞ M] in
 private lemma chartLifted_apply_norm_le
     (α : M) (v : M → ℝ) {Cv : ℝ} (hCv : ∀ x : M, ‖v x‖ ≤ Cv) (y : EuclN) :
     ‖chartLifted (I := I) (M := M) α v y‖ ≤ Cv := by
@@ -86,6 +87,7 @@ private lemma chartPushed_norm_le_sup
 noncomputable def leftSmoothFactor (α : M) (b u : M → ℝ) : EuclN → ℝ :=
   smoothExtension (I := I) (M := M) α (fun x => b x * u x)
 
+omit [IsManifold I ∞ M] in
 private lemma leftSmoothFactor_norm_le
     (α : M) (b u : M → ℝ) {Cu Cb : ℝ}
     (hCu : ∀ x : M, ‖u x‖ ≤ Cu) (hCb : ∀ x : M, ‖b x‖ ≤ Cb) (hCu_nn : 0 ≤ Cu)
@@ -156,6 +158,7 @@ private lemma chartSmoothExt_pou_mul_eq_chartPushed
       : C^∞⟮I, M; ℝ⟯) x * u x) hy]
   rfl
 
+omit [FiniteDimensional ℝ E] in
 lemma chosenWeakPartial_eq_classical_ae
     {p : ℝ≥0∞} (hp_one : 1 ≤ p) {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {f : EuclN → ℝ}
@@ -310,6 +313,7 @@ lemma leftSmoothFactor_smooth
     refine (tsupport_smul_subset_left (f := b) (g := u)).trans hb_supp
   exact contDiff_smoothExtension (I := I) (M := M) α hbu_smooth hbu_supp
 
+omit [IsManifold I ∞ M] in
 private lemma leftSmoothFactor_hasCompactSupport
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (α : M) {b u : M → ℝ}
@@ -323,6 +327,7 @@ private lemma leftSmoothFactor_hasCompactSupport
     refine (tsupport_smul_subset_left (f := b) (g := u)).trans hb_supp
   exact hasCompactSupport_smoothExtension (I := I) (M := M) α hbu_supp
 
+omit [IsManifold I ∞ M] in
 private lemma tsupport_leftSmoothFactor_subset_chartTarget
     [CompactSpace M] (α : M) {b u : M → ℝ}
     (hb_supp : tsupport b ⊆ (chartAt H α).source) :
@@ -483,6 +488,7 @@ lemma smoothPushed_norm_le_of_bound
     rw [if_neg hy, norm_zero]
     exact huMax_nn
 
+omit [IsManifold I ∞ M] in
 lemma leftSmoothFactor_norm_le_of_bound
     (α : M) {b u : M → ℝ}
     (hb_le_one : ∀ x : M, 0 ≤ b x ∧ b x ≤ 1) {uMax : ℝ}

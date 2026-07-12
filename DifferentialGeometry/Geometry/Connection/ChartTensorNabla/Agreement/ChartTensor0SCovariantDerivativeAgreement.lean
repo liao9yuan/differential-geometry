@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.Tensor0SChartChristoffel
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -26,6 +25,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 
+set_option linter.unusedSectionVars false in
 private lemma tensor0Iso_symm_apply_empty (x : M) (a : ℝ) :
     (show ContinuousMultilinearMap ℝ (fun _ : Fin 0 => TangentSpace I x) ℝ from
         ((tensor0Iso (I := I) (M := M) x).symm a))
@@ -51,12 +51,14 @@ private lemma tensor0Iso_symm_apply_empty (x : M) (a : ℝ) :
   rw [← hT0x]
   rw [hscalarFn, hscalar]
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace I x) :
     extDerivFun (I := I) f x v = mfderiv I 𝓘(ℝ, ℝ) f x v := by
   simp only [extDerivFun, ContinuousLinearMap.comp_apply, ContinuousLinearEquiv.coe_coe]
   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma mfderiv_section_zero_eq_scalarFn
     (T : Π b : M, Tensor0SSpace 0 I b) (b : M) (v : TangentSpace I b) :
     mfderiv I 𝓘(ℝ, ℝ)
@@ -80,6 +82,7 @@ private lemma mfderiv_section_zero_eq_scalarFn
   rw [h_funeq]
   rfl
 
+omit [CompleteSpace E] in
 theorem chartTensor0SCovariantDerivative_eq_abstract_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b : M, Tensor0SSpace 0 I b) (X : Π b : M, TangentSpace I b)

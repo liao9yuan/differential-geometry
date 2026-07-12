@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LinearizedVectorField
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Differentiability
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -37,6 +37,7 @@ lemma chartGramOnE_differentiableAt_interior
     hcd_int.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -50,6 +51,7 @@ lemma chartInvGramOnE_differentiableAt_interior
     hcd_int.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartLinearizedDeTurckVFPrincipal_differentiableAt
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) {y : E}
@@ -65,6 +67,7 @@ lemma chartLinearizedDeTurckVFPrincipal_differentiableAt
     hcd.contDiffAt (isOpen_interior.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartLinearizedChristoffelPrincipal_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (a b k : Fin (Module.finrank ℝ E)) {y : E}
@@ -94,6 +97,7 @@ def chartDeTurckCorrSecondOrderPart (g g' : SmoothRiemannianMetric I M) (α : M)
         partialDeriv (E := E) j
           (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y') y)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrSecondOrderPart_def
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -108,6 +112,7 @@ def chartDeTurckCorrSecondOrderPart (g g' : SmoothRiemannianMetric I M) (α : M)
               (fun y' => chartLinearizedDeTurckVFPrincipal (I := I) g g' α h k y') y) :=
   rfl
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma partialDeriv_chartLinearizedDeTurckVFPrincipal
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (k d : Fin (Module.finrank ℝ E)) {y : E}
@@ -153,6 +158,7 @@ lemma partialDeriv_chartLinearizedDeTurckVFPrincipal
   rw [partialDeriv_mul (chartInvGramOnE (I := I) g α a b) (Γ a b)
         (hG_diff a b) (hΓ_diff a b)]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] theorem chartDeTurckCorrSecondOrderPart_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :

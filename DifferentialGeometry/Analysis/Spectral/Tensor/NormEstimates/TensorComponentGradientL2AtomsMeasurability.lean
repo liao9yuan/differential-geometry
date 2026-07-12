@@ -16,7 +16,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartFiberTriv
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.MeasureTheory.Integral.IntegrableOn
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,11 +50,13 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pouTsupport_measurableSet_meas (α : M) :
     MeasurableSet (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).measurableSet
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -77,6 +78,7 @@ private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
   exact scalarOnE_extChartAt (I := I) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hb_ext
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -98,6 +100,7 @@ private lemma tensorChartComponentRaw_continuousOn_pouTsupport
     pouTsupport_subset_baseSet (I := I) (M := M) α hb
   exact hb_base
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarOnE_raw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -118,6 +121,7 @@ private lemma scalarOnE_raw_continuousOn_pouTsupport
   exact scalarOnE_raw_eq_raw_on_pouTsupport_meas
     (I := I) (M := M) g r s α S Idx Jdx hb
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma abs_scalarOnE_raw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -134,6 +138,7 @@ private lemma abs_scalarOnE_raw_continuousOn_pouTsupport
     (I := I) (M := M) g r s α S Idx Jdx
   exact _root_.continuous_abs.comp_continuousOn h_inner
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma abs_scalarOnE_raw_aestronglyMeasurable_restrict_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -153,6 +158,7 @@ private lemma abs_scalarOnE_raw_aestronglyMeasurable_restrict_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_measurableSet_meas (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem aestronglyMeasurable_indicator_tsupp_abs_raw
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s)
@@ -204,6 +210,7 @@ private def christoffelAtomIntegrand
       ((∑ k : Fin r, ‖trivInput (I := I) g r s α j T b k‖ ^ 2) +
        (∑ l : Fin s, ‖trivOutput (I := I) g r s α j T b l‖ ^ 2))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma triv_continuousLinearMapAt_eq_triv_snd
     {b : M} (hb : b ∈ (chartAt H α).source) (v : TensorRSSpace r s I b) :
     (trivializationAt (TensorRSModel r s ℝ E)
@@ -298,6 +305,7 @@ private lemma christoffelAtomIntegrand_continuousOn_pouTsupport
   exact pouTsupport_subset_baseSet (I := I) (M := M) α hb
 
 variable {g r s α j} in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma christoffelAtomIntegrand_zero_outside_pouTsupport
     (T : Π b' : M, TensorRSSpace r s I b') {b : M}
     (hb : b ∉ tsupport (fun x : M =>
@@ -310,6 +318,7 @@ private lemma christoffelAtomIntegrand_zero_outside_pouTsupport
   simp [christoffelAtomIntegrand, hρ_zero]
 
 variable {g r s α j} in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma christoffelAtomIntegrand_eq_indicator
     (T : Π b' : M, TensorRSSpace r s I b') :
     christoffelAtomIntegrand (I := I) g r s α j T =

@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.DeTurckRicci.RHSSmoothQuasilinear
 import DifferentialGeometry.Geometry.Flow.LieDerivativeChartFrameIdentity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -23,6 +22,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartFrameVec_eq_chartBasisVecFiber
     (α : M) (i : Fin (Module.finrank ℝ E)) (b : M) :
     chartFrameVec (I := I) α i b = chartBasisVecFiber (I := I) α i b := rfl

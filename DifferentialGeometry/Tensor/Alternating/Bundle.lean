@@ -11,7 +11,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Data.Bundle
 
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -211,6 +210,7 @@ theorem continuousAlternatingMap_symm_apply' {b : B} (hb : b ∈ e₁.baseSet �
   · rfl
   exact hb
 
+omit [Fintype ι] in
 theorem continuousAlternatingMapCoordChange_apply (b : B)
   (hb : b ∈ (e₁.baseSet ∩ e₂.baseSet) ∩ (e₁'.baseSet ∩ e₂'.baseSet)) (L : F₁ [⋀^ι]→L[𝕜] F₂) :
   continuousAlternatingMapCoordChange 𝕜 ι e₁ e₁' e₂ e₂' b L =

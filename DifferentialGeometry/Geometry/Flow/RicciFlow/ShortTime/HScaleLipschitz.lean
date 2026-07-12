@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.Regularity.BareFlowFr
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.CovariantIdentity.FlatIdentity
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothDependence.GlobalClosedManifold
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -40,6 +39,7 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
+omit [BoundarylessManifold I M] in
 theorem deturck_nemytskii_operator_hs_lipschitz_of_l2coeff_lipschitz
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

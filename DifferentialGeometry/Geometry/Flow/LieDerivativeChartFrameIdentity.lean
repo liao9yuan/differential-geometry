@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -22,6 +21,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+set_option linter.unusedSectionVars false in
 private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -56,6 +56,7 @@ private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
         (W : ∀ x : M, TangentSpace I x) hy_base]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma differentiableAt_chartE_pullback_W_alpha
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -233,6 +234,7 @@ private lemma chart_christoffel_expansion_nabla_W_alpha_chartBasis
     refine Finset.sum_congr rfl (fun j' _ => ?_)
     rw [hrepr_chartCoeff j']
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma metric_compat_coord_identity_alpha
     (g : SmoothRiemannianMetric I M)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -249,6 +251,7 @@ private lemma metric_compat_coord_identity_alpha
   exact
     partialDeriv_chartGramOnE_eq_chartChristoffel_sum (I := I) g α i j k hint
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartLieDerivMetricMatrix_alpha_algebraic
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

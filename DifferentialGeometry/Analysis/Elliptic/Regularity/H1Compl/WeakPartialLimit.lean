@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.L2Inclu
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ noncomputable def chartPushedPartialCLM
   (chartPushedPartialLpLin (I := I) (M := M) g α j).mkContinuous hLip.C
     hLip.bound
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartPushedPartialCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -72,6 +72,7 @@ noncomputable def chartPushedPartialCLM
     chartPushedPartialCLM (I := I) (M := M) g α j hLip v =
       chartPushedPartialLpLin (I := I) (M := M) g α j v := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_smoothToH1Compl_local
     (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToH1Compl (I := I) (M := M) g) := by
@@ -81,6 +82,7 @@ private lemma denseRange_smoothToH1Compl_local
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_smoothToH1Compl_local
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing (smoothToH1Compl (I := I) (M := M) g) := by
@@ -101,6 +103,7 @@ noncomputable def H1ComplPartialCLM
     (chartPushedPartialCLM (I := I) (M := M) g α j hLip)
     (smoothToH1Compl (I := I) (M := M) g)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma H1ComplPartialCLM_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -125,6 +128,7 @@ noncomputable def chartPushedWeakPartialLp
       (chartTargetEuclid (I := I) (M := M) α)) :=
   H1ComplPartialCLM (I := I) (M := M) g α j hLip u_h
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem chartPushedWeakPartialLp_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))
@@ -138,6 +142,7 @@ noncomputable def chartPushedWeakPartialLp
   rw [H1ComplPartialCLM_smoothToH1Compl]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedWeakPartialLp_continuous
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))

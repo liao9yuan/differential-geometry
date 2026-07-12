@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -25,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 @[simp] theorem iteratedCovGradSobolevNorm_zero
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGradSobolevNorm g r s k 0 T =
@@ -32,6 +32,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   unfold iteratedCovGradSobolevNorm
   simp
 
+set_option linter.unusedSectionVars false in
 private theorem toHs_norm_le_succ
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (σ : ℕ)
     (T' : SmoothCcTensor g r s) :
@@ -41,6 +42,7 @@ private theorem toHs_norm_le_succ
   refine ENNReal.toReal_mono ?_ (tensorPouSobolevHsNorm_le_succ (I := I) (M := M) g σ T')
   exact (tensorPouSobolevHsNorm_lt_top (I := I) (M := M) g (σ + 1) T').ne
 
+omit [BoundarylessManifold I M] in
 theorem toHs_norm_mono_order
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {σ τ : ℕ} (hστ : σ ≤ τ)
     (T' : SmoothCcTensor g r s) :
@@ -55,6 +57,7 @@ theorem toHs_norm_mono_order
       rw [show σ + (d + 1) = (σ + d) + 1 from by ring]
       exact toHs_norm_le_succ (I := I) (M := M) g (σ + d) T'
 
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGradSobolevNorm_le_topOrder
     (g : SmoothRiemannianMetric I M) (r s k j : ℕ) (T : SmoothCcTensor g r s) :
     iteratedCovGradSobolevNorm g r s k j T ≤

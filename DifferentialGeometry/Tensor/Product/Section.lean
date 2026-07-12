@@ -3,7 +3,6 @@ Authors: Jack McCarthy
 -/
 import DifferentialGeometry.Tensor.Product.Bundle
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -130,6 +129,7 @@ noncomputable def ContMDiffSection.tensorProduct
     congr 1 <;> simp [Trivialization.continuousLinearMapAt,
       e₁.coe_linearMapAt_of_mem hx.1, e₂.coe_linearMapAt_of_mem hx.2]⟩
 
+omit [ContMDiffVectorBundle n F₁ E₁ IB] [ContMDiffVectorBundle n F₂ E₂ IB] in
 @[simp]
 theorem ContMDiffSection.tensorProduct_apply
     (g : ContMDiffSection IB F₁ n E₁)

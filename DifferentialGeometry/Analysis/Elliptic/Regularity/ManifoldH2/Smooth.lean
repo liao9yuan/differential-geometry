@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Elliptic.Operator.ChartLocalLaplacian
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.H2Regularity.SmoothWeakSolutionH2
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] in
 theorem loc_chart_pulled
     (B : SmoothEllipticBilinearForm (Module.finrank ℝ E)
       (Set.univ : Set EuclN))
@@ -73,6 +73,7 @@ theorem loc_chart_pulled
 
 omit [NeZero (Module.finrank ℝ E)] in
 
+omit [FiniteDimensional ℝ E] in
 theorem memLp_two_continuous_compactSupport_restrict
     {f : EuclN → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
     (Ω' : Set EuclN) :

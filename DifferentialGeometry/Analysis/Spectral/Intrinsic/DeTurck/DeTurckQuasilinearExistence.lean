@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.TimeL2InterpolationLimit
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.FieldHa1TimeSupTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -98,6 +97,7 @@ theorem timeL2_norm_le_of_ae_mixed_bound
 
 variable {g₀ g_bg : SmoothRiemannianMetric I M}
 
+omit [BoundarylessManifold I M] in
 theorem timeL2Inclusion_maxRegDuhamelSolField {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (u₀ : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))
     (gforce : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :
@@ -158,6 +158,7 @@ theorem deTurckSobolevNHa2Symm_mixed_lipschitz_pointwise (a : ℕ)
                       (show (a : ℝ) + 1 ≤ (a : ℝ) + 2 by linarith) (u - u')‖ :=
   deTurckSobolevNonlinearitySymm_mixed_lipschitz_pointwise (I := I) (M := M) g₀ g_bg a ha_super
 
+omit [BoundarylessManifold I M] in
 theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1)
     (F : timeL2 (tensorHs (I := I) (M := M) g₀ 0 2 a) T) :
     ‖maxRegDuhamelSolField (I := I) (M := M) a hT hT1
@@ -178,6 +179,7 @@ theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1
   rw [hhom0, zero_add]
   exact hreg
 
+set_option linter.unusedSectionVars false in
 theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
     maxRegDuhamelSolField (I := I) (M := M) a hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))
@@ -187,6 +189,7 @@ theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : 
   rw [norm_zero, mul_zero] at h
   exact norm_le_zero_iff.mp h
 
+omit [BoundarylessManifold I M] in
 theorem nemytskii_time_mixed_bound (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
@@ -310,6 +313,7 @@ def nemytskiiMixedForcingMap (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : 
     (maxRegDuhamelSolField (I := I) (M := M) (a : ℝ) hT hT1
       (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F)
 
+omit [BoundarylessManifold I M] in
 @[simp] theorem nemytskiiMixedForcingMap_apply (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}
@@ -322,6 +326,7 @@ def nemytskiiMixedForcingMap (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : 
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F) :=
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}

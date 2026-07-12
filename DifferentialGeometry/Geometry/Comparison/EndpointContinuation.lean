@@ -21,7 +21,6 @@ import DifferentialGeometry.Geometry.Comparison.GeodesicSpeedBound
 import DifferentialGeometry.Geometry.Comparison.ChartVelocityConvergence
 import DifferentialGeometry.Geometry.Comparison.LocalGeodesicSeed
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -51,6 +50,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
+set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_extends_past_finite_endpoint
     (g : SmoothRiemannianMetric I M) {γ η : ℝ → M} {T δ : ℝ} (hδ : 0 < δ)
     (hγ : IsGeodesicOn (I := I) g γ (Set.Iio T))
@@ -71,6 +71,7 @@ def HasEndpointContinuation
     (∀ t ∈ Set.Ioo (-δ) δ, MDifferentiableAt 𝓘(ℝ, ℝ) I η t) ∧
     γ =ᶠ[nhdsWithin b (Set.Iio b)] (fun t => η (t - b))
 
+set_option linter.unusedSectionVars false in
 theorem chartPhaseVF_orbit_uniqueness_Icc_left
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)} (hK_compact : IsCompact K)
@@ -96,6 +97,7 @@ theorem chartPhaseVF_orbit_uniqueness_Icc_left
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem hasEndpointContinuation_of_complete
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {aL b c : ℝ}

@@ -52,6 +52,7 @@ private lemma norm_add_sq_le_two_mul_sq_add_sq
     linarith [this, h_lhs.symm.le, h_lhs.le, h_rhs.symm.le, h_rhs.le]
   exact hsq.trans (sq_add_le_two_mul_sq_add_sq _ _)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -106,6 +107,7 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le
       ‖P‖ ^ 2 * ‖F‖ ^ 2 * ‖w‖ ^ 2 := by ring
   linarith [hsq, hlhs_sq.symm.le, hlhs_sq.le, hrhs_sq.symm.le, hrhs_sq.le]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -275,6 +277,7 @@ theorem fderiv_tensorChartComponentRaw_pullback_norm_sq_two_term_split
       2 * ‖P‖ ^ 2 * Tcov ^ 2 + 2 * ‖P‖ ^ 2 * Tchr ^ 2 := by ring
   linarith [h_chain, h_rhs_eq.symm.le, h_rhs_eq.le]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem exists_const_fderiv_tensorChartComponentRaw_pullback_norm_sq_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

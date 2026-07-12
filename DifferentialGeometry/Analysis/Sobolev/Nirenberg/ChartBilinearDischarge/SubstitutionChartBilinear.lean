@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Sobolev.Nirenberg.SubstitutionIdentity.Subs
 import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 import DifferentialGeometry.Analysis.Sobolev.Approximation.H1WeakSolutionApprox
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma diffQuot_mul_apply
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (f g : EuclN → ℝ) (x : EuclN) :
     DifferentialGeometry.Analysis.Sobolev.diffQuot
@@ -51,6 +51,7 @@ lemma diffQuot_mul_apply
   DifferentialGeometry.Analysis.Sobolev.NirenbergEuclidean.diffQuot_coeff_apply
     (d := Module.finrank ℝ E) k h f g x
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma integral_F_diffQuot_neg_eq_neg_integral_diffQuot_F
     {F G : EuclN → ℝ} (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0)
     (hF_cont : Continuous F) (hG_smooth : ContDiff ℝ (⊤ : ℕ∞) G)

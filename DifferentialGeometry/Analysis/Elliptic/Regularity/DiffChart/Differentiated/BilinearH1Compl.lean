@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ def densityDerivOnEuclid (g : SmoothRiemannianMetric I M) (α : M)
     (l : Fin (Module.finrank ℝ E)) (y : EuclN) : ℝ :=
   (fderiv ℝ (densityOnEuclid (I := I) g α) y) (EuclideanSpace.single l 1)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -62,6 +62,7 @@ lemma weightedInvGramDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityDerivOnEuclid_contDiffOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -83,6 +84,7 @@ lemma densityDerivOnEuclid_contDiffOn
     (ContinuousLinearMap.apply ℝ ℝ (EuclideanSpace.single l (1 : ℝ))).contDiff
   exact h_eval.contDiffOn.comp h_fderiv (mapsTo_univ _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramDerivOnEuclid_continuousOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -91,6 +93,7 @@ lemma weightedInvGramDerivOnEuclid_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (weightedInvGramDerivOnEuclid_contDiffOn (I := I) g α i j l).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityDerivOnEuclid_continuousOn
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -99,6 +102,7 @@ lemma densityDerivOnEuclid_continuousOn
       (chartTargetEuclid (I := I) (M := M) α) :=
   (densityDerivOnEuclid_contDiffOn (I := I) g α l).continuousOn
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma weightedInvGramDerivOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -126,6 +130,7 @@ lemma weightedInvGramDerivOnEuclid_bounded_on_compact
   intro y hy
   exact h_max hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma densityDerivOnEuclid_bounded_on_compact
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -228,6 +233,7 @@ structure DiffChartBilinearH1ComplData
           base.f_chart y * ψ y
         ∂(volume : Measure EuclN))
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem differentiated_chart_bilinear_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -277,6 +283,7 @@ abbrev direction
     (D : DiffChartBilinearH1ComplData (I := I) (M := M) g α) :
     Fin (Module.finrank ℝ E) := D.direction
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem base_chart_bilinear_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

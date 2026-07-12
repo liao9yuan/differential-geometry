@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.See
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.BoundaryExtension.FullIntervalFlow
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.DiffeomorphismFamily.ChartBridge
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -44,6 +43,7 @@ variable
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
     (Φ : ℝ → M → M) {lo hi : ℝ} (hlo : lo < 0) (hhi : 0 < hi)
     (hΦsm : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.1 q.2)
@@ -157,6 +157,7 @@ private theorem flow_mfderiv_continuousWithinAt_zero_of_jointSmooth
   exact (hRHScont.congr hrecon.symm).continuousWithinAt
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem flow_chartBasis_section_contMDiffWithinAt_of_jointSmooth
     (Φ : ℝ → M → M) {lo hi : ℝ}
     (hΦsm : ContMDiffOn (𝓘(ℝ, ℝ).prod I) I ∞ (fun q : ℝ × M => Φ q.1 q.2)

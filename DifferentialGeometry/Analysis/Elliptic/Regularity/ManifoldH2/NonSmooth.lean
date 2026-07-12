@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Elliptic.Operator.VariationalLaplacian
 import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import Mathlib.MeasureTheory.Function.LpSeminorm.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -55,6 +54,7 @@ namespace ChartH2NonSmoothPOUWitness
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mk' {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
       (d := Module.finrank ℝ E) 2 2
@@ -64,6 +64,7 @@ theorem mk' {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     ChartH2NonSmoothPOUWitness (I := I) (M := M) g u α :=
   ⟨h⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkp_two_eq {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothPOUWitness (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -73,6 +74,7 @@ theorem memWkp_two_eq {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α) :=
   h.memWkp_two
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkp_one {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothPOUWitness (I := I) (M := M) g u α) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp
@@ -82,6 +84,7 @@ theorem memWkp_one {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α) :=
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_succ h.memWkp_two
 
+set_option linter.unusedSectionVars false in
 theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothPOUWitness (I := I) (M := M) g u α) :
     MemLp
@@ -94,6 +97,7 @@ theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
 
 end ChartH2NonSmoothPOUWitness
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_chartPOUWitnesses
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
@@ -103,6 +107,7 @@ theorem memWkpChart_two_of_chartPOUWitnesses
   intro α
   exact (h_witness α).memWkp_two
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_one_of_chartPOUWitnesses
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
@@ -111,6 +116,7 @@ theorem memWkpChart_one_of_chartPOUWitnesses
       (I := I) (M := M) g 1 2 u :=
   (memWkpChart_two_of_chartPOUWitnesses (I := I) (M := M) g h_witness).le_succ
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_two_eq_tsum
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) :
@@ -126,6 +132,7 @@ theorem wkpNormChart_two_eq_tsum
   DifferentialGeometry.Analysis.Sobolev.Chart.wkpNormChart_eq_tsum
     (I := I) (M := M) g 2 2 u
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_two_lt_top_of_chartPOUWitnesses
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
@@ -136,6 +143,7 @@ theorem wkpNormChart_two_lt_top_of_chartPOUWitnesses
     (I := I) (M := M) g (k := 2) (p := 2) (by norm_num)
     (memWkpChart_two_of_chartPOUWitnesses (I := I) (M := M) g h_witness)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_two_le_tsum_chart_norms
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (u : M → ℝ) :
@@ -190,6 +198,7 @@ namespace ChartH2NonSmoothBridgeData
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem loc_chart_of_chartH2NonSmoothBridgeData
     {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothBridgeData (I := I) (M := M) g u α) :
@@ -204,6 +213,7 @@ theorem loc_chart_of_chartH2NonSmoothBridgeData
     h.D h.Omega''_open h.Omega''_compact_closure h.h0_pos h.room
     h.M_bound_nn h.uniform_diffQuot_bound
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartH2NonSmoothPOUWitness_of_bridgeData
     {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH2NonSmoothBridgeData (I := I) (M := M) g u α) :
@@ -212,6 +222,7 @@ theorem chartH2NonSmoothPOUWitness_of_bridgeData
 
 end ChartH2NonSmoothBridgeData
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_chartH2NonSmoothBridgeData
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
@@ -221,6 +232,7 @@ theorem memWkpChart_two_of_chartH2NonSmoothBridgeData
   memWkpChart_two_of_chartPOUWitnesses (I := I) (M := M) g
     (fun α => (h_bridge α).chartH2NonSmoothPOUWitness_of_bridgeData)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_two_lt_top_of_chartH2NonSmoothBridgeData
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) {u : M → ℝ}
@@ -230,6 +242,7 @@ theorem wkpNormChart_two_lt_top_of_chartH2NonSmoothBridgeData
   wkpNormChart_two_lt_top_of_chartPOUWitnesses (I := I) (M := M) g
     (fun α => (h_bridge α).chartH2NonSmoothPOUWitness_of_bridgeData)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_laplacianDomain
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -244,6 +257,7 @@ theorem memWkpChart_two_of_laplacianDomain
   · exact memWkpChart_two_of_chartPOUWitnesses (I := I) (M := M) g h_witness
   · exact wkpNormChart_two_lt_top_of_chartPOUWitnesses (I := I) (M := M) g h_witness
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_laplacianDomain_with_norm
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -265,6 +279,7 @@ theorem memWkpChart_two_of_laplacianDomain_with_norm
   · exact (memWkpChart_two_of_laplacianDomain (I := I) (M := M) g u_h hu_h u h_witness).1
   · exact wkpNormChart_two_eq_tsum (I := I) (M := M) g u
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_laplacianDomain_bridgeData
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -284,12 +299,14 @@ def laplacianDomain.lpRep
     (g : SmoothRiemannianMetric I M) (u_h : H1Compl g) : M → ℝ :=
   ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomain.lpRep_aeEq_coeFn
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (u_h : H1Compl g) :
     laplacianDomain.lpRep (I := I) (M := M) g u_h =
       ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkpChart_two_of_laplacianDomain_canonical
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -305,6 +322,7 @@ theorem memWkpChart_two_of_laplacianDomain_canonical
   memWkpChart_two_of_laplacianDomain (I := I) (M := M) g u_h hu_h
     (laplacianDomain.lpRep (I := I) (M := M) g u_h) h_witness
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_memWkpChart_two_of_laplacianDomain
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -319,6 +337,7 @@ theorem exists_memWkpChart_two_of_laplacianDomain
   refine ⟨u, ?_⟩
   exact memWkpChart_two_of_laplacianDomain (I := I) (M := M) g u_h hu_h u h_witness
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem exists_memWkpChart_two_of_laplacianDomain_canonical
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.Solutions.Mollification
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.External.DeGiorgi.SobolevSpace.Approximation
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem exists_chart_target_cutoff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M}
@@ -77,6 +77,7 @@ theorem exists_chart_target_cutoff
     apply hχ_one
     exact Metric.self_subset_cthickening _ hx
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cutoff_uChart_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -142,6 +143,7 @@ lemma cutoff_uChart_memLp_two_univ
   rw [h_indicator_eq] at h_indicator_lp
   exact h_indicator_lp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cutoff_uChart_partial_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -298,6 +300,7 @@ lemma cutoff_uChart_partial_memLp_two_univ
   rw [h_indicator_eq] at h_indicator_lp
   exact h_indicator_lp
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma cutoff_uChart_hasWeakPartialDeriv_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -651,6 +654,7 @@ lemma cutoff_uChart_hasWeakPartialDeriv_univ
   rw [h_LHS_pt, h_RHS_split]
   linarith [h_ibp_chart]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cutoff_uChart_w1p_witness
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -807,6 +811,7 @@ theorem exists_smooth_uChart_approx
     rw [h_eq_tendsto]
     exact hu_grad_tendsto i
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem standardNirenbergTest_smooth_seq
     {η : EuclN → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η) (hη_supp : HasCompactSupport η)
     (k : Fin (Module.finrank ℝ E))
@@ -827,6 +832,7 @@ theorem standardNirenbergTest_smooth_seq
   · exact standardNirenbergTest_hasCompactSupport
       (d := Module.finrank ℝ E) k h hη_supp (u_seq n)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_translate_eq_local (k : Fin (Module.finrank ℝ E)) (h : ℝ)
     (F : EuclN → ℝ) :
     eLpNorm (DifferentialGeometry.Analysis.Sobolev.translate
@@ -847,6 +853,7 @@ private lemma eLpNorm_translate_eq_local (k : Fin (Module.finrank ℝ E)) (h : �
       eLpNorm F 2 (Measure.map τ volume) from by rw [hMP.map_eq]]
   exact (hτ_emb.eLpNorm_map_measure (g := F) (p := 2)).symm
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_diffQuot_le_local
     (k : Fin (Module.finrank ℝ E)) {h : ℝ} (hh : h ≠ 0) {F : EuclN → ℝ}
     (hF_aesm : AEStronglyMeasurable F (volume : Measure EuclN)) :
@@ -910,6 +917,7 @@ private lemma eLpNorm_diffQuot_le_local
         congr 1
         rw [ENNReal.div_eq_inv_mul]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma standardNirenbergTest_sub
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) (η u₁ u₂ : EuclN → ℝ) :
     (standardNirenbergTest (d := Module.finrank ℝ E) k h η u₁) -
@@ -935,6 +943,7 @@ private lemma standardNirenbergTest_sub
   rw [DifferentialGeometry.Analysis.Sobolev.diffQuot_sub
     (d := Module.finrank ℝ E) k (-h)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem standardNirenbergTest_seq_tendsto_eLpNorm
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

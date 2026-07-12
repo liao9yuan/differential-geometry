@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.WithBoundary.InteriorVariational
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ private abbrev I_half (n : ℕ) [NeZero n] :
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [SigmaCompactSpace M] [CompactSpace M] in
 lemma InteriorSmoothScalar.oneSubLap_continuous
     {g : SmoothRiemannianMetric (I_half n) M} (u : InteriorSmoothScalar g) :
     Continuous (fun x : M =>

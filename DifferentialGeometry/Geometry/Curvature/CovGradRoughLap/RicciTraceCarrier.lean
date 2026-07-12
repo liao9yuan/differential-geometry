@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldContra
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection
 import DifferentialGeometry.Geometry.Operator.MetricSharpSmooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -59,6 +58,7 @@ def ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M) :
           h, map_smul]
         rfl }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma ricEndoRaisedFib_apply (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     ricEndoRaisedFib (I := I) g x v =
@@ -66,6 +66,7 @@ def ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M) :
   rw [ricEndoRaisedFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma inner_ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g.inner x (ricEndoRaisedFib (I := I) g x v) w = ricciTensor (I := I) g x v w := by
@@ -74,6 +75,7 @@ lemma inner_ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem ricEndoRaisedFib_contMDiff (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
@@ -144,6 +146,7 @@ def ricSlotOpFib (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) :
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma ricSlotOpFib_apply (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) :
     ricSlotOpFib (I := I) (M := M) g s x D =
@@ -155,6 +158,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 lemma ricSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) (v0 : E) (vs : Fin s → E) :
     Tensor0SSpace.toModel (ricSlotOpFib (I := I) (M := M) g s x D) (Fin.cons v0 vs) =

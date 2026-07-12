@@ -23,6 +23,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+omit [CompleteSpace E] in
 theorem nablaTensorCurvSec_tensor0SCov_eq_nablaTensor0SCurv
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -33,6 +34,7 @@ theorem nablaTensorCurvSec_tensor0SCov_eq_nablaTensor0SCurv
       nablaTensor0SCurv (I := I) g s X Y Z A x :=
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem nablaTensorCurvSec_diag_frameSum_eq_nablaTensor0SCurv_diag_frameSum
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

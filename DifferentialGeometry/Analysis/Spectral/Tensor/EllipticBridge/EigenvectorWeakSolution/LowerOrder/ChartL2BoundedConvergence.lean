@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.ChartPouKernel
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma memLp_bdd_mul
     (α : M) {c : EuclN → ℝ} {C : ℝ} (hC : 0 ≤ C) (hc_bd : ∀ y, ‖c y‖ ≤ C)
     (hc_meas : AEStronglyMeasurable c (chartL2Measure (I := I) (M := M) α))
@@ -61,6 +61,7 @@ lemma memLp_bdd_mul
         eLpNorm_const_smul (C : ℝ) f 2 _
     _ < ⊤ := ENNReal.mul_lt_top (by simp) hf.2
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma eLpNorm_bdd_mul_le
     (α : M) {c : EuclN → ℝ} {C : ℝ} (hC : 0 ≤ C) (hc_bd : ∀ y, ‖c y‖ ≤ C)
     (f : EuclN → ℝ) :
@@ -84,6 +85,7 @@ lemma eLpNorm_bdd_mul_le
           eLpNorm f 2 (chartL2Measure (I := I) (M := M) α) := by
         rw [Real.enorm_eq_ofReal hC]
 
+set_option linter.unusedSectionVars false in
 lemma tendsto_bdd_mul
     (α : M) {c : EuclN → ℝ} {C : ℝ} (hC : 0 ≤ C) (hc_bd : ∀ y, ‖c y‖ ≤ C)
     (hc_meas : AEStronglyMeasurable c (chartL2Measure (I := I) (M := M) α))
@@ -163,6 +165,7 @@ lemma tendsto_bdd_mul
         mul_lt_mul_of_pos_left hd hCpos
     _ = ε := by field_simp
 
+set_option linter.unusedSectionVars false in
 lemma tensorChartComponent_contDiff'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -231,6 +234,7 @@ lemma chosenWeakPartial'_tensorChartComponent_ae_eq
   refine h_ae.trans (Filter.EventuallyEq.of_eq ?_)
   funext y; rw [euclidPartial_def]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma coeFn_finsetSum_lp
     (α : M) {ι : Type*} (s : Finset ι)
     (G : ι → Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
@@ -249,6 +253,7 @@ lemma coeFn_finsetSum_lp
       filter_upwards [ih] with y hy
       rw [Pi.add_apply, hy, Finset.sum_insert ha]
 
+set_option linter.unusedSectionVars false in
 lemma coeFn_finsetSum_toLp
     (α : M) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -351,6 +356,7 @@ lemma tendsto_sumToLp
       Finset.univ (fun a _ => hflim a))
     (fun _ => Filter.EventuallyEq.rfl) Filter.EventuallyEq.rfl
 
+set_option linter.unusedSectionVars false in
 lemma euclidPartial_finsetSum
     (l : Fin (Module.finrank ℝ E)) {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ} {y : EuclN}
@@ -460,6 +466,7 @@ lemma tendsto_sum5
       (fun b c d e => hflim a b c d e)
       (fun b c d e => h_tendsto a b c d e))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma differentiableAt_of_contDiffOn_chartTarget
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α))
@@ -470,6 +477,7 @@ lemma differentiableAt_of_contDiffOn_chartTarget
       (I := I) (M := M) α
   exact (hc.contDiffAt (hopen.mem_nhds hy)).differentiableAt (by simp)
 
+set_option linter.unusedSectionVars false in
 lemma differentiableAt_tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -480,6 +488,7 @@ lemma differentiableAt_tensorChartComponent
   ((tensorChartComponent_contDiff' (I := I) (M := M) g r s S α Idx Jdx).differentiable
     (by simp)).differentiableAt
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma toLp_add_eq
     (α : M) {f₁ f₂ F : EuclN → ℝ}
     (hf₁ : MemLp f₁ 2 (chartL2Measure (I := I) (M := M) α))

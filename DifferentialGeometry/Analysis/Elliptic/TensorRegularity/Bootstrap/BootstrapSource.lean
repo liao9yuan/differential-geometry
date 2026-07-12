@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.Bootstrap.BootstrapMixed
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EE" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 private lemma wkpNorm_chosenWeakPartial_le_succ
     (k : ℕ) {Ω : Set EE} (u : EE → ℝ) (i : Fin d) :
     iteratedWeakSobolevNorm (d := d) k 2 (chosenWeakPartial' 2 i u Ω) Ω ≤
@@ -54,6 +54,7 @@ private lemma wkpNorm_chosenWeakPartial_le_succ
     (f := fun j : Fin d => iteratedWeakSobolevNorm (d := d) k 2 (chosenWeakPartial' 2 j u Ω) Ω)
     (fun j _ => zero_le _) (Finset.mem_univ i)
 
+omit [NeZero d] in
 theorem wkpNorm_smul_globalSmooth_uniform
     (k : ℕ) {η : EE → ℝ} (hη_smooth : ContDiff ℝ (⊤ : ℕ∞) η)
     {C : ℝ} (hC : 0 ≤ C)
@@ -174,6 +175,7 @@ variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
 local notation "dimE" => Module.finrank ℝ E
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 private lemma contDiff_of_contDiffOn_zero_off_closed
     {P : EuclN → ℝ} {U C : Set EuclN}
     (hU : IsOpen U) (hC : IsClosed C) (hCU : C ⊆ U)
@@ -202,6 +204,7 @@ private structure ChartCutoff (α : M) {K : Set EuclN}
 
   hasCompactSupport : HasCompactSupport toFun
 
+omit [NeZero dimE] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma exists_chartCutoff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
     Nonempty (ChartCutoff (I := I) (M := M) α hK hK_target) := by
@@ -228,6 +231,7 @@ private lemma exists_chartCutoff (α : M) {K : Set EuclN}
            hasCompactSupport := HasCompactSupport.of_support_subset_isCompact
              hL_compact ((subset_tsupport _).trans hζ_supp) }⟩
 
+set_option linter.unusedSectionVars false in
 private lemma cutoff_mul_coeff_contDiff (α : M) {K : Set EuclN}
     {hK : IsCompact K} {hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α}
     (ζ : ChartCutoff (I := I) (M := M) α hK hK_target)
@@ -242,6 +246,7 @@ private lemma cutoff_mul_coeff_contDiff (α : M) {K : Set EuclN}
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, zero_mul]
 
+set_option linter.unusedSectionVars false in
 private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {c : EuclN → ℝ}
@@ -286,12 +291,14 @@ private lemma exists_wkpNorm_chartCoeff_mul_le (α : M) {K : Set EuclN}
   · rw [h_eq]
     exact hK₀ hΩ''_open hv_mem
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_contDiff {v : EuclN → ℝ} (hv : ContDiff ℝ ∞ v)
     (l : Fin dimE) :
     ContDiff ℝ ∞ (euclidPartial (E := E) l v) := by
   have h := contDiff_partial_eta (d := dimE) (by simpa using hv) l
   simpa [euclidPartial] using h
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 private lemma euclidPartial_eq_zero_of_notMem_tsupport {v : EuclN → ℝ}
     (l : Fin dimE) {y : EuclN} (hy : y ∉ tsupport v) :
     euclidPartial (E := E) l v y = 0 := by
@@ -304,6 +311,7 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport {v : EuclN → ℝ}
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hv_zero_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_tsupport_subset {v : EuclN → ℝ}
     (l : Fin dimE) :
     tsupport (euclidPartial (E := E) l v) ⊆ tsupport v := by
@@ -312,6 +320,7 @@ lemma euclidPartial_tsupport_subset {v : EuclN → ℝ}
   by_contra hyv
   exact hy (euclidPartial_eq_zero_of_notMem_tsupport (E := E) l hyv)
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_hasCompactSupport {K : Set EuclN} (hK : IsCompact K)
     {v : EuclN → ℝ} (hv_K : tsupport v ⊆ K) (l : Fin dimE) :
     HasCompactSupport (euclidPartial (E := E) l v) :=
@@ -319,6 +328,7 @@ lemma euclidPartial_hasCompactSupport {K : Set EuclN} (hK : IsCompact K)
     ((subset_tsupport _).trans
       ((euclidPartial_tsupport_subset (E := E) l).trans hv_K))
 
+set_option linter.unusedSectionVars false in
 lemma wkpNorm_euclidPartial_le {m : ℕ} {Ω'' : Set EuclN}
     (hΩ'' : IsOpen Ω'') {v : EuclN → ℝ} (hv_smooth : ContDiff ℝ ∞ v)
     (hv : MemWkp (d := dimE) (m + 1) 2 v Ω'') (l : Fin dimE) :
@@ -326,6 +336,7 @@ lemma wkpNorm_euclidPartial_le {m : ℕ} {Ω'' : Set EuclN}
       iteratedWeakSobolevNorm (d := dimE) (m + 1) 2 v Ω'' :=
   wkpNorm_classicalPartial_le (d := dimE) hΩ'' (by simpa using hv_smooth) hv l
 
+set_option linter.unusedSectionVars false in
 lemma memWkp_euclidPartial {m : ℕ} {Ω'' : Set EuclN}
     (hΩ'' : IsOpen Ω'') {v : EuclN → ℝ} (hv_smooth : ContDiff ℝ ∞ v)
     (hv : MemWkp (d := dimE) (m + 1) 2 v Ω'') (l : Fin dimE) :
@@ -333,6 +344,7 @@ lemma memWkp_euclidPartial {m : ℕ} {Ω'' : Set EuclN}
   classicalPartial_memWkp_of_memWkp_succ (d := dimE) hΩ''
     (by simpa using hv_smooth) hv l
 
+omit [NeZero dimE] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma covDerivLowerOrderTerm_eq_sum_componentEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (k : Fin dimE)
@@ -347,6 +359,7 @@ lemma covDerivLowerOrderTerm_eq_sum_componentEuclid
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [tensorComponentEuclid_apply_of_mem (I := I) (M := M) g r s T α p hy]
 
+set_option linter.unusedSectionVars false in
 private lemma chartCoeff_mul_contDiff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {c : EuclN → ℝ}
@@ -366,6 +379,7 @@ private lemma chartCoeff_mul_contDiff (α : M) {K : Set EuclN}
   rw [h_eq]
   exact hζc_smooth.mul hv
 
+set_option linter.unusedSectionVars false in
 lemma chartCoeffSum_contDiff (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     {ι : Type*} (S : Finset ι) (c v : ι → EuclN → ℝ)
@@ -379,6 +393,7 @@ lemma chartCoeffSum_contDiff (α : M) {K : Set EuclN}
   exact chartCoeff_mul_contDiff (I := I) (M := M) α hK hK_target
     (hc a ha) (hv a ha) (hv_K a ha)
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma chartCoeffSum_hasCompactSupport {K : Set EuclN}
     (hK : IsCompact K)
     {ι : Type*} (S : Finset ι) (c v : ι → EuclN → ℝ)
@@ -393,6 +408,7 @@ lemma chartCoeffSum_hasCompactSupport {K : Set EuclN}
     rw [image_eq_zero_of_notMem_tsupport (fun hy' => hyK (hv_K a ha hy')),
       mul_zero]))
 
+set_option linter.unusedSectionVars false in
 private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {ι : Type*} (S : Finset ι) (c : ι → EuclN → ℝ)
@@ -438,6 +454,7 @@ private lemma exists_wkpNorm_chartCoeffSum_le (α : M) {K : Set EuclN}
     Ka (fun a ha => hKa_nn a ha) D h_term_le).trans ?_
   rw [hD_def]
 
+set_option linter.unusedSectionVars false in
 lemma exists_wkpNorm_chartCoeffSum_bddBy (α : M) {K : Set EuclN}
     (hK : IsCompact K) (hK_target : K ⊆ chartTargetEuclid (I := I) (M := M) α)
     (m : ℕ) {ι : Type*} (S : Finset ι) (c : ι → EuclN → ℝ)
@@ -463,6 +480,7 @@ lemma exists_wkpNorm_chartCoeffSum_bddBy (α : M) {K : Set EuclN}
   refine (mul_le_mul_of_nonneg_left hsum (zero_le _)).trans ?_
   rw [nsmul_eq_mul, ← mul_assoc, ENNReal.ofReal_mul hKc_nn, ENNReal.ofReal_natCast]
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma eqOn_open_imp_ae_restrict {U : Set EuclN} (hU : IsOpen U)
     {f h : EuclN → ℝ} (hfh : Set.EqOn f h U) :
     f =ᵐ[volume.restrict U] h := by
@@ -470,6 +488,7 @@ lemma eqOn_open_imp_ae_restrict {U : Set EuclN} (hU : IsOpen U)
     ae_restrict_mem hU.measurableSet
   filter_upwards [hmem] with y hy using hfh hy
 
+omit [FiniteDimensional ℝ E] [NeZero dimE] in
 lemma euclidPartial_congr_of_eqOn_open {U : Set EuclN} (hU : IsOpen U)
     {f h : EuclN → ℝ} (hfh : Set.EqOn f h U)
     (l : Fin dimE) {y : EuclN} (hy : y ∈ U) :

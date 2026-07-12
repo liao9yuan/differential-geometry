@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegularity.BilinearH1ComplViaH3
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -59,6 +58,7 @@ noncomputable def chosenMthMixedPartialChartPushedU
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem chosenMthMixedPartialChartPushedU_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -68,6 +68,7 @@ noncomputable def chosenMthMixedPartialChartPushedU
         (I := I) (M := M) (chartAtlasPOU I M) α
         ((H1ComplToLp (I := I) (M := M) g u_h) : M → ℝ) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_succ
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -80,6 +81,7 @@ theorem chosenMthMixedPartialChartPushedU_succ
         (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid
           (I := I) (M := M) α) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -91,6 +93,7 @@ theorem chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial
   unfold chartPushedChosenFirstPartial
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -112,6 +115,7 @@ theorem chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
   rw [h_last_1, h_inner_last]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -135,6 +139,7 @@ theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartP
   unfold chosenThirdMixedPartialChartPushedU
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -183,6 +188,7 @@ theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
 
+set_option linter.unusedSectionVars false in
 theorem chosenMthMixedPartialChartPushedU_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -215,6 +221,7 @@ theorem chosenMthMixedPartialChartPushedU_memLp_two
       (I := I) (M := M) g α u_h m 0 h_parent' idx
   exact h_memWkp_0
 
+set_option linter.unusedSectionVars false in
 theorem chosenMthMixedPartialChartPushedU_memW1p_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

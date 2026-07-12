@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Tensor0S.ChartT
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.ChartTensor0SCovariantDerivativeAgreementSucc
 import DifferentialGeometry.Geometry.Connection.TensorNabla.TensorRSNabla
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -29,6 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 private lemma tensorSectionMDiffAt_tensorPartialEval
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -64,6 +64,7 @@ private lemma tensorSectionMDiffAt_tensorPartialEval
     (v := fun y : M => chartTensor0SParallelExtend (I := I) r α b α_input y)
     hT_at hW_at
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartTensor0SParallelExtend_at_self
     (r : ℕ) (α : M) {b : M}
     (hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -83,6 +84,7 @@ private lemma chartTensor0SParallelExtend_at_self
       (fun y : M => Tensor0SSpace r I y) α).symmL_continuousLinearMapAt
     (R := ℝ) hb_base_tensor α_input
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
     (r : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -107,6 +109,7 @@ private lemma chartTensor0SSlotCorrection_chartTensor0SParallelExtend_eq
       α_input m]
   rfl
 
+omit [InnerProductSpace ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -124,6 +127,7 @@ private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
   unfold chartTensorRSInputSlotCorrection
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlotCorrection
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')

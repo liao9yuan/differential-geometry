@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.TensorRegularity.WeakSolution.Weak
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Component.PouComponentBridge
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,15 +43,18 @@ def chartPouKernel (α : M) : Set EuclN :=
   toEuclidean '' ((extChartAt I α) ''
     (tsupport (fun x : M => ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)))
 
+set_option linter.unusedSectionVars false in
 lemma chartPouKernel_isCompact (α : M) :
     IsCompact (chartPouKernel (I := I) (M := M) α) :=
   (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartImage_pouTsupport_isCompact
     (I := I) (M := M) α).image (toEuclidean (E := E)).continuous
 
+set_option linter.unusedSectionVars false in
 lemma chartPouKernel_measurableSet (α : M) :
     MeasurableSet (chartPouKernel (I := I) (M := M) α) :=
   (chartPouKernel_isCompact (I := I) (M := M) α).isClosed.measurableSet
 
+set_option linter.unusedSectionVars false in
 lemma chartPouKernel_subset_chartTargetEuclid (α : M) :
     chartPouKernel (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := by
@@ -62,6 +64,7 @@ lemma chartPouKernel_subset_chartTargetEuclid (α : M) :
   exact DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartImage_pouTsupport_subset_target
     (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 private lemma notMem_pouTsupport_of_notMem_chartPouKernel
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
@@ -78,6 +81,7 @@ private lemma notMem_pouTsupport_of_notMem_chartPouKernel
     exact (extChartAt I α).right_inv hmem
   · exact toEuclidean.apply_symm_apply y
 
+set_option linter.unusedSectionVars false in
 lemma tensorChartComponent_eq_zero_off_chartPouKernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -141,6 +145,7 @@ lemma euclidPartial_tensorChartComponent_eq_zero_off_chartPouKernel
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
+set_option linter.unusedSectionVars false in
 lemma exists_bound_on_chartPouKernel
     (α : M) {c : EuclN → ℝ}
     (hc : ContDiffOn ℝ ∞ c (chartTargetEuclid (I := I) (M := M) α)) :

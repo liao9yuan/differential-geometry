@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.Gradient
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -47,6 +46,7 @@ noncomputable def chartPushedPartial
       (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α v.toFun) y)
       (EuclideanSpace.single j 1)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 @[simp] lemma chartPushedPartial_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) (v : SmoothScalar g) (y : EuclN) :
@@ -65,6 +65,7 @@ noncomputable def chartPushedPartialLp
       (DifferentialGeometry.Analysis.Sobolev.Chart.chartTargetEuclid (I := I) (M := M) α)) :=
   h.toLp _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 lemma norm_chartPushedPartialLp
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) (v : SmoothScalar g)
@@ -78,6 +79,7 @@ lemma norm_chartPushedPartialLp
   unfold chartPushedPartialLp
   exact MeasureTheory.Lp.norm_toLp _ _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompactSpace M] in
 lemma eLpNorm_chartPushedPartial_eq_ofReal_norm
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) (v : SmoothScalar g)
@@ -92,6 +94,7 @@ lemma eLpNorm_chartPushedPartial_eq_ofReal_norm
   rw [ENNReal.ofReal_toReal]
   exact h.2.ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cauchy_in_Lp_of_h1Compl_cauchy_with_extension
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : SmoothScalar g →L[ℝ] Lp ℝ 2
@@ -114,6 +117,7 @@ theorem cauchy_in_Lp_of_h1Compl_cauchy_with_extension
   have hT_uc : UniformContinuous T := T.uniformContinuous
   exact h_cauchy_smooth.map hT_uc
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cauchy_in_Lp_of_chartPushed_partial_smoothApprox_with_extension
     (g : SmoothRiemannianMetric I M) (α : M)
     (T : SmoothScalar g →L[ℝ] Lp ℝ 2
@@ -142,6 +146,7 @@ theorem cauchy_in_Lp_of_chartPushed_partial_smoothApprox_with_extension
   rw [h_funext] at h_dist
   exact h_dist
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cauchy_eLpNorm_diff_chartPushedPartial_with_extension
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E))

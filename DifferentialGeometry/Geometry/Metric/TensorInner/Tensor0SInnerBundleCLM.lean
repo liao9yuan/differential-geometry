@@ -17,7 +17,6 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -57,6 +56,7 @@ private def innerModelBilin
     (fun c T S =>
       tensorInnerPointwise_0s_smul_right (I := I) (M := M) g b s c T S)
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma innerModelBilin_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SModel s ℝ E) :
@@ -90,6 +90,7 @@ def innerModelCLM
   LinearMap.toContinuousLinearMap
     (innerModelLinearOuter (I := I) (M := M) g s b)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma innerModelCLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SModel s ℝ E) :
@@ -106,6 +107,7 @@ private def bundleToModelCLM (s : ℕ) (b : M) :
       Tensor0SModel s ℝ E :=
   (bundleCLE (I := I) (M := M) (E := E) s b).toContinuousLinearMap
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma bundleToModelCLM_apply (s : ℕ) (b : M)
     (T : Tensor0SSpace s I b) :
     bundleToModelCLM (I := I) (M := M) (E := E) s b T =
@@ -124,6 +126,7 @@ private def precompBundleCLM (s : ℕ) (b : M) :
   ((bundleCLE (I := I) (M := M) (E := E) s b).symm.arrowCongr
     (ContinuousLinearEquiv.refl ℝ ℝ)).toContinuousLinearMap
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma precompBundleCLM_apply (s : ℕ) (b : M)
     (f : Tensor0SModel s ℝ E →L[ℝ] ℝ) (T : Tensor0SSpace s I b) :
     precompBundleCLM (I := I) (M := M) (E := E) s b f T =
@@ -142,6 +145,7 @@ def innerBundleCLM
 
   stepA.comp (bundleToModelCLM (I := I) (M := M) (E := E) s b)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma innerBundleCLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SSpace s I b) :
@@ -153,6 +157,7 @@ def innerBundleCLM
           (𝕜 := ℝ) (E := E) (s := s) (x := b) S) := by
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma innerBundleCLM_symm
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SSpace s I b) :
@@ -161,6 +166,7 @@ lemma innerBundleCLM_symm
   rw [innerBundleCLM_apply, innerBundleCLM_apply]
   exact tensorInnerPointwise_0s_symm (I := I) (M := M) g b s _ _
 
+set_option linter.unusedSectionVars false in
 lemma innerBundleCLM_pos
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T : Tensor0SSpace s I b) (hT : T ≠ 0) :

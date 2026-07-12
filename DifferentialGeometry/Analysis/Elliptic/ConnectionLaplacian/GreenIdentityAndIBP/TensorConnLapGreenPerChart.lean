@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinateExpansion.RawTensorConnLapChartFrameTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.ChartGeometry.GoodSetMeasure
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -124,6 +123,7 @@ private lemma perDirWeight_continuous
     (tangentSectionAction_contMDiff (I := I) (frameVF (I := I) (M := M) g α i)
       (chartAtlasPOU I M α).contMDiff).continuous
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma perDir_integrable_of_continuous
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} (hf : Continuous f) :
     Integrable f (riemannianVolumeMeasure (I := I) (M := M) g) :=

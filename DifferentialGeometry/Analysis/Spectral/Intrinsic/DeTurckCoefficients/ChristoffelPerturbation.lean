@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.Inve
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.InvGramPerturbation
 import DifferentialGeometry.Geometry.Curvature.Riemann.Ricci
 
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -38,10 +37,12 @@ def gramPartialDiffEntry (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : 
 def chartGramPartialDiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : ℝ :=
   ∑ p, gramPartialDiffEntry (I := I) (M := M) g₁ g₂ α y p
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartGramPartialDiffSup_nonneg (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y :=
   Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv_chartGramOnE_sub_abs_le_partialDiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
     (a l b : Fin (Module.finrank ℝ E)) :
@@ -65,10 +66,12 @@ def gramPartial2DiffEntry (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y :
 def chartGramPartial2DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) : ℝ :=
   ∑ p, gramPartial2DiffEntry (I := I) (M := M) g₁ g₂ α y p
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartGramPartial2DiffSup_nonneg (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ chartGramPartial2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   Finset.sum_nonneg (fun _ _ => abs_nonneg _)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma partialDeriv2_chartGramOnE_sub_abs_le_partial2DiffSup
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
     (c a l b : Fin (Module.finrank ℝ E)) :
@@ -91,40 +94,47 @@ def chartMetricJet2DiffSup (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y 
   chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y
     + chartGramPartial2DiffSup (I := I) (M := M) g₁ g₂ α y
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartMetricJet1DiffSup_nonneg (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y :=
   add_nonneg (chartGramDiffSup_nonneg _ _ _ _)
     (chartGramPartialDiffSup_nonneg _ _ _ _)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartMetricJet2DiffSup_nonneg (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     0 ≤ chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   add_nonneg (chartMetricJet1DiffSup_nonneg _ _ _ _)
     (chartGramPartial2DiffSup_nonneg _ _ _ _)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartGramDiffSup_le_jet1
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     chartGramDiffSup (I := I) (M := M) g₁ g₂ α ((extChartAt I α).symm y) ≤
       chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y :=
   le_add_of_nonneg_right (chartGramPartialDiffSup_nonneg _ _ _ _)
 
+set_option linter.unusedSectionVars false in
 lemma chartGramPartialDiffSup_le_jet1
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y ≤
       chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y :=
   le_add_of_nonneg_left (chartGramDiffSup_nonneg _ _ _ _)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartMetricJet1DiffSup_le_jet2
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y ≤
       chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   le_add_of_nonneg_right (chartGramPartial2DiffSup_nonneg _ _ _ _)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartGramPartial2DiffSup_le_jet2
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     chartGramPartial2DiffSup (I := I) (M := M) g₁ g₂ α y ≤
       chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   le_add_of_nonneg_left (chartMetricJet1DiffSup_nonneg _ _ _ _)
 
+set_option linter.unusedSectionVars false in
 lemma symm_mem_baseSet_of_mem_interior_target
     (α : M) {y : E} (hy : y ∈ interior (extChartAt I α).target) :
     ((extChartAt I α).symm y) ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -135,6 +145,7 @@ lemma symm_mem_baseSet_of_mem_interior_target
   rw [trivializationAt_baseSet_eq_chartAt_source]
   exact hsource
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
     (α : M) {f : E → ℝ}
     (hf : ContDiffOn ℝ ∞ f (interior (extChartAt I α).target))
@@ -185,6 +196,7 @@ lemma chartChristoffel_eq_sum_invGramOnE_bracket
   rw [chartChristoffel_def]
   rfl
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_bound_of_contDiffOn_interior
     {f : E → ℝ}
     (α : M)
@@ -201,6 +213,7 @@ private lemma exists_bound_of_contDiffOn_interior
   · exact ⟨0, le_refl 0, fun y hy => absurd ⟨y, hy⟩ hKne⟩
 
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 private lemma exists_uniform_bound_of_family
     {ι : Type*} [Fintype ι] [Nonempty ι]
     (α : M) (f : ι → E → ℝ)
@@ -626,6 +639,7 @@ theorem partialDeriv_chartInvGramOnE_sub_abs_le
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q + M_b ^ 2) * jet1 =
         (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * ((2 * Cinv * M_b * Q + M_b ^ 2) * jet1)) by ring]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma gramBracketDeriv_sub_abs_le
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E)
     (m i j l : Fin (Module.finrank ℝ E)) :

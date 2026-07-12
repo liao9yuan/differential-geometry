@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.CurvatureRefol
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputSlotSymmetrization
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -46,6 +45,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 lemma ccTensorBilin_zero_weight (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     smoothCcTensorBilinForm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by
@@ -88,6 +88,7 @@ def ricciFoldKernelBilin (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor
         simp only [ContinuousLinearMap.smul_apply, map_smul, ContinuousLinearMap.comp_smul]
         rw [← smul_add, smul_comm] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma ricciFoldKernelBilin_apply (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q v0 v1 : TangentSpace I x) :
     ricciFoldKernelBilin (I := I) g₀ S x p q v0 v1 =
@@ -110,6 +111,7 @@ def frameRicciFoldKernel (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor
       + (smoothCcTensorBilinForm (I := I) g₀ S x).flip.comp
           ((riemannOp (LeviCivita (I := I) g₀) x v0).flip v1))
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma frameRicciFoldKernel_apply (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (v0 v1 p q : TangentSpace I x) :
     frameRicciFoldKernel (I := I) g₀ S x v0 v1 p q =
@@ -134,6 +136,7 @@ def ricciFoldSummandFib (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor 
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma ricciFoldSummandFib_toModel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -152,6 +155,7 @@ def ricciFoldBiContrFibFixedFrame (g₀ : SmoothRiemannianMetric I M)
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     ricciFoldSummandFib (I := I) g₀ S x (B a x) (B b x)
 
+set_option linter.unusedSectionVars false in
 lemma ricciFoldBiContrFibFixedFrame_toModel (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)

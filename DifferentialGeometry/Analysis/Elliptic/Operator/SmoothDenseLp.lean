@@ -3,7 +3,6 @@ import Mathlib.MeasureTheory.Function.ContinuousMapDense
 import Mathlib.Topology.ContinuousMap.StoneWeierstrass
 import Mathlib.Geometry.Manifold.BumpFunction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,21 +32,25 @@ def SmoothScalar.toContinuousMap {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) : C(M, ℝ) :=
   ⟨f.toFun, f.smooth.continuous⟩
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_apply {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) (x : M) :
     f.toContinuousMap x = f.toFun x := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_zero {g : SmoothRiemannianMetric I M} :
     (0 : SmoothScalar g).toContinuousMap = (0 : C(M, ℝ)) := by
   ext x
   rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_add {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     (f + h).toContinuousMap = f.toContinuousMap + h.toContinuousMap := by
   ext x
   rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.toContinuousMap_smul {g : SmoothRiemannianMetric I M}
     (c : ℝ) (f : SmoothScalar g) :
     (c • f).toContinuousMap = c • f.toContinuousMap := by
@@ -58,6 +61,7 @@ def SmoothScalar.one (g : SmoothRiemannianMetric I M) : SmoothScalar g where
   toFun := fun _ => (1 : ℝ)
   smooth := contMDiff_const
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.one_toFun (g : SmoothRiemannianMetric I M) :
     (SmoothScalar.one g).toFun = fun _ : M => (1 : ℝ) := rfl
 
@@ -66,6 +70,7 @@ def SmoothScalar.mul {g : SmoothRiemannianMetric I M} (f h : SmoothScalar g) :
   toFun := fun x => f.toFun x * h.toFun x
   smooth := f.smooth.mul h.smooth
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma SmoothScalar.mul_toFun {g : SmoothRiemannianMetric I M}
     (f h : SmoothScalar g) :
     (SmoothScalar.mul f h).toFun = fun x => f.toFun x * h.toFun x := rfl
@@ -104,11 +109,13 @@ def smoothScalarSubalgebra (g : SmoothRiemannianMetric I M) :
     change c = (c • (1 : C(M, ℝ))) x
     rw [ContinuousMap.smul_apply, ContinuousMap.one_apply, smul_eq_mul, mul_one]
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma mem_smoothScalarSubalgebra_iff {g : SmoothRiemannianMetric I M}
     {φ : C(M, ℝ)} :
     φ ∈ smoothScalarSubalgebra (I := I) (M := M) g ↔
       ∃ f : SmoothScalar g, f.toContinuousMap = φ := Iff.rfl
 
+set_option linter.unusedSectionVars false in
 private lemma exists_smooth_separating
     (x y : M) (hxy : x ≠ y) :
     ∃ f : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ f ∧ f x = 1 ∧ f y = 0 := by
@@ -129,6 +136,7 @@ private lemma exists_smooth_separating
     have hy_in_compl : y ∈ ({y}ᶜ : Set M) := hφ_tsupp hy_supp
     exact hy_in_compl rfl
 
+set_option linter.unusedSectionVars false in
 theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) :
     (smoothScalarSubalgebra (I := I) (M := M) g).SeparatesPoints := by
   intro x y hxy
@@ -139,6 +147,7 @@ theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) 
   · rw [hfx, hfy]
     exact one_ne_zero
 
+set_option linter.unusedSectionVars false in
 theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
     (φ : C(M, ℝ)) {ε : ℝ} (hε : 0 < ε) :
     ∃ f : SmoothScalar g, ‖f.toContinuousMap - φ‖ < ε := by
@@ -151,6 +160,7 @@ theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
   rw [hf]
   exact hg'_lt
 
+set_option linter.unusedSectionVars false in
 private lemma eLpNorm_two_le_of_norm_le
     (g : SmoothRiemannianMetric I M) (φ : M → ℝ) (_hφ : Continuous φ) (K : ℝ)
     (hK : ∀ x, ‖φ x‖ ≤ K) :
@@ -163,6 +173,7 @@ private lemma eLpNorm_two_le_of_norm_le
   exact MeasureTheory.eLpNorm_le_of_ae_bound (μ := riemannianVolumeMeasure (I := I) (M := M) g)
     (f := φ) (C := K) (Filter.Eventually.of_forall hK)
 
+set_option linter.unusedSectionVars false in
 private lemma eLpNorm_smooth_sub_bc_le
     (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) (ψ : M →ᵇ ℝ) (δ : ℝ)
@@ -178,12 +189,14 @@ private lemma eLpNorm_smooth_sub_bc_le
     f.smooth.continuous.sub ψ.continuous
   exact eLpNorm_two_le_of_norm_le (I := I) (M := M) g _ h_diff_cont δ h_pt
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma edist_toLp_eq_eLpNorm
     {μ : Measure M} (a b : M → ℝ) (ha : MemLp a 2 μ) (hb : MemLp b 2 μ) :
     edist (ha.toLp a) (hb.toLp b) = eLpNorm (fun x : M => a x - b x) 2 μ := by
   rw [Lp.edist_toLp_toLp]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma exists_smoothToLp_close_to_memLp
     (g : SmoothRiemannianMetric I M)
     [hμ_fin : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g)]
@@ -265,6 +278,7 @@ private lemma exists_smoothToLp_close_to_memLp
     _ ≤ ε / 2 + ε / 2 := add_le_add h1 h2_bound
     _ = ε := ENNReal.add_halves _
 
+set_option linter.unusedSectionVars false in
 theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToLp (I := I) (M := M) g) := by
   classical
@@ -285,6 +299,7 @@ theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
   conv_lhs => rw [show v = (Lp.memLp v).toLp (v : M → ℝ) from h_v_eq]
   exact hf
 
+set_option linter.unusedSectionVars false in
 theorem denseRange_H1ComplToLp (g : SmoothRiemannianMetric I M) :
     DenseRange (H1ComplToLp (I := I) (M := M) g) := by
   refine Dense.mono ?_ (denseRange_smoothToLp (I := I) (M := M) g)

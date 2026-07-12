@@ -18,7 +18,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.CrossScaleParabolicTr
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldCovariantCalculus
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.HomFieldActionIteratedCovGradWindow
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -51,6 +50,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [BoundarylessManifold I M] in
 private lemma weight_natCast (g₀ : SmoothRiemannianMetric I M)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) (n : ℕ) :
@@ -398,6 +398,7 @@ private lemma coeffContraction_secondCovGrad_sub (g₀ : SmoothRiemannianMetric 
         operatorFieldApply (I := I) (M := M) g₀ (2 + 2) 2 C (iteratedCovGrad (I := I) g₀ 0 2 2 v) := by
   rw [iteratedCovGrad_sub, appCc_sub_right]
 
+set_option linter.unusedSectionVars false in
 private lemma rawConnLap_oneMinusConnLap_comm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     rawTensorConnLapSmooth (I := I) g₀ 0 2 (oneMinusConnLapSmooth (I := I) g₀ 0 2 S) =

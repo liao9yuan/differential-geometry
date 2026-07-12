@@ -43,7 +43,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmDiffL2TameBallUniform
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzPhiMetTotalCurvatureFold
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -80,6 +79,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (reindexCoeffGen rei
 
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization (convexPerturbation convexPerturbation_gFibreOpBound realizedFam_inner_of_mem)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -87,6 +87,7 @@ private lemma dim1_smul_rep (h1 : Module.finrank ℝ E = 1) (e : E) (he : e ≠ 
     ∃ c : ℝ, c • e = v :=
   exists_smul_eq_of_finrank_eq_one (K := ℝ) (V := E) h1 he v
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -112,6 +113,7 @@ lemma dim1_domDomCongr_eq (h1 : Module.finrank ℝ E = 1) {d : ℕ}
     f.map_smul_univ c (fun _ => e)
   rw [hL, hR, Equiv.prod_comp ρ c]
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -174,6 +176,7 @@ lemma dim1_linearizedRicciConnDiffOrder0CoeffField_eq_zero
   rw [ContinuousLinearMap.zero_comp]
   rfl
 
+omit [CompactSpace M] [I.Boundaryless] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -201,6 +204,7 @@ private lemma dim1_riemannOp_first_two_eq_zero (h1 : Module.finrank ℝ E = 1)
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply]
   rw [hself, smul_zero]
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in

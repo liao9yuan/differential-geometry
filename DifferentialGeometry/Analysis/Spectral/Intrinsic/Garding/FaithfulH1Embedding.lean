@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SobolevScaleSummable
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -231,6 +230,7 @@ theorem smoothToTensorH1Compl_eigenvectorSmooth_eq
     map_smul]
   exact eigenvector_eq_resolvent_smul (I := I) (M := M) g 0 2 i
 
+omit [BoundarylessManifold I M] in
 theorem tensorEigenIdx_val_pos
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
@@ -242,6 +242,7 @@ theorem tensorEigenIdx_val_pos
   exact (tensorResolvent_eigenvalue_mem_unit_interval
     (I := I) (M := M) g r s hu_in hu_ne).1
 
+set_option linter.unusedSectionVars false in
 theorem one_add_lambda_eq_inv_val
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (i : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx

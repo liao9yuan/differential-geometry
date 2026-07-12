@@ -61,6 +61,7 @@ def transportCoeffManifold
       ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
         transitionCoeff (E := E) (I := I) (M := M) r s β α P₀ Q x
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma transportCoeffManifold_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) (x : M) :
@@ -69,6 +70,7 @@ def transportCoeffManifold
         ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ) x *
           transitionCoeff (E := E) (I := I) (M := M) r s β α P₀ Q x := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportCoeffManifold_eq_zero_of_cutoffα_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) {x : M}
@@ -76,6 +78,7 @@ private lemma transportCoeffManifold_eq_zero_of_cutoffα_zero
     transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q x = 0 := by
   rw [transportCoeffManifold_apply, hx]; ring
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportCoeffManifold_eq_zero_of_cutoffβ_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) {x : M}
@@ -87,23 +90,28 @@ private def transportSupportSet (α β : M) : Set M :=
   tsupport ((chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯) : M → ℝ) ∩
     tsupport ((chartKernelCutoff (I := I) (M := M) β : C^∞⟮I, M; ℝ⟯) : M → ℝ)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_isCompact (α β : M) :
     IsCompact (transportSupportSet (I := I) (M := M) α β) :=
   (chartKernelCutoff_hasCompactSupport (I := I) (M := M) α).inter_right
     (isClosed_tsupport _)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_isClosed (α β : M) :
     IsClosed (transportSupportSet (I := I) (M := M) α β) :=
   (isClosed_tsupport _).inter (isClosed_tsupport _)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_subset_sourceα (α β : M) :
     transportSupportSet (I := I) (M := M) α β ⊆ (chartAt H α).source :=
   fun _ hx => chartKernelCutoff_tsupport_subset_source (I := I) (M := M) α hx.1
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportSupportSet_subset_sourceβ (α β : M) :
     transportSupportSet (I := I) (M := M) α β ⊆ (chartAt H β).source :=
   fun _ hx => chartKernelCutoff_tsupport_subset_source (I := I) (M := M) β hx.2
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_transportCoeffManifold_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -122,6 +130,7 @@ lemma tsupport_transportCoeffManifold_subset
       (I := I) (M := M) g r s β α P₀ Q
       (image_eq_zero_of_notMem_tsupport hxβ))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem hasCompactSupport_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -131,6 +140,7 @@ theorem hasCompactSupport_transportCoeffManifold
     (fun _ hx => tsupport_transportCoeffManifold_subset
       (I := I) (M := M) g r s β α P₀ Q (subset_tsupport _ hx))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_transportCoeffManifold_subset_sourceα
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -139,6 +149,7 @@ lemma tsupport_transportCoeffManifold_subset_sourceα
   (tsupport_transportCoeffManifold_subset (I := I) (M := M) g r s β α P₀ Q).trans
     (transportSupportSet_subset_sourceα (I := I) (M := M) α β)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma tsupport_transportCoeffManifold_subset_sourceβ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -147,6 +158,7 @@ lemma tsupport_transportCoeffManifold_subset_sourceβ
   (tsupport_transportCoeffManifold_subset (I := I) (M := M) g r s β α P₀ Q).trans
     (transportSupportSet_subset_sourceβ (I := I) (M := M) α β)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem contMDiff_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -196,12 +208,14 @@ theorem contMDiff_transportCoeffManifold
     by_contra hne
     exact hy_notin hne
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma continuous_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
     Continuous (transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q) :=
   (contMDiff_transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q).continuous
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem exists_bound_transportCoeffManifold
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -221,6 +235,7 @@ private def transportCoeffPushed
   chartPushedRaw (I := I) (M := M) α
     (transportCoeffManifold (I := I) (M := M) g r s β α P₀ Q)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma exists_bound_transportCoeffPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -249,6 +264,7 @@ private structure TransportDiffeoData
   hsupp_subset : ∀ y, transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y ≠ 0 →
     y ∈ Ωαβ
 
+omit [CompleteSpace E] in
 private lemma exists_transportDiffeoData
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -305,6 +321,7 @@ private def transportFun
   fun y => transportCoeffPushed (I := I) (M := M) g r s β α P₀ Q y *
     (f : EuclN → ℝ) (chartTransitionEuclid (I := I) (M := M) α β y)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_eq_comp_Φ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -319,6 +336,7 @@ private lemma transportFun_eq_comp_Φ
   · rw [hy, zero_mul, zero_mul]
   · rw [D.hΦ_eq y (D.hsupp_subset y hy)]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_eq_zero_off_Ωαβ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -332,6 +350,7 @@ private lemma transportFun_eq_zero_off_Ωαβ
     exact hy (D.hsupp_subset y hne)
   rw [hcoeff, zero_mul]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_eq_indicator
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -347,6 +366,7 @@ private lemma transportFun_eq_indicator
   · rw [Set.indicator_of_notMem hy,
       transportFun_eq_zero_off_Ωαβ (I := I) (M := M) g r s β α P₀ Q D f hy]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartL2Measure_restrict_Ωαβ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -355,6 +375,7 @@ private lemma chartL2Measure_restrict_Ωαβ
       (volume : Measure EuclN).restrict D.Ωαβ := by
   rw [chartL2Measure, Measure.restrict_restrict_of_subset D.hΩαβ_subset_target]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Ωαβ_measurableSet
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -362,6 +383,7 @@ private lemma Ωαβ_measurableSet
     MeasurableSet D.Ωαβ :=
   D.hΩαβ_open.measurableSet
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma aestronglyMeasurable_transportCoeffPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s) :
@@ -389,6 +411,7 @@ private lemma aestronglyMeasurable_transportCoeffPushed
   intro y hy
   exact chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma aestronglyMeasurable_transportFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -418,6 +441,7 @@ private lemma aestronglyMeasurable_transportFun
     h_f_meas.comp_quasiMeasurePreserving D.Φ.toFun_quasiMeasurePreserving
   exact h_coeff.mul h_comp
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma exists_eLpNorm_transportFun_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -501,6 +525,7 @@ private lemma exists_eLpNorm_transportFun_bound
             eLpNorm (f : EuclN → ℝ) 2 (chartL2Measure (I := I) (M := M) β) := by
           rw [ENNReal.ofReal_mul hC_nn, mul_assoc]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memLp_transportFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -516,6 +541,7 @@ private lemma memLp_transportFun
   refine ENNReal.mul_lt_top ENNReal.ofReal_lt_top ?_
   exact (Lp.memLp f).2
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_aux_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -561,6 +587,7 @@ private lemma transportFun_aux_ae_eq
     exact hy (D.hsupp_subset y hne)
   rw [hcoeff, zero_mul, zero_mul]
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_ae_eq_of_coeFn_ae_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -581,6 +608,7 @@ private def transportLp
     Lp ℝ 2 (chartL2Measure (I := I) (M := M) α) :=
   (memLp_transportFun (I := I) (M := M) g r s β α P₀ Q D f).toLp _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLp_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -593,6 +621,7 @@ private lemma transportLp_coeFn
   unfold transportLp
   exact MemLp.coeFn_toLp _
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLp_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -628,6 +657,7 @@ private lemma transportLp_add
     (transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q D f₂)).symm.trans
     (Lp.coeFn_add _ _).symm
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLp_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -669,6 +699,7 @@ private def transportLpLin
   map_add' f₁ f₂ := transportLp_add (I := I) (M := M) g r s β α P₀ Q D f₁ f₂
   map_smul' c f := transportLp_smul (I := I) (M := M) g r s β α P₀ Q D c f
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma transportLpLin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -677,6 +708,7 @@ private def transportLpLin
     transportLpLin (I := I) (M := M) g r s β α P₀ Q D f =
       transportLp (I := I) (M := M) g r s β α P₀ Q D f := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma transportLpLin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -731,6 +763,7 @@ def chartTransitionTransportCLM
     (transportLpLin_norm_le (I := I) (M := M) g r s β α P₀ Q
       (transportDiffeoData (I := I) (M := M) g r s β α P₀ Q)).choose_spec.2
 
+omit [CompleteSpace E] in
 lemma chartTransitionTransportCLM_coeFn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -748,6 +781,7 @@ lemma chartTransitionTransportCLM_coeFn
   exact transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q
     (transportDiffeoData (I := I) (M := M) g r s β α P₀ Q) f
 
+set_option linter.unusedSectionVars false in
 theorem chartTransitionTransportCLM_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -764,6 +798,7 @@ theorem chartTransitionTransportCLM_coeFn_aeEq
   funext y
   rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma transportFun_tensorChartComponent_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (S : SmoothCcTensor g r s)
@@ -826,6 +861,7 @@ private lemma transportFun_tensorChartComponent_eq
     rw [h_lhs, zero_mul,
       chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
 
+set_option linter.unusedSectionVars false in
 theorem chartTransitionTransportCLM_coeFn_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (S : SmoothCcTensor g r s)

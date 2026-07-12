@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.LocalFormula
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -18,6 +17,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
+set_option linter.unusedSectionVars false in
 lemma chartCoeff_pullback
     (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenc
 import DifferentialGeometry.Bundle.RicciDifferenceMeanValueClmSectionJointSmoothness
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValueJointTensorFieldSmoothness
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -43,6 +42,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem ccTensorMultilinear_add (g : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g 0 2) (x : M) :
     (ccTensorMultilinear (I := I) g (T + T') x : Tensor0SSpace 2 I x)
@@ -52,6 +52,7 @@ theorem ccTensorMultilinear_add (g : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem ccTensorModel_add (g : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (T + T') x =
@@ -71,11 +72,13 @@ def convexPerturbation (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) (s : ℝ) : SmoothCcTensor g₀ 0 2 :=
   (1 - s) • T' + s • T
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma convexPerturbation_zero (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) :
     convexPerturbation (I := I) g₀ T T' 0 = T' := by
   simp [convexPerturbation]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma convexPerturbation_one (g₀ : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2) :
     convexPerturbation (I := I) g₀ T T' 1 = T := by
@@ -151,6 +154,7 @@ theorem realizedMetricPath_inner (g₀ : SmoothRiemannianMetric I M)
         ccTensorBilinSymm (I := I) g₀ (convexPerturbation (I := I) g₀ T T' s) x v w := by
   rw [realizedMetricPath, tensorSectionRealizeMetric_inner]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianMetric_eq_of_inner (g g' : SmoothRiemannianMetric I M)
     (h : ∀ (b : M) (v w : TangentSpace I b), g.inner b v w = g'.inner b v w) :
     g = g' := by
@@ -545,6 +549,7 @@ theorem realizedFam_chartInvGramMatrix_jointContMDiffOn_free
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartBasisVec_jointContMDiffOn (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' E (E := fun z : M => TangentSpace I z) p.1
@@ -558,6 +563,7 @@ theorem chartBasisVec_jointContMDiffOn (α : M) (i : Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem metricSharpChartCoeff_jointContMDiffOn
     (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
     (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ}
@@ -584,6 +590,7 @@ theorem metricSharpChartCoeff_jointContMDiffOn
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
 
+set_option linter.unusedSectionVars false in
 theorem metricSharpChartLocal_jointContMDiffOn
     (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
     (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ}

@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovGradParametricJo
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.ContractedBianchi
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.SlotSubstitutionFiberNormBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -62,6 +61,7 @@ noncomputable def domDomCongrFibPerm (σ : Equiv.Perm (Fin 4)) (x : M) :
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) 4 x).toContinuousLinearMap)
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem domDomCongrFibPerm_apply (σ : Equiv.Perm (Fin 4)) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 4 I x) :
     domDomCongrFibPerm (I := I) σ x D =
@@ -80,6 +80,7 @@ noncomputable def deTurckLieTraceFib (g₁ : SmoothRiemannianMetric I M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem domDomCongr_section_contMDiff_local {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -183,6 +184,7 @@ theorem deTurckLieTraceCoeff_realizedFam_jointContMDiff (g₀ : SmoothRiemannian
   change deTurckLieTraceFib (I := I) (realizedFam (I := I) g₀ T T' hδ hδ' p.2) σ p.1 (Y p.1) = _
   rw [deTurckLieTraceFib, ContinuousLinearMap.comp_apply, domDomCongrFibPerm_apply]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpaceRS_sub_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞
@@ -215,6 +217,7 @@ private theorem jointTotalSpaceRS_sub_local {r s : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpaceRS_add_local {r s : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.TensorRSSpace r s I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel r s ℝ E)) ∞

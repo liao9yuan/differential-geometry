@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.FreeDirectionReduction
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -73,6 +72,7 @@ noncomputable def covGradRoughLapMovingFrameResidual
       (unitZeroSec (I := I) (M := M) x) -
     fixedFrameSwapTraceUnit (I := I) (M := M) g T₀ x w
 
+omit [CompactSpace M] in
 lemma covGradRoughLapMovingFrameResidual_def
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (w : TangentSpace I x) :
@@ -83,6 +83,7 @@ lemma covGradRoughLapMovingFrameResidual_def
           (unitZeroSec (I := I) (M := M) x) -
         fixedFrameSwapTraceUnit (I := I) (M := M) g T₀ x w := rfl
 
+omit [CompactSpace M] in
 theorem rhs_curry_eq_swap_add_residual
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (w : TangentSpace I x) :
@@ -192,6 +193,7 @@ noncomputable def covGradRoughLapMovingFrameResidual_gen
       (unitZeroSec (I := I) (M := M) x) -
     fixedFrameSwapTraceUnit_gen (I := I) (M := M) g s T₀ x w
 
+omit [CompactSpace M] in
 lemma covGradRoughLapMovingFrameResidual_gen_def
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T₀ : SmoothCcTensor g 0 s)
     (x : M) (w : TangentSpace I x) :
@@ -202,6 +204,7 @@ lemma covGradRoughLapMovingFrameResidual_gen_def
           (unitZeroSec (I := I) (M := M) x) -
         fixedFrameSwapTraceUnit_gen (I := I) (M := M) g s T₀ x w := rfl
 
+omit [CompactSpace M] in
 theorem rhs_curry_eq_swap_add_residual_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T₀ : SmoothCcTensor g 0 s)
     (x : M) (w : TangentSpace I x) :
@@ -228,6 +231,7 @@ theorem covGrad_rawConnLap_curry_eq_swap_add_residual_gen
   rw [covGrad_rawConnLap_unit_eval_curry_gen (I := I) (M := M) g s T₀ x w]
   exact rhs_curry_eq_swap_add_residual_gen (I := I) (M := M) g s T₀ x w
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma frame_trace_third_eq_swap_unit_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T₀ : SmoothCcTensor g 0 s)
     (x : M) (w : TangentSpace I x) :

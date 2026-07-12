@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Operator.Bilinear
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -25,6 +24,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+omit [Module.Finite ℝ E] in
 lemma chartJ_self (b : M) :
     (trivializationAt E (TangentSpace I) b).continuousLinearMapAt ℝ b =
       (1 : E →L[ℝ] E) := by
@@ -34,6 +34,7 @@ lemma chartJ_self (b : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H b) b
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H b) v
 
+omit [Module.Finite ℝ E] in
 lemma chartJinv_self (b : M) :
     (trivializationAt E (TangentSpace I) b).symmL ℝ b = (1 : E →L[ℝ] E) := by
   rw [TangentBundle.symmL_trivializationAt_eq_core
@@ -42,6 +43,7 @@ lemma chartJinv_self (b : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H b) b
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H b) v
 
+omit [Module.Finite ℝ E] in
 theorem chartJinv_wrapped_continuousAt
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContinuousAt
@@ -52,6 +54,7 @@ theorem chartJinv_wrapped_continuousAt
       b₀ :=
   (contMDiffAt_tangentTrivialization_coordChangeL_alpha_to_b0 (I := I) (M := M) α hb₀).continuousAt
 
+omit [Module.Finite ℝ E] in
 theorem chartJ_wrapped_continuousAt
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContinuousAt
@@ -62,6 +65,7 @@ theorem chartJ_wrapped_continuousAt
       b₀ :=
   (contMDiffAt_tangentTrivialization_coordChangeL_b0_to_alpha (I := I) (M := M) α hb₀).continuousAt
 
+omit [Module.Finite ℝ E] in
 theorem chartJinv_wrapped_centre_eq
     (α : M) (b₀ : M) :
     ((trivializationAt E (TangentSpace I) b₀).continuousLinearMapAt ℝ b₀ ∘L
@@ -72,6 +76,7 @@ theorem chartJinv_wrapped_centre_eq
   ext v
   rfl
 
+omit [Module.Finite ℝ E] in
 theorem chartJ_wrapped_centre_eq
     (α : M) (b₀ : M) :
     ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b₀ ∘L

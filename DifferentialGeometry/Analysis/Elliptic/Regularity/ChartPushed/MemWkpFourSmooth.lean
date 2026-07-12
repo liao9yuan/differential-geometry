@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.Multiply
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -50,6 +49,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedSectionVars false in
 private theorem MemWkp_two_extend_via_cutoff_aux
     (k : ℕ)
     {Ω Ω' K : Set EuclN}

@@ -30,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartTensorRSInputSlotCorrection_chartComp_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -106,6 +107,7 @@ theorem chartTensorRSInputSlotCorrection_chartComp_formula
     hsubst
   rw [hsubst_fiber]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartTensorRSOutputSlotCorrection_chartComp_formula
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')

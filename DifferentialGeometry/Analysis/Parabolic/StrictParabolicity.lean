@@ -47,6 +47,7 @@ lemma deTurckSymbol_apply_apply (g g' : SmoothRiemannianMetric I M) (x : M) (ξ 
   rw [deTurckSymbol_apply, LinearMap.add_apply, LinearMap.smul_apply,
     LinearMap.add_apply, LinearMap.smul_apply, smul_eq_mul]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma raisedFormContraction_eq_snd_of_symm (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (ht : ∀ v w, t v w = t w v) (k : Fin (Module.finrank ℝ E)) :

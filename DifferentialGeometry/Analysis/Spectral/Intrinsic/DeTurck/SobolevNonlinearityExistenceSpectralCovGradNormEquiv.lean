@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitz
 import DifferentialGeometry.Analysis.Spectral.Tensor.Spectrum.SlotSwapEquivariance
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
+set_option linter.unusedSectionVars false in
 private theorem oneMinusConnLapSmoothIter_succ'
     (g₀ : SmoothRiemannianMetric I M) (k : ℕ) (S : SmoothCcTensor g₀ 0 2) :
     oneMinusConnLapSmoothIter (I := I) g₀ 0 2 (k + 1) S =
@@ -181,6 +181,7 @@ theorem exists_smoothCcToTensorHs_even_le_iteratedCovGrad_sum
     _ = Cl2 * Cdrop * Chebey * ∑ j ∈ Finset.range (2 * k + 1),
           ‖iteratedCovGrad (I := I) g₀ 0 2 j S‖ := by ring
 
+omit [BoundarylessManifold I M] in
 private theorem tensorL2Inner_eq_tsum_tensorL2Coeff_cross
     (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 0 2) :
@@ -330,6 +331,7 @@ private theorem norm_iteratedCovGrad_comp_local
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
+omit [BoundarylessManifold I M] in
 private theorem norm_iteratedCovGrad_order_eq
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {n n' : ℕ} (h : n = n')
     (S : SmoothCcTensor g₀ 0 s) :

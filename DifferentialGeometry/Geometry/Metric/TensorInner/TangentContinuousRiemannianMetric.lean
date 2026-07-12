@@ -3,7 +3,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -24,6 +23,7 @@ noncomputable def tangentContinuousRiemannianMetric
     Bundle.ContinuousRiemannianMetric E (TangentSpace I : M → Type _) :=
   g.toContinuousRiemannianMetric
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tangentContinuousRiemannianMetric_inner
     (g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M)
     (b : M) :

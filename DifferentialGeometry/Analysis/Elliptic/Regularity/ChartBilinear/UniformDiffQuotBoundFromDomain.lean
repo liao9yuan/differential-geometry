@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDi
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomainTestFunctionSquareBound
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.UniformDiffQuotBoundFromDomainNonsmoothCoercivityBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -54,6 +53,7 @@ private def extendedDensity
     (g : SmoothRiemannianMetric I M) (α : M) (χ : EuclN → ℝ) (y : EuclN) : ℝ :=
   χ y * densityOnEuclid (I := I) g α y + (1 - χ y) * 1
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma extendedDensity_contDiff
     (g : SmoothRiemannianMetric I M) (α : M) [I.Boundaryless]
     {χ : EuclN → ℝ} (hχ_smooth : ContDiff ℝ (⊤ : ℕ∞) χ)
@@ -86,6 +86,7 @@ private lemma extendedDensity_contDiff
     exact contDiffOn_const.congr (fun y hy => hf_eq_const y hy)
   exact contDiff_of_contDiffOn_union_of_isOpen hf_on_s hf_on_t hcov hs_open ht_open
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma extendedDensity_eq_density_of_chi_one
     (g : SmoothRiemannianMetric I M) (α : M) {χ : EuclN → ℝ} {y : EuclN}
     (hχ_one : χ y = 1) :

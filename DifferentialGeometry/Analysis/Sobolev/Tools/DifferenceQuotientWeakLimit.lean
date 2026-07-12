@@ -5,7 +5,6 @@ import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.InnerProductSpace.Dual
 import Mathlib.MeasureTheory.Function.L2Space
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -125,10 +124,12 @@ def smoothCSToLp :
     filter_upwards [h2, h3] with x hx2 hx3
     rw [hx2, Pi.smul_apply, Pi.smul_apply, hx3]
 
+omit [NeZero d] in
 @[simp] lemma smoothCSToLp_apply (φ : smoothCSSubmodule (d := d)) :
     smoothCSToLp (d := d) φ =
       (memLp_two_of_smoothCS (d := d) φ.2.1 φ.2.2).toLp φ.1 := rfl
 
+omit [NeZero d] in
 lemma denseRange_smoothCSToLp :
     DenseRange (smoothCSToLp (d := d)) := by
   intro f
@@ -262,8 +263,7 @@ omit [NeZero d] in
     smoothTestFunctional (d := d) hw_l2 k φ =
       -∫ x, w x * (fderiv ℝ φ.1 x) (EuclideanSpace.single k 1) := rfl
 
-omit [NeZero d] in
-omit [NeZero d] in
+set_option linter.unusedSectionVars false in
 
 private lemma diffQuot_eq_zero_of_notMem_cthickening
     {φ : E → ℝ} (_hφ_supp : HasCompactSupport φ)
@@ -420,7 +420,7 @@ private lemma volume_cthickening_lt_top
   have hK_thick : IsCompact (Metric.cthickening r K) := hK.cthickening
   exact hK_thick.measure_lt_top
 
-omit [NeZero d] in
+set_option linter.unusedSectionVars false in
 
 private lemma tendsto_integral_w_diffQuot_phi
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
@@ -534,7 +534,7 @@ private lemma tendsto_integral_w_diffQuot_phi
     bound (Filter.Eventually.of_forall h_aesm_seq)
     h_pointwise_bound h_bound_int h_pointwise_conv
 
-omit [NeZero d] in
+set_option linter.unusedSectionVars false in
 
 private lemma abs_smoothTestFunctional_le
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
@@ -637,7 +637,7 @@ private lemma abs_smoothTestFunctional_le
     h_abs_conv tendsto_const_nhds (fun n => h_dual_bound n)
   exact h_lim_le
 
-omit [NeZero d] in
+set_option linter.unusedSectionVars false in
 
 private lemma abs_smoothTestFunctional_le_lpNorm
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
@@ -663,6 +663,7 @@ def smoothTestFunctional_ext
   (smoothTestFunctional (d := d) hw_l2 k).extendOfNorm
     (smoothCSToLp (d := d))
 
+set_option linter.unusedSectionVars false in
 private lemma opNorm_smoothTestFunctional_ext_le
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -675,6 +676,7 @@ private lemma opNorm_smoothTestFunctional_ext_le
   intro φ
   exact abs_smoothTestFunctional_le_lpNorm (d := d) hw_l2 k hM_nn hh₀ h_bdd φ
 
+set_option linter.unusedSectionVars false in
 private lemma smoothTestFunctional_ext_apply
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) {M : ℝ} (hM_nn : 0 ≤ M) {h₀ : ℝ} (hh₀ : 0 < h₀)
@@ -697,6 +699,7 @@ def smoothTestFunctional_riesz
   (InnerProductSpace.toDual ℝ (Lp ℝ 2 (volume : Measure E))).symm
     (smoothTestFunctional_ext (d := d) hw_l2 k)
 
+omit [NeZero d] in
 private lemma norm_smoothTestFunctional_riesz
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d) :
@@ -706,6 +709,7 @@ private lemma norm_smoothTestFunctional_riesz
   exact (InnerProductSpace.toDual ℝ
     (Lp ℝ 2 (volume : Measure E))).symm.norm_map _
 
+omit [NeZero d] in
 private lemma smoothTestFunctional_ext_eq_inner
     {w : E → ℝ} (hw_l2 : MemLp w 2 (volume : Measure E))
     (k : Fin d)
@@ -715,6 +719,7 @@ private lemma smoothTestFunctional_ext_eq_inner
   unfold smoothTestFunctional_riesz
   rw [InnerProductSpace.toDual_symm_apply]
 
+set_option linter.unusedSectionVars false in
 theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_univ
     {w : E → ℝ}
     (hw_l2 : MemLp w 2 (volume : Measure E))

@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 import DifferentialGeometry.Analysis.Elliptic.Regularity.LaplacianDomain.VariationalIdentityIntegral
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -199,6 +198,7 @@ private lemma chosenInnerPartialChartPushedU_isWeakPartial
   exact DifferentialGeometry.Analysis.Sobolev.Euclidean.chosenWeakPartial'_isWeakPartial_of_mem
     h_chartPushed_memW1p i
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrable_of_memLp_two_compact_open_subset
     (K Ω' : Set EuclN) (_hK_compact : IsCompact K) (hΩ'_subset_K : Ω' ⊆ K)
     (hΩ'_meas : MeasurableSet Ω')
@@ -935,6 +935,7 @@ private lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled
   filter_upwards [h_chartPushedRaw_add_ae, h_piece1] with y hy_add hy_piece1
   rw [hy_add, hy_piece1]
 
+set_option linter.unusedSectionVars false in
 private lemma vol_abs_chartPulledWeighted_on_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict

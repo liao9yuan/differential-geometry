@@ -7,7 +7,6 @@ import Mathlib.Topology.Separation.Basic
 import Mathlib.Analysis.Normed.Operator.Bilinear
 import Mathlib.Analysis.InnerProductSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -114,6 +113,7 @@ theorem bddAbove_iSup_normalized_of_locally_bounded_opNorm
     exact Finset.le_sup' Cₐ hy₀
   linarith
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [T2Space M] [SigmaCompactSpace M] in
 theorem bddAbove_iSup_normalized_of_continuous_opNorm
     (Δ : ∀ y : M, TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ)
     (h_cont : Continuous (fun b : M => ‖Δ b‖)) :

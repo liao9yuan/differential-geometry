@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.Covaria
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.VariationalODE.EuclideanVariationalODE
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.VariationalEquation.FlatPairedResidual
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -27,6 +26,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+set_option linter.unusedSectionVars false in
 theorem hasDerivAt_partialSpatialFderiv_of_isLocalFlow_at_chart
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -43,6 +43,7 @@ theorem hasDerivAt_partialSpatialFderiv_of_isLocalFlow_at_chart
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [IsManifold I ∞ M] [BoundarylessManifold I M] in
 theorem hagree_of_spatial_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ) (Φ_eucl : E → ℝ → E)
     (hreal : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
@@ -59,6 +60,7 @@ theorem hagree_of_spatial_chart_realisation
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] in
 theorem chartMovingTriv_orbit_hasDerivAt_of_chartJet
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ)
     {G' : E →L[ℝ] (E →L[ℝ] E)} {velChart : E}
@@ -70,6 +72,7 @@ theorem chartMovingTriv_orbit_hasDerivAt_of_chartJet
   have := hGfd.comp_hasDerivAt t hc
   simpa using this
 
+set_option linter.unusedSectionVars false in
 theorem chartCloseFactors_of_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (x : M) (t : ℝ)
     (Φ_eucl : E → ℝ → E) {D'_eucl g' : E →L[ℝ] E}

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.LowerOrderCoeffFactors
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -66,6 +65,7 @@ def componentLpLimit
 
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral in
 
+omit [CompleteSpace E] in
 lemma approxComponentLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -124,6 +124,7 @@ def partialLpLimit
   i.fst.val •
     eigenvectorChartPartialLp (I := I) (M := M) g r s i α P k
 
+omit [CompleteSpace E] in
 lemma approxPartialLp_tendsto
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)

@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Geometry.Operator.Gradient
 import DifferentialGeometry.Analysis.Elliptic.Operator.Variational
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -36,11 +35,13 @@ noncomputable def SmoothScalar.oneSubLapClassical {g : SmoothRiemannianMetric I 
   toFun := u.toFun - Δ_g (I := I) g u.smooth
   smooth := u.smooth.sub (Δ_g_contMDiff (I := I) g u.smooth)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothScalar.oneSubLapClassical_toFun
     {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
     (u.oneSubLapClassical).toFun =
       u.toFun - Δ_g (I := I) g u.smooth := rfl
 
+set_option linter.unusedSectionVars false in
 theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
     {g : SmoothRiemannianMetric I M}
     (u v : SmoothScalar g) :
@@ -100,6 +101,7 @@ theorem smoothScalarH1Inner_eq_integral_oneSubLap_mul
   rw [integral_sub h_uv h_vΔu]
   ring
 
+set_option linter.unusedSectionVars false in
 theorem smoothScalarH1Inner_eq_lpInner_oneSubLap
     {g : SmoothRiemannianMetric I M} (u v : SmoothScalar g) :
     smoothScalarH1Inner (I := I) (M := M) u v =
@@ -131,6 +133,7 @@ theorem smoothScalarH1Inner_eq_lpInner_oneSubLap
       RCLike.inner_apply _ _]
   ring
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma inner_smoothToH1Compl_smoothToH1Compl
     {g : SmoothRiemannianMetric I M} (u v : SmoothScalar g) :
     ⟪smoothToH1Compl (I := I) (M := M) g u,
@@ -143,6 +146,7 @@ theorem smoothScalarH1Inner_eq_lpInner_oneSubLap
   rw [UniformSpace.Completion.inner_coe (𝕜 := ℝ) u v]
   rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma H1ComplBilin_smoothToH1Compl_smoothToH1Compl
     {g : SmoothRiemannianMetric I M} (u v : SmoothScalar g) :
     H1ComplBilin (I := I) (M := M) g
@@ -152,6 +156,7 @@ theorem smoothScalarH1Inner_eq_lpInner_oneSubLap
   rw [H1ComplBilin_apply]
   exact inner_smoothToH1Compl_smoothToH1Compl u v
 
+set_option linter.unusedSectionVars false in
 theorem smoothScalar_bilin_eq_lpFunctional_smooth
     {g : SmoothRiemannianMetric I M}
     (u v : SmoothScalar g) :
@@ -166,6 +171,7 @@ theorem smoothScalar_bilin_eq_lpFunctional_smooth
   rw [lpFunctionalCLM_apply, H1ComplToLp_smoothToH1Compl]
   exact real_inner_comm _ _
 
+set_option linter.unusedSectionVars false in
 theorem denseRange_smoothToH1Compl (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToH1Compl (I := I) (M := M) g) := by
   unfold smoothToH1Compl
@@ -174,6 +180,7 @@ theorem denseRange_smoothToH1Compl (g : SmoothRiemannianMetric I M) :
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+set_option linter.unusedSectionVars false in
 theorem smoothToH1Compl_bilin_eq_lpFunctional
     {g : SmoothRiemannianMetric I M}
     (u : SmoothScalar g) (w : H1Compl g) :
@@ -202,6 +209,7 @@ theorem smoothToH1Compl_bilin_eq_lpFunctional
     ((denseRange_smoothToH1Compl (I := I) (M := M) g).equalizer
       hL_cont hR_cont hLR_smooth) w
 
+set_option linter.unusedSectionVars false in
 theorem smoothToH1Compl_eq_resolvent_oneSubLap
     {g : SmoothRiemannianMetric I M}
     (u : SmoothScalar g) :
@@ -217,6 +225,7 @@ theorem smoothToH1Compl_eq_resolvent_oneSubLap
   rw [resolvent_inner_eq_lpFunctional]
   rw [lpFunctionalCLM_apply]
 
+set_option linter.unusedSectionVars false in
 theorem smoothToH1Compl_eq_resolvent_oneSubLap_of_function
     (g : SmoothRiemannianMetric I M)
     (u : M → ℝ) (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u) :
@@ -227,6 +236,7 @@ theorem smoothToH1Compl_eq_resolvent_oneSubLap_of_function
           (⟨u, hu⟩ : SmoothScalar g).oneSubLapClassical) :=
   smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M) ⟨u, hu⟩
 
+set_option linter.unusedSectionVars false in
 theorem resolvent_smoothToLp_oneSubLapClassical
     {g : SmoothRiemannianMetric I M} (u : SmoothScalar g) :
     resolvent (I := I) (M := M) g

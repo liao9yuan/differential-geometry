@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.VariationalIde
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.Differentiated.CrossTermIBP
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.SmoothCoefWeakPartialIBP
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,14 +44,17 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 private abbrev Kα (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_compact (α : M) :
     IsCompact (Kα (I := I) (M := M) α) :=
   chartImagePOUTsupport_isCompact (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma Kα_meas (α : M) :
     MeasurableSet (Kα (I := I) (M := M) α) :=
   (Kα_compact (I := I) (M := M) α).isClosed.measurableSet
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma Kα_subset_target (α : M) :
     Kα (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
@@ -283,6 +285,7 @@ noncomputable def fChartEffStep
         (I := I) (M := M) g α u_h m dirs fChartEffPrev l y /
       densityOnEuclid (I := I) g α y)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_def_unfold
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -296,6 +299,7 @@ theorem fChartEffStep_def_unfold
           (I := I) (M := M) g α u_h m dirs fChartEffPrev l z /
           densityOnEuclid (I := I) g α z) y := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem density_mul_fChartEffStep_eq_indicator_numerator
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)
@@ -319,6 +323,7 @@ theorem density_mul_fChartEffStep_eq_indicator_numerator
     field_simp
   · rw [Set.indicator_of_notMem hy_K, Set.indicator_of_notMem hy_K, mul_zero]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem fChartEffStep_supported_in_chartImagePOUTsupport
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g} {m : ℕ}
@@ -331,6 +336,7 @@ theorem fChartEffStep_supported_in_chartImagePOUTsupport
   unfold fChartEffStep
   exact Set.support_indicator_subset
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma exists_bound_continuousOn_compact
     {f : EuclN → ℝ} {α : M}
     (hf_contOn :
@@ -355,6 +361,7 @@ private lemma exists_bound_continuousOn_compact
     hK_compact.exists_isMaxOn hK_ne h_abs_K
   exact ⟨|f y_max|, fun y hy => h_max hy⟩
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma memLp_two_of_bounded_mul
     {f h : EuclN → ℝ} {K : Set EuclN}
     (hh_meas : AEStronglyMeasurable h ((volume : Measure EuclN).restrict K))
@@ -376,6 +383,7 @@ private lemma memLp_two_of_bounded_mul
     exact hy.trans (le_max_left _ _)
   exact MemLp.mul' (p := ∞) (q := 2) (r := 2) hf hh_memLp_top
 
+set_option linter.unusedSectionVars false in
 private lemma memLp_two_continuousOn_mul_on_Kα
     {α : M} {h f : EuclN → ℝ}
     (hh_contOn : ContinuousOn h
@@ -405,6 +413,7 @@ private lemma memLp_two_continuousOn_mul_on_Kα
     exact hC_bd y hy
   exact memLp_two_of_bounded_mul (h := h) h_meas h_ae_bd hf
 
+set_option linter.unusedSectionVars false in
 private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -441,6 +450,7 @@ private lemma chartPulledWeightedMeasure_restrict_compact_le_volume
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
+set_option linter.unusedSectionVars false in
 private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
     {g : SmoothRiemannianMetric I M} {α : M} {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -455,6 +465,7 @@ private lemma memLp_chartPulledWeighted_restrict_of_volume_restrict
   exact hw.of_measure_le_smul (c := ENNReal.ofReal c)
     ENNReal.ofReal_ne_top h_le
 
+set_option linter.unusedSectionVars false in
 private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j l : Fin (Module.finrank ℝ E)) :
@@ -484,6 +495,7 @@ private lemma weightedInvGramDerivOnEuclid_partial_continuousOn
   have h := h_eval.contDiffOn.comp h_fderiv_diff (mapsTo_univ _ _)
   exact h.continuousOn
 
+set_option linter.unusedSectionVars false in
 private lemma memLp_restrict_Kα_of_memLp_chartTarget
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -757,6 +769,7 @@ private lemma fChartEffStepNumerator_memLp_vol_K
   unfold fChartEffStepNumerator
   convert h_step4 using 2 with y
 
+set_option linter.unusedSectionVars false in
 private lemma one_div_densityOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn (fun y => 1 / densityOnEuclid (I := I) g α y)

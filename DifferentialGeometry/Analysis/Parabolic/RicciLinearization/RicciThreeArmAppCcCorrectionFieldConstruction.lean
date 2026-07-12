@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmA
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcArmReadoutCovDeriv
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciThreeArmAppCcArmCoeffJetEnvelopeBallUniform
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -71,6 +70,7 @@ lemma appCc_zero_left_local (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [show ((0 : SmoothCcTensor g 0 s).toSection x : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) =
       (0 : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) from rfl]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma linearizedRicciThreeArmHjoint_zero (g₀ : SmoothRiemannianMetric I M)
     {δ δ' : ℝ} :
     linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 3

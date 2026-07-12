@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -31,6 +30,7 @@ def euclidPartial (i : Fin (Module.finrank ℝ E))
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) : ℝ :=
   fderiv ℝ u y (EuclideanSpace.single i 1)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma euclidPartial_def (i : Fin (Module.finrank ℝ E))
     (u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ)
     (y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))) :
@@ -41,6 +41,7 @@ def chartInvGramEuclid (g : SmoothRiemannianMetric I M) (α : M)
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   fun y => chartInvGramOnE (I := I) g α k l (toEuclidean.symm y)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartInvGramEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -53,6 +54,7 @@ def chartChristoffelEuclid (g : SmoothRiemannianMetric I M) (α : M)
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   fun y => chartChristoffel (I := I) g α k l m (toEuclidean.symm y)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartChristoffelEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l m : Fin (Module.finrank ℝ E))
@@ -67,6 +69,7 @@ def weightedInvGramEuclid (g : SmoothRiemannianMetric I M) (α : M)
     chartDensityOnE (I := I) g α (toEuclidean.symm y) *
       chartInvGramEuclid (I := I) g α k l y
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma weightedInvGramEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E))
@@ -75,6 +78,7 @@ def weightedInvGramEuclid (g : SmoothRiemannianMetric I M) (α : M)
       chartDensityOnE (I := I) g α (toEuclidean.symm y) *
         chartInvGramEuclid (I := I) g α k l y := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma toEuclidean_symm_mem_extChartAt_target
     {α : M} {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -87,10 +91,12 @@ private lemma toEuclidean_symm_mem_extChartAt_target
   rw [hzy]
   exact hz_mem
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma extChartAt_target_eq_interior (α : M) :
     (extChartAt I α).target = interior ((extChartAt I α).target : Set E) :=
   (isOpen_extChartAt_target (I := I) α).interior_eq.symm
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartInvGramEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -111,6 +117,7 @@ theorem chartInvGramEuclid_contDiffOn
       exact toEuclidean_symm_mem_extChartAt_target (I := I) (M := M) hy
   exact hcomp
 
+omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartChristoffelEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l m : Fin (Module.finrank ℝ E)) :
@@ -136,6 +143,7 @@ theorem chartChristoffelEuclid_contDiffOn
       exact toEuclidean_symm_mem_extChartAt_target (I := I) (M := M) hy
   exact hcomp
 
+omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem weightedInvGramEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -158,6 +166,7 @@ theorem weightedInvGramEuclid_contDiffOn
         chartInvGramEuclid (I := I) g α k l y from rfl]
   exact hdensity.mul (chartInvGramEuclid_contDiffOn (I := I) (M := M) g α k l)
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_contDiff
     {u : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
     (hu : ContDiff ℝ ∞ u) (i : Fin (Module.finrank ℝ E)) :
@@ -172,6 +181,7 @@ private lemma euclidPartial_contDiff
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single i 1)).contDiff.comp hfd
 
+set_option linter.unusedSectionVars false in
 theorem tensorChartComp_euclidPartial_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -183,6 +193,7 @@ theorem tensorChartComp_euclidPartial_contDiff
   euclidPartial_contDiff (E := E)
     (tensorChartComp_contDiff (I := I) (M := M) g r s T α Idx Jdx) i
 
+omit [CompleteSpace E] in
 theorem tensorChartComp_euclidPartial_partial_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -195,6 +206,7 @@ theorem tensorChartComp_euclidPartial_partial_contDiff
   euclidPartial_contDiff (E := E)
     (tensorChartComp_euclidPartial_contDiff (I := I) (M := M) g r s T α Idx Jdx l) k
 
+set_option linter.unusedSectionVars false in
 private lemma tensorChartComp_euclidPartial_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -223,6 +235,7 @@ private lemma tensorChartComp_euclidPartial_hasCompactSupport
     rfl
   exact HasCompactSupport.of_support_subset_isCompact hfd hsubset
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasCompactSupport_finset_sum
     {ι : Type*} {β : Type*} [TopologicalSpace β]
     [AddCommMonoid β] [ContinuousAdd β]

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Exponential.Defs
 import DifferentialGeometry.Geometry.Exponential.Smoothness.ChartFlowVelocitySlice
 import DifferentialGeometry.Geometry.Geodesic.SmoothFlow
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -34,12 +33,15 @@ variable [I.Boundaryless]
 def rescaleChartOrbit (a : ℝ) : E × E → E × E :=
   fun z => (z.1, a • z.2)
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma rescaleChartOrbit_apply (a : ℝ) (z : E × E) :
     rescaleChartOrbit a z = (z.1, a • z.2) := rfl
 
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma rescaleChartOrbit_mk (a : ℝ) (x v : E) :
     rescaleChartOrbit (E := E) a (x, v) = (x, a • v) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartPhaseVF_rescale
     (g : SmoothRiemannianMetric I M) (α : M)
     (a : ℝ) (x v : E) :
@@ -57,6 +59,7 @@ lemma chartPhaseVF_rescale
       -(a * a) • chartChristoffelContraction (I := I) g α v v x
   rw [hΓ, neg_smul]
 
+set_option linter.unusedSectionVars false in
 lemma hasDerivAt_rescaled_orbit
     {g : SmoothRiemannianMetric I M} {α : M}
     {c : ℝ → E × E} {s₀ a : ℝ}
@@ -130,6 +133,7 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : UniformChartFlowBridge (I := I) g p) :
@@ -184,6 +188,7 @@ theorem expMap_contMDiffAt_zero_of_uniformChartFlowBridge
     exact hheq
   exact hF_cd.congr_of_eventuallyEq hev
 
+set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAt_zero_exists
     (g : SmoothRiemannianMetric I M) (p : M)
     (huniform : ∃ (Φ : (E × E) × ℝ → E × E) (t' ρ : ℝ), 0 < t' ∧ 0 < ρ ∧
@@ -204,6 +209,7 @@ section UniformBridgePointwise
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 lemma chartFlowCandidate_zero_matches_expMap_at_origin
     (g : SmoothRiemannianMetric I M) (p : M)
     {Φ : (E × E) × ℝ → E × E}

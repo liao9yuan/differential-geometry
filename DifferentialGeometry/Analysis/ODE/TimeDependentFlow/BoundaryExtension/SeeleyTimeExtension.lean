@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.SmoothInSpace.ChartOperator.ConventionBridge
 import DifferentialGeometry.Analysis.Calculus.SmoothExtension.BorelHalfLineParam
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -16,6 +15,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
 
+set_option linter.unusedSectionVars false in
 theorem chartE_jointReading_contMDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
     (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -47,6 +47,7 @@ theorem chartE_jointReading_contMDiffOn
   · exact Set.prod_mono (subset_refl _) (subset_univ _)
 
 
+set_option linter.unusedSectionVars false in
 theorem partitionOfUnity_assembled_section_contMDiff
     {ι : Type*} {ρ : SmoothPartitionOfUnity ι I M (univ : Set M)} {U : ι → Set M}
     (hsub : ρ.IsSubordinate U) (hU : ∀ i, IsOpen (U i))
@@ -147,6 +148,7 @@ theorem partitionOfUnity_assembled_section_contMDiff
       (tsupport_smul_subset_left (fun q : ℝ × M => ρ i q.2) (g i)) hi) ∞
 
 
+set_option linter.unusedSectionVars false in
 private theorem chartE_euclideanReading_contDiffOn
     (X : ℝ → ∀ x : M, TangentSpace I x) (s : Set ℝ) (α : M)
     (hX : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
@@ -181,6 +183,7 @@ private theorem chartE_euclideanReading_contDiffOn
   exact hcomp
 
 
+set_option linter.unusedSectionVars false in
 private theorem lift_extended_reading_contMDiffOn
     (α : M) (gext : ℝ → E → E) (V : Set E)
     (hgext : ContDiffOn ℝ ∞ (Function.uncurry gext) ((univ : Set ℝ) ×ˢ V)) :

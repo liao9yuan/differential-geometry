@@ -29,6 +29,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 theorem chartSideH2kBridge_iff_memWkpChart_two_k
     (g : SmoothRiemannianMetric I M) (k : ℕ) (u : M → ℝ) :
     ChartSideH2kBridge (I := I) (M := M) g k u ↔

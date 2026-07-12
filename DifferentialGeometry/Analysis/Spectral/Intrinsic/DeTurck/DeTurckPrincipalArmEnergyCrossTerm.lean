@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.EigenCombination
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.RoughLaplacianAppCcCommutation
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.SobolevNonlinearityExistence
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -77,6 +76,7 @@ theorem smoothCcToTensorHs_inner_order_congr (g₀ : SmoothRiemannianMetric I M)
         (smoothCcToTensorHs (I := I) (M := M) g₀ σ' T) : ℝ) := by
   subst h; rfl
 
+omit [BoundarylessManifold I M] in
 private lemma weight_natCast (g₀ : SmoothRiemannianMetric I M)
     (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
       (I := I) (M := M) g₀ 0 2) (n : ℕ) :
@@ -1574,6 +1574,7 @@ private lemma smoothCcToTensorHs_subCross (g₀ : SmoothRiemannianMetric I M) (�
   simp only [sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff, smoothCcToTensorHs_coeff,
     map_add, map_neg, tensorL2Coeff_eq_inner, inner_add_right, inner_neg_right]
 
+set_option linter.unusedSectionVars false in
 private lemma rawConnLap_oneMinusConnLap_comm (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) :
     rawTensorConnLapSmooth (I := I) g₀ 0 2 (oneMinusConnLapSmooth (I := I) g₀ 0 2 S) =

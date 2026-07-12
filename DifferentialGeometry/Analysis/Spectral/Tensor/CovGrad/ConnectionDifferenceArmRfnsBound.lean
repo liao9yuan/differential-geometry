@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceJetTower
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ConnectionDifferenceFibreBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -161,6 +160,7 @@ private lemma g0_inner_sharpFlatRaiseEndo_eq_g1
   rw [cotangentToDualLinear_apply]
   rw [cotangentToDual_g0FlatCLM (I := I) g₁ x v w]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma g1_self_upper_bound
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (h : ∀ y v w, g₁.inner y v w =
@@ -437,6 +437,7 @@ private lemma fiberNormSqComponent_covGrad_raisedKoszul
     (cotangentToDual_apply (I := I) (x := x) _ _).symm]
   rw [cotangentToDual_g0FlatCLM (I := I) g₀ x (e (K 0))]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sqrt_g0_inner_add_le_arm
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g₀.inner x (a + b) (a + b)) ≤
@@ -720,6 +721,7 @@ private theorem g0_inner_endoCov_sharpFlatRaise_eq
   rw [hconnY, map_sub, ContinuousLinearMap.sub_apply]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma sqrt_g1_le_sqrt_g0_of_realize
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (h : ∀ y v w, g₁.inner y v w =
@@ -741,6 +743,7 @@ private lemma sqrt_g1_le_sqrt_g0_of_realize
       _ = Real.sqrt (1 + δ) * Real.sqrt (g₀.inner x a a) := by
           rw [Real.sqrt_mul (le_of_lt hd)]
 
+set_option linter.unusedSectionVars false in
 private lemma sqrt_self_of_inner_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (u : TangentSpace I x) (K : ℝ) (hK : 0 ≤ K)
     (hbd : ∀ z : TangentSpace I x, g₀.inner x u z ≤ K * Real.sqrt (g₀.inner x z z)) :
@@ -930,6 +933,7 @@ private lemma abs_unitModel4_iteratedCovGrad_symmS_le
           Real.sqrt (g₀.inner x a a) * Real.sqrt (g₀.inner x b b) *
             Real.sqrt (g₀.inner x c c) * Real.sqrt (g₀.inner x d d) := by ring
 
+set_option linter.unusedSectionVars false in
 private lemma sqrt_g0_self_of_g1_inner_le
     (g₀ g₁ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     (h : ∀ y v w, g₁.inner y v w =

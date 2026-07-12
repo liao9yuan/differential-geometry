@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.NablaTensor.NablaTensorF
 import DifferentialGeometry.Analysis.Sobolev.HebeyBlock.ChartParallelTransportOpNorm.ChristoffelCkBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradChartIdentity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Analysis.Sobolev.Chart
   DifferentialGeometry.Analysis.Laplacian.TensorRegularity in
 
+omit [BoundarylessManifold I M] in
 private lemma covGradCompPull_eqOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -74,6 +74,7 @@ private def rawPull (g : SmoothRiemannianMetric I M) (r s : ℕ)
     ∘ (extChartAt I α).symm
     ∘ (toEuclidean (E := E)).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -83,6 +84,7 @@ private lemma rawPull_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
         ∘ (toEuclidean (E := E)).symm) =
       rawPull (I := I) (M := M) g r s T α Idx Jdx := rfl
 
+omit [BoundarylessManifold I M] in
 private lemma rawPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -94,6 +96,7 @@ private lemma rawPull_contDiffOn (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hy]
   rfl
 
+omit [BoundarylessManifold I M] in
 private lemma rawPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -103,6 +106,7 @@ private lemma rawPull_contDiffAt (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (rawPull_contDiffOn (I := I) (M := M) g r s T α Idx Jdx).contDiffAt
     ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
+omit [BoundarylessManifold I M] in
 private lemma covGrad_iteratedFDeriv_eq (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -135,6 +139,7 @@ private lemma covGrad_iteratedFDeriv_eq (g : SmoothRiemannianMetric I M)
     filter_upwards [h_open.mem_nhds hy] with z hz using h_eqOn hz
   exact (Filter.EventuallyEq.iteratedFDeriv ℝ h_evEq j).self_of_nhds
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartPushedRaw_eventuallyEq_rawPull (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (T : SmoothCcTensor g r s) (α : M)
     (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -149,6 +154,7 @@ private lemma chartPushedRaw_eventuallyEq_rawPull (g : SmoothRiemannianMetric I 
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]
   rfl
 
+omit [BoundarylessManifold I M] in
 private lemma euclidPartial_term_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Idx : Fin r → Fin (Module.finrank ℝ E))
@@ -205,6 +211,7 @@ private lemma euclidPartial_term_iteratedFDeriv_norm_le
         rw [h_single_norm, one_mul]
     _ = ‖iteratedFDeriv ℝ (j + 1) u y‖ := h_fderiv_iter
 
+omit [BoundarylessManifold I M] in
 private lemma covDerivLowerOrderCoeff_contDiffAt (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (m : Fin (Module.finrank ℝ E))
     (Idx Idx' : Fin r → Fin (Module.finrank ℝ E))
@@ -215,6 +222,7 @@ private lemma covDerivLowerOrderCoeff_contDiffAt (g : SmoothRiemannianMetric I M
   (covDerivLowerOrderCoeff_contDiffOn (I := I) (M := M) g r s α m Idx Idx'
     Jdx Jdx').contDiffAt ((chartTargetEuclid_isOpen (I := I) (M := M) α).mem_nhds hy)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma exists_iteratedFDeriv_norm_bound_on_compact
     {f : EuclN → ℝ} {s : Set EuclN} (hf : ContDiffOn ℝ ∞ f s) (hs : IsOpen s)
     {K : Set EuclN} (hK : IsCompact K) (hKs : K ⊆ s) (N : ℕ) :
@@ -246,6 +254,7 @@ private lemma exists_iteratedFDeriv_norm_bound_on_compact
     exact (hCl l y hy).trans
       (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
 
+omit [BoundarylessManifold I M] in
 private lemma exists_lowerOrderCoeff_uniform_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -291,6 +300,7 @@ private lemma exists_lowerOrderCoeff_uniform_bound
     exact (hCw ⟨m, Idx, Jdx', p⟩ l hl y hy).trans
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
+omit [BoundarylessManifold I M] in
 private lemma lowerOrderTerm_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (m : Fin (Module.finrank ℝ E))
@@ -362,6 +372,7 @@ private lemma lowerOrderTerm_iteratedFDeriv_norm_le
       iteratedFDerivWithin_of_isOpen (𝕜 := ℝ)
         (f := rawPull (I := I) (M := M) g r s T α p.1 p.2) (j - l) h_open hy]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouPull_eq_zero_off_kernel (α : M) (y : EuclN)
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (hy_off : y ∉ chartImagePOUTsupport (I := I) (M := M) α) :
@@ -381,6 +392,7 @@ private lemma pouPull_eq_zero_off_kernel (α : M) (y : EuclN)
   refine ⟨(extChartAt I α) b, ⟨b, hb_supp, rfl⟩, ?_⟩
   rw [h_round]; simp
 
+omit [BoundarylessManifold I M] in
 private lemma covGrad_component_iteratedFDeriv_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (_hΓbd_nn : 0 ≤ Γbd)
@@ -515,12 +527,14 @@ private def rhsHsContent (g : SmoothRiemannianMetric I M) (r s σ : ℕ)
             (fun i => EuclideanSpace.basisFun
               (Fin (Module.finrank ℝ E)) ℝ (bIdx i))| ^ 2
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rhsHsContent_nonneg (g : SmoothRiemannianMetric I M) (r s σ : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (y : EuclN) :
     0 ≤ rhsHsContent (I := I) (M := M) g r s σ T α y :=
   Finset.sum_nonneg (fun _ _ => Finset.sum_nonneg
     (fun _ _ => Finset.sum_nonneg (fun _ _ => sq_nonneg _)))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -558,6 +572,7 @@ private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
     (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
     (Finset.mem_univ q)
 
+set_option linter.unusedSectionVars false in
 private lemma covGradComp_basisSum_le_rhsHsContent
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (hΓbd_nn : 0 ≤ Γbd)
@@ -830,6 +845,7 @@ private lemma covGrad_pointwise_integrand_le
       pouPull_eq_zero_off_kernel (I := I) (M := M) α y hy hyK
     rw [hρ0]; simp
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma pouPullCont (α : M) :
     ContinuousOn
       (fun y : EuclN =>
@@ -849,6 +865,7 @@ private lemma pouPullCont (α : M) :
     exact hy
   exact hPOU_cont.comp_continuousOn h_inner
 
+omit [BoundarylessManifold I M] in
 private lemma rawPullIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -888,6 +905,7 @@ private lemma rawPullIntegrand_aemeasurable
   exact ENNReal.measurable_ofReal.comp_aemeasurable
     (h_real.aestronglyMeasurable h_open.measurableSet).aemeasurable
 
+omit [BoundarylessManifold I M] in
 private lemma sumIntegrals_eq_integral_sum
     (g : SmoothRiemannianMetric I M) (r' s' : ℕ) (S : SmoothCcTensor g r' s')
     (α : M) (K : ℕ) :

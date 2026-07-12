@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.ChartPartial.EigenvectorChartPartialL2
 import DifferentialGeometry.Analysis.Sobolev.Tools.WeakPartialLimit
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_congr_ae
     {k : Fin (Module.finrank ℝ E)} {g f g' f' : EuclN → ℝ} {Ω : Set EuclN}
     (hf : f =ᵐ[(volume : Measure EuclN).restrict Ω] f')
@@ -53,6 +53,7 @@ private lemma hasWeakPartialDeriv_congr_ae
   rw [h_lhs, h_rhs]
   exact h φ hφ hφ_supp hφ_sub
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_const_smul
     {k : Fin (Module.finrank ℝ E)} {g f : EuclN → ℝ} {Ω : Set EuclN} (c : ℝ)
     (h : DeGiorgi.HasWeakPartialDeriv (d := Module.finrank ℝ E) k g f Ω) :

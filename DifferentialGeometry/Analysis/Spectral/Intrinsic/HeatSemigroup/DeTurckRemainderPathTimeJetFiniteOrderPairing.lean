@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNor
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.SimpLemmas
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.DeTurckRemainderPathTimeJetRealizePathJointSmoothness
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -47,6 +46,7 @@ open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem contMDiffWithinAt_curriedSection_prod_ofOrder {N : WithTop ℕ∞} {n : ℕ}
     {s : Set (M × ℝ)} {p₀ : M × ℝ}
     (T : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace (n + 1) I p.1)
@@ -106,6 +106,7 @@ private theorem contMDiffWithinAt_curriedSection_prod_ofOrder {N : WithTop ℕ�
           (fun y : M => Tensor0SBundle.Tensor0SSpace (n + 1) I y) p₀.1 ⟨p₀.1, T p₀⟩).2)
     exact hpt
 
+set_option linter.unusedSectionVars false in
 private theorem contMDiffWithinAt_section_apply_prod_ofOrder {N : WithTop ℕ∞} : ∀ (n : ℕ)
     {s : Set (M × ℝ)} {p₀ : M × ℝ}
     (T : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace n I p.1)
@@ -201,6 +202,7 @@ private theorem contMDiffWithinAt_section_apply_prod_ofOrder {N : WithTop ℕ∞
       · simp [Fin.cons_zero]
       · intro k; simp [Fin.cons_succ]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem chartTensorInnerPointwise_0s_jointContMDiffOn_args_ofOrder
     {N : WithTop ℕ∞} (hN : N ≤ (∞ : WithTop ℕ∞))
     (g : SmoothRiemannianMetric I M) (α : M) {T : ℝ} :

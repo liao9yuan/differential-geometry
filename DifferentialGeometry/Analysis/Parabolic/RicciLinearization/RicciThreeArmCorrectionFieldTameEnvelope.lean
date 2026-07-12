@@ -5,7 +5,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciConnDiffOrder0Ke
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldInputSlotSymmetrization
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_smul_real (g : SmoothRiemannianMetric I M) (r s j : ℕ) (c : ℝ)
     (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -388,6 +388,7 @@ theorem corrArm0Combination_eq_order0_add_halfRiemann
     show (3 / 2 : ℝ) = 1 + 1 / 2 from by norm_num, add_smul, one_smul]
   abel
 
+omit [BoundarylessManifold I M] in
 private theorem exists_rfns_iteratedCovGrad_fixedCoeffField_bound
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 2 2) :
     ∃ c : ℕ → ℝ, (∀ i, 0 ≤ c i) ∧ ∀ (i : ℕ) (x : M),
@@ -401,6 +402,7 @@ private theorem exists_rfns_iteratedCovGrad_fixedCoeffField_bound
   choose c hc0 hcb using h
   exact ⟨c, hc0, hcb⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_smul_value (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (x : M) (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =
@@ -432,6 +434,7 @@ private lemma pJetGridWindow_mono (b : ℕ → ℝ) (hb : ∀ j, 0 ≤ b j) {i i
   intro k _ _
   exact Combinatorics.antidiagonalTupleGrid_nonneg b hb k
 
+omit [BoundarylessManifold I M] in
 private lemma pJetGridWindow_eq_tripleSum (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2) (x : M) (i : ℕ) :
     pJetGridWindow (fun j => riemannianFiberNormSq (I := I) (M := M) g₀ 0 (2 + j) x

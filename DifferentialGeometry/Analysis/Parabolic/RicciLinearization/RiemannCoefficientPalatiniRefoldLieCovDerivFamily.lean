@@ -14,7 +14,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmResidualFieldGridWindow
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldFamilyJointSmoothness
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -145,6 +144,7 @@ theorem curvatureRefoldMonomialCoeffField_unitValue_trans_swap
   rw [toModel_ccTensorUnitValueSection_domDomCongrSection_swap]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (y : M) :
     ccTensorUnitValueSection (I := I) (M := M) g₀ (S + S') y =
@@ -157,6 +157,7 @@ lemma ccTensorUnitValueSection_add (g₀ : SmoothRiemannianMetric I M)
   rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 lemma ccTensorUnitValueSection_smul (g₀ : SmoothRiemannianMetric I M) (c : ℝ)
     (S : SmoothCcTensor g₀ 0 2) (y : M) :
     ccTensorUnitValueSection (I := I) (M := M) g₀ (c • S) y =

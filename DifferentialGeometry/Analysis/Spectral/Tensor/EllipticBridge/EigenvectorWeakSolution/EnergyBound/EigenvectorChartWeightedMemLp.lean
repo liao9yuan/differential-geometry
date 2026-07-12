@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.LowerOrder.EigenvectorChartLowerOrderLimits
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.VariationalIdentity.TensorChartBilinearData
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma ae_eq_zero_off_of_tendsto_Lp
     {μ : Measure EuclN} {K : Set EuclN} {F : ℕ → Lp ℝ 2 μ} {glim : Lp ℝ 2 μ}
     (hF : ∀ n, ∀ᵐ y ∂μ, y ∉ K → (F n : EuclN → ℝ) y = 0)
@@ -51,6 +51,7 @@ lemma ae_eq_zero_off_of_tendsto_Lp
     refine Filter.Tendsto.congr (fun i => (h_zero i hy).symm) tendsto_const_nhds
   exact tendsto_nhds_unique h_lim h_const
 
+set_option linter.unusedSectionVars false in
 private lemma chartPulledWeightedMeasure_restrict_le_volume_of_compact
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -82,6 +83,7 @@ private lemma chartPulledWeightedMeasure_restrict_le_volume_of_compact
   rw [smul_eq_mul]
   exact h_pointwise_bd.trans (le_of_eq h_const_eval)
 
+set_option linter.unusedSectionVars false in
 theorem memLp_chartPulledWeightedMeasure_of_memLp_volume_of_ae_zero_off_compact
     (g : SmoothRiemannianMetric I M) (α : M) {w : EuclN → ℝ}
     {K : Set EuclN} (hK_compact : IsCompact K) (hK_meas : MeasurableSet K)
@@ -186,6 +188,7 @@ theorem tensorL2ChartComponent_memLp_weighted
 def cutoffChartKernelEuclid (α : M) : Set EuclN :=
   toEuclidean '' (cutoffChartKernel (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 lemma cutoffChartKernelEuclid_isCompact (α : M) :
     IsCompact (cutoffChartKernelEuclid (I := I) (M := M) α) :=
   (cutoffChartKernel_isCompact (I := I) (M := M) α).image
@@ -195,6 +198,7 @@ lemma cutoffChartKernelEuclid_measurableSet (α : M) :
     MeasurableSet (cutoffChartKernelEuclid (I := I) (M := M) α) :=
   (cutoffChartKernelEuclid_isCompact (I := I) (M := M) α).isClosed.measurableSet
 
+set_option linter.unusedSectionVars false in
 lemma cutoffChartKernelEuclid_subset_chartTargetEuclid (α : M) :
     cutoffChartKernelEuclid (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := by
@@ -202,6 +206,7 @@ lemma cutoffChartKernelEuclid_subset_chartTargetEuclid (α : M) :
   unfold cutoffChartKernelEuclid chartTargetEuclid
   exact Set.image_mono (cutoffChartKernel_subset_target (I := I) (M := M) α)
 
+set_option linter.unusedSectionVars false in
 private lemma cutoffComponentEuclid_eq_zero_off_cutoffChartKernelEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -318,6 +323,7 @@ theorem crossRightLimitComponent_memLp_weighted_unconditional
       (eigenvectorResolvent (I := I) (M := M) g r s i))
     α P
 
+omit [CompleteSpace E] in
 lemma covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -331,6 +337,7 @@ lemma covPrincipalRotationCoeffLimit_eq_zero_off_chartPouKernel_unconditional
     Finset.sum_eq_zero (fun k _ => Finset.sum_eq_zero (fun l _ => ?_))))
   rw [Set.indicator_of_notMem hy, zero_mul]
 
+omit [CompleteSpace E] in
 lemma covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -349,6 +356,7 @@ lemma covLowerOrderRotationValueCoeffLimit_eq_zero_off_chartPouKernel_unconditio
           rw [Set.indicator_of_notMem hy, zero_mul]))))),
     add_zero]
 
+omit [CompleteSpace E] in
 lemma weightedGradCoeffDivLimit_eq_zero_off_chartPouKernel_unconditional
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s)
@@ -443,6 +451,7 @@ theorem weightedGradCoeffDivLimit_memLp_weighted_unconditional
         (I := I) (M := M) g r s i α P₀ l hy))
     h_plain
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem memLp_weighted_contDiffOn_mul
     (g : SmoothRiemannianMetric I M) (α : M)
     {c : EuclN → ℝ}
@@ -502,6 +511,7 @@ theorem memLp_weighted_contDiffOn_mul
     exact lt_of_le_of_lt (eLpNorm_mono (μ := μw) hpt) (hw.const_smul (C : ℝ)).2
   exact MemLp.ae_eq h_prod_eq.symm h_bdd_mul
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartPulledWeightedMeasure_restrict_absolutelyContinuous
     (g : SmoothRiemannianMetric I M) (α : M) :
     (chartPulledWeightedMeasure (I := I) g α).restrict

@@ -48,6 +48,7 @@ noncomputable def smoothInclusionHsSuccLin
     rw [SmoothCcTensorHs.toCcTensor_smul]
     rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorPouSobolevNorm_inner_integral_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -266,6 +267,7 @@ private lemma tensorPouSobolevNorm_inner_integral_lt_top
   rw [ENNReal.coe_toReal, Real.coe_toNNReal']
   exact (hB y hy).trans (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem tensorPouSobolevNorm_ne_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -341,6 +343,7 @@ theorem tensorPouSobolevNorm_ne_top
   exact tensorPouSobolevNorm_inner_integral_lt_top
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma tensorChartComponentRaw_euclidPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -388,6 +391,7 @@ private lemma tensorChartComponentRaw_euclidPull_contDiffOn
   exact h_raw_pull_contDiffOn.comp
     h_toEucl_symm_smooth.contDiffOn h_maps
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorPouSobolevHsNorm_inner_integral_lt_top
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -602,6 +606,7 @@ private lemma tensorPouSobolevHsNorm_inner_integral_lt_top
   rw [ENNReal.coe_toReal, Real.coe_toNNReal']
   exact (hB y hy).trans (le_max_left _ _)
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tensorPouSobolevHsNorm_ne_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -693,6 +698,7 @@ private lemma tensorPouSobolevHsNorm_ne_top
     (I := I) (M := M) g r s T α IJ.1 IJ.2 j basisIdx
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma smoothInclusionHsSuccLin_norm_le
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (S : SmoothCcTensorHs g r s (k + 1)) :
@@ -766,6 +772,7 @@ noncomputable def inclusionHk_succ
         TensorPouSobolevHilbert g r s (k + 1))
 
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem inclusionHk_succ_opNorm_le_one
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     ‖inclusionHk_succ (I := I) (M := M) g r s k‖ ≤ 1 := by

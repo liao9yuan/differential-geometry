@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.Variational.CovDerivPointwi
 import DifferentialGeometry.Bundle.Section
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorDirichletCurrentGreenIdentityRS
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,6 +40,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 section SecondOrderInterpInfra
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem continuous_riemannianFiberNormSq_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) :
@@ -51,6 +51,7 @@ theorem continuous_riemannianFiberNormSq_section
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
 
+set_option linter.unusedSectionVars false in
 private theorem memLp_riemannianFiberNormSq_rpow
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) (a : ℝ) (ha : 0 ≤ a) (p : ℝ≥0∞) :
@@ -66,6 +67,7 @@ private theorem memLp_riemannianFiberNormSq_rpow
   exact hcont.memLp_of_hasCompactSupport (HasCompactSupport.of_compactSpace _)
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [I.Boundaryless] in
 theorem real_holder_three_nonneg
     (g : SmoothRiemannianMetric I M) (f₁ f₂ f₃ : M → ℝ)
     (hf₁c : Continuous f₁) (hf₂c : Continuous f₂) (hf₃c : Continuous f₃)

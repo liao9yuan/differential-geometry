@@ -154,6 +154,7 @@ theorem parseval_family_sum_bilin_eq
 
 variable [CompactSpace M]
 
+omit [BoundarylessManifold I M] in
 theorem exists_smooth_parseval_frame_family (g : SmoothRiemannianMetric I M) :
     ∃ (N : ℕ) (W : Fin N → Π b : M, TangentSpace I b),
       (∀ a, ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% (W a))) ∧

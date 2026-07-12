@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciIdentity
 import DifferentialGeometry.Geometry.Curvature.FiberNormParseval.Tensor3rdCurvFiberNormBound
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqRiemannOpHigherRankParseval
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -71,6 +70,7 @@ lemma rawConnLap_covGrad_curry_eq_abstractRoughLap_curry
   rw [rawTensorConnLap_covGrad_unit_eval_eq_abstract_roughLap (I := I) (M := M) g T₀ x]
   rw [smoothExtensionTangent_eq]
 
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covApply_unit_eval_eq_two
     (g : SmoothRiemannianMetric I M)
     (σ : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun y : M => TensorRSSpace 0 2 I y)⟯)
@@ -96,6 +96,7 @@ noncomputable def covApplyT₀Section
     (covApplyRS_contMDiff (I := I) g 0 2 (T := fun y => T₀.toSection y)
       T₀.toSection.contMDiff hX)
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma covApplyT₀Section_apply
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     {X : Π b : M, TangentSpace I b} (hX : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% X)) (y : M) :
@@ -116,6 +117,7 @@ noncomputable def covApplyBcovApplyT₀Section
       (covApplyRS_contMDiff (I := I) g 0 2 (T := fun u => T₀.toSection u)
         T₀.toSection.contMDiff hW) hB)
 
+set_option linter.unusedSectionVars false in
 lemma frameTraceSummand_unit_eq_abstract
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (w : TangentSpace I x) (i : Fin (Module.finrank ℝ E)) :

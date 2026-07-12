@@ -10,7 +10,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFibe
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradFibreNormPermutationInvariance
 import DifferentialGeometry.Analysis.Sobolev.AntidiagonalTupleProductGrid
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -176,6 +175,7 @@ theorem endoCov_gInvDiffRaisedField_apply
     rw [hβdef, gInvRaisedEndo_apply]]
   abel
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma sqrt_g0_inner_add_le'
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g₀.inner x (a + b) (a + b)) ≤

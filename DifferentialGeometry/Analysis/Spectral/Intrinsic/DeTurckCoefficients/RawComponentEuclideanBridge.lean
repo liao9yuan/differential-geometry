@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.ChartGramRealizeDiffJet
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.IteratedCovGradChartJetPeel
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma rawPullR_eq_rawCompOnE_comp (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) :
     tensorComponentEuclideanChart (I := I) (M := M) g 0 2 S α (![] : Fin 0 → Fin (Module.finrank ℝ E)) Jdx =
@@ -35,6 +35,7 @@ lemma rawPullR_eq_rawCompOnE_comp (g : SmoothRiemannianMetric I M) (S : SmoothCc
   funext y
   rw [tensorComponentEuclideanChart, Function.comp_apply, Function.comp_apply, Function.comp_apply, tensorChartComponentOnModel]
 
+set_option linter.unusedSectionVars false in
 lemma norm_iteratedFDeriv_rawPullR_le_iteratedFDerivWithin_rawCompOnE
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (m : ℕ) {y : EuclN}

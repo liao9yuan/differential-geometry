@@ -34,6 +34,7 @@ noncomputable abbrev EigenIdx.lambda
     (i : EigenIdx (I := I) (M := M) g) : ℝ :=
   laplacianEigenvalueOf i.fst.val
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem EigenIdx.lambda_nonneg
     {g : SmoothRiemannianMetric I M}
     (i : EigenIdx (I := I) (M := M) g) :

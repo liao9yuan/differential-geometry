@@ -190,6 +190,7 @@ theorem manifoldFlowFamily_exists_chartRepr
       exact (hdiffeo t ht htT).choose_spec x
     rw [hfam_eq, hαrepr t]
 
+omit [FiniteDimensional ℝ E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem manifoldFlow_hasMFDerivWithinAt_of_chartLocal
     (X : ℝ → ∀ x : M, TangentSpace I x) (α x : M)
     (hper : ChartLocalPicardData X α)

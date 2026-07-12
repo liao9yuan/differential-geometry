@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.AbstractChar
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartBilinear.H1Compl
 import DifferentialGeometry.Analysis.Integration.L2.Hilbert.DenseSubset
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,15 +37,18 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 private def cutoffKernelEuclid (α : M) : Set EuclN :=
   (toEuclidean : E ≃L[ℝ] EuclN) '' (cutoffChartKernel (I := I) (M := M) α)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffKernelEuclid_isCompact (α : M) :
     IsCompact (cutoffKernelEuclid (I := I) (M := M) α) :=
   (cutoffChartKernel_isCompact (I := I) (M := M) α).image
     (toEuclidean (E := E)).continuous
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffKernelEuclid_measurableSet (α : M) :
     MeasurableSet (cutoffKernelEuclid (I := I) (M := M) α) :=
   (cutoffKernelEuclid_isCompact (I := I) (M := M) α).isClosed.measurableSet
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffKernelEuclid_subset_chartTargetEuclid (α : M) :
     cutoffKernelEuclid (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := by
@@ -54,6 +56,7 @@ private lemma cutoffKernelEuclid_subset_chartTargetEuclid (α : M) :
   rintro y ⟨x, hx, rfl⟩
   exact ⟨x, cutoffChartKernel_subset_target (I := I) (M := M) α hx, rfl⟩
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -94,6 +97,7 @@ private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
       hy_ne
 
 
+set_option linter.unusedSectionVars false in
 private lemma eLpNorm_chartPulledWeighted_restrict_le_of_support_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN}
@@ -178,6 +182,7 @@ private def chartL2RestrictLin (α : M) (s : Set EuclN) :
     exact (Measure.restrict_le_self.absolutelyContinuous).ae_eq
       (Lp.coeFn_smul c lp)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartL2RestrictLin_norm_le (α : M) (s : Set EuclN)
     (lp : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
     ‖chartL2RestrictLin (I := I) (M := M) α s lp‖ ≤ 1 * ‖lp‖ := by
@@ -194,11 +199,13 @@ private def chartL2RestrictCLM (α : M) (s : Set EuclN) :
   (chartL2RestrictLin (I := I) (M := M) α s).mkContinuous 1
     (chartL2RestrictLin_norm_le (I := I) (M := M) α s)
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] private lemma chartL2RestrictCLM_apply (α : M) (s : Set EuclN)
     (lp : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
     chartL2RestrictCLM (I := I) (M := M) α s lp =
       ((Lp.memLp lp).restrict s).toLp (lp : EuclN → ℝ) := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartL2RestrictCLM_eq_zero_iff (α : M) (s : Set EuclN)
     (lp : Lp ℝ 2 (chartL2Measure (I := I) (M := M) α)) :
     chartL2RestrictCLM (I := I) (M := M) α s lp = 0 ↔

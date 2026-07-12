@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.SmoothCasePairingIdentification
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -45,6 +44,7 @@ noncomputable def chartHessianVOnEuclid
   chartHessianTensor (I := I) g α v.toFun k l
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartHessianVOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -60,6 +60,7 @@ noncomputable def chartPushedChristoffelCorrection
       partialDeriv (E := E) m (scalarOnE (I := I) α v.toFun)
         ((toEuclidean (E := E)).symm y)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma chartPushedChristoffelCorrection_def
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -69,6 +70,7 @@ noncomputable def chartPushedChristoffelCorrection
           partialDeriv (E := E) m (scalarOnE (I := I) α v.toFun)
             ((toEuclidean (E := E)).symm y) := rfl
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -87,6 +89,7 @@ theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
     (extChartAt I α).right_inv hy_target
   rw [h_inv]
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedChristoffelCorrection_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -135,6 +138,7 @@ theorem chartPushedChristoffelCorrection_continuousOn
     h_pd_cont.comp h_toE_cont.continuousOn h_maps
   exact h_chris_comp.mul h_pd_comp
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessianVOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -195,6 +199,7 @@ noncomputable def smoothTensorPairingChart
             chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
             chartHessianVOnEuclid (I := I) (M := M) g α v k l y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma smoothTensorPairingChart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -208,6 +213,7 @@ noncomputable def smoothTensorPairingChart
                 chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
                 chartHessianVOnEuclid (I := I) (M := M) g α v k l y := rfl
 
+omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -233,6 +239,7 @@ private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
   intro y _hy
   rfl
 
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem smoothTensorPairingChart_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
@@ -579,6 +586,7 @@ noncomputable def smoothPairingChristoffelDiff
   smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v y -
     smoothTensorPairingChart (I := I) (M := M) g α φ v y
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma smoothPairingChristoffelDiff_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -586,6 +594,7 @@ noncomputable def smoothPairingChristoffelDiff
       smoothEuclidHessianPairingChart (I := I) (M := M) g α φ v y -
         smoothTensorPairingChart (I := I) (M := M) g α φ v y := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem smoothEuclidHessianPairingChart_eq_tensor_plus_diff
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :

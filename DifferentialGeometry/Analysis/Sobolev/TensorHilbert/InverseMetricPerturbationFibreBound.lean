@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricInverseDifferenceMultiplier
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ variable
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma sqrt_g0_inner_add_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g₀.inner x (a + b) (a + b)) ≤

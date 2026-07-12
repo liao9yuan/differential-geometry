@@ -26,6 +26,7 @@ variable
   {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
+set_option linter.unusedSectionVars false in
 theorem tensorRSCovariantDerivative_congr_of_eventuallyEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {σ σ' : Π b : M, TensorRSSpace r s I b}

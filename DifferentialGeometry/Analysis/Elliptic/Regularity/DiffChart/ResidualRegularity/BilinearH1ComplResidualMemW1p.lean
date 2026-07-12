@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.SmoothMul
 import DifferentialGeometry.Analysis.Sobolev.Manifold.RellichManifold
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ private def smoothExt (α : M) (f : M → ℝ) : EuclN → ℝ := by
       f ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
     else 0
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothExt_apply_of_mem
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -56,6 +56,7 @@ private lemma smoothExt_apply_of_mem
   classical
   unfold smoothExt; simp [hy]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothExt_apply_of_notMem
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -63,6 +64,7 @@ private lemma smoothExt_apply_of_notMem
   classical
   unfold smoothExt; simp [hy]
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothExt_eq_chartPushedRaw (α : M) (f : M → ℝ) :
     smoothExt (I := I) (M := M) α f =
       chartPushedRaw (I := I) (M := M) α f := by
@@ -74,6 +76,7 @@ private lemma smoothExt_eq_chartPushedRaw (α : M) (f : M → ℝ) :
   · rw [smoothExt_apply_of_notMem (I := I) (M := M) α f hy]
     rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy]
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
     {α : M} {f : M → ℝ}
     {y : EuclN}
@@ -85,6 +88,7 @@ private lemma chartPushedRaw_smooth_eq_zero_off_image_tsupport
       (I := I) (M := M) (u := f) α hy_target hy
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) α f hy_target
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_smooth_hasCompactSupport
     {α : M} {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -111,6 +115,7 @@ private lemma chartPushedRaw_smooth_hasCompactSupport
   exact chartPushedRaw_smooth_eq_zero_off_image_tsupport
     (I := I) (M := M) (f := f) (α := α) hyK
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_smooth_continuous
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -188,6 +193,7 @@ private lemma chartPushedRaw_smooth_continuous
     · exact continuousAt_const
     · filter_upwards [hKc_nhds] with z hz using (h_eq_zero_on_Kc z hz).symm
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_smooth_memLp
     {α : M} {f : M → ℝ}
     (hf_smooth : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -309,6 +315,7 @@ noncomputable def fHLeibnizResidualSmoothRep
       (gradFun (I := I) g v.toFun x)) -
     (laplacianOfChartPOU (I := I) (M := M) g α : M → ℝ) x * v.toFun x
 
+omit [CompactSpace M] in
 lemma fHLeibnizResidualSmoothRep_contMDiff
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fHLeibnizResidualSmoothRep (I := I) (M := M) g α v) := by

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2SobolevBounds.RawTensorConnLapWtwokTwoZeroSquaredAggregate
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 local notation "EuclN" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+set_option linter.unusedSectionVars false in
 private lemma tensorChartComp_eq_zero_of_notMem_finset
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s)
     {α : M} (hα : α ∉ chartAtlasPOU_finset (I := I) (M := M))
@@ -88,6 +88,7 @@ private lemma wtwokTwoNorm_zero_rawTensorConnLap_eq_finset_sum
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma wkpNorm_zero_eq_eLpNorm
     (u : EuclN → ℝ) (Ω : Set EuclN) :
     iteratedWeakSobolevNorm (d := Module.finrank ℝ E) 0 2 u Ω =

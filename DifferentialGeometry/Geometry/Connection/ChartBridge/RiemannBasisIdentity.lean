@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundli
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartLieBracket
 import DifferentialGeometry.Geometry.Connection.CovApplyCovRSChartBasisExtension
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -97,6 +96,7 @@ lemma exists_globalSmooth_chartBasisVec_ext
   change (χ : M → ℝ) y • chartBasisVecFiber (I := I) x j y = chartBasisVecFiber (I := I) x j y
   rw [hχ_one_y, one_smul]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (b i m : Fin (Module.finrank ℝ E)) :

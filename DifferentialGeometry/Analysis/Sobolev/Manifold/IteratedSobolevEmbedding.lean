@@ -7,7 +7,6 @@ import DifferentialGeometry.Analysis.Sobolev.Intrinsic.Equivalence
 import DifferentialGeometry.Analysis.Sobolev.Approximation.ContMDiffDense
 import DifferentialGeometry.External.DeGiorgi.WholeSpaceSobolev
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -591,6 +590,7 @@ namespace ChartTower
 
 variable [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
+omit [I.Boundaryless] in
 lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
     [CompactSpace M] (α : M) :
     IsCompact (toEuclidean ''
@@ -623,6 +623,7 @@ lemma toEuclidean_extChartAt_tsupport_pou_compact_subset
   rw [← hxz]
   exact (extChartAt I α).map_source (hTα_ext_src hx_supp)
 
+omit [I.Boundaryless] in
 lemma tsupport_chartPushedRaw_pou_mul_subset
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -674,6 +675,7 @@ lemma tsupport_chartPushedRaw_pou_mul_subset
   rw [tsupport]
   exact hK_closed.closure_subset_iff.mpr h_supp_sub
 
+omit [I.Boundaryless] in
 lemma hasCompactSupport_chartPushedRaw_pou_mul
     [CompactSpace M] (α : M) (u : M → ℝ) :
     HasCompactSupport (chartPushedRaw (I := I) (M := M) α
@@ -686,6 +688,7 @@ lemma hasCompactSupport_chartPushedRaw_pou_mul
   exact hK_compact.of_isClosed_subset (isClosed_tsupport _)
     (tsupport_chartPushedRaw_pou_mul_subset (I := I) (M := M) α u)
 
+omit [I.Boundaryless] in
 lemma tsupport_chartPushedRaw_pou_mul_subset_target
     [CompactSpace M] (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α
@@ -1333,11 +1336,13 @@ local notation "EuN" => EuclideanSpace ℝ (Fin d)
 
 open DifferentialGeometry.Analysis.Sobolev.Euclidean
 
+omit [NeZero d] in
 private lemma diff_K_subset_diff_subset
     {S K Ω : Set EuN} (hSK : S ⊆ K) :
     Ω \ K ⊆ Ω \ S := fun _ ⟨hx_Ω, hx_notK⟩ =>
   ⟨hx_Ω, fun h => hx_notK (hSK h)⟩
 
+omit [NeZero d] in
 private lemma ae_eq_indicator_of_ae_zero_off_subset
     {Ω : Set EuN} (hΩ_open : IsOpen Ω) {S K : Set EuN} (hSK : S ⊆ K)
     (hK_meas : MeasurableSet K)
@@ -1364,6 +1369,7 @@ private lemma ae_eq_indicator_of_ae_zero_off_subset
     have : g x = 0 := hx hx_diff
     simp [Set.indicator_of_notMem h_in_K, this]
 
+omit [NeZero d] in
 private lemma chosenWeakPartial'_ae_eq_indicator_of_tsupport_subset
     {p : ℝ≥0∞} (hp_one : 1 ≤ p)
     {Ω : Set EuN} (hΩ_open : IsOpen Ω)
@@ -1383,6 +1389,7 @@ private lemma chosenWeakPartial'_ae_eq_indicator_of_tsupport_subset
   exact ae_eq_indicator_of_ae_zero_off_subset (Ω := Ω) hΩ_open
     (S := tsupport f) (K := K) hf_supp hK_meas h_ae_zero_sdiff
 
+omit [NeZero d] in
 theorem memWkp_mono_exponent_of_tsupport_subset
     (k : ℕ) {Ω : Set EuN} (hΩ_open : IsOpen Ω)
     {K : Set EuN} (hK_closed : IsClosed K)
@@ -1499,24 +1506,29 @@ private noncomputable def carrierK (α : M) :
       (tsupport ((DifferentialGeometry.Integral.Measure.chartAtlasPOU I M α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ)))
 
+omit [I.Boundaryless] in
 private lemma carrierK_isCompact [CompactSpace M] (α : M) :
     IsCompact (carrierK (I := I) (M := M) α) :=
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
     (I := I) (M := M) α).1
 
+omit [I.Boundaryless] in
 private lemma carrierK_isClosed [CompactSpace M] (α : M) :
     IsClosed (carrierK (I := I) (M := M) α) :=
   (carrierK_isCompact (I := I) (M := M) α).isClosed
 
+omit [I.Boundaryless] in
 private lemma carrierK_volume_lt_top [CompactSpace M] (α : M) :
     MeasureTheory.volume (carrierK (I := I) (M := M) α) ≠ ⊤ :=
   (carrierK_isCompact (I := I) (M := M) α).measure_lt_top.ne
 
+omit [I.Boundaryless] in
 private lemma carrierK_subset_target [CompactSpace M] (α : M) :
     carrierK (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   (ChartTower.toEuclidean_extChartAt_tsupport_pou_compact_subset
     (I := I) (M := M) α).2
 
+omit [I.Boundaryless] in
 private lemma tsupport_chartPushedRaw_pou_mul_subset_carrier [CompactSpace M]
     (α : M) (u : M → ℝ) :
     tsupport (chartPushedRaw (I := I) (M := M) α

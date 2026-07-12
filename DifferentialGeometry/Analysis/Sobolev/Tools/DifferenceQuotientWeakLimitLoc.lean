@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tools.DifferenceQuotientWeakLimit
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -153,12 +152,14 @@ def smoothCSSupportedInToLp (Ω'' : Set E) :
     filter_upwards [h2, h3] with x hx2 hx3
     rw [hx2, Pi.smul_apply, Pi.smul_apply, hx3]
 
+omit [NeZero d] in
 @[simp] lemma smoothCSSupportedInToLp_apply
     (Ω'' : Set E) (φ : smoothCSSupportedInSubmodule (d := d) Ω'') :
     smoothCSSupportedInToLp (d := d) Ω'' φ =
       (memLp_two_restrict_of_smoothCS (d := d)
         (Ω'' := Ω'') φ.2.1 φ.2.2.1).toLp φ.1 := rfl
 
+omit [NeZero d] in
 lemma denseRange_smoothCSSupportedInToLp
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
     (hΩ''_compact_closure : IsCompact (closure Ω'')) :
@@ -1134,6 +1135,7 @@ def smoothTestFunctional_loc_ext
   (smoothTestFunctional_loc (d := d) (Ω := Ω) (Ω'' := Ω'') hw_l2 k).extendOfNorm
     (smoothCSSupportedInToLp (d := d) Ω'')
 
+omit [NeZero d] in
 private lemma opNorm_smoothTestFunctional_loc_ext_le
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1156,6 +1158,7 @@ private lemma opNorm_smoothTestFunctional_loc_ext_le
   exact abs_smoothTestFunctional_loc_le_lpNorm (d := d) hΩ_open hΩ''_open
     hΩ''_compact_closure hh₀ h_room hw_l2 k hM_nn h_bdd φ
 
+omit [NeZero d] in
 private lemma smoothTestFunctional_loc_ext_apply
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')
@@ -1224,6 +1227,7 @@ private lemma smoothTestFunctional_loc_ext_eq_inner
   unfold smoothTestFunctional_loc_riesz
   rw [InnerProductSpace.toDual_symm_apply]
 
+omit [NeZero d] in
 theorem hasWeakPartialDeriv_of_diffQuot_uniform_bound_loc
     {Ω : Set E} (hΩ_open : IsOpen Ω)
     {Ω'' : Set E} (hΩ''_open : IsOpen Ω'')

@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Family
 import Mathlib.MeasureTheory.Function.LpSpace.Complete
 import Mathlib.MeasureTheory.Function.LpSeminorm.TriangleInequality
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -83,6 +82,7 @@ lemma gNormGrad_eq_zero_of_notMem_tsupport
   rw [gradFun_eq_zero_off_tsupport_smooth (I := I) (M := M) g hf hx]
   simp
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] in
 private lemma mdifferentiableAt_finset_sum
     {ι : Type*} (S : Finset ι) (h : ι → M → ℝ)
     (hh : ∀ α ∈ S, ∀ x : M, MDifferentiableAt I 𝓘(ℝ, ℝ) (h α) x) (x : M) :

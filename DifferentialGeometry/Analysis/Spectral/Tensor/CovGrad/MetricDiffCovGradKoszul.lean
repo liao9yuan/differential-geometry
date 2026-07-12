@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.CovGradCovDe
 import DifferentialGeometry.Geometry.Connection.LeviCivita.ChristoffelDifferenceKoszul
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma tensorSectionMDiffAt_curriedSection_apply_loc
     (s : ℕ) (W : Π x : M, Tensor0SSpace (s + 1) I x) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -64,6 +64,7 @@ private def bilinCurriedSec (V : Π b : M, Tensor0SSpace 2 I b)
   fun b => Tensor0SNabla.curriedSection I M
     (fun y : M => Tensor0SNabla.curriedSection I M V y (Y y)) b (Z b)
 
+set_option linter.unusedSectionVars false in
 private lemma scalarFn_bilinCurriedSec
     (V : Π b : M, Tensor0SSpace 2 I b)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -81,6 +82,7 @@ private lemma scalarFn_bilinCurriedSec
         (T := V b) (v0 := Y b) (vs := Fin.cons (Z b) (fun i => Fin.elim0 i))]
   congr 1
 
+set_option linter.unusedSectionVars false in
 private theorem tensor0SCovariantDerivative02_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 2 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 2 V x)
@@ -178,6 +180,7 @@ theorem covGrad02_unitModel_eval_eq_leibnizDefect
   exact tensor0SCovariantDerivative02_consEval_leibnizDefect (I := I) (M := M) g₀
     (unitEvalSection (I := I) (M := M) g₀ 2 S) hV Y Z v
 
+set_option linter.unusedSectionVars false in
 private lemma unitEvalSection_toModel_eq_ccTensorBilin
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (b : M)
     (Y Z : TangentSpace I b) :
@@ -274,6 +277,7 @@ theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv'
       metricDiffCovDeriv_eq_metricCovDeriv (I := I) g₁' g₀
         (Y := fun b => Y b) (Z := fun b => Z b) Y.mdifferentiableAt Z.mdifferentiableAt]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma bilinEvalFn_unitEvalSection_eq_unitModel
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (b : M)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

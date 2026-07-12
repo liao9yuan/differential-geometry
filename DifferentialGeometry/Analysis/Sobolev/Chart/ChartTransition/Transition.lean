@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.Chart.ChartTransition.ChartPullbackSmooth
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Density
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -20,6 +19,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [IsManifold I ∞ M] in
 private lemma chartTransitionEuclid_comp_eq_id_on_overlap
     [I.Boundaryless]
     (γ α : M) {y : EuclN}
@@ -28,6 +28,7 @@ private lemma chartTransitionEuclid_comp_eq_id_on_overlap
         (chartTransitionEuclid (I := I) (M := M) γ α z)) y = y :=
   chartTransitionEuclid_left_inv (I := I) (M := M) γ α hy
 
+omit [IsManifold I ∞ M] in
 private lemma chartTransitionEuclid_comp_eventuallyEq_id
     [I.Boundaryless]
     (γ α : M) {y : EuclN}

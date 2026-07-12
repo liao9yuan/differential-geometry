@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.ChartComponents
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ def MemWtwokTwo
       (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
       (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem MemWtwokTwo_def
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -49,6 +49,7 @@ theorem MemWtwokTwo_def
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) := Iff.rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem MemWtwokTwo_iff
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -60,6 +61,7 @@ theorem MemWtwokTwo_iff
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α) := Iff.rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem MemWtwokTwo_zero
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) :
@@ -174,6 +176,7 @@ def wtwokTwoNorm
           (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
           (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem wtwokTwoNorm_eq_tsum
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -185,6 +188,7 @@ theorem wtwokTwoNorm_eq_tsum
               (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
               (chartTargetEuclid (I := I) (M := M) α) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem wtwokTwoNorm_nonneg
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -269,6 +273,7 @@ theorem wtwokTwoNorm_smul
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
     (h α Idx Jdx) c
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem MemWtwokTwo.le_succ
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -278,6 +283,7 @@ theorem MemWtwokTwo.le_succ
   have hle : 2 * k ≤ 2 * (k + 1) := by omega
   exact MemWkp.le_of_le (d := Module.finrank ℝ E) hle (h α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem MemWtwokTwo.le_of_le
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k k' : ℕ}
     {T : SmoothCcTensor g r s}

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Nirenberg.MasterInequality.Coercivity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -683,6 +682,7 @@ theorem diffQuot_coeff_cutoff_gradient_pointwise_bound
     have h_t2 : M * N * 0 * (diffQuot k h u x)^2 = 0 := by ring
     linarith
 
+omit [NeZero d] in
 private lemma fderiv_eta_sq_diffQuot_apply
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)
@@ -698,6 +698,7 @@ private lemma fderiv_eta_sq_diffQuot_apply
       (d := d) hη hu k k hh x
   exact h_apply
 
+omit [NeZero d] in
 lemma fderiv_eta_sq_diffQuot_sq_bound
     {u : E → ℝ} (hu : ContDiff ℝ (⊤ : ℕ∞) u)
     {η : E → ℝ} (hη : ContDiff ℝ (⊤ : ℕ∞) η)

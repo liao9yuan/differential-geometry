@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorMetric
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.TensorRicciCommutator
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.HomBundleCurvatureLeibniz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ private abbrev TensorSmooth (t : ℕ) (A : Π b : M, Tensor0SSpace t I b) : Prop
     (fun b => TotalSpace.mk' (Tensor0SModel t ℝ E)
       (E := fun z : M => Tensor0SSpace t I z) b (A b))
 
+set_option linter.unusedSectionVars false in
 private lemma scalarFn_covApply_tensor0SCov_zero
     (g : SmoothRiemannianMetric I M) (A : Π b : M, Tensor0SSpace 0 I b)
     (W : Π b : M, TangentSpace I b) (b : M) :
@@ -132,6 +132,7 @@ noncomputable def homGenS (g : SmoothRiemannianMetric I M) (s : ℕ) :
     (LeviCivita (I := I) g)
     (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
 
+omit [I.Boundaryless] in
 lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Π b : M, Tensor0SSpace (s + 1) I b)
@@ -187,6 +188,7 @@ lemma tensor0S_curry_tensor0SCov_succ_eq_homGenS
   rw [hVx, hYx] at hgoal
   exact hgoal
 
+omit [I.Boundaryless] in
 lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -234,6 +236,7 @@ lemma tensor0S_curry_riemannSec_tensor0SCov_succ_eq
       (VectorField.mlieBracket I (fun b => X b) (fun b => W b) x)]
   rw [hcurry_covApply W, hcurry_covApply X]
 
+omit [I.Boundaryless] in
 theorem riemannSec_tensor0SCov_succ_consEval
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

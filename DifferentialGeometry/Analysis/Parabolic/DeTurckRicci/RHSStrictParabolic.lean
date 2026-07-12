@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorre
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.DeTurckCorrectionSymbol
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.MetricFamilyChartLinearization
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -57,6 +56,7 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
 variable [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_testLinearForm (x : M) (ξ : E)
     (p : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p
@@ -122,6 +122,7 @@ private lemma partialDeriv_testLinearForm (x : M) (ξ : E)
   · intro b _ hb; rw [if_neg (Ne.symm hb)]; ring
   · intro hp; exact absurd (Finset.mem_univ p) hp
 
+set_option linter.unusedSectionVars false in
 private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (p q c d : Fin (Module.finrank ℝ E)) :
@@ -190,6 +191,7 @@ private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ 
   rw [hL, partialDeriv_testLinearForm x ξ p (extChartAt I x x)]
   rw [hK]; ring
 
+set_option linter.unusedSectionVars false in
 private lemma chartRicciSecondOrderPrincipalSymbol_symbolTestPerturbation
     (g₀ : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
@@ -206,6 +208,7 @@ private lemma chartRicciSecondOrderPrincipalSymbol_symbolTestPerturbation
     partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht j l i k,
     partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht k i l j]
 
+set_option linter.unusedSectionVars false in
 private lemma chartDeTurckCorrPrincipalSymbolExpr_symbolTestPerturbation
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
@@ -432,6 +435,7 @@ theorem deTurckRicciRHS_isStrictlyParabolic_at_self [I.Boundaryless]
       (DifferentialGeometry.PDE.DeTurck.deTurckSymbolCoeff (I := I) g₀),
     deTurckRicciRHS_hasPrincipalSymbol_at_self g₀ g_bg⟩
 
+omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem bridge_symbol_equality_to_is_strictly_parabolic_metric_rhs
     (F : SmoothRiemannianMetric I M →
          (∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ))

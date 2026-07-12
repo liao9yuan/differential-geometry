@@ -8,7 +8,6 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.MeasureTheory.Function.LocallyIntegrable
 import Mathlib.Topology.Algebra.Support
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ theorem aestronglyMeasurable_of_continuous
     MeasureTheory.AEStronglyMeasurable f μ :=
   hf.aestronglyMeasurable
 
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 theorem aestronglyMeasurable_of_contMDiff
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [SecondCountableTopology F]
@@ -44,6 +44,7 @@ theorem aestronglyMeasurable_of_contMDiff
     MeasureTheory.AEStronglyMeasurable f μ :=
   aestronglyMeasurable_of_continuous (M := M) hf.continuous μ
 
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 theorem aestronglyMeasurable_of_contMDiff_of_nat
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
     [SecondCountableTopology F]
@@ -52,6 +53,7 @@ theorem aestronglyMeasurable_of_contMDiff_of_nat
     MeasureTheory.AEStronglyMeasurable f μ :=
   aestronglyMeasurable_of_continuous (M := M) hf.continuous μ
 
+set_option linter.unusedSectionVars false in
 theorem integrable_of_continuous_of_hasCompactSupport
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F]
@@ -62,6 +64,7 @@ theorem integrable_of_continuous_of_hasCompactSupport
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   hfc.integrable_of_hasCompactSupport hfsup
 
+set_option linter.unusedSectionVars false in
 theorem integrable_of_contMDiff_of_hasCompactSupport
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -71,6 +74,7 @@ theorem integrable_of_contMDiff_of_hasCompactSupport
   integrable_of_continuous_of_hasCompactSupport (I := I) (M := M) g
     hfc.continuous hfsup
 
+set_option linter.unusedSectionVars false in
 theorem integrable_of_continuous_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {F : Type*} [NormedAddCommGroup F]
@@ -80,6 +84,7 @@ theorem integrable_of_continuous_compactSpace
   integrable_of_continuous_of_hasCompactSupport (I := I) (M := M) g hf
     (HasCompactSupport.of_compactSpace f)
 
+set_option linter.unusedSectionVars false in
 theorem integrable_of_contMDiff_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -88,6 +93,7 @@ theorem integrable_of_contMDiff_compactSpace
     MeasureTheory.Integrable f (riemannianVolumeMeasure (I := I) (M := M) g) :=
   integrable_of_continuous_compactSpace (I := I) (M := M) g hf.continuous
 
+set_option linter.unusedSectionVars false in
 theorem integral_add_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -100,6 +106,7 @@ theorem integral_add_of_riemannianVolume
           + (∫ x, f' x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) :=
   MeasureTheory.integral_add hf hf'
 
+set_option linter.unusedSectionVars false in
 theorem integral_smul_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -109,6 +116,7 @@ theorem integral_smul_of_riemannianVolume
       = c • ∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
   MeasureTheory.integral_smul c f
 
+set_option linter.unusedSectionVars false in
 theorem integral_sub_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -121,6 +129,7 @@ theorem integral_sub_of_riemannianVolume
           - (∫ x, f' x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) :=
   MeasureTheory.integral_sub hf hf'
 
+set_option linter.unusedSectionVars false in
 theorem integral_neg_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -129,6 +138,7 @@ theorem integral_neg_of_riemannianVolume
       = -∫ x, f x ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
   MeasureTheory.integral_neg f
 
+set_option linter.unusedSectionVars false in
 theorem integral_zero_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     (F : Type*) [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -136,6 +146,7 @@ theorem integral_zero_of_riemannianVolume
     ∫ _ : M, (0 : F) ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 :=
   MeasureTheory.integral_zero M F
 
+set_option linter.unusedSectionVars false in
 theorem integral_const_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F] [CompleteSpace F]
@@ -144,6 +155,7 @@ theorem integral_const_of_riemannianVolume
       = (riemannianVolumeMeasure (I := I) (M := M) g).real univ • c :=
   MeasureTheory.integral_const c
 
+set_option linter.unusedSectionVars false in
 theorem integral_congr_ae_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
@@ -154,6 +166,7 @@ theorem integral_congr_ae_of_riemannianVolume
       = ∫ x, f' x ∂(riemannianVolumeMeasure (I := I) (M := M) g) :=
   MeasureTheory.integral_congr_ae h
 
+set_option linter.unusedSectionVars false in
 theorem lintegral_add_left_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -163,6 +176,7 @@ theorem lintegral_add_left_of_riemannianVolume
           + (∫⁻ x, f' x ∂(riemannianVolumeMeasure (I := I) (M := M) g)) :=
   MeasureTheory.lintegral_add_left hf f'
 
+set_option linter.unusedSectionVars false in
 theorem lintegral_const_mul_of_riemannianVolume
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

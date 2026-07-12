@@ -471,6 +471,7 @@ private lemma weightedGradChartCoeff_contDiffOn
     (covChartMetricGramInv_entry_contDiffOn (I := I) (M := M)
       g r s α a.2.1 P₀)
 
+omit [NeZero dimE] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma weightedGradCoeff_eq_chartCoeffSum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) (P₀ : CompIdx E r s)

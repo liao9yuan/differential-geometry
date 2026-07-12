@@ -40,12 +40,14 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartKernelCutoff_contMDiff (α : M) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞
       (fun x : M => ((chartKernelCutoff (I := I) (M := M) α
         : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) :=
   (chartKernelCutoff (I := I) (M := M) α : C^∞⟮I, M; ℝ⟯).contMDiff
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 lemma euclidPartial_contDiff_of_contDiff'
     {u : EuclN → ℝ} (hu : ContDiff ℝ ∞ u) (k : Fin (Module.finrank ℝ E)) :
     ContDiff ℝ ∞ (euclidPartial (E := E) k u) := by
@@ -60,6 +62,7 @@ lemma euclidPartial_contDiff_of_contDiff'
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single k 1)).contDiff.comp hfd
 
+omit [CompleteSpace E] in
 private lemma cutoffComponentEuclid_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -74,6 +77,7 @@ private lemma cutoffComponentEuclid_contDiff
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [CompleteSpace E] in
 private lemma cutoffComponentEuclid_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -87,6 +91,7 @@ private lemma cutoffComponentEuclid_hasCompactSupport
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
+omit [CompleteSpace E] in
 private lemma cutoffComponentEuclid_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -100,6 +105,7 @@ private lemma cutoffComponentEuclid_tsupport_subset
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
+set_option linter.unusedSectionVars false in
 lemma chosenWeakPartial'_cutoffComponentEuclid_ae_eq_euclidPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -152,6 +158,7 @@ lemma chartPushedRaw_rawComponent_continuousOn'
   (chartPushedRaw_tensorChartComponentRaw_contDiffOn
     (I := I) (M := M) g r s S α Idx Jdx).continuousOn
 
+omit [CompleteSpace E] in
 lemma euclidPartial_chartPushedRaw_rawComponent_continuousOn'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -166,6 +173,7 @@ lemma euclidPartial_chartPushedRaw_rawComponent_continuousOn'
   (euclidPartial_chartPushedRaw_contDiffOn
     (I := I) (M := M) g r s S α k Idx Jdx).continuousOn
 
+set_option linter.unusedSectionVars false in
 lemma cutoffComponentEuclid_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

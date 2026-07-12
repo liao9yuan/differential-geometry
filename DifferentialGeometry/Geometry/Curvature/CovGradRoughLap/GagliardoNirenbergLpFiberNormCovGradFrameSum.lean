@@ -11,7 +11,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormDiscreteLogConvex
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNormHolderIntegrability
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ section GeneralValenceRS
 
 open Bundle Tensor0SBundle Tensor0SNabla TensorRSNabla TensorMultilinear
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : Tensor0SBundle.TensorRSSpace r (s + 1) I x)
@@ -70,6 +70,7 @@ private lemma fiberNormSqComponent_covGradBundleEquiv_symm_apply_eq_finCons
 
 set_option maxHeartbeats 1600000 in
 
+omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : Tensor0SBundle.TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -107,6 +108,7 @@ theorem riemannianFiberNormSq_eq_sum_fiberNormSqComponent_sq_of_orthonormalFrame
 
 set_option maxHeartbeats 1600000 in
 
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_covGradBundleEquiv_eq_sum_frame_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] Tensor0SBundle.TensorRSSpace r s I x)

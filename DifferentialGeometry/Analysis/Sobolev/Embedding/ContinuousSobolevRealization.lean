@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SmoothCcDense
 import Mathlib.Analysis.Normed.Operator.Extend
 import Mathlib.Analysis.Normed.Module.Completion
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -25,6 +24,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M] [SigmaCompactSpace M]
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma smoothCcTensor_toSection_add_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (S T : SmoothCcTensor g r s) (x : M) :
@@ -32,6 +32,7 @@ lemma smoothCcTensor_toSection_add_apply
   rw [SmoothCcTensor.toSection_add]; rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma smoothCcTensor_toSection_smul_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (c : ℝ) (T : SmoothCcTensor g r s) (x : M) :
@@ -39,6 +40,7 @@ lemma smoothCcTensor_toSection_smul_apply
   rw [SmoothCcTensor.toSection_smul]; rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma smoothCcTensor_toSection_neg_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (T : SmoothCcTensor g r s) (x : M) :
@@ -46,6 +48,7 @@ lemma smoothCcTensor_toSection_neg_apply
   rw [SmoothCcTensor.toSection_neg]; rfl
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma smoothCcTensor_toSection_zero_apply
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (x : M) :
     (0 : SmoothCcTensor g r s).toSection x = 0 := by
@@ -82,6 +85,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma gSupVal_nonneg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) : 0 ≤ gSupVal (I := I) (M := M) g r s T := by
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -94,6 +98,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma gSupVal_zero (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     gSupVal (I := I) (M := M) g r s 0 = 0 := by
   letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -111,6 +116,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma gSupVal_neg (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) :
     gSupVal (I := I) (M := M) g r s (-T) = gSupVal (I := I) (M := M) g r s T := by
@@ -194,10 +200,12 @@ namespace CSupTensor
 
 variable {g : SmoothRiemannianMetric I M} {r s k : ℕ}
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[ext] theorem ext {S T : CSupTensor g r s k}
     (h : S.toHsTensor = T.toHsTensor) : S = T := by
   cases S; cases T; congr
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma toHsTensor_injective :
     Function.Injective
       (fun S : CSupTensor g r s k => S.toHsTensor) := by
@@ -212,20 +220,26 @@ instance : Sub (CSupTensor g r s k) :=
 instance : SMul ℝ (CSupTensor g r s k) :=
   ⟨fun c S => ⟨c • S.toHsTensor⟩⟩
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_zero :
     (0 : CSupTensor g r s k).toHsTensor = 0 := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_add (S T : CSupTensor g r s k) :
     (S + T).toHsTensor = S.toHsTensor + T.toHsTensor := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_neg (S : CSupTensor g r s k) :
     (-S).toHsTensor = -S.toHsTensor := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_sub (S T : CSupTensor g r s k) :
     (S - T).toHsTensor = S.toHsTensor - T.toHsTensor := rfl
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 @[simp] lemma toHsTensor_smul (c : ℝ) (S : CSupTensor g r s k) :
     (c • S).toHsTensor = c • S.toHsTensor := rfl
 
 instance : SMul ℕ (CSupTensor g r s k) := ⟨nsmulRec⟩
 instance : SMul ℤ (CSupTensor g r s k) := ⟨zsmulRec⟩
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 @[simp] lemma toHsTensor_nsmul (S : CSupTensor g r s k) (n : ℕ) :
     (n • S).toHsTensor = n • S.toHsTensor := by
   induction n with
@@ -238,6 +252,7 @@ instance : SMul ℤ (CSupTensor g r s k) := ⟨zsmulRec⟩
       have hn : (nsmulRec n S).toHsTensor = n • S.toHsTensor := ih
       rw [toHsTensor_add, hn, succ_nsmul]
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 @[simp] lemma toHsTensor_zsmul (S : CSupTensor g r s k) (z : ℤ) :
     (z • S).toHsTensor = z • S.toHsTensor := by
   rcases z with n | n
@@ -274,6 +289,7 @@ def ofHs :
   map_add' := fun _ _ => rfl
   map_smul' := fun _ _ => rfl
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] in
 @[simp] lemma ofHs_apply
     (S : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) :
     (ofHs (g := g) (r := r) (s := s) (k := k) S).toHsTensor = S := rfl
@@ -281,10 +297,14 @@ def ofHs :
 def toCc (S : CSupTensor g r s k) : SmoothCcTensor g r s :=
   S.toHsTensor.toCcTensor
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma toCc_zero : (0 : CSupTensor g r s k).toCc = 0 := rfl
+set_option linter.unusedSectionVars false in
 @[simp] lemma toCc_add (S T : CSupTensor g r s k) :
     (S + T).toCc = S.toCc + T.toCc := rfl
+set_option linter.unusedSectionVars false in
 @[simp] lemma toCc_neg (S : CSupTensor g r s k) : (-S).toCc = -S.toCc := rfl
+set_option linter.unusedSectionVars false in
 @[simp] lemma toCc_smul (c : ℝ) (S : CSupTensor g r s k) :
     (c • S).toCc = c • S.toCc := rfl
 
@@ -327,6 +347,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma csupSeminormedAddCommGroup_norm
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (hk : 2 * k > Module.finrank ℝ E) (S : CSupTensor g r s k) :
@@ -424,6 +445,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma norm_coe_toCompl_eq_toHs
     (g : SmoothRiemannianMetric I M) (r s k : ℕ)
     (S : IntrinsicSobolev.SmoothCcTensorHs g r s (2 * k)) :
@@ -480,6 +502,7 @@ set_option synthInstance.maxHeartbeats 400000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 lemma denseRange_toComplL_toLinearMap
     (g : SmoothRiemannianMetric I M) (r s k : ℕ) :
     DenseRange

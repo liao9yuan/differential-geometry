@@ -44,6 +44,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 theorem exists_cutoff_around_tsupport
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {α : M} {η : EuclN → ℝ} (hη_supp : HasCompactSupport η)
@@ -86,6 +87,7 @@ theorem exists_cutoff_around_tsupport
     exact ⟨hx_mem.1, hx_mem.2⟩
   exact ⟨χ, hχ_smooth, hχ_cs, hχ_nn, hχ_one, hχ_tsupp_in_chart⟩
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem cutoff_fChart_memLp_two_univ
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

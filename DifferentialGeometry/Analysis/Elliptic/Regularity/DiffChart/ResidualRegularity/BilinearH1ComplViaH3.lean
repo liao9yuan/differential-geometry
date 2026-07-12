@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.ResidualRegul
 import DifferentialGeometry.Analysis.Elliptic.Regularity.ChartPushed.WeakPartialOnVolume
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.IteratedSobolev
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -75,6 +74,7 @@ theorem chartPushedChosenFirstPartial_memW1p_two
   rw [DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p] at h_step
   exact h_step
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma locallyIntegrable_of_memLp_two_compact_open_subset
     (K Ω' : Set EuclN) (_hK_compact : IsCompact K) (hΩ'_subset_K : Ω' ⊆ K)
     (hΩ'_meas : MeasurableSet Ω')
@@ -178,6 +178,7 @@ theorem chartPushedWeakPartialLp_ae_eq_chosenFirstPartial_on_precompact_open
     h_chartPushed_isWeakPartial_Ω' h_chosenFirst_isWeakPartial_Ω'
     h_chartPushed_locInt h_chosenFirst_locInt
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_sigmaCompact_cover
     (α : M) :
     ∃ K : ℕ → Set EuclN,

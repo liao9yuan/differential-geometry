@@ -57,6 +57,7 @@ private lemma ae_eq_of_ae_eq_restrict_of_eqOn_compl
   · rwa [h_inter]
   · exact ht.nullMeasurableSet
 
+set_option linter.unusedSectionVars false in
 private lemma transportChartCenters_subset_chartAtlasPOU_finset (β : M) :
     transportChartCenters (I := I) (M := M) β ⊆
       chartAtlasPOU_finset (I := I) (M := M) := by
@@ -72,6 +73,7 @@ private lemma ite_finsetSum_eq_finsetSum_ite
   · simp only [if_pos hp]
   · simp only [if_neg hp, Finset.sum_const_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushedPouWeight_toEuclidean_extChartAt
     (α : M) {z : M} (hz : z ∈ (chartAt H α).source) :
     chartPushedPouWeight (I := I) (M := M) α

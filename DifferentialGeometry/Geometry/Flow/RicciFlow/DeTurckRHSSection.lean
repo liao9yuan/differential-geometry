@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Tensor.Mixed.Field
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.Field
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -95,6 +94,7 @@ private def deTurckRHSModelFun (g_bg g : SmoothRiemannianMetric I M) (x : M) :
   Tensor0SSpace.ofModel
     (bilinFormToModel (TangentSpace I x) (deTurckRicciRHS (I := I) g_bg g x))
 
+omit [CompactSpace M] in
 private theorem deTurckRHSModelFun_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (deTurckRHSModelFun (I := I) g_bg g x) v =
@@ -135,6 +135,7 @@ def deTurckRHSField (g_bg g : SmoothRiemannianMetric I M) :
     rw [deTurckRHSModelFun_toModel_apply]
     rfl⟩
 
+omit [CompactSpace M] in
 @[simp] theorem deTurckRHSField_toModel_apply
     (g_bg g : SmoothRiemannianMetric I M) (x : M) (v : Fin 2 → TangentSpace I x) :
     Tensor0SSpace.toModel (deTurckRHSField (I := I) g_bg g x) v =

@@ -21,6 +21,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [IsManifold I ∞ M] in
 theorem chartPushedRaw_sq_eq_compositionSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (u : M → ℝ)
@@ -32,6 +33,7 @@ theorem chartPushedRaw_sq_eq_compositionSq
   rw [DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw_apply_of_mem
     (I := I) (M := M) α u hy]
 
+omit [IsManifold I ∞ M] in
 theorem fderiv_chartPushedRaw_sq_le_compFderivSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (u : M → ℝ)
@@ -95,6 +97,7 @@ theorem fderiv_chartPushedRaw_sq_le_compFderivSq
   rw [hf_def, hL_def]
   ring
 
+omit [IsManifold I ∞ M] in
 theorem iteratedFDeriv_two_chartPushedRaw_sq_le_compIterSq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (α : M) (u : M → ℝ)

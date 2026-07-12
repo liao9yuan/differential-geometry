@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficients
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RicciArmOrder1KoszulTameEnvelope
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -194,6 +193,7 @@ theorem ricciArmPrincipalCoeffPure_eq_doubleTrace_add_appCcRS
     rfl
   rw [← hsub]; abel
 
+set_option linter.unusedSectionVars false in
 private lemma fourTrace_iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -202,6 +202,7 @@ private lemma fourTrace_iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r
   | succ j ih => rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma fourTrace_rfns_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =

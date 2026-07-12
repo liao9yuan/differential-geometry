@@ -38,7 +38,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzArmConnLapJetBounds
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitzRicciArmCoeffBallUniform
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -171,6 +170,7 @@ noncomputable def realizedDeTurckLieChartSum
         (DifferentialGeometry.PDE.DeTurck.RicciLinearization.realizedFam
           (I := I) g₀ T T' hδ hδ' s) g_bg x i j (extChartAt I x x)
 
+omit [BoundarylessManifold I M] in
 private theorem realizedDeTurckLieChartSum_contDiffAt
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -280,6 +280,7 @@ theorem linearizedDeTurckLieAt_eq_deriv_chartSum_on_Ioo
   rw [linearizedDeTurckLieAt]
   exact Filter.EventuallyEq.deriv_eq heq
 
+set_option linter.unusedSectionVars false in
 private theorem deriv_realizedDeTurckLieChartSum_continuousOn
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)
@@ -410,6 +411,7 @@ theorem lieDerivMetricClm_realized_sub_eq_integral_linearizedDeTurckLie
     intervalIntegral.integral_eq_sub_of_hasDerivAt_of_le zero_le_one hcont hderiv hint
   rw [hFTC, realizedDeTurckLiePathValue_one, realizedDeTurckLiePathValue_zero]
 
+omit [BoundarylessManifold I M] in
 theorem hasDerivAt_realizedDeTurckLieChartSum_general
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)

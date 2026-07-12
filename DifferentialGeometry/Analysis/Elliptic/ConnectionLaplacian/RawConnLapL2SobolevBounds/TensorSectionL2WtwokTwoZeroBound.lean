@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RawConnLapL2So
 import DifferentialGeometry.Analysis.Spectral.Tensor.TrivProj.ChartTwistIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.TensorChartTwistUniformBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -57,6 +56,7 @@ noncomputable def chartSobolevSectionNormPou
             (fun b : M => T.toSection b) y)
       ∂(volume : Measure EuclN)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 @[simp] lemma chartSobolevSectionNormPou_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : SmoothCcTensor g r s) :
     chartSobolevSectionNormPou (I := I) (M := M) g r s T =
@@ -70,6 +70,7 @@ noncomputable def chartSobolevSectionNormPou
                 (fun b : M => T.toSection b) y)
           ∂(volume : Measure EuclN) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma normSq_section_le_card_mul_sum_pou_sq_mul_normSq
     {r s : ℕ} (T : Π b : M, TensorRSSpace r s I b) (x : M) :
     (‖T x‖ ^ 2 : ℝ) ≤
@@ -109,6 +110,7 @@ private lemma normSq_section_le_card_mul_sum_pou_sq_mul_normSq
     _ ≤ (sset.card : ℝ) *
           ∑ α ∈ sset, ((chartAtlasPOU I M α : M → ℝ) x) ^ 2 * v ^ 2 := hCS
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g r s)
@@ -163,6 +165,7 @@ private lemma manifold_lintegral_pou_sq_section_normSq_eq_chartTarget
   rw [chartLocalMeasure_lintegral_via_chartTargetEuclid
       (I := I) (M := M) g α hF_meas]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma section_normSq_apply_eq_pushedNormSq
     {r s : ℕ} (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g r s)
@@ -178,6 +181,7 @@ private lemma section_normSq_apply_eq_pushedNormSq
       (fun b : M => T.toSection b) hy]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 private lemma density_pou_sq_le_section
     (g : SmoothRiemannianMetric I M) (α : M)
     (h_supp_ne :
@@ -220,6 +224,7 @@ private lemma density_pou_sq_le_section
       linarith
     exact mul_le_mul_of_nonneg_right hbound hρ_sq_nn
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem tensorSection_L2NormSq_le_chartSobolevSectionNormPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧

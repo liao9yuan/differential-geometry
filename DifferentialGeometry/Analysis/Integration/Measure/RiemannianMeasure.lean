@@ -3,7 +3,6 @@ import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.MeasureTheory.Measure.WithDensity
 import Mathlib.MeasureTheory.Integral.Lebesgue.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -32,6 +31,7 @@ def chartAtlasPOU [T2Space M] [SigmaCompactSpace M] :
 
 variable (I M) in
 
+set_option linter.unusedSectionVars false in
 lemma chartAtlasPOU_isSubordinate [T2Space M] [SigmaCompactSpace M] :
     (chartAtlasPOU I M).IsSubordinate (fun x : M => (chartAt H x).source) :=
   (SmoothPartitionOfUnity.exists_isSubordinate_chartAt_source I M).choose_spec
@@ -43,6 +43,7 @@ def riemannianMeasure
     (chartLocalMeasure (I := I) g α).withDensity
       (fun x : M => ENNReal.ofReal (ρ α x))
 
+set_option linter.unusedSectionVars false in
 lemma riemannianMeasure_def
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ) :
@@ -51,6 +52,7 @@ lemma riemannianMeasure_def
         (chartLocalMeasure (I := I) g α).withDensity
           (fun x : M => ENNReal.ofReal (ρ α x))) := rfl
 
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma measurable_ofReal_pou_weight
     (ρ : SmoothPartitionOfUnity M I M univ) (α : M) :
     Measurable (fun x : M => ENNReal.ofReal (ρ α x)) := by
@@ -58,6 +60,7 @@ lemma measurable_ofReal_pou_weight
     (ρ α).contMDiff.continuous
   exact ENNReal.measurable_ofReal.comp hcont.measurable
 
+set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_lintegral_eq
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -76,6 +79,7 @@ theorem riemannianMeasure_lintegral_eq
       (f := fun x : M => ENNReal.ofReal (ρ α x)) hρ (g := f) hf
   simpa [Pi.mul_apply] using h
 
+set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_lintegral_finset_le
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -86,6 +90,7 @@ theorem riemannianMeasure_lintegral_finset_le
   rw [riemannianMeasure_lintegral_eq (I := I) g ρ hf]
   exact ENNReal.sum_le_tsum s
 
+set_option linter.unusedSectionVars false in
 theorem chartLocalMeasure_withDensity_le_riemannianMeasure
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ) (α : M) :

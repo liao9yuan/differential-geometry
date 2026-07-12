@@ -22,6 +22,7 @@ section CoefficientRegularity
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]
 variable {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {Φ : E × ℝ → E}
 
+omit [CompleteSpace E] in
 private theorem contDiffOn_variational_coeff_aux
     {n : ℕ} {T : ℝ} {ρ : ℝ≥0}
     (hf_succ : ContDiffOn ℝ ((n : ℕ∞) + 1) (uncurry f) (univ : Set (ℝ × E)))

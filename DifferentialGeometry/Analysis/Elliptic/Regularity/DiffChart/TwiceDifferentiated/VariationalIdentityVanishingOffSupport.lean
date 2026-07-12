@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import Mathlib.Analysis.Calculus.FDeriv.Symmetric
 import DifferentialGeometry.Analysis.Elliptic.Regularity.DiffChart.TwiceDifferentiated.VariationalIdentityBaseDataLocalRegularity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -58,25 +57,31 @@ variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 private abbrev K_α (α : M) : Set EuclN :=
   chartImagePOUTsupport (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma K_α_compact (α : M) : IsCompact (K_α (I := I) (M := M) α) :=
   chartImagePOUTsupport_isCompact (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma K_α_meas (α : M) : MeasurableSet (K_α (I := I) (M := M) α) :=
   (K_α_compact (I := I) (M := M) α).isClosed.measurableSet
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma K_α_subset_target (α : M) :
     K_α (I := I) (M := M) α ⊆ chartTargetEuclid (I := I) (M := M) α :=
   chartImagePOUTsupport_subset_target (I := I) (M := M) α
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartTarget_diff_K_α_isOpen (α : M) :
     IsOpen (chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α) :=
   (chartTargetEuclid_isOpen (I := I) (M := M) α).sdiff
     (K_α_compact (I := I) (M := M) α).isClosed
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartTarget_diff_K_α_subset_target (α : M) :
     chartTargetEuclid (I := I) (M := M) α \ K_α (I := I) (M := M) α ⊆
       chartTargetEuclid (I := I) (M := M) α := fun _ hy => hy.1
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
     {p : ℝ≥0∞} (hp : 1 ≤ p) {Ω V : Set EuclN}
     (_hΩ : IsOpen Ω) (hV : IsOpen V) (hV_sub : V ⊆ Ω)
@@ -155,6 +160,7 @@ private lemma chosenWeakPartial'_ae_zero_on_open_subset_of_ae_zero
       hg_loc_Ω_V hgV_loc
   exact h_unique.trans h_chosen_V_zero
 
+set_option linter.unusedSectionVars false in
 private lemma chartPushed_u_h_ae_zero_off_K_α
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -249,6 +255,7 @@ private lemma chosenSecond_ae_zero_off_K_α
     (chartTarget_diff_K_α_subset_target (I := I) (M := M) α)
     h_g_i_memW1p h_g_i_ae l
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma weakPartial_ae_zero_on_open_subset_of_ae_zero
     {Ω U : Set EuclN} (hΩ_open : IsOpen Ω) (hU_open : IsOpen U)
     (hU_sub : U ⊆ Ω)
@@ -303,6 +310,7 @@ private lemma weakPartial_ae_zero_on_open_subset_of_ae_zero
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
+set_option linter.unusedSectionVars false in
 private lemma locallyIntegrableOn_of_locally_memLp_two_chart
     (_g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ}
@@ -368,6 +376,7 @@ private lemma chosenThird_ae_zero_off_K_α
     hΩ_open hU_open hU_sub (i := j) h_isWeak hw_li ?_
   exact hf_ae
 
+set_option linter.unusedSectionVars false in
 private lemma vol_restrict_chart_target_absCont_weighted (α : M)
     (g : SmoothRiemannianMetric I M) :
     (volume : Measure EuclN).restrict
@@ -483,6 +492,7 @@ private lemma base_f_chart_locally_memLp_helper
   base_f_chart_locally_memLp (I := I) (M := M) g α hu_h hK_compact
     hK_compact.isClosed.measurableSet hK_in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma memLp_top_of_continuousOn_on_compact_chart
     (_g : SmoothRiemannianMetric I M) (α : M)
     {h : EuclN → ℝ}

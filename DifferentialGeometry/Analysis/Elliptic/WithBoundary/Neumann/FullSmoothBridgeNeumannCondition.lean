@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Elliptic.WithBoundary.Neumann.FullSmoothBri
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.GreenFull
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.WithBoundary.BoundaryContribution.SurfaceIntegralIdentification
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ private abbrev I_half (n : ℕ) [NeZero n] :
 
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [CompactSpace M] in
 private lemma localDivergenceWithin_mul_pou_continuous
     (g : SmoothRiemannianMetric (I_half n) M) (α : M)
     (X : Cₛ^∞⟮(I_half n); EuclideanSpace ℝ (Fin n),
@@ -98,6 +98,7 @@ lemma divergence_g_with_boundary_pou_continuous
   exact continuous_finset_sum _ (fun α _ =>
     localDivergenceWithin_mul_pou_continuous (n := n) (M := M) g α X)
 
+omit [CompactSpace M] in
 private lemma divergence_g_with_boundary_mul_pou_chart_local_ae
     (g : SmoothRiemannianMetric (I_half n) M) (α : M)
     (X : Cₛ^∞⟮(I_half n); EuclideanSpace ℝ (Fin n),

@@ -4,7 +4,6 @@ import DifferentialGeometry.Tensor.RSTensor.Defs
 import Mathlib.Topology.Algebra.Support
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -84,6 +83,7 @@ def compactlySupportedSmoothTensorSections
     rw [h]
     exact hS.smul_left
 
+set_option linter.unusedSectionVars false in
 @[simp]
 lemma mem_compactlySupportedSmoothTensorSections {r s : ℕ}
     {S : Cₛ^∞⟮I; TensorRSModel r s ℝ E,
@@ -107,11 +107,13 @@ def toFun {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) : M → TensorRSModel r s ℝ E :=
   fun x => TensorRSSpace.toModel (S.toSection x)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma toFun_apply
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (x : M) :
     S.toFun x = TensorRSSpace.toModel (S.toSection x) := rfl
 
+set_option linter.unusedSectionVars false in
 @[ext] lemma ext
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {S T : SmoothCcTensor g r s} (h : S.toSection = T.toSection) :
@@ -201,23 +203,29 @@ instance : SMul ℝ (SmoothCcTensor g r s) where
         exact S.hasCompactSupport.smul_left }
 
 
+set_option linter.unusedSectionVars false in
 lemma SmoothCcTensor.toSection_injective :
     Function.Injective (fun S : SmoothCcTensor g r s => S.toSection) := by
   intro S T h
   exact SmoothCcTensor.ext h
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_zero :
     (0 : SmoothCcTensor g r s).toSection = 0 := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_add (S T : SmoothCcTensor g r s) :
     (S + T).toSection = S.toSection + T.toSection := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_neg (S : SmoothCcTensor g r s) :
     (-S).toSection = -S.toSection := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_sub (S T : SmoothCcTensor g r s) :
     (S - T).toSection = S.toSection - T.toSection := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_smul (c : ℝ) (S : SmoothCcTensor g r s) :
     (c • S).toSection = c • S.toSection := rfl
 
@@ -225,6 +233,7 @@ instance : SMul ℕ (SmoothCcTensor g r s) := ⟨nsmulRec⟩
 
 instance : SMul ℤ (SmoothCcTensor g r s) := ⟨zsmulRec⟩
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_nsmul (S : SmoothCcTensor g r s) (n : ℕ) :
     (n • S).toSection = n • S.toSection := by
   induction n with
@@ -237,6 +246,7 @@ instance : SMul ℤ (SmoothCcTensor g r s) := ⟨zsmulRec⟩
     have hn : (nsmulRec n S).toSection = n • S.toSection := ih
     rw [SmoothCcTensor.toSection_add, hn, succ_nsmul]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toSection_zsmul (S : SmoothCcTensor g r s) (z : ℤ) :
     (z • S).toSection = z • S.toSection := by
   rcases z with n | n
@@ -273,30 +283,35 @@ instance : Module ℝ (SmoothCcTensor g r s) :=
     SmoothCcTensor.toSectionAddHom
     SmoothCcTensor.toSection_smul
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toFun_zero :
     (0 : SmoothCcTensor g r s).toFun = 0 := by
   funext x
   simp [SmoothCcTensor.toFun, SmoothCcTensor.toSection_zero,
     ContMDiffSection.coe_zero, TensorRSSpace.toModel_zero]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toFun_add (S T : SmoothCcTensor g r s) :
     (S + T).toFun = S.toFun + T.toFun := by
   funext x
   simp [SmoothCcTensor.toFun, SmoothCcTensor.toSection_add,
     ContMDiffSection.coe_add, Pi.add_apply, TensorRSSpace.toModel_add]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toFun_neg (S : SmoothCcTensor g r s) :
     (-S).toFun = -S.toFun := by
   funext x
   simp [SmoothCcTensor.toFun, SmoothCcTensor.toSection_neg,
     ContMDiffSection.coe_neg, Pi.neg_apply, TensorRSSpace.toModel_neg]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toFun_sub (S T : SmoothCcTensor g r s) :
     (S - T).toFun = S.toFun - T.toFun := by
   funext x
   simp [SmoothCcTensor.toFun, SmoothCcTensor.toSection_sub,
     ContMDiffSection.coe_sub, Pi.sub_apply, TensorRSSpace.toModel_sub]
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma SmoothCcTensor.toFun_smul (c : ℝ) (S : SmoothCcTensor g r s) :
     (c • S).toFun = c • S.toFun := by
   funext x

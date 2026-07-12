@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoeffic
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldMonomialRefoldL2JetWindow
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RiemannCoefficientPalatiniRefoldRicciFoldWeightKernel
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -112,6 +111,7 @@ private lemma bdKRaw_unitModel_eq_linearizedKoszul (g₀ : SmoothRiemannianMetri
   rw [bdKRaw_unitModel (I := I) (M := M) g₀ S x a b c,
     linearizedKoszulCovec_apply (I := I) g₀ S x a b c]
 
+omit [BoundarylessManifold I M] in
 private lemma bdInner_sharpKoszul_left (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (a b z : TangentSpace I x) :
     g₁.inner x (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) z =
@@ -119,6 +119,7 @@ private lemma bdInner_sharpKoszul_left (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [sharpRaisedKoszulVec]
   exact inner_metricSharp (I := I) g₁ x (linearizedKoszulCovec (I := I) g₀ S x a b) z
 
+omit [BoundarylessManifold I M] in
 private lemma bdInner_sharpKoszul_right (g₀ g₁ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (x : M) (a b z : TangentSpace I x) :
     g₁.inner x z (sharpRaisedKoszulVec (I := I) g₀ g₁ S x a b) =
@@ -138,6 +139,7 @@ private lemma bdKoszulCc_unitModel_eq_g1_inner (g₀ g₁ : SmoothRiemannianMetr
   rw [connDiffInner_g1_eq_half_covGradSymmS (I := I) g₀ g₁ P htie x a b c]
   rfl
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma bdSlotExtendIter_three_toModel (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 3) (x : M) (D : Tensor0SSpace 3 I x)
@@ -698,6 +700,7 @@ lemma bdSGK_eq_refold (g₀ g₁ : SmoothRiemannianMetric I M)
       (smoothOrthoFrame (I := I) g₁ x a x) (smoothOrthoFrame (I := I) g₁ x b x)
       (v 0) (v 1)]
 
+set_option linter.unusedSectionVars false in
 private lemma bdCovGrad_unitModel_smul (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (c : ℝ) (x : M) (v : Fin 3 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 3 (covGrad (I := I) (M := M) g₀ 0 2 (c • T)) x v =
@@ -905,6 +908,7 @@ lemma bdSGKXi_smul (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma bdTensorProd_toModel (x : M) (D : Tensor0SSpace 2 I x)
     (W : Tensor0SSpace 4 I x) (u : Fin 6 → E) :
     Tensor0SSpace.toModel (tensorProdWithCLM (I := I) 2 4 x D W) u =
@@ -952,6 +956,7 @@ private lemma bdSGKProd_toSection (g₀ : SmoothRiemannianMetric I M)
     funext k
     fin_cases k <;> rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem bdJointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -986,6 +991,7 @@ private theorem bdJointTotalSpace0S_add_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem bdJointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
@@ -1020,6 +1026,7 @@ private theorem bdJointTotalSpace0S_sub_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem bdTensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
     (P : ∀ p : M × ℝ, Tensor0SSpace m I p.1)
     (Q : ∀ p : M × ℝ, Tensor0SSpace k I p.1)

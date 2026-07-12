@@ -9,7 +9,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.Rellich
 import Mathlib.MeasureTheory.Function.ConvergenceInMeasure
 import Mathlib.Topology.UniformSpace.UniformEmbedding
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 section
 variable [NeZero (Module.finrank ℝ E)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNormChart_cauchy_of_seminormCauchySeq
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -69,6 +69,7 @@ theorem wkpNormChart_cauchy_of_seminormCauchySeq
   rw [← ENNReal.ofReal_toReal h_ne_top]
   exact ENNReal.ofReal_le_ofReal hdist.le
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_cauchy_of_wkpNormChart_cauchy
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}
@@ -232,6 +233,7 @@ noncomputable def manifoldLimitFun
       pullbackToManifold (I := I) β
         (chartLimit (I := I) (M := M) hp_one hp_top h_cauchy β) x
 
+omit [NeZero (Module.finrank ℝ E)] in
 lemma wkpChartFun_eq_finset_sum_pullback
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : DifferentialGeometry.Integral.Measure.SmoothRiemannianMetric I M}

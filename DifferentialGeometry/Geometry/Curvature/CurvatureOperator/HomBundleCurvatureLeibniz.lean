@@ -1,7 +1,6 @@
 import DifferentialGeometry.Geometry.Connection.TensorNabla.HomBundleNabla
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.CurvatureBundling
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,12 +39,14 @@ def pairedSection (τ : Π b : M, (U b →L[ℝ] V b)) (Y : Π b : M, U b) :
     Π b : M, V b :=
   fun b => τ b (Y b)
 
+omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [∀ (x : M), IsTopologicalAddGroup (U x)] [∀ (x : M), ContinuousSMul ℝ (U x)] [∀ (x : M), IsTopologicalAddGroup (V x)] [∀ (x : M), ContinuousSMul ℝ (V x)] in
 @[simp] lemma pairedSection_apply (τ : Π b : M, (U b →L[ℝ] V b)) (Y : Π b : M, U b) (b : M) :
     pairedSection (M := M) (U := U) (V := V) τ Y b = τ b (Y b) := rfl
 
 local notation "covHom" =>
   homBundleCovariantDerivativeGen I M E_U U F V
 
+set_option linter.unusedSectionVars false in
 lemma covApply_cov_V_pairedSection_eq
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -77,6 +78,7 @@ lemma covApply_cov_V_pairedSection_eq
   rw [hkey]
   abel
 
+set_option linter.unusedSectionVars false in
 lemma cov_V_toFun_pairedSection_apply
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -106,6 +108,7 @@ lemma cov_V_toFun_pairedSection_apply
       cov_V.toFun (fun y => σ y (Y y)) x v from rfl, hkey]
   abel
 
+set_option linter.unusedSectionVars false in
 lemma cov_V_toFun_covApply_pairedSection_apply
     (cov_U : CovariantDerivative I E_U U) [ContMDiffCovariantDerivative cov_U ∞]
     (cov_V : CovariantDerivative I F V) [ContMDiffCovariantDerivative cov_V ∞]

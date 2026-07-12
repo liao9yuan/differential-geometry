@@ -14,6 +14,7 @@ variable {d : ℕ} [NeZero d]
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin d)
 
+omit [NeZero d] in
 theorem chartTarget_iteratedFDeriv_two_eLpNorm_le_wkpNorm_two
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     {u : EuclN → ℝ} (hu_smooth : ContDiff ℝ ∞ u)

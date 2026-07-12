@@ -4,7 +4,6 @@ import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 import DifferentialGeometry.Analysis.Integration.Measure.RiemannianMeasure
 import Mathlib.Algebra.Order.Chebyshev
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -67,6 +66,7 @@ private lemma intrinsic_norm_sq_neg_sum_add_sum_le_two_mul
 
 variable (I M) in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem intrinsicG1G3BridgePouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C_bridge : ℝ, 0 ≤ C_bridge ∧
@@ -179,6 +179,7 @@ theorem intrinsicG1G3BridgePouTsupport
 
 variable (I M) in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem norm_sq_triv_neg_sum_add_sum_le_const_mul_sum_norm_sq_on_pouTsupport_intrinsic_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C_bridge : ℝ, 0 ≤ C_bridge ∧

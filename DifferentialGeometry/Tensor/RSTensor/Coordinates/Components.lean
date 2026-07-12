@@ -1,7 +1,6 @@
 import DifferentialGeometry.Tensor.RSTensor.Coordinates.CoordinateBasis
 import DifferentialGeometry.Tensor.Multilinear.Tensor
 
-set_option linter.unusedSectionVars false
 set_option linter.unusedFintypeInType false
 set_option linter.unusedDecidableInType false
 
@@ -25,6 +24,7 @@ section Covariant
 variable {s q : Nat}
 variable (basis : Module.Basis Idx Real (TangentSpace I x))
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_add
     (A B : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
@@ -32,6 +32,7 @@ theorem component0S_add
       component0S (I := I) basis A slots + component0S (I := I) basis B slots := by
   rfl
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] [DecidableEq Idx] in
 @[simp]
 theorem component0S_smul
     (c : Real) (A : Tensor0SSpace s I x) (slots : Fin s -> Idx) :
@@ -39,6 +40,7 @@ theorem component0S_smul
       c * component0S (I := I) basis A slots := by
   rfl
 
+omit [FiniteDimensional ℝ E] [Fintype Idx] [DecidableEq Idx] in
 theorem component0S_product
     (A : Tensor0SSpace s I x) (B : Tensor0SSpace q I x)
     (slots : Fin (s + q) -> Idx) :

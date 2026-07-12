@@ -4,7 +4,6 @@ import DifferentialGeometry.Geometry.Connection.ChartBridge.HessFrobenius
 import DifferentialGeometry.Geometry.Operator.NormGradSq
 import DifferentialGeometry.Geometry.Curvature.Bochner.OrthonormalFrameTrace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -181,6 +180,7 @@ theorem bochner_abstract_of_heart_of_bochner [I.Boundaryless]
   rw [inner_ricciSharp (I := I) g x (gradFun (I := I) g f x)
         (gradFun (I := I) g f x)]
 
+omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem normGradSq_contMDiff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :

@@ -4,7 +4,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.MFDeriv.Basic
 import DifferentialGeometry.Analysis.Integration.Measure.ChartDensity
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ def metricCompatibleDifferential
     (Yx Zx : TangentSpace I x) : TangentSpace I x →L[ℝ] ℝ :=
   (g.inner x Zx).comp covY + (g.inner x Yx).comp covZ
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 lemma metricCompatibleDifferential_apply
     (g : Measure.SmoothRiemannianMetric I M) {x : M}
@@ -56,10 +56,12 @@ variable
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x)}
     {g : Measure.SmoothRiemannianMetric I M}
 
+omit [FiniteDimensional ℝ E] in
 lemma mono {s t : Set M} (h : IsMetricCompatibleOn cov g t) (hst : s ⊆ t) :
     IsMetricCompatibleOn cov g s :=
   fun _Y _Z _x hY hZ hxs v => h hY hZ (hst hxs) v
 
+omit [FiniteDimensional ℝ E] in
 lemma iUnion {ι : Type*} {s : ι → Set M}
     (h : ∀ i, IsMetricCompatibleOn cov g (s i)) :
     IsMetricCompatibleOn cov g (⋃ i, s i) := by
@@ -67,6 +69,7 @@ lemma iUnion {ι : Type*} {s : ι → Set M}
   obtain ⟨si, ⟨i, rfl⟩, hxsi⟩ := hx
   exact h i hY hZ hxsi v
 
+omit [FiniteDimensional ℝ E] in
 lemma swap {s : Set M} (h : IsMetricCompatibleOn cov g s)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) (hxs : x ∈ s)
@@ -81,6 +84,7 @@ lemma swap {s : Set M} (h : IsMetricCompatibleOn cov g s)
       add_comm]
   exact hYZ
 
+omit [FiniteDimensional ℝ E] in
 lemma apply {s : Set M} (h : IsMetricCompatibleOn cov g s)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) (hxs : x ∈ s)
@@ -89,6 +93,7 @@ lemma apply {s : Set M} (h : IsMetricCompatibleOn cov g s)
       g.inner x (cov Y x v) (Z x) + g.inner x (Y x) (cov Z x v) :=
   h hY hZ hxs v
 
+omit [FiniteDimensional ℝ E] in
 lemma hasMFDerivAt {s : Set M} (h : IsMetricCompatibleOn cov g s)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x) (hxs : x ∈ s)
@@ -108,6 +113,7 @@ namespace IsMetricCompatible
 variable {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
 variable {g : Measure.SmoothRiemannianMetric I M}
 
+omit [FiniteDimensional ℝ E] in
 lemma apply (h : IsMetricCompatible cov g)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x)
@@ -116,6 +122,7 @@ lemma apply (h : IsMetricCompatible cov g)
       g.inner x (cov.toFun Y x v) (Z x) + g.inner x (Y x) (cov.toFun Z x v) :=
   h hY hZ (Set.mem_univ _) v
 
+omit [FiniteDimensional ℝ E] in
 lemma swap (h : IsMetricCompatible cov g)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x)
@@ -124,6 +131,7 @@ lemma swap (h : IsMetricCompatible cov g)
       g.inner x (cov.toFun Z x v) (Y x) + g.inner x (Z x) (cov.toFun Y x v) :=
   IsMetricCompatibleOn.swap h hY hZ (Set.mem_univ _) v
 
+omit [FiniteDimensional ℝ E] in
 lemma hasMFDerivAt (h : IsMetricCompatible cov g)
     {Y Z : Π x : M, TangentSpace I x} {x : M}
     (hY : MDiffAt (T% Y) x) (hZ : MDiffAt (T% Z) x)
@@ -133,16 +141,19 @@ lemma hasMFDerivAt (h : IsMetricCompatible cov g)
       (metricCompatibleDifferential g (cov.toFun Y x) (cov.toFun Z x) (Y x) (Z x)) :=
   IsMetricCompatibleOn.hasMFDerivAt h hY hZ (Set.mem_univ _) hsmooth
 
+omit [FiniteDimensional ℝ E] in
 lemma toIsMetricCompatibleOn (h : IsMetricCompatible cov g) {s : Set M} :
     IsMetricCompatibleOn cov.toFun g s :=
   IsMetricCompatibleOn.mono (t := Set.univ) h (fun _ _ => trivial)
 
+omit [FiniteDimensional ℝ E] in
 @[simp]
 lemma toIsMetricCompatibleOn_univ_iff :
     IsMetricCompatibleOn cov.toFun g Set.univ ↔ IsMetricCompatible cov g := Iff.rfl
 
 end IsMetricCompatible
 
+omit [FiniteDimensional ℝ E] in
 lemma IsMetricCompatibleOn.toIsMetricCompatible
     {cov : CovariantDerivative I E (TangentSpace I : M → Type _)}
     {g : Measure.SmoothRiemannianMetric I M}

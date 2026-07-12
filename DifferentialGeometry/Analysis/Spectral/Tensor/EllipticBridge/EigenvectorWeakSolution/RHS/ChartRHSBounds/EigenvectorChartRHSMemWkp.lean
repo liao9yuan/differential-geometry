@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.CovGrad.EigenvectorCovGradComponent
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Cutoff.EigenvectorCutoffWeakPartials
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -65,6 +64,7 @@ private lemma memWkp_finsetSum
       rw [h_eq]
       exact h_add
 
+set_option linter.unusedSectionVars false in
 private lemma memWkp_smoothCoef_mul_aeZeroFactor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -167,6 +167,7 @@ private lemma memWkp_smoothCoef_mul_aeZeroFactor
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae_eq).mp h_prod_memWkp
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma memWkp_of_weakPartial_of_memWkp_succ
     {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -198,6 +199,7 @@ private lemma memWkp_of_weakPartial_of_memWkp_succ
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mpr h_chosen_memWkp
 
+omit [FiniteDimensional ℝ E] [CompleteSpace E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasWeakPartialDeriv_ae_zero_off_of_ae_zero_off
     {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (k : Fin (Module.finrank ℝ E))
@@ -345,6 +347,7 @@ lemma cutoffPartialLpLimit_ae_zero_off_cutoffChartKernelEuclid
   filter_upwards [h_smul, h_partial_zero] with y hy hy_zero hyK
   rw [hy, smul_eq_mul, hy_zero hyK, mul_zero]
 
+set_option linter.unusedSectionVars false in
 private lemma memWkp_indicatorSmoothCoef_mul_aeZeroFactor
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -382,6 +385,7 @@ private lemma memWkp_indicatorSmoothCoef_mul_aeZeroFactor
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open h_ae).mpr h_bare
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma memWkp_offKernelSmoothCoef_mul
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -427,6 +431,7 @@ private lemma memWkp_offKernelSmoothCoef_mul
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ_open hcoef_smooth
     (fun j _hj y _hy => hC_bd y j _hj) hfactor_memWkp
 
+set_option linter.unusedSectionVars false in
 private lemma recipDensityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞)

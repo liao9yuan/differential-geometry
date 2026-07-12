@@ -19,7 +19,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegulari
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.PointwiseDeriv
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SeriesContinuous
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow
 
@@ -46,6 +45,7 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 private theorem tensorL2_ext_of_tensorL2Coeff_jsmooth
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (h_compact : IsCompactOperator
@@ -63,6 +63,7 @@ private theorem tensorL2_ext_of_tensorL2Coeff_jsmooth
   have hT : (b.repr T) i = tensorL2Coeff (I := I) (M := M) h_compact T i := rfl
   rw [hS, hT, h i]
 
+omit [BoundarylessManifold I M] in
 private theorem ccTensorBilinSymm_zero_apply_jsmooth (g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2) x v w = 0 := by

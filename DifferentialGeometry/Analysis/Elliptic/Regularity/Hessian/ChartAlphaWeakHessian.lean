@@ -6,7 +6,6 @@ import DifferentialGeometry.Analysis.Sobolev.Euclidean.IteratedSobolevSpace.Iter
 import DifferentialGeometry.Geometry.Operator.Hessian
 import DifferentialGeometry.Geometry.Connection.ChartFrame.ChartMetric
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -84,6 +83,7 @@ noncomputable def chosenChartFirstWeakPartial
     (chartPushedPouFun (I := I) (M := M) g α u_h)
     (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chosenChartFirstWeakPartial_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -154,6 +154,7 @@ noncomputable def chosenChartSecondWeakPartial
       (chartTargetEuclid (I := I) (M := M) α))
     (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chosenChartSecondWeakPartial_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -221,6 +222,7 @@ noncomputable def chartChristoffelCorrectionWeak
     chartChristoffel (I := I) g α k l m ((toEuclidean (E := E)).symm y) *
       chosenChartFirstWeakPartial (I := I) (M := M) g α hu_h m y
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartChristoffelCorrectionWeak_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -231,6 +233,7 @@ noncomputable def chartChristoffelCorrectionWeak
         chartChristoffel (I := I) g α k l m ((toEuclidean (E := E)).symm y) *
           chosenChartFirstWeakPartial (I := I) (M := M) g α hu_h m y := rfl
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartChristoffel_toE_symm_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l m : Fin (Module.finrank ℝ E)) :
@@ -251,6 +254,7 @@ private lemma chartChristoffel_toE_symm_continuousOn_chartTargetEuclid
     toEuclidean_symm_mem_target (I := I) hy
   exact h_chris_cont.comp h_toE_cont.continuousOn h_maps
 
+omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartChristoffel_toE_symm_bounded_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l m : Fin (Module.finrank ℝ E))
@@ -339,6 +343,7 @@ noncomputable def chartTensorWeakHessianRaw
   chosenChartSecondWeakPartial (I := I) (M := M) g α hu_h k l y -
     chartChristoffelCorrectionWeak (I := I) (M := M) g α hu_h k l y
 
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartTensorWeakHessianRaw_def
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl (I := I) (M := M) g}

@@ -24,7 +24,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipal
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalArmResidualDivergenceSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckPrincipalArmLadderTransportBounds
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -56,6 +55,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 theorem tensorL2Inner_eq_tsum_l2Coeff_cross_arm
     (g₀ : SmoothRiemannianMetric I M)
     (A B : SmoothCcTensor g₀ 0 2) :

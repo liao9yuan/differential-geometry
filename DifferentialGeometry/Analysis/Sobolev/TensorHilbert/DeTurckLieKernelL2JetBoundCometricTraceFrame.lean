@@ -13,7 +13,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckLineari
 import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Analysis.Integration.DivergenceTheorem.BracketDivergenceForm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -64,6 +63,7 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 
+set_option linter.unusedSectionVars false in
 theorem iteratedCovGrad_smul_dla (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -77,6 +77,7 @@ def sigmaE0dla : Equiv.Perm (Fin 6) :=
    fun i => (![4, 0, 5, 1, 2, 3] : Fin 6 → Fin 6) i,
    by decide, by decide⟩
 
+set_option linter.unusedSectionVars false in
 private lemma tensor0S_zero_rank_decomp_dla (x : M) (t : Tensor0SSpace 0 I x) :
     t = (Tensor0SSpace.toModel t (fun i : Fin 0 => i.elim0)) • unitTensor (I := I) (M := M) x := by
   apply Tensor0SSpace.toModel_injective
@@ -92,6 +93,7 @@ private lemma tensor0S_zero_rank_decomp_dla (x : M) (t : Tensor0SSpace 0 I x) :
     rfl]
   rw [smul_eq_mul, mul_one]
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 lemma slotExtendIter_two_toModel_dla (g₀ : SmoothRiemannianMetric I M)
     (X : SmoothCcTensor g₀ 0 4) (x : M) (D : Tensor0SSpace 2 I x)
@@ -178,6 +180,7 @@ def cometricDoubleTraceSmoothCcTensor (g₀ g₁ : SmoothRiemannianMetric I M) (
       contMDiff_toFun := cometricDoubleTraceFib_contMDiff (I := I) g₁ s }
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_cons_sum_smul_dla (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -210,6 +213,7 @@ lemma toModel_cons_sum_smul_dla (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma toModel_cons_cons_sum_smul_dla (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -244,6 +248,7 @@ lemma toModel_cons_cons_sum_smul_dla (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+set_option linter.unusedSectionVars false in
 lemma smoothOrthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),

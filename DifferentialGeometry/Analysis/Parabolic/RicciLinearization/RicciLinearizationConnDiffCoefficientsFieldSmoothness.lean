@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Flow.DeTurckVFConnDiffVariation
 import DifferentialGeometry.Tensor.Multilinear.ModelProductContinuousBilinear
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffCoefficientsFibreOperators
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -44,6 +43,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -76,6 +76,7 @@ private theorem domDomCongrSectionContMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
   rfl
 
 
+set_option linter.unusedSectionVars false in
 theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
     (Z : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hZ : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -92,6 +93,7 @@ theorem slotPermCLM_field_contMDiff {d : ℕ} (ρ : Equiv.Perm (Fin d))
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
     (P : ∀ x : M, Tensor0SBundle.Tensor0SSpace m I x)
     (Q : ∀ x : M, Tensor0SBundle.Tensor0SSpace k I x)
@@ -141,6 +143,7 @@ private theorem tensorProdWithCLM_field_contMDiff (m k : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem connContrCLM_field_contMDiff (m k : ℕ)
     (Bf : ∀ x : M, Tensor0SBundle.TensorRSSpace 1 (k + 1) I x)
     (hBf : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.TensorRSModel 1 (k + 1) ℝ E)) ∞

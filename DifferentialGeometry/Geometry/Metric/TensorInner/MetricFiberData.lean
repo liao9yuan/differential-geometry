@@ -5,7 +5,6 @@ import Mathlib.Analysis.InnerProductSpace.Defs
 import Mathlib.Geometry.Manifold.VectorBundle.Riemannian
 import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 
-set_option linter.unusedSectionVars false
 
 
 namespace Tensor0SBundle
@@ -24,6 +23,7 @@ namespace MetricFiberData
 
 variable {V : Type*} [AddCommGroup V] [Module Real V] [FiniteDimensional Real V]
 
+omit [FiniteDimensional ℝ V] in
 private theorem dual_finrank_eq :
     Module.finrank Real V = Module.finrank Real (Module.Dual Real V) :=
   Subspace.dual_finrank_eq.symm
@@ -169,12 +169,14 @@ def tangentFlatLinear (g : SmoothMetric I M) (x : M) :
     change g.inner x (c • v) u = c • g.inner x v u
     simp
 
+omit [FiniteDimensional ℝ E] in
 @[simp] theorem tangentFlatLinear_apply
     (g : SmoothMetric I M) (x : M)
     (v w : TangentSpace I x) :
     tangentFlatLinear (I := I) g x v w = g.inner x v w := by
   rfl
 
+omit [FiniteDimensional ℝ E] in
 theorem tangentFlatLinear_injective
     (g : SmoothMetric I M) (x : M) :
     Function.Injective (tangentFlatLinear (I := I) g x) := by

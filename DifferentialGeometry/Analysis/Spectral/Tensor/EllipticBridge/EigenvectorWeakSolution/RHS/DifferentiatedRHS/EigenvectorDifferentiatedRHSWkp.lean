@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedDatum
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.Multiplication.MultiplyQuantK
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -41,16 +40,19 @@ private abbrev Kα (α : M) : Set EuclN :=
 private abbrev Ωα (α : M) : Set EuclN :=
   chartTargetEuclid (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 private lemma Kα_compact (α : M) : IsCompact (Kα (I := I) (M := M) α) :=
   chartPouKernel_isCompact (I := I) (M := M) α
 
 private lemma Kα_meas (α : M) : MeasurableSet (Kα (I := I) (M := M) α) :=
   chartPouKernel_measurableSet (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 private lemma Kα_subset_Ωα (α : M) :
     Kα (I := I) (M := M) α ⊆ Ωα (I := I) (M := M) α :=
   chartPouKernel_subset_chartTargetEuclid (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 private lemma Ωα_isOpen (α : M) : IsOpen (Ωα (I := I) (M := M) α) :=
   chartTargetEuclid_isOpen (I := I) (M := M) α
 
@@ -161,6 +163,7 @@ private lemma memWkp_coef_mul_factor
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) (Ωα_isOpen (I := I) (M := M) α) h_ae_eq).mp
     h_prod_memWkp
 
+set_option linter.unusedSectionVars false in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -234,6 +237,7 @@ private lemma layer_E_memWkp
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
+set_option linter.unusedSectionVars false in
 private lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ (⊤ : ℕ∞) (fun y => 1 / densityOnEuclid (I := I) g α y)

@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.GagliardoNirenbergLpFiberNorm
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
+omit [NeZero (Module.finrank ℝ E)] [BoundarylessManifold I M] [I.Boundaryless] in
 private theorem real_holder_two_nonneg
     (g : SmoothRiemannianMetric I M) (φ ψ : M → ℝ)
     (hφc : Continuous φ) (hψc : Continuous ψ)
@@ -88,6 +88,7 @@ private theorem real_holder_two_nonneg
   exact (ENNReal.ofReal_le_ofReal_iff hrhs_nn).mp hHolder
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private theorem continuous_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) :
@@ -98,6 +99,7 @@ private theorem continuous_riemannianFiberNormSq
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
 
+set_option linter.unusedSectionVars false in
 private theorem integrable_riemannianFiberNormSq_mul
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ)
     (S : Integral.L2.SmoothCcTensor g r₁ s₁) (T : Integral.L2.SmoothCcTensor g r₂ s₂) :

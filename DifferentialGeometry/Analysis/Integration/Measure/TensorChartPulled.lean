@@ -163,6 +163,7 @@ theorem tensorTrivProjPushedNormSq_hasCompactSupport
   · exact tensorTrivProjPushedNormSq_apply_of_notMem
       (I := I) (M := M) g r s α S hy_target
 
+omit [IsManifold I ∞ M] in
 private lemma chartTargetEuclid_measurableSet'
     (α : M) :
     MeasurableSet (chartTargetEuclid (I := I) (M := M) α) :=

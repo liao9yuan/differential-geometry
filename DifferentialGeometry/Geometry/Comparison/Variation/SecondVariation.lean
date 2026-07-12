@@ -23,7 +23,6 @@ import DifferentialGeometry.Geometry.Comparison.Variation.FirstVariation
 import DifferentialGeometry.Geometry.Comparison.Variation.CovariantCommutationCurvature
 import DifferentialGeometry.Geometry.Comparison.Variation.RegularParameterFirstVariation
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -79,6 +78,7 @@ attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 
+omit [InnerProductSpace ℝ E] [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma continuousOn_g_inner_along_curve
     (g : SmoothRiemannianMetric I M)
     {γ : ℝ → M} {v w : ∀ t : ℝ, TangentSpace I (γ t)} {s : Set ℝ}

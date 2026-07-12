@@ -12,7 +12,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSection
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceSymmetrizedReindexedCoeff
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciDeTurckSectionDifferenceReindexingArmSplitting
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -58,6 +57,7 @@ def riemannKernelBilin (g₁ : SmoothRiemannianMetric I M) (x : M) (p q : Tangen
           ContinuousLinearMap.smul_apply, ContinuousLinearMap.smul_apply, map_smul,
           RingHom.id_apply] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem riemannKernelBilin_apply (g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q v0 v1 : TangentSpace I x) :
     riemannKernelBilin (I := I) g₁ x p q v0 v1 =
@@ -78,6 +78,7 @@ def riemannSummandFib (g₁ : SmoothRiemannianMetric I M) (x : M) (p q : Tangent
         rw [Tensor0SSpace.toModel_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul,
           RingHom.id_apply, mul_smul] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] theorem riemannSummandFib_toModel (g₁ : SmoothRiemannianMetric I M) (x : M)
     (p q : TangentSpace I x) (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
     Tensor0SSpace.toModel (riemannSummandFib (I := I) g₁ x p q D) v =
@@ -94,6 +95,7 @@ def riemannBiContrFibFixedFrame (g₁ : SmoothRiemannianMetric I M)
   (2 : ℝ) • ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     riemannSummandFib (I := I) g₁ x (B a x) (B b x)
 
+set_option linter.unusedSectionVars false in
 theorem riemannBiContrFibFixedFrame_toModel (g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -122,6 +124,7 @@ def innerPairBilin (x : M) (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x �
       map_add' := fun Y Y' => by rw [map_add, add_smul]
       map_smul' := fun c Y => by rw [map_smul, smul_eq_mul, RingHom.id_apply, mul_smul] }
 
+omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem innerPairBilin_apply (x : M) (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (X Y Y' : TangentSpace I x) :
     innerPairBilin (I := I) x K Dd X Y Y' = K X Y * Dd X Y' := by
@@ -157,6 +160,7 @@ def outerPairBilin (g : SmoothRiemannianMetric I M) (x : M)
         refine Finset.sum_congr rfl (fun l _ => ?_)
         ring }
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem outerPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ) (X X' : TangentSpace I x) :
     outerPairBilin (I := I) g x K Dd X X' =
@@ -170,6 +174,7 @@ theorem outerPairBilin_apply (g : SmoothRiemannianMetric I M) (x : M)
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
+set_option linter.unusedSectionVars false in
 theorem double_frame_bilin_trace_eq_fixed
     (g : SmoothRiemannianMetric I M) (x : M)
     (K Dd : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -210,6 +215,7 @@ theorem double_frame_bilin_trace_indep
   rw [double_frame_bilin_trace_eq_fixed (I := I) g x K Dd B hB,
     double_frame_bilin_trace_eq_fixed (I := I) g x K Dd C hC]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem contMDiff_bilinSection_of_chartScalar
     (Hb : (x : M) → TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hscalar : ∀ (x₀ : M) (σ : Fin 2 → Fin (Module.finrank ℝ E)),
@@ -247,6 +253,7 @@ theorem contMDiff_bilinSection_of_chartScalar
   exact bilinFormToModel_apply (TangentSpace I x) (Hb x)
     (fun j => (trivializationAt E (TangentSpace I) x₀).symmL ℝ x (b (σ j)))
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem kernelScalar_global (g₁ : SmoothRiemannianMetric I M)
     {Y W p q : Π b : M, TangentSpace I b}
     (hY : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% Y))
@@ -269,6 +276,7 @@ theorem kernelScalar_global (g₁ : SmoothRiemannianMetric I M)
   exact contMDiff_g_inner_of_smooth_sections (I := I) g₁
     ⟨fun b => riemannSec (LeviCivita (I := I) g₁) Y p q b, hRsec⟩ ⟨fun b => W b, hW⟩
 
+set_option linter.unusedSectionVars false in
 theorem riemannKernelBilin_homSection_contMDiff (g₁ : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}
     (hp : ContMDiff I (I.prod 𝓘(ℝ, E)) ∞ (T% p))
@@ -296,6 +304,7 @@ theorem riemannKernelBilin_homSection_contMDiff (g₁ : SmoothRiemannianMetric I
   rw [riemannKernelBilin_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem contMDiff_bilinSection_of_homSection
     (Hb : (x : M) → TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (hHb : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
@@ -444,6 +453,7 @@ def frameRiemannKernel (g₁ : SmoothRiemannianMetric I M) (x : M) (v0 v1 : Tang
         simp only [ContinuousLinearMap.comp_apply, ContinuousLinearMap.smul_apply,
           RingHom.id_apply, (riemannOp (LeviCivita (I := I) g₁) x v0).map_smul c p, map_smul] }
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem frameRiemannKernel_apply (g₁ : SmoothRiemannianMetric I M) (x : M)
     (v0 v1 p q : TangentSpace I x) :
     frameRiemannKernel (I := I) g₁ x v0 v1 p q =

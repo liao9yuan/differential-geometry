@@ -20,7 +20,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityA
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.SlotSwapPairingCalculus
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.HomFieldCurvatureJetDecomposition
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -82,6 +81,7 @@ theorem armJet_norm_comp (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ)
   have hb : (0 : ℝ) ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   rw [← Real.sqrt_sq ha, ← Real.sqrt_sq hb, hsq]
 
+omit [BoundarylessManifold I M] in
 private theorem armJet_norm_order_congr (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     {n n' : ℕ} (h : n = n') (S : SmoothCcTensor g₀ 0 s) :
     ‖iteratedCovGrad (I := I) g₀ 0 s n S‖ = ‖iteratedCovGrad (I := I) g₀ 0 s n' S‖ := by
@@ -455,6 +455,7 @@ theorem armJet_iteratedCovGrad_iterL_le (g₀ : SmoothRiemannianMetric I M) (s a
             add_le_add h1 h2
         _ = (Cf p + C5 p * ∑ b ∈ Finset.range (p + 3), Cf b) * SFULL := by ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 theorem armJet_abs_pairing_le (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g₀ 0 s) :
     |tensorL2Inner (I := I) (M := M) g₀ 0 s A.toFun B.toFun| ≤ ‖A‖ * ‖B‖ := by
@@ -462,6 +463,7 @@ theorem armJet_abs_pairing_le (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
   rw [← h]
   exact abs_real_inner_le_norm A B
 
+omit [BoundarylessManifold I M] in
 theorem armJet_jetSum_mono (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {m m' : ℕ}
     (h : m ≤ m') (v : SmoothCcTensor g₀ 0 s) :
     ∑ q ∈ Finset.range m, ‖iteratedCovGrad (I := I) g₀ 0 s q v‖ ≤
@@ -486,6 +488,7 @@ theorem armJet_jetSum_covGrad_le (g₀ : SmoothRiemannianMetric I M) (s m : ℕ)
   have h0 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s 0 v‖ := norm_nonneg _
   linarith [h]
 
+set_option linter.unusedSectionVars false in
 theorem armJet_jetProduct_le (g₀ : SmoothRiemannianMetric I M) (n p q : ℕ)
     (hp : p ≤ n + 2) (hq : q ≤ n + 2) (hpq : p + q ≤ 2 * n + 3)
     (u₀ : SmoothCcTensor g₀ 0 2) :

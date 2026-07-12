@@ -3,7 +3,6 @@ import Mathlib.Geometry.Manifold.IntegralCurve.ExistUnique
 import Mathlib.Geometry.Manifold.MFDeriv.SpecificFunctions
 import Mathlib.Geometry.Manifold.Diffeomorph
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -23,6 +22,7 @@ def AutonomizedFieldJointC1 (X : ℝ → ∀ x : M, TangentSpace I x) : Prop :=
         (⟨p, autonomizedFlowVF X p⟩ : TangentBundle (𝓘(ℝ, ℝ).prod I) (ℝ × M)))
       p
 
+omit [FiniteDimensional ℝ E] [T2Space M] in
 theorem time_dependent_vf_bare_local_flow_of_jointC1 [CompleteSpace E]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : AutonomizedFieldJointC1 (I := I) X) (x : M) :
@@ -71,6 +71,7 @@ theorem autonomizedLift_isMIntegralCurveOn_of_bareFlow
   intro t ht
   exact autonomizedLift_hasMFDerivWithinAt X (fun u : ℝ => Φ u x) s t (hflow t ht)
 
+omit [FiniteDimensional ℝ E] in
 theorem bare_integral_flow_eqOn_of_jointC1 [CompleteSpace E]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : AutonomizedFieldJointC1 (I := I) X)
@@ -103,6 +104,7 @@ theorem bare_integral_flow_eqOn_of_jointC1 [CompleteSpace E]
   have := heq ht
   simpa using congrArg Prod.snd this
 
+omit [FiniteDimensional ℝ E] in
 theorem time_dependent_vf_bare_local_flow_exists_unique_of_jointC1 [CompleteSpace E]
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hX : AutonomizedFieldJointC1 (I := I) X) (x : M) :
@@ -130,6 +132,7 @@ theorem time_dependent_vf_bare_local_flow_exists_unique_of_jointC1 [CompleteSpac
 
 variable [CompactSpace M] [SigmaCompactSpace M]
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [CompactSpace M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_bare_flow_family
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (hT : 0 < T) (Φ : ℝ → M → M)

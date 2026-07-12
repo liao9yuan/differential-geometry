@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.Order2Equivale
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.AllOrderGardingConstant
 import DifferentialGeometry.Analysis.Sobolev.Embedding.RawConnLapToHsOrderDropping
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -37,6 +36,7 @@ def order2ConnLapIterateL2Sum (g : SmoothRiemannianMetric I M)
   ∑ j ∈ Finset.range (2 + 1),
     ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g 0 2 j T)‖
 
+omit [CompactSpace M] [I.Boundaryless] in
 theorem order2IterateNspec_nonneg (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) :
     0 ≤ order2ConnLapIterateL2Sum (I := I) (M := M) g T :=

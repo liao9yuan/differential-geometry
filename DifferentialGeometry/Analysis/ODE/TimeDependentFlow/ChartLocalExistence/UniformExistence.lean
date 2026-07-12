@@ -1,7 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.TimeDependentFlow.ChartLocalExistence.PointwiseLocal
 import Mathlib.Geometry.Manifold.IsManifold.InteriorBoundary
 
-set_option linter.unusedSectionVars false
 
 namespace DifferentialGeometry.PDE.RicciFlow.ODE
 
@@ -38,6 +37,7 @@ def ChartLocalPicardData.U
   (chartAt H α).source ∩
     ((chartAt H α) ⁻¹' (I ⁻¹' Metric.ball (I ((chartAt H α) α)) data.r))
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ChartLocalPicardData.isOpen_U
     {X : ℝ → ∀ x : M, TangentSpace I x} {α : M}
     (data : ChartLocalPicardData X α) : IsOpen data.U := by
@@ -49,6 +49,7 @@ lemma ChartLocalPicardData.isOpen_U
     (chartAt H α).continuousOn
   exact h₃.isOpen_inter_preimage h₁ h₂
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma ChartLocalPicardData.mem_U_self
     {X : ℝ → ∀ x : M, TangentSpace I x} {α : M}
     (data : ChartLocalPicardData X α) : α ∈ data.U := by
@@ -56,6 +57,7 @@ lemma ChartLocalPicardData.mem_U_self
   refine ⟨mem_chart_source H α, ?_⟩
   exact Metric.mem_ball_self data.r_pos
 
+omit [FiniteDimensional ℝ E] [IsManifold I ∞ M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem time_dependent_vf_uniform_existence_time_on_closed_mfd
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (hper : ∀ α : M, ChartLocalPicardData X α) :

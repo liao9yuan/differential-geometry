@@ -9,7 +9,6 @@ import Mathlib.Geometry.Manifold.VectorBundle.Tangent
 import Mathlib.Geometry.Manifold.VectorBundle.SmoothSection
 import Mathlib.Topology.VectorBundle.Riemannian
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -38,6 +37,7 @@ noncomputable def loweredCompose
       DifferentialGeometry.Tensor.Tensor0SRiemannian.chartTrivializationLinearMapSymm
         (I := I) (M := M) α b)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma loweredCompose_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T : TensorRSModel r s ℝ E) (v : Fin (r + s) → E) :
@@ -49,6 +49,7 @@ noncomputable def loweredCompose
   unfold loweredCompose
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
 
+set_option linter.unusedSectionVars false in
 lemma loweredCompose_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (T₁ T₂ : TensorRSModel r s ℝ E) :
@@ -59,6 +60,7 @@ lemma loweredCompose_add
   rw [ContinuousLinearMap.map_add]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma loweredCompose_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (c : ℝ) (T : TensorRSModel r s ℝ E) :
@@ -68,6 +70,7 @@ lemma loweredCompose_smul
   rw [ContinuousLinearMap.map_smul]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma loweredCompose_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M) :
     loweredCompose (I := I) (M := M) g r s α b (0 : TensorRSModel r s ℝ E) =
@@ -83,6 +86,7 @@ noncomputable def chartTensorInnerPointwise
     (loweredCompose (I := I) (M := M) g r s α b T)
     (loweredCompose (I := I) (M := M) g r s α b S)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartTensorInnerPointwise_apply
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T S : TensorRSModel r s ℝ E) :
@@ -91,6 +95,7 @@ noncomputable def chartTensorInnerPointwise
         (loweredCompose (I := I) (M := M) g r s α b T)
         (loweredCompose (I := I) (M := M) g r s α b S) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_add_left
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T₁ T₂ S : TensorRSModel r s ℝ E) :
@@ -102,6 +107,7 @@ lemma chartTensorInnerPointwise_add_left
   exact chartTensorInnerPointwise_0s_add_left
     (I := I) (M := M) g α b (r + s) _ _ _
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_add_right
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T S₁ S₂ : TensorRSModel r s ℝ E) :
@@ -113,6 +119,7 @@ lemma chartTensorInnerPointwise_add_right
   exact chartTensorInnerPointwise_0s_add_right
     (I := I) (M := M) g α b (r + s) _ _ _
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_smul_left
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -123,6 +130,7 @@ lemma chartTensorInnerPointwise_smul_left
   exact chartTensorInnerPointwise_0s_smul_left
     (I := I) (M := M) g α b (r + s) c _ _
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_smul_right
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -133,6 +141,7 @@ lemma chartTensorInnerPointwise_smul_right
   exact chartTensorInnerPointwise_0s_smul_right
     (I := I) (M := M) g α b (r + s) c _ _
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_zero_left
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (S : TensorRSModel r s ℝ E) :
@@ -146,6 +155,7 @@ lemma chartTensorInnerPointwise_zero_left
   rw [h₀] at h
   linarith
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_zero_right
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) (b : M)
     (T : TensorRSModel r s ℝ E) :
@@ -159,6 +169,7 @@ lemma chartTensorInnerPointwise_zero_right
   rw [h₀] at h
   linarith
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_bridge_identity
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -169,6 +180,7 @@ theorem tensorInnerPointwise_bridge_identity
   exact tensorInnerPointwise_0s_bridge_identity
     (I := I) (M := M) g α (r + s) hb _ _
 
+set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_symm
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -179,6 +191,7 @@ lemma chartTensorInnerPointwise_symm
     ← tensorInnerPointwise_bridge_identity (I := I) (M := M) g α r s hb S T]
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s b T S
 
+set_option linter.unusedSectionVars false in
 theorem chartTensorInnerPointwise_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (T S : M → TensorRSModel r s ℝ E)
@@ -204,6 +217,7 @@ theorem chartTensorInnerPointwise_continuousOn
       (fun b => loweredCompose (I := I) (M := M) g r s α b (S b)) hT hS
   exact hcont
 
+set_option linter.unusedSectionVars false in
 theorem chartLocal_continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : ∀ y : M, TensorRSSpace r s I y) (α : M)
@@ -276,6 +290,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
+set_option linter.unusedSectionVars false in
 theorem continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : ∀ y : M, TensorRSSpace r s I y)

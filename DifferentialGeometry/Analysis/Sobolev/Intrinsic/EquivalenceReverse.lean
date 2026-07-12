@@ -31,6 +31,7 @@ open DifferentialGeometry.Analysis.Sobolev.Chart
 local notation "EuclN_E" =>
   EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [FiniteDimensional ℝ E] in
 private lemma mfderiv_extChartAt_apply_triv_symm
     (α : M) {x : M} (hxchart : x ∈ (chartAt H α).source) (v_E : E) :
     mfderiv I 𝓘(ℝ, E) (extChartAt I α) x
@@ -47,6 +48,7 @@ private lemma mfderiv_extChartAt_apply_triv_symm
   exact Trivialization.continuousLinearMapAt_symmL
     (R := ℝ) (trivializationAt E (TangentSpace I) α) hbase v_E
 
+omit [FiniteDimensional ℝ E] in
 private lemma mfderiv_triv_symm_const_eq_fderiv_scalarOnE
     (α : M) {f : M → ℝ} {x : M}
     (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)

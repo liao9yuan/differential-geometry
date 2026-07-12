@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.ChartCoordinat
 import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivitaChartSmooth
 import DifferentialGeometry.Analysis.Sobolev.Chart.SmoothDensity.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,6 +33,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma pouTsupport_image_isCompact (α : M) :
     IsCompact
       ((fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
@@ -74,6 +74,7 @@ lemma pouTsupport_image_isCompact (α : M) :
   rw [h_image_eq]
   exact h_te_image_compact
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
     ((fun b : M => (toEuclidean (E := E)) ((extChartAt I α) b)) ''
       tsupport (fun x : M =>
@@ -89,6 +90,7 @@ lemma pouTsupport_image_subset_chartTargetEuclid (α : M) :
     (extChartAt I α).map_source hb_src
   exact ⟨(extChartAt I α) b, hb_tgt, rfl⟩
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma exists_sup_bound_of_contDiffOn_on_compact_subset
     {U : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))}
     {K : Set (EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))} (hK : IsCompact K)

@@ -8,7 +8,6 @@ import Mathlib.Analysis.Normed.Module.Completion
 import Mathlib.Analysis.InnerProductSpace.Completion
 import Mathlib.Analysis.Normed.Operator.Extend
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ noncomputable def smoothToTensorH1Compl
     SmoothCcTensorH1 g r s →L[ℝ] TensorH1Compl g r s :=
   UniformSpace.Completion.toComplL
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma smoothToTensorH1Compl_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -56,6 +56,7 @@ noncomputable def smoothToTensorH1Compl
   rfl
 
 
+set_option linter.unusedSectionVars false in
 lemma SmoothCcTensor.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -65,6 +66,7 @@ lemma SmoothCcTensor.norm_sq_eq_inner_self
   exact h.symm
 
 
+set_option linter.unusedSectionVars false in
 lemma SmoothCcTensorH1.norm_sq_eq_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -75,6 +77,7 @@ lemma SmoothCcTensorH1.norm_sq_eq_inner_self
   exact h.symm
 
 
+set_option linter.unusedSectionVars false in
 lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -93,6 +96,7 @@ lemma SmoothCcTensorH1.l2NormSq_le_h1NormSq
   linarith
 
 
+set_option linter.unusedSectionVars false in
 lemma SmoothCcTensorH1.l2Norm_le_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -102,6 +106,7 @@ lemma SmoothCcTensorH1.l2Norm_le_h1Norm
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
 
+set_option linter.unusedSectionVars false in
 lemma SmoothCcTensorH1.l2Norm_le_one_mul_h1Norm
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensorH1 g r s) :
@@ -123,6 +128,7 @@ noncomputable def smoothCcTensorH1ToTensorL2Lin
     rw [SmoothCcTensorH1.toCcTensor_smul]
     exact UniformSpace.Completion.coe_smul _ _
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma smoothCcTensorH1ToTensorL2Lin_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -130,6 +136,7 @@ noncomputable def smoothCcTensorH1ToTensorL2Lin
       (S.toCcTensor : TensorL2 r s g) := rfl
 
 
+set_option linter.unusedSectionVars false in
 lemma smoothCcTensorH1ToTensorL2Lin_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -149,12 +156,14 @@ noncomputable def smoothCcTensorH1ToTensorL2
   (smoothCcTensorH1ToTensorL2Lin (I := I) (M := M) g r s).mkContinuous 1
     (fun S => smoothCcTensorH1ToTensorL2Lin_norm_le (I := I) (M := M) g r s S)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma smoothCcTensorH1ToTensorL2_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
     smoothCcTensorH1ToTensorL2 (I := I) (M := M) g r s S =
       (S.toCcTensor : TensorL2 r s g) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma denseRange_toComplL_smoothCcTensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     DenseRange
@@ -167,6 +176,7 @@ private lemma denseRange_toComplL_smoothCcTensorH1
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
+set_option linter.unusedSectionVars false in
 private lemma isUniformInducing_toComplL_smoothCcTensorH1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsUniformInducing
@@ -186,6 +196,7 @@ noncomputable def TensorH1ComplToTensorL2
     (UniformSpace.Completion.toComplL :
       SmoothCcTensorH1 g r s →L[ℝ] TensorH1Compl g r s)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma TensorH1ComplToTensorL2_smoothToTensorH1Compl
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -199,6 +210,7 @@ noncomputable def TensorH1ComplToTensorL2
     (denseRange_toComplL_smoothCcTensorH1 (I := I) (M := M) g r s)
     (isUniformInducing_toComplL_smoothCcTensorH1 (I := I) (M := M) g r s) S
 
+set_option linter.unusedSectionVars false in
 theorem TensorH1ComplToTensorL2_smoothToTensorH1Compl_eq_coe
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :

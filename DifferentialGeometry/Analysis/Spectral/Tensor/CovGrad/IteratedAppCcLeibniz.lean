@@ -61,6 +61,7 @@ private theorem covGrad_appCcLeibniz_sum (g : SmoothRiemannianMetric I M) (a b c
   congr 1
 
 
+set_option linter.unusedSectionVars false in
 private theorem appCcLeibnizPsi_succ_zero (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) 0 =
@@ -68,6 +69,7 @@ private theorem appCcLeibnizPsi_succ_zero (g : SmoothRiemannianMetric I M) (b c 
   rfl
 
 
+set_option linter.unusedSectionVars false in
 private theorem appCcLeibnizPsi_succ_succ (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i j : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ (i + 1) (j + 1) =

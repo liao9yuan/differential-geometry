@@ -21,7 +21,6 @@ import Mathlib.MeasureTheory.Measure.Haar.InnerProductSpace
 import Mathlib.MeasureTheory.Measure.Lebesgue.EqHaar
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -50,6 +49,7 @@ export DifferentialGeometry (SmoothRiemannianMetric)
   (EuclideanSpace.basisFun (Fin (Module.finrank ℝ E)) ℝ).toBasis.map
     (toEuclidean (E := E)).symm.toLinearEquiv
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartModelBasis_apply (i : Fin (Module.finrank ℝ E)) :
     chartModelBasis E i =
       (toEuclidean (E := E)).symm (EuclideanSpace.single i (1 : ℝ)) := by
@@ -69,12 +69,15 @@ def chartBasisVec (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
     M → TotalSpace E (TangentSpace I : M → Type _) :=
   fun x => TotalSpace.mk' E x (chartBasisVecFiber (I := I) x₀ i x)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartBasisVec_proj (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     (chartBasisVec (I := I) x₀ i x).proj = x := rfl
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartBasisVec_snd (x₀ : M) (i : Fin (Module.finrank ℝ E)) (x : M) :
     (chartBasisVec (I := I) x₀ i x).2 = chartBasisVecFiber (I := I) x₀ i x := rfl
 
+set_option linter.unusedSectionVars false in
 lemma trivializationAt_chartBasisVec_snd
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -85,6 +88,7 @@ lemma trivializationAt_chartBasisVec_snd
     ((chartModelBasis E) i)
   simpa [chartBasisVecFiber] using congrArg Prod.snd h
 
+set_option linter.unusedSectionVars false in
 lemma chartBasisVec_contMDiffOn
     (x₀ : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (chartBasisVec (I := I) x₀ i)
@@ -101,6 +105,7 @@ lemma chartBasisVec_contMDiffOn
   intro x hx
   exact (trivializationAt_chartBasisVec_snd (I := I) x₀ i hx)
 
+set_option linter.unusedSectionVars false in
 lemma chartAlphaFrame_section_contMDiffOn
     (α : M) (i : Fin (Module.finrank ℝ E)) :
     ContMDiffOn I I.tangent ∞
@@ -130,6 +135,7 @@ def chartBasisFamily (x₀ : M) {x : M}
     (ContinuousLinearEquiv.toLinearEquiv
       ((trivializationAt E (TangentSpace I) x₀).continuousLinearEquivAt ℝ x hx).symm)
 
+set_option linter.unusedSectionVars false in
 lemma chartBasisFamily_apply (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
     (i : Fin (Module.finrank ℝ E)) :
@@ -139,6 +145,7 @@ lemma chartBasisFamily_apply (x₀ : M) {x : M}
   rw [Module.Basis.map_apply]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartBasisFamily_linearIndependent (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     LinearIndependent ℝ
@@ -159,6 +166,7 @@ def chartGramMatrix (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M) :
       (chartBasisVecFiber (I := I) x₀ i x)
       (chartBasisVecFiber (I := I) x₀ j x)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartGramMatrix_apply
     (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -167,6 +175,7 @@ def chartGramMatrix (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M) :
         (chartBasisVecFiber (I := I) x₀ i x)
         (chartBasisVecFiber (I := I) x₀ j x) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_isHermitian
     (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M) :
     (chartGramMatrix g x₀ x).IsHermitian := by
@@ -178,6 +187,7 @@ lemma chartGramMatrix_isHermitian
     (chartBasisVecFiber (I := I) x₀ j x)
     (chartBasisVecFiber (I := I) x₀ i x)
 
+set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_dotProduct_mulVec
     (g : SmoothRiemannianMetric I M) (x₀ : M) (x : M)
     (c : Fin (Module.finrank ℝ E) → ℝ) :
@@ -229,6 +239,7 @@ lemma chartGramMatrix_dotProduct_mulVec
   intro j _
   ring
 
+set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_posDef
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
@@ -248,12 +259,14 @@ lemma chartGramMatrix_posDef
     exact hc this
   exact g.pos x w hwnz
 
+set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_det_pos
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     0 < (chartGramMatrix g x₀ x).det :=
   (chartGramMatrix_posDef (I := I) g x₀ hx).det_pos
 
+set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -283,6 +296,7 @@ lemma chartGramMatrix_entry_contMDiffOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
   exact hpx.2
 
+set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_pair_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (ij : Fin (Module.finrank ℝ E) × Fin (Module.finrank ℝ E)) :
@@ -291,6 +305,7 @@ private lemma chartGramMatrix_pair_entry_contMDiffOn
       (trivializationAt E (TangentSpace I) x₀).baseSet :=
   chartGramMatrix_entry_contMDiffOn (I := I) g x₀ ij.1 ij.2
 
+set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_det_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContMDiffOn I 𝓘(ℝ) ∞

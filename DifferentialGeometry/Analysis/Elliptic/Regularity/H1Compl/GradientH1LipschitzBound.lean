@@ -8,7 +8,6 @@ import Mathlib.MeasureTheory.Integral.Bochner.Basic
 import Mathlib.MeasureTheory.Function.LpSpace.Basic
 import Mathlib.Analysis.Calculus.ContDiff.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -48,6 +47,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma chartPushedPartial_eq_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) {y : EuclN}
@@ -88,6 +88,7 @@ private lemma chartPushedPartial_eq_fderiv_chartSmoothExt
     rw [if_pos h_eq_z]
   rw [h_chartSmoothExt]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -102,6 +103,7 @@ private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt
   refine Filter.Eventually.of_forall (fun y hy => ?_)
   exact chartPushedPartial_eq_fderiv_chartSmoothExt (I := I) (M := M) g α j v hy
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt_volume
     (g : SmoothRiemannianMetric I M) (α : M) (j : Fin (Module.finrank ℝ E))
     (v : SmoothScalar g) :
@@ -115,6 +117,7 @@ private lemma chartPushedPartial_aeEq_fderiv_chartSmoothExt_volume
   refine Filter.Eventually.of_forall (fun y hy => ?_)
   exact chartPushedPartial_eq_fderiv_chartSmoothExt (I := I) (M := M) g α j v hy
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPulledWeightedMeasure_le_smul_volume_on_kPouCompact
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ M_d : ℝ, 0 ≤ M_d ∧
@@ -150,10 +153,12 @@ private noncomputable def chartPulledWeightedConst
     (g : SmoothRiemannianMetric I M) (α : M) : ℝ :=
   Real.sqrt (chartPulledWeightedMeasure_le_smul_volume_on_kPouCompact (I := I) (M := M) g α).choose
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma chartPulledWeightedConst_nonneg
     (g : SmoothRiemannianMetric I M) (α : M) :
     0 ≤ chartPulledWeightedConst (I := I) (M := M) g α := Real.sqrt_nonneg _
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ} (hf_supp : Function.support f ⊆ kPouCompact (I := I) (M := M) α) :
@@ -241,6 +246,7 @@ private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
     rw [← ENNReal.ofReal_rpow_of_nonneg hM_d_nn (by positivity)]
   rw [h_pow_eq, smul_eq_mul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lintegral_enorm_v_toFun_sq_eq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     ∫⁻ x, ‖v.toFun x‖ₑ ^ (2 : ℝ)
@@ -266,6 +272,7 @@ private lemma lintegral_enorm_v_toFun_sq_eq
     rw [← abs_mul, abs_mul_self]
   · exact (v.integrable_mul v).lintegral_lt_top.ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_v_toFun_le_norm
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     eLpNorm v.toFun 2 (riemannianVolumeMeasure (I := I) (M := M) g) ≤
@@ -299,6 +306,7 @@ private lemma eLpNorm_v_toFun_le_norm
   rw [show ‖v‖ = Real.sqrt (‖v‖^2) from (Real.sqrt_sq h_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sqrt_sq_le
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma lintegral_enorm_sqrt_grad_v_sq_eq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     ∫⁻ x, ‖Real.sqrt (g.inner x (gradFun (I := I) g v.toFun x) (gradFun (I := I) g v.toFun x))‖ₑ
@@ -350,6 +358,7 @@ private lemma lintegral_enorm_sqrt_grad_v_sq_eq
     rw [Real.mul_self_sqrt (h_inner_nn x)]
   · exact (v.integrable_inner_grad v).lintegral_lt_top.ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_sqrt_grad_v_le_norm
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     eLpNorm (fun x : M => Real.sqrt (g.inner x
@@ -394,6 +403,7 @@ private lemma eLpNorm_sqrt_grad_v_le_norm
   rw [show ‖v‖ = Real.sqrt (‖v‖^2) from (Real.sqrt_sq h_norm_nn).symm]
   exact Real.sqrt_le_sqrt h_sqrt_sq_le
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushedPartial_h1_lipschitz
     (g : SmoothRiemannianMetric I M) (α : M)
     (j : Fin (Module.finrank ℝ E)) :

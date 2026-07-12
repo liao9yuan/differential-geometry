@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Sobolev.Tensor.NormBasics
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -28,6 +27,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem tensorChartComp_eq_zero_of_notMem_finset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) {α : M}
@@ -45,6 +45,7 @@ theorem tensorChartComp_eq_zero_of_notMem_finset
     ring
   · exact tensorChartComp_apply_of_notMem (I := I) (M := M) g r s T α Idx Jdx hy
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNorm_chartTerm_eq_zero_of_notMem_finset
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) {α : M}
@@ -62,6 +63,7 @@ theorem wtwokTwoNorm_chartTerm_eq_zero_of_notMem_finset
   exact wkpNorm_zero_fun_zero (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem memWkp_tensorChartComp_of_notMem_finset
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) {α : M}
@@ -75,6 +77,7 @@ theorem memWkp_tensorChartComp_of_notMem_finset
   exact MemWkp_zero_fun (d := Module.finrank ℝ E) (by norm_num)
     (chartTargetEuclid_isOpen (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem MemWtwokTwo_iff_forall_finset
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -94,6 +97,7 @@ theorem MemWtwokTwo_iff_forall_finset
     · exact memWkp_tensorChartComp_of_notMem_finset
         (I := I) (M := M) g k T hα Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem MemWtwokTwo_of_forall_finset_memWkp
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s)
@@ -106,6 +110,7 @@ theorem MemWtwokTwo_of_forall_finset_memWkp
     MemWtwokTwo (I := I) (M := M) g k T :=
   (MemWtwokTwo_iff_forall_finset (I := I) (M := M) g k T).mpr hT
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 theorem MemWtwokTwo.memWkp_chartComp_finset
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -118,6 +123,7 @@ theorem MemWtwokTwo.memWkp_chartComp_finset
       (chartTargetEuclid (I := I) (M := M) α) :=
   hT α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem MemWtwokTwo.memWkp_chartComp
     {g : SmoothRiemannianMetric I M} {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -130,6 +136,7 @@ theorem MemWtwokTwo.memWkp_chartComp
       (chartTargetEuclid (I := I) (M := M) α) :=
   hT α Idx Jdx
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNorm_eq_finset_sum
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -155,6 +162,7 @@ def wtwokTwoChartTerm
         (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
         (chartTargetEuclid (I := I) (M := M) α)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma wtwokTwoChartTerm_def
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) (α : M) :
@@ -165,6 +173,7 @@ def wtwokTwoChartTerm
             (tensorChartComp (I := I) (M := M) g r s T α Idx Jdx)
             (chartTargetEuclid (I := I) (M := M) α) := rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem wtwokTwoChartTerm_lt_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -177,6 +186,7 @@ theorem wtwokTwoChartTerm_lt_top
   intro Jdx _
   exact wkpNorm_lt_top_of_memWkp (d := Module.finrank ℝ E) (hT α Idx Jdx)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 theorem wtwokTwoChartTerm_ne_top
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -184,6 +194,7 @@ theorem wtwokTwoChartTerm_ne_top
     wtwokTwoChartTerm (I := I) (M := M) g k T α ≠ ⊤ :=
   (wtwokTwoChartTerm_lt_top (I := I) (M := M) g hT α).ne
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNorm_eq_finset_sum_chartTerm
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -193,6 +204,7 @@ theorem wtwokTwoNorm_eq_finset_sum_chartTerm
   rw [wtwokTwoNorm_eq_finset_sum (I := I) (M := M) g k T]
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoChartTerm_le_wtwokTwoNorm
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) {α : M}
@@ -204,6 +216,7 @@ theorem wtwokTwoChartTerm_le_wtwokTwoNorm
     (f := fun α => wtwokTwoChartTerm (I := I) (M := M) g k T α)
     (fun α _ => zero_le _) hα
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wkpNorm_tensorChartComp_le_wtwokTwoNorm
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) {α : M}
@@ -228,6 +241,7 @@ theorem wkpNorm_tensorChartComp_le_wtwokTwoNorm
       (chartTargetEuclid (I := I) (M := M) α))
     (fun Jdx _ => zero_le _) (Finset.mem_univ Jdx)
 
+set_option linter.unusedSectionVars false in
 theorem tensorChartComp_reconstruct
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -239,6 +253,7 @@ theorem tensorChartComp_reconstruct
             tensorChartBasisElement (E := E) r s Idx Jdx :=
   tensorChartPushed_eq_sum_tensorChartComp (I := I) (M := M) g r s T α y
 
+set_option linter.unusedSectionVars false in
 theorem tensorChartPushed_eqOn_zero_of_tensorChartComp_eqOn_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -257,6 +272,7 @@ theorem tensorChartPushed_eqOn_zero_of_tensorChartComp_eqOn_zero
   intro Jdx _
   rw [h Idx Jdx hy, zero_smul]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNormReal_eq_finset_sum_toReal
     (g : SmoothRiemannianMetric I M) {r s : ℕ}
     (k : ℕ) (T : SmoothCcTensor g r s) :
@@ -266,6 +282,7 @@ theorem wtwokTwoNormReal_eq_finset_sum_toReal
   unfold wtwokTwoNormReal
   rw [wtwokTwoNorm_eq_finset_sum_chartTerm (I := I) (M := M) g k T]
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNormReal_le_finset_sum
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -278,6 +295,7 @@ theorem wtwokTwoNormReal_le_finset_sum
   intro α _
   exact wtwokTwoChartTerm_ne_top (I := I) (M := M) g hT α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNormReal_ge_finset_sum
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -290,6 +308,7 @@ theorem wtwokTwoNormReal_ge_finset_sum
   intro α _
   exact wtwokTwoChartTerm_ne_top (I := I) (M := M) g hT α
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNormReal_eq_finset_sum
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -301,6 +320,7 @@ theorem wtwokTwoNormReal_eq_finset_sum
     (wtwokTwoNormReal_le_finset_sum (I := I) (M := M) g hT)
     (wtwokTwoNormReal_ge_finset_sum (I := I) (M := M) g hT)
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoChartTerm_toReal_le_wtwokTwoNormReal
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}
@@ -314,6 +334,7 @@ theorem wtwokTwoChartTerm_toReal_le_wtwokTwoNormReal
     (wtwokTwoNorm_ne_top (I := I) (M := M) g hT) |>.mpr ?_
   exact wtwokTwoChartTerm_le_wtwokTwoNorm (I := I) (M := M) g k T hα
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem wtwokTwoNormReal_le_card_mul
     (g : SmoothRiemannianMetric I M) {r s : ℕ} {k : ℕ}
     {T : SmoothCcTensor g r s}

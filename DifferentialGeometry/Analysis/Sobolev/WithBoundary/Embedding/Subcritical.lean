@@ -3,7 +3,6 @@ import DifferentialGeometry.Analysis.Sobolev.WithBoundary.Chart.Defs
 import DifferentialGeometry.Analysis.Sobolev.Euclidean.SupportAndDomain.IteratedSobolevHalfSpace
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -98,6 +97,7 @@ variable {M : Type*} [TopologicalSpace M]
   [ChartedSpace (EuclideanHalfSpace n) M]
   [IsManifold (modelWithCornersEuclideanHalfSpace n) ∞ M]
 
+omit [IsManifold (𝓡∂ n) ∞ M] in
 theorem interiorHalfSpace_chartTargetEuclid_eq (α : M) :
     DifferentialGeometry.Analysis.Sobolev.Euclidean.interiorHalfSpace
         (chartTargetEuclid (n := n) (M := M) α) =

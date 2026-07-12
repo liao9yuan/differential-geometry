@@ -25,7 +25,6 @@ import Mathlib.Data.Fin.Tuple.NatAntidiagonal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerPairTraceRepresentationIdentity
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTowerPairTraceRepresentationDiagonalGridBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -224,6 +223,7 @@ lemma appCcRS_slotInsert_id_eq (g₀ : SmoothRiemannianMetric I M) (s c : ℕ)
     rw [fullRaisedEndoField_apply, gInvRaisedEndo_apply, inverseMetricSharpFib_g0FlatCLM]]
   rw [Function.update_eq_self]
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 1) ℝ E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -256,6 +256,7 @@ private lemma toModel_cons_sum_smul (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+omit [NeZero (Module.finrank ℝ E)] [TopologicalSpace M] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_cons_cons_sum_smul (_x : M) {n : ℕ}
     (Zm : Tensor0SModel (n + 2) ℝ E) (aa : E) (d : ℕ) (t : Fin d → ℝ)
     (u : Fin d → E) (rest : Fin n → E) :
@@ -290,6 +291,7 @@ private lemma toModel_cons_cons_sum_smul (_x : M) {n : ℕ}
   refine Finset.sum_congr rfl fun c _ => ?_
   rw [← h1 (u c)]
 
+set_option linter.unusedSectionVars false in
 private lemma orthoFrame_center_repr (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     v = ∑ i : Fin (Module.finrank ℝ E),
@@ -489,6 +491,7 @@ lemma appCcRS_add_left_local (g₀ : SmoothRiemannianMetric I M) (a b c : ℕ)
   rw [h]
   abel
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 lemma slotExtend_sub_cc (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (X Y : SmoothCcTensor g₀ r s) :
@@ -797,6 +800,7 @@ theorem riemannMixedCoeff_eq_pairTrace (g₀ g₁ : SmoothRiemannianMetric I M) 
     smoothOrthoFrame (I := I) g₀ x a x from rfl]
   ring
 
+set_option linter.unusedSectionVars false in
 lemma iteratedCovGrad_zero_of_covGrad_zero (g₀ : SmoothRiemannianMetric I M)
     (r s : ℕ) (Φ : SmoothCcTensor g₀ r s)
     (hΦ : covGrad (I := I) (M := M) g₀ r s Φ = 0) (m : ℕ) :

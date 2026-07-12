@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.Flow.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -18,6 +17,7 @@ section IccToIciIic
 
 variable {y : ℝ → E} {y' : E} {a b τ : ℝ}
 
+omit [CompleteSpace E] in
 lemma hasDerivWithinAt_Ici_of_Icc
     (h : HasDerivWithinAt y y' (Icc a b) τ) (hτ : τ ∈ Ico a b) :
     HasDerivWithinAt y y' (Ici τ) τ := by
@@ -27,6 +27,7 @@ lemma hasDerivWithinAt_Ici_of_Icc
   intro s hs
   refine ⟨hτ.1.trans hs.2, le_of_lt hs.1.2⟩
 
+omit [CompleteSpace E] in
 lemma hasDerivWithinAt_Iic_of_Icc
     (h : HasDerivWithinAt y y' (Icc a b) τ) (hτ : τ ∈ Ioc a b) :
     HasDerivWithinAt y y' (Iic τ) τ := by
@@ -114,6 +115,7 @@ section GronwallBound
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
+omit [CompleteSpace E] in
 theorem IsVariationalSolutionOn.norm_le_exp_of_mem_Icc
     {T M : ℝ} (hT : 0 ≤ T) (hM : 0 ≤ M)
     {δ : E} {y : ℝ → E}
@@ -241,6 +243,7 @@ section LinearMap
 
 variable {f : ℝ → E → E} {α : ℝ → E} {t₀ : ℝ}
 
+omit [CompleteSpace E] in
 theorem IsVariationalSolutionOn.unique_Icc
     {T : ℝ} (hT : 0 < T)
     (hA_cont : ContinuousOn (fun t => fderiv ℝ (f t) (α t)) (Icc (t₀ - T) (t₀ + T)))

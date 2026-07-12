@@ -8,7 +8,6 @@ import Mathlib.Analysis.SpecialFunctions.Integrability.Basic
 import Mathlib.MeasureTheory.Covering.DensityTheorem
 import Mathlib.MeasureTheory.Integral.Average
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -153,6 +152,7 @@ private theorem integral_norm_sub_rpow_ball_of_gt_neg_dim
     simp]
   exact integral_norm_rpow_ball_of_gt_neg_dim hα hR
 
+omit [NeZero d] in
 private lemma setIntegral_ball_translate {f : E → ℝ} {x₀ : E} {R : ℝ} :
     ∫ y in Metric.ball x₀ R, f y ∂volume =
       ∫ z in Metric.ball (0 : E) R, f (x₀ + z) ∂volume := by

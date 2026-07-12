@@ -15,7 +15,6 @@ import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidu
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsSharpGradientKoszul
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFieldsRicciFold
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -68,6 +67,7 @@ theorem bgRDiffRefoldRemainderField_self (g₀ : SmoothRiemannianMetric I M) :
     appCcRS_zero_left, ricciArmSharpGradKoszulResidualField_zero_weight,
     ricciArmRicciFoldRemainderField_zero_weight, smul_zero, add_zero, sub_zero]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma inner_ext_vec (g : SmoothRiemannianMetric I M) (x : M) {a b : TangentSpace I x}
     (h : ∀ z : TangentSpace I x, g.inner x a z = g.inner x b z) : a = b := by
   apply (metricFlatMap (I := I) g x).injective
@@ -86,6 +86,7 @@ private lemma toModel_slotSwapFib_pair (x : M) (D : Tensor0SBundle.Tensor0SSpace
   funext i
   fin_cases i <;> rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma unitModel_sub_loc (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (A - B) x =
@@ -94,6 +95,7 @@ lemma unitModel_sub_loc (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
     ContinuousLinearMap.sub_apply, Tensor0SBundle.Tensor0SSpace.toModel_sub]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_add_loc (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (A + B) x =
@@ -102,6 +104,7 @@ private lemma unitModel_add_loc (g : SmoothRiemannianMetric I M) (s : ℕ)
   rw [SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply,
     ContinuousLinearMap.add_apply, Tensor0SBundle.Tensor0SSpace.toModel_add]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma unitModel_smul_loc (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (A : SmoothCcTensor g 0 s) (x : M) :
     unitModel (I := I) (M := M) g s (c • A) x =
@@ -110,6 +113,7 @@ private lemma unitModel_smul_loc (g : SmoothRiemannianMetric I M) (s : ℕ) (c :
   rw [SmoothCcTensor.toSection_smul, ContMDiffSection.coe_smul, Pi.smul_apply,
     ContinuousLinearMap.smul_apply, Tensor0SBundle.Tensor0SSpace.toModel_smul]
 
+set_option linter.unusedSectionVars false in
 private theorem foldOrthoFrame_basis_at_center (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x),
       ∀ i, bse i = smoothOrthoFrame (I := I) g x i x := by
@@ -141,6 +145,7 @@ private theorem foldOrthoFrame_basis_at_center (g : SmoothRiemannianMetric I M) 
   exact ⟨basisOfLinearIndependentOfCardEqFinrank he_li hcard,
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
+set_option linter.unusedSectionVars false in
 private theorem foldOrthoFrame_expansion_at_center (g : SmoothRiemannianMetric I M)
     (x : M) (u : TangentSpace I x) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -172,6 +177,7 @@ private theorem foldOrthoFrame_expansion_at_center (g : SmoothRiemannianMetric I
       refine Finset.sum_congr rfl fun i _ => ?_
       rw [hcoeff i, hbse i]
 
+set_option linter.unusedSectionVars false in
 private lemma foldInvSharpKoszul_eq_connDiff (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     inverseMetricSharpFib (I := I) g₁ x
@@ -192,6 +198,7 @@ private lemma vec2_upd_one {F : Type*} (a b z : F) :
   funext k
   fin_cases k <;> simp [Function.update]
 
+set_option linter.unusedSectionVars false in
 private lemma foldTensor0sClmExtUnit {s : ℕ} {x : M}
     {φ ψ : Tensor0SBundle.Tensor0SSpace 0 I x →L[ℝ] Tensor0SBundle.Tensor0SSpace s I x}
     (h : φ (unitZeroSec (I := I) (M := M) x) = ψ (unitZeroSec (I := I) (M := M) x)) :
@@ -355,6 +362,7 @@ private lemma foldG2_pair_antisym (g₀ : SmoothRiemannianMetric I M)
       smoothCcTensorBilinForm (I := I) g₀ P x c (riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d) from
     hAPtoModel ![c, riemannOp (LeviCivita (I := I) g₀) x (X x) (Y x) d]]
 
+set_option linter.unusedSectionVars false in
 private lemma foldBilinSymm_eq_of_symm (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (hPsymm : ∀ (x : M) (v w : TangentSpace I x),
@@ -587,6 +595,7 @@ private lemma foldCore_pointwise (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [hinner, hc1, hc2]
   ring
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldToModel_slot2_neg (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I x)
     (p w : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel D ![(p : E), (-w : E)] =
@@ -671,6 +680,7 @@ private lemma foldMovingTraceRow (g₀ g₁ : SmoothRiemannianMetric I M)
     exact riemannOp_swap (cov := LeviCivita (I := I) g₀) x Ba u z
   rw [hswap2, foldToModel_slot2_neg (I := I) (M := M) x D Ba Rz]
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldQuadruplePatterns (x : M) (p q c d : TangentSpace I x) :
     ((fun i => (Fin.cons (p : E) (Fin.cons (q : E) ![(c : E), (d : E)]) : Fin 4 → E)
         ((Equiv.swap (0 : Fin 4) 2) i)) = ![(c : E), (q : E), (p : E), (d : E)]) ∧
@@ -798,6 +808,7 @@ private lemma foldKernelTerm_eval (g₀ g₁ : SmoothRiemannianMetric I M)
   rw [smul_eq_mul]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma foldDonorWeight_eq (g₀ : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g₀ 0 2) (x : M) (p q : TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 W x
@@ -890,12 +901,14 @@ private lemma foldSwapBgR_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     refine Finset.sum_congr rfl (fun c _ => ?_)
     exact toModel_slotSwapFib_pair (I := I) (M := M) x Wuv _ _
 
+set_option linter.unusedSectionVars false in
 private lemma unitModel_smul_apply_loc (g : SmoothRiemannianMetric I M) (s : ℕ) (c : ℝ)
     (A : SmoothCcTensor g 0 s) (x : M) (v : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g s (c • A) x v =
       c * unitModel (I := I) (M := M) g s A x v := by
   rw [unitModel_smul_loc, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
+set_option linter.unusedSectionVars false in
 private lemma unitModel_sub_apply_loc (g : SmoothRiemannianMetric I M) (s : ℕ)
     (A B : SmoothCcTensor g 0 s) (x : M) (v : Fin s → TangentSpace I x) :
     unitModel (I := I) (M := M) g s (A - B) x v =
@@ -1032,6 +1045,7 @@ private lemma foldRF_eval (g₀ g₁ : SmoothRiemannianMetric I M)
     rfl]
   rw [ricciFoldBiContrFib, ricciFoldBiContrFibFixedFrame_toModel]
 
+set_option linter.unusedSectionVars false in
 private lemma foldHtie_zero (g₀ : SmoothRiemannianMetric I M) :
     ∀ (y : M) (v w : TangentSpace I y),
       g₀.inner y v w = g₀.inner y v w +
@@ -1040,6 +1054,7 @@ private lemma foldHtie_zero (g₀ : SmoothRiemannianMetric I M) :
   rw [ccTensorBilinSymm_apply, ccTensorBilin_zero_weight, ccTensorBilin_zero_weight]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma foldPsymm_zero (g₀ : SmoothRiemannianMetric I M) :
     ∀ (x : M) (v w : TangentSpace I x),
       smoothCcTensorBilinForm (I := I) g₀ (0 : SmoothCcTensor g₀ 0 2) x v w =

@@ -5,7 +5,6 @@ import DifferentialGeometry.Geometry.Operator.NormGradSq
 
 set_option linter.unnecessarySimpa false
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -35,6 +34,7 @@ private noncomputable def coBchange
     Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   Matrix.of fun i k => (chartModelBasis E).repr (B i) k
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] private lemma coBchange_apply
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -46,6 +46,7 @@ private noncomputable def modelGramMatrix :
   Matrix.of fun k l =>
     g.inner x ((chartModelBasis E) k) ((chartModelBasis E) l)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] private lemma modelGramMatrix_apply
     (k l : Fin (Module.finrank ℝ E)) :
     modelGramMatrix (I := I) g x k l =
@@ -59,6 +60,7 @@ private lemma modelGramMatrix_eq_chartGramMatrix :
   rw [chartBasisVecFiber_self (I := I) x k]
   rw [chartBasisVecFiber_self (I := I) x l]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma decompose_in_modelBasis
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i : Fin (Module.finrank ℝ E)) :
@@ -69,6 +71,7 @@ private lemma decompose_in_modelBasis
   have h := (chartModelBasis E).sum_repr (B i)
   exact h.symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma bilin_expand_modelBasis
     (Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -128,6 +131,7 @@ private lemma bilin_expand_modelBasis
   intro l _
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma gram_expand_modelBasis
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -145,6 +149,7 @@ private lemma gram_expand_modelBasis
   intro l _
   rw [modelGramMatrix_apply]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma orthonormal_matrix_form
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -190,6 +195,7 @@ private lemma orthonormal_matrix_form
   intro k₀ _
   ring
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma orthonormal_matrix_inverse
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),

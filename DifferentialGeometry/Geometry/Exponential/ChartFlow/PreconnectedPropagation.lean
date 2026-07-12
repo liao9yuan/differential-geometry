@@ -1,6 +1,5 @@
 import DifferentialGeometry.Geometry.Exponential.ChartFlow.ChartFlowToTangentLift
 
-set_option linter.unusedSectionVars false
 
 
 noncomputable section
@@ -25,6 +24,7 @@ section MaximalGeodesicWitnessFromLift
 
 variable [I.Boundaryless] [CompleteSpace E]
 
+set_option linter.unusedSectionVars false in
 theorem exists_picardLift_witness_interval
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {g_v : ℝ → TangentBundle I M}
@@ -70,6 +70,7 @@ section ClopenPropagation
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem isMIntegralCurveOn_eq_of_isPreconnected
     (g : SmoothRiemannianMetric I M) (p : M)
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -187,6 +188,7 @@ section PicardLiftProjEqMaximalGeodesic
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem picardLift_proj_eq_maximalGeodesic_on_ball
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {g_v : ℝ → TangentBundle I M}
@@ -243,6 +245,7 @@ section ChartFlowOrbitLiftProjEqMaximalGeodesic
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem chartFlowOrbitLift_proj_eq_maximalGeodesic_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {Φ : (E × E) × ℝ → E × E}
@@ -283,6 +286,7 @@ section HeadlineRD2
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
+set_option linter.unusedSectionVars false in
 theorem exists_chartFlowOrbitLift_proj_eq_maximalGeodesic_data
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

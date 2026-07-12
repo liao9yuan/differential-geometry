@@ -8,7 +8,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.MetricConnDiffLower
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.DeTurckLieArm1CoeffField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieRealizedFamilyJointSmooth
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -347,6 +346,7 @@ theorem deTurckLieArm1Coeff_realizedFam_jointSmooth (g₀ : SmoothRiemannianMetr
         (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg) (δ := δ) (δ' := δ') :=
   deTurckLieArm1Coeff_realizedFam_jointContMDiff (I := I) g₀ T T' hδ hδ' g_bg
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTangent_add_local {S : Set ℝ}
     (A B : ∀ p : M × ℝ, TangentSpace I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, E)) ∞
@@ -376,6 +376,7 @@ private theorem jointTangent_add_local {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointTotalSpace0S_smulScalar_local {d : ℕ} {S : Set ℝ}
     (c : M × ℝ → ℝ)
     (hc : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ c ((Set.univ : Set M) ×ˢ S))
@@ -406,6 +407,7 @@ private theorem jointTotalSpace0S_smulScalar_local {d : ℕ} {S : Set ℝ}
       (c p₀) (A p₀)
 
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieEvalScalar_section_contMDiff
     (U : ContMDiffSection I (Tensor0SBundle.Tensor0SModel 0 ℝ E) ∞
       (fun x : M => Tensor0SBundle.Tensor0SSpace 0 I x)) :
@@ -419,6 +421,7 @@ private theorem dLieEvalScalar_section_contMDiff
   exact congrArg _ (Subsingleton.elim _ _)
 
 
+set_option linter.unusedSectionVars false in
 private theorem dLieEmbedRS_section_contMDiff {d : ℕ}
     (A : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hA : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -569,6 +572,7 @@ private def dLieTriEvalFn (V : Π b : M, Tensor0SBundle.Tensor0SSpace 3 I b)
   fun b => Tensor0SBundle.Tensor0SSpace.toModel (V b) (Fin.cons (A b) (Fin.cons (B b) ![C b]))
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma dLieTriMDiffAt_curried
     (s : ℕ) (W : Π x : M, Tensor0SBundle.Tensor0SSpace (s + 1) I x) {x : M}
     (hW : TensorSectionMDiffAt (I := I) (s + 1) W x)
@@ -590,6 +594,7 @@ private lemma dLieTriMDiffAt_curried
     (v := fun y : M => Y y) hCurried hY
 
 
+set_option linter.unusedSectionVars false in
 private theorem dLieNabla3_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SBundle.Tensor0SSpace 3 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 3 V x)
@@ -841,6 +846,7 @@ private theorem dLieDiagTrace_toModel (g₁ : SmoothRiemannianMetric I M) (p : �
     (vs := Fin.cons (smoothOrthoFrame (I := I) g₁ x e x) u)]
 
 
+omit [CompactSpace M] [I.Boundaryless] in
 private theorem dLieFrameExpand_update (g₁ : SmoothRiemannianMetric I M) (x : M)
     (L3 : Tensor0SBundle.Tensor0SSpace 3 I x)
     (base : Fin 3 → TangentSpace I x) (i : Fin 3) (w : TangentSpace I x) :
@@ -901,18 +907,21 @@ private def dLieXiPermB : Equiv.Perm (Fin 4) :=
   ⟨![1, 2, 3, 0], ![3, 0, 1, 2], by decide, by decide⟩
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieUpdateZero (x : M) (a b c u : TangentSpace I x) :
     Function.update (![a, b, c] : Fin 3 → TangentSpace I x) 0 u = ![u, b, c] := by
   funext j
   fin_cases j <;> simp [Function.update]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieUpdateOne (x : M) (a b c u : TangentSpace I x) :
     Function.update (![a, b, c] : Fin 3 → TangentSpace I x) 1 u = ![a, u, c] := by
   funext j
   fin_cases j <;> simp [Function.update]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieUpdateTwo (x : M) (a b c u : TangentSpace I x) :
     Function.update (![a, b, c] : Fin 3 → TangentSpace I x) 2 u = ![a, b, u] := by
   funext j
@@ -1711,6 +1720,7 @@ private theorem deTurckLieEndoDerivation_realizedFam_apply_jointContMDiffOn
   rw [deTurckLieDLbFib, ContinuousLinearMap.add_apply]
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieBiArgY (x : M) (u0 u1 u2 u3 : TangentSpace I x)
     (v : Fin 2 → TangentSpace I x) :
     ((fun i : Fin 6 =>
@@ -1720,6 +1730,7 @@ private theorem dLieBiArgY (x : M) (u0 u1 u2 u3 : TangentSpace I x)
   fin_cases j <;> rfl
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieBiArgXi (x : M) (u0 u1 u2 u3 : TangentSpace I x)
     (v : Fin 2 → TangentSpace I x) :
     ((fun i : Fin 6 =>
@@ -1729,6 +1740,7 @@ private theorem dLieBiArgXi (x : M) (u0 u1 u2 u3 : TangentSpace I x)
   fin_cases j <;> rfl
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieXiArgA (x : M) (a0 a1 a2 a3 : TangentSpace I x) :
     (fun i : Fin 4 => (![a0, a1, a2, a3] : Fin 4 → TangentSpace I x) (dLieXiPermA i)) =
       ![a0, a2, a3, a1] := by
@@ -1736,6 +1748,7 @@ private theorem dLieXiArgA (x : M) (a0 a1 a2 a3 : TangentSpace I x) :
   fin_cases j <;> rfl
 
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem dLieXiArgB (x : M) (a0 a1 a2 a3 : TangentSpace I x) :
     (fun i : Fin 4 => (![a0, a1, a2, a3] : Fin 4 → TangentSpace I x) (dLieXiPermB i)) =
       ![a1, a2, a3, a0] := by

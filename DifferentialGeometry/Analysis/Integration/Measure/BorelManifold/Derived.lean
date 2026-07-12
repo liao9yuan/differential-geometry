@@ -10,7 +10,6 @@ import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.AEStronglyMeasurable
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -106,6 +105,7 @@ theorem measurable_of_continuousOn_chart_source
     (hf_φ n).isOpen_inter_preimage (hopen_source n) hU
   exact MeasurableSet.inter hopen.measurableSet (hsmeas n)
 
+set_option linter.unusedSectionVars false in
 private lemma rs_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun x : M => TensorRSSpace r s I x) α).baseSet =
@@ -120,6 +120,7 @@ private lemma rs_baseSet_eq_chart_source' (α : M) (r s : ℕ) :
   rw [Set.inter_self]
   rfl
 
+set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_trivProj
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α : M) :
@@ -146,6 +147,7 @@ private lemma contMDiffOn_trivProj
   rw [hbase] at hrewrite
   exact hrewrite
 
+set_option linter.unusedSectionVars false in
 private lemma continuousOn_trivProj
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α : M) :
@@ -156,6 +158,7 @@ private lemma continuousOn_trivProj
       ((chartAt H α).source) :=
   (contMDiffOn_trivProj (I := I) (M := M) S α).continuousOn
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_continuousLinearMapAt_levelSet (α x : M)
     (hx : chartAt H x = chartAt H α) :
     (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ x =
@@ -175,6 +178,7 @@ private lemma tangent_continuousLinearMapAt_levelSet (α x : M)
   exact (tangentBundleCore I M).coordChange_self (achart H α) x
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact hx_src) v
 
+omit [Module.Finite ℝ E] in
 private lemma tangent_symmL_levelSet (α x : M)
     (hx : chartAt H x = chartAt H α) :
     (trivializationAt E (TangentSpace I) α).symmL ℝ x = (1 : E →L[ℝ] E) := by
@@ -193,6 +197,7 @@ private lemma tangent_symmL_levelSet (α x : M)
   exact (tangentBundleCore I M).coordChange_self (achart H α) x
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact hx_src) v
 
+set_option linter.unusedSectionVars false in
 private lemma tensor0S_continuousLinearMapAt_levelSet_apply
     (s : ℕ) (α x : M) (hx : chartAt H x = chartAt H α)
     (p : Tensor0SSpace s I x) :
@@ -225,6 +230,7 @@ private lemma tensor0S_continuousLinearMapAt_levelSet_apply
   change p (fun i => (1 : E →L[ℝ] E) (v i)) = p v
   congr
 
+set_option linter.unusedSectionVars false in
 private lemma tensor0S_symmL_levelSet_apply
     (s : ℕ) (α x : M) (hx : chartAt H x = chartAt H α)
     (p : Tensor0SModel s ℝ E) :
@@ -251,6 +257,7 @@ private lemma tensor0S_symmL_levelSet_apply
         (fun y : M => Tensor0SSpace s I y) α).symmL ℝ x p)
   exact hid.symm.trans hinv
 
+set_option linter.unusedSectionVars false in
 private lemma tensorRS_levelSet_identity
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α x : M)
@@ -272,6 +279,7 @@ private lemma tensorRS_levelSet_identity
     ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S.toSection x) v)]
   rfl
 
+set_option linter.unusedSectionVars false in
 theorem SmoothCcTensor.measurable_toFun
     [IsBorelChartedSpace H M] [Nonempty M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -373,6 +381,7 @@ theorem SmoothCcTensor.measurable_toFun
     (hg_n_cont n).isOpen_inter_preimage (chartAt H (xn n)).open_source hU
   exact MeasurableSet.inter hopen.measurableSet (hs'meas n)
 
+set_option linter.unusedSectionVars false in
 theorem SmoothCcTensor.stronglyMeasurable_toFun
     [IsBorelChartedSpace H M] [Nonempty M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -385,6 +394,7 @@ theorem SmoothCcTensor.stronglyMeasurable_toFun
   have hmeas := SmoothCcTensor.measurable_toFun (I := I) (M := M) S
   exact hmeas.stronglyMeasurable
 
+set_option linter.unusedSectionVars false in
 theorem SmoothCcTensor.aestronglyMeasurable_toFun
     [IsBorelChartedSpace H M] [Nonempty M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

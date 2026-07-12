@@ -18,7 +18,6 @@ import Mathlib.Analysis.Normed.Operator.NormedSpace
 import Mathlib.Analysis.Normed.Module.Multilinear.Curry
 import Mathlib.Geometry.Manifold.ContMDiff.NormedSpace
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -52,14 +51,17 @@ noncomputable def chartTrivializationLinearMap (α : M) (b : M) : E →L[ℝ] E 
 noncomputable def chartTrivializationLinearMapSymm (α : M) (b : M) : E →L[ℝ] E :=
   (trivializationAt E (TangentSpace I) α).symmL ℝ b
 
+omit [Module.Finite ℝ E] in
 lemma chartJinv_apply (α : M) (b : M) (v : E) :
     chartTrivializationLinearMapSymm (I := I) (M := M) α b v =
       (trivializationAt E (TangentSpace I) α).symmL ℝ b v := rfl
 
+omit [Module.Finite ℝ E] in
 lemma chartJ_apply (α : M) (b : M) (v : E) :
     chartTrivializationLinearMap (I := I) (M := M) α b v =
       (trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b v := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartJinv_basis (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
     chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i) =
@@ -67,6 +69,7 @@ private lemma chartJinv_basis (α : M) (b : M)
   unfold chartBasisVecFiber chartTrivializationLinearMapSymm
   rfl
 
+omit [Module.Finite ℝ E] in
 lemma chartJ_chartJinv (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : E) :
     chartTrivializationLinearMap (I := I) (M := M) α b
@@ -74,6 +77,7 @@ lemma chartJ_chartJinv (α : M) {b : M}
   unfold chartTrivializationLinearMap chartTrivializationLinearMapSymm
   exact (trivializationAt E (TangentSpace I) α).continuousLinearMapAt_symmL hb v
 
+omit [Module.Finite ℝ E] in
 lemma chartJinv_chartJ (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : TangentSpace I b) :
     chartTrivializationLinearMapSymm (I := I) (M := M) α b
@@ -81,12 +85,14 @@ lemma chartJinv_chartJ (α : M) {b : M}
   unfold chartTrivializationLinearMap chartTrivializationLinearMapSymm
   exact (trivializationAt E (TangentSpace I) α).symmL_continuousLinearMapAt hb v
 
+omit [Module.Finite ℝ E] in
 lemma chartJinv_chartJ_self (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (v : E) :
     chartTrivializationLinearMapSymm (I := I) (M := M) α b
         (chartTrivializationLinearMap (I := I) (M := M) α b v) = v :=
   chartJinv_chartJ (I := I) (M := M) α hb v
 
+set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_eq_innerJinv
     (g : SmoothRiemannianMetric I M) (α b : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -97,6 +103,7 @@ lemma chartGramMatrix_eq_innerJinv
   rw [chartGramMatrix_apply]
   rw [chartJinv_basis (I := I) (M := M), chartJinv_basis (I := I) (M := M)]
 
+omit [Module.Finite ℝ E] in
 private lemma curryLeft_sum {n : ℕ} {s : ℕ}
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ)
     (c : Fin n → ℝ) (v : Fin n → E) :
@@ -107,6 +114,7 @@ private lemma curryLeft_sum {n : ℕ} {s : ℕ}
   intro k _
   rw [map_smul]
 
+omit [Module.Finite ℝ E] in
 private lemma compContinuousLinearMap_curryLeft {s : ℕ}
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ)
     (L : E →L[ℝ] E) (w : E) :
@@ -125,6 +133,7 @@ private lemma compContinuousLinearMap_curryLeft {s : ℕ}
       simp
   rw [hcons_eq]
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_0s_sum_left
     (g : SmoothRiemannianMetric I M) (b : M) (s : ℕ) {n : ℕ}
     (c : Fin n → ℝ) (S : Fin n → Tensor0SModel s ℝ E)
@@ -148,6 +157,7 @@ private lemma tensorInnerPointwise_0s_sum_left
       rw [tensorInnerPointwise_0s_add_left, tensorInnerPointwise_0s_smul_left]
       rw [ih_app]
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_0s_sum_right
     (g : SmoothRiemannianMetric I M) (b : M) (s : ℕ) {n : ℕ}
     (S : Tensor0SModel s ℝ E)
@@ -181,6 +191,7 @@ private noncomputable def tensorInnerOnFrame :
         Ginv i j *
           tensorInnerOnFrame s f Ginv (T.curryLeft (f i)) (S.curryLeft (f j))
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerOnFrame_zero
     (f : Fin (Module.finrank ℝ E) → E)
     (Ginv : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ)
@@ -188,6 +199,7 @@ private lemma tensorInnerOnFrame_zero
     tensorInnerOnFrame (E := E) 0 f Ginv T S =
       T (fun i => Fin.elim0 i) * S (fun i => Fin.elim0 i) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerOnFrame_succ (s : ℕ)
     (f : Fin (Module.finrank ℝ E) → E)
     (Ginv : Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ)
@@ -197,6 +209,7 @@ private lemma tensorInnerOnFrame_succ (s : ℕ)
         Ginv i j *
           tensorInnerOnFrame (E := E) s f Ginv (T.curryLeft (f i)) (S.curryLeft (f j)) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_0s_eq_tensorInnerOnFrame
     (g : SmoothRiemannianMetric I M) (b : M) :
     ∀ (s : ℕ) (T S : Tensor0SModel s ℝ E),
@@ -217,6 +230,7 @@ private lemma tensorInnerPointwise_0s_eq_tensorInnerOnFrame
       rw [ih (T.curryLeft ((chartModelBasis E) i))
           (S.curryLeft ((chartModelBasis E) j))]
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerPointwise_0s_eq_tensorInnerOnFrame
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     ∀ (s : ℕ) (T S : Tensor0SModel s ℝ E),
@@ -250,12 +264,14 @@ private noncomputable def chartTensorInnerOnChartBasis :
             (T.curryLeft (chartBasisVecFiber (I := I) α i b))
             (S.curryLeft (chartBasisVecFiber (I := I) α j b))
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerOnChartBasis_zero
     (g : SmoothRiemannianMetric I M) (α b : M)
     (T S : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
     chartTensorInnerOnChartBasis (I := I) (M := M) 0 g α b T S =
       T (fun i => Fin.elim0 i) * S (fun i => Fin.elim0 i) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerOnChartBasis_succ
     (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
     (T S : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ) :
@@ -266,6 +282,7 @@ private lemma chartTensorInnerOnChartBasis_succ
             (T.curryLeft (chartBasisVecFiber (I := I) α i b))
             (S.curryLeft (chartBasisVecFiber (I := I) α j b)) := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartJinv_compose_curry_chartBasis {s : ℕ} (α : M) (b : M)
     (T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ)
     (i : Fin (Module.finrank ℝ E)) :
@@ -276,6 +293,7 @@ private lemma chartJinv_compose_curry_chartBasis {s : ℕ} (α : M) (b : M)
   rw [compContinuousLinearMap_curryLeft]
   rw [chartJinv_basis (I := I) (M := M)]
 
+set_option linter.unusedSectionVars false in
 private theorem chartTensorInnerOnChartBasis_eq_chartTensorInnerPointwise_compose
     (g : SmoothRiemannianMetric I M) (α : M) (b : M) :
     ∀ (s : ℕ) (T S : Tensor0SModel s ℝ E),
@@ -314,12 +332,14 @@ private noncomputable def chartTrivializationMatrixInv (α : M) (b : M) :
     ((chartModelBasis E).repr
       (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i))) a
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma chartJinvMatrix_apply (α : M) (b : M)
     (a i : Fin (Module.finrank ℝ E)) :
     chartTrivializationMatrixInv (I := I) (M := M) α b a i =
       ((chartModelBasis E).repr
         (chartTrivializationLinearMapSymm (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartBasisVecFiber_eq_sum (α : M) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
     chartBasisVecFiber (I := I) α i b =
@@ -335,12 +355,14 @@ private noncomputable def chartTrivializationMatrix (α : M) (b : M) :
     ((chartModelBasis E).repr
       (chartTrivializationLinearMap (I := I) (M := M) α b ((chartModelBasis E) i))) a
 
+set_option linter.unusedSectionVars false in
 @[simp] private lemma chartJMatrix_apply (α : M) (b : M)
     (a i : Fin (Module.finrank ℝ E)) :
     chartTrivializationMatrix (I := I) (M := M) α b a i =
       ((chartModelBasis E).repr
         (chartTrivializationLinearMap (I := I) (M := M) α b ((chartModelBasis E) i))) a := rfl
 
+set_option linter.unusedSectionVars false in
 private lemma chartJ_apply_repr (α : M) (b : M) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
     ((chartModelBasis E).repr (chartTrivializationLinearMap (I := I) (M := M) α b v)) a =
@@ -360,6 +382,7 @@ private lemma chartJ_apply_repr (α : M) (b : M) (v : E)
   rw [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, chartJMatrix_apply]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma chartJinv_apply_repr (α : M) (b : M) (v : E)
     (a : Fin (Module.finrank ℝ E)) :
     ((chartModelBasis E).repr (chartTrivializationLinearMapSymm (I := I) (M := M) α b v)) a =
@@ -378,6 +401,7 @@ private lemma chartJinv_apply_repr (α : M) (b : M) (v : E)
   rw [Finsupp.coe_smul, Pi.smul_apply, smul_eq_mul, chartJinvMatrix_apply]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_eq_matrix_form
     (g : SmoothRiemannianMetric I M) (α b : M) :
     chartGramMatrix g α b =
@@ -471,6 +495,7 @@ private lemma chartGramMatrix_eq_matrix_form
     intro a _
     rw [Matrix.transpose_apply]
 
+set_option linter.unusedSectionVars false in
 private lemma chartJinvMatrix_mul_chartJMatrix (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     chartTrivializationMatrixInv (I := I) (M := M) α b *
@@ -497,6 +522,7 @@ private lemma chartJinvMatrix_mul_chartJMatrix (α : M) {b : M}
     have : ¬ a = c := fun h => hac h.symm
     rw [if_neg this]
 
+set_option linter.unusedSectionVars false in
 private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     chartTrivializationMatrix (I := I) (M := M) α b *
@@ -523,6 +549,7 @@ private lemma chartJMatrix_mul_chartJinvMatrix (α : M) {b : M}
     have : ¬ a = c := fun h => hac h.symm
     rw [if_neg this]
 
+set_option linter.unusedSectionVars false in
 private lemma chartJinvMatrix_inv (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     (chartTrivializationMatrixInv (I := I) (M := M) α b)⁻¹ =
@@ -530,12 +557,14 @@ private lemma chartJinvMatrix_inv (α : M) {b : M}
   apply Matrix.inv_eq_left_inv
   exact chartJMatrix_mul_chartJinvMatrix (I := I) (M := M) α hb
 
+set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_isUnit_det
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     IsUnit (chartGramMatrix g α b).det :=
   (chartGramMatrix_det_pos (I := I) g α hb).ne'.isUnit
 
+set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_isUnit
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -543,6 +572,7 @@ private lemma chartGramMatrix_isUnit
   (Matrix.isUnit_iff_isUnit_det _).mpr
     (chartGramMatrix_isUnit_det (I := I) (M := M) g α hb)
 
+set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_inv_mul_self_at
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -552,6 +582,7 @@ private lemma chartGramMatrix_inv_mul_self_at
     ((Matrix.isUnit_iff_isUnit_det _).mp
       (chartGramMatrix_isUnit (I := I) (M := M) g α hb))
 
+set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_self_mul_inv_at
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -561,6 +592,7 @@ private lemma chartGramMatrix_self_mul_inv_at
     ((Matrix.isUnit_iff_isUnit_det _).mp
       (chartGramMatrix_isUnit (I := I) (M := M) g α hb))
 
+set_option linter.unusedSectionVars false in
 private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -641,6 +673,7 @@ private lemma chartJinv_chartGramInv_chartJinvT_eq_gramInv_entry
     exact (Matrix.inv_eq_left_inv hrhs).symm
   rw [hMain]
 
+set_option linter.unusedSectionVars false in
 private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ) {b : M},
@@ -894,6 +927,7 @@ private theorem tensorInnerPointwise_0s_eq_chartTensorInnerOnChartBasis
       symm
       exact step8
 
+set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_bridge_identity
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ) {b : M},

@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Elliptic.Regularity.Hessian.PairingLapDom
 import DifferentialGeometry.Analysis.Elliptic.Regularity.GradInner.Laplacian.LpIdentity
 import DifferentialGeometry.Analysis.Elliptic.Regularity.Iterated.Defs
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -40,6 +39,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma h1ComplToLp_smoothToH1Compl_coeFn_aeEq_smooth
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :
     ((H1ComplToLp (I := I) (M := M) g
@@ -54,6 +54,7 @@ private lemma h1ComplToLp_smoothToH1Compl_coeFn_aeEq_smooth
       =ᵐ[riemannianVolumeMeasure (I := I) (M := M) g] v.toFun
   exact MemLp.coeFn_toLp v.memLp_two
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma h1ComplToLp_smoothToH1Compl_measurable
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) :
     Measurable
@@ -62,11 +63,13 @@ private lemma h1ComplToLp_smoothToH1Compl_measurable
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) : M → ℝ) :=
   (Lp.stronglyMeasurable _).measurable
 
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smoothScalar_toFun_measurable
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     Measurable (v.toFun : M → ℝ) :=
   v.smooth.continuous.measurable
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartPushed_smoothToH1Compl_coeFn_aeEq_chartPushed_v
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     chartPushed (I := I) (M := M) (chartAtlasPOU I M) α
@@ -90,6 +93,7 @@ theorem chartPushed_smoothToH1Compl_coeFn_aeEq_chartPushed_v
   exact chartPushed_aeEq_of_ae_eq_riemannianMeasure
     (I := I) (M := M) g α h_meas_u h_meas_v h_ae
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainHessianChart_smooth_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) (i j : Fin (Module.finrank ℝ E)) :
@@ -121,7 +125,7 @@ noncomputable def chartPushedEuclidHessian
       (chartTargetEuclid (I := I) (M := M) α))
     (chartTargetEuclid (I := I) (M := M) α) y
 
-omit [NeZero (Module.finrank ℝ E)] in
+set_option linter.unusedSectionVars false in
 @[simp] lemma chartPushedEuclidHessian_def
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -134,6 +138,7 @@ omit [NeZero (Module.finrank ℝ E)] in
           (chartTargetEuclid (I := I) (M := M) α))
         (chartTargetEuclid (I := I) (M := M) α) y := rfl
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem laplacianDomainHessianChart_eq_chartPushedEuclidHessian_aeEq
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) (i j : Fin (Module.finrank ℝ E)) :
@@ -156,7 +161,7 @@ noncomputable def smoothEuclidHessianPairingChart
             chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
             chartPushedEuclidHessian (I := I) (M := M) (g := g) α v k l y
 
-omit [NeZero (Module.finrank ℝ E)] in
+set_option linter.unusedSectionVars false in
 @[simp] lemma smoothEuclidHessianPairingChart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -226,7 +231,7 @@ noncomputable def hessPairingSmoothOnEuclid
     (smoothScalarToContMDiffMap (I := I) (g := g) v)
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-omit [NeZero (Module.finrank ℝ E)] in
+set_option linter.unusedSectionVars false in
 @[simp] lemma hessPairingSmoothOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -285,6 +290,7 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_chart_global
   hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_globalHypothesis
     (I := I) (M := M) g φ v h_chart_global
 
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hessPairingMOnLapDom_eq_hessPairingChart_of_per_chart
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (h_per_chart : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M), ∀ x : M,
@@ -338,6 +344,7 @@ theorem hessPairingLpOnLapDom_eq_hessPairingSmoothLp_of_per_chart_pointwise
   exact hessPairingMOnLapDom_eq_hessPairingChart_of_per_chart
     (I := I) (M := M) g φ v h_per_chart x
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma hessPairingMOnLapDom_eq_pointwise_at
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M)

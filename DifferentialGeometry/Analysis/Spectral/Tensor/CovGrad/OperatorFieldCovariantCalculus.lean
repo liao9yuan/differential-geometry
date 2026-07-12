@@ -1,6 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldEvaluationLeibniz
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -33,6 +32,7 @@ set_option synthInstance.maxHeartbeats 1600000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_comp_clm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (φ : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) :
@@ -69,6 +69,7 @@ def appCcFib (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 theorem appCcFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 0 s ℝ E)) ∞
@@ -107,6 +108,7 @@ def operatorFieldApply (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma appCc_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (W : SmoothCcTensor g 0 r) (x : M) :
     (operatorFieldApply (I := I) (M := M) g r s Φ W).toSection x =
@@ -133,6 +135,7 @@ def slotExtendPointwise (_g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 @[simp] lemma slotExtendFib_apply (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) (D : Tensor0SSpace (r + 1) I x) :
     slotExtendPointwise (I := I) (M := M) g r s x A D =
@@ -143,6 +146,7 @@ set_option backward.isDefEq.respectTransparency false in
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 lemma slotExtendFib_apply_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) (D : Tensor0SSpace (r + 1) I x)
     (v0 : E) (vs : Fin s → E) :
@@ -160,6 +164,7 @@ lemma slotExtendFib_apply_eval (g : SmoothRiemannianMetric I M) (r s : ℕ) (x :
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem contMDiff_uncurriedSection_of_contMDiff_homSection {n : ℕ}
     (G : ∀ b : M, TangentSpace I b →L[ℝ] Tensor0SSpace n I b)
     (hG : ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] Tensor0SModel n ℝ E)) ∞
@@ -209,6 +214,7 @@ theorem contMDiff_uncurriedSection_of_contMDiff_homSection {n : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] [CompleteSpace E] in
 theorem slotExtendFib_contMDiff (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel (r + 1) (s + 1) ℝ E)) ∞
@@ -285,6 +291,7 @@ def slotExtend (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma slotExtend_toSection (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : SmoothCcTensor g r s) (x : M) :
     (slotExtend (I := I) (M := M) g r s Φ).toSection x =
@@ -445,6 +452,7 @@ theorem tensorCovDerivAt_appCc_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [BoundarylessManifold I M] [CompleteSpace E] in
 theorem tensor0S_curry_covGrad_appCc_eq (g : SmoothRiemannianMetric I M) (r : ℕ)
     (W : SmoothCcTensor g 0 r) (x : M) (d : Tensor0SSpace 0 I x) (v0 : E) :
     (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x)

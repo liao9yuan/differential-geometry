@@ -8,7 +8,6 @@ import Mathlib.MeasureTheory.Function.L1Space.Integrable
 import Mathlib.Geometry.Manifold.Metrizable
 import Mathlib.Geometry.Manifold.VectorBundle.Basic
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -77,10 +76,12 @@ noncomputable instance instInnerProductSpace :
   InnerProductSpace.ofCore _
 
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem SmoothCcTensor.inner_def (S T : SmoothCcTensor g r s) :
     ⟪S, T⟫_ℝ = tensorL2Inner (I := I) (M := M) g r s S.toFun T.toFun := rfl
 
 
+set_option linter.unusedSectionVars false in
 theorem SmoothCcTensor.norm_def (S : SmoothCcTensor g r s) :
     ‖S‖ = tensorL2Norm (I := I) (M := M) g r s S.toFun := rfl
 

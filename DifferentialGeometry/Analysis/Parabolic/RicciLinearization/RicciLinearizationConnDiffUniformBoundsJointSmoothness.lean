@@ -9,7 +9,6 @@ import DifferentialGeometry.Geometry.Connection.MetricCompatibility.TensorLoweri
 import DifferentialGeometry.Geometry.Metric.MetricBounds
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciLinearizationConnDiffUniformBoundsSlotPermutations
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -49,6 +48,7 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 section JointSmoothness
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointField_add {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -81,6 +81,7 @@ private theorem jointField_add {d : ℕ} {S : Set ℝ}
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_add
       (A p₀) (B p₀)).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointField_sub {d : ℕ} {S : Set ℝ}
     (A B : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -113,6 +114,7 @@ private theorem jointField_sub {d : ℕ} {S : Set ℝ}
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
       (A p₀) (B p₀)).symm
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem jointField_smul {d : ℕ} {S : Set ℝ} (a : ℝ)
     (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -140,6 +142,7 @@ private theorem jointField_smul {d : ℕ} {S : Set ℝ} (a : ℝ)
   · exact ((e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       a (A p₀)).symm
 
+set_option linter.unusedSectionVars false in
 private theorem jointField_neg {d : ℕ} {S : Set ℝ}
     (A : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -155,6 +158,7 @@ private theorem jointField_neg {d : ℕ} {S : Set ℝ}
     (E := fun z : M => Tensor0SBundle.Tensor0SSpace d I z) p.1 t) ?_
   rw [neg_one_smul]
 
+set_option linter.unusedSectionVars false in
 private theorem slotPermField_jointContMDiffOn {d : ℕ} (ρ : Equiv.Perm (Fin d)) {S : Set ℝ}
     (Z : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace d I p.1)
     (hZ : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -174,6 +178,7 @@ private theorem slotPermField_jointContMDiffOn {d : ℕ} (ρ : Equiv.Perm (Fin d
 
 set_option backward.isDefEq.respectTransparency false in
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem tensorProdField_jointContMDiffOn (m k : ℕ) {S : Set ℝ}
     (P : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace m I p.1)
     (Q : ∀ p : M × ℝ, Tensor0SBundle.Tensor0SSpace k I p.1)

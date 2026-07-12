@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Iterated.EigenvectorIteratedData
 import DifferentialGeometry.Analysis.Spectral.Tensor.NormEstimates.TensorChartComponentSobolevBound
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -34,11 +33,13 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTargetEuclid_eq (α : M) :
     (chartTargetEuclid (I := I) (M := M) α : Set EuclN) =
       DifferentialGeometry.Analysis.Laplacian.MetricExtension.chartTargetEuclid
         (I := I) (M := M) α := rfl
 
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma chartPouKernel_eq_empty_of_pou_zero {α : M}
     (h_zero : ∀ x : M,
       ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x = 0) :
@@ -59,6 +60,7 @@ private lemma chartPouKernel_eq_empty_of_pou_zero {α : M}
   rw [h_tsupp_empty]
   rw [Set.image_empty, Set.image_empty]
 
+set_option linter.unusedSectionVars false in
 private lemma chartPouKernel_eq_empty_of_notMem_activeFinset
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M) :
     chartPouKernel (I := I) (M := M) α = (∅ : Set EuclN) :=

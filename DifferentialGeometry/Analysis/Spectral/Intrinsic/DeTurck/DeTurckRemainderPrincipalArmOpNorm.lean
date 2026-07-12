@@ -23,7 +23,6 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainder
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmOpNormArmFieldPathIntegralJetL2
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmOpNormConnLapIterateJetLadder
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -1173,6 +1172,7 @@ theorem exists_deTurckPrincipalCometricCoeff_realize_coeffJetEnvelope_le
           rw [← Finset.sum_mul]
           ring
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -1186,6 +1186,7 @@ private theorem pje_icg_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih,
       DifferentialGeometry.Analysis.Parabolic.TensorSpectral.covGrad_smul]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3755,6 +3756,7 @@ theorem exists_smoothCcToTensorHs_coeffAction_fibreSmallCoeff_opNorm_le
       rw [hnormL, hnorm2, hnorm1]
       exact hb
 
+set_option linter.unusedSectionVars false in
 private lemma gFibreOpBound_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMetric I M)
     {δ : ℝ}
     (h : ∀ x : M, TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
@@ -3776,6 +3778,7 @@ private lemma gFibreOpBound_delta_nonneg [Nonempty M] (g₀ : SmoothRiemannianMe
   exact le_trans (abs_nonneg _) hb
 
 
+set_option linter.unusedSectionVars false in
 private lemma riemannianFiberNormSq_le_of_ccTensorBilinSymm_gFibreOpBound [Nonempty M]
     (g₀ : SmoothRiemannianMetric I M) {δ : ℝ}
     (T₀ : SmoothCcTensor g₀ 0 2)

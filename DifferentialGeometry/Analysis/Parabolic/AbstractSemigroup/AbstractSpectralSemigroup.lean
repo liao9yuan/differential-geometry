@@ -2,7 +2,6 @@ import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.Semigroup.BoundedC0Se
 import Mathlib.Analysis.InnerProductSpace.l2Space
 import Mathlib.Analysis.SpecialFunctions.Exp
 
-set_option linter.unusedSectionVars false
 
 noncomputable section
 
@@ -66,6 +65,7 @@ lemma summable_basis_coeff_sq' (b : HilbertBasis ι ℝ X) (v : X) :
     funext i; rw [Real.norm_eq_abs, sq_abs]
   rwa [h_eq] at h
 
+omit [CompleteSpace X] in
 private lemma parseval_norm_sq (b : HilbertBasis ι ℝ X) (v : X) :
     ‖v‖ ^ 2 = ∑' i : ι, (⟪b i, v⟫_ℝ) ^ 2 := by
   have h_par := b.tsum_inner_mul_inner v v
