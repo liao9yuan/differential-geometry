@@ -182,7 +182,7 @@ lemma cutoffCovNormSumFun_measurable
     Measurable (cutoffCovNormSumFun (I := I) (M := M) g r s S α) :=
   (cutoffCovNormSumFun_continuous (I := I) (M := M) g r s S α).measurable
 
-omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma chartBasePoint_mem_goodSet'
     (α : M) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :

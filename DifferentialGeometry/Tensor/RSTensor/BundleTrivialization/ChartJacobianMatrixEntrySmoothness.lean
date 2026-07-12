@@ -84,122 +84,99 @@ private lemma coordChangeL_apply_eq_clmAt_symmL
       Bundle.Trivialization.coe_linearMapAt_of_mem _ hbβ',
       Bundle.Trivialization.symmL_apply]
 
-private noncomputable def basisCoordCLM (j : Fin (Module.finrank ℝ E)) : E →L[ℝ] ℝ :=
-  ((Module.finBasis ℝ E).coord j).toContinuousLinearMap
-
-set_option linter.unusedSectionVars false in
-@[simp] private lemma basisCoordCLM_apply (j : Fin (Module.finrank ℝ E)) (v : E) :
-    basisCoordCLM (E := E) j v = (Module.finBasis ℝ E).coord j v := rfl
-
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 theorem tangentCoordChangeL_entry_contMDiffOn
-    (α β : M) (i j : Fin (Module.finrank ℝ E)) :
+    (α β : M) (φ : E →L[ℝ] ℝ) (w : E) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun b : M => (Module.finBasis ℝ E).coord j
+      (fun b : M => φ
         ((trivializationAt E (TangentSpace I) β).continuousLinearMapAt ℝ b
-          ((trivializationAt E (TangentSpace I) α).symmL ℝ b
-            ((Module.finBasis ℝ E) i))))
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ b w)))
       ((chartAt H α).source ∩ (chartAt H β).source) := by
-
   have hcoord := contMDiffOn_coordChangeL_tangent (I := I) α β
   have hcoord_app : ContMDiffOn I 𝓘(ℝ, E) ∞
       (fun b : M => ((trivializationAt E (TangentSpace I) α).coordChangeL ℝ
-        (trivializationAt E (TangentSpace I) β) b : E →L[ℝ] E)
-          ((Module.finBasis ℝ E) i))
+        (trivializationAt E (TangentSpace I) β) b : E →L[ℝ] E) w)
       ((chartAt H α).source ∩ (chartAt H β).source) :=
     hcoord.clm_apply contMDiffOn_const
-  have hcoordj : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, ℝ) ∞ (basisCoordCLM (E := E) j) :=
-    (basisCoordCLM (E := E) j).contMDiff
+  have hcoordj : ContMDiff 𝓘(ℝ, E) 𝓘(ℝ, ℝ) ∞ φ := φ.contMDiff
   have hwrapped : ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun b : M => (basisCoordCLM (E := E) j)
+      (fun b : M => φ
         (((trivializationAt E (TangentSpace I) α).coordChangeL ℝ
-          (trivializationAt E (TangentSpace I) β) b : E →L[ℝ] E)
-            ((Module.finBasis ℝ E) i)))
+          (trivializationAt E (TangentSpace I) β) b : E →L[ℝ] E) w))
       ((chartAt H α).source ∩ (chartAt H β).source) := by
     intro b hb
     exact (hcoordj _).contMDiffWithinAt.comp _ (hcoord_app _ hb) (mapsTo_univ _ _)
   refine hwrapped.congr ?_
   intro b ⟨hbα, hbβ⟩
-  rw [basisCoordCLM_apply]
-  exact (congrArg ((Module.finBasis ℝ E).coord j)
-    (coordChangeL_apply_eq_clmAt_symmL (I := I) α β hbα hbβ
-      ((Module.finBasis ℝ E) i))).symm
+  exact (congrArg φ
+    (coordChangeL_apply_eq_clmAt_symmL (I := I) α β hbα hbβ w)).symm
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 theorem tangentCoordChangeL_entry_contMDiffOn_swap
-    (α β : M) (i j : Fin (Module.finrank ℝ E)) :
+    (α β : M) (φ : E →L[ℝ] ℝ) (w : E) :
     ContMDiffOn I 𝓘(ℝ, ℝ) ∞
-      (fun b : M => (Module.finBasis ℝ E).coord j
+      (fun b : M => φ
         ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
-          ((trivializationAt E (TangentSpace I) β).symmL ℝ b
-            ((Module.finBasis ℝ E) i))))
+          ((trivializationAt E (TangentSpace I) β).symmL ℝ b w)))
       ((chartAt H α).source ∩ (chartAt H β).source) := by
-
-  have h := tangentCoordChangeL_entry_contMDiffOn (I := I) β α i j
-
+  have h := tangentCoordChangeL_entry_contMDiffOn (I := I) β α φ w
   rw [Set.inter_comm] at h
   exact h
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 theorem tangentCoordChangeL_entry_contMDiffAt
-    (α : M) (i j : Fin (Module.finrank ℝ E))
+    (α : M) (φ : E →L[ℝ] ℝ) (w : E)
     {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
-      (fun b : M => (Module.finBasis ℝ E).coord j
+      (fun b : M => φ
         ((trivializationAt E (TangentSpace I) b₀).continuousLinearMapAt ℝ b
-          ((trivializationAt E (TangentSpace I) α).symmL ℝ b
-            ((Module.finBasis ℝ E) i))))
+          ((trivializationAt E (TangentSpace I) α).symmL ℝ b w)))
       b₀ := by
-  have hwrapped := tangentCoordChangeL_entry_contMDiffOn (I := I) α b₀ i j
+  have hwrapped := tangentCoordChangeL_entry_contMDiffOn (I := I) α b₀ φ w
   have hOpen : IsOpen ((chartAt H α).source ∩ (chartAt H b₀).source) :=
     (chartAt H α).open_source.inter (chartAt H b₀).open_source
   have hb₀mem : b₀ ∈ (chartAt H α).source ∩ (chartAt H b₀).source :=
     ⟨hb₀, mem_chart_source H b₀⟩
   exact (hwrapped _ hb₀mem).contMDiffAt (hOpen.mem_nhds hb₀mem)
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 theorem tangentCoordChangeL_entry_eq_symmL_entry_self
-    (α : M) (i j : Fin (Module.finrank ℝ E))
+    (α : M) (φ : E →L[ℝ] ℝ) (w : E)
     {b₀ : M} (_hb₀ : b₀ ∈ (chartAt H α).source) :
-    (Module.finBasis ℝ E).coord j
+    φ
       ((trivializationAt E (TangentSpace I) b₀).continuousLinearMapAt ℝ b₀
-        ((trivializationAt E (TangentSpace I) α).symmL ℝ b₀
-          ((Module.finBasis ℝ E) i))) =
-    (Module.finBasis ℝ E).coord j
-      ((trivializationAt E (TangentSpace I) α).symmL ℝ b₀
-        ((Module.finBasis ℝ E) i)) := by
+        ((trivializationAt E (TangentSpace I) α).symmL ℝ b₀ w)) =
+    φ
+      ((trivializationAt E (TangentSpace I) α).symmL ℝ b₀ w) := by
   have h := tangent_clmAt_self_eq_one (I := I) b₀
   rw [h]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 theorem tangentCoordChangeL_entry_contMDiffAt_swap
-    (α : M) (i j : Fin (Module.finrank ℝ E))
+    (α : M) (φ : E →L[ℝ] ℝ) (w : E)
     {b₀ : M} (hb₀ : b₀ ∈ (chartAt H α).source) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
-      (fun b : M => (Module.finBasis ℝ E).coord j
+      (fun b : M => φ
         ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b
-          ((trivializationAt E (TangentSpace I) b₀).symmL ℝ b
-            ((Module.finBasis ℝ E) i))))
+          ((trivializationAt E (TangentSpace I) b₀).symmL ℝ b w)))
       b₀ := by
-  have hwrapped := tangentCoordChangeL_entry_contMDiffOn_swap (I := I) α b₀ i j
+  have hwrapped := tangentCoordChangeL_entry_contMDiffOn_swap (I := I) α b₀ φ w
   have hOpen : IsOpen ((chartAt H α).source ∩ (chartAt H b₀).source) :=
     (chartAt H α).open_source.inter (chartAt H b₀).open_source
   have hb₀mem : b₀ ∈ (chartAt H α).source ∩ (chartAt H b₀).source :=
     ⟨hb₀, mem_chart_source H b₀⟩
   exact (hwrapped _ hb₀mem).contMDiffAt (hOpen.mem_nhds hb₀mem)
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] in
 theorem tangentCoordChangeL_entry_eq_continuousLinearMapAt_entry_self
-    (α : M) (i j : Fin (Module.finrank ℝ E))
+    (α : M) (φ : E →L[ℝ] ℝ) (w : E)
     {b₀ : M} (_hb₀ : b₀ ∈ (chartAt H α).source) :
-    (Module.finBasis ℝ E).coord j
+    φ
       ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b₀
-        ((trivializationAt E (TangentSpace I) b₀).symmL ℝ b₀
-          ((Module.finBasis ℝ E) i))) =
-    (Module.finBasis ℝ E).coord j
-      ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b₀
-        ((Module.finBasis ℝ E) i)) := by
+        ((trivializationAt E (TangentSpace I) b₀).symmL ℝ b₀ w)) =
+    φ
+      ((trivializationAt E (TangentSpace I) α).continuousLinearMapAt ℝ b₀ w) := by
   have h := tangent_symmL_self_eq_one (I := I) b₀
   rw [h]
   rfl

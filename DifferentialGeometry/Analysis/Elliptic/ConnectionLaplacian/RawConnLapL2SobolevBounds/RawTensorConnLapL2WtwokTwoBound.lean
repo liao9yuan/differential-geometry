@@ -1936,7 +1936,7 @@ private lemma iteratedFDeriv_two_pou_raw_symm_sq_le_iteratedFDeriv_two_chartComp
   refine h_sq_le.trans (le_of_eq ?_)
   ring
 
-omit [CompactSpace M] [BoundarylessManifold I M] in
+set_option linter.unusedSectionVars false in
 private lemma symm_mem_pou_inter_goodSet
     (α : M) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (h_pou_pos :
@@ -1963,7 +1963,7 @@ private lemma symm_mem_pou_inter_goodSet
     rw [h_goodSet_eq]; exact hb_extSrc
   exact ⟨hb_tsupp, hb_good⟩
 
-omit [CompactSpace M] [BoundarylessManifold I M] in
+set_option linter.unusedSectionVars false in
 private lemma mem_pouImage_of_pou_pos
     (α : M) {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α)
     (h_pou_pos :

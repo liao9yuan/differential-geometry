@@ -516,7 +516,7 @@ private lemma exists_nablaChartRiemannData_uniform_bound_pouTsupport
     _ ≤ C := hidx_le
 
 
-omit [CompactSpace M] [BoundarylessManifold I M] in
+set_option linter.unusedSectionVars false in
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆

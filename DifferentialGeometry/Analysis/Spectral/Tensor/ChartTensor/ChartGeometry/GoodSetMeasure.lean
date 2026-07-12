@@ -27,7 +27,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_eq_extChartAt_source
     [I.Boundaryless] (α : M) :
     chartLeviCivitaGoodSet (I := I) α = (extChartAt I α).source := by
@@ -54,7 +54,7 @@ theorem chartLeviCivitaGoodSet_eq_extChartAt_source
         (extChartAt I α).map_source hx
       rw [h_interior_eq]; exact h_map
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_image_eq_target
     [I.Boundaryless] (α : M) :
     (extChartAt I α) '' (chartLeviCivitaGoodSet (I := I) α)
@@ -62,7 +62,7 @@ theorem chartLeviCivitaGoodSet_image_eq_target
   rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α]
   exact (extChartAt I α).image_source_eq_target
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_imageEuclid_eq_chartTargetEuclid
     [I.Boundaryless] (α : M) :
     toEuclidean ''
@@ -71,7 +71,7 @@ theorem chartLeviCivitaGoodSet_imageEuclid_eq_chartTargetEuclid
   rw [chartLeviCivitaGoodSet_image_eq_target (I := I) α]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_target_diff_image_eq_empty
     [I.Boundaryless] (α : M) :
     ((extChartAt I α).target : Set E) \
@@ -80,7 +80,7 @@ theorem chartLeviCivitaGoodSet_target_diff_image_eq_empty
   rw [chartLeviCivitaGoodSet_image_eq_target (I := I) α]
   exact Set.diff_self
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_chartTargetEuclid_diff_image_eq_empty
     [I.Boundaryless] (α : M) :
     chartTargetEuclid (I := I) (M := M) α \
@@ -90,7 +90,7 @@ theorem chartLeviCivitaGoodSet_chartTargetEuclid_diff_image_eq_empty
   rw [chartLeviCivitaGoodSet_imageEuclid_eq_chartTargetEuclid (I := I) (M := M) α]
   exact Set.diff_self
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_target_diff_image_measure_zero
     [I.Boundaryless] (α : M) :
     (MeasureTheory.volume : Measure E)
@@ -99,7 +99,7 @@ theorem chartLeviCivitaGoodSet_target_diff_image_measure_zero
   rw [chartLeviCivitaGoodSet_target_diff_image_eq_empty (I := I) α]
   exact MeasureTheory.measure_empty
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_restrict_target_diff_image_measure_zero
     [I.Boundaryless] (α : M) (μ : Measure E) :
     (μ.restrict ((extChartAt I α).target : Set E))
@@ -108,7 +108,7 @@ theorem chartLeviCivitaGoodSet_restrict_target_diff_image_measure_zero
   rw [chartLeviCivitaGoodSet_target_diff_image_eq_empty (I := I) α]
   exact MeasureTheory.measure_empty
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_chartTargetEuclid_diff_image_measure_zero
     [I.Boundaryless] (α : M) :
     (MeasureTheory.volume : Measure EuclN)
@@ -119,7 +119,7 @@ theorem chartLeviCivitaGoodSet_chartTargetEuclid_diff_image_measure_zero
       (I := I) (M := M) α]
   exact MeasureTheory.measure_empty
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartLeviCivitaGoodSet_image_complement_measureZero
     [I.Boundaryless] (α : M) :
     ((MeasureTheory.volume : Measure EuclN).restrict
@@ -131,20 +131,20 @@ theorem chartLeviCivitaGoodSet_image_complement_measureZero
       (I := I) (M := M) α]
   exact MeasureTheory.measure_empty
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem mem_chartLeviCivitaGoodSet_iff_mem_extChartAt_source
     [I.Boundaryless] (α x : M) :
     x ∈ chartLeviCivitaGoodSet (I := I) α ↔ x ∈ (extChartAt I α).source := by
   rw [chartLeviCivitaGoodSet_eq_extChartAt_source (I := I) α]
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem mem_image_chartLeviCivitaGoodSet_iff_mem_target
     [I.Boundaryless] (α : M) (y : E) :
     y ∈ (extChartAt I α) '' (chartLeviCivitaGoodSet (I := I) α)
       ↔ y ∈ (extChartAt I α).target := by
   rw [chartLeviCivitaGoodSet_image_eq_target (I := I) α]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem mem_imageEuclid_chartLeviCivitaGoodSet_iff_mem_chartTargetEuclid
     [I.Boundaryless] (α : M) (y : EuclN) :
     y ∈ toEuclidean ''

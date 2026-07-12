@@ -457,7 +457,7 @@ private lemma goodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
   chartLeviCivitaGoodSet_image_isOpen (I := I) α
 
-omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma goodSet_subset_chartSource (α : M) :
     chartLeviCivitaGoodSet (I := I) α ⊆ (chartAt H α).source := by
   intro b hb

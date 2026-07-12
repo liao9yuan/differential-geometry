@@ -24,19 +24,19 @@ open DifferentialGeometry.Integral.Measure
 
 section LiftContinuity
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsMIntegralCurveAt.continuousAt_lift
-    {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
+    {v : (p : TangentBundle I M) → TangentSpace I.tangent p} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
-    (hf : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g α) t₀) :
+    (hf : IsMIntegralCurveAt f v t₀) :
     ContinuousAt f t₀ :=
   hf.continuousAt
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsMIntegralCurve.continuous_lift
-    {g : SmoothRiemannianMetric I M} {α : M}
+    {v : (p : TangentBundle I M) → TangentSpace I.tangent p}
     {f : ℝ → TangentBundle I M}
-    (hf : IsMIntegralCurve f (geodesicVectorFieldChart (I := I) g α)) :
+    (hf : IsMIntegralCurve f v) :
     Continuous f :=
   hf.continuous
 

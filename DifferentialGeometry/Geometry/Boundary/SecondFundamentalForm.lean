@@ -37,7 +37,7 @@ def chartChristoffelNormalCorrection
     chartChristoffel (I := I) g α i l k y *
       normalFieldComp (E := E) νChart l y
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] hI in
 @[simp] lemma chartChristoffelNormalCorrection_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (νChart : E → E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -52,7 +52,7 @@ def chartCovariantDerivativeOfNormal
   partialDeriv (E := E) i (normalFieldComp (E := E) νChart k) y +
     chartChristoffelNormalCorrection (I := I) g α νChart i k y
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] hI in
 @[simp] lemma chartCovariantDerivativeOfNormal_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (νChart : E → E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -68,7 +68,7 @@ def chartSecondFundamentalFormEntry
       chartCovariantDerivativeOfNormal (I := I) g (x : M) νChart i k
         (extChartAt I (x : M) (x : M))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] hI in
 @[simp] lemma chartSecondFundamentalFormEntry_def
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E) (i j : Fin (Module.finrank ℝ E)) :
@@ -159,7 +159,7 @@ def secondFundamentalForm
         Finset.sum_congr rfl (fun j _ => hpull j)]
       rw [← Finset.mul_sum])
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] hI in
 @[simp] lemma secondFundamentalForm_apply
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E)
@@ -171,7 +171,7 @@ set_option linter.unusedSectionVars false in
             ((Module.finBasis ℝ E).repr Y) j *
             chartSecondFundamentalFormEntry (I := I) (M := M) g x νChart i j := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] hI in
 theorem secondFundamentalForm_symm
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E)
@@ -207,7 +207,7 @@ omit [InnerProductSpace ℝ E] in
       secondFundamentalForm (I := I) (M := M) g x νChart
         (boundaryInclusionMfderiv (M := M) x Xb) (boundaryInclusionMfderiv (M := M) x Yb) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem secondFundamentalFormBoundary_symm
     (g : SmoothRiemannianMetric I M) (x : BoundaryManifold I M)
     (νChart : E → E)
