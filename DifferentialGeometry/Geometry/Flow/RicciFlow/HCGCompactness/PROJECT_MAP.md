@@ -8,6 +8,10 @@
 > list).  HCG compactness is `ham3_cgh_limit`'s producer and Morgan–Tian
 > `converge2`'s counterpart inside that program.
 
+> **Merge (2026-07-11):** the `qinz1yang` fork PROVED `ricci_flow_short_time_existence`
+> (sorry-free, axiom-clean, joint smoothness to `t=0`); merge + forward plan
+> (U-track uniqueness, E-track `extends_of_rmBounded`) = `../SHORTTIME_MERGE_PLAN.md`.
+>
 > **Migration (2026-07-07):** work moved from Claude (Fable) to Codex.  The
 > full state/next-work/long-term handoff is the repo-root `CODEX_HANDOFF.md`
 > (includes the durable lessons formerly held in the assistant's private

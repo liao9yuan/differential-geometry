@@ -99,6 +99,19 @@ theorem left_inv
       congrArg B.inv (B.hom_eq hu).symm
     _ = u := by simpa only [inv] using B.hom.left_inv hu
 
+/-- A tangent vector in the selected source is recovered from its intrinsic
+exponential endpoint by the selected inverse. -/
+theorem inv_eq_of_exp
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {p y pt : M} (B : DiagInvBranch (I := I) g hEnorm p)
+    {v : TangentSpace I y}
+    (hvsrc : (⟨y, v⟩ : TangentBundle I M) ∈ B.hom.source)
+    (hexp : expMapIntrinsic (I := I) g hEnorm y v = pt) :
+    B.inv (y, pt) = (⟨y, v⟩ : TangentBundle I M) := by
+  simpa only [diagExp_apply, hexp] using B.left_inv hvsrc
+
 /-- On the selected inverse domain, the inverse tangent vector is based at the
 first point of the pair. -/
 theorem proj_eq

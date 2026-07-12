@@ -21,3 +21,14 @@ transported HCG branches, their readout domains, and finite-family containment
 are now checked elsewhere.  The concrete `StepB1RawInput` producer and textbook
 B1 theorem remain 0%; Step-B/B1 machinery is about 77%, Chapter 4 machinery
 about 74%, and whole-HCG machinery about 51%.
+
+## 2026-07-12 intrinsic-endpoint recovery
+
+Added `DiagInvBranch.inv_eq_of_exp`: a tangent vector already in the selected
+source is recovered by `B.inv` when its intrinsic exponential endpoint is the
+given second point.  The stable proof uses `simpa only [diagExp_apply, hexp]`;
+an unrestricted `simp` unfolds the intrinsic exponential too far.  Focused
+verification passed, and the module object was refreshed.  This is a generic
+branch-interface adapter, so the interface brick remains 100%; it does not
+change the concrete B1 endpoint (still 0%) or the project-wide machinery
+estimates above.
