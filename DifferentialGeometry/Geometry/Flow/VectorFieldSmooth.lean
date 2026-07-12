@@ -99,7 +99,7 @@ private lemma connDiff_chartBasis_contMDiffOn (g g' : SmoothRiemannianMetric I M
     exact h
   exact connDiff_contMDiffOn_local (I := I) g g' hopen (hframe j) (hframe k)
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+set_option linter.unusedSectionVars false in
 private lemma chartInvGramMatrix_entry_contMDiffOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     (j k : Fin (Module.finrank ℝ E)) :

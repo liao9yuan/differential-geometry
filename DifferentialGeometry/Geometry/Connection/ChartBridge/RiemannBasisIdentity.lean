@@ -27,6 +27,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma extDerivFun_comp_extChartAt_apply_basis [I.Boundaryless]
     (x : M) {gE : E → ℝ}
     (hgE : ContDiffAt ℝ ∞ gE (extChartAt I x x))

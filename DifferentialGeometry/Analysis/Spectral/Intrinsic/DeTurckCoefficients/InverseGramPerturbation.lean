@@ -164,6 +164,7 @@ theorem chartInvGramMatrix_entry_sub_abs_le_gramDiffSup
     (fun p q => chartGramMatrix_sub_entry_abs_le_gramDiffSup (I := I) (M := M)
       g₁ g₂ α x p q) k l
 
+omit [InnerProductSpace ℝ E] in
 lemma exists_chartInvGramMatrix_entry_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H α).source) :
@@ -192,6 +193,7 @@ lemma exists_chartInvGramMatrix_entry_bound_on_compact
     exact abs_entry_le_matrixEntryL1 (chartInvGramMatrix (I := I) g α x) p q
   exact h_entry_le.trans (h_l1_le.trans (le_max_left _ _))
 
+omit [InnerProductSpace ℝ E] in
 theorem exists_chartInvGramMatrix_lipschitz_on_compact
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     {K : Set M} (hK : IsCompact K)

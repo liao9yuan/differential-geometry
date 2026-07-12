@@ -20,6 +20,7 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private theorem sum_g_inner_T_self_eq_invGram_sum
     (g : SmoothRiemannianMetric I M) (x : M)
     (T : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -57,6 +58,7 @@ private theorem sum_g_inner_T_self_eq_invGram_sum
   intro l _
   rw [hHb_apply]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private lemma g_inner_modelBasis_eq_chartGram
     (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -67,6 +69,7 @@ private lemma g_inner_modelBasis_eq_chartGram
   rw [chartBasisVecFiber_self (I := I) x i]
   rw [chartBasisVecFiber_self (I := I) x j]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private lemma g_inner_modelBasis_first_decomp
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) (n : Fin (Module.finrank ℝ E)) :
@@ -91,6 +94,7 @@ private lemma g_inner_modelBasis_first_decomp
   rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [g_inner_modelBasis_eq_chartGram (I := I) g x p n]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M] in
 private lemma modelBasis_repr_eq_invGram_sum
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) (n : Fin (Module.finrank ℝ E)) :

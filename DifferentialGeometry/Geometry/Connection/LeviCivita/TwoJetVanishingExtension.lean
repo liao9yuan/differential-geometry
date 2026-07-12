@@ -508,7 +508,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] 
       (linExtBump (I := I) x₀ : M → ℝ) b •
         trivFromE (I := I) x₀ b (P (extChartAt I x₀ b - extChartAt I x₀ x₀)) := rfl
 
-omit [CompactSpace M] [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 lemma polyCoordExtensionTangent_basepoint (x₀ : M) (P : E → E) :
     polyCoordExtensionTangent (I := I) x₀ P x₀ = P 0 := by
   classical
@@ -628,7 +628,7 @@ theorem polyCoordExtensionTangent_smooth (x₀ : M) {P : E → E}
   rw [h_eq]
   exact h
 
-omit [CompactSpace M] in
+set_option linter.unusedSectionVars false in
 theorem covApply_polyCoordExtensionTangent_basepoint_eq
     (g : SmoothRiemannianMetric I M) (x₀ : M) {P : E → E} (hP : ContDiff ℝ ∞ P)
     (u : TangentSpace I x₀) :
@@ -954,7 +954,7 @@ private lemma fderiv_jetCancelPoly_centred
   rw [ContinuousLinearMap.neg_apply, hL]
   rfl
 
-omit [CompactSpace M] [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma tangentCoord_self (x₀ : M) (u : TangentSpace I x₀) :
     tangentCoord (I := I) x₀ u = u := trivToE_self_apply (I := I) x₀ u
 
@@ -1326,7 +1326,7 @@ private lemma fderiv_innerReprPoly_jetCancel (g : SmoothRiemannianMetric I M) (x
     refine Finset.sum_congr rfl (fun m _ => ?_)
     exact fderiv_jetCancel_Bsummand (I := I) g x₀ hPcd hP0 U u i j m
 
-omit [CompactSpace M] [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma psiDGamma_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
     (u : TangentSpace I x₀) :
     christoffelDerivQuadraticCorrection (I := I) g x₀ V u u =
@@ -1342,7 +1342,7 @@ private lemma psiDGamma_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
   rw [psiDGamma_apply, tangentCoord_self]
   simp only [map_sum, ContinuousLinearMap.map_smul]
 
-omit [CompactSpace M] [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma psiGG_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
     (u : TangentSpace I x₀) :
     christoffelSquaredQuadraticCorrection (I := I) g x₀ V u u =

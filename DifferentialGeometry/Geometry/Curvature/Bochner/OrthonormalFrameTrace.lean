@@ -52,6 +52,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     modelGramMatrix (I := I) g x k l =
       g.inner x ((chartModelBasis E) k) ((chartModelBasis E) l) := rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma modelGramMatrix_eq_chartGramMatrix :
     modelGramMatrix (I := I) g x = chartGramMatrix (I := I) g x x := by
   classical
@@ -218,6 +219,7 @@ private lemma orthonormal_matrix_inverse
   rw [Matrix.mul_assoc] at hA_left_inv
   exact (Matrix.inv_eq_right_inv hA_left_inv).symm
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma sum_coBchange_eq_invGram
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
     (hB : ∀ i j : Fin (Module.finrank ℝ E),
@@ -249,6 +251,7 @@ private lemma sum_coBchange_eq_invGram
   rw [heval]
   rfl
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem orthonormal_basis_bilin_trace
     (Hb : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] ℝ)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -296,6 +299,7 @@ section TraceIdentity
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma finBasis_repr_eq_invGram_inner_sum
     (X : TangentSpace I x) (k : Fin (Module.finrank ℝ E)) :
     (chartModelBasis E).repr X k =
@@ -431,6 +435,7 @@ private lemma finBasis_repr_eq_invGram_inner_sum
     · intro hk
       exact absurd (Finset.mem_univ k) hk]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma linearMap_trace_eq_invGram_bilin_sum
     (T : TangentSpace I x →ₗ[ℝ] TangentSpace I x) :
     LinearMap.trace ℝ (TangentSpace I x) T =
@@ -452,6 +457,7 @@ private lemma linearMap_trace_eq_invGram_bilin_sum
   exact finBasis_repr_eq_invGram_inner_sum (I := I) g x
     (T ((chartModelBasis E) k)) k
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private theorem linearMap_trace_eq_orthonormal_bilin_sum
     (T : TangentSpace I x →ₗ[ℝ] TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -610,6 +616,7 @@ section OrthonormalRiesz
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
+set_option linter.unusedSectionVars false in
 theorem g_inner_eq_orthonormal_parseval_sum
     (X Y : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)

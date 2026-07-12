@@ -62,7 +62,7 @@ lemma arcLength_slice_eq_integral_sqrt_speedSq
       = ∫ t in (0 : ℝ)..L, Real.sqrt (speedSq (I := I) g f s t) := by
   rfl
 
-omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma speedSq_eq_chartGramAlongCurve
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (s t : ℝ) :

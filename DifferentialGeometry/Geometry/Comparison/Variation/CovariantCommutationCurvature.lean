@@ -199,7 +199,7 @@ private lemma chartCoord_longitudinalVelocity_contDiffAt
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
 
-omit [T2Space M] [SigmaCompactSpace M] in
+set_option linter.unusedSectionVars false in
 lemma slice_secondCovDeriv_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -954,7 +954,7 @@ lemma commute_ds_dt_intrinsic_shifted
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
 
-omit [T2Space M] [SigmaCompactSpace M] in
+set_option linter.unusedSectionVars false in
 lemma slice_secondCovDeriv_central_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :
@@ -1058,7 +1058,7 @@ lemma slice_secondCovDeriv_central_chartRep_differentiableAt
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
   DifferentialGeometry.Integral.DivergenceTheorem in
 
-omit [T2Space M] [SigmaCompactSpace M] in
+set_option linter.unusedSectionVars false in
 lemma variationField_covDeriv_chartRep_differentiableAt
     (g : SmoothRiemannianMetric I M) (f : ℝ → ℝ → M)
     (hf : IsSmoothVariation (I := I) f) (t : ℝ) :

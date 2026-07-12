@@ -23,7 +23,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+set_option linter.unusedSectionVars false in
 lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
     (α : M) {gE : E → ℝ} {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -279,6 +279,7 @@ lemma LeviCivita_chartBasisVec_secondCovDeriv_alpha [I.Boundaryless]
           refine Finset.sum_congr rfl (fun m _ => ?_)
           rw [mul_comm]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma fderiv_chartE_section_repr_alpha_eq_zero_of_eventuallyEq [I.Boundaryless]
     (α : M) (j : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -318,6 +319,7 @@ lemma fderiv_chartE_section_repr_alpha_eq_zero_of_eventuallyEq [I.Boundaryless]
   rw [hev.fderiv_eq]
   exact fderiv_chartE_chartBasisVec_alpha_eq_zero (I := I) α j hx
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma mlieBracket_chartBasisVec_ext_self_eq_zero_alpha [I.Boundaryless]
     (α : M) (j k : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)

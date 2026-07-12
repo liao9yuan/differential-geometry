@@ -136,6 +136,7 @@ private lemma deTurckCobMatrix_isUnit (α : M) {x : M}
   rw [Matrix.isUnit_iff_isUnit_det] at hbase_unit ⊢
   rwa [Matrix.det_transpose]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartGramMatrix_self_eq_model (g : SmoothRiemannianMetric I M) (x : M)
     (k l : Fin (Module.finrank ℝ E)) :
     chartGramMatrix (I := I) g x x k l =
@@ -144,6 +145,7 @@ private lemma chartGramMatrix_self_eq_model (g : SmoothRiemannianMetric I M) (x 
   rw [chartGramMatrix_apply, chartBasisVecFiber_self (I := I) x k,
     chartBasisVecFiber_self (I := I) x l]
 
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartGramMatrix_eq_cob_conj (g : SmoothRiemannianMetric I M)
     (α : M) (x : M) :
     chartGramMatrix (I := I) g α x =

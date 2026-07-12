@@ -816,7 +816,7 @@ theorem deTurckLieDLbCoeffField_apply_eq (g₀ g₁ g_bg : SmoothRiemannianMetri
     fin_cases j <;> simp
 
 
-omit [CompactSpace M] [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma christoffelCorrection_chartModelBasis_pair_self
     (g : SmoothRiemannianMetric I M) (x : M) (i j : Fin (Module.finrank ℝ E)) :
     christoffelCorrection (I := I) g x x ((chartModelBasis E) j) ((chartModelBasis E) i) =

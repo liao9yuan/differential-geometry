@@ -1454,7 +1454,7 @@ private lemma lieArm_arm1_value_traced
   · exact lieArm_arm1_T14_traced (I := I) g₀ g₁ x
       (unitModel (I := I) (M := M) g₀ 3 D x) (chartModelBasis E i) (chartModelBasis E j)
 
-omit [CompactSpace M] [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma lieArm_inner_chartBasis_center (g : SmoothRiemannianMetric I M) (x : M)
     (p q : Fin (Module.finrank ℝ E)) :
     g.inner x ((chartModelBasis E) p : TangentSpace I x)
@@ -1560,7 +1560,7 @@ private lemma lieArm_U3_sum_slot2
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-omit [CompactSpace M] [I.Boundaryless] in
+set_option linter.unusedSectionVars false in
 private lemma lieArm_inner_connDiff_chartBasis_value
     (gm gA gB : SmoothRiemannianMetric I M) (x : M)
     (a c d : Fin (Module.finrank ℝ E)) :
@@ -5905,7 +5905,7 @@ private lemma lieCorr0_upd4_23 (z0 z1 z2 z3 a b : E) :
   funext i
   fin_cases i <;> simp [Function.update]
 
-omit [CompactSpace M] in
+set_option linter.unusedSectionVars false in
 private lemma lieCorr0_riemLowered_basis_value (x : M)
     (i j ml kl : Fin (Module.finrank ℝ E)) :
     Tensor0SSpace.toModel (lieCorr0RiemLoweredFib (I := I) g₀ x)
