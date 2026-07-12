@@ -27,7 +27,7 @@ open DifferentialGeometry.Integral.Measure
 open scoped Manifold Topology ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E] [InnerProductSpace ℝ E]
+  [Module.Finite ℝ E] [InnerProductSpace ℝ E]
 
 noncomputable def eval0SLinear (n : ℕ) :
     Tensor0SModel n ℝ E →ₗ[ℝ]

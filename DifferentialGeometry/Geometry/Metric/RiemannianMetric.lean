@@ -19,7 +19,7 @@ open scoped Manifold Topology Bundle ContDiff
 
 variable {𝕜 : Type*} [NontriviallyNormedField 𝕜]
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] (I : ModelWithCorners ℝ E H)
 variable (n : WithTop ℕ∞)
 variable (M : Type*) [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ω M]

@@ -21,7 +21,7 @@ open Tensor0SBundle
 open DifferentialGeometry.Tensor.TensorRSRiemannianBundle
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
-  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [FiniteDimensional ℝ E] [CompleteSpace E]
+  [InnerProductSpace ℝ E] [Module.Finite ℝ E] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 

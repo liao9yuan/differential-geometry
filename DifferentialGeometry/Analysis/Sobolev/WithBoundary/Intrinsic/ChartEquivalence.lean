@@ -22,7 +22,7 @@ namespace WithBoundary
 namespace EquivalenceFull
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -290,7 +290,7 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_interior
 
 theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-    [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+    [Module.Finite ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -314,7 +314,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
 
 theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-    [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+    [Module.Finite ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -639,7 +639,7 @@ private lemma hasWeakRiemannianGradLp_withBoundary_gradFun_smooth
 
 theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-    [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+    [Module.Finite ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -661,7 +661,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_contMDiff
 
 theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-    [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+    [Module.Finite ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -675,7 +675,7 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth
 
 theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-    [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+    [Module.Finite ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
@@ -701,7 +701,7 @@ theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff
 
 theorem w1pNormIntrinsicLp_withBoundary_lt_top_of_contMDiff_interior
     {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-    [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+    [Module.Finite ℝ E]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
     {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]

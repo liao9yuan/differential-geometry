@@ -23,7 +23,7 @@ namespace WithBoundary
 open DifferentialGeometry.Integral.Measure
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [FiniteDimensional ℝ E]
+  [Module.Finite ℝ E]
 
 def partialDerivWithin (s : Set E) (i : Fin (Module.finrank ℝ E))
     (u : E → ℝ) (y : E) : ℝ :=
