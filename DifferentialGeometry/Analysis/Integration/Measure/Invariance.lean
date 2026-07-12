@@ -59,7 +59,6 @@ lemma measurableSet_extChartAt_target (x₀ : M) :
   · exact (I.continuous_symm.isOpen_preimage _ (chartAt H x₀).open_target).measurableSet
   · exact I.isClosed_range.measurableSet
 
-set_option linter.unusedSectionVars false in
 theorem chartLocalMeasure_apply_of_disjoint_source
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {A : Set M} (hAmeas : MeasurableSet A)
@@ -95,7 +94,6 @@ theorem chartLocalMeasure_apply_of_disjoint_source
 
 variable (E) in
 
-set_option linter.unusedSectionVars false in
 theorem euclideanChangeOfVariablesMap
     {s : Set E}
     (hs : NullMeasurableSet s (modelHaar (E := E)))
@@ -124,7 +122,6 @@ lemma tangentCoordChange_hasFDerivWithinAt
       (tangentCoordChange I x₀ x₁ x) (range I) (extChartAt I x₀ x) :=
   hasFDerivWithinAt_tangentCoordChange (I := I) h
 
-set_option linter.unusedSectionVars false in
 lemma chartModelBasis_repr_sum
     (L : E →L[ℝ] E) (i : Fin (Module.finrank ℝ E)) :
     L ((chartModelBasis E) i) =
@@ -138,21 +135,18 @@ def transitionMatrix (x₀ x₁ : M) (x : M) :
     (chartModelBasis E).repr
       ((tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) i)) k
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma transitionMatrix_apply (x₀ x₁ : M) (x : M)
     (k i : Fin (Module.finrank ℝ E)) :
     transitionMatrix (I := I) x₀ x₁ x k i =
       (chartModelBasis E).repr
         ((tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) i)) k := rfl
 
-set_option linter.unusedSectionVars false in
 lemma tangentCoordChange_chartModelBasis_eq_sum
     (x₀ x₁ : M) (x : M) (i : Fin (Module.finrank ℝ E)) :
     (tangentCoordChange I x₁ x₀ x) ((chartModelBasis E) i) =
       ∑ k, transitionMatrix (I := I) x₀ x₁ x k i • (chartModelBasis E) k :=
   chartModelBasis_repr_sum (tangentCoordChange I x₁ x₀ x) i
 
-set_option linter.unusedSectionVars false in
 lemma chartBasisVecFiber_pullback
     (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -220,7 +214,6 @@ lemma chartBasisVecFiber_pullback
   rw [map_smul]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_pullback_eq_sum
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -272,7 +265,6 @@ lemma chartGramMatrix_pullback_eq_sum
   rw [chartGramMatrix_apply]
   ring
 
-set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_pullback_eq_mul
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -292,7 +284,6 @@ lemma chartGramMatrix_pullback_eq_mul
   intro k _
   ring
 
-set_option linter.unusedSectionVars false in
 lemma transitionMatrix_det (x₀ x₁ : M) (x : M) :
     (transitionMatrix (I := I) x₀ x₁ x).det =
       (tangentCoordChange I x₁ x₀ x : E →L[ℝ] E).det := by
@@ -305,7 +296,6 @@ lemma transitionMatrix_det (x₀ x₁ : M) (x : M) :
   rw [hL]
   rw [LinearMap.det_toMatrix]
 
-set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_det_pullback
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -318,7 +308,6 @@ lemma chartGramMatrix_det_pullback
   rw [transitionMatrix_det (I := I) x₀ x₁ x]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartDensity_pullback_eq_abs_det_jacobian
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M) {x : M}
     (hx0 : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -349,7 +338,6 @@ lemma extChartAt_source_eq_chartAt_source (x₀ : M) :
     (extChartAt I x₀).source = (chartAt H x₀).source := by
   rw [extChartAt_source]
 
-set_option linter.unusedSectionVars false in
 lemma chartDensity_continuousOn
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContinuousOn (chartDensity g x₀)
@@ -363,14 +351,13 @@ def riemannianVolumeMeasure
     (g : SmoothRiemannianMetric I M) : MeasureTheory.Measure M :=
   riemannianMeasure (I := I) g (chartAtlasPOU I M)
 
-set_option linter.unusedSectionVars false in
 lemma riemannianVolumeMeasure_def
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
     riemannianVolumeMeasure (I := I) (M := M) g =
       riemannianMeasure (I := I) g (chartAtlasPOU I M) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I ∞ M] in
 lemma aemeasurable_extChartAt_symm_restrict_target
     (x₀ : M) :
     AEMeasurable ((extChartAt I x₀).symm)
@@ -379,7 +366,6 @@ lemma aemeasurable_extChartAt_symm_restrict_target
     measurableSet_extChartAt_target (I := I) x₀
   exact (continuousOn_extChartAt_symm (I := I) x₀).aemeasurable htarget_meas
 
-set_option linter.unusedSectionVars false in
 lemma aemeasurable_chartDensity_symm_pullback
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     AEMeasurable
@@ -403,7 +389,6 @@ lemma aemeasurable_chartDensity_symm_pullback
     hcontOn.aemeasurable htarget_meas
   exact ENNReal.measurable_ofReal.comp_aemeasurable haem_density
 
-set_option linter.unusedSectionVars false in
 theorem chartLocalMeasure_lintegral
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
@@ -498,7 +483,6 @@ lemma ennreal_abs_det_tangentCoordChange_mul_abs_det_inv
   rw [abs_det_tangentCoordChange_mul_abs_det_inv (I := I) x₀ x₁ h]
   exact ENNReal.ofReal_one
 
-set_option linter.unusedSectionVars false in
 theorem chartLocalMeasure_setLintegral_indicator
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {U : Set M} (hUmeas : MeasurableSet U)
@@ -538,7 +522,7 @@ lemma extChartAt_image_measurableSet_of_open_subset_source (x₀ : M)
   exact I.isClosedEmbedding.measurableEmbedding.measurableSet_image.mpr
     hchart_img.measurableSet
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_image_measurableSet_of_overlap (x₀ x₁ : M) :
     MeasurableSet ((extChartAt I x₀) ''
       ((chartAt H x₀).source ∩ (chartAt H x₁).source)) :=
@@ -546,7 +530,7 @@ lemma extChartAt_image_measurableSet_of_overlap (x₀ x₁ : M) :
     (isOpen_chartAt_source_inter (H := H) (M := M) x₀ x₁)
     Set.inter_subset_left
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_transition_image
     (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) (_hUsub1 : U ⊆ (chartAt H x₁).source) :
@@ -560,7 +544,7 @@ lemma extChartAt_transition_image
   change extChartAt I x₁ ((extChartAt I x₀).symm (extChartAt I x₀ x)) = _
   rw [(extChartAt I x₀).left_inv hxsrc0]
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma extChartAt_transition_injOn_overlap_image
     (x₀ x₁ : M) {U : Set M}
     (hUsub0 : U ⊆ (chartAt H x₀).source) (hUsub1 : U ⊆ (chartAt H x₁).source) :
@@ -609,7 +593,7 @@ lemma extChartAt_transition_hasFDerivWithinAt_on_overlap_image
   rw [hsymm_eq]
   exact hfull.mono himage_sub
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I ∞ M] in
 lemma setLIntegral_target_eq_setLIntegral_image
     (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source)
@@ -648,7 +632,6 @@ lemma setLIntegral_target_eq_setLIntegral_image
     · rintro ⟨⟨hy_t, hy_u⟩, _⟩; exact ⟨hy_t, hy_u⟩
     · rintro ⟨hy_t, hy_u⟩; exact ⟨⟨hy_t, hy_u⟩, hy_t⟩]
 
-set_option linter.unusedSectionVars false in
 lemma chartLocalMeasure_lintegral_U_eq_setLIntegral_image
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {U : Set M} (hUopen : IsOpen U) (hUsub : U ⊆ (chartAt H x₀).source)
@@ -675,7 +658,6 @@ lemma chartLocalMeasure_lintegral_U_eq_setLIntegral_image
     (fun y _ => hpt y)]
   exact setLIntegral_target_eq_setLIntegral_image (I := I) (E := E) x₀ hUopen hUsub _
 
-set_option linter.unusedSectionVars false in
 theorem chartLocalMeasure_lintegral_U_eq_of_overlap
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M)
     {F : M → ℝ≥0∞} (hF : Measurable F) :
@@ -765,7 +747,6 @@ theorem chartLocalMeasure_lintegral_U_eq_of_overlap
         (ENNReal.ofReal (chartDensity g x₀ x) * F x) by ring]
   rw [hdet_mul, one_mul]
 
-set_option linter.unusedSectionVars false in
 theorem chartLocalMeasure_restrict_overlap_eq
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M) :
     (chartLocalMeasure (I := I) g x₀).restrict
@@ -775,7 +756,6 @@ theorem chartLocalMeasure_restrict_overlap_eq
   refine MeasureTheory.Measure.ext_of_lintegral _ (fun F hF => ?_)
   exact chartLocalMeasure_lintegral_U_eq_of_overlap (I := I) g x₀ x₁ hF
 
-set_option linter.unusedSectionVars false in
 lemma chartLocalMeasure_lintegral_eq_of_support_in_overlap
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M)
     {f : M → ℝ≥0∞} (hf : Measurable f)
@@ -890,7 +870,7 @@ lemma lintegral_ofReal_pou_zero_of_support_empty
     rw [this, ENNReal.ofReal_zero, zero_mul]
   simp [h_zero]
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma tsum_integral_pou_eq_subtype
     [T2Space M] [SigmaCompactSpace M]
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -907,7 +887,7 @@ lemma tsum_integral_pou_eq_subtype
   rw [Set.not_nonempty_iff_eq_empty] at hne
   exact hα (lintegral_ofReal_pou_zero_of_support_empty ρ α hne (cLM α) F)
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma ofReal_pou_mul_expand_on_subtype
     [T2Space M] [SigmaCompactSpace M]
     (ρ ρ' : SmoothPartitionOfUnity M I M univ) (α : M)
@@ -944,7 +924,6 @@ lemma ofReal_pou_mul_expand_on_subtype
     linarith
   rw [h_inner, h_full, tsum_ofReal_pou_eq_one (I := I) ρ' x, mul_one]
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_eq_of_pou_independent
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1035,7 +1014,6 @@ theorem riemannianMeasure_eq_of_pou_independent
         (ρ' β.val).contMDiff.continuous.measurable)).mul hF)
   · exact pou_product_support_subset_overlap (I := I) ρ ρ' hρ hρ' α.val β.val F
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_independent_of_atlas
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -1045,7 +1023,6 @@ theorem riemannianMeasure_independent_of_atlas
     riemannianMeasure (I := I) g ρ = riemannianMeasure (I := I) g ρ' :=
   riemannianMeasure_eq_of_pou_independent (I := I) g ρ ρ' hρ hρ'
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_eq_riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

@@ -29,7 +29,6 @@ variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 private def chartedExpAt (g : SmoothRiemannianMetric I M) (p : M) : E → E :=
   fun v => (extChartAt I p) (expMap (I := I) g p (show TangentSpace I p from v))
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExpAt_contMDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffAt 𝓘(ℝ, E) 𝓘(ℝ, E) 1 (chartedExpAt (I := I) g p) (0 : E) := by
@@ -46,13 +45,11 @@ private lemma chartedExpAt_contMDiffAt_zero
     exact contMDiffAt_extChartAt (I := I) (x := p) (n := 1)
   exact hext.comp (0 : E) hexp
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExpAt_contDiffAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContDiffAt ℝ 1 (chartedExpAt (I := I) g p) (0 : E) :=
   (chartedExpAt_contMDiffAt_zero (I := I) g p).contDiffAt
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExpAt_hasFDerivAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasFDerivAt (chartedExpAt (I := I) g p) (ContinuousLinearMap.id ℝ E) (0 : E) := by
@@ -85,7 +82,6 @@ private lemma chartedExpAt_hasFDerivAt_zero
   rw [ContinuousLinearMap.id_comp] at hcomp_mfd
   exact hasMFDerivAt_iff_hasFDerivAt.mp hcomp_mfd
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExpAt_hasFDerivAt_refl
     (g : SmoothRiemannianMetric I M) (p : M) :
     HasFDerivAt (chartedExpAt (I := I) g p)
@@ -105,14 +101,12 @@ private def chartedExpAtIFTHomeomorph
     (chartedExpAt_hasFDerivAt_refl (I := I) g p)
     one_ne_zero
 
-set_option linter.unusedSectionVars false in
 private lemma zero_mem_chartedExpAtIFTHomeomorph_source
     (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : E) ∈ (chartedExpAtIFTHomeomorph (I := I) g p).source :=
   ContDiffAt.mem_toOpenPartialHomeomorph_source
     (chartedExpAt_contDiffAt_zero (I := I) g p) _ one_ne_zero
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExpAt_zero_mem_IFT_target
     (g : SmoothRiemannianMetric I M) (p : M) :
     chartedExpAt (I := I) g p (0 : E) ∈
@@ -120,14 +114,12 @@ private lemma chartedExpAt_zero_mem_IFT_target
   ContDiffAt.image_mem_toOpenPartialHomeomorph_target
     (chartedExpAt_contDiffAt_zero (I := I) g p) _ one_ne_zero
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExpAtIFTHomeomorph_symm_eq_localInverse
     (g : SmoothRiemannianMetric I M) (p : M) :
     (chartedExpAtIFTHomeomorph (I := I) g p).symm =
       (chartedExpAt_contDiffAt_zero (I := I) g p).localInverse
         (chartedExpAt_hasFDerivAt_refl (I := I) g p) one_ne_zero := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExpAtIFTHomeomorph_symm_contDiffAt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContDiffAt ℝ 1 (chartedExpAtIFTHomeomorph (I := I) g p).symm
@@ -138,7 +130,6 @@ private lemma chartedExpAtIFTHomeomorph_symm_contDiffAt
   rw [chartedExpAtIFTHomeomorph_symm_eq_localInverse]
   exact hinv
 
-set_option linter.unusedSectionVars false in
 private theorem exists_nice_open_nhds
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (U : Set E) (W : Set E),
@@ -254,7 +245,6 @@ private def niceSymmDomain (g : SmoothRiemannianMetric I M) (p : M) : Set E :=
   Classical.choose
     (Classical.choose_spec (exists_nice_open_nhds (I := I) g p))
 
-set_option linter.unusedSectionVars false in
 private lemma niceSource_spec (g : SmoothRiemannianMetric I M) (p : M) :
     IsOpen (expLocalDiffeoSource (I := I) g p) ∧
     (0 : E) ∈ expLocalDiffeoSource (I := I) g p ∧
@@ -274,42 +264,35 @@ private lemma niceSource_spec (g : SmoothRiemannianMetric I M) (p : M) :
   Classical.choose_spec
     (Classical.choose_spec (exists_nice_open_nhds (I := I) g p))
 
-set_option linter.unusedSectionVars false in
 private lemma niceSource_isOpen (g : SmoothRiemannianMetric I M) (p : M) :
     IsOpen (expLocalDiffeoSource (I := I) g p) := (niceSource_spec (I := I) g p).1
 
-set_option linter.unusedSectionVars false in
 private lemma zero_mem_niceSource (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : E) ∈ expLocalDiffeoSource (I := I) g p := (niceSource_spec (I := I) g p).2.1
 
-set_option linter.unusedSectionVars false in
 private lemma niceSource_sub_IFT_source
     (g : SmoothRiemannianMetric I M) (p : M) :
     expLocalDiffeoSource (I := I) g p ⊆ (chartedExpAtIFTHomeomorph (I := I) g p).source :=
   (niceSource_spec (I := I) g p).2.2.1
 
-set_option linter.unusedSectionVars false in
 private lemma niceSource_smoothOn (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn 𝓘(ℝ, E) I 1
       (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
       (expLocalDiffeoSource (I := I) g p) :=
   (niceSource_spec (I := I) g p).2.2.2.1
 
-set_option linter.unusedSectionVars false in
 private lemma niceSource_extSrc (g : SmoothRiemannianMetric I M) (p : M) :
     ∀ v ∈ expLocalDiffeoSource (I := I) g p,
       (expMap (I := I) g p (show TangentSpace I p from v) : M)
         ∈ (extChartAt I p).source :=
   (niceSource_spec (I := I) g p).2.2.2.2.1
 
-set_option linter.unusedSectionVars false in
 private lemma niceSymmDomain_contDiffOn
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContDiffOn ℝ 1 (chartedExpAtIFTHomeomorph (I := I) g p).symm
       (niceSymmDomain (I := I) g p) :=
   (niceSource_spec (I := I) g p).2.2.2.2.2.2.2.1
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExp_niceSource_sub_niceSymmDomain
     (g : SmoothRiemannianMetric I M) (p : M) :
     chartedExpAt (I := I) g p '' (expLocalDiffeoSource (I := I) g p) ⊆
@@ -320,7 +303,6 @@ private def expLocalDiffeoTarget (g : SmoothRiemannianMetric I M) (p : M) : Set 
   (fun v : E => (expMap (I := I) g p (show TangentSpace I p from v) : M))
     '' (expLocalDiffeoSource (I := I) g p)
 
-set_option linter.unusedSectionVars false in
 private lemma chartedExp_image_niceSource_isOpen
     (g : SmoothRiemannianMetric I M) (p : M) :
     IsOpen (chartedExpAt (I := I) g p '' (expLocalDiffeoSource (I := I) g p)) := by
@@ -334,7 +316,6 @@ private lemma chartedExp_image_niceSource_isOpen
   rw [heq]
   exact (chartedExpAtIFTHomeomorph (I := I) g p).isOpen_image_of_subset_source hopen hsub
 
-set_option linter.unusedSectionVars false in
 private lemma niceTarget_eq_source_inter_preimage
     (g : SmoothRiemannianMetric I M) (p : M) :
     expLocalDiffeoTarget (I := I) g p =
@@ -359,7 +340,6 @@ private lemma niceTarget_eq_source_inter_preimage
     have hinj := (extChartAt I p).injOn hq_src hexp_src h_eq
     exact hinj.symm
 
-set_option linter.unusedSectionVars false in
 private lemma niceTarget_isOpen
     (g : SmoothRiemannianMetric I M) (p : M) :
     IsOpen (expLocalDiffeoTarget (I := I) g p) := by
@@ -368,7 +348,6 @@ private lemma niceTarget_isOpen
   exact isOpen_extChartAt_preimage' (I := I) (x := p)
     (chartedExp_image_niceSource_isOpen (I := I) g p)
 
-set_option linter.unusedSectionVars false in
 private lemma niceTarget_sub_extChartSource
     (g : SmoothRiemannianMetric I M) (p : M) :
     expLocalDiffeoTarget (I := I) g p ⊆ (extChartAt I p).source := by
@@ -376,7 +355,6 @@ private lemma niceTarget_sub_extChartSource
   rintro q ⟨v, hv, rfl⟩
   exact niceSource_extSrc (I := I) g p v hv
 
-set_option linter.unusedSectionVars false in
 private lemma niceTarget_sub_chartSource
     (g : SmoothRiemannianMetric I M) (p : M) :
     expLocalDiffeoTarget (I := I) g p ⊆ (chartAt H p).source := by
@@ -384,7 +362,6 @@ private lemma niceTarget_sub_chartSource
   have := niceTarget_sub_extChartSource (I := I) g p hq
   rwa [extChartAt_source I] at this
 
-set_option linter.unusedSectionVars false in
 private lemma extChartAt_niceTarget_sub_niceSymmDomain
     (g : SmoothRiemannianMetric I M) (p : M) :
     (extChartAt I p) '' (expLocalDiffeoTarget (I := I) g p) ⊆ niceSymmDomain (I := I) g p := by
@@ -398,7 +375,6 @@ private lemma extChartAt_niceTarget_sub_niceSymmDomain
 private def expLocalDiffeoInvFun (g : SmoothRiemannianMetric I M) (p : M) : M → E :=
   fun q => (chartedExpAtIFTHomeomorph (I := I) g p).symm ((extChartAt I p) q)
 
-set_option linter.unusedSectionVars false in
 private lemma niceInvFun_left_inv
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hv : v ∈ expLocalDiffeoSource (I := I) g p) :
@@ -419,7 +395,6 @@ private lemma niceInvFun_left_inv
   rwa [show ((chartedExpAtIFTHomeomorph (I := I) g p) : E → E) v =
         chartedExpAt (I := I) g p v from rfl] at this
 
-set_option linter.unusedSectionVars false in
 private lemma niceInvFun_mapsTo_niceSource
     (g : SmoothRiemannianMetric I M) (p : M) {q : M}
     (hq : q ∈ expLocalDiffeoTarget (I := I) g p) :
@@ -429,7 +404,6 @@ private lemma niceInvFun_mapsTo_niceSource
   rw [niceInvFun_left_inv (I := I) g p hv]
   exact hv
 
-set_option linter.unusedSectionVars false in
 private lemma niceInvFun_right_inv
     (g : SmoothRiemannianMetric I M) (p : M) {q : M}
     (hq : q ∈ expLocalDiffeoTarget (I := I) g p) :
@@ -443,7 +417,6 @@ private lemma niceInvFun_right_inv
     expMap (I := I) g p (show TangentSpace I p from v)
   rw [niceInvFun_left_inv (I := I) g p hv]
 
-set_option linter.unusedSectionVars false in
 private lemma niceInvFun_contMDiffOn
     (g : SmoothRiemannianMetric I M) (p : M) :
     ContMDiffOn I 𝓘(ℝ, E) 1 (expLocalDiffeoInvFun (I := I) g p) (expLocalDiffeoTarget (I := I) g p) := by
@@ -490,13 +463,11 @@ private def expMapPartialDiffeomorph
   contMDiffOn_toFun := niceSource_smoothOn (I := I) g p
   contMDiffOn_invFun := niceInvFun_contMDiffOn (I := I) g p
 
-set_option linter.unusedSectionVars false in
 private lemma zero_mem_expMapPartialDiffeomorph_source
     (g : SmoothRiemannianMetric I M) (p : M) :
     (0 : E) ∈ (expMapPartialDiffeomorph (I := I) g p).source :=
   zero_mem_niceSource (I := I) g p
 
-set_option linter.unusedSectionVars false in
 theorem expMap_isLocalDiffeomorphAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) :
     IsLocalDiffeomorphAt 𝓘(ℝ, E) I 1
@@ -508,7 +479,6 @@ theorem expMap_isLocalDiffeomorphAt_zero
   intro v _hv
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem exists_open_nhds_expMap_diffeoOn
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1,
