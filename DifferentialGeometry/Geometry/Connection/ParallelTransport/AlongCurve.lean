@@ -32,10 +32,6 @@ namespace SectionAlongCurve
 
 variable {γ : ℝ → M}
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
-@[simp] lemma toFun_def (X : SectionAlongCurve I M γ) (t : ℝ) :
-    X.toFun t = X.toFun t := rfl
-
 set_option linter.unusedSectionVars false in
 def zero : SectionAlongCurve I M γ := ⟨fun _ => 0⟩
 

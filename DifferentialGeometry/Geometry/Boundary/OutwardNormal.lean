@@ -1604,13 +1604,6 @@ theorem outwardNormalAt_section_contMDiffAt
     · rw [Trivialization.continuousLinearMapAt_apply]
       rw [T_amb.coe_linearMapAt_of_mem hb_amb_baseSet]
 
-private def positivityLocus
-    (α₀ : BoundaryManifold I M) : Set (BoundaryManifold I M) :=
-  (trivializationAt hI.boundaryE (TangentSpace hI.boundaryI) α₀).baseSet ∩
-    {b : BoundaryManifold I M |
-      0 < g.inner (b : M) (outwardDirAt (M := M) g α₀ b)
-        (outwardDirAt (M := M) g α₀ b)}
-
 set_option linter.unusedSectionVars false in
 private lemma metricPullback_surjective
     (g : Measure.SmoothRiemannianMetric I M) (y : BoundaryManifold I M) :

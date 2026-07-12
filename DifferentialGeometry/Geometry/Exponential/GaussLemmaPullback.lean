@@ -395,10 +395,6 @@ lemma gauss_t2Space_base (I : ModelWithCorners ℝ E H) [ChartedSpace H M]
       (Bundle.zeroSection E (TangentSpace I)) := fun _ => rfl
   exact (IsEmbedding.of_leftInverse hinv hproj hzero).t2Space
 
-private def gaussVariation (g : SmoothRiemannianMetric I M) (p : M) (v w : E) :
-    ℝ → ℝ → M :=
-  fun s t => expMap (I := I) g p (show TangentSpace I p from (t • (v + s • w)))
-
 omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma velocityChartRep_differentiableAt_of_contMDiffAt2
     (γ : ℝ → M) (t₀ : ℝ) (hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t₀) :
