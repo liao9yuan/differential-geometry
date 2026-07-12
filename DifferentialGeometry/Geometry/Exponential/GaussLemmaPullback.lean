@@ -1135,7 +1135,6 @@ private lemma gauss_phi_continuousOn
 set_option linter.unusedSectionVars false in
 theorem gauss_lemma_pullback
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
-    (_hv : (show TangentSpace I p from v) ∈ expDomain (I := I) g p)
     (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
     g.inner (expMap (I := I) g p (show TangentSpace I p from v))
         (mfderiv 𝓘(ℝ, E) I
@@ -1335,7 +1334,6 @@ theorem expMap_normalChartAt (g : SmoothRiemannianMetric I M) (p : M) {x : M}
 set_option linter.unusedSectionVars false in
 private theorem gauss_radial_lower_bound
     (g : SmoothRiemannianMetric I M) (p : M) {u : E}
-    (hu : (show TangentSpace I p from u) ∈ expDomain (I := I) g p)
     (hsmall : ‖(u : E)‖ < expMapC2Radius (I := I) g p)
     (hune : u ≠ 0) (ζ : E) :
     (g.inner p u ζ)^2 / g.inner p u u ≤
@@ -1347,7 +1345,7 @@ private theorem gauss_radial_lower_bound
           (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
           (show TangentSpace I p from ζ)) := by
   classical
-  obtain ⟨hdiag, hcross⟩ := gauss_lemma_pullback (I := I) g p hu hsmall
+  obtain ⟨hdiag, hcross⟩ := gauss_lemma_pullback (I := I) g p hsmall
   set q := expMap (I := I) g p (show TangentSpace I p from u) with hq
   set D : E →L[ℝ] E :=
     mfderiv 𝓘(ℝ, E) I (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
@@ -1390,7 +1388,6 @@ private theorem gauss_radial_lower_bound
 set_option linter.unusedSectionVars false in
 theorem gauss_radial_lower_bound_eq_iff
     (g : SmoothRiemannianMetric I M) (p : M) {u : E}
-    (hu : (show TangentSpace I p from u) ∈ expDomain (I := I) g p)
     (hsmall : ‖(u : E)‖ < expMapC2Radius (I := I) g p)
     (hune : u ≠ 0) (ζ : E) :
     (g.inner p u ζ)^2 / g.inner p u u =
@@ -1406,7 +1403,7 @@ theorem gauss_radial_lower_bound_eq_iff
           (show TangentSpace I p from
             (ζ - (g.inner p u ζ / g.inner p u u) • u)) = 0 := by
   classical
-  obtain ⟨hdiag, hcross⟩ := gauss_lemma_pullback (I := I) g p hu hsmall
+  obtain ⟨hdiag, hcross⟩ := gauss_lemma_pullback (I := I) g p hsmall
   set q := expMap (I := I) g p (show TangentSpace I p from u) with hq
   set D : E →L[ℝ] E :=
     mfderiv 𝓘(ℝ, E) I (fun y : E => expMap (I := I) g p (show TangentSpace I p from y)) u
@@ -1506,8 +1503,6 @@ theorem gauss_pointwise_speed_lower_bound
     (g : SmoothRiemannianMetric I M) (p : M) {γ : ℝ → M} {t : ℝ}
     (hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t)
     (hsrc : γ t ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
-    (hdom : (show TangentSpace I p from (NormalCoordinates.normalChartAt (I := I) g p (γ t)))
-      ∈ expDomain (I := I) g p)
     (hball : ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
       expMapC2Radius (I := I) g p)
     (hune : NormalCoordinates.normalChartAt (I := I) g p (γ t) ≠ 0)
@@ -1522,7 +1517,7 @@ theorem gauss_pointwise_speed_lower_bound
   have hbase : γ t = expMap (I := I) g p
       (show TangentSpace I p from (NormalCoordinates.normalChartAt (I := I) g p (γ t))) :=
     (expMap_normalChartAt (I := I) g p hsrc).symm
-  have hkernel := gauss_radial_lower_bound (I := I) g p hdom hball hune
+  have hkernel := gauss_radial_lower_bound (I := I) g p hball hune
     (mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
       (fun s => NormalCoordinates.normalChartAt (I := I) g p (γ s)) t (1:ℝ))
   rw [← hbase] at hkernel

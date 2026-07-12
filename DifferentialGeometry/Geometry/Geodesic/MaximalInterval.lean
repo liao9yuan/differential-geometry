@@ -346,13 +346,7 @@ private lemma continuousOn_g_speedSq_velocityWithin
 set_option linter.unusedSectionVars false in
 lemma speedSqrt_integrableOn_Icc_of_C1
     (g : SmoothRiemannianMetric I M) {η : ℝ → M} {a b : ℝ} (hab : a ≤ b)
-    (hη : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc a b))
-    (_hEnorm : ∀ t ∈ Set.Icc a b,
-        ‖mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ)‖ₑ
-          = ENNReal.ofReal (Real.sqrt
-              (g.inner (η t)
-                (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))
-                (mfderiv 𝓘(ℝ, ℝ) I η t (1 : ℝ))))) :
+    (hη : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc a b)) :
     MeasureTheory.IntegrableOn
       (fun t : ℝ => Real.sqrt
         (g.inner (η t)

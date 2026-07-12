@@ -55,7 +55,7 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       tangentSectionAction (I := I) X f x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf X x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g X x]
     change g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x) =
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)
     exact g.symm x _ _
@@ -100,7 +100,7 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
       tangentSectionAction (I := I) X h x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hh X x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g X x]
     rfl
   have hRHS_eq : ∀ x : M,
       h x * divergence_g_with_boundary (I := I) g X x =

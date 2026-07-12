@@ -211,7 +211,6 @@ set_option linter.unusedSectionVars false in
 private theorem trivializationAt_separableFormBundleSection_eval_basis
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) {b : M}
-    (_hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (ψ : Fin r → Fin (Module.finrank ℝ E)) :
     (trivializationAt (Tensor0SModel r ℝ E)
         (fun y : M => Tensor0SSpace r I y) α
@@ -262,9 +261,9 @@ private lemma contMDiffOn_separableFormBundleSection
     refine contMDiffOn_finset_prod (fun k _ => ?_)
     exact chartGramMatrix_entry_contMDiffOn (I := I) g α (φ_first k) (ψ k)
 
-  refine h_prod_smooth.congr (fun b hb => ?_)
+  refine h_prod_smooth.congr (fun b _hb => ?_)
   exact trivializationAt_separableFormBundleSection_eval_basis
-    (I := I) (M := M) g r α φ_first hb ψ
+    (I := I) (M := M) g r α φ_first ψ
 
 set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_lower_at_chartBasis_aux_general

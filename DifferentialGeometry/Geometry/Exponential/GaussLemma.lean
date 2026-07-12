@@ -136,7 +136,7 @@ private theorem radialDist_endpoint_le_pathELength
     (hbball : ∀ t ∈ Set.Icc a b,
       ‖NormalCoordinates.normalChartAt (I := I) g p (γ t)‖ <
         expMapC2Radius (I := I) g p)
-    (hdom : ∀ t ∈ Set.Icc a b,
+    (_hdom : ∀ t ∈ Set.Icc a b,
       (show TangentSpace I p from
           NormalCoordinates.normalChartAt (I := I) g p (γ t))
         ∈ expDomain (I := I) g p) :
@@ -317,7 +317,7 @@ private theorem radialDist_endpoint_le_pathELength
       have hball : ‖ψ (γ x)‖ < expMapC2Radius (I := I) g p := hbball x hxIcc
       have hune : ψ (γ x) ≠ 0 := hcx
       have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
-        (hsrc x hxIcc) (hdom x hxIcc) hball hune hev
+        (hsrc x hxIcc) hball hune hev
       have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
           (fun s => ψ (γ s)) x (1 : ℝ) := rfl
       have hρ'sq_le : ρ' ^ 2 ≤
@@ -846,9 +846,6 @@ private theorem radial_minimizer_radiality
       (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1)
       (mfderivWithin 𝓘(ℝ, ℝ) I γ (Set.Icc a b) t 1))
     with hφ_def
-  have hdom : ∀ t ∈ Set.Icc a b,
-      (show TangentSpace I p from ψ (γ t)) ∈ expDomain (I := I) g p :=
-    fun t ht => mem_expDomain_of_norm_lt_radius (I := I) g p (hbball t ht)
   have hγcont : ContinuousOn γ (Set.Icc a b) := hγ.continuousOn
   have hψcont : ContinuousOn ψ ψ.source :=
     (NormalCoordinates.normalChartAt_contMDiffOn (I := I) g p).continuousOn
@@ -1008,7 +1005,7 @@ private theorem radial_minimizer_radiality
       have hball : ‖ψ (γ x)‖ < expMapC2Radius (I := I) g p := hbball x hxIcc
       have hune : ψ (γ x) ≠ 0 := hcx
       have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
-        (hsrc x hxIcc) (hdom x hxIcc) hball hune hev
+        (hsrc x hxIcc) hball hune hev
       have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E)
           (fun s => ψ (γ s)) x (1 : ℝ) := rfl
       have hρ'sq_le : ρ' ^ 2 ≤
@@ -1157,7 +1154,7 @@ private theorem radial_minimizer_radiality
       filter_upwards [hopen] with s hs using hsrc s (Ioo_subset_Icc_self hs)
     have hball : ‖ψ (γ t)‖ < expMapC2Radius (I := I) g p := hbball t htIcc
     have hgauss := gauss_pointwise_speed_lower_bound (I := I) g p hγdiff
-      (hsrc t htIcc) (hdom t htIcc) hball hne hev
+      (hsrc t htIcc) hball hne hev
     have hcv₂_eq : cv₂ = mfderiv 𝓘(ℝ, ℝ) 𝓘(ℝ, E) (fun s => ψ (γ s)) t (1 : ℝ) := rfl
     have hφt_sq : φ t ^ 2 =
         g.inner (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
@@ -1199,7 +1196,7 @@ private theorem radial_minimizer_radiality
               (fun y : E => (expMap (I := I) g p (show TangentSpace I p from y) : M)) (ψ (γ t))
               (show TangentSpace I p from cv₂)) := by
       rw [hRHS]; exact htight
-    have hiff := gauss_radial_lower_bound_eq_iff (I := I) g p (hdom t htIcc) hball hne cv₂
+    have hiff := gauss_radial_lower_bound_eq_iff (I := I) g p hball hne cv₂
     have horth_dexp := hiff.mp hgauss_eq
     have hinj := mfderiv_expMap_injective_of_norm_lt_radius (I := I) g p hball
     have horth_zero :

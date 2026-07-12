@@ -84,7 +84,7 @@ private lemma inner_grad_grad_continuous_of_interior_support
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) =
         tangentSectionAction (I := I) Y f x := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf Y x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g Y x]
     change g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) =
       g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x)
     exact g.symm x _ _
@@ -214,7 +214,7 @@ theorem green_first_with_boundary
       tangentSectionAction (I := I) X f x =
         g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x) := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g hf X x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I) g X x]
     change g.inner x (gradFun (I := I) g h x) (gradFun (I := I) g f x) =
       g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g h x)
     exact g.symm x _ _

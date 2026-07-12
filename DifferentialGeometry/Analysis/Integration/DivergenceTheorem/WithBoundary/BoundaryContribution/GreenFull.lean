@@ -314,7 +314,7 @@ theorem green_first_eq_boundary_surface_integral
           (gradFun (I := I') g f x)
           (gradFun (I := I') g h x) := by
     intro x
-    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I') g hf X x]
+    rw [tangentSectionAction_grad_g_with_boundary_eq_inner (I := I') g X x]
     change g.inner x
         (gradFun (I := I') g h x)
         (gradFun (I := I') g f x) =
