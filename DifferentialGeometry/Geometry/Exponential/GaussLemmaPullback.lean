@@ -38,7 +38,6 @@ section GaussLemma
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-set_option linter.unusedSectionVars false in
 theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -124,7 +123,6 @@ theorem radial_maximalGeodesic_hasGeodesicEquationAt_of_small
     (γ' := fun s : ℝ => (F s).proj) (t₀ := t)
     (hF_proj t ht_J).symm hEvEq hgeoEqF
 
-set_option linter.unusedSectionVars false in
 theorem radial_maximalGeodesic_cont_and_foot_in_source_of_small
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ ρ : ℝ, 0 < ρ ∧
@@ -202,7 +200,6 @@ def expMapC2Radius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
         (Classical.choose
           (exists_metric_ball_subset_expMapDiffeo_source (I := I) g p))))
 
-set_option linter.unusedSectionVars false in
 lemma expMapC2Radius_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < expMapC2Radius (I := I) g p := by
   rw [expMapC2Radius, lt_min_iff, lt_min_iff, lt_min_iff]
@@ -216,7 +213,6 @@ lemma expMapC2Radius_pos (g : SmoothRiemannianMetric I M) (p : M) :
   · exact (Classical.choose_spec
       (exists_metric_ball_subset_expMapDiffeo_source (I := I) g p)).1
 
-set_option linter.unusedSectionVars false in
 lemma expMap_contMDiffAt2_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {w : E}
     (hw : ‖w‖ < expMapC2Radius (I := I) g p) :
@@ -226,7 +222,6 @@ lemma expMap_contMDiffAt2_of_norm_lt_radius
     (Exponential.expMap_contMDiffAt2_of_norm_lt (I := I) g p)).2 w
     (lt_of_lt_of_le hw (min_le_left _ _))
 
-set_option linter.unusedSectionVars false in
 lemma radial_hasGeodesicEquationAt_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
     (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Ioo (-1 : ℝ) 2) :
@@ -236,7 +231,6 @@ lemma radial_hasGeodesicEquationAt_of_norm_lt_radius
     (radial_maximalGeodesic_hasGeodesicEquationAt_of_small (I := I) g p)).2
     (lt_of_lt_of_le hv (le_trans (min_le_right _ _) (min_le_left _ _))) t ht
 
-set_option linter.unusedSectionVars false in
 lemma maximalGeodesic_rescale_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {v : TangentSpace I p}
     (hv : ‖(v : E)‖ < expMapC2Radius (I := I) g p) (t : ℝ) (ht : t ∈ Set.Icc (0 : ℝ) 1) :
@@ -246,7 +240,6 @@ lemma maximalGeodesic_rescale_of_norm_lt_radius
     (lt_of_lt_of_le hv
       (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_left _ _)))) t ht
 
-set_option linter.unusedSectionVars false in
 lemma ball_subset_normalChartAt_target
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -258,7 +251,6 @@ lemma ball_subset_normalChartAt_target
   exact lt_of_lt_of_le hx
     (le_trans (min_le_right _ _) (le_trans (min_le_right _ _) (min_le_right _ _)))
 
-set_option linter.unusedSectionVars false in
 lemma mem_expDomain_of_norm_lt_radius
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hx : ‖x‖ < expMapC2Radius (I := I) g p) :
@@ -283,7 +275,8 @@ lemma mem_expDomain_of_norm_lt_radius
       (NormalCoordinates.expMapDiffeo (I := I) g p).toPartialEquiv.injOn
     exact hx0 (hinj hsrc h0src (by rw [hΦx, hΦ0]))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+  [T2Space (TangentBundle I M)] in
 private lemma metric_coercive_at_point (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ c : ℝ, 0 < c ∧ ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x := by
   classical
@@ -332,12 +325,14 @@ private lemma metric_coercive_at_point (g : SmoothRiemannianMetric I M) (p : M) 
 def metricCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
   Classical.choose (metric_coercive_at_point (I := I) g p)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+  [T2Space (TangentBundle I M)] in
 lemma metricCoerciveConst_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < metricCoerciveConst (I := I) g p :=
   (Classical.choose_spec (metric_coercive_at_point (I := I) g p)).1
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E]
+  [T2Space (TangentBundle I M)] in
 lemma metricCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     metricCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
   (Classical.choose_spec (metric_coercive_at_point (I := I) g p)).2 x
@@ -345,14 +340,12 @@ lemma metricCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
 def metricCoerciveExpRadius (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
   Real.sqrt (metricCoerciveConst (I := I) g p) * expMapC2Radius (I := I) g p
 
-set_option linter.unusedSectionVars false in
 lemma expRadiusGp_pos (g : SmoothRiemannianMetric I M) (p : M) :
     0 < metricCoerciveExpRadius (I := I) g p := by
   rw [metricCoerciveExpRadius]
   exact mul_pos (Real.sqrt_pos.mpr (metricCoerciveConst_pos (I := I) g p))
     (expMapC2Radius_pos (I := I) g p)
 
-set_option linter.unusedSectionVars false in
 lemma norm_lt_expMapC2Radius_of_sqrt_inner_lt
     (g : SmoothRiemannianMetric I M) (p : M) {x : E}
     (hx : Real.sqrt (g.inner p x x) < metricCoerciveExpRadius (I := I) g p) :
@@ -424,7 +417,7 @@ private lemma velocityChartRep_differentiableAt_of_contMDiffAt2
     exact hbridge
   exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 private lemma speedSq_hasDerivAt_zero_of_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t₀ : ℝ)
     (hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t₀)
@@ -446,7 +439,6 @@ private lemma speedSq_hasDerivAt_zero_of_geodesic
     rw [hzero]; simp
   rw [← hval]; exact hmc
 
-set_option linter.unusedSectionVars false in
 lemma radialCurve_contMDiffAt2
     (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)
     (ht₀ : ‖t₀ • a‖ < expMapC2Radius (I := I) g p) :
@@ -460,7 +452,6 @@ lemma radialCurve_contMDiffAt2
     expMap_contMDiffAt2_of_norm_lt_radius (I := I) g p ht₀
   exact hexp.comp t₀ hbase
 
-set_option linter.unusedSectionVars false in
 private lemma radialCurve_hasGeodesicEquationAt
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
@@ -480,7 +471,6 @@ private lemma radialCurve_hasGeodesicEquationAt
     exact maximalGeodesic_rescale_of_norm_lt_radius (I := I) g p ha u hu01
   exact HasGeodesicEquationAt.congr_of_eventuallyEq_at hEvEq.eq_of_nhds hEvEq hgeo
 
-set_option linter.unusedSectionVars false in
 private lemma radialCurve_launch_velocity
     (g : SmoothRiemannianMetric I M) (p : M) (a : E) :
     mfderiv 𝓘(ℝ, ℝ) I
@@ -519,7 +509,6 @@ private def radialSpeedSq (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t : 
     (mfderiv 𝓘(ℝ, ℝ) I
       (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) t (1 : ℝ))
 
-set_option linter.unusedSectionVars false in
 private lemma radialSpeedSq_hasDerivAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
@@ -536,7 +525,6 @@ private lemma radialSpeedSq_hasDerivAt_zero
     (radialCurve_contMDiffAt2 (I := I) g p a t₀ hnorm)
     (radialCurve_hasGeodesicEquationAt (I := I) g p a ha t₀ ht₀)
 
-set_option linter.unusedSectionVars false in
 lemma radialSpeedSq_eq_inner
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
@@ -752,7 +740,6 @@ private lemma gaussClamp_contMDiff (δ : ℝ) :
   rw [contMDiff_iff_contDiff]
   exact contDiff_const.mul (Real.contDiff_arctan.comp (contDiff_id.div_const δ))
 
-set_option linter.unusedSectionVars false in
 private lemma gauss_phi_hasDerivAt
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) (δ : ℝ) (hδ : 0 < δ)
     (hsmall : ‖v‖ < expMapC2Radius (I := I) g p)
@@ -997,7 +984,6 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-set_option linter.unusedSectionVars false in
 private lemma radialCurve_mfderiv_chain
     (g : SmoothRiemannianMetric I M) (p : M) (a : E) (t₀ : ℝ)
     (ht : ‖t₀ • a‖ < expMapC2Radius (I := I) g p) :
@@ -1029,7 +1015,6 @@ private lemma radialCurve_mfderiv_chain
     rw [ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.one_apply, one_smul]
   rw [hlaunch]
 
-set_option linter.unusedSectionVars false in
 private lemma gauss_phi_continuousOn
     (g : SmoothRiemannianMetric I M) (p : M) (v w : E) (δ : ℝ)
     (hsmall : ‖v‖ < expMapC2Radius (I := I) g p) :
@@ -1132,7 +1117,6 @@ private lemma gauss_phi_continuousOn
   exact Variation.continuousOn_g_inner_along_curve (I := I) g hsecV hsecW
 
 
-set_option linter.unusedSectionVars false in
 theorem gauss_lemma_pullback
     (g : SmoothRiemannianMetric I M) (p : M) {v : E}
     (hsmall : ‖(v : E)‖ < expMapC2Radius (I := I) g p) :
@@ -1320,7 +1304,6 @@ section RadialLengthEngine
 
 open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
 
-set_option linter.unusedSectionVars false in
 theorem expMap_normalChartAt (g : SmoothRiemannianMetric I M) (p : M) {x : M}
     (hx : x ∈ (NormalCoordinates.normalChartAt (I := I) g p).source) :
     (expMap (I := I) g p
@@ -1331,7 +1314,6 @@ theorem expMap_normalChartAt (g : SmoothRiemannianMetric I M) (p : M) {x : M}
   have h1 := NormalCoordinates.normalChartAt_left_inv (I := I) g p hx
   rw [← h2, h1]
 
-set_option linter.unusedSectionVars false in
 private theorem gauss_radial_lower_bound
     (g : SmoothRiemannianMetric I M) (p : M) {u : E}
     (hsmall : ‖(u : E)‖ < expMapC2Radius (I := I) g p)
@@ -1385,7 +1367,6 @@ private theorem gauss_radial_lower_bound
   rw [hlhs]
   nlinarith [hββ_nn, mul_nonneg (sq_nonneg α) hupos.le]
 
-set_option linter.unusedSectionVars false in
 theorem gauss_radial_lower_bound_eq_iff
     (g : SmoothRiemannianMetric I M) (p : M) {u : E}
     (hsmall : ‖(u : E)‖ < expMapC2Radius (I := I) g p)
@@ -1448,7 +1429,6 @@ theorem gauss_radial_lower_bound_eq_iff
   change ((B u ζ) ^ 2 / B u u = Bq (D ζ) (D ζ)) ↔ D β = 0
   rw [hiff_seminorm, hiff_zero]
 
-set_option linter.unusedSectionVars false in
 theorem radial_chain_mfderiv
     (g : SmoothRiemannianMetric I M) (p : M) {γ : ℝ → M} {t : ℝ}
     (hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t)
@@ -1498,7 +1478,6 @@ theorem radialDist_hasDerivAt
       mul_div_mul_left _ _ (by norm_num : (2:ℝ) ≠ 0)]
   rwa [hcoef] at hsqrt
 
-set_option linter.unusedSectionVars false in
 theorem gauss_pointwise_speed_lower_bound
     (g : SmoothRiemannianMetric I M) (p : M) {γ : ℝ → M} {t : ℝ}
     (hγdiff : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t)
