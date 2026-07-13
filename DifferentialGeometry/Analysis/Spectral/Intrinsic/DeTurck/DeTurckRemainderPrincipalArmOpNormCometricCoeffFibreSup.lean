@@ -551,6 +551,7 @@ private lemma kscr_traceHessianCoeff_sub_eq_reindex_pcc
     traceHessianFib, traceHessianFib, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.comp_apply, domDomCongrFib_apply]
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option maxHeartbeats 1600000 in

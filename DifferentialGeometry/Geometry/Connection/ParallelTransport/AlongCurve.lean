@@ -688,6 +688,7 @@ lemma fderiv_chartGramOnE_eq_sum_partialDeriv
   rw [map_smul, smul_eq_mul]
   rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_comp_chartCurve_hasDerivAt
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (i j : Fin (Module.finrank ℝ E)) {uPrime : ℝ → E} {t : ℝ}

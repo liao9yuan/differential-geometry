@@ -64,6 +64,7 @@ lemma extDerivFun_comp_extChartAt_apply_basis_alpha [I.Boundaryless]
     (fderiv ℝ gE (extChartAt I α x)) ((chartModelBasis E) a)
   rw [hscalar_eq.fderiv_eq]
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartChristoffel_contDiffAt_alpha
     (g : SmoothRiemannianMetric I M) (α : M)

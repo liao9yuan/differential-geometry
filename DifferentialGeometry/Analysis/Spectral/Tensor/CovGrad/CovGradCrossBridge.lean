@@ -45,7 +45,6 @@ noncomputable def prependCovGradSlot (g : SmoothRiemannianMetric I M) (r s : ℕ
     scalarSmul (I := I) (M := M) g r (s + 1) ζ
       (covGrad (I := I) (M := M) g r s S)
 
-set_option linter.unusedSectionVars false in
 lemma prependCovGradSlot_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) :
@@ -61,7 +60,7 @@ private noncomputable def prependGradCLM
     TangentSpace I x →L[ℝ] TensorRSSpace r s I x :=
   (extDerivFun (I := I) (ζ : M → ℝ) x).smulRight (S.toSection x)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma prependGradCLM_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -69,7 +68,7 @@ private lemma prependGradCLM_apply
       (extDerivFun (I := I) (ζ : M → ℝ) x v) • S.toSection x := by
   rw [prependGradCLM, ContinuousLinearMap.smulRight_apply]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smulRight_add_right (r s : ℕ) {x : M}
     (φ : TangentSpace I x →L[ℝ] ℝ) (t₁ t₂ : TensorRSSpace r s I x) :
     φ.smulRight (t₁ + t₂) = φ.smulRight t₁ + φ.smulRight t₂ := by
@@ -79,7 +78,7 @@ private lemma smulRight_add_right (r s : ℕ) {x : M}
     ContinuousLinearMap.smulRight_apply, ContinuousLinearMap.smulRight_apply,
     smul_add]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma smulRight_smul_right (r s : ℕ) {x : M}
     (φ : TangentSpace I x →L[ℝ] ℝ) (c : ℝ) (t : TensorRSSpace r s I x) :
     φ.smulRight (c • t) = c • φ.smulRight t := by
@@ -88,7 +87,6 @@ private lemma smulRight_smul_right (r s : ℕ) {x : M}
   rw [ContinuousLinearMap.smul_apply, ContinuousLinearMap.smulRight_apply,
     ContinuousLinearMap.smulRight_apply, smul_comm]
 
-set_option linter.unusedSectionVars false in
 private lemma prependGradCLM_eq_sub
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M) :
@@ -115,7 +113,6 @@ private lemma prependGradCLM_eq_sub
   rw [tensorCovDerivAt_scalarSmul (I := I) (M := M) g r s ζ S x v]
   rw [add_sub_cancel_left]
 
-set_option linter.unusedSectionVars false in
 theorem prependCovGradSlot_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M) :
@@ -136,7 +133,6 @@ theorem prependCovGradSlot_toSection_apply
   rw [← prependGradCLM_eq_sub (I := I) (M := M) g r s ζ S x]
   rw [prependGradCLM]
 
-set_option linter.unusedSectionVars false in
 theorem prependCovGradSlot_toSection_apply_eval
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M)
@@ -153,7 +149,6 @@ theorem prependCovGradSlot_toSection_apply_eval
     ((extDerivFun (I := I) (ζ : M → ℝ) x).smulRight (S.toSection x)) D v]
   rw [ContinuousLinearMap.smulRight_apply]
 
-set_option linter.unusedSectionVars false in
 theorem prependCovGradSlot_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S₁ S₂ : SmoothCcTensor g r s) :
@@ -172,7 +167,6 @@ theorem prependCovGradSlot_add
   rw [show ((S₁ + S₂).toSection x) = S₁.toSection x + S₂.toSection x from rfl,
     smulRight_add_right (I := I) r s, map_add]
 
-set_option linter.unusedSectionVars false in
 theorem prependCovGradSlot_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (c : ℝ) (S : SmoothCcTensor g r s) :
@@ -187,7 +181,6 @@ theorem prependCovGradSlot_smul
   rw [show ((c • S).toSection x) = c • S.toSection x from rfl,
     smulRight_smul_right (I := I) r s, map_smul]
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem prependCovGradSlot_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) :
@@ -195,7 +188,7 @@ set_option linter.unusedSectionVars false in
   have h := prependCovGradSlot_smul (I := I) (M := M) g r s ζ (0 : ℝ) 0
   rwa [zero_smul, zero_smul] at h
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma crossLeft_tensorRSSpace_toModel_apply
     (r s : ℕ) (x : M) (T : TensorRSSpace r s I x)
     (Dm : Tensor0SModel r ℝ E) :
@@ -206,7 +199,6 @@ private lemma crossLeft_tensorRSSpace_toModel_apply
           (Tensor0SSpace.ofModel Dm)) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma crossLeft_covGrad_toModel_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M)
@@ -226,7 +218,6 @@ private lemma crossLeft_covGrad_toModel_apply
   rw [crossLeft_tensorRSSpace_toModel_apply (I := I) r s x
         (tensorCovDerivAt (I := I) (M := M) g r s w x (v 0)) Dm]
 
-set_option linter.unusedSectionVars false in
 private lemma crossLeft_prependCovGradSlot_toModel_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M)
@@ -284,7 +275,6 @@ private lemma crossDiffSlot_succAbove_natAdd (r s : ℕ) (a : Fin s) :
   simp only [Fin.val_succ, Fin.val_natAdd]
   omega
 
-set_option linter.unusedSectionVars false in
 private lemma crossLeft_lower_covGrad_insertNth_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (w : SmoothCcTensor g r s) (x : M)
@@ -330,7 +320,6 @@ private lemma crossLeft_lower_covGrad_insertNth_basis
         (fun j : Fin (s + 1) => (chartModelBasis E) (I' (Fin.natAdd r j)))]
   rw [hdir, hupper, hcov]
 
-set_option linter.unusedSectionVars false in
 private lemma crossLeft_lower_prependCovGradSlot_insertNth_basis
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (S : SmoothCcTensor g r s) (x : M)
@@ -375,7 +364,7 @@ private lemma crossLeft_lower_prependCovGradSlot_insertNth_basis
         (fun a : Fin (s + 1) => (chartModelBasis E) (J' (Fin.natAdd r a)))]
   rw [hdir, hupper, hcov, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma crossLeft_gramInv_prod_insertNth_split
     (g : SmoothRiemannianMetric I M) (x : M) (r s : ℕ)
     (k l : Fin (Module.finrank ℝ E))
@@ -428,7 +417,6 @@ private lemma crossLeft_sum_reindex_diffSlot (r s : ℕ)
         (crossDiffSlot r s)) F).symm
   rw [h1, Fintype.sum_prod_type]
 
-set_option linter.unusedSectionVars false in
 theorem tensorCovDerivCrossLeft_eq_tensorInnerPointwise_grad
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :

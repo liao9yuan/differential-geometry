@@ -504,6 +504,7 @@ lemma extChartAt_proj_contMDiffOn (α : M) :
     fun _ hp => hp
   exact hchart.comp hproj hsubset
 
+set_option linter.unusedSectionVars false in
 lemma chartChristoffel_extChartAt_proj_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :

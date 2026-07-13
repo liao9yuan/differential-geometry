@@ -68,6 +68,7 @@ def ChartGramFamilyJointSmoothNondegenerate (S : Set ℝ) : Prop :=
       ∀ {x : M}, x ∈ (trivializationAt E (TangentSpace I) α).baseSet →
       0 < (chartGramMatrix (I := I) (gfam s₀) α x).det)
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma chartInvGramOnE_contDiffAt_joint {S : Set ℝ} (hG : ChartGramFamilyJointSmoothNondegenerate (I := I) gfam α S)
     (k l : Fin (Module.finrank ℝ E)) {s₀ : ℝ} {y₀ : E} (hs : s₀ ∈ S)

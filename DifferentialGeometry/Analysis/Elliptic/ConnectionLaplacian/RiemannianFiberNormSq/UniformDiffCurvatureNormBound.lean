@@ -39,7 +39,7 @@ private lemma metric_inner_self_nonneg
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_eq_of_leftMidRight
     (g : SmoothRiemannianMetric I M)
     (X X' Y Y' Z Z' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M)
@@ -62,7 +62,7 @@ private lemma nablaBaseSlotCurv_eq_of_leftMidRight
   congr 1
   exact nablaBaseSlotCurv_eq_of_leftMid (I := I) g X' X' Z Z' Y' x rfl hZZ' u
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma nablaBaseSlotCurv_chartBasisVec_alpha_value
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s : Fin (Module.finrank ℝ E)) {x : M}
@@ -131,7 +131,7 @@ private lemma nablaBaseSlotCurv_chartBasisVec_alpha_value
   exact nablaCurvSec_chartBasisVec_alpha_frame_expand (I := I) g α p q r s hx
     hXp_sm hXq_sm hXr_sm hXs_sm hU_open hxU hU_good hXp_eqU hXq_eqU hXr_eqU hXs_eqU
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_zero_left
     (g : SmoothRiemannianMetric I M)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -140,7 +140,7 @@ private lemma nablaBaseSlotCurv_zero_left
   rw [add_zero] at h
   exact add_eq_left.mp h.symm
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_zero_Z
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -161,7 +161,7 @@ private lemma nablaBaseSlotCurv_zero_Z
   rw [add_zero] at h
   rw [add_eq_left.mp h.symm, neg_zero]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_finsetSum_left
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X : ι → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -174,7 +174,7 @@ private lemma nablaBaseSlotCurv_finsetSum_left
   | insert a s ha ih =>
       rw [Finset.sum_insert ha, nablaBaseSlotCurv_add_left, ih, Finset.sum_insert ha]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_finsetSum_right
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -192,7 +192,7 @@ private lemma nablaBaseSlotCurv_finsetSum_right
   | insert a s ha ih =>
       rw [Finset.sum_insert ha, nablaBaseSlotCurv_add_right, ih, Finset.sum_insert ha]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_smul_Z
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (u : TangentSpace I x) :
@@ -209,7 +209,7 @@ private lemma nablaBaseSlotCurv_smul_Z
     exact nablaCurvSec_swap23 (g := g) Y.contMDiff W.contMDiff hext
   rw [hswap (c • Z), nablaBaseSlotCurv_smul_right, hswap Z, smul_neg]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma nablaBaseSlotCurv_finsetSum_Z
     (g : SmoothRiemannianMetric I M) {ι : Type*} (t : Finset ι)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -267,7 +267,7 @@ private def chartFrameExtSection
   ContMDiffSection.mk (smoothExtensionTangent (I := I) x (chartBasisVecFiber (I := I) α p x))
     (smoothExtensionTangent_contMDiff (I := I) x (chartBasisVecFiber (I := I) α p x))
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [SigmaCompactSpace M] in
 private lemma chartFrameExtSection_value
     (α : M) (p : Fin (Module.finrank ℝ E)) (x : M) :
     (chartFrameExtSection (I := I) α p x : Π b : M, TangentSpace I b) x =
@@ -275,6 +275,7 @@ private lemma chartFrameExtSection_value
   change smoothExtensionTangent (I := I) x (chartBasisVecFiber (I := I) α p x) x = _
   rw [smoothExtensionTangent_eq]
 
+omit [CompactSpace M] in
 private lemma nablaBaseSlotCurv_chartCoord_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -439,7 +440,7 @@ private def nablaChartRiemannEuclid (g : SmoothRiemannianMetric I M) (α : M)
     EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ :=
   fun y => nablaChartRiemannCoeff (I := I) g α p q r s l (toEuclidean.symm y)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma nablaChartRiemannEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (p q r s l : Fin (Module.finrank ℝ E)) :
@@ -463,6 +464,7 @@ private lemma nablaChartRiemannEuclid_contDiffOn
         (I := I) (M := M) hy
   exact hcomp
 
+omit [BoundarylessManifold I M] in
 private lemma exists_nablaChartRiemannData_uniform_bound_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -516,7 +518,7 @@ private lemma exists_nablaChartRiemannData_uniform_bound_pouTsupport
     _ ≤ C := hidx_le
 
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [BoundarylessManifold I M] in
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆
@@ -605,6 +607,7 @@ private lemma sum4_prod_factor {ι : Type*} [Fintype ι] (F G H K : ι → ℝ) 
       rw [← Finset.sum_mul, ← Finset.sum_mul, ← Finset.mul_sum])
   rw [hq, ← Finset.sum_mul, ← Finset.sum_mul, ← Finset.sum_mul]
 
+omit [CompactSpace M] in
 private lemma W_chartFrame_expand
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -644,6 +647,7 @@ private lemma diffCurv_arith_core
         gcongr
     _ = CR ^ 2 * (N ^ 6 * G ^ 4) * U := by ring
 
+omit [CompactSpace M] in
 private lemma nablaBaseSlotCurv_frameSum_normSq_le_chartConstants_mul_normSq_u
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx_base : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)

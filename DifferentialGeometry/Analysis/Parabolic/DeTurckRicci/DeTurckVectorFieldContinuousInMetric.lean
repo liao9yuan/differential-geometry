@@ -101,6 +101,7 @@ theorem chartGramOnE_adjugate_continuous_in_metric_at
     intro t _
     rfl
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartInvGramOnE_continuous_in_metric_at
     (g_DT : ℝ → SmoothRiemannianMetric I M) (α : M) (y : E)

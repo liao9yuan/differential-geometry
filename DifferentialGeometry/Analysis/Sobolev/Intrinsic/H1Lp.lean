@@ -60,7 +60,7 @@ private lemma g_inner_neg_left
     g.inner x (-v) y = - g.inner x v y := by
   rw [map_neg, ContinuousLinearMap.neg_apply]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_norm_const_smul
     (g : SmoothRiemannianMetric I M) (x : M) (c : ℝ) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (c • v) (c • v)) =
@@ -71,14 +71,14 @@ private lemma g_norm_const_smul
   rw [Real.sqrt_mul (sq_nonneg c)]
   rw [Real.sqrt_sq_eq_abs]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_norm_neg
     (g : SmoothRiemannianMetric I M) (x : M) (v : TangentSpace I x) :
     Real.sqrt (g.inner x (-v) (-v)) = Real.sqrt (g.inner x v v) := by
   rw [g_inner_neg_left g x v (-v), map_neg]
   simp
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma g_norm_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     Real.sqrt (g.inner x (v + w) (v + w)) ≤
@@ -164,7 +164,7 @@ private lemma g_norm_triangle
       from Real.sqrt_sq h_nn] at h_sqrt_le
   exact h_sqrt_le
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem hasWeakRiemannianGradLp_congr_ae
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {u u' : M → ℝ} {G G' : M → E}
@@ -197,7 +197,7 @@ theorem hasWeakRiemannianGradLp_congr_ae
     rw [integral_congr_ae hLHS, integral_congr_ae hRHS]
     exact h.2 X hX
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem memLp_g_norm_congr_ae
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {G G' : M → E} {p : ℝ≥0∞}
@@ -221,7 +221,7 @@ namespace PairAEMeasurable
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem zero (g : SmoothRiemannianMetric I M) :
     PairAEMeasurable (I := I) (M := M) g (fun _ : M => (0 : E)) := by
   intro V _
@@ -234,7 +234,7 @@ theorem zero (g : SmoothRiemannianMetric I M) :
   rw [hcongr]
   exact aestronglyMeasurable_const
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem add {g : SmoothRiemannianMetric I M} {G G' : M → E}
     (hG : PairAEMeasurable (I := I) (M := M) g G)
     (hG' : PairAEMeasurable (I := I) (M := M) g G') :
@@ -248,7 +248,7 @@ theorem add {g : SmoothRiemannianMetric I M} {G G' : M → E}
   rw [hcongr]
   exact (hG V hV).add (hG' V hV)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem const_smul {g : SmoothRiemannianMetric I M} {G : M → E} (c : ℝ)
     (hG : PairAEMeasurable (I := I) (M := M) g G) :
     PairAEMeasurable (I := I) (M := M) g (fun x => c • G x) := by
@@ -261,7 +261,7 @@ theorem const_smul {g : SmoothRiemannianMetric I M} {G : M → E} (c : ℝ)
   rw [hcongr]
   exact (hG V hV).const_mul c
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem neg {g : SmoothRiemannianMetric I M} {G : M → E}
     (hG : PairAEMeasurable (I := I) (M := M) g G) :
     PairAEMeasurable (I := I) (M := M) g (fun x => -G x) := by
@@ -271,7 +271,7 @@ theorem neg {g : SmoothRiemannianMetric I M} {G : M → E}
   rw [heq] at h
   exact h
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [CompactSpace M] in
 theorem congr_ae {g : SmoothRiemannianMetric I M} {G G' : M → E}
     (hG : G =ᵐ[riemannianVolumeMeasure I M g] G')
     (h : PairAEMeasurable (I := I) (M := M) g G) :
@@ -300,7 +300,7 @@ namespace MemH1Lp
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem zero (g : SmoothRiemannianMetric I M) :
     MemH1Lp (I := I) (M := M) g (0 : Lp ℝ 2 (riemannianVolumeMeasure I M g)) := by
   refine ⟨(0 : Lp E 2 (riemannianVolumeMeasure I M g)), ?_, ?_, ?_⟩
@@ -343,7 +343,6 @@ theorem zero (g : SmoothRiemannianMetric I M) :
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h0G.symm
       (PairAEMeasurable.zero (I := I) (M := M) g)
 
-set_option linter.unusedSectionVars false in
 theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u) :
@@ -391,7 +390,6 @@ theorem const_smul (g : SmoothRiemannianMetric I M) (c : ℝ)
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_smul_G.symm
       (PairAEMeasurable.const_smul (I := I) (M := M) c hG_pair)
 
-set_option linter.unusedSectionVars false in
 theorem neg (g : SmoothRiemannianMetric I M)
     {u : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u) :
@@ -408,7 +406,6 @@ namespace MemH1Lp
 
 variable [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem add (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u)
@@ -538,7 +535,6 @@ theorem add (g : SmoothRiemannianMetric I M)
       PairAEMeasurable.add (I := I) (M := M) (g := g) hG_pair hG'_pair
     exact PairAEMeasurable.congr_ae (I := I) (M := M) (g := g) h_sum_G.symm hsum_pair
 
-set_option linter.unusedSectionVars false in
 theorem sub (g : SmoothRiemannianMetric I M)
     {u v : Lp ℝ 2 (riemannianVolumeMeasure I M g)}
     (hu : MemH1Lp (I := I) (M := M) g u)

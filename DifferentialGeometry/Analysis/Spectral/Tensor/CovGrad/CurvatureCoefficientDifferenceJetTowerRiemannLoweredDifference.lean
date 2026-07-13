@@ -92,8 +92,8 @@ omit [CompactSpace M] [I.Boundaryless] in
   rw [ricMixedSharpEndoFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
+omit [CompactSpace M] in
 theorem ricMixedSharpEndoFib_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
@@ -149,6 +149,7 @@ def ricMixedSharpEndoField (g₀ g₁ : SmoothRiemannianMetric I M) :
   toFun := fun x : M => ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x
   contMDiff_toFun := ricMixedSharpEndoFib_contMDiff (I := I) (M := M) g₀ g₁
 
+set_option linter.unusedSectionVars false in
 lemma ricMixedSharpEndoField_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
     ricMixedSharpEndoField (I := I) (M := M) g₀ g₁ x =
       ricMixedSharpEndoFib (I := I) (M := M) g₀ g₁ x := rfl
@@ -343,7 +344,7 @@ private lemma riemannLoweredScalar_global (gm gc : SmoothRiemannianMetric I M)
   exact contMDiff_g_inner_of_smooth_sections (I := I) gm
     ⟨fun b => riemannSec (LeviCivita (I := I) gc) Y p q b, hRsec⟩ ⟨fun b => W b, hW⟩
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 private lemma riemannLoweredScalar_contMDiffAt (gm gc : SmoothRiemannianMetric I M)
     (V0 V1 V2 V3 : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x₀ : M) :
     ContMDiffAt I 𝓘(ℝ, ℝ) ∞
@@ -354,6 +355,7 @@ private lemma riemannLoweredScalar_contMDiffAt (gm gc : SmoothRiemannianMetric I
     V0.contMDiff V1.contMDiff V2.contMDiff V3.contMDiff
   exact hglob.contMDiffAt
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 theorem riemannLoweredCovec_section_contMDiff (gm gc : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 4 ℝ E)) ∞
@@ -467,7 +469,7 @@ private lemma interiorProduct_toModel_eval_pal (s : ℕ) (x : M) (vv : TangentSp
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_om_single_eq_cotangentToDual (x : M) (om : Tensor0SSpace 1 I x)
     (m : Fin 1 → TangentSpace I x) :
     Tensor0SSpace.toModel om (fun k => (m k : E)) =
@@ -647,7 +649,7 @@ lemma iteratedCovGrad_slotInsert_fullRaised_id_succ_eq_zero
   | succ m' ih =>
       rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
 lemma iteratedCovGrad_smul_pt (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by
@@ -667,7 +669,7 @@ lemma rfns_smul_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 lemma rfns_neg_pt (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (-v) =
@@ -1844,7 +1846,7 @@ private def perturbationSharpEndoFib (g₀ : SmoothRiemannianMetric I M)
           h, map_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma perturbationSharpEndoFib_apply (g₀ : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g₀ 0 2) (x : M) (v : TangentSpace I x) :
     perturbationSharpEndoFib (I := I) (M := M) g₀ T x v =
@@ -1919,7 +1921,7 @@ def perturbationSharpEndoField (g₀ : SmoothRiemannianMetric I M)
   toFun := fun x : M => perturbationSharpEndoFib (I := I) (M := M) g₀ T x
   contMDiff_toFun := perturbationSharpEndoFib_contMDiff (I := I) (M := M) g₀ T
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma unitModel_eq_ccTensorBilin_pt (g₀ : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g₀ 0 2) (b : M) (u w : TangentSpace I b) :
     unitModel (I := I) (M := M) g₀ 2 S b ![u, w] = smoothCcTensorBilinForm (I := I) g₀ S b u w := by
@@ -2144,7 +2146,7 @@ lemma riemannG1LoweringDifference_slotInsert_repr (g₀ g₁ : SmoothRiemannianM
   rw [ccTensorBilinSymm_symm (I := I) g₀ T x (m 1)
     (riemannOp (LeviCivita (I := I) g₁) x (m 0) (m 2) (m 3))]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma rfns_eq_sum_componentSq_of_horth_pt
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (S : TensorRSSpace r s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (hn : n = Module.finrank ℝ E)
@@ -2177,7 +2179,7 @@ private lemma rfns_eq_sum_componentSq_of_horth_pt
     intro i; rw [hbse_def, coe_basisOfLinearIndependentOfCardEqFinrank]
   exact riemannianFiberNormSq_eq_sum_componentSq_of_basis (I := I) (M := M) g₀ r s x S e bse hn hbse horth
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma fiberNormSqComponent_zero_toModel_pt
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : SmoothCcTensor g₀ 0 s)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 0 → Fin n) (L : Fin s → Fin n) :
@@ -2562,7 +2564,7 @@ theorem rfns_iteratedCovGrad_riemannLoweredBackgroundDifference_diagonalProductG
           ∑ i' ∈ Finset.range (i + 1), (Module.finrank ℝ E : ℝ) * AA i i')) * WW := by
         ring
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma linearMap_trace_eq_orthoFrame_inner_sum (g₀ : SmoothRiemannianMetric I M)
     (x : M) (G : TangentSpace I x →ₗ[ℝ] TangentSpace I x) :
     LinearMap.trace ℝ (TangentSpace I x) G =
@@ -2633,7 +2635,7 @@ private lemma interiorProduct_toModel_eval_lc (s : ℕ) (x : M) (v : TangentSpac
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma toModel_om_eval_lc (x : M) (om : Tensor0SSpace 1 I x) (V : TangentSpace I x) :
     Tensor0SSpace.toModel om (fun _ : Fin 1 => (V : E)) =
       cotangentToDual (I := I) om V := by

@@ -146,6 +146,7 @@ theorem gradInnerLapU_smoothCase
   rw [preimageLift_smoothCase]
   rw [gradInnerCLM_smoothToH1Compl_eq_smoothToLp]
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem v_sub_oneSubLap_eq_lap
     (g : SmoothRiemannianMetric I M) (v : SmoothScalar g) (x : M) :
@@ -210,6 +211,7 @@ lemma smoothLaplacianBundle_toFun_eq_smoothLaplacianAsScalar
     ((smoothLaplacianBundle (I := I) (M := M) g φ) : M → ℝ) =
       (smoothLaplacianAsScalar (I := I) (M := M) g φ).toFun := rfl
 
+set_option linter.unusedSectionVars false in
 theorem oneSubLapClassical_gradInner_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :

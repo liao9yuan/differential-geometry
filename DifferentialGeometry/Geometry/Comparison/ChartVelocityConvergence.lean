@@ -48,7 +48,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem velocity_converges_of_bounded_accel
     {P P' : ℝ → E} {b C : ℝ}
     (hderiv : ∀ s : ℝ, s < b → HasDerivAt P (P' s) s)
@@ -102,7 +102,7 @@ theorem velocity_converges_of_bounded_accel
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem velocity_converges_of_bounded_accel_Ioo
     {P P' : ℝ → E} {a b C : ℝ} (hab : a < b)
     (hderiv : ∀ s : ℝ, s ∈ Set.Ioo a b → HasDerivAt P (P' s) s)
@@ -165,7 +165,10 @@ theorem velocity_converges_of_bounded_accel_Ioo
         have := mul_lt_mul_of_pos_left hfrac hε
         rwa [mul_one] at this
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartChristoffelContraction_continuousOn_prod
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContinuousOn
@@ -194,7 +197,10 @@ theorem chartChristoffelContraction_continuousOn_prod
     exact this.comp continuous_fst
   exact (hΓp.mul hci.continuousOn).mul hcj.continuousOn
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_converges_at_finite_endpoint
     (g : SmoothRiemannianMetric I M) (α : M)
     {u u' : ℝ → E} {b K₁ : ℝ} {S : Set E}
@@ -235,7 +241,10 @@ theorem chartVelocity_converges_at_finite_endpoint
   exact velocity_converges_of_bounded_accel (P := u') (P' := P') (b := b) (C := C)
     hderiv_pf hbound_pf
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_converges_at_finite_endpoint_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {u u' : ℝ → E} {a b K₁ : ℝ} {S : Set E} (hab : a < b)
@@ -283,7 +292,10 @@ private def chartGramQuad (g : SmoothRiemannianMetric I M) (y : M)
     chartGramOnE (I := I) g y i j z *
       chartCoord (E := E) i V * chartCoord (E := E) j V
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_eq_inner
     (g : SmoothRiemannianMetric I M) (y : M) {z : E}
     (_hz : z ∈ (extChartAt I y).target) (V : E) :
@@ -298,7 +310,10 @@ private lemma chartGramQuad_eq_inner
   refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
   rw [chartGramOnE_def, hx_def]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_pos
     (g : SmoothRiemannianMetric I M) (y : M) {z : E}
     (hz : z ∈ (extChartAt I y).target) {V : E} (hV : V ≠ 0) :
@@ -323,7 +338,10 @@ private lemma chartGramQuad_pos
     exact hround.symm
   exact g.pos x _ hsymm_ne
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_smul
     (g : SmoothRiemannianMetric I M) (y : M) (z : E) (a : ℝ) (V : E) :
     chartGramQuad (I := I) g y z (a • V) = a ^ 2 * chartGramQuad (I := I) g y z V := by
@@ -336,7 +354,10 @@ private lemma chartGramQuad_smul
   rw [chartCoord_smul, chartCoord_smul]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma chartGramQuad_continuousOn
     (g : SmoothRiemannianMetric I M) (y : M) :
     ContinuousOn (fun p : E × E => chartGramQuad (I := I) g y p.1 p.2)
@@ -354,7 +375,10 @@ private lemma chartGramQuad_continuousOn
     (((chartModelBasis E).coord j).toContinuousLinearMap).continuous.comp continuous_snd
   exact (hG.mul hci.continuousOn).mul hcj.continuousOn
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 private lemma exists_chartGramQuad_lower_bound
     (g : SmoothRiemannianMetric I M) (y : M) {S : Set E}
     (hS_compact : IsCompact S) (hS_sub : S ⊆ (extChartAt I y).target)
@@ -410,7 +434,10 @@ private lemma exists_chartGramQuad_lower_bound
       _ ≤ ‖V‖ ^ 2 * chartGramQuad (I := I) g y z Vhat :=
           mul_le_mul_of_nonneg_left hmin hr2_nn
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E]
+  [T2Space M] [SigmaCompactSpace M] [ConnectedSpace M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] in
 theorem chartVelocity_bound_near_limit
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {a b c : ℝ}
     (hab : a < b) (hc_nonneg : 0 ≤ c)

@@ -971,6 +971,7 @@ private lemma mem_cutoffKernelM_image_of_cutoffComponentEuclid_ne_zero
   rw [h_extChartAt_b]
   exact (toEuclidean (E := E)).apply_symm_apply y
 
+set_option linter.unusedSectionVars false in
 private theorem exists_const_covDerivLowerOrderCoeff_bdd_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

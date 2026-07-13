@@ -643,6 +643,7 @@ private lemma lieArm1_slot0_collapse (g₁ : SmoothRiemannianMetric I M) (x : M)
       (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
         ((Module.finBasis ℝ E).cDualBasis j)))).symm
 
+set_option linter.unusedSectionVars false in
 private lemma lieArm1_cometricTrace_eq_chartInvGram (g₁ : SmoothRiemannianMetric I M) (x : M)
     (F : E →L[ℝ] E →L[ℝ] ℝ) :
     (∑ k : Fin (Module.finrank ℝ E),

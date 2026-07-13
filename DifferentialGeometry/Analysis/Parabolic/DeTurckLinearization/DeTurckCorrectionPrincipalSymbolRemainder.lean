@@ -470,7 +470,7 @@ private lemma partialDeriv_smul_apply
   rw [heq, partialDeriv_const_smul (E := E) c (h a b) (h.differentiableAt a b y),
     smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrHessBlock_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -493,7 +493,7 @@ set_option linter.unusedSectionVars false in
     ring
   rw [hzero, mul_zero]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrHessBlock_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -510,7 +510,7 @@ lemma chartDeTurckCorrHessBlock_add
     partialDeriv_partialDeriv_add_apply h₁ h₂ d l a b y]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrHessBlock_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -536,7 +536,7 @@ lemma chartDeTurckCorrHessBlock_smul
     ring]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrGramDerivBlock_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -555,7 +555,7 @@ set_option linter.unusedSectionVars false in
     ring
   rw [hzero, mul_zero]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrGramDerivBlock_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -571,7 +571,7 @@ lemma chartDeTurckCorrGramDerivBlock_add
     partialDeriv_add_apply h₁ h₂ l a b y]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartDeTurckCorrGramDerivBlock_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (d a b k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -598,7 +598,7 @@ lemma chartDeTurckCorrGramDerivBlock_smul
 
 end BlockLinearity
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrPrincipalSymbolExpr_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -618,7 +618,7 @@ set_option linter.unusedSectionVars false in
   rw [Finset.sum_eq_zero (fun k _ => by rw [hzero i k, mul_zero]),
     Finset.sum_eq_zero (fun k _ => by rw [hzero j k, mul_zero]), add_zero]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -683,7 +683,7 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_add
     rw [hsplit j k, mul_add]]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -734,7 +734,7 @@ theorem chartDeTurckCorrPrincipalSymbolExpr_smul
     rw [hscale j k]; ring]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 @[simp] lemma chartDeTurckCorrFirstOrderRemainder_zero
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -763,7 +763,6 @@ set_option linter.unusedSectionVars false in
   rw [Finset.sum_eq_zero (fun k _ => by rw [hbranchA i k, hbranchB i k]; ring),
     Finset.sum_eq_zero (fun k _ => by rw [hbranchA j k, hbranchB j k]; ring), add_zero]
 
-set_option linter.unusedSectionVars false in
 theorem chartDeTurckCorrFirstOrderRemainder_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -863,7 +862,6 @@ theorem chartDeTurckCorrFirstOrderRemainder_add
     rw [hA j k, hB j k]; ring]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartDeTurckCorrFirstOrderRemainder_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -940,8 +938,7 @@ theorem chartDeTurckCorrFirstOrderRemainder_smul
     rw [hA j k, hB j k]; ring]
   ring
 
-set_option linter.unusedSectionVars false in
-omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_symm
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j : Fin (Module.finrank ℝ E)) (y : E) :

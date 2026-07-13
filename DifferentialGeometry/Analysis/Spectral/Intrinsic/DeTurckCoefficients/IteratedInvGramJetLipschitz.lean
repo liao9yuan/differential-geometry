@@ -71,6 +71,7 @@ lemma iteratedFDerivSeminorm_gramDiff_le_sum (N : ℕ)
     (fun _ _ => Finset.sum_nonneg fun _ _ => iteratedFDerivSeminorm_nonneg _ _ _ _)
     (Finset.mem_univ a)
 
+set_option linter.unusedSectionVars false in
 lemma chartInvGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -78,6 +79,7 @@ lemma chartInvGramOnE_contDiffOn_int
       (interior (extChartAt I α).target) :=
   (chartInvGramOnE_contDiffOn (I := I) g α k l).mono interior_subset
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a b : Fin (Module.finrank ℝ E)) :

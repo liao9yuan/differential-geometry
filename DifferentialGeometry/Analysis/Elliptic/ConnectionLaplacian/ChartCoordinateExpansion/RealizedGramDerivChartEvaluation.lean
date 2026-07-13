@@ -46,6 +46,7 @@ lemma ccTensorBilin_chartBasis_eq_tensorChartComponent
     (chartModelBasis E a) (chartModelBasis E b)]
   exact unitModel_basisChart_eq_tensorChartComponent (I := I) (M := M) g₀ W x a b
 
+set_option linter.unusedSectionVars false in
 lemma cometricFinBasisTrace_eq_chartInvGram_bilin
     (g₁ : SmoothRiemannianMetric I M) (x : M)
     (F : E →L[ℝ] E →L[ℝ] ℝ) :
@@ -537,6 +538,7 @@ private lemma sum_pi_fin_succ' {n : ℕ} {β : Type*} [AddCommMonoid β]
   rw [Fintype.sum_prod_type]
   rfl
 
+set_option linter.unusedSectionVars false in
 omit [BoundarylessManifold I M] in
 lemma covDerivLowerOrderTerm02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
@@ -658,6 +660,7 @@ lemma covDerivLowerOrderTerm02_center_eq
     exact absurd (Subsingleton.elim b ![]) hb
   · intro h; exact absurd (Finset.mem_univ _) h
 
+set_option linter.unusedSectionVars false in
 omit [BoundarylessManifold I M] in
 lemma covDerivLowerOrderTerm03_center_hout
     (g₀ : SmoothRiemannianMetric I M) (x : M)

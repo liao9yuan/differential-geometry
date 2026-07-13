@@ -139,6 +139,7 @@ noncomputable def leibnizLhsCLM
   (smoothMulLp (I := I) (M := M) g ρα).comp
     (gradInnerCLM (I := I) (M := M) g ρα)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma leibnizLhsCLM_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (u_h : H1Compl g) :
     leibnizLhsCLM (I := I) (M := M) g ρα u_h =

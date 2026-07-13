@@ -475,6 +475,7 @@ private lemma divergence_dirichletVFGen_summand_eq
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [BoundarylessManifold I M] in
 private lemma tensorCovDerivPointwiseInnerGen_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) (b : M) :

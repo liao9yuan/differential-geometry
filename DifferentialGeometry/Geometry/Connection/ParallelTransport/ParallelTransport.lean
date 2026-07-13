@@ -386,6 +386,7 @@ theorem parallelTransport_preserves_inner_product [I.Boundaryless]
       (fun τ hτ => (hderiv τ hτ).deriv) hx hd.ht₀
   exact hconst t ht
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem trivialization_coordinateChange_eq_chartTransitionAt [I.Boundaryless]
     (α β : M) {b : M}

@@ -170,6 +170,7 @@ private noncomputable def rhoOneSubLapSmoothScalar
   toFun := fun x : M => (ρα : M → ℝ) x * v.oneSubLapClassical.toFun x
   smooth := ρα.contMDiff.mul v.oneSubLapClassical.smooth
 
+set_option linter.unusedSectionVars false in
 private lemma smoothMulLp_oneSubLap_eq_smoothToLp
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     smoothMulLp (I := I) (M := M) g ρα
@@ -208,6 +209,7 @@ private noncomputable def laplacianRhoMulSmoothScalar
   smooth :=
     (laplacianOfChartPOU (I := I) (M := M) g α).contMDiff.mul v.smooth
 
+set_option linter.unusedSectionVars false in
 private lemma smoothMulLp_laplacianRho_eq_smoothToLp
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     smoothMulLp (I := I) (M := M) g (laplacianOfChartPOU (I := I) (M := M) g α)

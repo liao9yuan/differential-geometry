@@ -146,6 +146,7 @@ theorem chartPushVF_eq_geodesicVectorFieldChartFiber
   rw [tangentCoordChange_tangent_f0_eq (I := I) hf0_proj (f t)]
   exact tangentCoordChange_tangent_geodesicVF (I := I) g α (f t) ht
 
+set_option linter.unusedSectionVars false in
 theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} (hf0_proj : (f 0).proj = α)
@@ -206,6 +207,7 @@ theorem chartPushVF_eq_geodesicVectorFieldChartFiber_at
   rw [tangentCoordChange_tangent_ft₀_eq (I := I) (t₀ := t₀) hft₀_proj (f s)]
   exact tangentCoordChange_tangent_geodesicVF (I := I) g α (f s) hs
 
+set_option linter.unusedSectionVars false in
 theorem geodesicVectorFieldChartFiber_eq_chartPhaseVF_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {t₀ : ℝ} (hft₀_proj : (f t₀).proj = α)

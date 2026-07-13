@@ -114,6 +114,7 @@ private lemma vwIntegrandOnE_apply_of_notMem
     vwIntegrandOnE (I := I) g α X i y = 0 :=
   Set.indicator_of_notMem hy _
 
+set_option linter.unusedSectionVars false in
 private lemma vwIntegrandOnE_contDiffOn_interior_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

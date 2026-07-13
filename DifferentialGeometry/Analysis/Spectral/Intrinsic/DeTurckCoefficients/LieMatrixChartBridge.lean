@@ -26,6 +26,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 lemma chartCoeff_eq_repr_trivToE (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

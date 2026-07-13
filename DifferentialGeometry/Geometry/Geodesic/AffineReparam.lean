@@ -29,7 +29,7 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartChristoffelContraction_smul_left_right
     (g : SmoothRiemannianMetric I M) (α : M) (a : ℝ) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α (a • v) (a • w) y
@@ -60,7 +60,7 @@ theorem chartChristoffelContraction_smul_left_right
         intro j _
         ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartFiberCoord_fiberScale
     (α : M) (c : ℝ) {q : TangentBundle I M}
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -134,7 +134,7 @@ theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
     ContinuousLinearMap.toSpanSingleton_apply, one_smul]
   exact hval
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem hasMFDerivWithinAt_of_chartPhase_at_zero_section
     (α : M) {c : ℝ → TangentBundle I M} {S' : Set ℝ} {s₀ : ℝ} {w : E × E}
     (hcont : ContinuousWithinAt c S' s₀)
@@ -221,7 +221,7 @@ theorem hasMFDerivWithinAt_of_chartDeriv_self
   simp only [mfld_simps] at hd ⊢
   convert hd using 1
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem geodesicVectorFieldChart_eq_zero_of_notMem_source
     (g : SmoothRiemannianMetric I M) (α : M) (p : TangentBundle I M)
     (hp : p.proj ∉ (chartAt H α).source) :
@@ -246,7 +246,7 @@ theorem extChartAt_tangent_zero_fiberScale (β : M) (c : ℝ) {q : TangentBundle
       rescaleChartOrbit_apply]
   exact Prod.ext rfl (chartFiberCoord_fiberScale (I := I) β c hq)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem tangentCoordChange_zero_section_geodesicVF
     (g : SmoothRiemannianMetric I M) (α : M) (q : TangentBundle I M)
     (hq : q.proj ∈ (chartAt H α).source) :
@@ -290,7 +290,6 @@ private theorem fiberRescaleCLM_apply (c : ℝ) (y : E × E) :
   change (c • (ContinuousLinearMap.id ℝ E)) y.2 = c • y.2
   rw [ContinuousLinearMap.smul_apply]; rfl
 
-set_option linter.unusedSectionVars false in
 private theorem inchart_rescaledLift_chartPhase
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -391,7 +390,6 @@ private theorem inchart_rescaledLift_chartPhase
     rw [extChartAt_tangent_zero_fiberScale (I := I) α c hssrc, fiberRescaleCLM_apply,
       rescaleChartOrbit_apply]
 
-set_option linter.unusedSectionVars false in
 private theorem offchart_rescaledLift_chartDeriv_self
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -461,7 +459,7 @@ private theorem offchart_rescaledLift_chartDeriv_self
     rw [← hpe, extChartAt_tangent_zero_fiberScale (I := I) β c hssrc, fiberRescaleCLM_apply,
       rescaleChartOrbit_apply]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private theorem rescaledLift_continuousWithinAt
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -496,7 +494,6 @@ private theorem rescaledLift_continuousWithinAt
   exact chartFiberCoord_fiberScale (I := I) (L s₀).proj c (q := f (aff s₀))
     (mem_chart_source H (L s₀).proj)
 
-set_option linter.unusedSectionVars false in
 theorem scaledTangentLift_transport
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ}
@@ -547,7 +544,8 @@ open Manifold
 
 variable [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M]
+  [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)] in
 theorem pathELength_comp_affineHomeo
     (γ : ℝ → M) {a b : ℝ} (c d : ℝ) (hab : a ≤ b) (hc : 0 < c)
     (hγ : MDifferentiableOn 𝓘(ℝ, ℝ) I γ (Set.Icc a b)) :

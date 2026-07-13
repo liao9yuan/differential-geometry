@@ -1316,6 +1316,7 @@ theorem lieTrace_eq_reindex_fw (g₀ g₁ : SmoothRiemannianMetric I M)
     rw [hcomp j]
   rw [harg]
 
+set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in

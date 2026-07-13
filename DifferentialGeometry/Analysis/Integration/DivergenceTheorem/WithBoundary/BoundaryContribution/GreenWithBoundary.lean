@@ -41,7 +41,7 @@ noncomputable def boundaryFaceSum
     chartBoundaryFaceIntegral (I := I) g α X
       ((chartAtlasPOU I M) α : M → ℝ)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma boundaryFaceSum_def
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -55,7 +55,6 @@ section StokesGlobal
 
 variable [hI : HasSmoothBoundary E H I]
 
-set_option linter.unusedSectionVars false in
 theorem integral_divergence_with_boundary_eq_boundaryFaceSum
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -66,7 +65,7 @@ theorem integral_divergence_with_boundary_eq_boundaryFaceSum
   rw [boundaryFaceSum_def]
   exact stokes_compact_via_pou (I := I) g X
 
-set_option linter.unusedSectionVars false in
+omit hI in
 private lemma inner_grad_grad_continuous_of_interior_support
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -131,7 +130,7 @@ private lemma inner_grad_grad_continuous_of_interior_support
   intro x
   exact (h_eq x).symm
 
-set_option linter.unusedSectionVars false in
+omit hI in
 private lemma f_mul_Δ_continuous
     [T2Space M]
     (g : SmoothRiemannianMetric I M)
@@ -142,7 +141,7 @@ private lemma f_mul_Δ_continuous
   hf.continuous.mul (Δ_g_with_boundary_continuous (I := I) g hh hh_int)
 
 
-set_option linter.unusedSectionVars false in
+omit hI in
 private lemma f_mul_Δ_hasCompactSupport
     [T2Space M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -152,7 +151,7 @@ private lemma f_mul_Δ_hasCompactSupport
       f x * Δ_g_with_boundary (I := I) g hh hh_int x) :=
   HasCompactSupport.of_compactSpace _
 
-set_option linter.unusedSectionVars false in
+omit hI in
 private lemma f_mul_Δ_integrable
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -166,7 +165,7 @@ private lemma f_mul_Δ_integrable
   exact (f_mul_Δ_continuous (I := I) g hf hh hh_int).integrable_of_hasCompactSupport
     (f_mul_Δ_hasCompactSupport (I := I) g hf hh hh_int)
 
-set_option linter.unusedSectionVars false in
+omit hI in
 private lemma inner_grad_grad_integrable
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -181,7 +180,6 @@ private lemma inner_grad_grad_integrable
     (I := I) g hf hh hh_int).integrable_of_hasCompactSupport
     (HasCompactSupport.of_compactSpace _)
 
-set_option linter.unusedSectionVars false in
 theorem green_first_with_boundary
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -246,7 +244,6 @@ theorem green_first_with_boundary
   linarith
 
 
-set_option linter.unusedSectionVars false in
 theorem green_first_with_boundary_face_sum_eq_zero_of_interior_support
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -275,7 +272,6 @@ theorem green_first_with_boundary_face_sum_eq_zero_of_interior_support
   rw [h_div_Y_zero] at h_stokes
   exact h_stokes.symm
 
-set_option linter.unusedSectionVars false in
 private theorem green_first_with_boundary_swap
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -290,7 +286,6 @@ private theorem green_first_with_boundary_swap
           (grad_g_with_boundary_section (I := I) g hf hf_int)) :=
   green_first_with_boundary (I := I) g hh hf hf_int
 
-set_option linter.unusedSectionVars false in
 theorem green_second_with_boundary
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

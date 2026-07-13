@@ -48,6 +48,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
+set_option linter.unusedSectionVars false in
 omit [BoundarylessManifold I M] in
 lemma ccTensorBilinSymm_eq_half_rawComponent
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)

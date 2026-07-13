@@ -811,6 +811,7 @@ theorem tensorPouSobolevHsNorm_zero_le_tensorL2Norm
     _ = Real.sqrt Ksum * L := by
         rw [Real.sqrt_mul hKsum_nn, Real.sqrt_sq hL_nn]
 
+set_option linter.unusedSectionVars false in
 lemma tensorL2Norm_toFun_eq_norm
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (S : SmoothCcTensor g r s) :
     tensorL2Norm (I := I) (M := M) g r s S.toFun = ‖S‖ := by

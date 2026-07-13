@@ -507,6 +507,7 @@ private lemma chartTensorCovDerivPointwiseInner_continuousOn
   · exact (chartGramMatrixInv_entry_contMDiffOn (I := I) (M := M) g α i j).continuousOn
   · exact continuousOn_tensorInnerPointwise_chartCov (I := I) (M := M) g r s S T α i j
 
+set_option linter.unusedSectionVars false in
 theorem tensorCovDerivPointwiseInner_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S T : SmoothCcTensor g r s) :

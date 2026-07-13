@@ -100,6 +100,7 @@ lemma gradFun_smoothScalarMulFun
   exact LaplacianDomainVariationalLimitGeneral.gradFun_smul_smooth_eq_pointwise
     (I := I) (M := M) g φ.contMDiff v.smooth x
 
+set_option linter.unusedSectionVars false in
 private lemma sq_phi_mul_v_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
     (x : M) :
@@ -734,6 +735,7 @@ noncomputable def leibnizCompensatedSourceResidualCLMOfSmoothFactor
       (smoothLaplacianBundle (I := I) (M := M) g φ)).comp
       (H1ComplToLp (I := I) (M := M) g)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma fHLeibnizGeneralResidualCLM_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) :
@@ -813,6 +815,7 @@ private lemma smoothMulH1ComplInner_smoothToH1Compl_smooth_eq_integral
   exact smoothScalarH1Inner_eq_integral_oneSubLap_mul
     (smoothScalarMulFun (I := I) (M := M) g φ uT) vT
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma smoothScalarMulFun_oneSubLapClassical_pointwise_leibniz
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (uT : SmoothScalar g)
@@ -961,6 +964,7 @@ private theorem smoothMulH1Compl_smoothToH1Compl_eq_resolvent_fHLeibnizGeneral
   exact (smoothToH1Compl_eq_resolvent_oneSubLap (I := I) (M := M)
     (smoothScalarMulFun (I := I) (M := M) g φ uT))
 
+set_option linter.unusedSectionVars false in
 private lemma smoothMulLp_inner_left_eq_inner_right
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :

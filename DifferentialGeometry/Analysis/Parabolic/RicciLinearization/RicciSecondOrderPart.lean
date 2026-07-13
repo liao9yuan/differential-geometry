@@ -22,6 +22,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Differentiability
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -879,6 +880,7 @@ theorem chartRicciFirstOrderRemainder_smul
     ← Finset.mul_sum, ← Finset.mul_sum]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciSecondOrderPrincipalSymbol_symm
     (g : SmoothRiemannianMetric I M) (α : M)

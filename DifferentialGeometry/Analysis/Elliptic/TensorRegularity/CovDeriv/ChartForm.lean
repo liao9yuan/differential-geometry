@@ -390,6 +390,7 @@ lemma covPrincipalIntegrand_def
                       (tensorChartComponentRaw (I := I) (M := M)
                         g r s T α Q.1 Q.2)) y := rfl
 
+set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covPrincipalIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

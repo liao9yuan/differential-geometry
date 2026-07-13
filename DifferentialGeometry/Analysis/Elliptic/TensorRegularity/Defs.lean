@@ -96,6 +96,7 @@ private lemma extChartAt_target_eq_interior (α : M) :
     (extChartAt I α).target = interior ((extChartAt I α).target : Set E) :=
   (isOpen_extChartAt_target (I := I) α).interior_eq.symm
 
+set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartInvGramEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -117,6 +118,7 @@ theorem chartInvGramEuclid_contDiffOn
       exact toEuclidean_symm_mem_extChartAt_target (I := I) (M := M) hy
   exact hcomp
 
+set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartChristoffelEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)

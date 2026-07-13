@@ -236,6 +236,7 @@ private lemma triv_continuousLinearMapAt_eq_triv_snd
   exact congrFun hcoe _
 
 variable {g r s α j} in
+set_option linter.unusedSectionVars false in
 private lemma trivInput_continuousOn_chartSource (S : SmoothCcTensor g r s)
     (k : Fin r) :
     ContinuousOn (fun b : M => trivInput (I := I) g r s α j S.toSection b k)
@@ -253,6 +254,7 @@ private lemma trivInput_continuousOn_chartSource (S : SmoothCcTensor g r s)
       (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b k)
 
 variable {g r s α j} in
+set_option linter.unusedSectionVars false in
 private lemma trivOutput_continuousOn_chartSource (S : SmoothCcTensor g r s)
     (l : Fin s) :
     ContinuousOn (fun b : M => trivOutput (I := I) g r s α j S.toSection b l)

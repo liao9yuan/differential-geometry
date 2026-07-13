@@ -44,6 +44,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 
 variable [I.Boundaryless]
 
+set_option linter.unusedSectionVars false in
 omit [I.Boundaryless] in
 lemma chartChristoffelContraction_scalarCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)

@@ -11,8 +11,8 @@ namespace DifferentialGeometry
 namespace Analysis
 namespace Laplacian
 
-variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -23,9 +23,9 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
+omit [Module.Finite ℝ E] [T2Space M] [SigmaCompactSpace M] in
 private lemma exists_phiSupBound
     (_g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x : M, |((φ : M → ℝ) x)| ≤ C := by
@@ -42,21 +42,20 @@ noncomputable def phiSupBound
     (_g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) : ℝ :=
   Classical.choose (exists_phiSupBound (I := I) (M := M) _g φ)
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [T2Space M] [SigmaCompactSpace M] in
 lemma phiSupBound_nonneg
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     0 ≤ phiSupBound (I := I) (M := M) g φ :=
   (Classical.choose_spec
     (exists_phiSupBound (I := I) (M := M) g φ)).1
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [T2Space M] [SigmaCompactSpace M] in
 lemma abs_phi_le_phiSupBound
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (x : M) :
     |((φ : M → ℝ) x)| ≤ phiSupBound (I := I) (M := M) g φ :=
   (Classical.choose_spec
     (exists_phiSupBound (I := I) (M := M) g φ)).2 x
 
-set_option linter.unusedSectionVars false in
 lemma memLp_phi_mul_lp
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -90,7 +89,6 @@ noncomputable def smoothMulLpFun
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (memLp_phi_mul_lp (I := I) (M := M) g φ f).toLp _
 
-set_option linter.unusedSectionVars false in
 lemma smoothMulLpFun_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -100,7 +98,6 @@ lemma smoothMulLpFun_coeFn
       (fun x : M => (φ : M → ℝ) x * (f : M → ℝ) x) :=
   MemLp.coeFn_toLp _
 
-set_option linter.unusedSectionVars false in
 theorem smoothMulLpFun_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f₁ f₂ : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -122,7 +119,6 @@ theorem smoothMulLpFun_add
   rw [hx_sum, Pi.add_apply, hx_f₁, hx_f₂]
   rw [hx_arg, Pi.add_apply, mul_add]
 
-set_option linter.unusedSectionVars false in
 theorem smoothMulLpFun_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ)
@@ -151,14 +147,12 @@ noncomputable def smoothMulLpLin
   map_add' f₁ f₂ := smoothMulLpFun_add (I := I) (M := M) g φ f₁ f₂
   map_smul' c f := smoothMulLpFun_smul (I := I) (M := M) g φ c f
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma smoothMulLpLin_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     smoothMulLpLin (I := I) (M := M) g φ f =
       smoothMulLpFun (I := I) (M := M) g φ f := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_smoothMulLp_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -178,7 +172,6 @@ private lemma eLpNorm_smoothMulLp_le
     (abs_phi_le_phiSupBound (I := I) (M := M) g φ x)
     (norm_nonneg _)
 
-set_option linter.unusedSectionVars false in
 theorem norm_smoothMulLpFun_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -217,7 +210,6 @@ theorem norm_smoothMulLpFun_le
   rw [ENNReal.toReal_mul, h_finite_ofReal] at h_le_real
   exact h_le_real
 
-set_option linter.unusedSectionVars false in
 theorem smoothMulLpFun_norm_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ (∀ x : M, |((φ : M → ℝ) x)| ≤ C) ∧
@@ -236,14 +228,12 @@ noncomputable def smoothMulLp
     (phiSupBound (I := I) (M := M) g φ)
     (fun f => norm_smoothMulLpFun_le (I := I) (M := M) g φ f)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma smoothMulLp_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     smoothMulLp (I := I) (M := M) g φ f =
       smoothMulLpFun (I := I) (M := M) g φ f := rfl
 
-set_option linter.unusedSectionVars false in
 theorem smoothMulLp_norm_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ (∀ x : M, |((φ : M → ℝ) x)| ≤ C) ∧
@@ -255,7 +245,6 @@ theorem smoothMulLp_norm_le
     (phiSupBound_nonneg (I := I) (M := M) g φ)
     (fun f => norm_smoothMulLpFun_le (I := I) (M := M) g φ f)
 
-set_option linter.unusedSectionVars false in
 theorem smoothMulLp_apply_coeFn
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :

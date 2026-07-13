@@ -250,6 +250,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     invGramPerturbation (I := I) g α (0 : ChartMetricPerturbation E) l m y = 0 := by
   simp [invGramPerturbation]
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma invGramPerturbation_symm (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (l m : Fin (Module.finrank ℝ E)) (y : E) :

@@ -86,6 +86,7 @@ private lemma differentiableAt_repr_comp
   have hclm : DifferentiableAt ℝ ci (f y) := ci.differentiableAt
   exact hclm.comp y hf
 
+set_option linter.unusedSectionVars false in
 lemma chartGramOnE_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))

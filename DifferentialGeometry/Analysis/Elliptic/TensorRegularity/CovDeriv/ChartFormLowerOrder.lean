@@ -384,6 +384,7 @@ theorem covLowerOrderIntegrand_eqOn
   rw [h]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covLowerOrderIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

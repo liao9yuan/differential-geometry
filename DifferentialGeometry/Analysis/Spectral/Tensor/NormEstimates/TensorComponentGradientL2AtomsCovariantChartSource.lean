@@ -51,13 +51,14 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pouTsupport_measurableSet (α : M) :
     MeasurableSet (tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).measurableSet
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma chartTensorRSCovariantDerivative_eq_of_eq_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -88,7 +89,7 @@ private lemma chartTensorRSCovariantDerivative_eq_of_eq_at
   rw [Finset.sum_congr rfl (fun k _ => hInput k)]
   rw [Finset.sum_congr rfl (fun l _ => hOutput l)]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (X : Π b' : M, TangentSpace I b')
@@ -129,7 +130,7 @@ lemma chartTensorRSCovariantDerivative_eq_tensorCovDerivAt_at
   have hYb' : Y.toFun b = X b := hYb
   rw [hYb']
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma triv_continuousLinearMapAt_chartTensorRSCovariantDerivative_eq_triv_snd
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -167,7 +168,7 @@ private lemma triv_continuousLinearMapAt_chartTensorRSCovariantDerivative_eq_tri
         (chartBasisVecFiber (I := I) α k b)) = _
   exact congrFun hcoe _
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma triv_chartTensorRSCovariantDerivative_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E)) :
@@ -199,7 +200,7 @@ private lemma triv_chartTensorRSCovariantDerivative_continuousOn_chart_source
   exact triv_continuousLinearMapAt_chartTensorRSCovariantDerivative_eq_triv_snd
     (I := I) (M := M) g r s α S hb_chart k
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma norm_sq_sum_triv_chartTensorRSCovariantDerivative_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -225,7 +226,7 @@ private lemma norm_sq_sum_triv_chartTensorRSCovariantDerivative_continuousOn_cha
       ((chartAt H α).source) := h_proj.norm
   exact h_norm.pow 2
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma pou_mul_sqrt_sum_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -265,7 +266,6 @@ private lemma pou_mul_sqrt_sum_continuousOn_chart_source
     Real.continuous_sqrt.comp_continuousOn h_sumsq
   exact h_pou_on.mul h_sqrt
 
-set_option linter.unusedSectionVars false in
 private lemma pou_mul_sqrt_sum_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -290,7 +290,7 @@ private lemma pou_mul_sqrt_sum_continuousOn_pouTsupport
     pouTsupport_subset_baseSet (I := I) (M := M) α hb
   exact hb_base
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pou_mul_sqrt_sum_zero_outside_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}
@@ -311,7 +311,7 @@ private lemma pou_mul_sqrt_sum_zero_outside_pouTsupport
     exact hb (subset_tsupport _ hne)
   rw [hρ_zero, zero_mul]
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
 private lemma pou_mul_sqrt_sum_eq_indicator
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -346,7 +346,6 @@ private lemma pou_mul_sqrt_sum_eq_indicator
     exact pou_mul_sqrt_sum_zero_outside_pouTsupport
       (I := I) (M := M) g r s α S hb
 
-set_option linter.unusedSectionVars false in
 private lemma pou_mul_sqrt_sum_aestronglyMeasurable_restrict_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -371,7 +370,6 @@ private lemma pou_mul_sqrt_sum_aestronglyMeasurable_restrict_pouTsupport
     (pouTsupport_isCompact (I := I) (M := M) α)
     (pouTsupport_measurableSet (I := I) (M := M) α)
 
-set_option linter.unusedSectionVars false in
 theorem aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensorH1 g r s) :
@@ -394,7 +392,7 @@ theorem aestronglyMeasurable_pou_mul_sqrt_sum_triv_chart_cov
   exact pou_mul_sqrt_sum_aestronglyMeasurable_restrict_pouTsupport
     (I := I) (M := M) g r s α S.toCcTensor
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma triv_continuousLinearMapAt_chart_cov_eq_chartRSTwistInv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M} (hb : b ∈ (chartAt H α).source)
@@ -417,7 +415,6 @@ private lemma triv_continuousLinearMapAt_chart_cov_eq_chartRSTwistInv
     (tensorCovDerivAt (I := I) (M := M) g r s S b
       (chartBasisVecFiber (I := I) α k b))
 
-set_option linter.unusedSectionVars false in
 private lemma pou_mul_sqrt_sum_triv_chart_cov_eq_pou_mul_sqrt_sum_chartRSTwistInv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (b : M) :
@@ -465,7 +462,6 @@ private lemma pou_mul_sqrt_sum_triv_chart_cov_eq_pou_mul_sqrt_sum_chartRSTwistIn
     rw [hρ_zero]
     ring
 
-set_option linter.unusedSectionVars false in
 theorem exists_eLpNorm_sq_pou_mul_sum_triv_chart_cov_le_const_mul_h1NormSq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

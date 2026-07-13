@@ -43,7 +43,7 @@ private lemma achart_eq_of_chartAt_eq {b b₀ : M}
   apply Subtype.ext
   exact h_chart
 
-set_option linter.unusedSectionVars false in
+omit [Module.Finite ℝ E] [InnerProductSpace ℝ E] [T2Space M] in
 private lemma chartJinv_eq_id_of_chartAt_eq
     {b b₀ : M} (h_chart : chartAt H b = chartAt H b₀)
     (hb : b ∈ (chartAt H b₀).source) :
@@ -57,7 +57,7 @@ private lemma chartJinv_eq_id_of_chartAt_eq
   rw [tangentBundleCore_baseSet, coe_achart]
   exact hb
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 private lemma g_inner_eq_chartGramBilin_of_chartAt_eq
     (g : SmoothRiemannianMetric I M) {b b₀ : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -68,7 +68,7 @@ private lemma g_inner_eq_chartGramBilin_of_chartAt_eq
   rw [chartJinv_eq_id_of_chartAt_eq (I := I) (M := M) h_chart hb]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 private lemma chartGramBilin_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (b₀ : M) :
     ContinuousOn (fun b : M => chartGramBilin (I := I) (M := M) g b₀ b)
@@ -94,7 +94,7 @@ private lemma chartGramBilin_continuousOn_chartSource
     exact hsmooth.continuousOn
   exact h_entry.smul continuousOn_const
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 private lemma chartGramBilin_norm_continuousOn
     (g : SmoothRiemannianMetric I M) (b₀ : M) :
     ContinuousOn (fun b : M => ‖chartGramBilin (I := I) (M := M) g b₀ b‖)
@@ -102,7 +102,7 @@ private lemma chartGramBilin_norm_continuousOn
   continuous_norm.comp_continuousOn
     (chartGramBilin_continuousOn_chartSource (I := I) (M := M) g b₀)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 private lemma g_inner_le_chartGramBilin_norm_sq
     (g : SmoothRiemannianMetric I M) {b b₀ : M}
     (h_chart : chartAt H b = chartAt H b₀)
@@ -122,7 +122,7 @@ private lemma g_inner_le_chartGramBilin_norm_sq
     _ ≤ ‖chartGramBilin (I := I) (M := M) g b₀ b‖ * ‖v‖ * ‖v‖ := h_abs_le
     _ = ‖chartGramBilin (I := I) (M := M) g b₀ b‖ * ‖v‖ ^ 2 := by ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 private lemma exists_norm_bound_on_compact_subset_of_chartSource
     (g : SmoothRiemannianMetric I M) (b₀ : M)
     {K : Set M} (hK : IsCompact K) (hKsub : K ⊆ (chartAt H b₀).source) :
@@ -146,7 +146,7 @@ private lemma exists_norm_bound_on_compact_subset_of_chartSource
     hC ⟨b, hb, rfl⟩
   exact h1.trans (le_max_left _ _)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 private lemma chartGramBilin_self_nonneg
     (g : SmoothRiemannianMetric I M) (α b : M) (v : E) :
     0 ≤ chartGramBilin (I := I) (M := M) g α b v v := by
@@ -154,7 +154,7 @@ private lemma chartGramBilin_self_nonneg
   exact metric_inner_self_nonneg (I := I) (M := M) g b
     (chartTrivializationLinearMapSymm (I := I) (M := M) α b v)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 private lemma chartGramBilin_self_le_norm_sq
     (g : SmoothRiemannianMetric I M) (α b : M) (v : E) :
     chartGramBilin (I := I) (M := M) g α b v v ≤
@@ -169,7 +169,7 @@ private lemma chartGramBilin_self_le_norm_sq
     _ ≤ ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ * ‖v‖ := h_abs_le
     _ = ‖chartGramBilin (I := I) (M := M) g α b‖ * ‖v‖ ^ 2 := by ring
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 theorem g_inner_sqrt_uniform_upper_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K_base : Set M} (hK_base : IsCompact K_base)
@@ -204,7 +204,7 @@ theorem g_inner_sqrt_uniform_upper_bound_on_compact
     nlinarith [h_norm_nn]
   linarith
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [T2Space M] in
 theorem g_inner_chartJinv_sqrt_uniform_upper_bound_on_compact_unconditional
     (g : SmoothRiemannianMetric I M) (α : M)
     {K_base : Set M} (hK_base : IsCompact K_base)

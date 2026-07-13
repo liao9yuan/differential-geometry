@@ -381,6 +381,7 @@ theorem gradChartLocalWithin_eq_gradFun
   rw [inner_gradChartLocalWithin_chartBasis (I := I) g α f hbase k,
     hmfderiv_basis k]
 
+set_option linter.unusedSectionVars false in
 private lemma gradChartCoeffWithin_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)

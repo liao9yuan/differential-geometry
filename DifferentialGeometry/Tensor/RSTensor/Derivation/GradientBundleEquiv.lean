@@ -29,14 +29,12 @@ def covGradModelEquiv (r s : ℕ) :
       (continuousMultilinearCurryLeftEquiv ℝ
         (fun _ : Fin (s + 1) => E) ℝ).symm.toContinuousLinearEquiv)
 
-set_option linter.unusedSectionVars false in
 theorem covGradModelEquiv_apply (r s : ℕ)
     (Φ : E →L[ℝ] TensorRSModel r s ℝ E) (D : Tensor0SModel r ℝ E)
     (v : Fin (s + 1) → E) :
     covGradModelEquiv (E := E) r s Φ D v = Φ (v 0) D (Matrix.vecTail v) := by
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem covGradModelEquiv_symm_apply (r s : ℕ)
     (T : TensorRSModel r (s + 1) ℝ E) (w : E) (D : Tensor0SModel r ℝ E)
     (v : Fin s → E) :
@@ -53,7 +51,6 @@ def covGradBundleEquiv (r s : ℕ) (x : M) :
 
 set_option backward.isDefEq.respectTransparency true in
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_apply (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace r s I x) :
     covGradBundleEquiv (I := I) (M := M) r s x Φ =
@@ -65,7 +62,6 @@ theorem covGradBundleEquiv_apply (r s : ℕ) (x : M)
 
 set_option backward.isDefEq.respectTransparency true in
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_symm_apply (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x) :
     (covGradBundleEquiv (I := I) (M := M) r s x).symm T =
@@ -77,7 +73,6 @@ theorem covGradBundleEquiv_symm_apply (r s : ℕ) (x : M)
 
 set_option backward.isDefEq.respectTransparency true in
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_apply_eval (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace r s I x)
     (D : Tensor0SSpace r I x) (v : Fin (s + 1) → TangentSpace I x) :
@@ -92,7 +87,6 @@ theorem covGradBundleEquiv_apply_eval (r s : ℕ) (x : M)
 
 set_option backward.isDefEq.respectTransparency true in
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_symm_apply_eval (r s : ℕ) (x : M)
     (T : TensorRSSpace r (s + 1) I x) (w : TangentSpace I x)
     (D : Tensor0SSpace r I x) (v : Fin s → TangentSpace I x) :
@@ -107,9 +101,6 @@ theorem covGradBundleEquiv_symm_apply_eval (r s : ℕ) (x : M)
 
 section Trivialisation
 
-variable [CompleteSpace ℝ]
-
-set_option linter.unusedSectionVars false in
 private theorem tensorRSBundle_baseSet_eq (r s : ℕ) (α : M) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -124,7 +115,6 @@ private theorem tensorRSBundle_baseSet_eq (r s : ℕ) (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet
   exact Set.inter_self _
 
-set_option linter.unusedSectionVars false in
 private theorem covGradBundle_baseSet_eq (r s : ℕ) (α : M) :
     (trivializationAt (E →L[ℝ] TensorRSModel r s ℝ E)
         (fun y : M => TangentSpace I y →L[ℝ] TensorRSSpace r s I y) α).baseSet =
@@ -137,7 +127,6 @@ private theorem covGradBundle_baseSet_eq (r s : ℕ) (α : M) :
 
 open TensorMultilinear in
 
-set_option linter.unusedSectionVars false in
 private theorem tensor0S_trivFibre_apply (n : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt (Tensor0SModel n ℝ E)
       (fun x : M => Tensor0SSpace n I x) α).baseSet)
@@ -163,7 +152,6 @@ private theorem tensor0S_trivFibre_apply (n : ℕ) (α : M) {b : M}
 set_option maxHeartbeats 1600000 in
 open TensorMultilinear in
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (Φ : TangentSpace I b →L[ℝ] TensorRSSpace r s I b) :
@@ -305,7 +293,6 @@ theorem covGradBundleEquiv_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
   rw [hLHS, hRHS]
   congr 1
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_symm_trivializationAt_eq (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
     (T : TensorRSSpace r (s + 1) I b) :
@@ -324,11 +311,8 @@ end Trivialisation
 
 section SmoothEquiv
 
-variable [CompleteSpace ℝ]
-
 set_option maxHeartbeats 1600000 in
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_contMDiff_totalSpace (r s : ℕ) :
     ContMDiff (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E))
       (I.prod 𝓘(ℝ, TensorRSModel r (s + 1) ℝ E)) ∞
@@ -363,7 +347,6 @@ theorem covGradBundleEquiv_contMDiff_totalSpace (r s : ℕ) :
 
 set_option maxHeartbeats 1600000 in
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleEquiv_symm_contMDiff_totalSpace (r s : ℕ) :
     ContMDiff (I.prod 𝓘(ℝ, TensorRSModel r (s + 1) ℝ E))
       (I.prod 𝓘(ℝ, E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -423,18 +406,15 @@ noncomputable def covGradBundleSmoothEquiv (r s : ℕ) :=
         (TensorRSModel r (s + 1) ℝ E)
         (fun y : M => TensorRSSpace r (s + 1) I y))
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleSmoothEquiv_baseMap (r s : ℕ) :
     (covGradBundleSmoothEquiv (I := I) (M := M) r s).baseMap = id :=
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleSmoothEquiv_fiberLinearEquiv (r s : ℕ) (x : M) :
     (covGradBundleSmoothEquiv (I := I) (M := M) r s).fiberLinearEquiv x =
       (covGradBundleEquiv (I := I) (M := M) r s x).toLinearEquiv :=
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem covGradBundleSmoothEquiv_toDiffeomorph_apply (r s : ℕ) (x : M)
     (Φ : TangentSpace I x →L[ℝ] TensorRSSpace r s I x) :
     (covGradBundleSmoothEquiv (I := I) (M := M) r s).toDiffeomorph ⟨x, Φ⟩ =

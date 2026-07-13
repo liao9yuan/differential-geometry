@@ -31,7 +31,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 theorem chartLocalMeasure_compact_lt_top
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
@@ -131,7 +130,6 @@ theorem chartLocalMeasure_compact_lt_top
       _ < (⊤ : ℝ≥0∞) := by
           exact ENNReal.mul_lt_top ENNReal.ofReal_lt_top hKE_compact.measure_lt_top
 
-set_option linter.unusedSectionVars false in
 private lemma pou_term_zero_of_tsupport_disjoint
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -151,7 +149,6 @@ private lemma pou_term_zero_of_tsupport_disjoint
     exact hxK_ts (subset_tsupport _ hne)
   simp [this]
 
-set_option linter.unusedSectionVars false in
 private lemma pou_term_le_chartLocalMeasure
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -189,7 +186,6 @@ private lemma pou_term_le_chartLocalMeasure
           rw [lintegral_indicator htsup_meas, Measure.restrict_restrict htsup_meas,
               setLIntegral_const, one_mul, Set.inter_comm]
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_compact_lt_top
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -238,7 +234,6 @@ theorem riemannianMeasure_compact_lt_top
   exact lt_of_le_of_lt hbound
     (chartLocalMeasure_compact_lt_top (I := I) (M := M) g α hKts_compact hKts_sub)
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_isFiniteMeasureOnCompacts
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -247,7 +242,6 @@ theorem riemannianMeasure_isFiniteMeasureOnCompacts
     IsFiniteMeasureOnCompacts (riemannianMeasure (I := I) g ρ) :=
   ⟨fun _K hK => riemannianMeasure_compact_lt_top (I := I) (M := M) g ρ hρ hK⟩
 
-set_option linter.unusedSectionVars false in
 theorem riemannianVolumeMeasure_isFiniteMeasureOnCompacts
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -266,7 +260,6 @@ theorem locallyCompactSpace_of_chartedSpace
   have _hH : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_isLocallyFiniteMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -279,7 +272,6 @@ theorem riemannianMeasure_isLocallyFiniteMeasure
     locallyCompactSpace_of_chartedSpace E H I M
   inferInstance
 
-set_option linter.unusedSectionVars false in
 theorem riemannianVolumeMeasure_isLocallyFiniteMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -288,7 +280,6 @@ theorem riemannianVolumeMeasure_isLocallyFiniteMeasure
   exact riemannianMeasure_isLocallyFiniteMeasure (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_sigmaFinite
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -299,7 +290,6 @@ theorem riemannianMeasure_sigmaFinite
     riemannianMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g ρ hρ
   SigmaFinite.of_isFiniteMeasureOnCompacts _
 
-set_option linter.unusedSectionVars false in
 theorem riemannianVolumeMeasure_sigmaFinite
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -308,7 +298,6 @@ theorem riemannianVolumeMeasure_sigmaFinite
   exact riemannianMeasure_sigmaFinite (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -319,7 +308,6 @@ theorem riemannianMeasure_isFiniteMeasure_of_compactSpace
     riemannianMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g ρ hρ
   infer_instance
 
-set_option linter.unusedSectionVars false in
 theorem riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -370,7 +358,6 @@ private lemma interior_isInteriorPoint_dense :
   exact (I.isInteriorPoint_iff_of_mem_atlas hntop (chart_mem_atlas H x) hy_chartSrc).mpr
     hp_inExtTarget
 
-set_option linter.unusedSectionVars false in
 private lemma chartLocalMeasure_open_pos_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     {V : Set M} (hVopen : IsOpen V) {x₁ : M} (hx₁V : x₁ ∈ V)
@@ -528,7 +515,6 @@ private lemma exists_open_nbhd_pou_pos
   · intro y hy; exact hy.1.2
   · intro y hy; exact le_of_lt hy.2
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_isOpenPosMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -581,7 +567,6 @@ theorem riemannianMeasure_isOpenPosMeasure
     measure_mono hVU
   exact ne_of_gt (lt_of_lt_of_le hpos (hle_g.trans hle_g'))
 
-set_option linter.unusedSectionVars false in
 theorem riemannianVolumeMeasure_isOpenPosMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -590,7 +575,6 @@ theorem riemannianVolumeMeasure_isOpenPosMeasure
   exact riemannianMeasure_isOpenPosMeasure (I := I) (M := M) g
     (chartAtlasPOU I M) (chartAtlasPOU_isSubordinate I M)
 
-set_option linter.unusedSectionVars false in
 theorem riemannianMeasure_regular
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -602,7 +586,6 @@ theorem riemannianMeasure_regular
     riemannianMeasure_isLocallyFiniteMeasure (I := I) (M := M) g ρ hρ
   exact MeasureTheory.Measure.Regular.of_sigmaCompactSpace_of_isLocallyFiniteMeasure _
 
-set_option linter.unusedSectionVars false in
 theorem riemannianVolumeMeasure_regular
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :

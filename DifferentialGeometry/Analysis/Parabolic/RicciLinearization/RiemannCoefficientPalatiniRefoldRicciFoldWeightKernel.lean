@@ -1007,6 +1007,7 @@ private lemma connDiffQuadraticMonomial_chartBasis_eq (g₀ g₁ : SmoothRiemann
   rw [map_smul, ContinuousLinearMap.smul_apply, map_smul, ContinuousLinearMap.smul_apply,
     smul_eq_mul, houter c]
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma palatiniRefoldGenJointGram_const_g0
     (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :

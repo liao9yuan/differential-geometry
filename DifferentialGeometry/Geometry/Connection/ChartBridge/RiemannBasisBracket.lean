@@ -363,6 +363,7 @@ private lemma chartE_section_repr_covApply_eventuallyEq
   rw [trivToE_trivFromE (I := I) x hb_base]
   rw [hb_def, (extChartAt I x).right_inv hy_tgt]
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartChristoffel_differentiableAt_self
     [I.Boundaryless]

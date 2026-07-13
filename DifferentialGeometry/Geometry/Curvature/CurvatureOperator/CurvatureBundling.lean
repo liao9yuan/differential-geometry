@@ -273,7 +273,7 @@ private lemma riemannSec_add_third_smooth
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZ'_le)
     (covApply_mdifferentiableAt_local (cov := cov) hX_at hZsum_le)
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] [T2Space M] [ContMDiffVectorBundle ∞ F V I] [FiniteDimensional ℝ F] in
 private lemma riemannSec_smul_third_smooth
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -346,7 +346,7 @@ private lemma riemannSec_smul_third_smooth
     hZ_at hcXZ_at hcYZ_at hcXfZ_at hcYfZ_at hYf_at hXf_at
     hf_smul_cYZ_at hf_smul_cXZ_at hYf_smul_Z_at hXf_smul_Z_at hx_int
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 private lemma riemannSec_eq_zero_of_Z_eq_zero
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -467,7 +467,7 @@ private lemma riemannSec_eq_zero_of_Z_eq_zero
     rw [IH]
     rw [Finset.sum_insert hjs]
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 lemma riemannSec_eq_of_Z_eq_at
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
@@ -492,7 +492,7 @@ lemma riemannSec_eq_of_Z_eq_at
   rw [riemannSec_add_third_smooth (cov := cov) hX hY hZ' hτ_smooth]
   rw [hτ_vanishes, add_zero]
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 theorem riemannSec_eq_of_pointwise_eq
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X X' Y Y' : Π b : M, TangentSpace I b} {Z Z' : Π b : M, V b} {x : M}
@@ -514,7 +514,7 @@ theorem riemannSec_eq_of_pointwise_eq
     riemannSec_eq_of_Z_eq_at (cov := cov) hX' hY' hZ hZ' hZ_eq
   rw [h1, h2, h3]
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 theorem riemannOpFun_eq_riemannSec
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
@@ -536,7 +536,7 @@ theorem riemannOpFun_eq_riemannSec
   · exact smoothExtensionTangent_eq x (Y x)
   · exact smoothExtensionFiber_eq (V := V) x (Z x)
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 theorem riemannOpFun_well_defined
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M} {v w : TangentSpace I x}
@@ -549,7 +549,7 @@ theorem riemannOpFun_well_defined
   rw [← hX_eq, ← hY_eq, ← hZ_eq]
   exact riemannOpFun_eq_riemannSec (cov := cov) hX hY hZ
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 private lemma riemannOpFun_add_left
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v v' : TangentSpace I x) (w : TangentSpace I x) (u : V x) :
@@ -583,7 +583,7 @@ private lemma riemannOpFun_add_left
     (covApply_mdifferentiableAt_local (cov := cov) ((hXv x).mdifferentiableAt (by simp)) hZ_le)
     (covApply_mdifferentiableAt_local (cov := cov) ((hXv' x).mdifferentiableAt (by simp)) hZ_le)
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 private lemma riemannOpFun_smul_left
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (c : ℝ) (v w : TangentSpace I x) (u : V x) :
@@ -610,7 +610,7 @@ private lemma riemannOpFun_smul_left
     mdifferentiableAt_const ((hXv x).mdifferentiableAt (by simp))
     (covApply_mdifferentiableAt_local (cov := cov) ((hXv x).mdifferentiableAt (by simp)) hZ_le)
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 private lemma riemannOpFun_add_right
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v : TangentSpace I x) (w w' : TangentSpace I x) (u : V x) :
@@ -643,7 +643,7 @@ private lemma riemannOpFun_add_right
     (covApply_mdifferentiableAt_local (cov := cov) ((hYw x).mdifferentiableAt (by simp)) hZ_le)
     (covApply_mdifferentiableAt_local (cov := cov) ((hYw' x).mdifferentiableAt (by simp)) hZ_le)
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 private lemma riemannOpFun_smul_right
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v : TangentSpace I x) (c : ℝ) (w : TangentSpace I x) (u : V x) :
@@ -670,7 +670,7 @@ private lemma riemannOpFun_smul_right
     mdifferentiableAt_const ((hYw x).mdifferentiableAt (by simp))
     (covApply_mdifferentiableAt_local (cov := cov) ((hYw x).mdifferentiableAt (by simp)) hZ_le)
 
-set_option linter.unusedSectionVars false in
+omit [SigmaCompactSpace M] in
 private lemma riemannOpFun_add_third
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v : TangentSpace I x) (w : TangentSpace I x) (u u' : V x) :
@@ -698,6 +698,7 @@ private lemma riemannOpFun_add_third
       riemannOpFun_well_defined (cov := cov) hX hY hZu' hX_eq hY_eq hZu'_eq]
   exact riemannSec_add_third_smooth (cov := cov) hX hY hZu hZu'
 
+omit [SigmaCompactSpace M] in
 private lemma riemannOpFun_smul_third
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v w : TangentSpace I x) (c : ℝ) (u : V x) :
@@ -790,12 +791,14 @@ noncomputable def riemannOp
   haveI : FiniteDimensional ℝ (TangentSpace I x) := inferInstanceAs (FiniteDimensional ℝ E)
   LinearMap.toContinuousLinearMap (riemannOp_Xslot (cov := cov) x)
 
+omit [SigmaCompactSpace M] in
 theorem riemannOp_apply_fun
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
     (x : M) (v w : TangentSpace I x) (u : V x) :
     riemannOp cov x v w u = riemannOpFun cov x v w u := rfl
 
+omit [SigmaCompactSpace M] in
 theorem riemannOp_apply_smooth
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -807,6 +810,7 @@ theorem riemannOp_apply_smooth
   rw [riemannOp_apply_fun]
   exact riemannOpFun_eq_riemannSec (cov := cov) hX hY hZ
 
+omit [SigmaCompactSpace M] in
 lemma riemannOp_swap
     (cov : CovariantDerivative I F V)
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

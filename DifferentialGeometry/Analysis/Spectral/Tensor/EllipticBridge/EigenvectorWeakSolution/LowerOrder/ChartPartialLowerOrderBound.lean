@@ -77,6 +77,7 @@ private lemma abs_sum_coeff_kronecker_le
     _ ≤ ∑ _i ∈ t, Cχ := Finset.sum_le_sum hbound
     _ = t.card * Cχ := by rw [Finset.sum_const, nsmul_eq_mul]
 
+set_option linter.unusedSectionVars false in
 private theorem exists_const_covDerivLowerOrderCoeff_bdd
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -23,7 +23,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_symm
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -37,7 +36,6 @@ theorem tensorL2Inner_symm
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s x (S x) (T x)
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_add_left
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -68,7 +66,6 @@ theorem tensorL2Inner_add_left
   exact MeasureTheory.integral_add h₁ h₂
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_add_right
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -99,7 +96,6 @@ theorem tensorL2Inner_add_right
   exact MeasureTheory.integral_add h₁ h₂
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_smul_left
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -120,7 +116,6 @@ theorem tensorL2Inner_smul_left
   rw [hcongr, MeasureTheory.integral_const_mul]
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_smul_right
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -141,7 +136,6 @@ theorem tensorL2Inner_smul_right
   rw [hcongr, MeasureTheory.integral_const_mul]
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_zero_left
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -159,7 +153,6 @@ theorem tensorL2Inner_zero_left
   exact MeasureTheory.integral_zero M ℝ
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_zero_right
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -177,7 +170,6 @@ theorem tensorL2Inner_zero_right
   exact MeasureTheory.integral_zero M ℝ
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_nonneg
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -189,7 +181,6 @@ theorem tensorL2Inner_nonneg
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s x (S x)
 
 
-set_option linter.unusedSectionVars false in
 theorem MemL2.integrable_inner_of_aestronglyMeasurable
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -257,7 +248,6 @@ theorem MemL2.integrable_inner_of_aestronglyMeasurable
   exact Filter.Eventually.of_forall h_bound
 
 
-set_option linter.unusedSectionVars false in
 theorem MemL2.add
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -318,7 +308,6 @@ theorem MemL2.add
   exact hsum
 
 
-set_option linter.unusedSectionVars false in
 theorem MemL2.smul
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}

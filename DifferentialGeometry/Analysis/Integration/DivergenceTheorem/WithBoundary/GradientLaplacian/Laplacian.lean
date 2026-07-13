@@ -34,7 +34,7 @@ private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma gradFun_eq_zero_on_compl_tsupport
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     {x : M} (hx : x ∈ (tsupport f)ᶜ) :
@@ -46,7 +46,7 @@ private lemma gradFun_eq_zero_on_compl_tsupport
     exact hy (subset_tsupport _ hne)
   exact gradFun_eq_zero_of_eventuallyEq_zero (I := I) g hev
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma gradFun_total_eq_zeroSection_on_compl_tsupport
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     {y : M} (hy : y ∈ (tsupport f)ᶜ) :
@@ -57,7 +57,7 @@ private lemma gradFun_total_eq_zeroSection_on_compl_tsupport
   rw [hzero]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma gradFun_total_contMDiffOn_compl_tsupport
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞
@@ -102,7 +102,6 @@ def grad_g_with_boundary_section [T2Space M]
       interior_union_compl_tsupport_eq_univ (I := I) (M := M) hf_int
     exact contMDiff_of_contMDiffOn_union_of_isOpen hs ht hcover hs_open ht_open⟩
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma grad_g_with_boundary_section_apply [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -111,7 +110,6 @@ set_option linter.unusedSectionVars false in
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       gradFun (I := I) g f x := rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma grad_g_with_boundary_section_coe [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -120,7 +118,6 @@ set_option linter.unusedSectionVars false in
       Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) x =
       grad_g_with_boundary (I := I) g f x := rfl
 
-set_option linter.unusedSectionVars false in
 lemma support_grad_g_with_boundary_section_subset [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -131,7 +128,6 @@ lemma support_grad_g_with_boundary_section_subset [T2Space M]
           ∀ x, TangentSpace I x) ⊆ tsupport f :=
   support_grad_g_with_boundary_subset (I := I) g f
 
-set_option linter.unusedSectionVars false in
 lemma tsupport_grad_g_with_boundary_section_subset [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -143,7 +139,6 @@ lemma tsupport_grad_g_with_boundary_section_subset [T2Space M]
     (support_grad_g_with_boundary_section_subset (I := I) g hf hf_int)
     (isClosed_tsupport _)
 
-set_option linter.unusedSectionVars false in
 lemma tsupport_grad_g_with_boundary_section_subset_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -153,7 +148,6 @@ lemma tsupport_grad_g_with_boundary_section_subset_interior [T2Space M]
       ∀ x, TangentSpace I x) ⊆ I.interior M :=
   (tsupport_grad_g_with_boundary_section_subset (I := I) g hf hf_int).trans hf_int
 
-set_option linter.unusedSectionVars false in
 lemma hasCompactSupport_grad_g_with_boundary_section [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -173,7 +167,6 @@ def Δ_g_with_boundary [T2Space M]
   divergence_g_with_boundary (I := I) g
     (grad_g_with_boundary_section (I := I) g hf hf_int)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma Δ_g_with_boundary_def [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -182,7 +175,6 @@ set_option linter.unusedSectionVars false in
       divergence_g_with_boundary (I := I) g
         (grad_g_with_boundary_section (I := I) g hf hf_int) x := rfl
 
-set_option linter.unusedSectionVars false in
 theorem Δ_g_with_boundary_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -192,7 +184,6 @@ theorem Δ_g_with_boundary_contMDiffOn_interior [T2Space M]
   divergence_g_with_boundary_contMDiffOn_interior (I := I) g
     (grad_g_with_boundary_section (I := I) g hf hf_int)
 
-set_option linter.unusedSectionVars false in
 lemma tsupport_Δ_g_with_boundary_subset [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -209,7 +200,6 @@ lemma tsupport_Δ_g_with_boundary_subset [T2Space M]
       (I := I) g (grad_g_with_boundary_section (I := I) g hf hf_int) hsec_supp
   exact h1.trans (tsupport_grad_g_with_boundary_section_subset (I := I) g hf hf_int)
 
-set_option linter.unusedSectionVars false in
 theorem Δ_g_with_boundary_continuous [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -236,7 +226,6 @@ theorem Δ_g_with_boundary_continuous [T2Space M]
       exact hy (subset_tsupport _ hne)
     exact (continuous_const.continuousAt.congr hev_zero.symm)
 
-set_option linter.unusedSectionVars false in
 lemma hasCompactSupport_Δ_g_with_boundary [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)

@@ -414,6 +414,7 @@ theorem memW1p_fChartResidual_smooth_aux
     (I := I) (M := M) (f := fHLeibnizResidualSmoothRep (I := I) (M := M) g α v)
     (α := α) h_smooth h_supp 2
 
+set_option linter.unusedSectionVars false in
 theorem fHLeibnizResidualLp_smoothToH1Compl_coeFn_ae
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) :
     ((DifferentialGeometry.Analysis.Laplacian.DiffChartBilinearH1Compl.fHLeibnizResidualLp

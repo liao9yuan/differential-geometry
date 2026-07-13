@@ -85,6 +85,7 @@ theorem chartImage_pouTsupport_subset_interior_target
   rw [h_open.interior_eq]
   exact chartImage_pouTsupport_subset_target (I := I) (M := M) α
 
+set_option linter.unusedSectionVars false in
 theorem chartChristoffel_bdd_on_compact
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)

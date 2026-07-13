@@ -30,6 +30,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [CompleteSpace E]
 
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] in
 lemma rfns_repr_of_orthoFrame_cb
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (S : TensorRSSpace 0 t I x)

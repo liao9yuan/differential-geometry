@@ -884,6 +884,7 @@ private lemma raisedKoszulVec_realizedFam_chartα
   rw [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
   rw [g_inner_eq_chartGramMatrix_basis (I := I) g₁ α x q l]
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma genJointGram_const_g0
     (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :

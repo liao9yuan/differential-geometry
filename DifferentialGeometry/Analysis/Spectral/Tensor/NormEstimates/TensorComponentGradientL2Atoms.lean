@@ -346,6 +346,7 @@ private theorem indicator_eLpNorm_raw_le_const_mul_tensorL2Norm
     ENNReal.ofReal_mul (Real.sqrt_nonneg _)] at h_eLpNorm_le
   exact h_eLpNorm_le
 
+set_option linter.unusedSectionVars false in
 private lemma tensorL2Norm_eq_norm_toCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :

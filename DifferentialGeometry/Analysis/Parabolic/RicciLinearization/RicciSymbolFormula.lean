@@ -24,6 +24,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section InvGramBridge
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartInvGramOnE_extChartAt_self (g : SmoothRiemannianMetric I M) (x : M)
     (j l : Fin (Module.finrank ℝ E)) :

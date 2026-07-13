@@ -128,7 +128,7 @@ section CandidateAtBallPoint
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 private lemma chartFlowCandidate_contMDiffAt_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -165,7 +165,7 @@ private lemma chartFlowCandidate_contMDiffAt_of_mem_ball
   rw [hcand_eq]
   exact hsymm_at.comp v₁ hs_cmda
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 private lemma chartFlowCandidate_contMDiffAt2_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E}
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -202,7 +202,7 @@ private lemma chartFlowCandidate_contMDiffAt2_of_mem_ball
   rw [hcand_eq]
   exact hsymm_at.comp v₁ hs_cmda
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 private lemma chartFlowCandidate_contMDiffAt_nat_of_mem_ball
     {p : M} {Φ : (E × E) × ℝ → E × E} {ρ T t' : ℝ} {v₁ : E} (n : ℕ)
     (hv₁ : ‖v₁‖ < ρ) (ht' : t' ∈ Set.Ioo (-T) T)
@@ -247,7 +247,6 @@ section SmallVector
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAt_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
@@ -358,7 +357,6 @@ theorem expMap_contMDiffAt_of_norm_lt
     exact hheq
   exact hcomp.congr_of_eventuallyEq hev
 
-set_option linter.unusedSectionVars false in
 private theorem exists_unified_chartFlow_data_two
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -546,7 +544,6 @@ private theorem exists_unified_chartFlow_data_two
   · intro v hv
     exact hF_int v hv
 
-set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAt2_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
@@ -660,7 +657,6 @@ theorem expMap_contMDiffAt2_of_norm_lt
     exact hheq
   exact hcomp.congr_of_eventuallyEq hev
 
-set_option linter.unusedSectionVars false in
 private theorem exists_unified_chartFlow_data_nat
     (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (hn : 1 ≤ n) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -850,7 +846,6 @@ private theorem exists_unified_chartFlow_data_nat
   · intro v hv
     exact hF_int v hv
 
-set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAtN_of_norm_lt
     (g : SmoothRiemannianMetric I M) (p : M) (n : ℕ) (hn : 1 ≤ n) :
     ∃ δ : ℝ, 0 < δ ∧ ∀ w : E, ‖w‖ < δ →
@@ -969,8 +964,6 @@ theorem expMap_contMDiffAtN_of_norm_lt
 
 section JointBasepointVector
 
-variable [I.Boundaryless] [CompleteSpace E]
-
 omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma contDiffAt_chartFlow_jointSlice_fst_of_mem_ball_nat
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T t' : ℝ} {z₁ : E × E} (n : ℕ)
@@ -995,7 +988,7 @@ private lemma contDiffAt_chartFlow_jointSlice_fst_of_mem_ball_nat
   have hfst : ContDiff ℝ (n : ℕ∞) (Prod.fst : E × E → E) := contDiff_fst
   exact hfst.contDiffAt.comp z₁ hslice
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
 private lemma contDiffOn_chartFlow_jointSlice_fst_of_ball_nat
     {Φ : (E × E) × ℝ → E × E} {z₀ : E × E} {ρ T t' : ℝ} (n : ℕ)
     (ht' : t' ∈ Set.Ioo (-T) T)
@@ -1074,7 +1067,7 @@ private lemma exists_phaseBall_orbit_in_inner_ball {x₀ : E}
     have hmem : ((z, s) : (E × E) × ℝ) ∈ U ×ˢ V := ⟨hz_U, hs_V⟩
     exact h_subset hmem
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [T2Space (TangentBundle I M)] in
 theorem exists_chartExp_jointContDiffOn_nat
     (g : SmoothRiemannianMetric I M) (α : M) (n : ℕ) (hn : 1 ≤ n) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T t' : ℝ),

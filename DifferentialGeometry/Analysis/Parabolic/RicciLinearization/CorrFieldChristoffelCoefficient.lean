@@ -162,6 +162,7 @@ private lemma corrField_realizedFam_chartGramMatrix_jointContMDiffOn
     rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hqx]
   · rw [Function.comp_apply, chartGramOnE_def, (extChartAt I α).left_inv hxsrc]
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma corrField_genJointGram_const_g0
     (g₀ : SmoothRiemannianMetric I M) (α : M) {S : Set ℝ} :
@@ -886,6 +887,7 @@ noncomputable def corrFieldChristoffelCoeff1Fib (g₀ g₁ : SmoothRiemannianMet
       raisedKoszulFib (I := I) g₀ g₁ x).comp
     (cometricDoubleTraceFib (I := I) g₁ 1 x)
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem corrFieldChristoffelCoeff1Fib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 3 I x) :
     corrFieldChristoffelCoeff1Fib (I := I) g₀ g₁ x D =

@@ -12,7 +12,7 @@ namespace Integral
 namespace DivergenceTheorem
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
-  [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [Module.Finite ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
@@ -22,7 +22,7 @@ def chartInvGramOnE (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) : E → ℝ :=
   fun y => chartInvGramMatrix (I := I) g α ((extChartAt I α).symm y) i j
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma chartInvGramOnE_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -36,7 +36,7 @@ def gradChartCoeffOnE (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
       chartInvGramOnE (I := I) g α i j y *
         partialDeriv (E := E) j (scalarOnE (I := I) α f) y
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma gradChartCoeffOnE_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -50,7 +50,7 @@ def chartVossWeylIntegrand (g : SmoothRiemannianMetric I M) (α : M) (f : M → 
   fun y =>
     gradChartCoeffOnE (I := I) g α f i y * chartDensityOnE (I := I) g α y
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma chartVossWeylIntegrand_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -66,7 +66,7 @@ def chartVossWeylLaplacian (g : SmoothRiemannianMetric I M) (α : M) (f : M → 
         (extChartAt I α x))
     / chartDensity (I := I) g α x
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma chartVossWeylLaplacian_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M) :
     chartVossWeylLaplacian (I := I) g α f x =
@@ -76,7 +76,7 @@ set_option linter.unusedSectionVars false in
             (extChartAt I α x))
         / chartDensity (I := I) g α x := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -141,7 +141,7 @@ lemma chartCoeff_grad_g_eq_gradChartCoeff [I.Boundaryless]
   rw [hLgrad]
   exact hrepr_basis_combo
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma chartCoeffOnE_grad_g_eq_gradChartCoeffOnE [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -175,7 +175,7 @@ private lemma chartCoeffOnE_grad_g_eq_gradChartCoeffOnE [I.Boundaryless]
   rw [hext_z]
   rw [chartInvGramOnE_def]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -206,7 +206,6 @@ lemma localDivergence_grad_g_eq_chartVossWeylLaplacian [I.Boundaryless]
   unfold partialDeriv
   rw [hev.fderiv_eq]
 
-set_option linter.unusedSectionVars false in
 theorem voss_weyl_laplacian_formula_of_closed
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -217,7 +216,6 @@ theorem voss_weyl_laplacian_formula_of_closed
   rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g hf) hx]
   exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
 
-set_option linter.unusedSectionVars false in
 theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -228,7 +226,6 @@ theorem laplacian_eq_chartVossWeyl_of_sigmaCompact
   rw [voss_weyl_divergence_formula (I := I) g α (grad_g (I := I) g hf) hx]
   exact localDivergence_grad_g_eq_chartVossWeylLaplacian (I := I) g α hf hx
 
-set_option linter.unusedSectionVars false in
 theorem voss_weyl_laplacian_formula_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M)

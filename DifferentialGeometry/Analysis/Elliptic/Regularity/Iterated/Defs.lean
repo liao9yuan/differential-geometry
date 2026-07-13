@@ -36,18 +36,15 @@ noncomputable def iteratedResolventL2 (g : SmoothRiemannianMetric I M) (k : ℕ)
     (ContinuousLinearMap.id ℝ _)
     (fun _ prev => (resolventL2 (I := I) (M := M) g).comp prev) k
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma iteratedResolventL2_zero (g : SmoothRiemannianMetric I M) :
     iteratedResolventL2 (I := I) (M := M) g 0 =
       ContinuousLinearMap.id ℝ _ := rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma iteratedResolventL2_succ (g : SmoothRiemannianMetric I M) (k : ℕ) :
     iteratedResolventL2 (I := I) (M := M) g (k + 1) =
       (resolventL2 (I := I) (M := M) g).comp
         (iteratedResolventL2 (I := I) (M := M) g k) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma iteratedResolventL2_one (g : SmoothRiemannianMetric I M) :
     iteratedResolventL2 (I := I) (M := M) g 1 =
       resolventL2 (I := I) (M := M) g := by
@@ -55,19 +52,16 @@ lemma iteratedResolventL2_one (g : SmoothRiemannianMetric I M) :
   rw [iteratedResolventL2_zero]
   exact ContinuousLinearMap.comp_id _
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma iteratedResolventL2_zero_apply (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     iteratedResolventL2 (I := I) (M := M) g 0 f = f := rfl
 
-set_option linter.unusedSectionVars false in
 lemma iteratedResolventL2_succ_apply (g : SmoothRiemannianMetric I M) (k : ℕ)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     iteratedResolventL2 (I := I) (M := M) g (k + 1) f =
       resolventL2 (I := I) (M := M) g
         (iteratedResolventL2 (I := I) (M := M) g k f) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma iteratedResolventL2_add (g : SmoothRiemannianMetric I M) (j k : ℕ) :
     iteratedResolventL2 (I := I) (M := M) g (j + k) =
       (iteratedResolventL2 (I := I) (M := M) g j).comp
@@ -86,18 +80,15 @@ noncomputable def laplacianDomainPow (g : SmoothRiemannianMetric I M) (k : ℕ) 
       ((resolvent (I := I) (M := M) g).toLinearMap.comp
         (iteratedResolventL2 (I := I) (M := M) g k).toLinearMap)) k
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma laplacianDomainPow_zero (g : SmoothRiemannianMetric I M) :
     laplacianDomainPow (I := I) (M := M) g 0 = ⊤ := rfl
 
-set_option linter.unusedSectionVars false in
 lemma laplacianDomainPow_succ (g : SmoothRiemannianMetric I M) (k : ℕ) :
     laplacianDomainPow (I := I) (M := M) g (k + 1) =
       LinearMap.range
         ((resolvent (I := I) (M := M) g).toLinearMap.comp
           (iteratedResolventL2 (I := I) (M := M) g k).toLinearMap) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma laplacianDomainPow_one (g : SmoothRiemannianMetric I M) :
     laplacianDomainPow (I := I) (M := M) g 1 =
       laplacianDomain (I := I) (M := M) g := by
@@ -106,7 +97,6 @@ lemma laplacianDomainPow_one (g : SmoothRiemannianMetric I M) :
   rw [iteratedResolventL2_zero]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma laplacianDomainPow_succ_mem_iff (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u : H1Compl (I := I) (M := M) g} :
     u ∈ laplacianDomainPow (I := I) (M := M) g (k + 1) ↔
@@ -127,7 +117,6 @@ lemma laplacianDomainPow_succ_mem_iff (g : SmoothRiemannianMetric I M) (k : ℕ)
       ContinuousLinearMap.coe_coe]
     exact hf.symm
 
-set_option linter.unusedSectionVars false in
 lemma laplacianDomainPow_succ_subset_laplacianDomain
     (g : SmoothRiemannianMetric I M) (k : ℕ) :
     (laplacianDomainPow (I := I) (M := M) g (k + 1) : Set (H1Compl g)) ⊆
@@ -139,7 +128,6 @@ lemma laplacianDomainPow_succ_subset_laplacianDomain
   rw [laplacianDomain_mem_iff]
   exact ⟨iteratedResolventL2 (I := I) (M := M) g k f, hf⟩
 
-set_option linter.unusedSectionVars false in
 lemma laplacianDomainPow_succ_preimage_in_range
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

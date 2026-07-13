@@ -63,7 +63,7 @@ private noncomputable def chartModelBasisVectorNormSup : ℝ :=
     (Finset.univ_nonempty_iff.mpr ⟨⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩⟩)
     (fun k => ‖(chartModelBasis E) k‖)
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private lemma chrRiemBasisCoordSup_nonneg : 0 ≤ chartModelBasisCoordNormSup (E := E) := by
   unfold chartModelBasisCoordNormSup
   set i₀ : Fin (Module.finrank ℝ E) := ⟨0, Nat.pos_of_ne_zero (NeZero.ne _)⟩
@@ -71,7 +71,7 @@ private lemma chrRiemBasisCoordSup_nonneg : 0 ≤ chartModelBasisCoordNormSup (E
     _ ≤ _ := Finset.le_sup' (f := fun i =>
         ‖((chartModelBasis E).coord i).toContinuousLinearMap‖) (Finset.mem_univ i₀)
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private lemma chrRiemBasisVecSup_nonneg : 0 ≤ chartModelBasisVectorNormSup (E := E) := by
   unfold chartModelBasisVectorNormSup
   have hne : (Finset.univ : Finset (Fin (Module.finrank ℝ E))).Nonempty :=
@@ -80,7 +80,7 @@ private lemma chrRiemBasisVecSup_nonneg : 0 ≤ chartModelBasisVectorNormSup (E 
   exact le_trans (norm_nonneg _)
     (Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) hk₀)
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private lemma chrRiem_repr_coord_abs_le (x : E) (i : Fin (Module.finrank ℝ E)) :
     |((chartModelBasis E).repr x) i| ≤ chartModelBasisCoordNormSup (E := E) * ‖x‖ := by
   have h_eq : (chartModelBasis E).repr x i =
@@ -95,12 +95,12 @@ private lemma chrRiem_repr_coord_abs_le (x : E) (i : Fin (Module.finrank ℝ E))
           (f := fun i => ‖((chartModelBasis E).coord i).toContinuousLinearMap‖)
           (Finset.mem_univ _)
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private lemma chrRiem_basis_vec_norm_le (k : Fin (Module.finrank ℝ E)) :
     ‖(chartModelBasis E) k‖ ≤ chartModelBasisVectorNormSup (E := E) :=
   Finset.le_sup' (f := fun k => ‖(chartModelBasis E) k‖) (Finset.mem_univ _)
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private theorem christoffelCorrection_riem_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -211,7 +211,8 @@ private theorem christoffelCorrection_riem_norm_le_on_pouTsupport
             (mul_nonneg (mul_nonneg hn_nn hCc_nn) (norm_nonneg _)))
     _ = (n : ℝ) ^ 3 * Cc ^ 2 * Cv * CΓ * ‖Y‖ * ‖w‖ := by ring
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma chrRiem_slotConjFactor_self_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -237,7 +238,7 @@ private lemma chrRiem_slotConjFactor_self_apply
           (trivFromE (I := I) α b w))) = _
   rw [trivToE_trivFromE (I := I) α hb_base]
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private lemma christoffelChartConjugationFactor_basisVector_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -299,7 +300,7 @@ private lemma christoffelChartConjugationFactor_basisVector_norm_le_on_pouTsuppo
   exact ContinuousLinearMap.opNorm_le_bound _
     (mul_nonneg hCχ_nn hCvec_nn) hpt
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private lemma christoffelChartConjugation_inputSlotCLM_prodNorm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -333,7 +334,7 @@ private lemma christoffelChartConjugation_inputSlotCLM_prodNorm_le_on_pouTsuppor
         Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
     _ = (max C₀ 1) ^ r := by rw [Finset.prod_const]; simp
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] in
 private lemma chrRiem_slotOutputConjCLM_prod_norm_le_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -367,7 +368,8 @@ private lemma chrRiem_slotOutputConjCLM_prod_norm_le_on_pouTsupport
         Finset.prod_le_prod (fun j _ => norm_nonneg _) (fun j _ => h_factor_le j)
     _ = (max C₀ 1) ^ s := by rw [Finset.prod_const]; simp
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma chrRiem_inputSlotChartKernel_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b') (i : Fin r) (b : M)
@@ -388,7 +390,8 @@ private lemma chrRiem_inputSlotChartKernel_apply_norm_le
     _ = (∏ j : Fin r, ‖slotInputConjCLM (I := I) g r α X i b j‖) * ‖S‖ := by
         ring
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma chrRiem_outputSlotChartKernel_apply_norm_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (X : Π b' : M, TangentSpace I b') (l : Fin s) (b : M)
@@ -407,7 +410,8 @@ private lemma chrRiem_outputSlotChartKernel_apply_norm_le
           (𝕜 := ℝ) (E := fun _ : Fin s => E) ℝ
           (slotOutputConjCLM (I := I) g s α X l b)
 
-set_option linter.unusedSectionVars false in
+omit [CompleteSpace E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma chrRiem_tensorRSTriv_baseSet_eq_chartSource (r s : ℕ) (α : M) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun y : M => TensorRSSpace r s I y) α).baseSet =
@@ -432,7 +436,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem chartTensorRSInputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=
@@ -529,7 +532,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem chartTensorRSOutputSlotCorrection_riemannian_norm_le_on_pouTsupport_local
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     letI : Bundle.RiemannianBundle (fun b : M => TensorRSSpace r s I b) :=

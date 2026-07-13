@@ -44,14 +44,12 @@ noncomputable def tensor0SRiemannianInnerCLM
     Tensor0SSpace s I b →L[ℝ] Tensor0SSpace s I b →L[ℝ] ℝ :=
   innerBundleCLM (I := I) (M := M) g s b
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma tensor0SRiemannianInnerCLM_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SSpace s I b) :
     tensor0SRiemannianInnerCLM (I := I) (M := M) g s b T S =
       innerBundleCLM (I := I) (M := M) g s b T S := rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SRiemannianInner_symm
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T S : Tensor0SSpace s I b) :
@@ -59,14 +57,12 @@ theorem tensor0SRiemannianInner_symm
       tensor0SRiemannianInnerCLM (I := I) (M := M) g s b S T :=
   innerBundleCLM_symm (I := I) (M := M) g s b T S
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SRiemannianInner_pos
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T : Tensor0SSpace s I b) (hT : T ≠ 0) :
     0 < tensor0SRiemannianInnerCLM (I := I) (M := M) g s b T T :=
   innerBundleCLM_pos (I := I) (M := M) g s b T hT
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SRiemannianInner_smul_left
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (c : ℝ) (T S : Tensor0SSpace s I b) :
@@ -79,7 +75,6 @@ theorem tensor0SRiemannianInner_smul_left
   rw [h]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SRiemannianInner_smul_right
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (c : ℝ) (T S : Tensor0SSpace s I b) :
@@ -91,7 +86,6 @@ theorem tensor0SRiemannianInner_smul_right
   rw [h]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma innerModel_diagonal_continuous
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Continuous (fun T : Tensor0SModel s ℝ E =>
@@ -102,7 +96,6 @@ private lemma innerModel_diagonal_continuous
     hModelCLM.clm_apply continuous_id
   simpa [innerModelCLM_apply] using this
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SRiemannianInner_diagonal_continuous
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Continuous (fun v : Tensor0SSpace s I b =>
@@ -127,14 +120,12 @@ theorem tensor0SRiemannianInner_diagonal_continuous
       (𝕜 := ℝ) (E := E) (I := I) (M := M) (s := s) (x := b)
   exact (innerModel_diagonal_continuous (I := I) (M := M) g s b).comp htoM
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SRiemannianInner_diagonal_continuousAt_zero
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     ContinuousAt (fun v : Tensor0SSpace s I b =>
       tensor0SRiemannianInnerCLM (I := I) (M := M) g s b v v) 0 :=
   (tensor0SRiemannianInner_diagonal_continuous (I := I) (M := M) g s b).continuousAt
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0SRiemannianInner_diagonal_clm_apply
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M)
     (T : Tensor0SSpace s I b) :
@@ -148,8 +139,6 @@ private lemma tensor0SRiemannianInner_diagonal_clm_apply
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 800000 in
-
-set_option linter.unusedSectionVars false in
 private lemma innerModel_diagonal_sublevel_isBounded
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     Bornology.IsBounded
@@ -194,7 +183,6 @@ private lemma innerModel_diagonal_sublevel_isBounded
     have hv0 : v = 0 := Subsingleton.elim v 0
     rw [hv0, norm_zero]; exact one_pos
 
-set_option linter.unusedSectionVars false in
 private lemma innerModel_diagonal_sublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -203,7 +191,6 @@ private lemma innerModel_diagonal_sublevel_isVonNBounded
   NormedSpace.isVonNBounded_of_isBounded ℝ
     (innerModel_diagonal_sublevel_isBounded (I := I) (M := M) g s b)
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SRiemannianInner_isVonNBounded
     (g : SmoothRiemannianMetric I M) (s : ℕ) (b : M) :
     IsVonNBounded ℝ

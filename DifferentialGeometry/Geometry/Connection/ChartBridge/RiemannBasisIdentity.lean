@@ -97,6 +97,7 @@ lemma exists_globalSmooth_chartBasisVec_ext
   change (χ : M → ℝ) y • chartBasisVecFiber (I := I) x j y = chartBasisVecFiber (I := I) x j y
   rw [hχ_one_y, one_smul]
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartChristoffel_contDiffAt_self [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)

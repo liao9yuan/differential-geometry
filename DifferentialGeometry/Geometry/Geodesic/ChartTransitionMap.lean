@@ -28,7 +28,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 def chartTransitionSource (α β : M) : Set E :=
   ((extChartAt I α).symm ≫ extChartAt I β).source
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartTransitionSource_def (α β : M) :
     chartTransitionSource (I := I) α β =
       ((extChartAt I α).symm ≫ extChartAt I β).source := rfl
@@ -36,12 +36,12 @@ lemma chartTransitionSource_def (α β : M) :
 def chartTransitionMap (α β : M) : E → E :=
   extChartAt I β ∘ (extChartAt I α).symm
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartTransitionMap_def (α β : M) :
     chartTransitionMap (I := I) α β =
       extChartAt I β ∘ (extChartAt I α).symm := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartTransitionMap_apply (α β : M) (x : E) :
     chartTransitionMap (I := I) α β x =
       extChartAt I β ((extChartAt I α).symm x) := rfl
@@ -107,12 +107,12 @@ theorem chartTransitionSource_isOpen [I.Boundaryless] (α β : M) :
 def chartTransitionAt (α β : M) (x : E) : E →L[ℝ] E :=
   fderiv ℝ (chartTransitionMap (I := I) α β) x
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartTransitionAt_def (α β : M) (x : E) :
     chartTransitionAt (I := I) α β x =
       fderiv ℝ (chartTransitionMap (I := I) α β) x := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem chartTransitionMap_contDiffAt [I.Boundaryless]
     (α β : M) {x : E}
     (hx : x ∈ chartTransitionSource (I := I) α β) :
@@ -124,7 +124,7 @@ theorem chartTransitionMap_contDiffAt [I.Boundaryless]
     chartTransitionMap_contDiffOn (I := I) α β
   exact (h_on.contDiffAt (h_open.mem_nhds hx))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem chartTransitionMap_differentiableAt [I.Boundaryless]
     (α β : M) {x : E}
     (hx : x ∈ chartTransitionSource (I := I) α β) :
@@ -132,7 +132,7 @@ theorem chartTransitionMap_differentiableAt [I.Boundaryless]
   (chartTransitionMap_contDiffAt (I := I) α β hx).differentiableAt (by
     decide)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem chartTransitionAt_smooth [I.Boundaryless] (α β : M) :
     ContDiffOn ℝ ∞
       (fun x => (chartTransitionAt (I := I) α β x : E →L[ℝ] E))
@@ -162,20 +162,20 @@ lemma chartTransitionMap_self_apply
   change extChartAt I α ((extChartAt I α).symm x) = x
   exact (extChartAt I α).right_inv hx
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartTransitionMap_value_on_overlap
     (α β : M) {x : M}
     (hx_α : x ∈ (chartAt H α).source) :
     chartTransitionMap (I := I) α β ((extChartAt I α) x) = extChartAt I β x :=
   chartTransitionMap_apply_extChartAt (I := I) α β hx_α
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem chartTransitionMap_continuousOn (α β : M) :
     ContinuousOn (chartTransitionMap (I := I) α β)
       (chartTransitionSource (I := I) α β) :=
   (chartTransitionMap_contDiffOn (I := I) α β).continuousOn
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem chartTransitionMap_continuousAt [I.Boundaryless]
     (α β : M) {x : E}
     (hx : x ∈ chartTransitionSource (I := I) α β) :
@@ -184,7 +184,7 @@ theorem chartTransitionMap_continuousAt [I.Boundaryless]
     chartTransitionSource_isOpen (I := I) α β
   exact (chartTransitionMap_continuousOn (I := I) α β).continuousAt (h_open.mem_nhds hx)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 lemma chartTransitionMap_comp_self_extChartAt
     (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source)
@@ -226,7 +226,7 @@ lemma chartTransitionMap_mapsTo_source [I.Boundaryless]
     rw [(extChartAt I β).left_inv hy_pre']
     exact (extChartAt I α).map_target hy_tgt
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem chartTransitionAt_comp_chartTransitionAt [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
     (chartTransitionAt (I := I) β α (chartTransitionMap (I := I) α β y)).comp
@@ -264,7 +264,7 @@ theorem chartTransitionAt_comp_chartTransitionAt [I.Boundaryless]
   rw [chartTransitionAt_def, chartTransitionAt_def]
   rw [← h_fderiv_comp, h_chain]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 theorem chartTransitionAt_comp_chartTransitionAt' [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β) :
     (chartTransitionAt (I := I) α β y).comp

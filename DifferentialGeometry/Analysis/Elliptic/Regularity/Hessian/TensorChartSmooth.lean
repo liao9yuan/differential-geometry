@@ -90,6 +90,7 @@ theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
     (extChartAt I α).right_inv hy_target
   rw [h_inv]
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartPushedChristoffelCorrection_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)
@@ -214,6 +215,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
                 chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
                 chartHessianVOnEuclid (I := I) (M := M) g α v k l y := rfl
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma invGramOnEuclid_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)

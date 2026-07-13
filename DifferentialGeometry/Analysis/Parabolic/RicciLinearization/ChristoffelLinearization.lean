@@ -182,6 +182,7 @@ private lemma partialDeriv_perturbation_contDiff
     ContDiff ℝ ∞ (partialDeriv (E := E) i (h a b)) :=
   partialDeriv_contDiff_of_contDiff (h.smooth a b) i
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedChristoffelPrincipal_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)

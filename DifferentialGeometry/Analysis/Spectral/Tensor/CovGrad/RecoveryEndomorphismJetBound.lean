@@ -308,6 +308,7 @@ private lemma flatArmVec_self_eq_zero (g₀ : SmoothRiemannianMetric I M) (kind 
       simp only [flatArmVec, if_neg (by decide : ¬ (false = true)), hcd]
       simp
 
+set_option linter.unusedSectionVars false in
 private lemma flatArmFib_self_eq_zero (g₀ : SmoothRiemannianMetric I M) (kind : Bool) (x : M) :
     flatArmFib (I := I) g₀ g₀ kind x = (0 : TensorRSSpace 1 2 I x) := by
   apply tensorRSSpace_ext 1 2 x

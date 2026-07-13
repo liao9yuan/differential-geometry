@@ -32,6 +32,7 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
     (x y : M) (z : M) :
     tangentCoordChange I x y z =
@@ -44,7 +45,7 @@ private lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
 private def applyJac (α : M) (p : TangentBundle I M) (z : E × E) : E :=
   chartTransitionAt (I := I) p.proj α z.1 z.2
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source) :
@@ -86,6 +87,7 @@ private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
   exact (extChartAt I p.proj).right_inv hz_tgt
 
 set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) :
     DifferentiableAt ℝ (fun z => chartTransitionAt (I := I) α β z) x := by
@@ -96,7 +98,7 @@ private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
     chartTransitionAt_smooth (I := I) α β
   exact (hsmooth.contDiffAt (h_open.mem_nhds hx)).differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma fderiv_applyJac_apply [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -141,7 +143,7 @@ private lemma fderiv_applyJac_apply [I.Boundaryless]
   rw [hc_fderiv]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma chartCoord_fderiv_chartTransitionAt [I.Boundaryless]
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -219,7 +221,6 @@ private lemma chartCoord_fderiv_chartTransitionAt [I.Boundaryless]
   rw [hLHS_expand]
   rw [Finset.sum_comm]
 
-set_option linter.unusedSectionVars false in
 theorem geodesicVectorFieldChart_eq_geodesicVectorField
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -387,7 +388,6 @@ theorem geodesicVectorFieldChart_eq_geodesicVectorField
     rw [hXval, geodesicVectorField_snd]
   apply Prod.ext hfst hsnd
 
-set_option linter.unusedSectionVars false in
 theorem geodesicVectorFieldChart_eq_of_proj_mem
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α α' : M)
@@ -399,7 +399,6 @@ theorem geodesicVectorFieldChart_eq_of_proj_mem
   rw [geodesicVectorFieldChart_eq_geodesicVectorField (I := I) g α hα,
     geodesicVectorFieldChart_eq_geodesicVectorField (I := I) g α' hα']
 
-set_option linter.unusedSectionVars false in
 theorem gc_vf_chart_coincidence
     [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α α' : M)
@@ -428,7 +427,6 @@ theorem gc_vf_chart_coincidence
     geodesicVectorFieldChart_eq_of_proj_mem (I := I) g α α' (p := f t) ht_α2 ht_α'2
   exact hvf_eq ▸ htD
 
-set_option linter.unusedSectionVars false in
 theorem gc_cross_vf_projection_uniqueness
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
@@ -461,7 +459,6 @@ theorem gc_cross_vf_projection_uniqueness
   filter_upwards [hfe] with t ht
   rw [ht, hproj t]
 
-set_option linter.unusedSectionVars false in
 theorem IsGeodesicAt.hasGeodesicEquationAt
     [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {t₀ : ℝ}
@@ -476,7 +473,6 @@ section MovingFootToFixedChart
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {t : ℝ}
     (hγ_cont : ContinuousAt γ t)
@@ -612,6 +608,7 @@ theorem hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
   exact hUderiv
 
 set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {t : ℝ}
     (hγ_cont : ContinuousAt γ t)
@@ -659,7 +656,7 @@ theorem hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
 
 end MovingFootToFixedChart
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma hasGeodesicEquationAt_comp_sub_const
     {g : SmoothRiemannianMetric I M} {η : ℝ → M} {T t : ℝ}
     (h : HasGeodesicEquationAt (I := I) g η (t - T)) :

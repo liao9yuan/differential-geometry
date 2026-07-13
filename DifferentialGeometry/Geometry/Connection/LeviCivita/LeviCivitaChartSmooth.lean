@@ -211,6 +211,7 @@ lemma chartE_section_repr_basis_component_contMDiffOn
   intro x hx
   exact (hcoord_clm.contMDiffAt).comp_contMDiffWithinAt x (hbase x hx)
 
+set_option linter.unusedSectionVars false in
 lemma chartChristoffel_contMDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :

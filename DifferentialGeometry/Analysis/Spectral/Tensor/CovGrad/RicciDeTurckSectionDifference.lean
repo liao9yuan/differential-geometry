@@ -47,6 +47,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 
+set_option linter.unusedSectionVars false in
 theorem connDiffQuad_telescope (g₀ g₁ g₁' : SmoothRiemannianMetric I M) (x : M)
     (p q r : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) g₁ g₀ x

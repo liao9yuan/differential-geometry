@@ -75,6 +75,7 @@ private lemma partialDeriv_contDiffOn_int_of_contDiffOn
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
+set_option linter.unusedSectionVars false in
 private lemma partial_chartGramOnE_contDiffOn_int'
     (g : SmoothRiemannianMetric I M) (α : M)
     (a l b : Fin (Module.finrank ℝ E)) :

@@ -64,6 +64,7 @@ theorem exists_iteratedCovGrad_rs_toModel_domDomCongr
       (iteratedCovGrad (I := I) g r s i Φ) (iteratedCovGrad (I := I) g r s i Φ')
       hτ x d v
 
+set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_iteratedCovGrad_rs_eq_of_section_domDomCongr
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (σ : Equiv.Perm (Fin s))
     (Φ Φ' : SmoothCcTensor g r s)

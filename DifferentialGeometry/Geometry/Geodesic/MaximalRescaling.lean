@@ -87,7 +87,6 @@ section RescaledChartOrbit
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem chartPushLift_rescaled_eventually_hasDerivAt_chartPhaseVF
     {g : SmoothRiemannianMetric I M} {p : M}
     {f_v : ℝ → TangentBundle I M}
@@ -117,7 +116,6 @@ theorem chartPushLift_rescaled_eventually_hasDerivAt_chartPhaseVF
   exact hasDerivAt_rescaled_orbit (I := I) (g := g) (α := p)
     (c := chartPushLift (I := I) f_v 0) (s₀ := s) (a := a) hs
 
-set_option linter.unusedSectionVars false in
 lemma rescaled_chartPushLift_at_zero
     {f_v : ℝ → TangentBundle I M} {p : M} {v : E}
     (hf_v0 : f_v 0 = (⟨p, v⟩ : TangentBundle I M)) (a : ℝ) :
@@ -134,7 +132,6 @@ section ChartCoordUniqueness
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 lemma chartPushLift_av_phaseVF_and_target_interior
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_av : ℝ → TangentBundle I M}
@@ -150,7 +147,6 @@ lemma chartPushLift_av_phaseVF_and_target_interior
   exact chartPushLift_eventually_hasDerivAt_chartPhaseVF_and_target_interior
     (I := I) (g := g) (α := p) (f := f_av) hproj hf_av_int
 
-set_option linter.unusedSectionVars false in
 lemma rescaled_chartPushLift_phaseVF_and_target_interior
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_v : ℝ → TangentBundle I M}
@@ -208,7 +204,6 @@ lemma rescaled_chartPushLift_phaseVF_and_target_interior
     exact (extChartAt I p).map_source h_src
   exact extChartAt_target_subset_interior_of_boundaryless (I := I) p h_target
 
-set_option linter.unusedSectionVars false in
 theorem chartPushLift_rescaled_eq_chartPushLift_av_eventually
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_v f_av : ℝ → TangentBundle I M}
@@ -267,7 +262,6 @@ lemma rescaled_chartPushLift_fst
   change ((chartPushLift (I := I) f_v 0 (a * s)).1, _).1 = _
   rw [hfst]; rfl
 
-set_option linter.unusedSectionVars false in
 theorem projectCurve_rescale_eventually
     {g : SmoothRiemannianMetric I M} {p : M} {a : ℝ} {v : E}
     {f_v f_av : ℝ → TangentBundle I M}
@@ -351,10 +345,8 @@ end ManifoldProjection
 
 section ChosenCurveRescaling
 
-variable [I.Boundaryless] [CompleteSpace E]
-  [T2Space (TangentBundle I M)]
+variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem maximalGeodesicChosenCurve_rescale_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (ha_dom : a ∈ maximalGeodesicInterval (I := I) g p v)
@@ -387,10 +379,7 @@ end ChosenCurveRescaling
 
 section RescaleAtOneSmallScale
 
-variable [I.Boundaryless] [CompleteSpace E]
-  [T2Space (TangentBundle I M)]
-
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesicChosenCurve_rescale_at_one
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (ha_dom : a ∈ maximalGeodesicInterval (I := I) g p v)
@@ -404,7 +393,7 @@ theorem maximalGeodesicChosenCurve_rescale_at_one
   simp only [Set.mem_setOf_eq, mul_one] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesic_rescale_at_one_of_agreement
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (ha_dom : a ∈ maximalGeodesicInterval (I := I) g p v)
@@ -419,7 +408,7 @@ theorem maximalGeodesic_rescale_at_one_of_agreement
   exact maximalGeodesicChosenCurve_rescale_at_one (I := I)
     g p v a ha_dom h1_dom h1_in
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesic_rescale_at_one
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (a : ℝ)
     (_ha_pos : 0 < a)

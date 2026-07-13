@@ -73,7 +73,7 @@ def dirichletForm
     rw [hcov, TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left]
     rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 @[simp] lemma dirichletForm_apply
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M)
     (X : TangentSpace I b) :
@@ -87,7 +87,7 @@ def dirichletVF
     TangentSpace I b :=
   metricSharp (I := I) g b (dirichletForm (I := I) (M := M) g T v b)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 lemma inner_dirichletVF
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M)
     (X : TangentSpace I b) :
@@ -96,7 +96,7 @@ lemma inner_dirichletVF
   rw [dirichletVF]
   exact inner_metricSharp (I := I) g b (dirichletForm (I := I) (M := M) g T v b) X
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma dirichletForm_chartBasis_component_contMDiffOn
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -148,7 +148,7 @@ private lemma dirichletForm_chartBasis_component_contMDiffOn
   intro b _
   rw [dirichletForm_apply]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 lemma dirichletVF_contMDiff
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -165,13 +165,13 @@ def dirichletVFSection
     (fun b : M => dirichletVF (I := I) (M := M) g T v b)
     (dirichletVF_contMDiff (I := I) (M := M) g T v)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 @[simp] lemma dirichletVFSection_apply
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     dirichletVFSection (I := I) (M := M) g T v b =
       dirichletVF (I := I) (M := M) g T v b := rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 lemma divergence_g_chartBasis_metricTrace_self
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -208,7 +208,7 @@ lemma divergence_g_chartBasis_metricTrace_self
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [chartChristoffel_symm (I := I) g b k i i]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 lemma divergence_g_eq_smoothOrthoFrame_trace
     (g : SmoothRiemannianMetric I M)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
@@ -248,7 +248,6 @@ lemma divergence_g_eq_smoothOrthoFrame_trace
     rw [hHb_apply, chartBasisVecFiber_self (I := I) b m,
       chartBasisVecFiber_self (I := I) b n]
 
-set_option linter.unusedSectionVars false in
 private lemma divergence_dirichletVF_summand_eq
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -364,7 +363,7 @@ private lemma divergence_dirichletVF_summand_eq
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [BoundarylessManifold I M] in
 private lemma tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g 0 2 T v b =
@@ -430,7 +429,6 @@ private lemma tensorCovDerivPointwiseInner_eq_smoothOrthoFrame_diag
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
 
-set_option linter.unusedSectionVars false in
 lemma divergence_dirichletVF_eq
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) (b : M) :
     divergence_g (I := I) g (dirichletVFSection (I := I) (M := M) g T v) b =
@@ -479,7 +477,6 @@ lemma divergence_dirichletVF_eq
         (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
         (fun y : M => T.toSection y) b) Finset.univ
 
-set_option linter.unusedSectionVars false in
 theorem green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed
     (g : SmoothRiemannianMetric I M) (T v : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (2 + 1)

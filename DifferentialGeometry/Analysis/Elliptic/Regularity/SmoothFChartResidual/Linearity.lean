@@ -58,6 +58,7 @@ private lemma smoothToH1Compl_eq_sub
   rw [smoothScalar_eq_sub_of_toFun_eq v₁ v₂ v_diff h_diff]
   exact map_sub (smoothToH1Compl (I := I) (M := M) g) v₁ v₂
 
+set_option linter.unusedSectionVars false in
 private lemma fHLeibnizResidualLp_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (u₁ u₂ : H1Compl (I := I) (M := M) g) :

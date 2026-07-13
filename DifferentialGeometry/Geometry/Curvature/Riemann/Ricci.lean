@@ -18,7 +18,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartInvGramOnE_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -93,7 +93,7 @@ lemma partialDeriv_partialDeriv_chartGramOnE_swap
   rw [hkey a b, hkey b a]
   exact hsymm_2 _ _
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma sum_invGram_partialDeriv_swap
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -116,7 +116,7 @@ private lemma sum_invGram_partialDeriv_swap
   exact congrArg (fun f => partialDeriv (E := E) l f y)
     (funext (fun y' => chartGramOnE_symm (I := I) g α j i y'))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (y : E) :
@@ -239,7 +239,6 @@ private lemma chartInvGramOnE_diffAt_int
     hcd_int.contDiffAt (hop.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_chartGramOnE_diffAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (l j b : Fin (Module.finrank ℝ E)) {y : E}
@@ -256,7 +255,6 @@ private lemma partialDeriv_chartGramOnE_diffAt_int
     hcd.contDiffAt (hop.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 private lemma chartChristoffel_diag_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -280,7 +278,6 @@ private lemma chartChristoffel_diag_contDiffOn_interior
     · exact partialDeriv_chartGramOnE_contDiffOn_interior (I := I) g α l i j
     · exact partialDeriv_chartGramOnE_contDiffOn_interior (I := I) g α i j l
 
-set_option linter.unusedSectionVars false in
 private lemma chartChristoffel_diag_diffAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {y : E}
@@ -297,7 +294,7 @@ private lemma chartChristoffel_diag_diffAt_int
     hcd.contDiffAt (hop.mem_nhds hy)
   exact hat.differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma traceCyclic_invGram_partial
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -403,7 +400,6 @@ private lemma traceCyclic_invGram_partial
     rw [← Matrix.mul_assoc]
   rw [heq1, Matrix.trace_mul_comm (H * Ak) (H * Ai), heq2]
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_doubleSum_invGram_partialGram
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -515,7 +511,6 @@ private lemma partialDeriv_doubleSum_invGram_partialGram
           (partialDeriv (E := E) i (chartGramOnE (I := I) g α l j)) y
   ring
 
-set_option linter.unusedSectionVars false in
 theorem partialDeriv_contractedChristoffel_swap
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -791,7 +786,6 @@ theorem partialDeriv_contractedChristoffel_swap
   rw [hsubst_LHS, hsubst_RHS, hSchwarz]
   rw [traceCyclic_invGram_partial (I := I) g α i k y]
 
-set_option linter.unusedSectionVars false in
 lemma sum_partialDeriv_eq_partialDeriv_sum_christ
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -810,7 +804,6 @@ lemma sum_partialDeriv_eq_partialDeriv_sum_christ
   rw [fderiv_fun_sum (fun j _ => hdiff_each j)]
   rw [ContinuousLinearMap.coe_sum', Finset.sum_apply]
 
-set_option linter.unusedSectionVars false in
 theorem chartRicciTensor_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) {y : E}
@@ -1039,7 +1032,6 @@ theorem chartRicciTensor_symm
     ring
   rw [hT1, hT2, hT3, hT4]
 
-set_option linter.unusedSectionVars false in
 theorem chartRicciTensor_symm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -1054,7 +1046,6 @@ theorem chartRicciTensor_symm_of_boundaryless [I.Boundaryless]
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact chartRicciTensor_symm (I := I) g α i k hx_int
 
-set_option linter.unusedSectionVars false in
 theorem ricciFun_isPointwiseSymm_of_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) :
     IsPointwiseSymm (ricciFun (I := I) (M := M) g) := by

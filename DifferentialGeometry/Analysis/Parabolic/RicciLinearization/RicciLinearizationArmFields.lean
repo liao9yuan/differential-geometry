@@ -65,6 +65,7 @@ noncomputable def linearizedRicciArm1Fib (g₀ g₁ : SmoothRiemannianMetric I M
     (cometricDoubleTraceFib (I := I) g₁ 1 x)
 
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem linearizedRicciArm1Fib_apply (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 3 I x) :
     linearizedRicciArm1Fib (I := I) g₀ g₁ x D =

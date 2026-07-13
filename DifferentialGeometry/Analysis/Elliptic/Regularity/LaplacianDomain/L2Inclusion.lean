@@ -29,7 +29,7 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 lemma SmoothScalar.memLp_two {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     MemLp f.toFun 2 (riemannianVolumeMeasure (I := I) (M := M) g) := by
@@ -51,12 +51,12 @@ noncomputable def smoothToLpLin (g : SmoothRiemannianMetric I M) :
     rw [h_lhs_rfl, MemLp.toLp_const_smul]
     rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 @[simp] lemma smoothToLpLin_apply (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) :
     smoothToLpLin (I := I) (M := M) g f = f.memLp_two.toLp f.toFun := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [I.Boundaryless] in
 lemma SmoothScalar.norm_smoothToLp_sq {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     ‖smoothToLpLin (I := I) (M := M) g f‖ ^ 2 =
@@ -79,7 +79,6 @@ lemma SmoothScalar.norm_smoothToLp_sq {g : SmoothRiemannianMetric I M}
   rw [integral_congr_ae hae] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
 lemma SmoothScalar.norm_sq_eq_inner_self {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     ‖f‖ ^ 2 = smoothScalarH1Inner (I := I) (M := M) f f := by
@@ -87,7 +86,6 @@ lemma SmoothScalar.norm_sq_eq_inner_self {g : SmoothRiemannianMetric I M}
   rw [SmoothScalar.inner_def] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
 lemma SmoothScalar.norm_smoothToLp_sq_le {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     ‖smoothToLpLin (I := I) (M := M) g f‖ ^ 2 ≤ ‖f‖ ^ 2 := by
@@ -102,7 +100,6 @@ lemma SmoothScalar.norm_smoothToLp_sq_le {g : SmoothRiemannianMetric I M}
     f.integral_inner_grad_self_nonneg
   linarith
 
-set_option linter.unusedSectionVars false in
 lemma SmoothScalar.norm_smoothToLp_le {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     ‖smoothToLpLin (I := I) (M := M) g f‖ ≤ ‖f‖ := by
@@ -111,7 +108,6 @@ lemma SmoothScalar.norm_smoothToLp_le {g : SmoothRiemannianMetric I M}
   have h_rhs_nn : 0 ≤ ‖f‖ := norm_nonneg _
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
-set_option linter.unusedSectionVars false in
 lemma SmoothScalar.norm_smoothToLp_le_one_mul {g : SmoothRiemannianMetric I M}
     (f : SmoothScalar g) :
     ‖smoothToLpLin (I := I) (M := M) g f‖ ≤ 1 * ‖f‖ := by
@@ -122,13 +118,11 @@ noncomputable def smoothToLp (g : SmoothRiemannianMetric I M) :
   (smoothToLpLin (I := I) (M := M) g).mkContinuous 1
     (fun f => f.norm_smoothToLp_le_one_mul)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma smoothToLp_apply (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) :
     smoothToLp (I := I) (M := M) g f =
       f.memLp_two.toLp f.toFun := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma denseRange_toComplL_smoothScalar (g : SmoothRiemannianMetric I M) :
     DenseRange (UniformSpace.Completion.toComplL : SmoothScalar g →L[ℝ] H1Compl g) := by
   rw [show (UniformSpace.Completion.toComplL : SmoothScalar g → H1Compl g) =
@@ -136,7 +130,6 @@ private lemma denseRange_toComplL_smoothScalar (g : SmoothRiemannianMetric I M) 
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-set_option linter.unusedSectionVars false in
 private lemma isUniformInducing_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing
@@ -151,7 +144,6 @@ noncomputable def H1ComplToLp (g : SmoothRiemannianMetric I M) :
   ContinuousLinearMap.extend (smoothToLp (I := I) (M := M) g)
     (UniformSpace.Completion.toComplL : SmoothScalar g →L[ℝ] H1Compl g)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma H1ComplToLp_smoothToH1Compl (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) :
     H1ComplToLp (I := I) (M := M) g

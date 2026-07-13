@@ -55,7 +55,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMetric I M)
     (s : ℕ) (W : SmoothCcTensor g 0 s) (x : M)
     (Jdx : Fin s → Fin (Module.finrank ℝ E)) :
@@ -69,7 +70,8 @@ theorem unitModel_basisChart_eq_tensorChartComponentRaw (g : SmoothRiemannianMet
   unfold unitModel
   congr 2
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric I M)
     (W : SmoothCcTensor g 0 2) (x : M) (k i : Fin (Module.finrank ℝ E)) :
     unitModel (I := I) (M := M) g 2 W x ![chartModelBasis E k, chartModelBasis E i] =
@@ -80,7 +82,7 @@ theorem unitModel_basisChart_eq_tensorChartComponent (g : SmoothRiemannianMetric
     funext j; fin_cases j <;> rfl
   rwa [hfun] at h
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 theorem cometricLmodel_covectorOfCLM_cDualBasis_eq_chartBasis_sum
     (g₁ : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) :
     cometricLmodel (I := I) g₁ x (Tensor0SBundle.model_covectorOfCLM (𝕜 := ℝ) (E := E)
@@ -226,7 +228,7 @@ theorem iteratedCovGrad2_chartComponent_readout (g₀ : SmoothRiemannianMetric I
   exact chartCovariantSecondGrad_chartHessian_sub_correction (I := I) (M := M) g₀ h x
     ![] Jdx hy
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma euclidPartial_add_local
     (l : Fin (Module.finrank ℝ E))
     {f h : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -249,7 +251,7 @@ noncomputable def arm2ReadoutCovDerivPair (g₀ : SmoothRiemannianMetric I M)
         (covGrad (I := I) (M := M) g₀ 0 2 h) x (Jdx 0) ![]
         (Matrix.vecTail Jdx) (toEuclidean (E := E) (extChartAt I x x))
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
 theorem iteratedCovGrad1_chartComponent_readout (g₀ : SmoothRiemannianMetric I M)
     (h : SmoothCcTensor g₀ 0 2) (x : M)
     (Jdx : Fin (2 + 1) → Fin (Module.finrank ℝ E)) :
@@ -313,7 +315,8 @@ private lemma sum_pi_fin_succ' {n : ℕ} {β : Type*} [AddCommMonoid β]
   rw [Fintype.sum_prod_type]
   rfl
 
-omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma covDerivLowerOrderTerm02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (x : M)
     (m p q : Fin (Module.finrank ℝ E)) :
@@ -434,7 +437,8 @@ private lemma covDerivLowerOrderTerm02_center_eq
     exact absurd (Subsingleton.elim b ![]) hb
   · intro h; exact absurd (Finset.mem_univ _) h
 
-omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma covDerivLowerOrderTerm03_center_hout
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m b c d : Fin (Module.finrank ℝ E))
@@ -498,7 +502,8 @@ private lemma sum_fin3_collapse_gen
     show ((1 : Fin 2) = (Fin.succ 0)) from rfl, Fin.cons_succ]
   rw [show (default : Fin 1) = (0 : Fin 1) from rfl]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma covDerivLowerOrderTerm03_center_eq
     (g₀ : SmoothRiemannianMetric I M) (W : SmoothCcTensor g₀ 0 3) (x : M)
     (m b c d : Fin (Module.finrank ℝ E)) :
@@ -616,7 +621,8 @@ private lemma covDerivLowerOrderTerm03_center_eq
     exact absurd (Subsingleton.elim b' ![]) hb'
   · intro h; exact absurd (Finset.mem_univ _) h
 
-omit [BoundarylessManifold I M] in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma lowerOrderCoeff02_eqOn_chartChristoffelEuclid
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin (Module.finrank ℝ E))
@@ -664,7 +670,8 @@ private lemma lowerOrderCoeff02_eqOn_chartChristoffelEuclid
   rw [herase0, herase1]
   simp only [Finset.prod_singleton]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma gradCoeff02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m : Fin (Module.finrank ℝ E))
@@ -688,7 +695,7 @@ private lemma gradCoeff02_center_eq
   rw [lowerOrderCoeff02_eqOn_chartChristoffelEuclid (I := I) (M := M) g₀ x m Jdx Jdx' hcenter]
   simp only [chartChristoffelEuclid_def, hsymm]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma valueCoeff02_center_eq
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (m a : Fin (Module.finrank ℝ E))
@@ -750,7 +757,8 @@ private lemma valueCoeff02_center_eq
     ← euclidPartial_def, ← euclidPartial_def]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
+  [T2Space M] [SigmaCompactSpace M] in
 lemma arm1ReadoutCovDeriv_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c : Fin (Module.finrank ℝ E)) :
@@ -863,6 +871,7 @@ private lemma sum_two_slot_indicator_collapse
   · intro a0 _ ha0; rw [if_neg (fun h => ha0 h.symm), zero_mul]
   · intro h; exact absurd (Finset.mem_univ c) h
 
+omit [BoundarylessManifold I M] in
 private lemma arm2ReadoutPairTerm1_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -963,7 +972,7 @@ private lemma arm2ReadoutPairTerm1_center_eq
     exact absurd (Subsingleton.elim b' ![]) hb'
   · intro hcontra; exact absurd (Finset.mem_univ _) hcontra
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
 private lemma rawCompCovGrad03_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (p q r : Fin (Module.finrank ℝ E)) :
@@ -998,6 +1007,7 @@ private lemma rawCompCovGrad03_center_eq
   rw [show (![p, q, r] : Fin (2 + 1) → Fin (Module.finrank ℝ E)) 0 = p from rfl]
   rw [covDerivLowerOrderTerm02_center_eq (I := I) (M := M) g₀ h x p q r]
 
+omit [BoundarylessManifold I M] in
 private lemma arm2ReadoutPairTerm2_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :
@@ -1092,6 +1102,7 @@ private lemma arm2ReadoutPairTerm2_center_eq
     refine Finset.sum_congr rfl (fun r _ => ?_)
     rw [rawCompCovGrad03_center_eq (I := I) (M := M) g₀ h x b c r] ]
 
+omit [BoundarylessManifold I M] in
 lemma arm2ReadoutCovDerivPair_center_eq
     (g₀ : SmoothRiemannianMetric I M) (h : SmoothCcTensor g₀ 0 2) (x : M)
     (a b c d : Fin (Module.finrank ℝ E)) :

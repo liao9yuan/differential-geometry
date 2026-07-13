@@ -271,6 +271,7 @@ theorem lieDerivMetric_isPointwiseSymm (g : SmoothRiemannianMetric I M)
   rw [lieDerivMetricMatrix_symm (I := I) g W j i]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeff_zero_of_mem (α : M) (k : Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
@@ -364,6 +365,7 @@ omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [Boundary
   rw [lieDerivMetricMatrix_zero (I := I) g i j x]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeff_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
     (W₁ W₂ : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -380,6 +382,7 @@ private lemma chartCoeff_add_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
   rw [chartCoeff_def, chartCoeff_def, chartCoeff_def, hadd,
     LinearEquiv.map_add, Finsupp.add_apply]
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma chartCoeff_smul_of_mem (α : M) (k : Fin (Module.finrank ℝ E))
     (c : ℝ) (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}
@@ -599,6 +602,7 @@ theorem lieDerivMetric_smul_vectorField [I.Boundaryless]
   rw [lieDerivMetricMatrix_smul_vectorField (I := I) g c W i j x]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv_chartGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -618,6 +622,7 @@ private lemma partialDeriv_chartGramOnE_contDiffOn_interior
       (interior (extChartAt I α).target) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 private lemma partialDeriv_chartCoeffOnE_contDiffOn_interior
     (α : M) (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

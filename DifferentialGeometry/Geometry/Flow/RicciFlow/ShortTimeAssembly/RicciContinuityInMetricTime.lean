@@ -56,6 +56,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartGramOnE_diffAt_int
     (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))
@@ -66,6 +67,7 @@ private lemma chartGramOnE_diffAt_int
     (chartGramOnE_contDiffOn (I := I) g α i j).mono interior_subset
   exact (hcd.contDiffAt (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma fderiv_chartGramOnE_diffAt_int
     (g : SmoothRiemannianMetric I M) (α : M) (i j : Fin (Module.finrank ℝ E))

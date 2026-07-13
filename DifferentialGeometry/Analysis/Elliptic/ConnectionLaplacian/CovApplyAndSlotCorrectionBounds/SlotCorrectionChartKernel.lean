@@ -392,7 +392,7 @@ theorem chartTensorRSOutputSlotCorrection_chart_kernel_factorization
     exact slotOutputConjCLM_compose_chartJinv (I := I) (M := M) g s α B hb l m j
   exact hLHS_eval.trans hRHS_eval.symm
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartLCConj_eq_christoffelCorrectionCLM
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Π b' : M, TangentSpace I b') {b : M}
@@ -419,7 +419,7 @@ private lemma chartLCConj_eq_christoffelCorrectionCLM
   rw [trivToE_trivFromE (I := I) α hb_base]
   exact christoffelCorrection_eq_christoffelCorrectionCLM (I := I) g α X hb_base w
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartLCConj_contMDiffOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -457,7 +457,7 @@ private lemma goodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) :=
   chartLeviCivitaGoodSet_image_isOpen (I := I) α
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma goodSet_subset_chartSource (α : M) :
     chartLeviCivitaGoodSet (I := I) α ⊆ (chartAt H α).source := by
   intro b hb
@@ -472,7 +472,7 @@ private lemma extChartAt_mem_goodSet_image (α : M) {b : M}
     extChartAt I α b ∈ (extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α :=
   ⟨b, hb, rfl⟩
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartLCConj_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -519,7 +519,7 @@ private lemma chartLCConj_chart_pulled_contDiffOn
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartLCConj_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -539,7 +539,7 @@ private lemma chartLCConj_chart_pulled_contDiffAt
   exact (chartLCConj_chart_pulled_contDiffOn (I := I) (M := M) g α B).contDiffAt
     (hOpen.mem_nhds hmem)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma slotInputConjCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r)
@@ -571,7 +571,7 @@ private lemma slotInputConjCLM_chart_pulled_contDiffAt
     rw [heq]
     exact contDiffAt_const
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma slotOutputConjCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s)
@@ -603,7 +603,7 @@ private lemma slotOutputConjCLM_chart_pulled_contDiffAt
     rw [heq]
     exact contDiffAt_const
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r)
@@ -648,7 +648,7 @@ private lemma inputSlotPrecompCLM_chart_pulled_contDiffAt
   intro y
   exact h_eval y
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma outputSlotPostcompCLM_chart_pulled_contDiffAt
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s)
@@ -693,7 +693,7 @@ private lemma outputSlotPostcompCLM_chart_pulled_contDiffAt
   intro y
   exact h_eval y
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem inputSlotChartKernel_contDiffAt_chart_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -717,7 +717,7 @@ theorem inputSlotChartKernel_contDiffAt_chart_pulled
   intro y
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem outputSlotChartKernel_contDiffAt_chart_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -895,7 +895,7 @@ private lemma outputSlotChartKernel_opNorm_le (g : SmoothRiemannianMetric I M)
   refine le_trans (mul_le_mul_of_nonneg_right h_le h_nn) ?_
   rw [one_mul]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem inputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -926,7 +926,7 @@ theorem inputSlotChartKernel_chart_pulled_contDiffOn
     rfl
   exact h_at.contDiffWithinAt
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem outputSlotChartKernel_chart_pulled_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
@@ -957,7 +957,7 @@ theorem outputSlotChartKernel_chart_pulled_contDiffOn
     rfl
   exact h_at.contDiffWithinAt
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma inputSlotChartKernel_fderiv_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -978,7 +978,7 @@ private lemma inputSlotChartKernel_fderiv_continuousOn
     exact hcd.fderiv_of_isOpen hOpen h_le
   exact continuous_norm.comp_continuousOn hfd_cd.continuousOn
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 private lemma outputSlotChartKernel_fderiv_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :

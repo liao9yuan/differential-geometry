@@ -164,6 +164,7 @@ private lemma chartE_section_repr_covApply_linExt_eventuallyEq
     rw [hb_def, (extChartAt I x₀).right_inv hy_tgt]
   rw [hreprVb, hφb]
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartChristoffel_differentiableAt_basepoint
     (g : SmoothRiemannianMetric I M) (x₀ : M) (i j m : Fin (Module.finrank ℝ E)) :

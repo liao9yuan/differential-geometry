@@ -162,6 +162,7 @@ lemma unitModel_eq_ccTensorBilin_pt (S : SmoothCcTensor g₀ 0 2) (b : M)
   funext k
   fin_cases k <;> rfl
 
+set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 private lemma reindexCoeffGen_one_eq (r s : ℕ) (R : SmoothCcTensor g₀ r s) :
     reindexCoeffGen (I := I) (M := M) g₀ r s R 1 = R := by

@@ -38,7 +38,6 @@ example (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (smoothSmul
         (I := I) φ hφ X) x = φ x • X x := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma scalarOnE_mdifferentiableWithinAt_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -53,20 +52,6 @@ private lemma scalarOnE_mdifferentiableWithinAt_target
   exact hdiff.mdifferentiableWithinAt
 
 omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
-private lemma extChartAt_target_eventuallyEq_range
-    (α : M) {y : E} (hy : y ∈ (extChartAt I α).target) :
-    (extChartAt I α).target =ᶠ[𝓝 y] (Set.range I) :=
-  extChartAt_target_eventuallyEq_of_mem hy
-
-set_option linter.unusedSectionVars false in
-private lemma fderivWithin_target_eq_fderivWithin_range
-    (α : M) (u : E → ℝ) {y : E} (hy : y ∈ (extChartAt I α).target) :
-    fderivWithin ℝ u (extChartAt I α).target y =
-      fderivWithin ℝ u (Set.range I) y :=
-  fderivWithin_congr_set
-    (extChartAt_target_eventuallyEq_range (I := I) α hy)
-
-set_option linter.unusedSectionVars false in
 private lemma extChartAt_mapsTo_target_chart_source (α : M) :
     Set.MapsTo (extChartAt I α : M → E) (chartAt H α).source
       (extChartAt I α).target := by
@@ -75,7 +60,7 @@ private lemma extChartAt_mapsTo_target_chart_source (α : M) :
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   exact (extChartAt I α).map_source hx'
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma mfderiv_extChartAt_chartBasisVecFiber
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source)
     (i : Fin (Module.finrank ℝ E)) :
@@ -119,7 +104,6 @@ private lemma mfderivWithin_chart_source_of_mdiff
     mfderivWithin I 𝓘(ℝ) f (chartAt H α).source x = mfderiv I 𝓘(ℝ) f x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
-set_option linter.unusedSectionVars false in
 private lemma mfderiv_factor_through_extChartAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -195,7 +179,6 @@ private lemma mfderiv_factor_through_extChartAt
   rw [hgoal_full, hscalar_mfd_eq_fd]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma mfderiv_chartBasisVecFiber_within
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -210,7 +193,6 @@ private lemma mfderiv_chartBasisVecFiber_within
   rw [mfderiv_extChartAt_chartBasisVecFiber (I := I) α hx i]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem tangentSectionAction_chartLocal_within
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -252,7 +234,7 @@ private lemma chartCoeffOnE_mul_chartDensityOnE_differentiableWithinAt
     chartCoeffOnE_mul_chartDensityOnE_contDiffOn (I := I) g α X i
   exact (hsmooth y hy).differentiableWithinAt (by simp)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma scalarOnE_differentiableWithinAt
     (α : M) {φ : M → ℝ} (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -262,7 +244,6 @@ private lemma scalarOnE_differentiableWithinAt
     scalarOnE_contDiffOn (I := I) α hφ
   exact (hsmooth y hy).differentiableWithinAt (by simp)
 
-set_option linter.unusedSectionVars false in
 private lemma localDivergenceWithin_at_self_smoothSmul
     (g : SmoothRiemannianMetric I M) (x : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -401,7 +382,6 @@ private lemma localDivergenceWithin_at_self_smoothSmul
     intro i _
     rw [hchartCoeff i]
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_with_boundary_smoothSmul [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -416,7 +396,6 @@ theorem divergence_g_with_boundary_smoothSmul [T2Space M]
   rw [divergence_g_with_boundary_def, divergence_g_with_boundary_def]
   exact localDivergenceWithin_at_self_smoothSmul (I := I) g x φ hφ X
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_with_boundary_add [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -517,7 +496,6 @@ theorem divergence_g_with_boundary_add [T2Space M]
         Finset.sum_congr rfl (fun i _ => hpartial_split i)]
   rw [Finset.sum_add_distrib, add_div]
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem divergence_g_with_boundary_zero [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     ∀ x : M, divergence_g_with_boundary (I := I) g
@@ -593,7 +571,6 @@ set_option linter.unusedSectionVars false in
         Finset.sum_eq_zero (fun i _ => hpartial_zero i)]
   rw [zero_div]
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_with_boundary_pou_tsum [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
