@@ -351,6 +351,7 @@ private lemma sndFDeriv_apply_self_eq_sum_of_basis
   intros j _
   rw [h_outer_inner i j]
 
+set_option linter.unusedSectionVars false in
 private lemma chartHessianTensor_quad_form_nonpos_at_max
     [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)

@@ -46,6 +46,7 @@ noncomputable def gradInnerLapU
   gradInnerCLM (I := I) (M := M) g φ
     (u_h - preimageLift (I := I) (M := M) g hu_h)
 
+set_option linter.unusedSectionVars false in
 @[simp] lemma gradInnerLapU_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -54,6 +55,7 @@ noncomputable def gradInnerLapU
       gradInnerCLM (I := I) (M := M) g φ
         (u_h - preimageLift (I := I) (M := M) g hu_h) := rfl
 
+set_option linter.unusedSectionVars false in
 lemma gradInnerLapU_eq_sub
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -119,6 +121,7 @@ theorem gradInnerCLM_mem_image_laplacianDomain_smooth
   gradInnerCLM_smoothToH1Compl_mem_image_laplacianDomain
     (I := I) (M := M) g φ v
 
+set_option linter.unusedSectionVars false in
 theorem gradInnerCLM_mem_image_laplacianDomain_from_witness
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -243,6 +246,7 @@ theorem smoothMulH1Compl_smoothToH1Compl_mem_laplacianDomainPow_two_via
   exact gradInnerCLM_mem_image_laplacianDomain_smooth
     (I := I) (M := M) g φ v
 
+set_option linter.unusedSectionVars false in
 theorem gradInnerCLM_mem_image_laplacianDomain_of_witness
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}

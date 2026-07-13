@@ -69,13 +69,11 @@ def gramMatrixAt (g : SmoothRiemannianMetric I M) (x : M) :
   Matrix.of fun i j =>
     g.inner x ((chartModelBasis E) i) ((chartModelBasis E) j)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma gramMatrixAt_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
     gramMatrixAt (I := I) (M := M) g x i j =
       g.inner x ((chartModelBasis E) i) ((chartModelBasis E) j) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma gramMatrixAt_isHermitian
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x).IsHermitian := by
@@ -86,13 +84,11 @@ lemma gramMatrixAt_isHermitian
   rw [gramMatrixAt_apply, gramMatrixAt_apply, star_trivial]
   exact g.symm x _ _
 
-set_option linter.unusedSectionVars false in
 lemma gramMatrixAt_inv_isHermitian
     (g : SmoothRiemannianMetric I M) (x : M) :
     ((gramMatrixAt (I := I) (M := M) g x)⁻¹).IsHermitian :=
   (gramMatrixAt_isHermitian (I := I) (M := M) g x).inv
 
-set_option linter.unusedSectionVars false in
 lemma gramMatrixAt_posDef
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x).PosDef := by
@@ -188,13 +184,11 @@ lemma gramMatrixAt_posDef
   rw [hquad]
   exact g.pos x w hw_ne
 
-set_option linter.unusedSectionVars false in
 lemma gramMatrixAt_inv_posSemidef
     (g : SmoothRiemannianMetric I M) (x : M) :
     ((gramMatrixAt (I := I) (M := M) g x)⁻¹).PosSemidef :=
   (gramMatrixAt_posDef (I := I) (M := M) g x).inv.posSemidef
 
-set_option linter.unusedSectionVars false in
 lemma gramMatrixAt_inv_eigenvalues_pos
     (g : SmoothRiemannianMetric I M) (x : M) (k : Fin (Module.finrank ℝ E)) :
     0 < (gramMatrixAt_inv_isHermitian (I := I) (M := M) g x).eigenvalues k := by
@@ -202,13 +196,11 @@ lemma gramMatrixAt_inv_eigenvalues_pos
     (gramMatrixAt_posDef (I := I) (M := M) g x).inv
   exact hpd.eigenvalues_pos k
 
-set_option linter.unusedSectionVars false in
 lemma gramMatrixAt_isUnit
     (g : SmoothRiemannianMetric I M) (x : M) :
     IsUnit (gramMatrixAt (I := I) (M := M) g x) :=
   (gramMatrixAt_posDef (I := I) (M := M) g x).isUnit
 
-set_option linter.unusedSectionVars false in
 lemma gramMatrixAt_inv_mul_self
     (g : SmoothRiemannianMetric I M) (x : M) :
     (gramMatrixAt (I := I) (M := M) g x)⁻¹ *
@@ -412,7 +404,6 @@ private noncomputable def lowerAllUpperIndicesML
           update_natAdd_last]
       rw [ContinuousMultilinearMap.map_update_smul]
 
-set_option linter.unusedSectionVars false in
 @[simp]
 private lemma lowerAllUpperIndicesML_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -425,7 +416,6 @@ private lemma lowerAllUpperIndicesML_apply
   unfold lowerAllUpperIndicesML
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma lowerAllUpperIndicesML_norm_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) (v : Fin (r + s) → E) :
@@ -488,7 +478,6 @@ private noncomputable def lowerAllUpperIndicesCMLM
     (‖T‖ * ∏ _i : Fin r, ‖g.inner x‖)
     (lowerAllUpperIndicesML_norm_bound (I := I) (M := M) g r s x T)
 
-set_option linter.unusedSectionVars false in
 @[simp]
 private lemma lowerAllUpperIndicesCMLM_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -501,7 +490,6 @@ private lemma lowerAllUpperIndicesCMLM_apply
   change (lowerAllUpperIndicesML (I := I) (M := M) g r s x T) v = _
   rw [lowerAllUpperIndicesML_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lowerAllUpperIndicesCMLM_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     lowerAllUpperIndicesCMLM (I := I) (M := M) g r s x 0 = 0 := by
@@ -510,7 +498,6 @@ private lemma lowerAllUpperIndicesCMLM_zero
   rw [lowerAllUpperIndicesCMLM_apply, ContinuousMultilinearMap.zero_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma lowerAllUpperIndicesCMLM_add
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T₁ T₂ : TensorRSModel r s ℝ E) :
@@ -521,7 +508,6 @@ private lemma lowerAllUpperIndicesCMLM_add
   intro v
   simp [ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lowerAllUpperIndicesCMLM_smul
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (T : TensorRSModel r s ℝ E) :
@@ -541,7 +527,6 @@ private noncomputable def lowerAllUpperIndicesAddHom
   map_add' := fun T₁ T₂ =>
     lowerAllUpperIndicesCMLM_add (I := I) (M := M) g r s x T₁ T₂
 
-set_option linter.unusedSectionVars false in
 private lemma lowerAllUpperIndicesCMLM_norm_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E) :
@@ -577,7 +562,6 @@ noncomputable def lowerAllUpperIndices
       (lowerAllUpperIndicesCMLM_norm_bound
         (I := I) (M := M) g r s x T).trans_eq (by ring))
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma lowerAllUpperIndices_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
@@ -588,7 +572,6 @@ lemma lowerAllUpperIndices_apply
         (fun j : Fin s => v (Fin.natAdd r j)) :=
   lowerAllUpperIndicesCMLM_apply (I := I) (M := M) g r s x T v
 
-set_option linter.unusedSectionVars false in
 private lemma separableFormAt_basis_apply
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ)
     (idx jdx : Fin r → Fin (Module.finrank ℝ E)) :
@@ -602,7 +585,6 @@ private lemma separableFormAt_basis_apply
   intro k _
   rw [gramMatrixAt_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma lower_at_basis_pair_zero_of_lower_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (T : TensorRSModel r s ℝ E)
@@ -641,7 +623,6 @@ private lemma lower_at_basis_pair_zero_of_lower_zero
   rw [hcast, hnat] at hzero
   exact hzero
 
-set_option linter.unusedSectionVars false in
 private lemma cmlm_eq_zero_of_basis_zero
     {p : ℕ} (S : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
     (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
@@ -655,7 +636,6 @@ private lemma cmlm_eq_zero_of_basis_zero
     MultilinearMap.zero_apply]
   exact h v
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0SModel_ext_basis
     {p : ℕ} (S₁ S₂ : ContinuousMultilinearMap ℝ (fun _ : Fin p => E) ℝ)
     (h : ∀ φ : Fin p → Fin (Module.finrank ℝ E),
@@ -668,7 +648,6 @@ private lemma tensor0SModel_ext_basis
   intro v
   exact h v
 
-set_option linter.unusedSectionVars false in
 theorem lowerAllUpperIndices_injective
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     Function.Injective

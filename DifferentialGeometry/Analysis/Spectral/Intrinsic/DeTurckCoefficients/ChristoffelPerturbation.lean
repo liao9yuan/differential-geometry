@@ -187,6 +187,7 @@ def gramBracket (g : SmoothRiemannianMetric I M) (α : M)
     partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
     partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y
 
+set_option linter.unusedSectionVars false in
 lemma chartChristoffel_eq_sum_invGramOnE_bracket
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) (y : E) :

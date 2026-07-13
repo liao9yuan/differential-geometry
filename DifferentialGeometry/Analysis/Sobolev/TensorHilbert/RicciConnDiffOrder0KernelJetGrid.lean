@@ -150,6 +150,7 @@ private lemma cDualBasis_eq_coord' (B : Module.Basis (Fin (Module.finrank ℝ E)
   exact congrArg (fun L : E →ₗ[ℝ] ℝ => LinearMap.toContinuousLinearMap L)
     (congrFun (Module.Basis.coe_dualBasis B) k)
 
+set_option linter.unusedSectionVars false in
 private lemma rs13ContrVec_pairing (x : M) (B : Tensor0SBundle.TensorRSSpace 1 3 I x)
     (β : Tensor0SBundle.Tensor0SSpace 1 I x) (v : Fin 3 → E) :
     Tensor0SSpace.toModel

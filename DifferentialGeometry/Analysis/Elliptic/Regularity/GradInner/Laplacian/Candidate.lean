@@ -104,6 +104,7 @@ noncomputable def gradInnerLaplacianCandidate
     - (2 : ℝ) • h_ricci_part
     - (2 : ℝ) • h_hess_part
 
+set_option linter.unusedSectionVars false in
 @[simp] theorem gradInnerLaplacianCandidate_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -120,6 +121,7 @@ noncomputable def gradInnerLaplacianCandidate
         - (2 : ℝ) • h_ricci_part
         - (2 : ℝ) • h_hess_part := rfl
 
+set_option linter.unusedSectionVars false in
 theorem gradInnerLaplacianCandidate_ricci_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -135,6 +137,7 @@ theorem gradInnerLaplacianCandidate_ricci_add
   rw [smul_add]
   abel
 
+set_option linter.unusedSectionVars false in
 theorem gradInnerLaplacianCandidate_hess_add
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -150,6 +153,7 @@ theorem gradInnerLaplacianCandidate_hess_add
   rw [smul_add]
   abel
 
+set_option linter.unusedSectionVars false in
 theorem gradInnerLaplacianCandidate_norm_lt_top
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -162,6 +166,7 @@ theorem gradInnerLaplacianCandidate_norm_lt_top
         (riemannianVolumeMeasure (I := I) (M := M) g) < ⊤ :=
   (Lp.memLp _).2
 
+set_option linter.unusedSectionVars false in
 theorem gradInnerLaplacianCandidate_norm_le
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}

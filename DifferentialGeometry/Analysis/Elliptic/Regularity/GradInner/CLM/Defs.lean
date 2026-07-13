@@ -29,7 +29,8 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInnerSmooth_continuous
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -46,7 +47,7 @@ lemma gradInnerSmooth_continuous
       g.inner x (gradFun (I := I) g ρα x) (gradFun (I := I) g v.toFun x)
   rw [grad_g_apply, grad_g_apply]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_memLp_two
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -64,14 +65,14 @@ noncomputable def gradInnerSmooth
     Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (gradInnerSmooth_memLp_two (I := I) (M := M) g ρα v).toLp _
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerSmooth_def
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     gradInnerSmooth (I := I) (M := M) g ρα v =
       (gradInnerSmooth_memLp_two (I := I) (M := M) g ρα v).toLp _ := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_coeFn
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -82,7 +83,8 @@ lemma gradInnerSmooth_coeFn
         (gradFun (I := I) g v.toFun x)) :=
   MemLp.coeFn_toLp _
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
 lemma gradInnerSmooth_pt_add
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) (x : M) :
@@ -98,7 +100,7 @@ lemma gradInnerSmooth_pt_add
       (w.smooth.mdifferentiable (by simp) x)
   rw [hgrad_add, ContinuousLinearMap.map_add]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_pt_smul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) (x : M) :
@@ -113,7 +115,7 @@ lemma gradInnerSmooth_pt_smul
   rw [hgrad_smul]
   rw [ContinuousLinearMap.map_smul, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmooth_add
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v w : SmoothScalar g) :
@@ -133,7 +135,7 @@ theorem gradInnerSmooth_add
   rw [h_sum, Pi.add_apply, h_v_eq, h_w_eq]
   exact (gradInnerSmooth_pt_add (I := I) (M := M) g ρα v w x).symm
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmooth_smul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) :
@@ -157,14 +159,15 @@ noncomputable def gradInnerSmoothLin
   map_add' v w := gradInnerSmooth_add (I := I) (M := M) g ρα v w
   map_smul' c v := gradInnerSmooth_smul (I := I) (M := M) g ρα c v
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerSmoothLin_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     gradInnerSmoothLin (I := I) (M := M) g ρα v =
       gradInnerSmooth (I := I) (M := M) g ρα v := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] in
 private lemma exists_gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ x : M,
@@ -188,14 +191,16 @@ noncomputable def gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) : ℝ :=
   Classical.choose (exists_gradSupBound (I := I) (M := M) g ρα)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] in
 lemma gradSupBound_nonneg
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     0 ≤ gradSupBound (I := I) (M := M) g ρα :=
   (Classical.choose_spec
     (exists_gradSupBound (I := I) (M := M) g ρα)).1
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [T2Space M]
+  [SigmaCompactSpace M] in
 lemma sqrt_inner_grad_self_le_gradSupBound
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (x : M) :
     Real.sqrt (g.inner x (gradFun (I := I) g ρα x)
@@ -203,7 +208,8 @@ lemma sqrt_inner_grad_self_le_gradSupBound
   (Classical.choose_spec
     (exists_gradSupBound (I := I) (M := M) g ρα)).2 x
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M]
+  [SigmaCompactSpace M] [CompactSpace M] in
 lemma abs_gradInner_le_sqrt_mul_sqrt
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -214,7 +220,7 @@ lemma abs_gradInner_le_sqrt_mul_sqrt
           (gradFun (I := I) g v.toFun x)) :=
   abs_metric_inner_le_sqrt_metric_quadratic (I := I) (M := M) g x _ _
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 lemma abs_gradInner_le_gradSupBound_mul_sqrt
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -228,7 +234,7 @@ lemma abs_gradInner_le_gradSupBound_mul_sqrt
       (gradFun (I := I) g v.toFun x)) := Real.sqrt_nonneg _
   exact h1.trans (mul_le_mul_of_nonneg_right h2 h_sqrt_v_nn)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma norm_gradInnerSmooth_sq
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -261,7 +267,7 @@ lemma norm_gradInnerSmooth_sq
   rw [integral_congr_ae hae] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] in
 lemma sq_gradInner_le_gradSupBound_sq_mul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) (x : M) :
@@ -307,7 +313,7 @@ lemma sq_gradInner_le_gradSupBound_sq_mul
   rw [h_rhs_sq] at h_sq
   exact h_sq
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma norm_gradInnerSmooth_sq_le_gradSupBound_sq_mul_integral
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -356,7 +362,7 @@ lemma norm_gradInnerSmooth_sq_le_gradSupBound_sq_mul_integral
   rw [integral_const_mul] at h_int_le
   exact h_int_le
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 lemma integral_inner_grad_self_le_h1_norm_sq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :
     (∫ x, g.inner x (gradFun (I := I) g v.toFun x)
@@ -381,7 +387,7 @@ lemma integral_inner_grad_self_le_h1_norm_sq
     rfl
   linarith [h_grad_eq]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem norm_gradInnerSmooth_le
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
@@ -406,7 +412,7 @@ theorem norm_gradInnerSmooth_le
     mul_nonneg (gradSupBound_nonneg (I := I) (M := M) g ρα) (norm_nonneg _)
   exact abs_le_of_sq_le_sq' h_sq h_rhs_nn |>.2
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem gradInnerSmooth_norm_le
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) :
     ∃ C : ℝ, 0 ≤ C ∧ ∀ (v : SmoothScalar g),
@@ -422,14 +428,14 @@ noncomputable def gradInnerCLMOnSmooth
     (gradSupBound (I := I) (M := M) g ρα)
     (fun v => norm_gradInnerSmooth_le (I := I) (M := M) g ρα v)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma gradInnerCLMOnSmooth_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :
     gradInnerCLMOnSmooth (I := I) (M := M) g ρα v =
       gradInnerSmooth (I := I) (M := M) g ρα v := rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma denseRange_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     DenseRange (UniformSpace.Completion.toComplL :
@@ -439,7 +445,7 @@ private lemma denseRange_toComplL_smoothScalar
       UniformSpace.Completion.coe_toComplL]
   exact UniformSpace.Completion.denseRange_coe
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma isUniformInducing_toComplL_smoothScalar
     (g : SmoothRiemannianMetric I M) :
     IsUniformInducing
@@ -457,7 +463,7 @@ noncomputable def gradInnerCLM
     (UniformSpace.Completion.toComplL :
       SmoothScalar g →L[ℝ] H1Compl g)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 @[simp] theorem gradInnerCLM_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :

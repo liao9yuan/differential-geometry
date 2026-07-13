@@ -144,6 +144,7 @@ private lemma scalarOnE_neg_pointwise (α : M) (f : M → ℝ) :
   unfold scalarOnE
   rfl
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianTensor_add_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
@@ -289,6 +290,7 @@ lemma chartHessianTensor_add_of_smooth
   rw [h_iter_add, h_chris_sum]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianTensor_neg_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f : M → ℝ}

@@ -471,11 +471,13 @@ noncomputable def smoothMulH1ComplConst
   Real.sqrt (2 * (phiSupBound (I := I) (M := M) g φ ^ 2 +
     gradSupBound (I := I) (M := M) g φ ^ 2))
 
+set_option linter.unusedSectionVars false in
 lemma smoothMulH1ComplConst_nonneg
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     0 ≤ smoothMulH1ComplConst (I := I) (M := M) g φ :=
   Real.sqrt_nonneg _
 
+set_option linter.unusedSectionVars false in
 lemma smoothMulH1ComplConst_sq
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) :
     smoothMulH1ComplConst (I := I) (M := M) g φ ^ 2 =

@@ -710,6 +710,7 @@ lemma chartCoord_chartChristoffelContraction
       (fun l => ∑ i, ∑ j, chartChristoffel (I := I) g x i j l y *
         chartCoord (E := E) i v * chartCoord (E := E) j w) l]
 
+set_option linter.unusedSectionVars false in
 omit [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [BoundarylessManifold I M] in
 lemma partialDeriv_chartChristoffel_symm
     (g : SmoothRiemannianMetric I M) (x : M) (i j l d : Fin (Module.finrank ℝ E)) (y : E) :

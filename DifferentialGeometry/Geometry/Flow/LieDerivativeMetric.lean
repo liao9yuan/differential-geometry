@@ -89,6 +89,7 @@ theorem chartLieDerivMetricMatrix_def (g : SmoothRiemannianMetric I M)
     rw [chartGramMatrix_apply, chartGramMatrix_apply]
     exact g.symm x _ _]
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartLieMetricConvective_symm (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

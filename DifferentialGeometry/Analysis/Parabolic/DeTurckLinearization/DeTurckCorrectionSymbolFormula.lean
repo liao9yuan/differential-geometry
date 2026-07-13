@@ -24,6 +24,7 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section GramBridge
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartGramOnE_extChartAt_self (g : SmoothRiemannianMetric I M) (x : M)
     (k j : Fin (Module.finrank ℝ E)) :

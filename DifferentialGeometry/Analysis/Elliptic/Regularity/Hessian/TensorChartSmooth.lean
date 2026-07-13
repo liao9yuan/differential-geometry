@@ -70,6 +70,7 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
           partialDeriv (E := E) m (scalarOnE (I := I) α v.toFun)
             ((toEuclidean (E := E)).symm y) := rfl
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartHessianVOnEuclid_eq_plain_minus_chris_on_chart_target
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g)

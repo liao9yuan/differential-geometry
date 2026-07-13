@@ -48,7 +48,7 @@ def gradChartCoeffWithin (g : SmoothRiemannianMetric I M) (α : M) (f : M → �
       partialDerivWithin (E := E) (extChartAt I α).target j
         (scalarOnE (I := I) α f) (extChartAt I α x)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma gradChartCoeffWithin_def
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -64,7 +64,6 @@ def gradChartLocalWithin (g : SmoothRiemannianMetric I M)
     gradChartCoeffWithin (I := I) g α f i x •
       chartBasisVecFiber (I := I) α i x
 
-set_option linter.unusedSectionVars false in
 private lemma scalarOnE_mdifferentiableWithinAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {y : E} (hy : y ∈ (extChartAt I α).target) :
@@ -78,7 +77,7 @@ private lemma scalarOnE_mdifferentiableWithinAt
     hcont.differentiableWithinAt (by simp)
   exact hdiff.mdifferentiableWithinAt
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAt_mapsTo_target_of_chart_source (α : M) :
     Set.MapsTo (extChartAt I α : M → E) (chartAt H α).source
       (extChartAt I α).target := by
@@ -87,7 +86,7 @@ private lemma extChartAt_mapsTo_target_of_chart_source (α : M) :
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   exact (extChartAt I α).map_source hx'
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma mfderiv_extChartAt_chartBasisVecFiber'
     (α : M) {x : M} (hx : x ∈ (chartAt H α).source)
     (i : Fin (Module.finrank ℝ E)) :
@@ -130,7 +129,6 @@ private lemma mfderivWithin_chart_source_of_mdiff'
     mfderivWithin I 𝓘(ℝ, ℝ) f (chartAt H α).source x = mfderiv I 𝓘(ℝ, ℝ) f x :=
   mfderivWithin_of_isOpen (chartAt H α).open_source hx
 
-set_option linter.unusedSectionVars false in
 private lemma mfderiv_factor_through_extChartAt'
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -206,7 +204,6 @@ private lemma mfderiv_factor_through_extChartAt'
   rw [hgoal_full, hscalar_mfd_eq_fd]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma mfderiv_chartBasisVecFiber_within_of_smooth
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -221,7 +218,7 @@ lemma mfderiv_chartBasisVecFiber_within_of_smooth
   rw [mfderiv_extChartAt_chartBasisVecFiber' (I := I) α hx i]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma inner_gradChartLocalWithin_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ)
     {x : M} (hx : x ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -331,7 +328,6 @@ lemma inner_gradChartLocalWithin_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-set_option linter.unusedSectionVars false in
 theorem gradChartLocalWithin_eq_gradFun
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -385,7 +381,6 @@ theorem gradChartLocalWithin_eq_gradFun
   rw [inner_gradChartLocalWithin_chartBasis (I := I) g α f hbase k,
     hmfderiv_basis k]
 
-set_option linter.unusedSectionVars false in
 private lemma gradChartCoeffWithin_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -441,7 +436,6 @@ private lemma gradChartCoeffWithin_contMDiffOn
       fun _ hx => hx.2
     exact hpartialM.comp hchart' hsubset
 
-set_option linter.unusedSectionVars false in
 private lemma gradChartLocalWithin_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -488,7 +482,7 @@ private lemma isOpen_interior_M' : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma extChartAt_mem_interior_target_of_interior
     (α : M) {x : M} (hx_src : x ∈ (chartAt H α).source)
     (hx_int : x ∈ I.interior M) :
@@ -496,7 +490,6 @@ private lemma extChartAt_mem_interior_target_of_interior
   extChartAt_mem_interior_target_of_isInteriorPoint
     (I := I) α hx_src hx_int
 
-set_option linter.unusedSectionVars false in
 private lemma gradFun_eq_gradChartLocalWithin_on_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -506,7 +499,6 @@ private lemma gradFun_eq_gradChartLocalWithin_on_chart_inter_interior
   intro y hy
   exact (gradChartLocalWithin_eq_gradFun (I := I) g x₀ hf hy.1).symm
 
-set_option linter.unusedSectionVars false in
 private lemma gradChartLocalWithin_contMDiffOn_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -521,7 +513,6 @@ private lemma gradChartLocalWithin_contMDiffOn_chart_inter_interior
   · rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hy.1
   · exact extChartAt_mem_interior_target_of_interior (I := I) x₀ hy.1 hy.2
 
-set_option linter.unusedSectionVars false in
 private lemma gradFun_contMDiffOn_chart_inter_interior
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -540,7 +531,6 @@ private lemma gradFun_contMDiffOn_chart_inter_interior
     TotalSpace.mk' E y (gradChartLocalWithin (I := I) g x₀ f y)
   rw [h]
 
-set_option linter.unusedSectionVars false in
 theorem gradFun_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -565,12 +555,11 @@ abbrev grad_g_with_boundary
     ∀ x : M, TangentSpace I x :=
   gradFun (I := I) g f
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma grad_g_with_boundary_apply
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M) :
     grad_g_with_boundary (I := I) g f x = gradFun (I := I) g f x := rfl
 
-set_option linter.unusedSectionVars false in
 theorem grad_g_with_boundary_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -580,7 +569,7 @@ theorem grad_g_with_boundary_contMDiffOn_interior [T2Space M]
   gradFun_contMDiffOn_interior (I := I) g hf
 
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem tangentSectionAction_grad_g_with_boundary_eq_inner
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ}
@@ -592,7 +581,7 @@ theorem tangentSectionAction_grad_g_with_boundary_eq_inner
   rfl
 
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem tangentSectionAction_grad_g_with_boundary_eq_inner_left
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ}
@@ -603,7 +592,7 @@ theorem tangentSectionAction_grad_g_with_boundary_eq_inner_left
   exact g.symm x (X x) (grad_g_with_boundary (I := I) g f x)
 
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem inner_grad_g_with_boundary_symm
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (x : M) :
@@ -613,21 +602,21 @@ theorem inner_grad_g_with_boundary_symm
         (grad_g_with_boundary (I := I) g f x) :=
   g.symm x _ _
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma support_grad_g_with_boundary_subset
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) :
     Function.support (fun x : M => grad_g_with_boundary (I := I) g f x) ⊆
       tsupport f :=
   support_gradFun_subset (I := I) g f
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma grad_g_with_boundary_eq_zero_of_eventuallyEq_zero
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}
     (hf : f =ᶠ[𝓝 x] (fun _ : M => (0 : ℝ))) :
     grad_g_with_boundary (I := I) g f x = (0 : TangentSpace I x) :=
   gradFun_eq_zero_of_eventuallyEq_zero (I := I) g hf
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma hasCompactSupport_grad_g_with_boundary [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf_cs : HasCompactSupport f) :

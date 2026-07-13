@@ -49,14 +49,14 @@ private lemma continuous_g_inner_smooth_sections
     Continuous (fun b : M => g.inner b (G b) (X b)) :=
   TangentBundle.continuous_g_inner_of_smooth_sections (I := I) (M := M) g G X
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma continuous_g_norm_sq_smooth_section
     (g : SmoothRiemannianMetric I M)
     (G : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
     Continuous (fun b : M => g.inner b (G b) (G b)) :=
   continuous_g_inner_smooth_sections g G G
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma continuous_g_norm_smooth_section
     (g : SmoothRiemannianMetric I M)
     (G : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -83,7 +83,7 @@ private lemma exists_bound_continuous_compactSpace
     intro x
     exact (hM ⟨x⟩).elim
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma continuous_memLp_of_compactSpace
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -98,7 +98,7 @@ private lemma continuous_memLp_of_compactSpace
   obtain ⟨C, hC⟩ := exists_bound_continuous_compactSpace hf
   exact MemLp.of_bound hmeas C (Filter.Eventually.of_forall (fun x => hC x))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma continuous_integrable_of_compactSpace
     [CompactSpace M] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -121,7 +121,7 @@ def HasWeakRiemannianGrad
         -∫ x, u x * divergence_g (I := I) g X x
           ∂(riemannianVolumeMeasure I M g)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma HasWeakRiemannianGrad.pairing_eq
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -142,14 +142,13 @@ def MemW1pIntrinsic
       MemLp (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
         (riemannianVolumeMeasure I M g)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma MemW1pIntrinsic.memLp_self
     [T2Space M] [SigmaCompactSpace M] [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
     (h : MemW1pIntrinsic (I := I) (M := M) g p u) :
     MemLp u p (riemannianVolumeMeasure I M g) := h.1
 
-set_option linter.unusedSectionVars false in
 theorem integral_inner_gradFun_eq_neg_integral_mul_divergence
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -171,7 +170,6 @@ theorem integral_inner_gradFun_eq_neg_integral_mul_divergence
   exact integral_tangentSectionAction_eq_neg_integral_smul_divergence
     (I := I) (M := M) g hu X hX
 
-set_option linter.unusedSectionVars false in
 theorem hasWeakRiemannianGrad_grad_g_of_contMDiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -189,7 +187,6 @@ theorem hasWeakRiemannianGrad_grad_g_of_contMDiff
   exact integral_inner_gradFun_eq_neg_integral_mul_divergence
     (I := I) (M := M) g hu X hX
 
-set_option linter.unusedSectionVars false in
 theorem MemW1pIntrinsic_of_contMDiff
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞)
@@ -201,7 +198,6 @@ theorem MemW1pIntrinsic_of_contMDiff
   · have hcont := continuous_g_norm_smooth_section g (grad_g (I := I) g hu)
     exact continuous_memLp_of_compactSpace g p hcont
 
-set_option linter.unusedSectionVars false in
 theorem HasWeakRiemannianGrad.add
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M}
@@ -274,7 +270,6 @@ theorem HasWeakRiemannianGrad.add
   intro x
   ring
 
-set_option linter.unusedSectionVars false in
 theorem MemW1pIntrinsic.add
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -289,7 +284,7 @@ theorem MemW1pIntrinsic.add
   · have hcont := continuous_g_norm_smooth_section g (G + G')
     exact continuous_memLp_of_compactSpace g p hcont
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGrad.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) :
@@ -308,7 +303,7 @@ theorem HasWeakRiemannianGrad.zero
       (fun _ : M => (0 : ℝ)) from by funext x; simp]
   simp [integral_zero]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -329,7 +324,6 @@ theorem MemW1pIntrinsic.zero
     rw [hcongr]
     exact MemLp.zero
 
-set_option linter.unusedSectionVars false in
 theorem HasWeakRiemannianGrad.const_smul
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -371,7 +365,6 @@ theorem HasWeakRiemannianGrad.const_smul
   rw [hcong, integral_const_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem MemW1pIntrinsic.const_smul
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -384,7 +377,7 @@ theorem MemW1pIntrinsic.const_smul
   · have hcont := continuous_g_norm_smooth_section g (c • G)
     exact continuous_memLp_of_compactSpace g p hcont
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGrad.pairing_inner_eq
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -397,7 +390,7 @@ theorem HasWeakRiemannianGrad.pairing_inner_eq
       ∫ x, g.inner x (G' x) (X x) ∂(riemannianVolumeMeasure I M g) := by
   rw [h₁.pairing_eq X hX, h₂.pairing_eq X hX]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem HasWeakRiemannianGrad.pairing_inner_diff_eq_zero
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {u : M → ℝ}
@@ -439,7 +432,7 @@ private def gradInfimum
       eLpNorm (fun x : M => Real.sqrt (g.inner x (G x) (G x))) p
         (riemannianVolumeMeasure I M g)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma w1pNormIntrinsic_def
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) (u : M → ℝ) :
@@ -447,7 +440,7 @@ private lemma w1pNormIntrinsic_def
       eLpNorm u p (riemannianVolumeMeasure I M g) +
         gradInfimum (I := I) (M := M) g p u := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma gradInfimum_le_of_weakGrad
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {p : ℝ≥0∞} {u : M → ℝ}
@@ -459,7 +452,7 @@ private lemma gradInfimum_le_of_weakGrad
   unfold gradInfimum
   exact iInf_le_of_le G (iInf_le _ hG)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem w1pNormIntrinsic_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (p : ℝ≥0∞) :
@@ -494,7 +487,7 @@ theorem w1pNormIntrinsic_zero
     exact le_of_eq h_zero_norm
   · exact zero_le _
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.eLpNorm_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -502,7 +495,7 @@ theorem MemW1pIntrinsic.eLpNorm_lt_top
     eLpNorm u p (riemannianVolumeMeasure I M g) < ⊤ :=
   h.memLp_self.2
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.gradInfimum_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -513,7 +506,7 @@ theorem MemW1pIntrinsic.gradInfimum_lt_top
     (gradInfimum_le_of_weakGrad g hG_weak) ?_
   exact hG_p.2
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem MemW1pIntrinsic.w1pNormIntrinsic_lt_top
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {p : ℝ≥0∞} {u : M → ℝ}
@@ -522,7 +515,6 @@ theorem MemW1pIntrinsic.w1pNormIntrinsic_lt_top
   rw [w1pNormIntrinsic_def]
   exact ENNReal.add_lt_top.mpr ⟨h.eLpNorm_lt_top, h.gradInfimum_lt_top⟩
 
-set_option linter.unusedSectionVars false in
 private lemma gradInfimum_add_le_of_weakGrads
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {p : ℝ≥0∞} (hp : 1 ≤ p)
@@ -680,7 +672,6 @@ private lemma gradInfimum_add_le_of_weakGrads
   refine le_trans ?_ (hmono.trans htri)
   exact gradInfimum_le_of_weakGrad g hsum_weak
 
-set_option linter.unusedSectionVars false in
 theorem w1pNormIntrinsic_add_le
     [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) {p : ℝ≥0∞} (hp : 1 ≤ p)

@@ -20,6 +20,7 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
+set_option linter.unusedSectionVars false in
 lemma christoffelCorrection_symm_cancel
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (v w : TangentSpace I x) :
     christoffelCorrection (I := I) g α x (trivToE (I := I) α x w) v =

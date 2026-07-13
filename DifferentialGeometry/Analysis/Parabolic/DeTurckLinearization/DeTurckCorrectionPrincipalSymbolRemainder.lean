@@ -940,6 +940,7 @@ theorem chartDeTurckCorrFirstOrderRemainder_smul
     rw [hA j k, hB j k]; ring]
   ring
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckCorrPrincipalSymbolExpr_symm
     (g g' : SmoothRiemannianMetric I M) (α : M)

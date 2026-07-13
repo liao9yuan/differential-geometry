@@ -716,6 +716,7 @@ lemma chartTransitionMap_extChartAt_symm
     rw [extChartAt_source (I := I)]; exact hp_β
   exact (extChartAt I β).left_inv hp_β_src
 
+set_option linter.unusedSectionVars false in
 lemma chartInvGramBeta_mul_chartGramOnE_diag
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}

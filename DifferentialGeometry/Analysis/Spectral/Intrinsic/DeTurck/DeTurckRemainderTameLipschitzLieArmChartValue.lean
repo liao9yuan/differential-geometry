@@ -522,6 +522,7 @@ private lemma lieArm_chartInvGramOnE_center (g : SmoothRiemannianMetric I M) (x 
     rw [extChartAt_source (I := I)]; exact mem_chart_source H x
   rw [(extChartAt I x).left_inv hx_src]
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lieArm_chartGramOnE_center (g : SmoothRiemannianMetric I M) (x : M)
     (a b : Fin (Module.finrank ℝ E)) :
@@ -6885,6 +6886,7 @@ private lemma lc0_vfcomp_center (g₁ gP : SmoothRiemannianMetric I M) (x : M)
   exact Finset.sum_congr rfl (fun a _ => Finset.sum_congr rfl (fun b _ => by
     rw [lieArm_chartInvGramOnE_center (I := I) g₁ x a b]))
 
+set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma lc0_gramBracket_symm (g₁ : SmoothRiemannianMetric I M) (x : M)
     (a b l : Fin (Module.finrank ℝ E)) (y : E) :

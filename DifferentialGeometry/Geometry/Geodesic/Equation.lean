@@ -58,6 +58,7 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
               chartCoord (E := E) i v * chartCoord (E := E) j w) •
           chartModelBasis E k := rfl
 
+set_option linter.unusedSectionVars false in
 lemma chartChristoffelContraction_symm
     (g : SmoothRiemannianMetric I M) (α : M) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α v w y =

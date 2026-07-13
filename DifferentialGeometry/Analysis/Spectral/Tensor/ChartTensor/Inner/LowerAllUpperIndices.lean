@@ -37,7 +37,6 @@ def chartCoordCLM (E : Type*) [NormedAddCommGroup E] [NormedSpace ℝ E]
   (ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : Fin (Module.finrank ℝ E) => ℝ) i).comp
     (chartModelBasis E).equivFunL.toContinuousLinearMap
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma chartCoordCLM_apply (i : Fin (Module.finrank ℝ E)) (u : E) :
     chartCoordCLM E i u = (chartModelBasis E).equivFun u i := by
@@ -49,7 +48,6 @@ def chartGramBilin (g : SmoothRiemannianMetric I M) (α b : M) :
   ∑ j : Fin (Module.finrank ℝ E), ∑ k : Fin (Module.finrank ℝ E),
     chartGramMatrix g α b j k • (chartCoordCLM E j).smulRight (chartCoordCLM E k)
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma chartGramBilin_apply
     (g : SmoothRiemannianMetric I M) (α b : M) (u w : E) :
@@ -68,7 +66,6 @@ def chartSeparableFormAt
   (ContinuousMultilinearMap.mkPiAlgebra ℝ (Fin r) ℝ).compContinuousLinearMap
     (fun k => chartGramBilin (I := I) (M := M) g α b (v k))
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma chartSeparableFormAt_apply
     (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ) (v w : Fin r → E) :
@@ -79,7 +76,6 @@ lemma chartSeparableFormAt_apply
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply,
     ContinuousMultilinearMap.mkPiAlgebra_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma chartSeparableFormAt_update_add
     (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ)
     (v : Fin r → E) (i : Fin r) (a c : E) :
@@ -115,7 +111,6 @@ private lemma chartSeparableFormAt_update_add
   rw [h_bilin_add]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma chartSeparableFormAt_update_smul
     (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ)
     (v : Fin r → E) (i : Fin r) (c : ℝ) (a : E) :
@@ -258,7 +253,6 @@ private noncomputable def chartLowerAllUpperIndices_modelML
           upd_natAdd_last]
       rw [ContinuousMultilinearMap.map_update_smul]
 
-set_option linter.unusedSectionVars false in
 @[simp]
 private lemma chartLowerAllUpperIndices_modelML_apply
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
@@ -271,7 +265,6 @@ private lemma chartLowerAllUpperIndices_modelML_apply
   unfold chartLowerAllUpperIndices_modelML
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chartLowerAllUpperIndices_modelML_norm_bound
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel r s ℝ E) (v : Fin (r + s) → E) :
@@ -349,7 +342,6 @@ def chartLowerAllUpperIndices_model
     (chartLowerAllUpperIndices_modelML_norm_bound (I := I) (M := M)
       r s g α b T)
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma chartLowerAllUpperIndices_model_apply
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
@@ -363,7 +355,6 @@ lemma chartLowerAllUpperIndices_model_apply
       r s g α b T v = _
   rw [chartLowerAllUpperIndices_modelML_apply]
 
-set_option linter.unusedSectionVars false in
 lemma chartLowerAllUpperIndices_model_zero
     (s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel 0 s ℝ E) (v : Fin (0 + s) → E) :
@@ -382,7 +373,6 @@ lemma chartLowerAllUpperIndices_model_zero
     simp
   rw [h_empty]
 
-set_option linter.unusedSectionVars false in
 lemma chartLowerAllUpperIndices_model_succ
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T : TensorRSModel (r + 1) s ℝ E) (v : Fin ((r + 1) + s) → E) :
@@ -392,7 +382,6 @@ lemma chartLowerAllUpperIndices_model_succ
         (fun j : Fin s => v (Fin.natAdd (r + 1) j)) := by
   rw [chartLowerAllUpperIndices_model_apply]
 
-set_option linter.unusedSectionVars false in
 lemma chartLowerAllUpperIndices_model_zero_tensor
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M) :
     chartLowerAllUpperIndices_model (I := I) (M := M) r s g α b
@@ -402,7 +391,6 @@ lemma chartLowerAllUpperIndices_model_zero_tensor
   rw [chartLowerAllUpperIndices_model_apply, ContinuousMultilinearMap.zero_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartLowerAllUpperIndices_model_add
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (T₁ T₂ : TensorRSModel r s ℝ E) :
@@ -414,7 +402,6 @@ lemma chartLowerAllUpperIndices_model_add
   simp [chartLowerAllUpperIndices_model_apply,
     ContinuousLinearMap.add_apply, ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 lemma chartLowerAllUpperIndices_model_smul
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α b : M)
     (c : ℝ) (T : TensorRSModel r s ℝ E) :
@@ -440,14 +427,14 @@ private noncomputable def chartLowerEvalBasisLinear (n : ℕ) :
     funext φ
     simp [ContinuousMultilinearMap.smul_apply]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartLowerEvalBasisLinear_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     chartLowerEvalBasisLinear (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartLowerEvalBasisLinear_injective (n : ℕ) :
     Function.Injective (chartLowerEvalBasisLinear (E := E) n) := by
   intro Φ₁ Φ₂ h
@@ -456,7 +443,7 @@ private lemma chartLowerEvalBasisLinear_injective (n : ℕ) :
   intro v
   exact congr_fun h v
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartLower_finrank_tensor0SModel (n : ℕ) :
     Module.finrank ℝ (Tensor0SModel n ℝ E) =
       (Module.finrank ℝ E) ^ n := by
@@ -486,7 +473,7 @@ private lemma chartLower_finrank_basis_pi (n : ℕ) :
   rw [Module.finrank_pi, Fintype.card_pi]
   simp [Fintype.card_fin]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartLowerEvalBasisLinear_bijective (n : ℕ) :
     Function.Bijective (chartLowerEvalBasisLinear (E := E) n) := by
   have h_inj := chartLowerEvalBasisLinear_injective (E := E) n
@@ -502,14 +489,14 @@ private noncomputable def chartLowerEvalBasisCLE (n : ℕ) :
   (LinearEquiv.ofBijective (chartLowerEvalBasisLinear (E := E) n)
     (chartLowerEvalBasisLinear_bijective (E := E) n)).toContinuousLinearEquiv
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] private lemma chartLowerEvalBasisCLE_apply (n : ℕ)
     (Φ : Tensor0SModel n ℝ E)
     (φ : Fin n → Fin (Module.finrank ℝ E)) :
     chartLowerEvalBasisCLE (E := E) n Φ φ =
       Φ (fun k : Fin n => (chartModelBasis E) (φ k)) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I ∞ M] [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_local
     {n : ℕ} {U : Set M} (Φ : M → Tensor0SModel n ℝ E)
     (h : ∀ φ : Fin n → Fin (Module.finrank ℝ E),
@@ -531,7 +518,7 @@ private lemma contMDiffOn_into_tensor0SModel_of_eval_basis_local
   intro b _
   exact ((chartLowerEvalBasisCLE (E := E) n).symm_apply_apply (Φ b)).symm
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartGramBilin_basis_basis
     (g : SmoothRiemannianMetric I M) (α b : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -606,7 +593,7 @@ private lemma chartGramBilin_basis_basis
       chartGramMatrix (I := I) g α b i j)]
   simp
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartSeparableFormAt_basis_basis
     (g : SmoothRiemannianMetric I M) (α b : M) (r : ℕ)
     (φ_first ψ : Fin r → Fin (Module.finrank ℝ E)) :
@@ -621,7 +608,7 @@ private lemma chartSeparableFormAt_basis_basis
   exact chartGramBilin_basis_basis (I := I) (M := M) g α b
     (φ_first k) (ψ k)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma chartSeparableFormAt_basis_contMDiffOn
     {r : ℕ} (g : SmoothRiemannianMetric I M) (α : M)
     (φ_first : Fin r → Fin (Module.finrank ℝ E)) :
@@ -645,7 +632,7 @@ private lemma chartSeparableFormAt_basis_contMDiffOn
   refine contMDiffOn_finset_prod (fun k _ => ?_)
   exact chartGramMatrix_entry_contMDiffOn (I := I) g α (φ_first k) (ψ k)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartLowerAllUpperIndices_model_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) (T : TensorRSModel r s ℝ E) :

@@ -193,6 +193,7 @@ private lemma s_contDiffAt_det_and_ne
     exact s_contDiffAt_chartGramOnE (I := I) hfam (σ k) k hy
   · exact ne_of_gt (chartGramMatrix_det_pos (I := I) (gfam 0) α hx_base)
 
+set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma s_contDiffAt_adjugate
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}

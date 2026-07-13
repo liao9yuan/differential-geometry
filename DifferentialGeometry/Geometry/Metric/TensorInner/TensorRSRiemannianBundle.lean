@@ -51,7 +51,6 @@ private def innerModelBilinRS
     (fun c T S =>
       tensorInnerPointwise_smul_right (I := I) (M := M) g r s b c T S)
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma innerModelBilinRS_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S : TensorRSModel r s ℝ E) :
@@ -85,14 +84,12 @@ def innerModelCLMRS
   LinearMap.toContinuousLinearMap
     (innerModelLinearOuterRS (I := I) (M := M) g r s b)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma innerModelCLMRS_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S : TensorRSModel r s ℝ E) :
     innerModelCLMRS (I := I) (M := M) g r s b T S =
       tensorInnerPointwise (I := I) (M := M) g r s b T S := rfl
 
-set_option linter.unusedSectionVars false in
 lemma innerModelCLMRS_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S : TensorRSModel r s ℝ E) :
@@ -101,7 +98,6 @@ lemma innerModelCLMRS_symm
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s b _ _
 
-set_option linter.unusedSectionVars false in
 lemma innerModelCLMRS_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSModel r s ℝ E) (hT : T ≠ 0) :
@@ -116,7 +112,6 @@ lemma innerModelCLMRS_pos
     exact (tensorInnerPointwise_eq_zero_iff
       (I := I) (M := M) g r s b T).mp heq.symm
 
-set_option linter.unusedSectionVars false in
 lemma innerModelCLMRS_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSModel r s ℝ E) :
@@ -124,7 +119,6 @@ lemma innerModelCLMRS_nonneg
   rw [innerModelCLMRS_apply]
   exact tensorInnerPointwise_nonneg (I := I) (M := M) g r s b T
 
-set_option linter.unusedSectionVars false in
 lemma innerModelCLMRS_add_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T₁ T₂ S : TensorRSModel r s ℝ E) :
@@ -134,7 +128,6 @@ lemma innerModelCLMRS_add_left
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_add_left (I := I) (M := M) g r s b _ _ _
 
-set_option linter.unusedSectionVars false in
 lemma innerModelCLMRS_add_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S₁ S₂ : TensorRSModel r s ℝ E) :
@@ -144,7 +137,6 @@ lemma innerModelCLMRS_add_right
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_add_right (I := I) (M := M) g r s b _ _ _
 
-set_option linter.unusedSectionVars false in
 lemma innerModelCLMRS_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -153,7 +145,6 @@ lemma innerModelCLMRS_smul_left
   rw [innerModelCLMRS_apply, innerModelCLMRS_apply]
   exact tensorInnerPointwise_smul_left (I := I) (M := M) g r s b c _ _
 
-set_option linter.unusedSectionVars false in
 lemma innerModelCLMRS_smul_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSModel r s ℝ E) :
@@ -177,7 +168,6 @@ private def precompBundleCLMRS (r s : ℕ) (b : M) :
   ((bundleCLERS (I := I) (M := M) (E := E) r s b).symm.arrowCongr
     (ContinuousLinearEquiv.refl ℝ ℝ)).toContinuousLinearMap
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma precompBundleCLMRS_apply (r s : ℕ) (b : M)
     (f : TensorRSModel r s ℝ E →L[ℝ] ℝ) (T : TensorRSSpace r s I b) :
     precompBundleCLMRS (I := I) (M := M) (E := E) r s b f T =
@@ -193,7 +183,6 @@ def tensorRSRiemannianInnerCLM
       (innerModelCLMRS (I := I) (M := M) g r s b)
   stepA.comp (bundleToModelCLMRS (I := I) (M := M) (E := E) r s b)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma tensorRSRiemannianInnerCLM_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S : TensorRSSpace r s I b) :
@@ -205,7 +194,6 @@ set_option linter.unusedSectionVars false in
           (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b) S) := by
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T S : TensorRSSpace r s I b) :
@@ -214,7 +202,6 @@ theorem tensorRSRiemannianInnerCLM_symm
   rw [tensorRSRiemannianInnerCLM_apply, tensorRSRiemannianInnerCLM_apply]
   exact tensorInnerPointwise_symm (I := I) (M := M) g r s b _ _
 
-set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_pos
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) (hT : T ≠ 0) :
@@ -248,7 +235,6 @@ theorem tensorRSRiemannianInnerCLM_pos
     exact (tensorInnerPointwise_eq_zero_iff
       (I := I) (M := M) g r s b _).mp heq.symm
 
-set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_smul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSSpace r s I b) :
@@ -260,7 +246,6 @@ theorem tensorRSRiemannianInnerCLM_smul_left
   rw [h]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_smul_right
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (c : ℝ) (T S : TensorRSSpace r s I b) :
@@ -272,7 +257,6 @@ theorem tensorRSRiemannianInnerCLM_smul_right
   rw [h]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma innerModelRS_quadratic_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Continuous (fun T : TensorRSModel r s ℝ E =>
@@ -388,7 +372,6 @@ private lemma innerModelRS_quadratic_continuous
   intro T
   exact (hbilin_expand T).symm
 
-set_option linter.unusedSectionVars false in
 lemma tensorRSRiemannianInnerCLM_diagonal_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Continuous (fun v : TensorRSSpace r s I b =>
@@ -407,7 +390,6 @@ lemma tensorRSRiemannianInnerCLM_diagonal_continuous
     (Tensor0SBundle.TensorRSSpace.toModel_continuous
       (𝕜 := ℝ) (E := E) (I := I) (M := M) (r := r) (s := s) (x := b))
 
-set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_diagonal_continuousAt_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     ContinuousAt (fun v : TensorRSSpace r s I b =>
@@ -416,8 +398,6 @@ theorem tensorRSRiemannianInnerCLM_diagonal_continuousAt_zero
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 800000 in
-
-set_option linter.unusedSectionVars false in
 private lemma innerModelRS_diagonal_sublevel_isBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     Bornology.IsBounded
@@ -459,8 +439,6 @@ private lemma innerModelRS_diagonal_sublevel_isBounded
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
-
-set_option linter.unusedSectionVars false in
 private lemma innerModelRS_diagonal_sublevel_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ
@@ -469,7 +447,6 @@ private lemma innerModelRS_diagonal_sublevel_isVonNBounded
   NormedSpace.isVonNBounded_of_isBounded ℝ
     (innerModelRS_diagonal_sublevel_isBounded (I := I) (M := M) g r s b)
 
-set_option linter.unusedSectionVars false in
 private lemma tensorRSRiemannianInner_diagonal_clm_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M)
     (T : TensorRSSpace r s I b) :
@@ -482,8 +459,6 @@ private lemma tensorRSRiemannianInner_diagonal_clm_apply
   rw [tensorRSRiemannianInnerCLM_apply]
 
 set_option maxHeartbeats 800000 in
-
-set_option linter.unusedSectionVars false in
 theorem tensorRSRiemannianInnerCLM_isVonNBounded
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (b : M) :
     IsVonNBounded ℝ

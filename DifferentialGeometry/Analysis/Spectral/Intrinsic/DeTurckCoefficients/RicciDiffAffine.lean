@@ -137,6 +137,7 @@ theorem chartRicciSecondOrderTerm_symm
     exact partialDeriv_contractedChristoffel_swap (I := I) g α i k hy
   rw [hT1, hT2]
 
+set_option linter.unusedSectionVars false in
 theorem chartRicciFirstOrderTerm_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E)) (y : E) :

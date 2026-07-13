@@ -78,6 +78,7 @@ theorem lpInner_H1ComplToLp_oneSubLap_eq_lpInner_smooth_preimage
     exact resolvent_laplacianDomain_preimage_eq (I := I) (M := M) g ⟨w_lift, hw_lift⟩
   rw [h_LHS, h_RHS]
 
+set_option linter.unusedSectionVars false in
 theorem lpInner_gradInner_smooth_oneSubLap_eq_lpInner_smooth_preimage
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
@@ -198,6 +199,7 @@ theorem integral_H1ComplToLp_oneSubLap_eq_integral_preimage_smooth
   rw [← h_LHS_integral, ← h_RHS_integral]
   exact h_abs
 
+set_option linter.unusedSectionVars false in
 theorem integral_gradInner_oneSubLap_smooth_eq_integral_preimage_smooth
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     {u_h : H1Compl (I := I) (M := M) g}
