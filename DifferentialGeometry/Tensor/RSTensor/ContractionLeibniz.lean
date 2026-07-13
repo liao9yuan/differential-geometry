@@ -168,7 +168,10 @@ theorem nabla0SFun_product_eval {s q : ℕ}
   -- The product field's scalar evaluation is `af · bf`, pointwise.
   have hPeval : ∀ y : M, P y (fun a : Fin (s + q) => V a y) = af y * bf y := by
     intro y
-    rw [tensor0SField_product_apply (I := I) A B y (fun a : Fin (s + q) => V a y)]
+    dsimp only [P]
+    change Bundle.continuousMultilinearMap.product_fun (A y) (B y)
+      (fun a : Fin (s + q) => V a y) = _
+    rw [Bundle.continuousMultilinearMap.product_fun_apply]
     rfl
   -- Differentiability of the two scalar factor fields at `x`.
   have haf : MDifferentiableAt I 𝓘(Real, Real) af x :=
@@ -211,7 +214,11 @@ theorem nabla0SFun_product_eval {s q : ℕ}
     · -- First block: slot index `Fin.castAdd q a`, updates only the `A` factor.
       rw [Finset.sum_mul]
       refine Finset.sum_congr rfl fun a _ => ?_
-      rw [tensor0SField_product_apply (I := I) A B x]
+      dsimp only [P]
+      change Bundle.continuousMultilinearMap.product_fun (A x) (B x)
+        (Function.update (fun b : Fin (s + q) => V b x) (Fin.castAdd q a)
+          ((cov (fun p : M => V (Fin.castAdd q a) p) x) (X x))) = _
+      rw [Bundle.continuousMultilinearMap.product_fun_apply]
       congr 1
       · -- `A` argument: the updated first block.
         congr 1
@@ -231,7 +238,11 @@ theorem nabla0SFun_product_eval {s q : ℕ}
     · -- Last block: slot index `Fin.natAdd s a`, updates only the `B` factor.
       rw [Finset.mul_sum]
       refine Finset.sum_congr rfl fun a _ => ?_
-      rw [tensor0SField_product_apply (I := I) A B x]
+      dsimp only [P]
+      change Bundle.continuousMultilinearMap.product_fun (A x) (B x)
+        (Function.update (fun b : Fin (s + q) => V b x) (Fin.natAdd s a)
+          ((cov (fun p : M => V (Fin.natAdd s a) p) x) (X x))) = _
+      rw [Bundle.continuousMultilinearMap.product_fun_apply]
       congr 1
       · -- `A` argument: the first block is untouched by a last-block update.
         congr 1

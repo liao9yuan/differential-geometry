@@ -53,7 +53,17 @@ theorem metricTensor0S_apply
     (g : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 2 -> TangentSpace I x) :
     metricTensor0S (I := I) g x v = g.inner x (v 0) (v 1) := by
-  simp [metricTensor0S, Fin.tail]
+  unfold metricTensor0S
+  change
+    ((continuousMultilinearCurryFin1 Real (TangentSpace I x) Real).symm
+      (g.inner x (v 0))) (fun i : Fin 1 => v i.succ) =
+      g.inner x (v 0) (v 1)
+  have htail : (fun i : Fin 1 => v i.succ) = fun _ : Fin 1 => v 1 := by
+    funext i
+    fin_cases i
+    rfl
+  rw [htail]
+  rfl
 
 /-- Intrinsic metric trace of a covariant two-tensor, expressed as the metric
 inner product with the metric tensor itself.  The metric tensor is placed in
@@ -96,18 +106,15 @@ private theorem tensor0SSpace_sum_apply {ι : Type*} [Fintype ι] {x : M} {s : �
       simp
   | insert a S ha ih =>
       rw [Finset.sum_insert ha, Finset.sum_insert ha]
-      change (((T a : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) +
-          (∑ i ∈ S, (T i : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real))) v) =
-        (T a : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) v +
-          ∑ i ∈ S, (T i : ContinuousMultilinearMap Real (fun _ : Fin s => E) Real) v
-      rw [ContinuousMultilinearMap.add_apply, ih]
+      change T a v + (∑ i ∈ S, T i) v = T a v + ∑ i ∈ S, T i v
+      rw [ih]
 
 private theorem tensor0SSpace_smul_apply {x : M} {s : ℕ}
     (c : Real)
     (T : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s x)
     (v : Fin s -> TangentSpace I x) :
     (c • T) v = c * T v := by
-  simp [ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+  rfl
 
 private theorem metricTraceInput_update_first {x : M} {s : ℕ}
     (v : Fin 2 -> TangentSpace I x) (tail : Fin s -> TangentSpace I x)
@@ -662,6 +669,12 @@ theorem trace_sub_le_c0
       (metricTensor0S (I := I) h x -
         metricTensor0S (I := I) g x)
       (vec2 (I := I) (basis i) (basis i))
+    have hsub :
+        (metricTensor0S (I := I) h x - metricTensor0S (I := I) g x)
+            (vec2 (I := I) (basis i) (basis i)) =
+          h.inner x (basis i) (basis i) - g.inner x (basis i) (basis i) := by
+      rfl
+    rw [hsub] at hb
     simpa [c0, metricTensor0S_apply, vec2, hgON] using hb
   have hAComp (i) :
       |A (vec2 (I := I) (basis i) (basis i))| ≤ a0 := by

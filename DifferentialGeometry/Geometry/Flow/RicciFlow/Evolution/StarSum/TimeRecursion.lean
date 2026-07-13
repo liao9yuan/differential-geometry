@@ -405,7 +405,7 @@ private theorem gammaStarU
       | empty => simp
       | insert a s ha ih =>
           rw [Finset.sum_insert ha, Finset.sum_insert ha]
-          simp only [ContMDiffSection.coe_add, Pi.add_apply, ContinuousMultilinearMap.add_apply]
+          simp only [ContMDiffSection.coe_add, Pi.add_apply, Tensor0SSpace.add_apply]
           rw [ih]
     have hTBp : (TB y) (fun p => (hframe.toBasisAt hy) (I0 p)) =
         ∑ q : Fin (4 + k),
@@ -424,7 +424,7 @@ private theorem gammaStarU
       | empty => simp
       | insert a s ha ih =>
           rw [Finset.sum_insert ha, Finset.sum_insert ha]
-          simp only [ContMDiffSection.coe_add, Pi.add_apply, ContinuousMultilinearMap.add_apply]
+          simp only [ContMDiffSection.coe_add, Pi.add_apply, Tensor0SSpace.add_apply]
           rw [ih]
     have hTCp : (TC y) (fun p => (hframe.toBasisAt hy) (I0 p)) =
         ∑ q : Fin (4 + k),
@@ -443,11 +443,11 @@ private theorem gammaStarU
       | empty => simp
       | insert a s ha ih =>
           rw [Finset.sum_insert ha, Finset.sum_insert ha]
-          simp only [ContMDiffSection.coe_add, Pi.add_apply, ContinuousMultilinearMap.add_apply]
+          simp only [ContMDiffSection.coe_add, Pi.add_apply, Tensor0SSpace.add_apply]
           rw [ih]
     simp only [tensor0SComponent_apply, ContMDiffSection.coe_add, Pi.add_apply,
-      ContinuousMultilinearMap.add_apply, ContMDiffSection.coe_smul, Pi.smul_apply,
-      ContinuousMultilinearMap.smul_apply, hTAp, hTBp, hTCp]
+      Tensor0SSpace.add_apply, ContMDiffSection.coe_smul, Pi.smul_apply,
+      Tensor0SSpace.smul_apply, hTAp, hTBp, hTCp]
     rw [Finset.smul_sum, Finset.smul_sum]
     simp only [neg_one_smul]
     rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
@@ -650,7 +650,7 @@ theorem resStarLFU
               rw [hframe.toBasisAt_coe hz i, hframe.toBasisAt_coe hz j]
               exact horthU z hz i j
             rw [huniq, frameComp0S_apply]
-            simp only [tensor0SComponent_apply, ContinuousMultilinearMap.add_apply,
+            simp only [tensor0SComponent_apply, Tensor0SSpace.add_apply,
               ContMDiffSection.coe_add, Pi.add_apply, metricTraceFirstTwoField_apply]
             rw [traceOrthoEq (I := I) (S.base.metric (t : Real)) (hframe.toBasisAt hz) horth_z
               (nablaKRm04Field (I := I) S (t : Real) (k + 2) z) (fun a => frame (m a) z)]

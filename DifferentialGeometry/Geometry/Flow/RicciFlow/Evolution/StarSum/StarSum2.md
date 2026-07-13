@@ -1058,3 +1058,20 @@ StarSum2 metric context.  The exported star-sum surfaces no longer expose that
 extra smoothness spelling.
 
 Verification passed for the edited file.
+
+## 2026-07-12 short-time-existence branch alignment
+
+The merge exposed three representation/API compatibility failures, with no new
+mathematical frontier: `stNabla_starBase` now rewrites `mtIter_add` explicitly
+after the two `domDomCongr` maps distribute over addition; both occurrences of
+`product_fun_apply` now supply the bundle fibre and arity parameters; and the
+double-trace diagonal calculation closes its normalized reflexive goal
+explicitly.
+
+Focused verification and the targeted module refresh passed.  `StarSum2` theorem/machinery remains complete
+(100%); this compatibility repair is complete (100%).  The short-time-existence
+theorem itself remains proved (100%); its branch-alignment verification is about
+99% pending the downstream Hamilton target replay, while the merge commit is
+still 0% until final verification and diff review.  This repair does not change
+the completion percentage of the Hamilton positive-Ricci endpoint or the wider
+HCG compactness theorem.

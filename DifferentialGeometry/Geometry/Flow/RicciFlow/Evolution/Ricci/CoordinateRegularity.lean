@@ -725,6 +725,14 @@ theorem coordNab2Can
       (Finset.univ : Finset Idx) (0 : Fin 3)
       (fun p : Idx => Γ d a p • frame p x0)
       (fun b : Fin 3 => V b x0)
+    change
+      (nablaA x0)
+          (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
+            (∑ p : Idx, Γ d a p • frame p x0)) =
+        ∑ p : Idx,
+          (nablaA x0)
+            (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
+              (Γ d a p • frame p x0)) at hsum
     calc
       nablaA x0
           (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
@@ -737,7 +745,8 @@ theorem coordNab2Can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
                 (Γ d a p • frame p x0)) := by
-          simpa using hsum
+          simpa only [ContinuousMultilinearMap.map_update_smul,
+            Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ = ∑ p : Idx, Γ d a p * N p i j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -769,6 +778,14 @@ theorem coordNab2Can
       (Finset.univ : Finset Idx) (1 : Fin 3)
       (fun p : Idx => Γ d i p • frame p x0)
       (fun b : Fin 3 => V b x0)
+    change
+      (nablaA x0)
+          (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
+            (∑ p : Idx, Γ d i p • frame p x0)) =
+        ∑ p : Idx,
+          (nablaA x0)
+            (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
+              (Γ d i p • frame p x0)) at hsum
     calc
       nablaA x0
           (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
@@ -781,7 +798,8 @@ theorem coordNab2Can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
                 (Γ d i p • frame p x0)) := by
-          simpa using hsum
+          simpa only [ContinuousMultilinearMap.map_update_smul,
+            Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ = ∑ p : Idx, Γ d i p * N a p j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -813,6 +831,14 @@ theorem coordNab2Can
       (Finset.univ : Finset Idx) (2 : Fin 3)
       (fun p : Idx => Γ d j p • frame p x0)
       (fun b : Fin 3 => V b x0)
+    change
+      (nablaA x0)
+          (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
+            (∑ p : Idx, Γ d j p • frame p x0)) =
+        ∑ p : Idx,
+          (nablaA x0)
+            (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
+              (Γ d j p • frame p x0)) at hsum
     calc
       nablaA x0
           (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
@@ -825,7 +851,8 @@ theorem coordNab2Can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
                 (Γ d j p • frame p x0)) := by
-          simpa using hsum
+          simpa only [ContinuousMultilinearMap.map_update_smul,
+            Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ = ∑ p : Idx, Γ d j p * N a i p := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]

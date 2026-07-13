@@ -358,3 +358,20 @@ CURVACT helper) — it was **STALE**.  The proof is pure pointwise component red
 membership proofs (`starSum2_sum`/`StarSum2.base`, lines ~521–533).  The transparency option is **load-bearing**
 for the `StarSum2` structure instance synthesis — this is the bundle/structural class, not pure component-eval.
 Restored.  Focused-check **green** (55.4s).  See `Tensor/RSTensor/ComponentEvalApiPlan.md` (8th pass).
+
+## 2026-07-12 short-time-existence branch alignment
+
+The merge made `Tensor0SSpace` point evaluation opaque at the old underlying
+`ContinuousMultilinearMap` representation.  The finite-sum induction in
+`spatialCommStarSum` now uses the public `Tensor0SSpace.add_apply` theorem
+instead of the representation-level `ContinuousMultilinearMap.add_apply`.
+This is a compatibility repair only; it does not change the star-sum witness or
+the spatial commutator argument.
+
+Focused verification and the targeted module refresh passed.  `spatialCommStarSum` and its dedicated machinery
+remain complete (100%); this compatibility repair is complete (100%).  The
+short-time-existence theorem itself remains proved (100%); branch-alignment
+verification is about 99% pending the downstream Hamilton replay, and the merge
+commit remains 0% until final verification and diff review.  No completion
+percentage of the Hamilton positive-Ricci endpoint or wider HCG compactness
+theorem changes here.

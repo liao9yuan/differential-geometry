@@ -238,8 +238,9 @@ theorem solution_rm04_kn_firstTrace_gform_at
   have h :=
     DifferentialGeometry.Integral.Connection.rm04_kn_gform (I := I)
       (traceData_can (I := I) S horth) X Y Z W
-  simp only [ContinuousMultilinearMap.neg_apply] at h
-  rw [h]; ring
+  simp only [Tensor0SSpace.neg_apply] at h
+  rw [h]
+  ring
 
 /-- **Step 2 — the KN identity as a pointwise field (basis hidden).**  At any time `s`
 and point `x` of a dim-3 solution, the lowered Riemann tensor is the geometric KN
@@ -1174,13 +1175,74 @@ private theorem knField_eq_rm04
     · simpa [DifferentialGeometry.Integral.Connection.vec2] using h0
     · simpa [DifferentialGeometry.Integral.Connection.vec2] using h1
   rw [solution_rm04_kn_all (I := I) S t x (hdim x) v]
-  simp only [knField, knRicT, knScalT,
-    ContMDiffSection.coe_add, Pi.add_apply, ContinuousMultilinearMap.add_apply,
-    ContMDiffSection.coe_smul, Pi.smul_apply, ContinuousMultilinearMap.smul_apply,
-    smul_eq_mul,
-    MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    tensor0SField_product_apply, tensor0SField_smulByFun_apply,
-    metricTensorField_apply, Function.comp_apply]
+  have hadd (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2)) :
+      ((A + B) x) v = A x v + B x v := by
+    rw [ContMDiffSection.coe_add, Pi.add_apply, Tensor0SSpace.add_apply]
+  have hsmul (c : Real)
+      (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) (2 + 2)) :
+      ((c • A) x) v = c * A x v := by
+    rw [ContMDiffSection.coe_smul, Pi.smul_apply, Tensor0SSpace.smul_apply,
+      smul_eq_mul]
+  have hricT (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+      knRicT (I := I) S t e x v =
+        S.ricci t x ((fun i => v (e i)) ∘ Fin.castAdd 2) *
+          (S.base.metric t).inner x
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 0)
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 1) := by
+    unfold knRicT
+    change (ContinuousMultilinearMap.domDomCongr e _) v = _
+    rw [Tensor0SSpace.domDomCongr_apply, tensor0SField_product_apply,
+      metricTensorField_apply, SolutionOn.family_metric]
+  have hscalT (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+      knScalT (I := I) S t e x v =
+        S.scalar t x *
+            (S.base.metric t).inner x
+              (((fun i => v (e i)) ∘ Fin.castAdd 2) 0)
+              (((fun i => v (e i)) ∘ Fin.castAdd 2) 1) *
+          (S.base.metric t).inner x
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 0)
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 1) := by
+    unfold knScalT
+    change (ContinuousMultilinearMap.domDomCongr e _) v = _
+    rw [Tensor0SSpace.domDomCongr_apply, tensor0SField_product_apply,
+      tensor0SField_smulByFun_apply,
+      Tensor0SSpace.smul_apply, smul_eq_mul, metricTensorField_apply,
+      metricTensorField_apply, SolutionOn.family_metric]
+  have hE1 : (fun i : Fin (2 + 2) => v (knE1 i)) =
+      DifferentialGeometry.Integral.Connection.vec4
+        (v 0) (v 2) (v 1) (v 3) := by
+    funext i
+    fin_cases i <;>
+      simp [knE1, DifferentialGeometry.Integral.Connection.vec4,
+        Equiv.swap_apply_def]
+  have hE2 : (fun i : Fin (2 + 2) => v (knE2 i)) =
+      DifferentialGeometry.Integral.Connection.vec4
+        (v 1) (v 2) (v 0) (v 3) := by
+    funext i
+    fin_cases i <;>
+      simp [knE2, DifferentialGeometry.Integral.Connection.vec4,
+        Equiv.swap_apply_def]
+  have hE3 : (fun i : Fin (2 + 2) => v (knE3 i)) =
+      DifferentialGeometry.Integral.Connection.vec4
+        (v 0) (v 3) (v 1) (v 2) := by
+    funext i
+    fin_cases i <;>
+      simp [knE3, DifferentialGeometry.Integral.Connection.vec4,
+        Equiv.swap_apply_def]
+  have hE4 : (fun i : Fin (2 + 2) => v (knE4 i)) =
+      DifferentialGeometry.Integral.Connection.vec4
+        (v 1) (v 3) (v 0) (v 2) := by
+    funext i
+    fin_cases i <;>
+      simp [knE4, DifferentialGeometry.Integral.Connection.vec4,
+        Equiv.swap_apply_def]
+  unfold knField
+  repeat rw [hadd]
+  repeat rw [hsmul]
+  rw [hricT knE1, hricT knE2, hricT knE3, hricT knE4,
+    hscalT knE1, hscalT knE2]
   rw [hric _ 0 2 (by simp [knE1, Equiv.swap_apply_def])
         (by simp [knE1, Equiv.swap_apply_def]),
       hric _ 1 2 (by simp [knE2, Equiv.swap_apply_def])
@@ -1189,7 +1251,8 @@ private theorem knField_eq_rm04
         (by simp [knE3, Equiv.swap_apply_def]),
       hric _ 1 3 (by simp [knE4, Equiv.swap_apply_def])
         (by simp [knE4, Equiv.swap_apply_def])]
-  simp [knE1, knE2, knE3, knE4, Equiv.trans_apply, Equiv.swap_apply_def, Fin.ext_iff]
+  rw [hE1, hE2, hE3, hE4]
+  simp [DifferentialGeometry.Integral.Connection.vec4]
   ring
 
 set_option maxHeartbeats 1000000 in

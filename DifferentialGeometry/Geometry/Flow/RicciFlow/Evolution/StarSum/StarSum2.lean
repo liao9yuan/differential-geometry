@@ -377,7 +377,8 @@ theorem stNabla_starBase
     e₂.trans ((frontExtendEquiv σ).trans ρ), ?_⟩
   rw [heq]
   simp only [MultilinearSection.domDomCongr_add, MultilinearSection.domDomCongr_trans,
-    Equiv.trans_assoc, mtIter_add, starBaseField]
+    Equiv.trans_assoc, starBaseField]
+  rw [mtIter_add]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Brick 3: the star-sum class is closed under `∇`.**  The level steps `k ↦ k+1`. -/
@@ -529,6 +530,8 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   | zero =>
       intro mm
       have hpf := Bundle.continuousMultilinearMap.product_fun_apply
+        (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
+        (s := 4 + a) (q := 4 + b) (x := x)
         (nablaKRm04Field (I := I) S t a x) (nablaKRm04Field (I := I) S t b x)
         (fun q => basis (mm q))
       refine le_trans (le_of_eq (congrArg abs hpf)) ?_
@@ -543,6 +546,8 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   | succ r ih =>
       intro mm
       have hpf := Bundle.continuousMultilinearMap.product_fun_apply
+        (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
+        (s := (4 + a) + (4 + b) + 2 * r) (q := 2) (x := x)
         (starProd (I := I) S t a b r x)
         (metricTensorField (I := I) (S.family.metric t) x)
         (fun q => basis (mm q))
@@ -708,6 +713,7 @@ theorem starBase_comp_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   -- fold the `j`-trace input as `basis ∘ mIdx`, apply the inner trace, then unfold back
   obtain ⟨mIdx, hmIdx⟩ := mtInputBasis (I := I) basis j j m
   rw [hmIdx, mtfDiag (I := I) (S.family.metric t) basis horth A mIdx, ← hmIdx]
+  rfl
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Product evaluation of a base star term** (r = 0): the double-trace diagonal sum with

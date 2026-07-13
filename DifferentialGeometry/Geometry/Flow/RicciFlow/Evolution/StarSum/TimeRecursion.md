@@ -1504,3 +1504,20 @@ time-side inputs, not this equivalent smoothness spelling.
 
 Verification passed for the edited file.
 
+## 2026-07-12 short-time-existence branch alignment
+
+The merge made point evaluation through the old
+`ContinuousMultilinearMap` representation opaque.  The finite-sum component
+expansions and the induction-step trace comparison now use the public
+`Tensor0SSpace.add_apply` and `Tensor0SSpace.smul_apply` theorems.  Five
+representation-level rewrites in the same proof block were replaced together;
+the definitions, witnesses, and mathematical statements are unchanged.
+
+Focused verification and the targeted module refresh passed.  The all-order `resStarLFU` endpoint remains
+complete and sorry-free (100%), and this compatibility repair is complete
+(100%).  The short-time-existence theorem itself remains proved (100%);
+branch-alignment verification is about 99% pending the downstream Hamilton
+replay, and the merge commit remains 0% until final verification and diff
+review.  This repair does not change the completion percentage of the Hamilton
+positive-Ricci endpoint or wider HCG compactness theorem.
+

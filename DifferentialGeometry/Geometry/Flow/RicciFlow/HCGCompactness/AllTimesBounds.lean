@@ -1299,7 +1299,8 @@ theorem metricCov2_coord
               (fun p : Idx =>
                 DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p •
                   frame p x) slots
-          simpa [A, slots] using hsum
+          simpa [A, slots, ContinuousMultilinearMap.map_update_smul,
+            Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d a p *
@@ -1398,7 +1399,8 @@ theorem metricCov2_coord
               (fun p : Idx =>
                 DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p •
                   frame p x) slots
-          simpa [A, slots] using hsum
+          simpa [A, slots, ContinuousMultilinearMap.map_update_smul,
+            Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d b p *
@@ -1497,7 +1499,8 @@ theorem metricCov2_coord
               (fun p : Idx =>
                 DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p •
                   frame p x) slots
-          simpa [A, slots] using hsum
+          simpa [A, slots, ContinuousMultilinearMap.map_update_smul,
+            Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x d c p *
@@ -1734,7 +1737,8 @@ theorem metricCov3_coord
               (fun p : Idx =>
                 DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p •
                   frame p x) slotsT
-          simpa [A, slotsT] using hsum
+          simpa [A, slotsT, ContinuousMultilinearMap.map_update_smul,
+            Tensor0SBundle.Tensor0SSpace.map_update_smul, smul_eq_mul] using hsum
       _ =
         ∑ p : Idx,
           DifferentialGeometry.Tensor.Coordinates.christoffelSymbolInFrame cov frame hframe1 x m (slot r) p *
@@ -2666,7 +2670,15 @@ theorem covOneCompDiff
           else ((CovariantDerivative.difference covH covG x) (Z x)) (X x))
     have hraw : 0 - N = -(T1 + T2) := by
       rw [hzero] at hsub
-      simpa [slots, N, T1, T2] using hsub
+      let NG := Tensor0SBundle.nabla0SFun (𝕜 := Real) (E := E) (H := H)
+        (I := I) (M := M) 2 covG X alpha x
+      change ((0 - NG) slots = _) at hsub
+      rw [show (0 - NG) = 0 + -NG by exact sub_eq_add_neg 0 NG,
+        Tensor0SBundle.Tensor0SSpace.add_apply,
+        Tensor0SBundle.Tensor0SSpace.zero_apply, zero_add,
+        show -NG = (-1 : Real) • NG by exact (neg_one_smul Real NG).symm,
+        Tensor0SBundle.Tensor0SSpace.smul_apply, neg_one_smul] at hsub
+      simpa [slots, N, T1, T2, NG] using hsub
     have hN : N = T1 + T2 := by
       linarith
     simpa [slots, N, T1, T2] using hN

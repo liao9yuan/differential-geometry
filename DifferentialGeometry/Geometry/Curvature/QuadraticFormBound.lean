@@ -39,8 +39,9 @@ private theorem tensor02_vec2_smul
   have hfun :
       vec2 (I := I) (c • v) (c • v) = fun a : Fin 2 => c • vec2 (I := I) v v a := by
     funext a; fin_cases a <;> simp [vec2]
-  rw [hfun, ContinuousMultilinearMap.map_smul_univ]
-  simp [Finset.prod_const, smul_eq_mul]
+  rw [hfun]
+  have hmap := Q.map_smul_univ (fun _ : Fin 2 => c) (vec2 (I := I) v v)
+  simpa [Fin.prod_univ_two, pow_two, smul_eq_mul] using hmap
 
 /-- Quadratic homogeneity of the metric: `g(c•v, c•v) = c² · g(v, v)`. -/
 private theorem metric_inner_smul_self
@@ -98,9 +99,10 @@ theorem tensor02_quadForm_abs_le_of_unit_bound
   rw [abs_le]
   refine ⟨?_, ?_⟩
   · have h := tensor02_quadForm_le_of_unit_bound g (-Q) (Λ := Λ) ?_ v
-    · rw [ContinuousMultilinearMap.neg_apply] at h; linarith
+    · change -(Q (vec2 (I := I) v v)) ≤ Λ * g.inner x v v at h
+      linarith
     · intro u hu
-      rw [ContinuousMultilinearMap.neg_apply]
+      change -(Q (vec2 (I := I) u u)) ≤ Λ
       exact le_trans (neg_le_abs _) (hunit u hu)
   · refine tensor02_quadForm_le_of_unit_bound g Q (Λ := Λ) ?_ v
     intro u hu

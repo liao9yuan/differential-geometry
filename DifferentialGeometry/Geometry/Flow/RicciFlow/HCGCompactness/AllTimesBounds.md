@@ -1,5 +1,11 @@
 # AllTimesBounds
 
+## 2026-07-12 — short-time branch alignment
+
+- Four frame-sum proofs now use both the underlying multilinear slot-linearity theorem and the opaque `Tensor0SSpace` projection theorem.
+- The connection-difference sign calculation now normalizes tensor negation before scalar evaluation.
+- Focused verification passed without `sorry`; this repairs consumer compatibility and does not change the HCG theorem frontier.
+
 ## Source
 
 This file follows MSM135 Chapter 3, Lemma 3.11, "Derivative of metric bounds

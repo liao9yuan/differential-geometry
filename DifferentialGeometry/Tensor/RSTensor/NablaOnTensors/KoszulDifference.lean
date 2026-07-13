@@ -108,10 +108,14 @@ theorem nabla_metric_two_term
     (metricTensorField (I := I) g) x
   have hzero := nabla_metric_zero (I := I) cov g hmc X x
   rw [hzero] at hsub
-  simp only [ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.zero_apply,
-    metricTensorField_apply] at hsub
-  simp only [if_true, show ((1 : Fin 2) = 0) = False from by simp, if_false] at hsub
-  linarith [hsub]
+  let N := nabla0SFun 2 cov' X (metricTensorField (I := I) g) x
+  rw [show (0 - N) = 0 + -N by rw [sub_eq_add_neg], Tensor0SSpace.add_apply,
+    Tensor0SSpace.zero_apply, zero_add,
+    show -N = (-1 : ℝ) • N by rw [neg_one_smul], Tensor0SSpace.smul_apply,
+    neg_one_smul] at hsub
+  simp only [metricTensorField_apply, if_true,
+    show ((1 : Fin 2) = 0) = False from by simp, if_false] at hsub
+  exact neg_injective hsub
 
 /-- **The Koszul formula for the connection difference**: for `cov`
 metric-compatible with `g` and BOTH connections torsion-free at `x`,

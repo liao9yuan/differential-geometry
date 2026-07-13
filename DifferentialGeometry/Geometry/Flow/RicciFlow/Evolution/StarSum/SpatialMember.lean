@@ -657,7 +657,7 @@ theorem spatialCommStarSum
           simp
       | insert a Sset ha ih =>
           rw [Finset.sum_insert ha, Finset.sum_insert ha]
-          simp only [ContMDiffSection.coe_add, Pi.add_apply, ContinuousMultilinearMap.add_apply]
+          simp only [ContMDiffSection.coe_add, Pi.add_apply, Tensor0SSpace.add_apply]
           rw [ih]
           by_cases ha0 : a.val = 0 <;> simp [ha0]
     have hsplit :

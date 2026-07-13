@@ -51,7 +51,7 @@ private def connTraceEvalLin
           (extChartAt I x x))
       (A β) Fin.elim0
   map_add' β γ := by
-    simp only [metricTrace0S2InBasis, map_add, ContinuousMultilinearMap.add_apply]
+    simp only [metricTrace0S2InBasis, map_add, Tensor0SSpace.add_apply]
     rw [← Finset.sum_add_distrib]
     apply Finset.sum_congr rfl
     intro i _
@@ -60,7 +60,7 @@ private def connTraceEvalLin
     intro j _
     ring_nf
   map_smul' c β := by
-    simp only [metricTrace0S2InBasis, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+    simp only [metricTrace0S2InBasis, map_smul, Tensor0SSpace.smul_apply, smul_eq_mul]
     rw [Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro i _

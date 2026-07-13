@@ -329,16 +329,8 @@ theorem nablaRic_ein3
             simp [df3, dScalarSec]
       _ = (1 / 3 : Real) * extDerivFun (I := I) scalar y v := by
             rw [DifferentialGeometry.Integral.Connection.differential1FormFun_apply_eq_extDerivFun]
-      _ = extDerivFun (I := I) f3 y v := by
-            simpa [f3, Pi.smul_apply, smul_eq_mul] using hv.symm
-  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H)
-    (I := I) (M := M) (s := 2)
-  letI := tensor0SBundle_fiber (𝕜 := Real) (E := E) (H := H)
-    (I := I) (M := M) (s := 2)
-  letI := tensor0SBundle_vector (𝕜 := Real) (E := E) (H := H)
-    (I := I) (M := M) (s := 2)
-  letI := tensor0SBundle_smooth (𝕜 := Real) (E := E) (H := H)
-    (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
+       _ = extDerivFun (I := I) f3 y v := by
+             simpa [f3, Pi.smul_apply, smul_eq_mul] using hv.symm
   have hRicEq : Ric = smulSec := by
     apply DFunLike.ext
     intro y
@@ -349,10 +341,21 @@ theorem nablaRic_ein3
       fin_cases i <;> rfl
     have hEin_y := hEin y (slots 0) (slots 1)
     rw [hslots]
+    change metricRicciAt (I := I) (M := M) g y
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) (slots 0) (slots 1)) =
+      f3 y * metricSec y
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) (slots 0) (slots 1))
     simpa [Ric, smulSec, metricSec, f3, scalar, metricRicci_apply,
-      tensor0SField_smulByFun_apply, ContinuousMultilinearMap.smul_apply,
       smul_eq_mul, metricTensorField_apply, DifferentialGeometry.Integral.Connection.vec2, div_eq_mul_inv,
       mul_assoc, mul_comm, mul_left_comm] using hEin_y
+  letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (s := 2)
+  letI := tensor0SBundle_fiber (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (s := 2)
+  letI := tensor0SBundle_vector (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (s := 2)
+  letI := tensor0SBundle_smooth (𝕜 := Real) (E := E) (H := H)
+    (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) (s := 2)
   let X : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M -> Type _) :=
     (ContMDiffSection.exists_eq_at_gen
       (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x A).choose
@@ -416,8 +419,9 @@ theorem nablaRic_ein3
       funext i
       fin_cases i <;> rfl
     rw [hleft, hright]
-    simp [df3, dScalarSec, metricSec, slots, metricTensorField_apply,
-      DifferentialGeometry.Integral.Connection.vec2, DifferentialGeometry.Integral.Connection.vec2, mul_assoc]
+    simp only [df3, tensor0SField_smulByFun_apply]
+    change ((1 / 3 : Real) * dScalarSec x (fun _ : Fin 1 => A)) * metricSec x slots = _
+    simp [dScalarSec, metricSec, slots, DifferentialGeometry.Integral.Connection.vec2, mul_assoc]
   calc
     totalNabla0SFun (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := M) 2 cov Ric x (DifferentialGeometry.Integral.Connection.vec3 (I := I) A B C)

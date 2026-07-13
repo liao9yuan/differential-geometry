@@ -73,10 +73,9 @@ theorem totalNabla0SFun_smul {s : ℕ}
     | zero => rw [Fin.cons_zero]; exact hX.symm
     | succ j => rw [Fin.cons_succ]
   rw [component0S_apply, component0S_apply, hcons]
-  simp only [ContinuousMultilinearMap.smul_apply]
-  rw [totalNabla0SFun_apply_section, totalNabla0SFun_apply_section,
-    nabla0SFun_smul]
-  simp only [ContinuousMultilinearMap.smul_apply]
+  rw [Tensor0SSpace.smul_apply, totalNabla0SFun_apply_section,
+    totalNabla0SFun_apply_section, nabla0SFun_smul]
+  rw [Tensor0SSpace.smul_apply]
 
 /-- The total covariant derivative of a covariant tensor field is additive in the
 tensor argument. -/
@@ -113,9 +112,8 @@ theorem totalNabla0SFun_add {s : ℕ}
     | zero => rw [Fin.cons_zero]; exact hX.symm
     | succ j => rw [Fin.cons_succ]
   rw [component0S_apply, component0S_apply, hcons]
-  simp only [ContinuousMultilinearMap.add_apply]
-  rw [totalNabla0SFun_apply_section, totalNabla0SFun_apply_section,
-    totalNabla0SFun_apply_section, nabla0SFun_add]
-  simp only [ContinuousMultilinearMap.add_apply]
+  rw [Tensor0SSpace.add_apply, totalNabla0SFun_apply_section,
+    totalNabla0SFun_apply_section, totalNabla0SFun_apply_section, nabla0SFun_add]
+  rw [Tensor0SSpace.add_apply]
 
 end Tensor0SBundle
