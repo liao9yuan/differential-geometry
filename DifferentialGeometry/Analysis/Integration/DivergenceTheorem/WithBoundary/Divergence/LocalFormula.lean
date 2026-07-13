@@ -30,7 +30,7 @@ def localDivergenceWithin (g : SmoothRiemannianMetric I M)
           (extChartAt I α x))
       / chartDensity (I := I) g α x
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma localDivergenceWithin_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -54,7 +54,7 @@ lemma extChartAt_mem_interior_target_of_isInteriorPoint
       (chart_mem_atlas H α) hx_src).1 hx_int
   exact h
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem localDivergenceWithin_eq_localDivergence_of_isInteriorPoint
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -88,7 +88,7 @@ theorem localDivergenceWithin_eq_localDivergence_of_isInteriorPoint
       hy_int
   rw [localDivergenceWithin_def, localDivergence_def, hsum]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma partialDerivWithin_chartCoeffOnE_mul_chartDensityOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -114,7 +114,7 @@ private lemma extChartAt_contMDiffOn_chartAt_source (α : M) :
     ContMDiffOn I 𝓘(ℝ, E) ∞ (extChartAt I α : M → E) (chartAt H α).source :=
   contMDiffOn_extChartAt (I := I) (x := α)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [IsManifold I ∞ M] in
 private lemma extChartAt_mapsTo_target (α : M) :
     Set.MapsTo (extChartAt I α : M → E) (chartAt H α).source
       (extChartAt I α).target := by
@@ -123,7 +123,7 @@ private lemma extChartAt_mapsTo_target (α : M) :
     rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
   exact (extChartAt I α).map_source hx'
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma localDivergenceWithin_summand_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -160,7 +160,7 @@ lemma localDivergenceWithin_summand_contMDiffOn
     fun x hx => extChartAt_mapsTo_target (I := I) α hx
   exact hpartialM.comp hchart hsubset
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 lemma localDivergenceWithin_numerator_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -176,19 +176,19 @@ lemma localDivergenceWithin_numerator_contMDiffOn
   contMDiffOn_finset_sum
     (fun i _ => localDivergenceWithin_summand_contMDiffOn (I := I) g α X i)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma chartDensity_contMDiffOn_chartAt_source
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContMDiffOn I 𝓘(ℝ) ∞ (chartDensity (I := I) g α) (chartAt H α).source :=
   chartDensity_contMDiffOn (I := I) g α
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 private lemma chartDensity_ne_zero_on_chartAt_source
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ x ∈ (chartAt H α).source, chartDensity (I := I) g α x ≠ 0 :=
   fun _ hx => ne_of_gt (chartDensity_pos (I := I) g α hx)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem localDivergenceWithin_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -209,7 +209,7 @@ theorem localDivergenceWithin_contMDiffOn
     chartDensity_contMDiffOn_chartAt_source (I := I) g α
   exact hnum.div₀ hden (chartDensity_ne_zero_on_chartAt_source (I := I) g α)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 theorem localDivergenceWithin_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

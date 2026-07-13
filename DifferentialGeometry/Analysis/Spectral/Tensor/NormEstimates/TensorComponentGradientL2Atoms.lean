@@ -54,6 +54,7 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)

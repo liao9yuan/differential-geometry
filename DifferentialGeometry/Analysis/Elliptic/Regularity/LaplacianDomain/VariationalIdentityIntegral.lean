@@ -50,7 +50,7 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledWeightedMeasure_lt_top_of_compact_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -85,7 +85,7 @@ private lemma chartPulledWeightedMeasure_lt_top_of_compact_subset
     rw [hKne, measure_empty]
     exact ENNReal.zero_lt_top
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartPulledWeightedMeasure_restrict_lt_top_of_compact_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -98,7 +98,7 @@ private lemma chartPulledWeightedMeasure_restrict_lt_top_of_compact_subset
   exact chartPulledWeightedMeasure_lt_top_of_compact_subset
     (I := I) (M := M) g α hK_compact hK_in
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ} (hf_cont : Continuous f) (hf_cs : HasCompactSupport f)
@@ -160,7 +160,7 @@ private lemma principalMultiplier_eq_zero_off_tsupport
   refine Finset.sum_eq_zero (fun j _ => ?_)
   rw [h_fder_zero, mul_zero]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma principalMultiplier_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -181,7 +181,7 @@ private lemma principalMultiplier_continuousOn
     (hψ1.continuous_fderiv (by norm_cast)).clm_apply continuous_const
   exact h_inv.mul h_fder.continuousOn
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma principalMultiplier_continuous
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -242,6 +242,7 @@ private noncomputable def principalMultiplierLp
     (principalMultiplier_hasCompactSupport (I := I) (M := M) g α i hψ_cs)
     (principalMultiplier_tsupport_subset (I := I) (M := M) g α i hψ_supp)).toLp _
 
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma principalMultiplierLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -266,7 +267,7 @@ private noncomputable def massMultiplierLp
   (continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (I := I) (M := M) g α hψ.continuous hψ_cs hψ_supp).toLp _
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma massMultiplierLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}
@@ -281,7 +282,7 @@ private lemma massMultiplierLp_coeFn
   unfold massMultiplierLp
   exact MemLp.coeFn_toLp _
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma densityOnEuclid_aemeasurable_restrict_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     AEMeasurable (fun y : EuclN => ENNReal.ofReal (densityOnEuclid (I := I) g α y))
@@ -300,7 +301,7 @@ private lemma densityOnEuclid_lt_top_ae_restrict_chartTarget
       ENNReal.ofReal (densityOnEuclid (I := I) g α y) < ⊤ :=
   Filter.Eventually.of_forall (fun _ => ENNReal.ofReal_lt_top)
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
     (g : SmoothRiemannianMetric I M) (α : M) (f : EuclN → ℝ) :
     ∫ y in chartTargetEuclid (I := I) (M := M) α, f y
@@ -325,7 +326,7 @@ lemma setIntegral_chartPulledWeighted_eq_setIntegral_density_mul_volume
       (ENNReal.ofReal (densityOnEuclid (I := I) g α y)).toReal * f y from rfl]
   rw [this]
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma smooth_lhs_principal_per_i_integral_eq_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -378,6 +379,7 @@ private lemma smooth_lhs_principal_per_i_integral_eq_weighted
     (fun y => principalMultiplier (I := I) (M := M) g α i ψ y *
       chartPushedPartial (I := I) (M := M) g α i v y)]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_principal_per_i_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -565,7 +567,7 @@ lemma chartPushedLpFromLp_tendsto
     simpa using h_comp
   exact h_toReal_tendsto
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] in
 private lemma smooth_lhs_mass_integral_eq_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (v : SmoothScalar g) (ψ : EuclN → ℝ) :
@@ -728,6 +730,7 @@ private lemma smooth_lhs_mass_eq_inner
             (chartTargetEuclid (I := I) (M := M) α))) : EuclN → ℝ) y) from rfl]
   rw [h_ψy, h_Cy]
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma smooth_lhs_principal_per_i_tendsto
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -860,6 +863,7 @@ private lemma smooth_lhs_mass_tendsto
     funext h_per_n]
   exact h_inner_tendsto
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma general_lhs_principal_per_i_eq_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {ψ : EuclN → ℝ}
@@ -1061,6 +1065,7 @@ private lemma general_lhs_principal_full_integrand_pointwise
   rw [← Finset.sum_mul, ← Finset.mul_sum]
   ring
 
+omit [NeZero (Module.finrank ℝ E)] in
 private lemma general_lhs_principal_eq_sum_inner
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ}

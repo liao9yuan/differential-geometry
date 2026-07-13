@@ -266,6 +266,7 @@ private lemma pou_mul_sqrt_sum_continuousOn_chart_source
     Real.continuous_sqrt.comp_continuousOn h_sumsq
   exact h_pou_on.mul h_sqrt
 
+set_option linter.unusedSectionVars false in
 private lemma pou_mul_sqrt_sum_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) :
@@ -415,6 +416,7 @@ private lemma triv_continuousLinearMapAt_chart_cov_eq_chartRSTwistInv
     (tensorCovDerivAt (I := I) (M := M) g r s S b
       (chartBasisVecFiber (I := I) α k b))
 
+set_option linter.unusedSectionVars false in
 private lemma pou_mul_sqrt_sum_triv_chart_cov_eq_pou_mul_sqrt_sum_chartRSTwistInv
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) (b : M) :

@@ -56,6 +56,7 @@ private lemma pouTsupport_measurableSet_meas (α : M) :
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).measurableSet
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -78,6 +79,7 @@ private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
   exact scalarOnE_extChartAt (I := I) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hb_ext
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)

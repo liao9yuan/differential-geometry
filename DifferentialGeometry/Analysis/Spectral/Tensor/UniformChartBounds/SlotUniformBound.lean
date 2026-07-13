@@ -44,6 +44,7 @@ private lemma section_norm_eq_toFun_norm
     (S : SmoothCcTensor g r s) (b : M) :
     ‖S.toSection b‖ = ‖S.toFun b‖ := rfl
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tsupport_chartAtlasPOU_subset_chartAt_source (α : M) :
     tsupport (fun x : M =>

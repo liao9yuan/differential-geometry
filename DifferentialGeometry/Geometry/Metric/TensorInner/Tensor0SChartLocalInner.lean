@@ -42,9 +42,6 @@ open DifferentialGeometry.Integral.Measure (chartGramMatrix
   chartGramMatrix_entry_contMDiffOn chartGramMatrix_det_contMDiffOn
   chartBasisVecFiber chartBasisVec)
 
-variable {n : ℕ}
-
-set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_adjugate_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -96,7 +93,6 @@ private lemma chartGramMatrix_adjugate_entry_contMDiffOn
     rw [heq]
     exact chartGramMatrix_entry_contMDiffOn (I := I) g α (σ k) k
 
-set_option linter.unusedSectionVars false in
 lemma chartGramMatrix_inv_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -138,14 +134,12 @@ noncomputable def chartTensorInnerPointwise_0s :
             (S.curryLeft ((chartModelBasis E) i))
             (T.curryLeft ((chartModelBasis E) j))
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_zero
     (g : SmoothRiemannianMetric I M) (α b : M)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
     chartTensorInnerPointwise_0s (I := I) (M := M) 0 g α b S T =
       S (fun i => Fin.elim0 i) * T (fun i => Fin.elim0 i) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_succ
     (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ) :
@@ -156,7 +150,6 @@ lemma chartTensorInnerPointwise_0s_succ
             (S.curryLeft ((chartModelBasis E) i))
             (T.curryLeft ((chartModelBasis E) j)) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ) (S T : Tensor0SModel s ℝ E),
@@ -201,7 +194,6 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn
           (S.curryLeft ((chartModelBasis E) i))
           (T.curryLeft ((chartModelBasis E) j))
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_add_left
     (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
     (S₁ S₂ T : Tensor0SModel s ℝ E) :
@@ -232,7 +224,6 @@ lemma chartTensorInnerPointwise_0s_add_left
       rw [hcurry, ih]
       ring
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_smul_left
     (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
     (c : ℝ) (S T : Tensor0SModel s ℝ E) :
@@ -260,7 +251,6 @@ lemma chartTensorInnerPointwise_0s_smul_left
       rw [hcurry, ih]
       ring
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_add_right
     (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
     (S T₁ T₂ : Tensor0SModel s ℝ E) :
@@ -291,7 +281,6 @@ lemma chartTensorInnerPointwise_0s_add_right
       rw [hcurry, ih]
       ring
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_smul_right
     (g : SmoothRiemannianMetric I M) (α b : M) (s : ℕ)
     (c : ℝ) (S T : Tensor0SModel s ℝ E) :

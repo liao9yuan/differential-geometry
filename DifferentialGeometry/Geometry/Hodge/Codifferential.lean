@@ -25,14 +25,13 @@ def codifferentialOfVectorField [I.Boundaryless] [T2Space M]
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
   fun y => -divergence_g (I := I) g X y
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma codifferentialOfVectorField_def [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
     codifferentialOfVectorField (I := I) g X y =
       -divergence_g (I := I) g X y := rfl
 
-set_option linter.unusedSectionVars false in
 theorem codifferentialOfVectorField_contMDiff [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -43,7 +42,6 @@ theorem codifferentialOfVectorField_contMDiff [I.Boundaryless] [T2Space M]
     hdiv.neg
   exact hneg
 
-set_option linter.unusedSectionVars false in
 theorem codifferentialOfVectorField_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -55,7 +53,6 @@ theorem codifferentialOfVectorField_add [I.Boundaryless] [T2Space M]
   rw [divergence_g_add (I := I) g X Y y]
   ring
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem codifferentialOfVectorField_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (y : M) :
     codifferentialOfVectorField (I := I) g
@@ -70,14 +67,13 @@ def formLaplacianScalar [I.Boundaryless] [T2Space M]
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) : M → ℝ :=
   codifferentialOfVectorField (I := I) g (grad_g (I := I) g hf)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] in
 @[simp] lemma formLaplacianScalar_def [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
     formLaplacianScalar (I := I) g hf y =
       codifferentialOfVectorField (I := I) g (grad_g (I := I) g hf) y := rfl
 
-set_option linter.unusedSectionVars false in
 theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (y : M) :
@@ -88,14 +84,12 @@ theorem formLaplacianScalar_eq_neg_Δ_g [I.Boundaryless] [T2Space M]
   rw [codifferentialOfVectorField_def (I := I) g (grad_g (I := I) g hf) y]
   rw [DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def (I := I) g hf y]
 
-set_option linter.unusedSectionVars false in
 theorem formLaplacianScalar_contMDiff [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContMDiff I 𝓘(ℝ) ∞ (formLaplacianScalar (I := I) g hf) :=
   codifferentialOfVectorField_contMDiff (I := I) g (grad_g (I := I) g hf)
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem formLaplacianScalar_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (h0 : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => (0 : ℝ))) (y : M) :
@@ -116,7 +110,6 @@ set_option linter.unusedSectionVars false in
   rw [divergence_g_zero (I := I) g y]
   exact neg_zero
 
-set_option linter.unusedSectionVars false in
 theorem formLaplacianScalar_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}

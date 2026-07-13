@@ -649,6 +649,7 @@ private lemma chartPulledIntegralCLM_density_ψ_smoothToLp_eq_setIntegral
     (I := I) (M := M) α v.toFun hy]
   ring
 
+set_option linter.unusedSectionVars false in
 private lemma psi_memLp_chartPulledWeighted
     (g : SmoothRiemannianMetric I M) (α : M)
     {ψ : EuclN → ℝ} (hψ : ContDiff ℝ (⊤ : ℕ∞) ψ)
@@ -663,6 +664,7 @@ private lemma psi_memLp_chartPulledWeighted
   continuous_compactSupport_memLp_chartPulledWeighted_restrict
     (I := I) (M := M) g α hψ.continuous hψ_cs hψ_supp
 
+set_option linter.unusedSectionVars false in
 private lemma setIntegral_density_eq_integral_weighted
     (g : SmoothRiemannianMetric I M) (α : M)
     (f ψ : EuclN → ℝ) :
