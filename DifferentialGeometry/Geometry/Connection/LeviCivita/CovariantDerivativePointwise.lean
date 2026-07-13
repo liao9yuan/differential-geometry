@@ -2,7 +2,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Metric.Defs
 import DifferentialGeometry.Geometry.Connection.MLieBracket
 import DifferentialGeometry.Geometry.Connection.LeviCivita.PullbackConnection
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivative
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Defs
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Koszul
 

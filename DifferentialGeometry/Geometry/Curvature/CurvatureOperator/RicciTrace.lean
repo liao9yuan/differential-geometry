@@ -1,4 +1,3 @@
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.Riemann
 import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
 import DifferentialGeometry.Geometry.Connection.MLieBracket
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.RicciConnection

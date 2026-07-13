@@ -3,7 +3,6 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.LeviCivita
 import DifferentialGeometry.Geometry.Connection.MLieBracket
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivative
 import DifferentialGeometry.Geometry.Connection.LeviCivita.CovariantDerivativePointwise
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
 import DifferentialGeometry.Geometry.Flow.LieDerivativeMetric

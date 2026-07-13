@@ -1622,8 +1622,6 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFo
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.EvaluationFormProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Formula
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.ChainRule
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Conjugation.Riemann
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.CovariantDerivative
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Naturality.LieDerivativeMetric
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.PushforwardVF
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.TimeDerivativeChainRule
