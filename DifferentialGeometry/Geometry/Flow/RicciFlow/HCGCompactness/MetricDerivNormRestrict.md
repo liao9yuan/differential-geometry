@@ -1,5 +1,12 @@
 # MetricDerivNormRestrict
 
+## 2026-07-13 short-time alignment
+
+The pointwise difference-tower restriction proof now evaluates subtraction
+with the public `Tensor0SSpace.sub_apply` theorem instead of rewriting the
+underlying multilinear-map representation.  Its public statement is unchanged,
+and focused verification passed without warnings.
+
 ## 2026-06-21
 
 This file isolates the open-subtype restriction bridge needed between fixed-window

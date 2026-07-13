@@ -251,6 +251,130 @@ variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- The actual selected center satisfies the readout equation on an explicit
+branch readout domain once its inverse vectors lie in the named realized-exp
+radius. -/
+theorem centerReadoutB_zero
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι] (mu : ι -> Real) (xi : ι -> E)
+    (join : M -> M -> Real -> M) (r : Real)
+    (h : CenterInput (I := I) g mu
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
+      join p r)
+    (hcenter : centerOfMass (I := I) g mu
+      (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
+      join p r h ∈ (NormalCoordinates.normalChartAt (I := I) g p).source)
+    (hdiff :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, MDifferentiableAt I 𝓘(Real, Real)
+        (CenterOfMass.halfSqDist
+          ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)))
+        (centerOfMass (I := I) g mu
+          (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+          join p r h))
+    (hsrc :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i) ∈
+        (NormalCoordinates.normalChartAt (I := I) g
+          (centerOfMass (I := I) g mu
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+            join p r h)).source)
+    (hsmall :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i) ≠
+          centerOfMass (I := I) g mu
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+            join p r h ->
+        Real.sqrt
+          (g.inner
+            (centerOfMass (I := I) g mu
+              (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+              join p r h)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerOfMass (I := I) g mu
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+                join p r h)
+              ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E)
+            (NormalCoordinates.normalChartAt (I := I) g
+              (centerOfMass (I := I) g mu
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+                join p r h)
+              ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E)) <
+          centerOfMass.eqnRadius (I := I) h)
+    (hread : ∀ i,
+      (centerOfMass (I := I) g mu
+          (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+          join p r h,
+        (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) ∈ B.readDom)
+    (hreal : ∀ i,
+      Real.sqrt
+        (g.inner
+          (centerOfMass (I := I) g mu
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+            join p r h)
+          (B.inv
+            (centerOfMass (I := I) g mu
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+                join p r h,
+              (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).snd
+          (B.inv
+            (centerOfMass (I := I) g mu
+                (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+                join p r h,
+              (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))).snd) <
+        expDiffeoRadius (I := I) g hEnorm
+          (centerOfMass (I := I) g mu
+            (fun j => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi j))
+            join p r h)) :
+    chartCmEqnB (I := I) g hEnorm p B
+      (NormalCoordinates.normalChartAt (I := I) g p
+        (centerOfMass (I := I) g mu
+          (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
+          join p r h))
+      (mu, xi) = 0 := by
+  let c := centerOfMass (I := I) g mu
+    (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
+    join p r h
+  obtain ⟨i₀, _⟩ := h.μ_pos
+  have hbase : c ∈ (trivializationAt E (TangentSpace I) p).baseSet := by
+    simpa only [c] using (hread i₀).2
+  have hpt (i : ι) :
+      B.inv (c, (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) =
+        (⟨c, (show TangentSpace I c from
+          (NormalCoordinates.normalChartAt (I := I) g c
+            ((NormalCoordinates.normalChartAt (I := I) g p).symm (xi i)) : E))⟩ :
+          TangentBundle I M) := by
+    exact B.inv_eq_normal_lt (hread i).1 (hreal i)
+  have hbook := centerOfMass.expInv_eqn_of_lt (I := I) h hdiff hsrc hsmall
+  have hreadout := (readoutB_zero_iff (I := I) g hEnorm p B mu c
+    (fun i => (NormalCoordinates.normalChartAt (I := I) g p).symm (xi i))
+    hbase hpt).2 hbook
+  have hdecode : (NormalCoordinates.normalChartAt (I := I) g p).symm
+      (NormalCoordinates.normalChartAt (I := I) g p c) = c :=
+    (NormalCoordinates.normalChartAt (I := I) g p).left_inv hcenter
+  unfold chartCmEqnB
+  rw [hdecode]
+  exact hreadout
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- The actual selected center satisfies the chart readout equation under the
 named geometric small-domain conditions.  The equation is produced by
 `centerOfMass.expInv_eqn_of_lt` and transported to the fixed trivialization by
@@ -387,6 +511,48 @@ theorem centerReadout_zero
 omit [T3Space M] in
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- Specialize compact pinned-root gluing to the center equation associated to
+an explicit selected inverse branch. -/
+theorem existsCmExtensionB
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (D : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι]
+    {A B : Set ((ι -> Real) × (ι -> E))} (hA : IsCompact A) (hAB : A ⊆ B)
+    (c : ((ι -> Real) × (ι -> E)) -> E) (hc : ContinuousOn c B)
+    (hzero : ∀ params ∈ B,
+      chartCmEqnB (I := I) g hEnorm p D (c params) params = 0)
+    (hjoint : ∀ params ∈ A, ContDiffAt Real 1
+      (fun w : E × ((ι -> Real) × (ι -> E)) =>
+        chartCmEqnB (I := I) g hEnorm p D w.1 w.2) (c params, params))
+    (hinv : ∀ params ∈ A, ∃ L : E ≃L[Real] E,
+      HasFDerivAt
+        (fun z : E => chartCmEqnB (I := I) g hEnorm p D z params)
+        (L : E →L[Real] E) (c params)) :
+    ∃ (T : Set (E × ((ι -> Real) × (ι -> E))))
+        (V : Set ((ι -> Real) × (ι -> E)))
+        (z : ((ι -> Real) × (ι -> E)) -> E),
+      IsOpen T ∧ IsOpen V ∧
+      (∀ params ∈ A, (c params, params) ∈ T) ∧
+      Set.InjOn
+        (fun w : E × ((ι -> Real) × (ι -> E)) =>
+          (chartCmEqnB (I := I) g hEnorm p D w.1 w.2, w.2)) T ∧
+      A ⊆ V ∧ ContinuousOn z V ∧
+      (∀ params ∈ V, chartCmEqnB (I := I) g hEnorm p D (z params) params = 0) ∧
+      Set.EqOn z c (B ∩ V) := by
+  apply existsRootExtension
+    (G := fun z params => chartCmEqnB (I := I) g hEnorm p D z params)
+    hA hAB c hc hzero
+  intro params hparams
+  exact existsPinnedLocal
+    (fun z params => chartCmEqnB (I := I) g hEnorm p D z params)
+    (c params) params one_ne_zero (hjoint params hparams) (hinv params hparams)
+
+omit [T3Space M] in
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Specialize the compact pinned-root gluing theorem to the readout
 center-of-mass equation.  Joint `C¹` regularity and Hessian invertibility are
 needed only along the compact actual-configuration set `A`; the resulting root
@@ -489,6 +655,59 @@ theorem chartCenterOn_cont
     rw [centerCfgOn_eq (I := I) g p join r h params.2]
   rw [heq]
   exact hf
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- A continuous ambient solution extension of the selected-branch center
+equation is smooth on its open parameter domain. -/
+theorem cmExtB_contDiffOn
+    [IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : forall (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) (B : DiagInvBranch (I := I) g hEnorm p)
+    {ι : Type} [Fintype ι]
+    (z : ((ι -> Real) × (ι -> E)) -> E)
+    {V : Set ((ι -> Real) × (ι -> E))} (hV : IsOpen V)
+    (hchz : ∀ params0 ∈ V, forall n : Nat, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
+      (fun z : E => (NormalCoordinates.normalChartAt (I := I) g p).symm z)
+      (z params0))
+    (hchxi : ∀ params0 ∈ V, forall n : Nat, forall i, ContMDiffAt 𝓘(ℝ, E) I (n : ℕ∞)
+      (fun xi : E => (NormalCoordinates.normalChartAt (I := I) g p).symm xi)
+      (params0.2 i))
+    (hsm : ∀ params0 ∈ V, forall n : Nat, forall i,
+      ContMDiffAt (I.prod I) 𝓘(ℝ, E) (n : ℕ∞)
+        (fun yq : M × M => B.diagReadout yq)
+        ((NormalCoordinates.normalChartAt (I := I) g p).symm (z params0),
+          (NormalCoordinates.normalChartAt (I := I) g p).symm (params0.2 i)))
+    (hinv : ∀ params0 ∈ V, exists L : E ≃L[Real] E,
+      HasFDerivAt (fun z : E => chartCmEqnB (I := I) g hEnorm p B z params0)
+        (L : E →L[Real] E) (z params0))
+    (hzero : ∀ params0 ∈ V,
+      chartCmEqnB (I := I) g hEnorm p B (z params0) params0 = 0)
+    (hzcont : ContinuousOn z V) :
+    ContDiffOn Real (∞ : WithTop ℕ∞) z V := by
+  rw [contDiffOn_infty]
+  intro n params0 hparams
+  have hsolves : ∀ᶠ eventuallyParams in nhds params0,
+      chartCmEqnB (I := I) g hEnorm p B (z eventuallyParams) eventuallyParams = 0 := by
+    filter_upwards [hV.mem_nhds hparams] with params hparamsV
+    exact hzero params hparamsV
+  have hcont : Filter.Tendsto z (nhds params0) (nhds (z params0)) :=
+    (hzcont.continuousAt (hV.mem_nhds hparams)).tendsto
+  obtain ⟨f, _hf0, hfcd, _hfsolves, huniq⟩ :=
+    readoutSolB_cdAt (I := I) g hEnorm p B (z params0) params0
+      (max 1 n) (le_max_left 1 n)
+    (hchz params0 hparams (max 1 n))
+    (hchxi params0 hparams (max 1 n))
+    (hsm params0 hparams (max 1 n))
+    (hinv params0 hparams) (hzero params0 hparams)
+  have huniq' := (hcont.prodMk_nhds Filter.tendsto_id).eventually huniq
+  have hid : z =ᶠ[nhds params0] f := by
+    filter_upwards [huniq', hsolves] with params hu hs
+    exact hu hs
+  exact ((hfcd.congr_of_eventuallyEq hid).of_le
+    (by exact_mod_cast le_max_right 1 n)).contDiffWithinAt
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

@@ -144,3 +144,14 @@ subtype to the ambient manifold. Its inverse uses `Function.invFun Subtype.val` 
 range; `invSubtype_mdiff` proves precisely that range-scoped smoothness. `liftOpen_mfderiv` reads
 the ambient differential back as the original subtype-valued differential. Focused verification
 and the targeted producer build passed. No new `sorry` was introduced.
+## 2026-07-13 short-time alignment
+
+The composition organs were adapted to the merged non-reducible tensor API.
+Fiber subtraction now uses `Tensor0SSpace.sub_apply`, section subtraction is
+handled separately, and the `covDerivOfField_eq_iterCov` reindex readout uses
+the explicit continuous-multilinear `domDomCongr` evaluation.  Obsolete
+representation-level simp arguments were removed.
+
+Focused verification passes.  The two pre-existing ordinary-wrapper `sorry`s
+remain unchanged; no new frontier or theorem assumption was introduced, and
+the HCG percentages remain those in `PROJECT_MAP.md`.

@@ -1,6 +1,6 @@
 # Conjugate heat
 
-## State — 2026-07-09
+## State — 2026-07-10
 
 The first conjugate-heat producer is checked:
 
@@ -15,11 +15,11 @@ The first conjugate-heat producer is checked:
 - `IsConjHeatOn` specializes the interval-local `IsHeatPotOn` predicate to the
   forward problem for the reversed metric, and `heat_pot_to_conj` recovers the
   original backward equation at reflected regular times.
-- `Geometry/Operator/LaplacianBridge.lean` now contains the focused-checked
+- `Geometry/Operator/LaplacianBridge.lean` contains the checked
   source bridge from the realized scalar equation to divergence-form
-  `Delta_g` for the canonical Levi-Civita connection.  Its targeted refresh is
-  blocked by the documented upstream `nablaRSFun_eval_moving_raw` performance
-  wall, so no downstream theorem claims this bridge yet.
+  `Delta_g` for the canonical Levi-Civita connection.  Its former upstream
+  `nablaRSFun_eval_moving_raw` performance wall is closed, and its targeted
+  build now passes.
 - `conj_heat_mass_one` propagates unit terminal mass to every earlier time.
 
 The proof is geometric rather than a predicate wrapper.  Ricci-flow volume
@@ -36,14 +36,15 @@ conditional positivity theorem; it does not assume a positivity wrapper.
 
 The next genuine producer is existence of a smooth solution of the backward
 conjugate heat equation for a time-dependent Ricci-flow metric, with prescribed
-terminal density.  `IsHeatPotOn` now records the correct interval-local classical
-solution interface, and `TimeSobolev.timeOp` lifts bounded measurable operator
-families to the time-`L²` spaces.  `nonaut_strong_exists` supplies the abstract
-two-scale contraction theorem for a bounded order-two plus order-one
-perturbation.  The fixed-metric heat-semigroup APIs still do not construct the
-geometric non-autonomous evolution.  The current smallest analytic frontier is
-a frozen-metric Sobolev operator estimate for
-`laplacian(g(T-s)) - laplacian(g(T))`.
+terminal density.  `IsHeatPotOn` records the interval-local classical solution
+interface, and `nonaut_strong_exists` supplies the abstract two-scale strong
+solution theorem.  The genuine frozen-scale inputs are now checked:
+`lapDiffA20_short` realizes `Delta_(g(T-s)) - Delta_(gT)`, and
+`conjA1_short` realizes multiplication by `-R(T-s)`.
+`ConjStrong.conj_strong_exists` now completes their specialized spectral
+strong-solution assembly.  The remaining analytic gap is to upgrade that
+time-Sobolev solution to a jointly smooth classical field satisfying
+`IsHeatPotOn`; the exact proposed producer is `heatpot_of_maxreg`.
 
 Normalization and nonnegativity are now checked conditionally on a classical
 solution; existence remains separate.  Later entropy
@@ -60,9 +61,9 @@ analytic W-route.
 
 - time-reversal, classical-solution interface, and mass normalization: 100%.
 - conjugate-heat existence theorem: not proved (0%); its dedicated analytic
-  machinery is about 25%.
+  machinery is about 70%.
 - Perelman no-local-collapsing theorem and `ham3_noncollapse`: not proved (0%).
-  Existing W/F variation plus the conjugate-heat bricks amount to roughly 20%
+  Existing W/F variation plus the conjugate-heat bricks amount to roughly 32%
   of the dedicated analytic producer machinery.
 - Hamilton-side rescaled-ball/curvature realization remains about 40%; this is
   separate from the unproved Perelman theorem.
@@ -70,9 +71,7 @@ analytic W-route.
 - Whole HCG compactness machinery remains about 45%, with its endpoint theorems
   still 0%; this entropy brick does not change that percentage.
 
-The conjugate-heat file passed focused verification before the final theorem
-naming cleanup.  The cleanup is source-local, but the current recheck cannot
-start because `NablaOnTensors/Regularity/Derivation.olean` was removed by the
-failed upstream rebuild.  No downstream theorem was added on the basis of an
-unbuilt Laplacian bridge; the exact performance blocker is recorded in
-`NablaOnTensors/Regularity/Derivation.md`.
+The conjugate-heat source passed focused verification.  The upstream derivation
+performance blocker and the Laplacian-bridge object-file blocker are now
+resolved; the new A2 and A1 producer stacks both pass focused and targeted
+verification.

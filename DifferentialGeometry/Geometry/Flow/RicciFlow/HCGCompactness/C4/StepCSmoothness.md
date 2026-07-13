@@ -387,3 +387,27 @@ stucks every consumer of `hcomp`), then `hcomp.unique hconst` with `hconst` in t
   `ApproximatesLinearOn` with constants uniform on live centers), followed by an
   explicitly controlled inverse branch.  Adding a bare consumer-side
   `branchRadius` field would only rename this missing geometry.
+
+## 2026-07-11 - selected-branch equation core
+
+- Added `chartCmEqnB`, the readout center equation parameterized by an explicit
+  `DiagInvBranch`.  The existing `chartCmEqn'` remains unchanged as the legacy
+  compatibility API.
+- `chartCmEqnB_std` proves that specialization to `stdBranch` recovers the old
+  equation exactly, using `std_inv_eq` rather than a new uniqueness argument.
+- `chartCmEqnB_cdAt` proves joint smoothness at an arbitrary order from the
+  selected readout's smoothness and the two inverse-chart hypotheses.  This is
+  the branch-generic analytic core needed by both the legacy and quantitative
+  lanes.
+- `readoutB_sum_eq` and `readoutB_zero_iff` transport the selected ambient
+  branch readout to the intrinsic normal-coordinate sum under an explicit
+  pointwise inverse identification.
+- `readoutSolB_strict` and `readoutSolB_cdAt` run the existing implicit-function
+  engine for the selected branch.  `centerB_hasStrict` and `centerB_contDiff`
+  then transfer the local implicit solution to any continuous center family
+  solving that branch equation.
+- Focused verification passed without warnings or local `sorry`s.  The
+  equation, zero-set, implicit-solution, and chart-center migration brick is
+  complete.  The selected-branch extension/domain consumers in
+  `StepCCmDomain`, the concrete quantitative HCG branch producer, and the
+  finite-hat scale specialization remain.

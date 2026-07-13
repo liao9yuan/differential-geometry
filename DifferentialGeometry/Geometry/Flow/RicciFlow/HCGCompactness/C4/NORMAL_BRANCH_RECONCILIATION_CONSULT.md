@@ -1,5 +1,13 @@
 # Pro consultation prompt: canonical quantitative moving-inverse branch
 
+> **Disposition (2026-07-10):** the qualitative-germ containment route is not
+> quantitatively recoverable from the private IFT choices.  The HCG lane will
+> parameterize/select the transported quantitative branch and keep generic
+> `diagExpInv` as a compatibility API.  `PhaseFlow.quantInv_smooth` has closed
+> inverse smoothness conditional on forward smoothness of that exact branch.
+> The remaining single producer and current consultation prompt are in
+> `NORMAL_ENDPOINT_SMOOTH_CONSULT.md`.
+
 Work against branch `short-time-existence` of the RicciFlower repository,
 Lean/Mathlib v4.29.0, checkout `E:\testdifferential-geometry`.  If the checkout
 is unavailable, reason from the exact checked state below and distinguish
@@ -124,4 +132,3 @@ extend equality to the full quantitative target ball.
 Return the recommended architecture first, then exact Lean interfaces and a
 dependency-safe migration sequence, and finally list any unavoidable new
 mathematical producer.
-

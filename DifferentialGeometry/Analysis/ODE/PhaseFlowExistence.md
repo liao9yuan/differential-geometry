@@ -13,6 +13,9 @@
 - `exists_fenced_sym` uses the same numerical fence to produce one common
   family on `[-1,1]`.  It retains the exact within derivative on the closed
   interval and also exposes the resulting ordinary derivative on `(-1,1)`.
+- `exists_fenced_on` exposes the same Picard core on an arbitrary positive
+  symmetric time window.  The normal-phase consumer uses this to make time one
+  an interior point without changing the phase-box ledger.
 - `scale_maps_ball` converts an ordinary initial phase ball into the inner
   normalized ball.
 - Focused verification and the targeted module refresh passed without warnings
@@ -23,6 +26,5 @@ complete (100%), and this file's fenced existence layer is complete for the
 current compactness consumer.  It is supporting machinery only; the unstated
 moving inverse theorem itself remains 0% complete.
 
-The remaining work is geometric, not ODE existence: identify the normal-model
-endpoint with the manifold diagonal exponential under the normal-coordinate
-diffeomorphism.
+The remaining work is geometric and consumer-side, not ODE existence: transport
+the checked quantitative branch into the HCG readout and finite-hat assembly.

@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.ODE.PhaseFlowSmallness
+import Mathlib.Analysis.Calculus.ContDiff.Operations
+import Mathlib.LinearAlgebra.FiniteDimensional.Basic
 
 /-!
 # Quantitative inverse for a retained phase endpoint
@@ -10,7 +12,7 @@ close to the free retained-endpoint equivalence.
 noncomputable section
 
 open Set Metric
-open scoped NNReal
+open scoped ContDiff NNReal
 
 namespace DifferentialGeometry
 namespace PhaseFlow
@@ -35,6 +37,76 @@ theorem freeDiagInv_pos [Nontrivial E] :
   have hnorm : (0 : Real) < ‖L‖ := norm_pos_iff.mpr hL
   have hnn : (0 : NNReal) < ‖L‖₊ := by exact_mod_cast hnorm
   exact inv_pos.mpr hnn
+
+/-- An open partial homeomorphism whose source and forward map realize a
+quantitative approximation has a smooth inverse whenever its forward map is
+smooth on that source. -/
+theorem inv_smooth_of_approx [CompleteSpace E] [FiniteDimensional Real E]
+    {f : E → E} {A : E ≃L[Real] E} {s : Set E} {c : NNReal}
+    (hf : ApproximatesLinearOn f (A : E →L[Real] E) s c)
+    (hc : Subsingleton E ∨ c < ‖(A.symm : E →L[Real] E)‖₊⁻¹)
+    (hs : IsOpen s) (hsm : ContDiffOn Real ∞ f s)
+    (e : OpenPartialHomeomorph E E) (hsource : e.source = s)
+    (hcoe : (e : E → E) = f) :
+    ContDiffOn Real ∞ e.symm e.target := by
+  intro y hy
+  have hx : e.symm y ∈ s := by
+    rw [← hsource]
+    exact e.map_target hy
+  have hsmx : ContDiffAt Real ∞ f (e.symm y) :=
+    hsm.contDiffAt (hs.mem_nhds hx)
+  let D : E →L[Real] E := fderiv Real f (e.symm y)
+  have hfD : HasFDerivAt f D (e.symm y) := by
+    exact (hsmx.differentiableAt (by simp)).hasFDerivAt
+  have hres : HasFDerivAt (f - (A : E → E)) (D - (A : E →L[Real] E))
+      (e.symm y) := by
+    simpa only [Pi.sub_apply] using hfD.sub A.hasFDerivAt
+  have hDnorm : ‖D - (A : E →L[Real] E)‖ ≤ (c : Real) :=
+    hres.le_of_lipschitzOn (hs.mem_nhds hx) hf.lipschitzOnWith
+  have hDapprox : ApproximatesLinearOn (D : E → E) (A : E →L[Real] E)
+      Set.univ c := by
+    intro u _ v _
+    have hbound := (D - (A : E →L[Real] E)).le_opNorm (u - v)
+    have hmul : ‖D - (A : E →L[Real] E)‖ * ‖u - v‖ ≤
+        (c : Real) * ‖u - v‖ :=
+      mul_le_mul_of_nonneg_right hDnorm (norm_nonneg _)
+    calc
+      ‖D u - D v - A (u - v)‖ =
+          ‖(D - (A : E →L[Real] E)) (u - v)‖ := by
+        rw [← D.map_sub]
+        rfl
+      _ ≤ ‖D - (A : E →L[Real] E)‖ * ‖u - v‖ := hbound
+      _ ≤ (c : Real) * ‖u - v‖ := hmul
+  have hDinj : Function.Injective D := by
+    rw [← Set.injOn_univ]
+    exact hDapprox.injOn hc
+  have hDsurj : Function.Surjective D :=
+    LinearMap.surjective_of_injective hDinj
+  let D' : E ≃L[Real] E := ContinuousLinearEquiv.ofBijective D
+    (LinearMap.ker_eq_bot.mpr hDinj) (LinearMap.range_eq_top.mpr hDsurj)
+  have hfD' : HasFDerivAt f (D' : E →L[Real] E) (e.symm y) := by
+    simpa only [D', ContinuousLinearEquiv.coe_ofBijective] using hfD
+  have heD' : HasFDerivAt (e : E → E) (D' : E →L[Real] E) (e.symm y) := by
+    rw [hcoe]
+    exact hfD'
+  have hesm : ContDiffAt Real ∞ (e : E → E) (e.symm y) := by
+    rw [hcoe]
+    exact hsmx
+  exact (e.contDiffAt_symm hy heD' hesm).contDiffWithinAt
+
+/-- The inverse of the exact quantitative partial homeomorphism is smooth on
+its target whenever the forward map is smooth on the approximation domain. -/
+theorem quantInv_smooth [CompleteSpace E] [FiniteDimensional Real E]
+    {f : E → E} {A : E ≃L[Real] E} {s : Set E} {c : NNReal}
+    (hf : ApproximatesLinearOn f (A : E →L[Real] E) s c)
+    (hc : Subsingleton E ∨ c < ‖(A.symm : E →L[Real] E)‖₊⁻¹)
+    (hs : IsOpen s) (hsm : ContDiffOn Real ∞ f s) :
+    ContDiffOn Real ∞
+      (hf.toOpenPartialHomeomorph (f' := A) f s hc hs).symm
+      (hf.toOpenPartialHomeomorph (f' := A) f s hc hs).target := by
+  apply inv_smooth_of_approx hf hc hs hsm
+  · rfl
+  · rfl
 
 /-- A map uniformly close to the free retained-endpoint equivalence on a
 positive closed ball has a quantitative inverse branch on the corresponding

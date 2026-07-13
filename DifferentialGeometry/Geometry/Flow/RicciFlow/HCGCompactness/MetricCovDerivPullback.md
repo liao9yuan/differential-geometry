@@ -1,5 +1,13 @@
 # MetricCovDerivPullback
 
+## 2026-07-13 short-time alignment
+
+`metricDiffCovDerivAt_pullback` was adapted to the merged non-reducible
+`Tensor0SSpace` API by evaluating tensor subtraction through the public
+`Tensor0SSpace.sub_apply` theorem on both sides.  The statement and the
+pullback-naturality argument are unchanged.  Focused verification passed; this
+compatibility repair does not change the curvature frontier recorded below.
+
 2026-06-17: started the pullback bridge for the HCG/P4 source-domain
 seminorm comparison.  The first target is
 `metricCovDeriv_one_pullback_sections`, an order-one metric-covariant-

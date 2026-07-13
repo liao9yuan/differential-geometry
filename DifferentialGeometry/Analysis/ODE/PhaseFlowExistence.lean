@@ -289,6 +289,35 @@ theorem exists_fenced [CompleteSpace E]
   exact Analysis.ODE.Flow.hasDerivWithinAt_Ici_of_Icc
     (hΦderiv t ⟨ht.1, ht.2.le⟩) ht
 
+/-- A normalized Picard argument produces one common exact phase-flow family
+on any symmetric interval whose length fits the normalized fence. -/
+theorem exists_fenced_on [CompleteSpace E]
+    {P V A L b κ : NNReal} {T : Real} {a : E × E → E}
+    (hT : 0 ≤ T) (hP : 0 < P) (hV : 0 < V)
+    (haLip : LipschitzOnWith κ a (phaseBox P V))
+    (haNorm : ∀ z ∈ phaseBox P V, ‖a z‖ ≤ (A : Real))
+    (hVP : V ≤ L * P) (hAV : A ≤ L * V)
+    (hLb : (L : Real) * T ≤ 1 - (b : Real)) :
+    ∃ Φ : (E × E) → Real → E × E,
+      ∀ z, phaseScale P V z ∈ closedBall (0 : E × E) b →
+        Φ z 0 = z ∧
+        ContinuousOn (Φ z) (Icc (-T) T) ∧
+        (∀ t ∈ Icc (-T) T,
+          HasDerivWithinAt (Φ z) (phaseField a (Φ z t)) (Icc (-T) T) t) ∧
+        (∀ t ∈ Ioo (-T) T,
+          HasDerivAt (Φ z) (phaseField a (Φ z t)) t) ∧
+        ∀ t ∈ Icc (-T) T, Φ z t ∈ phaseBox P V := by
+  obtain ⟨Φ, hΦ⟩ := exists_fenced_Icc (E := E) (tmin := -T) (tmax := T)
+    (by constructor <;> linarith) hP hV haLip haNorm hVP hAV (by
+      simpa only [sub_zero, zero_sub, neg_neg, max_self] using hLb)
+  refine ⟨Φ, ?_⟩
+  intro z hz
+  obtain ⟨hΦ0, hΦcont, hΦderiv, hΦmem⟩ := hΦ z hz
+  refine ⟨hΦ0, hΦcont, hΦderiv, ?_, hΦmem⟩
+  intro t ht
+  exact (hΦderiv t (Ioo_subset_Icc_self ht)).hasDerivAt
+    (Icc_mem_nhds ht.1 ht.2)
+
 /-- Under the same unit-time fence as `exists_fenced`, one common family of
 exact phase trajectories exists on the symmetric interval `[-1, 1]`.  The
 closed-interval derivative is retained, and hence becomes an ordinary

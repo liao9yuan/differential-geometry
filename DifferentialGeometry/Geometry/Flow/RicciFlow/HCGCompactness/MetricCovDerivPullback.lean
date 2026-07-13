@@ -651,7 +651,26 @@ theorem metricDiffCovDerivAt_pullback
         (Diffeomorph.pullbackMetric (I := I) gRef Phi) x slots =
       metricDiffCovDerivAt (I := I) a gk gInf gRef (Phi x)
         (fun q : Fin (a + 2) => mfderiv I I (Phi : M -> N) x (slots q)) := by
-  simp [metricDiffCovDerivAt, metricCovDeriv_pullback]
+  unfold metricDiffCovDerivAt
+  calc
+    (metricCovDeriv (I := I) (Diffeomorph.pullbackMetric (I := I) gk Phi)
+          (Diffeomorph.pullbackMetric (I := I) gRef Phi) a x -
+        metricCovDeriv (I := I) (Diffeomorph.pullbackMetric (I := I) gInf Phi)
+          (Diffeomorph.pullbackMetric (I := I) gRef Phi) a x) slots =
+        metricCovDeriv (I := I) (Diffeomorph.pullbackMetric (I := I) gk Phi)
+            (Diffeomorph.pullbackMetric (I := I) gRef Phi) a x slots -
+          metricCovDeriv (I := I) (Diffeomorph.pullbackMetric (I := I) gInf Phi)
+            (Diffeomorph.pullbackMetric (I := I) gRef Phi) a x slots :=
+      Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) x _ _ slots
+    _ = metricCovDeriv (I := I) gk gRef a (Phi x)
+          (fun q : Fin (a + 2) => mfderiv I I (Phi : M -> N) x (slots q)) -
+        metricCovDeriv (I := I) gInf gRef a (Phi x)
+          (fun q : Fin (a + 2) => mfderiv I I (Phi : M -> N) x (slots q)) := by
+      rw [metricCovDeriv_pullback, metricCovDeriv_pullback]
+    _ = (metricCovDeriv (I := I) gk gRef a (Phi x) -
+          metricCovDeriv (I := I) gInf gRef a (Phi x))
+        (fun q : Fin (a + 2) => mfderiv I I (Phi : M -> N) x (slots q)) :=
+      (Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) (Phi x) _ _ _).symm
 
 private lemma infty_ne_zero : (∞ : WithTop ℕ∞) ≠ 0 := by decide
 

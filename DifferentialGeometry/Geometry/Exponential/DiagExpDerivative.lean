@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Exponential.DiagInvBranch
 import DifferentialGeometry.Geometry.Exponential.ExpVariationSmooth
 import DifferentialGeometry.Geometry.Exponential.Smoothness.IntrinsicMfderivZero
 import DifferentialGeometry.Geometry.Exponential.MinimizingGeodesic
@@ -1150,6 +1151,188 @@ theorem exists_diagInvDom_inf
     rw [diagExp_snd, hproj] at h
     exact h
   exact ⟨hri, hproj, hexp⟩
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The chart transport of the qualitative Banach-IFT branch to the tangent
+bundle and the manifold product. -/
+private def diagExpHome
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) : OpenPartialHomeomorph (TangentBundle I M) (M × M) :=
+  let cO : OpenPartialHomeomorph (TangentBundle I M) (E × E) :=
+    { toPartialEquiv :=
+        extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)
+      open_source := isOpen_extChartAt_source _
+      open_target := isOpen_extChartAt_target _
+      continuousOn_toFun := continuousOn_extChartAt _
+      continuousOn_invFun := continuousOn_extChartAt_symm _ }
+  let dO : OpenPartialHomeomorph (M × M) (E × E) :=
+    { toPartialEquiv := extChartAt (I.prod I) (p, p)
+      open_source := isOpen_extChartAt_source _
+      open_target := isOpen_extChartAt_target _
+      continuousOn_toFun := continuousOn_extChartAt _
+      continuousOn_invFun := continuousOn_extChartAt_symm _ }
+  (cO.trans (diagExpIFT (I := I) g hEnorm p)).trans dO.symm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private theorem diagExpHome_inv
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    ⇑(diagExpHome (I := I) g hEnorm p).symm =
+      diagExpInv (I := I) g hEnorm p := by
+  rfl
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+private theorem exists_stdBranch
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    ∃ B : DiagInvBranch (I := I) g hEnorm p,
+      B.inv = diagExpInv (I := I) g hEnorm p := by
+  classical
+  obtain ⟨U, hUopen, hpU, hUsmooth, hU⟩ :=
+    exists_diagInvDom_inf (I := I) g hEnorm p
+  let cO : OpenPartialHomeomorph (TangentBundle I M) (E × E) :=
+    { toPartialEquiv :=
+        extChartAt I.tangent (⟨p, (0 : E)⟩ : TangentBundle I M)
+      open_source := isOpen_extChartAt_source _
+      open_target := isOpen_extChartAt_target _
+      continuousOn_toFun := continuousOn_extChartAt _
+      continuousOn_invFun := continuousOn_extChartAt_symm _ }
+  let dO : OpenPartialHomeomorph (M × M) (E × E) :=
+    { toPartialEquiv := extChartAt (I.prod I) (p, p)
+      open_source := isOpen_extChartAt_source _
+      open_target := isOpen_extChartAt_target _
+      continuousOn_toFun := continuousOn_extChartAt _
+      continuousOn_invFun := continuousOn_extChartAt_symm _ }
+  let F : OpenPartialHomeomorph (TangentBundle I M) (M × M) :=
+    diagExpHome (I := I) g hEnorm p
+  let R : OpenPartialHomeomorph (M × M) (TangentBundle I M) :=
+    F.symm.restrOpen U hUopen
+  let H : OpenPartialHomeomorph (TangentBundle I M) (M × M) := R.symm
+  have hHinv : ⇑H.symm = diagExpInv (I := I) g hEnorm p := by
+    change ⇑(F.symm.restrOpen U hUopen) = diagExpInv (I := I) g hEnorm p
+    rw [OpenPartialHomeomorph.coe_restrOpen]
+    exact diagExpHome_inv (I := I) g hEnorm p
+  have htarget_sub : H.target ⊆ U := by
+    intro y hy
+    change y ∈ (F.symm.restrOpen U hUopen).source at hy
+    exact hy.2
+  have hzeroIFT : diagExpZeroPt (I := I) p ∈
+      (diagExpIFT (I := I) g hEnorm p).source :=
+    ContDiffAt.mem_toOpenPartialHomeomorph_source
+      (chartedDiagExp_cdaOne (I := I) g hEnorm p)
+      (diagExp_hasFDerivAt_zero_unipotent (I := I) g hEnorm p 1 le_rfl)
+      one_ne_zero
+  let u0 : TangentBundle I M := ⟨p, (0 : E)⟩
+  have hu0c : u0 ∈ cO.source :=
+    mem_extChartAt_source (I := I.tangent) u0
+  have hc0 : cO u0 = diagExpZeroPt (I := I) p := rfl
+  have hu0mid : u0 ∈ (cO.trans (diagExpIFT (I := I) g hEnorm p)).source := by
+    rw [OpenPartialHomeomorph.trans_source]
+    refine ⟨hu0c, ?_⟩
+    change cO u0 ∈ (diagExpIFT (I := I) g hEnorm p).source
+    rw [hc0]
+    exact hzeroIFT
+  have hmid0 : (cO.trans (diagExpIFT (I := I) g hEnorm p)) u0 = dO (p, p) := by
+    rw [OpenPartialHomeomorph.trans_apply, hc0,
+      diagExpIFT_coe (I := I) g hEnorm p]
+    exact (outer_center (I := I) g hEnorm p).symm
+  have hmidTarget :
+      (cO.trans (diagExpIFT (I := I) g hEnorm p)) u0 ∈ dO.symm.source := by
+    change (cO.trans (diagExpIFT (I := I) g hEnorm p)) u0 ∈ dO.target
+    rw [hmid0]
+    exact dO.map_source (mem_extChartAt_source (I := I.prod I) (p, p))
+  have hu0F : u0 ∈ F.source := by
+    change u0 ∈
+      ((cO.trans (diagExpIFT (I := I) g hEnorm p)).trans dO.symm).source
+    rw [OpenPartialHomeomorph.trans_source]
+    exact ⟨hu0mid, hmidTarget⟩
+  have hF0 : F u0 = (p, p) := by
+    change dO.symm ((cO.trans (diagExpIFT (I := I) g hEnorm p)) u0) = (p, p)
+    rw [hmid0]
+    exact dO.left_inv (mem_extChartAt_source (I := I.prod I) (p, p))
+  have hpF : (p, p) ∈ F.target := by
+    have hmap := F.map_source hu0F
+    rwa [hF0] at hmap
+  have hpR : (p, p) ∈ R.source := by
+    change (p, p) ∈ F.target ∩ U
+    exact ⟨hpF, hpU⟩
+  have hzeroH : u0 ∈ H.source := by
+    have hmap := R.map_source hpR
+    change R (p, p) ∈ H.source at hmap
+    have hR0 : R (p, p) = u0 := by
+      change F.symm (p, p) = u0
+      rw [show F.symm = diagExpInv (I := I) g hEnorm p from
+        diagExpHome_inv (I := I) g hEnorm p]
+      exact diagExpInv_center (I := I) g hEnorm p
+    rwa [hR0] at hmap
+  have hhomEq : EqOn (fun u ↦ H u) (diagExp (I := I) g hEnorm) H.source := by
+    intro u hu
+    have hy : H u ∈ H.target := H.map_source hu
+    have hleft := H.left_inv hu
+    have hleft' : diagExpInv (I := I) g hEnorm p (H u) = u := by
+      rw [← hHinv]
+      exact hleft
+    have hright := (hU (H u) (htarget_sub hy)).1
+    rw [hleft'] at hright
+    exact hright.symm
+  have hinvInf : ContMDiffOn (I.prod I) I.tangent ∞ H.symm H.target := by
+    rw [hHinv]
+    exact hUsmooth.mono htarget_sub
+  let B : DiagInvBranch (I := I) g hEnorm p :=
+    { hom := H
+      zero_mem := hzeroH
+      hom_eq := hhomEq
+      inv_inf := hinvInf }
+  refine ⟨B, ?_⟩
+  exact hHinv
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The selected generic branch carried by the existing qualitative
+`diagExpInv` construction. -/
+noncomputable def stdBranch
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) : DiagInvBranch (I := I) g hEnorm p :=
+  Classical.choose (exists_stdBranch (I := I) g hEnorm p)
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The generic selected branch has the same totalized inverse function as the
+existing `diagExpInv` compatibility API. -/
+theorem std_inv_eq
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
+    [T2Space (TangentBundle I M)]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (p : M) :
+    (stdBranch (I := I) g hEnorm p).inv =
+      diagExpInv (I := I) g hEnorm p :=
+  Classical.choose_spec (exists_stdBranch (I := I) g hEnorm p)
 
 end DiagExpDerivative
 

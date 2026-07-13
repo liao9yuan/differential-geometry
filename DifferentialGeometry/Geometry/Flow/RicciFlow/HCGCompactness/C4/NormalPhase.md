@@ -6,6 +6,8 @@
   with the raised Koszul expression on the quarter normal ball.
 - `normalAccel_norm` and `normalAccel_lip` are uniform in the sequence index
   and base point once a common source radius is supplied.
+- `normalAccel_zero` records the stationary zero phase needed to normalize the
+  quantitative endpoint branch at the model origin.
 - `normalDiag_approx` is the reusable conditional endpoint estimate.
 - `exists_normalFlow` now discharges its former trajectory assumptions.  For
   a sufficiently small ordinary phase ball it constructs exact trajectories,
@@ -13,8 +15,7 @@
   endpoint map `ApproximatesLinearOn` the free diagonal map.
 - Focused verification passed.
 
-The next frontier is a local-isometry/exponential naturality bridge.  The
-endpoint is written in the `exp_x` normal model, while the existing generic
-`diagExpIFT` is written in the ambient atlas and tangent-bundle charts; they
-must be related by the normal-coordinate diffeomorphism rather than treated as
-literally the same `E x E -> E x E` function.
+The normal acceleration and fenced-flow producer layer is complete for the
+current quantitative branch.  Endpoint naturality is now handled downstream
+by `NormalPhaseEndpoint`; the live frontier is transporting the resulting
+uniform branch into the HCG readout consumer.

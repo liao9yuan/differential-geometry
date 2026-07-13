@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.PhaseFlowSmallness
+import DifferentialGeometry.Analysis.ODE.PhaseEndpointInverse
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessInputs
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalPhase
 
@@ -216,6 +217,149 @@ theorem exists_phase_q
       3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤ (q : Real) ∧
       PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < eps :=
   exists_normal_q_lt (I := I) hb (h.phaseRadius_pos R) heps
+
+/-- The normal phase radius can be selected at one fixed positive fraction of
+the sequence-relative scale.  The accompanying target-radius coefficient is
+also uniform in the exhaustion radius. -/
+theorem exists_phase_scale
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) :
+    let T : NNReal :=
+      ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹
+    ∃ aq aδ : Real,
+      0 < aq ∧ 0 < aδ ∧
+      ∀ R, 0 ≤ R →
+        ∃ q : NNReal,
+          (q : Real) = aq * hd.mu R ∧
+          6 * (q : Real) < h.phaseRadius R ∧
+          3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
+            (2 / 3 : Real) * (q : Real) ∧
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T ∧
+          aδ * hd.mu R ≤
+            ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
+              ((q : Real) / 2) := by
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos
+    (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank Real E)))
+  let T : NNReal :=
+    ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+      (E × E) →L[Real] (E × E))‖₊⁻¹
+  have hT : 0 < T := PhaseFlow.freeDiagInv_pos (E := E)
+  have hTReal : (0 : Real) < T := by exact_mod_cast hT
+  have hhalfT : 0 < T / 2 := div_pos hT (by norm_num)
+  have htwo : Tendsto (fun q : NNReal ↦ 2 * q) (nhds 0) (nhds 0) := by
+    have hcont : Continuous (fun q : NNReal ↦ 2 * q) :=
+      continuous_const.mul continuous_id
+    have hAt : Tendsto (fun q : NNReal ↦ 2 * q) (nhds (0 : NNReal))
+        (nhds ((fun q : NNReal ↦ 2 * q) 0)) := hcont.continuousAt
+    simpa using hAt
+  have herrEv : ∀ᶠ q : NNReal in nhds 0,
+      PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 :=
+    htwo (normalPhaseErr_lt_ev (I := I) hb hhalfT)
+  obtain ⟨eps, heps, herr⟩ := Metric.eventually_nhds_iff_ball.mp herrEv
+  let C : Real := hb.metricC 1
+  have hC : 0 ≤ C := hb.metricC_nonneg 1
+  have hμ0 : 0 < hd.mu 0 := hd.mu_pos 0
+  let accelBound : Real := 1 / (36 * (C + 1))
+  have hden : 0 < 36 * (C + 1) := mul_pos (by norm_num) (by linarith)
+  have haccel : 0 < accelBound := one_div_pos.mpr hden
+  let aq : Real := min (h.ratio / 48)
+    (min (eps / (2 * hd.mu 0)) (accelBound / hd.mu 0))
+  have haq : 0 < aq := by
+    dsimp only [aq]
+    exact lt_min (div_pos h.ratio_pos (by norm_num))
+      (lt_min (div_pos heps (mul_pos (by norm_num) hμ0))
+        (div_pos haccel hμ0))
+  let aδ : Real := (T : Real) * aq / 4
+  have haδ : 0 < aδ := by
+    dsimp only [aδ]
+    exact div_pos (mul_pos hTReal haq) (by norm_num)
+  refine ⟨aq, aδ, haq, haδ, ?_⟩
+  intro R hR
+  have hμR : 0 < hd.mu R := hd.mu_pos R
+  have hμle : hd.mu R ≤ hd.mu 0 := hd.mu_antitone hR
+  let qReal : Real := aq * hd.mu R
+  have hqReal : 0 < qReal := mul_pos haq hμR
+  let q : NNReal := ⟨qReal, hqReal.le⟩
+  have haqRatio : aq ≤ h.ratio / 48 := min_le_left _ _
+  have haqEps : aq ≤ eps / (2 * hd.mu 0) :=
+    (min_le_right _ _).trans (min_le_left _ _)
+  have haqAccel : aq ≤ accelBound / hd.mu 0 :=
+    (min_le_right _ _).trans (min_le_right _ _)
+  have hqEps : qReal ≤ eps / 2 := by
+    calc
+      qReal = aq * hd.mu R := rfl
+      _ ≤ aq * hd.mu 0 := mul_le_mul_of_nonneg_left hμle haq.le
+      _ ≤ (eps / (2 * hd.mu 0)) * hd.mu 0 :=
+        mul_le_mul_of_nonneg_right haqEps hμ0.le
+      _ = eps / 2 := by field_simp [ne_of_gt hμ0]
+  have hqAccel : qReal ≤ accelBound := by
+    calc
+      qReal = aq * hd.mu R := rfl
+      _ ≤ aq * hd.mu 0 := mul_le_mul_of_nonneg_left hμle haq.le
+      _ ≤ (accelBound / hd.mu 0) * hd.mu 0 :=
+        mul_le_mul_of_nonneg_right haqAccel hμ0.le
+      _ = accelBound := by field_simp [ne_of_gt hμ0]
+  have hqBall : q ∈ Metric.ball (0 : NNReal) eps := by
+    rw [Metric.mem_ball, NNReal.dist_eq]
+    change |qReal - 0| < eps
+    rw [sub_zero, abs_of_pos hqReal]
+    exact hqEps.trans_lt (half_lt_self heps)
+  have herrQ : PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 :=
+    herr q hqBall
+  have hqRadius : 6 * (q : Real) < h.phaseRadius R := by
+    have haRatio : 6 * aq < h.ratio / 4 := by
+      nlinarith [h.ratio_pos]
+    calc
+      6 * (q : Real) = (6 * aq) * hd.mu R := by
+        change 6 * qReal = _
+        dsimp only [qReal]
+        ring
+      _ < (h.ratio / 4) * hd.mu R := mul_lt_mul_of_pos_right haRatio hμR
+      _ = h.phaseRadius R := by
+        dsimp only [phaseRadius]
+        ring
+  have hqProd : qReal * (36 * (C + 1)) ≤ 1 := by
+    calc
+      qReal * (36 * (C + 1)) ≤ accelBound * (36 * (C + 1)) :=
+        mul_le_mul_of_nonneg_right hqAccel hden.le
+      _ = 1 := by
+        dsimp only [accelBound]
+        field_simp [ne_of_gt hden]
+  have hlinear : 18 * C * qReal ≤ 1 := by
+    nlinarith [mul_nonneg hC hqReal.le]
+  have hmul : 0 ≤ qReal * (1 - 18 * C * qReal) :=
+    mul_nonneg hqReal.le (sub_nonneg.mpr hlinear)
+  have hqAcc : 3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
+      (2 / 3 : Real) * (q : Real) := by
+    change 3 * C * (2 * qReal) ^ 2 ≤ (2 / 3 : Real) * qReal
+    nlinarith
+  have herrOut : PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T := by
+    calc
+      PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 := herrQ
+      _ < T := by exact_mod_cast (half_lt_self hTReal)
+  have herrReal :
+      (PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : Real) < (T : Real) / 2 := by
+    exact_mod_cast herrQ
+  have hmargin : (T : Real) / 2 ≤
+      ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) := by
+    rw [NNReal.coe_sub herrOut.le]
+    linarith
+  have hδlower : aδ * hd.mu R ≤
+      ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
+        ((q : Real) / 2) := by
+    calc
+      aδ * hd.mu R = ((T : Real) / 2) * (qReal / 2) := by
+        dsimp only [aδ, qReal]
+        ring
+      _ ≤ ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
+          (qReal / 2) :=
+        mul_le_mul_of_nonneg_right hmargin (div_nonneg hqReal.le (by norm_num))
+      _ = ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
+          ((q : Real) / 2) := rfl
+  exact ⟨q, rfl, hqRadius, hqAcc, herrOut, hδlower⟩
 
 end NormalRadiusProfile
 

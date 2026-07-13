@@ -43,6 +43,20 @@ noncomputable def normalAccel
   exact -((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
     (normalTotal (I := I) Y x) (fun _ : E ↦ z.2) z.1) z.2)
 
+/-- The normal-coordinate geodesic acceleration vanishes at zero phase. -/
+@[simp] theorem normalAccel_zero
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    normalAccel (I := I) Y x (0 : E × E) = 0 := by
+  unfold normalAccel
+  change -((Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+    (normalTotal (I := I) Y x) (fun _ : E ↦ (0 : E)) (0 : E)) (0 : E)) = 0
+  rw [Integral.Connection.leviCivitaConnectionOfMetric_apply]
+  have hz :
+      Integral.Connection.leviCivitaConnectionCandidateAt (I := 𝓘(Real, E))
+        (normalTotal (I := I) Y x) (fun _ : E ↦ (0 : E)) (0 : E) (0 : E) = 0 :=
+    ContinuousLinearMap.map_zero _
+  rw [hz, neg_zero]
+
 /-- A position ball crossed with a uniform closed velocity ball. -/
 def normalPhaseBox (r : Real) (R : ℝ≥0) : Set (E × E) :=
   {z | z.1 ∈ Metric.ball (0 : E) r ∧ ‖z.2‖ ≤ (R : Real)}

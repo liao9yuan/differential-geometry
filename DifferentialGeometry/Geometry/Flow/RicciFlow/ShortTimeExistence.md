@@ -1,5 +1,23 @@
 # ShortTimeExistence audit
 
+## 2026-07-13 latest-progress resync
+
+After the completed branch-alignment merge `d842bedee`, the two newer committed
+updates from our `short-time-existence` branch (`17de115b1` and `2a2ce366e`)
+were merged into the alignment worktree.  The source merge was conflict-free.
+The resulting tensor-API compatibility points were repaired in nine consumers
+using public `Tensor0SSpace` evaluation lemmas, without changing theorem
+statements or adding assumptions.
+
+The resynced tree passes the latest targeted C4/spectral/entropy build, the
+explicit 9,924-job Hamilton consumer, and the 10,258-job default full build.
+The headline axiom audit remains exactly `[propext, Classical.choice,
+Quot.sound]`.  Thus the short-time-existence theorem remains 100% proved, its
+dedicated machinery remains 100% integrated, and the latest progress resync is
+100% verified.  HCG endpoint status is separate: the conditional compactness
+endpoint and textbook B1 theorem remain 0%, while their shared machinery is
+tracked in `HCGCompactness/PROJECT_MAP.md`.
+
 ## 2026-07-12 corrected branch-alignment audit
 
 This section supersedes the `main`-based integration route recorded below on 2026-07-10. The

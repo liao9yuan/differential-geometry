@@ -194,3 +194,19 @@ order-1 proof; the ONLY changes are the ContDiffAt order on the inner symm and t
   identifies any transported quantitative branch with `diagExpInv` on their
   common neighborhood, but a uniform `StepB1RawInput` domain still requires an
   explicit uniform containment/refactoring argument.
+
+## 2026-07-11 - explicit standard selected branch
+
+- `stdBranch` now packages the existing qualitative `diagExpInv` construction
+  as a `DiagInvBranch`.  Its manifold-level open partial homeomorphism is the
+  chart transport of the private Banach-IFT branch, with its target restricted
+  to the already checked common `C^infinity` domain.
+- The restriction is on the target side, so the inverse total function remains
+  exactly `diagExpInv`; `std_inv_eq` exports that compatibility globally.
+- The branch forward equality with intrinsic `diagExp` is derived from the
+  partial-homeomorphism left inverse and the existing right-inverse theorem on
+  the restricted target.  No radius is extracted from the qualitative branch.
+- Focused verification passed without warnings or local `sorry`s.  The generic
+  standard-branch instance is 100% complete; it is compatibility machinery and
+  does not complete the still-unstated quantitative HCG branch/readout theorem
+  or the `StepB1RawInput` producer.

@@ -1,3 +1,4 @@
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.ApproxIsometryDefs
 import Mathlib.Geometry.Manifold.Riemannian.Basic
 import Mathlib.Data.Real.Sqrt
 import Mathlib.Topology.MetricSpace.Lipschitz
@@ -7,10 +8,9 @@ set_option autoImplicit false
 /-!
 # Distance Consequence Of Approximate Isometries
 
-This file contains the metric-space ball-inclusion step in MSM135 Chapter 4,
-Proposition "Distances".  The remaining Riemannian producer is the chain-rule
-speed estimate that turns a concrete `(eps,0)` pre-approximate isometry into the
-tangent-path hypothesis used here.
+This file contains MSM135 Chapter 4, Proposition "Distances": the path-length
+comparison, its ball-inclusion consequences, and the book-facing producer from
+localized pre-approximate-isometry data.
 -/
 
 namespace DifferentialGeometry
@@ -18,6 +18,11 @@ namespace HCGCompactness
 
 open Bundle Manifold
 open scoped Manifold ContDiff ENNReal
+
+section RiemannianNorm
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace
 
 /-- MSM135 Chapter 4, Proposition "Distances", length-infimum bridge.
 
@@ -264,7 +269,7 @@ theorem image_ball_local
     [TopologicalSpace N] [ChartedSpace H N] [PseudoEMetricSpace N]
     [RiemannianBundle (fun x : N => TangentSpace I x)]
     [IsRiemannianManifold I N]
-    (F : M -> N) {eps r : Real} (heps : 0 < 1 + eps) (hr : 0 < r) (x0 : M)
+    (F : M -> N) {eps r : Real} (_heps : 0 < 1 + eps) (_hr : 0 < r) (x0 : M)
     (hspeed : forall {y : M} (γ : ℝ → M), (CMDiff[Set.Icc (0:ℝ) 1] 1 γ) →
       γ 0 = x0 → γ 1 = y →
       Manifold.pathELength (I := I) γ 0 1 < ENNReal.ofReal r →
@@ -286,9 +291,167 @@ theorem image_ball_local
         · exact hη1
     _ ≤ ENNReal.ofReal (Real.sqrt (1 + eps)) * Manifold.pathELength (I := I) γ 0 1 := hηlen
     _ ≤ ENNReal.ofReal (Real.sqrt (1 + eps)) * ENNReal.ofReal r := by
-        exact mul_le_mul_left' (le_of_lt hγlen) _
+        gcongr
     _ = ENNReal.ofReal (Real.sqrt (1 + eps) * r) := by
         rw [← ENNReal.ofReal_mul (Real.sqrt_nonneg _)]
+
+universe u uE uH
+
+open DifferentialGeometry.Integral.Connection Tensor0SBundle
+
+section Speed
+
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+
+/-- A `C⁰` pullback-tensor error controls the image speed squared. -/
+theorem speed_le_of_c0
+    (P : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) (n := (∞ : WithTop ℕ∞)) 2)
+    (g : SmoothRiemannianMetric I M) {ε : ℝ} {x : M}
+    (hc0 : metricTensorErrorNorm (I := I) P g x ≤ ε)
+    (v : TangentSpace I x) :
+    P x (fun _ => v) ≤ (1 + ε) * g.inner x v v := by
+  classical
+  obtain ⟨basis, hON⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
+  have hCS := Tensor0SBundle.abs_apply_le_sqrt_normSq0S (I := I)
+    g x 2 basis (fun i j => hON i j)
+    (P x - Tensor0SBundle.metricTensorField (I := I) g x)
+    (fun _ => v)
+  have hval : (P x - Tensor0SBundle.metricTensorField (I := I) g x) (fun _ => v)
+      = P x (fun _ => v) - g.inner x v v := by
+    calc
+      (P x - Tensor0SBundle.metricTensorField (I := I) g x) (fun _ => v) =
+          P x (fun _ => v) -
+            Tensor0SBundle.metricTensorField (I := I) g x (fun _ => v) :=
+        Tensor0SSpace.sub_apply 2 x _ _ _
+      _ = P x (fun _ => v) - g.inner x v v := by
+        rw [Tensor0SBundle.metricTensorField_apply]
+  have hnn : 0 ≤ g.inner x v v := by
+    by_cases hv : v = 0
+    · simp [hv]
+    · exact (g.pos x v hv).le
+  have hprod : (∏ _a : Fin 2, Real.sqrt (g.inner x v v)) = g.inner x v v := by
+    rw [Fin.prod_univ_two, Real.mul_self_sqrt hnn]
+  have habs : |P x (fun _ => v) - g.inner x v v| ≤ ε * g.inner x v v := by
+    unfold metricTensorErrorNorm at hc0
+    calc |P x (fun _ => v) - g.inner x v v|
+        = |(P x - Tensor0SBundle.metricTensorField (I := I) g x) (fun _ => v)| := by
+          rw [hval]
+      _ ≤ Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x 2
+            (P x - Tensor0SBundle.metricTensorField (I := I) g x))
+          * ∏ _a : Fin 2, Real.sqrt (g.inner x v v) := hCS
+      _ ≤ ε * g.inner x v v := by
+          rw [hprod]
+          exact mul_le_mul_of_nonneg_right hc0 hnn
+  nlinarith [abs_le.mp habs]
+
+end Speed
+
+section BookData
+
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H}
+variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M] [T2Space M]
+  [IsManifold I ∞ M] [SigmaCompactSpace M]
+  [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable {N : Type u} [TopologicalSpace N] [ChartedSpace H N] [IsManifold I ∞ N]
+
+/-- MSM135 Chapter 4, Proposition "Distances", for localized partial-map data.
+
+A partial map carrying pre-approximate-isometry data on a closed `r₂`-ball maps
+the open `r`-ball into the closed `sqrt (1 + ε) * r`-ball whenever `r ≤ r₂`. -/
+theorem data_image_ball
+    [PseudoEMetricSpace M] [RiemannianBundle (fun x : M => TangentSpace I x)]
+    [IsRiemannianManifold I M]
+    [PseudoEMetricSpace N] [RiemannianBundle (fun y : N => TangentSpace I y)]
+    [IsRiemannianManifold I N]
+    (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞)) {O : M} {r r₂ ε : ℝ} {p : ℕ}
+    {g : SmoothRiemannianMetric I M} {h : SmoothRiemannianMetric I N}
+    (hgnorm : ∀ (x : M) (v : TangentSpace I x),
+      ‖v‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x v v)))
+    (hhnorm : ∀ (y : N) (w : TangentSpace I y),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (h.inner y w w)))
+    (hr : 0 < r) (hrr₂ : r ≤ r₂) (hε0 : 0 ≤ ε)
+    (hdata : PreApproxIsoDataOn (I := I)
+      (Metric.closedEBall O (ENNReal.ofReal r₂)) ε p (Φ : M → N) g h)
+    (hsub : Metric.closedEBall O (ENNReal.ofReal r₂) ⊆ Φ.source) :
+    (Φ : M → N) '' Metric.eball O (ENNReal.ofReal r) ⊆
+      Metric.closedEBall ((Φ : M → N) O)
+        (ENNReal.ofReal (Real.sqrt (1 + ε) * r)) := by
+  refine image_ball_local (I := I) (Φ : M → N) (by linarith) hr O ?_
+  intro y γ hγC hγ0 hγ1 hγlen
+  have hrange : ∀ t ∈ Set.Icc (0 : ℝ) 1,
+      γ t ∈ Metric.closedEBall O (ENNReal.ofReal r₂) := by
+    intro t ht
+    rw [Metric.mem_closedEBall, edist_comm, IsRiemannianManifold.out (I := I) O (γ t)]
+    calc Manifold.riemannianEDist I O (γ t)
+        ≤ Manifold.pathELength (I := I) γ 0 t := by
+          refine Manifold.riemannianEDist_le_pathELength
+            (hγC.mono (Set.Icc_subset_Icc le_rfl ht.2)) hγ0 rfl ht.1
+      _ ≤ Manifold.pathELength (I := I) γ 0 1 :=
+          Manifold.pathELength_mono (I := I) (γ := γ) (a' := 0) (b' := 1) le_rfl ht.2
+      _ ≤ ENNReal.ofReal r := le_of_lt hγlen
+      _ ≤ ENNReal.ofReal r₂ := ENNReal.ofReal_le_ofReal hrr₂
+  refine ⟨(Φ : M → N) ∘ γ, ?_, by simp [Function.comp, hγ0],
+    by simp [Function.comp, hγ1], ?_⟩
+  · exact (Φ.contMDiffOn_toFun.of_le (by exact_mod_cast le_top)).comp hγC
+      (fun t ht => hsub (hrange t ht))
+  · rw [Manifold.pathELength_eq_lintegral_mfderiv_Ioo,
+      Manifold.pathELength_eq_lintegral_mfderiv_Ioo,
+      ← MeasureTheory.lintegral_const_mul' _ _ ENNReal.ofReal_ne_top]
+    refine MeasureTheory.lintegral_mono_ae
+      (Filter.eventually_of_mem
+        (MeasureTheory.self_mem_ae_restrict measurableSet_Ioo) ?_)
+    intro t ht
+    have htIcc : t ∈ Set.Icc (0 : ℝ) 1 := Set.mem_Icc_of_Ioo ht
+    have hγt : γ t ∈ Metric.closedEBall O (ENNReal.ofReal r₂) := hrange t htIcc
+    have hγd : MDifferentiableAt 𝓘(ℝ, ℝ) I γ t := by
+      refine ((hγC.contMDiffAt ?_).mdifferentiableAt (by norm_num))
+      exact Icc_mem_nhds ht.1 ht.2
+    have hΦd : MDifferentiableAt I I (Φ : M → N) (γ t) :=
+      (Φ.contMDiffOn_toFun.contMDiffAt
+        (Φ.open_source.mem_nhds (hsub hγt))).mdifferentiableAt
+        (by decide : (∞ : WithTop ℕ∞) ≠ 0)
+    have hchain := mfderiv_comp t hΦd hγd
+    have happ : mfderiv 𝓘(ℝ, ℝ) I ((Φ : M → N) ∘ γ) t 1
+        = mfderiv I I (Φ : M → N) (γ t) (mfderiv 𝓘(ℝ, ℝ) I γ t 1) := by
+      rw [hchain]
+      rfl
+    rw [happ]
+    set w := mfderiv 𝓘(ℝ, ℝ) I γ t 1 with hw
+    have hPval : h.inner ((Φ : M → N) (γ t))
+        (mfderiv I I (Φ : M → N) (γ t) w) (mfderiv I I (Φ : M → N) (γ t) w)
+        = hdata.pullback (γ t) (fun _ => w) := by
+      rw [hdata.pullback_apply (γ t) hγt (fun _ => w)]
+    have hquad : hdata.pullback (γ t) (fun _ => w)
+        ≤ (1 + ε) * g.inner (γ t) w w :=
+      speed_le_of_c0 (I := I) hdata.pullback g (hdata.c0_small (γ t) hγt) w
+    calc ‖mfderiv I I (Φ : M → N) (γ t) w‖ₑ
+        = ENNReal.ofReal (Real.sqrt (h.inner ((Φ : M → N) (γ t))
+            (mfderiv I I (Φ : M → N) (γ t) w)
+            (mfderiv I I (Φ : M → N) (γ t) w))) := hhnorm _ _
+      _ ≤ ENNReal.ofReal (Real.sqrt ((1 + ε) * g.inner (γ t) w w)) := by
+          refine ENNReal.ofReal_le_ofReal (Real.sqrt_le_sqrt ?_)
+          rw [hPval]
+          exact hquad
+      _ = ENNReal.ofReal (Real.sqrt (1 + ε))
+          * ENNReal.ofReal (Real.sqrt (g.inner (γ t) w w)) := by
+          rw [Real.sqrt_mul (by linarith : (0 : ℝ) ≤ 1 + ε),
+            ENNReal.ofReal_mul (Real.sqrt_nonneg _)]
+      _ = ENNReal.ofReal (Real.sqrt (1 + ε)) * ‖w‖ₑ := by
+          rw [hgnorm (γ t) w]
+
+end BookData
+
+end RiemannianNorm
 
 end HCGCompactness
 end DifferentialGeometry

@@ -1,5 +1,28 @@
 # StepCCmDomain
 
+## 2026-07-11 selected-branch migration
+
+- `centerReadoutB_zero` proves the actual center equation for an explicit
+  `DiagInvBranch`.  It now consumes finite-pair membership in `B.readDom` and
+  smallness of the branch inverse below `expDiffeoRadius`; internally it derives
+  fixed-trivialization base membership from a positive weight and derives
+  `B.inv = normalChartAt` from `DiagInvBranch.inv_eq_normal_lt`.  Callers no
+  longer supply either conclusion as a separate hypothesis.  The legacy
+  `centerReadout_zero` remains unchanged because its hypotheses do not include
+  membership in the standard branch domain.
+- `existsCmExtensionB` specializes compact pinned-root gluing to
+  `chartCmEqnB`; `cmExtB_contDiffOn` globalizes the branch-parametric implicit
+  solution on an open parameter domain.  The old `diagExpInv` entrypoints remain
+  compatibility APIs.
+- Focused verification passed without warnings or local `sorry`s.  The abstract
+  branch-parametric domain/extension consumer layer is complete.  The concrete
+  quantitative HCG branch and finite-configuration `readDom` containment are
+  now produced in `NormalDiagBranch` / `NormalBranchCage`.  The remaining
+  producer work is the quantitative intrinsic/realized-exp compatibility,
+  reverse-chart/half-squared-distance radius control, and Hessian/Neumann bound.
+- This migration does not complete `StepB1RawInput` or textbook B1; both remain
+  0%.  The rounded machinery estimates below are unchanged.
+
 ## 2026-07-10 current verified state
 
 This section supersedes the 2026-07-09 in-progress paragraph below.
@@ -21,11 +44,31 @@ This section supersedes the 2026-07-09 in-progress paragraph below.
   finite-hat instantiation is not yet complete.
 - Focused verification and targeted builds passed. Branch gluing/agreement is
   no longer a frontier.
-- The remaining genuine inputs are one common off-diagonal `C^infty` branch
-  domain, containment of finite-hat configurations in that domain and in
+- The common off-diagonal branch and finite-family `readDom` containment are no
+  longer frontiers.  The remaining genuine inputs are containment in
   `eqnRadius`, reverse-chart/named-radius smallness needed to instantiate the
   checked differentiability and branch-identification producers, and the
   book-scale Hessian/Neumann producer.
+
+## 2026-07-11 quantitative compatibility stop
+
+- The selected branch does not by itself discharge the remaining
+  `expDiffeoRadius` inequality.  That radius is the minimum of
+  `expRadiusGp` and a pointwise `Classical.choose` radius for
+  `expMapIntrinsic = expMap`; `NormalRadiusProfile` controls the former but has
+  no lower bound for the latter.
+- Replacing `hreal` by a direct branch-source estimate therefore cannot work
+  with the present API.  Globally identifying the two exponentials enters the
+  unfinished cross-chart maximal-geodesic continuation layer.  Reproving the
+  center equation directly for the selected intrinsic branch also requires a
+  new quantitative minimizing/first-variation theorem: the current
+  `HalfSqDistGrad` route uses the same qualitative agreement radius.
+- This is a three-route design/API stop, not a coercion failure.  Do not add a
+  consumer-side uniform agreement-radius assumption.  The next decision is
+  whether to prove a quantitative intrinsic/realized-exp compatibility theorem
+  from the H6 phase tube, make the intrinsic branch canonical for normal
+  coordinates, or formulate and prove the first-variation/root equation
+  directly for the selected branch.
 
 ## 2026-07-09 restricted configuration interface
 
@@ -68,9 +111,9 @@ This section supersedes the 2026-07-09 in-progress paragraph below.
   implemented and verified.
 - `StepB1RawInput` producer theorem: 0%.
 - Textbook B1 theorem: 0%.
-- Dedicated Step-B1 machinery: about 63%.
-- Chapter 4 machinery: about 66%.
-- Whole HCG compactness machinery: about 46%.
+- Dedicated Step-B1 machinery: about 77%.
+- Chapter 4 machinery: about 74%.
+- Whole HCG compactness machinery: about 51%.
 - Conditional and final compactness endpoints: 0%.
 
 ## 2026-07-10 — lower-level root-equation inputs

@@ -1,5 +1,13 @@
 # ComponentConvTower.lean — covariant-tower component convergence (P3 Gap B)
 
+## 2026-07-13 short-time alignment
+
+The finite slot-expansion proof was normalized to the current
+`map_update_sum` result, which already pulls scalar coefficients outside the
+multilinear evaluation.  The following step now only identifies the updated
+section slot.  No theorem statement or convergence input changed, and focused
+verification passed without warnings.
+
 Target: `componentConv_covDeriv_of_chartCInf` — the `a ≥ 1` covariant tower of the
 metric-component convergence (general-`a` analogue of `componentConv_covDeriv_zero`).
 

@@ -55,8 +55,9 @@ private theorem toRS0_sub {x : M} (A B : Tensor0SSpace 0 I x) :
       Tensor0SSpace.toRS0 A - Tensor0SSpace.toRS0 B := by
   apply ContinuousLinearMap.ext
   intro c
-  simp only [Tensor0SSpace.toRS0_apply,
-    ContinuousLinearMap.sub_apply, smul_sub]
+  change tensor0SSpace_evalScalar x c • (A - B) =
+    tensor0SSpace_evalScalar x c • A - tensor0SSpace_evalScalar x c • B
+  exact smul_sub _ _ _
 
 /-- The true moving-minus-reference rough Laplacian on the smooth finite core. -/
 noncomputable def lapDiffSec

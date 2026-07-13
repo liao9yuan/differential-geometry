@@ -1,5 +1,12 @@
 # Moving scalar Laplacian core and extension
 
+## 2026-07-13 short-time alignment
+
+The local `toRS0_sub` proof now changes directly to the scalar-evaluation
+smul identity and applies `smul_sub`, avoiding the old reducible Hom
+representation.  Focused verification and the refreshed targeted build pass.
+No public statement or progress percentage changed.
+
 ## State — 2026-07-10
 
 Focused and targeted verification pass.
