@@ -30,13 +30,13 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 def chartPhaseVF (g : SmoothRiemannianMetric I M) (α : M) : E × E → E × E :=
   fun z => (z.2, - chartChristoffelContraction (I := I) g α z.2 z.2 z.1)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartPhaseVF_apply (g : SmoothRiemannianMetric I M) (α : M)
     (z : E × E) :
     chartPhaseVF (I := I) g α z =
       (z.2, - chartChristoffelContraction (I := I) g α z.2 z.2 z.1) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma chartPhaseVF_mk (g : SmoothRiemannianMetric I M) (α : M)
     (x v : E) :
     chartPhaseVF (I := I) g α (x, v) =
@@ -44,7 +44,7 @@ set_option linter.unusedSectionVars false in
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 lemma chartChristoffelContraction_scalarCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k : Fin (Module.finrank ℝ E)) :
@@ -85,7 +85,7 @@ lemma chartChristoffelContraction_scalarCoeff_contDiffOn
     (hCLM_j.comp hsnd).contDiffOn
   exact (hΓ.mul hci).mul hcj
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 lemma chartChristoffelContraction_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞
@@ -102,7 +102,7 @@ lemma chartChristoffelContraction_contDiffOn
     contDiffOn_const
   exact hscalar.smul hconst
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 theorem chartPhaseVF_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (chartPhaseVF (I := I) g α)
@@ -120,14 +120,14 @@ def chartPhaseVFCutoff (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) : E × E → E × E :=
   fun z => b z • chartPhaseVF (I := I) g α z
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma chartPhaseVFCutoff_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) (z : E × E) :
     chartPhaseVFCutoff (I := I) g α z₀ b z =
       b z • chartPhaseVF (I := I) g α z := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma chartPhaseVFCutoff_eq_of_mem_closedBall
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) {z : E × E}
@@ -136,7 +136,7 @@ lemma chartPhaseVFCutoff_eq_of_mem_closedBall
   have hb1 : b z = 1 := b.one_of_mem_closedBall hz
   simp [chartPhaseVFCutoff_apply, hb1]
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 theorem chartPhaseVFCutoff_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -178,14 +178,14 @@ def chartPhaseVFTime (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) : ℝ → (E × E) → E × E :=
   fun _ z => chartPhaseVFCutoff (I := I) g α z₀ b z
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 @[simp] lemma chartPhaseVFTime_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) (t : ℝ) (z : E × E) :
     chartPhaseVFTime (I := I) g α z₀ b t z =
       chartPhaseVFCutoff (I := I) g α z₀ b z := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 lemma uncurry_chartPhaseVFTime_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) :
@@ -193,7 +193,7 @@ lemma uncurry_chartPhaseVFTime_eq
       fun p : ℝ × (E × E) => chartPhaseVFCutoff (I := I) g α z₀ b p.2 := by
   funext p; rfl
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 lemma chartPhaseVFTime_uncurry_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -205,7 +205,7 @@ lemma chartPhaseVFTime_uncurry_contDiff
     chartPhaseVFCutoff_contDiff (I := I) g α z₀ b hb_sub
   exact hVF.comp contDiff_snd
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 lemma chartPhaseVFTime_uncurry_contDiffOn_univ_one
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -218,7 +218,7 @@ lemma chartPhaseVFTime_uncurry_contDiffOn_univ_one
     h.of_le (by exact_mod_cast (le_top : (1 : ℕ∞) ≤ ⊤))
   exact h1.contDiffOn
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 lemma chartPhaseVFTime_uncurry_contDiffOn_univ_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -235,7 +235,7 @@ lemma chartPhaseVFTime_uncurry_contDiffOn_univ_two
     h.of_le hle
   exact h2.contDiffOn
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 lemma chartPhaseVFTime_uncurry_contDiffOn_univ_nat
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀) (n : ℕ)
@@ -271,7 +271,7 @@ lemma exists_contDiffBump_subset_chart_interior
   have hfst_lt : dist p.1 x₀ < ε := lt_of_le_of_lt hfst (by linarith)
   exact hε_sub (Metric.mem_ball.mpr hfst_lt)
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 theorem exists_chartPhase_isLocalFlow
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -301,7 +301,7 @@ theorem exists_chartPhase_isLocalFlow
   rw [heq1, heq2] at hΦ
   exact hΦ
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 lemma exists_bound_fderiv_chartPhaseVFCutoff
     (g : SmoothRiemannianMetric I M) (α : M)
     (z₀ : E × E) (b : ContDiffBump z₀)
@@ -356,7 +356,7 @@ lemma exists_bound_fderiv_chartPhaseVFCutoff
     rw [norm_zero]
     exact hMglob_nn
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 theorem exists_chartPhase_contDiffOn_isLocalFlow
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -488,7 +488,7 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow
       exact_mod_cast (le_of_lt hrN)))
   refine ⟨b, (ρ : ℝ), T, Φ, hρ_pos, hT_pos, hb_sub, hCDOn, hinitial⟩
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 theorem exists_chartPhase_contDiffOn_isLocalFlow_combined
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -628,7 +628,7 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow_combined
       exact_mod_cast (le_of_lt hrN)))
   exact ⟨b, rN, εN, (ρ : ℝ), T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hΦ', hCDOn, hinitial⟩
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 theorem exists_chartPhase_contDiffOn_isLocalFlow_combined_two
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E}
@@ -702,7 +702,7 @@ theorem exists_chartPhase_contDiffOn_isLocalFlow_combined_two
       exact_mod_cast (le_of_lt hrN)))
   exact ⟨b, rN, εN, ρ, T, Φ, hrN, hεN, hρ_pos, hT_pos, hb_sub, hΦ', hCDOn, hinitial⟩
 
-set_option linter.unusedSectionVars false in
+omit [I.Boundaryless] in
 theorem exists_chartPhase_contDiffOn_isLocalFlow_combined_nat
     [CompleteSpace E]
     (g : SmoothRiemannianMetric I M) (α : M) {x₀ v₀ : E} (n : ℕ) (hn : 1 ≤ n)

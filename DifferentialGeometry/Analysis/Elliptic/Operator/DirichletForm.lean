@@ -36,7 +36,6 @@ def dirichletForm (g : SmoothRiemannianMetric I M)
       ((gradL2 (I := I) (M := M) g v : M → E) x)
     ∂(riemannianVolumeMeasure I M g)
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_symm (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u v =
@@ -46,7 +45,6 @@ theorem dirichletForm_symm (g : SmoothRiemannianMetric I M)
   refine Filter.Eventually.of_forall (fun x => ?_)
   exact g.symm x _ _
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_self_nonneg (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     0 ≤ dirichletForm (I := I) (M := M) g u u := by
@@ -65,7 +63,6 @@ theorem dirichletForm_self_nonneg (g : SmoothRiemannianMetric I M)
     linarith [h_zero]
   · exact (g.pos x _ h0).le
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_zero_left (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g 0 u = 0 := by
@@ -91,7 +88,6 @@ theorem dirichletForm_zero_left (g : SmoothRiemannianMetric I M)
   rw [integral_congr_ae h_ae]
   simp
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_zero_right (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u 0 = 0 := by
@@ -105,7 +101,6 @@ def shiftedForm (g : SmoothRiemannianMetric I M)
       ((toLp (I := I) (M := M) g v : M → ℝ) x)
     ∂(riemannianVolumeMeasure I M g)
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_symm (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u v =
@@ -116,7 +111,6 @@ theorem shiftedForm_symm (g : SmoothRiemannianMetric I M)
   refine integral_congr_ae ?_
   refine Filter.Eventually.of_forall (fun x => mul_comm _ _)
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_self_nonneg (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     0 ≤ shiftedForm (I := I) (M := M) g u u := by
@@ -126,7 +120,6 @@ theorem shiftedForm_self_nonneg (g : SmoothRiemannianMetric I M)
   intro x
   exact mul_self_nonneg _
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_zero_left (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g 0 u = 0 := by
@@ -151,14 +144,12 @@ theorem shiftedForm_zero_left (g : SmoothRiemannianMetric I M)
   rw [integral_congr_ae h_ae]
   simp
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_zero_right (g : SmoothRiemannianMetric I M)
     (u : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u 0 = 0 := by
   rw [shiftedForm_symm (I := I) (M := M) g u 0]
   exact shiftedForm_zero_left (I := I) (M := M) g u
 
-set_option linter.unusedSectionVars false in
 private lemma dirichletForm_integrand_add_left
     (g : SmoothRiemannianMetric I M)
     (u₁ u₂ v : H1Intrinsic (I := I) (M := M) g) :
@@ -198,7 +189,6 @@ private lemma dirichletForm_integrand_add_left
           g.inner x ((gradL2 g u₂ : M → E) x) ((gradL2 g v : M → E) x) := by
           rw [ContinuousLinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma dirichletForm_integrand_smul_left
     (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
@@ -230,7 +220,6 @@ private lemma dirichletForm_integrand_smul_left
     _ = c * g.inner x ((gradL2 g u : M → E) x) ((gradL2 g v : M → E) x) := by
           rw [ContinuousLinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_add_left (g : SmoothRiemannianMetric I M)
     (u₁ u₂ v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g (u₁ + u₂) v =
@@ -270,7 +259,6 @@ theorem dirichletForm_add_left (g : SmoothRiemannianMetric I M)
         g x ((gradL2 g u₂ : M → E) x) ((gradL2 g v : M → E) x)
       rwa [show ‖_‖ = |_| from Real.norm_eq_abs _]
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g (c • u) v =
@@ -280,7 +268,6 @@ theorem dirichletForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     (I := I) (M := M) g c u v)]
   rw [integral_const_mul]
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_add_right (g : SmoothRiemannianMetric I M)
     (u v₁ v₂ : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u (v₁ + v₂) =
@@ -291,7 +278,6 @@ theorem dirichletForm_add_right (g : SmoothRiemannianMetric I M)
   rw [dirichletForm_symm (I := I) (M := M) g v₁ u,
     dirichletForm_symm (I := I) (M := M) g v₂ u]
 
-set_option linter.unusedSectionVars false in
 theorem dirichletForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     dirichletForm (I := I) (M := M) g u (c • v) =
@@ -321,13 +307,11 @@ def dirichletFormLM (g : SmoothRiemannianMetric I M) :
     rw [dirichletForm_smul_left (I := I) (M := M) g c u v]
     rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma dirichletFormLM_apply (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     dirichletFormLM (I := I) (M := M) g u v =
       dirichletForm (I := I) (M := M) g u v := rfl
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_add_left (g : SmoothRiemannianMetric I M)
     (u₁ u₂ v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g (u₁ + u₂) v =
@@ -382,7 +366,6 @@ theorem shiftedForm_add_left (g : SmoothRiemannianMetric I M)
   rw [h_int_eq]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g (c • u) v =
@@ -417,7 +400,6 @@ theorem shiftedForm_smul_left (g : SmoothRiemannianMetric I M) (c : ℝ)
     rw [integral_congr_ae h_ae, integral_const_mul]
   rw [h_int_eq]; ring
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_add_right (g : SmoothRiemannianMetric I M)
     (u v₁ v₂ : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u (v₁ + v₂) =
@@ -428,7 +410,6 @@ theorem shiftedForm_add_right (g : SmoothRiemannianMetric I M)
   rw [shiftedForm_symm (I := I) (M := M) g v₁ u,
     shiftedForm_symm (I := I) (M := M) g v₂ u]
 
-set_option linter.unusedSectionVars false in
 theorem shiftedForm_smul_right (g : SmoothRiemannianMetric I M) (c : ℝ)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     shiftedForm (I := I) (M := M) g u (c • v) =
@@ -458,7 +439,6 @@ def shiftedFormLM (g : SmoothRiemannianMetric I M) :
     rw [shiftedForm_smul_left (I := I) (M := M) g c u v]
     rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma shiftedFormLM_apply (g : SmoothRiemannianMetric I M)
     (u v : H1Intrinsic (I := I) (M := M) g) :
     shiftedFormLM (I := I) (M := M) g u v =

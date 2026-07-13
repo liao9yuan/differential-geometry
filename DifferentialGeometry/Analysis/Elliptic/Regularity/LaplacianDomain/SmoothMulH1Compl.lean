@@ -80,6 +80,7 @@ noncomputable def smoothScalarMulLin
   map_add' v w := smoothScalarMulFun_add (I := I) (M := M) g φ v w
   map_smul' c v := smoothScalarMulFun_smul (I := I) (M := M) g φ c v
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 @[simp] lemma smoothScalarMulLin_apply
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :

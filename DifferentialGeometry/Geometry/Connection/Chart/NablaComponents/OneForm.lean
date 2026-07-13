@@ -11,16 +11,14 @@ open Bundle Set Tensor0SBundle TensorLieDeriv
 open scoped BigOperators Manifold ContDiff Topology
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M]
 variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace Real]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0S_one_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -61,7 +59,6 @@ theorem nabla0S_one_model_coord
   simp only [modelDeriv0SAt]
   simp_rw [tensor0SModelAt_coordComponent0SAt (I := I)]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0S_one_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -81,7 +78,6 @@ theorem nabla0S_one_coord
             coordComponent0SAt (I := I) (α x₀) (fun _ : Fin 1 => k) := by
   rw [nabla0S_one_model_coord (I := I) cov X α x₀ j, hderiv]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_one_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -101,7 +97,7 @@ theorem nabla0SFun_one_eval_coordFrame
   simpa [coordComponent0SAt, component0S] using
     nabla0S_one_coord (I := I) cov X α x₀ hderiv j
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I 2 M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 theorem tensor0S_one_eval_coordFrame_sum
     {x₀ : M}
     (αx : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x₀)
@@ -163,7 +159,7 @@ theorem tensor0S_one_eval_coordFrame_sum
             αx (fun _ : Fin 1 => coordinateFrameAt (I := I) x₀ j x₀) := by
           simp [b]
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem tensor0S_one_eval_finset_sum
     {ι : Type*} {x : M}
     (αx : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 1 x)
@@ -192,7 +188,7 @@ private theorem tensor0S_one_eval_finset_sum
           refine Finset.sum_congr rfl fun i _ => ?_
           rw [hupdate]
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem mdifferentiableAt_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real) {x : M}
     (hf : ∀ i ∈ t, MDifferentiableAt I 𝓘(Real, Real) (f i) x) :
@@ -211,7 +207,7 @@ private theorem mdifferentiableAt_finset_sum
       have hadd : MDifferentiableAt I 𝓘(Real, Real) (f i + t.sum f) x := hfi.add hsum
       simpa [Finset.sum_insert, hit] using hadd
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem extDerivFun_finset_sum
     {ι : Type*} (t : Finset ι) (f : ι -> M -> Real)
     {x : M} (v : TangentSpace I x)
@@ -244,7 +240,7 @@ private theorem extDerivFun_finset_sum
               rw [ih hft]
               simp [Finset.sum_insert, hit]
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem extDerivFun_mul
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (hf : MDifferentiableAt I 𝓘(Real, Real) f x)
@@ -260,7 +256,7 @@ private theorem extDerivFun_mul
   simpa [extDerivFun, Pi.smul_apply, smul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
     using hprod
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 theorem covariantDerivative_finset_sum
     {ι : Type*} (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (t : Finset ι) (σ : ι -> (x : M) -> TangentSpace I x)
@@ -288,7 +284,7 @@ theorem covariantDerivative_finset_sum
               rw [ih]
               simp [Finset.sum_insert, hit]
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem coordinateFrame_coeff_at_base_eq_coord
     (x₀ : M) (Z : TangentSpace I x₀) (j : CoordinateIdx E) :
     (coordinateFrameAt_isLocalFrame_one (I := I) x₀).coeff j x₀ Z =
@@ -304,7 +300,7 @@ private theorem coordinateFrame_coeff_at_base_eq_coord
   rw [dif_pos (coordinateFrameAt_mem (I := I) x₀)]
   rw [hbasis]
 
-set_option linter.unusedSectionVars false in
+omit [FiniteDimensional Real E] [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ∞ M] [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem extDerivFun_congr_eventually
     {f g : M -> Real} {x : M} (v : TangentSpace I x)
     (h : f =ᶠ[𝓝 x] g) :
@@ -314,7 +310,7 @@ private theorem extDerivFun_congr_eventually
   unfold extDerivFun
   rw [hmf, hx]
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 private theorem oneForm_pair_coordFrame_eventually
     (Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -397,7 +393,7 @@ private theorem oneForm_pair_coordFrame_eventually
             funext q; fin_cases q; simp
           rw [hbase, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 theorem oneForm_pair_coordFrame_product_rule
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
     (α : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
@@ -471,7 +467,7 @@ theorem oneForm_pair_coordFrame_product_rule
   · intro j _
     exact (hdiff_z j).mul (hdiff_α j)
 
-set_option linter.unusedSectionVars false in
+omit [IsManifold I (⊤ : WithTop ℕ∞) M] [CompleteSpace Real] in
 theorem oneForm_covariantDerivative_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -708,7 +704,6 @@ theorem oneForm_covariantDerivative_coordFrame_product_rule
     rw [hsmul2]
     simp [h_eval_cov, smul_eq_mul]]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_one_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -732,7 +727,6 @@ theorem nabla0SFun_one_eval_coordFrame_expanded
   refine Finset.sum_congr rfl fun j _ => ?_
   rw [nabla0SFun_one_eval_coordFrame (I := I) cov X α x₀ hderiv j]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_one_eval_of_coordFrame_product
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -772,7 +766,6 @@ theorem nabla0SFun_one_eval_of_coordFrame_product
   simp_rw [Finset.sum_add_distrib]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_one_eval_of_coordFrame_product_rule
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -815,7 +808,6 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rule
       (I := I) X Z α x₀ z dz hz hdz hdiff_z hdiff_α)
     hcovZ
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -847,7 +839,6 @@ theorem nabla0SFun_one_eval_of_coordFrame_product_rules
     (oneForm_covariantDerivative_coordFrame_product_rule
       (I := I) cov X Z α x₀ z dz hz hdz hdiff_z)
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_one_eval_coordFrame_moving
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X Z : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

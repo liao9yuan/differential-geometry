@@ -44,12 +44,11 @@ def LoweringIntertwinerRS (g : SmoothRiemannianMetric I M) (r s : ℕ) : Prop :=
         (TensorRSSpace.toModel
           (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g) S x v))
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 theorem loweringIntertwinerRS_holds (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     LoweringIntertwinerRS (I := I) (M := M) g r s :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_rs (I := I) (M := M) g r s S x v
 
-set_option linter.unusedSectionVars false in
 theorem loweringIntertwinerRS_zero (g : SmoothRiemannianMetric I M) (s : ℕ) :
     LoweringIntertwinerRS (I := I) (M := M) g 0 s :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen (I := I) (M := M) g s S x v
@@ -62,7 +61,7 @@ def covDerivAlongVFrawRS
   covApply (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g))
     (fun y : M => B y) (fun y : M => T y)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma covDerivAlongVFrawRS_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -71,7 +70,7 @@ set_option linter.unusedSectionVars false in
       (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDerivAlongVFrawRS_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -108,7 +107,7 @@ def covDerivAlongVFSectionRS
     (fun y : M => covDerivAlongVFrawRS (I := I) (M := M) g r s T B y)
     (covDerivAlongVFrawRS_contMDiff (I := I) (M := M) g r s T B)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 @[simp] lemma covDerivAlongVFSectionRS_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -117,7 +116,7 @@ set_option linter.unusedSectionVars false in
       (tensorRSCovariantDerivative I M r s (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDerivAlongVFSectionRS_lowered_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -129,7 +128,7 @@ lemma covDerivAlongVFSectionRS_lowered_eq
   rw [hint T y (B y)]
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 lemma toModel_liftedTensorSection_covDerivAlongVFSectionRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -142,7 +141,7 @@ lemma toModel_liftedTensorSection_covDerivAlongVFSectionRS
   rw [toModel_liftedTensorSection]
   exact covDerivAlongVFSectionRS_lowered_eq (I := I) (M := M) g r s hint T B y
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] [I.Boundaryless] in
 lemma covDerivAlongRS_covDerivAlongVFSectionRS_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -187,7 +186,7 @@ def dirichletFormRS
     rw [hcov, TensorRSSpace.toModel_smul, tensorInnerPointwise_smul_left]
     rfl
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 @[simp] lemma dirichletFormRS_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M)
     (X : TangentSpace I b) :
@@ -201,7 +200,7 @@ def dirichletVFRS
     TangentSpace I b :=
   metricSharp (I := I) g b (dirichletFormRS (I := I) (M := M) g r s T v b)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 lemma inner_dirichletVFRS
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M)
     (X : TangentSpace I b) :
@@ -210,7 +209,7 @@ lemma inner_dirichletVFRS
   rw [dirichletVFRS]
   exact inner_metricSharp (I := I) g b (dirichletFormRS (I := I) (M := M) g r s T v b) X
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 private lemma dirichletFormRS_chartBasis_component_contMDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (α : M)
     (j : Fin (Module.finrank ℝ E)) :
@@ -262,7 +261,7 @@ private lemma dirichletFormRS_chartBasis_component_contMDiffOn
   intro b _
   rw [dirichletFormRS_apply]
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 lemma dirichletVFRS_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) :
     ContMDiff I (I.prod 𝓘(ℝ, E)) ∞
@@ -279,13 +278,12 @@ def dirichletVFSectionRS
     (fun b : M => dirichletVFRS (I := I) (M := M) g r s T v b)
     (dirichletVFRS_contMDiff (I := I) (M := M) g r s T v)
 
-set_option linter.unusedSectionVars false in
+omit [CompactSpace M] in
 @[simp] lemma dirichletVFSectionRS_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M) :
     dirichletVFSectionRS (I := I) (M := M) g r s T v b =
       dirichletVFRS (I := I) (M := M) g r s T v b := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma divergence_dirichletVFRS_summand_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -403,7 +401,7 @@ private lemma divergence_dirichletVFRS_summand_eq
         (fun y : M => smoothOrthoFrame (I := I) g b i y) from rfl]
   ring
 
-set_option linter.unusedSectionVars false in
+omit [BoundarylessManifold I M] in
 private lemma tensorCovDerivPointwiseInnerRS_eq_smoothOrthoFrame_diag
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T v : SmoothCcTensor g r s) (b : M) :
     tensorCovDerivPointwiseInner (I := I) (M := M) g r s T v b =
@@ -469,7 +467,6 @@ private lemma tensorCovDerivPointwiseInnerRS_eq_smoothOrthoFrame_diag
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [hframe_eq i]
 
-set_option linter.unusedSectionVars false in
 lemma divergence_dirichletVFRS_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -520,7 +517,6 @@ lemma divergence_dirichletVFRS_eq
         (smoothOrthoFrame (I := I) g b i) (smoothOrthoFrame (I := I) g b i)
         (fun y : M => T.toSection y) b) Finset.univ
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs_of_intertwiner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (hint : LoweringIntertwinerRS (I := I) (M := M) g r s)
@@ -601,7 +597,6 @@ theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs_of_
     refine integral_congr_ae (Filter.Eventually.of_forall (fun b => ?_))
     simp only [SmoothCcTensor.toFun_apply, rawTensorConnLapSmooth_toSection_apply]
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawTensorConnLapSmooth_rs
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T v : SmoothCcTensor g r s) :

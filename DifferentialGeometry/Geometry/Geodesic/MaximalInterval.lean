@@ -32,7 +32,7 @@ def IsGeodesicOnWithInitial
     f 0 = (⟨p, v⟩ : TangentBundle I M) ∧
     IsMIntegralCurveOn f (geodesicVectorFieldChart (I := I) g p) s
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesicOnWithInitial.isGeodesicAt
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
     {p : M} {v : TangentSpace I p} {t : ℝ}
@@ -43,7 +43,7 @@ lemma IsGeodesicOnWithInitial.isGeodesicAt
   refine ⟨p, f, hproj, ?_, hf.isMIntegralCurveAt ht⟩
   rw [hproj t]; exact ht_src
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesicOnWithInitial.start_eq
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s : Set ℝ}
     {p : M} {v : TangentSpace I p}
@@ -54,7 +54,7 @@ lemma IsGeodesicOnWithInitial.start_eq
   simp [hf0] at h
   exact h.symm
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma IsGeodesicOnWithInitial.mono
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {s s' : Set ℝ}
     {p : M} {v : TangentSpace I p}
@@ -75,7 +75,7 @@ def maximalGeodesicInterval
     Set ℝ :=
   {t : ℝ | MaximalGeodesicWitness (I := I) g p v t}
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma mem_maximalGeodesicInterval_iff
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
     {t : ℝ} :
@@ -83,7 +83,7 @@ lemma mem_maximalGeodesicInterval_iff
       MaximalGeodesicWitness (I := I) g p v t :=
   Iff.rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem maximalGeodesicInterval_isOpen
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     IsOpen (maximalGeodesicInterval (I := I) g p v) := by
@@ -98,7 +98,6 @@ section LocalExistence
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 lemma exists_maximalGeodesicWitness_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     MaximalGeodesicWitness (I := I) g p v 0 := by
@@ -111,13 +110,11 @@ lemma exists_maximalGeodesicWitness_zero
   · exact (convex_ball (0 : ℝ) ε).isPreconnected
   exact ⟨f, fun _ => rfl, hf0, hf_on⟩
 
-set_option linter.unusedSectionVars false in
 theorem zero_mem_maximalGeodesicInterval
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     (0 : ℝ) ∈ maximalGeodesicInterval (I := I) g p v :=
   exists_maximalGeodesicWitness_zero (I := I) g p v
 
-set_option linter.unusedSectionVars false in
 theorem maximalGeodesicInterval_nonempty
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     (maximalGeodesicInterval (I := I) g p v).Nonempty :=
@@ -135,7 +132,8 @@ def maximalGeodesicChosenCurve
     ℝ → M :=
   Classical.choose h
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [CompleteSpace E] in
 lemma maximalGeodesicChosenCurve_spec
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     {t : ℝ} (h : MaximalGeodesicWitness (I := I) g p v t) :
@@ -152,7 +150,8 @@ def maximalGeodesic
     maximalGeodesicChosenCurve (I := I) g p v h t
   else p
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [CompleteSpace E] in
 lemma maximalGeodesic_of_not_mem
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
     {t : ℝ} (ht : t ∉ maximalGeodesicInterval (I := I) g p v) :
@@ -161,7 +160,8 @@ lemma maximalGeodesic_of_not_mem
   letI : Decidable (MaximalGeodesicWitness (I := I) g p v t) := Classical.dec _
   exact dif_neg ht
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [CompleteSpace E] in
 lemma maximalGeodesic_of_mem
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
     {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v) :
@@ -177,7 +177,6 @@ section MaximalGeodesicValue
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem maximalGeodesic_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     maximalGeodesic (I := I) g p v 0 = p := by
@@ -193,7 +192,7 @@ section MaximalGeodesicAtTime
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 theorem exists_isGeodesicAt_of_mem_maximalGeodesicInterval
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
     {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v)
@@ -207,7 +206,7 @@ theorem exists_isGeodesicAt_of_mem_maximalGeodesicInterval
   refine ⟨γ, J, hJ, h0, ht, hγ, ?_⟩
   exact hγ.isGeodesicAt (hJ.mem_nhds ht) (ht_src γ J hγ)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless] [CompleteSpace E] in
 theorem exists_isGeodesicAt_zero_of_mem_maximalGeodesicInterval
     {g : SmoothRiemannianMetric I M} {p : M} {v : TangentSpace I p}
     {t : ℝ} (h : t ∈ maximalGeodesicInterval (I := I) g p v)
@@ -228,7 +227,6 @@ section MaximalGeodesicMain
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem maximalGeodesic_structure_of_footInSource
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p)
     (hsrc : ∀ t ∈ maximalGeodesicInterval (I := I) g p v,
@@ -256,7 +254,8 @@ section BridgeLemmas
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+  [CompleteSpace E] in
 lemma isGeodesic_iff_isGeodesicOn_univ
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} :
     IsGeodesic (I := I) g γ ↔ IsGeodesicOn (I := I) g γ (Set.univ : Set ℝ) := by
@@ -274,9 +273,11 @@ open MeasureTheory intervalIntegral
 
 variable [I.Boundaryless]
 variable [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
-variable [T2Space M] [SigmaCompactSpace M] [FiniteDimensional ℝ E]
+variable [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma continuousOn_velocityWithin_totalSpace_C1
     {η : ℝ → M} {a b : ℝ} (hab : a < b)
     (hη : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc a b)) :
@@ -314,7 +315,9 @@ private lemma continuousOn_velocityWithin_totalSpace_C1
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [T2Space M] [SigmaCompactSpace M] in
 private lemma continuousOn_g_speedSq_velocityWithin
     (g : SmoothRiemannianMetric I M) {η : ℝ → M} {a b : ℝ}
     (hVW : ContinuousOn
@@ -343,7 +346,9 @@ private lemma continuousOn_g_speedSq_velocityWithin
   intro t _ht
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [T2Space M] [SigmaCompactSpace M] in
 lemma speedSqrt_integrableOn_Icc_of_C1
     (g : SmoothRiemannianMetric I M) {η : ℝ → M} {a b : ℝ} (hab : a ≤ b)
     (hη : ContMDiffOn 𝓘(ℝ, ℝ) I 1 η (Set.Icc a b)) :
@@ -405,7 +410,9 @@ lemma speedSqrt_integrableOn_Icc_of_C1
       exact hAgree t ht
     exact hIntW.congr hae
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)]
+  [I.Boundaryless] [Bundle.RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
+  [T2Space M] [SigmaCompactSpace M] in
 theorem pathELength_eq_arcLength
     (g : SmoothRiemannianMetric I M) {γ : ℝ → M} {a b : ℝ}
     (hab : a ≤ b)

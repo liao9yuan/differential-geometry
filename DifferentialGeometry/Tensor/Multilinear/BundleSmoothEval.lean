@@ -40,7 +40,6 @@ private theorem compContinuousLinearMap_isEmpty
   congr 1
   exact Subsingleton.elim _ _
 
-set_option linter.unusedSectionVars false in
 theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ b : M) :
     (trivializationAt (Tensor0SModel (n + 1) ℝ E)
@@ -48,7 +47,6 @@ theorem trivializationAt_tensor0SBundle_succ_fibre {n : ℕ}
     (T b).compContinuousLinearMap
       (fun _ : Fin (n + 1) => (trivializationAt E (TangentSpace I) x₀).symmL ℝ b) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem trivializationAt_tensor0SBundle_zero_fibre
     (T : ∀ b : M, Tensor0SSpace 0 I b) (x₀ b : M) :
     (trivializationAt (Tensor0SModel 0 ℝ E)
@@ -60,7 +58,6 @@ theorem trivializationAt_tensor0SBundle_zero_fibre
     ContinuousMultilinearMap.constOfIsEmpty ℝ _ ((T b) 0)
   rw [compContinuousLinearMap_isEmpty]
 
-set_option linter.unusedSectionVars false in
 theorem trivializationAt_homBundle_fibre {n : ℕ}
     (ϕ : ∀ b : M, TangentSpace I b →L[ℝ] Tensor0SSpace n I b) (x₀ b : M) :
     (trivializationAt (E →L[ℝ] Tensor0SModel n ℝ E)
@@ -71,7 +68,6 @@ theorem trivializationAt_homBundle_fibre {n : ℕ}
       ((ϕ b).comp
         ((trivializationAt E (TangentSpace I) x₀).symmL ℝ b)) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SBundle_linearMapAt_apply_of_mem {n : ℕ} (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n ℝ E)
       (fun x : M => Tensor0SSpace n I x) x₀).baseSet)
@@ -96,7 +92,6 @@ def curriedSection {n : ℕ} (T : ∀ b : M, Tensor0SSpace (n + 1) I b) :
     ∀ b : M, TangentSpace I b →L[ℝ] Tensor0SSpace n I b :=
   fun b => tensor0S_curry (I := I) (M := M) n b (T b)
 
-set_option linter.unusedSectionVars false in
 theorem trivializationAt_homBundle_curriedSection_eq {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ b : M)
     (hb : b ∈ (trivializationAt (Tensor0SModel n ℝ E)
@@ -129,7 +124,6 @@ theorem trivializationAt_homBundle_curriedSection_eq {n : ℕ}
   · intro k
     simp [Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 private theorem continuous_curriedSection_of_continuous_section {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b)
     (hT : Continuous (fun b : M =>
@@ -174,7 +168,6 @@ private theorem continuous_curriedSection_of_continuous_section {n : ℕ}
       ⟨b, curriedSection T b⟩).2
   exact (trivializationAt_homBundle_curriedSection_eq (I := I) (M := M) T x b hb).symm
 
-set_option linter.unusedSectionVars false in
 private theorem contMDiff_curriedSection_of_contMDiff_section {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b)
     (hT : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel (n + 1) ℝ E)) ∞
@@ -225,7 +218,6 @@ theorem tensor0S_curry_apply_eval {n : ℕ} {b : M}
       ((tensor0SSpace_continuousLinearEquiv (I := I) (M := M) (n + 1) b) T) (Fin.cons v0 vs)
   rw [continuousMultilinearCurryLeftEquiv_apply]
 
-set_option linter.unusedSectionVars false in
 private theorem continuous_section_apply_aux : ∀ (n : ℕ)
     (T : ∀ b : M, Tensor0SSpace n I b)
     (_hT : Continuous (fun b : M =>
@@ -300,7 +292,6 @@ private theorem continuous_section_apply_aux : ∀ (n : ℕ)
     · simp [Fin.cons_zero]
     · intro k; simp [Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 private theorem contMDiff_section_apply_aux : ∀ (n : ℕ)
     (T : ∀ b : M, Tensor0SSpace n I b)
     (_hT : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel n ℝ E)) ∞
@@ -373,7 +364,6 @@ private theorem contMDiff_section_apply_aux : ∀ (n : ℕ)
     · simp [Fin.cons_zero]
     · intro k; simp [Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 theorem continuous_section_apply
     {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -387,7 +377,6 @@ theorem continuous_section_apply
       Tensor0SSpace.toModel (T b) (fun i : Fin n => v i b)) :=
   continuous_section_apply_aux n T hT v hv
 
-set_option linter.unusedSectionVars false in
 theorem contMDiff_section_apply
     {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -403,7 +392,6 @@ theorem contMDiff_section_apply
       (fun b : M => Tensor0SSpace.toModel (T b) (fun i : Fin n => v i b)) :=
   contMDiff_section_apply_aux n T hT v hv
 
-set_option linter.unusedSectionVars false in
 theorem contMDiffAt_curriedSection_of_contMDiffAt_section {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b) (x₀ : M)
     (hT : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel (n + 1) ℝ E)) ∞
@@ -441,7 +429,6 @@ theorem contMDiffAt_curriedSection_of_contMDiffAt_section {n : ℕ}
         (fun y : M => Tensor0SSpace (n + 1) I y) x₀ ⟨b, T b⟩).2)
   exact trivializationAt_homBundle_curriedSection_eq (I := I) (M := M) T x₀ b hb
 
-set_option linter.unusedSectionVars false in
 private theorem contMDiffAt_section_apply_aux : ∀ (n : ℕ) (x₀ : M)
     (T : ∀ b : M, Tensor0SSpace n I b)
     (_hT : ContMDiffAt I (I.prod 𝓘(ℝ, Tensor0SModel n ℝ E)) ∞
@@ -515,7 +502,6 @@ private theorem contMDiffAt_section_apply_aux : ∀ (n : ℕ) (x₀ : M)
     · simp [Fin.cons_zero]
     · intro k; simp [Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 theorem contMDiffAt_section_apply
     {n : ℕ} {x₀ : M}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -531,7 +517,6 @@ theorem contMDiffAt_section_apply
       (fun b : M => Tensor0SSpace.toModel (T b) (fun i : Fin n => v i b)) x₀ :=
   contMDiffAt_section_apply_aux n x₀ T hT v hv
 
-set_option linter.unusedSectionVars false in
 private theorem contMDiffWithinAt_curriedSection_of_contMDiffWithinAt_section_prod {n : ℕ}
     {s : Set (M × ℝ)} {p₀ : M × ℝ}
     (T : ∀ b : M, Tensor0SSpace (n + 1) I b)
@@ -586,7 +571,6 @@ private theorem contMDiffWithinAt_curriedSection_of_contMDiffWithinAt_section_pr
     exact trivializationAt_homBundle_curriedSection_eq (I := I) (M := M) T p₀.1 p₀.1
       (mem_baseSet_trivializationAt _ _ _)
 
-set_option linter.unusedSectionVars false in
 theorem contMDiffWithinAt_section_apply_prod : ∀ (n : ℕ)
     {s : Set (M × ℝ)} {p₀ : M × ℝ}
     (T : ∀ b : M, Tensor0SSpace n I b)
@@ -680,7 +664,6 @@ theorem contMDiffWithinAt_section_apply_prod : ∀ (n : ℕ)
       · simp [Fin.cons_zero]
       · intro k; simp [Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 theorem contMDiffAt_section_apply_prod {n : ℕ} {p₀ : M × ℝ}
     (T : ∀ b : M, Tensor0SSpace n I b)
     (hT : ContMDiffAt (I.prod 𝓘(ℝ,ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel n ℝ E)) ∞
@@ -695,7 +678,6 @@ theorem contMDiffAt_section_apply_prod {n : ℕ} {p₀ : M × ℝ}
   exact contMDiffWithinAt_section_apply_prod n T hT v
     (fun i => (contMDiffWithinAt_univ).mpr (hv i))
 
-set_option linter.unusedSectionVars false in
 theorem contMDiff_section_apply_prod {n : ℕ}
     (T : ∀ b : M, Tensor0SSpace n I b)
     (hT : ContMDiff (I.prod 𝓘(ℝ,ℝ)) (I.prod 𝓘(ℝ, Tensor0SModel n ℝ E)) ∞

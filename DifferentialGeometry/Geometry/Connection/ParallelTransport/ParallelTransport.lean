@@ -35,7 +35,7 @@ open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem parallel_ode_chart_local
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) (Y : ℝ → E) (s : Set ℝ) :
@@ -50,7 +50,6 @@ theorem parallel_ode_chart_local
   refine imp_congr_right (fun _ => ?_)
   simp [zero_sub]
 
-set_option linter.unusedSectionVars false in
 theorem parallel_local_existence_uniqueness [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (uPrime : ℝ → E) {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Icc a b)
@@ -77,7 +76,6 @@ theorem parallel_local_existence_uniqueness [I.Boundaryless]
   exact parallel_local_uniqueness_on_Icc (I := I) g α γ uPrime hab ht₀ huCont
     huCurveCont hsource hY_deriv hY'_deriv (hY_init.trans hY'_init.symm)
 
-set_option linter.unusedSectionVars false in
 theorem parallel_chart_overlap_consistency [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α β : M) (γ : ℝ → M) (hγ : Continuous γ)
     (uPrimeα Yα : ℝ → E) (s : Set ℝ)
@@ -200,7 +198,6 @@ theorem parallel_chart_overlap_consistency [I.Boundaryless]
       simpa using hYβd
     exact hgoal
 
-set_option linter.unusedSectionVars false in
 theorem parallel_global_extension [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     {a b t₀ : ℝ} (hab : a ≤ b) (ht₀ : t₀ ∈ Set.Ioo a b)
@@ -267,7 +264,6 @@ noncomputable def parallelTransport [I.Boundaryless]
   ⟨(parallel_global_extension (I := I) g α γ hd.hab hd.ht₀ hd.huCont
       hd.huCurveCont hd.huDeriv hd.hsource v₀).choose⟩
 
-set_option linter.unusedSectionVars false in
 lemma parallelTransport_spec [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -278,14 +274,12 @@ lemma parallelTransport_spec [I.Boundaryless]
   (parallel_global_extension (I := I) g α γ hd.hab hd.ht₀ hd.huCont
     hd.huCurveCont hd.huDeriv hd.hsource v₀).choose_spec.1
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem parallelTransport_initial [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
     (parallelTransport (I := I) g α γ hd v₀).toFun t₀ = v₀ :=
   (parallelTransport_spec (I := I) g α γ hd v₀).1
 
-set_option linter.unusedSectionVars false in
 theorem parallelTransport_isParallel [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ : E) :
@@ -294,7 +288,6 @@ theorem parallelTransport_isParallel [I.Boundaryless]
       (parallelTransport (I := I) g α γ hd v₀).toFun (Set.Ioo a b) :=
   (parallelTransport_spec (I := I) g α γ hd v₀).2
 
-set_option linter.unusedSectionVars false in
 theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     {V W : ℝ → E} {s : Set ℝ}
@@ -358,7 +351,6 @@ theorem chartGramAlongCurve_hasDerivAt_zero_of_parallel [I.Boundaryless]
   rw [hVzero, hWzero] at hbase
   simpa using hbase
 
-set_option linter.unusedSectionVars false in
 theorem parallelTransport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {a b t₀ : ℝ}
     (hd : ParallelSegmentData (I := I) g α γ a b t₀) (v₀ w₀ : E)
@@ -394,7 +386,7 @@ theorem parallelTransport_preserves_inner_product [I.Boundaryless]
       (fun τ hτ => (hderiv τ hτ).deriv) hx hd.ht₀
   exact hconst t ht
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem trivialization_coordinateChange_eq_chartTransitionAt [I.Boundaryless]
     (α β : M) {b : M}
     (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
@@ -503,7 +495,6 @@ theorem chartCurve_continuousOn_of_mapsTo
     exact hsrc t ht
   exact hφ.comp hγ.continuousOn hmaps
 
-set_option linter.unusedSectionVars false in
 theorem exists_piece_parallel_section [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {a b t₀ : ℝ} (hab : a < b)
@@ -638,7 +629,6 @@ theorem exists_piece_parallel_section [I.Boundaryless]
     rw [hgoal, hYβ_zero]
 
 
-set_option linter.unusedSectionVars false in
 theorem parallel_transport_preserves_inner_product [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (_hlohi : lo ≤ hi)
@@ -749,7 +739,6 @@ theorem parallel_transport_preserves_inner_product [I.Boundaryless]
   intro t ht
   exact hconst t ht
 
-set_option linter.unusedSectionVars false in
 theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {lo hi : ℝ} (hlohi : lo ≤ hi)
@@ -804,7 +793,7 @@ theorem parallel_transport_unique_of_eq_at_point [I.Boundaryless]
   rw [sub_eq_zero] at this
   exact this
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem chartRepAt_eventuallyEq_of_eventuallyEq (γ : ℝ → M)
     {V W : ∀ t, TangentSpace I (γ t)} {t : ℝ}
     (h : ∀ᶠ s in 𝓝 t, V s = W s) :
@@ -812,7 +801,7 @@ theorem chartRepAt_eventuallyEq_of_eventuallyEq (γ : ℝ → M)
   filter_upwards [h] with s hs
   rw [chartRepAt_apply, chartRepAt_apply, hs]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_congr_of_eventuallyEq (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     {V W : ∀ t, TangentSpace I (γ t)} {t : ℝ}
     (h : ∀ᶠ s in 𝓝 t, V s = W s) :
@@ -850,7 +839,6 @@ theorem exists_uniform_chart_radius
   simp only [hc_def, Set.mem_preimage] at this
   exact this
 
-set_option linter.unusedSectionVars false in
 theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
@@ -1021,7 +1009,6 @@ theorem exists_global_parallel_transport_on_Ioo [I.Boundaryless]
   · intro t ht
     exact hV_par t ⟨ht.1, ht.2⟩
 
-set_option linter.unusedSectionVars false in
 theorem exists_parallel_transport_on_Icc [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ,ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :

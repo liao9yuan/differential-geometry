@@ -80,6 +80,7 @@ private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     (extChartAt I α).map_target hy
   rwa [extChartAt_source] at hsrc
 
+set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covChartMetricGram_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)

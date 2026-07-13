@@ -100,6 +100,7 @@ lemma gradInnerSmooth_pt_add
       (w.smooth.mdifferentiable (by simp) x)
   rw [hgrad_add, ContinuousLinearMap.map_add]
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 lemma gradInnerSmooth_pt_smul
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯)

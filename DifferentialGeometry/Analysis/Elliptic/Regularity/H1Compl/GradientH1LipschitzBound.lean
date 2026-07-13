@@ -246,6 +246,7 @@ private lemma eLpNorm_chartPulledWeighted_le_eLpNorm_volume_of_support_in_kPou
     rw [← ENNReal.ofReal_rpow_of_nonneg hM_d_nn (by positivity)]
   rw [h_pow_eq, smul_eq_mul]
 
+set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma lintegral_enorm_v_toFun_sq_eq
     {g : SmoothRiemannianMetric I M} (v : SmoothScalar g) :

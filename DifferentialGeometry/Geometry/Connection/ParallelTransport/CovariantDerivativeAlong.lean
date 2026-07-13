@@ -42,7 +42,7 @@ lemma symmL_chartRepAt_self (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) 
   exact (trivializationAt E (TangentSpace I) (γ t)).symmL_continuousLinearMapAt
     (R := ℝ) hmem (V t)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem sectionAlongCurve_continuousWithinAt_totalSpace
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ} {x₀ : ℝ}
     (hx₀ : x₀ ∈ s)
@@ -70,7 +70,7 @@ theorem sectionAlongCurve_continuousWithinAt_totalSpace
     hV.continuousAt.continuousWithinAt
   exact hcont.congr_of_eventuallyEq heq (heq.eq_of_nhdsWithin hx₀)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem sectionAlongCurve_continuousOn_totalSpace
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
     (hγ : ContinuousOn γ s)
@@ -81,7 +81,7 @@ theorem sectionAlongCurve_continuousOn_totalSpace
   exact sectionAlongCurve_continuousWithinAt_totalSpace (I := I) γ V hx₀
     (hγ x₀ hx₀) (hV x₀ hx₀)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem sectionAlongCurve_continuousOn_totalSpace_of_contMDiffOn
     (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) {s : Set ℝ}
     (hγ : ContMDiffOn 𝓘(ℝ, ℝ) I 1 γ s)
@@ -95,14 +95,14 @@ def covDerivAlong (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
     (chartCovDerivAlong (I := I) g (γ t) γ (chartRepAt (I := I) γ V t) t)
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 @[simp] lemma covDerivAlong_def (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ V t =
       (trivializationAt E (TangentSpace I) (γ t)).symmL ℝ (γ t)
         (chartCovDerivAlong (I := I) g (γ t) γ (chartRepAt (I := I) γ V t) t) := rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlong_chartCoord (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt ℝ (γ t)
@@ -114,7 +114,7 @@ lemma covDerivAlong_chartCoord (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   exact (trivializationAt E (TangentSpace I) (γ t)).continuousLinearMapAt_symmL
     (R := ℝ) hmem _
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ V t = 0 ↔
@@ -127,7 +127,6 @@ lemma covDerivAlong_eq_zero_iff (g : SmoothRiemannianMetric I M) (γ : ℝ → M
   · intro h
     rw [covDerivAlong_def, h, map_zero]
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma covDerivAlong_zero (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ) :
     covDerivAlong (I := I) g γ (fun s => (0 : TangentSpace I (γ s))) t = 0 := by
   have hrep : chartRepAt (I := I) γ (fun s => (0 : TangentSpace I (γ s))) t = fun _ => (0 : E) := by
@@ -160,7 +159,7 @@ lemma chartRepAt_smulFun (γ : ℝ → M) (f : ℝ → ℝ) (V : ∀ t, TangentS
   funext s
   simp [chartRepAt, map_smul]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_add (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V W : ∀ t, TangentSpace I (γ t)) (t : ℝ)
     (hV : DifferentiableAt ℝ (chartRepAt (I := I) γ V t) t)
@@ -176,7 +175,7 @@ theorem covDerivAlong_add (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_add_right]
   abel
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (c : ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     covDerivAlong (I := I) g γ (fun s => c • V s) t =
@@ -190,7 +189,7 @@ theorem covDerivAlong_smul (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   rw [ChartChristoffel.contraction_smul_right]
   rw [smul_add]
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_smulFun (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (f : ℝ → ℝ) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ)
     (hf : DifferentiableAt ℝ f t)
@@ -249,14 +248,14 @@ private lemma contDiffOn_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ 
   rw [hfun]
   exact contMDiffOn_iff_contDiffOn.mp h_comp_mdiff
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 lemma contDiffAt_chartCurve {n : WithTop ℕ∞} [IsManifold I n M] {γ : ℝ → M}
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ) (t : ℝ) :
     ContDiffAt ℝ n (chartCurve (I := I) (γ t) γ) t :=
   (contDiffOn_chartCurve (I := I) hγ t).contDiffAt
     ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma velocity_chartRep_eqOn {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     EqOn (chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t)
       (deriv (chartCurve (I := I) (γ t) γ)) (chartTime I γ t) := by
@@ -269,14 +268,14 @@ private lemma velocity_chartRep_eqOn {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ,
     (γ := γ) hγ (γ t) (t := s) hs']
   rfl
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ E)] in
 private lemma velocity_chartRep_eventuallyEq {γ : ℝ → M} (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     chartRepAt (I := I) γ (fun s => (mfderiv 𝓘(ℝ, ℝ) I γ s : ℝ →L[ℝ] _) (1 : ℝ)) t
       =ᶠ[𝓝 t] deriv (chartCurve (I := I) (γ t) γ) :=
   (velocity_chartRep_eqOn (I := I) hγ t).eventuallyEq_of_mem
     ((chartTime_isOpen (I := I) hγ.continuous t).mem_nhds (mem_chartTime_self (I := I) γ t))
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) :
@@ -340,7 +339,7 @@ theorem covDerivAlong_velocity_eq_zero_iff_hasGeodesicEquationAt
     rw [← hv_eq, ← ha_eq]
     exact hid
 
-set_option linter.unusedSectionVars false in
+omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
 theorem covDerivAlong_velocity_eq_zero_of_hasGeodesicEquationAt_C2
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (t : ℝ)
     (hγ2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t)
@@ -430,7 +429,7 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ
 lemma chartRepAtBase_foot (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAtBase (I := I) (γ t) γ V = chartRepAt (I := I) γ V t := rfl
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
     (α β : M) {b : M}
     (hα : b ∈ (chartAt H α).source) (hβ : b ∈ (chartAt H β).source) (v : E) :
@@ -459,7 +458,6 @@ private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
   rw [← hcc]
   exact hcomp
 
-set_option linter.unusedSectionVars false in
 theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))
@@ -625,7 +623,7 @@ theorem covDerivAlong_chart_foot_invariance [I.Boundaryless]
   abel
 
 
-set_option linter.unusedSectionVars false in
+omit [NeZero (Module.finrank ℝ E)] in
 theorem chartRepAtBase_differentiableAt [I.Boundaryless]
     {n : WithTop ℕ∞} [ENat.LEInfty n] (hn : n ≠ 0)
     (_g : SmoothRiemannianMetric I M) (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t))

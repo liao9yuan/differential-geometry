@@ -55,14 +55,12 @@ private local instance : BorelSpace M := ⟨rfl⟩
 namespace SmoothCcTensor
 
 
-set_option linter.unusedSectionVars false in
 theorem hasCompactSupport_toFun
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) : HasCompactSupport S.toFun :=
   S.hasCompactSupport
 
 
-set_option linter.unusedSectionVars false in
 theorem hasCompactSupport_inner_self
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -79,7 +77,6 @@ theorem hasCompactSupport_inner_self
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x 0
 
 
-set_option linter.unusedSectionVars false in
 theorem hasCompactSupport_inner_cross
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S T : SmoothCcTensor g r s) :
@@ -95,7 +92,6 @@ theorem hasCompactSupport_inner_cross
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x (T.toFun x)
 
-set_option linter.unusedSectionVars false in
 private lemma rs_baseSet_eq_chart_source (α : M) (r s : ℕ) :
     (trivializationAt (TensorRSModel r s ℝ E)
         (fun x : M => TensorRSSpace r s I x) α).baseSet =
@@ -112,7 +108,6 @@ omit [Module.Finite ℝ E] in
 private lemma tangent_baseSet_eq_chart_source (α : M) :
     (trivializationAt E (TangentSpace I) α).baseSet = (chartAt H α).source := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma contMDiffOn_trivProj_chart_source
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α : M) :
@@ -132,7 +127,6 @@ private lemma contMDiffOn_trivProj_chart_source
   rw [hbase] at hrewrite
   exact hrewrite
 
-set_option linter.unusedSectionVars false in
 private lemma continuousOn_trivProj_chart_source
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (α : M) :
@@ -143,7 +137,6 @@ private lemma continuousOn_trivProj_chart_source
       ((chartAt H α).source) :=
   (contMDiffOn_trivProj_chart_source (I := I) (M := M) S α).continuousOn
 
-set_option linter.unusedSectionVars false in
 private lemma continuous_totalSpace_section
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) :
@@ -170,7 +163,6 @@ private lemma tangent_symmL_self (x : M) :
   exact (tangentBundleCore I M).coordChange_self (achart H x) x
     (by rw [tangentBundleCore_baseSet, coe_achart]; exact mem_chart_source H x) v
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0S_continuousLinearMapAt_self_apply (s : ℕ) (x : M)
     (p : Tensor0SSpace s I x) :
     (trivializationAt (Tensor0SModel s ℝ E)
@@ -196,7 +188,6 @@ private lemma tensor0S_continuousLinearMapAt_self_apply (s : ℕ) (x : M)
   change p (fun i => (1 : E →L[ℝ] E) (v i)) = p v
   congr
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0S_symmL_self_apply (s : ℕ) (x : M)
     (p : Tensor0SModel s ℝ E) :
     (trivializationAt (Tensor0SModel s ℝ E)
@@ -216,7 +207,6 @@ private lemma tensor0S_symmL_self_apply (s : ℕ) (x : M)
         (fun y : M => Tensor0SSpace s I y) x).symmL ℝ x p)
   exact hid.symm.trans hinv
 
-set_option linter.unusedSectionVars false in
 private lemma tensorRS_centre_point_identity
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     (S : SmoothCcTensor g r s) (x : M) :
@@ -237,7 +227,6 @@ private lemma tensorRS_centre_point_identity
     ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from S.toSection x) v)]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma inner_self_eq_zero_off_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s)
     {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -248,7 +237,6 @@ private lemma inner_self_eq_zero_off_support
   rw [hSx_zero]
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x 0
 
-set_option linter.unusedSectionVars false in
 private lemma inner_cross_eq_zero_off_S_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S T : SmoothCcTensor g r s)
     {x : M} (hx : x ∉ tsupport S.toFun) :
@@ -260,7 +248,6 @@ private lemma inner_cross_eq_zero_off_S_support
   exact tensorInnerPointwise_zero_left (I := I) (M := M) g r s x (T.toFun x)
 
 
-set_option linter.unusedSectionVars false in
 theorem continuous_inner_self
     [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
@@ -278,7 +265,6 @@ theorem continuous_inner_self
         (I := I) (M := M) g r s S.toSection α)
 
 
-set_option linter.unusedSectionVars false in
 theorem continuous_inner_cross
     [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -297,7 +283,6 @@ theorem continuous_inner_cross
         (I := I) (M := M) g r s T.toSection α)
 
 
-set_option linter.unusedSectionVars false in
 theorem aestronglyMeasurable_inner_self
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
@@ -308,7 +293,6 @@ theorem aestronglyMeasurable_inner_self
   (continuous_inner_self (I := I) (M := M) S).aestronglyMeasurable
 
 
-set_option linter.unusedSectionVars false in
 theorem aestronglyMeasurable_inner_cross
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -320,7 +304,6 @@ theorem aestronglyMeasurable_inner_cross
   (continuous_inner_cross (I := I) (M := M) S T).aestronglyMeasurable
 
 
-set_option linter.unusedSectionVars false in
 theorem integrable_inner_cross
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -336,7 +319,6 @@ theorem integrable_inner_cross
     (hasCompactSupport_inner_cross (I := I) (M := M) S T)
 
 
-set_option linter.unusedSectionVars false in
 theorem memL2_toFun
     [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
     {g : SmoothRiemannianMetric I M} {r s : ℕ} (S : SmoothCcTensor g r s) :
