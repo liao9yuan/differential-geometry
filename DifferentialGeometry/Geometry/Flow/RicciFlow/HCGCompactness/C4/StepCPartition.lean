@@ -546,6 +546,80 @@ theorem hatPOU_active_mem (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     simpa [Function.mem_support] using hγx
   exact hρ γ (subset_tsupport (ρ γ) hx_support)
 
+/-- Membership in two `4 * lamInf` hats witnesses intersection of the
+corresponding book `5 * lamInf` balls. -/
+theorem binter_of_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    {α β : Fin (pb.A r)} {z : (X.obj (L.φ k)).M}
+    (hα : z ∈ L.hatBall hd D P pb r k α)
+    (hβ : z ∈ L.hatBall hd D P pb r k β) :
+    BInter hd D P L.lamInf (α : Nat) (β : Nat) (L.φ k) := by
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  cases hcα : seqCenter hd D P (L.φ k) (α : Nat) with
+  | none => simp [hatBall, hcα] at hα
+  | some x =>
+      cases hcβ : seqCenter hd D P (L.φ k) (β : Nat) with
+      | none => simp [hatBall, hcβ] at hβ
+      | some y =>
+          have hα' : z ∈ Metric.ball x (4 * L.lamInf (α : Nat)) := by
+            simpa only [hatBall, hcα] using hα
+          have hβ' : z ∈ Metric.ball y (4 * L.lamInf (β : Nat)) := by
+            simpa only [hatBall, hcβ] using hβ
+          have hlamAlpha : 0 < L.lamInf (α : Nat) :=
+            hd.lambda_pos hD (L.rInf (α : Nat))
+          have hlamBeta : 0 < L.lamInf (β : Nat) :=
+            hd.lambda_pos hD (L.rInf (β : Nat))
+          refine ⟨x, y, hcα, hcβ, Set.not_disjoint_iff.mpr ⟨z, ?_, ?_⟩⟩
+          · rw [Metric.mem_ball] at hα' ⊢
+            nlinarith
+          · rw [Metric.mem_ball] at hβ' ⊢
+            nlinarith
+
+/-- A nonzero subordinate hat weight can interact only with a hat containing
+the same source point. -/
+theorem binter_of_active (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    (ρ :
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).sigmaCompact
+      letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+      letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+      SmoothPartitionOfUnity (Fin (pb.A r)) I (X.obj (L.φ k)).M
+        (Metric.closedBall (X.obj (L.φ k)).basepoint r))
+    (hρ :
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).sigmaCompact
+      letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+      letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+      ρ.IsSubordinate (fun γ : Fin (pb.A r) => L.hatBall hd D P pb r k γ))
+    {β γ : Fin (pb.A r)} {x : (X.obj (L.φ k)).M}
+    (hβx :
+      letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+      x ∈ L.hatBall hd D P pb r k β)
+    (hγx :
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).sigmaCompact
+      letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+      letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+      ρ γ x ≠ 0) :
+    BInter hd D P L.lamInf (β : Nat) (γ : Nat) (L.φ k) := by
+  letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+  letI : SigmaCompactSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).sigmaCompact
+  letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  exact L.binter_of_mem_hat hd hD P pb r k hβx
+    (L.hatPOU_active_mem hd P pb r k ρ hρ hγx)
+
 /-- Bundled Step-C hat POU weight facts at a point of the covered base ball:
 nonnegativity, a positive weight, and finite sum one. -/
 theorem hatPOU_weights (hd : InjRadiusDecayInput (I := I) X) {D : Real}

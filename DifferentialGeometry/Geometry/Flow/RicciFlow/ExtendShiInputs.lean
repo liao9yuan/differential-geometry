@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendViaUniqueness
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CovOrderTail
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
@@ -435,23 +436,148 @@ theorem ric_quad_le_of_soln
     (hbound t x ht.1 ht.2) v
   rwa [show Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E from rfl] at h
 
-/-- **Cited producer: interior covariant metric bounds (Shi's derivative estimates, GSM77 Ch. 7).**
-Body `sorry` — a cited black box; the eventual discharge is the banked Bernstein–Bando–Shi tower
-(`Evolution/BernsteinShi*`, `Evolution/StarSum/*`).  From a bounded-curvature solution (`hS` + the raw
-`|Rm|²` bound `hbound`), the fixed-background covariant derivatives of the metric up to order 3 are
-uniformly bounded on a tail `[t₂, ω)` — exactly `ricci_flow_interior_restart`'s `hcov` for
-`g_fam := S.base.metric`.  This is the third and final cited input of the interior-restart route. -/
-theorem shiCovBound_of_soln
+/-- A bound for any lowered Riemann section realizing the solution connection
+transfers to the canonical metric curvature section. -/
+theorem rm04_bound_can
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
     (Rm04 : ℝ → Tensor04Section (I := I) (M := M))
+    (hRm : ∀ t ∈ Set.Ico alpha omega,
+      Rm04RealizesConnection (I := I) (S.base.metric t)
+        (metricCov (I := I) (M := M) (S.base.metric t)) (Rm04 t))
+    (hbound : ∃ K : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
+      normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K) :
+    ∃ K : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
+      normSq0S (I := I) (S.base.metric t) x 4 ((S.base.rm04 t) x) ≤ K := by
+  obtain ⟨K, hK⟩ := hbound
+  refine ⟨K, fun t x htα htω => ?_⟩
+  have hcan :
+      Rm04RealizesConnection (I := I) (S.base.metric t)
+        (metricCov (I := I) (M := M) (S.base.metric t)) (S.base.rm04 t) := by
+    simpa [SolutionFamily.rm04, metricCov] using
+      (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
+  have heq := rm04_eq_of_realizes (I := I) (S.base.metric t)
+    (metricCov (I := I) (M := M) (S.base.metric t)) hcan
+    (hRm t ⟨htα, htω⟩) x
+  rw [heq]
+  exact hK t x htα htω
+
+/-- Moving-metric Shi estimates on all upper-truncated tail windows of a
+bounded-curvature Ricci-flow solution. -/
+theorem movingShi_of_soln
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    (_hdim : Module.finrank ℝ E = 3)
     (_hS : IsSolutionOn (I := I) S)
     (_hbound : ∃ K : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
-      normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K) :
+      normSq0S (I := I) (S.base.metric t) x 4 ((S.base.rm04 t) x) ≤ K) :
+    ∃ KShi : ℝ, 0 ≤ KShi ∧ ∃ tShi ∈ Set.Ico alpha omega,
+      ∀ ψ ∈ Set.Ico tShi omega,
+        MovingShiBoundOn (I := I) Set.univ tShi ψ
+          (fun _ t => S.base.metric t) 3 KShi := by
+  sorry
+
+/-- Interior fixed-background covariant metric bounds obtained from uniform
+metric equivalence, moving Shi estimates, and the constants-first Lemma 3.11
+tower. -/
+theorem shiCovBound_of_soln
+    {alpha omega : ℝ} {hαω : alpha < omega}
+    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
+    (hdim : Module.finrank ℝ E = 3)
+    (_hS : IsSolutionOn (I := I) S)
+    (_hbound : ∃ K : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
+      normSq0S (I := I) (S.base.metric t) x 4 ((S.base.rm04 t) x) ≤ K)
+    (hEquiv : ∃ Λ : ℝ, 1 ≤ Λ ∧ ∃ t₁ ∈ Set.Ico alpha omega,
+      ∀ s ∈ Set.Ico t₁ omega, ∀ x : M, ∀ v : TangentSpace I x,
+        Λ⁻¹ * (S.base.metric alpha).inner x v v ≤ (S.base.metric s).inner x v v ∧
+          (S.base.metric s).inner x v v ≤ Λ * (S.base.metric alpha).inner x v v) :
     ∃ C : ℝ, 1 ≤ C ∧ ∃ t₂ ∈ Set.Ico alpha omega, ∀ s ∈ Set.Ico t₂ omega,
       ∀ a : ℕ, a ≤ 3 →
         MetricCovDerivOrderBoundOn Set.univ a (S.base.metric s) (S.base.metric alpha) C := by
-  sorry
+  classical
+  obtain ⟨Λ, hΛ, t₁, ht₁, hEquivTail⟩ := hEquiv
+  obtain ⟨KShi, hKShi0, tShi, htShi, hShi⟩ :=
+    movingShi_of_soln (I := I) hdim _hS _hbound
+  have hmaxω : max t₁ tShi < omega := max_lt ht₁.2 htShi.2
+  obtain ⟨t₂, hmaxt₂, ht₂ω⟩ := exists_between hmaxω
+  have ht₁t₂ : t₁ ≤ t₂ := le_trans (le_max_left _ _) hmaxt₂.le
+  have htShit₂ : tShi ≤ t₂ := le_trans (le_max_right _ _) hmaxt₂.le
+  have hαt₂ : alpha < t₂ :=
+    lt_of_le_of_lt (le_trans ht₁.1 (le_max_left _ _)) hmaxt₂
+  let D := RealTimeInterval.closedOpen alpha omega hαω
+  let gSeq : Nat → ℝ → SmoothRiemannianMetric I M := fun _ t => S.base.metric t
+  let gRef : SmoothRiemannianMetric I M := S.base.metric alpha
+  have hequivWindow : ∀ ψ ∈ Set.Ico t₂ omega,
+      MetricUniformEquivalentOnWindow (I := I) Set.univ t₂ ψ gRef gSeq (fun _ => Λ) := by
+    intro ψ hψ i t ht
+    refine ⟨hΛ, ?_⟩
+    intro x _hx v
+    exact hEquivTail t ⟨le_trans ht₁t₂ ht.1, lt_of_le_of_lt ht.2 hψ.2⟩ x v
+  have hShiWindow : ∀ ψ ∈ Set.Ico t₂ omega,
+      MovingShiBoundOn (I := I) Set.univ t₂ ψ gSeq 3 KShi := by
+    intro ψ hψ q hq i t ht x hx
+    exact hShi ψ ⟨le_trans htShit₂ hψ.1, hψ.2⟩ q hq i t
+      ⟨le_trans htShit₂ ht.1, ht.2⟩ x hx
+  have hDreg : ∀ {t : ℝ}, t ∈ D.regular → D.regular ∈ nhds t :=
+    fun {_t} ht => D.regular_isOpen.mem_nhds ht
+  have hevWindow : ∀ ψ ∈ Set.Ico t₂ omega, ∀ q : Nat, 1 ≤ q → q ≤ 3 →
+      ∀ i : Nat, ∀ x ∈ Set.univ, ∀ s ∈ Set.Icc t₂ ψ,
+        ∀ v : Fin (q + 2) → TangentSpace I x,
+          HasDerivAt
+            (fun r : ℝ => metricCovDeriv (I := I) (gSeq i r) gRef q x v)
+            (((-2 : ℝ) • nablaRicReal (I := I) gSeq gRef q i s x) v) s := by
+    intro ψ hψ q _hq1 _hq3
+    exact hevComp_of_solutions (I := I) (K := Set.univ) (β := t₂) (ψ := ψ) (N := q)
+      (fun _ => D) (fun _ => S) (fun _ => _hS) (fun _ _ => rfl)
+      (fun _ t ht => by
+        change t ∈ Set.Ioo alpha omega
+        exact ⟨lt_of_lt_of_le hαt₂ ht.1, lt_of_le_of_lt ht.2 hψ.2⟩)
+      (fun _ p hp V x₀ => solnTowerSwap_reg (I := I) gRef S _hS q hDreg p hp V x₀)
+  obtain ⟨initC, hinitC0, hinit⟩ := exists_initC (I := I) (S.base.metric t₂) gRef
+  have htime : ∀ t ∈ Set.Ico t₂ omega, |t - t₂| ≤ omega - t₂ := by
+    intro t ht
+    rw [abs_of_nonneg (sub_nonneg.mpr ht.1)]
+    linarith [ht.2]
+  have hpos := covOrder_Ico_tail (I := I)
+    (K := Set.univ) (U := Set.univ) (t0 := t₂) (omega := omega)
+    (gSeq := gSeq) (gRef := gRef)
+    isCompact_univ isOpen_univ (subset_refl Set.univ) 3 Λ hΛ KShi hKShi0
+    initC hinitC0 (omega - t₂) (fun _ => Λ) hequivWindow
+    (fun _ _ => le_rfl) hShiWindow hevWindow
+    (fun q _ _ _i x _hx => hinit q x) htime
+  obtain ⟨C₁, hC₁⟩ := hpos 1 (by omega) (by omega)
+  obtain ⟨C₂, hC₂⟩ := hpos 2 (by omega) (by omega)
+  obtain ⟨C₃, hC₃⟩ := hpos 3 (by omega) (by omega)
+  let Cpos := max C₁ (max C₂ C₃)
+  have hposAll : ∀ s ∈ Set.Ico t₂ omega, ∀ a : Nat, 1 ≤ a → a ≤ 3 →
+      MetricCovDerivOrderBoundOn (I := I) Set.univ a (S.base.metric s) gRef Cpos := by
+    intro s hs a ha1 ha3
+    have ha : a = 1 ∨ a = 2 ∨ a = 3 := by omega
+    rcases ha with rfl | rfl | rfl
+    · intro x hx
+      exact le_trans (hC₁ 0 s hs x hx) (le_max_left _ _)
+    · intro x hx
+      exact le_trans (hC₂ 0 s hs x hx) (le_trans (le_max_left _ _) (le_max_right _ _))
+    · intro x hx
+      exact le_trans (hC₃ 0 s hs x hx) (le_trans (le_max_right _ _) (le_max_right _ _))
+  let C₀ := Λ * Real.sqrt (Module.finrank Real E : Real)
+  have hC₀ : ∀ s ∈ Set.Ico t₂ omega,
+      MetricCovDerivOrderBoundOn (I := I) Set.univ 0 (S.base.metric s) gRef C₀ := by
+    intro s hs
+    apply covOrder_zero_le (I := I)
+    refine ⟨hΛ, ?_⟩
+    intro x _hx v
+    exact hEquivTail s ⟨le_trans ht₁t₂ hs.1, hs.2⟩ x v
+  refine ⟨max 1 (max C₀ Cpos), le_max_left _ _, t₂, ⟨hαt₂.le, ht₂ω⟩, ?_⟩
+  intro s hs a ha3
+  by_cases ha0 : a = 0
+  · subst a
+    intro x hx
+    exact le_trans (hC₀ s hs x hx) (le_trans (le_max_left _ _) (le_max_right _ _))
+  · have ha1 : 1 ≤ a := Nat.one_le_iff_ne_zero.mpr ha0
+    intro x hx
+    exact le_trans (hposAll s hs a ha1 ha3 x hx)
+      (le_trans (le_max_right _ _) (le_max_right _ _))
 
 /-- **Y1 endpoint: the two `ricci_flow_interior_restart` inputs from a solution.**  Produces
 `⟨hell, hcov⟩` for `g_fam := S.base.metric`, in RAW-hypothesis form so that Y2 (in `MaximalTime`)
@@ -461,20 +587,21 @@ Ricci-vs-metric bound `hric` (which Y2 discharges from the raw `|Rm|²` bound vi
 theorem extendInputs_of_soln
     {alpha omega : ℝ} {hαω : alpha < omega}
     {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
-    (Rm04 : ℝ → Tensor04Section (I := I) (M := M))
+    (hdim : Module.finrank ℝ E = 3)
     (hS : IsSolutionOn (I := I) S)
     {K : ℝ} (hK : 0 ≤ K)
     (hric : ∀ t ∈ Set.Ico alpha omega, ∀ x : M, ∀ v : TangentSpace I x,
       |ricciTensor (I := I) (S.base.metric t) x v v| ≤ K * (S.base.metric t).inner x v v)
     (hbound : ∃ K' : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
-      normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K') :
+      normSq0S (I := I) (S.base.metric t) x 4 ((S.base.rm04 t) x) ≤ K') :
     (∃ Λ : ℝ, 1 ≤ Λ ∧ ∃ t₁ ∈ Set.Ico alpha omega, ∀ s ∈ Set.Ico t₁ omega,
       ∀ x : M, ∀ v : TangentSpace I x,
         Λ⁻¹ * (S.base.metric alpha).inner x v v ≤ (S.base.metric s).inner x v v ∧
           (S.base.metric s).inner x v v ≤ Λ * (S.base.metric alpha).inner x v v) ∧
     (∃ C : ℝ, 1 ≤ C ∧ ∃ t₂ ∈ Set.Ico alpha omega, ∀ s ∈ Set.Ico t₂ omega,
       ∀ a : ℕ, a ≤ 3 →
-        MetricCovDerivOrderBoundOn Set.univ a (S.base.metric s) (S.base.metric alpha) C) :=
-  ⟨hell_of_soln hS hK hric, shiCovBound_of_soln Rm04 hS hbound⟩
+        MetricCovDerivOrderBoundOn Set.univ a (S.base.metric s) (S.base.metric alpha) C) := by
+  have hEquiv := hell_of_soln hS hK hric
+  exact ⟨hEquiv, shiCovBound_of_soln hdim hS hbound hEquiv⟩
 
 end DifferentialGeometry.PDE.RicciFlow

@@ -23,6 +23,9 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
@@ -129,6 +132,146 @@ theorem lapDiffA20_core
   filter_upwards [lapDiffA2_core (I := I) (M := M) G hG T] with s hs
   intro v
   rw [lapDiffA20_apply, LinearIsometryEquiv.apply_symm_apply, hs v]
+
+/-- The applied `H² → H⁰` moving-Laplacian graph lies in the norm closure of
+its genuine smooth finite-core graph. -/
+theorem lapDiffA20_graph
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) :
+    ∀ᶠ s in nhds (0 : Real),
+      ∀ u : tensorHs (I := I) (M := M)
+          (G.metric (T : Real)) 0 0 2,
+        (u,
+            tensorHsZeroEquivL2 (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator
+                (I := I) (M := M) (G.metric (T : Real)) 0 0)
+              (lapDiffA20 (I := I) (M := M) G T s u)) ∈
+          closure
+            (Set.range fun
+              v : ScalarH2Core (I := I) (M := M)
+                  (G.metric (T : Real)) =>
+                ((v.1 : tensorHs (I := I) (M := M)
+                    (G.metric (T : Real)) 0 0 2),
+                  lapDiffCore (I := I) (M := M)
+                    (G.metric (T : Real))
+                    (G.metric ((T : Real) - s)) v)) := by
+  filter_upwards [lapDiffA20_core (I := I) (M := M) G hG T] with s hs
+  intro u
+  let J := tensorHsZeroEquivL2 (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator
+      (I := I) (M := M) (G.metric (T : Real)) 0 0)
+  let graph :
+      tensorHs (I := I) (M := M) (G.metric (T : Real)) 0 0 2 →
+        tensorHs (I := I) (M := M) (G.metric (T : Real)) 0 0 2 ×
+          TensorL2 0 0 (G.metric (T : Real)) :=
+    fun w => (w, J (lapDiffA20 (I := I) (M := M) G T s w))
+  have hgraph : Continuous graph :=
+    continuous_id.prodMk
+      (J.continuous.comp
+        (lapDiffA20 (I := I) (M := M) G T s).continuous)
+  have hu :
+      u ∈ closure
+        (ScalarH2Core (I := I) (M := M) (G.metric (T : Real)) :
+          Set (tensorHs (I := I) (M := M)
+            (G.metric (T : Real)) 0 0 2)) :=
+    tensorHs.mem_closure_finiteSupportSubmodule (I := I) (M := M) u
+  have hmem := mem_closure_image hgraph.continuousAt hu
+  rw [Set.image_eq_range] at hmem
+  change graph u ∈ closure
+    (Set.range fun
+      v : ScalarH2Core (I := I) (M := M) (G.metric (T : Real)) =>
+        ((v.1 : tensorHs (I := I) (M := M)
+            (G.metric (T : Real)) 0 0 2),
+          lapDiffCore (I := I) (M := M) (G.metric (T : Real))
+            (G.metric ((T : Real) - s)) v))
+  refine closure_mono ?_ hmem
+  rintro _ ⟨x, rfl⟩
+  let v : ScalarH2Core (I := I) (M := M) (G.metric (T : Real)) :=
+    ⟨x.1, x.2⟩
+  refine ⟨v, Prod.ext rfl ?_⟩
+  exact (hs v).symm
+
+/-- Testing the applied moving-Laplacian difference against a finite spectral
+vector lies in the scalar image of the genuine smooth-core graph closure. -/
+theorem lapDiffA20_test
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (T : D.RegularTime) (s : Real)
+    (u : tensorHs (I := I) (M := M)
+      (G.metric (T : Real)) 0 0 2)
+    (w : ScalarH2Core (I := I) (M := M) (G.metric (T : Real)))
+    (hgraph :
+      (u,
+          tensorHsZeroEquivL2 (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator
+              (I := I) (M := M) (G.metric (T : Real)) 0 0)
+            (lapDiffA20 (I := I) (M := M) G T s u)) ∈
+        closure
+          (Set.range fun
+            v : ScalarH2Core (I := I) (M := M)
+                (G.metric (T : Real)) =>
+              ((v.1 : tensorHs (I := I) (M := M)
+                  (G.metric (T : Real)) 0 0 2),
+                lapDiffCore (I := I) (M := M)
+                  (G.metric (T : Real))
+                  (G.metric ((T : Real) - s)) v))) :
+    (u,
+        inner Real
+          (tensorHsZeroEquivL2 (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator
+              (I := I) (M := M) (G.metric (T : Real)) 0 0)
+            (lapDiffA20 (I := I) (M := M) G T s u))
+          (SmoothCcTensor.toL2
+            (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2))) ∈
+      closure
+        (Set.range fun
+          v : ScalarH2Core (I := I) (M := M)
+              (G.metric (T : Real)) =>
+            ((v.1 : tensorHs (I := I) (M := M)
+                (G.metric (T : Real)) 0 0 2),
+              ∫ x, (Δ_g (I := I) (G.metric ((T : Real) - s))
+                      (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+                    Δ_g (I := I) (G.metric (T : Real))
+                      (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) *
+                  reprScalar0 (I := I) (M := M) w.1 w.2 x
+                ∂(riemannianVolumeMeasure (I := I) (M := M)
+                  (G.metric (T : Real))))) := by
+  let J := tensorHsZeroEquivL2 (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator
+      (I := I) (M := M) (G.metric (T : Real)) 0 0)
+  let test : TensorL2 0 0 (G.metric (T : Real)) :=
+    SmoothCcTensor.toL2
+      (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)
+  let eval :
+      (tensorHs (I := I) (M := M) (G.metric (T : Real)) 0 0 2 ×
+          TensorL2 0 0 (G.metric (T : Real))) →
+        tensorHs (I := I) (M := M) (G.metric (T : Real)) 0 0 2 × Real :=
+    fun p => (p.1, inner Real p.2 test)
+  have heval : Continuous eval :=
+    continuous_fst.prodMk
+      (((innerSL Real).flip test).continuous.comp continuous_snd)
+  have hmem := mem_closure_image heval.continuousAt hgraph
+  change eval (u, J (lapDiffA20 (I := I) (M := M) G T s u)) ∈
+    closure
+      (Set.range fun
+        v : ScalarH2Core (I := I) (M := M) (G.metric (T : Real)) =>
+          ((v.1 : tensorHs (I := I) (M := M)
+              (G.metric (T : Real)) 0 0 2),
+            ∫ x, (Δ_g (I := I) (G.metric ((T : Real) - s))
+                    (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+                  Δ_g (I := I) (G.metric (T : Real))
+                    (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) *
+                reprScalar0 (I := I) (M := M) w.1 w.2 x
+              ∂(riemannianVolumeMeasure (I := I) (M := M)
+                (G.metric (T : Real)))))
+  refine closure_mono ?_ hmem
+  rintro _ ⟨_, ⟨v, rfl⟩, rfl⟩
+  refine ⟨v, Prod.ext rfl ?_⟩
+  simpa only [eval, test] using
+    (lapDiffCore_pair (I := I) (M := M)
+      (G.metric (T : Real)) (G.metric ((T : Real) - s)) v w).symm
 
 /-- The support-independent finite-core modulus is unchanged by the
 isometric `L² ≃ H⁰` output identification. -/

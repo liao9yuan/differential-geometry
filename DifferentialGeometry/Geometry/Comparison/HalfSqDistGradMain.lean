@@ -222,6 +222,94 @@ theorem halfSqDist_dir_deriv
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- The gradient of half the squared distance along any minimizing intrinsic
+exponential tangent.  Unlike `grad_halfSqDist`, this statement does not require
+the tangent to come from the fixed normal chart at the base point. -/
+theorem grad_halfSqDist_min
+    [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M] [T3Space M]
+    [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
+    (g : SmoothRiemannianMetric I M)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (q pt : M) (v : TangentSpace I q) :
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    expMapIntrinsic (I := I) g hEnorm q v = pt →
+    Real.sqrt (g.inner q v v) = (riemannianEDist I q pt).toReal →
+    MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q →
+    gradientFun (I := I) g (CenterOfMass.halfSqDist pt) q = -v := by
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  intro hexp hlen hdiff
+  by_cases hpt : pt = q
+  · rw [hpt] at hlen hdiff ⊢
+    have hsqrt : Real.sqrt (g.inner q v v) = 0 := by
+      rw [riemannianEDist_self, ENNReal.toReal_zero] at hlen
+      exact hlen
+    have hinner0 : g.inner q v v = 0 := by
+      nlinarith [Real.sq_sqrt (gInner_self_nonneg (I := I) g q v)]
+    have hv0 : v = 0 := by
+      by_contra hv
+      exact absurd hinner0 (ne_of_gt (g.pos q v hv))
+    have hlocal : IsLocalMin (CenterOfMass.halfSqDist q) q := by
+      unfold IsLocalMin IsMinFilter
+      refine Filter.Eventually.of_forall ?_
+      intro z
+      unfold CenterOfMass.halfSqDist
+      have hsq : 0 ≤ dist z q ^ 2 := sq_nonneg _
+      rw [dist_self]
+      nlinarith
+    have hgrad0 : gradientFun (I := I) g (CenterOfMass.halfSqDist q) q = 0 :=
+      gradientFun_eq_zero_of_isLocalMin (I := I) g hlocal hdiff
+    simpa only [hv0, neg_zero] using hgrad0
+  · set L : ℝ := dist q pt with hL
+    have hLpos : 0 < L := by
+      rw [hL]
+      exact dist_pos.mpr (fun h => hpt h.symm)
+    have hdist_eq : L = Real.sqrt (g.inner q v v) := by
+      rw [hL, HopfRinow.riemMetric_dist_eq (I := I) (M := M) q pt]
+      exact hlen.symm
+    have hgpos : 0 < g.inner q v v := Real.sqrt_pos.mp (hdist_eq ▸ hLpos)
+    have hLsq : L ^ 2 = g.inner q v v := by
+      rw [hdist_eq]
+      exact Real.sq_sqrt hgpos.le
+    have hLne : L ≠ 0 := ne_of_gt hLpos
+    set u : TangentSpace I q := L⁻¹ • v with hu
+    have hu_unit : g.inner q u u = 1 := by
+      rw [hu, gInner_smul_self (I := I) g q L⁻¹ v, ← hLsq, inv_pow]
+      exact inv_mul_cancel₀ (pow_ne_zero 2 hLne)
+    have hLu : (L • u : TangentSpace I q) = v := by
+      rw [hu, smul_smul, mul_inv_cancel₀ hLne, one_smul]
+    have hgL : intrinsicGeodesic (I := I) g hEnorm q u L = pt := by
+      rw [← intrinsicGeodesic_smul (I := I) g hEnorm q u L, hLu,
+        ← expMapIntrinsic_def]
+      exact hexp
+    have hflat :
+        (mfderiv I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q).toLinearMap =
+          metricFlatEquiv (I := I) g q (-v) := by
+      apply LinearMap.ext
+      intro w
+      obtain ⟨f, hf, hf0, hfixL, hfderiv⟩ :=
+        exists_gradVariation (I := I) g hEnorm q pt u L hLpos hgL w
+      have hf00 : f 0 0 = q := by
+        rw [hf0 0]
+        exact intrinsicGeodesic_zero (I := I) g hEnorm q u
+      have hval :=
+        halfSqDist_dir_deriv (I := I) g hEnorm q pt u L hLpos hu_unit hgL
+          f hf hf0 hfixL hf00 hL.symm hdiff
+      have hw' : mfderiv 𝓘(ℝ, ℝ) I (fun s : ℝ => f s 0) 0 (1 : ℝ) = w := hfderiv
+      have hu' :
+          mfderiv 𝓘(ℝ, ℝ) I (intrinsicGeodesic (I := I) g hEnorm q u) 0 (1 : ℝ) = u :=
+        intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm q u
+      rw [hw', hu'] at hval
+      have hvw : g.inner q v w = L * g.inner q u w := by
+        rw [← hLu, (g.inner q).map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
+      change mfderiv I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist pt) q w =
+        g.inner q (-v) w
+      rw [hval, (g.inner q).map_neg, ContinuousLinearMap.neg_apply, hvw,
+        g.symm q w u, mul_neg]
+    exact gradientFun_eq_of_flat (I := I) g hflat
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- **One-summand distance-squared gradient covector identity (`lbl411`).**  For
 `pt` in a small normal ball of `q` with `pt ≠ q`, the differential of
 `halfSqDist pt = ½ d²(·, pt)` at `q` is the metric flat of `-exp_q⁻¹(pt)`:

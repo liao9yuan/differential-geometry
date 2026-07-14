@@ -5,7 +5,13 @@
 The local `toRS0_sub` proof now changes directly to the scalar-evaluation
 smul identity and applies `smul_sub`, avoiding the old reducible Hom
 representation.  Focused verification and the refreshed targeted build pass.
-No public statement or progress percentage changed.
+
+`lapDiffCore_pair` now identifies the fixed-`mu_q` pairing of one genuine
+finite-core moving-Laplacian value against another finite-core test with the
+corresponding scalar integral.  The theorem is fully applied and scalar-valued;
+it does not assert equality of tensor-valued or Hom-valued objects.  Focused
+verification passes.  This closes the core identity needed by the applied graph
+consumer, but it is not a cross-metric formal-adjoint theorem.
 
 ## State — 2026-07-10
 

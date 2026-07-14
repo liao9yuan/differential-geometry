@@ -1,6 +1,10 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAveragePOU
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveringItem3
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCTransitionRefine
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.MetricCompactnessInputs
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomConv
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAtomDiagonal
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCPairTail
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -20,7 +24,7 @@ center-average convergence capstone `NetLimitData.unifHatCageSelfComp`
 expRadiusGp` is carried by the normal chart into the Euclidean ball of radius
 `expMapC2Radius`.  `hatCageImg` composes it with `hatCageInClosed` to give the
 finite-hat cage image inclusion consumed by the capstone's domain inputs
-(`hKU`/`hKV`/`hmap`) and by `existsTransUniv`'s `hUx`/`hVy`/`hmaps` obligations.
+(`hKU`/`hKV`) and by `existsTransUniv`'s `hUx`/`hVy`/`hmaps` obligations.
 -/
 
 noncomputable section
@@ -203,8 +207,8 @@ theorem properBallImgOfRad'
       _ ≤ R := hgc_le
   exact lt_of_le_of_lt hbound hσ
 
-/-- **Finite-hat cage image inclusion.**  Under the `g_p`-scale input `hR`
-(`4 λ^γ < expRadiusGp` at the live center — the `Item3GpScaleInput` field), the
+/-- **Finite-hat cage image inclusion.**  Under the packing-local `g_p` scale
+fact `hR` (`4 λ^γ < expRadiusGp` at the live center), the
 normal chart at `center γ` carries the canonical source cage into the Euclidean
 `expMapC2Radius` ball.  Composes `hatCageInClosed` with `properBallImgOfRad`. -/
 theorem hatCageImg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -305,7 +309,7 @@ theorem hatCageImg' (hd : InjRadiusDecayInput (I := I) X) {D : Real}
 
 /-- **σ-discharge of `stepCJoin`'s `hUx`/`hVy` domain-radius hypotheses** (Ruling #2 tail, green).
 Given a per-hat radius family `σ` below the `expMapC2Radius` at every live center of every subsequence
-index `k` (`hσ` — the `Item3RadiusInput`-shaped `g_p`-scale field, `k`-independent `σ γ`), the domain
+index `k` (`hσ` — the `SigmaScaleField` upper bound, with `k`-independent `σ γ`), the domain
 `U γ := Metric.ball 0 (σ γ)` sits inside the `expMapC2Radius`-ball that `stepCJoin`'s `hUx`/`hVy`
 demand.  This is `Metric.ball_subset_ball` — the σ-parametric domain inputs are discharged from the
 single scale field, no per-`k` threading.  (Instantiate with `x`/`y` for `hUx`/`hVy` respectively.) -/
@@ -330,35 +334,36 @@ theorem hUx_of_sigma (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   intro gamma k
   exact Metric.ball_subset_ball (hσ gamma k)
 
-/-- `min`-variant of `hUx_of_sigma` for the `r₁`-capped (`lbl418`-faithful) domain
-hypotheses of `stepCJoin` (2026-07-05 statement fix): a per-hat radius `σ` below BOTH
-the `lbl418` comparison scale `r₁` (`hσr₁`, the book's `σ ≪ r₁` choice) and the
-per-center `expMapC2Radius` (`hσ`) puts `ball 0 (σ γ)` inside the capped ball. -/
-theorem hUx_of_sigma_min (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+/-- The sigma-scale inequalities at one index of the net-limit subsequence. -/
+def SigmaScaleAt (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
-    (pb : hd.PackingBound D) (r r₁ : Real)
-    (x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M) (σ : Fin (pb.A r) -> Real)
-    (hσr₁ : forall gamma : Fin (pb.A r), σ gamma ≤ r₁)
-    (hσ : forall gamma : Fin (pb.A r), forall k : Nat,
-      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
-      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) := (X.obj (L.φ k)).t2TangentBundle
-      σ gamma ≤ expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k)) :
-    forall gamma : Fin (pb.A r), forall k : Nat,
-      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
-      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) := (X.obj (L.φ k)).t2TangentBundle
-      Metric.ball (0 : E) (σ gamma) ⊆
-        Metric.ball (0 : E)
-          (min r₁ (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k))) := by
-  intro gamma k
-  exact Metric.ball_subset_ball (le_min (hσr₁ gamma) (hσ gamma k))
+    (pb : hd.PackingBound D) (r : Real)
+    (x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M)
+    (σ : Fin (pb.A r) -> Real) (n : Nat) : Prop :=
+  forall gamma : Fin (pb.A r),
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    4 * L.lamInf (gamma : Nat) /
+        Real.sqrt (gpCoerciveConst (I := I) (X.obj (L.φ n)).metric (x gamma n)) < σ gamma ∧
+      σ gamma ≤ expMapC2Radius (I := I) (X.obj (L.φ n)).metric (x gamma n)
 
-/-- **The sibling `g_p`-scale field for the σ-domain discharge** (Ruling #4, `lbl383` family, next to
-`Item3GpScaleInput`).  A `k`-independent per-hat radius `σ γ` sandwiched, at every live center of
+/-- The finite family of sigma-scale inequalities eventually holds along the
+net-limit subsequence. -/
+def SigmaScaleTail (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real)
+    (x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M)
+    (σ : Fin (pb.A r) -> Real) : Prop :=
+  ∀ᶠ n in Filter.atTop, SigmaScaleAt (I := I) hd P L pb r x σ n
+
+/-- **The sibling `g_p`-scale field for the σ-domain discharge** (Ruling #4,
+`lbl383` family).  A `k`-independent per-hat radius `σ γ` sandwiched, at every live center of
 every subsequence index `k`, between the coercive cage radius and the chart `C²`-radius:
 `4 λ^γ / √(gpCoerciveConst (x γ k)) < σ γ ≤ expMapC2Radius (x γ k)`.  The upper bound feeds
 `hUx_of_sigma` (`hUx`/`hVy`), the strict lower bound feeds `hatCageImg'`'s `hσ`, and its
@@ -378,6 +383,63 @@ def SigmaScaleField (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     4 * L.lamInf (gamma : Nat) /
         Real.sqrt (gpCoerciveConst (I := I) (X.obj (L.φ k)).metric (x gamma k)) < σ gamma ∧
       σ gamma ≤ expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k)
+
+/-- Restrict an all-index sigma field to one sequence index. -/
+theorem SigmaScaleField.at {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    {L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P}
+    {pb : hd.PackingBound D} {r : Real}
+    {x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M}
+    {σ : Fin (pb.A r) -> Real}
+    (hfield : SigmaScaleField (I := I) hd P L pb r x σ) (n : Nat) :
+    SigmaScaleAt (I := I) hd P L pb r x σ n := fun gamma => hfield gamma n
+
+/-- An all-index sigma field gives the corresponding eventual tail. -/
+theorem SigmaScaleField.to_tail {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    {L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P}
+    {pb : hd.PackingBound D} {r : Real}
+    {x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M}
+    {σ : Fin (pb.A r) -> Real}
+    (hfield : SigmaScaleField (I := I) hd P L pb r x σ) :
+    SigmaScaleTail (I := I) hd P L pb r x σ :=
+  Filter.Eventually.of_forall hfield.at
+
+/-- Reindex a sigma-scale tail along a further strict subsequence. -/
+theorem SigmaScaleTail.subseq {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real)
+    {x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M}
+    {σ : Fin (pb.A r) -> Real}
+    (htail : SigmaScaleTail (I := I) hd P L pb r x σ)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) :
+    SigmaScaleTail (I := I) hd P (L.subseq hψ) pb r
+      (fun gamma k => x gamma (ψ k)) σ := by
+  filter_upwards [hψ.tendsto_atTop.eventually htail] with n hn
+  intro gamma
+  exact hn gamma
+
+/-- Shift past an eventual sigma tail to obtain an all-index field on one
+strictly refined subsequence. -/
+theorem SigmaScaleTail.exists_field
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    {P : forall k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real)
+    {x : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M}
+    {σ : Fin (pb.A r) -> Real}
+    (htail : SigmaScaleTail (I := I) hd P L pb r x σ) :
+    ∃ ψ : Nat → Nat, ∃ hψ : StrictMono ψ,
+      SigmaScaleField (I := I) hd P (L.subseq hψ) pb r
+        (fun gamma k => x gamma (ψ k)) σ := by
+  obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp htail
+  let ψ : Nat → Nat := fun k => k + N
+  have hψ : StrictMono ψ := by
+    simpa only [ψ] using strictMono_id.add_const N
+  refine ⟨ψ, hψ, ?_⟩
+  intro gamma k
+  exact hN (ψ k) (by simp only [ψ]; omega) gamma
 
 /-- The `expRadiusGp` scale (`4 λ^γ < expRadiusGp`, `hatCageImg'`'s `hR`) is a consequence of the
 sibling field: `4 λ^γ/√c < σ γ ≤ expMapC2Radius` gives `4 λ^γ < √c · expMapC2Radius = expRadiusGp`. -/
@@ -409,21 +471,398 @@ theorem SigmaScaleField.expRadiusGp {hd : InjRadiusDecayInput (I := I) X} {D : R
   rw [div_lt_iff₀ hsc] at h1
   exact h1.trans_eq (mul_comm _ _)
 
+/-- The H6 radius profile produces a uniform sigma tail at the canonical
+totalized net centres, with `σ γ = 8 * λ^γ`. -/
+theorem NormalRadiusProfile.sigmaCenterTail
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb) {D : Real} (hD : 0 < D)
+    (h16 : (16 : Real) < h.ratio * D)
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (hre : hd.RealizesEdist)
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real) :
+    SigmaScaleTail (I := I) hd P L pb r
+      (fun gamma k => seqCenterD hd P L k (gamma : Nat))
+      (fun gamma => 8 * L.lamInf (gamma : Nat)) := by
+  have hwin : ∀ᶠ n in Filter.atTop, ∀ gamma ∈ Finset.range (pb.A r),
+      L.lamInf gamma / 2 ≤
+        hd.lambda D (seqRadius hd D P (L.φ n) gamma) :=
+    (Filter.eventually_all_finset _).mpr fun gamma _ =>
+      (L.lambda_window hd hD P gamma).mono fun _ hgamma => by
+        simpa only [NetLimitData.lamInf] using hgamma.1
+  filter_upwards [hwin] with n hn
+  intro gamma
+  letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
+  haveI : ProperSpace (X.obj (L.φ n)).M := (P (L.φ n)).proper
+  have hx : hd.dist (L.φ n) (seqCenterD hd P L n (gamma : Nat))
+      (X.obj (L.φ n)).basepoint ≤
+      seqRadius hd D P (L.φ n) (gamma : Nat) := by
+    rw [← ProperMetricOn.dist_eq hd hre P (L.φ n),
+      ← seqCenterD_dist_eq hd P L n (gamma : Nat)]
+  letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+  letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+  letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+    (X.obj (L.φ n)).t2TangentBundle
+  constructor
+  · have hhalf : (1 / 2 : Real) ≤ gpCoerciveConst (I := I)
+        (X.obj (L.φ n)).metric (seqCenterD hd P L n (gamma : Nat)) :=
+      hb.half_le_gpConst (L.φ n) (seqCenterD hd P L n (gamma : Nat))
+    have hsqrt_half : (1 / 2 : Real) < Real.sqrt (1 / 2 : Real) := by
+      have hs := Real.sq_sqrt (by norm_num : (0 : Real) ≤ 1 / 2)
+      have hn := Real.sqrt_nonneg (1 / 2 : Real)
+      nlinarith
+    have hsqrt : (1 / 2 : Real) < Real.sqrt (gpCoerciveConst (I := I)
+        (X.obj (L.φ n)).metric (seqCenterD hd P L n (gamma : Nat))) :=
+      hsqrt_half.trans_le (Real.sqrt_le_sqrt hhalf)
+    have hsc : 0 < Real.sqrt (gpCoerciveConst (I := I)
+        (X.obj (L.φ n)).metric (seqCenterD hd P L n (gamma : Nat))) :=
+      Real.sqrt_pos.mpr (gpCoerciveConst_pos (I := I)
+        (X.obj (L.φ n)).metric (seqCenterD hd P L n (gamma : Nat)))
+    have hlam : 0 < L.lamInf (gamma : Nat) :=
+      hd.lambda_pos hD (L.rInf (gamma : Nat))
+    apply (div_lt_iff₀ hsc).2
+    have hfour : (4 : Real) < 8 * Real.sqrt (gpCoerciveConst (I := I)
+        (X.obj (L.φ n)).metric (seqCenterD hd P L n (gamma : Nat))) := by
+      nlinarith
+    calc
+      4 * L.lamInf (gamma : Nat) <
+          (8 * Real.sqrt (gpCoerciveConst (I := I)
+            (X.obj (L.φ n)).metric
+              (seqCenterD hd P L n (gamma : Nat)))) *
+            L.lamInf (gamma : Nat) :=
+        mul_lt_mul_of_pos_right hfour hlam
+      _ = (8 * L.lamInf (gamma : Nat)) *
+          Real.sqrt (gpCoerciveConst (I := I) (X.obj (L.φ n)).metric
+            (seqCenterD hd P L n (gamma : Nat))) := by ring
+  · calc
+      8 * L.lamInf (gamma : Nat) =
+          16 * (L.lamInf (gamma : Nat) / 2) := by ring
+      _ ≤ 16 * hd.lambda D
+          (seqRadius hd D P (L.φ n) (gamma : Nat)) :=
+        mul_le_mul_of_nonneg_left
+          (hn (gamma : Nat) (Finset.mem_range.mpr gamma.isLt)) (by norm_num)
+      _ ≤ expMapC2Radius (I := I) (X.obj (L.φ n)).metric
+          (seqCenterD hd P L n (gamma : Nat)) :=
+        (h.mul_lambda_lt_exp (D := D) (c := 16)
+          (R := seqRadius hd D P (L.φ n) (gamma : Nat)) hD h16 hx).le
+
 /-- **Limit-membership bridge for the capstone's `hKV`.**  If the two-index Step-B
-maps `B a` each carry `v` into a CLOSED set `V'` and `B → Binf` in `C∞` on compacts
-of `U ∋ v`, then the limit map lands in `V'` as well.  With `V' ⊆ V γ` a closed
-sub-ball of the open domain `V γ`, this discharges `unifHatCageSelfComp`'s `hKV`
-(`Binf γ v ∈ V γ`) from an all-index hypothesis `∀ a, B γ a v ∈ V'`. -/
+maps `B a` eventually carry `v` into a closed set `V'` and `B → Binf` in `C∞` on
+compacts of `U ∋ v`, then the limit map lands in `V'` as well. -/
 theorem binfMemClosed {U V' : Set E} {B : Nat -> E -> E} {Binf : E -> E}
     (hB : MapCInfConvOnCompacts U B Binf) {v : E} (hv : v ∈ U)
-    (hV'closed : IsClosed V') (hmem : forall a : Nat, B a v ∈ V') :
+    (hV'closed : IsClosed V') (hmem : ∀ᶠ a in Filter.atTop, B a v ∈ V') :
     Binf v ∈ V' :=
-  hV'closed.mem_of_tendsto (tendsto_of_cInf hB hv) (Filter.Eventually.of_forall hmem)
+  hV'closed.mem_of_tendsto (tendsto_of_cInf hB hv) hmem
+
+/-- A nonzero normalized limit weight selects an interacting live target, and
+the corresponding H6 transition limit lands in the closed six-lambda ball. -/
+theorem HasAtomWeightLim.binf_of_weight
+    (inp : MetricCompactnessInputs (I := I) X)
+    (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
+    (hradRatio : 2 * item3RadiusFactor inp.decay inp.D <
+      inp.normalRadius.ratio * inp.D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) (r : Real) (hr : 0 ≤ r)
+    (hgp : Item3GpScaleTail (I := I) inp.decay inp.D P L inp.pack r)
+    (alpha : LiveSlot L inp.pack r) (U : Set E)
+    (aInf : Fin (inp.pack.A r) → E → Real)
+    (hlim : HasAtomWeightLim (I := I) inp.decay inp.hD P L inp.realizes
+      inp.pack r hr
+      (fun k => seqCenterD inp.decay P L k (alpha.1 : Nat)) U aInf)
+    (hsource : ∀ᶠ k in Filter.atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric
+          (seqCenterD inp.decay P L k (alpha.1 : Nat)) z)
+        U (L.hatBall inp.decay inp.D P inp.pack r k alpha.1))
+    (phi : Nat -> Nat) (hphi : StrictMono phi)
+    (Binf : InterSlot L inp.pack r alpha -> E -> E)
+    (hB : forall target : InterSlot L inp.pack r alpha,
+      MapCInfConvOnCompacts U
+        (fun k => normalTransition (I := I) (X.obj (L.φ (phi k)))
+          (seqCenterD inp.decay P L (phi k) (alpha.1 : Nat))
+          (seqCenterD inp.decay P L (phi k) (target.1.1 : Nat)))
+        (Binf target))
+    {z : E} (hz : z ∈ U) (gamma : Fin (inp.pack.A r))
+    (hweight : rawWeights
+      (cutRaw (aInf (baseIndex inp.decay inp.realizes inp.pack hr)) aInf
+        (baseIndex inp.decay inp.realizes inp.pack hr)) z gamma ≠ 0) :
+    ∃ target : InterSlot L inp.pack r alpha,
+      target.1.1 = gamma ∧
+        Binf target z ∈ Metric.closedBall 0 (6 * L.lamInf (gamma : Nat)) := by
+  classical
+  have hdata := hlim
+  dsimp only [HasAtomWeightLim] at hdata
+  have hgammaLive : L.alive (gamma : Nat) = true := by
+    cases hgamma : L.alive (gamma : Nat) with
+    | false =>
+        have haZero : aInf gamma = 0 := hdata.1 gamma hgamma
+        have hnum : aInf gamma z ≠ 0 :=
+          num_ne_of_cut_ne (num_ne_of_raw_ne hweight)
+        exact False.elim (hnum (by rw [haZero]; rfl))
+    | true => rfl
+  have hinter : ∀ᶠ k in Filter.atTop,
+      BInter inp.decay inp.D P L.lamInf
+        (alpha.1 : Nat) (gamma : Nat) (L.φ k) :=
+    hlim.binter_of_weight hgp alpha.1 gamma hz hsource hweight
+  let target : InterSlot L inp.pack r alpha :=
+    ⟨⟨gamma, hgammaLive⟩, hinter⟩
+  have hweightTail := hphi.tendsto_atTop.eventually
+    (hlim.weight_ne_tail hz hweight)
+  have hrad : Item3RadiusTail (I := I) inp.decay inp.D P L inp.pack r
+      (item3RadiusFactor inp.decay inp.D) :=
+    inp.normalRadius.radiusScaleTail inp.hD
+      (item3Factor_pos inp.decay inp.D) hradD hradRatio
+      P inp.realizes L inp.pack r
+  have hradTail := hphi.tendsto_atTop.eventually hrad
+  have hgpTail := hphi.tendsto_atTop.eventually hgp
+  have hcenterTail := hphi.tendsto_atTop.eventually
+    (seqCenterD_live inp.decay P L (gamma : Nat) hgammaLive)
+  have hmem : ∀ᶠ k in Filter.atTop,
+      normalTransition (I := I) (X.obj (L.φ (phi k)))
+          (seqCenterD inp.decay P L (phi k) (alpha.1 : Nat))
+          (seqCenterD inp.decay P L (phi k) (gamma : Nat)) z ∈
+        Metric.closedBall 0 (6 * L.lamInf (gamma : Nat)) := by
+    filter_upwards [hweightTail, hradTail, hgpTail, hcenterTail]
+      with k hweightK hradK hgpK hcenterK
+    letI : TopologicalSpace (X.obj (L.φ (phi k))).M :=
+      (X.obj (L.φ (phi k))).topology
+    letI : ChartedSpace H (X.obj (L.φ (phi k))).M :=
+      (X.obj (L.φ (phi k))).charted
+    letI : IsManifold I ∞ (X.obj (L.φ (phi k))).M :=
+      (X.obj (L.φ (phi k))).smooth
+    letI : T2Space (TangentBundle I (X.obj (L.φ (phi k))).M) :=
+      (X.obj (L.φ (phi k))).t2TangentBundle
+    have hExp : (1 : Real) ≤
+        Real.exp (inp.decay.C * (20 * inp.decay.lambda inp.D 0)) := by
+      rw [show (1 : Real) = Real.exp 0 from Real.exp_zero.symm]
+      exact Real.exp_le_exp.mpr
+        (mul_nonneg inp.decay.C_nonneg
+          (by nlinarith [(inp.decay.lambda_pos inp.hD 0).le]))
+    have hfactor : (8 : Real) ≤ item3RadiusFactor inp.decay inp.D := by
+      rw [item3RadiusFactor]
+      nlinarith
+    have hC2 : 8 * L.lamInf (gamma : Nat) ≤
+        expMapC2Radius (I := I) (X.obj (L.φ (phi k))).metric
+          (seqCenterD inp.decay P L (phi k) (gamma : Nat)) :=
+      (mul_le_mul_of_nonneg_right hfactor
+        (inp.decay.lambda_pos inp.hD (L.rInf (gamma : Nat))).le).trans
+          (hradK gamma
+            (seqCenterD inp.decay P L (phi k) (gamma : Nat)) hcenterK).2
+    exact Metric.ball_subset_closedBall
+      (inp.weight_trans_small P L r (phi k) hgpK
+        (fun j => seqCenterD inp.decay P L j (alpha.1 : Nat))
+        (baseIndex inp.decay inp.realizes inp.pack hr) gamma hC2 z hweightK)
+  refine ⟨target, rfl, ?_⟩
+  exact binfMemClosed (hB target) hz Metric.isClosed_closedBall (by
+    simpa only [target] using hmem)
+
+/-- Extract one common H6 transition subsequence for every target interacting
+with a fixed live source, while retaining the support-to-closed-ball readout for
+the normalized atom limits on any smaller source domain. -/
+theorem MetricCompactnessInputs.exists_supp_trans
+    (inp : MetricCompactnessInputs (I := I) X)
+    (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
+    (hradRatio : 2 * item3RadiusFactor inp.decay inp.D <
+      inp.normalRadius.ratio * inp.D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) (r : Real) (hr : 0 ≤ r)
+    (hgp : Item3GpScaleTail (I := I) inp.decay inp.D P L inp.pack r)
+    (alpha : LiveSlot L inp.pack r) (U : Set E)
+    (hUsub : U ⊆ Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)))
+    (aInf : Fin (inp.pack.A r) → E → Real)
+    (hlim : HasAtomWeightLim (I := I) inp.decay inp.hD P L inp.realizes
+      inp.pack r hr
+      (fun k => seqCenterD inp.decay P L k (alpha.1 : Nat)) U aInf)
+    (hsource : ∀ᶠ k in Filter.atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric
+          (seqCenterD inp.decay P L k (alpha.1 : Nat)) z)
+        U (L.hatBall inp.decay inp.D P inp.pack r k alpha.1)) :
+    ∃ phi : Nat -> Nat, StrictMono phi ∧
+      ∃ Jinf : InterSlot L inp.pack r alpha -> E -> E,
+      ∃ Jbarinf : InterSlot L inp.pack r alpha -> E -> E,
+        (forall target : InterSlot L inp.pack r alpha,
+          ContDiffOn Real (⊤ : ℕ∞) (Jinf target)
+              (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+          ContDiffOn Real (⊤ : ℕ∞) (Jbarinf target)
+              (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+          ContinuousOn (Jinf target)
+              (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+          ContinuousOn (Jbarinf target)
+              (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+          MapCInfConvOnCompacts
+            (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)))
+            (fun k => normalTransition (I := I) (X.obj (L.φ (phi k)))
+              (seqCenterD inp.decay P L (phi k) (alpha.1 : Nat))
+              (seqCenterD inp.decay P L (phi k) (target.1.1 : Nat)))
+            (Jinf target) ∧
+          MapCInfConvOnCompacts
+            (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
+            (fun k => normalTransition (I := I) (X.obj (L.φ (phi k)))
+              (seqCenterD inp.decay P L (phi k) (target.1.1 : Nat))
+              (seqCenterD inp.decay P L (phi k) (alpha.1 : Nat)))
+            (Jbarinf target) ∧
+          (forall z, z ∈ Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) ->
+            Jinf target z ∈ Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) ->
+              Jbarinf target (Jinf target z) = z) ∧
+          (forall w, w ∈ Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) ->
+            Jbarinf target w ∈ Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) ->
+              Jinf target (Jbarinf target w) = w)) ∧
+        forall z : E, z ∈ U -> forall gamma : Fin (inp.pack.A r),
+          rawWeights
+            (cutRaw (aInf (baseIndex inp.decay inp.realizes inp.pack hr)) aInf
+              (baseIndex inp.decay inp.realizes inp.pack hr)) z gamma ≠ 0 ->
+            ∃ target : InterSlot L inp.pack r alpha,
+              target.1.1 = gamma ∧
+                Jinf target z ∈
+                  Metric.closedBall 0 (6 * L.lamInf (gamma : Nat)) := by
+  classical
+  letI : Finite (InterSlot L inp.pack r alpha) :=
+    Finite.of_injective
+      (fun target : InterSlot L inp.pack r alpha => target.1.1)
+      (by
+        intro a b hab
+        apply Subtype.ext
+        apply Subtype.ext
+        exact hab)
+  obtain ⟨phi, hphi, Jinf, Jbarinf, hspec⟩ :=
+    inp.exists_pair_trans hradD hradRatio P L r
+      (fun _ : InterSlot L inp.pack r alpha => alpha)
+      (fun target : InterSlot L inp.pack r alpha => target.1)
+      (fun target : InterSlot L inp.pack r alpha => target.2)
+  refine ⟨phi, hphi, Jinf, Jbarinf, hspec, ?_⟩
+  intro z hz gamma hweight
+  exact hlim.binf_of_weight inp hradD hradRatio P L r hr hgp alpha U aInf
+    hsource phi hphi Jinf (fun target K hK hKU p =>
+      (hspec target).2.2.2.2.1 K hK (hKU.trans hUsub) p)
+    hz gamma hweight
+
+/-- Extract one common H6 transition subsequence for the interacting targets of
+every live source.  The dependent pair index avoids a second source-by-source
+diagonal and retains each target in the original stabilized pair family. -/
+theorem MetricCompactnessInputs.exists_supp_fin
+    (inp : MetricCompactnessInputs (I := I) X)
+    (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
+    (hradRatio : 2 * item3RadiusFactor inp.decay inp.D <
+      inp.normalRadius.ratio * inp.D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) (r : Real) (hr : 0 ≤ r)
+    (hgp : Item3GpScaleTail (I := I) inp.decay inp.D P L inp.pack r)
+    (U : LiveSlot L inp.pack r → Set E)
+    (hUsub : ∀ alpha, U alpha ⊆
+      Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)))
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (hlim : ∀ alpha,
+      HasAtomWeightLim (I := I) inp.decay inp.hD P L inp.realizes
+        inp.pack r hr
+        (fun k => seqCenterD inp.decay P L k (alpha.1 : Nat))
+        (U alpha) (aInf alpha))
+    (hsource : ∀ alpha, ∀ᶠ k in Filter.atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric
+          (seqCenterD inp.decay P L k (alpha.1 : Nat)) z)
+        (U alpha) (L.hatBall inp.decay inp.D P inp.pack r k alpha.1)) :
+    ∃ phi : Nat → Nat, StrictMono phi ∧
+      ∃ Jinf : (alpha : LiveSlot L inp.pack r) →
+          InterSlot L inp.pack r alpha → E → E,
+      ∃ Jbarinf : (alpha : LiveSlot L inp.pack r) →
+          InterSlot L inp.pack r alpha → E → E,
+        (∀ alpha target,
+          ContDiffOn Real (⊤ : ℕ∞) (Jinf alpha target)
+              (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+          ContDiffOn Real (⊤ : ℕ∞) (Jbarinf alpha target)
+              (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+          ContinuousOn (Jinf alpha target)
+              (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+          ContinuousOn (Jbarinf alpha target)
+              (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+          MapCInfConvOnCompacts
+            (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)))
+            (fun k => normalTransition (I := I) (X.obj (L.φ (phi k)))
+              (seqCenterD inp.decay P L (phi k) (alpha.1 : Nat))
+              (seqCenterD inp.decay P L (phi k) (target.1.1 : Nat)))
+            (Jinf alpha target) ∧
+          MapCInfConvOnCompacts
+            (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
+            (fun k => normalTransition (I := I) (X.obj (L.φ (phi k)))
+              (seqCenterD inp.decay P L (phi k) (target.1.1 : Nat))
+              (seqCenterD inp.decay P L (phi k) (alpha.1 : Nat)))
+            (Jbarinf alpha target) ∧
+          (∀ z, z ∈ Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
+            Jinf alpha target z ∈
+                Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
+              Jbarinf alpha target (Jinf alpha target z) = z) ∧
+          (∀ w, w ∈ Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
+            Jbarinf alpha target w ∈
+                Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
+              Jinf alpha target (Jbarinf alpha target w) = w)) ∧
+        ∀ alpha z, z ∈ U alpha → ∀ gamma : Fin (inp.pack.A r),
+          rawWeights
+            (cutRaw
+              (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
+              (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
+            z gamma ≠ 0 →
+          ∃ target : InterSlot L inp.pack r alpha,
+            target.1.1 = gamma ∧
+              Jinf alpha target z ∈
+                Metric.closedBall 0 (6 * L.lamInf (gamma : Nat)) := by
+  classical
+  let PairSlot := Σ alpha : LiveSlot L inp.pack r, InterSlot L inp.pack r alpha
+  letI (alpha : LiveSlot L inp.pack r) : Finite (InterSlot L inp.pack r alpha) :=
+    Finite.of_injective
+      (fun target : InterSlot L inp.pack r alpha => target.1.1)
+      (by
+        intro a b hab
+        apply Subtype.ext
+        apply Subtype.ext
+        exact hab)
+  letI : Finite PairSlot := inferInstance
+  obtain ⟨phi, hphi, J, Jbar, hspec⟩ :=
+    inp.exists_pair_trans hradD hradRatio P L r
+      (fun pair : PairSlot => pair.1)
+      (fun pair : PairSlot => pair.2.1)
+      (fun pair : PairSlot => pair.2.2)
+  let Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E :=
+    fun alpha target => J ⟨alpha, target⟩
+  let Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E :=
+    fun alpha target => Jbar ⟨alpha, target⟩
+  refine ⟨phi, hphi, Jinf, Jbarinf, ?_, ?_⟩
+  · intro alpha target
+    exact hspec ⟨alpha, target⟩
+  · intro alpha z hz gamma hweight
+    exact (hlim alpha).binf_of_weight inp hradD hradRatio P L r hr hgp
+      alpha (U alpha) (aInf alpha) (hsource alpha) phi hphi (Jinf alpha)
+      (fun target K hK hKU p =>
+        (hspec ⟨alpha, target⟩).2.2.2.2.1 K hK
+          (hKU.trans (hUsub alpha)) p)
+      hz gamma hweight
 
 set_option maxHeartbeats 800000 in
 /-- **C3 join, fixed-subsequence form (shape A).**  `unifHatCageSelfComp` with the two
-book-external/limit obligations discharged from the producer bridges: `hR` from the
-`Item3GpScaleInput` honest scale field (`hgp`), and `hKV` from `binfMemClosed` (the two-index
+limit obligations discharged from the producer bridges: `hR` from the fixed-index
+`Item3GpScaleAt` fact (`hgp`), and `hKV` from `binfMemClosed` (the two-index
 maps land in a closed `V' γ ⊆ V γ`, so their `C∞`-limit `Binf γ` does too).  `B`/`A` stay
 abstract; the concrete Step-B transition maps are plugged by the outer wrapper. -/
 theorem stepCJoinFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -464,7 +903,7 @@ theorem stepCJoinFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hX : SeqMetricComplete (I := I) X)
     (hcenter : forall gamma : Fin (pb.A r),
       seqCenter hd D P (L.φ n) (gamma : Nat) = some (center gamma))
-    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r n)
     (hrad : forall a b : Nat, forall x : (X.obj (L.φ n)).M,
       x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n -> 0 < radSeq a b x)
     (hactive_mem :
@@ -507,17 +946,6 @@ theorem stepCJoinFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
               (fun y : (X.obj (L.φ n)).M => fun gamma : Fin (pb.A r) => rho gamma y)
               (ptsSeq a b) (fun y : (X.obj (L.φ n)).M => y) x)
             join x (radSeq a b x))
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) := (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r), MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
     (hA : forall gamma : Fin (pb.A r), MapCInfConvOnCompacts (V gamma) (A gamma) (Ainf gamma))
@@ -590,11 +1018,11 @@ theorem stepCJoinFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
                   (hstrict a b y hy)) x) < eps := by
   exact NetLimitData.unifHatCageSelfComp hd P L pb r n rho hrho join radSeq center U V
     B Binf A Ainf hconn hX hcenter
-    (fun gamma => hgp n (gamma : Nat) (center gamma) (hcenter gamma))
-    hrad hactive_mem hstrict hmap hVopen hB hA hBcont hAcont hid hKU
+    (fun gamma => hgp gamma (center gamma) (hcenter gamma))
+    hrad hactive_mem hstrict hVopen hB hA hBcont hAcont hid hKU
     (fun gamma v hv =>
       hV'sub gamma (binfMemClosed (hB gamma) (hKU gamma hv) (hV'closed gamma)
-        (hKV0 gamma v hv)))
+        (Filter.Eventually.of_forall (hKV0 gamma v hv))))
 
 set_option maxHeartbeats 800000 in
 /-- **C3 join, fixed-subsequence explicit-weight form.**  This is the `4 * lamInf`
@@ -634,7 +1062,7 @@ theorem stepCJoinDataFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hX : SeqMetricComplete (I := I) X)
     (hcenter : forall gamma : Fin (pb.A r),
       seqCenter hd D P (L.φ n) (gamma : Nat) = some (center gamma))
-    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r n)
     (hrad : forall a b : Nat, forall x : (X.obj (L.φ n)).M,
       x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n -> 0 < radSeq a b x)
     (hactive_mem :
@@ -676,17 +1104,6 @@ theorem stepCJoinDataFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
             (centerAverage.activeFill mu (ptsSeq a b)
               (fun y : (X.obj (L.φ n)).M => y) x)
             join x (radSeq a b x))
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) := (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r), MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
     (hA : forall gamma : Fin (pb.A r), MapCInfConvOnCompacts (V gamma) (A gamma) (Ainf gamma))
@@ -752,28 +1169,29 @@ theorem stepCJoinDataFixed (hd : InjRadiusDecayInput (I := I) X) {D : Real}
                   (hstrict a b y hy)) x) < eps := by
   exact NetLimitData.unifHatCageData hd P L pb r n mu hmu join radSeq center U V
     B Binf A Ainf hconn hX hcenter
-    (fun gamma => hgp n (gamma : Nat) (center gamma) (hcenter gamma))
-    hrad hactive_mem hstrict hmap hVopen hB hA hBcont hAcont hid hKU
+    (fun gamma => hgp gamma (center gamma) (hcenter gamma))
+    hrad hactive_mem hstrict hVopen hB hA hBcont hAcont hid hKU
     (fun gamma v hv =>
       hV'sub gamma (binfMemClosed (hB gamma) (hKU gamma hv) (hV'closed gamma)
-        (hKV0 gamma v hv)))
+        (Filter.Eventually.of_forall (hKV0 gamma v hv))))
 
-set_option maxHeartbeats 1600000 in
 /-- **C3 producer join (shape B).**  Feeds the concrete Step-B same-manifold transition maps
 `normalTransition` (indexed by the two sequence indices, over the reindexed sequence
-`X ∘ L.φ`) into `stepCJoinFixed`: `existsTransUniv` produces the subsequence `phi` and the
-`C∞` limit maps `Jinf`/`Jbarinf` with the two-sided cocycle, then `stepCJoinFixed` averages
-them to the identity on the frozen source ball.  Overlap/cocycle/domain data for
-`existsTransUniv` are honest parametric inputs (its own style); the map-dependent
-`hactive0`/`hstrict0`/`hmap0`/`hKV0` are stated over ALL sequence indices and specialised at
+`X ∘ L.φ`) into `stepCJoinFixed`: the H6-backed `existsTransUniv` produces the
+subsequence `phi` and the `C∞` limit maps `Jinf`/`Jbarinf` with the two-sided cocycle,
+then `stepCJoinFixed` averages them to the identity on the frozen source ball.  The
+fixed convergence domains and independent H6 target-anchor domains, their
+metric/exp-radius data, smoothness, overlap, maps-to, and cocycle data for
+`existsTransUniv` are honest parametric inputs; the map-dependent
+`hactive0`/`hstrict0`/`hKV0` are stated over ALL sequence indices and specialised at
 `phi` (the `decodedCompPts` reindexing is a definitional identity). -/
 theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
     (pb : hd.PackingBound D) (r : Real) (n : Nat)
-    (input : ExpInverseDerivBoundInput (I := I) X)
+    (metricInput : NormalCoordMetricBoundInput (I := I) X)
     (x y : Fin (pb.A r) -> forall k : Nat, (X.obj (L.φ k)).M)
-    (U V : Fin (pb.A r) -> Set E)
+    (U V Ua Va : Fin (pb.A r) -> Set E)
     (rho :
       letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
       letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -800,55 +1218,87 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
       ConnectedSpace (X.obj (L.φ n)).M)
     (hX : SeqMetricComplete (I := I) X)
-    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r n)
     (hcenter : forall gamma : Fin (pb.A r),
       seqCenter hd D P (L.φ n) (gamma : Nat) = some (x gamma n))
     (hrad : forall a b : Nat, forall xx : (X.obj (L.φ n)).M,
       xx ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n -> 0 < radSeq a b xx)
     (hU : forall gamma : Fin (pb.A r), IsOpen (U gamma))
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
-    (hovlJ : forall gamma : Fin (pb.A r), forall k : Nat,
-      NormalOverlapOn (I := I) (X.obj (L.φ k)) (x gamma k) (y gamma k) (U gamma))
-    (hovlJbar : forall gamma : Fin (pb.A r), forall k : Nat,
-      NormalOverlapOn (I := I) (X.obj (L.φ k)) (y gamma k) (x gamma k) (V gamma))
-    (hUx : forall gamma : Fin (pb.A r), forall k : Nat,
-      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
-      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) := (X.obj (L.φ k)).t2TangentBundle
+    (hUa : forall gamma : Fin (pb.A r), IsOpen (Ua gamma))
+    (hVa : forall gamma : Fin (pb.A r), IsOpen (Va gamma))
+    (hUanorm : forall gamma : Fin (pb.A r),
+      ∃ Z : Real, ∀ z ∈ Ua gamma, ‖z‖ ≤ Z)
+    (hVanorm : forall gamma : Fin (pb.A r),
+      ∃ Z : Real, ∀ z ∈ Va gamma, ‖z‖ ≤ Z)
+    (hUmetric : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
       U gamma ⊆ Metric.ball (0 : E)
-        (min input.r₁ (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k))))
-    (hmapsJ : forall gamma : Fin (pb.A r), forall k : Nat,
-      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
-      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) := (X.obj (L.φ k)).t2TangentBundle
-      Set.MapsTo (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (x gamma k) z) (U gamma)
-        ((fun v : E => (expMap (I := I) (X.obj (L.φ k)).metric (y gamma k)
-            (show TangentSpace I (y gamma k) from v) : (X.obj (L.φ k)).M)) ''
-          Metric.ball (0 : E)
-            (min input.r₁ (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (y gamma k)))))
-    (hVy : forall gamma : Fin (pb.A r), forall k : Nat,
-      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
-      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) := (X.obj (L.φ k)).t2TangentBundle
+        (metricInput.radius (L.φ k) (x gamma k)))
+    (hVmetric : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
       V gamma ⊆ Metric.ball (0 : E)
-        (min input.r₁ (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (y gamma k))))
-    (hmapsJbar : forall gamma : Fin (pb.A r), forall k : Nat,
+        (metricInput.radius (L.φ k) (y gamma k)))
+    (hUametric : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      Ua gamma ⊆ Metric.ball (0 : E)
+        (metricInput.radius (L.φ k) (x gamma k)))
+    (hVametric : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      Va gamma ⊆ Metric.ball (0 : E)
+        (metricInput.radius (L.φ k) (y gamma k)))
+    (hUexp : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
       letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) := (X.obj (L.φ k)).t2TangentBundle
-      Set.MapsTo (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (y gamma k) z) (V gamma)
-        ((fun v : E => (expMap (I := I) (X.obj (L.φ k)).metric (x gamma k)
-            (show TangentSpace I (x gamma k) from v) : (X.obj (L.φ k)).M)) ''
-          Metric.ball (0 : E)
-            (min input.r₁ (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k)))))
-    (hLeft : forall gamma : Fin (pb.A r), forall k : Nat, forall z, z ∈ U gamma ->
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      U gamma ⊆ Metric.ball (0 : E)
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k)))
+    (hVexp : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      V gamma ⊆ Metric.ball (0 : E)
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (y gamma k)))
+    (hUaexp : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Ua gamma ⊆ Metric.ball (0 : E)
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (x gamma k)))
+    (hVaexp : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Va gamma ⊆ Metric.ball (0 : E)
+        (expMapC2Radius (I := I) (X.obj (L.φ k)).metric (y gamma k)))
+    (hJ : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      ContDiffOn Real (⊤ : ℕ∞)
+        (normalTransition (I := I) (X.obj (L.φ k)) (x gamma k) (y gamma k))
+        (U gamma))
+    (hJbar : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      ContDiffOn Real (⊤ : ℕ∞)
+        (normalTransition (I := I) (X.obj (L.φ k)) (y gamma k) (x gamma k))
+        (V gamma))
+    (hovlJ : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      NormalOverlapOn (I := I) (X.obj (L.φ k)) (x gamma k) (y gamma k) (U gamma))
+    (hovlJbar : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      NormalOverlapOn (I := I) (X.obj (L.φ k)) (y gamma k) (x gamma k) (V gamma))
+    (hmapJ : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      Set.MapsTo
+        (normalTransition (I := I) (X.obj (L.φ k)) (x gamma k) (y gamma k))
+        (U gamma) (Va gamma))
+    (hmapJbar : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop,
+      Set.MapsTo
+        (normalTransition (I := I) (X.obj (L.φ k)) (y gamma k) (x gamma k))
+        (V gamma) (Ua gamma))
+    (hLeft : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop, forall z, z ∈ U gamma ->
       normalTransition (I := I) (X.obj (L.φ k)) (y gamma k) (x gamma k)
         (normalTransition (I := I) (X.obj (L.φ k)) (x gamma k) (y gamma k) z) = z)
-    (hRight : forall gamma : Fin (pb.A r), forall k : Nat, forall w, w ∈ V gamma ->
+    (hRight : forall gamma : Fin (pb.A r), ∀ᶠ k in atTop, forall w, w ∈ V gamma ->
       normalTransition (I := I) (X.obj (L.φ k)) (x gamma k) (y gamma k)
         (normalTransition (I := I) (X.obj (L.φ k)) (y gamma k) (x gamma k) w) = w)
     (hactive0 :
@@ -898,18 +1348,6 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
                 a b)
               (fun yy : (X.obj (L.φ n)).M => yy) xx)
             join xx (radSeq a b xx))
-    (hmap0 :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) := (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric (x gamma n)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        normalTransition (I := I) (X.obj (L.φ b)) (y gamma b) (x gamma b)
-          (normalTransition (I := I) (X.obj (L.φ a)) (x gamma a) (y gamma a) v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric (x gamma n)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hKU :
       letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
       letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -979,9 +1417,38 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
                        (rho := rho) (hrho := hrho) a b hy).1.2.1)
                      (hstrict0 (phi a) (phi b) yy hy)) xx) < eps) := by
   classical
+  have htail (gamma : Fin (pb.A r)) : ∀ᶠ k in atTop,
+      NormalTransAt (I := I)
+        (NormalCoordMetricBoundInput.subseq (I := I) metricInput L.φ)
+        x y U V Ua Va gamma k := by
+    filter_upwards
+      [hUmetric gamma, hVmetric gamma, hUametric gamma, hVametric gamma,
+        hUexp gamma, hVexp gamma, hUaexp gamma, hVaexp gamma,
+        hJ gamma, hJbar gamma, hovlJ gamma, hovlJbar gamma,
+        hmapJ gamma, hmapJbar gamma, hLeft gamma, hRight gamma]
+      with k hkUM hkVM hkUaM hkVaM hkUE hkVE hkUaE hkVaE
+        hkJ hkJbar hkOvl hkOvlbar hkMap hkMapbar hkLeft hkRight
+    exact
+      { Umetric := hkUM
+        Vmetric := hkVM
+        Uametric := hkUaM
+        Vametric := hkVaM
+        Uexp := hkUE
+        Vexp := hkVE
+        Uaexp := hkUaE
+        Vaexp := hkVaE
+        J := hkJ
+        Jbar := hkJbar
+        ovlJ := hkOvl
+        ovlJbar := hkOvlbar
+        mapJ := hkMap
+        mapJbar := hkMapbar
+        left := hkLeft
+        right := hkRight }
   obtain ⟨phi, hphi, Jinf, Jbarinf, hspec⟩ :=
-    existsTransUniv (I := I) (X := X.subseq L.φ) (input.subseq L.φ) x y U V
-      hU hVopen hovlJ hovlJbar hUx hmapsJ hVy hmapsJbar hLeft hRight
+    existsTransTail (I := I) (X := X.subseq L.φ)
+      (NormalCoordMetricBoundInput.subseq (I := I) metricInput L.φ)
+      x y U V Ua Va hU hVopen hUa hVa hUanorm hVanorm htail
   refine ⟨phi, hphi, ?_⟩
   exact stepCJoinFixed hd P L pb r n rho hrho join
     (fun a b => radSeq (phi a) (phi b))
@@ -994,10 +1461,11 @@ theorem stepCJoin (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (fun a b => hrad (phi a) (phi b))
     (fun a b => hactive0 (phi a) (phi b))
     (fun a b => hstrict0 (phi a) (phi b))
-    (fun gamma a b => hmap0 gamma (phi a) (phi b))
     hVopen
-    (fun gamma => (hspec gamma).2.2.2.2.1)
-    (fun gamma => (hspec gamma).2.2.2.2.2.1)
+    (fun gamma => by
+      simpa only [PointedRiemannianSeq.subseq] using (hspec gamma).2.2.2.2.1)
+    (fun gamma => by
+      simpa only [PointedRiemannianSeq.subseq] using (hspec gamma).2.2.2.2.2.1)
     (fun gamma => (hspec gamma).2.2.1)
     (fun gamma => (hspec gamma).2.2.2.1)
     (fun gamma => (hspec gamma).2.2.2.2.2.2.1)

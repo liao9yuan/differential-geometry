@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCAveraging
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.StepCSmoothness
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalBranchMin
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -26,6 +27,7 @@ open Set Bundle Manifold
 open scoped Topology Manifold ContDiff
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
+open DifferentialGeometry.Integral.Connection
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [InnerProductSpace Real E] [FiniteDimensional Real E]
@@ -766,6 +768,201 @@ theorem cmExt_contDiffOn
     (by exact_mod_cast le_max_right 1 n)).contDiffWithinAt
 
 end SmoothDomain
+
+end HCGCompactness
+end DifferentialGeometry
+
+namespace DifferentialGeometry
+namespace HCGCompactness
+
+open Set Bundle Manifold
+open scoped Topology Manifold ContDiff
+open DifferentialGeometry.Geometry.Riemannian
+open DifferentialGeometry.Geometry.Riemannian.Exponential
+open DifferentialGeometry.Integral.Connection
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace
+
+variable {E : Type uE} [NormedAddCommGroup E] [InnerProductSpace Real E]
+variable [FiniteDimensional Real E] [CompleteSpace E]
+variable [NeZero (Module.finrank Real E)]
+variable {H : Type uH} [TopologicalSpace H]
+variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+
+/-- The center selected from a controlled configuration is a zero of the
+selected minimizing-branch readout equation. -/
+theorem centerReadoutB_min
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
+    (hcomplete : MetricComplete (I := I) (X.obj k))
+    (hconn : letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (x : (X.obj k).M) {q : NNReal} {δ ρ : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
+    {ι : Type} [Fintype ι] (mu : ι → Real) (xi : ι → E)
+    (join : (X.obj k).M → (X.obj k).M → Real → (X.obj k).M)
+    (p : (X.obj k).M) (r : Real) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : IsManifold I 1 (X.obj k).M := IsManifold.of_le
+      (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+    letI : T2Space (X.obj k).M := (X.obj k).t2
+    letI : ConnectedSpace (X.obj k).M := hconn
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+      Manifold.metrizableSpace I (X.obj k).M
+    letI : T3Space (X.obj k).M := inferInstance
+    letI : RiemannianBundle
+        (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+      (X.obj k).riemBundle (I := I)
+    letI : (z : (X.obj k).M) → InnerProductSpace Real (TangentSpace I z) :=
+      (X.obj k).riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+      (X.obj k).riemBundle_cont (I := I)
+    letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
+    letI : CompleteSpace (X.obj k).M :=
+      MetricComplete.complete (I := I) (X.obj k) hcomplete
+    letI : MetricSpace (X.obj k).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
+    let pts : ι → (X.obj k).M := fun i ↦
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm (xi i)
+    ∀ h : CenterInput (I := I) (X.obj k).metric mu pts join p r,
+      0 < ρ →
+      2 * ρ < (q : Real) →
+      ρ ≤ hb.radius k x →
+      ρ / 2 ≤ expRadiusGp (I := I) (X.obj k).metric x →
+      let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
+      (∀ i, max (riemannianEDist I x c) (riemannianEDist I x (pts i)) <
+        ENNReal.ofReal (ρ / 2)) →
+      let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he
+      chartCmEqnB (I := I) (X.obj k).metric
+        (normal_enorm (I := I) (X.obj k)) x B
+        (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)
+        (mu, xi) = 0 := by
+  classical
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M := IsManifold.of_le
+    (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : ConnectedSpace (X.obj k).M := hconn
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (z : (X.obj k).M) → InnerProductSpace Real (TangentSpace I z) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) hcomplete
+  letI : MetricSpace (X.obj k).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
+  dsimp only
+  intro h hρ hρq hρmetric hρexp hpairs
+  let pts : ι → (X.obj k).M := fun i ↦
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm (xi i)
+  let c := centerOfMass (I := I) (X.obj k).metric mu pts join p r h
+  let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he
+  change ∀ i, max (riemannianEDist I x c) (riemannianEDist I x (pts i)) <
+    ENNReal.ofReal (ρ / 2) at hpairs
+  have hdiff (i : ι) : MDifferentiableAt I 𝓘(Real, Real)
+      (CenterOfMass.halfSqDist (pts i)) c := by
+    let S : Set (X.obj k).M :=
+      {z | max (riemannianEDist I x z) (riemannianEDist I x (pts i)) <
+        ENNReal.ofReal (ρ / 2)}
+    have hSopen : IsOpen S := by
+      dsimp only [S]
+      exact isOpen_lt
+        ((continuous_riemannianEDist (I := I) (X.obj k).metric x).max
+          continuous_const) continuous_const
+    have hsmooth : ContMDiffOn I 𝓘(Real) ∞
+        (CenterOfMass.halfSqDist (pts i)) S := by
+      simpa only [S] using
+        IsNormalDiag.halfSq_inf (I := I) hb k hcomplete hconn x hq he hf
+          hρ hρq hρmetric hρexp
+    have hcS : c ∈ S := by
+      simpa only [S] using hpairs i
+    exact (hsmooth.contMDiffAt (hSopen.mem_nhds hcS)).mdifferentiableAt (by simp)
+  have hgrad (i : ι) :
+      gradientFun (I := I) (X.obj k).metric
+          (CenterOfMass.halfSqDist (pts i)) c =
+        -(show TangentSpace I c from (B.inv (c, pts i)).snd) := by
+    simpa only [B] using
+      IsNormalDiag.grad_half_inv (I := I) hb k hcomplete hconn x hq he hf
+        hρ hρq hρmetric hρexp (hpairs i)
+  have hbook : ∑ i : ι, mu i •
+      (show TangentSpace I c from (B.inv (c, pts i)).snd) = 0 :=
+    centerOfMass.invB_eqn (I := I) h
+      (fun i ↦ show TangentSpace I c from (B.inv (c, pts i)).snd) hdiff hgrad
+  obtain ⟨i₀, _hi₀⟩ := h.μ_pos
+  have hcLt : riemannianEDist I x c < ENNReal.ofReal (ρ / 2) :=
+    (le_max_left _ _).trans_lt (hpairs i₀)
+  have hcFin : riemannianEDist I x c ≠ ⊤ :=
+    ne_of_lt (hcLt.trans ENNReal.ofReal_lt_top)
+  have hcReal : (riemannianEDist I x c).toReal < ρ / 2 :=
+    (ENNReal.lt_ofReal_iff_toReal_lt hcFin).mp hcLt
+  have hcSource :=
+    (hb.chart_mem_norm_le k x c ⟨hcFin, hcReal.trans_le hρexp⟩).1
+  have hbase : c ∈ (trivializationAt E (TangentSpace I) x).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]
+    apply NormalCoordinates.exp_target_sub_chart (I := I) (X.obj k).metric x
+    rwa [← NormalCoordinates.normalChartAt_source_eq]
+  have hdom (i : ι) : (c, pts i) ∈ B.dom := by
+    exact (IsNormalDiag.inv_is_min (I := I) hb k hcomplete hconn x hq he hf
+      hρ hρq hρmetric hρexp (hpairs i)).choose_spec.1
+  have hinvBase (i : ι) :
+      B.inv (c, pts i) =
+        (⟨c, (show TangentSpace I c from (B.inv (c, pts i)).snd)⟩ :
+          TangentBundle I (X.obj k).M) := by
+    refine Bundle.TotalSpace.ext (B.proj_eq (hdom i)) ?_
+    exact heq_of_eq rfl
+  have hterm (i : ι) :
+      B.diagReadout (c, pts i) =
+        (trivializationAt E (TangentSpace I) x).continuousLinearEquivAt Real c hbase
+          (show TangentSpace I c from (B.inv (c, pts i)).snd) := by
+    unfold DiagInvBranch.diagReadout
+    rw [hinvBase i]
+    exact congrArg Prod.snd
+      ((trivializationAt E (TangentSpace I) x).apply_eq_prod_continuousLinearEquivAt
+        Real c hbase _)
+  have hreadout : (∑ i : ι, mu i • B.diagReadout (c, pts i)) = 0 := by
+    calc
+      (∑ i : ι, mu i • B.diagReadout (c, pts i)) =
+          (trivializationAt E (TangentSpace I) x).continuousLinearEquivAt Real c hbase
+            (∑ i : ι, mu i •
+              (show TangentSpace I c from (B.inv (c, pts i)).snd)) := by
+        simp_rw [hterm]
+        rw [map_sum]
+        exact Finset.sum_congr rfl (fun i _ => (map_smul _ (mu i) _).symm)
+      _ = (trivializationAt E (TangentSpace I) x).continuousLinearEquivAt Real c hbase 0 :=
+        congrArg _ hbook
+      _ = 0 := map_zero _
+  have hdecode :
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).symm
+          (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c) = c :=
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x).left_inv hcSource
+  change chartCmEqnB (I := I) (X.obj k).metric
+    (normal_enorm (I := I) (X.obj k)) x B
+    (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c) (mu, xi) = 0
+  unfold chartCmEqnB
+  rw [hdecode]
+  exact hreadout
 
 end HCGCompactness
 end DifferentialGeometry

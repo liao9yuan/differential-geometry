@@ -1152,7 +1152,7 @@ private theorem coordDgSmAt
     (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (a i j : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         fderivWithin Real
           (DifferentialGeometry.Integral.Connection.metricFlatModelInChart_component
@@ -1166,8 +1166,8 @@ private theorem coordDgSmAt
   let X : (y : M) -> TangentSpace I y := frame a
   have hF :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
-        (3 : WithTop ℕ∞) F ((t : Real), x) :=
-    (coordMetricSmoothAt (I := I) S hS x₀ t x hx i j).of_le (WithTop.coe_le_coe.mpr le_top)
+        (∞ : WithTop ℕ∞) F ((t : Real), x) :=
+    coordMetricSmoothAt (I := I) S hS x₀ t x hx i j
   have hX :
       ContMDiffAt I (I.prod 𝓘(Real, E))
         (∞ : WithTop ℕ∞) (T% X) x :=
@@ -1175,11 +1175,11 @@ private theorem coordDgSmAt
       (coordinateFrameSet_open (I := I) x₀) hx a
   have hD :
       ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real)
-        (2 : WithTop ℕ∞)
+        (∞ : WithTop ℕ∞)
         (fun p : Real × M =>
           extDerivFun (I := I) (fun y : M => F (p.1, y)) p.2 (X p.2))
         ((t : Real), x) :=
-    prodExtDerivAt (I := I) (F := F) (X := X) hF hX
+    prodExtDerivAt_inf (I := I) (F := F) (X := X) hF hX
   have heq :
       (fun p : Real × M =>
         fderivWithin Real
@@ -1210,7 +1210,7 @@ private theorem gammaRhsSm
     (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         DifferentialGeometry.Integral.Connection.leviCivitaChristoffelModelRHS
           (I := I) (S.family.metric p.1) x₀ i j k (extChartAt I x₀ p.2))
@@ -1220,12 +1220,12 @@ private theorem gammaRhsSm
   refine contMDiffAt_const.mul ?_
   refine ContMDiffAt.sum fun l _ => ?_
   have hInv :
-      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M =>
           coordInv (I := I) S x₀ p.1 p.2 k l) ((t : Real), x) :=
-    (coordInvSmoothAt (I := I) S hS x₀ t x hx k l).of_le (WithTop.coe_le_coe.mpr le_top)
+    coordInvSmoothAt (I := I) S hS x₀ t x hx k l
   have hInv' :
-      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+      ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M =>
           (Module.finBasis Real E).coord k
             ((ContinuousLinearMap.inverse
@@ -1240,13 +1240,13 @@ private theorem gammaRhsSm
   have h₃ := coordDgSmAt (I := I) S hS x₀ t x hx l i j
   exact hInv'.mul ((h₁.add h₂).sub h₃)
 
-/-- Spacetime smoothness of canonical coordinate Christoffel components.
+/-- Spacetime (C^infty) regularity of canonical coordinate Christoffel components.
 
 This is the family version of the Levi-Civita Christoffel formula:
 `Γ = 1/2 g^{-1} * (∂g + ∂g - ∂g)`, with `g = S.family.metric t`.
 It should be proved from `coordMetricSmoothAt`, smooth inversion of the
 coordinate Gram matrix, and the fixed-chart Christoffel formula. -/
-theorem coordGammaSmoothAt
+theorem coordGammaSmoothInf
     [I.Boundaryless]
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     (S : SolutionOn (I := I) (M := M) D)
@@ -1254,7 +1254,7 @@ theorem coordGammaSmoothAt
     (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
     (hx : x ∈ coordinateFrameSet (I := I) x₀)
     (i j k : CoordinateIdx (𝕜 := Real) E) :
-    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M =>
         christoffelSymbolInFrame
           (S.family.connection p.1) (coordinateFrameAt (I := I) x₀)
@@ -1276,6 +1276,24 @@ theorem coordGammaSmoothAt
     filter_upwards [hopen.mem_nhds hx] with p hp
     exact coordGammaForm (I := I) S x₀ p.1 hp i j k
   exact hmodel.congr_of_eventuallyEq heq
+
+/-- Spacetime (C^2) regularity of canonical coordinate Christoffel components. -/
+theorem coordGammaSmoothAt
+    [I.Boundaryless]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M) (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D) (x : M)
+    (hx : x ∈ coordinateFrameSet (I := I) x₀)
+    (i j k : CoordinateIdx (𝕜 := Real) E) :
+    ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) 2
+      (fun p : Real × M =>
+        christoffelSymbolInFrame
+          (S.family.connection p.1) (coordinateFrameAt (I := I) x₀)
+          (coordinateFrameAt_isLocalFrame_one (I := I) x₀) p.2 i j k)
+      ((t : Real), x) := by
+  exact (coordGammaSmoothInf (I := I) S hS x₀ t x hx i j k).of_le
+    (WithTop.coe_le_coe.mpr le_top)
 
 /-- Regular-time fixed-base mixed derivative for canonical coordinate
 Christoffel components. -/

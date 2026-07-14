@@ -412,3 +412,90 @@ analysis). `StepCProducers.lean` now has **ZERO `sorry` tokens** (verified by gr
   `NormalOverlapOn`); they thread through `existsTransUniv`'s parametric inputs (the join is already
   parametric over them). No new producer needed — they are supplied at the capstone call site from the
   Step-B `normalTransition` cocycle, the same as `hmapsJ`/`hmapsJbar`.
+
+## 2026-07-13 packing-local Item 3 input
+
+`stepCJoinFixed`, `stepCJoinDataFixed`, and `stepCJoin` now require only
+`Item3GpScaleAt ... pb r n`, exactly the finite fixed-index fact used to feed
+the capstone's `hR`. The legacy all-index `Item3GpScaleInput` is no longer a
+consumer boundary in this file. Focused verification and the narrow refresh
+passed.
+
+This closes the join-side `g_p` quantifier mismatch, not the independent
+`SigmaScaleField`, full item-3 convexity/physical-cage, or Hessian/Neumann
+producers. The finite exp-diffeomorphism radius tail is now checked separately.
+The concrete `StepB1RawInput` producer and textbook B1 theorem remain 0%;
+dedicated Step-B/B1 machinery is about 80%, Chapter 4 machinery about 76%,
+whole-HCG machinery about 53%, and compactness endpoints remain 0%.
+
+## 2026-07-13 canonical sigma tail and refinement
+
+Added `SigmaScaleAt` and `SigmaScaleTail` to distinguish a sigma inequality at
+one subsequence index from the eventual finite-family statement actually
+produced by the radius profile.  `SigmaScaleField.at` and `.to_tail` project an
+all-index field, `SigmaScaleTail.subseq` preserves an eventual tail under a
+strict refinement, and `SigmaScaleTail.exists_field` shifts once past the tail
+to recover the all-index field required by the existing Step-C consumer.
+
+For the canonical totalized centres, `NormalRadiusProfile.sigmaCenterTail`
+chooses `sigma gamma = 8 * L.lamInf gamma`.  Under the one-shot
+`16 < ratio * D` budget it proves both the coercive lower inequality and the
+upper `expMapC2Radius` inequality eventually, using
+`seqCenterD_dist_eq` to read the controlled radius.  Separately,
+`sigmaCenter_le` derives the uniform comparison-radius bound from
+`8 * lambda D 0 < r1`.
+
+`MetricCompactnessInputs.sigmaCenterData` packages that canonical tail with
+the `r1` bound, while `MetricCompactnessInputs.exists_sigmaField` performs the
+single tail shift and returns the `SigmaScaleField` used downstream.  These
+declarations passed focused verification.
+
+This closes the sigma producer for the canonical `x` family only.  No analogous
+profile connection has yet been proved for an arbitrary partner `y` family,
+so that is still a real producer-side wiring obligation.  `StrictDistInput`
+and its Hessian/Neumann strict-convexity producer remain an independent
+frontier.  The sigma/refinement API itself is complete (100%), but
+`StepB1RawInput`, textbook B1, and all compactness endpoints remain 0%; the
+whole-HCG machinery estimate is not raised above about 53% by these helpers.
+
+## 2026-07-13 eventual H6 join and support-local blocker
+
+`stepCJoin` now combines its sixteen per-slot geometric conditions into
+`NormalTransAt` and calls `existsTransTail`.  Thus a single finite common shift,
+not an all-index strengthening, feeds the H6 transition diagonal.  Focused
+verification passed.
+
+The remaining `hKV0` obligation in `stepCJoinFixed`, `stepCJoinDataFixed`, and
+`stepCJoin` is intentionally still visible.  Pair H6 gives a large item-3
+target anchor and only conditional inverse-limit cancellation; it does not map
+the entire canonical cage into the reverse eight-lambda convergence domain.
+The checked active-support theorem in `StepCPairTail` gives the needed six-
+lambda containment only when the atom/weight is nonzero.  Closing the capstone
+therefore requires a support-local specialization of the averaging/composition
+consumer, or a genuinely stronger later-reference cage.  Treat this as an
+architecture consultation frontier, not a missing rewrite lemma.
+
+## 2026-07-13 support-local H6 transition join
+
+The support-local choice has now been implemented and focused-verified.
+`binfMemClosed` consumes eventual rather than all-index membership;
+`HasAtomWeightLim.binf_of_weight` turns a nonzero limit weight into an
+interacting target whose forward limit lies in the closed six-lambda ball.
+`exists_supp_trans` extracts all interacting targets for one fixed live source.
+
+`exists_supp_fin` performs the outer transition extraction once on the finite
+dependent type `Sigma alpha, InterSlot alpha`. It returns one common strict
+subsequence, curried forward/reverse limits and cocycles for every live source,
+and the same support-to-six-lambda readout. It deliberately retains the
+pre-refinement `InterSlot` indices; further refinement preserves atom packages
+but need not make the refined interaction subtype surjective. Both focused
+checks passed.
+
+The remaining blocker is no longer an H6 derivative or pair-extraction gap.
+The fixed-manifold capstone must assemble source-local chart pullbacks into the
+global source ball, totalize noninteracting targets only behind zero weights,
+and make `exists_hat_cm_tail` support-local (it still requests point convergence
+on the whole `hatBall`). This is a real outer API/quantifier design question,
+not a local Lean error. Sparse active-support machinery is about 92% and
+pair-to-capstone integration about 78%; whole-HCG machinery remains about 53%,
+while `StepB1RawInput`, textbook B1, and all compactness endpoints remain 0%.

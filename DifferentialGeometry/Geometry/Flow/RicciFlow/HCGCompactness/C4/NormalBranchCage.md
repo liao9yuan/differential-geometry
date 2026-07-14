@@ -7,38 +7,46 @@ selected quantitative branch for the whole finite configuration.
 
 ## Verified state
 
-- `seqCenterD_dist_le` combines eventual live-slot realization with
-  `seqRadius_mem`, giving the explicit ordered-net basepoint-distance bound.
-- `liveCenters_dist_le` and `liveCenters_cage` finite-intersect those bounds and
-  place every live center in one fixed packing-cage sublevel on a common tail.
-- `exists_live_dom` consumes `normalBrScale` at that sublevel and gives one
-  relative selected branch domain for all live centers on the same tail.
-- `exists_cm_branch` combines `centerPairs_lt_le` with
-  `HasNormalBranchDom.exists_pair_readout`; the distance-orientation mismatch
-  is discharged by `riemannianEDist_comm`.  The whole finite center/point family
-  now lies in one selected `B.readDom`.
+- `seqCenterD_rInf_lt` identifies the totalized center distance with the ordered
+  net radius and places it eventually below `rInf gamma + 1`.
+  `liveCenters_rInf` finite-intersects this slotwise statement.
+- `exists_slot_min` calls `normalMinScale` once, before `D` is chosen.  The same
+  positive `aMin` is then specialized to every `LiveSlot` at
+  `Rgamma = rInf gamma + 1`, retaining the full minimizing branch, the metric
+  radius bound, and the non-strict half-radius `expRadiusGp` floor.
+- `lamInf_lt_halfMin` converts the one-shot physical budget
+  `8 * exp C < aMin * D` into the strict slotwise half-margin
+  `4 * lamInf gamma < (aMin * mu (rInf gamma + 1)) / 2`.
+- `exists_rad_cage` takes a finite supremum of the positive slot margins.  One
+  common pair-index threshold then places every active-point radius inside the
+  physical cage for every stabilized live slot.
+- `HasNormalBrFull.exists_cm_eqn` re-encodes the actual point family in the
+  selected normal chart and applies the minimizing readout using the checked
+  non-strict `expRadiusGp` floor; it returns the branch fence and the actual
+  `chartCmEqnB = 0` equation.
+- `aliveSlots_tail`, `hat_mem_live`, and `hat_dist_centerD` make the finite-hat
+  routing dead-slot aware: a positive POU weight forces the chosen hat slot to
+  be live and supplies its canonical four-`lamInf` distance bound.
+- `exists_hat_cm_eqn` closes the fixed-stage physical readout consumer.  It
+  selects a positive-weight slot, proves it live, transports the proper-metric
+  distance to the Riemannian metric, consumes the physical cage, and returns
+  the selected minimizing-branch center equation.
 
-Focused verification and the targeted module build pass without a local
-`sorry` or warning, including regression against the full-acceptance producer
-and its `normalBrScale` compatibility projection.
+Focused verification passes, including `exists_hat_cm_eqn`, without a local
+`sorry`.
 
 ## Frontier
 
-The fixed-trivialization gate is closed.  `NormalCoordinates.expMapDiffeo`
-retains the existing `exists_exp_pd_chart` target-in-base-chart property, and
-the finite-family consumer reaches `B.readDom` without a second normal chart.
+The fixed-stage physical finite-hat readout is closed, but the higher assembly
+is not.  It still has to intersect and thread the actual transition-map and POU
+tails into this consumer and produce the concrete `CenterInput`; in particular,
+the `StrictDistInput`/strict-convexity content carried by that input has not been
+proved here.  Hessian/Neumann is therefore still a separate analytic frontier,
+not a consequence of the cage inequalities.
 
-The physical finite-hat ledger still needs the book's
-large-`D` inequality against the positive coefficient produced by
-`normalBrScale`.  `normalBrHat` proves the scalar implication, but the exact
-assembly witness must remain visible rather than being renamed as a new radius
-assumption.
-
-The more immediate center-root blocker is quantitative compatibility with the
-realized exponential: `expDiffeoRadius` contains a pointwise qualitative
-agreement radius not bounded by `NormalRadiusProfile`.  `readDom` membership
-alone cannot produce this inequality.
-
-`StepB1RawInput` and textbook B1 remain 0%; this finite-cage consumer is only
-supporting machinery.  Dedicated Step-B/B1 machinery is about 77%, Chapter 4
-machinery about 74%, and whole HCG compactness machinery about 51%.
+No endpoint radius assumption was added.  The selected minimizing-branch
+Gates 1--6 machinery and this fixed-stage physical cage/readout sub-brick are
+100%.  The concrete `StepB1RawInput` producer, textbook B1 theorem, full
+item-3 geodesic-convexity theorem, and compactness endpoints remain 0%.
+Dedicated Step-B/B1 machinery is about 83%, Chapter 4 machinery about 79%, and
+whole-HCG compactness machinery remains about 53% after conservative rounding.

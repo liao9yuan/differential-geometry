@@ -761,6 +761,171 @@ theorem evol_ricci_lichnerowicz_coordFrameAt_of_christoffelEvolution_nabla2_comm
     ring
   exact hRicci.congr_deriv hSpecAt.symm
 
+/-- Pointwise Corollary 6.5: a Ricci-evolution component becomes the
+Lichnerowicz component once inverse-metric and Ricci symmetry are known at the
+same spacetime point. -/
+theorem ricciLichAt
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (Rm04 : Real -> DifferentialGeometry.Integral.Connection.Tensor04Section (I := I) (M := M))
+    (gInv : Real -> DifferentialGeometry.Integral.Connection.InverseMetricComponents M Idx)
+    (frame : Idx -> (x : M) -> TangentSpace I x)
+    (roughLapRic : Real -> M -> Idx -> Idx -> Real)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (x : M) (i j : Idx)
+    (hRicci : HasDerivWithinAt
+      (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
+      (ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+        (t : Real) x i j) D.carrier (t : Real))
+    (hInv : forall a b : Idx,
+      gInv (t : Real) x a b = gInv (t : Real) x b a)
+    (hRic : forall a b : Idx,
+      ricciCompInFrame (I := I) S frame (t : Real) x a b =
+        ricciCompInFrame (I := I) S frame (t : Real) x b a) :
+    HasDerivWithinAt
+      (fun s : Real => ricciCompInFrame (I := I) S frame s x i j)
+      (lichnerowiczRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+        (ricciCompInFrame (I := I) S frame)
+        (raisedRicciCompInFrame (I := I) S gInv frame)
+        (t : Real) x i j) D.carrier (t : Real) := by
+  have hLeft :=
+    ricciLeftActionCompInFrame_eq_quadratic
+      (I := I) S gInv frame (t : Real) x i j
+  have hRight :=
+    ricciRightActionCompInFrame_eq_quadratic_at
+      (I := I) S gInv frame (t : Real) x i j hInv hRic
+  have hSpec :
+      lichnerowiczRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+          (ricciCompInFrame (I := I) S frame)
+          (raisedRicciCompInFrame (I := I) S gInv frame)
+          (t : Real) x i j =
+        ricciEvolutionRHSInFrame (I := I) S Rm04 gInv frame roughLapRic
+          (t : Real) x i j := by
+    simp [lichnerowiczRHSInFrame, ricciEvolutionRHSInFrame,
+      rmRicciContractionCompInFrame, hLeft, hRight]
+    ring
+  exact hRicci.congr_deriv hSpec.symm
+
+/-- The canonical centered coordinate components of every Ricci-flow solution
+satisfy the Ricci Lichnerowicz equation at the frame center. -/
+theorem coordRicciLich
+    [I.Boundaryless] [IsManifold I (∞ + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (i j : CoordinateIdx (𝕜 := Real) E) :
+    HasDerivWithinAt
+      (fun s : Real =>
+        ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀) s x₀ i j)
+      (lichnerowiczRHSInFrame (I := I) S S.base.rm04
+        (coordInv (I := I) S x₀) (coordinateFrameAt (I := I) x₀)
+        (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀))
+        (ricciCompInFrame (I := I) S (coordinateFrameAt (I := I) x₀))
+        (raisedRicciCompInFrame (I := I) S (coordInv (I := I) S x₀)
+          (coordinateFrameAt (I := I) x₀))
+        (t : Real) x₀ i j) D.carrier (t : Real) := by
+  apply ricciLichAt (I := I) S S.base.rm04
+    (coordInv (I := I) S x₀) (coordinateFrameAt (I := I) x₀)
+    (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀)) t x₀ i j
+    (coordRicciEvol (I := I) S hS x₀ t i j)
+  · intro a b
+    exact coordInvSymmOn (I := I) S x₀ (t : Real)
+      (coordinateFrameAt_mem (I := I) x₀) a b
+  · intro a b
+    exact coordRicSymmOn (I := I) S x₀ (t : Real)
+      (coordinateFrameAt_mem (I := I) x₀) a b
+
+/-- Coordinate-basis expansion of the centered Ricci-evolution right-hand side
+on a fixed pair of tangent vectors. -/
+noncomputable def ricciPairRHS
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : Real) (x₀ : M) (v w : TangentSpace I x₀) : Real :=
+  ∑ i : CoordinateIdx (𝕜 := Real) E, ∑ j : CoordinateIdx (𝕜 := Real) E,
+    (coordinateFrameAt_toBasis (I := I) x₀).coord i v *
+      (coordinateFrameAt_toBasis (I := I) x₀).coord j w *
+        ricciEvolutionRHSInFrame (I := I) S S.base.rm04
+          (coordInv (I := I) S x₀) (coordinateFrameAt (I := I) x₀)
+          (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀))
+          t x₀ i j
+
+/-- The time derivative of Ricci on any fixed pair of tangent vectors is the
+coordinate-basis expansion of the centered Ricci-evolution right-hand side. -/
+theorem ricciPairCoord
+    [I.Boundaryless] [IsManifold I (∞ + 1) M]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (x₀ : M)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (v w : TangentSpace I x₀) :
+    HasDerivWithinAt
+      (fun s : Real => S.ricci s x₀
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w))
+      (ricciPairRHS (I := I) S (t : Real) x₀ v w)
+      D.carrier (t : Real) := by
+  classical
+  let b := coordinateFrameAt_toBasis (I := I) x₀
+  let frame := coordinateFrameAt (I := I) x₀
+  let rhs : CoordinateIdx (𝕜 := Real) E → CoordinateIdx (𝕜 := Real) E → Real :=
+    fun i j =>
+      ricciEvolutionRHSInFrame (I := I) S S.base.rm04
+        (coordInv (I := I) S x₀) frame
+        (coordRoughRic (I := I) S x₀ (coordNab2Ric (I := I) S x₀))
+        (t : Real) x₀ i j
+  have hsum_eval : ∀ s : Real,
+      S.ricci s x₀ (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) =
+        ∑ i : CoordinateIdx (𝕜 := Real) E, ∑ j : CoordinateIdx (𝕜 := Real) E,
+          b.coord i v * b.coord j w *
+            ricciCompInFrame (I := I) S frame s x₀ i j := by
+    intro s
+    have h :=
+      tensor0S_two_eval_coordFrame_sum (I := I)
+        (M := M) (x₀ := x₀) (Ax := S.ricci s x₀) v w
+    simpa [b, frame, DifferentialGeometry.Integral.Connection.vec2,
+      ricciCompInFrame, SolutionOn.ricci, SolutionOn.ricciAt] using h
+  have hsum_deriv :
+      HasDerivWithinAt
+        (fun s : Real =>
+          ∑ i : CoordinateIdx (𝕜 := Real) E, ∑ j : CoordinateIdx (𝕜 := Real) E,
+            b.coord i v * b.coord j w *
+              ricciCompInFrame (I := I) S frame s x₀ i j)
+        (∑ i : CoordinateIdx (𝕜 := Real) E, ∑ j : CoordinateIdx (𝕜 := Real) E,
+          b.coord i v * b.coord j w * rhs i j)
+        D.carrier (t : Real) := by
+    simpa [rhs, b, frame, mul_assoc] using
+      (HasDerivWithinAt.fun_sum
+        (u := (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)))
+        (A := fun i s =>
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            b.coord i v * b.coord j w *
+              ricciCompInFrame (I := I) S frame s x₀ i j)
+        (A' := fun i =>
+          ∑ j : CoordinateIdx (𝕜 := Real) E,
+            b.coord i v * b.coord j w * rhs i j)
+        (s := D.carrier) (x := (t : Real))
+        (fun i _hi => by
+          simpa [rhs, b, frame, mul_assoc] using
+            (HasDerivWithinAt.fun_sum
+              (u := (Finset.univ : Finset (CoordinateIdx (𝕜 := Real) E)))
+              (A := fun j s =>
+                b.coord i v * b.coord j w *
+                  ricciCompInFrame (I := I) S frame s x₀ i j)
+              (A' := fun j => b.coord i v * b.coord j w * rhs i j)
+              (s := D.carrier) (x := (t : Real))
+              (fun j _hj => by
+                simpa [rhs, b, frame, mul_assoc] using
+                  ((coordRicciEvol (I := I) S hS x₀ t i j).const_mul
+                    (b.coord i v * b.coord j w))))))
+  have hderiv := hsum_deriv.congr_of_eventuallyEq
+    (by
+      filter_upwards with s
+      exact hsum_eval s)
+    (hsum_eval (t : Real))
+  simpa [ricciPairRHS, rhs, b, frame] using hderiv
+
 end Components
 
 end DifferentialGeometry.PDE.RicciFlow

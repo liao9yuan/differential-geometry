@@ -14,7 +14,7 @@ the weights and points are supplied explicitly at each source point.
 
 noncomputable section
 
-universe u uE uH uX
+universe u uE uH uX uY
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -113,6 +113,98 @@ theorem activeFill_close {μ : X → ι → ℝ} {pts : X → ι → M} {qstar :
   · simpa [activeFill, hzero] using hactive i hzero
 
 variable [Fintype ι]
+
+omit [Fintype ι] in
+/-- A finite family of active points that converges uniformly to a target admits
+a strictly positive common radius which still converges uniformly to zero. -/
+theorem exists_active_radius {Y : Type uY} [PseudoMetricSpace Y] {s : Set X}
+    [Finite ι]
+    {target : X → Y} {μSeq : ℕ → ℕ → X → ι → ℝ}
+    {ptsSeq : ℕ → ℕ → X → ι → Y}
+    (hpts : ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ a ≥ N, ∀ b ≥ N, ∀ x ∈ s,
+      μSeq a b x i ≠ 0 → dist (target x) (ptsSeq a b x i) < ε) :
+    ∃ radSeq : ℕ → ℕ → X → ℝ,
+      (∀ a b x, 0 < radSeq a b x) ∧
+      (∀ a b x, x ∈ s → ∀ i : ι, μSeq a b x i ≠ 0 →
+        dist (target x) (ptsSeq a b x i) < radSeq a b x) ∧
+      ∀ ε > 0, ∃ N : ℕ, ∀ a ≥ N, ∀ b ≥ N, ∀ x ∈ s, radSeq a b x < ε := by
+  classical
+  letI := Fintype.ofFinite ι
+  let radSeq : ℕ → ℕ → X → ℝ := fun a b x =>
+    (∑ i : ι, if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) +
+      1 / ((a : ℝ) + 1)
+  refine ⟨radSeq, ?_, ?_, ?_⟩
+  · intro a b x
+    have hsum : 0 ≤
+        ∑ i : ι, if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i) := by
+      exact Finset.sum_nonneg fun i _ => by
+        split_ifs
+        · exact le_rfl
+        · exact dist_nonneg
+    have htail : 0 < 1 / ((a : ℝ) + 1) := by positivity
+    exact add_pos_of_nonneg_of_pos hsum htail
+  · intro a b x hx i hi
+    have hle : dist (target x) (ptsSeq a b x i) ≤
+        ∑ j : ι, if μSeq a b x j = 0 then 0 else dist (target x) (ptsSeq a b x j) := by
+      calc
+        dist (target x) (ptsSeq a b x i) =
+            (if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) := by
+              simp [hi]
+        _ ≤ ∑ j : ι,
+            if μSeq a b x j = 0 then 0 else dist (target x) (ptsSeq a b x j) := by
+              refine Finset.single_le_sum (s := Finset.univ)
+                (f := fun j : ι =>
+                  if μSeq a b x j = 0 then (0 : ℝ) else dist (target x) (ptsSeq a b x j))
+                ?_ (Finset.mem_univ i)
+              intro j _
+              change 0 ≤ if μSeq a b x j = 0 then (0 : ℝ) else
+                dist (target x) (ptsSeq a b x j)
+              by_cases hj : μSeq a b x j = 0
+              · simp [hj]
+              · simp [hj, dist_nonneg]
+    have htail : 0 < 1 / ((a : ℝ) + 1) := by positivity
+    exact lt_of_le_of_lt hle (lt_add_of_pos_right _ htail)
+  · intro ε hε
+    let δ : ℝ := ε / (2 * ((Fintype.card ι : ℝ) + 1))
+    have hδ : 0 < δ := by
+      dsimp [δ]
+      positivity
+    choose N hN using fun i : ι => hpts i δ hδ
+    let Nmax : ℕ := Finset.univ.sup N
+    have htail : ∀ᶠ a : ℕ in Filter.atTop, 1 / ((a : ℝ) + 1) < ε / 2 :=
+      (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).eventually
+        (Iio_mem_nhds (by linarith))
+    obtain ⟨Ntail, hNtail⟩ := Filter.eventually_atTop.mp htail
+    refine ⟨max Nmax Ntail, fun a ha b hb x hx => ?_⟩
+    have ha_max : Nmax ≤ a := le_trans (le_max_left _ _) ha
+    have ha_tail : Ntail ≤ a := le_trans (le_max_right _ _) ha
+    have hb_max : Nmax ≤ b := le_trans (le_max_left _ _) hb
+    have hsum_le :
+        (∑ i : ι,
+          if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) ≤
+          ∑ _i : ι, δ := by
+      refine Finset.sum_le_sum fun i _ => ?_
+      by_cases hi : μSeq a b x i = 0
+      · simp [hi, hδ.le]
+      · simp only [hi, ↓reduceIte]
+        have hNi : N i ≤ Nmax :=
+          Finset.le_sup (s := Finset.univ) (f := N) (Finset.mem_univ i)
+        exact le_of_lt (hN i a (le_trans hNi ha_max) b (le_trans hNi hb_max) x hx hi)
+    have hcard :
+        (∑ _i : ι, δ) = (Fintype.card ι : ℝ) * δ := by simp
+    have hcard_lt : (Fintype.card ι : ℝ) * δ < ε / 2 := by
+      dsimp [δ]
+      have hden : 0 < 2 * ((Fintype.card ι : ℝ) + 1) := by positivity
+      rw [← mul_div_assoc]
+      apply (div_lt_iff₀ hden).2
+      have hcard_nonneg : 0 ≤ (Fintype.card ι : ℝ) := by positivity
+      nlinarith
+    have hsum_lt :
+        (∑ i : ι,
+          if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) <
+          ε / 2 :=
+      lt_of_le_of_lt hsum_le (hcard ▸ hcard_lt)
+    simpa [radSeq] using add_lt_add_of_lt_of_lt hsum_lt (hNtail a ha_tail)
 
 /-- Pointwise normalized finite weights on `s`, together with the regions on
 which their nonzero entries are active. -/

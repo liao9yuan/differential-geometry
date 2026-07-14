@@ -524,3 +524,69 @@ proofs do not reinstall incompatible tangent-fibre norm instances.
 Focused verification and the targeted module build passed.  These adapters are
 reusable geometry producers; they do not change the theorem-level progress by
 themselves.
+
+## 2026-07-13, finite-hat active radius
+
+Added `NetLimitData.exists_hat_radius`, the thin finite-hat specialization of
+`centerAverage.exists_active_radius`.  It accepts a general two-index point
+family and uniform convergence on each canonical `hatBall`.  A nonzero POU
+weight is sent into that ball by `hatPOUDataTwo`; the generic finite-family
+producer then chooses one `radSeq` which is positive on `hatSourceBall`,
+strictly contains every active point distance, and tends uniformly to zero on
+the source ball as both indices grow.
+
+No coordinate-composition maps or new radius assumptions occur in this
+adapter.  The focused Lean check passed.
+
+Accounting: `exists_hat_radius` and this finite-hat active-radius specialization
+are complete (100%).  Supplying the concrete point-family convergence is a
+separate producer obligation, while the physical cage and strict-convexity
+consumers remain incomplete; no Chapter-4 endpoint theorem advanced (0%).
+
+## 2026-07-13, dead-slot composition cages
+
+Added `NetLimitData.hatPtsCasesComp`, the dead-slot-aware canonical-cage
+specialization of `hatSrcPtsOfComp`.  It installs `hatCageCompact` and
+`hatCageSub` directly, and uses `hatCageSrcCases` for chart-source membership.
+Consequently a radial source bound is required only when the corresponding
+`seqCenter` is live; an empty/dead slot no longer carries a fictitious center
+hypothesis.
+
+The composition convergence, cage preservation, and compact-image hypotheses
+remain the same as in the existing all-live `hatSrcPtsCageComp` wrapper.  The
+focused Lean check passed.
+
+Accounting: `hatPtsCasesComp` and the dead-slot consumer specialization are
+complete (100%).  Concrete live-center radius and composition-map producers
+remain downstream, and no Chapter-4 endpoint theorem advanced (0%).
+
+Together, `exists_hat_radius` and `hatPtsCasesComp` close the finite-hat
+specialization on the consumer side without reinstating an all-slots-live
+assumption.  They do not construct the concrete arbitrary partner (`y`)
+point-family, nor do they discharge `StrictDistInput`.  The latter remains the
+independent Hessian/Neumann strict-convexity frontier; no compactness endpoint
+is stated or proved here (0%).
+
+## 2026-07-13, support-local decoded composition
+
+`hatSuppPtsOfComp` and `unifHatSuppData` are focused-green. They run decoded
+composition convergence only on nonzero-weight entries and use
+`centerAverage.activeFill` at the averaging boundary. The new endpoint asks
+only for `WeightDataOn ... Set.univ`; actual support containment is carried by
+the separate `hSupp` hypothesis, so normalization no longer duplicates a
+geometric hat-support assertion.
+
+`hatSuppCageData` is also focused-green. For each slot it closes the actual
+nonzero-weight support inside a caller-supplied compact source-local cage and
+extends the closed limit-target condition to that closure. It does not assume
+that the whole canonical cage maps into the reverse convergence domain, and it
+does not assume that the full global source ball lies in every local normal
+chart.
+
+This completes the reusable support-local consumer and cage sub-brick (100%).
+The remaining capstone work is the outer finite source-chart assembly: pull the
+limit weights back on the appropriate local cages, totalize sparse pair maps
+only across zero-weight slots, and replace the whole-`hatBall` point premise of
+`exists_hat_cm_tail` by its support-local analogue. Pair-to-capstone integration
+is about 78%; `StepB1RawInput`, textbook B1, and compactness endpoints remain
+theorem-level 0%. Whole-HCG machinery remains about 53%.

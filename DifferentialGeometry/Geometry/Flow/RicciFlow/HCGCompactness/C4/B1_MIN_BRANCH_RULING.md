@@ -1,6 +1,11 @@
 # B1 minimizing-branch ruling and executor handoff
 
-Status: 2026-07-12, branch `short-time-existence`, paused after Gate 3a.
+Status: 2026-07-13, aligned branch `codex/short-time-existence-align`; Gates
+1--6 are focused-green.  The true `expRadiusGp` floor, minimizing scale,
+D-independent packing producer, canonical sigma tail, and finite-hat physical
+cage/readout are checked.  The next B/C scale frontiers are full geodesic
+convexity, the concrete outer source-slot diagonal, and the independent
+Hessian/Neumann producer.
 
 This file records the GPT Pro response to
 `B1_INTRINSIC_REALIZED_CONSULT.md`, reconciled with the current live tree.  It
@@ -45,7 +50,8 @@ Do not:
 
 ## Live implementation state
 
-The other B/C task already started this ruling.  Resume it; do not restart.
+The ruling is implemented through Gate 6.  Continue from the post-packing
+finite-cage/Item-3 frontier below; do not restart the completed gates.
 
 1. `DiagInvBranch.inv_eq_of_exp` is present in
    `Geometry/Exponential/DiagInvBranch.lean` and focused-check passed.  Its
@@ -58,49 +64,49 @@ The other B/C task already started this ruling.  Resume it; do not restart.
    A broad `simp` is intentionally avoided because it unfolds the intrinsic
    exponential too far.
 
-2. `C4/NormalBranchMin.lean` now has focused-green proofs of:
+2. `C4/NormalBranchMin.lean` now has focused-green, sorry-free proofs of:
 
    - `normalTan_metric`;
    - `normalTanHome_target`;
    - Gate 1, `IsNormalDiag.tan_mem_of_small`;
    - Gate 2, `IsNormalDiag.inv_is_min`;
-   - Gate 3a, `IsNormalDiag.halfSq_eq_inv`.
+   - Gate 3a, `IsNormalDiag.halfSq_eq_inv`;
+   - Gate 3b, `IsNormalDiag.halfSq_inf`;
+   - Gate 4, `IsNormalDiag.grad_half_inv`.
 
-3. Gate 3b, `IsNormalDiag.halfSq_inf`, is saved with a complete proof candidate
-   but is not yet verified.  The last focused check stopped before local
-   elaboration because an upstream `Tensor0SRiemannian/Comparison.olean` was
-   missing.  The dependency refresh was intentionally stopped on pause to free
-   resources.  Resume by checking the saved file; do not rewrite the candidate
-   first.
+3. The comparison layer now exports the focused-green producer
+   `grad_halfSqDist_min`, which proves the gradient formula from an arbitrary
+   minimizing intrinsic exponential tangent and has no qualitative-radius or
+   realized-exp agreement input.
 
-4. Gate 4 `grad_half_inv`, Gate 5 center readout, and Gate 6 uniform scale have
-   no Lean implementation yet.  The concrete `StepB1RawInput`, textbook B1,
-   and compactness endpoints remain theorem-level 0%.
+4. Gate 5 is focused-green: `centerOfMass.invB_eqn` is the generic finite-sum
+   minimizer equation and `centerReadoutB_min` transports the selected inverse
+   tangent sum to `chartCmEqnB = 0`. The route no longer uses
+   `centerOfMass.eqnRadius`, `expDiffeoRadius`, or a normal-chart inverse at the
+   moving center.
 
-## Important correction to the Pro response
+5. Gate 6 is focused-green: `normalMinScale` retains the full branch/fence/
+   transport package while shrinking to a real H6-derived `expRadiusGp` floor.
+   `NormalBranchCage.exists_slot_min` chooses that coefficient once before
+   `D`, specializes it at the slotwise radius `rInf + 1`, and keeps the full
+   branch data on one live-center tail.  The concrete `StepB1RawInput`,
+   textbook B1, and compactness endpoints remain theorem-level 0%.
 
-The Pro response says that `NormalRadiusProfile` supplies a uniform lower floor
-for `expRadiusGp`.  The current structure does not state that.  Its
-`le_exp_radius` field and `floor_le_exp` theorem target `expMapC2Radius`.
+## Important correction to the Pro response -- RESOLVED 2026-07-13
 
-Therefore:
+The original response conflated the profile's `expMapC2Radius` floor with
+`expRadiusGp`.  The repair was made at the canonical producer layers rather
+than by adding an endpoint assumption:
 
-- the pointwise `tan_mem_of_small` statement is honest with the explicit input
-
-  ```lean
-  rho / 2 <= expRadiusGp (I := I) (X.obj k).metric x;
-  ```
-
-- the proposed sequence-uniform `normalMinScale` does not follow verbatim from
-  the current `NormalRadiusProfile` API;
-- before exporting `normalMinScale`, prove a real relative lower-floor producer
-  for `expRadiusGp` from existing H6 metric equivalence and
-  `gpCoerciveConst`, or stop with that producer as the exact missing lemma;
-- do not silently replace the missing floor by a new endpoint assumption.
-
-This correction does not invalidate the fourth route.  It separates the
-pointwise source-capture theorem, which is locally feasible, from the later
-sequence-uniform scale theorem.
+- `gpCoerciveConst` is now the optimal unit-sphere coefficient and
+  `le_gpCoerciveConst` compares every valid quadratic lower bound with it;
+- H6 origin metric equivalence plus low-layer `normalMetric_zero` proves
+  `(1 / 2 : Real) <= gpCoerciveConst`;
+- `NormalRadiusProfile.gpRatio`, `floor_le_expGp`, and
+  `mul_lambda_lt_expGp` give the actual relative intrinsic-radius floor;
+- `tan_mem_of_small` retains its explicit pointwise hypothesis, while
+  `normalMinScale` now supplies that hypothesis honestly on the sequence
+  profile.
 
 ## Implementation order
 
@@ -151,7 +157,7 @@ Also export branch-domain membership or the selected-inverse norm equality if
 that materially shortens the next theorem.  Do not create a wrapper that merely
 renames all of these hypotheses.
 
-### Gate 3: identify half squared distance on the branch -- IN PROGRESS
+### Gate 3: identify half squared distance on the branch -- COMPLETE
 
 Still in `NormalBranchMin.lean`, prove:
 
@@ -178,11 +184,9 @@ fun y =>
 Use the selected branch's existing all-order inverse smoothness.  This replaces
 the HCG use of the qualitative `exists_halfSqDist_md` radius.
 
-Pause status: `halfSq_eq_inv` is focused-green.  `halfSq_inf` is saved but not
-yet verified because the focused check encountered a missing upstream object
-before reaching the declaration.
+Both `halfSq_eq_inv` and `halfSq_inf` are focused-green and sorry-free.
 
-### Gate 4: branch-native first variation -- NOT STARTED
+### Gate 4: branch-native first variation -- COMPLETE
 
 Prove:
 
@@ -198,7 +202,10 @@ and the selected inverse of the diagonal zero tangent.
 Do not infer the gradient formula from smoothness plus an intrinsic endpoint
 identity; that would omit minimization.
 
-### Gate 5: center equation and readout root -- NOT STARTED
+Implemented through the generic producer `grad_halfSqDist_min`, then consumed
+by `IsNormalDiag.grad_half_inv` together with `inv_is_min` and `halfSq_inf`.
+
+### Gate 5: center equation and readout root -- COMPLETE
 
 At the generic center layer, add the shortest branch-parametric analogue of the
 existing center first-order equation, preferably named
@@ -230,32 +237,63 @@ The finite-hat path should migrate to this theorem.  Keep
 users; do not route the new producer back through `normalChartAt` or
 `centerOfMass.eqnRadius`.
 
-### Gate 6: sequence-uniform scale -- BLOCKED ON REAL FLOOR PRODUCER
+The checked implementation is `centerOfMass.invB_eqn` plus
+`centerReadoutB_min`. The latter derives branch-domain and fixed-trivialization
+base membership from the half-cage and uses the selected branch directly.
 
-Only after Gates 1-5 are green, design `normalMinScale` from
-`normalBrAccept`, which retains `IsNormalDiag`, `NormalDiagFence`, and full
-source/target transport.
+### Gate 6: sequence-uniform scale -- COMPLETE
 
-Before claiming this gate, resolve both quantifier issues:
+The checked chain is:
 
-1. prove the relative `expRadiusGp` floor missing from the current
-   `NormalRadiusProfile` API, or report its smallest missing producer;
-2. choose large `D` before freezing the fixed-`D` packing package.
+1. the exponential layer selects the optimal `gpCoerciveConst` and exports
+   `le_gpCoerciveConst`;
+2. `StepBInputs` proves the H6 origin bound `half_le_gpConst`;
+3. `NormalRadiusProfile` defines positive `gpRatio` and proves the relative
+   `expRadiusGp` floor;
+4. `HasNormalBrFull.mono` shrinks only the consumer ball, and
+   `normalMinScale` returns the full branch/fence/transport package together
+   with `(aMin * mu R) / 2 <= expRadiusGp`;
+5. `NormalBranchCage.exists_live_min` specializes that result to every live
+   center on one common tail.
+6. `Item3GpScaleAt` / `Item3GpScaleTail` record only the finite packing slots,
+   `NormalRadiusProfile.gpScaleTail` proves the tail with the exact `c = 8`
+   budget from `lambda_window`, and the Step-C atom/package/join consumers now
+   use those weaker facts.
+7. `Item3RadiusAt` / `Item3RadiusTail` record the finite exp-diffeomorphism
+   radii, and `NormalRadiusProfile.radiusScaleTail` proves their injectivity and
+   `expMapC2Radius` bounds.
+8. `MetricCompactBase.exists_item3D` aggregates the book factor and all current
+   scalar constraints before packing; `exists_item3OfBase` and
+   `item3ScaleTails` return the original fixed-`D` bundle and both tails.
+9. The same one-shot selector accepts an arbitrary extra scalar budget.  With
+   `physScale_of_extra` it gives `8 * exp C < aMin * D`, while also choosing
+   `16 < ratio * D` and `8 * lambda D 0 < r₁` before packing.
+10. `NormalRadiusProfile.sigmaCenterTail` and
+    `MetricCompactnessInputs.exists_sigmaField` close the canonical
+    `seqCenterD` sigma family, including its `r₁` bound.
+11. `lamInf_lt_halfMin`, `exists_rad_cage`, and
+    `HasNormalBrFull.exists_cm_eqn` close the physical half-cage.  The
+    dead-slot-aware `hat_mem_live`/`hat_dist_centerD` bridge and
+    `exists_hat_cm_eqn` then select a positive-weight live slot and produce the
+    actual selected-branch center equation without a strict radius floor.
 
-Do not add a branch-specific inequality field to `MetricCompactnessInputs`.
-If the conditional endpoint is responsible for choosing book-large `D`, the
-honest architecture is either:
+The fixed-`D` order is also checked without modifying downstream consumers:
+`MetricCompactBase` carries `forall D > 0, PackingBound D`,
+`MetricCompactBase.exists_item3D` makes one scalar choice satisfying the
+`gpRatio`, item-3 radius, and `stepA_cap_le` budgets, and
+`MetricCompactnessInputs.ofBase` instantiates packing only after that choice.
 
-```text
-base inputs with packing available for every positive D
--> produce scale coefficients
--> choose D
--> construct the fixed-D downstream package
-```
+The post-packing `g_p` ledger is now checked. Direct `4 * lambda` uses budget
+`c = 4`, while `lambda_window` makes finite-slot `4 * lamInf` require `c = 8`;
+the producer chooses that budget before packing and proves the common finite
+tail after `A_D(r)` is available. The old all-index `Item3GpScaleInput` remains
+only as compatibility API.
 
-or a constructor that builds the existing fixed-`D` bundle only after the
-coefficients and `D` are chosen.  Defer this public API decision until the
-pointwise minimizing branch route is checked.
+The legacy all-index `Item3RadiusInput` is no longer needed on the canonical
+finite-slot route.  The canonical sigma and configuration-dependent physical
+cage/readout ledgers are now checked.  This does not discharge the full
+geodesic-convexity scale or Hessian/Neumann estimates; no endpoint radius field
+is to be added.
 
 ## Independent frontier
 
@@ -263,20 +301,51 @@ The Hessian/Neumann producer remains independent.  Capturing the minimizing
 branch proves the root equation and first derivative formula; it does not prove
 coercivity or invertibility of the center-equation derivative.
 
+The physical scalar and pair-index ledgers are no longer missing:
+`exists_rad_cage` produces the common threshold and `exists_hat_cm_eqn`
+consumes the actual stabilized configuration.  `StepCHatReadout` now intersects
+the sequence tail with `exists_hat_radius`, constructs the filled
+`CenterInput`, and leaves `StrictDistInput` as the final honest continuation.
+
+The canonical sigma family is also closed.  The finite source-slot diagonal has
+now migrated completely to H6 and the temporary S6 endpoint field is gone.
+`InterSlot` plus `exists_pair_trans` extracts only stably intersecting live
+targets, while `atom_disjoint_conv` supplies the genuine zero branch for stable
+nonintersection.  `atom_trans_small` and `weight_trans_small` prove that actual
+active support maps into the reverse six-lambda ball.
+
+The support-local capstone choice is now settled and its reusable consumer is
+focused-green. `hatSuppPtsOfComp`, `unifHatSuppData`, and `hatSuppCageData`
+restrict decoded composition to actual nonzero-weight support and fill zero
+entries by the identity. `HasAtomWeightLim.weight_data` supplies normalized
+limit weights, while `exists_supp_fin` extracts one common H6 subsequence for
+all dependent source/interaction pairs. No whole-cage `hKV0` inference or
+stronger endpoint radius field was introduced.
+
+The remaining outer wiring is a narrower but genuine quantifier/API choice:
+assemble the chartwise limit families on source-local compact cages into the
+fixed global source ball, totalize sparse pair maps only on zero-weight slots,
+and make `exists_hat_cm_tail` consume point convergence on active support rather
+than the whole `hatBall`. Existing `hbetaU` points from a Euclidean chart domain
+into the source ball and does not put the whole source ball in one chart.
+Consult on this source-local/global assembly before changing the final capstone
+or readout interface. Do not manufacture a global chart selector, a parallel
+radius API, or an arbitrary-`y` endpoint field.
+
 `StepB1RawInput`, textbook B1, and the conditional compactness endpoint remain
-theorem-level 0% until the minimizing branch chain, Hessian producer, convergence
-estimates, and final assembly are all completed.
+theorem-level 0% until the support-local capstone choice, remaining Item-3 full
+convexity, Hessian producer, convergence estimates, and final assembly are all
+completed. The
+selected minimizing-branch Gates 1--6 machinery is 100%; dedicated Step-B/B1
+machinery is about 84%, Chapter 4 machinery about 80%, and whole-HCG machinery
+about 53%.
 
 ## Ownership and coordination
 
-The B/C task owns:
-
-- `Geometry/Exponential/DiagInvBranch.lean` for the generic adapter already
-  added;
-- `C4/NormalBranchMin.lean` for Gates 1-4;
-- the subsequent branch-native center/readout edits when it reaches Gate 5.
-
-The thread that produced this handoff must not edit those Lean files in
-parallel.  It may review the B/C result after each green gate.  Update the
-running B1 plan status after each gate; do not restart the branch, transport,
-scale-selection, or `B.readDom` work.
+The completed Gate 1--6 files remain the B/C lane's settled base:
+`DiagInvBranch.lean`, `NormalBranchMin.lean`, `StepCCenterOfMass.lean`,
+`StepCCmDomain.lean`, `NormalBranchScale.lean`, `NormalBranchCage.lean`, and
+`StepCHatReadout.lean`.  Future work should claim only the concrete outer
+source-slot/Item-3 or independent Hessian/Neumann files it actually edits,
+coordinate with Step D through file claims, and preserve these checked
+interfaces unless a live contradiction is found.

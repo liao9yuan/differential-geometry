@@ -145,7 +145,9 @@ theorem ccTensorUnitValueSection_contMDiff (g : SmoothRiemannianMetric I M)
     T.toSection.contMDiff (unitZeroSec (I := I) (M := M)).contMDiff
 
 set_option linter.unusedSectionVars false in
-private theorem metricCcTensor_ccTensorBilin (g₀ g : SmoothRiemannianMetric I M)
+/-- Evaluates the covariant metric tensor, tagged over `g₀`, on two tangent
+vectors. -/
+theorem metricCcTensor_apply (g₀ g : SmoothRiemannianMetric I M)
     (x : M) (v w : TangentSpace I x) :
     ccTensorBilin (I := I) g₀ (metricCcTensor (I := I) (M := M) g₀ g) x v w =
       g.inner x v w := by

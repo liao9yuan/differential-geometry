@@ -49,30 +49,35 @@ The explicit selected-branch route is now checked through
   `aq`, `aδ`, and `aρ`, with `q`, `δ`, the whole quantitative target ball, and
   the common `aρ * mu R` branch domain selected before the sequence index and
   center.  `normalBrScale` preserves the established consumer interface, while
-  `normalBrHat` supplies the
-finite-hat scale inequality.  `NormalBranchCage` now checks the eventual
-live-center sublevel, the common selected branch domains, and the finite
-center/point family in `B.readDom`.  `centerReadoutB_zero` consumes this
-membership and derives fixed-trivialization base membership and branch equality
-internally.  The live design gate is now the unquantified
-`expMapIntrinsic = expMap` component of `expDiffeoRadius`; see
-`B1_INTRINSIC_REALIZED_CONSULT.md`.
-Dedicated Step-B/B1 machinery is about 77%; the
+  `normalBrHat` supplies the finite-hat scale inequality.  The fourth-route
+minimizing tangent has removed the unquantified `expMapIntrinsic = expMap`
+radius from the B1 readout path.  `NormalBranchCage` now chooses one minimizing
+coefficient before `D`, specializes the full branch at each slotwise
+`rInf + 1` cage, proves the common active-radius half-margin, handles dead
+slots, and derives the actual finite-hat selected-branch equation.  The
+canonical sigma field and its `r₁` bound are also produced.  Dedicated
+Step-B/B1 machinery is about 83%; the
 `StepB1RawInput` producer and textbook B1 theorem remain 0%.
 
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
 ONLY where the book itself cites an external theorem (`lbl384`, the Rauch comparison
 in `lbl387`, the Hessian comparison `lbl413`) — with one declared exception: the
-"`D` large enough" **scale-choice inputs** (`Item3RadiusInput`, `Item3GpScaleInput`,
-`SigmaScaleField`), which are book-internal choices deferred to the D6 assembly,
-where each must be DISCHARGED rather than survive to the endpoint.
+"`D` large enough" **construction-stage choices**, which must be discharged at
+D6 rather than survive to the endpoint.  The former all-index
+`Item3RadiusInput` and `Item3GpScaleInput` exceptions are retired from the
+canonical route: the profile now proves packing-local `Item3RadiusTail` and
+`Item3GpScaleTail` after `D`, `pb`, and `r` are fixed.  The canonical
+`SigmaScaleField` and physical finite-hat cage/readout are checked; full
+convexity and the Hessian/Neumann producer remain construction-stage work.
 **2026-07-11 correction:** the relative `kappa * mu(distance)` lower profile is
 already encoded separately by the endpoint's `normalRadius` field and consumed by
 the checked `NormalRadiusProfile.floor_le_*`, `exists_phase_scale`,
 `normalBrScale`, and `mul_lambda_lt_*` API.  Branch-scale and
 fixed-trivialization `readDom` production are closed.  The live discharge
-problem is quantitative intrinsic/realized-exp compatibility followed by the
-physical large-`D` ledger, not another radius record.
+problem is the remaining full-convexity and Hessian/Neumann work plus concrete
+outer source-slot wiring, not another endpoint radius record.  The finite-slot
+`g_p`, exp-diffeomorphism-radius, canonical sigma/`r₁`, and physical-cage
+ledgers are checked from one pre-packing divisor.
 Everything the book proves, we prove. Build via
 `& .\scripts\lake-locked.ps1 build +<Module>`; no
 `sorry`/admissions; `#print axioms`-clean.
@@ -123,7 +128,8 @@ equivalence factor: `Comparison.lean:sqrt_normSq0S_le_of_metric_equiv` (the book
 
 **F2 — Prop *Distances*.** `Distances.lean`: `pathComp_tangent`, `dist_le_tangent`,
 `image_ball_tangent`, `edist_le_of_path_comp`, `lipschitz_sqrt_of_dist_le`,
-`image_ball_subset_of_lipschitz_sqrt`.
+`image_ball_subset_of_lipschitz_sqrt`, and the book-facing
+`speed_le_of_c0` / `data_image_ball` producers consumed by Step D.
 
 **F3 — Lemma *Norms of cov. derivs, I*** (`|∇_g^r T|_g ≤ |∇_h^r T|_g + εCΣ_{k<r}|∇_h^k T|_g`).
 `Lemma45Engine.lean:lemma45_F3` (component-`compL2` form, sorry-free). Engine:
@@ -157,44 +163,39 @@ now also the vector-target core `arzelaAscoli_isCompact_closure` + sequential
 **Honest-input fields (book-external).** `GeometricInputs.lean`/`StepAInputs.lean`
 (A0 `lbl384` inj-radius decay, A0' Rauch/volume); `StepBInputs.lean` (S6 `lbl418`
 exp⁻¹ deriv — `ExpInverseDerivBoundInput`, temporary);
-`GoodCoveringItem3.lean` (`Item3RadiusInput` = `lbl391`/`lbl392` "`D` large enough"
-Euclidean/inj `C²`-radius discipline; **`Item3GpScaleInput`** = `lbl383`/`lbl427`
-`g_p`-scale choice `4 λ^γ < expRadiusGp` at live centers — the C3 capstone's `hR`,
-added 2026-07-02; same un-provable-choice-radius boundary as `Item3RadiusInput`).
+`GoodCoveringItem3.lean` keeps legacy all-index radius/`g_p` declarations only
+for compatibility. The canonical `lbl391`/`lbl392` exp-diffeomorphism scale is
+`Item3RadiusAt` / `Item3RadiusTail`, and the `lbl383`/`lbl427` intrinsic scale is
+`Item3GpScaleAt` / `Item3GpScaleTail`; both are produced from
+`NormalRadiusProfile` after packing.
 
 ---
 
 ## ACTIVE FRONTIER (Track α, no §5 geometry)
 
-- [~] **F4 — Cor *Norms of cov. derivs, II* (`lbl370`).** STRUCTURE done
-      (`Lemma45Covariant.lean:lemma45_cor_II_of_intrinsic`, Cor II from the intrinsic
-      Lemma I `hF3` + the `√(C^{q₂+r})` factor). **LIFT FRONTIER SOLVED at the lemma
-      level (2026-06-11, green, `Lemma45Intrinsic.lean`):** `compL2_tower_eq_gen` (the
-      decoupled tower-norm identity — the g-norm of the *gRef*-tower, which the
-      parallel matched-metric `B5`/`compL2_tower_le` can't express) + `hF3_term` (one
-      `compL2` Lemma-I ineq → intrinsic `hF3` at a g-ON point). So
-      `lemma45_F3 → hF3_term → hF3 → lemma45_cor_II_of_intrinsic → Cor II` is now all
-      at the lemma level. REMAINING = mechanical assembly (apply `exists_goodFrame_compBound`
-      with `gRef:=g` for the g-ON frame; ∃-collection into `lemma45_cor_II_of_intrinsic`),
-      gated on the lake lock / live parallel session. See `Lemma45Intrinsic.md`. ⟸ F3, good-frame.
-- [~] **F5 (C^p part)** — Prop *Composition of approx isometries, I* derivative side.
+- [x] **F4 — Cor *Norms of cov. derivs, II* (`lbl370`).** CLOSED in
+      `Lemma45F4.lean`: `lemma45_corII`, `lemma45_corII_bound`, and
+      `lemma45_corII_unif` assemble the intrinsic lift with data-independent
+      constants. ⟸ F3, good-frame.
+- [x] **F5 (C^p part)** — Prop *Composition of approx isometries, I* derivative side.
       **GREEN sorry-free (2026-06-11): `ApproxIsometryCompHigher.lean:comp_cov_le`** —
       `|∇_{g₀}^r(δ₀+δ₁)|_{g₀} ≤ ε₀ + ε₁·C_p` (same-domain). Fiber Minkowski at a g₀-ON
       basis (`exists_gOrthonormalBasis` + `metricInverseInBasis_of_orthonormal` +
       `sqrt_normSq0S_add_le`) splits the composed tower; the `δ₁` term via
-      `lemma45_corII` (F4) + `iterCov_add`. (`[~]` because it rests on F4's one
-      assembly-`sorry`; F5 itself is sorry-free.) ⟸ F4.
-- [~] **F6 — Cor *Composition, II* (`lbl372`).** **GREEN sorry-free:
+      `lemma45_corII` (F4) + `iterCov_add`. ⟸ F4.
+- [x] **F6 — Cor *Composition, II* (`lbl372`).** **GREEN sorry-free:
       `ApproxIsometryCompHigher.lean:comp_cov_accum`** — the `n`-fold accumulation
       `e n ≤ C·Σ_{i≤n} εᵢ` via the scalar fold `compEpsAccum` (ApproxIsometryComp.lean). ⟸ F5.
-- [ ] **F2-book** — Prop *Distances*, pre-approx-isometry form: feed `image_ball_tangent`
-      from `PreApproxIsometryData` (no invented pullback-metric constructor). ⟸ F1-c0, F2.
+- [x] **F2-book** — Prop *Distances*, localized pre-approx-isometry form:
+      `speed_le_of_c0` supplies the path-speed bound and `data_image_ball`
+      supplies the image-ball inclusion from `PreApproxIsoDataOn`. ⟸ F1-c0, F2.
 - [x] **F7** — Def *Cᵖ-convergence of maps* + *C^∞-conv. on compacts* (`lbl373`).
       **GREEN sorry-free (2026-06-11): `MapConvergence.lean`** — `mapDerivNorm`,
       `MapCPConvOn`, `MapCInfConvOnCompacts` (Euclidean `iteratedFDeriv` form, parallel to
       `PointedConvergence`'s `Metric*` names) + order/subset/subseq API + the bridges
       `mapCPConvOn_of_tendstoUniformly`, `tendstoUniformlyOn_of_cPConv`, `tendsto_of_cInf`.
-- [~] **F8** — Cor *Compactness of a sequence of isometries* (`lbl374`).
+- [x] **F8** — Cor *Compactness of a sequence of isometries* (`lbl374`), conditional
+      on the separately audited [H6] `IsometryDerivBounds` input.
       **ASSEMBLED sorry-free (2026-06-11): `IsometryCompactness.lean`** —
       `isometry_seq_cInf` (convergence core) + `comp_eq_id_of_cInf` (invertibility, fully
       proved) + `isometry_seq_diffeo` (full `lbl374`, incl. the `C^∞` diffeomorphism limit
@@ -263,13 +264,13 @@ exp endpoint. Honest inputs: A0 `lbl384` CGT decay, A0' PackingBound/ratio-ballM
       ball-diffeo producer. **3b** = `ConvexBalls.lean:isConvexWith_smallNormalBall`
       (lbl417 assembly) modulo the §5 honest-inputs (Hopf–Rinow join selector + lbl416
       d²-Hessian-convexity, both = the plan's approved §5/`lbl413` boundary).
-      **B5 DONE 2026-06-13 — ITEM 3 COMPLETE at the brick level.**
+      **B5 exp-diffeomorphism bridge DONE; full item 3 remains open.**
       `GoodCoveringItem3.lean`: `PointedRiemannianManifold.exists_expBall_diffeo` (layer
-      bridge net-manifold → exp ball diffeo) + `Item3RadiusInput` (honest-input, book's
-      "`D` large enough" §5 scale) + `exists_seqItem3Diffeo` (net-level `lbl383` item 3:
-      every live center carries the exp ball diffeo). So item 3 = 3a
-      (`exists_expBall_diffeo_of_lt`, unconditional) + 3b (`isConvexWith_smallNormalBall`,
-      §5 honest-inputs) + net wiring (`exists_seqItem3Diffeo`, §5 radius honest-input).
+      bridge net-manifold → exp ball diffeo) + the compatibility consumer
+      `exists_seqItem3Diffeo`.  The canonical finite-slot radius is now produced
+      by `Item3RadiusTail` and `exists_item3Diffeo`.  This closes 3a and its
+      radius quantifiers; 3b still requires the §5 convexity/Hessian and
+      physical-cage assembly, so the full textbook item-3 theorem is 0%.
       Optional: fold `exists_seqItem3Diffeo` into the `exists_stableNetData` capstone as a
       field (presentation only). The Jacobi/Grönwall bricks (keystone, ExpNonsingular, ∞→N
       refactor) are reusable analysis, now relevant to Step B `lbl395`, not item 3.
@@ -329,7 +330,7 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
       `normalTransition` maps via `existsTransUniv` on `X.subseq L.φ`, averaged → id). Both
       green, no sorry, axiom-clean `[propext, Classical.choice, Quot.sound]`. Endpoint =
       `∃ phi, StrictMono phi ∧ (averaged concrete-map → id on hatSourceBall)` for B1. Bridges:
-      `Item3GpScaleInput` (hR honest scale), `properBallImgOfRad`/`hatCageImg` (cage↔chart-image),
+      `Item3GpScaleAt` (hR fixed-slot scale), `properBallImgOfRad`/`hatCageImg` (cage↔chart-image),
       `binfMemClosed` (hKV limit). Overlap/cocycle/σ-domain inputs threaded parametrically.
       **C2 `lbl430`(i) at C¹ COMPLETE 2026-07-04:** `StepCSmoothness.lean` — the center of mass is
       strictly differentiable (`C¹`) in (weights, points). Chain (all sorry-free, axiom-clean):
@@ -352,6 +353,12 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
       (coercive-tightened, GREEN) + `hatCageImg'` (GREEN, `⊆ ball 0 (σ γ)` under strict `4λ/√c < σ γ`;
       the strict scale kills the open/closed gap) + `hUx_of_sigma` (GREEN) + `SigmaScaleField` (the ONE
       sibling `lbl383` field folding `4λ/√c < σ ∧ σ ≤ expMapC2Radius`, `.expRadiusGp` derives `hR`).
+      **2026-07-13 canonical producer closure:** `SigmaScaleAt`/`SigmaScaleTail`,
+      `sigmaCenterTail`, `sigmaCenter_le`, and `exists_sigmaField` produce one
+      common refinement for all ordered-net slots and include the `r₁` upper
+      bound.  The real fixed-`beta`/active-`alpha` atom route can project this
+      same field twice; only the old generic arbitrary-`y` API lacks a distance
+      profile, and it will not be strengthened with an endpoint assumption.
       **B1 (`lbl397`) honest boundary, repaired 2026-07-09:** the false P-only
       `stepB1_approxIso` skeleton was deleted.  `StepB1RawInput` records the raw
       comparison-map producer data, while `stepB1_of_raw` and
@@ -384,41 +391,37 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
 - [ ] D5 completeness (`MetricComplete limit` via compact closed balls / ProperSpace).
 - [ ] **D6 ASSEMBLY: discharge `MetricCompactnessInputs.metricCompactness`**
       (the CONDITIONAL endpoint — ruling 2026-07-05) from D1–D5, including the
-      scale-input discharges (`Item3RadiusInput`/`Item3GpScaleInput`/`SigmaScaleField`
-      after supplying the missing uniform-radius/quantitative inverse producer,
-      or after proving a complete fixed-index diagonal replacement).
+      already checked finite-slot radius/`g_p` tails, plus the remaining
+      `SigmaScaleField`, full convexity, physical-cage, and Hessian producers.
 
 ---
 
-## Critical path (updated 2026-07-11)
+## Critical path (updated 2026-07-13)
 
-**DONE:** Step A (metric core + item 3, modulo declared inputs); F-track about 95%
-(F4 closed; F2-book wrapper remains); `lbl394` (both halves);
-C1/C3/C4-shape plus C2 regularity at every finite order; and Step D's D2--D5
-machinery, including the common-limit convergence/completeness package.  The
+**DONE:** Step A (metric core + item 3, modulo declared inputs); F-track engines
+100% (including F4/F5/F6 and the F2 book-facing wrapper); `lbl394` (both halves);
+C1/C3/C4-shape plus C2 regularity at every finite order; and all Step-D consumer
+machinery, including `compactness_of_b1`, the common-limit convergence package,
+completeness, and original-sequence transport.  The
 conditional endpoint `MetricCompactnessInputs.metricCompactness` is STATED
-(sorry = the A→D assembly).  **LIVE frontier, two lanes followed by one merge:**
+(sorry = the concrete B/C producer and endpoint wiring).  **LIVE frontier:**
 
 1. **B/C lane:** the parallel origin-metric/transition extraction, common
    refinement, atom/weight package, pinned implicit-center branch, and
    gluing/agreement are checked; the generic conditional center-root producer
    and the explicit branch-parametric all-order readout machinery are also
-   checked.  The transported quantitative branch, its global relative
-   coefficients, and finite-family `B.readDom` containment are checked.  Resolve
-   the quantitative intrinsic/realized-exp compatibility design, then
-   instantiate the checked pointwise compatibility and fixed-target
+   checked.  The transported quantitative branch, minimizing-tangent
+   compatibility, global relative coefficients, canonical sigma field, and
+   finite-hat physical cage/readout are checked.  Next wire the real outer
+   fixed-source-slot diagonal, instantiate the checked fixed-target
    `halfSqDist` differentiability producers, prove the Hessian/Neumann producer,
    and assemble `StepB1RawInput`.  Finite-order center
    regularity and the Faà-di-Bruno composition engine are checked;
    arbitrary-order quantitative bounds remain separate.
-2. **D6 lane:** Step-D machinery is about 97%; `tailAmbientConv`,
-   `tailLimitComplete`, and original-sequence `tailMemberMaps` are checked.  Its
-   current 3/3 stop is a basepoint-insensitive maps/convergence congruence (or
-   equivalent explicit-maps generalization), not a return to D1--D5.
-3. **After both:** assemble the B/C raw producer and D6 convergence package,
-   discharge the scale inputs, and prove the conditional endpoint.
+2. **After B/C:** construct `StepB1RawInput` and consume the already-checked
+   `compactness_of_b1` theorem in the conditional endpoint.
 
-Remaining non-B/C/D todo: F2-book.  The unconditional `metricCompactness`
+There is no independent Step D or F-track todo.  The unconditional `metricCompactness`
 stays `sorry` (external citations; out of Chapter 4 scope by the 2026-07-05 ruling).
 
 ### 2026-06-22 — `lbl394` DONE (both halves); B1 scoped (intertwines with C)
@@ -435,12 +438,14 @@ USES Step C's averaging (`lbl434`). So B1 and C are NOT cleanly sequential; the 
 `B1→…→B6 → C` ordering is a labeling artifact. Actual structure:
 `lbl394 (J,J̄ limits, done) → lbl398/lbl399 (local maps F^α_{kℓ,β}=J̄∘J → id) → [C averaging] → lbl397`.
 
-**Precise next brick:** resolve the architecture question recorded in
-`B1_INTRINSIC_REALIZED_CONSULT.md`.  The selected branch and finite-family
-`B.readDom` containment are checked, but `expDiffeoRadius` still includes a
-pointwise qualitative intrinsic/realized-exp agreement radius with no H6 lower
-bound.  The next producer must remove that unquantified radius from the B1 path,
-not repackage it as an assumption.
+**Precise next brick:** `StepCHatReadout.exists_hat_cm_tail` now joins
+`exists_slot_min`/`aliveSlots_tail`, `exists_hat_radius`, `exists_rad_cage`, the
+filled `CenterInput`, and `exists_hat_cm_eqn`, while retaining
+`StrictDistInput` as the independent honest frontier.  Next specialize the atom
+route's outer source slot to `seqCenterD ... beta` so the existing sigma field
+controls both fixed-`beta` and active-`alpha` centers, then thread
+`hatPtsCasesComp` into this checked tail.  Do not revive the resolved
+qualitative intrinsic/realized-exp radius route.
 
 The ODE/branch-scale work preceding this gate is complete: `normalDiagAtFull`
 packages the smooth quantitative endpoint and normal-coordinate fence,
@@ -449,9 +454,9 @@ packages the smooth quantitative endpoint and normal-coordinate fence,
 coefficients, whole-target domain and inverse data with the required quantifier
 order.  `normalBrScale` is its checked compatibility projection.  `NormalBranchCage` already
 checks the eventual live-center sublevel, one common selected `B.readDom`
-branch, and the finite center/point consumer.  After the compatibility decision,
-the next bricks are the physical large-`D` ledger and reverse-chart
-source/smallness for the checked
+branch, and the finite center/point consumer.  The physical large-`D`,
+pair-index cage, dead-slot, and readout ledgers are now checked.  The next
+geometric bricks are reverse-chart source/smallness for the checked
 `exists_halfSqDist_md` producer
 and the independent Hessian/Neumann producer.  Atom/weight
 production and pinned gluing/agreement are no longer frontiers;
@@ -474,16 +479,16 @@ Honest-input boundary (total, restructured 2026-07-05 — see
   `lbl387` `PackingBound`, A0' `VolumeComparisonInput` (**statement fixed 2026-07-05
   and sharpened 2026-07-08: capped at containing scale `m * r ≤ r0`, not just
   `r ≤ r0` — the uncapped form was FALSE in hyperbolic members**),
-  `RealizesEdist`, `lbl395` `NormalCoordMetricBoundInput`, S6 `lbl418`
-  `ExpInverseDerivBoundInput` (**statement fixed 2026-07-05: capped at the book's
-  comparison scale `r₁` — the uncapped form was over-strong/unsatisfiable**).
+  `RealizesEdist`, and `lbl395` `NormalCoordMetricBoundInput`.  The temporary S6
+  `ExpInverseDerivBoundInput` and endpoint field were removed after the H6
+  finite source-slot migration and a zero-consumer audit.
 - **Construction-stage, DISCHARGED at D6 (may not survive to the endpoint):**
-  `Item3RadiusInput` / `Item3GpScaleInput` / `SigmaScaleField` (the "`D` large enough"
-  choices; the intended relative radius is encoded by the separate
-  `normalRadius : NormalRadiusProfile ...` endpoint field, so their discharge now
-  awaits consumption by the quantitative branch and live-slot assembly rather
-  than a new profile),
-  `CmHessianInput` / `StrictDistInput` (per-configuration `lbl413`/`lbl416`
+  `normalRadius : NormalRadiusProfile ...` now produces both packing-local
+  `Item3GpScaleTail` and `Item3RadiusTail` from one pre-packing divisor; the
+  legacy all-index inputs are compatibility-only.  Sigma/`r₁`, full convexity,
+  and physical-cage discharge still await their quantitative assembly.
+- **Configuration-stage, DISCHARGED at D6:** `CmHessianInput` /
+  `StrictDistInput` (per-configuration `lbl413`/`lbl416`
   consequences at book scale).
 - **Bundle-v2, gated on the B-loc bridge:** F8 `lbl375`/[H6] §5
   (`IsometryDerivBounds`) — per-map-sequence; its universally-quantified bundle
@@ -492,8 +497,11 @@ Honest-input boundary (total, restructured 2026-07-05 — see
 The former Step A Hopf--Rinow `exists_proper_realization` input is discharged
 (`HopfRinowProper.lean`; note `Comparison/HopfRinow.lean` still carries 4 DEAD
 sorries in 3 unconsumed intrinsic-frontier statements — audited harmless 2026-07-05).
-*(Open question for Step B: whether S6 is derivable from `lbl395` + the F8
-bound-propagation, shrinking this set.)*
+The H6 localized isometry-derivative producer now supplies the transition and
+atom extraction chain directly; no S6 derivation or replacement input remains.
+The current B/C consultation frontier is instead support locality: active
+weights have checked six-lambda target control, but the existing capstone asks
+for the stronger whole-cage `hKV0`, which does not follow from H6.
 
 **Shared with Chapter 3:** the good-frame producer (`RicBoundGoodFrame.lean`) is the
 same gate as ric_bound's R4 (`RicBound.lean` endpoint, `RicBoundAssembly.aN_intrinsic_point`);

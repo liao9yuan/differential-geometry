@@ -152,6 +152,20 @@ theorem appCcRS_zero_eq_appCc (g : SmoothRiemannianMetric I M) (r s : ℕ)
   intro x
   rw [appCcRS_toSection, appCc_toSection]
 
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- Fibrewise operator-field application is associative with generic-valence composition. -/
+theorem appCc_assoc (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (C : SmoothCcTensor g a b)
+    (W : SmoothCcTensor g 0 a) :
+    appCc (I := I) (M := M) g b c Φ (appCc (I := I) (M := M) g a b C W) =
+      appCc (I := I) (M := M) g a c (appCcRS (I := I) (M := M) g a b c Φ C) W := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  rw [appCc_toSection, appCc_toSection, appCc_toSection, appCcRS_toSection,
+    ContinuousLinearMap.comp_assoc]
+
 /-! ## Bilinearity of the operator-field action at valence `a` -/
 
 set_option linter.unusedSectionVars false in
@@ -188,6 +202,29 @@ theorem appCcRS_smul_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
   rw [show ((k • W).toSection x : TensorRSSpace a b I x) = k • W.toSection x from by
     rw [SmoothCcTensor.toSection_smul]; rfl]
   rw [ContinuousLinearMap.comp_smul]
+
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The operator-field action distributes over subtraction in the contracted factor. -/
+theorem appCcRS_sub_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
+    (Φ : SmoothCcTensor g b c) (W₁ W₂ : SmoothCcTensor g a b) :
+    appCcRS (I := I) (M := M) g a b c Φ (W₁ - W₂) =
+      appCcRS (I := I) (M := M) g a b c Φ W₁ -
+        appCcRS (I := I) (M := M) g a b c Φ W₂ := by
+  calc
+    appCcRS (I := I) (M := M) g a b c Φ (W₁ - W₂) =
+        appCcRS (I := I) (M := M) g a b c Φ (W₁ + (-W₂)) := by
+      rw [sub_eq_add_neg]
+    _ = appCcRS (I := I) (M := M) g a b c Φ W₁ +
+        appCcRS (I := I) (M := M) g a b c Φ (-W₂) :=
+      appCcRS_add_right (I := I) (M := M) g a b c Φ W₁ (-W₂)
+    _ = appCcRS (I := I) (M := M) g a b c Φ W₁ +
+        -appCcRS (I := I) (M := M) g a b c Φ W₂ := by
+      rw [show -W₂ = (-1 : ℝ) • W₂ by rw [neg_one_smul],
+        appCcRS_smul_right, neg_one_smul]
+    _ = appCcRS (I := I) (M := M) g a b c Φ W₁ -
+        appCcRS (I := I) (M := M) g a b c Φ W₂ := by
+      rw [sub_eq_add_neg]
 
 set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in

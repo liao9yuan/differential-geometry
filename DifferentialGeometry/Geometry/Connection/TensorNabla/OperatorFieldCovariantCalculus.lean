@@ -460,6 +460,51 @@ set_option backward.isDefEq.respectTransparency false in
         slotExtendFib (I := I) (M := M) g r s x
           (show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Φ.toSection x)) := rfl
 
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- Passenger-slot extension distributes over subtraction of operator fields. -/
+theorem slotExtend_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (X Y : SmoothCcTensor g r s) :
+    slotExtend (I := I) (M := M) g r s (X - Y) =
+      slotExtend (I := I) (M := M) g r s X - slotExtend (I := I) (M := M) g r s Y := by
+  apply SmoothCcTensor.ext
+  apply ContMDiffSection.ext
+  intro x
+  apply ContinuousLinearMap.ext
+  intro D
+  rw [show ((slotExtend (I := I) (M := M) g r s X -
+        slotExtend (I := I) (M := M) g r s Y).toSection x) =
+      (slotExtend (I := I) (M := M) g r s X).toSection x -
+        (slotExtend (I := I) (M := M) g r s Y).toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [ContinuousLinearMap.sub_apply]
+  rw [show ((slotExtend (I := I) (M := M) g r s (X - Y)).toSection x) D =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+          (X - Y).toSection x).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) from rfl]
+  rw [show ((slotExtend (I := I) (M := M) g r s X).toSection x) D =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from X.toSection x).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) from rfl]
+  rw [show ((slotExtend (I := I) (M := M) g r s Y).toSection x) D =
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) s x).symm
+        ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Y.toSection x).comp
+          (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) from rfl]
+  rw [show ((X - Y).toSection x) = X.toSection x - Y.toSection x from by
+    rw [SmoothCcTensor.toSection_sub]; rfl]
+  rw [show ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from
+      X.toSection x - Y.toSection x).comp
+      (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) =
+      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from X.toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) -
+      ((show Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x from Y.toSection x).comp
+        (tensor0S_curry (I := I) (M := M) (𝕜 := ℝ) r x D)) from by
+    apply ContinuousLinearMap.ext
+    intro w
+    rfl]
+  rw [map_sub]
+
 /-! ## Bilinearity of the operator-field action
 
 The operator-field action `appCc Φ W` is `ℝ`-bilinear: additive and homogeneous in both the

@@ -1818,65 +1818,6 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 2000000 in
-/-- Forward half of `partialData_comp`: the peel-last ledger only needs the
-forward producer and therefore only the forward asymmetric tolerance bound. -/
-noncomputable def compDataFwd [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
-    {P : Type u} [TopologicalSpace P] [ChartedSpace H P] [IsManifold I ∞ P]
-    [T2Space N] [SigmaCompactSpace N] [T2Space P] [SigmaCompactSpace P]
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-    [IsManifold I 1 N] [IsManifold I 2 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
-    [IsManifold I 1 P] [IsManifold I 2 P] [IsManifold I ((∞ : WithTop ℕ∞) + 1) P]
-    (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
-    (Φ' : PartialDiffeomorph I I N P (∞ : WithTop ℕ∞))
-    {U₁ : Opens M} [Nonempty U₁] (hU₁ : (U₁ : Set M) ⊆ Φ.source)
-    {K₂ : Opens N} [Nonempty K₂] (hK₂ : (K₂ : Set N) ⊆ Φ'.source)
-    (himg : (Φ : M → N) '' (U₁ : Set M) ⊆ (K₂ : Set N))
-    {K : Set M} (hK : IsCompact K) (hKU : K ⊆ (U₁ : Set M))
-    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1/2) (hε'2 : ε' ≤ 1/2)
-    (C : ℝ) (hC0 : 0 ≤ C)
-    (hC : ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
-      [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']
-      [IsManifold I 1 M'] [IsManifold I 2 M']
-      [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
-      {u : Set M'}, IsOpen u →
-      ∀ (g₀ g₁ : SmoothRiemannianMetric I M')
-        (δ₀ δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2)
-        (eps0 eps1 : Real), 0 ≤ eps0 → eps0 ≤ 1 → 0 ≤ eps1 →
-        (∀ x ∈ u, ∀ v : TangentSpace I x,
-          (1 + eps0)⁻¹ * g₁.inner x v v ≤ g₀.inner x v v ∧
-            g₀.inner x v v ≤ (1 + eps0) * g₁.inner x v v) →
-        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + j)
-            (iterCov (I := I) g₁ 2
-              (Tensor0SBundle.metricTensorField (I := I) g₀) j x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2 δ₀ r x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ k, k ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
-            (iterCov (I := I) g₁ 2 δ₁ k x)) ≤ eps1) →
-        ∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2
-              (δ₀ + δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-                (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2) r x)) ≤ eps0 + eps1 * C)
-    (g : SmoothRiemannianMetric I M) (h : SmoothRiemannianMetric I N)
-    (h' : SmoothRiemannianMetric I P)
-    (D₁ : BookApproxIsoPartialData (I := I) (U₁ : Set M) ε p Φ g h)
-    (D₂ : BookApproxIsoPartialData (I := I) (K₂ : Set N) ε' p Φ' h h') :
-    ∀ ε'' : ℝ,
-      ε / (1 - ε) + ε' * max C 2 ≤ ε'' →
-      ε'' < 1 →
-      PreApproxIsoDataOn (I := I) K ε'' p
-        (PartialDiffeomorph.trans (I := I) Φ Φ' : M → P) g h' := by
-  classical
-  -- This is exactly the forward organ of `partialData_comp` up to the assembly step.
-  -- It is exposed separately so D1b can keep the peel-last forward ledger linear.
-  sorry
-
-set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 2000000 in
 /-- Forward separated-parameter half of `partialData_comp`.
 
 The F5 feed `q` dominates the metric-equivalence parameter converted from the
@@ -2330,66 +2271,6 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
       pullback_apply := fun x hx v => hP''apply x (hVKG (hKV hx)) v
       c0_small := fun x hx => le_trans (hc0P'' x hx) hc0_out
       cov_small := fun a h1 h2 x hx => le_trans (hcovP'' a h1 h2 x hx) hcov_out }
-
-set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 2000000 in
-/-- Reverse half of `partialData_comp`: the peel-first ledger only needs the
-reverse producer and therefore only the reverse asymmetric tolerance bound. -/
-noncomputable def compDataRev [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
-    {P : Type u} [TopologicalSpace P] [ChartedSpace H P] [IsManifold I ∞ P]
-    [T2Space N] [SigmaCompactSpace N] [T2Space P] [SigmaCompactSpace P]
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-    [IsManifold I 1 N] [IsManifold I 2 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
-    [IsManifold I 1 P] [IsManifold I 2 P] [IsManifold I ((∞ : WithTop ℕ∞) + 1) P]
-    (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
-    (Φ' : PartialDiffeomorph I I N P (∞ : WithTop ℕ∞))
-    {U₁ : Opens M} [Nonempty U₁] (hU₁ : (U₁ : Set M) ⊆ Φ.source)
-    {K₂ : Opens N} [Nonempty K₂] (hK₂ : (K₂ : Set N) ⊆ Φ'.source)
-    (himg : (Φ : M → N) '' (U₁ : Set M) ⊆ (K₂ : Set N))
-    {K : Set M} (hK : IsCompact K) (hKU : K ⊆ (U₁ : Set M))
-    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1/2) (hε'2 : ε' ≤ 1/2)
-    (C : ℝ) (hC0 : 0 ≤ C)
-    (hC : ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
-      [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']
-      [IsManifold I 1 M'] [IsManifold I 2 M']
-      [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
-      {u : Set M'}, IsOpen u →
-      ∀ (g₀ g₁ : SmoothRiemannianMetric I M')
-        (δ₀ δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2)
-        (eps0 eps1 : Real), 0 ≤ eps0 → eps0 ≤ 1 → 0 ≤ eps1 →
-        (∀ x ∈ u, ∀ v : TangentSpace I x,
-          (1 + eps0)⁻¹ * g₁.inner x v v ≤ g₀.inner x v v ∧
-            g₀.inner x v v ≤ (1 + eps0) * g₁.inner x v v) →
-        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + j)
-            (iterCov (I := I) g₁ 2
-              (Tensor0SBundle.metricTensorField (I := I) g₀) j x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2 δ₀ r x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ k, k ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
-            (iterCov (I := I) g₁ 2 δ₁ k x)) ≤ eps1) →
-        ∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2
-              (δ₀ + δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-                (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2) r x)) ≤ eps0 + eps1 * C)
-    (g : SmoothRiemannianMetric I M) (h : SmoothRiemannianMetric I N)
-    (h' : SmoothRiemannianMetric I P)
-    (D₁ : BookApproxIsoPartialData (I := I) (U₁ : Set M) ε p Φ g h)
-    (D₂ : BookApproxIsoPartialData (I := I) (K₂ : Set N) ε' p Φ' h h') :
-    ∀ ε'' : ℝ,
-      ε' / (1 - ε') + ε * max C 2 ≤ ε'' →
-      ε'' < 1 →
-      PreApproxIsoDataOn (I := I)
-        ((PartialDiffeomorph.trans (I := I) Φ Φ' : M → P) '' K) ε'' p
-        ((PartialDiffeomorph.trans (I := I) Φ Φ').symm : P → M) h' g := by
-  classical
-  -- This is exactly the reverse organ of `partialData_comp` up to the assembly step.
-  -- It is exposed separately so D1b can keep the peel-first reverse ledger linear.
-  sorry
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 2000000 in

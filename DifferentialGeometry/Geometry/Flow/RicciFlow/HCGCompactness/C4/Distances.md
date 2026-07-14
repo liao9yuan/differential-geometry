@@ -35,4 +35,5 @@ remains a separate endpoint frontier; it is not hidden in this file.
 
 ## Verification
 
-Verification passed for the targeted `Distances` file.
+Verification passed for the targeted `Distances` file, its downstream
+`StepDDirected` consumer, and the aligned full build.

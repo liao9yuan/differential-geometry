@@ -97,6 +97,22 @@ def HasNormalBrFull
 
 namespace HasNormalBrFull
 
+/-- Shrinking the common closed-ball radius preserves all selected-branch,
+fence, and transport data. -/
+theorem mono
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {δ ρ ρ' : Real}
+    (h : HasNormalBrFull (I := I) Y hcomplete hconn x q δ ρ)
+    (hρ : ρ' ≤ ρ) :
+    HasNormalBrFull (I := I) Y hcomplete hconn x q δ ρ' := by
+  dsimp only [HasNormalBrFull] at h ⊢
+  rcases h with ⟨hq, e, he, hfence, hclosed, hδdom, htransport⟩
+  refine ⟨hq, e, he, hfence, ?_, hδdom, htransport⟩
+  intro w hw
+  exact hclosed w (Metric.closedBall_subset_closedBall hρ hw)
+
 /-- Forget the full transport data while retaining the common intrinsic
 branch-domain witness used by existing consumers. -/
 theorem toDom
@@ -313,6 +329,91 @@ theorem normalBrAccept
             normalTangent (I := I) (X.obj k) x (e.symm w)
   exact ⟨hq, e, he, hfence, hclosed, hδdom, htransport.1,
     htransport.2.1, htransport.2.2, hδinv⟩
+
+/-- The selected quantitative branch can be shrunk to one uniform coefficient
+that simultaneously satisfies the minimizing-gradient metric and intrinsic
+exponential-radius requirements. -/
+theorem normalMinScale
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M) :
+    ∃ aq aδ aMin : Real,
+      0 < aq ∧ 0 < aδ ∧ 0 < aMin ∧
+      ∀ R, 0 ≤ R →
+        ∃ (q : NNReal) (δ : Real),
+          0 < q ∧ 0 < δ ∧
+          (q : Real) = aq * hd.mu R ∧
+          aδ * hd.mu R ≤ δ ∧
+          6 * (q : Real) < h.phaseRadius R ∧
+          2 * (aMin * hd.mu R) < (q : Real) ∧
+          ∀ k (x : (X.obj k).M),
+            hd.dist k x (X.obj k).basepoint ≤ R →
+            letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+            letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+            letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+            letI : T2Space (TangentBundle I (X.obj k).M) :=
+              (X.obj k).t2TangentBundle
+            HasNormalBrFull (I := I) (X.obj k) (hcomplete.complete k)
+                (hconn k) x q δ (aMin * hd.mu R) ∧
+              aMin * hd.mu R ≤ hb.radius k x ∧
+              (aMin * hd.mu R) / 2 ≤
+                Geometry.Riemannian.expRadiusGp (I := I) (X.obj k).metric x := by
+  obtain ⟨aq, aδ, aρ, haq, haδ, haρ, hall⟩ :=
+    normalBrAccept (I := I) h hcomplete hconn
+  let aMin : Real := min aρ (min (aq / 4) h.gpRatio)
+  have haMin : 0 < aMin := by
+    dsimp only [aMin]
+    exact lt_min haρ (lt_min (div_pos haq (by norm_num)) h.gpRatio_pos)
+  have haMinρ : aMin ≤ aρ := by
+    dsimp only [aMin]
+    exact min_le_left _ _
+  have haMinq : aMin ≤ aq / 4 := by
+    dsimp only [aMin]
+    exact (min_le_right _ _).trans (min_le_left _ _)
+  have haMinGp : aMin ≤ h.gpRatio := by
+    dsimp only [aMin]
+    exact (min_le_right _ _).trans (min_le_right _ _)
+  refine ⟨aq, aδ, aMin, haq, haδ, haMin, ?_⟩
+  intro R hR
+  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hfull⟩ := hall R hR
+  have hqReal : (0 : Real) < q := by exact_mod_cast hq
+  have hMinq : 2 * (aMin * hd.mu R) < (q : Real) := by
+    calc
+      2 * (aMin * hd.mu R) ≤ 2 * ((aq / 4) * hd.mu R) :=
+        mul_le_mul_of_nonneg_left
+          (mul_le_mul_of_nonneg_right haMinq (hd.mu_nonneg R)) (by norm_num)
+      _ = (q : Real) / 2 := by rw [hqeq]; ring
+      _ < (q : Real) := half_lt_self hqReal
+  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hMinq, ?_⟩
+  intro k x hx
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  have hρsmall : aMin * hd.mu R ≤ aρ * hd.mu R :=
+    mul_le_mul_of_nonneg_right haMinρ (hd.mu_nonneg R)
+  have hbranch : HasNormalBrFull (I := I) (X.obj k) (hcomplete.complete k)
+      (hconn k) x q δ (aMin * hd.mu R) :=
+    HasNormalBrFull.mono (I := I) (X.obj k) (hcomplete.complete k)
+      (hconn k) x (hfull k x hx) hρsmall
+  have hMinRatio : aMin ≤ h.ratio := haMinGp.trans h.gpRatio_le_ratio
+  have hradius : aMin * hd.mu R ≤ hb.radius k x :=
+    (mul_le_mul_of_nonneg_right hMinRatio (hd.mu_nonneg R)).trans
+      (h.floor_le_radius hx)
+  have hMinFloor : aMin * hd.mu R ≤ h.gpRatio * hd.mu R :=
+    mul_le_mul_of_nonneg_right haMinGp (hd.mu_nonneg R)
+  have hhalfFloor : (aMin * hd.mu R) / 2 ≤ h.gpRatio * hd.mu R := by
+    calc
+      (aMin * hd.mu R) / 2 ≤ aMin * hd.mu R := by
+        nlinarith [mul_nonneg haMin.le (hd.mu_nonneg R)]
+      _ ≤ h.gpRatio * hd.mu R := hMinFloor
+  exact ⟨hbranch, hradius, hhalfFloor.trans (h.floor_le_expGp hx)⟩
 
 /-- Compatibility form of `normalBrAccept` retaining the established
 common-domain endpoint used by downstream cage consumers. -/

@@ -141,7 +141,7 @@ theorem frameGramCLM_spacetimeSmooth
       MetricFrameSpacetimeRegularityInFrameOnLocal
         (I := I) S gInv gInvDt frame u) :
     ContMDiffOn (𝓘(Real, Real).prod I)
-      𝓘(Real, (Idx -> Real) →L[Real] (Idx -> Real)) ⊤
+      𝓘(Real, (Idx -> Real) →L[Real] (Idx -> Real)) ∞
       (fun p : Real × M => frameGramCLM (I := I) S frame p)
       (D.carrier ×ˢ u) := by
   classical
@@ -751,7 +751,7 @@ theorem frameGInvCLM_spacetimeSmooth
       MetricFrameSpacetimeRegularityInFrameOnLocal
         (I := I) S gInv gInvDt frame u) :
     ContMDiffOn (𝓘(Real, Real).prod I)
-      𝓘(Real, (Idx -> Real) →L[Real] (Idx -> Real)) ⊤
+      𝓘(Real, (Idx -> Real) →L[Real] (Idx -> Real)) ∞
       (fun p : Real × M => frameGInvCLM (Idx := Idx) gInv p)
       (D.carrier ×ˢ u) := by
   classical
@@ -773,13 +773,13 @@ theorem frameGInvCLM_spacetimeSmooth
     intro a b
     exact (hreg.nondegenerateGram p.1 p.2 hp.2 a b).2
   have hinvAt :
-      ContDiffAt Real ⊤ ContinuousLinearMap.inverse
+      ContDiffAt Real ∞ ContinuousLinearMap.inverse
         (frameGramCLM (I := I) S frame p) :=
     (frameGramCLM_isInvertible_at (I := I) S gInv frame p
       hleft hright).contDiffAt_map_inverse
   have hcomp :
       ContMDiffWithinAt (𝓘(Real, Real).prod I)
-        𝓘(Real, (Idx -> Real) →L[Real] (Idx -> Real)) ⊤
+        𝓘(Real, (Idx -> Real) →L[Real] (Idx -> Real)) ∞
         (fun q : Real × M =>
           ContinuousLinearMap.inverse (frameGramCLM (I := I) S frame q))
         (D.carrier ×ˢ u) p :=
@@ -825,27 +825,27 @@ theorem gInv_spacetimeSmooth
       MetricFrameSpacetimeRegularityInFrameOnLocal
         (I := I) S gInv gInvDt frame u)
     (i j : Idx) :
-    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+    ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
       (fun p : Real × M => gInv p.1 p.2 i j)
       (D.carrier ×ˢ u) := by
   classical
   have hsmooth :=
     frameGInvCLM_spacetimeSmooth (I := I) S gInv gInvDt frame hreg
   have happ :
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Idx -> Real) ⊤
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Idx -> Real) ∞
         (fun p : Real × M =>
           frameGInvCLM (Idx := Idx) gInv p (Pi.single j 1))
         (D.carrier ×ˢ u) := by
     exact hsmooth.clm_apply contMDiffOn_const
   have hcoord :
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M =>
           frameGInvCLM (Idx := Idx) gInv p (Pi.single j 1) i)
         (D.carrier ×ˢ u) := by
     exact (contMDiffOn_const
       (I := 𝓘(Real, Real).prod I)
       (I' := 𝓘(Real, (Idx -> Real) →L[Real] Real))
-      (n := ⊤) (s := D.carrier ×ˢ u)
+      (n := ∞) (s := D.carrier ×ˢ u)
       (c := LinearMap.toContinuousLinearMap
         (LinearMap.proj (R := Real) (φ := fun _ : Idx => Real) i))).clm_apply happ
   refine hcoord.congr ?_
@@ -872,13 +872,13 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.gInv_mdiffAt
       (fun y : M => gInv (t : Real) y i j) x := by
   have ht : (t : Real) ∈ D.carrier := D.regular_subset t.2
   have hslice :
-      ContMDiffOn I (𝓘(Real, Real).prod I) ⊤
+      ContMDiffOn I (𝓘(Real, Real).prod I) ∞
         (fun y : M => ((t : Real), y)) u := by
     exact (contMDiffOn_const (c := (t : Real))).prodMk contMDiffOn_id
   have hsmooth :=
     gInv_spacetimeSmooth (I := I) S gInv gInvDt frame hreg i j
   have hcomp :
-      ContMDiffOn I 𝓘(Real, Real) ⊤
+      ContMDiffOn I 𝓘(Real, Real) ∞
         ((fun p : Real × M => gInv p.1 p.2 i j) ∘
           fun y : M => ((t : Real), y)) u := by
     exact hsmooth.comp hslice (by
@@ -905,12 +905,12 @@ theorem MetricFrameSpacetimeRegularityInFrameOnLocal.metricComp_mdiffAt
       (fun y : M => metricCompInFrame (I := I) S frame (t : Real) y i j) x := by
   have ht : (t : Real) ∈ D.carrier := D.regular_subset t.2
   have hslice :
-      ContMDiffOn I (𝓘(Real, Real).prod I) ⊤
+      ContMDiffOn I (𝓘(Real, Real).prod I) ∞
         (fun y : M => ((t : Real), y)) u := by
     exact (contMDiffOn_const (c := (t : Real))).prodMk contMDiffOn_id
   have hsmooth := hreg.frameMetricSpacetimeSmooth i j
   have hcomp :
-      ContMDiffOn I 𝓘(Real, Real) ⊤
+      ContMDiffOn I 𝓘(Real, Real) ∞
         ((fun p : Real × M =>
             metricCompInFrame (I := I) S frame p.1 p.2 i j) ∘
           fun y : M => ((t : Real), y)) u := by

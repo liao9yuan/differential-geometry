@@ -1,6 +1,30 @@
 # NormalBranchMin
 
-## 2026-07-13 integration verification
+## 2026-07-13 Gate 4 complete
+
+`IsNormalDiag.grad_half_inv` is implemented, focused-green, and sorry-free.
+It combines the already checked minimizing inverse `inv_is_min`, half-cage
+smoothness `halfSq_inf`, and the comparison-layer producer
+`grad_halfSqDist_min`. The conclusion identifies the gradient with the
+negative selected inverse tangent for both diagonal and non-diagonal pairs.
+
+The theorem retains the honest pointwise input
+`rho / 2 <= expRadiusGp`; it adds no endpoint radius assumption and does not
+identify `expMapC2Radius` with `expRadiusGp`. Gates 1--4 in this file are now
+100% theorem-complete. Gate 5 is completed in `StepCCenterOfMass.lean` and
+`StepCCmDomain.lean`; Gate 6 is now completed by the optimal
+`gpCoerciveConst` comparison, H6 `gpRatio` floor, `normalMinScale`, and its
+live-cage consumer.
+
+Whole-project accounting remains conservative: the selected minimizing-branch
+pointwise chain is complete, but `StepB1RawInput`, textbook B1, and the
+conditional compactness endpoint are each still 0%. Step-B/B1 machinery
+is about 79%, Chapter 4 machinery about 75%, and whole-HCG machinery about 52%
+after rounding. The selected minimizing-branch Gates 1--6 machinery is 100%;
+the post-packing finite-cage/Item-3 and independent Hessian/Neumann frontiers
+remain.
+
+## Earlier 2026-07-13 integration checkpoint (superseded)
 
 After the latest `short-time-existence` progress was merged into the alignment
 worktree, the missing `NormalDiagBranch` dependency was refreshed and the

@@ -1,5 +1,20 @@
 # StepCCenterOfMass.lean — MSM135 Ch4 §6 Step C (center of mass / nonlinear averages)
 
+## Implementation update (2026-07-13, selected inverse-vector equation)
+
+`centerOfMass.invB_eqn` is implemented, focused-green, and sorry-free. It is
+the weakest generic center-layer consumer: given differentiability of every
+half-squared-distance summand and identities `grad_i = -v_i` for an arbitrary
+tangent family at the selected center, it proves `sum mu_i • v_i = 0`.
+
+The theorem reuses the checked global minimizer, `centerEnergy_diff`, and
+`CenterOfMass.sum_grad_eq_zero`. It does not depend on `DiagInvBranch`,
+`normalChartAt`, `eqnRadius`, or any radius hypothesis; the B1 consumer supplies
+the selected inverse tangent family. This theorem is 100% complete. The
+branch-native Gate 5 readout is completed separately in `StepCCmDomain.lean`.
+The independent Hessian/Neumann producer remains open and is not implied by
+this first-order equation.
+
 Plan note (2026-06-22). Lean file not yet created — this records the **verified feasibility**,
 decomposition, available infrastructure, and honest-input boundary, so C1 can be built cleanly.
 

@@ -1,5 +1,30 @@
 # StepCCmDomain
 
+## 2026-07-13 minimizing-branch center readout
+
+`centerReadoutB_min` is implemented, focused-green, and sorry-free. For a
+finite configuration in the explicit half-cage of the selected quantitative
+branch it derives, rather than assumes:
+
+- differentiability of every summand from `IsNormalDiag.halfSq_inf`;
+- the branch-native gradient identities from `IsNormalDiag.grad_half_inv`;
+- branch-domain and fixed-trivialization base membership;
+- the weighted inverse-tangent equation from `centerOfMass.invB_eqn`.
+
+The fixed-trivialization linear equivalence then transports the tangent sum to
+`chartCmEqnB = 0`. This route does not use the moving-center normal-chart
+inverse, `centerOfMass.eqnRadius`, `expDiffeoRadius`, an external `hread`, or a
+new endpoint radius assumption. Gate 5 is therefore theorem-complete (100%).
+
+This closes the selected-branch root equation, not the whole B1 producer.
+Gate 6 uniform scale is now completed in `NormalBranchScale.lean` and consumed
+on the live cage in `NormalBranchCage.lean`; the generic large-`D`/packing order
+is checked in `MetricCompactnessInputs.lean`. `StepB1RawInput`, textbook B1,
+and the conditional compactness endpoint remain 0%. The post-packing
+finite-cage/Item-3, Hessian/Neumann, and convergence frontiers remain.
+Consequently the rounded machinery estimates are about 79% for Step-B/B1, 75%
+for Chapter 4, and 52% for the whole HCG compactness project.
+
 ## 2026-07-11 selected-branch migration
 
 - `centerReadoutB_zero` proves the actual center equation for an explicit

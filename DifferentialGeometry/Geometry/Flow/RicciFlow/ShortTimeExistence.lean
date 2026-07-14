@@ -64,7 +64,12 @@ continuity extension `ricci_flow_pde_at_zero`; the joint smoothness/continuity o
 (`conjugating_flow_*`, pinned to the genuine flow by its orbit ODE). The
 construction step is assembled in `h_construct` below; it transits only those
 faithful labeled inputs. -/
-theorem ricci_flow_short_time_existence
+/-- Short-time Ricci flow with joint one-sided `C∞` chart-Gram regularity on `[0,T)`.
+
+This is the strongest regularity produced by the conjugating-flow construction.  The
+compatibility headline `ricci_flow_short_time_existence` below projects it to interior
+smoothness and closed-left continuity. -/
+theorem short_time_joint
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
       [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
     {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
@@ -76,11 +81,6 @@ theorem ricci_flow_short_time_existence
       g_fam 0 = g₀ ∧
       (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
         ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-          (fun p : ℝ × M =>
-            Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
-          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
-      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-        ContinuousOn
           (fun p : ℝ × M =>
             Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
           (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
@@ -100,11 +100,6 @@ theorem ricci_flow_short_time_existence
         g_fam 0 = g₀ ∧
         (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
           ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-            (fun p : ℝ × M =>
-              Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
-            (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
-        (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-          ContinuousOn
             (fun p : ℝ × M =>
               Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
             (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
@@ -171,24 +166,8 @@ theorem ricci_flow_short_time_existence
         h_reg_T hΦorbit0 hΦmfderiv0
     have h_gram_fam :=
       conjugating_flow_pullback_jointGram_onesided (I := I) g_DT T Φ_fam hΦjoint h_gramIcc_T
-    have h_gram_fam_interior : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
-          (fun p : ℝ × M =>
-            Integral.Measure.chartGramMatrix (I := I)
-              (Diffeomorph.pullbackMetric (g_DT p.1) (Φ_fam p.1)) x₀ p.2 i j)
-          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
-      intro x₀ i j
-      exact (h_gram_fam x₀ i j).mono
-        (Set.prod_mono_left Set.Ioo_subset_Ico_self)
-    have h_gram_fam_cont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
-        ContinuousOn
-          (fun p : ℝ × M =>
-            Integral.Measure.chartGramMatrix (I := I)
-              (Diffeomorph.pullbackMetric (g_DT p.1) (Φ_fam p.1)) x₀ p.2 i j)
-          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
-      fun x₀ i j => (h_gram_fam x₀ i j).continuousOn
     refine ⟨T, hT0, fun s => Diffeomorph.pullbackMetric (g_DT s) (Φ_fam s),
-      ?_, h_gram_fam_interior, h_gram_fam_cont, ?_⟩
+      ?_, h_gram_fam, ?_⟩
     · change Diffeomorph.pullbackMetric (g_DT 0) (Φ_fam 0) = g₀
       rw [hΦ0, Diffeomorph.pullbackMetric_refl, hDT_init]
     · have hDT_deriv_Ico : ∀ s ∈ Set.Ico (0 : ℝ) T, ∀ y : M, ∀ a b : TangentSpace I y,
@@ -210,6 +189,40 @@ theorem ricci_flow_short_time_existence
           h_cont h_ric_cont (fun s hs => h_interior s hs x v w)
       · exact h_interior t ⟨h0, ht.2⟩ x v w
   exact h_construct
+
+/-- Short-time Ricci-flow existence in the compatibility shape used by older callers:
+interior joint smoothness, closed-left continuity, and the Ricci-flow equation. -/
+theorem ricci_flow_short_time_existence
+    {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
+      [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
+      [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
+      [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    (g₀ : SmoothRiemannianMetric I M) :
+    ∃ T : ℝ, 0 < T ∧ ∃ g_fam : ℝ → SmoothRiemannianMetric I M,
+      g_fam 0 = g₀ ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+          (Set.Ioo (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+        ContinuousOn
+          (fun p : ℝ × M =>
+            Integral.Measure.chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+          (Set.Ico (0 : ℝ) T ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) ∧
+      (∀ t ∈ Set.Ico (0 : ℝ) T, ∀ x : M, ∀ v w : TangentSpace I x,
+        HasDerivWithinAt (fun s : ℝ => (g_fam s).inner x v w)
+          ((-2 : ℝ) *
+            DifferentialGeometry.Integral.Connection.ricciTensor
+              (I := I) (g_fam t) x v w) (Set.Ici 0) t) := by
+  obtain ⟨T, hT, g_fam, hstart, hjoint, hpde⟩ := short_time_joint (I := I) (M := M) g₀
+  refine ⟨T, hT, g_fam, hstart, ?_, ?_, hpde⟩
+  · intro x₀ i j
+    exact (hjoint x₀ i j).mono (Set.prod_mono_left Set.Ioo_subset_Ico_self)
+  · intro x₀ i j
+    exact (hjoint x₀ i j).continuousOn
 
 #print axioms ricci_flow_short_time_existence
 

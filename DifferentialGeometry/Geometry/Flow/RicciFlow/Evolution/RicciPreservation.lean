@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ShiftedReaction
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Lichnerowicz
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.MetricVariationBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak
 import DifferentialGeometry.Geometry.Curvature.Realized.CurvatureProducers
@@ -2228,6 +2229,75 @@ theorem ricciRoughTrace_coord
           coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x) t x i j
   simpa [b, frame, hcomp_if] using hsum
 
+/-- The intrinsic rough Ricci tensor evaluated on a fixed pair is the
+coordinate expansion of the canonical coordinate rough-Laplacian components. -/
+theorem ricciRoughPair
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (x : M) (v w : TangentSpace I x) :
+    metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+        (ricciNabla2WMP (I := I) S t x)
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) =
+      ∑ i : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        ∑ j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+          (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord i v *
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord j w *
+              coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x)
+                t x i j := by
+  classical
+  let b := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
+  let frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
+  let roughA : Tensor0SSpace (𝕜 := Real) (E := E) (H := H)
+      (I := I) (M := M) 2 x :=
+    roughLap0STensor (I := I) (S.base.metric t)
+      (ricciNabla2WMP (I := I) S t x)
+  have hnabla : ∀ y a i j,
+      ricciNablaWMP (I := I) S t y
+          (DifferentialGeometry.Integral.Connection.vec3 (I := I)
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x a y)
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x i y)
+            (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x j y)) =
+        nablaRicComp (I := I) S
+          (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x) t y a i j := by
+    intro y a i j
+    simp [ricciNablaWMP, ricciDerivsWMP, nablaRicComp,
+      CanonicalSpatialDerivs0S.of_smooth_connection]
+  have hnab2 :=
+    coordNab2_can (I := I) S t x
+      (ricciNablaWMP (I := I) S t)
+      (ricciNabla2WMP (I := I) S t)
+      (by
+        simpa [SolutionOn.family, ricciNablaWMP, ricciNabla2WMP] using
+          (ricciSpatialWMP (I := I) S).second t)
+      hnabla
+  have hcomp :
+      ∀ i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        roughA
+            (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
+          coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x)
+            t x i j := by
+    intro i j
+    simpa [roughA, frame, SolutionOn.family] using
+      coordRough_can (I := I) S t x
+        (ricciNabla2WMP (I := I) S t) hnab2 i j
+  have hcomp_if :
+      ∀ i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        roughA
+            (fun q : Fin 2 => if q = 0 then frame i x else frame j x) =
+          coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x)
+            t x i j := by
+    intro i j
+    simpa [DifferentialGeometry.Integral.Connection.vec2] using hcomp i j
+  have hsum :=
+    DifferentialGeometry.Tensor.Coordinates.tensor0S_two_eval_coordFrame_sum (I := I)
+      (M := M) (x₀ := x) (Ax := roughA) v w
+  rw [← roughLap0STensor_apply (I := I) (S.base.metric t)
+      (ricciNabla2WMP (I := I) S t x)
+      (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w)]
+  change roughA (fun q : Fin 2 => if q = 0 then v else w) = _
+  simpa [b, frame, hcomp_if] using hsum
+
 /-- The metric trace of the pointwise product `Hess(R) ⊗ g` is
 `(tr Hess(R)) g` when the metric factor is parallel. -/
 theorem scalarMetric_trace
@@ -2782,6 +2852,20 @@ def ricciCoordReact
   ricciCoordQuadRHS (I := I) S t x v -
     ricciCoordRough (I := I) S t x v
 
+/-- Coordinate Ricci-evolution reaction evaluated on a fixed pair, obtained by
+subtracting the coordinate rough-Laplacian expansion from `ricciPairRHS`. -/
+noncomputable def ricciPairReact
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : Real) (x : M) (v w : TangentSpace I x) : Real :=
+  ricciPairRHS (I := I) S t x v w -
+    ∑ i : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ∑ j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord i v *
+          (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord j w *
+            coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x) t x i j
+
 /-- Coordinate RHS for the time derivative of the shifted pinching quadratic
 evaluation. -/
 def pinchCoordTime
@@ -2815,7 +2899,8 @@ def pinchCoordReact
         S.scalar t x *
           ((-2 : Real) * S.ricciAt t x (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v)))
 
-private def ricciActualReactAt
+/-- Intrinsic reaction tensor in the Ricci evolution equation. -/
+noncomputable def ricciActualReactAt
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
     [SigmaCompactSpace M] [T2Space M]
     (S : SolutionOn (I := I) (M := M) D)
@@ -2838,6 +2923,29 @@ private theorem actualReact_apply
   unfold ricciActualReactAt
   simp only [Tensor0SSpace.sub_apply, real_smul0S_apply,
     Tensor0SSpace.nsmul_apply, nsmul_eq_mul, Nat.cast_ofNat]
+
+/-- Components of the intrinsic Ricci reaction in any tangent basis. -/
+theorem actualReact_comp
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : Real) (x : M)
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Idx → Idx → Real)
+    (hinv : MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis gInv)
+    (i j : Idx) :
+    ricciActualReactAt (I := I) S t x
+        (vec2 (I := I) (basis i) (basis j)) =
+      (-2 : Real) *
+          DifferentialGeometry.Integral.Connection.rm04RicciContractionAt
+            (I := I) basis (S.base.rm04 t x) gInv (S.ricci t x) i j -
+        2 * DifferentialGeometry.Integral.Connection.ricciQuadraticAt
+          (I := I) basis gInv (S.ricci t x) i j := by
+  rw [actualReact_apply (I := I) (M := M) S t x
+    (vec2 (I := I) (basis i) (basis j))]
+  rw [rm04ContrAt_comp_basis (I := I) (M := M) basis gInv hinv,
+    ricciQuadAt_comp_basis (I := I) (M := M) basis gInv hinv]
 
 private theorem reaction3_apply
     (g : SmoothRiemannianMetric I M) {x : M}
@@ -3041,6 +3149,158 @@ private theorem ricciCoordReact_eq_actual
           ∑ j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
             c i j * L i j
   exact sum_coord_react_cancel c L R Q
+
+/-- The coordinate reaction on a fixed pair is the evaluation of the intrinsic
+Ricci reaction tensor on that pair. -/
+theorem pairReact_eq_actual
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : Real) (x : M) (v w : TangentSpace I x) :
+    ricciPairReact (I := I) S t x v w =
+      ricciActualReactAt (I := I) S t x
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) := by
+  classical
+  let b := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x
+  let frame := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x
+  let gInvAt : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
+      DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
+    fun i j => coordInv (I := I) S x t x i j
+  have hinv :
+      MetricInverseInBasis_gen (I := I) (S.base.metric t) x b gInvAt := by
+    simpa [b, gInvAt] using coordInvReal (I := I) S x t
+  have hbasis :
+      ∀ i : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        b i = frame i x := by
+    intro i
+    simp [b, frame, DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply]
+  have hcomp :
+      ∀ i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        ricciActualReactAt (I := I) S t x
+            (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
+          (-2 : Real) *
+              rmRicciContractionCompInFrame
+                (I := I) S S.base.rm04 (coordInv (I := I) S x)
+                frame t x i j -
+            2 * ricciQuadraticCompInFrame
+                (I := I) S (coordInv (I := I) S x) frame t x i j := by
+    intro i j
+    calc
+      ricciActualReactAt (I := I) S t x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (frame i x) (frame j x)) =
+        ricciActualReactAt (I := I) S t x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (b i) (b j)) := by
+            rw [hbasis i, hbasis j]
+      _ =
+        (-2 : Real) *
+            DifferentialGeometry.Integral.Connection.rm04RicciContractionAt
+              (I := I) b (S.base.rm04 t x) gInvAt (S.ricci t x) i j -
+          2 * DifferentialGeometry.Integral.Connection.ricciQuadraticAt
+            (I := I) b gInvAt (S.ricci t x) i j :=
+        actualReact_comp (I := I) (M := M) S t x b gInvAt hinv i j
+      _ =
+          (-2 : Real) *
+              rmRicciContractionCompInFrame
+                (I := I) S S.base.rm04 (coordInv (I := I) S x)
+                frame t x i j -
+            2 * ricciQuadraticCompInFrame
+                (I := I) S (coordInv (I := I) S x) frame t x i j := by
+          simp [rmRicciContractionCompInFrame, raisedRicciCompInFrame,
+            ricciQuadraticCompInFrame, ricciOneUpCompInFrame, ricciCompInFrame,
+            DifferentialGeometry.Integral.Connection.rm04Comp,
+            DifferentialGeometry.Integral.Connection.rm04RicciContractionAt,
+            DifferentialGeometry.Integral.Connection.raised02CompAt,
+            DifferentialGeometry.Integral.Connection.ricciQuadraticAt,
+            DifferentialGeometry.Integral.Connection.oneUp02CompAt,
+            SolutionOn.ricciAt, SolutionFamily.ricciAt, SolutionOn.ricci,
+            SolutionFamily.ricci, b, frame, gInvAt, hbasis]
+  have hcomp_if :
+      ∀ i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        ricciActualReactAt (I := I) S t x
+            (fun q : Fin 2 => if q = 0 then frame i x else frame j x) =
+          (-2 : Real) *
+              rmRicciContractionCompInFrame
+                (I := I) S S.base.rm04 (coordInv (I := I) S x)
+                frame t x i j -
+            2 * ricciQuadraticCompInFrame
+                (I := I) S (coordInv (I := I) S x) frame t x i j := by
+    intro i j
+    simpa [DifferentialGeometry.Integral.Connection.vec2] using hcomp i j
+  have hsum :=
+    DifferentialGeometry.Tensor.Coordinates.tensor0S_two_eval_coordFrame_sum (I := I)
+      (M := M) (x₀ := x) (Ax := ricciActualReactAt (I := I) S t x) v w
+  symm
+  change ricciActualReactAt (I := I) S t x
+      (fun q : Fin 2 => if q = 0 then v else w) =
+    ricciPairReact (I := I) S t x v w
+  rw [hsum]
+  simp only [ricciPairReact, ricciPairRHS, ricciEvolutionRHSInFrame,
+    hcomp_if, frame]
+  let c : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
+      DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
+    fun i j =>
+      (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord i v *
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis (I := I) x).coord j w
+  let L : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
+      DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
+    fun i j => coordRoughRic (I := I) S x (coordNab2Ric (I := I) S x) t x i j
+  let R : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
+      DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
+    fun i j =>
+      rmRicciContractionCompInFrame
+        (I := I) S S.base.rm04 (coordInv (I := I) S x)
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x) t x i j
+  let Q : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
+      DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
+    fun i j =>
+      ricciQuadraticCompInFrame
+        (I := I) S (coordInv (I := I) S x)
+        (DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt (I := I) x) t x i j
+  change
+    (∑ i : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+      ∑ j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        c i j * ((-2 : Real) * R i j - 2 * Q i j)) =
+      (∑ i : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+        ∑ j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+          c i j * (L i j - 2 * R i j - 2 * Q i j)) -
+        ∑ i : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+          ∑ j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+            c i j * L i j
+  exact sum_coord_react_cancel c L R Q
+
+/-- Intrinsic Ricci evolution on any fixed pair of tangent vectors, produced
+directly from `IsSolutionOn`. -/
+theorem ricciPairDeriv
+    [I.Boundaryless]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    [CompleteSpace E] [SigmaCompactSpace M] [T2Space M]
+    (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (x : M) (v w : TangentSpace I x) :
+    HasDerivWithinAt
+      (fun s : Real => S.ricci s x
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w))
+      (metricTraceFirstTwo0SAt (I := I) (S.base.metric (t : Real))
+          (ricciNabla2WMP (I := I) S (t : Real) x)
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) +
+        ricciActualReactAt (I := I) S (t : Real) x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w))
+      D.carrier (t : Real) := by
+  have hcoord := ricciPairCoord (I := I) S hS x t v w
+  have hrough := ricciRoughPair (I := I) S (t : Real) x v w
+  have hreact := pairReact_eq_actual (I := I) S (t : Real) x v w
+  have hvalue :
+      ricciPairRHS (I := I) S (t : Real) x v w =
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric (t : Real))
+            (ricciNabla2WMP (I := I) S (t : Real) x)
+            (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) +
+          ricciActualReactAt (I := I) S (t : Real) x
+            (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w) := by
+    unfold ricciPairReact at hreact
+    rw [hrough]
+    linarith
+  exact hcoord.congr_deriv hvalue
 
 theorem shiftNRaw_pinchCoordReact
     {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}

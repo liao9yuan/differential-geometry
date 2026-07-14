@@ -587,12 +587,8 @@ theorem ham3_short_solution_candidate
   · intro t ht x v w
     exact hpde t ht x v w
 
-/-- Short-time Ricci-flow solution package.
-
-`ham3_short_solution_candidate` supplies the current checked short-time
-candidate data.  This theorem is the remaining package/regularity handoff from
-that candidate to the folder-level `IsSolutionOn` predicate; the detailed
-construction status is tracked in the same-name markdown note. -/
+/-- Short-time Ricci-flow solution package, assembled from the closed-left joint
+chart-Gram regularity of `short_time_joint` and `solutionOn_of_joint`. -/
 theorem ham3_short_isSolution
     (hM : Closed3Manifold (I := I) (M := M))
     (g0 : SmoothRiemannianMetric I M) :
@@ -603,12 +599,16 @@ theorem ham3_short_isSolution
             (DifferentialGeometry.Integral.Connection.RealTimeInterval.closedOpen 0 T hT).initial
               = g0 ∧
           DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I) S := by
+  classical
+  letI : CompactSpace M := hM.1
   haveI : I.Boundaryless := hM.2.2.1
-  obtain ⟨T, hT, S, hstart, _hSmooth, _hCont, _hPDE⟩ :=
-    ham3_short_solution_candidate (I := I) (M := M) hM g0
-  refine ⟨T, hT, S, hstart, ?_⟩
-  -- Short-time package/regularity handoff; see `HamiltonPositiveRicci.md`.
-  sorry
+  obtain ⟨T, hT, g, hstart, hjoint, hpde⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.short_time_joint (I := I) (M := M) g0
+  refine ⟨T, hT, ⟨⟨g⟩⟩, ?_, ?_⟩
+  · show g 0 = g0
+    exact hstart
+  · exact DifferentialGeometry.PDE.RicciFlow.solutionOn_of_joint
+      (I := I) (M := M) hT g hjoint hpde
 
 /-- Short-time *smooth* normalized existence, assembled from the short-time
 solution producer `ham3_short_isSolution` and the checked regularity promotion

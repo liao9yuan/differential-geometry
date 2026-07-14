@@ -38,3 +38,15 @@ Promoted the formerly private radial chain-rule calculation to the public theore
 of `exp_p` at `t • a` applied to `a`, under the existing `expMapC2Radius` smallness condition.
 This is the reusable exponential-layer API needed by Step B; no HCG-specific data enters its
 statement.  Focused verification and the targeted module refresh passed.
+
+## 2026-07-13: optimal coercivity witness
+
+`gpCoerciveConst` keeps its public name and existing positivity/coercivity API,
+but its opaque witness is now selected as the minimum of `g_p(v,v)` on the
+compact unit sphere.  The new comparison theorem `le_gpCoerciveConst` proves
+that every global quadratic coercivity coefficient is below this selected
+constant; the candidate coefficient need not be positive.
+
+This is the canonical lower-layer repair needed by the HCG Gate 6 radius
+producer.  Focused verification and the targeted module refresh passed.  No
+HCG endpoint assumption or parallel coercivity constant was introduced.

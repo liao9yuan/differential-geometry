@@ -54,3 +54,15 @@ satisfy them honestly — the conclusions were already conditional, so this just
 hypotheses. Proof change is one line (`have hidx : ∀ k, Φ k (Ψ k x) = x := fun k => hid k x
 hx` before the `simp`). Both re-verified axiom-clean. Backward compatible (the only caller,
 `exists_transitionLimit_on`, threads the membership through).
+
+## 2026-07-13 finite Pi bounds
+
+Added `IsometryDerivBoundsOn.pi`. Componentwise localized derivative bounds,
+together with componentwise smoothness on the open domain, now assemble into
+the bound for a finite Pi-valued map. The proof uses the canonical
+`Analysis/Calculus/PiDeriv.lean` tuple-derivative identity and a finite sum of
+nonnegative component bounds.
+
+Focused verification and the targeted refresh passed with no local warning.
+This is reusable compactness machinery; it does not itself produce
+`StepB1RawInput`.

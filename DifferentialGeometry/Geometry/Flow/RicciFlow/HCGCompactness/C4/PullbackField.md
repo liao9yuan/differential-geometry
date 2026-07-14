@@ -152,6 +152,14 @@ handled separately, and the `covDerivOfField_eq_iterCov` reindex readout uses
 the explicit continuous-multilinear `domDomCongr` evaluation.  Obsolete
 representation-level simp arguments were removed.
 
-Focused verification passes.  The two pre-existing ordinary-wrapper `sorry`s
-remain unchanged; no new frontier or theorem assumption was introduced, and
-the HCG percentages remain those in `PROJECT_MAP.md`.
+Focused verification passes.  No new frontier or theorem assumption was
+introduced, and the HCG percentages remain those in `PROJECT_MAP.md`.
+
+## 2026-07-13: unused ordinary wrappers removed
+
+A repository-wide Lean reference audit found no consumers of `compDataFwd` or
+`compDataRev`; only their declarations and historical Markdown mentions
+remained.  Both obsolete single-ledger declarations were deleted.  The active
+Step-D route continues to use the independently proved `compSepFwd` and
+`compSepRev` organs.  Focused verification, the targeted producer refresh,
+and the downstream `StepDDirected` check all passed.

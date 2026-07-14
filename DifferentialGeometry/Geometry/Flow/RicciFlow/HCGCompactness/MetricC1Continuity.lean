@@ -225,6 +225,92 @@ section Compact
 
 variable [CompactSpace M]
 
+/-- One fixed covariant order is uniformly small over the compact manifold
+for all times sufficiently close to a regular time. -/
+private theorem metric_c_event
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) (a : ℕ)
+    {ε : Real} (hε : 0 < ε) :
+    ∀ᶠ t in 𝓝 (T : Real), ∀ y : M,
+      metricDerivNorm (I := I) a
+        (G.metric t) (G.metric (T : Real)) (G.metric (T : Real)) y < ε := by
+  classical
+  choose V hV W hWOpen hxW hloc using
+    fun x : M => metric_c_patch (I := I) G hG T a x hε
+  obtain ⟨F, _, hF⟩ :=
+    (isCompact_univ : IsCompact (Set.univ : Set M)).elim_nhds_subcover W
+      (fun x _ => (hWOpen x).mem_nhds (hxW x))
+  have htime :
+      ∀ᶠ t in 𝓝 (T : Real), ∀ x ∈ F, t ∈ V x := by
+    exact
+      (Finset.eventually_all
+        (I := F)
+        (l := 𝓝 (T : Real))
+        (p := fun x t => t ∈ V x)).2
+        (fun x _ => hV x)
+  filter_upwards [htime] with t ht
+  intro y
+  obtain ⟨x, hxF, hyW⟩ :=
+    Set.mem_iUnion₂.mp (hF (Set.mem_univ y))
+  exact hloc x t (ht x hxF) y hyW
+
+/-- At a regular time, a smooth realized metric family converges to its
+fixed-time metric in every finite cumulative fixed-background seminorm. -/
+theorem metric_cp_tendsto
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) (p : ℕ) :
+    Filter.Tendsto
+      (fun t : Real =>
+        metricDerivNormSupOn (I := I) Set.univ p
+          (G.metric t) (G.metric (T : Real)) (G.metric (T : Real)))
+      (𝓝 (T : Real)) (𝓝 0) := by
+  classical
+  rw [Metric.tendsto_nhds]
+  intro ε hε
+  have hε2 : 0 < ε / 2 := half_pos hε
+  have htime :
+      ∀ᶠ t in 𝓝 (T : Real),
+        ∀ a ∈ Finset.range (p + 1), ∀ y : M,
+          metricDerivNorm (I := I) a
+            (G.metric t) (G.metric (T : Real)) (G.metric (T : Real)) y < ε / 2 := by
+    exact
+      (Finset.eventually_all
+        (I := Finset.range (p + 1))
+        (l := 𝓝 (T : Real))
+        (p := fun a t => ∀ y : M,
+          metricDerivNorm (I := I) a
+            (G.metric t) (G.metric (T : Real)) (G.metric (T : Real)) y < ε / 2)).2
+        (fun a _ => metric_c_event (I := I) G hG T a hε2)
+  filter_upwards [htime] with t ht
+  have hpoint :
+      ∀ a : ℕ, a ≤ p → ∀ y ∈ (Set.univ : Set M),
+        metricDerivNorm (I := I) a
+            (G.metric t) (G.metric (T : Real)) (G.metric (T : Real)) y
+          ≤ ε / 2 := by
+    intro a ha y _
+    exact (ht a (by simp only [Finset.mem_range]; omega) y).le
+  have hsup :
+      metricDerivNormSupOn (I := I) Set.univ p
+          (G.metric t) (G.metric (T : Real)) (G.metric (T : Real))
+        ≤ ε / 2 :=
+    metricDerivNormSupOn_le_of_forall
+      (I := I) Set.univ p
+      (G.metric t) (G.metric (T : Real)) (G.metric (T : Real))
+      (ε / 2) hε2.le hpoint
+  have hnonneg :
+      0 ≤ metricDerivNormSupOn (I := I) Set.univ p
+        (G.metric t) (G.metric (T : Real)) (G.metric (T : Real)) := by
+    unfold metricDerivNormSupOn
+    apply Real.sSup_nonneg
+    rintro r ⟨a, ha, y, hy, rfl⟩
+    exact Real.sqrt_nonneg _
+  simpa only [Real.dist_eq, sub_zero, abs_of_nonneg hnonneg] using
+    hsup.trans_lt (half_lt_self hε)
+
 /-- At a regular time, a smooth realized metric family converges to its
 fixed-time metric in the cumulative order-one fixed-background seminorm. -/
 theorem metric_c1_tendsto

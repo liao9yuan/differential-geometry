@@ -248,7 +248,7 @@ structure MetricFrameTimeRegularityInFrameOnLocal
     (u : Set M) : Prop where
   metricSmooth :
     forall x : M, x ∈ u -> forall i j : Idx,
-      ContDiffOn Real ⊤
+      ContDiffOn Real ∞
         (fun t : Real => metricCompInFrame (I := I) S frame t x i j)
         D.carrier
   /-- Nondegeneracy is represented by an explicit two-sided inverse of the
@@ -279,7 +279,7 @@ structure MetricFrameSpacetimeRegularityInFrameOnLocal
         (I := I) S gInv gInvDt frame u where
   frameMetricSpacetimeSmooth :
     forall i j : Idx,
-      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ⊤
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
         (fun p : Real × M => metricCompInFrame (I := I) S frame p.1 p.2 i j)
         (D.carrier ×ˢ u)
   frameMetricExtDerivTimeDerivative :

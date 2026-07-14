@@ -159,7 +159,7 @@ theorem mapCInf_apply {ι Q : Type*} [Fintype ι]
   have hbase := hk0 k hk r hr x hx
   simp only [mapDerivNorm] at hbase ⊢
   change ‖iteratedFDeriv Real r (fun y j => u k y j - uinf y j) x‖ <= epsilon at hbase
-  rw [iteratedFDerivPi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi] at hbase
+  rw [iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi] at hbase
   exact (norm_le_pi_norm (fun j =>
     iteratedFDeriv Real r (fun y => u k y j - uinf y j) x) i).trans hbase
 
@@ -350,23 +350,6 @@ variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSp
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- At the origin of a normal chart, the pulled-back coordinate metric is the
-metric inner product at the chart centre. -/
-theorem normalMetric_zero
-    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (c : Y.M) :
-    letI : TopologicalSpace Y.M := Y.topology
-    letI : ChartedSpace H Y.M := Y.charted
-    letI : IsManifold I ∞ Y.M := Y.smooth
-    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    normalCoordMetric (I := I) Y c 0 = Y.metric.inner c := by
-  letI : TopologicalSpace Y.M := Y.topology
-  letI : ChartedSpace H Y.M := Y.charted
-  letI : IsManifold I ∞ Y.M := Y.smooth
-  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  ext v w
-  rw [normalCoordMetric_apply (I := I), expMapDiffeo_zero (I := I)]
-  exact normalChartAt_metric_pullback_at_origin (I := I) Y.metric c v w
-
 /-- On a normal-chart overlap, the intrinsic quadratic bump is the scalar bump
 applied to the origin metric coefficient and the normal transition vector. -/
 theorem quadNormal_readout
@@ -444,6 +427,22 @@ noncomputable def seqCenterD
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (k gamma : Nat) : (X.obj (L.φ k)).M :=
   (seqCenter hd D P (L.φ k) gamma).getD (X.obj (L.φ k)).basepoint
+
+/-- The totalized centre has exactly the ordered-net radius, including the
+dead-slot convention where both sides are zero. -/
+theorem seqCenterD_dist_eq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (k gamma : Nat) :
+    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+    seqRadius hd D P (L.φ k) gamma =
+      dist (seqCenterD hd P L k gamma) (X.obj (L.φ k)).basepoint := by
+  letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+  haveI : ProperSpace (X.obj (L.φ k)).M := (P (L.φ k)).proper
+  unfold seqRadius seqCenterD seqCenter OrderedNet.netRadius
+  cases OrderedNet.netCenter (X.obj (L.φ k)).basepoint (hd.lambda D)
+      (hd.lambda_continuous D) gamma <;> simp
 
 /-- Totalized moving centres commute with strict refinement of the net-limit
 data. -/
@@ -556,10 +555,10 @@ theorem seqAtomChart_smooth
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
-    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
-    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k)
     (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (gamma : Fin (pb.A r))
-    (k : Nat) {U : Set E}
+    {U : Set E}
     (hUx :
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
@@ -629,6 +628,42 @@ theorem seqAtom_dead_conv
   filter_upwards [seqCenter_dead hd P L (gamma : Nat) hgamma] with k hk
   intro z _hz
   simp [seqAtomChart, seqAtom_none hd hD P L pb r k gamma hk]
+
+/-- A slot whose five-lambda ball is eventually disjoint from the source hat
+has zero chart-pulled atom limit on the source domain. -/
+theorem atom_disjoint_conv
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : Item3GpScaleTail (I := I) hd D P L pb r)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M) (alpha gamma : Fin (pb.A r))
+    {U : Set E} (hU : IsOpen U)
+    (hsource : ∀ᶠ k in Filter.atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        U (L.hatBall hd D P pb r k alpha))
+    (hdisjoint : ∀ᶠ k in Filter.atTop,
+      ¬ BInter hd D P L.lamInf (alpha : Nat) (gamma : Nat) (L.φ k)) :
+    MapCInfConvOnCompacts U
+      (fun k => seqAtomChart (I := I) hd hD P L pb r beta gamma k)
+      (fun _ => 0) := by
+  have hzero : MapCInfConvOnCompacts U
+      (fun _ : Nat => fun _ : E => (0 : Real)) (fun _ => 0) :=
+    mapCInfConv_const (fun _ : E => (0 : Real))
+  refine hzero.congr_eventually hU ?_ fun _ _ => rfl
+  filter_upwards [hsource, hdisjoint, hgp] with k hsourceK hdisjointK hgpK
+  intro z hz
+  by_contra hne
+  apply hdisjointK
+  exact L.binter_of_mem_hat hd hD P pb r k (hsourceK hz)
+    (seqAtom_mem_hat hd hD P L pb r k hgpK gamma (by
+      simpa only [seqAtomChart] using hne))
 
 /-- Assemble all finite slots without imposing geometric extraction inputs on
 dead ones.  Live slots use their supplied intrinsic-atom limits; dead slots

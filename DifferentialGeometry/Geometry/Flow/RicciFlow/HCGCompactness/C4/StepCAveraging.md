@@ -139,3 +139,30 @@ only needs nonnegativity, a positive entry, sum one, and active-region
 membership.
 
 Verification status: the focused Lean check passed.
+
+## 2026-07-13, active-radius producer
+
+Added `centerAverage.exists_active_radius`.  From two-index uniform convergence
+of each nonzero-weight entry in a finite family, it constructs one
+`radSeq : Nat -> Nat -> X -> Real` which is everywhere positive, strictly
+dominates every active distance on the source set, and converges uniformly to
+zero there as both indices tend to infinity.
+
+The construction is the finite sum of the active distances plus the positive
+tail `1 / (a + 1)`.  Thus no radius assumption is added: finiteness combines the
+per-entry convergence, while the tail supplies strict positivity and strict
+domination.  The theorem is metric-generic and does not depend on the
+Riemannian center-of-mass implementation.
+
+The public statement now asks only for `[Finite ι]`, installing
+`Fintype.ofFinite ι` internally for the finite sum.  The surrounding file's
+`[Fintype ι]` section instance is explicitly omitted from this theorem, so the
+weaker reusable API does not carry an unused section variable.  The resulting
+linter cleanup was included in the successful focused verification.
+
+Verification status: the focused Lean check passed.
+
+Accounting: `exists_active_radius` and the generic active-radius producer are
+complete (100%).  Instantiating its convergence hypothesis for the concrete
+finite-hat maps and proving the later cage/strict-convexity bounds remain
+downstream work; no Chapter-4 endpoint theorem was completed (endpoint 0%).

@@ -72,6 +72,17 @@ theorem PointedRiemannianManifold.exists_expBall_diffeo
 
 variable {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
 
+/-- The scalar multiplying `lamInf` in the book's item-3 exponential-ball
+radius.  It is kept separate from the radius predicate so the divisor can be
+chosen once before the packing bound is instantiated. -/
+def item3RadiusFactor (hd : InjRadiusDecayInput (I := I) X) (D : Real) : Real :=
+  205 * Real.exp (hd.C * (20 * hd.lambda D 0))
+
+/-- The book's item-3 radius factor is positive. -/
+theorem item3Factor_pos (hd : InjRadiusDecayInput (I := I) X) (D : Real) :
+    0 < item3RadiusFactor hd D := by
+  exact mul_pos (by norm_num) (Real.exp_pos _)
+
 /-- **Honest-input (book "`D` large enough", `lbl391`/`lbl392`).**  At each live net center
 `x_k^α`, the chosen item-3 ball radius `ρ k α` is below the exponential `C²` radius and the
 injectivity radius of the realized metric `(X.obj k).metric`.  This is the §5 geometric
@@ -90,6 +101,43 @@ def Item3RadiusInput (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     letI := (X.obj k).t2TangentBundle
     ENNReal.ofReal (ρ k α) < injRadius (I := I) (X.obj k).metric c ∧
       ρ k α ≤ expMapC2Radius (I := I) (X.obj k).metric c
+
+/-- The item-3 radius discipline at one sequence index and on the finite
+packing family, for radii `a * lamInf γ`. -/
+def Item3RadiusAt (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (r a : Real)
+    (n : Nat) : Prop :=
+  ∀ γ : Fin (pb.A r), ∀ c : (X.obj (L.φ n)).M,
+    seqCenter hd D P (L.φ n) (γ : Nat) = some c →
+      letI := (X.obj (L.φ n)).topology
+      letI := (X.obj (L.φ n)).charted
+      letI := (X.obj (L.φ n)).smooth
+      letI := (X.obj (L.φ n)).sigmaCompact
+      letI := (X.obj (L.φ n)).t2
+      letI := (X.obj (L.φ n)).t2TangentBundle
+      ENNReal.ofReal (a * L.lamInf (γ : Nat)) <
+          injRadius (I := I) (X.obj (L.φ n)).metric c ∧
+        a * L.lamInf (γ : Nat) ≤
+          expMapC2Radius (I := I) (X.obj (L.φ n)).metric c
+
+/-- The finite packing-local item-3 radius discipline eventually holds along
+the chosen net-limit subsequence. -/
+def Item3RadiusTail (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (r a : Real) : Prop :=
+  ∀ᶠ n in Filter.atTop, Item3RadiusAt (I := I) hd D P L pb r a n
+
+/-- Reindex a packing-local item-3 radius tail along a further subsequence. -/
+theorem Item3RadiusTail.subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (r a : Real)
+    (hrad : Item3RadiusTail (I := I) hd D P L pb r a)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) :
+    Item3RadiusTail (I := I) hd D P (L.subseq hψ) pb r a := by
+  filter_upwards [hψ.tendsto_atTop.eventually hrad] with n hn
+  intro γ c hc
+  exact hn γ c hc
 
 namespace Item3RadiusInput
 
@@ -134,18 +182,40 @@ theorem exists_seqItem3Diffeo
           (Metric.ball (0 : E) (ρ k α)) :=
   (X.obj k).exists_expBall_diffeo c (hrad k α c hc).1 (hrad k α c hc).2
 
-/-- **`lbl383`/`lbl427` `g_p`-scale honest input** (book-external; sibling of
-`Item3RadiusInput`).  At every live net center `x_{L.φ n}^γ` the center-of-mass ball
-scale `4 λ^γ` sits below the `g_p`-coercive radial normal radius `expRadiusGp` of the
-realized metric.  This is the book's ball-scale choice (`lbl383`, applied at `lbl427`'s
-convexity radius `r < min{inj/3, π/(6√K)}`; cf. chapter4.tex L1672 "by the choice of
-balls in Lemma `lbl383` we can apply Proposition `lbl434`").  Like `Item3RadiusInput`
-the comparison is a `§5`/`lbl413` curvature-comparison boundary and is un-provable
-natively because `expMapC2Radius` — hence `expRadiusGp = √(g_p-coercive) · expMapC2Radius`
-— is an opaque choice radius (the same uniform-radius-anchoring frontier as
-`Item3RadiusInput`).  Stated `L`-relative with `L.lamInf` so the `unifHatCageSelfComp`
-hypothesis `hR` (`4 * L.lamInf γ < expRadiusGp … (center γ)`) is a one-line
-consequence at each live center. -/
+/-- The packing-local fixed-index item-3 radius fact gives the corresponding
+exponential-ball diffeomorphism at each selected slot. -/
+theorem exists_item3Diffeo
+    (hd : InjRadiusDecayInput (I := I) X) {D a r : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (n : Nat)
+    (hrad : Item3RadiusAt (I := I) hd D P L pb r a n)
+    (γ : Fin (pb.A r)) (c : (X.obj (L.φ n)).M)
+    (hc : seqCenter hd D P (L.φ n) (γ : Nat) = some c) :
+    letI := (X.obj (L.φ n)).topology
+    letI := (X.obj (L.φ n)).charted
+    letI := (X.obj (L.φ n)).smooth
+    letI := (X.obj (L.φ n)).sigmaCompact
+    letI := (X.obj (L.φ n)).t2
+    letI := (X.obj (L.φ n)).t2TangentBundle
+      ∃ Φ : PartialDiffeomorph 𝓘(ℝ, E) I E (X.obj (L.φ n)).M 1,
+        Φ.source = Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
+        Φ.target = (fun v : E =>
+          (expMap (I := I) (X.obj (L.φ n)).metric c
+            (show TangentSpace I c from v) : (X.obj (L.φ n)).M)) ''
+              Metric.ball (0 : E) (a * L.lamInf (γ : Nat)) ∧
+        Set.EqOn Φ (fun v : E =>
+          (expMap (I := I) (X.obj (L.φ n)).metric c
+            (show TangentSpace I c from v) : (X.obj (L.φ n)).M))
+          (Metric.ball (0 : E) (a * L.lamInf (γ : Nat))) :=
+  (X.obj (L.φ n)).exists_expBall_diffeo c
+    (hrad γ c hc).1 (hrad γ c hc).2
+
+/-- Legacy all-index form of the `lbl383`/`lbl427` `g_p` scale separation.  It
+requires every natural-numbered slot at every index and is therefore stronger
+than the construction needs.  The canonical post-packing API below uses
+`Item3GpScaleAt` and `Item3GpScaleTail`; the H6 relative-radius profile produces
+that finite eventual form.  This declaration remains as a compatibility input
+for older callers. -/
 def Item3GpScaleInput (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData (I := I) hd D P) : Prop :=
@@ -159,6 +229,49 @@ def Item3GpScaleInput (hd : InjRadiusDecayInput (I := I) X) (D : Real)
         (X.obj (L.φ n)).t2TangentBundle
       4 * L.lamInf γ < expRadiusGp (I := I) (X.obj (L.φ n)).metric c
 
+/-- The `g_p` scale separation at one sequence index, on the finite family of
+slots selected by one fixed packing bound and source radius. -/
+def Item3GpScaleAt (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (r : Real)
+    (n : Nat) : Prop :=
+  ∀ γ : Fin (pb.A r), ∀ c : (X.obj (L.φ n)).M,
+    seqCenter hd D P (L.φ n) (γ : Nat) = some c →
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      4 * L.lamInf (γ : Nat) < expRadiusGp (I := I) (X.obj (L.φ n)).metric c
+
+/-- The finite packing-local scale separation eventually holds along the chosen
+net-limit subsequence.  This is the construction-facing asymptotic input. -/
+def Item3GpScaleTail (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (r : Real) : Prop :=
+  ∀ᶠ n in Filter.atTop, Item3GpScaleAt (I := I) hd D P L pb r n
+
+/-- The older all-slot scale input restricts to the finite packing family at
+any fixed sequence index. -/
+theorem Item3GpScaleInput.at (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P)
+    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (pb : hd.PackingBound D) (r : Real) (n : Nat) :
+    Item3GpScaleAt (I := I) hd D P L pb r n := by
+  intro γ c hc
+  exact hgp n (γ : Nat) c hc
+
+/-- The older all-slot scale input implies the finite packing-local tail input. -/
+theorem Item3GpScaleInput.to_tail (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P)
+    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (pb : hd.PackingBound D) (r : Real) :
+    Item3GpScaleTail (I := I) hd D P L pb r :=
+  Filter.Eventually.of_forall fun n => hgp.at hd D P L pb r n
+
 /-- Reindex the `g_p`-scale input along a further subsequence: `L.subseq hψ` shares
 `L`'s `lamInf` and reindexes `φ` by `ψ`, so the scale separation transports directly. -/
 theorem Item3GpScaleInput.subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real)
@@ -169,6 +282,17 @@ theorem Item3GpScaleInput.subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real
     Item3GpScaleInput (I := I) hd D P (L.subseq hψ) := by
   intro n γ c hc
   exact hgp (ψ n) γ c hc
+
+/-- Reindex a packing-local scale tail along a further subsequence. -/
+theorem Item3GpScaleTail.subseq (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData (I := I) hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hgp : Item3GpScaleTail (I := I) hd D P L pb r)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) :
+    Item3GpScaleTail (I := I) hd D P (L.subseq hψ) pb r := by
+  filter_upwards [hψ.tendsto_atTop.eventually hgp] with n hn
+  intro γ c hc
+  exact hn γ c hc
 
 end HCGCompactness
 end DifferentialGeometry

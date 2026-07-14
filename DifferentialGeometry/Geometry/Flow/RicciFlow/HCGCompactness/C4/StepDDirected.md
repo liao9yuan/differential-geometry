@@ -1,6 +1,6 @@
 # StepDDirected.lean — D1b: the lbl406 directed system
 
-## State (2026-07-09)
+## State (2026-07-13 alignment)
 
 Focused `StepDDirected.lean` verification passes with no local `sorry` warning.
 The `directed_of_b1` recursion body is now locally closed in this file:
@@ -22,17 +22,21 @@ misled by stale examples.
 
 Progress accounting: the conditional D1b consumer body is 100% checked, while
 the textbook D1b theorem from the endpoint hypotheses is 0%.  The missing producer
-is `StepB1RawInput`, not F4/F5 or the separated-composition organs.  Step D conditional
-machinery is about 87--88%;
-Step D assembly/D6 remains 0% because no assembly theorem discharging
-`metricCompactness` has been proved.  Whole HCG endpoint completion is still
-0%; machinery moves only modestly upward.
+is `StepB1RawInput`, not F4/F5, F2, or the separated-composition organs.  Step-D
+consumer machinery is 100%, and the conditional assembly `compactness_of_b1`
+is 100% proved from that package.  The working `metricCompactness` endpoint
+remains 0% because its body still waits on the concrete B/C producer.
 
 Downstream check after refreshing `PullbackField.lean` passed: the proved
 `compSepFwd`/`compSepRev` bodies do not break the D1b consumer.
 
+The aligned tree also promotes `speed_le_of_c0` and `data_image_ball` to
+`Distances.lean`; this file now consumes that public F2 API.  Downstream and
+full alignment verification passed.
+
 Next target outside this phase: produce `StepB1RawInput` from the honest C-track
-data, or continue the independent Step D D2 limiting-metrics lane.
+data.  There is no independent Step D/F target unless that producer exposes an
+actual interface mismatch.
 The former F4 scaling gate is closed by `metricComp_mul`, explicit Claim-1/F3
 constants, and the completed `lemma45_corII_unif`.
 

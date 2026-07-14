@@ -45,3 +45,56 @@
 - Chapter 4 machinery: about 66%.
 - Whole HCG compactness machinery: about 46%.
 - Conditional and final compactness endpoints: 0%.
+
+## 2026-07-13 lower-layer relocation
+
+`normalMetric_zero` was moved without renaming to `StepBInputs.lean`, its
+canonical home next to `normalCoordMetric`.  This module now consumes the
+imported theorem and no longer carries a duplicate definition.  Focused
+verification passed; the atom-convergence API and all consumer names are
+unchanged.
+
+## 2026-07-13 fixed-index scale input
+
+`seqAtomChart_smooth` now takes the exact fixed-index
+`Item3GpScaleAt ... pb r k` fact used by `seqAtom_contMDiff`. It no longer
+requires a scale theorem for unrelated indices or ordered-net slots. Focused
+verification and the narrow refresh passed.
+
+The atom-convergence theorem remains complete as infrastructure. The concrete
+`StepB1RawInput` producer and textbook B1 theorem remain 0%; dedicated
+Step-B/B1 machinery is about 80%, Chapter 4 machinery about 76%, whole-HCG
+machinery about 53%, and compactness endpoints remain 0%.
+
+## 2026-07-13 totalized-centre distance readout
+
+Added `seqCenterD_dist_eq`.  In the realized proper metric it identifies the
+ordered-net radius exactly with the distance from the totalized centre
+`seqCenterD` to the pointed basepoint.  The equality includes the dead-slot
+case: `seqCenterD` is then the basepoint and both sides reduce to zero, so later
+canonical-centre radius arguments do not need an artificial live-slot split.
+
+The focused verification passed.  This helper is complete (100%) and supplies
+only a radial readout for existing net data; it does not construct an arbitrary
+partner-centre family or discharge `StrictDistInput`/Hessian estimates.
+`StepB1RawInput`, textbook B1, and the compactness endpoints remain 0%.
+
+## 2026-07-13 canonical finite-Pi derivative API
+
+The atom-convergence proof now uses
+`Analysis/Calculus/PiDeriv.iteratedFDeriv_pi` after the generic theorem was
+moved out of `StepB1Producers`. This is a name/import-layer migration only;
+focused verification passed and the convergence statement is unchanged.
+
+## 2026-07-13 stable-disjoint atom branch
+
+Added `atom_disjoint_conv`.  If the source chart maps into one finite source
+hat and a target five-lambda ball is eventually disjoint from it, the target
+chart-pulled atom converges in C-infinity to zero on the source domain.  The
+proof combines `seqAtom_mem_hat` with `binter_of_mem_hat`; it needs no transition
+map for the noninteracting target.  Focused verification passed.
+
+This closes the low-level live-but-noninteracting branch that the earlier
+live/dead split omitted.  Sparse atom packaging still has to combine this zero
+branch with `InterSlot` transition limits on one common subsequence; that is
+infrastructure, while `StepB1RawInput` and all endpoint theorems remain 0%.

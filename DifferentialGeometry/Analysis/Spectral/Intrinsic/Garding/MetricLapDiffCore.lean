@@ -109,6 +109,68 @@ noncomputable def lapDiffCore
   (SmoothCcTensor.toL2 (g := g) (r := 0) (s := 0)).toLinearMap.comp
     (lapDiffSec (I := I) (M := M) g h)
 
+/-- Pairing a finite-core moving-Laplacian difference with a finite spectral
+test vector is the fixed-volume integral of the genuine scalar difference. -/
+theorem lapDiffCore_pair
+    (q h : SmoothRiemannianMetric I M)
+    (v w : ScalarH2Core (I := I) (M := M) q) :
+    inner Real (lapDiffCore (I := I) (M := M) q h v)
+        (SmoothCcTensor.toL2
+          (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)) =
+      ∫ x, (Δ_g (I := I) h
+              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+            Δ_g (I := I) q
+              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) *
+          reprScalar0 (I := I) (M := M) w.1 w.2 x
+        ∂(riemannianVolumeMeasure (I := I) (M := M) q) := by
+  change inner Real
+      (SmoothCcTensor.toL2 (lapDiffSec (I := I) (M := M) q h v))
+      (SmoothCcTensor.toL2
+        (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)) = _
+  rw [SmoothCcTensor.inner_toL2, SmoothCcTensor.inner_def]
+  unfold tensorL2Inner
+  refine integral_congr_ae (Filter.Eventually.of_forall fun x => ?_)
+  simp only [SmoothCcTensor.toFun_apply]
+  rw [lapDiffSec_apply (I := I) (M := M) q h v x]
+  have hrepr_x :
+      (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2).toSection x =
+        (Tensor0SField.fromScalarField ∞
+          (reprScalar0 (I := I) (M := M) w.1 w.2)
+          (reprScalar0_smooth (I := I) (M := M) w.1 w.2)).toTensorRSField ∞ x := by
+    exact congrArg (fun T => T x)
+      (repr_eq_lift (I := I) (M := M) w.1 w.2).symm
+  rw [hrepr_x, Tensor0SField.toRS0_eq,
+    inner_toRS0_zero (I := I) (M := M) q x]
+  have hlap :
+      tensor0SSpace_evalScalar x
+        ((Tensor0SNabla.tensor0Iso I M x).symm
+          (Δ_g (I := I) h
+              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+            Δ_g (I := I) q
+              (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x)) =
+        Δ_g (I := I) h
+            (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+          Δ_g (I := I) q
+            (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x := by
+    change Tensor0SNabla.tensor0Iso I M x
+      ((Tensor0SNabla.tensor0Iso I M x).symm _) = _
+    rw [ContinuousLinearEquiv.apply_symm_apply]
+  have hrepr :
+      tensor0SSpace_evalScalar x
+        (Tensor0SField.fromScalarField ∞
+          (reprScalar0 (I := I) (M := M) w.1 w.2)
+          (reprScalar0_smooth (I := I) (M := M) w.1 w.2) x) =
+        reprScalar0 (I := I) (M := M) w.1 w.2 x := by
+    rw [Tensor0SSpace.evalScalar_apply]
+    change Tensor0SSpace.toModel
+      (Tensor0SField.fromScalarField ∞
+        (reprScalar0 (I := I) (M := M) w.1 w.2)
+        (reprScalar0_smooth (I := I) (M := M) w.1 w.2) x) Fin.elim0 = _
+    exact Tensor0SField.fromScalarField_apply ∞
+      (reprScalar0 (I := I) (M := M) w.1 w.2)
+      (reprScalar0_smooth (I := I) (M := M) w.1 w.2) x Fin.elim0
+  rw [hlap, hrepr]
+
 /-- The squared fixed-reference `L²` norm of `lapDiffCore` is the scalar
 Laplacian-difference energy. -/
 theorem lapDiffCore_sq

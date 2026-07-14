@@ -25,16 +25,31 @@ fixed-`q` normal endpoint worker, and the transported intrinsic branch.
   `aρ = min aδ (aq / 2)`, preserving a positive relative coefficient while
   satisfying both the target-ball and normal-coordinate source fences.
 - Focused verification and the targeted module build passed without local
-  warnings or local `sorry`s.  The finite-cage downstream focused check and
-  targeted build also passed after refreshing this module.
+  warnings or local `sorry`s.  The finite-cage downstream focused check also
+  passed after refreshing its missing upstream object; the cage module itself
+  was not targeted-built.
 
 ## Frontier and accounting
 
 - The architecture-2 acceptance theorem is complete: quantifier order,
   relative scales, full transport, whole-target domain, inverse formula, and
   backward-compatible consumers are all checked.
-- `normalBrAccept`/`normalBrScale` are producer machinery.  `StepB1RawInput` and textbook B1 are
+- `normalBrAccept`/`normalBrScale` are producer machinery.  The concrete
+  theorem producing the already-stated `StepB1RawInput`, and textbook B1, are
   still unstated and 0% complete.
-- Dedicated Step-B/B1 machinery is about 77%; Chapter 4 machinery about 74%;
-  whole HCG compactness machinery about 51%.  Conditional and final compactness
+- Dedicated Step-B/B1 machinery is about 79%; Chapter 4 machinery about 75%;
+  whole HCG compactness machinery about 52%.  Conditional and final compactness
   endpoints remain 0%.
+
+## 2026-07-13 minimizing scale specialization
+
+`HasNormalBrFull.mono` shrinks only the final closed-ball consumer radius while
+retaining the selected branch, fence, target ball, transport identities, and
+inverse formula.  `normalMinScale` consumes `normalBrAccept`, shrinks its
+coefficient by both the phase and `gpRatio` budgets, and returns the full branch
+together with the normal-coordinate radius bound and
+`(aMin * mu R) / 2 <= expRadiusGp`.
+
+Focused verification and the targeted refresh passed without a local `sorry`.
+This completes Gate 6's sequence-uniform minimizing scale; it does not choose
+the later physical finite-cage radius or prove `StepB1RawInput`.

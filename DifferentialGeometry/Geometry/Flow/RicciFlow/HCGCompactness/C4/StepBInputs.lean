@@ -13,25 +13,19 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# MSM135 Chapter 4 Step B honest inputs (S6 / `lbl418`, and `lbl395`)
+# MSM135 Chapter 4 Step B normal-coordinate inputs (`lbl395`)
 
 This file collects the book-external honest inputs that Step B consumes at the
 model-coordinate level.
 
-## S6 / `lbl418` — derivatives of `exp⁻¹`
+## H6 / `lbl418` — transition derivatives
 
-The Jacobi/Rauch-comparison input for Step B: uniform `C^p` bounds for the
-normal-coordinate transition maps `normalChart_y ∘ exp_x : E → E` on chart overlaps
-(MSM135 §`lbl-2103`, "derivatives of `exp⁻¹`").  This is the rebuild of the former
-`GeometricInputs.lean` S6 section on the NATIVE normal-coordinate API
-(`Geometry.Riemannian.expMapDiffeo` / `normalChartAt`), replacing
-the dangling `RicciFlower.Coordinates.NormalChartData` reference.
-
-The field `exp_inv_deriv` is the deep external comparison-geometry theorem (the book
-cites it; proving it from §5 `S1–S5` is optional later work).  Note the native
-`expMapDiffeo` source is *some* open neighbourhood of `0`; widening the charts to the
-full `λ`-ball scale (so the bounds apply on the Step A covering balls) is part of the
-`lbl383` item-3 frontier, not of this input.
+The former S6 endpoint package for uniform `C^p` bounds on
+`normalChart_y ∘ exp_x` has been removed.  The canonical H6 route now derives
+those bounds from the normal-coordinate metric jets in `H6IsometryDeriv.lean`;
+the transition layer keeps the source and target containments explicit and
+uses the native `expMapDiffeo` / `normalChartAt` API.  No `exp_inv_deriv`
+endpoint field remains in this file.
 
 ## `lbl395` — normal-coordinate metric bounds
 
@@ -82,67 +76,6 @@ noncomputable def normalTransition
   fun z =>
     normalChartAt (I := I) X.metric y
       (expMapDiffeo (I := I) X.metric x z)
-
-/-- Derivative bound for one normal-coordinate transition map, on the chart overlap
-**below a scale cap `r₁`**: the evaluation point `z` lies in the `min r₁ (C²-radius of x)`
-ball, and its image lies in the `min r₁ (C²-radius of y)` normal ball of `y`.
-
-The scale cap is the book's own domain (MSM135 `lbl418` proves the bounds for
-`x, y ∈ B(p, r₁)`, `r₁ ≤ min{inj(p)/4, c/√C₀}`).  An uncapped version quantified over
-the whole chart overlap is over-strong: chart sources are not scale-controlled, and in
-negatively curved members `d(exp_x)` grows exponentially with the radius, so transition
-derivatives are not uniformly bounded far out. -/
-def NormalTransitionDerivBound
-    (X : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x y : X.M)
-    (r₁ : Real) (p : Nat) (C : Real) : Prop :=
-  letI : TopologicalSpace X.M := X.topology
-  letI : ChartedSpace H X.M := X.charted
-  letI : IsManifold I ∞ X.M := X.smooth
-  letI : T2Space (TangentBundle I X.M) := X.t2TangentBundle
-  forall z : E,
-    ‖z‖ < min r₁ (expMapC2Radius (I := I) X.metric x) ->
-    z ∈ (expMapDiffeo (I := I) X.metric x).source ->
-      expMapDiffeo (I := I) X.metric x z ∈
-          (fun v : E => (expMap (I := I) X.metric y
-            (show TangentSpace I y from v) : X.M)) ''
-            Metric.ball (0 : E) (min r₁ (expMapC2Radius (I := I) X.metric y)) ->
-      expMapDiffeo (I := I) X.metric x z ∈
-          (normalChartAt (I := I) X.metric y).source ->
-        ‖iteratedFDeriv Real p (normalTransition (I := I) X x y) z‖ <= C
-
-/-- MSM135 Chapter 4, section `lbl-2103` (S6 / `lbl418`): Jacobi/Rauch comparison
-bounds for derivatives of the normal-coordinate transition maps `exp_y⁻¹ ∘ exp_x`,
-valid below the comparison scale `r₁` (the book's `r₁ ≤ min{inj/4, c/√C₀}`).
-
-The field `exp_inv_deriv` is the deep external theorem, consumed by Steps B/C. -/
-structure ExpInverseDerivBoundInput
-    (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
-  /-- The comparison scale below which the transition-derivative bounds hold. -/
-  r₁ : Real
-  r₁_pos : 0 < r₁
-  derivC : Nat -> Real
-  derivC_nonneg : forall p : Nat, 0 <= derivC p
-  /-- Consumed by Steps B/C: uniform `C^p` bounds for the normal-coordinate
-  transition map on the overlap of two normal charts, below the scale `r₁`. -/
-  exp_inv_deriv :
-    forall k p : Nat, forall x y : (X.obj k).M,
-      NormalTransitionDerivBound (I := I) (X.obj k) x y r₁ p (derivC p)
-
-namespace ExpInverseDerivBoundInput
-
-/-- Reindex the normal-transition derivative input along a subsequence. -/
-def subseq {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (h : ExpInverseDerivBoundInput (I := I) X) (f : Nat -> Nat) :
-    ExpInverseDerivBoundInput (I := I) (X.subseq f) where
-  r₁ := h.r₁
-  r₁_pos := h.r₁_pos
-  derivC := h.derivC
-  derivC_nonneg := h.derivC_nonneg
-  exp_inv_deriv := by
-    intro k p x y
-    simpa [PointedRiemannianSeq.subseq] using h.exp_inv_deriv (f k) p x y
-
-end ExpInverseDerivBoundInput
 
 /-! ## `lbl395` normal-coordinate metric bounds (honest input) -/
 
@@ -219,6 +152,23 @@ theorem normalCoordMetric_apply
   simp only [normalCoordMetric, ContinuousLinearMap.comp_apply,
     ContinuousLinearMap.precomp_apply]
   rfl
+
+/-- At the origin of a normal chart, the pulled-back coordinate metric is the
+metric inner product at the chart centre. -/
+theorem normalMetric_zero
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (c : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    normalCoordMetric (I := I) Y c 0 = Y.metric.inner c := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  ext v w
+  rw [normalCoordMetric_apply (I := I), expMapDiffeo_zero (I := I)]
+  exact normalChartAt_metric_pullback_at_origin (I := I) Y.metric c v w
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
@@ -399,7 +349,7 @@ theorem normalCoordMetric_contDiffOn_of_smooth
   exact (hscalar v w).congr (fun z _ => normalCoordMetric_apply (I := I) Y x z v w)
 
 set_option synthInstance.maxHeartbeats 800000 in
-/-- **B-metric smoothness producer** (frontier-1, S6/`lbl395`): the model-coordinate
+/-- **B-metric smoothness producer** (frontier-1, H6/`lbl395`): the model-coordinate
 normal-coordinate pulled-back metric `normalCoordMetric Y x` is `ContDiffOn ℝ ⊤` on a uniform
 ball `ball 0 δ ∩ source` where forward `expMap` is `C∞`.  This discharges the `hsmooth`
 hypothesis of `exists_metricLimit_normalCoord` for a fixed `β`.  Built from
@@ -610,6 +560,31 @@ structure NormalCoordMetricBoundInput
         (Metric.ball (0 : E) (radius k x)) p (metricC p)
 
 namespace NormalCoordMetricBoundInput
+
+/-- The H6 origin metric comparison makes `1 / 2` a valid coercivity
+coefficient for the Riemannian metric at every controlled centre. -/
+theorem half_le_gpConst
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : NormalCoordMetricBoundInput (I := I) X)
+    (k : Nat) (x : (X.obj k).M) :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    (1 / 2 : Real) ≤ gpCoerciveConst (I := I) (X.obj k).metric x := by
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  have h0 : (0 : E) ∈ Metric.ball 0 (h.radius k x) := by
+    rw [Metric.mem_ball, dist_self]
+    exact h.radius_pos k x
+  apply le_gpCoerciveConst (I := I)
+  intro v
+  simpa only [normalMetric_zero (I := I) (X.obj k) x] using
+    (h.metric_equiv k x 0 h0 v).1
 
 -- Evaluation of the order-one metric jet in the nested bilinear-form space
 -- needs the project-standard extended, terminating synthesis budget.

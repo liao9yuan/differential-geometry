@@ -261,6 +261,25 @@ theorem covDivergence_eq_appCc_cometricDoubleTrace
   simp only [vecTail_cons_eq, Fin.cons_zero]
   rfl
 
+set_option linter.unusedSectionVars false in
+set_option backward.isDefEq.respectTransparency false in
+/-- The divergence of an endomorphism applied to a covector splits by the covariant product rule. -/
+theorem covDiv_appCc (g₀ : SmoothRiemannianMetric I M)
+    (Φ : SmoothCcTensor g₀ 1 1) (W : SmoothCcTensor g₀ 0 1) :
+    covDivergence (I := I) (M := M) g₀ 0
+        (appCc (I := I) (M := M) g₀ 1 1 Φ W) =
+      appCc (I := I) (M := M) g₀ 1 0
+          (appCcRS (I := I) (M := M) g₀ 1 2 0
+            (cometricDoubleTraceField (I := I) g₀ 0)
+            (covGrad (I := I) (M := M) g₀ 1 1 Φ)) W +
+        appCc (I := I) (M := M) g₀ 2 0
+          (appCcRS (I := I) (M := M) g₀ 2 2 0
+            (cometricDoubleTraceField (I := I) g₀ 0)
+            (slotExtend (I := I) (M := M) g₀ 1 1 Φ))
+          (covGrad (I := I) (M := M) g₀ 0 1 W) := by
+  rw [covDivergence_eq_appCc_cometricDoubleTrace, covGrad_appCc_eq, appCc_add_right]
+  rw [appCc_assoc, appCc_assoc]
+
 private theorem l2Inner_sub_left_cc (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ T : SmoothCcTensor g r s) :
     tensorL2Inner (I := I) (M := M) g r s (S₁.toFun - S₂.toFun) T.toFun =

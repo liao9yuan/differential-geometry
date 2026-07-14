@@ -255,6 +255,78 @@ omit [BoundarylessManifold I M] in
           (I := I) (M := M) q 0 0)).symm
         (scalarPotOp (I := I) (M := M) q ζ v) := rfl
 
+/-- Testing the applied `H¹ → H⁰` multiplier against a finite spectral
+vector is the same as moving the real scalar multiplier to the test vector. -/
+theorem scalarPotH0_test
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
+    (u : tensorHs (I := I) (M := M) q 0 0 1)
+    (v : ScalarH1Core (I := I) (M := M) q) :
+    inner Real
+        (tensorHsZeroEquivL2 (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator
+            (I := I) (M := M) q 0 0)
+          (scalarPotH0 (I := I) (M := M) q ζ u))
+        (tensorHsToL2 (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator
+            (I := I) (M := M) q 0 0)
+          (show (0 : Real) ≤ 1 by norm_num) v.1) =
+      inner Real
+        (tensorHsToL2 (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator
+            (I := I) (M := M) q 0 0)
+          (show (0 : Real) ≤ 1 by norm_num) u)
+        (scalarPotCore (I := I) (M := M) q ζ v) := by
+  let J := tensorHsZeroEquivL2 (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0)
+  let inc := tensorHsToL2 (I := I) (M := M)
+    (tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0)
+    (show (0 : Real) ≤ 1 by norm_num)
+  have hdense :
+      DenseRange (ScalarH1Core (I := I) (M := M) q).subtype :=
+    (tensorHsFiniteSupportSubmodule_dense
+      (I := I) (M := M) (g := q) (r := 0) (s := 0) (σ := 1)).denseRange_val
+  change inner Real (J (scalarPotH0 (I := I) (M := M) q ζ u))
+      (inc v.1) =
+    inner Real (inc u) (scalarPotCore (I := I) (M := M) q ζ v)
+  refine hdense.induction_on u (isClosed_eq ?_ ?_) ?_
+  · exact ((innerSL Real).flip (inc v.1)).continuous.comp
+      (J.continuous.comp
+        (scalarPotH0 (I := I) (M := M) q ζ).continuous)
+  · exact ((innerSL Real).flip
+      (scalarPotCore (I := I) (M := M) q ζ v)).continuous.comp
+        inc.continuous
+  · intro w
+    rw [scalarPotH0_apply, LinearIsometryEquiv.apply_symm_apply]
+    change inner Real (scalarPotOp (I := I) (M := M) q ζ w.1)
+        (inc v.1) =
+      inner Real (inc w.1) (scalarPotCore (I := I) (M := M) q ζ v)
+    rw [scalarPotOp_core]
+    rw [← tensorHsSmoothRepr_toL2 (I := I) (M := M)
+        (show (0 : Real) ≤ 1 by norm_num) v.1 v.2,
+      ← tensorHsSmoothRepr_toL2 (I := I) (M := M)
+        (show (0 : Real) ≤ 1 by norm_num) w.1 w.2,
+      scalarPotCore_apply, scalarPotCore_apply]
+    change inner Real
+        (SmoothCcTensor.toL2
+          (scalarSmul (I := I) (M := M) q 0 0 ζ
+            (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)))
+        (SmoothCcTensor.toL2
+          (tensorHsSmoothRepr (I := I) (M := M) v.1 v.2)) =
+      inner Real
+        (SmoothCcTensor.toL2
+          (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2))
+        (SmoothCcTensor.toL2
+          (scalarSmul (I := I) (M := M) q 0 0 ζ
+            (tensorHsSmoothRepr (I := I) (M := M) v.1 v.2)))
+    rw [SmoothCcTensor.inner_toL2, SmoothCcTensor.inner_toL2]
+    rw [SmoothCcTensor.inner_def, SmoothCcTensor.inner_def]
+    unfold tensorL2Inner
+    apply integral_congr_ae
+    filter_upwards with x
+    rw [scalarSmul_toFun_apply, scalarSmul_toFun_apply,
+      tensorInnerPointwise_smul_left,
+      tensorInnerPointwise_smul_right]
+
 omit [BoundarylessManifold I M] in
 /-- The canonical `L² ≃ H⁰` postcomposition preserves the multiplier norm. -/
 theorem scalarPotH0_norm

@@ -1,9 +1,11 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.Rm13DerivProducer
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRaisingBridge
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ImprovedPinching.BookData
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Uhlenbeck
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Ricci.Lichnerowicz
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RicciPreservation
 import DifferentialGeometry.Tensor.RSTensor.ProductNablaLeibniz
 import DifferentialGeometry.Tensor.RSTensor.NablaDomDomCongr
 import DifferentialGeometry.Tensor.RSTensor.MetricCompatibility
@@ -499,6 +501,94 @@ theorem ricDot_ortho
     Fin.reduceEq, reduceIte, ite_mul, mul_ite, one_mul, zero_mul, mul_zero, mul_one,
     add_zero, zero_add]
   simp only [hsym j 0, hsym j 1, hsym j 2, hsym 0 i, hsym 1 i, hsym 2 i]
+  ring
+
+set_option maxHeartbeats 1000000 in
+open DifferentialGeometry.Dim3Reaction in
+/-- Ricci component evolution in an arbitrary orthonormal `Fin 3` basis,
+produced directly from `IsSolutionOn` without a supplied frame equation. -/
+theorem ricDot_of_solution
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (x : M) (hdim : Module.finrank Real (TangentSpace I x) = 3)
+    (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
+    (horth : DifferentialGeometry.Integral.Connection.OrthonormalBasisAt
+      (I := I) (S.base.metric (t : Real)) x basis)
+    (R : Real → Fin 3 → Fin 3 → Real)
+    (hR : ∀ (s : Real) (i j : Fin 3),
+      R s i j = S.ricciAt s x
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)))
+    (i j : Fin 3) :
+    HasDerivWithinAt (fun s : Real => R s i j)
+      (DifferentialGeometry.Integral.Connection.metricTraceFirstTwo0SAt
+          (I := I) (S.base.metric (t : Real))
+          (ricciNabla2WMP (I := I) S (t : Real) x)
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) -
+        2 * Cc (R (t : Real)) i j - 2 * Rsq (R (t : Real)) i j)
+      D.carrier (t : Real) := by
+  classical
+  have hRic : ∀ a b : Fin 3,
+      S.ricciAt (t : Real) x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis a) (basis b)) =
+        R (t : Real) a b := fun a b => (hR (t : Real) a b).symm
+  have hRicSec : ∀ a b : Fin 3,
+      S.ricci (t : Real) x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis a) (basis b)) =
+        R (t : Real) a b := by
+    intro a b
+    simpa [SolutionOn.ricci, SolutionOn.ricciAt, SolutionFamily.ricci,
+      SolutionFamily.ricciAt] using hRic a b
+  have horthf : ∀ a b : Fin 3,
+      (S.base.metric (t : Real)).inner x (basis a) (basis b) =
+        (if a = b then (1 : Real) else 0) := by
+    intro a b
+    simpa [DifferentialGeometry.Integral.Connection.delta3] using horth a b
+  have htr : S.scalar (t : Real) x = sc (R (t : Real)) := by
+    rw [scalar_eq_trace_ortho (I := I) S (t : Real) x horth]
+    unfold sc
+    rw [hR (t : Real) 0 0, hR (t : Real) 1 1, hR (t : Real) 2 2]
+  have hRm : ∀ a k b l : Fin 3,
+      S.base.rm04 (t : Real) x
+          (DifferentialGeometry.Integral.Connection.vec4 (I := I)
+            (basis a) (basis k) (basis b) (basis l)) =
+        rm (R (t : Real)) a k b l := by
+    intro a k b l
+    rw [solution_rm04_kn_field (I := I) S (t : Real) x hdim, htr]
+    simp only [horthf, hRic]
+    unfold rm kd
+    ring
+  have hinv :
+      MetricInverseInBasis_gen (I := I) (S.base.metric (t : Real)) x basis
+        (identityInvMetric (Idx := Fin 3)) :=
+    by
+      have hinv' :=
+        DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
+          (I := I) (S.base.metric (t : Real)) basis horthf
+      simpa [identityInvMetric, diagonalInvMetric] using hinv'
+  have hreact :
+      ricciActualReactAt (I := I) S (t : Real) x
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) =
+        -2 * Cc (R (t : Real)) i j - 2 * Rsq (R (t : Real)) i j := by
+    rw [actualReact_comp (I := I) (M := M) S (t : Real) x basis
+      (identityInvMetric (Idx := Fin 3)) hinv i j]
+    unfold DifferentialGeometry.Integral.Connection.rm04RicciContractionAt
+      DifferentialGeometry.Integral.Connection.raised02CompAt
+      DifferentialGeometry.Integral.Connection.ricciQuadraticAt
+      DifferentialGeometry.Integral.Connection.oneUp02CompAt Cc Rsq
+    simp only [identityInvMetric, diagonalInvMetric, hRm, hRicSec,
+      Fin.sum_univ_three, Fin.isValue, Fin.reduceEq, reduceIte,
+      ite_mul, mul_ite, one_mul, zero_mul, mul_zero, mul_one, add_zero, zero_add]
+  have hpair := ricciPairDeriv (I := I) S hS t x (basis i) (basis j)
+  have hRfun : ∀ s : Real,
+      R s i j = S.ricci s x
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) (basis i) (basis j)) := by
+    intro s
+    simpa [SolutionOn.ricci, SolutionOn.ricciAt, SolutionFamily.ricci,
+      SolutionFamily.ricciAt] using hR s i j
+  have hpair' := hpair.congr (fun s _ => hRfun s) (hRfun (t : Real))
+  refine hpair'.congr_deriv ?_
+  rw [hreact]
   ring
 
 set_option maxHeartbeats 1000000 in
@@ -1296,6 +1386,23 @@ private noncomputable def rm04DerivsKn
       (((knScal2Realizes (I := I) S t knE1).smul (1 / 2 : Real)).add
         ((knScal2Realizes (I := I) S t knE2).smul (-(1 / 2) : Real)))⟩
 
+/-- The second derivative in the KN package is the canonical all-order
+`nablaKRm04Field` at level two. -/
+private theorem rm04Nab2Kn_eq
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (hdim : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3) :
+    (rm04DerivsKn (I := I) S t hdim).nabla2A =
+      nablaKRm04Field (I := I) S t 2 := by
+  let P := rm04DerivsKn (I := I) S t hdim
+  have hfirst : P.nablaA = nablaKRm04Field (I := I) S t 1 :=
+    totalNabla0SRealizes_unique P.first
+      (nablaKRm04Field_realizes (I := I) S t 0)
+  have hsecond := P.second
+  rw [hfirst] at hsecond
+  exact totalNabla0SRealizes_unique hsecond
+    (nablaKRm04Field_realizes (I := I) S t 1)
+
 /-! ### B3c-2 trace step: the rough Laplacian `ΔRm04 = KN(ΔRic, ΔS, g)` (dim 3)
 
 `metricTraceFirstTwoField g` contracts the two leading covariant-derivative slots of the
@@ -1515,6 +1622,134 @@ private noncomputable def lapRm04Kn
     + ((1 / 2 : Real) • knScalLapT (I := I) S t knE1
         + (-(1 / 2) : Real) • knScalLapT (I := I) S t knE2)
 
+open DifferentialGeometry.Integral.Connection in
+/-- Pointwise evaluation of the KN diffusion field in terms of the canonical
+rough Ricci tensor and scalar Hessian trace. -/
+private theorem lapRm04Kn_apply
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) (x : M)
+    (v : Fin 4 → TangentSpace I x) :
+    lapRm04Kn (I := I) S t x v =
+      -metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x) (vec2 (I := I) (v 0) (v 2)) *
+          (S.base.metric t).inner x (v 1) (v 3) +
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x) (vec2 (I := I) (v 1) (v 2)) *
+          (S.base.metric t).inner x (v 0) (v 3) +
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x) (vec2 (I := I) (v 0) (v 3)) *
+          (S.base.metric t).inner x (v 1) (v 2) -
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x) (vec2 (I := I) (v 1) (v 3)) *
+          (S.base.metric t).inner x (v 0) (v 2) +
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+            (scalarHessSec (I := I) S t x) Fin.elim0 / 2 *
+          ((S.base.metric t).inner x (v 0) (v 2) *
+              (S.base.metric t).inner x (v 1) (v 3) -
+            (S.base.metric t).inner x (v 1) (v 2) *
+              (S.base.metric t).inner x (v 0) (v 3)) := by
+  classical
+  have hadd (A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (2 + 2)) :
+      ((A + B) x) v = A x v + B x v := by
+    rw [ContMDiffSection.coe_add, Pi.add_apply, Tensor0SSpace.add_apply]
+  have hsmul (c : Real)
+      (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) (2 + 2)) :
+      ((c • A) x) v = c * A x v := by
+    rw [ContMDiffSection.coe_smul, Pi.smul_apply, Tensor0SSpace.smul_apply,
+      smul_eq_mul]
+  have hricT (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+      knRicLapT (I := I) S t e x v =
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+            (ricciNabla2WMP (I := I) S t x)
+            ((fun i => v (e i)) ∘ Fin.castAdd 2) *
+          (S.base.metric t).inner x
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 0)
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 1) := by
+    unfold knRicLapT
+    change (ContinuousMultilinearMap.domDomCongr e _) v = _
+    rw [Tensor0SSpace.domDomCongr_apply, tensor0SField_product_apply,
+      metricTraceFirstTwoField_apply, metricTraceFirstTwo0STensor_apply,
+      metricTensorField_apply, SolutionOn.family_metric]
+    rfl
+  have hscalT (e : Fin (2 + 2) ≃ Fin (2 + 2)) :
+      knScalLapT (I := I) S t e x v =
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+            (scalarHessSec (I := I) S t x) Fin.elim0 *
+          (S.base.metric t).inner x
+            (((fun i => v (e i)) ∘ Fin.castAdd 2) 0)
+            (((fun i => v (e i)) ∘ Fin.castAdd 2) 1) *
+          (S.base.metric t).inner x
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 0)
+            (((fun i => v (e i)) ∘ Fin.natAdd 2) 1) := by
+    let rawHess : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) 2 :=
+      totalNabla0S (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        1 (S.family.connection t)
+        (duSec (I := I) (S.scalar t) (scalarSmoothOfSol (I := I) S t))
+        (totalNabla0S_reg (E := E) (H := H) (I := I) (M := M)
+          1 (S.family.connection t) (connSmoothSol (I := I) S t) _)
+    have hHess : rawHess = scalarHessSec (I := I) S t := by
+      simp only [rawHess, scalarHessSec, hessianSec, SolutionOn.family_connection]
+    unfold knScalLapT
+    change (ContinuousMultilinearMap.domDomCongr e _) v = _
+    rw [Tensor0SSpace.domDomCongr_apply, tensor0SField_product_apply]
+    change (Bundle.continuousMultilinearMap.product_fun _ _) _ * _ = _
+    rw [Bundle.continuousMultilinearMap.product_fun_apply]
+    have hzero :
+        (((fun i => v (e i)) ∘ Fin.castAdd 2) ∘ Fin.castAdd 2) =
+          (Fin.elim0 : Fin 0 → TangentSpace I x) := Subsingleton.elim _ _
+    rw [hzero]
+    change ((metricTraceFirstTwoField (I := I) (M := M)
+          (S.family.metric t) rawHess) x) Fin.elim0 *
+        ((metricTensorField (I := I) (S.family.metric t)) x) _ *
+        ((metricTensorField (I := I) (S.family.metric t)) x) _ = _
+    rw [hHess, metricTraceFirstTwoField_apply, metricTraceFirstTwo0STensor_apply,
+      metricTensorField_apply, metricTensorField_apply, SolutionOn.family_metric]
+    simp
+  have hE1 : (fun i : Fin (2 + 2) => v (knE1 i)) =
+      vec4 (I := I) (v 0) (v 2) (v 1) (v 3) := by
+    funext i
+    fin_cases i <;> simp [knE1, vec4, Equiv.swap_apply_def]
+  have hE2 : (fun i : Fin (2 + 2) => v (knE2 i)) =
+      vec4 (I := I) (v 1) (v 2) (v 0) (v 3) := by
+    funext i
+    fin_cases i <;> simp [knE2, vec4, Equiv.swap_apply_def]
+  have hE3 : (fun i : Fin (2 + 2) => v (knE3 i)) =
+      vec4 (I := I) (v 0) (v 3) (v 1) (v 2) := by
+    funext i
+    fin_cases i <;> simp [knE3, vec4, Equiv.swap_apply_def]
+  have hE4 : (fun i : Fin (2 + 2) => v (knE4 i)) =
+      vec4 (I := I) (v 1) (v 3) (v 0) (v 2) := by
+    funext i
+    fin_cases i <;> simp [knE4, vec4, Equiv.swap_apply_def]
+  have hT1 : vec4 (I := I) (v 0) (v 2) (v 1) (v 3) ∘ Fin.castAdd 2 =
+      vec2 (I := I) (v 0) (v 2) := by
+    funext i
+    fin_cases i <;> rfl
+  have hT2 : vec4 (I := I) (v 1) (v 2) (v 0) (v 3) ∘ Fin.castAdd 2 =
+      vec2 (I := I) (v 1) (v 2) := by
+    funext i
+    fin_cases i <;> rfl
+  have hT3 : vec4 (I := I) (v 0) (v 3) (v 1) (v 2) ∘ Fin.castAdd 2 =
+      vec2 (I := I) (v 0) (v 3) := by
+    funext i
+    fin_cases i <;> rfl
+  have hT4 : vec4 (I := I) (v 1) (v 3) (v 0) (v 2) ∘ Fin.castAdd 2 =
+      vec2 (I := I) (v 1) (v 3) := by
+    funext i
+    fin_cases i <;> rfl
+  unfold lapRm04Kn
+  repeat rw [hadd]
+  repeat rw [hsmul]
+  rw [hricT knE1, hricT knE2, hricT knE3, hricT knE4,
+    hscalT knE1, hscalT knE2]
+  rw [hE1, hE2, hE3, hE4]
+  rw [hT1, hT2, hT3, hT4]
+  simp [vec2, vec4]
+  ring
+
 set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Integral.Connection in
 /-- **B3c-2 ENDPOINT: the rough Laplacian of `Rm04` is the Kulkarni–Nomizu combination of
@@ -1534,7 +1769,158 @@ theorem traceRm04Kn
   rw [traceRicWit, traceRicWit, traceRicWit, traceRicWit, traceScalWit, traceScalWit]
   rfl
 
+open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
+/-- The canonical rough Laplacian of `Rm04`, evaluated in an orthonormal
+`Fin 3` basis, is the dimension-three KN combination of the canonical rough
+Ricci tensor and scalar Laplacian. -/
+theorem roughRm04_comp
+    [IsManifold I 1 M] [IsManifold I 2 M]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real)
+    (hdim : ∀ x : M, Module.finrank Real (TangentSpace I x) = 3)
+    (x : M) (basis : Module.Basis (Fin 3) Real (TangentSpace I x))
+    (horth : ∀ i j : Fin 3,
+      (S.base.metric t).inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
+    (I0 : Fin 4 → Fin 3) :
+    tensor0SComponent (I := I)
+        (metricTrace0S2TensorInBasis (I := I) basis
+          (identityInvMetric (Idx := Fin 3))
+          (nablaKRm04Field (I := I) S t 2 x)) (fun i => basis i) I0 =
+      -metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x)
+          (vec2 (I := I) (basis (I0 0)) (basis (I0 2))) * kd (I0 1) (I0 3) +
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x)
+          (vec2 (I := I) (basis (I0 1)) (basis (I0 2))) * kd (I0 0) (I0 3) +
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x)
+          (vec2 (I := I) (basis (I0 0)) (basis (I0 3))) * kd (I0 1) (I0 2) -
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (ricciNabla2WMP (I := I) S t x)
+          (vec2 (I := I) (basis (I0 1)) (basis (I0 3))) * kd (I0 0) (I0 2) +
+        DifferentialGeometry.Integral.Connection.laplacianAt (I := I)
+            (flowG (I := I) S) t (S.scalar t) x / 2 *
+          (kd (I0 0) (I0 2) * kd (I0 1) (I0 3) -
+            kd (I0 1) (I0 2) * kd (I0 0) (I0 3)) := by
+  classical
+  let v : Fin 4 → TangentSpace I x := fun p => basis (I0 p)
+  have hinv : MetricInverseInBasis_gen (I := I) (S.base.metric t) x basis
+      (identityInvMetric (Idx := Fin 3)) := by
+    have hinv' := metricInverseInBasis_of_orthonormal
+      (I := I) (S.base.metric t) basis horth
+    simpa [identityInvMetric, diagonalInvMetric] using hinv'
+  have htrace :
+      tensor0SComponent (I := I)
+          (metricTrace0S2TensorInBasis (I := I) basis
+            (identityInvMetric (Idx := Fin 3))
+            (nablaKRm04Field (I := I) S t 2 x)) (fun i => basis i) I0 =
+        metricTraceFirstTwo0SAt (I := I) (S.base.metric t)
+          (nablaKRm04Field (I := I) S t 2 x) v := by
+    rw [tensor0SComponent_apply, metricTrace0S2TensorInBasis_apply]
+    exact metricTrace0S2InBasis_eq_metricTrace (I := I) (S.base.metric t)
+      basis (identityInvMetric (Idx := Fin 3)) hinv
+      (nablaKRm04Field (I := I) S t 2 x) v
+  have hfield :
+      metricTraceFirstTwoField (I := I) (M := M) (S.base.metric t)
+          (nablaKRm04Field (I := I) S t 2) =
+        lapRm04Kn (I := I) S t := by
+    rw [← rm04Nab2Kn_eq (I := I) S t hdim]
+    simpa [SolutionOn.family_metric] using traceRm04Kn (I := I) S t hdim
+  have hpoint := congrArg (fun A => A x v) hfield
+  simp only [metricTraceFirstTwoField_apply,
+    metricTraceFirstTwo0STensor_apply] at hpoint
+  rw [htrace, hpoint, lapRm04Kn_apply (I := I) S t x v,
+    scalarHessTrace_eq_lap (I := I) S t x]
+  simp only [v, horth, kd]
+
 end KnField
+
+set_option maxHeartbeats 1000000 in
+open DifferentialGeometry.Integral.Connection DifferentialGeometry.Dim3Reaction in
+/-- The level-zero Uhlenbeck/StarSum time input produced directly from a
+dimension-three Ricci-flow solution. -/
+theorem rm04Base_of_sol
+    {D : RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (hS : IsSolutionOn (I := I) S)
+    (t : RealTimeInterval.RegularTime D)
+    (hdim : ∀ y : M, Module.finrank Real (TangentSpace I y) = 3) :
+    ∀ (y : M) (basis : Module.Basis (Fin 3) Real (TangentSpace I y))
+      (_horth : ∀ i j : Fin 3,
+        (S.base.metric (t : Real)).inner y (basis i) (basis j) =
+          if i = j then (1 : Real) else 0)
+      (I0 : Fin 4 → Fin 3),
+      HasDerivWithinAt
+        (fun r : Real => S.base.rm04 r y (fun p => basis (I0 p)))
+        (tensor0SComponent (I := I)
+            (metricTrace0S2TensorInBasis (I := I) basis
+              (identityInvMetric (Idx := Fin 3))
+              (nablaKRm04Field (I := I) S (t : Real) 2 y))
+            (fun i => basis i) I0 +
+          (-2 * (Bt (fun i j => S.ricciAt (t : Real) y
+                    (vec2 (I := I) (basis i) (basis j)))
+                  (I0 0) (I0 1) (I0 2) (I0 3) -
+                Bt (fun i j => S.ricciAt (t : Real) y
+                    (vec2 (I := I) (basis i) (basis j)))
+                  (I0 0) (I0 1) (I0 3) (I0 2) +
+                Bt (fun i j => S.ricciAt (t : Real) y
+                    (vec2 (I := I) (basis i) (basis j)))
+                  (I0 0) (I0 2) (I0 1) (I0 3) -
+                Bt (fun i j => S.ricciAt (t : Real) y
+                    (vec2 (I := I) (basis i) (basis j)))
+                  (I0 0) (I0 3) (I0 1) (I0 2)) -
+            drift (fun i j => S.ricciAt (t : Real) y
+                (vec2 (I := I) (basis i) (basis j)))
+              (I0 0) (I0 1) (I0 2) (I0 3)))
+        D.carrier (t : Real) := by
+  classical
+  intro y basis horth I0
+  let R : Real → Fin 3 → Fin 3 → Real := fun r i j =>
+    S.ricciAt r y (vec2 (I := I) (basis i) (basis j))
+  let lap : Fin 3 → Fin 3 → Real := fun i j =>
+    metricTraceFirstTwo0SAt (I := I) (S.base.metric (t : Real))
+      (ricciNabla2WMP (I := I) S (t : Real) y)
+      (vec2 (I := I) (basis i) (basis j))
+  let scalarLap : Real → M → Real := fun r z =>
+    DifferentialGeometry.Integral.Connection.laplacianAt (I := I)
+      (flowG (I := I) S) r (S.scalar r) z
+  let lapS : Real := scalarLap (t : Real) y
+  have hRicDot : ∀ i j : Fin 3,
+      HasDerivWithinAt (fun r : Real => R r i j)
+        (lap i j - 2 * Cc (R (t : Real)) i j - 2 * Rsq (R (t : Real)) i j)
+        D.carrier (t : Real) := by
+    intro i j
+    exact ricDot_of_solution (I := I) S hS t y (hdim y) basis horth R
+      (fun _ _ _ => rfl) i j
+  have hscalar : ScalarEvolutionEquationOn (D := D) S.scalar scalarLap
+      (ricciNorm (I := I) S) := by
+    intro r z
+    simpa [scalarLap, ricciNorm] using
+      (scalarEvolOfSol (I := I) S hS (flowG (I := I) S)
+        (by intro _; rfl) (by intro _; rfl) r z)
+  have hScDot : HasDerivWithinAt (fun r : Real => S.scalar r y)
+      (lapS + 2 * normSq (R (t : Real))) D.carrier (t : Real) := by
+    simpa [lapS] using scalarDot_ortho (I := I) S scalarLap hscalar t y horth
+      (R (t : Real)) (fun _ _ => rfl)
+  have htr : S.scalar (t : Real) y = sc (R (t : Real)) := by
+    rw [scalar_eq_trace_ortho (I := I) S (t : Real) y horth]
+    simp [R, sc]
+  have hbase := rm04BaseEvolution_at (I := I) S hS t y (hdim y)
+    (fun i => basis i) horth R (fun _ _ _ => rfl) lap lapS hRicDot hScDot htr
+    (I0 0) (I0 1) (I0 2) (I0 3)
+  have hfun : ∀ r : Real,
+      S.base.rm04 r y (fun p => basis (I0 p)) =
+        S.base.rm04 r y
+          (vec4 (I := I) (basis (I0 0)) (basis (I0 1))
+            (basis (I0 2)) (basis (I0 3))) := by
+    intro r
+    congr 1
+    funext p
+    fin_cases p <;> rfl
+  have hbase' := hbase.congr (fun r _ => hfun r) (hfun (t : Real))
+  refine hbase'.congr_deriv ?_
+  have hrough := roughRm04_comp (I := I) S (t : Real) hdim y basis horth I0
+  dsimp only [lap, lapS, scalarLap, R]
+  rw [hrough]
+  ring
 
 set_option maxHeartbeats 1000000 in
 open DifferentialGeometry.Dim3Reaction in

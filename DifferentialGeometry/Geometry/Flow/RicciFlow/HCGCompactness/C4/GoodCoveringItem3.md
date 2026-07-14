@@ -11,22 +11,20 @@ Verification passed, sorry-free (2026-06-13). The B5 layer-bridge from the Step 
   `ofReal ρ < injRadius Y.metric c`, exp is a `C^1` partial diffeomorphism on `ball 0 ρ`.
   Installs `Y`'s stored instances (`Y.topology`…`Y.t2TangentBundle`) via `letI` (the
   `MetricComplete` pattern), then calls `exists_expBall_diffeo_of_lt`.
-- **`Item3RadiusInput`** (honest-input) — the book's "`D` large enough" (`lbl391`/`lbl392`)
-  scale choice: at each live net center the item-3 radius `ρ k α` is below the `C²`/inj
-  radius of `(X.obj k).metric`. Inj part follows from `InjRadiusDecayInput.decay` (`D>1`);
-  `C²` part is the §5/`lbl413` curvature-comparison boundary. `ProperMetricOn.realizes`
-  identifies net `ms`-distances with the Riemannian ones across the layer.
-- **`exists_seqItem3Diffeo`** — the net-level `lbl383` item 3: every live center
-  `c ∈ seqCenter hd D P k α` carries the exp ball diffeomorphism, via the bridge.
+- **`Item3RadiusAt` / `Item3RadiusTail`** — the canonical finite-slot book
+  scale. `item3RadiusFactor` records the exact multiplier, and the profile
+  producer proves the injectivity/`expMapC2Radius` tail after packing.
+- **`Item3RadiusInput` / `exists_seqItem3Diffeo`** — legacy all-index
+  compatibility API. New assembly uses `exists_item3Diffeo` at a fixed slot.
 
 ## Status
 
-Item 3 COMPLETE at the brick level: 3a = `exists_expBall_diffeo_of_lt` (unconditional);
-3b = `ConvexBalls.isConvexWith_smallNormalBall` (modulo §5 honest-inputs); net wiring =
-`exists_seqItem3Diffeo` (modulo the §5 radius honest-input; `ProperMetricOn` is now produced
-by the intrinsic Hopf--Rinow adapter rather than a deferred black box). Optional follow-up:
-fold `exists_seqItem3Diffeo` in as a field of the capstone `GoodCoveringSeq.exists_stableNetData`
-(which intentionally omitted item 3) — a presentation choice; the math is done.
+The exp-ball diffeomorphism brick is complete: 3a is
+`exists_expBall_diffeo_of_lt`, and the net-level compatibility consumer is
+`exists_seqItem3Diffeo`.  The canonical finite-slot route below no longer asks
+for the legacy all-index radius input.  Full textbook item 3 is not complete:
+the geodesic-convexity scale and its §5 Hessian/physical-cage assembly remain a
+separate theorem-level frontier.
 
 Targeted build of `GoodCoveringItem3` passed after the Hopf--Rinow proper-realization
 replacement, confirming the new `properMetricOn` producer assumptions do not affect this
@@ -51,3 +49,32 @@ sequence without restating the exp-ball hypotheses.  Verification passed.
 - No ProperMetricOn-vs-manifold topology diamond bites here: the net center is just an
   element of `Y.M`; only `realizes` is needed to relate the radius scales (absorbed into
   the honest-input).
+
+## 2026-07-13 finite-slot `g_p` scale API
+
+The old `Item3GpScaleInput` quantified over every sequence index and every
+natural-numbered ordered-net slot. No live consumer required that strength.
+It remains as a compatibility declaration, with `at` and `to_tail`
+projections.
+
+The canonical construction API is now `Item3GpScaleAt`, for one fixed index
+and `Fin (pb.A r)`, together with `Item3GpScaleTail`, its eventual form.
+`Item3GpScaleTail.subseq` preserves the tail under later refinements. Focused
+verification and the narrow refresh passed.
+
+This closes only the `g_p` finite-slot quantifier split. `SigmaScaleField` and
+the physical cage remain separate, and compactness endpoints remain 0%.
+
+## 2026-07-13 finite-slot item-3 radius
+
+Added the canonical radius factor `item3RadiusFactor`, its positivity theorem,
+`Item3RadiusAt` / `Item3RadiusTail`, subsequence stability, and the fixed-index
+consumer `exists_item3Diffeo`.  The legacy all-index `Item3RadiusInput` remains
+only for compatibility.
+
+The finite tail uses radius
+`item3RadiusFactor hd D * L.lamInf γ`.  Its two strict bounds are produced in
+`MetricCompactnessInputs.radiusScaleTail`; no endpoint radius field was added.
+Focused verification and the targeted refresh passed.  This closes the
+exp-diffeomorphism radius quantifiers, not the book's full geodesic-convexity
+claim, which remains theorem-level 0%.

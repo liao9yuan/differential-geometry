@@ -501,3 +501,10 @@ after the stale upstream artifacts in the shared build tree were refreshed.
 The rounded accounting remains unchanged: this closes the algebraic
 denominator reduction, not the `StepB1RawInput` producer or textbook B1
 theorem; both remain 0%.
+
+## 2026-07-13 finite-Pi calculus extraction
+
+The generic `iteratedFDerivPi` proof was moved to
+`Analysis/Calculus/PiDeriv.lean` as `iteratedFDeriv_pi`. This file now imports
+and consumes the lower-layer theorem; no Step-B1 producer statement changed.
+Focused verification passed.
