@@ -125,6 +125,18 @@ def sharpFlatEndoCc (g₀ g₁ : SmoothRiemannianMetric I M) : SmoothCcTensor g�
       TensorRSSpace.ofCLM
         ((g0FlatCLM (I := I) g₀ x).comp (inverseMetricSharpFib (I := I) g₁ x)) := rfl
 
+/-- Scalar evaluation of the sharp-flat covector endomorphism. -/
+theorem sharpFlatEndo_eval (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om : Tensor0SSpace 1 I x) (w : TangentSpace I x) :
+    cotangentToDual (I := I)
+        ((show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (sharpFlatEndoCc (I := I) g₀ g₁).toSection x) om) w =
+      cotangentToDual (I := I) om (gInvRaisedEndo (I := I) g₀ g₁ x w) := by
+  rw [show (show Tensor0SSpace 1 I x →L[ℝ] Tensor0SSpace 1 I x from
+        (sharpFlatEndoCc (I := I) g₀ g₁).toSection x) om =
+      g0FlatCLM (I := I) g₀ x (inverseMetricSharpFib (I := I) g₁ x om) from rfl]
+  rw [cotangentToDual_g0FlatCLM, inner_sharp_mixed (I := I) (M := M)]
+
 end TensorSpectral
 end Parabolic
 end Analysis

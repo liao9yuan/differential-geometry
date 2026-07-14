@@ -12,3 +12,13 @@ edited file were also removed.
 Focused verification passed without warnings.  This is an integration repair,
 not new endpoint mathematics: the theorem status and the HCG machinery and
 endpoint percentages remain those recorded in `PROJECT_MAP.md`.
+
+## 2026-07-14 bilinear metric-difference bound
+
+Added `metricDiff_abs_le`, the coefficient-one intrinsic Cauchy--Schwarz bound
+for an arbitrary bilinear evaluation of the order-zero metric difference.  It
+uses a reference-metric orthonormal basis, `abs_apply_le_sqrt_normSq0S`, and the
+existing scalar evaluation theorem `metricDiffCovDerivAt_zero_apply`.
+
+Focused verification passed.  This is a reusable metric-norm producer; it does
+not itself prove the scalar Galerkin closure or Perelman noncollapsing endpoint.

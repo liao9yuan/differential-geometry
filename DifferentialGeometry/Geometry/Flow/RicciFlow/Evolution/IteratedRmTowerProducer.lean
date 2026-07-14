@@ -500,6 +500,64 @@ theorem nablaKRm04Reaction_orthoBasis_eq_compContract
               (∑ m : Fin (4 + k) → Idx, residC m * rmC m)) from by ring]
   rw [hcombine]
 
+/-- Pointwise orthonormal collapse of the intrinsic tower reaction. This is the
+local-basis form consumed by the pointwise heat producer. -/
+theorem nablaKReactionAt_eq
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv ric : Idx → Idx → Real)
+    (Tdot : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (4 + k) x)
+    (horth : ∀ i j : Idx,
+      (S.base.metric t).inner x (basis i) (basis j) =
+        if i = j then (1 : Real) else 0)
+    (hgInv : gInv = identityInvMetric (Idx := Idx)) :
+    nablaKReactionAt (I := I) S k t x basis gInv ric Tdot =
+      2 * ∑ m : Fin (4 + k) → Idx,
+        tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
+            (fun i => basis i) m *
+          combinedStarArray ric
+            (fun I0 : Fin (4 + k) → Idx =>
+              tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
+                (fun i => basis i) I0)
+            (fun m : Fin (4 + k) → Idx =>
+              tensor0SComponent (I := I)
+                (Tdot - metricTrace0S2TensorInBasis (I := I) basis gInv
+                    (nablaKRm04Field (I := I) S t (k + 2) x))
+                (fun i => basis i) m)
+            m := by
+  classical
+  rw [nablaKReactionAt]
+  set rmC : (Fin (4 + k) → Idx) → Real :=
+    fun I0 => tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
+      (fun i => basis i) I0 with hrmC
+  set resid : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (4 + k) x :=
+    Tdot - metricTrace0S2TensorInBasis (I := I) basis gInv
+      (nablaKRm04Field (I := I) S t (k + 2) x) with hresid
+  set residC : (Fin (4 + k) → Idx) → Real :=
+    fun m => tensor0SComponent (I := I) resid (fun i => basis i) m with hresidC
+  rw [hgInv]
+  rw [ricReactionContract_delta_eq_compContract (Idx := Idx) ric rmC rmC]
+  rw [inner0S_orthoBasis_eq_compContract (I := I) (S.base.metric t) basis horth
+    resid (nablaKRm04Field (I := I) S t k x)]
+  have hcombine :
+      (∑ I0 : Fin (4 + k) → Idx, rmC I0 * ricStarArray ric rmC I0) +
+          (∑ m : Fin (4 + k) → Idx, residC m * rmC m) =
+        ∑ m : Fin (4 + k) → Idx,
+          rmC m * combinedStarArray ric rmC residC m := by
+    rw [← Finset.sum_add_distrib]
+    refine Finset.sum_congr rfl fun m _ => ?_
+    unfold combinedStarArray
+    ring
+  rw [show
+      2 * (∑ I0 : Fin (4 + k) → Idx, rmC I0 * ricStarArray ric rmC I0) +
+          2 * (∑ m : Fin (4 + k) → Idx, residC m * rmC m) =
+        2 * ((∑ I0 : Fin (4 + k) → Idx, rmC I0 * ricStarArray ric rmC I0) +
+              (∑ m : Fin (4 + k) → Idx, residC m * rmC m)) from by ring]
+  rw [hcombine]
+
 end ReactionBridge
 
 /-! ## The remaining frontier (the commuted-curvature star decomposition)

@@ -168,6 +168,53 @@ theorem reactionContract_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq I
         ring
 
 set_option linter.unusedSectionVars false in
+/-- Pointwise form of the intrinsic tower-reaction estimate at an orthonormal
+basis. -/
+theorem nablaKReactionAt_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D)
+    (t : Real) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv ric : Idx → Idx → Real)
+    (Tdot : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (4 + k) x)
+    (w : ℕ → Real → M → Real)
+    (horth : ∀ i j : Idx,
+      (S.base.metric t).inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
+    (hgInv : gInv = identityInvMetric (Idx := Idx))
+    (hlevel : compNormSqMulti (fun I0 : Fin (4 + k) → Idx =>
+        tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
+          (fun i => basis i) I0) ≤ w k t x)
+    (hRic : ∀ p q : Idx, |ric p q| ≤
+      (Fintype.card Idx : Real) * Real.sqrt (w 0 t x))
+    (Cres : Real) (hCres : 0 ≤ Cres)
+    (hresid : ∀ m : Fin (4 + k) → Idx,
+      |tensor0SComponent (I := I)
+          (Tdot - metricTrace0S2TensorInBasis (I := I) basis gInv
+            (nablaKRm04Field (I := I) S t (k + 2) x))
+          (fun i => basis i) m| ≤
+        Cres * ∑ j ∈ Finset.range (k + 1),
+          Real.sqrt (w j t x) * Real.sqrt (w (k - j) t x)) :
+    |nablaKReactionAt (I := I) S k t x basis gInv ric Tdot| ≤
+      towerReactionSum (M := M) w
+        (2 * Real.sqrt ((Fintype.card (Fin (4 + k) → Idx) : Real)) *
+          (((4 + k : ℕ) : Real) * (Fintype.card Idx : Real) ^ 2 + Cres)) k t x := by
+  rw [nablaKReactionAt_eq (I := I) S k t x basis gInv ric Tdot horth hgInv]
+  refine le_trans (reactionContract_le
+    (fun I0 : Fin (4 + k) → Idx =>
+      tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
+        (fun i => basis i) I0)
+    (fun m : Fin (4 + k) → Idx =>
+      tensor0SComponent (I := I)
+        (Tdot - metricTrace0S2TensorInBasis (I := I) basis gInv
+          (nablaKRm04Field (I := I) S t (k + 2) x))
+        (fun i => basis i) m)
+    ric (fun j => w j t x) hlevel hRic Cres hCres hresid) ?_
+  rw [towerReactionSum]
+  refine le_of_eq (Finset.sum_congr rfl fun j _ => ?_)
+  ring
+
+set_option linter.unusedSectionVars false in
 /-- **Step 2 (the intrinsic reaction bound).**  The actual heat-equation reaction
 `nablaKRm04ReactionIntrinsic` — at a `g`-orthonormal basis (`gInv = δ`), with the `∇ᵏRm` components'
 norm `≤ w k`, Ricci components `≤ card·√(w 0)`, and the residual `(∂ₜ − Δ)∇ᵏRm = Tdot − roughLap`
@@ -201,18 +248,10 @@ theorem nablaKReaction_le {k : ℕ} {Idx : Type*} [Fintype Idx] [DecidableEq Idx
       ≤ towerReactionSum (M := M) w
           (2 * Real.sqrt ((Fintype.card (Fin (4 + k) → Idx) : Real)) *
             (((4 + k : ℕ) : Real) * (Fintype.card Idx : Real) ^ 2 + Cres)) k t x := by
-  rw [nablaKRm04Reaction_orthoBasis_eq_compContract (I := I) S k basis gInv ric Tdot t x horth hgInv]
-  refine le_trans (reactionContract_le
-    (fun I0 : Fin (4 + k) → Idx =>
-      tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x) (fun i => basis x i) I0)
-    (fun m : Fin (4 + k) → Idx =>
-      tensor0SComponent (I := I)
-        (Tdot t x - metricTrace0S2TensorInBasis (I := I) (basis x) (gInv t x)
-          (nablaKRm04Field (I := I) S t (k + 2) x)) (fun i => basis x i) m)
-    (ric t x) (fun j => w j t x) hlevel hRic Cres hCres hresid) ?_
-  rw [towerReactionSum]
-  refine le_of_eq (Finset.sum_congr rfl fun j _ => ?_)
-  ring
+  change |nablaKReactionAt (I := I) S k t x (basis x) (gInv t x)
+      (ric t x) (Tdot t x)| ≤ _
+  exact nablaKReactionAt_le (I := I) S t x (basis x) (gInv t x) (ric t x)
+    (Tdot t x) w horth hgInv hlevel hRic Cres hCres hresid
 
 set_option linter.unusedSectionVars false in
 /-- **Step 3 (TowerHeatBoundOn from heat equation + reaction bound).**

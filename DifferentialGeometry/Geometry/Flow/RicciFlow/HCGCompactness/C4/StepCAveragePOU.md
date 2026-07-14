@@ -590,3 +590,18 @@ only across zero-weight slots, and replace the whole-`hatBall` point premise of
 `exists_hat_cm_tail` by its support-local analogue. Pair-to-capstone integration
 is about 78%; `StepB1RawInput`, textbook B1, and compactness endpoints remain
 theorem-level 0%. Whole-HCG machinery remains about 53%.
+
+## 2026-07-13, source-local generic support indices
+
+`hatSuppCageData` and `hatSuppPtsOfComp` now expose their proof-generic shape:
+the support index is an arbitrary type and the source set is an inferred
+implicit parameter. Existing finite-hat callers continue to infer the old
+`Fin` index and `hatSourceBall`; the sparse producer instantiates the same API
+with the original dependent `InterSlot L ... alpha` and the single source patch
+owned by `alpha`.
+
+The proofs themselves did not use finite enumeration or the distinguished
+whole source ball, so no mathematics changed. The generalized file is
+focused-green with no local warning. This closes the support-index/API part of
+the B/C architecture (100%); it does not close the independent
+Hessian/Neumann `StrictDistInput` frontier or any compactness endpoint (0%).

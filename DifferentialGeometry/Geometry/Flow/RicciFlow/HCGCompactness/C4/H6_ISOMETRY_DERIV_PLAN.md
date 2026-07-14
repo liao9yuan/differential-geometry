@@ -112,7 +112,7 @@ Leibniz/term-collection theorem is the honest Gate 3 frontier.
   implementation exposes a new mathematical obstruction.  Do not derive
   `hKV0` from `normalTrans_mapsTo` or conditional cancellation alone.
 
-Current accounting: localized H6 producer 100%; S6 removal 100%; finite
+Pre-capstone snapshot: localized H6 producer 100%; S6 removal 100%; finite
 positive-pair extraction 100%; sparse active-support machinery about 85%;
 pair-to-capstone integration about 65%; dedicated Step-B/B1 machinery about
 84%; Chapter 4 machinery about 80%; whole HCG machinery about 53%.
@@ -129,16 +129,30 @@ pair-to-capstone integration about 65%; dedicated Step-B/B1 machinery about
   calls the pair extractor once on `Sigma alpha, InterSlot alpha`, so every
   source uses one common subsequence and no interaction subtype is transported
   backwards across refinement.
-- The next consultation frontier is the outer source-local/global assembly,
-  not H6: choose the canonical way to pull each chartwise limit weight family
-  onto the fixed manifold and combine the finite local cages, totalize sparse
-  pair maps behind zero weights, and weaken `exists_hat_cm_tail` from
-  whole-`hatBall` point convergence to active support. Existing `hbetaU` has
-  the reverse maps-to direction and does not place the entire global source
-  ball in one normal chart.
+- 2026-07-13: the approved source-local/global architecture is implemented and
+  focused-green. `existsAtomWeightH6_of_innerCover` exposes the actual inner
+  cover premise; `exists_live_source_cover` produces the finite chart cover;
+  `exists_supp_pts_fin` keeps old-`L` `InterSlot`s and totalizes only the final
+  point family; and `exists_hat_cm_tail_support` consumes convergence only on
+  nonzero limit-weight support.
+- `StepCSupportCapstone.exists_supp_cm_fin` chooses one minimizing scale, one
+  divisor, one stable net, and one master subsequence.  It then takes a finite
+  maximum over targets inside each patch and a second finite maximum over
+  source patches. `exists_cm_on_source` derives the global-ball
+  existential-source corollary without a glued weight or chart selector.
+- The remaining obstruction is no longer H6 or source-cover wiring.  The
+  conditional capstone still consumes `StrictDistInput`; its uniform
+  full-convexity/Hessian--Neumann producer is the independent analytic
+  frontier.
+- The 2026-07-14 audit removes the two-point selector from that frontier:
+  `GeodesicConvexity.minJoin` is a focused-green wrapper around the proved
+  intrinsic Hopf--Rinow minimizing vector.  The actual missing comparison is
+  `lbl412` plus the positive `lbl413` bound; current second variation gives only
+  index-form nonnegativity.  No H6 field, endpoint radius, or weight
+  compatibility assumption can discharge this gap.
 
 Updated accounting: localized H6 producer 100%; S6 removal 100%; finite
-positive-pair extraction 100%; sparse active-support machinery about 92%;
-pair-to-capstone integration about 78%; dedicated Step-B/B1 machinery about
-84%; Chapter 4 machinery about 80%; whole-HCG machinery about 53%.
+positive-pair extraction 100%; sparse active-support machinery 100%;
+conditional source-local/global capstone 100%; dedicated Step-B/B1 machinery
+about 88%; Chapter 4 machinery about 82%; whole-HCG machinery about 54%.
 `StepB1RawInput`, textbook B1, and compactness endpoints remain 0%.

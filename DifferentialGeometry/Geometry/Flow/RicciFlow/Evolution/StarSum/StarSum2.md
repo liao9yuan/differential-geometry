@@ -1,5 +1,16 @@
 # `StarSum2` — design + brick status
 
+## 2026-07-14 quantitative StarSum certificate
+
+Added `StarSum2Cost`, its membership/nonnegativity/component-bound projections,
+the canonical `StarSum2.cost`, and exact cost propagation through sums and
+covariant differentiation. The base residual has fixed cost `108` in
+dimension three. Focused verification and the module refresh passed.
+
+This closes the quantifier defect in the old existential component bound: a
+cost now depends only on the recorded constructor tree, not on the spacetime
+point where the estimate is consumed.
+
 Goal is the five BBS bricks: `StarSum2` predicate + `.add`, `.bound`, `.nabla`, the `E_k`
 recursion, and the `IteratedRmTowerOn` wiring.
 

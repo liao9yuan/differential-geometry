@@ -55,3 +55,19 @@ The finite atom diagonal remains 100%; sparse active-support machinery is now
 about 92% and pair-to-capstone integration about 78%. Dedicated Step-B/B1
 machinery remains about 84%, Chapter 4 about 80%, and whole-HCG machinery about
 53%. `StepB1RawInput`, textbook B1, and compactness endpoints remain 0%.
+
+`HasAtomWeightLim.weight_data_of_innerCover` is now the primary normalized
+weight projection for a chart mapping into the strict inner-ball union. It uses
+the existing `seqWeights_data` directly on that union. The older `weight_data`
+statement remains a corollary through `innerBall_cover`. Focused verification
+passed, with no new field added to `HasAtomWeightLim`.
+
+`HasAtomWeightLim.of_atoms` is now focused-green. It is the thin downstream
+projection of `atomWeight_of_atoms`: prescribed per-slot atom limits and the
+existing direct inner-cover premise are packaged into `HasAtomWeightLim`
+without adding an assumption, field, alias, or second atom representation.
+This local packaging brick is 100%; sparse active-support machinery remains
+about 92%, pair-to-capstone integration about 78%, dedicated Step-B/B1
+machinery about 84%, Chapter 4 about 80%, and whole-HCG machinery about 53%.
+`StepB1RawInput`, textbook B1, and the compactness endpoints remain theorem-level
+0%.

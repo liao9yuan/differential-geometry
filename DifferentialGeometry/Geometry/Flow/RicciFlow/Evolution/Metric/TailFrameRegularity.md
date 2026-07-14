@@ -9,5 +9,6 @@ joint metric-frame smoothness applies even at the new left endpoint.  The
 fixed-base space/time derivative field is supplied by the Ricci-flow equation
 and `metricFrameComp_fixedBaseSwap_of_solution`.
 
-Status: implementation added; focused verification pending the active shared
-dependency refresh.
+Status: focused verification passed. The theorem constructs the positive-tail
+metric-frame spacetime regularity package from `IsSolutionOn`; it does not
+assume that package as a new blackbox.

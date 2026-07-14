@@ -200,6 +200,27 @@ theorem metricDiffCovDerivAt_zero_apply
       Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
     _ = gk.inner x a b - gInf.inner x a b := by rw [hk, hI]
 
+/-- The order-zero metric-difference norm controls every bilinear evaluation,
+with the tangent-vector norms measured by the reference metric. -/
+theorem metricDiff_abs_le
+    (gk gInf gRef : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    |gk.inner x v w - gInf.inner x v w| ≤
+      metricDerivNorm (I := I) 0 gk gInf gRef x *
+        Real.sqrt (gRef.inner x v v) * Real.sqrt (gRef.inner x w w) := by
+  obtain ⟨basis, hON⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+      (I := I) gRef x
+  have hbound := Tensor0SBundle.abs_apply_le_sqrt_normSq0S
+    (I := I) (g := gRef) (x := x) (s := 2) basis hON
+    (metricDiffCovDerivAt (I := I) 0 gk gInf gRef x)
+    (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w)
+  rw [metricDiffCovDerivAt_zero_apply (I := I) gk gInf gRef x v w] at hbound
+  rw [metricDerivNorm]
+  refine hbound.trans_eq ?_
+  rw [Fin.prod_univ_two]
+  simp [DifferentialGeometry.Integral.Connection.vec2, mul_assoc]
+
 /-- Polarization: an off-diagonal component of the metric difference in a
 `gInf`-orthonormal frame is bounded by `4(C-1)` when `gInf ≃ gk` with constant
 `C`. -/

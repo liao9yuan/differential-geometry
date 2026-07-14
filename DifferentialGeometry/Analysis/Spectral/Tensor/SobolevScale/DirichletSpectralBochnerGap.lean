@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderDefs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SpectralPouNormEquiv
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.PointwiseToL2Packaging
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.TensorCovDivergence
@@ -33,22 +34,23 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+omit [BoundarylessManifold I M] in
 private theorem tensorL2Inner_eq_tsum_l2Coeff_cross
-    (g₀ : SmoothRiemannianMetric I M) (A B : SmoothCcTensor g₀ 0 2) :
-    tensorL2Inner (I := I) (M := M) g₀ 0 2 A.toFun B.toFun =
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (A B : SmoothCcTensor g₀ 0 s) :
+    tensorL2Inner (I := I) (M := M) g₀ 0 s A.toFun B.toFun =
       ∑' i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2,
+          (I := I) (M := M) g₀ 0 s,
         tensorL2Coeff (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
             (SmoothCcTensor.toL2 A) i *
           tensorL2Coeff (I := I) (M := M)
-            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
             (SmoothCcTensor.toL2 B) i := by
   classical
-  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s
     with hcompact_def
   set b := tensorResolventHilbertEigenbasisSigma (I := I) (M := M) h_compact with hb_def
-  have hinner_eq : tensorL2Inner (I := I) (M := M) g₀ 0 2 A.toFun B.toFun =
+  have hinner_eq : tensorL2Inner (I := I) (M := M) g₀ 0 s A.toFun B.toFun =
       (⟪SmoothCcTensor.toL2 A, SmoothCcTensor.toL2 B⟫_ℝ : ℝ) := by
     rw [DifferentialGeometry.Integral.L2.SmoothCcTensor.inner_toL2
       (I := I) (M := M) A B]
@@ -62,57 +64,79 @@ private theorem tensorL2Inner_eq_tsum_l2Coeff_cross
   rw [show (⟪SmoothCcTensor.toL2 A, b i⟫_ℝ : ℝ) = ⟪b i, SmoothCcTensor.toL2 A⟫_ℝ from
     real_inner_comm _ _]
 
+private theorem cc_raw_coeff
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
+    (hc : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g₀ 0 s))
+    (S : SmoothCcTensor g₀ 0 s)
+    (m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g₀ 0 s) (i : ℕ) :
+    tensorL2Coeff (I := I) (M := M) hc
+        (SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 s i S)) m =
+      (-TensorEigenIdx.lambda (I := I) (M := M) m) ^ i *
+        tensorL2Coeff (I := I) (M := M) hc (SmoothCcTensor.toL2 S) m := by
+  induction i with
+  | zero => simp
+  | succ i ih =>
+      rw [rawTensorConnLapIter_succ,
+        rawLap_coeff (I := I) (M := M) g₀ s hc
+          (rawTensorConnLapIter (I := I) g₀ 0 s i S) m,
+        ih, pow_succ]
+      ring
+
+set_option maxHeartbeats 1600000 in
 private theorem rawConnLapIter_l2NormSq_eq_tsum
-    (g₀ : SmoothRiemannianMetric I M) (t : ℕ) (S : SmoothCcTensor g₀ 0 2) :
-    ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S)‖ ^ 2 =
+    (g₀ : SmoothRiemannianMetric I M) (s t : ℕ) (S : SmoothCcTensor g₀ 0 s) :
+    ‖SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 s t S)‖ ^ 2 =
       ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2,
+          (I := I) (M := M) g₀ 0 s,
         (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (2 * t) *
           (tensorL2Coeff (I := I) (M := M)
-              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
               (SmoothCcTensor.toL2 S) m) ^ 2 := by
   classical
-  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s
     with hcompact_def
   rw [← tensorParseval_l2Coeff_ofCompact_sq (I := I) (M := M) h_compact
-    (SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 2 t S))]
+    (SmoothCcTensor.toL2 (rawTensorConnLapIter (I := I) g₀ 0 s t S))]
   refine tsum_congr (fun m => ?_)
-  rw [tensorL2Coeff_ofCompact_rawTensorConnLapIter (I := I) (M := M) g₀ h_compact S m t]
+  rw [cc_raw_coeff (I := I) (M := M) g₀ s h_compact S m t]
   set c := tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m with hc_def
   set L := TensorEigenIdx.lambda (I := I) (M := M) m with hL_def
   rw [mul_pow, ← pow_mul, mul_comm t 2, (even_two_mul t).neg_pow L]
 
+set_option maxHeartbeats 1600000 in
 private theorem covGrad_rawConnLapIter_l2NormSq_eq_tsum
-    (g₀ : SmoothRiemannianMetric I M) (i : ℕ) (S : SmoothCcTensor g₀ 0 2) :
-    ‖covGrad (I := I) (M := M) g₀ 0 2
-        (rawTensorConnLapIter (I := I) g₀ 0 2 i S)‖ ^ 2 =
+    (g₀ : SmoothRiemannianMetric I M) (s i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
+    ‖covGrad (I := I) (M := M) g₀ 0 s
+        (rawTensorConnLapIter (I := I) g₀ 0 s i S)‖ ^ 2 =
       ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2,
+          (I := I) (M := M) g₀ 0 s,
         (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (2 * i + 1) *
           (tensorL2Coeff (I := I) (M := M)
-              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
               (SmoothCcTensor.toL2 S) m) ^ 2 := by
   classical
-  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2
+  set h_compact := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s
     with hcompact_def
-  set U : SmoothCcTensor g₀ 0 2 := rawTensorConnLapIter (I := I) g₀ 0 2 i S with hU_def
-  have hnorm_sq : ‖covGrad (I := I) (M := M) g₀ 0 2 U‖ ^ 2 =
-      tensorL2Inner (I := I) (M := M) g₀ 0 3
-        (covGrad (I := I) (M := M) g₀ 0 2 U).toFun
-        (covGrad (I := I) (M := M) g₀ 0 2 U).toFun := by
-    rw [SmoothCcTensor.norm_def (covGrad (I := I) (M := M) g₀ 0 2 U)]
-    exact tensorL2Norm_sq_toFun (I := I) (M := M) g₀ 0 3 (covGrad (I := I) (M := M) g₀ 0 2 U)
+  set U : SmoothCcTensor g₀ 0 s := rawTensorConnLapIter (I := I) g₀ 0 s i S with hU_def
+  have hnorm_sq : ‖covGrad (I := I) (M := M) g₀ 0 s U‖ ^ 2 =
+      tensorL2Inner (I := I) (M := M) g₀ 0 (s + 1)
+        (covGrad (I := I) (M := M) g₀ 0 s U).toFun
+        (covGrad (I := I) (M := M) g₀ 0 s U).toFun := by
+    rw [SmoothCcTensor.norm_def (covGrad (I := I) (M := M) g₀ 0 s U)]
+    exact tensorL2Norm_sq_toFun (I := I) (M := M) g₀ 0 (s + 1)
+      (covGrad (I := I) (M := M) g₀ 0 s U)
   rw [hnorm_sq,
-    tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner_gen (I := I) (M := M) g₀ 2 U]
-  have hraw_eq : rawTensorConnLapSmooth (I := I) g₀ 0 2 U =
-      rawTensorConnLapIter (I := I) g₀ 0 2 (i + 1) S := by
+    tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner_gen (I := I) (M := M) g₀ s U]
+  have hraw_eq : rawTensorConnLapSmooth (I := I) g₀ 0 s U =
+      rawTensorConnLapIter (I := I) g₀ 0 s (i + 1) S := by
     rw [hU_def, rawTensorConnLapIter_succ]
   rw [hraw_eq, tensorL2Inner_eq_tsum_l2Coeff_cross (I := I) (M := M) g₀
-    (rawTensorConnLapIter (I := I) g₀ 0 2 (i + 1) S) U, hU_def]
+    s (rawTensorConnLapIter (I := I) g₀ 0 s (i + 1) S) U, hU_def]
   rw [← tsum_neg]
   refine tsum_congr (fun m => ?_)
-  rw [tensorL2Coeff_ofCompact_rawTensorConnLapIter (I := I) (M := M) g₀ h_compact S m (i + 1),
-    tensorL2Coeff_ofCompact_rawTensorConnLapIter (I := I) (M := M) g₀ h_compact S m i]
+  rw [cc_raw_coeff (I := I) (M := M) g₀ s h_compact S m (i + 1),
+    cc_raw_coeff (I := I) (M := M) g₀ s h_compact S m i]
   set c := tensorL2Coeff (I := I) (M := M) h_compact (SmoothCcTensor.toL2 S) m with hc_def
   set L := TensorEigenIdx.lambda (I := I) (M := M) m with hL_def
   have hpow : ((-L) ^ (i + 1) * c) * ((-L) ^ i * c) = (-L) ^ (2 * i + 1) * c ^ 2 := by
@@ -259,6 +283,111 @@ private theorem spectralModeMass_succ_le_smoothCcToTensorHs_succ_normSq
       1 + TensorEigenIdx.lambda (I := I) (M := M) m := by linarith
   exact mul_le_mul_of_nonneg_right (pow_le_pow_left₀ hL_nn hle (n + 1)) (sq_nonneg _)
 
+private theorem cc_raw_hs_le
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
+    (T : SmoothCcTensor g₀ 0 s) :
+    ‖ccTensorToHs (I := I) (M := M) g₀ s σ
+        (rawTensorConnLapSmooth (I := I) g₀ 0 s T)‖ ≤
+      ‖ccTensorToHs (I := I) (M := M) g₀ s (σ + 2) T‖ := by
+  classical
+  set hc := tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s
+  have hright : 0 ≤ ‖ccTensorToHs (I := I) (M := M) g₀ s (σ + 2) T‖ := norm_nonneg _
+  apply le_of_sq_le_sq _ hright
+  rw [ccToHs_norm_sq, ccToHs_norm_sq]
+  have hrs := (ccTensorToHs (I := I) (M := M) g₀ s (σ + 2) T).weighted_summable
+  refine Summable.tsum_le_tsum (fun m => ?_) ?_ hrs
+  · rw [rawLap_coeff (I := I) (M := M) g₀ s hc T m]
+    have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
+      tensor_lambda_nonneg (I := I) (M := M) m
+    have hw : tensorSobolevWeight (I := I) (M := M) m (σ + 2) =
+        tensorSobolevWeight (I := I) (M := M) m σ *
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ 2 := by
+      rw [tensorHs.tensorSobolevWeight_add]
+      congr 1
+      unfold tensorSobolevWeight
+      rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+    rw [hw, show (-TensorEigenIdx.lambda (I := I) (M := M) m *
+        tensorL2Coeff (I := I) (M := M) hc (SmoothCcTensor.toL2 T) m) ^ 2 =
+      TensorEigenIdx.lambda (I := I) (M := M) m ^ 2 *
+        tensorL2Coeff (I := I) (M := M) hc (SmoothCcTensor.toL2 T) m ^ 2 by ring]
+    have hle : TensorEigenIdx.lambda (I := I) (M := M) m ≤
+        1 + TensorEigenIdx.lambda (I := I) (M := M) m := by linarith
+    simpa only [mul_assoc] using
+      (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_left
+          (pow_le_pow_left₀ hlam hle 2)
+          (le_of_lt (tensorSobolevWeight_pos (I := I) (M := M) m σ)))
+        (sq_nonneg (tensorL2Coeff (I := I) (M := M) hc
+          (SmoothCcTensor.toL2 T) m)))
+  · refine Summable.of_nonneg_of_le (fun m => ?_) (fun m => ?_) hrs
+    · rw [rawLap_coeff (I := I) (M := M) g₀ s hc T m]
+      exact mul_nonneg
+        (le_of_lt (tensorSobolevWeight_pos (I := I) (M := M) m σ))
+        (sq_nonneg _)
+    · rw [rawLap_coeff (I := I) (M := M) g₀ s hc T m]
+      rw [ccTensorToHs_coeff]
+      have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
+        tensor_lambda_nonneg (I := I) (M := M) m
+      have hw : tensorSobolevWeight (I := I) (M := M) m (σ + 2) =
+          tensorSobolevWeight (I := I) (M := M) m σ *
+            (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ 2 := by
+        rw [tensorHs.tensorSobolevWeight_add]
+        congr 1
+        unfold tensorSobolevWeight
+        rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast]
+      rw [hw, show (-TensorEigenIdx.lambda (I := I) (M := M) m *
+          tensorL2Coeff (I := I) (M := M) hc (SmoothCcTensor.toL2 T) m) ^ 2 =
+        TensorEigenIdx.lambda (I := I) (M := M) m ^ 2 *
+          tensorL2Coeff (I := I) (M := M) hc (SmoothCcTensor.toL2 T) m ^ 2 by ring]
+      have hle : TensorEigenIdx.lambda (I := I) (M := M) m ≤
+          1 + TensorEigenIdx.lambda (I := I) (M := M) m := by linarith
+      simpa only [mul_assoc] using
+        (mul_le_mul_of_nonneg_right
+          (mul_le_mul_of_nonneg_left
+            (pow_le_pow_left₀ hlam hle 2)
+            (le_of_lt (tensorSobolevWeight_pos (I := I) (M := M) m σ)))
+          (sq_nonneg (tensorL2Coeff (I := I) (M := M) hc
+            (SmoothCcTensor.toL2 T) m)))
+
+private theorem cc_mass_le
+    (g₀ : SmoothRiemannianMetric I M) (s n : ℕ)
+    (u : SmoothCcTensor g₀ 0 s) :
+    (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 s,
+      TensorEigenIdx.lambda (I := I) (M := M) m ^ (n + 1) *
+        tensorL2Coeff (I := I) (M := M)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
+          (SmoothCcTensor.toL2 u) m ^ 2) ≤
+      ‖ccTensorToHs (I := I) (M := M) g₀ s (((n : ℕ) : ℝ) + 1) u‖ ^ 2 := by
+  classical
+  rw [ccToHs_norm_sq]
+  have hrs := (ccTensorToHs (I := I) (M := M) g₀ s (((n : ℕ) : ℝ) + 1) u).weighted_summable
+  refine Summable.tsum_le_tsum (fun m => ?_) ?_ hrs
+  · have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
+      tensor_lambda_nonneg (I := I) (M := M) m
+    have hw : tensorSobolevWeight (I := I) (M := M) m (((n : ℕ) : ℝ) + 1) =
+        (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ (n + 1) := by
+      unfold tensorSobolevWeight
+      rw [show ((n : ℕ) : ℝ) + 1 = ((n + 1 : ℕ) : ℝ) by push_cast; ring,
+        Real.rpow_natCast]
+    rw [hw]
+    exact mul_le_mul_of_nonneg_right
+      (pow_le_pow_left₀ hlam (by linarith) (n + 1)) (sq_nonneg _)
+  · refine Summable.of_nonneg_of_le (fun m => ?_) (fun m => ?_) hrs
+    · have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
+        tensor_lambda_nonneg (I := I) (M := M) m
+      positivity
+    · have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) m :=
+        tensor_lambda_nonneg (I := I) (M := M) m
+      have hw : tensorSobolevWeight (I := I) (M := M) m (((n : ℕ) : ℝ) + 1) =
+          (1 + TensorEigenIdx.lambda (I := I) (M := M) m) ^ (n + 1) := by
+        unfold tensorSobolevWeight
+        rw [show ((n : ℕ) : ℝ) + 1 = ((n + 1 : ℕ) : ℝ) by push_cast; ring,
+          Real.rpow_natCast]
+      rw [hw]
+      exact mul_le_mul_of_nonneg_right
+        (pow_le_pow_left₀ hlam (by linarith) (n + 1)) (sq_nonneg _)
+
 private theorem covGrad_rawConnLapIter_l2_le_ccSpectralEmbed_odd_local
     (g₀ : SmoothRiemannianMetric I M) (i : ℕ) (S : SmoothCcTensor g₀ 0 2) :
     ‖covGrad (I := I) (M := M) g₀ 0 2
@@ -273,7 +402,7 @@ private theorem covGrad_rawConnLapIter_l2_le_ccSpectralEmbed_odd_local
       ‖covGrad (I := I) (M := M) g₀ 0 2
           (rawTensorConnLapIter (I := I) g₀ 0 2 i S)‖ ^ 2 ≤
         ‖ccSpectralEmbed (I := I) (M := M) g₀ ((2 * i + 1 : ℕ) : ℝ) S‖ ^ 2 := by
-    rw [covGrad_rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ i S,
+    rw [covGrad_rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ 2 i S,
       ccSpectralEmbed_norm_sq_eq_tsum]
     refine Summable.tsum_le_tsum ?_ ?_ ?_
     · intro m
@@ -337,6 +466,7 @@ private theorem norm_iteratedCovGrad_comp_local
   have h2 : 0 ≤ ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := norm_nonneg _
   nlinarith [hsq, h1, h2]
 
+omit [BoundarylessManifold I M] in
 private theorem norm_iteratedCovGrad_order_eq_local
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {n n' : ℕ} (h : n = n')
     (S : SmoothCcTensor g₀ 0 s) :
@@ -344,6 +474,8 @@ private theorem norm_iteratedCovGrad_order_eq_local
   subst h
   rfl
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma contract_eq_covGradBundleEquiv_symm_local
     (s : ℕ) (x : M) (v : TangentSpace I x) (A : TensorRSSpace 0 (s + 1) I x) :
     Tensor0SBundle.contract_covariant 0 s x v A =
@@ -951,29 +1083,29 @@ private theorem exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general_local
 
 set_option maxHeartbeats 1600000 in
 private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower
-    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 2),
-      ‖rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k)
-          (iteratedCovGrad (I := I) g₀ 0 2 k u)‖ ^ 2 ≤
-        ‖iteratedCovGrad (I := I) g₀ 0 2 k
-            (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)‖ ^ 2
+    (g₀ : SmoothRiemannianMetric I M) (s k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 s),
+      ‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + k)
+          (iteratedCovGrad (I := I) g₀ 0 s k u)‖ ^ 2 ≤
+        ‖iteratedCovGrad (I := I) g₀ 0 s k
+            (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2
         + C * (∑ a ∈ Finset.range (k + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖) ^ 2 := by
+            ‖iteratedCovGrad (I := I) g₀ 0 s a u‖) ^ 2 := by
   classical
   rcases k with _ | j
   · refine ⟨0, le_refl _, fun u => ?_⟩
     have hD0 :
-        rawTensorConnLapSmooth (I := I) g₀ 0 (2 + 0)
-            (iteratedCovGrad (I := I) g₀ 0 2 0 u) =
-          iteratedCovGrad (I := I) g₀ 0 2 0
-            (rawTensorConnLapSmooth (I := I) g₀ 0 2 u) := by
+        rawTensorConnLapSmooth (I := I) g₀ 0 (s + 0)
+            (iteratedCovGrad (I := I) g₀ 0 s 0 u) =
+          iteratedCovGrad (I := I) g₀ 0 s 0
+            (rawTensorConnLapSmooth (I := I) g₀ 0 s u) := by
       simp only [iteratedCovGrad_zero, Nat.add_zero]
     rw [hD0]
     simp
   · obtain ⟨Cfun, hCfun_nn, hCfun⟩ :=
-      iteratedRoughLapGrad_commutator_l2Norm_le_local (I := I) (M := M) g₀ (j + 1) 2
+      iteratedRoughLapGrad_commutator_l2Norm_le_local (I := I) (M := M) g₀ (j + 1) s
     obtain ⟨Crc, hCrc_nn, hCrc⟩ :=
-      exists_iteratedCovGrad_rawConnLap_l2Norm_le_local (I := I) (M := M) g₀ j 2
+      exists_iteratedCovGrad_rawConnLap_l2Norm_le_local (I := I) (M := M) g₀ j s
     set dimR : ℝ := Real.sqrt (Module.finrank ℝ E) with hdimR
     have hdimR_nn : 0 ≤ dimR := Real.sqrt_nonneg _
     refine ⟨(Cfun 0) ^ 2 + 2 * (Crc * (dimR * Cfun 1)),
@@ -983,15 +1115,15 @@ private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLa
               (mul_nonneg hCrc_nn (mul_nonneg hdimR_nn (hCfun_nn 1)))),
       fun u => ?_⟩
     set SUM : ℝ := ∑ a ∈ Finset.range (j + 1 + 2),
-      ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ with hSUM
+      ‖iteratedCovGrad (I := I) g₀ 0 s a u‖ with hSUM
     have hSUM_nn : (0 : ℝ) ≤ SUM := Finset.sum_nonneg (fun a _ => norm_nonneg _)
-    set B : SmoothCcTensor g₀ 0 (2 + (j + 1)) :=
-      rawTensorConnLapSmooth (I := I) g₀ 0 (2 + (j + 1))
-        (iteratedCovGrad (I := I) g₀ 0 2 (j + 1) u) with hB_def
-    set A : SmoothCcTensor g₀ 0 (2 + (j + 1)) :=
-      iteratedCovGrad (I := I) g₀ 0 2 (j + 1)
-        (rawTensorConnLapSmooth (I := I) g₀ 0 2 u) with hA_def
-    set D : SmoothCcTensor g₀ 0 (2 + (j + 1)) := B - A with hD_def
+    set B : SmoothCcTensor g₀ 0 (s + (j + 1)) :=
+      rawTensorConnLapSmooth (I := I) g₀ 0 (s + (j + 1))
+        (iteratedCovGrad (I := I) g₀ 0 s (j + 1) u) with hB_def
+    set A : SmoothCcTensor g₀ 0 (s + (j + 1)) :=
+      iteratedCovGrad (I := I) g₀ 0 s (j + 1)
+        (rawTensorConnLapSmooth (I := I) g₀ 0 s u) with hA_def
+    set D : SmoothCcTensor g₀ 0 (s + (j + 1)) := B - A with hD_def
     have hBAD : B = A + D := by rw [hD_def]; abel
     have hnorm_add :
         ‖B‖ ^ 2 = ‖A‖ ^ 2 + 2 * (⟪A, D⟫_ℝ : ℝ) + ‖D‖ ^ 2 := by
@@ -1000,10 +1132,10 @@ private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLa
         SmoothCcTensor.norm_toL2, SmoothCcTensor.norm_toL2,
         SmoothCcTensor.inner_toL2]
     have hD_eq_comm : D =
-        rawTensorConnLapSmooth (I := I) g₀ 0 (2 + (j + 1))
-            (iteratedCovGrad (I := I) g₀ 0 2 (j + 1) u) -
-          iteratedCovGrad (I := I) g₀ 0 2 (j + 1)
-            (rawTensorConnLapSmooth (I := I) g₀ 0 2 u) := by
+        rawTensorConnLapSmooth (I := I) g₀ 0 (s + (j + 1))
+            (iteratedCovGrad (I := I) g₀ 0 s (j + 1) u) -
+          iteratedCovGrad (I := I) g₀ 0 s (j + 1)
+            (rawTensorConnLapSmooth (I := I) g₀ 0 s u) := by
       rw [hD_def, hB_def, hA_def]
     have hDnorm : ‖D‖ ≤ Cfun 0 * SUM := by
       have h := hCfun 0 u
@@ -1015,26 +1147,26 @@ private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLa
       refine Finset.sum_le_sum_of_subset_of_nonneg ?_ (fun b _ _ => norm_nonneg _)
       intro b hb; rw [Finset.mem_range] at hb ⊢; omega
     have hgradDnorm :
-        ‖covGrad (I := I) (M := M) g₀ 0 (2 + (j + 1)) D‖ ≤ Cfun 1 * SUM := by
+        ‖covGrad (I := I) (M := M) g₀ 0 (s + (j + 1)) D‖ ≤ Cfun 1 * SUM := by
       have h := hCfun 1 u
       have hcovD :
-          ‖covGrad (I := I) (M := M) g₀ 0 (2 + (j + 1)) D‖ =
-            ‖iteratedCovGrad (I := I) g₀ 0 (2 + (j + 1)) 1
-              (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + (j + 1))
-                  (iteratedCovGrad (I := I) g₀ 0 2 (j + 1) u) -
-                iteratedCovGrad (I := I) g₀ 0 2 (j + 1)
-                  (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ := by
+          ‖covGrad (I := I) (M := M) g₀ 0 (s + (j + 1)) D‖ =
+            ‖iteratedCovGrad (I := I) g₀ 0 (s + (j + 1)) 1
+              (rawTensorConnLapSmooth (I := I) g₀ 0 (s + (j + 1))
+                  (iteratedCovGrad (I := I) g₀ 0 s (j + 1) u) -
+                iteratedCovGrad (I := I) g₀ 0 s (j + 1)
+                  (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ := by
         rw [hD_eq_comm]
         simp only [iteratedCovGrad_succ, iteratedCovGrad_zero, Nat.add_zero]
       rw [hcovD]
       have hrange : ∑ a ∈ Finset.range (j + 1 + 1 + 1),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ = SUM := by
+          ‖iteratedCovGrad (I := I) g₀ 0 s a u‖ = SUM := by
         rw [hSUM, show j + 1 + 1 + 1 = j + 1 + 2 from by omega]
       rw [hrange] at h
       exact h
-    set T : SmoothCcTensor g₀ 0 (2 + j) :=
-      iteratedCovGrad (I := I) g₀ 0 2 j (rawTensorConnLapSmooth (I := I) g₀ 0 2 u) with hT_def
-    have hA_covGrad : A = covGrad (I := I) (M := M) g₀ 0 (2 + j) T := by
+    set T : SmoothCcTensor g₀ 0 (s + j) :=
+      iteratedCovGrad (I := I) g₀ 0 s j (rawTensorConnLapSmooth (I := I) g₀ 0 s u) with hT_def
+    have hA_covGrad : A = covGrad (I := I) (M := M) g₀ 0 (s + j) T := by
       rw [hA_def, hT_def, iteratedCovGrad_succ]
     have hTnorm : ‖T‖ ≤ Crc * SUM := by
       have h := hCrc u
@@ -1043,28 +1175,28 @@ private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLa
       refine mul_le_mul_of_nonneg_left ?_ hCrc_nn
       rw [hSUM, show j + 3 = j + 1 + 2 from by omega]
     have hcovDivD :
-        ‖covDivergence (I := I) (M := M) g₀ (2 + j) D‖ ≤ dimR * (Cfun 1 * SUM) := by
-      have hp1 := covDivergence_l2Norm_le_covGrad_local (I := I) (M := M) g₀ (2 + j) D
+        ‖covDivergence (I := I) (M := M) g₀ (s + j) D‖ ≤ dimR * (Cfun 1 * SUM) := by
+      have hp1 := covDivergence_l2Norm_le_covGrad_local (I := I) (M := M) g₀ (s + j) D
       refine le_trans hp1 ?_
       exact mul_le_mul_of_nonneg_left hgradDnorm hdimR_nn
     have hIBP :
         (⟪A, D⟫_ℝ : ℝ) =
-          - tensorL2Inner (I := I) (M := M) g₀ 0 (2 + j) T.toFun
-              (covDivergence (I := I) (M := M) g₀ (2 + j) D).toFun := by
+          - tensorL2Inner (I := I) (M := M) g₀ 0 (s + j) T.toFun
+              (covDivergence (I := I) (M := M) g₀ (s + j) D).toFun := by
       rw [SmoothCcTensor.inner_def A D, hA_covGrad]
       exact tensorL2Inner_covGrad_eq_neg_tensorL2Inner_covDivergence
-        (I := I) (M := M) g₀ (2 + j) T D
+        (I := I) (M := M) g₀ (s + j) T D
     have hcross_abs : |(⟪A, D⟫_ℝ : ℝ)| ≤ (Crc * SUM) * (dimR * (Cfun 1 * SUM)) := by
       rw [hIBP, abs_neg]
       have habs_inner :
-          |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + j) T.toFun
-              (covDivergence (I := I) (M := M) g₀ (2 + j) D).toFun| ≤
-            ‖T‖ * ‖covDivergence (I := I) (M := M) g₀ (2 + j) D‖ := by
-        rw [show tensorL2Inner (I := I) (M := M) g₀ 0 (2 + j) T.toFun
-              (covDivergence (I := I) (M := M) g₀ (2 + j) D).toFun =
-            (⟪T, covDivergence (I := I) (M := M) g₀ (2 + j) D⟫_ℝ : ℝ) from
-          (SmoothCcTensor.inner_def T (covDivergence (I := I) (M := M) g₀ (2 + j) D)).symm]
-        exact abs_real_inner_le_norm T (covDivergence (I := I) (M := M) g₀ (2 + j) D)
+          |tensorL2Inner (I := I) (M := M) g₀ 0 (s + j) T.toFun
+              (covDivergence (I := I) (M := M) g₀ (s + j) D).toFun| ≤
+            ‖T‖ * ‖covDivergence (I := I) (M := M) g₀ (s + j) D‖ := by
+        rw [show tensorL2Inner (I := I) (M := M) g₀ 0 (s + j) T.toFun
+              (covDivergence (I := I) (M := M) g₀ (s + j) D).toFun =
+            (⟪T, covDivergence (I := I) (M := M) g₀ (s + j) D⟫_ℝ : ℝ) from
+          (SmoothCcTensor.inner_def T (covDivergence (I := I) (M := M) g₀ (s + j) D)).symm]
+        exact abs_real_inner_le_norm T (covDivergence (I := I) (M := M) g₀ (s + j) D)
       refine le_trans habs_inner ?_
       exact mul_le_mul hTnorm hcovDivD (norm_nonneg _)
         (mul_nonneg hCrc_nn hSUM_nn)
@@ -1073,10 +1205,10 @@ private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLa
         pow_le_pow_left₀ (norm_nonneg _) hDnorm 2
       calc ‖D‖ ^ 2 ≤ (Cfun 0 * SUM) ^ 2 := h1
         _ = (Cfun 0) ^ 2 * SUM ^ 2 := by ring
-    rw [show ‖rawTensorConnLapSmooth (I := I) g₀ 0 (2 + (j + 1))
-          (iteratedCovGrad (I := I) g₀ 0 2 (j + 1) u)‖ ^ 2 = ‖B‖ ^ 2 from rfl,
-      show ‖iteratedCovGrad (I := I) g₀ 0 2 (j + 1)
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)‖ ^ 2 = ‖A‖ ^ 2 from rfl,
+    rw [show ‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + (j + 1))
+          (iteratedCovGrad (I := I) g₀ 0 s (j + 1) u)‖ ^ 2 = ‖B‖ ^ 2 from rfl,
+      show ‖iteratedCovGrad (I := I) g₀ 0 s (j + 1)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2 = ‖A‖ ^ 2 from rfl,
       hnorm_add]
     have hcross_le : 2 * (⟪A, D⟫_ℝ : ℝ) ≤
         2 * ((Crc * SUM) * (dimR * (Cfun 1 * SUM))) := by
@@ -1086,98 +1218,98 @@ private theorem rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLa
 
 set_option maxHeartbeats 1600000 in
 private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
-    (g₀ : SmoothRiemannianMetric I M) (k : ℕ) :
-    ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 2),
-      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (k + 2) u)‖ ^ 2 ≤
-        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 k
-            (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ ^ 2
+    (g₀ : SmoothRiemannianMetric I M) (s k : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 s),
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (k + 2) u)‖ ^ 2 ≤
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s k
+            (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ ^ 2
         + C * (∑ a ∈ Finset.range (k + 2),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖) ^ 2 := by
+            ‖iteratedCovGrad (I := I) g₀ 0 s a u‖) ^ 2 := by
   classical
   obtain ⟨Cgap, hCgap_nn, hgap⟩ :=
     rawConnLap_iteratedCovGrad_l2NormSq_le_iteratedCovGrad_rawConnLap_base_add_lower
-      (I := I) (M := M) g₀ k
+      (I := I) (M := M) g₀ s k
   obtain ⟨K, hK_nn, hK⟩ :=
-    exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le (I := I) (M := M) g₀ (2 + k)
+    exists_iteratedCovGrad_pointwiseTensorCurv_l2Norm_le (I := I) (M := M) g₀ (s + k)
   refine ⟨Cgap + K 0, add_nonneg hCgap_nn (hK_nn 0), fun u => ?_⟩
-  set P : SmoothCcTensor g₀ 0 (2 + k) := iteratedCovGrad (I := I) g₀ 0 2 k u with hP_def
-  set SUM : ℝ := ∑ a ∈ Finset.range (k + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ with hSUM
+  set P : SmoothCcTensor g₀ 0 (s + k) := iteratedCovGrad (I := I) g₀ 0 s k u with hP_def
+  set SUM : ℝ := ∑ a ∈ Finset.range (k + 2), ‖iteratedCovGrad (I := I) g₀ 0 s a u‖ with hSUM
   have hSUM_nn : (0 : ℝ) ≤ SUM := Finset.sum_nonneg (fun a _ => norm_nonneg _)
   have hPnorm : ‖P‖ ≤ SUM := by
     rw [hP_def, hSUM]
-    refine Finset.single_le_sum (f := fun a => ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖)
+    refine Finset.single_le_sum (f := fun a => ‖iteratedCovGrad (I := I) g₀ 0 s a u‖)
       (fun a _ => norm_nonneg _) ?_
     rw [Finset.mem_range]; omega
-  have hgradP_eq : covGrad (I := I) (M := M) g₀ 0 (2 + k) P =
-      iteratedCovGrad (I := I) g₀ 0 2 (k + 1) u := by
+  have hgradP_eq : covGrad (I := I) (M := M) g₀ 0 (s + k) P =
+      iteratedCovGrad (I := I) g₀ 0 s (k + 1) u := by
     rw [hP_def, iteratedCovGrad_succ]
-  have hgradPnorm : ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ ≤ SUM := by
+  have hgradPnorm : ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ ≤ SUM := by
     rw [hgradP_eq, hSUM]
-    refine Finset.single_le_sum (f := fun a => ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖)
+    refine Finset.single_le_sum (f := fun a => ‖iteratedCovGrad (I := I) g₀ 0 s a u‖)
       (fun a _ => norm_nonneg _) ?_
     rw [Finset.mem_range]; omega
-  have hLHS_eq : iteratedCovGrad (I := I) g₀ 0 2 (k + 2) u =
-      covGrad (I := I) (M := M) g₀ 0 (2 + k + 1)
-        (covGrad (I := I) (M := M) g₀ 0 (2 + k) P) := by
+  have hLHS_eq : iteratedCovGrad (I := I) g₀ 0 s (k + 2) u =
+      covGrad (I := I) (M := M) g₀ 0 (s + k + 1)
+        (covGrad (I := I) (M := M) g₀ 0 (s + k) P) := by
     rw [hP_def]
     rfl
   have hLHS_norm_sq :
-      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (k + 2) u)‖ ^ 2 =
-        tensorL2Norm (I := I) (M := M) g₀ 0 (2 + k + 1 + 1)
-            (covGrad (I := I) (M := M) g₀ 0 (2 + k + 1)
-              (covGrad (I := I) (M := M) g₀ 0 (2 + k) P)).toFun ^ 2 := by
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (k + 2) u)‖ ^ 2 =
+        tensorL2Norm (I := I) (M := M) g₀ 0 (s + k + 1 + 1)
+            (covGrad (I := I) (M := M) g₀ 0 (s + k + 1)
+              (covGrad (I := I) (M := M) g₀ 0 (s + k) P)).toFun ^ 2 := by
     rw [SmoothCcTensor.norm_toL2, hLHS_eq,
       DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
         (I := I) (M := M) g₀
-        (covGrad (I := I) (M := M) g₀ 0 (2 + k + 1)
-          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P))]
-  have hweitz := weitzenbock_integrated_covGrad_l2_normSq (I := I) (M := M) g₀ (2 + k) P
+        (covGrad (I := I) (M := M) g₀ 0 (s + k + 1)
+          (covGrad (I := I) (M := M) g₀ 0 (s + k) P))]
+  have hweitz := weitzenbock_integrated_covGrad_l2_normSq (I := I) (M := M) g₀ (s + k) P
   have hcurv_eq :
-      rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k + 1)
-          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P) -
-        covGrad (I := I) (M := M) g₀ 0 (2 + k)
-          (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P) =
-      pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P := rfl
+      rawTensorConnLapSmooth (I := I) g₀ 0 (s + k + 1)
+          (covGrad (I := I) (M := M) g₀ 0 (s + k) P) -
+        covGrad (I := I) (M := M) g₀ 0 (s + k)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 (s + k) P) =
+      pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P := rfl
   rw [hcurv_eq] at hweitz
   have hbase_eq :
-      tensorL2Norm (I := I) (M := M) g₀ 0 (2 + k)
-          (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P).toFun ^ 2 =
-        ‖rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P‖ ^ 2 := by
+      tensorL2Norm (I := I) (M := M) g₀ 0 (s + k)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 (s + k) P).toFun ^ 2 =
+        ‖rawTensorConnLapSmooth (I := I) g₀ 0 (s + k) P‖ ^ 2 := by
     rw [DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
-      (I := I) (M := M) g₀ (rawTensorConnLapSmooth (I := I) g₀ 0 (2 + k) P)]
+      (I := I) (M := M) g₀ (rawTensorConnLapSmooth (I := I) g₀ 0 (s + k) P)]
   have hpair_le :
-      |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
-          (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
-          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun| ≤
-        ‖pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P‖ *
-          ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ := by
+      |tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
+          (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun| ≤
+        ‖pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P‖ *
+          ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ := by
     have habs :
-        tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
-            (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
-            (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun =
-          (⟪pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P,
-              covGrad (I := I) (M := M) g₀ 0 (2 + k) P⟫_ℝ : ℝ) :=
-      (SmoothCcTensor.inner_def (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P)
-        (covGrad (I := I) (M := M) g₀ 0 (2 + k) P)).symm
+        tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
+            (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
+            (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun =
+          (⟪pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P,
+              covGrad (I := I) (M := M) g₀ 0 (s + k) P⟫_ℝ : ℝ) :=
+      (SmoothCcTensor.inner_def (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P)
+        (covGrad (I := I) (M := M) g₀ 0 (s + k) P)).symm
     rw [habs]
     exact abs_real_inner_le_norm
-      (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P)
-      (covGrad (I := I) (M := M) g₀ 0 (2 + k) P)
+      (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P)
+      (covGrad (I := I) (M := M) g₀ 0 (s + k) P)
   have hcurvnorm :
-      ‖pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P‖ ≤ K 0 * SUM := by
+      ‖pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P‖ ≤ K 0 * SUM := by
     have hKb := hK 0 P
     have hsumexp :
-        ∑ a ∈ Finset.range (0 + 2), ‖iteratedCovGrad (I := I) g₀ 0 (2 + k) a P‖ =
-          ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ := by
+        ∑ a ∈ Finset.range (0 + 2), ‖iteratedCovGrad (I := I) g₀ 0 (s + k) a P‖ =
+          ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ := by
       rw [show (0 + 2) = 2 by ring, Finset.sum_range_succ, Finset.sum_range_one]
       simp only [iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
     rw [iteratedCovGrad_zero] at hKb
     rw [hsumexp] at hKb
     refine le_trans hKb ?_
-    have hsum_le : ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ ≤ SUM := by
-      have hPexpand : ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ =
-          ‖iteratedCovGrad (I := I) g₀ 0 2 k u‖ +
-            ‖iteratedCovGrad (I := I) g₀ 0 2 (k + 1) u‖ := by
+    have hsum_le : ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ ≤ SUM := by
+      have hPexpand : ‖P‖ + ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ =
+          ‖iteratedCovGrad (I := I) g₀ 0 s k u‖ +
+            ‖iteratedCovGrad (I := I) g₀ 0 s (k + 1) u‖ := by
         rw [hgradP_eq, hP_def]
       rw [hPexpand, hSUM]
       have hpair : ({k, k + 1} : Finset ℕ) ⊆ Finset.range (k + 2) := by
@@ -1186,24 +1318,24 @@ private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
         rw [Finset.mem_range]; omega
       have hsub :=
         Finset.sum_le_sum_of_subset_of_nonneg hpair
-          (fun a _ _ => norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 a u))
+          (fun a _ _ => norm_nonneg (iteratedCovGrad (I := I) g₀ 0 s a u))
       have hpairsum :
-          ∑ a ∈ ({k, k + 1} : Finset ℕ), ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ =
-            ‖iteratedCovGrad (I := I) g₀ 0 2 k u‖ +
-              ‖iteratedCovGrad (I := I) g₀ 0 2 (k + 1) u‖ := by
+          ∑ a ∈ ({k, k + 1} : Finset ℕ), ‖iteratedCovGrad (I := I) g₀ 0 s a u‖ =
+            ‖iteratedCovGrad (I := I) g₀ 0 s k u‖ +
+              ‖iteratedCovGrad (I := I) g₀ 0 s (k + 1) u‖ := by
         rw [Finset.sum_insert (by simp), Finset.sum_singleton]
       rw [hpairsum] at hsub
       exact hsub
     nlinarith [hsum_le, hK_nn 0, hSUM_nn]
   have hpair_bound :
-      |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
-          (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
-          (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun| ≤ K 0 * SUM ^ 2 := by
-    calc |tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
-            (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
-            (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun|
-        ≤ ‖pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P‖ *
-            ‖covGrad (I := I) (M := M) g₀ 0 (2 + k) P‖ := hpair_le
+      |tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
+          (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
+          (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun| ≤ K 0 * SUM ^ 2 := by
+    calc |tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
+            (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
+            (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun|
+        ≤ ‖pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P‖ *
+            ‖covGrad (I := I) (M := M) g₀ 0 (s + k) P‖ := hpair_le
       _ ≤ (K 0 * SUM) * SUM := by
           refine mul_le_mul hcurvnorm hgradPnorm (norm_nonneg _) ?_
           exact mul_nonneg (hK_nn 0) hSUM_nn
@@ -1211,75 +1343,75 @@ private theorem iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower
   have hbase_le := hgap u
   rw [← hP_def] at hbase_le
   have hbase_toL2 :
-      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 k
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ ^ 2 =
-        ‖iteratedCovGrad (I := I) g₀ 0 2 k
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)‖ ^ 2 := by
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s k
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ ^ 2 =
+        ‖iteratedCovGrad (I := I) g₀ 0 s k
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ ^ 2 := by
     rw [SmoothCcTensor.norm_toL2]
   rw [hLHS_norm_sq, hweitz, hbase_eq, hbase_toL2]
   have hneg_le := neg_abs_le
-    (tensorL2Inner (I := I) (M := M) g₀ 0 (2 + k + 1)
-      (pointwiseTensorCurv (I := I) (M := M) g₀ (2 + k) P).toFun
-      (covGrad (I := I) (M := M) g₀ 0 (2 + k) P).toFun)
+    (tensorL2Inner (I := I) (M := M) g₀ 0 (s + k + 1)
+      (pointwiseTensorCurv (I := I) (M := M) g₀ (s + k) P).toFun
+      (covGrad (I := I) (M := M) g₀ 0 (s + k) P).toFun)
   nlinarith [hbase_le, hpair_bound, hneg_le, hSUM_nn, hCgap_nn, hK_nn 0]
 
 private theorem spectralModeMass_base0
-    (g₀ : SmoothRiemannianMetric I M) (u : SmoothCcTensor g₀ 0 2) :
-    ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u)‖ ^ 2 =
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (u : SmoothCcTensor g₀ 0 s) :
+    ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (0 + 1) u)‖ ^ 2 =
       ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-          (I := I) (M := M) g₀ 0 2,
+          (I := I) (M := M) g₀ 0 s,
         (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (0 + 1) *
           (tensorL2Coeff (I := I) (M := M)
-              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+              (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
               (SmoothCcTensor.toL2 u) m) ^ 2 := by
-  have hcov : iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u =
-      covGrad (I := I) (M := M) g₀ 0 2 (rawTensorConnLapIter (I := I) g₀ 0 2 0 u) := by
+  have hcov : iteratedCovGrad (I := I) g₀ 0 s (0 + 1) u =
+      covGrad (I := I) (M := M) g₀ 0 s (rawTensorConnLapIter (I := I) g₀ 0 s 0 u) := by
     rw [rawTensorConnLapIter_zero]
     rfl
-  rw [show ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u)‖ ^ 2 =
-        ‖iteratedCovGrad (I := I) g₀ 0 2 (0 + 1) u‖ ^ 2 by
+  rw [show ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (0 + 1) u)‖ ^ 2 =
+        ‖iteratedCovGrad (I := I) g₀ 0 s (0 + 1) u‖ ^ 2 by
       rw [SmoothCcTensor.norm_toL2], hcov]
-  rw [covGrad_rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ 0 u]
+  rw [covGrad_rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ s 0 u]
 
 private theorem spectralModeMass_base1
-    (g₀ : SmoothRiemannianMetric I M) : ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 2),
-      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (1 + 1) u)‖ ^ 2 ≤
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) : ∃ C : ℝ, 0 ≤ C ∧ ∀ (u : SmoothCcTensor g₀ 0 s),
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (1 + 1) u)‖ ^ 2 ≤
         (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2,
+            (I := I) (M := M) g₀ 0 s,
           (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (1 + 1) *
             (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
                 (SmoothCcTensor.toL2 u) m) ^ 2)
-        + C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) u‖ ^ 2 := by
+        + C * ‖ccTensorToHs (I := I) (M := M) g₀ s ((1 : ℕ) : ℝ) u‖ ^ 2 := by
   classical
   obtain ⟨Cstep, hCstep_nn, hCstep⟩ :=
-    iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower (I := I) (M := M) g₀ 0
+    iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower (I := I) (M := M) g₀ s 0
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-    exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general_local (I := I) (M := M) g₀ 1
+    hsJet_le (I := I) (M := M) g₀ s 1
   refine ⟨Cstep * Csob ^ 2, by positivity, fun u => ?_⟩
   have hS := hCstep u
   have hbase0 :
-      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 0
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ ^ 2 =
+      ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s 0
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ ^ 2 =
         ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2,
+            (I := I) (M := M) g₀ 0 s,
           (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (1 + 1) *
             (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
                 (SmoothCcTensor.toL2 u) m) ^ 2 := by
     rw [iteratedCovGrad_zero,
-      show rawTensorConnLapSmooth (I := I) g₀ 0 2 u =
-        rawTensorConnLapIter (I := I) g₀ 0 2 1 u by rw [rawTensorConnLapIter_succ,
+      show rawTensorConnLapSmooth (I := I) g₀ 0 s u =
+        rawTensorConnLapIter (I := I) g₀ 0 s 1 u by rw [rawTensorConnLapIter_succ,
           rawTensorConnLapIter_zero],
-      rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ 1 u]
+      rawConnLapIter_l2NormSq_eq_tsum (I := I) (M := M) g₀ s 1 u]
   have hSobu := hCsob u
-  set SUM := ∑ a ∈ Finset.range (0 + 2), ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ with hSUM
+  set SUM := ∑ a ∈ Finset.range (0 + 2), ‖iteratedCovGrad (I := I) g₀ 0 s a u‖ with hSUM
   have hSUM_nn : (0 : ℝ) ≤ SUM := Finset.sum_nonneg (fun a _ => norm_nonneg _)
-  set HN := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) u‖ with hHN
+  set HN := ‖ccTensorToHs (I := I) (M := M) g₀ s ((1 : ℕ) : ℝ) u‖ with hHN
   have hHN_nn : (0 : ℝ) ≤ HN := norm_nonneg _
   have hSobidx : SUM ≤ Csob * HN := by
-    have hh : ∑ a ∈ Finset.range (1 + 1), ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ ≤
-        Csob * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((1 : ℕ) : ℝ) u‖ := hSobu
+    have hh : ∑ a ∈ Finset.range (1 + 1), ‖iteratedCovGrad (I := I) g₀ 0 s a u‖ ≤
+        Csob * ‖ccTensorToHs (I := I) (M := M) g₀ s ((1 : ℕ) : ℝ) u‖ := hSobu
     rw [hSUM, hHN, show (0 + 2) = (1 + 1) by ring]
     exact hh
   have hstep_sq : Cstep * SUM ^ 2 ≤ (Cstep * Csob ^ 2) * HN ^ 2 := by
@@ -1287,77 +1419,77 @@ private theorem spectralModeMass_base1
     calc Cstep * SUM ^ 2 ≤ Cstep * (Csob * HN) ^ 2 :=
           mul_le_mul_of_nonneg_left h1 hCstep_nn
       _ = (Cstep * Csob ^ 2) * HN ^ 2 := by ring
-  calc ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (1 + 1) u)‖ ^ 2
-      ≤ ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 0
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ ^ 2 + Cstep * SUM ^ 2 := hS
+  calc ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (1 + 1) u)‖ ^ 2
+      ≤ ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s 0
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ ^ 2 + Cstep * SUM ^ 2 := hS
     _ = (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2,
+            (I := I) (M := M) g₀ 0 s,
           (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (1 + 1) *
             (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
                 (SmoothCcTensor.toL2 u) m) ^ 2) + Cstep * SUM ^ 2 := by rw [hbase0]
     _ ≤ (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2,
+            (I := I) (M := M) g₀ 0 s,
           (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (1 + 1) *
             (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
                 (SmoothCcTensor.toL2 u) m) ^ 2) + (Cstep * Csob ^ 2) * HN ^ 2 := by
         linarith [hstep_sq]
 
 private theorem exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_lower
-    (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
+    (g₀ : SmoothRiemannianMetric I M) (s n : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (u : SmoothCcTensor g₀ 0 2),
-        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u)‖ ^ 2 ≤
+      ∀ (u : SmoothCcTensor g₀ 0 s),
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (n + 1) u)‖ ^ 2 ≤
           (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2,
+              (I := I) (M := M) g₀ 0 s,
             (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (n + 1) *
               (tensorL2Coeff (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
                   (SmoothCcTensor.toL2 u) m) ^ 2) +
-            C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u‖ ^ 2 := by
+            C * ‖ccTensorToHs (I := I) (M := M) g₀ s ((n : ℕ) : ℝ) u‖ ^ 2 := by
   classical
   induction n using Nat.strong_induction_on with
   | _ n IH =>
     match n, IH with
     | 0, _ =>
       refine ⟨0, le_refl _, fun u => ?_⟩
-      rw [spectralModeMass_base0 (I := I) (M := M) g₀ u]
+      rw [spectralModeMass_base0 (I := I) (M := M) g₀ s u]
       simp
-    | 1, _ => exact spectralModeMass_base1 (I := I) (M := M) g₀
+    | 1, _ => exact spectralModeMass_base1 (I := I) (M := M) g₀ s
     | (Nat.succ (Nat.succ N)), IH =>
       obtain ⟨Cstep, hCstep_nn, hCstep⟩ :=
-        iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower (I := I) (M := M) g₀ (N + 1)
+        iteratedCovGrad_l2NormSq_succ_le_rawConnLap_base_add_lower (I := I) (M := M) g₀ s (N + 1)
       obtain ⟨Cih, hCih_nn, hCih⟩ := IH N (by omega)
       obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
-        exists_iteratedCovGrad_sum_le_smoothCcToTensorHs_general_local (I := I) (M := M) g₀ (N + 2)
+        hsJet_le (I := I) (M := M) g₀ s (N + 2)
       refine ⟨Cstep * Csob ^ 2 + Cih, by positivity, fun u => ?_⟩
       have hS := hCstep u
-      have hIH := hCih (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)
-      have hHsh := smoothCcToTensorHs_rawTensorConnLapSmooth_le_self
-        (I := I) (M := M) g₀ ((N : ℕ) : ℝ) u
+      have hIH := hCih (rawTensorConnLapSmooth (I := I) g₀ 0 s u)
+      have hHsh := cc_raw_hs_le
+        (I := I) (M := M) g₀ s ((N : ℕ) : ℝ) u
       have hSobu := hCsob u
       have hLHSidx : (N + 1 + 2) = (N + 2 + 1) := by ring
       rw [hLHSidx] at hS
       have hTopShift :
           (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-              (I := I) (M := M) g₀ 0 2,
+              (I := I) (M := M) g₀ 0 s,
             (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (N + 1) *
               (tensorL2Coeff (I := I) (M := M)
-                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                  (SmoothCcTensor.toL2 (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)) m) ^ 2) =
+                  (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
+                  (SmoothCcTensor.toL2 (rawTensorConnLapSmooth (I := I) g₀ 0 s u)) m) ^ 2) =
             ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-                (I := I) (M := M) g₀ 0 2,
+                (I := I) (M := M) g₀ 0 s,
               (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (N + 2 + 1) *
                 (tensorL2Coeff (I := I) (M := M)
-                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                    (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
                     (SmoothCcTensor.toL2 u) m) ^ 2 := by
         refine tsum_congr (fun m => ?_)
-        rw [tensorL2Coeff_ofCompact_rawTensorConnLapSmooth (I := I) (M := M) g₀
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2) u m]
+        rw [rawLap_coeff (I := I) (M := M) g₀ s
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s) u m]
         set L := TensorEigenIdx.lambda (I := I) (M := M) m with hL
         set c := tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+          (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
           (SmoothCcTensor.toL2 u) m with hc
         rw [show (- L * c) ^ 2 = L ^ 2 * c ^ 2 by ring,
           show N + 2 + 1 = (N + 1) + 2 by ring, pow_add]
@@ -1365,26 +1497,26 @@ private theorem exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_low
       rw [hTopShift] at hIH
       have hHidx : ((N : ℕ) : ℝ) + 2 = ((N + 2 : ℕ) : ℝ) := by push_cast; ring
       rw [hHidx] at hHsh
-      set A := ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (N + 1)
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u))‖ ^ 2 with hA
+      set A := ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (N + 1)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s u))‖ ^ 2 with hA
       set TOPg := ∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2,
+            (I := I) (M := M) g₀ 0 s,
           (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (N + 2 + 1) *
             (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
                 (SmoothCcTensor.toL2 u) m) ^ 2 with hTOPg
       set SUM := (∑ a ∈ Finset.range ((N + 1) + 2),
-          ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖) with hSUM
-      set HN := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((N : ℕ) : ℝ)
-          (rawTensorConnLapSmooth (I := I) g₀ 0 2 u)‖ with hHN
-      set HNu := ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((N + 2 : ℕ) : ℝ) u‖ with hHNu
+          ‖iteratedCovGrad (I := I) g₀ 0 s a u‖) with hSUM
+      set HN := ‖ccTensorToHs (I := I) (M := M) g₀ s ((N : ℕ) : ℝ)
+          (rawTensorConnLapSmooth (I := I) g₀ 0 s u)‖ with hHN
+      set HNu := ‖ccTensorToHs (I := I) (M := M) g₀ s ((N + 2 : ℕ) : ℝ) u‖ with hHNu
       have hSUM_nn : (0 : ℝ) ≤ SUM := Finset.sum_nonneg (fun a _ => norm_nonneg _)
       have hHN_nn : (0 : ℝ) ≤ HN := norm_nonneg _
       have hHNu_nn : (0 : ℝ) ≤ HNu := norm_nonneg _
       have hSob_le : SUM ≤ Csob * HNu := by
         have hSobu' : ∑ a ∈ Finset.range ((N + 2) + 1),
-            ‖iteratedCovGrad (I := I) g₀ 0 2 a u‖ ≤
-              Csob * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((N + 2 : ℕ) : ℝ) u‖ := hSobu
+            ‖iteratedCovGrad (I := I) g₀ 0 s a u‖ ≤
+              Csob * ‖ccTensorToHs (I := I) (M := M) g₀ s ((N + 2 : ℕ) : ℝ) u‖ := hSobu
         rw [hSUM, hHNu, show ((N + 1) + 2) = ((N + 2) + 1) by ring]
         exact hSobu'
       have hIH_H : Cih * HN ^ 2 ≤ Cih * HNu ^ 2 := by
@@ -1395,14 +1527,44 @@ private theorem exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_low
         calc Cstep * SUM ^ 2 ≤ Cstep * (Csob * HNu) ^ 2 :=
               mul_le_mul_of_nonneg_left h1 hCstep_nn
           _ = (Cstep * Csob ^ 2) * HNu ^ 2 := by ring
-      have hgoal : ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (N + 2 + 1) u)‖ ^ 2 ≤
+      have hgoal : ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (N + 2 + 1) u)‖ ^ 2 ≤
           TOPg + (Cstep * Csob ^ 2 + Cih) * HNu ^ 2 := by
-        calc ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (N + 2 + 1) u)‖ ^ 2
+        calc ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (N + 2 + 1) u)‖ ^ 2
             ≤ A + Cstep * SUM ^ 2 := hS
           _ ≤ (TOPg + Cih * HN ^ 2) + Cstep * SUM ^ 2 := by linarith [hIH]
           _ ≤ TOPg + (Cstep * Csob ^ 2 + Cih) * HNu ^ 2 := by nlinarith [hIH_H, hStep_sq]
       exact hgoal
 
+/-- The coefficient-one Dirichlet–Bochner gap for smooth covariant tensors. -/
+theorem cc_dirichlet_gap
+    (g₀ : SmoothRiemannianMetric I M) (s n : ℕ) :
+    ∃ Cgap : ℝ, 0 ≤ Cgap ∧
+      ∀ (u : SmoothCcTensor g₀ 0 s),
+        ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (n + 1) u)‖ ^ 2 ≤
+          ‖ccTensorToHs (I := I) (M := M) g₀ s (((n : ℕ) : ℝ) + 1) u‖ ^ 2 +
+            Cgap * ‖ccTensorToHs (I := I) (M := M) g₀ s ((n : ℕ) : ℝ) u‖ ^ 2 := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ :=
+    exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_lower (I := I) (M := M) g₀ s n
+  refine ⟨C, hC_nn, fun u => ?_⟩
+  have hmass := cc_mass_le
+    (I := I) (M := M) g₀ s n u
+  have hbound := hC u
+  calc ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 s (n + 1) u)‖ ^ 2
+      ≤ (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+            (I := I) (M := M) g₀ 0 s,
+          (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (n + 1) *
+            (tensorL2Coeff (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
+                (SmoothCcTensor.toL2 u) m) ^ 2) +
+          C * ‖ccTensorToHs (I := I) (M := M) g₀ s ((n : ℕ) : ℝ) u‖ ^ 2 := hbound
+    _ ≤ ‖ccTensorToHs (I := I) (M := M) g₀ s (((n : ℕ) : ℝ) + 1) u‖ ^ 2 +
+          C * ‖ccTensorToHs (I := I) (M := M) g₀ s ((n : ℕ) : ℝ) u‖ ^ 2 := by
+        have hMn_nn : 0 ≤ C * ‖ccTensorToHs (I := I) (M := M) g₀ s ((n : ℕ) : ℝ) u‖ ^ 2 :=
+          mul_nonneg hC_nn (sq_nonneg _)
+        linarith [hmass]
+
+/-- The rank-two compatibility specialization of `cc_dirichlet_gap`. -/
 theorem exists_iteratedCovGrad_l2NormSq_le_smoothCcToTensorHs_succ_add_lower
     (g₀ : SmoothRiemannianMetric I M) (n : ℕ) :
     ∃ Cgap : ℝ, 0 ≤ Cgap ∧
@@ -1410,26 +1572,19 @@ theorem exists_iteratedCovGrad_l2NormSq_le_smoothCcToTensorHs_succ_add_lower
         ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u)‖ ^ 2 ≤
           ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u‖ ^ 2 +
             Cgap * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u‖ ^ 2 := by
-  classical
-  obtain ⟨C, hC_nn, hC⟩ :=
-    exists_iteratedCovGrad_l2NormSq_le_spectralModeMass_succ_add_lower (I := I) (M := M) g₀ n
-  refine ⟨C, hC_nn, fun u => ?_⟩
-  have hmass := spectralModeMass_succ_le_smoothCcToTensorHs_succ_normSq
-    (I := I) (M := M) g₀ n u
-  have hbound := hC u
-  calc ‖SmoothCcTensor.toL2 (iteratedCovGrad (I := I) g₀ 0 2 (n + 1) u)‖ ^ 2
-      ≤ (∑' m : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
-            (I := I) (M := M) g₀ 0 2,
-          (TensorEigenIdx.lambda (I := I) (M := M) m) ^ (n + 1) *
-            (tensorL2Coeff (I := I) (M := M)
-                (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 2)
-                (SmoothCcTensor.toL2 u) m) ^ 2) +
-          C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u‖ ^ 2 := hbound
-    _ ≤ ‖smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u‖ ^ 2 +
-          C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u‖ ^ 2 := by
-        have hMn_nn : 0 ≤ C * ‖smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u‖ ^ 2 :=
-          mul_nonneg hC_nn (sq_nonneg _)
-        linarith [hmass]
+  obtain ⟨Cgap, hCgap, hbound⟩ := cc_dirichlet_gap (I := I) (M := M) g₀ 2 n
+  refine ⟨Cgap, hCgap, fun u => ?_⟩
+  have h := hbound u
+  have hhigh :
+      ccTensorToHs (I := I) (M := M) g₀ 2 (((n : ℕ) : ℝ) + 1) u =
+        smoothCcToTensorHs (I := I) (M := M) g₀ (((n : ℕ) : ℝ) + 1) u :=
+    tensorHs.ext (funext (fun _ => rfl))
+  have hlow :
+      ccTensorToHs (I := I) (M := M) g₀ 2 ((n : ℕ) : ℝ) u =
+        smoothCcToTensorHs (I := I) (M := M) g₀ ((n : ℕ) : ℝ) u :=
+    tensorHs.ext (funext (fun _ => rfl))
+  rw [hhigh, hlow] at h
+  exact h
 
 end IntrinsicSpectral
 end RicciFlow

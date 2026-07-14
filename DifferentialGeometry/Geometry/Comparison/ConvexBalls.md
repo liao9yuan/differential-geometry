@@ -116,3 +116,23 @@ input-producer brick, not here.
 ## Verification
 
 B1 + B2 focused checks passed (sorry-free, warning-clean).
+
+## 2026-07-14 selector closure and exact comparison blocker
+
+The two-point selector is no longer a black-box item.  The focused-green
+`GeodesicConvexity.minJoin` uses the unconditional intrinsic Hopf--Rinow
+minimizing-vector theorem and supplies length, endpoints, and time continuity.
+Consequently B4 should not add another selector input or a synonymous join API.
+
+The first missing reusable theorem is now the public, germ-local `lbl412`
+identity expressing `hessFun g (halfSqDist pt)` through the covariant derivative
+of the selected moving inverse.  After that, the genuine `lbl413` theorem must
+give a uniform positive Hessian lower bound on the larger bootstrap cage.  Its
+along-`minJoin` corollary supplies both confinement (take target `p`) and strict
+convexity (take each active target point).  `SecondVariationMinimiser` only gives
+index-form nonnegativity, so it cannot close this strict estimate by itself.
+
+The `lbl417` assembly theorem in this file remains checked, but the actual B4
+producer is theorem-level 0%.  Its dedicated machinery is at the foundational
+Hessian/variation stage; no new endpoint-radius field or C4 wrapper should hide
+that frontier.

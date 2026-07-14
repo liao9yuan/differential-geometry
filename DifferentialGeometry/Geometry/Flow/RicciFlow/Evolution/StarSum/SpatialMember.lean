@@ -493,6 +493,13 @@ private theorem curvRoute
 `[Δ,∇]∇ᵏRm`-components (the `spatialComm_nablaKRm_split` LHS, evaluated at the orthonormal frame
 tuple `basis ∘ I0`) equal the components of a star-sum element `T ∈ StarSum2 S t (k+1)`, uniformly
 in the centre `x`. -/
+
+/-- Constructor-tree cost of the spatial commutator witness in dimension
+`n`: two sums of length `4+k` and one sum of length `5+k`, each made of
+double-trace base terms. -/
+def commStarCost (n k : ℕ) : Real :=
+  (n : Real) ^ 2 * (13 + 3 * k)
+
 set_option backward.isDefEq.respectTransparency false in
 /-- **Brick 4, P2 (frozen statement): the spatial commutator `[Δ,∇]∇ᵏRm` is a star sum.**
 See `SpatialMember.md` for the assembly route. -/
@@ -502,7 +509,8 @@ theorem spatialCommStarSum
     {Idx : Type*} [Fintype Idx] [DecidableEq Idx] :
     ∃ T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) (4 + (k + 1)),
-      StarSum2 (I := I) S (t : Real) (k + 1) T ∧
+      StarSum2Cost (I := I) Idx S (t : Real) (k + 1) T
+          (commStarCost (Fintype.card Idx) k) ∧
       ∀ (x : M) (basis : Module.Basis Idx Real (TangentSpace I x))
         (gInv : Idx → Idx → Real)
         (_hinv : MetricInverseInBasis_gen (I := I) (M := M)
@@ -533,44 +541,58 @@ theorem spatialCommStarSum
           (sigmaCurvPos k q hq))
   let T := (-1 : Real) • (TA + TB + TC)
   refine ⟨T, ?_, ?_⟩
-  · have hTA : StarSum2 (I := I) S (t : Real) (k + 1) TA := by
+  · have hTA : StarSum2Cost (I := I) Idx S (t : Real) (k + 1) TA
+        (∑ _q : Fin (4 + k), (Fintype.card Idx : Real) ^ 2) := by
       dsimp [TA]
-      refine starSum2_sum (I := I) (S := S) (t := (t : Real))
+      refine starSum2Cost_sum (I := I) (Idx := Idx) (S := S) (t := (t : Real))
         (Finset.univ : Finset (Fin (4 + k)))
         (fun q => starBaseField (I := I) S (t : Real) (k + 1) 1 k 0 (sigmaDiffA k q))
+        (fun _q => (Fintype.card Idx : Real) ^ 2)
         ?_
       intro q _
-      exact StarSum2.base (I := I) (S := S) (t := (t : Real)) (k + 1) 1 k 0
+      exact StarSum2Cost.base (I := I) (Idx := Idx) (S := S) (t := (t : Real))
+        (k + 1) 1 k 0
         (sigmaDiffA k q)
-    have hTB : StarSum2 (I := I) S (t : Real) (k + 1) TB := by
+    have hTB : StarSum2Cost (I := I) Idx S (t : Real) (k + 1) TB
+        (∑ _q : Fin (4 + k), (Fintype.card Idx : Real) ^ 2) := by
       dsimp [TB]
-      refine starSum2_sum (I := I) (S := S) (t := (t : Real))
+      refine starSum2Cost_sum (I := I) (Idx := Idx) (S := S) (t := (t : Real))
         (Finset.univ : Finset (Fin (4 + k)))
         (fun q => starBaseField (I := I) S (t : Real) (k + 1) 0 (k + 1) 0
-          (sigmaDiffB k q)) ?_
+          (sigmaDiffB k q))
+        (fun _q => (Fintype.card Idx : Real) ^ 2) ?_
       intro q _
-      exact StarSum2.base (I := I) (S := S) (t := (t : Real)) (k + 1) 0 (k + 1) 0
+      exact StarSum2Cost.base (I := I) (Idx := Idx) (S := S) (t := (t : Real))
+        (k + 1) 0 (k + 1) 0
         (sigmaDiffB k q)
-    have hTC : StarSum2 (I := I) S (t : Real) (k + 1) TC := by
+    have hTC : StarSum2Cost (I := I) Idx S (t : Real) (k + 1) TC
+        (∑ _q : Fin (4 + (k + 1)), (Fintype.card Idx : Real) ^ 2) := by
       dsimp [TC]
-      refine starSum2_sum (I := I) (S := S) (t := (t : Real))
+      refine starSum2Cost_sum (I := I) (Idx := Idx) (S := S) (t := (t : Real))
         (Finset.univ : Finset (Fin (4 + (k + 1))))
         (fun q =>
           if hq : q.val = 0 then
             starBaseField (I := I) S (t : Real) (k + 1) (k + 1) 0 0 (sigmaCurv0 k)
           else
             starBaseField (I := I) S (t : Real) (k + 1) (k + 1) 0 0
-              (sigmaCurvPos k q hq)) ?_
+              (sigmaCurvPos k q hq))
+        (fun _q => (Fintype.card Idx : Real) ^ 2) ?_
       intro q _
       by_cases hq : q.val = 0
       · simpa [hq] using
-          (StarSum2.base (I := I) (S := S) (t := (t : Real)) (k + 1) (k + 1) 0 0
+          (StarSum2Cost.base (I := I) (Idx := Idx) (S := S) (t := (t : Real))
+            (k + 1) (k + 1) 0 0
             (sigmaCurv0 k))
       · simpa [hq] using
-          (StarSum2.base (I := I) (S := S) (t := (t : Real)) (k + 1) (k + 1) 0 0
+          (StarSum2Cost.base (I := I) (Idx := Idx) (S := S) (t := (t : Real))
+            (k + 1) (k + 1) 0 0
             (sigmaCurvPos k q hq))
-    exact StarSum2.smul (I := I) (S := S) (t := (t : Real)) (-1)
-      (StarSum2.add (StarSum2.add hTA hTB) hTC)
+    convert StarSum2Cost.smul (I := I) (Idx := Idx) (S := S) (t := (t : Real)) (-1)
+      (StarSum2Cost.add (StarSum2Cost.add hTA hTB) hTC) using 1
+    simp only [abs_neg, abs_one, one_mul, Finset.sum_const, Finset.card_univ,
+      Fintype.card_fin, nsmul_eq_mul, commStarCost]
+    push_cast
+    ring
   · intro x basis _gInv _hinv horth I0
     let tail : Fin (4 + k) → TangentSpace I x := fun p => basis (I0 p.succ)
     have hinvId : MetricInverseInBasis_gen (I := I) (M := M)

@@ -847,6 +847,56 @@ theorem existsLiveMetric0
   refine ⟨psi, gInf, hpsi, hginf, ?_⟩
   simpa only [X', c, PointedRiemannianSeq.subseq] using hconv
 
+/-- The common live-slot origin-metric limit retains the uniform Euclidean
+metric equivalence of the finite-stage normal-coordinate metrics. -/
+theorem liveMetric0_equiv
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (input : NormalCoordMetricBoundInput (I := I) X)
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    {psi : Nat → Nat}
+    {gInf : E → (LiveSlot L pb r → (E →L[Real] E →L[Real] Real))}
+    (hconv : MapCInfConvOnCompacts Set.univ
+      (fun k _ gamma => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD hd P L (psi k) (gamma.1 : Nat)) 0)
+      gInf) :
+    ∀ gamma : LiveSlot L pb r, ∀ v : E,
+      (1 / 2 : Real) * ‖v‖ ^ 2 ≤ gInf 0 gamma v v ∧
+        gInf 0 gamma v v ≤ 2 * ‖v‖ ^ 2 := by
+  intro gamma v
+  have htendAll : Filter.Tendsto
+      (fun k gamma => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD hd P L (psi k) (gamma.1 : Nat)) 0)
+      Filter.atTop (𝓝 (gInf 0)) :=
+    tendsto_of_cInf hconv (Set.mem_univ 0)
+  have htend : Filter.Tendsto
+      (fun k => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD hd P L (psi k) (gamma.1 : Nat)) 0)
+      Filter.atTop (𝓝 (gInf 0 gamma)) :=
+    (tendsto_pi_nhds.mp htendAll) gamma
+  have hcont : Continuous
+      (fun c : E →L[Real] E →L[Real] Real => c v v) := by
+    fun_prop
+  have htendv : Filter.Tendsto
+      (fun k => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD hd P L (psi k) (gamma.1 : Nat)) 0 v v)
+      Filter.atTop (𝓝 (gInf 0 gamma v v)) :=
+    (hcont.tendsto (gInf 0 gamma)).comp htend
+  have hzero : ∀ k : Nat, (0 : E) ∈ Metric.ball 0
+      (input.radius (L.φ (psi k))
+        (seqCenterD hd P L (psi k) (gamma.1 : Nat))) := by
+    intro k
+    rw [Metric.mem_ball, dist_self]
+    exact input.radius_pos _ _
+  exact ⟨
+    ge_of_tendsto htendv (Filter.Eventually.of_forall fun k =>
+      (input.metric_equiv (L.φ (psi k))
+        (seqCenterD hd P L (psi k) (gamma.1 : Nat)) 0 (hzero k) v).1),
+    le_of_tendsto htendv (Filter.Eventually.of_forall fun k =>
+      (input.metric_equiv (L.φ (psi k))
+        (seqCenterD hd P L (psi k) (gamma.1 : Nat)) 0 (hzero k) v).2)⟩
+
 end OriginMetric
 
 end HCGCompactness

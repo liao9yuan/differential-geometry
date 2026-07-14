@@ -252,3 +252,43 @@ moving conjugate-heat theorem, Perelman no-local-collapsing, and
 `ham3_noncollapse` remain 0% as theorems.  Dedicated machinery is about 35%,
 77%, and 40% respectively; whole HCG machinery remains about 53%, with its
 endpoints at 0%.
+
+## Principal pairing update -- 2026-07-14
+
+The scalar coefficient-to-flux split and the small principal pairing are now
+proved and focused-verified.  In particular, `cc_principal_pair` isolates the
+order-zero perturbation coefficient `delta / (1 - delta)` without a
+spectral-support-dependent constant or a new consumer hypothesis.
+
+The next producer remains the balanced `cc_comm_pair`.  The existing public
+raw-commutator theorem is third order, rank-two-specific, and tied to a
+resolvent family, so it cannot serve as this producer.  The mathematically
+correct transport-and-telescope proof exists privately in the DeTurck energy
+pairing file; the current task is to extract its base-rank-generic core and
+specialize it to scalars.  Moving dissipation and the final Dirichlet gap remain
+downstream of that extraction.
+
+The endpoint accounting is unchanged: `heatpot_of_maxreg`, the classical
+moving conjugate-heat theorem, Perelman no-local-collapsing, and
+`ham3_noncollapse` remain 0% as theorems.  Dedicated machinery is about 35%,
+77%, and 40% respectively; whole HCG machinery remains about 53%, with its
+endpoints at 0%.
+
+## Balanced scalar dissipation update -- 2026-07-14
+
+The generic passenger-slot transport and its scalar adapters are now proved
+and verified.  In particular, `cc_comm_pair` and `cc_energy_diss` give the
+support-independent high-order moving-cometric pairing with sharp top
+coefficient `delta / (1 - delta)` and only adjacent covariant-jet windows.
+
+This is machinery progress, not completion of `heatpot_of_maxreg`.  The live
+frontier is the rank-generic coefficient-one Dirichlet gap followed by the
+finite-core scalar weighted-pairing identification needed by the Galerkin
+consumer.  Time smallness can be selected internally from `metric_cp_tendsto`,
+so no new convergence assumption is required.
+
+Honest accounting: `heatpot_of_maxreg`, the classical moving conjugate-heat
+theorem, Perelman no-local-collapsing, and `ham3_noncollapse` remain 0% as
+theorems.  Dedicated machinery is about 35%, 77%, and 40% respectively;
+`scalar_crit_tame` remains 0% with about 72% dedicated machinery.  Whole HCG
+machinery remains about 53%, with endpoints at 0%.

@@ -1,5 +1,23 @@
 # BBSLimitProducer — Dispatch C: `cinftyLimitData_of_solution`
 
+## 2026-07-14 uniform residual and C1 assembly pass
+
+- The residual constant obstruction is solved in the verified core stack:
+  `StarSum2Cost`, `commStarCost`, `gammaStarCost`, and `resStarCost` produce one
+  constant depending only on `k`.
+- Smooth local orthonormal frames are already supplied by `smoothOrtho_local`;
+  the old G1 entry is obsolete.
+- `SolutionTowerHeat.lean` now contains the full source body for `towerHeatSol`,
+  directly composing the local-frame residual, inverse-metric evolution,
+  pointwise norm heat equation, and reaction bound.
+- `towerHeatSol` is still **0% as a theorem** until focused verification passes.
+  Its dedicated machinery is about **98%**. The current stop is tooling: an
+  active shared Spectral/Elliptic build is rebuilding transitive imports, so
+  checks fail on moving missing `.olean` files before reaching this theorem.
+- `bbsAllMBounds` remains **0% as a theorem**. After C1 verifies, C2 still needs
+  the one-constant-per-target-level Bernstein slab/time-shift assembly. C3
+  remains the separate hard smooth-limit and Ricci-continuity analysis.
+
 Producer for the gating `hLimit` sorry in `MaximalTime.lean:171`: from a
 bounded-curvature Ricci-flow solution on `[α,ω)`, produce the smooth limit data
 `CinftyLimitData g_fam α ω hαω` at the right endpoint `ω`.
@@ -110,8 +128,9 @@ Per target `(t₀,x₀)` (because `TowerHeatBoundOn` is `∀t x ∃d`, and the o
 TowerProducer.md step 3):
 1. Choose a **smooth local orthonormal frame** `frame` on an open `u ∋ x₀`, orthonormal w.r.t.
    `g_{t₀}` at `t₀` on `u`. (Frame existence producer — see §4 gap G1.)
-2. `resStarBoundLF S hS k t₀ frame … (standing inputs)` ⟹ `T_k`, `C_k`, the per-comp `hT`, and the
-   residual bound. Feed `hT` + `hgInvDt` (+ the spatial realization data `hinv/hfields/hdu/hHess/hlapTrace`
+2. `resStarSol S hS hdim k t₀ frame …` ⟹ `T_k`, `C_k`, the per-comp `hT`, and the
+   residual bound, with all five former standing inputs produced from the solution. Feed `hT` +
+   `hgInvDt` (+ the spatial realization data `hinv/hfields/hdu/hHess/hlapTrace`
    from `hS`) to `nablaKRm04NormHeatEquationOn_intrinsic` ⟹ `NablaRm04NormHeatEquationOn …`.
 3. `hRic` (= `|ric|≤card·√(w0)`) from the Ricci-controls-Rm bridge at the orthonormal frame; `hlevel`
    (= `compNormSqMulti(∇ᵏRm comps) ≤ w k`) is `compNormSqMulti_orthoBasis_eq_normSq0S` ▸ defeq.
@@ -144,29 +163,23 @@ Assemble `BernsteinTower G` with `w = nablaKRm04NormSqIntrinsic S`:
 
 ---
 
-## 3. Standing-input ledger (the frontier)
+## 3. Standing-input ledger (discharged)
 
-`resStarBoundLF` carries five standing inputs. Discharge status from `IsSolutionOn` (via banked
-producers — see §4):
+`resStarBoundLF` carries five standing inputs. `resStarSol` now discharges all five from
+`IsSolutionOn` on a strictly positive-time tail:
 
 | input | meaning | discharged from `hS`? | by |
 |---|---|---|---|
-| `hbase` | `∂ₜRm04 = Δ+2B−drift` at orthonormal basis (Lemma 6.1) | **NO — DeTurck** | needs `hmetricFrame`/`hmix` + `hlich`/`hsc`; `rm04HrmProducer` reduces it but bottoms on DeTurck time-smoothness of `Rm04` |
-| `hrm` | `∂ₜ(lfBase)` frame-comp derivatives | reduces to `hbase` | `rm04HrmProducer`/`rmBaseDeriv_basis` |
-| `hchr` | `∂ₜΓ` frame-comp derivatives | **YES, given `hmetricFrame`** | `christoffelEvolution_of_solution` |
-| `hchrId` | `∂ₜΓ = −∇Ric−∇Ric+∇Ric` value | **YES** (proved, not assumed) | `christoffelEvolution_of_solution` |
-| `hswap` | time/space deriv swap on the Rm tower | **NO — DeTurck** | needs joint `(t,x)` `ContMDiffOn ⊤` of the moving connection |
+| `hbase` | `∂ₜRm04 = Δ+2B−drift` at orthonormal basis (Lemma 6.1) | **YES** | `rm04Base_of_sol` |
+| `hrm` | `∂ₜ(lfBase)` frame-comp derivatives | **YES** | `tailTowerData` level zero |
+| `hchr` | `∂ₜΓ` frame-comp derivatives | **YES** | `tailChristoffel` via `tailTowerData` |
+| `hchrId` | `∂ₜΓ = −∇Ric−∇Ric+∇Ric` value | **YES** | `tailTowerData`, using the inverse-metric identity at an orthonormal frame |
+| `hswap` | time/space derivative swap on the Rm tower | **YES** | `frameTowerSwap` via `tailTowerData` |
 
-Irreducible DeTurck frontier (coworker's lane, per `DeTurckHandoff.md`): **`hbase`, `hswap`**, and the
-metric-frame regularity boxes `MetricFrameTimeRegularityInFrameOnLocal` (`Metric/Basic.lean:241`) /
-`…SpacetimeRegularity…` (`:270`) whose core gap is `metricSmooth : ContDiffOn ℝ ⊤ (t↦g_t(frame i,frame j)) D.carrier`
-— the `ContMDiffOn (ℝ×M) ⊤` time-regularity of the flow at the closed endpoint. This is exactly the
-DeTurck content already deferred by `extends_of_rmBounded`'s `hglue` sorry.
-
-**Consequence:** C1, hence C2/C3, is provable only **conditional on the DeTurck time-regularity
-standing inputs**. The target signature `(hS,hRm,hbound)→CinftyLimitData` as written is **not
-provable** — it is missing (i) those standing inputs and (ii) `hdim : finrank E = 3` (the residual
-machinery is dim-3 only). This is a STOP-condition design choice (§5).
+The old DeTurck-gate diagnosis is superseded. The current C1 frontier is downstream: construct the
+smooth local frame required by `resStarSol`, expose the norm heat equation in a pointwise form that
+accepts its local component derivative, and supply the scalar differential realizations. The dim-3
+hypothesis remains explicit in `bbsAllMBounds`; it is not hidden by this producer.
 
 ---
 
@@ -211,6 +224,12 @@ Options:
 
 ## 6. Running status
 
+- **2026-07-14 — the standing-input frontier is discharged.**
+  `resStarSol` is focused-check and targeted-build green. It combines `tailTowerData` with
+  `rm04Base_of_sol`, so `hbase`, `hrm`, `hchr`, `hchrId`, and `hswap` are no longer assumptions or
+  DeTurck black boxes. `bbsAllMBounds` itself remains an unproved theorem (0%): C1 still needs the
+  local-frame adapter, a pointwise norm-heat interface, and scalar derivative/Laplacian realizations;
+  C2 then needs the Bernstein time-slab assembly. C3 remains the separate hard smooth-limit problem.
 - **2026-06-13 (this session) — D1 = (b) “one precise frontier sorry” (user-chosen); EXECUTED.**
   Read the full interface (§1) + standing-input ledger (§3); surfaced D1; user chose the clean public
   signature with the DeTurck-gated content localized to named frontier sorries.  `BBSLimitProducer.lean`

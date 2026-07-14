@@ -1,4 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.PosDefPerturbation
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBoundsFlow
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricC1Continuity
 
 /-!
@@ -68,6 +70,104 @@ private theorem lapDiff_rho
         (tendsto_id : Tendsto (fun s : Real => s) (𝓝 0) (𝓝 0)))
   exact (HCGCompactness.metric_c1_tendsto
     (I := I) G hG T).comp hshift
+
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
+/-- Near the frozen time, the moving-minus-frozen metric bilinear form has
+intrinsic fibre operator norm at most `1 / 4` relative to the frozen metric. -/
+theorem lapDiff_fibreSmall
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) :
+    ∀ᶠ s in 𝓝 (0 : Real),
+      MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+        (fun x : M =>
+          (G.metric ((T : Real) - s)).inner x - (G.metric (T : Real)).inner x)
+        (1 / 4 : Real) := by
+  let q : SmoothRiemannianMetric I M := G.metric (T : Real)
+  let rho : Real → Real := fun s =>
+    HCGCompactness.metricDerivNormSupOn (I := I) Set.univ 1
+      (G.metric ((T : Real) - s)) q q
+  have hrho : Tendsto rho (𝓝 0) (𝓝 0) := by
+    simpa only [rho, q] using lapDiff_rho (I := I) G hG T
+  have hsmall : ∀ᶠ s in 𝓝 (0 : Real), rho s < (1 / 4 : Real) :=
+    hrho.eventually_lt_const (by norm_num)
+  filter_upwards [hsmall] with s hs
+  intro x v w
+  have hnorm :
+      HCGCompactness.metricDerivNorm (I := I) 0
+          (G.metric ((T : Real) - s)) q q x ≤ rho s := by
+    simpa only [rho] using
+      (HCGCompactness.derivNorm_le_sup (I := I) (K := Set.univ)
+        isCompact_univ (a := 0) (p := 1) (by omega)
+        (G.metric ((T : Real) - s)) q q (Set.mem_univ x))
+  have heval := HCGCompactness.metricDiff_abs_le (I := I)
+    (G.metric ((T : Real) - s)) q q x v w
+  have hfinal :
+      |(G.metric ((T : Real) - s)).inner x v w - q.inner x v w| ≤
+        (1 / 4 : Real) * Real.sqrt (q.inner x v v) * Real.sqrt (q.inner x w w) :=
+    heval.trans (mul_le_mul_of_nonneg_right
+        (mul_le_mul_of_nonneg_right (hnorm.trans hs.le) (Real.sqrt_nonneg _))
+        (Real.sqrt_nonneg _))
+  simpa only [q, ContinuousLinearMap.sub_apply] using hfinal
+
+omit [NeZero (Module.finrank Real E)] [BoundarylessManifold I M] in
+/-- One short backward-time interval stays in the regular set and has
+quarter-size metric perturbation relative to the frozen metric. -/
+theorem lapDiff_short
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) :
+    ∃ tau : Real, 0 < tau ∧ tau ≤ 1 ∧
+      ∀ s ∈ Set.Icc (0 : Real) tau,
+        (T : Real) - s ∈ D.regular ∧
+          MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+            (fun x : M =>
+              (G.metric ((T : Real) - s)).inner x -
+                (G.metric (T : Real)).inner x)
+            (1 / 4 : Real) := by
+  have hshift :
+      Tendsto (fun s : Real => (T : Real) - s)
+        (𝓝 0) (𝓝 (T : Real)) := by
+    simpa only [sub_zero] using
+      (tendsto_const_nhds.sub
+        (tendsto_id : Tendsto (fun s : Real => s) (𝓝 0) (𝓝 0)))
+  have hreg :
+      ∀ᶠ s in 𝓝 (0 : Real), (T : Real) - s ∈ D.regular :=
+    hshift.eventually (D.regular_isOpen.mem_nhds T.2)
+  have hsmall := lapDiff_fibreSmall (I := I) (M := M) G hG T
+  let U : Set Real := {s |
+    (T : Real) - s ∈ D.regular ∧
+      MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+        (fun x : M =>
+          (G.metric ((T : Real) - s)).inner x -
+            (G.metric (T : Real)).inner x)
+        (1 / 4 : Real)}
+  have hU : U ∈ 𝓝 (0 : Real) := by
+    change ∀ᶠ s in 𝓝 (0 : Real),
+      (T : Real) - s ∈ D.regular ∧
+        MetricRealization.gFibreOpBound (I := I) (G.metric (T : Real))
+          (fun x : M =>
+            (G.metric ((T : Real) - s)).inner x -
+              (G.metric (T : Real)).inner x)
+          (1 / 4 : Real)
+    filter_upwards [hreg, hsmall] with s hs hr
+    exact ⟨hs, hr⟩
+  obtain ⟨delta, hdelta, hball⟩ := Metric.mem_nhds_iff.mp hU
+  let tau : Real := min 1 (delta / 2)
+  have htau : 0 < tau := by
+    dsimp only [tau]
+    exact lt_min zero_lt_one (half_pos hdelta)
+  have htau_one : tau ≤ 1 := min_le_left _ _
+  have htau_delta : tau < delta :=
+    (min_le_right (1 : Real) (delta / 2)).trans_lt (half_lt_self hdelta)
+  refine ⟨tau, htau, htau_one, ?_⟩
+  intro s hs
+  have hsball : s ∈ Metric.ball (0 : Real) delta := by
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
+    exact hs.2.trans_lt htau_delta
+  simpa only [U] using hball hsball
 
 /-- Near zero, `lapDiffA2` agrees on every finite spectral vector with the
 genuine smooth Laplacian-difference core action. -/

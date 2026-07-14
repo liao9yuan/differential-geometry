@@ -117,6 +117,15 @@ def castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ) {a b : ℕ} (h : a 
     (W : SmoothCcTensor g r a) : SmoothCcTensor g r b :=
   h ▸ W
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [CompleteSpace E] in
+/-- A covariant-rank cast preserves the intrinsic norm of a smooth tensor. -/
+@[simp] theorem norm_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ)
+    {a b : ℕ} (h : a = b) (W : SmoothCcTensor g r a) :
+    ‖castRankCc_db g r h W‖ = ‖W‖ := by
+  subst h
+  rfl
+
 set_option linter.unusedSectionVars false in
 /-- **The iterated-gradient `rfns` is invariant under the rank-cast `castRankCc_db`.** -/
 theorem rfns_iteratedCovGrad_castRankCc_db (g : SmoothRiemannianMetric I M) (r : ℕ)

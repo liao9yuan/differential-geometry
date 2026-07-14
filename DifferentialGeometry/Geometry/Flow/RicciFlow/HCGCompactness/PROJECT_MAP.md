@@ -32,7 +32,7 @@ Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
 Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
-                    → Step B (local metrics/transitions/B1 machinery, ~83%;
+                    → Step B (local metrics/transitions/B1 machinery, ~88%;
                       origin-metric and transition branches run in parallel,
                       then merge on one further subsequence)
                     → Step C (center-of-mass averaging, ~3/4)
@@ -55,7 +55,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 
 | Lane | Entry plan | State |
 |---|---|---|
-| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/STEPB_PLAN.md` + `C4/B1_JOIN_HANDOFF.md` + `C4/NormalBranchScale.md` + `Geometry/Exponential/LocalDiffeomorphism.md` + `C4/COMPCONV_HANDOFF.md` | active |
+| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/STEPB_PLAN.md` + `C4/B1_JOIN_HANDOFF.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchScale.md` + `Geometry/Exponential/LocalDiffeomorphism.md` + `C4/COMPCONV_HANDOFF.md` | source-local/global capstone checked; independent StrictDist/Hessian producer active |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` | conditional consumer complete: D6 convergence transport and `compactness_of_b1` are checked.  Do not restart D1--D6; resume at the upstream `StepB1RawInput` producer in `B1_JOIN_HANDOFF.md`. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldEndgame.md` | producer hypotheses remain active; canonical conditional wrappers are checked |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
@@ -79,12 +79,12 @@ book-faithful; **FIXED** = the pre-audit statement was wrong and was corrected t
 | `RealizesEdist` | — | plumbing | provable at instantiation from `ProperMetricOn`; not external math. |
 | `NormalCoordMetricBoundInput` / `NormalRadiusProfile` | `lbl395` = [H6] Cor 4.12 + CGT compatibility | **FIXED floor; `g_p` tail checked** | `normalRadius` supplies the relative `expMapC2Radius` floor. The optimal `gpCoerciveConst`, H6 origin bound, and positive `gpRatio` give the true `expRadiusGp` floor; `gpScaleTail` now consumes it on the post-packing finite slots. No endpoint radius assumption was added. |
 | retired `ExpInverseDerivBoundInput` (S6) | `lbl418` | **REMOVED** | The localized H6 derivative producer replaced the temporary S6 consumer chain.  After the finite source-slot diagonal migrated and a zero-consumer audit passed, the S6 type, compatibility entrypoints, endpoint field, and obsolete selector budget were removed. |
-| `IsometryDerivBounds` (F8) | `lbl375` → [H6] §5 | **PROVED producer; finite H6 migration checked** | `C4/H6_ISOMETRY_DERIV_PLAN.md`: `normal_bounds_on`, fixed-pair/refinement/live-slot extraction, atom/weight packaging, and `exists_atom_lim`/`exists_atom_fin` are checked without S6.  Positive interacting-pair extraction, active six-lambda image control, and the nonzero-limit-weight to eventual-`BInter` bridge are checked.  The capstone audit selected support-local decoded convergence plus `activeFill`; implementation is still open. |
+| `IsometryDerivBounds` (F8) | `lbl375` → [H6] §5 | **PROVED producer; finite H6 migration and capstone wiring checked** | `C4/H6_ISOMETRY_DERIV_PLAN.md`: `normal_bounds_on`, fixed-pair/refinement/live-slot extraction, atom/weight packaging, and `exists_atom_lim`/`exists_atom_fin` are checked without S6. Positive interacting-pair extraction, active six-lambda image control, source-local decoded convergence, `activeFill`, the finite source cover, and the global existential-source corollary are checked. No glued weights or chart selector are used. |
 | `Item3RadiusAt` / `Item3RadiusTail` | `lbl391/392` ("D large") | **CHECKED exp-diffeomorphism producer** | `radiusScaleTail` proves the finite common tail for the book factor; `exists_item3D` selects one divisor satisfying injectivity, `expMapC2Radius`, `g_p`, and Step-A cap budgets before packing. The legacy all-index `Item3RadiusInput` is compatibility-only. Full geodesic convexity is a separate open theorem. |
 | `Item3GpScaleAt` / `Item3GpScaleTail` | `lbl383/427` | **CHECKED producer and consumers** | `gpScaleTail` finite-intersects `lambda_window` after packing with the exact `c = 8` budget. Step-C atoms, atom package, and joins consume only `At`/`Tail`; legacy all-index `Item3GpScaleInput` is compatibility-only. |
-| `SigmaScaleField` | `lbl383` family | relative branch and readout wiring checked | `normalMinScale` now retains the full minimizing branch with its `expRadiusGp` half-floor, and `NormalBranchCage.exists_live_min` specializes it to live centers.  The physical cage still depends on `A_D(r)` and a center radius chosen only after packing; its D-ledger remains post-packing assembly work. |
-| `CmHessianInput` | `lbl413`-adjacent | **TRUE** at book scale | below the convexity radius `∂_z(exp⁻¹) ≈ −id`, Neumann-series invertibility; per-configuration honest input. |
-| `StrictDistInput` | `lbl416/417` | **TRUE** at book scale | strict convexity of `½d²` below `min{inj/3, π/(6√K)}`. |
+| `SigmaScaleField` | `lbl383` family | relative branch and readout wiring checked | `normalMinScale` retains the full minimizing branch with its `expRadiusGp` half-floor, and `NormalBranchCage.exists_live_min` specializes it to live centers. The one-shot divisor, post-packing finite-slot tails, physical cage, source-local support readout, and finite source maximum are now checked; full convexity/Hessian remains independent. |
+| `CmHessianInput` | `lbl413`-adjacent | **0% producer; true at book scale** | Below the convexity radius `∂_z(exp⁻¹) ≈ −id`, Neumann-series invertibility follows. The current structure is only the per-configuration consumer shape; the derivative estimate and Neumann producer are not proved. |
+| `StrictDistInput` | `lbl416/417` | **0% producer; minimizing join checked** | `GeodesicConvexity.minJoin` now packages the sorry-free Hopf--Rinow two-point selector. What remains is the `lbl412` Hessian identity and `lbl413` positive lower bound giving confinement and strict convexity of `½d²` below `min{inj/3, π/(6√K)}`. |
 | endpoint `hconn` | book convention | added 2026-07-05 | connectedness is genuinely needed by the Hopf–Rinow proper realization (disconnected ⇒ emetric `⊤`); the book's manifolds are connected by convention. |
 
 Meta-finding: 2 of the 12 audited inputs were mis-stated (one unsatisfiable, one
@@ -107,7 +107,7 @@ its docstring BEFORE consumers are built against it.
 ## 6. Honest progress (updated 2026-07-13)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
-  Step-B/B1 machinery ~83% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
+  Step-B/B1 machinery ~88% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
   sorry-free/axiom-clean 2026-07-05** — `exists_diffeo_of_injOn` construction +
   `BookApproxIsoPartialData` forward/reverse transport via `PreApproxIsoDataOn.congr`;
   **2026-07-09 statement repair:** the false P-only `stepB1_approxIso` and its `sorry`
@@ -136,7 +136,7 @@ its docstring BEFORE consumers are built against it.
   former velocity-`hderiv` API gap, and `normLowerOfSepExp` now derives the coordinate norm lower
   bound directly from named-exp-ball containment and Riemannian separation.  This improves the
   producer machinery but does not change theorem completion: the `StepB1RawInput` producer and
-  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 83%.
+  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 88%.
   **2026-07-13 minimizing-branch closure:** Gates 1--6 are now focused-green:
   the selected inverse is minimizing, `halfSq` agrees with intrinsic squared
   distance on its cage, the generic gradient identity is proved in the
@@ -166,6 +166,23 @@ its docstring BEFORE consumers are built against it.
   pair-index tails and builds the actual filled `CenterInput`, with
   `StrictDistInput` left as the honest independent continuation.  This is
   machinery; `StepB1RawInput` remains 0% produced.
+  **2026-07-13 source-local/global capstone closure:**
+  `existsAtomWeightH6_of_innerCover`, `exists_live_source_cover`, and
+  `exists_supp_pts_fin` produce one master subsequence carrying chart-local
+  normalized weights and old-`L` sparse interaction points.  The support
+  readout now consumes only nonzero limit-weight slots.
+  `StepCSupportCapstone.exists_supp_cm_fin` chooses the minimizing scale before
+  the one-shot divisor, then uses separate finite maxima over target and source
+  slots. `exists_cm_on_source` gives the global-ball existential-source
+  corollary. This conditional architecture is 100%; the concrete
+  `StrictDistInput`/Hessian--Neumann producer and `StepB1RawInput` remain open.
+  **2026-07-14 strict-distance audit:** the intrinsic Hopf--Rinow endpoint is
+  now exposed by the focused-green `minimizingVec`/`minJoin` API, so a concrete
+  two-point join is no longer part of the honest input.  The smallest genuine
+  comparison gap is the `lbl412` Hessian identity plus the `lbl413` uniform
+  positive lower bound on the controlled cut-locus-free ball.  The existing
+  second-variation theorem supplies only index-form nonnegativity and therefore
+  cannot prove either `StrictDistInput` or the sibling Neumann invertibility.
   **Later 2026-07-09:** `seqCenter_zero` / `seqCenter_edist_ge` and
   `seqChartNorm_ge` connect the actual ordered-net centers to that coordinate
   lower bound.  The former POU representation mismatch is now resolved:
@@ -354,13 +371,13 @@ its docstring BEFORE consumers are built against it.
    consumer, finite source-slot diagonal, and endpoint S6 removal are **100%
    migrated**.  Finite positive interacting-pair extraction is checked, as are
    stable-disjoint zero limits and the active six-lambda target-image theorem.
-   The remaining B/C implementation frontier is to specialize decoded
-   convergence to actual atom/weight support and totalize it with `activeFill`:
-   the current whole-cage `hKV0` cannot follow from the larger H6 target anchor
-   and conditional cancellation.  The checked
-   `HasAtomWeightLim.binter_of_weight` bridge now connects nonzero limit support
-   to the positive-pair tail needed by that route.
-   Ch4 **machinery** overall remains ≈ **80%** after rounding;
+   The source-local decoded convergence, point-only totalization, finite source
+   cover, support readout, two finite maxima, and global-ball existential-source
+   corollary are now checked in `StepCProducers` and
+   `StepCSupportCapstone`.  The remaining B/C analytic frontier is the
+   `StrictDistInput`/Hessian--Neumann producer, not an H6 or chart-compatibility
+   theorem.
+   Ch4 **machinery** overall is ≈ **82%** after rounding;
   the conditional compactness endpoint and textbook B1 theorem remain **0%**.
 - Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
 - Ch3: Lemma 3.11 done (hShi hypothesis).  The canonical conditional assembly
@@ -427,15 +444,15 @@ its docstring BEFORE consumers are built against it.
   than quantified over arbitrary limits.  This contract refactor is checked
   infrastructure, not completion of either producer.
 - **B/C support-local H6 integration:** the normalized limit-weight projection,
-  actual-support compact cages, support-local decoded composition, fixed-source
-  support readout, and one common dependent finite pair extraction are now
-  focused-green. Sparse active-support machinery is about 92% and
-  pair-to-capstone integration about 78%. The live consultation frontier is the
-  outer source-local/global assembly plus a support-local
-  `exists_hat_cm_tail`; H6 derivative production and pair extraction are no
-  longer blockers. This advances infrastructure only: `StepB1RawInput`,
-  textbook B1, and compactness endpoints remain 0%.
-- **Whole HCG project — conservative MACHINERY estimate ≈ 53%** (this is infrastructure coverage,
+  actual-support compact cages, producer-owned finite source cover,
+  support-local decoded composition/readout, old-`L` sparse interaction points,
+  source finite maximum, and global-ball existential-source corollary are all
+  focused-green. The approved conditional source-local/global capstone is 100%.
+  H6 derivative production, pair extraction, and outer cover wiring are no
+  longer blockers. The independent `StrictDistInput`/Hessian--Neumann producer
+  remains open. This advances infrastructure only: `StepB1RawInput`, textbook
+  B1, and compactness endpoints remain 0%.
+- **Whole HCG project — conservative MACHINERY estimate ≈ 54%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
   unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved.**  The separate
   conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes
@@ -443,10 +460,9 @@ its docstring BEFORE consumers are built against it.
   completion of the endpoint theorem.
   The riskiest open items (D3d metric transport RESOLVED 2026-07-07; D1a-(ii) naturality wall
   DISSOLVED 2026-07-07 — was a third walls-overcount, the restrictOpen/pullback stack pre-existed):
-  the remaining Item-3 full-convexity and concrete outer source-slot assembly
+  the remaining Item-3 full-convexity and Hessian/Neumann invertibility
   (the `g_p`, exp-diffeomorphism-radius, canonical sigma, pre-packing large-`D`,
-  and physical finite-hat ledgers are now checked),
-  Hessian/Neumann invertibility,
+  physical finite-hat, and outer source-slot ledgers are now checked),
   the arbitrary-order quantitative center-of-mass derivative theorem (`lbl430`
   bounds half), and the B1 raw producer.
   The metric/transition join, atom/weight package, pinned center gluing, generic

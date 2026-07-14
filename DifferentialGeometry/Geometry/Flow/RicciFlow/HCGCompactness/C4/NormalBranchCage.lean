@@ -557,8 +557,165 @@ theorem HasNormalBrFull.exists_cm_eqn
     mu xi join p r h' hρ hρq hρmetric hρexp hpairs''
   simpa only [xi, hdecode] using hz
 
+/-- A prescribed live source slot whose hat contains the center supplies its
+slotwise quantitative branch and reads the actual center equation. -/
+theorem exists_hat_cm_eqn_at
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real}
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (hre : hd.RealizesEdist) (L : NetLimitData hd D P)
+    (pb : hd.PackingBound D) (r : Real) (k : Nat)
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (q : LiveSlot L pb r → NNReal) (δ : LiveSlot L pb r → Real)
+    (hqdata : ∀ gamma : LiveSlot L pb r,
+      let Rgamma := L.rInf (gamma.1 : Nat) + 1
+      let rho := aMin * hd.mu Rgamma
+      0 < q gamma ∧ 0 < δ gamma ∧ 0 < rho ∧
+        2 * rho < (q gamma : Real))
+    (hbranch : ∀ gamma : LiveSlot L pb r,
+      let Rgamma := L.rInf (gamma.1 : Nat) + 1
+      let rho := aMin * hd.mu Rgamma
+      let x0 := seqCenterD hd P L k (gamma.1 : Nat)
+      letI : TopologicalSpace (X.obj (L.φ k)).M :=
+        (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M :=
+        (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M :=
+        (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      HasNormalBrFull (I := I) (X.obj (L.φ k))
+          (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0
+          (q gamma) (δ gamma) rho ∧
+        rho ≤ hb.radius (L.φ k) x0 ∧
+        rho / 2 ≤ expRadiusGp (I := I) (X.obj (L.φ k)).metric x0)
+    (alpha : LiveSlot L pb r)
+    :
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : IsManifold I 1 (X.obj (L.φ k)).M := IsManifold.of_le
+      (I := I) (M := (X.obj (L.φ k)).M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).sigmaCompact
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : ConnectedSpace (X.obj (L.φ k)).M := hconn (L.φ k)
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ k)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ k)).M
+    letI : T3Space (X.obj (L.φ k)).M := inferInstance
+    letI : RiemannianBundle
+        (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+      (X.obj (L.φ k)).riemBundle (I := I)
+    letI : (z : (X.obj (L.φ k)).M) →
+        InnerProductSpace Real (TangentSpace I z) :=
+      (X.obj (L.φ k)).riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+      (X.obj (L.φ k)).riemBundle_cont (I := I)
+    letI : EMetricSpace (X.obj (L.φ k)).M :=
+      (X.obj (L.φ k)).emetricSpace (I := I)
+    letI : CompleteSpace (X.obj (L.φ k)).M :=
+      MetricComplete.complete (I := I) (X.obj (L.φ k))
+        (hcomplete.complete (L.φ k))
+    letI : MetricSpace (X.obj (L.φ k)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ k)).M)
+    ∀ (mu : Fin (pb.A r) → Real)
+        (pts : Fin (pb.A r) → (X.obj (L.φ k)).M)
+        (join : (X.obj (L.φ k)).M → (X.obj (L.φ k)).M → Real →
+          (X.obj (L.φ k)).M)
+        (x : (X.obj (L.φ k)).M) (rad : Real),
+      ∀ h : CenterInput (I := I) (X.obj (L.φ k)).metric mu pts join x rad,
+        x ∈ NetLimitData.hatBall (I := I) (X := X) hd D P L pb r k alpha.1 →
+        ENNReal.ofReal
+            (4 * L.lamInf (alpha.1 : Nat) + 2 * rad) <
+          ENNReal.ofReal
+            ((aMin * hd.mu (L.rInf (alpha.1 : Nat) + 1)) / 2) →
+          ∃ (hq : 0 < q alpha)
+              (e : OpenPartialHomeomorph (E × E) (E × E))
+              (he : IsNormalDiag (I := I) (X.obj (L.φ k))
+                (hcomplete.complete (L.φ k)) (hconn (L.φ k))
+                (seqCenterD hd P L k (alpha.1 : Nat))
+                (q alpha) (δ alpha) e),
+            NormalDiagFence (I := I) (X.obj (L.φ k))
+                (seqCenterD hd P L k (alpha.1 : Nat)) (q alpha) e ∧
+              let x0 := seqCenterD hd P L k (alpha.1 : Nat)
+              let B := IsNormalDiag.toBranch (I := I) (X.obj (L.φ k))
+                (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0 hq he
+              let c := centerOfMass (I := I) (X.obj (L.φ k)).metric
+                mu pts join x rad h
+              let xi : Fin (pb.A r) → E := fun i =>
+                NormalCoordinates.normalChartAt
+                  (I := I) (X.obj (L.φ k)).metric x0 (pts i)
+              chartCmEqnB (I := I) (X.obj (L.φ k)).metric
+                (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
+                (NormalCoordinates.normalChartAt
+                  (I := I) (X.obj (L.φ k)).metric x0 c)
+                (mu, xi) = 0 := by
+  classical
+  letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+  letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+  letI : IsManifold I 1 (X.obj (L.φ k)).M := IsManifold.of_le
+    (I := I) (M := (X.obj (L.φ k)).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).sigmaCompact
+  letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+  letI : ConnectedSpace (X.obj (L.φ k)).M := hconn (L.φ k)
+  letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+    (X.obj (L.φ k)).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ k)).M :=
+    Manifold.metrizableSpace I (X.obj (L.φ k)).M
+  letI : T3Space (X.obj (L.φ k)).M := inferInstance
+  letI : RiemannianBundle
+      (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+    (X.obj (L.φ k)).riemBundle (I := I)
+  letI : (z : (X.obj (L.φ k)).M) →
+      InnerProductSpace Real (TangentSpace I z) :=
+    (X.obj (L.φ k)).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun z : (X.obj (L.φ k)).M ↦ TangentSpace I z) :=
+    (X.obj (L.φ k)).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj (L.φ k)).M :=
+    (X.obj (L.φ k)).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj (L.φ k)).M :=
+    MetricComplete.complete (I := I) (X.obj (L.φ k))
+      (hcomplete.complete (L.φ k))
+  letI : MetricSpace (X.obj (L.φ k)).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ k)).M)
+  intro mu pts join x rad h hxhat hradCage
+  let x0 := seqCenterD hd P L k (alpha.1 : Nat)
+  let rho0 := aMin * hd.mu (L.rInf (alpha.1 : Nat) + 1)
+  rcases hqdata alpha with ⟨hq, _hδ, hρ, hρq⟩
+  rcases hbranch alpha with ⟨hfull, hρmetric, hρexp⟩
+  have hproper :
+      (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+       dist x x0) < 4 * L.lamInf (alpha.1 : Nat) := by
+    simpa only [x0] using hat_dist_centerD hd P L pb r hxhat
+  have hhd : hd.dist (L.φ k) x x0 < 4 * L.lamInf (alpha.1 : Nat) := by
+    rw [← ProperMetricOn.dist_eq hd hre P (L.φ k) x x0]
+    exact hproper
+  have hed : riemannianEDist I x x0 =
+      ENNReal.ofReal (hd.dist (L.φ k) x x0) := by
+    have hrealize := hre.edist_eq (L.φ k) x x0
+    simpa [PointedRiemannianManifold.emetricSpace] using hrealize
+  have hpq : dist x x0 ≤ 4 * L.lamInf (alpha.1 : Nat) := by
+    rw [HopfRinow.riemMetric_dist_eq, hed,
+      ENNReal.toReal_ofReal (hre.dist_nonneg (L.φ k) x x0)]
+    exact hhd.le
+  have hresult := HasNormalBrFull.exists_cm_eqn (I := I) hb (L.φ k)
+    (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0 hfull
+    mu pts join x rad (4 * L.lamInf (alpha.1 : Nat)) h hpq
+    hradCage hρ hρq hρmetric hρexp
+  simpa only [x0, rho0] using hresult
+
 /-- At a stabilized finite-hat stage, one positive weight selects a live slot
-whose slotwise quantitative branch reads the actual center equation. -/
+and delegates the actual center equation to `exists_hat_cm_eqn_at`. -/
 theorem exists_hat_cm_eqn
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real}
@@ -654,7 +811,7 @@ theorem exists_hat_cm_eqn
                 (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0 hq he
               let c := centerOfMass (I := I) (X.obj (L.φ k)).metric
                 mu pts join x rad h
-              let xi : Fin (pb.A r) → E := fun i =>
+              let xi : Fin (pb.A r) → E := fun i ↦
                 NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 (pts i)
               chartCmEqnB (I := I) (X.obj (L.φ k)).metric
@@ -699,31 +856,9 @@ theorem exists_hat_cm_eqn
   have halive : L.alive (gamma : Nat) = true :=
     hat_mem_live hd P L pb r (hstable gamma) hxhat
   let gammaLive : LiveSlot L pb r := ⟨gamma, halive⟩
-  let x0 := seqCenterD hd P L k (gamma : Nat)
-  let rho0 := aMin * hd.mu (L.rInf (gamma : Nat) + 1)
-  rcases hqdata gammaLive with ⟨hq, _hδ, hρ, hρq⟩
-  rcases hbranch gammaLive with ⟨hfull, hρmetric, hρexp⟩
-  have hproper :
-      (letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-       dist x x0) < 4 * L.lamInf (gamma : Nat) := by
-    simpa only [x0] using hat_dist_centerD hd P L pb r hxhat
-  have hhd : hd.dist (L.φ k) x x0 < 4 * L.lamInf (gamma : Nat) := by
-    rw [← ProperMetricOn.dist_eq hd hre P (L.φ k) x x0]
-    exact hproper
-  have hed : riemannianEDist I x x0 =
-      ENNReal.ofReal (hd.dist (L.φ k) x x0) := by
-    have hrealize := hre.edist_eq (L.φ k) x x0
-    simpa [PointedRiemannianManifold.emetricSpace] using hrealize
-  have hpq : dist x x0 ≤ 4 * L.lamInf (gamma : Nat) := by
-    rw [HopfRinow.riemMetric_dist_eq, hed,
-      ENNReal.toReal_ofReal (hre.dist_nonneg (L.φ k) x x0)]
-    exact hhd.le
   refine ⟨gammaLive, ?_⟩
-  have hresult := HasNormalBrFull.exists_cm_eqn (I := I) hb (L.φ k)
-    (hcomplete.complete (L.φ k)) (hconn (L.φ k)) x0 hfull
-    mu pts join x rad (4 * L.lamInf (gamma : Nat)) h hpq
-    (hradCage gammaLive) hρ hρq hρmetric hρexp
-  simpa only [gammaLive, x0, rho0] using hresult
+  exact exists_hat_cm_eqn_at (I := I) hd P hre L pb r k hcomplete hconn
+    q δ hqdata hbranch gammaLive mu pts join x rad h hxhat (hradCage gammaLive)
 
 /-- A center-of-mass configuration satisfying the standard cage ledger uses
 one selected quantitative readout domain for every center/point pair. -/

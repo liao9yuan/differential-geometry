@@ -96,6 +96,28 @@ lemma curry_slotInsertEndoFib_zero (s : ℕ) (x : M)
   congr 1
   rw [Fin.cons_zero, Fin.update_cons_zero]
 
+omit [CompleteSpace E] in
+/-- Inserting an endomorphism into the unique covector slot is precomposition
+of the corresponding cotangent functional. -/
+lemma cotangent_slot_apply (x : M)
+    (Λ : TangentSpace I x →L[ℝ] TangentSpace I x) (om : Tensor0SSpace 1 I x)
+    (w : TangentSpace I x) :
+    cotangentToDual (I := I)
+        (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om) w =
+      cotangentToDual (I := I) om (Λ w) := by
+  rw [cotangentToDual_apply, cotangentToDual_apply]
+  rw [show (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om) (fun _ : Fin 1 => w) =
+      Tensor0SSpace.toModel (slotInsertEndoFib (I := I) (M := M) 1 0 x Λ om)
+        (fun _ : Fin 1 => (show E from w)) from rfl]
+  rw [slotInsertEndoFib_apply_eval]
+  rw [show Function.update (fun _ : Fin 1 => (show E from w)) 0
+        (Λ ((fun _ : Fin 1 => (show E from w)) 0)) =
+      (fun _ : Fin 1 => (show E from Λ w)) from by
+    funext k
+    fin_cases k
+    simp]
+  rfl
+
 set_option linter.unusedSectionVars false in
 private theorem core_slotInsert_curry_reading (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Λ : ContMDiffSection I (E →L[ℝ] E) ∞ (fun x : M => TangentSpace I x →L[ℝ] TangentSpace I x))

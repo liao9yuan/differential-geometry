@@ -283,6 +283,11 @@ private theorem traceOrthoEq
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
+/-- Constructor-tree cost of the Christoffel-time correction: three sums of
+`4+k` double-trace base terms in dimension three. -/
+def gammaStarCost (k : ℕ) : Real :=
+  9 * (12 + 3 * k)
+
 /-- **The gamma correction is a `StarSum2` element, UNIFORMLY on `u`.**  ONE global witness `Tgamma`,
 with the component equality holding for every `y ∈ u` — the shape the `resStarLFU` succ assembly
 needs (`spatialCommStarSum` is already `∀x`; a fixed-`x` `∃` would give a per-`y` witness that could
@@ -306,7 +311,7 @@ private theorem gammaStarU
         + ricciCovDerivCompInFrame (I := I) S frame t y p i j) :
     ∃ Tgamma : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) (4 + (k + 1)),
-      StarSum2 (I := I) S t (k + 1) Tgamma ∧
+      StarSum2Cost (I := I) (Fin 3) S t (k + 1) Tgamma (gammaStarCost k) ∧
       ∀ (y : M), y ∈ u → ∀ I0 : Fin (4 + (k + 1)) → Fin 3,
         covDerivStepDt (chrDt t y)
             (fun m : Fin (4 + k) → Fin 3 =>
@@ -317,26 +322,38 @@ private theorem gammaStarU
   let TB := ∑ q : Fin (4 + k), starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic2 k q)
   let TC := ∑ q : Fin (4 + k), starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic3 k q)
   refine ⟨(-1 : Real) • TA + (-1 : Real) • TB + TC, ?_, ?_⟩
-  · -- `StarSum2` membership (the witness is global).
-    have hTA : StarSum2 (I := I) S t (k + 1) TA := by
+  · have hTA : StarSum2Cost (I := I) (Fin 3) S t (k + 1) TA
+        (∑ _q : Fin (4 + k), (9 : Real)) := by
       dsimp only [TA]
-      refine starSum2_sum (I := I) (S := S) (t := t) Finset.univ
-        (fun q => starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic1 k q)) ?_
+      refine starSum2Cost_sum (I := I) (Idx := Fin 3) (S := S) (t := t) Finset.univ
+        (fun q => starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic1 k q))
+        (fun _q => 9) ?_
       intro q _
-      exact StarSum2.base (k + 1) 1 k 0 (sigmaRic1 k q)
-    have hTB : StarSum2 (I := I) S t (k + 1) TB := by
+      convert StarSum2Cost.base (I := I) (Idx := Fin 3) (k + 1) 1 k 0 (sigmaRic1 k q) using 1
+      norm_num
+    have hTB : StarSum2Cost (I := I) (Fin 3) S t (k + 1) TB
+        (∑ _q : Fin (4 + k), (9 : Real)) := by
       dsimp only [TB]
-      refine starSum2_sum (I := I) (S := S) (t := t) Finset.univ
-        (fun q => starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic2 k q)) ?_
+      refine starSum2Cost_sum (I := I) (Idx := Fin 3) (S := S) (t := t) Finset.univ
+        (fun q => starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic2 k q))
+        (fun _q => 9) ?_
       intro q _
-      exact StarSum2.base (k + 1) 1 k 0 (sigmaRic2 k q)
-    have hTC : StarSum2 (I := I) S t (k + 1) TC := by
+      convert StarSum2Cost.base (I := I) (Idx := Fin 3) (k + 1) 1 k 0 (sigmaRic2 k q) using 1
+      norm_num
+    have hTC : StarSum2Cost (I := I) (Fin 3) S t (k + 1) TC
+        (∑ _q : Fin (4 + k), (9 : Real)) := by
       dsimp only [TC]
-      refine starSum2_sum (I := I) (S := S) (t := t) Finset.univ
-        (fun q => starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic3 k q)) ?_
+      refine starSum2Cost_sum (I := I) (Idx := Fin 3) (S := S) (t := t) Finset.univ
+        (fun q => starBaseField (I := I) S t (k + 1) 1 k 0 (sigmaRic3 k q))
+        (fun _q => 9) ?_
       intro q _
-      exact StarSum2.base (k + 1) 1 k 0 (sigmaRic3 k q)
-    exact ((hTA.smul (-1)).add (hTB.smul (-1))).add hTC
+      convert StarSum2Cost.base (I := I) (Idx := Fin 3) (k + 1) 1 k 0 (sigmaRic3 k q) using 1
+      norm_num
+    convert ((hTA.smul (-1)).add (hTB.smul (-1))).add hTC using 1
+    simp only [abs_neg, abs_one, one_mul, Finset.sum_const, Finset.card_univ,
+      Fintype.card_fin, nsmul_eq_mul, gammaStarCost]
+    push_cast
+    ring
   · intro y hy I0
     have hbasis_y : ∀ i : Fin 3, frame i y = (hframe.toBasisAt hy) i :=
       fun i => (hframe.toBasisAt_coe hy i).symm
@@ -474,6 +491,13 @@ private theorem frameExtGerm {Idx : Type*} {r : ℕ}
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
+/-- Uniform constructor-tree cost of the canonical residual witness.  The
+successor step combines the two Leibniz daughters, the spatial commutator, and
+the Christoffel-time correction. -/
+def resStarCost : ℕ → Real
+  | 0 => 108
+  | k + 1 => 2 * resStarCost k + commStarCost 3 k + gammaStarCost k
+
 open DifferentialGeometry.Dim3Reaction in
 /-- **Brick 4 Phase P3 endpoint (uniform local-frame).**  For a smooth local frame `frame`
 orthonormal throughout `u`, the heat residual `(∂ₜ − Δ)∇ᵏRm` is a `StarSum2` element, witnessed by
@@ -549,7 +573,7 @@ theorem resStarLFU
         D.carrier (t : Real)) :
     ∃ T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) (4 + k),
-      StarSum2 (I := I) S (t : Real) k T ∧
+      StarSum2Cost (I := I) (Fin 3) S (t : Real) k T (resStarCost k) ∧
       ∀ (y : M) (hy : y ∈ u) (I0 : Fin (4 + k) → Fin 3),
         HasDerivWithinAt
           (fun r : Real =>
@@ -564,7 +588,8 @@ theorem resStarLFU
   induction k with
   | zero =>
       -- `residualStarSum_zero`'s body hard-codes the witness `e0Field`, so supply it explicitly.
-      refine ⟨e0Field (I := I) S (t : Real), e0Field_mem (I := I) S (t : Real), fun y hy I0 => ?_⟩
+      refine ⟨e0Field (I := I) S (t : Real), ?_, fun y hy I0 => ?_⟩
+      · simpa [resStarCost] using e0Field_cost (I := I) S (t : Real)
       obtain ⟨_, _, hcomp⟩ := residualStarSum_zero (I := I) S t hdim hbase
       -- Specialize at `y` with the pointwise basis `hframe.toBasisAt hy`, whose values are `frame · y`.
       have horthy : ∀ i j : Fin 3,
@@ -584,7 +609,8 @@ theorem resStarLFU
         gammaStarU (I := I) S (t : Real) k frame hframe hu horthU chrDt hchrId
       -- The Shi-recurrence witness `T = ∇Tk − comm − gamma`.
       refine ⟨stNabla (I := I) S (t : Real) Tk + (-1 : Real) • Tcomm + (-1 : Real) • Tgamma, ?_, ?_⟩
-      · exact ((StarSum2.nabla hTk).add (hTcomm.smul (-1))).add (hTgamma.smul (-1))
+      · convert ((hTk.nabla).add (hTcomm.smul (-1))).add (hTgamma.smul (-1)) using 1
+        simp only [abs_neg, abs_one, one_mul, Fintype.card_fin, resStarCost]
       · intro y hy I0
         -- The endpoint LHS component IS the level-`(k+1)` tower component (via `iterRmLF_eq_nabla`).
         have hLHSfun : (fun r : Real =>
@@ -654,7 +680,6 @@ theorem resStarLFU
               ContMDiffSection.coe_add, Pi.add_apply, metricTraceFirstTwoField_apply]
             rw [traceOrthoEq (I := I) (S.base.metric (t : Real)) (hframe.toBasisAt hz) horth_z
               (nablaKRm04Field (I := I) S (t : Real) (k + 2) z) (fun a => frame (m a) z)]
-            rfl
           -- Orthonormality lifted to the pointwise basis at `y`.
           have horth_y : ∀ i j : Fin 3,
               (S.base.metric (t : Real)).inner y ((hframe.toBasisAt hy) i) ((hframe.toBasisAt hy) j)

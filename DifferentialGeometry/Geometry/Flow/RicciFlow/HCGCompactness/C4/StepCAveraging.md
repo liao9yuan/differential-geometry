@@ -166,3 +166,14 @@ Accounting: `exists_active_radius` and the generic active-radius producer are
 complete (100%).  Instantiating its convergence hypothesis for the concrete
 finite-hat maps and proving the later cage/strict-convexity bounds remain
 downstream work; no Chapter-4 endpoint theorem was completed (endpoint 0%).
+
+## 2026-07-13, source-patch transport and finite tail
+
+Added `centerAverage.WeightDataOn.comp`, which pulls normalized finite weight
+data back along a source-set map without asserting compatibility between
+different charts. Added `finite_cover_two_tail`, which takes the finite maximum
+of the source-patch thresholds and produces one common two-index tail on every
+patch. Both additions passed focused verification.
+
+These are generic assembly tools only. The source-local B/C capstone and all
+compactness endpoint theorems remain unproved (endpoint 0%).

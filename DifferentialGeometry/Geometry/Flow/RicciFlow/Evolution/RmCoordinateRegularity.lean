@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendedSolutionRegularity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ChartRicciJetIdentity
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridge
+import DifferentialGeometry.Geometry.Coordinates.CoordinateFrame
 
 set_option autoImplicit false
 
@@ -21,10 +22,12 @@ open DifferentialGeometry.Analysis
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Tensor.Coordinates
+open IntrinsicSpectral.DeTurckCoefficients
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [Module.Finite Real E] [FiniteDimensional Real E]
+variable [FiniteDimensional Real E]
 variable [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
@@ -32,6 +35,39 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [SigmaCompactSpace M] [T2Space M]
 variable [BoundarylessManifold I M]
 
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [I.Boundaryless]
+  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
+private lemma coordFrame_chartSum
+    (x0 : M) {x : M} (hx : x ∈ coordinateFrameSet (I := I) x0)
+    (i : CoordinateIdx (𝕜 := Real) E) :
+    coordinateFrameAt (I := I) x0 i x =
+      ∑ j : Fin (Module.finrank Real E),
+        (chartModelBasis E).repr ((Module.finBasis Real E) i) j •
+          chartBasisVecFiber (I := I) x0 j x := by
+  let e := trivializationAt E (TangentSpace I) x0
+  change e.localFrame (Module.finBasis Real E) i x = _
+  rw [e.localFrame_apply_of_mem_baseSet (b := Module.finBasis Real E) hx]
+  calc
+    e.basisAt (Module.finBasis Real E) hx i =
+        e.symmL Real x ((Module.finBasis Real E) i) := by
+      simp [Bundle.Trivialization.basisAt]
+    _ = e.symmL Real x
+        (∑ j : Fin (Module.finrank Real E),
+          (chartModelBasis E).repr ((Module.finBasis Real E) i) j •
+            chartModelBasis E j) := by
+      rw [(chartModelBasis E).sum_repr ((Module.finBasis Real E) i)]
+    _ = ∑ j : Fin (Module.finrank Real E),
+        (chartModelBasis E).repr ((Module.finBasis Real E) i) j •
+          e.symmL Real x (chartModelBasis E j) := by
+      rw [map_sum]
+      exact Finset.sum_congr rfl fun j _ => by rw [map_smul]
+    _ = ∑ j : Fin (Module.finrank Real E),
+        (chartModelBasis E).repr ((Module.finBasis Real E) i) j •
+          chartBasisVecFiber (I := I) x0 j x := by
+      rfl
+
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
 /-- A Ricci-flow solution supplies joint chart-Gram smoothness on its regular
 time interval. -/
 theorem solnChartGramSmooth
@@ -66,9 +102,11 @@ theorem solnChartGramSmooth
   simp only [chartGramMatrix_apply, hbridge hp.2 i, hbridge hp.2 j,
     SolutionOn.family]
 
+omit [NeZero (Module.finrank Real E)] [CompleteSpace E] [I.Boundaryless]
+  [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 /-- The second spatial jet slot only needs differentiability on a neighborhood
 of the point, rather than on the whole model space. -/
-private theorem jet2GramD2Local
+private lemma jet2GramD2Local
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hG1 : ∀ᶠ z in nhds y,
       DifferentiableAt Real (chartGramPi (I := I) g x0) z)
@@ -91,8 +129,10 @@ private theorem jet2GramD2Local
   rw [heq.fderiv_eq]
   rfl
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+  [BoundarylessManifold I M] in
 /-- Local two-jet form of the coordinate Christoffel derivative. -/
-private theorem chartChrDerivJet
+private lemma chartChrDerivJet
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hy : y ∈ interior (extChartAt I x0).target)
     (hG : DifferentiableAt Real (chartGramPi (I := I) g x0) y)
@@ -114,8 +154,10 @@ private theorem chartChrDerivJet
     jet2_chartGram_d1 g x0 hG,
     jet2GramD2Local (I := I) g x0 hG1 hG2]
 
+omit [CompleteSpace E] [I.Boundaryless] [SigmaCompactSpace M] [T2Space M]
+  [BoundarylessManifold I M] in
 /-- Local two-jet form of the coordinate Riemann tensor. -/
-private theorem chartRmEqJet
+private lemma chartRmEqJet
     (g : SmoothRiemannianMetric I M) (x0 : M) {y : E}
     (hy : y ∈ interior (extChartAt I x0).target)
     (hG : DifferentiableAt Real (chartGramPi (I := I) g x0) y)
@@ -138,9 +180,10 @@ private theorem chartRmEqJet
     chartChristoffel_eq_jet g x0 hG k m l,
     chartChristoffel_eq_jet g x0 hG i j m]
 
+omit [CompleteSpace E] in
 /-- Joint smoothness of a chart Riemann component from joint smoothness of the
 metric's chart-Gram components. -/
-theorem chartRmSmoothAt
+theorem chartRmSmoothAt [CompactSpace M]
     (g : Real -> SmoothRiemannianMetric I M)
     (a b : Real) (x0 : M)
     (hsmooth : ∀ x : M, ∀ i j : Fin (Module.finrank Real E),
@@ -194,12 +237,16 @@ theorem chartRmSmoothAt
   have hdet : (Matrix.of (jet2 (G t) y).1).det ≠ 0 := by
     rw [hmat]
     exact ne_of_gt (chartGramMatrix_det_pos (I := I) (g t) x0 hx)
+  have houter : ContDiffAt Real ∞
+      (fun p : MatJet E (Module.finrank Real E) =>
+        jetRiemann (chartModelBasis E) p i j k l)
+      (jet2 (G t) y) :=
+    contDiffAt_jetRiemann (chartModelBasis E) hdet i j k l
   have hmodel : ContDiffAt Real ∞
       (fun q : Real × E =>
         jetRiemann (chartModelBasis E) (jet2 (G q.1) q.2) i j k l)
-      (t, y) :=
-    (contDiffAt_jetRiemann (chartModelBasis E) hdet i j k l).comp
-      (t, y) hjet
+      (t, y) := by
+    simpa only [Function.comp_apply] using houter.comp (t, y) hjet
   have heq :
       (fun q : Real × E =>
         chartRiemannTensor (I := I) (g q.1) x0 i j k l q.2) =ᶠ[nhds (t, y)]
@@ -230,9 +277,9 @@ theorem chartRmSmoothAt
       chartRmEqJet (I := I) (g q.1) x0 hq.2 hDiff hDiffNhd hDiff2 i j k l
   exact hmodel.congr_of_eventuallyEq heq
 
-/-- The realized coordinate-frame components of the canonical lowered Riemann
-tensor are jointly smooth at every regular spacetime point. -/
-theorem coordRmSmoothInf
+/-- The chart-basis components of the canonical lowered Riemann tensor are
+jointly smooth at every regular spacetime point. -/
+theorem coordRmSmoothInf [CompactSpace M]
     {alpha omega : Real} {hAlphaOmega : alpha < omega}
     {S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}
@@ -244,7 +291,8 @@ theorem coordRmSmoothInf
     (idx : Fin 4 -> Fin (Module.finrank Real E)) :
     ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
       (modelWithCornersSelf Real Real) ∞
-      (fun p : Real × M => realizedRmBase (I := I) S x0 p.1 p.2 idx)
+      (fun p : Real × M => S.base.rm04 p.1 p.2
+        (fun q : Fin 4 => chartBasisVecFiber (I := I) x0 (idx q) p.2))
       ((t : Real), x) := by
   let y := extChartAt I x0 x
   have hy : y ∈ interior (extChartAt I x0).target :=
@@ -266,12 +314,27 @@ theorem coordRmSmoothInf
         ((isOpen_Ioo.prod isOpen_interior).mem_nhds ⟨t.2, hy⟩)
   have hxsrc : x ∈ (extChartAt I x0).source :=
     chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hx
+  have hxchart : x ∈ (chartAt H x0).source := by
+    rw [← extChartAt_source_eq_chartAt_source (I := I)]
+    exact hxsrc
   have hmap : ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
       (modelWithCornersSelf Real (Real × E)) ∞
       (fun p : Real × M => (p.1, extChartAt I x0 p.2))
       ((t : Real), x) := by
-    exact contMDiffAt_fst.prodMk
-      ((contMDiffAt_extChartAt' (I := I) (n := ∞) hxsrc).comp x contMDiffAt_snd)
+    have hfst : ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
+        (modelWithCornersSelf Real Real) ∞
+        (fun p : Real × M => p.1) ((t : Real), x) :=
+      contMDiffAt_fst
+    have hsnd : ContMDiffAt ((modelWithCornersSelf Real Real).prod I) I ∞
+        (fun p : Real × M => p.2) ((t : Real), x) :=
+      contMDiffAt_snd
+    have hchart : ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
+        (modelWithCornersSelf Real E) ∞
+        (fun p : Real × M => extChartAt I x0 p.2) ((t : Real), x) :=
+      (contMDiffAt_extChartAt' (I := I) (n := ∞) hxchart).comp ((t : Real), x) hsnd
+    rw [contMDiffAt_prod_module_iff]
+    exact ⟨by simpa only [Function.comp_apply] using hfst,
+      by simpa only [Function.comp_apply] using hchart⟩
   have hLowerM : ContMDiffAt (modelWithCornersSelf Real (Real × E))
       (modelWithCornersSelf Real Real) ∞
       (fun q : Real × E =>
@@ -288,8 +351,74 @@ theorem coordRmSmoothInf
         nhds ((t : Real), x) :=
     ((chartLeviCivitaGoodSet_isOpen (I := I) x0).preimage continuous_snd).mem_nhds hx
   filter_upwards [hgoodNhd] with p hp
-  simpa [realizedRmBase, frameComp0S, chartGramOnE_def,
-    SolutionFamily.rm04] using
-    (rm04_coord_eq (I := I) (S.base.metric p.1) x0 idx hp).symm
+  change metricRm04 (I := I) (M := M) (S.base.metric p.1) p.2
+      (fun q : Fin 4 => chartBasisVecFiber (I := I) x0 (idx q) p.2) = _
+  rw [metricRm04_apply,
+    rm04_coord_eq (I := I) (S.base.metric p.1) x0 idx hp]
+  refine Finset.sum_congr rfl fun l _ => ?_
+  congr 1
+  rw [chartGramOnE_def, (extChartAt I x0).left_inv
+    (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hp)]
+
+/-- The coordinate-frame level-zero Riemann array is jointly smooth at every
+regular spacetime point in the chart good set. -/
+theorem coordRmFinSmooth [CompactSpace M]
+    {alpha omega : Real} {hAlphaOmega : alpha < omega}
+    {S : SolutionOn (I := I) (M := M)
+      (RealTimeInterval.closedOpen alpha omega hAlphaOmega)}
+    (hS : IsSolutionOn (I := I) S)
+    (x0 : M)
+    (t : RealTimeInterval.RegularTime
+      (RealTimeInterval.closedOpen alpha omega hAlphaOmega))
+    (x : M) (hx : x ∈ chartLeviCivitaGoodSet (I := I) x0)
+    (idx : Fin 4 -> CoordinateIdx (𝕜 := Real) E) :
+    ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
+      (modelWithCornersSelf Real Real) ∞
+      (fun p : Real × M => realizedRmBase (I := I) S x0 p.1 p.2 idx)
+      ((t : Real), x) := by
+  let coeff : CoordinateIdx (𝕜 := Real) E ->
+      Fin (Module.finrank Real E) -> Real :=
+    fun i j => (chartModelBasis E).repr ((Module.finBasis Real E) i) j
+  have hsum : ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
+      (modelWithCornersSelf Real Real) ∞
+      (fun p : Real × M =>
+        ∑ slots : Fin 4 -> Fin (Module.finrank Real E),
+          (∏ q : Fin 4, coeff (idx q) (slots q)) *
+            S.base.rm04 p.1 p.2
+              (fun q : Fin 4 =>
+                chartBasisVecFiber (I := I) x0 (slots q) p.2))
+      ((t : Real), x) := by
+    refine ContMDiffAt.sum fun slots _ => contMDiffAt_const.mul ?_
+    exact coordRmSmoothInf (I := I) hS x0 t x hx slots
+  refine hsum.congr_of_eventuallyEq ?_
+  have hxframe : x ∈ coordinateFrameSet (I := I) x0 :=
+    chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
+  have hframeNhd :
+      {p : Real × M | p.2 ∈ coordinateFrameSet (I := I) x0} ∈
+        nhds ((t : Real), x) :=
+    ((coordinateFrameSet_open (I := I) x0).preimage continuous_snd).mem_nhds hxframe
+  filter_upwards [hframeNhd] with p hp
+  simp only [realizedRmBase_apply]
+  let A := S.base.rm04 p.1 p.2
+  change A (fun q : Fin 4 => coordinateFrameAt (I := I) x0 (idx q) p.2) = _
+  calc
+    A (fun q : Fin 4 => coordinateFrameAt (I := I) x0 (idx q) p.2) =
+        A (fun q : Fin 4 =>
+          ∑ j : Fin (Module.finrank Real E),
+            coeff (idx q) j • chartBasisVecFiber (I := I) x0 j p.2) := by
+      congr 1
+      funext q
+      exact coordFrame_chartSum (I := I) x0 hp (idx q)
+    _ = ∑ slots : Fin 4 -> Fin (Module.finrank Real E),
+        A (fun q : Fin 4 => coeff (idx q) (slots q) •
+          chartBasisVecFiber (I := I) x0 (slots q) p.2) := by
+      exact A.map_sum fun q j =>
+        coeff (idx q) j • chartBasisVecFiber (I := I) x0 j p.2
+    _ = ∑ slots : Fin 4 -> Fin (Module.finrank Real E),
+        (∏ q : Fin 4, coeff (idx q) (slots q)) *
+          A (fun q : Fin 4 =>
+            chartBasisVecFiber (I := I) x0 (slots q) p.2) := by
+      refine Finset.sum_congr rfl fun slots _ => ?_
+      rw [A.map_smul_univ, smul_eq_mul]
 
 end DifferentialGeometry.PDE.RicciFlow

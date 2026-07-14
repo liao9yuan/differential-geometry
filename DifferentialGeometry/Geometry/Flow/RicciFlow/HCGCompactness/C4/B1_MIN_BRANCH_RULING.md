@@ -322,30 +322,59 @@ limit weights, while `exists_supp_fin` extracts one common H6 subsequence for
 all dependent source/interaction pairs. No whole-cage `hKV0` inference or
 stronger endpoint radius field was introduced.
 
-The remaining outer wiring is a narrower but genuine quantifier/API choice:
-assemble the chartwise limit families on source-local compact cages into the
-fixed global source ball, totalize sparse pair maps only on zero-weight slots,
-and make `exists_hat_cm_tail` consume point convergence on active support rather
-than the whole `hatBall`. Existing `hbetaU` points from a Euclidean chart domain
-into the source ball and does not put the whole source ball in one chart.
-Consult on this source-local/global assembly before changing the final capstone
-or readout interface. Do not manufacture a global chart selector, a parallel
-radius API, or an arbitrary-`y` endpoint field.
+The approved source-local/global architecture is now implemented and
+focused-green. `existsAtomWeightH6_of_innerCover` and
+`weight_data_of_innerCover` expose the strict-inner-ball normalization premise;
+`exists_live_source_cover` produces the finite source-chart cover;
+`exists_supp_pts_fin` retains old-`L` `InterSlot`s and totalizes only points;
+and `exists_hat_cm_tail_support` consumes the pulled-back limit weights on
+their nonzero support. `StepCSupportCapstone.exists_supp_cm_fin` takes one
+master subsequence and the two required finite maxima, while
+`exists_cm_on_source` gives the global-ball existential-source witness.  No
+global chart selector, glued weight, overlap equality, parallel radius API, or
+arbitrary-`y` endpoint field was introduced.
 
 `StepB1RawInput`, textbook B1, and the conditional compactness endpoint remain
-theorem-level 0% until the support-local capstone choice, remaining Item-3 full
-convexity, Hessian producer, convergence estimates, and final assembly are all
-completed. The
-selected minimizing-branch Gates 1--6 machinery is 100%; dedicated Step-B/B1
-machinery is about 84%, Chapter 4 machinery about 80%, and whole-HCG machinery
-about 53%.
+theorem-level 0%.  The source-local/global conditional capstone is 100%, but
+its `StrictDistInput` continuation still requires the independent Item-3 full
+convexity and Hessian--Neumann producer before it can feed the concrete B1 raw
+package.  The selected minimizing-branch Gates 1--6 machinery is 100%;
+dedicated Step-B/B1 machinery is about 88%, Chapter 4 machinery about 82%, and
+whole-HCG machinery about 54%.
 
 ## Ownership and coordination
 
 The completed Gate 1--6 files remain the B/C lane's settled base:
 `DiagInvBranch.lean`, `NormalBranchMin.lean`, `StepCCenterOfMass.lean`,
 `StepCCmDomain.lean`, `NormalBranchScale.lean`, `NormalBranchCage.lean`, and
-`StepCHatReadout.lean`.  Future work should claim only the concrete outer
-source-slot/Item-3 or independent Hessian/Neumann files it actually edits,
+`StepCHatReadout.lean`, `StepCSourceCover.lean`, `StepCProducers.lean`, and
+`StepCSupportCapstone.lean`.  Future work should claim only the concrete
+Item-3 or independent Hessian/Neumann files it actually edits,
 coordinate with Step D through file claims, and preserve these checked
 interfaces unless a live contradiction is found.
+
+## 2026-07-14 strict-distance frontier audit
+
+The routine Hopf--Rinow part is now closed in
+`Geometry/Comparison/GeodesicConvexity.lean`: `minimizingVec` and `minJoin`
+give a focused-green two-point minimizing selector with its length, endpoints,
+and time-continuity facts.  It uses the unconditional
+`hopf_rinow_expMapIntrinsic_surjective_minimizing` endpoint and does not enter
+the older sorry-tainted headline in `Comparison/HopfRinow.lean`.
+
+The remaining `StrictDistInput` producer is not a local packaging proof.  The
+current second-variation layer proves only nonnegativity of the index form for
+a minimizing geodesic.  The missing comparison producer must supply the
+`lbl412` identity between the Hessian of `halfSqDist` and the derivative of the
+moving exponential inverse, followed by the `lbl413` uniform positive lower
+bound on the controlled cut-locus-free ball.  Its along-`minJoin` consequence
+must prove both small-ball confinement and the per-target `StrictConvexOn`
+field.  The same quantitative derivative estimate later feeds
+`CmHessianInput`, but the strict-distance and Neumann consumers remain separate.
+
+Accounting is unchanged by this small selector closure: `StrictDistInput` and
+`CmHessianInput` producers are theorem-level 0%; their common comparison
+foundation has advanced only by the join selector.  Dedicated Step-B/B1
+machinery remains about 88%, Chapter 4 machinery about 82%, and whole-HCG
+machinery about 54%; `StepB1RawInput`, textbook B1, and compactness endpoints
+remain 0%.

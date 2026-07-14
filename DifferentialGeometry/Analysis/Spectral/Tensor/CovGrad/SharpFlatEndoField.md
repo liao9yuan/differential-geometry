@@ -17,3 +17,10 @@ This extraction is supporting machinery only.  The next mathematical producer
 remains the field-level trace factorization in `ScalarNonautTame.lean`; no
 Noncollapsing endpoint theorem is completed by this move.
 
+## 2026-07-14 scalar evaluation
+
+`sharpFlatEndo_eval` now exposes the action of `g₀♭ ∘ g₁♯` only after
+application to a covector and tangent vector. It reuses the mixed sharp
+pairing in the cometric multiplier layer and avoids a whole-Hom equality in
+the scalar nonautonomous consumer. Focused verification and the producer
+refresh passed.

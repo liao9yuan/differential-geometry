@@ -1,5 +1,13 @@
 # `TimeRecursion` -- Brick 4 Phase P3 downstream plan
 
+## 2026-07-14 uniform recursive residual cost
+
+Added `gammaStarCost` and `resStarCost`, and strengthened `gammaStarU` and
+`resStarLFU` to carry exact `StarSum2Cost` certificates. The recurrence fixes
+one residual constant for each derivative order `k`, independent of the later
+choice of time, point, or local frame. Focused verification and the module
+refresh passed.
+
 ## 2026-06-13 Planner plan
 
 This is the new downstream home for Brick 4 P3.  It should import:

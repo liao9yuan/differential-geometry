@@ -1,5 +1,16 @@
 # RicciOperatorNormBound
 
+## 2026-07-14 component bound for the BBS tower
+
+Added `ricciComp_le_rmNorm`, which bounds each Ricci trace component by the
+dimension times the square root of the intrinsic lowered-Riemann norm. Added
+`metricRicciComp_le`, the canonical metric specialization that discharges the
+trace and lowering data from `metricCurvData`. Focused verification passed.
+
+These are proved curvature-layer producers. They remove the Ricci-component
+input from the solution-level Bernstein tower assembly; they do not by
+themselves prove `TowerHeatBoundOn` or any Hamilton endpoint.
+
 ## 2026-07-10 compact fixed-metric bound
 
 - Added `exists_rm04_bound`: spatial continuity of `normSq0S` for the canonical

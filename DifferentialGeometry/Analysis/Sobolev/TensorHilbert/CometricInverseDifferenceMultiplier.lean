@@ -748,6 +748,25 @@ def gInvRaisedEndo (g₀ g₁ : SmoothRiemannianMetric I M) (x : M) :
       inverseMetricSharpFib (I := I) g₁ x (g0FlatCLM (I := I) g₀ x v) := by
   rw [gInvRaisedEndo, ContinuousLinearMap.comp_apply]
 
+/-- Pairing a `g₁`-sharp covector with `g₀` is evaluation after the
+mixed raised endomorphism. -/
+lemma inner_sharp_mixed (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
+    (om : Tensor0SSpace 1 I x) (v : TangentSpace I x) :
+    g₀.inner x (inverseMetricSharpFib (I := I) g₁ x om) v =
+      cotangentToDual (I := I) (x := x) om (gInvRaisedEndo (I := I) g₀ g₁ x v) := by
+  rw [show cotangentToDual (I := I) (x := x) om (gInvRaisedEndo (I := I) g₀ g₁ x v) =
+      cotangentToDualLinear (I := I) (x := x) om
+        (gInvRaisedEndo (I := I) g₀ g₁ x v) from rfl]
+  rw [← inverseMetricSharpFib_inner (I := I) g₁ x om
+    (gInvRaisedEndo (I := I) g₀ g₁ x v)]
+  rw [g₁.symm x (inverseMetricSharpFib (I := I) g₁ x om)
+    (gInvRaisedEndo (I := I) g₀ g₁ x v)]
+  rw [gInvRaisedEndo_apply]
+  rw [inverseMetricSharpFib_inner (I := I) g₁ x
+    (g0FlatCLM (I := I) g₀ x v) (inverseMetricSharpFib (I := I) g₁ x om)]
+  rw [cotangentToDualLinear_apply, cotangentToDual_g0FlatCLM]
+  rw [g₀.symm x v (inverseMetricSharpFib (I := I) g₁ x om)]
+
 lemma gInvRaisedEndo_eq_diff_add_id (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     gInvRaisedEndo (I := I) g₀ g₁ x v = gInvDiffRaisedEndo (I := I) g₀ g₁ x v + v := by

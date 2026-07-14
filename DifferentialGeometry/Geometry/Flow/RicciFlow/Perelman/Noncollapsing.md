@@ -173,3 +173,53 @@ classical moving conjugate-heat theorem remains 0% with about 77% dedicated
 machinery; `heatpot_of_maxreg` remains 0% with about 35% directly reusable
 machinery.  Whole HCG machinery remains about 53%, with endpoint theorems at
 0%.
+
+## 2026-07-14 balanced dissipation closure
+
+The balanced-commutator frontier recorded above is closed.  The generic
+passenger-slot theorem `slot_iterL_pair` is proved and verified, and the scalar
+specializations `cc_comm_pair` and `cc_energy_diss` pass a complete focused
+check.  The resulting principal estimate has coefficient
+`delta / (1 - delta)` on the top covariant jet plus a support-independent
+adjacent-window remainder.  No raw third-order commutator, wrapper assumption,
+or `HasLocallyConstantChartAt` input is used.
+
+The remaining Galerkin closure has two producer tasks.  First, generalize the
+existing rank-two coefficient-one spectral/Bochner estimate to
+`cc_dirichlet_gap` at arbitrary covariant rank.  Second, identify the scalar
+finite spectral weighted pairing with the smooth `cc_energy_diss` pairing.
+The finite-core representation and spectral-to-jet bounds are already generic.
+The required strict smallness is also available without a consumer assumption:
+`metric_cp_tendsto` permits an internal fixed choice such as `delta = 1/4`;
+only the small metric-seminorm to `gFibreOpBound` adapter remains to be applied.
+
+Honest accounting: `cc_comm_pair` and `cc_energy_diss` are complete (100%),
+but `scalar_crit_tame`, `heatpot_of_maxreg`, the classical moving
+conjugate-heat theorem, Perelman no-local-collapsing, and `ham3_noncollapse`
+remain theorem-level 0%.  Scalar critical-tame dedicated machinery is about
+72%; the upper endpoint machinery remains about 35%, 77%, and 40%
+respectively.  Whole HCG machinery remains about 53%, with endpoints at 0%.
+
+## 2026-07-14 principal pairing frontier
+
+The previously recorded `trace_slot_flat` and flux-factorization frontier is
+closed.  `scalar_flux_split` and `cc_principal_pair` are now proved and
+focused-verified.  The principal energy coefficient is exactly the order-zero
+metric perturbation `delta / (1 - delta)`, with no spectral-support-dependent
+constant and no new consumer assumption.
+
+The exact next producer is `cc_comm_pair`.  A live API audit confirms that the
+public theorem in `ConnLapCommutatorCoefficientTame` controls the raw
+third-order commutator and is specialized to the rank-two DeTurck resolvent
+family, so it is not the selected route.  The correct balanced bilinear chain
+already exists privately in `DeTurckPrincipalArmEnergyPairing`; it must be
+extracted or generalized to rank-zero scalar data, then specialized through
+the scalar flux adapter.  This is a missing reusable API/extraction frontier,
+not a new geometric assumption.
+
+Honest accounting: Perelman no-local-collapsing and `ham3_noncollapse` remain
+0% as endpoint theorems, with about 40% dedicated analytic machinery.  The
+classical moving conjugate-heat theorem remains 0% with about 77% dedicated
+machinery; `heatpot_of_maxreg` remains 0% with about 35% directly reusable
+machinery.  Whole HCG machinery remains about 53%, with endpoint theorems at
+0%.

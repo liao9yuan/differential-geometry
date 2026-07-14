@@ -27,13 +27,17 @@ selected quantitative branch for the whole finite configuration.
 - `aliveSlots_tail`, `hat_mem_live`, and `hat_dist_centerD` make the finite-hat
   routing dead-slot aware: a positive POU weight forces the chosen hat slot to
   be live and supplies its canonical four-`lamInf` distance bound.
-- `exists_hat_cm_eqn` closes the fixed-stage physical readout consumer.  It
-  selects a positive-weight slot, proves it live, transports the proper-metric
-  distance to the Riemannian metric, consumes the physical cage, and returns
-  the selected minimizing-branch center equation.
+- `exists_hat_cm_eqn_at` is the source-local readout: a prescribed
+  `alpha : LiveSlot` together with membership in its hat and its slotwise cage
+  inequality supplies the corresponding minimizing-branch fence and center
+  equation.  It does not select a target weight and makes no assertion about
+  compatibility between different source charts.
+- `exists_hat_cm_eqn` keeps the previous API as a corollary.  It selects a
+  positive-weight slot, proves it live, and delegates the geometric readout to
+  `exists_hat_cm_eqn_at`.
 
-Focused verification passes, including `exists_hat_cm_eqn`, without a local
-`sorry`.
+Focused verification passes for both source-local and compatibility entrypoints,
+without a local `sorry`.
 
 ## Frontier
 

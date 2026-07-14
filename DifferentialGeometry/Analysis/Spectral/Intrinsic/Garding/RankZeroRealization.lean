@@ -4,6 +4,9 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorW
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
 import DifferentialGeometry.Geometry.Connection.Laplacian.RankZero
+import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tensor0SRSCovariantDerivativeAgreement
+import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
+import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 
 /-!
@@ -119,6 +122,142 @@ theorem repr_eq_lift
   simpa [reprScalar0] using
     (TensorRSField.lift_scalar0 (n := (∞ : WithTop ℕ∞))
       (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection)
+
+/-- The first covariant gradient of a finite rank-zero representative reads
+as the differential of its scalar realization. -/
+theorem grad_repr_apply
+    (g : SmoothRiemannianMetric I M)
+    (v : tensorHs (I := I) (M := M) g 0 0 2)
+    (hv : (Function.support v.coeff).Finite) (x : M)
+    (X : TangentSpace I x) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 1 I x from
+          (iteratedCovGrad (I := I) (M := M) g 0 0 1
+            (tensorHsSmoothRepr (I := I) (M := M) v hv)).toSection x)
+          (unitZeroSec (I := I) (M := M) x))
+        (fun _ : Fin 1 => X) =
+      duSec (I := I) (reprScalar0 (I := I) (M := M) v hv)
+        (reprScalar0_smooth (I := I) (M := M) v hv) x
+        (fun _ : Fin 1 => X) := by
+  let A : Tensor0SField ∞ 0 (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) :=
+    Tensor0SField.fromScalarField ∞
+      (reprScalar0 (I := I) (M := M) v hv)
+      (reprScalar0_smooth (I := I) (M := M) v hv)
+  have hunit (y : M) :
+      tensor0SSpace_evalScalar y (unitZeroSec (I := I) (M := M) y) = 1 := by
+    rw [Tensor0SSpace.evalScalar_apply, unitZeroSec_apply]
+    change ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) 1
+      Fin.elim0 = 1
+    rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+  have hsection :
+      (fun y : M =>
+        (show Tensor0SSpace 0 I y →L[ℝ] Tensor0SSpace 0 I y from
+          (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection y)
+          (unitZeroSec (I := I) (M := M) y)) =
+        fun y : M => A y := by
+    funext y
+    rw [← repr_eq_lift (I := I) (M := M) v hv,
+      Tensor0SField.toRS0_apply, hunit, one_smul]
+  have hscalar :
+      Tensor0SNabla.scalarFn I M (fun y : M => A y) =
+        reprScalar0 (I := I) (M := M) v hv := by
+    funext y
+    rw [Tensor0SNabla.scalarFn_eq_apply_zero]
+    change Tensor0SField.toScalarField ∞ A y =
+      reprScalar0 (I := I) (M := M) v hv y
+    exact congrFun (Tensor0SField.toScalarField_fromScalarField ∞
+      (reprScalar0 (I := I) (M := M) v hv)
+      (reprScalar0_smooth (I := I) (M := M) v hv)) y
+  rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
+  rw [covGrad_toSection_apply_eval (I := I) (M := M) g 0 0
+    (tensorHsSmoothRepr (I := I) (M := M) v hv) x
+    (unitZeroSec (I := I) (M := M) x) (fun _ : Fin 1 => X)]
+  rw [tensorCovDerivAt_def,
+    tensorRSCovariantDerivative_zeroS_unit_eval, hsection,
+    Tensor0SNabla.tensor0SCovariantDerivative_apply_zero, hscalar,
+    duSec_apply, differential1FormFun_apply_eq_extDerivFun]
+  change Tensor0SNabla.tensor0Iso I M x
+      ((Tensor0SNabla.tensor0Iso I M x).symm
+        (extDerivFun (I := I)
+          (reprScalar0 (I := I) (M := M) v hv) x X)) = _
+  rw [ContinuousLinearEquiv.apply_symm_apply]
+
+/-- The diagonal second covariant gradient of a finite rank-zero
+representative reads as the Hessian of its scalar realization. -/
+theorem grad2_repr_diag
+    (g : SmoothRiemannianMetric I M)
+    (v : tensorHs (I := I) (M := M) g 0 0 2)
+    (hv : (Function.support v.coeff).Finite)
+    (B : ContMDiffSection I E ∞ (TangentSpace I : M → Type _)) (x : M) :
+    Tensor0SSpace.toModel
+        ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace 2 I x from
+          (iteratedCovGrad (I := I) (M := M) g 0 0 2
+            (tensorHsSmoothRepr (I := I) (M := M) v hv)).toSection x)
+          (unitZeroSec (I := I) (M := M) x))
+        (vec2 (I := I) (B x) (B x)) =
+      hessianSec (I := I) (LeviCivita (I := I) g)
+        (by
+          simpa [LeviCivita] using
+            (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+              (I := I) (M := M) g))
+        (reprScalar0 (I := I) (M := M) v hv)
+        (reprScalar0_smooth (I := I) (M := M) v hv) x
+        (vec2 (I := I) (B x) (B x)) := by
+  let hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (LeviCivita (I := I) g) ∞ := by
+    simpa [LeviCivita] using
+      (leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
+        (I := I) (M := M) g)
+  let m0 : Fin 0 → TangentSpace I x := fun i => Fin.elim0 i
+  have hslots :
+      Fin.cons (B x) (Fin.cons (B x) m0) =
+        vec2 (I := I) (B x) (B x) := by
+    funext i
+    fin_cases i <;> rfl
+  have hiter :
+      iteratedCovGrad (I := I) (M := M) g 0 0 2
+          (tensorHsSmoothRepr (I := I) (M := M) v hv) =
+        covGrad (I := I) (M := M) g 0 1
+          (covGrad (I := I) (M := M) g 0 0
+            (tensorHsSmoothRepr (I := I) (M := M) v hv)) := by
+    rw [iteratedCovGrad_succ, iteratedCovGrad_succ, iteratedCovGrad_zero]
+  have hbridge :=
+    tensorSecondCovDeriv_eq_covGrad_succ_twoSlotEval_genVal
+      (I := I) (M := M) g 0
+      (tensorHsSmoothRepr (I := I) (M := M) v hv)
+      (X := fun y => B y) (Y := fun y => B y)
+      B.contMDiff B.contMDiff x m0
+  rw [hiter, ← hslots]
+  rw [hbridge]
+  have hrepr : (fun y : M =>
+        (tensorHsSmoothRepr (I := I) (M := M) v hv).toSection y) =
+      fun y : M =>
+        (Tensor0SField.fromScalarField ∞
+          (reprScalar0 (I := I) (M := M) v hv)
+          (reprScalar0_smooth (I := I) (M := M) v hv)).toTensorRSField ∞ y := by
+    funext y
+    exact congrArg (fun T => T y)
+      (repr_eq_lift (I := I) (M := M) v hv).symm
+  rw [hrepr]
+  rw [tensorSecondCovDeriv_def,
+    secondRS_scalar (I := I) (M := M) g hcov
+      (reprScalar0_smooth (I := I) (M := M) v hv) B x]
+  rw [hslots]
+  rw [Tensor0SSpace.toRS0_apply]
+  have hunit :
+      tensor0SSpace_evalScalar x (unitZeroSec (I := I) (M := M) x) = 1 := by
+    rw [Tensor0SSpace.evalScalar_apply, unitZeroSec_apply]
+    change ContinuousMultilinearMap.constOfIsEmpty ℝ (fun _ : Fin 0 => E) 1
+      Fin.elim0 = 1
+    rw [ContinuousMultilinearMap.constOfIsEmpty_apply]
+  rw [hunit, one_smul]
+  change Tensor0SNabla.tensor0Iso I M x
+      ((Tensor0SNabla.tensor0Iso I M x).symm
+        (hessianSec (I := I) (LeviCivita (I := I) g) hcov
+          (reprScalar0 (I := I) (M := M) v hv)
+          (reprScalar0_smooth (I := I) (M := M) v hv) x
+          (vec2 (I := I) (B x) (B x)))) = _
+  rw [ContinuousLinearEquiv.apply_symm_apply]
 
 /-- Pointwise, the rough Laplacian of the finite rank-zero spectral
 representative is the canonical lift of its invariant scalar Laplacian. -/

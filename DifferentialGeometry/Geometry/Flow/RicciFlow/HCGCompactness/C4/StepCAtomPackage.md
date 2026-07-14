@@ -20,11 +20,11 @@ actual chart-pulled atoms and normalized base-killed weights as Pi-valued
 
 ## Progress estimate
 
-- `existsAtomWeightH6` theorem: 100%; focused check and targeted build passed.
+- `existsAtomWeightH6` theorem: 100%; focused verification passed.
 - Dedicated atom/weight assembly machinery: 100% for the fixed-source package.
-- Step-B/B1 dedicated machinery: about 63%.
-- Chapter 4 machinery: about 66%.
-- Whole HCG compactness machinery: about 46%; endpoint theorem completion: 0%.
+- Step-B/B1 dedicated machinery: about 84%.
+- Chapter 4 machinery: about 80%.
+- Whole HCG compactness machinery: about 53%; endpoint theorem completion: 0%.
 
 ## 2026-07-13 scale tail joins the existing refinement
 
@@ -60,3 +60,35 @@ all-live-target overlap quantifier.  Stable noninteracting targets now have a
 proved zero-limit route in `StepCAtomConv`, and interacting targets are indexed
 by `InterSlot`, but combining those branches into the support-local capstone is
 still pending.  This does not change endpoint theorem completion (0%).
+
+## 2026-07-13 inner-cover seam
+
+Added `existsAtomWeightH6_of_innerCover`. The private core now consumes the
+actual premise used by atom normalization: the source chart maps into the union
+of strict inner balls. The existing `existsAtomWeightH6` statement is preserved
+as a compatibility corollary using `innerBall_cover`. Focused verification
+passed. The explicitly named targeted refresh exceeded the verification time
+window without reporting a Lean error; downstream focused verification did not
+depend on that refresh.
+
+This seam adds no input field or radius assumption. It also does not solve the
+separate all-live-target transition quantifier; the honest sparse producer must
+still combine `InterSlot` transitions with the stable-disjoint zero branch.
+
+## 2026-07-13 reusable atom-to-weight package
+
+The normalization half of the private core is now the public lower-layer theorem
+`atomWeight_of_atoms`. It consumes only the per-slot atom convergence and
+smoothness facts, the dead-slot zero limit, the existing item-3 scale fact at
+each stage, and direct chart-image containment in the strict inner-ball union.
+It returns the same Pi-valued atom and normalized-weight limit package used by
+the H6 consumers. The private core now performs subsequence and atom extraction
+and calls this theorem once; the normalization proof is no longer duplicated.
+
+`HasAtomWeightLim.of_atoms` cannot live in this module because
+`HasAtomWeightLim` is defined in the downstream `StepCAtomDiagonal` layer. That
+layer can wrap `atomWeight_of_atoms` directly when it has fixed `L`, `beta`, and
+`aInf`; no transition or all-live-target assumption is part of the reusable
+theorem. Focused verification passed. This API refactor changes no endpoint
+percentage: the final compactness theorem remains unstated/unproved (0%), while
+whole-project machinery remains about 53%.

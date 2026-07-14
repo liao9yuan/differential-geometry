@@ -1,5 +1,11 @@
 # `SpatialMember` — Brick 4 Phase P2 (spatial commutator is a star sum)
 
+## 2026-07-14 exact spatial-commutator cost
+
+Added `commStarCost` and strengthened `spatialCommStarSum` to return a
+`StarSum2Cost` certificate with that cost. The coefficient is uniform in the
+spacetime point and frame. Focused verification and the module refresh passed.
+
 # ═══ EXECUTION LOG (2026-06-12, Opus) — CURVACT half GREEN; SLOTDIFF fully de-risked ═══
 
 ## ✅ `curvactReduce` DONE (GREEN, 0 sorry) — the CURVACT half

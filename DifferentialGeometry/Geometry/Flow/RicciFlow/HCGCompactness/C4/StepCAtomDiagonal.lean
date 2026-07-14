@@ -56,6 +56,42 @@ def HasAtomWeightLim
     ContDiffOn Real (∞ : WithTop ℕ∞) weightInf U ∧
     MapCInfConvOnCompacts U weight weightInf
 
+/-- Packages prescribed per-slot atom limits as the downstream atom/weight
+limit predicate. -/
+theorem HasAtomWeightLim.of_atoms
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real} (hD : 0 < D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (hre : hd.RealizesEdist)
+    (pb : hd.PackingBound D) (r : Real) (hr : 0 ≤ r)
+    (hgp : ∀ k, Item3GpScaleAt (I := I) hd D P L pb r k)
+    (beta : ∀ k : Nat, (X.obj (L.φ k)).M)
+    (U : Set E) (hU : IsOpen U)
+    (hcoverU : ∀ k,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma))
+    (aInf : Fin (pb.A r) → E → Real)
+    (hdead : ∀ gamma : Fin (pb.A r),
+      L.alive (gamma : Nat) = false → aInf gamma = 0)
+    (hatom : ∀ gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts U
+        (fun k => seqAtomChart (I := I) hd hD P L pb r beta gamma k)
+        (aInf gamma))
+    (hatomSmooth : ∀ k (gamma : Fin (pb.A r)),
+      ContDiffOn Real (∞ : WithTop ℕ∞)
+        (seqAtomChart (I := I) hd hD P L pb r beta gamma k) U)
+    (hatomInfSmooth : ∀ gamma : Fin (pb.A r),
+      ContDiffOn Real (∞ : WithTop ℕ∞) (aInf gamma) U) :
+    HasAtomWeightLim (I := I) hd hD P L hre pb r hr beta U aInf := by
+  exact atomWeight_of_atoms (I := I) hD P L hre pb r hr hgp beta U hU hcoverU
+    aInf hdead hatom hatomSmooth hatomInfSmooth
+
 /-- Atom and normalized-weight limits persist along every further strict
 subsequence. -/
 theorem HasAtomWeightLim.subseq
@@ -113,10 +149,9 @@ theorem HasAtomWeightLim.weight_ne_tail
     ((tendsto_pi_nhds.mp (tendsto_of_cInf hweightConv hz)) gamma).eventually_ne
       hweight
 
-/-- The normalized limit weights retain the pointwise nonnegativity,
-positivity, and sum-one data of the stage weights.  Support is kept separate:
-the support-local capstone records it in its actual compact cages. -/
-theorem HasAtomWeightLim.weight_data
+/-- The normalized limit weights retain their pointwise finite weight data when
+the source chart maps directly into the strict inner-ball cover. -/
+theorem HasAtomWeightLim.weight_data_of_innerCover
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}
     {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
@@ -126,7 +161,7 @@ theorem HasAtomWeightLim.weight_data
     {aInf : Fin (pb.A r) → E → Real}
     (hlim : HasAtomWeightLim (I := I) hd hD P L hre pb r hr beta U aInf)
     (hgp : Item3GpScaleTail (I := I) hd D P L pb r)
-    (hsource : ∀ᶠ k in Filter.atTop,
+    (hcoverU : ∀ᶠ k in Filter.atTop,
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
       letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
@@ -134,7 +169,7 @@ theorem HasAtomWeightLim.weight_data
         (X.obj (L.φ k)).t2TangentBundle
       Set.MapsTo
         (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
-        U (L.hatSourceBall hd P r k)) :
+        U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma)) :
     centerAverage.WeightDataOn U (fun _ : Fin (pb.A r) => Set.univ)
       (fun z gamma => rawWeights
         (cutRaw (aInf (baseIndex hd hre pb hr)) aInf
@@ -149,7 +184,15 @@ theorem HasAtomWeightLim.weight_data
         i0) z gamma
   let weightInf : E → (Fin (pb.A r) → Real) := fun z gamma =>
     rawWeights (cutRaw (aInf i0) aInf i0) z gamma
-  have hstage := seqWeights_zero_ev (I := I) hd hD P L hre pb hr hgp
+  have hstage : ∀ᶠ k in Filter.atTop,
+      centerAverage.WeightDataOn
+        (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma)
+        (fun gamma : Fin (pb.A r) => L.hatBall hd D P pb r k gamma)
+        (rawWeights
+          (cutRaw (seqAtom hd hD P L pb r k i0)
+            (seqAtom hd hD P L pb r k) i0)) := by
+    filter_upwards [hgp] with k hgpK
+    exact seqWeights_data hd hD P L pb r k hgpK i0 Set.Subset.rfl
   dsimp only [HasAtomWeightLim] at hlim
   rcases hlim with
     ⟨_hdead, _hatomSmooth, _hatomInfSmooth, _hatomConv,
@@ -162,7 +205,7 @@ theorem HasAtomWeightLim.weight_data
   have hnonneg (z : E) (hz : z ∈ U) (gamma : Fin (pb.A r)) :
       0 ≤ weightInf z gamma := by
     apply ge_of_tendsto (hconv z hz gamma)
-    filter_upwards [hsource, hstage] with k hmap hdata
+    filter_upwards [hcoverU, hstage] with k hmap hdata
     letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
     letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
     letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
@@ -178,7 +221,7 @@ theorem HasAtomWeightLim.weight_data
         Filter.atTop (nhds (∑ gamma, weightInf z gamma)) :=
       tendsto_finset_sum Finset.univ fun gamma _ => hconv z hz gamma
     have hsumStage : ∀ᶠ k in Filter.atTop, ∑ gamma, weight k z gamma = 1 := by
-      filter_upwards [hsource, hstage] with k hmap hdata
+      filter_upwards [hcoverU, hstage] with k hmap hdata
       letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
       letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
       letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
@@ -210,6 +253,54 @@ theorem HasAtomWeightLim.weight_data
     norm_num at hsumNonpos
   · intro _z _hz _gamma _hweight
     exact Set.mem_univ _
+
+/-- Compatibility projection of normalized limit-weight data for chart domains
+whose images lie in the fixed closed source ball. -/
+theorem HasAtomWeightLim.weight_data
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real} {hD : 0 < D}
+    {P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)}
+    {L : NetLimitData hd D P} {hre : hd.RealizesEdist}
+    {pb : hd.PackingBound D} {r : Real} {hr : 0 ≤ r}
+    {beta : ∀ k : Nat, (X.obj (L.φ k)).M} {U : Set E}
+    {aInf : Fin (pb.A r) → E → Real}
+    (hlim : HasAtomWeightLim (I := I) hd hD P L hre pb r hr beta U aInf)
+    (hgp : Item3GpScaleTail (I := I) hd D P L pb r)
+    (hsource : ∀ᶠ k in Filter.atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        U (L.hatSourceBall hd P r k)) :
+    centerAverage.WeightDataOn U (fun _ : Fin (pb.A r) => Set.univ)
+      (fun z gamma => rawWeights
+        (cutRaw (aInf (baseIndex hd hre pb hr)) aInf
+          (baseIndex hd hre pb hr)) z gamma) := by
+  have hinner := L.innerBall_cover hd hD P hre pb r
+  have hcoverU : ∀ᶠ k in Filter.atTop,
+      letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+      letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+        (X.obj (L.φ k)).t2TangentBundle
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) (X.obj (L.φ k)).metric (beta k) z)
+        U (⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma) := by
+    filter_upwards [hsource, hinner] with k hmap hcover
+    letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
+    letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
+    letI : T2Space (X.obj (L.φ k)).M := (X.obj (L.φ k)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
+      (X.obj (L.φ k)).t2TangentBundle
+    letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
+    intro z hz
+    apply hcover
+    simpa only [NetLimitData.hatSourceBall] using hmap hz
+  exact hlim.weight_data_of_innerCover hgp hcoverU
 
 /-- A nonzero limit weight at a source-chart point forces eventual interaction
 between the source hat containing that point and the corresponding target hat. -/

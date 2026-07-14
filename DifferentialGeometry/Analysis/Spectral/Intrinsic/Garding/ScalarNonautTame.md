@@ -117,14 +117,14 @@ canonical operator-field modules and verified there.
 
 `scalar_flux_split` has now been stated and proved by combining
 `scalar_trace_factor` with the verified `covDiv_appCc` product rule and the
-successor normal form for `iteratedCovGrad`.  Its final consumer check is still
-pending while the exact `covDiv_appCc` producer refresh runs in the background;
-there is currently no Lean diagnostic.  Until that check returns green, this
-producer is recorded as implemented but unverified.
+successor normal form for `iteratedCovGrad`.  The exact producer refresh and
+the complete consumer focused check both passed.  The proof uses the named
+successor equality directly; a broad `rw` was rejected because it first
+expanded the nested `nabla U` occurrence and left the wrong normal form.
 
-The next mathematical frontier after a green check is the small principal
-pairing `cc_principal_pair`, followed by the balanced commutator pairing.  The
-raw commutator is not being treated as lower order before integration by parts.
+The exact live frontier is now the small principal pairing
+`cc_principal_pair`, followed by the balanced commutator pairing.  The raw
+commutator is not being treated as lower order before integration by parts.
 
 Honest accounting: `scalar_crit_tame` remains unstated/unproved (0%); its
 dedicated machinery is about 61%.  `heatpot_of_maxreg`, the classical moving
@@ -132,3 +132,93 @@ conjugate-heat theorem, Perelman no-local-collapsing, and `ham3_noncollapse`
 remain theorem-level 0%; their dedicated machinery is about 35%, 77%, and 40%
 respectively.  Whole HCG machinery remains about 53%, with endpoint theorems
 at 0%.
+
+## Principal pairing -- 2026-07-14
+
+The scalar flux evaluation is now connected to the intrinsic cometric-slot
+operator, and `cc_principal_pair` is proved and focused-verified.  Its only top
+coefficient is the order-zero metric perturbation
+`delta / (1 - delta)`; the proof uses the negative-sign slot pairing estimate
+and the scalar Green identity.  It adds no consumer assumption and does not
+depend on spectral support.
+
+The live audit also rules out reusing the raw commutator theorem in
+`ConnLapCommutatorCoefficientTame`: that theorem is third order, is specialized
+to rank-two DeTurck data, and assumes a resolvent-family presentation.  The
+closest correct route is the private balanced transport chain in
+`DeTurckPrincipalArmEnergyPairing`.  Its endpoint compares the transported
+Dirichlet pairing with the top slot pairing and bounds the difference by
+`C * J_n * J_(n+1)`.
+
+The exact frontier is therefore to extract that endpoint at arbitrary base
+covariant rank (or at least rank zero), using the already-public self-adjoint
+`oneMinusConnLap` algebra, curvature/divergence commutator identities, and the
+generic negative cometric-slot estimate.  Once available, `cc_comm_pair` is a
+small scalar adapter; the raw commutator remains deliberately unused.
+
+Honest accounting: `scalar_crit_tame` remains unstated/unproved (0%); its
+dedicated machinery is about 65%.  `heatpot_of_maxreg`, the classical moving
+conjugate-heat theorem, Perelman no-local-collapsing, and `ham3_noncollapse`
+remain theorem-level 0%; their dedicated machinery is about 35%, 77%, and 40%
+respectively.  Whole HCG machinery remains about 53%, with endpoint theorems
+at 0%.
+
+## Balanced scalar dissipation -- 2026-07-14
+
+The missing passenger-slot transport is now a public, rank-generic producer.
+`BalancedPairing` and `SlotTransportPairing` are focused-verified and their
+targeted module refreshes pass.  The scalar adapters `cc_last_pair`,
+`cc_comm_pair`, and `cc_energy_diss` are also proved and the complete
+`ScalarNonautTame` file is focused-verified.  The top coefficient is exactly
+`delta / (1 - delta)` and the commutator remainder is the product of the two
+adjacent covariant-jet windows.  Constants are independent of spectral support.
+
+The proof never estimates the raw third-order commutator.  It transports
+`1 - Delta_nabla` through the bilinear pairing, telescopes the passenger slot,
+and uses the existing HEq-to-rank-cast bridge only after the tensor has reached
+the fully applied top pairing.  No new consumer assumption or local-chart
+hypothesis was introduced.
+
+The exact next analytic producer is the rank-generic coefficient-one
+Dirichlet gap `cc_dirichlet_gap`.  The finite spectral core and generic
+spectral-to-jet APIs already exist; after this gap, a scalar finite-combination
+pairing adapter must identify the weighted Galerkin cross term with the proved
+smooth pairing.  Near the frozen time, `metric_cp_tendsto` supplies arbitrary
+metric smallness; fixing `delta = 1/4` will give the strict top-energy
+coefficient required by the Galerkin consumer once the smallness-to-
+`gFibreOpBound` adapter is applied.
+
+Honest accounting: `cc_comm_pair` and `cc_energy_diss` are complete (100%).
+`scalar_crit_tame` remains unstated/unproved (0%); its dedicated machinery is
+about 72%.  `heatpot_of_maxreg`, the classical moving conjugate-heat theorem,
+Perelman no-local-collapsing, and `ham3_noncollapse` remain theorem-level 0%;
+their dedicated machinery is about 35%, 77%, and 40% respectively.  Whole HCG
+machinery remains about 53%, with endpoint theorems at 0%.
+
+## Full scalar Laplacian pairing -- 2026-07-14
+
+The fixed-`(q,h)` first-order connection arm is now closed by
+`cc_conn_pair`, a direct specialization of the rank-generic
+`iterL_pair_jet_le`.  Its constant is independent of spectral support and its
+remainder is the same product of adjacent covariant-jet windows as the
+principal-arm estimate.
+
+`cc_lap_pair` combines that absolute connection-arm bound with
+`cc_energy_diss` and the subtraction in `scalarLapDiffCc`.  The resulting full
+moving-minus-fixed scalar Laplacian pairing retains the exact principal
+coefficient `delta / (1 - delta)` and adds only a support-independent adjacent-
+window remainder.  This is a fixed-coefficient theorem: it deliberately makes
+no time-uniform claim and introduces no new assumption.  Focused verification
+of the complete file passes without warnings.
+
+The remaining frontier is consumer-side: identify the finite spectral/Galerkin
+cross term with this smooth pairing and combine it with the rank-generic
+Dirichlet gap.  No new coefficient or commutator estimate is needed for that
+step.
+
+Honest accounting: `cc_conn_pair` and `cc_lap_pair` are complete (100%).
+`scalar_crit_tame` remains unstated/unproved (0%); its dedicated machinery is
+about 75%.  `heatpot_of_maxreg`, the classical moving conjugate-heat theorem,
+Perelman no-local-collapsing, and `ham3_noncollapse` remain theorem-level 0%;
+their dedicated machinery remains about 35%, 77%, and 40% respectively.  Whole
+HCG machinery remains about 53%, with endpoint theorems at 0%.

@@ -49,3 +49,23 @@ estimate remains unstated and unproved (0%).  Its dedicated machinery is now
 approximately 77% complete: the live local analytic frontier is the
 rank-generic arbitrary-input small-principal-coefficient `appCc` tame bound,
 then specialization to the scalar Hessian/gradient decomposition.
+
+## 2026-07-14 fixed-slab bounds
+
+The fixed-slab boundedness distinction is now explicit.  `metricCov_cont`
+proves fully applied scalar continuity at an arbitrary regular spacetime point
+while the covariant-derivative background metric stays fixed.  The public
+`metric_cp_bdd` then fixes one compact set `K ⊆ D.regular` first and returns an
+order-indexed family of constants bounding every finite cumulative metric
+seminorm uniformly on `K × M`.  No order-dependent shrinking of `K` occurs.
+Focused verification passes without warnings.
+
+This is a metric-jet producer, not yet the time-uniform lower-order pairing.
+The remaining analytic frontier is to transfer these bounds to uniform
+fixed-background jets of the exact mixed coefficient families
+`scalarFluxCoeff q (G.metric t)` and `connTraceCoeff q (G.metric t)`, then feed
+those envelopes into uniform versions of the balanced and slot-transport
+pairings.  `scalar_crit_tame` remains unstated/unproved (0%); its dedicated
+machinery is about 77%.  Perelman noncollapsing remains 0% with about 40%
+dedicated analytic machinery, and whole HCG machinery remains about 53% with
+endpoint theorems at 0%.

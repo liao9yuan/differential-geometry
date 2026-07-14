@@ -98,3 +98,19 @@ This closes the low-level live-but-noninteracting branch that the earlier
 live/dead split omitted.  Sparse atom packaging still has to combine this zero
 branch with `InterSlot` transition limits on one common subsequence; that is
 infrastructure, while `StepB1RawInput` and all endpoint theorems remain 0%.
+
+## 2026-07-13 live origin-metric equivalence
+
+Added `liveMetric0_equiv`.  Given the common `MapCInfConvOnCompacts` limit
+returned by the live-slot origin-metric extraction, it proves at the common
+origin that every live coefficient retains
+`(1/2) * ‖v‖^2 ≤ gInf 0 alpha v v ≤ 2 * ‖v‖^2`.  The proof first takes the
+finite-Pi coordinate of the pointwise limit and then evaluates the resulting
+bilinear form, avoiding an expensive combined dependent-Pi elaboration.
+Focused verification passed.
+
+This prerequisite is complete (100%).  The producer-owned finite live-source
+cover theorem is still not stated or proved (0%); this lemma supplies only its
+limit-metric equivalence input.  The current broader accounting remains:
+dedicated Step-B/B1 machinery about 80%, Chapter 4 machinery about 76%, whole
+HCG machinery about 53%, and all compactness endpoint theorems 0%.

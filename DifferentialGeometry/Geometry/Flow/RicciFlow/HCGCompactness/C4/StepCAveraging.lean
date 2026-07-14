@@ -214,6 +214,21 @@ structure WeightDataOn (s : Set X) (U : ι → Set X) (μ : X → ι → ℝ) : 
   sum_one : ∀ x ∈ s, ∑ i : ι, μ x i = 1
   active_mem : ∀ x ∈ s, ∀ i : ι, μ x i ≠ 0 → x ∈ U i
 
+/-- Pull normalized finite weight data back along a map of source sets. -/
+theorem WeightDataOn.comp {Y : Type uY} {s : Set Y} {U : Set X}
+    {R : ι → Set X} {μ : X → ι → ℝ} {f : Y → X}
+    (h : WeightDataOn U R μ) (hf : Set.MapsTo f s U) :
+    WeightDataOn s (fun i => f ⁻¹' R i) (fun y i => μ (f y) i) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro y hy i
+    exact h.nonneg (f y) (hf hy) i
+  · intro y hy
+    exact h.pos (f y) (hf hy)
+  · intro y hy
+    exact h.sum_one (f y) (hf hy)
+  · intro y hy i hne
+    exact h.active_mem (f y) (hf hy) i hne
+
 /-- Expose `WeightDataOn` in the conjunction shape consumed by the Step-C
 two-index averaging theorems. -/
 theorem WeightDataOn.data {s : Set X} {U : ι → Set X} {μ : X → ι → ℝ}
@@ -1246,6 +1261,25 @@ theorem eqn_local_on {s : Set X} {qstar : X → M}
     (join := join) (p := p x) (r := r x) (hOn x hx) hdiff hsrc'
 
 end centerAverage
+
+/-- A finite family of two-index tails admits one threshold which works on
+every source patch simultaneously. -/
+theorem finite_cover_two_tail {J Y : Type*} [Finite J]
+    {G : Set Y} {S : J → Set Y}
+    (_hcover : G ⊆ ⋃ j, S j)
+    (Q : J → Nat → Nat → Y → Prop)
+    (hlocal : ∀ j, ∃ Nj : Nat, ∀ a ≥ Nj, ∀ b ≥ Nj,
+      ∀ y ∈ S j, Q j a b y) :
+    ∃ N : Nat, ∀ a ≥ N, ∀ b ≥ N,
+      ∀ j, ∀ y ∈ S j, Q j a b y := by
+  classical
+  letI := Fintype.ofFinite J
+  choose Nj hNj using hlocal
+  refine ⟨Finset.univ.sup Nj, ?_⟩
+  intro a ha b hb j y hy
+  have hj : Nj j ≤ Finset.univ.sup Nj :=
+    Finset.le_sup (f := Nj) (Finset.mem_univ j)
+  exact hNj j a (hj.trans ha) b (hj.trans hb) y hy
 
 end HCGCompactness
 end DifferentialGeometry

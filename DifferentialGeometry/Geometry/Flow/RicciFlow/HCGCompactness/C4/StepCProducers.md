@@ -499,3 +499,85 @@ on the whole `hatBall`). This is a real outer API/quantifier design question,
 not a local Lean error. Sparse active-support machinery is about 92% and
 pair-to-capstone integration about 78%; whole-HCG machinery remains about 53%,
 while `StepB1RawInput`, textbook B1, and all compactness endpoints remain 0%.
+
+## 2026-07-13 point-level interaction totalization
+
+Added `interSlot?` on the original stabilized `InterSlot L pb r alpha` and
+`totalPts`, which totalizes only a pair-indexed point family to the ambient
+finite target slots.  A missing interaction is filled by the source point; no
+equivalence with an interaction subtype after subsequence refinement is used.
+
+The two `activeFill` readouts are now checked.  Zero limit weight returns the
+source point without inspecting the lookup.  At nonzero weight, the caller
+passes the exact target-existence implication produced by `exists_supp_fin`;
+the lookup's chosen target is identified using injectivity of the underlying
+finite slot projection.  The point family remains an explicit parameter because
+the live tree has no canonical `pairDecodedPts` yet; that family belongs to the
+later fixed-manifold source-patch producer, not to interaction lookup.
+
+Focused verification passed.  These lookup/totalization primitives are complete
+(100%), but the fused `exists_supp_pts_fin` producer is not yet stated (0%) and
+the source-patch cover plus pair-decoded point family remain the next producer
+work.  Sparse active-support machinery is now about 94%, pair-to-capstone
+integration about 80%, and whole-HCG machinery remains about 53%; `StepB1RawInput`,
+the textbook B1 theorem, and all compactness endpoint theorems remain 0%.
+
+## 2026-07-13 per-slot closed-ball readout
+
+Extracted and focused-verified `HasAtomWeightLim.binf_of_slot`.  Its input is one
+original stabilized `InterSlot`, the corresponding H6 limit-map convergence,
+and a nonzero normalized limit weight at that slot.  Its conclusion is exactly
+that the slot's limit image lies in the closed six-lambda ball.  It neither
+selects a target nor asks for source-wide interaction data, so the future fused
+atom/support producer can reuse it after its dependent-pair extraction.
+
+The existing `binf_of_weight` API is unchanged and now performs only the honest
+weight-to-interacting-slot selection before calling the per-slot lemma.  This
+removes duplicated radius/weight-tail reasoning without adding assumptions or
+changing the old `InterSlot L` index.  The per-slot readout is complete (100%);
+the fused `exists_atom_supp_fin` producer is still unstated (0%).  Sparse
+active-support machinery remains about 94%, pair-to-capstone integration about
+80%, and whole-HCG machinery about 53%; `StepB1RawInput`, textbook B1, and all
+compactness endpoint theorems remain 0%.
+
+## 2026-07-13 fused source-patch and sparse-point producer
+
+`MetricCompactnessInputs.exists_atom_supp_fin` and
+`MetricCompactnessInputs.exists_supp_pts_fin` are now checked and sorry-free.
+The first extracts one master subsequence, the finite live-source cover,
+source-local H6 atom/weight limits, old-`InterSlot` transition limits, and the
+nonzero-weight closed-six-lambda readout.  The second pulls each limit-weight
+family back only through its own frozen normal chart and constructs the
+two-index decoded point family.
+
+The frozen source index is correctly eventual.  On that same tail the proof
+combines the item-3 `expRadiusGp` scale with all live-center equations, uses the
+canonical source cage for the prescribed source slot, closes only the actual
+nonzero support inside the target six-lambda ball, and applies the generic
+composition convergence theorem.  It calls the dependent pair extractor once,
+keeps the original `InterSlot L ... alpha`, and totalizes only the final
+point-valued family at the ambient `Fin` boundary.  No chartwise weights are
+glued, no overlap equality or chart selector is asserted, and no whole-cage
+target containment or new radius assumption is used.
+
+Focused verification passed with no local warning.  Both fused producer
+theorems are complete (100%), and the source-cover/sparse-point architecture is
+complete (100%).  The final support-local center/branch outer theorem is not yet
+stated (0%); its dedicated pair-to-capstone machinery is about 90%.  Whole-HCG
+machinery remains about 53%, while `StepB1RawInput`, the textbook B1 theorem,
+and all compactness endpoint theorems remain 0%.
+
+## 2026-07-13 source-patch hat containment
+
+`MetricCompactnessInputs.exists_supp_pts_fin` now exports, on its existing
+frozen-index tail, the explicit containment of every source patch in the hat
+ball belonging to its prescribed source slot.  The proof reuses the producer's
+existing exp-image sandwich and the normal-chart left inverse; it adds no input
+and makes no assertion about another source chart or target slot.
+
+Focused verification passed.  The fused producer and its source-local
+cover/weight/point package remain complete (100%).  The sibling
+`StepCSupportCapstone.exists_supp_cm_fin` and its global-ball corollary are now
+checked, so the approved conditional pair-to-capstone architecture is 100%.
+Whole-HCG machinery is about 54%, while `StepB1RawInput`, the textbook B1
+theorem, and all compactness endpoint theorems remain 0%.
