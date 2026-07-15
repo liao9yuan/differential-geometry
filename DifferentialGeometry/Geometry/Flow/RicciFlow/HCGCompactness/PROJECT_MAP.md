@@ -32,7 +32,7 @@ Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
 Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
-                    → Step B (local metrics/transitions/B1 machinery, ~94%;
+                    → Step B (local metrics/transitions/B1 machinery, ~95%;
                       origin-metric and transition branches run in parallel,
                       then merge on one further subsequence)
                     → Step C (center-of-mass averaging, ~3/4)
@@ -55,7 +55,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 
 | Lane | Entry plan | State |
 |---|---|---|
-| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchHessian.md` + `C4/NormalBranchConvexity.md` + `C4/B1_MIN_BRANCH_RULING.md` | canonical global stage map and compact nested coordinate cores checked; consult next on the smooth support-sensitive target filler and common-domain moving implicit solver needed for the all-pairs chart tail |
+| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/B1_MOVING_ROOT_CONSULT.md` + `C4/StepCStageFill.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchHessian.md` + `C4/NormalBranchConvexity.md` + `C4/B1_MIN_BRANCH_RULING.md` | canonical global stage map, compact nested coordinate cores, and smooth Route-A finite-stage configurations checked; consult next on common-domain selected normal-diagonal inverse/readout convergence, then moving center roots, for the all-pairs chart tail |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` | conditional consumer complete: D6 convergence transport and `compactness_of_b1` are checked.  Do not restart D1--D6; resume at the upstream `StepB1RawInput` producer in `B1_JOIN_HANDOFF.md`. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldEndgame.md` | producer hypotheses remain active; canonical conditional wrappers are checked |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
@@ -107,7 +107,7 @@ its docstring BEFORE consumers are built against it.
 ## 6. Honest progress (updated 2026-07-15)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
-  Step-B/B1 machinery ~94% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
+  Step-B/B1 machinery ~95% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
   sorry-free/axiom-clean 2026-07-05** — `exists_diffeo_of_injOn` construction +
   `BookApproxIsoPartialData` forward/reverse transport via `PreApproxIsoDataOn.congr`;
   **2026-07-09 statement repair:** the false P-only `stepB1_approxIso` and its `sorry`
@@ -136,7 +136,7 @@ its docstring BEFORE consumers are built against it.
   former velocity-`hderiv` API gap, and `normLowerOfSepExp` now derives the coordinate norm lower
   bound directly from named-exp-ball containment and Riemannian separation.  This improves the
   producer machinery but does not change theorem completion: the `StepB1RawInput` producer and
-  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 94%.
+  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 95%.
   **2026-07-13 minimizing-branch closure:** Gates 1--6 are now focused-green:
   the selected inverse is minimizing, `halfSq` agrees with intrinsic squared
   distance on its cage, the generic gradient identity is proved in the
@@ -393,10 +393,12 @@ its docstring BEFORE consumers are built against it.
    cover, support readout, two finite maxima, and global-ball existential-source
    corollary are now checked in `StepCProducers` and
    `StepCSupportCapstone`.  The selected-branch Hessian/Neumann and strict-IFT
-   chain is also retained through that capstone.  The remaining B/C analytic
-   frontier is the `lbl413` to `StrictDistInput` comparison producer, not an
-   H6, chart-compatibility, or Neumann theorem.
-   Ch4 **machinery** overall is ≈ **83%** after rounding;
+   chain is also retained through that capstone, and the `lbl413` to
+   `StrictDistInput` comparison is checked.  The remaining B/C analytic
+   frontier starts with common-domain selected normal-diagonal inverse/readout
+   convergence and then the moving center equation/implicit-root family, not
+   an H6, chart-compatibility, support-filler, or Neumann theorem.
+   Ch4 **machinery** overall is ≈ **87%** after rounding;
   the conditional compactness endpoint and textbook B1 theorem remain **0%**.
 - Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
 - Ch3: Lemma 3.11 done (hShi hypothesis).  The canonical conditional assembly
@@ -490,12 +492,16 @@ its docstring BEFORE consumers are built against it.
   local filled center branches with its global minimizer.  The source producer
   now returns fixed compact nested cores whose strict inner images cover the
   source ball, and the producer/capstone chain retains them on the same master
-  subsequence.  Actual weight convergence is already all-pairs; the genuine
-  analytic stop is target-side smooth support filling plus a common-domain
-  moving implicit-solver convergence theorem.  See
-  `C4/B1_STAGE_MAP_RULING.md`.  This is infrastructure only: the all-pairs chart
+  subsequence.  `StepCStageFill` now supplies the fixed two-bump safety filler,
+  old-`InterSlot` finite totalization, actual refined configuration,
+  arbitrary-reindexing `C^infinity` convergence, and exact raw-target readout
+  at retained nonzero interacting slots.  The genuine analytic stop is now
+  common-domain selected normal-diagonal inverse/readout convergence, then a
+  center-equation and moving implicit-solver convergence theorem.  See
+  `C4/B1_STAGE_MAP_RULING.md` and `C4/B1_MOVING_ROOT_CONSULT.md`.  This is
+  infrastructure only: the all-pairs chart
   tail, `StepB1RawInput`, textbook B1, and all endpoints remain 0%, and rounded
-  machinery estimates stay 94% / 86% / 57% for Step-B/B1 / Chapter 4 / whole
+  machinery estimates stay 95% / 87% / 57% for Step-B/B1 / Chapter 4 / whole
   HCG.
 - **Whole HCG project — conservative MACHINERY estimate ≈ 57%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
@@ -503,10 +509,10 @@ its docstring BEFORE consumers are built against it.
   conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes
   explicit `StepB1RawInput`; do not read that consumer or the machinery % as
   completion of the endpoint theorem.
-  The riskiest open items are now the smooth support-sensitive target filler
-  (or a weighted-equation substitute), common-domain moving-stage implicit
-  solver convergence, global return-map injectivity, exact local-inverse
-  convergence, the chart-to-`tensor02CovDerivNormWith` bridge, and the concrete
+  The riskiest open items are now selected normal-diagonal inverse/readout
+  convergence, common-domain moving-stage center-equation and implicit-solver
+  convergence, global return-map injectivity, exact local-inverse convergence,
+  the chart-to-`tensor02CovDerivNormWith` bridge, and the concrete
   B1 raw producer.  The former arbitrary-order numerical center recurrence is
   one possible solver route, not a logically mandatory endpoint.  The `g_p`,
   exp-diffeomorphism-radius, canonical sigma, pre-packing large-`D`, physical

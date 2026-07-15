@@ -48,27 +48,39 @@ before the reference manifold is frozen.
   `exists_atom_supp_fin`, `HasSuppConvData`, `exists_supp_pts_fin`, and
   `MetricCompactBase.exists_supp_cm_fin` retain those cores on the same master
   subsequence as the support-local center solutions.
+- `ContDiffBump.radial` supplies the reusable safety clamp.  `StepCStageFill`
+  implements the fixed `6/7` activity bump, fixed `7/8` safety bump,
+  old-`InterSlot` finite totalization, actual refined weights/points, and full
+  configuration convergence for every pair of reindexings tending to
+  infinity.  `stagePtsSub_eq_ne` gives exact raw-target agreement at every
+  retained nonzero interacting slot.
+- `HasSuppConvData` retains the all-stage two-sided transition smoothness
+  already proved by its producer's common finite-pair shift; no new endpoint
+  input or second source-chart diagonal is used.
 
 All listed files passed focused verification; the canonical stage-map module
 and the canonical energy module also passed exact module refreshes.
 
 ## Exact analytic stop point
 
-Actual finite-stage weights already have all-pairs `C^infinity` convergence.
-The first target-side mismatch is support-sensitive: the direct target
-transition is known to enter the controlled target ball only when its actual
-weight is nonzero.  Existing tuple convergence asks for every slot to be smooth
-and mapped into its domain on the whole source core.  Pointwise `activeFill`
-does not supply that smoothness.  The route therefore needs either a smooth
-support filler agreeing with direct targets at every nonzero-weight slot, or a
-support-aware averaging/center-equation convergence theorem.
+The support-sensitive target mismatch is now closed by the Route-A two-bump
+filler.  `HasSuppConvData.pts_eq_ne` takes the finite common tail on which every
+arbitrary nonzero actual slot selects the retained old `InterSlot`, so the
+active-agreement package is also closed without gluing weights.
 
-Independently, existing `existsCmExtension` and `cmExt_contDiffOn` handle one
+Existing `existsCmExtension` and `cmExt_contDiffOn` handle one
 fixed center equation.  They do not provide a common parameter neighborhood or
-`C^infinity` convergence for a sequence of moving target-stage equations.  A
-compact-graph stability theorem for convergent implicit equations is genuinely
-missing, as is its HCG instantiation from normal-coordinate metric convergence
-to center-equation convergence on a common tube.
+`C^infinity` convergence for a sequence of moving target-stage equations.  The
+first precise missing bridge is now isolated one layer earlier: normal-metric
+convergence has no checked consumer proving common-domain `C^infinity`
+convergence of the selected normal-diagonal inverse (`e_n.symm`),
+`DiagInvBranch.diagReadout`, or `invVelSum`.  That bridge includes forward phase
+endpoint stability and inverse stability on the common `delta`-ball.  See the
+pasteable ruling request in `B1_MOVING_ROOT_CONSULT.md`.
+
+After inverse/readout convergence, a compact-graph stability theorem for
+convergent implicit equations is still genuinely missing.  The fixed-stage
+center extensions cannot supply it by composition alone.
 
 After those two bridges, the remaining large producers are exact-inverse
 `C^infinity` convergence and the chart-to-intrinsic
@@ -84,8 +96,9 @@ After those two bridges, the remaining large producers are exact-inverse
 
 ## Accounting
 
-The canonical map-definition seam and nested-core producer are each 100%.
+The canonical map-definition seam, nested-core producer, and smooth Route-A
+configuration convergence are each checked.
 The all-pairs stage-map chart-tail theorem, concrete `StepB1RawInput` producer,
 and textbook B1 theorem remain 0%.  Rounded dedicated Step-B/B1 machinery stays
-about 94%, Chapter 4 machinery about 86%, and whole-HCG machinery about 57%.
+about 95%, Chapter 4 machinery about 87%, and whole-HCG machinery about 57%.
 All compactness endpoints remain theorem-level 0%.

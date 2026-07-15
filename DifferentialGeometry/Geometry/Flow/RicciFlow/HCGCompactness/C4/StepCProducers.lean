@@ -1118,6 +1118,18 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
           Jbarinf alpha target w ∈
               Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
             Jinf alpha target (Jbarinf alpha target w) = w)) ∧
+      (∀ (alpha : LiveSlot L inp.pack r)
+          (target : InterSlot L inp.pack r alpha) (k : Nat),
+        ContDiffOn Real (⊤ : ℕ∞)
+          (normalTransition (I := I) (X.obj (Lphi.φ k))
+            (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
+            (seqCenterD inp.decay P Lphi k (target.1.1 : Nat)))
+          (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+        ContDiffOn Real (⊤ : ℕ∞)
+          (normalTransition (I := I) (X.obj (Lphi.φ k))
+            (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))
+            (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)))
+          (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))) ∧
       ∀ alpha z, z ∈ U alpha → ∀ gamma : Fin (inp.pack.A r),
         rawWeights
           (cutRaw
@@ -1505,7 +1517,7 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
       hdead hatom hatomSmooth hatomInfSmooth
   refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
   dsimp only
-  refine ⟨hUopen, hU8, hC0, hC1, hC01, hC1U, ?_, ?_, hlimAll, ?_, ?_⟩
+  refine ⟨hUopen, hU8, hC0, hC1, hC01, hC1U, ?_, ?_, hlimAll, ?_, ?_, ?_⟩
   · intro k
     have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
     simpa only [Lphi, phi, Function.comp_apply,
@@ -1525,6 +1537,21 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
     · simpa only [Jbarinf, Lphi, phi, L0, live0, NetLimitData.subseq,
         Function.comp_apply, seqCenterD_subseq, NetLimitData.subseq_lamInf] using
         hs.2.2.2.2.2.1.comp_subseq hshift
+  · intro alpha target k
+    let revTarget : InterSlot L inp.pack r target.1 :=
+      ⟨alpha, target.2.mono fun _ hk =>
+        BInter.symm inp.decay inp.D P L.lamInf hk⟩
+    have hk := hN (shift k) (by
+      simpa only [shift] using Nat.le_add_left N k)
+    have hf := (hk.2.2.1 (⟨alpha, target⟩ : PairSlot)).1
+    have hr := (hk.2.2.1 (⟨target.1, revTarget⟩ : PairSlot)).1
+    constructor
+    · simpa only [Lphi, phi, L0, live0, NetLimitData.subseq,
+        Function.comp_apply, seqCenterD_subseq,
+        NetLimitData.subseq_lamInf] using hf
+    · simpa only [revTarget, Lphi, phi, L0, live0, NetLimitData.subseq,
+        Function.comp_apply, seqCenterD_subseq,
+        NetLimitData.subseq_lamInf] using hr
   · intro alpha z hz gamma hweight
     have hnum : aInf alpha gamma z ≠ 0 :=
       num_ne_of_cut_ne (num_ne_of_raw_ne hweight)
@@ -1648,7 +1675,7 @@ def HasSuppConvData
       inp.pack r hr
       (fun k => seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
       (U alpha) (aInf alpha)) ∧
-  ∀ alpha target,
+  (∀ alpha target,
     ContDiffOn Real (⊤ : ℕ∞) (Jinf alpha target)
         (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
     ContDiffOn Real (⊤ : ℕ∞) (Jbarinf alpha target)
@@ -1676,7 +1703,19 @@ def HasSuppConvData
     ∀ w, w ∈ Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
       Jbarinf alpha target w ∈
           Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
-        Jinf alpha target (Jbarinf alpha target w) = w
+        Jinf alpha target (Jbarinf alpha target w) = w) ∧
+  ∀ (alpha : LiveSlot L inp.pack r)
+      (target : InterSlot L inp.pack r alpha) (k : Nat),
+    ContDiffOn Real (⊤ : ℕ∞)
+      (normalTransition (I := I) (X.obj (Lphi.φ k))
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
+        (seqCenterD inp.decay P Lphi k (target.1.1 : Nat)))
+      (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+    ContDiffOn Real (⊤ : ℕ∞)
+      (normalTransition (I := I) (X.obj (Lphi.φ k))
+        (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)))
+      (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
 
 set_option maxHeartbeats 800000 in
 /-- Produce one master subsequence with source-local normalized weights and
@@ -1773,12 +1812,13 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
                   dist x (pts alpha a b x gamma) < epsilon := by
   classical
   obtain ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, hUopen, hU8,
-      hC0, hC1, hC01, hC1U, hcore, hgeom, hlim, htrans, hsupp⟩ :=
+      hC0, hC1, hC01, hC1U, hcore, hgeom, hlim, htrans, hstage,
+      hsupp⟩ :=
     inp.exists_atom_supp_fin h8 hradD hradRatio P L hstable r hr
   refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
   dsimp only
   refine ⟨⟨hUopen, hU8, hC0, hC1, hC01, hC1U, hcore,
-    hgeom, hlim, htrans⟩, ?_⟩
+    hgeom, hlim, htrans, hstage⟩, ?_⟩
   obtain ⟨hgp0, _hrad⟩ := inp.item3ScaleTails h8 hradD hradRatio P L r
   have hgpPhi : Item3GpScaleTail (I := I) inp.decay inp.D P
       (L.subseq hphi) inp.pack r :=

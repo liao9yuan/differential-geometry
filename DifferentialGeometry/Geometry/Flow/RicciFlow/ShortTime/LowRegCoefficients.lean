@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSUniformFamily
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.RHSFirstDerivativeUniform
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.GramInvUniformEigenvalueLowerBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricPreconv
 
@@ -39,12 +40,13 @@ structure LowRegCoeff where
   gram2 : ℝ
   gram3 : ℝ
   rhsBound : ℝ
+  rhsD1Bound : ℝ
   rhsLip : ℝ
 
 /-- The active chart-atlas supports satisfy the ellipticity, order-at-most-three
-Gram bounds, absolute Ricci--DeTurck RHS bound, and RHS Lipschitz estimate
-against the metric `2`-jet difference recorded by `D`.  This is an input
-package for a future low-regularity parabolic solver. -/
+Gram bounds, absolute Ricci--DeTurck RHS and first-derivative bounds, and RHS
+Lipschitz estimate against the metric `2`-jet difference recorded by `D`.
+This is an input package for a future low-regularity parabolic solver. -/
 structure IsLowRegCoeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff) : Prop where
@@ -55,6 +57,7 @@ structure IsLowRegCoeff {ι : Type*}
   gram2_nonneg : 0 ≤ D.gram2
   gram3_nonneg : 0 ≤ D.gram3
   rhsBound_pos : 0 < D.rhsBound
+  rhsD1Bound_pos : 0 < D.rhsD1Bound
   rhsLip_pos : 0 < D.rhsLip
   elliptic :
     ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -106,6 +109,14 @@ structure IsLowRegCoeff {ι : Type*}
         ∀ i j : Fin (Module.finrank ℝ E),
           |chartDeTurckRHSComp (I := I) gBase (gSeq k) α i j
             (extChartAt I α b)| ≤ D.rhsBound
+  rhs_d1_bound :
+    ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ d i j : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) d
+            (chartDeTurckRHSComp (I := I) gBase (gSeq k) α i j)
+              (extChartAt I α b)| ≤ D.rhsD1Bound
   rhs_lipschitz :
     ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
@@ -233,6 +244,16 @@ theorem exists_low_reg_coeff {ι : Type*}
                 (chartGramOnE (I := I) (gSeq k) α i j))) (extChartAt I α b)| ≤ Q₃ := by
     intro α hα k b hb d c m i j
     simpa [gAll] using hQ₃ α hα (some k) b hb d c m i j
+  have hQ₃Base : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ d c m i j : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) d
+            (partialDeriv (E := E) c
+              (partialDeriv (E := E) m
+                (chartGramOnE (I := I) gBase α i j))) (extChartAt I α b)| ≤ Q₃ := by
+    intro α hα b hb d c m i j
+    simpa [gAll] using hQ₃ α hα none b hb d c m i j
   obtain ⟨ellMin, ellMax, hellMin, hellMax, hell⟩ :=
     chartInvGram_pou_eqv (I := I) (M := M) gBase gSeq Λ hΛ hequiv
   obtain ⟨Crhs, hCrhs, hRhs⟩ :=
@@ -243,6 +264,10 @@ theorem exists_low_reg_coeff {ι : Type*}
     chartRHS_pou_bnd (I := I) (M := M) gBase gSeq Λ hΛ hequiv
       Q₀ hQ₀_nn hQ₀Seq hQ₀Base Q₁ hQ₁_nn hQ₁Seq hQ₁Base
       Q₂ hQ₂_nn hQ₂Seq hQ₂Base
+  obtain ⟨CrhsD1, hCrhsD1, hRhsD1⟩ :=
+    chartRHSD_pou_bnd (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+      Q₀ hQ₀_nn hQ₀Seq Q₁ hQ₁_nn hQ₁Seq hQ₁Base
+      Q₂ hQ₂_nn hQ₂Seq hQ₂Base Q₃ hQ₃_nn hQ₃Seq hQ₃Base
   let D : LowRegCoeff :=
     { ellMin := ellMin
       ellMax := ellMax
@@ -251,6 +276,7 @@ theorem exists_low_reg_coeff {ι : Type*}
       gram2 := Q₂
       gram3 := Q₃
       rhsBound := CrhsBound
+      rhsD1Bound := CrhsD1
       rhsLip := Crhs }
   refine ⟨D, ?_⟩
   exact
@@ -261,6 +287,7 @@ theorem exists_low_reg_coeff {ι : Type*}
       gram2_nonneg := hQ₂_nn
       gram3_nonneg := hQ₃_nn
       rhsBound_pos := hCrhsBound
+      rhsD1Bound_pos := hCrhsD1
       rhsLip_pos := hCrhs
       elliptic := hell
       gram0_bound := hQ₀Seq
@@ -268,6 +295,7 @@ theorem exists_low_reg_coeff {ι : Type*}
       gram2_bound := hQ₂Seq
       gram3_bound := hQ₃Seq
       rhs_bound := hRhsBound
+      rhs_d1_bound := hRhsD1
       rhs_lipschitz := hRhs }
 
 end DifferentialGeometry.PDE.RicciFlow

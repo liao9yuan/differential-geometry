@@ -629,3 +629,20 @@ common-domain moving-stage implicit solver remain genuine analytic/API
 frontiers.  The all-pairs chart tail, `StepB1RawInput`, textbook B1, and every
 compactness endpoint remain 0%; running machinery estimates stay about
 94% / 86% / 57% for Step-B/B1 / Chapter 4 / whole HCG.
+
+## 2026-07-15 Route-A stage smoothness retention
+
+The common finite-pair shift inside `exists_atom_supp_fin` already proves that
+both finite-stage normal transitions are smooth on their full eight-lambda
+balls at every index of the returned subsequence.  `HasSuppConvData` now
+retains that existing output, and `exists_supp_pts_fin` forwards it unchanged.
+No second tail extraction and no new field of `MetricCompactnessInputs` was
+introduced.
+
+This retained datum is consumed by `HasSuppConvData.cfgSub_conv` in
+`StepCStageFill.lean`, which packages the actual weights and smooth Route-A
+point tuple into one source-local stage configuration converging to the
+diagonal for every pair of reindexings tending to infinity.  Focused
+verification and the exact producer refresh passed.  The raw B1 producer and
+textbook B1 remain theorem-level 0%; rounded machinery estimates are now about
+95% / 87% / 57% for Step-B/B1 / Chapter 4 / whole HCG.
