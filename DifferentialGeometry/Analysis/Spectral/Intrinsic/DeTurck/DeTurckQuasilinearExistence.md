@@ -19,9 +19,10 @@ joint-smooth realization shrinks the maximal-regularity interval to a positive
 subinterval with no uniform lower bound.
 
 Honest accounting: the low-regularity Ricci--DeTurck existence theorem is not
-stated or proved (0%).  Its dedicated quantitative-input machinery is about
-15% across the E1 lane: the fixed-point lifetime now has the right
-constants-first interface, and the chart-C3 and family-uniform ellipticity
-producers are focused-verified, but
-the low-regularity parabolic solver and uniform regularization horizon are the
-dominant missing analysis.
+stated or proved (0%).  The later `LowRegCoeff` package now closes the finite
+active-chart coefficient inputs from exactly the E1 `Lambda`-equivalence and
+order-at-most-three intrinsic bounds.  The package now also carries a uniform
+absolute RHS forcing budget, which is the `D`-type input needed by
+`nemytskii_sol_const`.  Dedicated E1 machinery is about 31%, but the
+low-regularity mixed `H^3 -> H^1` nonlinearity estimate, the resulting solver,
+and uniform same-interval regularization remain the dominant missing analysis.

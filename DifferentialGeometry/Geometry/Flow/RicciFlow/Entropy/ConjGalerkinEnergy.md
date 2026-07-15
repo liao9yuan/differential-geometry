@@ -49,3 +49,15 @@ compactness machinery is approximately **95% assembled**.  The later limit
 identification and scalar strong-solution theorem remain **0% complete**, with
 their dedicated machinery approximately **40% assembled**, before the separate
 second-order bootstrap frontier.
+
+## 2026-07-15 norm producer export
+
+`galVec_norm_sq` is now a public canonical energy-layer theorem rather than a
+private duplicate in the compactness consumer.  It gives the exact finite
+weighted coefficient formula used for support-independent `H²` domination.
+Focused verification passes without warnings or `sorry`; the exported object is
+still being refreshed through the shared upstream build queue.
+
+The theorem is infrastructure only.  Completion of the downstream
+`scalar_gal_limit` remains recorded in `ConjGalerkinStrong.md` and is not counted
+from this export by itself.

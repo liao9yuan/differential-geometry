@@ -62,6 +62,19 @@ data and compact cores covering every frozen source ball are retained on that
 same master subsequence.  Dedicated Step-B/B1 machinery is about 94%; the
 `StepB1RawInput` producer and textbook B1 theorem remain 0%.
 
+**2026-07-15 global stage-map ruling:** see `B1_STAGE_MAP_RULING.md`.
+`stageTarget`, `HasUniqueStageCenter`, and `stageComparisonMap` now give the
+chart-independent finite-stage definition, while zero-weight energy congruence
+identifies local filled branches with its unique minimizer.  The source-cover
+producer now also returns fixed compact nested cores whose strict inner images
+cover the source ball, and the producer/capstone chain retains those cores on
+the same master subsequence.  The remaining analytic stop is not a radius or chart
+compatibility assumption: it is the combination of a smooth support-sensitive
+target filler (or support-aware averaging theorem) and a common-domain moving
+implicit-solver convergence theorem.  The all-pairs chart-tail theorem,
+`StepB1RawInput` producer, and textbook B1 theorem remain 0%; rounded machinery
+estimates stay 94% / 86% / 57% for Step-B/B1 / Chapter 4 / whole HCG.
+
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
 ONLY where the book itself cites an external theorem (`lbl384`, the Rauch comparison
 in `lbl387`, the Hessian comparison `lbl413`) — with one declared exception: the
@@ -72,7 +85,8 @@ canonical route: the profile now proves packing-local `Item3RadiusTail` and
 `Item3GpScaleTail` after `D`, `pb`, and `r` are fixed.  The canonical
 `SigmaScaleField`, physical finite-hat cage/readout, selected-branch
 Hessian/Neumann, and full-convexity producers are checked.  The remaining
-construction-stage work is the global stage-map and quantitative B1 assembly.
+construction-stage work is the all-pairs convergence and quantitative B1
+assembly for the now-defined global stage map.
 **2026-07-14 correction:** the relative `kappa * mu(distance)` lower profile is
 already encoded separately by the endpoint's `normalRadius` field and consumed by
 the checked `NormalRadiusProfile.floor_le_*`, `exists_phase_scale`,
@@ -445,14 +459,15 @@ USES Step C's averaging (`lbl434`). So B1 and C are NOT cleanly sequential; the 
 `B1→…→B6 → C` ordering is a labeling artifact. Actual structure:
 `lbl394 (J,J̄ limits, done) → lbl398/lbl399 (local maps F^α_{kℓ,β}=J̄∘J → id) → [C averaging] → lbl397`.
 
-**Precise next brick:** `StepCHatReadout.exists_hat_cm_tail` now joins
-`exists_slot_min`/`aliveSlots_tail`, `exists_hat_radius`, `exists_rad_cage`, the
-filled `CenterInput`, and `exists_hat_cm_eqn`, while retaining
-`StrictDistInput` as the independent honest frontier.  Next specialize the atom
-route's outer source slot to `seqCenterD ... beta` so the existing sigma field
-controls both fixed-`beta` and active-`alpha` centers, then thread
-`hatPtsCasesComp` into this checked tail.  Do not revive the resolved
-qualitative intrinsic/realized-exp radius route.
+**Live next brick (2026-07-15):** the source-local center and intrinsic-join
+capstones are checked, and `StepCStageMap` now defines the canonical global
+finite-stage map.  The next analytic producer must solve the support-sensitive
+target-family mismatch: either construct a smooth filler which agrees with the
+direct stage targets at every nonzero-weight slot, or prove a support-aware
+moving center-equation convergence theorem.  In parallel it must supply a
+common-domain moving implicit solver with a threshold uniform in the reference,
+source, and target stages.  See `B1_STAGE_MAP_RULING.md`; do not restart the
+resolved sigma, H6, Hessian, or intrinsic-join routes.
 
 The ODE/branch-scale work preceding this gate is complete: `normalDiagAtFull`
 packages the smooth quantitative endpoint and normal-coordinate fence,
@@ -506,9 +521,12 @@ The former Step A Hopf--Rinow `exists_proper_realization` input is discharged
 sorries in 3 unconsumed intrinsic-frontier statements — audited harmless 2026-07-05).
 The H6 localized isometry-derivative producer now supplies the transition and
 atom extraction chain directly; no S6 derivation or replacement input remains.
-The current B/C consultation frontier is instead support locality: active
-weights have checked six-lambda target control, but the existing capstone asks
-for the stronger whole-cage `hKV0`, which does not follow from H6.
+The current B/C consultation frontier is the smooth version of support
+locality, not the old whole-cage `hKV0`: active weights have checked six-lambda
+target control, but the direct finite target tuple is not known to extend to a
+smooth all-slot family on the common compact core.  A separate common-domain
+moving implicit-solver convergence theorem is also missing.  The pointwise
+support capstone itself is checked.
 
 **Shared with Chapter 3:** the good-frame producer (`RicBoundGoodFrame.lean`) is the
 same gate as ric_bound's R4 (`RicBound.lean` endpoint, `RicBoundAssembly.aN_intrinsic_point`);

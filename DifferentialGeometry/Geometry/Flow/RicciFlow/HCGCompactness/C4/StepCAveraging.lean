@@ -85,6 +85,45 @@ noncomputable def activeFill (μ : X → ι → ℝ) (pts : X → ι → M)
   classical
   exact fun x i => if μ x i = 0 then qstar x else pts x i
 
+/-- Replacing zero-weight entries by the target point does not change the
+center energy. -/
+theorem energy_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
+    (μ : X → ι → ℝ) (pts : X → ι → M) (qstar : X → M)
+    (x : X) (q : M) :
+    CenterOfMass.centerEnergy (I := I) g (μ x) (activeFill μ pts qstar x) q =
+      CenterOfMass.centerEnergy (I := I) g (μ x) (pts x) q := by
+  apply CenterOfMass.centerEnergy_congr
+  intro i hi
+  simp only [activeFill, hi, ↓reduceIte]
+
+/-- A center input for the active-filled family gives the unique global
+minimizer of the original weighted energy. -/
+theorem uniqueMin_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
+    (μ : X → ι → ℝ) (pts : X → ι → M) (qstar : X → M)
+    (join : M → M → ℝ → M) (p : X → M) (r : X → ℝ)
+    (x : X) (h : CenterInput (I := I) g (μ x)
+      (activeFill μ pts qstar x) join (p x) (r x)) :
+    ∃! y : M, ∀ z : M,
+      CenterOfMass.centerEnergy (I := I) g (μ x) (pts x) y ≤
+        CenterOfMass.centerEnergy (I := I) g (μ x) (pts x) z := by
+  letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  obtain ⟨y, _hy, hmin, huniq⟩ := h.exists_cm
+  refine ⟨y, ?_, ?_⟩
+  · intro z
+    rw [← energy_activeFill g μ pts qstar x y,
+      ← energy_activeFill g μ pts qstar x z]
+    exact hmin z
+  · intro y' hy'
+    apply huniq y'
+    intro z
+    rw [energy_activeFill g μ pts qstar x y',
+      energy_activeFill g μ pts qstar x z]
+    exact hy' z
+
 /-- If every nonzero-weight entry is close to the target, then every filled
 entry is close to the target. -/
 theorem activeFill_close {μ : X → ι → ℝ} {pts : X → ι → M} {qstar : X → M}

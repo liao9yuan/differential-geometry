@@ -112,6 +112,32 @@ theorem normalTrans_mapsTo
   rw [normalChartAt_right_inv (I := I) Y.metric y hvy]
   exact hv
 
+/-- On a verified overlap, decoding a normal transition in the target chart
+returns the same manifold point as decoding its input in the source chart. -/
+theorem NormalOverlapOn.decode
+    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x y : Y.M}
+    {U : Set E} (h : NormalOverlapOn (I := I) Y x y U)
+    {z : E} (hz : z ∈ U) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    (normalChartAt (I := I) Y.metric y).symm
+        (normalTransition (I := I) Y x y z) =
+      (normalChartAt (I := I) Y.metric x).symm z := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  obtain ⟨_hzx, hzy⟩ := h z hz
+  change (normalChartAt (I := I) Y.metric x).symm z ∈
+    (normalChartAt (I := I) Y.metric y).source at hzy
+  change (normalChartAt (I := I) Y.metric y).symm
+      (normalChartAt (I := I) Y.metric y
+        ((normalChartAt (I := I) Y.metric x).symm z)) =
+    (normalChartAt (I := I) Y.metric x).symm z
+  exact normalChartAt_left_inv (I := I) Y.metric y hzy
+
 /-- On its overlap domain, reversing a normal-coordinate transition cancels
 the forward transition. -/
 theorem NormalOverlapOn.cancel

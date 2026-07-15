@@ -612,3 +612,20 @@ source stage.  They do not solve the uniform-in-stage/all-pairs tail, define the
 single global comparison map, or produce the two-sided covariant metric bounds.
 Those remain the next architecture/analytic frontier; theorem-level endpoint
 percentages are unchanged.
+
+## 2026-07-15 nested-core retention
+
+`exists_atom_supp_fin`, `HasSuppConvData`, and `exists_supp_pts_fin` now retain
+the fixed compact cores `C0` and `C1` produced by `exists_live_cores`, including
+compactness, `C0 alpha ⊆ interior (C1 alpha)`, `C1 alpha ⊆ U alpha`, and the
+all-stage source-ball cover by strict-inner-core exponential images.  The old
+open-domain geometry is recovered from these containments rather than by a
+second cover extraction.
+
+Focused verification and the exact producer refresh passed.  The retained
+origin-metric witness used to define these quadratic cores is not a full local
+metric convergence theorem.  The support-sensitive target family and the
+common-domain moving-stage implicit solver remain genuine analytic/API
+frontiers.  The all-pairs chart tail, `StepB1RawInput`, textbook B1, and every
+compactness endpoint remain 0%; running machinery estimates stay about
+94% / 86% / 57% for Step-B/B1 / Chapter 4 / whole HCG.

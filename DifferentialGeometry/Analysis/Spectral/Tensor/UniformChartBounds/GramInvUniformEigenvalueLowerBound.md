@@ -13,9 +13,15 @@ canonical active `chartAtlasPOU_finset`.  Its conclusion supplies one positive
 ellipticity constant simultaneously for every family member and every active
 compact chart support.
 
+The same route now also supplies the upper quadratic-form bound and entrywise
+inverse-Gram bound.  `chartInvGram_pou_eqv` packages a single positive
+two-sided ellipticity envelope on all active supports.  These bounds are used
+both by the uniform parabolicity package and by the Christoffel perturbation
+estimates.
+
 This is the quantitative uniform-ellipticity producer required by a
 low-regularity Ricci--DeTurck solver.  It does not provide that solver or a
 uniform existence time.  The uniform low-regularity existence theorem remains
-0%; its dedicated coefficient/input machinery is about 15% after this lemma.
+0%.
 
-Both family-uniform theorems pass focused verification without new warnings.
+The family-uniform theorems pass focused verification without new warnings.

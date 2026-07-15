@@ -90,3 +90,17 @@ The producer now also supplies `HasCompactCover` on the same frozen-stage
 tail, and `exists_supp_cm_fin` retains it unchanged beside the strict center
 capstone.  Focused verification passed.  This closes the compact-domain
 preparation only; it does not change any theorem-level completion percentage.
+
+## 2026-07-15 nested-core propagation
+
+`MetricCompactBase.exists_supp_cm_fin` now returns the fixed nested coordinate
+cores `C0` and `C1` inside its retained `HasSuppConvData` package.  Thus the
+strict-inner-core source cover survives on exactly the same master subsequence
+as the source-local center solutions; `exists_cm_on_source` intentionally
+forgets the extra data and preserves its public conclusion.
+
+Focused verification passed.  This closes the remaining routine data-erasure
+seam before the moving-stage argument.  It does not provide the support-smooth
+target tuple, a common-domain moving implicit solver, or an all-pairs chart
+tail.  `StepB1RawInput`, textbook B1, and all compactness endpoints remain 0%;
+the rounded machinery estimates remain 94% / 86% / 57%.

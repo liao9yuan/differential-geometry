@@ -14,3 +14,16 @@ the finite transition diagonal remain separate producers.  Dedicated
 Step-B/B1 machinery is about 83%, Chapter 4 machinery about 79%, and whole-HCG
 machinery about 53%; `StepB1RawInput`, textbook B1, and the conditional
 compactness endpoint remain theorem-level 0%.
+
+## 2026-07-15 canonical overlap decoding
+
+Added `NormalOverlapOn.decode`: on a verified normal-coordinate overlap,
+decoding a transition in the target chart gives the same manifold point as
+decoding the original vector in the source chart.  The proof uses only the
+existing overlap predicate and normal-chart inverse law; it adds no transition
+wrapper or radius assumption.
+
+Focused verification passed.  This is a reusable lower-layer projection lemma,
+not an all-pairs stage-map result.  Current rounded estimates remain about 94%
+for dedicated Step-B/B1 machinery, 86% for Chapter 4, and 57% for whole-HCG;
+`StepB1RawInput`, textbook B1, and every compactness endpoint remain 0%.

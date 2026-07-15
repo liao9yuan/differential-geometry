@@ -464,7 +464,18 @@ bridge needed as input to a low-regularity Ricci--DeTurck theorem.
 chart support, family member, and Gram entry.  Focused verification passes.
 
 This is coefficient infrastructure, not parabolic existence.  The uniform
-low-regularity Ricci--DeTurck theorem remains 0%; its dedicated machinery is
-about 15% across the E1 lane after the sibling family-uniform inverse-Gram
-ellipticity producer, with the actual low-regularity solver and uniform
-smoothing interval still missing.
+low-regularity Ricci--DeTurck theorem remains 0%.  After the later
+`LowRegCoeff` assembly, dedicated E1 machinery is about 28%, with the actual
+low-regularity solver and uniform smoothing interval still missing.
+
+## 2026-07-14: active-chart partial bounds through order three
+
+Added `chartGram_pou_bnd`, `chartGram_pou_d1`, `chartGram_pou_d2`, and
+`chartGram_pou_d3`.  They specialize the fixed-order `iteratedFDeriv` estimate
+to absolute coordinate Gram bounds of orders zero through three on every
+active partition-of-unity chart support.  The first three orders feed the full
+Ricci--DeTurck `2`-jet Lipschitz estimate; order three is retained as the
+coefficient-regularity input for the future low-regularity parabolic solver.
+
+Focused verification passed.  These are constants-first family producers and
+do not assert existence or regularization of a flow.

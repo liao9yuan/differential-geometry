@@ -286,16 +286,17 @@ spectral-mass theorem `cc_partial_le_norm` and a private scalar-sum normal form
 to avoid a whole-declaration heartbeat wall.  Its public assumptions and
 geometric content are unchanged.
 
-The next compactness layer is source-written in `ConjGalerkinLimit.lean`.
+The compactness layer in `ConjGalerkinLimit.lean` now passes focused
+verification without warnings or `sorry`.
 `scalar_gal_subseq` constructs the genuine extracted finite solutions and
 inherits every weighted mass bound.  `galLimHs` packages the limiting
 coefficients in each spectral Sobolev order, and `galLim_tendsto` proves
 fixed-time `H^m` convergence by applying `tendsto_of_coeff` one order above.
-These declarations still await their own focused verification after the
-upstream object refresh, so they remain theorem-level 0% despite their complete
-source routes.
+All three declarations and their dedicated compactness machinery are now 100%
+verified.  The heartbeat repair split only private scalar/Fatou/initial-value
+and support-aware Lipschitz producers; the public assumptions are unchanged.
 
-The precise frontier after that check is the separate `scalar_gal_limit`
+The precise frontier is the separate `scalar_gal_limit`
 producer: pass the finite right-derivative ODE to an interval-integral identity
 and identify the spectral strong solution.  Only then should the route enter
 the spacetime-smooth realization/second-order bootstrap and Perelman's entropy
@@ -303,11 +304,30 @@ argument.  No chart-selector hypothesis, supplied A2 black box, new convergence
 predicate, or consumer assumption has been introduced.
 
 Honest nested accounting: `scalar_gal_bound` is **100% verified**;
-`scalar_gal_subseq` is **0% verified** with about **98%** dedicated machinery;
-`galLim_tendsto` is **0% verified** with about **98%** dedicated machinery;
+`scalar_gal_subseq` is **100% verified** with **100%** dedicated machinery;
+`galLim_tendsto` is **100% verified** with **100%** dedicated machinery;
 `scalar_gal_limit` is **0%** with about **40%** dedicated machinery.  The
 classical moving conjugate-heat endpoint remains theorem-level **0%** with
-about **81%** dedicated machinery.  Perelman no-local-collapsing and
-`ham3_noncollapse` remain endpoint-level **0%**, with about **45%** dedicated
+about **82%** dedicated machinery.  Perelman no-local-collapsing and
+`ham3_noncollapse` remain endpoint-level **0%**, with about **46%** dedicated
 analytic machinery.  Whole HCG machinery remains about **54%**, with endpoint
 theorems at **0%**.
+
+## 2026-07-15 strong-limit source checkpoint
+
+The intrinsic Galerkin strong-limit source is now assembled through all three
+levels: modewise right-FTC plus dominated convergence, the `H⁰` Bochner FTC,
+and a genuine `timeH1.mk` / `MaxRegSolutionSpace` package that explicitly links
+its represented path to the `H² → H⁰` spectral limit.  The producer continuity
+retained in `IsConjGalSubseq` is filled by existing A2/A1 theorems; no consumer
+assumption, new convergence predicate, or chart selector was added.
+
+Verification has not yet reached these proof bodies because the shared targeted
+build is refreshing a long chain of missing upstream curvature and spectral
+objects.  Therefore `scalar_gal_limit` remains theorem-level **0%**.  Its source
+implementation is about **90% assembled**, while only the previously checked
+roughly **40%** should be counted as verified dedicated machinery until the new
+file passes.  The classical moving conjugate-heat / `IsHeatPotOn` theorem,
+Perelman no-local-collapsing, and `ham3_noncollapse` all remain theorem-level
+**0%**.  The canonical whole-HCG machinery estimate is about **57%**, with HCG
+endpoint theorems still **0%**.

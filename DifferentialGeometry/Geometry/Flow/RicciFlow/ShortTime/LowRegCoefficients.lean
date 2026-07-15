@@ -38,11 +38,13 @@ structure LowRegCoeff where
   gram1 : ℝ
   gram2 : ℝ
   gram3 : ℝ
+  rhsBound : ℝ
   rhsLip : ℝ
 
 /-- The active chart-atlas supports satisfy the ellipticity, order-at-most-three
-Gram bounds, and full Ricci--DeTurck `2`-jet Lipschitz estimate recorded by
-`D`.  This is an input package for a future low-regularity parabolic solver. -/
+Gram bounds, absolute Ricci--DeTurck RHS bound, and RHS Lipschitz estimate
+against the metric `2`-jet difference recorded by `D`.  This is an input
+package for a future low-regularity parabolic solver. -/
 structure IsLowRegCoeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff) : Prop where
@@ -52,6 +54,7 @@ structure IsLowRegCoeff {ι : Type*}
   gram1_nonneg : 0 ≤ D.gram1
   gram2_nonneg : 0 ≤ D.gram2
   gram3_nonneg : 0 ≤ D.gram3
+  rhsBound_pos : 0 < D.rhsBound
   rhsLip_pos : 0 < D.rhsLip
   elliptic :
     ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
@@ -96,6 +99,13 @@ structure IsLowRegCoeff {ι : Type*}
             (partialDeriv (E := E) c
               (partialDeriv (E := E) m
                 (chartGramOnE (I := I) (gSeq k) α i j))) (extChartAt I α b)| ≤ D.gram3
+  rhs_bound :
+    ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ i j : Fin (Module.finrank ℝ E),
+          |chartDeTurckRHSComp (I := I) gBase (gSeq k) α i j
+            (extChartAt I α b)| ≤ D.rhsBound
   rhs_lipschitz :
     ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
@@ -109,7 +119,7 @@ structure IsLowRegCoeff {ι : Type*}
 /-- Pointwise metric equivalence and uniform intrinsic metric bounds through
 order three produce all finite-chart coefficient constants needed by a
 low-regularity Ricci--DeTurck solver. -/
-theorem exists_lowRegCoeff {ι : Type*}
+theorem exists_low_reg_coeff {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M)
     (Λ : ℝ) (hΛ : 1 ≤ Λ)
@@ -172,6 +182,13 @@ theorem exists_lowRegCoeff {ι : Type*}
           |chartGramOnE (I := I) (gSeq k) α i j (extChartAt I α b)| ≤ Q₀ := by
     intro α hα k b hb i j
     simpa [gAll] using hQ₀ α hα (some k) b hb i j
+  have hQ₀Base : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ i j : Fin (Module.finrank ℝ E),
+          |chartGramOnE (I := I) gBase α i j (extChartAt I α b)| ≤ Q₀ := by
+    intro α hα b hb i j
+    simpa [gAll] using hQ₀ α hα none b hb i j
   have hQ₁Seq : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
       ∀ k : ι, ∀ b ∈ tsupport
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
@@ -222,6 +239,10 @@ theorem exists_lowRegCoeff {ι : Type*}
     chartRHS_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv
       Q₀ hQ₀_nn hQ₀Seq Q₁ hQ₁_nn hQ₁Seq hQ₁Base
       Q₂ hQ₂_nn hQ₂Seq hQ₂Base
+  obtain ⟨CrhsBound, hCrhsBound, hRhsBound⟩ :=
+    chartRHS_pou_bnd (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+      Q₀ hQ₀_nn hQ₀Seq hQ₀Base Q₁ hQ₁_nn hQ₁Seq hQ₁Base
+      Q₂ hQ₂_nn hQ₂Seq hQ₂Base
   let D : LowRegCoeff :=
     { ellMin := ellMin
       ellMax := ellMax
@@ -229,6 +250,7 @@ theorem exists_lowRegCoeff {ι : Type*}
       gram1 := Q₁
       gram2 := Q₂
       gram3 := Q₃
+      rhsBound := CrhsBound
       rhsLip := Crhs }
   refine ⟨D, ?_⟩
   exact
@@ -238,12 +260,14 @@ theorem exists_lowRegCoeff {ι : Type*}
       gram1_nonneg := hQ₁_nn
       gram2_nonneg := hQ₂_nn
       gram3_nonneg := hQ₃_nn
+      rhsBound_pos := hCrhsBound
       rhsLip_pos := hCrhs
       elliptic := hell
       gram0_bound := hQ₀Seq
       gram1_bound := hQ₁Seq
       gram2_bound := hQ₂Seq
       gram3_bound := hQ₃Seq
+      rhs_bound := hRhsBound
       rhs_lipschitz := hRhs }
 
 end DifferentialGeometry.PDE.RicciFlow

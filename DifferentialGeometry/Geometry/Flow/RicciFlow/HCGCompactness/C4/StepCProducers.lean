@@ -1030,6 +1030,7 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
     (r : Real) (hr : 0 ≤ r) :
     ∃ (phi : Nat → Nat) (hphi : StrictMono phi)
         (U : LiveSlot L inp.pack r → Set E)
+        (C0 C1 : LiveSlot L inp.pack r → Set E)
         (aInf : (alpha : LiveSlot L inp.pack r) →
           Fin (inp.pack.A r) → E → Real)
         (Jinf : (alpha : LiveSlot L inp.pack r) →
@@ -1040,6 +1041,23 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
       (∀ alpha, IsOpen (U alpha)) ∧
       (∀ alpha, U alpha ⊆
         Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+      (∀ alpha, IsCompact (C0 alpha)) ∧
+      (∀ alpha, IsCompact (C1 alpha)) ∧
+      (∀ alpha, C0 alpha ⊆ interior (C1 alpha)) ∧
+      (∀ alpha, C1 alpha ⊆ U alpha) ∧
+      (∀ k,
+        let Y := X.obj (Lphi.φ k)
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        letI : T2Space Y.M := Y.t2
+        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+        letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+        Lphi.hatSourceBall inp.decay P r k ⊆
+          ⋃ alpha : LiveSlot L inp.pack r,
+            (fun z => expMapDiffeo (I := I) Y.metric
+              (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z) ''
+                interior (C0 alpha)) ∧
       (∀ k,
         let Y := X.obj (Lphi.φ k)
         letI : TopologicalSpace Y.M := Y.topology
@@ -1122,8 +1140,41 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
         apply Subtype.ext
         exact hab)
   letI : Finite PairSlot := inferInstance
-  obtain ⟨psi, hpsi, gInf, U, hginf, hg, hUopen, hU8, hcover⟩ :=
-    inp.exists_live_source_cover h8 hradD hradRatio P L r
+  obtain ⟨psi, hpsi, gInf, U, C0, C1, hginf, hg, hUopen, hU8,
+      hC0, hC1, hC01, hC1U, hcore⟩ :=
+    inp.exists_live_cores h8 hradD hradRatio P L r
+  have hcover : ∀ᶠ k in Filter.atTop,
+      let Y := X.obj (L.φ (psi k))
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      letI : MetricSpace Y.M := (P (L.φ (psi k))).ms
+      (∀ alpha : LiveSlot L inp.pack r,
+        U alpha ⊆ Metric.ball 0
+            (inp.normalBounds.radius (L.φ (psi k))
+              (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat))) ∧
+        U alpha ⊆ Metric.ball 0
+            (expMapC2Radius (I := I) Y.metric
+              (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat))) ∧
+        Set.MapsTo
+          (fun z => expMapDiffeo (I := I) Y.metric
+            (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z)
+          (U alpha)
+          (L.hatBall inp.decay inp.D P inp.pack r (psi k) alpha.1 ∩
+            ⋃ gamma : Fin (inp.pack.A r),
+              L.innerBall inp.decay inp.D P inp.pack r (psi k) gamma)) ∧
+      L.hatSourceBall inp.decay P r (psi k) ⊆
+        ⋃ alpha : LiveSlot L inp.pack r,
+          (fun z => expMapDiffeo (I := I) Y.metric
+            (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z) '' U alpha := by
+    filter_upwards [hcore] with k hk
+    refine ⟨hk.1, ?_⟩
+    intro y hy
+    obtain ⟨alpha, v, hv, rfl⟩ := mem_iUnion.mp (hk.2 hy)
+    refine mem_iUnion.mpr ⟨alpha, v, ?_, rfl⟩
+    exact hC1U alpha (interior_subset (hC01 alpha (interior_subset hv)))
   let L0 := L.subseq hpsi
   let live0 : LiveSlot L inp.pack r → LiveSlot L0 inp.pack r := fun alpha =>
     ⟨alpha.1, by simpa only [L0, NetLimitData.subseq] using alpha.2⟩
@@ -1202,11 +1253,25 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
             (normalTransition (I := I) Y x y)
             (Metric.ball 0 (8 * L0.lamInf ((live0 pair.1).1 : Nat))) ∧
           NormalOverlapOn (I := I) Y x y
-            (Metric.ball 0 (8 * L0.lamInf ((live0 pair.1).1 : Nat)))) := by
+            (Metric.ball 0 (8 * L0.lamInf ((live0 pair.1).1 : Nat)))) ∧
+      (let Y := X.obj (L.φ (psi (tau k)))
+       letI : TopologicalSpace Y.M := Y.topology
+       letI : ChartedSpace H Y.M := Y.charted
+       letI : IsManifold I ∞ Y.M := Y.smooth
+       letI : T2Space Y.M := Y.t2
+       letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+       letI : MetricSpace Y.M := (P (L.φ (psi (tau k)))).ms
+       L.hatSourceBall inp.decay P r (psi (tau k)) ⊆
+        ⋃ alpha : LiveSlot L inp.pack r,
+          (fun z => expMapDiffeo (I := I) Y.metric
+            (seqCenterD inp.decay P L (psi (tau k)) (alpha.1 : Nat)) z) ''
+              interior (C0 alpha)) := by
     filter_upwards [htau.tendsto_atTop.eventually hcover,
+      htau.tendsto_atTop.eventually hcore,
       htau.tendsto_atTop.eventually hgp0,
-      htau.tendsto_atTop.eventually hpair] with k hcoverK hgpK hpairK
-    exact ⟨hcoverK, hgpK, hpairK⟩
+      htau.tendsto_atTop.eventually hpair]
+      with k hcoverK hcoreK hgpK hpairK
+    exact ⟨hcoverK, hgpK, hpairK, hcoreK.2⟩
   obtain ⟨N, hN⟩ := Filter.eventually_atTop.mp hall
   let shift : Nat → Nat := fun k => k + N
   have hshift : StrictMono shift := by
@@ -1315,7 +1380,7 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
             (beta k) (seqCenterD inp.decay P Lphi k (target.1.1 : Nat)))
           (U alpha) := by
       have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
-      have hsmooth := (hk.2.2 (⟨alpha, target⟩ : PairSlot)).1.mono (hU8 alpha)
+      have hsmooth := (hk.2.2.1 (⟨alpha, target⟩ : PairSlot)).1.mono (hU8 alpha)
       simpa only [beta, Lphi, phi, L0, live0, NetLimitData.subseq,
         Function.comp_apply, seqCenterD_subseq, NetLimitData.subseq_lamInf] using hsmooth
     have hOverlap (target : InterSlot L inp.pack r alpha) (k : Nat) :
@@ -1323,7 +1388,7 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
           (beta k) (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))
           (U alpha) := by
       have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
-      have hover := (hk.2.2 (⟨alpha, target⟩ : PairSlot)).2
+      have hover := (hk.2.2.1 (⟨alpha, target⟩ : PairSlot)).2
       intro z hz
       have hz' := hover z (hU8 alpha hz)
       simpa only [beta, Lphi, phi, L0, live0, NetLimitData.subseq,
@@ -1438,9 +1503,13 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
     exact HasAtomWeightLim.of_atoms (I := I) inp.hD P Lphi inp.realizes inp.pack
       r hr hgpPhi beta (U alpha) (hUopen alpha) hcoverPhi (aInf alpha)
       hdead hatom hatomSmooth hatomInfSmooth
-  refine ⟨phi, hphi, U, aInf, Jinf, Jbarinf, ?_⟩
+  refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
   dsimp only
-  refine ⟨hUopen, hU8, ?_, hlimAll, ?_, ?_⟩
+  refine ⟨hUopen, hU8, hC0, hC1, hC01, hC1U, ?_, ?_, hlimAll, ?_, ?_⟩
+  · intro k
+    have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
+    simpa only [Lphi, phi, Function.comp_apply,
+      seqCenterD_subseq, NetLimitData.hatSourceBall_subseq] using hk.2.2.2
   · intro k
     have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
     simpa only [Lphi, phi, Function.comp_apply,
@@ -1520,6 +1589,7 @@ def HasSuppConvData
     (r : Real) (hr : 0 ≤ r)
     (phi : Nat → Nat) (hphi : StrictMono phi)
     (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
     (aInf : (alpha : LiveSlot L inp.pack r) →
       Fin (inp.pack.A r) → E → Real)
     (Jinf : (alpha : LiveSlot L inp.pack r) →
@@ -1530,6 +1600,23 @@ def HasSuppConvData
   (∀ alpha, IsOpen (U alpha)) ∧
   (∀ alpha, U alpha ⊆
     Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+  (∀ alpha, IsCompact (C0 alpha)) ∧
+  (∀ alpha, IsCompact (C1 alpha)) ∧
+  (∀ alpha, C0 alpha ⊆ interior (C1 alpha)) ∧
+  (∀ alpha, C1 alpha ⊆ U alpha) ∧
+  (∀ k,
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+    Lphi.hatSourceBall inp.decay P r k ⊆
+      ⋃ alpha : LiveSlot L inp.pack r,
+        (fun z => expMapDiffeo (I := I) Y.metric
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z) ''
+            interior (C0 alpha)) ∧
   (∀ k,
     let Y := X.obj (Lphi.φ k)
     letI : TopologicalSpace Y.M := Y.topology
@@ -1614,6 +1701,7 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
       ConnectedSpace (X.obj k).M) :
     ∃ (phi : Nat → Nat) (hphi : StrictMono phi)
         (U : LiveSlot L inp.pack r → Set E)
+        (C0 C1 : LiveSlot L inp.pack r → Set E)
         (aInf : (alpha : LiveSlot L inp.pack r) →
           Fin (inp.pack.A r) → E → Real)
         (Jinf : (alpha : LiveSlot L inp.pack r) →
@@ -1630,7 +1718,8 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
             (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
             (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
           z gamma
-      HasSuppConvData (I := I) inp P L r hr phi hphi U aInf Jinf Jbarinf ∧
+      HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+        aInf Jinf Jbarinf ∧
       ∀ᶠ n in Filter.atTop,
         let Y := X.obj (Lphi.φ n)
         letI : TopologicalSpace Y.M := Y.topology
@@ -1683,12 +1772,13 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
                 localWeight alpha x gamma ≠ 0 →
                   dist x (pts alpha a b x gamma) < epsilon := by
   classical
-  obtain ⟨phi, hphi, U, aInf, Jinf, Jbarinf, hUopen, hU8,
-      hgeom, hlim, htrans, hsupp⟩ :=
+  obtain ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, hUopen, hU8,
+      hC0, hC1, hC01, hC1U, hcore, hgeom, hlim, htrans, hsupp⟩ :=
     inp.exists_atom_supp_fin h8 hradD hradRatio P L hstable r hr
-  refine ⟨phi, hphi, U, aInf, Jinf, Jbarinf, ?_⟩
+  refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
   dsimp only
-  refine ⟨⟨hUopen, hU8, hgeom, hlim, htrans⟩, ?_⟩
+  refine ⟨⟨hUopen, hU8, hC0, hC1, hC01, hC1U, hcore,
+    hgeom, hlim, htrans⟩, ?_⟩
   obtain ⟨hgp0, _hrad⟩ := inp.item3ScaleTails h8 hradD hradRatio P L r
   have hgpPhi : Item3GpScaleTail (I := I) inp.decay inp.D P
       (L.subseq hphi) inp.pack r :=

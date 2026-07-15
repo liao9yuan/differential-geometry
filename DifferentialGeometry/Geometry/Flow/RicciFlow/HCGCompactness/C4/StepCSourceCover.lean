@@ -101,16 +101,16 @@ theorem liveMetric0_close
     _ = (1 / 10 : Real) * ‖v‖ ^ 2 := by ring
 
 set_option synthInstance.maxHeartbeats 100000 in
-/-- A common origin-metric subsequence produces a finite family of fixed open
-source patches.  Each patch stays in its own eight-lambda model ball, maps into
-its own hat and the union of strict inner balls, and the patch images cover the
-frozen source ball.  The theorem returns the producing subsequence explicitly;
-the live-slot type remains the original `LiveSlot L inp.pack r`.
+/-- A common origin-metric subsequence produces fixed open source patches and
+compactly nested coordinate cores.  The strict inner core images cover the
+frozen source ball, while the outer core remains inside the corresponding open
+patch.  The theorem returns the producing subsequence explicitly; the live-slot
+type remains the original `LiveSlot L inp.pack r`.
 
 The radius clauses are source-chart clauses only.  Pairwise transition clauses
 remain indexed by `InterSlot L inp.pack r alpha` and are supplied by
 `pair_overlap_tail`; no overlap is asserted for stably disjoint live targets. -/
-theorem MetricCompactnessInputs.exists_live_source_cover
+theorem MetricCompactnessInputs.exists_live_cores
     (inp : MetricCompactnessInputs (I := I) X)
     (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
     (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
@@ -121,7 +121,7 @@ theorem MetricCompactnessInputs.exists_live_source_cover
     ∃ (psi : Nat → Nat) (_hpsi : StrictMono psi)
         (gInf : E →
           LiveSlot L inp.pack r → (E →L[Real] E →L[Real] Real))
-        (U : LiveSlot L inp.pack r → Set E),
+        (U C0 C1 : LiveSlot L inp.pack r → Set E),
       ContDiffOn Real (∞ : WithTop ℕ∞) gInf Set.univ ∧
       MapCInfConvOnCompacts Set.univ
         (fun k _ alpha => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
@@ -130,6 +130,10 @@ theorem MetricCompactnessInputs.exists_live_source_cover
       (∀ alpha, IsOpen (U alpha)) ∧
       (∀ alpha, U alpha ⊆
         Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+      (∀ alpha, IsCompact (C0 alpha)) ∧
+      (∀ alpha, IsCompact (C1 alpha)) ∧
+      (∀ alpha, C0 alpha ⊆ interior (C1 alpha)) ∧
+      (∀ alpha, C1 alpha ⊆ U alpha) ∧
       ∀ᶠ k in atTop,
         let Y := X.obj (L.φ (psi k))
         letI : TopologicalSpace Y.M := Y.topology
@@ -155,12 +159,19 @@ theorem MetricCompactnessInputs.exists_live_source_cover
         L.hatSourceBall inp.decay P r (psi k) ⊆
           ⋃ alpha : LiveSlot L inp.pack r,
             (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
-              (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z) '' U alpha := by
+              (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z) ''
+                interior (C0 alpha) := by
   classical
   obtain ⟨psi, gInf, hpsi, hginf, hconv⟩ :=
     existsLiveMetric0 (I := I) inp.normalBounds P L inp.pack r
   let U : LiveSlot L inp.pack r → Set E := fun alpha =>
     {v | gInf 0 alpha v v < ((5 / 2 : Real) * L.lamInf (alpha.1 : Nat)) ^ 2}
+  let C0 : LiveSlot L inp.pack r → Set E := fun alpha =>
+    {v | gInf 0 alpha v v ≤
+      (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2}
+  let C1 : LiveSlot L inp.pack r → Set E := fun alpha =>
+    {v | gInf 0 alpha v v ≤
+      (99 / 16 : Real) * L.lamInf (alpha.1 : Nat) ^ 2}
   have hequiv := liveMetric0_equiv (I := I) inp.normalBounds P L inp.pack r hconv
   have hclose := liveMetric0_close (I := I) inp P L r hconv
   have hscaled := hpsi.tendsto_atTop.eventually
@@ -208,7 +219,68 @@ theorem MetricCompactnessInputs.exists_live_source_cover
     by_contra hnot
     have hge : 8 * L.lamInf (alpha.1 : Nat) ≤ ‖v‖ := le_of_not_gt hnot
     nlinarith [sq_nonneg (‖v‖ - 8 * L.lamInf (alpha.1 : Nat))]
-  refine ⟨psi, hpsi, gInf, U, hginf, hconv, hopen, hU8, ?_⟩
+  have hC01 : ∀ alpha, C0 alpha ⊆ interior (C1 alpha) := by
+    intro alpha
+    have hquad : Continuous (fun v : E => gInf 0 alpha v v) :=
+      (gInf 0 alpha).continuous.clm_apply continuous_id
+    have hopen1 : IsOpen {v : E | gInf 0 alpha v v <
+        (99 / 16 : Real) * L.lamInf (alpha.1 : Nat) ^ 2} :=
+      isOpen_lt hquad continuous_const
+    have hstrictSub : {v : E | gInf 0 alpha v v <
+        (99 / 16 : Real) * L.lamInf (alpha.1 : Nat) ^ 2} ⊆ C1 alpha := by
+      intro v hv
+      change gInf 0 alpha v v <
+        (99 / 16 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 at hv
+      exact hv.le
+    intro v hv
+    apply (interior_maximal hstrictSub hopen1)
+    change gInf 0 alpha v v <
+      (99 / 16 : Real) * L.lamInf (alpha.1 : Nat) ^ 2
+    change gInf 0 alpha v v ≤
+      (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 at hv
+    have hlambda : 0 < L.lamInf (alpha.1 : Nat) :=
+      inp.decay.lambda_pos inp.hD (L.rInf (alpha.1 : Nat))
+    nlinarith [sq_pos_of_pos hlambda]
+  have hC1U : ∀ alpha, C1 alpha ⊆ U alpha := by
+    intro alpha v hv
+    change gInf 0 alpha v v <
+      ((5 / 2 : Real) * L.lamInf (alpha.1 : Nat)) ^ 2
+    change gInf 0 alpha v v ≤
+      (99 / 16 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 at hv
+    have hlambda : 0 < L.lamInf (alpha.1 : Nat) :=
+      inp.decay.lambda_pos inp.hD (L.rInf (alpha.1 : Nat))
+    nlinarith [sq_pos_of_pos hlambda]
+  have hC0compact : ∀ alpha, IsCompact (C0 alpha) := by
+    intro alpha
+    have hquad : Continuous (fun v : E => gInf 0 alpha v v) :=
+      (gInf 0 alpha).continuous.clm_apply continuous_id
+    have hclosed : IsClosed (C0 alpha) := by
+      exact isClosed_le hquad continuous_const
+    have hbounded : Bornology.IsBounded (C0 alpha) := by
+      rw [isBounded_iff_forall_norm_le]
+      refine ⟨8 * L.lamInf (alpha.1 : Nat), fun v hv => ?_⟩
+      have hvU : v ∈ U alpha :=
+        hC1U alpha (interior_subset (hC01 alpha hv))
+      have hvlt : ‖v‖ < 8 * L.lamInf (alpha.1 : Nat) := by
+        simpa only [Metric.mem_ball, dist_zero_right] using hU8 alpha hvU
+      exact hvlt.le
+    exact Metric.isCompact_of_isClosed_isBounded hclosed hbounded
+  have hC1compact : ∀ alpha, IsCompact (C1 alpha) := by
+    intro alpha
+    have hquad : Continuous (fun v : E => gInf 0 alpha v v) :=
+      (gInf 0 alpha).continuous.clm_apply continuous_id
+    have hclosed : IsClosed (C1 alpha) := by
+      exact isClosed_le hquad continuous_const
+    have hbounded : Bornology.IsBounded (C1 alpha) := by
+      rw [isBounded_iff_forall_norm_le]
+      refine ⟨8 * L.lamInf (alpha.1 : Nat), fun v hv => ?_⟩
+      have hvlt : ‖v‖ < 8 * L.lamInf (alpha.1 : Nat) := by
+        simpa only [Metric.mem_ball, dist_zero_right] using
+          hU8 alpha (hC1U alpha hv)
+      exact hvlt.le
+    exact Metric.isCompact_of_isClosed_isBounded hclosed hbounded
+  refine ⟨psi, hpsi, gInf, U, C0, C1, hginf, hconv, hopen, hU8,
+    hC0compact, hC1compact, hC01, hC1U, ?_⟩
   filter_upwards [hclose, hscaled, halive, hgpPsi, hradPsi, hmetricPsi, hcenters]
     with k hclosek hscaledk halivek hgpk hradk hmetrick hcentersk
   let Y := X.obj (L.φ (psi k))
@@ -325,8 +397,19 @@ theorem MetricCompactnessInputs.exists_live_source_cover
         ((9 / 4 : Real) * L.lamInf gamma) ^ 2 :=
       (sq_lt_sq₀ dist_nonneg
         (mul_nonneg (by norm_num) hlambda.le)).2 hdistLt
-    have hvU : v ∈ U alpha := by
-      change gInf 0 alpha v v < ((5 / 2 : Real) * L.lamInf gamma) ^ 2
+    have hvC0 : v ∈ interior (C0 alpha) := by
+      have hquad : Continuous (fun w : E => gInf 0 alpha w w) :=
+        (gInf 0 alpha).continuous.clm_apply continuous_id
+      have hopen0 : IsOpen {w : E | gInf 0 alpha w w <
+          (49 / 8 : Real) * L.lamInf gamma ^ 2} :=
+        isOpen_lt hquad continuous_const
+      have hstrictSub : {w : E | gInf 0 alpha w w <
+          (49 / 8 : Real) * L.lamInf gamma ^ 2} ⊆ C0 alpha := by
+        intro w hw
+        change gInf 0 alpha w w <
+          (49 / 8 : Real) * L.lamInf gamma ^ 2 at hw
+        exact hw.le
+      apply (interior_maximal hstrictSub hopen0)
       have hnormStage : ‖v‖ ^ 2 ≤ 2 * Y.metric.inner c v v := by
         nlinarith [hstageLower]
       have hqInfBase : gInf 0 alpha v v ≤
@@ -351,16 +434,76 @@ theorem MetricCompactnessInputs.exists_live_source_cover
       have hqInfLe : gInf 0 alpha v v ≤ (6 / 5 : Real) * dist c y ^ 2 := by
         rw [← hstageSq]
         exact hqInfStage
-      have hscale : (6 / 5 : Real) * dist c y ^ 2 <
-          ((5 / 2 : Real) * L.lamInf gamma) ^ 2 := by
+      have hscale0 : (6 / 5 : Real) * dist c y ^ 2 <
+          (49 / 8 : Real) * L.lamInf gamma ^ 2 := by
         have hlamSq : 0 < L.lamInf gamma ^ 2 := sq_pos_of_pos hlambda
         nlinarith
-      exact hqInfLe.trans_lt hscale
-    refine mem_iUnion.mpr ⟨alpha, ⟨v, hvU, ?_⟩⟩
+      exact hqInfLe.trans_lt hscale0
+    refine mem_iUnion.mpr ⟨alpha, ⟨v, hvC0, ?_⟩⟩
     simp only [alpha]
     rw [hcD]
     rw [expMapDiffeo_apply_eq (I := I) Y.metric c hvsrc]
     exact hyexp.symm
+
+set_option synthInstance.maxHeartbeats 100000 in
+/-- The fixed open source-patch cover is the open-core projection of
+`MetricCompactnessInputs.exists_live_cores`. -/
+theorem MetricCompactnessInputs.exists_live_source_cover
+    (inp : MetricCompactnessInputs (I := I) X)
+    (h8 : (8 : Real) < inp.normalRadius.gpRatio * inp.D)
+    (hradD : 2 * item3RadiusFactor inp.decay inp.D < inp.D)
+    (hradRatio : 2 * item3RadiusFactor inp.decay inp.D <
+      inp.normalRadius.ratio * inp.D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) (r : Real) :
+    ∃ (psi : Nat → Nat) (_hpsi : StrictMono psi)
+        (gInf : E →
+          LiveSlot L inp.pack r → (E →L[Real] E →L[Real] Real))
+        (U : LiveSlot L inp.pack r → Set E),
+      ContDiffOn Real (∞ : WithTop ℕ∞) gInf Set.univ ∧
+      MapCInfConvOnCompacts Set.univ
+        (fun k _ alpha => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+          (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) 0)
+        gInf ∧
+      (∀ alpha, IsOpen (U alpha)) ∧
+      (∀ alpha, U alpha ⊆
+        Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+      ∀ᶠ k in atTop,
+        let Y := X.obj (L.φ (psi k))
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        letI : T2Space Y.M := Y.t2
+        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+        letI : MetricSpace Y.M := (P (L.φ (psi k))).ms
+        (∀ alpha : LiveSlot L inp.pack r,
+          U alpha ⊆ Metric.ball 0
+              (inp.normalBounds.radius (L.φ (psi k))
+                (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat))) ∧
+          U alpha ⊆ Metric.ball 0
+              (expMapC2Radius (I := I) (X.obj (L.φ (psi k))).metric
+                (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat))) ∧
+          Set.MapsTo
+            (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
+              (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z)
+            (U alpha)
+            (L.hatBall inp.decay inp.D P inp.pack r (psi k) alpha.1 ∩
+              ⋃ gamma : Fin (inp.pack.A r),
+                L.innerBall inp.decay inp.D P inp.pack r (psi k) gamma)) ∧
+        L.hatSourceBall inp.decay P r (psi k) ⊆
+          ⋃ alpha : LiveSlot L inp.pack r,
+            (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
+              (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z) '' U alpha := by
+  obtain ⟨psi, hpsi, gInf, U, C0, C1, hginf, hconv, hopen, hU8,
+      _hC0, _hC1, hC01, hC1U, hcover⟩ :=
+    inp.exists_live_cores h8 hradD hradRatio P L r
+  refine ⟨psi, hpsi, gInf, U, hginf, hconv, hopen, hU8, ?_⟩
+  filter_upwards [hcover] with k hk
+  refine ⟨hk.1, ?_⟩
+  intro y hy
+  obtain ⟨alpha, v, hv, rfl⟩ := mem_iUnion.mp (hk.2 hy)
+  refine mem_iUnion.mpr ⟨alpha, v, ?_, rfl⟩
+  exact hC1U alpha (interior_subset (hC01 alpha (interior_subset hv)))
 
 end HCGCompactness
 end DifferentialGeometry

@@ -27,12 +27,18 @@ consumer now uses this lower-layer theorem directly.  The pre-existing
 low-norm interpolation theorem is retained as a short compatibility entrypoint
 derived from `tendsto_of_coeff`.
 
+`cont_of_coeff` is the corresponding parameterized continuity bridge.  It
+applies `tendsto_of_coeff` to every convergent sequence in a first-countable
+domain, using the uniform higher-order bound on the original family.  This is
+the reusable producer needed to turn the all-order Galerkin coefficient limit
+into a continuous path after one strict Sobolev downshift.
+
 ## Verification
 
-The generic exhaustion and coefficient-convergence sources are implemented
-without `sorry`, and focused verification passed.  These APIs and their
-dedicated machinery are 100% complete.  The later `scalar_gal_subseq` theorem
-remains not started (0%); its dedicated compactness machinery is about 75%
-complete.  The Perelman
-noncollapsing endpoint theorem remains not started (0%) and is not claimed by
-this API addition.
+The generic exhaustion, coefficient-convergence, and coefficient-continuity
+sources are implemented without `sorry`, and focused verification passed.
+These APIs and their dedicated machinery are 100% complete.  The downstream
+`scalar_gal_subseq` theorem is also verified elsewhere; the current frontier is
+the separate `scalar_gal_limit` strong-solution identification theorem.  The
+Perelman noncollapsing endpoint theorem remains theorem-level 0% and is not
+claimed by this API addition.

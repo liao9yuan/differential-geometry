@@ -447,6 +447,50 @@ theorem tendsto_of_coeff
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
   rwa [abs_of_nonneg hnn]
 
+/-- Coordinatewise continuity and a uniform higher-order Sobolev bound imply
+continuity after a strict Sobolev downshift. -/
+theorem cont_of_coeff
+    {X : Type*} [TopologicalSpace X] [FirstCountableTopology X]
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
+    (hσ'σ'' : σ' < σ'') (W : X → tensorHs (I := I) (M := M) g r s σ'')
+    {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ x, ‖W x‖ ≤ C)
+    (hcoeff : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Continuous (fun x => (W x).coeff i)) :
+    Continuous (fun x =>
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (W x)) := by
+  rw [continuous_iff_seqContinuous]
+  intro x x₀ hx
+  let d : ℕ → tensorHs (I := I) (M := M) g r s σ'' :=
+    fun n => W (x n) - W x₀
+  have hd_bound (n : ℕ) : ‖d n‖ ≤ 2 * C := by
+    calc
+      ‖d n‖ = ‖W (x n) - W x₀‖ := rfl
+      _ ≤ ‖W (x n)‖ + ‖W x₀‖ := norm_sub_le _ _
+      _ ≤ C + C := add_le_add (hCbd _) (hCbd _)
+      _ = 2 * C := by ring
+  have hd_coeff (i : TensorEigenIdx (I := I) (M := M) g r s) :
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0) := by
+    have hi := ((hcoeff i).tendsto x₀).comp hx
+    have hi' : Tendsto (fun n => (W (x n)).coeff i - (W x₀).coeff i)
+        atTop (𝓝 0) := tendsto_sub_nhds_zero_iff.mpr hi
+    simpa only [d, sub_eq_add_neg, tensorHs.add_coeff, tensorHs.neg_coeff,
+      Pi.add_apply, Pi.neg_apply] using hi'
+  have hnorm := tendsto_of_coeff (I := I) (M := M) hσ'σ'' d
+    (mul_nonneg (by norm_num) hC) hd_bound hd_coeff
+  have hzero : Tendsto (fun n =>
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)) atTop (𝓝 0) :=
+    tendsto_zero_iff_norm_tendsto_zero.mpr hnorm
+  have hsub : Tendsto (fun n =>
+      tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (W (x n)) -
+        tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+          hσ'σ''.le (W x₀)) atTop (𝓝 0) := by
+    refine hzero.congr' (Eventually.of_forall fun n => ?_)
+    simp only [d, map_sub]
+  exact tendsto_sub_nhds_zero_iff.mp hsub
+
 /-- If a uniformly high-order bounded sequence tends to zero in a lower
 Sobolev norm, then it tends to zero at every strict intermediate order. -/
 theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform

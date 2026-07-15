@@ -72,6 +72,9 @@ structure IsConjGalSubseq
         (S.family.metric (T : Real)) 0 0) (SmoothCcTensor.toL2 u0) i
   support : ∀ N t i, i ∉ eigenFinset (I := I) (M := M)
     (S.family.metric (T : Real)) 0 0 N → V N t i = 0
+  pert_cont : ContinuousOn
+    (fun t => scalarGalPert (I := I) (M := M) S T t)
+    (Icc (0 : Real) tau)
   energy : ∀ k : Nat, ∃ Bound : Real, ∀ N t,
     t ∈ Icc (0 : Real) tau →
       galerkinEnergy (I := I) (M := M)
@@ -87,11 +90,11 @@ structure IsConjGalSubseq
   lim_mass : ∀ k : Nat, ∃ Bound : Real, ∀ t ∈ Icc (0 : Real) tau,
     Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (k : Real) *
       (ulim t i) ^ 2) ∧
-    ∑' i, tensorSobolevWeight (I := I) (M := M) i (k : Real) *
-      (ulim t i) ^ 2 ≤ Bound
+      ∑' i, tensorSobolevWeight (I := I) (M := M) i (k : Real) *
+        (ulim t i) ^ 2 ≤ Bound
 
 omit [BoundarylessManifold I M] in
-private theorem galVec_norm_sq
+private theorem galVec_sq
     (q : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
     (c : TensorEigenIdx (I := I) (M := M) q 0 0 → Real) (sigma : Real) :
@@ -150,6 +153,101 @@ private theorem galPert_norm_le
       dsimp only [Inc, q]
       ring
 
+omit [BoundarylessManifold I M] in
+private theorem gal_lim_mass
+    (q : SmoothRiemannianMetric I M) {tau : Real}
+    (Fs : Nat → Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
+    (phi : Nat → Nat)
+    (V : Nat → Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real)
+    (ulim : Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real)
+    (hFs_phi : Tendsto (fun n => Fs (phi n)) atTop atTop)
+    (hconv : ∀ i, TendstoUniformlyOn
+      (fun n t => V (phi n) t i) (fun t => ulim t i)
+      atTop (Icc (0 : Real) tau))
+    (henergy : ∀ k : Nat, ∃ Bound : Real, ∀ N t,
+      t ∈ Icc (0 : Real) tau →
+        galerkinEnergy (I := I) (M := M) (Fs N) (V N) (k : Real) t ≤ Bound) :
+    ∀ k : Nat, ∃ Bound : Real, ∀ t ∈ Icc (0 : Real) tau,
+      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (k : Real) *
+        (ulim t i) ^ 2) ∧
+      ∑' i, tensorSobolevWeight (I := I) (M := M) i (k : Real) *
+        (ulim t i) ^ 2 ≤ Bound := by
+  intro k
+  obtain ⟨Bound, hBound⟩ := henergy k
+  refine ⟨Bound, ?_⟩
+  intro t ht
+  apply fatou_sq_mass (fun n => Fs (phi n)) hFs_phi
+    (fun i => tensorSobolevWeight (I := I) (M := M) i (k : Real))
+    (fun i => tensorSobolevWeight_nonneg (I := I) (M := M) i (k : Real))
+    (fun n i => V (phi n) t i) (ulim t)
+    (fun i => (hconv i).tendsto_at ht) Bound
+  intro n
+  simpa only [galerkinEnergy] using hBound (phi n) t ht
+
+open Classical in
+private theorem gal_lim_init
+    {Idx : Type*} {tau : Real}
+    (Fs : Nat → Finset Idx) (phi : Nat → Nat)
+    (V : Nat → Real → Idx → Real) (ulim : Real → Idx → Real)
+    (a : Idx → Real) (htau0 : (0 : Real) ∈ Icc (0 : Real) tau)
+    (hFs_phi : Tendsto (fun n => Fs (phi n)) atTop atTop)
+    (hconv : ∀ i, TendstoUniformlyOn
+      (fun n t => V (phi n) t i) (fun t => ulim t i)
+      atTop (Icc (0 : Real) tau))
+    (hinit : ∀ N i, i ∈ Fs N → V N 0 i = a i) :
+    ∀ i, ulim 0 i = a i := by
+  intro i
+  have hlim := (hconv i).tendsto_at htau0
+  have hev : ∀ᶠ n in atTop, i ∈ Fs (phi n) := by
+    have hsingle : ∀ᶠ n in atTop, ({i} : Finset Idx) ⊆ Fs (phi n) :=
+      hFs_phi.eventually_ge_atTop {i}
+    filter_upwards [hsingle] with n hn
+    exact hn (Finset.mem_singleton_self i)
+  have hinit_lim : Tendsto (fun n => V (phi n) 0 i) atTop (𝓝 (a i)) := by
+    apply tendsto_nhds_of_eventually_eq
+    filter_upwards [hev] with n hn
+    exact hinit (phi n) i hn
+  exact tendsto_nhds_unique hlim hinit_lim
+
+open Classical in
+private theorem supp_right_lip
+    {Idx : Type*} {tau : Real}
+    (F : Nat → Finset Idx) (u du : Nat → Real → Idx → Real)
+    (L : Idx → NNReal)
+    (hcont : ∀ N i, i ∈ F N →
+      ContinuousOn (fun t => u N t i) (Icc (0 : Real) tau))
+    (hderiv : ∀ N t, t ∈ Ico (0 : Real) tau → ∀ i, i ∈ F N →
+      HasDerivWithinAt (fun r => u N r i) (du N t i) (Ici t) t)
+    (hsupp : ∀ N t i, i ∉ F N → u N t i = 0)
+    (hdu : ∀ N t, t ∈ Ico (0 : Real) tau → ∀ i, i ∈ F N →
+      ‖du N t i‖ ≤ (L i : Real)) :
+    ∀ N i, LipschitzOnWith (L i) (fun t => u N t i)
+      (Icc (0 : Real) tau) := by
+  intro N i
+  have hc : ContinuousOn (fun t => u N t i) (Icc (0 : Real) tau) := by
+    by_cases hi : i ∈ F N
+    · exact hcont N i hi
+    · have hz : (fun t : Real => u N t i) = fun _ => 0 := by
+        funext t
+        exact hsupp N t i hi
+      rw [hz]
+      exact continuousOn_const
+  let f' : Real → Real := fun t => if i ∈ F N then du N t i else 0
+  apply right_lipschitz (f' := f') hc
+  · intro t ht
+    by_cases hi : i ∈ F N
+    · simpa only [f', if_pos hi] using hderiv N t ht i hi
+    · have hz : (fun r : Real => u N r i) = fun _ => 0 := by
+        funext r
+        exact hsupp N r i hi
+      rw [hz]
+      simpa only [f', if_neg hi] using
+        (hasDerivWithinAt_const t (Ici t) (0 : Real))
+  · intro t ht
+    by_cases hi : i ∈ F N
+    · simpa only [f', if_pos hi] using hdu N t ht i hi
+    · simpa only [f', if_neg hi, norm_zero] using (L i).property
+
 /-- Every smooth scalar initial datum has, on one common time interval, a
 modewise uniformly convergent subsequence of genuine finite Galerkin solutions.
 The limit inherits the all-order weighted spectral mass bounds. -/
@@ -169,11 +267,11 @@ theorem scalar_gal_subseq
   have hgal := scalar_gal_bound (I := I) (M := M) S hS T
   dsimp only at hgal
   obtain ⟨tauE, htauE, htauE_one, hsolve⟩ := hgal
-  obtain ⟨tau2, htau2, _htau2_one, _hcont2, _hmeas2, hbound2,
+  obtain ⟨tau2, htau2, _htau2_one, hcont2, _hmeas2, hbound2,
       _hboundAE2⟩ :=
     lapDiffA20_short (I := I) (M := M) S.family hS.smoothMetric T
       (epsilon := (1 : Real)) zero_lt_one
-  obtain ⟨tau1, htau1, _htau1_one, C1, _hcont1, _hmeas1, hbound1,
+  obtain ⟨tau1, htau1, _htau1_one, C1, hcont1, _hmeas1, hbound1,
       _hboundAE1⟩ := conjA1_short (I := I) (M := M) S hS T
   let tau : Real := min tauE (min tau2 tau1)
   have htau : 0 < tau := by
@@ -216,6 +314,16 @@ theorem scalar_gal_subseq
     intro k
     obtain ⟨Bound, hBound⟩ := henergyE k
     exact ⟨Bound, fun N t ht => hBound N t (hIccE ht)⟩
+  have hpert_cont : ContinuousOn
+      (fun t => scalarGalPert (I := I) (M := M) S T t)
+      (Icc (0 : Real) tau) := by
+    let Inc : tensorHs (I := I) (M := M) q 0 0 2 →L[Real]
+        tensorHs (I := I) (M := M) q 0 0 1 :=
+      tensorHsInclusion (I := I) (M := M)
+        (g := q) (r := 0) (s := 0) (show (1 : Real) ≤ 2 by norm_num)
+    have hPot := (hcont1.mono hIcc1).clm_comp
+      (continuousOn_const : ContinuousOn (fun _ : Real => Inc) (Icc 0 tau))
+    simpa only [scalarGalPert, q, Inc] using (hcont2.mono hIcc2).add hPot
   obtain ⟨B0, hB0⟩ := henergy 0
   obtain ⟨B2, hB2⟩ := henergy 2
   have htau0 : (0 : Real) ∈ Icc (0 : Real) tau := ⟨le_rfl, htau.le⟩
@@ -261,7 +369,7 @@ theorem scalar_gal_subseq
         Real.sqrt B2 := by
     have hsq :
         ‖scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2‖ ^ 2 ≤ B2 := by
-      rw [galVec_norm_sq (I := I) (M := M)]
+      rw [galVec_sq (I := I) (M := M)]
       simpa only [galerkinEnergy] using hB2 N t ht
     have hsqrt := Real.sqrt_le_sqrt hsq
     rwa [Real.sqrt_sq (norm_nonneg _)] at hsqrt
@@ -286,12 +394,11 @@ theorem scalar_gal_subseq
         using hcoeff
     exact hcoeff'.trans ((hpert_apply t ht v).trans
       (mul_le_mul_of_nonneg_left (hvec_norm N t ht) hKpert))
-  let dV : Nat → Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real :=
-    fun N t i => if i ∈ Fs N then
+  let rhs : Nat → Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real :=
+    fun N t i =>
       -(TensorEigenIdx.lambda (I := I) (M := M) i) * V N t i +
         (scalarGalPert (I := I) (M := M) S T t
           (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i
-      else 0
   let L : TensorEigenIdx (I := I) (M := M) q 0 0 → NNReal := fun i =>
     ⟨TensorEigenIdx.lambda (I := I) (M := M) i * Real.sqrt B0 +
       Kpert * Real.sqrt B2, by
@@ -299,58 +406,36 @@ theorem scalar_gal_subseq
           (mul_nonneg (tensor_lambda_nonneg (I := I) (M := M) i)
             (Real.sqrt_nonneg B0))
           (mul_nonneg hKpert (Real.sqrt_nonneg B2))⟩
-  have hcont_all (N : Nat) (i : TensorEigenIdx (I := I) (M := M) q 0 0) :
-      ContinuousOn (fun t => V N t i) (Icc (0 : Real) tau) := by
-    by_cases hi : i ∈ Fs N
-    · exact hcont N i hi
-    · have hz : (fun t : Real => V N t i) = fun _ => 0 := by
-        funext t
-        exact hsupp N t i hi
-      rw [hz]
-      exact continuousOn_const
-  have hderiv_all (N : Nat) (t : Real) (ht : t ∈ Ico (0 : Real) tau)
-      (i : TensorEigenIdx (I := I) (M := M) q 0 0) :
-      HasDerivWithinAt (fun r => V N r i) (dV N t i) (Ici t) t := by
-    by_cases hi : i ∈ Fs N
-    · simpa only [dV, if_pos hi] using hderiv N t ht i hi
-    · have hz : (fun r : Real => V N r i) = fun _ => 0 := by
-        funext r
-        exact hsupp N r i hi
-      rw [hz]
-      simpa only [dV, if_neg hi] using
-        (hasDerivWithinAt_const t (Ici t) (0 : Real))
-  have hdV_bound (N : Nat) (t : Real) (ht : t ∈ Ico (0 : Real) tau)
-      (i : TensorEigenIdx (I := I) (M := M) q 0 0) :
-      ‖dV N t i‖ ≤ (L i : Real) := by
-    by_cases hi : i ∈ Fs N
-    · have ht' : t ∈ Icc (0 : Real) tau := Set.Ico_subset_Icc_self ht
-      have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=
-        tensor_lambda_nonneg (I := I) (M := M) i
-      calc
-        ‖dV N t i‖ =
-            |-(TensorEigenIdx.lambda (I := I) (M := M) i) * V N t i +
-              (scalarGalPert (I := I) (M := M) S T t
-                (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| := by
-                  simp only [Real.norm_eq_abs, dV, if_pos hi]
-        _ ≤ |-(TensorEigenIdx.lambda (I := I) (M := M) i) * V N t i| +
-              |(scalarGalPert (I := I) (M := M) S T t
-                (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| :=
-            abs_add_le _ _
-        _ = TensorEigenIdx.lambda (I := I) (M := M) i * |V N t i| +
-              |(scalarGalPert (I := I) (M := M) S T t
-                (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| := by
-            rw [abs_mul, abs_neg, abs_of_nonneg hlam]
-        _ ≤ TensorEigenIdx.lambda (I := I) (M := M) i * Real.sqrt B0 +
-              Kpert * Real.sqrt B2 :=
-            add_le_add (mul_le_mul_of_nonneg_left (hcoord N t ht' i) hlam)
-              (hforce N t ht' i)
-        _ = (L i : Real) := rfl
-    · simpa only [dV, if_neg hi, norm_zero] using (L i).property
-  have hlip : ∀ N i,
-      LipschitzOnWith (L i) (fun t => V N t i) (Icc (0 : Real) tau) := by
-    intro N i
-    exact right_lipschitz (f' := fun t => dV N t i) (hcont_all N i)
-      (fun t ht => hderiv_all N t ht i) (fun t ht => hdV_bound N t ht i)
+  have hrhs_bound (N : Nat) (t : Real) (ht : t ∈ Ico (0 : Real) tau)
+      (i : TensorEigenIdx (I := I) (M := M) q 0 0) (hi : i ∈ Fs N) :
+      ‖rhs N t i‖ ≤ (L i : Real) := by
+    have ht' : t ∈ Icc (0 : Real) tau := Set.Ico_subset_Icc_self ht
+    have hlam : 0 ≤ TensorEigenIdx.lambda (I := I) (M := M) i :=
+      tensor_lambda_nonneg (I := I) (M := M) i
+    calc
+      ‖rhs N t i‖ =
+          |-(TensorEigenIdx.lambda (I := I) (M := M) i) * V N t i +
+            (scalarGalPert (I := I) (M := M) S T t
+              (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| := by
+                simp only [Real.norm_eq_abs, rhs]
+      _ ≤ |-(TensorEigenIdx.lambda (I := I) (M := M) i) * V N t i| +
+            |(scalarGalPert (I := I) (M := M) S T t
+              (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| :=
+          abs_add_le _ _
+      _ = TensorEigenIdx.lambda (I := I) (M := M) i * |V N t i| +
+            |(scalarGalPert (I := I) (M := M) S T t
+              (scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2)).coeff i| := by
+          rw [abs_mul, abs_neg, abs_of_nonneg hlam]
+      _ ≤ TensorEigenIdx.lambda (I := I) (M := M) i * Real.sqrt B0 +
+            Kpert * Real.sqrt B2 :=
+          add_le_add (mul_le_mul_of_nonneg_left (hcoord N t ht' i) hlam)
+            (hforce N t ht' i)
+      _ = (L i : Real) := rfl
+  have hlip := supp_right_lip (tau := tau) Fs V rhs L hcont
+    (by
+      intro N t ht i hi
+      simpa only [rhs] using hderiv N t ht i hi)
+    hsupp hrhs_bound
   have hC : ∀ _ : TensorEigenIdx (I := I) (M := M) q 0 0,
       0 ≤ Real.sqrt B0 := fun _ => Real.sqrt_nonneg B0
   let Kq := tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0
@@ -364,46 +449,19 @@ theorem scalar_gal_subseq
     simpa only [Fs] using eigenFinset_tendsto (I := I) (M := M) q 0 0
   have hFs_phi : Tendsto (fun n => Fs (phi n)) atTop atTop :=
     hFs.comp hphi.tendsto_atTop
-  have hlim_init (i : TensorEigenIdx (I := I) (M := M) q 0 0) :
-      ulim 0 i = tensorL2Coeff (I := I) (M := M)
-        (tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0)
-        (SmoothCcTensor.toL2 u0) i := by
-    have hlim := (hconv i).tendsto_at htau0
-    have hev : ∀ᶠ n in atTop, i ∈ Fs (phi n) := by
-      have hsingle : ∀ᶠ n in atTop, ({i} : Finset
-          (TensorEigenIdx (I := I) (M := M) q 0 0)) ⊆ Fs (phi n) :=
-        hFs_phi.eventually_ge_atTop {i}
-      filter_upwards [hsingle] with n hn
-      exact hn (Finset.mem_singleton_self i)
-    have hinit_lim : Tendsto (fun n => V (phi n) 0 i) atTop
-        (𝓝 (tensorL2Coeff (I := I) (M := M)
-          (tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0)
-          (SmoothCcTensor.toL2 u0) i)) := by
-      apply tendsto_nhds_of_eventually_eq
-      filter_upwards [hev] with n hn
-      exact hinit (phi n) i hn
-    exact tendsto_nhds_unique hlim hinit_lim
-  have hlim_mass : ∀ k : Nat, ∃ Bound : Real, ∀ t ∈ Icc (0 : Real) tau,
-      Summable (fun i => tensorSobolevWeight (I := I) (M := M) i (k : Real) *
-        (ulim t i) ^ 2) ∧
-      ∑' i, tensorSobolevWeight (I := I) (M := M) i (k : Real) *
-        (ulim t i) ^ 2 ≤ Bound := by
-    intro k
-    obtain ⟨Bound, hBound⟩ := henergy k
-    refine ⟨Bound, ?_⟩
-    intro t ht
-    apply fatou_sq_mass (fun n => Fs (phi n)) hFs_phi
-      (fun i => tensorSobolevWeight (I := I) (M := M) i (k : Real))
-      (fun i => tensorSobolevWeight_nonneg (I := I) (M := M) i (k : Real))
-      (fun n i => V (phi n) t i) (ulim t)
-      (fun i => (hconv i).tendsto_at ht) Bound
-    intro n
-    simpa only [galerkinEnergy] using hBound (phi n) t ht
+  have hlim_init := gal_lim_init (tau := tau) Fs phi V ulim
+    (fun i => tensorL2Coeff (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0)
+      (SmoothCcTensor.toL2 u0) i)
+    htau0 hFs_phi hconv hinit
+  have hlim_mass := gal_lim_mass (I := I) (M := M) (tau := tau)
+    q Fs phi V ulim hFs_phi hconv henergy
   refine ⟨V, phi, ulim, {
     cont := by simpa only [Fs] using hcont
     deriv := by simpa only [Fs, q] using hderiv
     init := by simpa only [Fs, q] using hinit
     support := by simpa only [Fs, q] using hsupp
+    pert_cont := hpert_cont
     energy := by simpa only [Fs, q] using henergy
     mono := hphi
     lim_cont := hulim_cont
@@ -431,6 +489,67 @@ noncomputable def galLimHs
       (S.family.metric (T : Real)) 0 0 (m : Real) where
   coeff := ulim t
   weighted_summable := ((hlim.lim_mass m).choose_spec t ht).1
+
+/-- The order-`m` Galerkin limit as a path on its compact time interval. -/
+noncomputable def galLimPath
+    {D : RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {T : D.RegularTime} {tau : Real}
+    {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
+    {V : Nat → Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    {phi : Nat → Nat}
+    {ulim : Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    (hlim : IsConjGalSubseq (I := I) (M := M)
+      S T tau u0 V phi ulim) (m : Nat) :
+    Icc (0 : Real) tau → tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 (m : Real) :=
+  fun t => galLimHs hlim m t t.2
+
+/-- The all-order coefficient limit is continuous in every finite Sobolev
+order on the compact Galerkin interval. -/
+theorem galLimPath_cont
+    {D : RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {T : D.RegularTime} {tau : Real}
+    {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
+    {V : Nat → Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    {phi : Nat → Nat}
+    {ulim : Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    (hlim : IsConjGalSubseq (I := I) (M := M)
+      S T tau u0 V phi ulim) (m : Nat) :
+    Continuous (galLimPath hlim m) := by
+  let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
+  have hm : (m : Real) < ((m + 1 : Nat) : Real) := by
+    exact_mod_cast Nat.lt_succ_self m
+  let W : Icc (0 : Real) tau →
+      tensorHs (I := I) (M := M) q 0 0 ((m + 1 : Nat) : Real) :=
+    galLimPath hlim (m + 1)
+  obtain ⟨B, hB⟩ := hlim.lim_mass (m + 1)
+  have hW_bound (t : Icc (0 : Real) tau) : ‖W t‖ ≤ Real.sqrt B := by
+    have hsq : ‖W t‖ ^ 2 ≤ B := by
+      rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M)]
+      simpa only [W, galLimPath, galLimHs, q] using (hB t t.2).2
+    have hsqrt := Real.sqrt_le_sqrt hsq
+    rwa [Real.sqrt_sq (norm_nonneg _)] at hsqrt
+  have hcoeff (i : TensorEigenIdx (I := I) (M := M) q 0 0) :
+      Continuous (fun t => (W t).coeff i) := by
+    simpa only [W, galLimPath, galLimHs, q] using
+      (hlim.lim_cont i).comp continuous_subtype_val
+  have hcont := cont_of_coeff (I := I) (M := M) hm W
+    (Real.sqrt_nonneg B) hW_bound hcoeff
+  have heq : (fun t =>
+      tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+        hm.le (W t)) = galLimPath hlim m := by
+    funext t
+    apply tensorHs.ext
+    funext i
+    simp only [W, galLimPath, galLimHs, q, tensorHsInclusion_coeff_apply]
+  rw [heq] at hcont
+  exact hcont
 
 /-- At every fixed time, the extracted finite Galerkin vectors converge to the
 spectral limit after one strict Sobolev downshift. -/
@@ -475,7 +594,7 @@ theorem galLim_tendsto
   obtain ⟨Bu, hBu⟩ := hlim.energy (m + 1)
   obtain ⟨BW, hBW⟩ := hlim.lim_mass (m + 1)
   have hu_sq (n : Nat) : ‖u n‖ ^ 2 ≤ Bu := by
-    rw [hu_def, galVec_norm_sq (I := I) (M := M)]
+    rw [hu_def, galVec_sq (I := I) (M := M)]
     simpa only [q, galerkinEnergy] using hBu (phi n) t ht
   have hW_sq : ‖W‖ ^ 2 ≤ BW := by
     rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M)]

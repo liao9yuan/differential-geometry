@@ -177,6 +177,42 @@ omit [BoundarylessManifold I M] in
         (fun i => if h : i ∈ F then w.ofLp ⟨i, h⟩ else 0) 2 :=
   rfl
 
+open Classical in
+omit [BoundarylessManifold I M] in
+/-- A finite scalar spectral vector is continuous when all of its supported
+coordinates are continuous. -/
+theorem scalarGalVec_cont
+    (q : SmoothRiemannianMetric I M)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
+    (c : Real → TensorEigenIdx (I := I) (M := M) q 0 0 → Real)
+    {A : Set Real}
+    (hc : ∀ i ∈ F, ContinuousOn (fun t => c t i) A) :
+    ContinuousOn
+      (fun t => scalarGalVec (I := I) (M := M) q F (c t) 2) A := by
+  let e := EuclideanSpace.equiv {i // i ∈ F} Real
+  let w : Real → EuclideanSpace Real {i // i ∈ F} :=
+    fun t => e.symm (fun j => c t j.1)
+  have hw : ContinuousOn w A :=
+    e.symm.continuous.comp_continuousOn
+      (continuousOn_pi.2 fun j => hc j.1 j.2)
+  have hemb :=
+    (scalarGalEmbed (I := I) (M := M) q F).continuous.comp_continuousOn hw
+  refine hemb.congr (fun t _ => ?_)
+  change scalarGalVec (I := I) (M := M) q F (c t) 2 =
+    scalarGalEmbed (I := I) (M := M) q F (w t)
+  rw [scalarGalEmbed_apply]
+  apply tensorHs.ext
+  funext i
+  simp only [scalarGalVec_coeff]
+  by_cases hi : i ∈ F
+  · simp only [if_pos hi, dif_pos hi]
+    have hwt : (w t).ofLp ⟨i, hi⟩ = c t i := by
+      dsimp only [w]
+      change e (e.symm (fun j => c t j.1)) ⟨i, hi⟩ = c t i
+      rw [e.apply_symm_apply]
+    exact hwt.symm
+  · simp only [if_neg hi, dif_neg hi]
+
 /-- Restrict an order-zero scalar spectral vector to finite coordinates. -/
 noncomputable def scalarGalRestrict
     (q : SmoothRiemannianMetric I M)

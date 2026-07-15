@@ -236,3 +236,14 @@ now wires the smooth launch-field variation constructor into the derivative of
 `V 0`. Thus the center-of-mass gradient route is reduced further to producing
 the specific smooth moving-base inverse-exponential field and proving its local
 distance-realization property.
+
+## 2026-07-15 - zero-weight energy congruence
+
+Added `CenterOfMass.centerEnergy_congr`.  It states at the canonical energy
+layer that two finite point families give the same center energy when they
+agree at every nonzero-weight slot.  This is the proof-independent bridge used
+to replace inactive stage targets without changing the global minimizer.
+
+Focused verification and the exact module refresh passed.  This helper is
+complete; it does not by itself construct a smooth inactive-slot filler or a
+Step-B1 comparison map.

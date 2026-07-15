@@ -29,3 +29,30 @@ pair-to-capstone integration about 82%, dedicated Step-B/B1 machinery about
 84%, Chapter 4 machinery about 80%, and whole-HCG machinery about 53%.
 `StepB1RawInput`, the textbook B1 theorem, and all compactness endpoint theorems
 remain theorem-level 0%.
+
+## 2026-07-15 compactly nested coordinate cores
+
+The stronger sibling `MetricCompactnessInputs.exists_live_cores` is now
+focused-green.  On the same origin-metric subsequence it returns fixed compact
+quadratic sublevels `C0 alpha` and `C1 alpha` with
+
+```text
+C0 alpha ⊆ interior (C1 alpha) ⊆ C1 alpha ⊆ U alpha,
+```
+
+and the frozen source ball is covered by exponential images of
+`interior (C0 alpha)`.  The proof uses the existing strict margin
+
+```text
+243/40 < 49/8 < 99/16 < 25/4
+```
+
+between the scaled-cover estimate and the old patch threshold.  No new input,
+radius assumption, or subsequence was introduced.  The old
+`exists_live_source_cover` statement is preserved as a projection.
+
+This closes the fixed nested-coordinate-core producer (100%).  It does not
+give a common moving-stage implicit-center domain.  Rounded project accounting
+therefore stays at about 94% for dedicated Step-B/B1 machinery, 86% for Chapter
+4 machinery, and 57% for whole-HCG machinery; `StepB1RawInput`, textbook B1,
+and all compactness endpoints remain theorem-level 0%.

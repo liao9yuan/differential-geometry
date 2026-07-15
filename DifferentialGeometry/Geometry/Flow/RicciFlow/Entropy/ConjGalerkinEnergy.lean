@@ -37,6 +37,23 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 private local instance : CompleteSpace E := FiniteDimensional.complete Real E
 
 omit [BoundarylessManifold I M] in
+/-- The squared Sobolev norm of a finite scalar spectral vector is its finite
+weighted coefficient energy. -/
+theorem galVec_norm_sq
+    (q : SmoothRiemannianMetric I M)
+    (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
+    (c : TensorEigenIdx (I := I) (M := M) q 0 0 → Real) (sigma : Real) :
+    ‖scalarGalVec (I := I) (M := M) q F c sigma‖ ^ 2 =
+      ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i sigma * (c i) ^ 2 := by
+  classical
+  rw [tensorHs.norm_sq_eq_tsum]
+  rw [tsum_eq_sum (s := F) (fun i hi => by
+    rw [scalarGalVec_coeff, if_neg hi]
+    ring)]
+  refine Finset.sum_congr rfl (fun i hi => ?_)
+  rw [scalarGalVec_coeff, if_pos hi]
+
+omit [BoundarylessManifold I M] in
 open scoped Classical in
 private theorem gal_crit_nf
     (q : SmoothRiemannianMetric I M)

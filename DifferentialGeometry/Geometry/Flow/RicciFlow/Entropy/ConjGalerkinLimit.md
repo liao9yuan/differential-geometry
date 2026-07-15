@@ -30,13 +30,11 @@ selector, or additional consumer assumption is used.
 
 ## Verification and frontier
 
-The source for `scalar_gal_subseq` and its exact output predicate is written
-without `sorry`.  Its upstream `scalar_gal_bound` focused verification passes;
-this file still awaits its own check after the upstream module refresh, so
-`scalar_gal_subseq` remains **0% verified**.  Its dedicated compactness
-machinery is approximately **98% assembled**; remaining risk is local
-elaboration, cumulative heartbeat, and normal-form repair in this assembly
-theorem.
+The complete file passes focused verification without warnings or `sorry`.
+Therefore `scalar_gal_subseq` and its dedicated compactness machinery are both
+**100% verified**.  The cumulative-heartbeat repair isolates four independent
+private producers: `galPert_norm_le`, `gal_lim_mass`, `gal_lim_init`, and
+`supp_right_lip`.  The public theorem and its assumptions are unchanged.
 
 The next theorem, tentatively `scalar_gal_limit`, remains **0%**.  It must pass
 the finite ODE integral identity to the limit and construct the spectral
@@ -46,24 +44,44 @@ their analytic machinery.
 
 ## Next spectral limit producer
 
-The post-subsequence fixed-time producer is now source-written as `galLimHs`
-and `galLim_tendsto`.  It packages `ulim t` as an `H^m` element using
-`lim_mass`, constructs the difference at order `m+1`, and uses the public
+The post-subsequence fixed-time producers `galLimHs` and `galLim_tendsto` are
+also **100% verified**.  They package `ulim t` as an `H^m` element using
+`lim_mass`, construct the difference at order `m+1`, and use the public
 `tendsto_of_coeff` at the strict downshift `m < m+1`.  Modewise convergence
 comes from `conv`, the high-order norm bounds come from `energy` and
 `lim_mass`, and eventual membership comes from the strictly monotone spectral
 exhaustion.  No new convergence predicate or consumer assumption is used.
 
-After verification, `scalar_gal_limit` can pass the finite right-derivative ODE to an
-interval-integral identity by dominated convergence and package the result in
-the existing `timeL2` / `timeH1` interfaces.  The genuine later frontier is the
-bridge from the all-order spectral strong limit to joint spacetime smoothness
-and `IsHeatPotOn`; the present intrinsic partition-of-unity all-order
-completeness theorem is not yet that realization bridge.
+The next frontier `scalar_gal_limit` must pass the finite right-derivative ODE
+to an interval-integral identity by dominated convergence and package the
+result in the existing `timeL2` / `timeH1` interfaces.  The genuine later
+frontier is the bridge from the all-order spectral strong limit to joint
+spacetime smoothness and `IsHeatPotOn`; the present intrinsic
+partition-of-unity all-order completeness theorem is not yet that realization
+bridge.
 
-Honest accounting before verification: `galLim_tendsto` is stated and
-source-written but remains theorem-level **0% verified**, with approximately
-**98%** of its dedicated machinery assembled;
-`scalar_gal_limit` is unstated/unproved (0%) with roughly 35--45% dedicated
-machinery.  `heatpot_of_maxreg`, the classical moving conjugate-heat theorem,
+Honest accounting: `scalar_gal_subseq` and `galLim_tendsto` are theorem-level
+**100% verified**.  `scalar_gal_limit` is unstated/unproved (**0%**) with
+roughly **40%** dedicated machinery.  `heatpot_of_maxreg`, the classical moving
+conjugate-heat theorem,
 and both noncollapsing endpoints remain theorem-level 0%.
+
+## 2026-07-15 strong-limit handoff preparation
+
+`IsConjGalSubseq` now retains continuity of the already-constructed moving
+perturbation as producer data, and `scalar_gal_subseq` fills that field from the
+existing A2/A1 continuity theorems.  This is not a new consumer assumption.
+`galLimPath` and `galLimPath_cont` package the all-order coefficient limit as a
+continuous Sobolev path by using one higher uniform mass bound and
+`cont_of_coeff`.
+
+Focused verification of these additions is currently blocked before the proof
+body by the shared target build refreshing a long chain of missing upstream
+objects.  A private `galVec_sq` copy is temporarily present only so this file can
+be checked before the newly public `ConjGalerkinEnergy.galVec_norm_sq` object is
+available; it must be removed and both call sites restored to the canonical
+producer before this change is treated as complete.
+
+The exact downstream frontier is `ConjGalerkinStrong.scalar_gal_limit`.  Its
+source now contains the scalar DCT, vector FTC, and `timeH1` packaging, but the
+theorem remains **0% verified** until the focused check succeeds.

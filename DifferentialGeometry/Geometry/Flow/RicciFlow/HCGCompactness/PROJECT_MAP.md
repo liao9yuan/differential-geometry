@@ -55,7 +55,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 
 | Lane | Entry plan | State |
 |---|---|---|
-| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/STEPB_PLAN.md` + `C4/B1_JOIN_HANDOFF.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchHessian.md` + `C4/NormalBranchConvexity.md` + `C4/B1_MIN_BRANCH_RULING.md` | selected-branch Hessian/Neumann, `StrictDistInput`, coherent chartwise convergence data, compact patch cores, and intrinsic-join capstones checked; consult next on the single stage-weighted cross-manifold map and all-pairs/raw-B1 quantifiers |
+| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchHessian.md` + `C4/NormalBranchConvexity.md` + `C4/B1_MIN_BRANCH_RULING.md` | canonical global stage map and compact nested coordinate cores checked; consult next on the smooth support-sensitive target filler and common-domain moving implicit solver needed for the all-pairs chart tail |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` | conditional consumer complete: D6 convergence transport and `compactness_of_b1` are checked.  Do not restart D1--D6; resume at the upstream `StepB1RawInput` producer in `B1_JOIN_HANDOFF.md`. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldEndgame.md` | producer hypotheses remain active; canonical conditional wrappers are checked |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
@@ -104,7 +104,7 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-14)
+## 6. Honest progress (updated 2026-07-15)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
   Step-B/B1 machinery ~94% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
@@ -462,6 +462,17 @@ its docstring BEFORE consumers are built against it.
   maximal-time interval.  Transfers are bound to the actual CGH witness rather
   than quantified over arbitrary limits.  This contract refactor is checked
   infrastructure, not completion of either producer.
+- **Hamilton E1 low-regularity short-time input:** `LowRegCoeff` and
+  `exists_low_reg_coeff` now package two-sided active-chart ellipticity, Gram
+  bounds through order three, a uniform absolute Ricci--DeTurck RHS bound, and
+  RHS-value Lipschitz control against metric `2`-jet differences directly from
+  the restart theorem's `Lambda`-equivalence and
+  `MetricCovDerivOrderBoundOn` hypotheses.  This
+  coefficient sublane is checked and axiom-clean.  The next missing producer
+  is the three-dimensional mixed `H^3 -> H^1` tame estimate; the uniformly
+  parabolic low-regularity solver, same-interval smoothing, and
+  `ricci_flow_unif_existence` remain theorem-level 0%; see
+  `../SHORTTIME_MERGE_PLAN.md`.
 - **B/C support-local H6 integration:** the normalized limit-weight projection,
   actual-support compact cages, producer-owned finite source cover,
   support-local decoded composition/readout, old-`L` sparse interaction points,
@@ -473,16 +484,31 @@ its docstring BEFORE consumers are built against it.
   `StrictDistInput` producer are now checked as well.  This advances
   infrastructure only: `StepB1RawInput`, textbook B1, and compactness endpoints
   remain 0%.
+- **B/C global finite-stage map (2026-07-15):** `stageTarget`,
+  `HasUniqueStageCenter`, and `stageComparisonMap` define one chart-independent
+  actual-weight comparison map, and zero-weight energy congruence identifies
+  local filled center branches with its global minimizer.  The source producer
+  now returns fixed compact nested cores whose strict inner images cover the
+  source ball, and the producer/capstone chain retains them on the same master
+  subsequence.  Actual weight convergence is already all-pairs; the genuine
+  analytic stop is target-side smooth support filling plus a common-domain
+  moving implicit-solver convergence theorem.  See
+  `C4/B1_STAGE_MAP_RULING.md`.  This is infrastructure only: the all-pairs chart
+  tail, `StepB1RawInput`, textbook B1, and all endpoints remain 0%, and rounded
+  machinery estimates stay 94% / 86% / 57% for Step-B/B1 / Chapter 4 / whole
+  HCG.
 - **Whole HCG project — conservative MACHINERY estimate ≈ 57%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
   unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved.**  The separate
   conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes
   explicit `StepB1RawInput`; do not read that consumer or the machinery % as
   completion of the endpoint theorem.
-  The riskiest open items (D3d metric transport RESOLVED 2026-07-07; D1a-(ii) naturality wall
-  DISSOLVED 2026-07-07 — was a third walls-overcount, the restrictOpen/pullback stack pre-existed):
-  the arbitrary-order quantitative center-of-mass derivative theorem (`lbl430`
-  bounds half), and the concrete B1 raw producer.  The `g_p`,
+  The riskiest open items are now the smooth support-sensitive target filler
+  (or a weighted-equation substitute), common-domain moving-stage implicit
+  solver convergence, global return-map injectivity, exact local-inverse
+  convergence, the chart-to-`tensor02CovDerivNormWith` bridge, and the concrete
+  B1 raw producer.  The former arbitrary-order numerical center recurrence is
+  one possible solver route, not a logically mandatory endpoint.  The `g_p`,
   exp-diffeomorphism-radius, canonical sigma, pre-packing large-`D`, physical
   finite-hat, outer source-slot, `lbl412`, positive-Hessian/full-convexity, and
   Neumann ledgers are now checked.

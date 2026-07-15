@@ -88,3 +88,16 @@ compactness machinery is about **80%**.  Perelman no-local-collapsing and
 `ham3_noncollapse` remain endpoint-level **0%**; their dedicated analytic
 machinery is about **44%**.  Whole HCG machinery remains about **54%**, with its
 endpoint theorems at **0%**.
+
+## 2026-07-15 finite-path continuity producer
+
+`scalarGalVec_cont` now packages coordinatewise continuity on the actual finite
+support into continuity of the `H²` spectral vector.  The proof uses the
+existing finite Euclidean embedding and checks the supported and unsupported
+coefficients separately; it does not unfold the Sobolev representation or add
+an assumption to a downstream theorem.  Focused verification passes without
+warnings or `sorry`.
+
+This is a completed low-layer producer.  The downstream strong-limit theorem is
+tracked separately in `ConjGalerkinStrong.md`; its theorem percentage must not
+be inferred from this helper alone.

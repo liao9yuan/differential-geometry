@@ -208,6 +208,7 @@ theorem MetricCompactBase.exists_supp_cm_fin
           (inp.properMetrics hcomplete hconn))
         (phi : Nat → Nat) (hphi : StrictMono phi)
         (U : LiveSlot L inp.pack r → Set E)
+        (C0 C1 : LiveSlot L inp.pack r → Set E)
         (aInf : (alpha : LiveSlot L inp.pack r) →
           Fin (inp.pack.A r) → E → Real)
         (Jinf : (alpha : LiveSlot L inp.pack r) →
@@ -227,7 +228,7 @@ theorem MetricCompactBase.exists_supp_cm_fin
             (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
             (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
           z gamma
-      HasSuppConvData (I := I) inp P L r hr phi hphi U aInf Jinf Jbarinf ∧
+      HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1 aInf Jinf Jbarinf ∧
       (∀ gamma : LiveSlot L inp.pack r,
         let Rgamma := L.rInf (gamma.1 : Nat) + 1
         let rhoMin := aMin * inp.decay.mu Rgamma
@@ -304,12 +305,13 @@ theorem MetricCompactBase.exists_supp_cm_fin
     inp.physScale_of_extra haMin hc0'
   let P := inp.properMetrics hcomplete hconn
   obtain ⟨L, hstable⟩ := inp.exists_stable_net P
-  obtain ⟨phi, hphi, U, aInf, Jinf, Jbarinf, hconv, hptsTail⟩ :=
+  obtain ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, hconv, hptsTail⟩ :=
     inp.exists_supp_pts_fin h8' hradD' hradRatio' P L hstable r hr hconn
   let Lphi := L.subseq hphi
   obtain ⟨q, δ, hqdata, hreadTail⟩ :=
     hread inp.hD hphys P Lphi inp.pack r
-  refine ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, Jinf, Jbarinf, q, δ, ?_⟩
+  refine ⟨aMin, haMin, inp, L, phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf,
+    q, δ, ?_⟩
   dsimp only
   refine ⟨hconv, ?_, ?_⟩
   · simpa only [Lphi, NetLimitData.subseq] using hqdata
@@ -466,8 +468,9 @@ theorem MetricCompactBase.exists_cm_on_source
           totalPts (X := X) pairPts alpha
         HasSourceCmFin (I := I) inp.decay P Lphi inp.pack r n
           hcomplete hconn q δ sourceBall sourcePatch localWeight pts := by
-  obtain ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, _Jinf, _Jbarinf, q, δ,
-      _hconv, hqdata, htail⟩ := b.exists_supp_cm_fin hcomplete hconn r hr
+  obtain ⟨aMin, haMin, inp, L, phi, hphi, U, _C0, _C1, aInf, _Jinf,
+      _Jbarinf, q, δ, _hconv, hqdata, htail⟩ :=
+    b.exists_supp_cm_fin hcomplete hconn r hr
   refine ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, q, δ, ?_⟩
   dsimp only
   refine ⟨hqdata, ?_⟩

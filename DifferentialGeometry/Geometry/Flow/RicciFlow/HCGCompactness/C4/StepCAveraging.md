@@ -177,3 +177,18 @@ patch. Both additions passed focused verification.
 
 These are generic assembly tools only. The source-local B/C capstone and all
 compactness endpoint theorems remain unproved (endpoint 0%).
+
+## 2026-07-15, energy invariance under active filling
+
+Added `centerAverage.energy_activeFill` and
+`centerAverage.uniqueMin_activeFill`.  The first proves that replacing every
+zero-weight point by the chosen filler leaves the original center energy
+unchanged.  The second transports the checked `CenterInput` uniqueness theorem
+back from the filled family to the actual finite-stage point family.  Both
+passed focused verification.
+
+These are pointwise energy and minimizer-identification lemmas.  They do not
+assert that `activeFill` is smooth when the active set varies with the source
+point.  The live all-pairs route still needs either a smooth support filler or a
+support-aware moving-center theorem.  `StepB1RawInput`, textbook B1, and every
+compactness endpoint remain theorem-level 0%.

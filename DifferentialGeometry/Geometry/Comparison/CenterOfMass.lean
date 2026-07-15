@@ -359,6 +359,19 @@ def centerEnergy (g : SmoothRiemannianMetric I M) (μ : ι -> Real) (pts : ι ->
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   (1 / 2 : Real) * ∑ i : ι, μ i * (riemannianEDist I q (pts i)).toReal ^ 2
 
+/-- The center energy only depends on target points carrying nonzero weight. -/
+theorem centerEnergy_congr (g : SmoothRiemannianMetric I M) (μ : ι → Real)
+    {pts pts' : ι → M} (hpts : ∀ i, μ i ≠ 0 → pts i = pts' i) (q : M) :
+    centerEnergy (I := I) g μ pts q = centerEnergy (I := I) g μ pts' q := by
+  classical
+  simp only [centerEnergy]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro i _hi
+  by_cases hi : μ i = 0
+  · simp only [hi, zero_mul]
+  · rw [hpts i hi]
+
 /-- The weighted center-of-mass energy is continuous. -/
 theorem centerEnergy_cont (g : SmoothRiemannianMetric I M)
     (μ : ι -> Real) (pts : ι -> M) :

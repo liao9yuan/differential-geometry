@@ -231,7 +231,7 @@ Sobolev comparison estimates; that changes the route and is not a thin adapter.
 
 ### 2026-07-14 low-regularity input progress
 
-Three sorry-free producer layers are now focused-verified:
+The sorry-free quantitative coefficient chain is now verified:
 
 - `nemytskii_sol_const` exposes the existing maximal-regularity fixed-point
   lifetime using explicit mixed constants `C1`, `C2` and an explicit budget
@@ -249,15 +249,35 @@ Three sorry-free producer layers are now focused-verified:
   positive finite minimum over the same active chart set.  This supplies the
   quantitative uniform-parabolicity half of the low-regularity coefficient
   package.
+- `chartGram_pou_bnd` and `chartGram_pou_d1/d2/d3` turn the intrinsic family
+  bounds into absolute coordinate Gram bounds through order three on every
+  active chart support.  The two-sided `chartInvGram_pou_eqv` envelope and the
+  inverse-Gram/Christoffel perturbation producers supply the corresponding
+  principal and lower-order coefficients.
+- `chartRicci_pou_lip` and `chartLie_pou_lip` combine in
+  `chartRHS_pou_lip`, giving one constant that controls the Ricci--DeTurck RHS
+  value difference by the metric `2`-jet difference for the whole family.
+- `chartRHS_pou_bnd` gives one positive absolute RHS component bound for the
+  whole family.  This supplies the forcing-size budget needed for the
+  fixed-point self-map estimate; a Lipschitz modulus alone did not supply it.
+- `LowRegCoeff`, `IsLowRegCoeff`, and `exists_low_reg_coeff` package all of
+  those facts directly from the E1 hypotheses.  Focused and targeted
+  verification pass; the headline package and RHS theorem are axiom-clean.
 
 These do not close E1.  The current spectral nonlinearity still requires high
 Sobolev order and the joint-smooth realization chooses a further positive
 subinterval without a uniform lower bound.  The smallest remaining E1 frontier
-is therefore the actual uniformly parabolic low-regularity solver, with
-lifetime controlled by ellipticity and these chart-C3 bounds, together with a
+is therefore the three-dimensional mixed tame estimate realizing the
+Ricci--DeTurck nonlinearity as `H^3 -> H^1` at maximal-regularity order `a = 1`,
+with constants controlled by `LowRegCoeff`.  The existing all-order compact
+chart-jet API chooses constants per metric pair, so it is not this uniform
+producer.  After that come the actual low-regularity solver and a
 regularization statement valid on the same uniform interval.  E1 and
 `ricci_flow_unif_existence` remain theorem-level 0%; dedicated E1 machinery is
-about 15%.
+about 31%.  The solver must quantify the admissible metric family once and
+produce one `tau > 0` such that every member has both an
+`IsQuasilinearMetricParabolicSolution` and `JointChartGramSmooth` on that same
+`tau`; a later metric-dependent shrink does not prove the uniform statement.
 
 Smallest honest U producer: harmonic-map heat-flow existence for a smooth Ricci
 flow relative to a fixed background, together with the gauge identity and a
