@@ -22,10 +22,14 @@ and the remaining frontier moved into the concrete `comparison` field.
 
 The Route-A two-bump stage configurations are implemented and focused-green in
 `StepCStageFill.lean`, including arbitrary two-index reindexing convergence and
-the exact active-target readout for retained interacting slots.  Still
-genuinely missing downstream are common-domain center-equation and moving
-implicit-center convergence, exact inverse convergence, and the
-chart-to-intrinsic covariant metric-error bridge.
+the exact active-target readout for retained interacting slots.  The generic
+metric spray and `normalGeodesicSpray_conv` are also checked.  The earliest
+remaining analytic theorem is now explicit in
+`Analysis/ODE/CInfConvergence.lean`: `ode_solutionAt` is stated at its final
+interface, but its compact-tube/all-order variational-jet proof is 0%.  Forward
+normal phase, compact moving roots, selected inverse convergence, `invVelSum`
+center roots, exact inverse convergence, and the chart-to-intrinsic covariant
+metric-error bridge remain downstream.
 
 The current target-first body remains the honest readable stopping shape until
 the integer-radius master diagonal supplies an actual `psi`: refining with

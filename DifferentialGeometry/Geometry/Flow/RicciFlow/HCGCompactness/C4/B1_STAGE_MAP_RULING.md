@@ -63,28 +63,24 @@ and the canonical energy module also passed exact module refreshes.
 
 ## Exact analytic stop point
 
-The support-sensitive target mismatch is now closed by the Route-A two-bump
-filler.  `HasSuppConvData.pts_eq_ne` takes the finite common tail on which every
-arbitrary nonzero actual slot selects the retained old `InterSlot`, so the
-active-agreement package is also closed without gluing weights.
+The analytic route is now decomposed at native layers.  Metric-jet to spray
+convergence is checked algebraic packaging: `MetricKoszul.metricSpray_conv` and
+`normalGeodesicSpray_conv` use a proof-independent inverse Gram expression and
+introduce no velocity, stage-stay, or endpoint-radius assumption.
 
-Existing `existsCmExtension` and `cmExt_contDiffOn` handle one
-fixed center equation.  They do not provide a common parameter neighborhood or
-`C^infinity` convergence for a sequence of moving target-stage equations.  The
-first precise missing bridge is now isolated one layer earlier: normal-metric
-convergence has no checked consumer proving common-domain `C^infinity`
-convergence of the selected normal-diagonal inverse (`e_n.symm`),
-`DiagInvBranch.diagReadout`, or `invVelSum`.  That bridge includes forward phase
-endpoint stability and inverse stability on the common `delta`-ball.  See the
-pasteable ruling request in `B1_MOVING_ROOT_CONSULT.md`.
+The earliest genuinely new theorem is
+`MapCInfConvOnCompacts.ode_solutionAt`, deriving compact-tube containment and
+all parameter-jet convergence from limit-trajectory containment.  Its exact
+analysis-layer statement is typechecked, while its proof remains 0% with one
+honest `sorry`.  Once it is proved, forward normal-phase endpoint convergence
+is a thin specialization.  A fixed compact root tube then supplies inverse
+convergence; the same moving-root API is later applied to `invVelSum`, not
+directly to `chartCmEqnB`.
 
-After inverse/readout convergence, a compact-graph stability theorem for
-convergent implicit equations is still genuinely missing.  The fixed-stage
-center extensions cannot supply it by composition alone.
-
-After those two bridges, the remaining large producers are exact-inverse
-`C^infinity` convergence and the chart-to-intrinsic
-`tensor02CovDerivNormWith` bridge.
+After the all-pairs chart tail, exact-local-inverse convergence and the
+chart-to-`tensor02CovDerivNormWith` bridge remain independent frontiers.  See
+`B1_MOVING_ROOT_CONSULT.md` for the answered architecture request and current
+theorem-level accounting.
 
 ## Forbidden repairs
 
@@ -98,6 +94,10 @@ After those two bridges, the remaining large producers are exact-inverse
 
 The canonical map-definition seam, nested-core producer, and smooth Route-A
 configuration convergence are each checked.
+The proof-independent metric spray and `normalGeodesicSpray_conv` are checked
+(100%).  `MapCInfConvOnCompacts.ode_solutionAt` has its final public statement
+and canonical placement (100%), but its theorem proof and dedicated all-order
+stability machinery remain 0%.
 The all-pairs stage-map chart-tail theorem, concrete `StepB1RawInput` producer,
 and textbook B1 theorem remain 0%.  Rounded dedicated Step-B/B1 machinery stays
 about 95%, Chapter 4 machinery about 87%, and whole-HCG machinery about 57%.

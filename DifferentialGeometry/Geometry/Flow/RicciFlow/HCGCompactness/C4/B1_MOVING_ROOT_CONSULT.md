@@ -16,32 +16,28 @@ the unchanged `StepB1RawInput` target.  Its proof remains theorem-level 0%:
 the real integer-radius diagonal must be constructed before the dependent
 `StepB1RawInput.comparison` record can honestly be opened.
 
-## Exact first missing analysis
+## Resolved architecture and current stop
 
-`exists_metricLimit_normalCoord` already extracts full local normal-metric
-`MapCInfConvOnCompacts` convergence on a fixed open set.  The branch/fence
-layer gives `normalDiagAtFull`, `IsNormalDiag.full_transport`, smooth forward
-and inverse maps on named domains, and a common closed `delta`-ball in every
-selected target.  What the tree does not contain is convergence of the moving
-selected inverse branch:
+The consultation decision is resolved.  Do not begin with a monolithic C4
+inverse-convergence theorem.  The canonical order is generic `C^infinity` ODE
+stability in `Analysis/ODE`, metric-to-geodesic-phase specialization in
+`Geometry/Exponential`, generic compact moving-root stability in
+`Analysis/Calculus`, and only then a thin HCG inverse wrapper.  The center
+application targets `invVelSum`; `chartCmEqnB_factor` is used only for zero-set
+and fixed-stage identification.
 
-- no `MapCInfConvOnCompacts` theorem for `e_n.symm`;
-- no such theorem for `DiagInvBranch.inv` or `diagReadout`;
-- consequently no common-domain convergence theorem for `invVelSum` or
-  `chartCmEqnB`.
+The generic map-convergence API has been moved to `Analysis/Calculus` without
+renaming declarations.  The proof-independent metric spray and
+`normalGeodesicSpray_conv` are checked.  The exact low-level theorem
+`MapCInfConvOnCompacts.ode_solutionAt` is now stated and typechecked with no
+stage-family stay assumption, but its all-order compact-tube/variational-jet
+proof is the earliest honest analytic frontier and remains one explicit
+`sorry`.  Forward normal-phase endpoint convergence, compact moving-root
+stability, selected inverse convergence, and `invVelSum` root convergence have
+not yet been stated as proved producers.  The new proof-level question for this
+frontier is recorded in `B1_ODE_STABILITY_CONSULT.md`.
 
-The fixed-stage `existsCmExtensionB`, `cmExtB_contDiffOn`, and `cm_sol_cd` do
-not solve this: they construct one equation-dependent local branch and do not
-give one common parameter neighborhood or convergence for moving equations.
-`ApproximatesLinearOn` supplies only first-derivative control, not all-order
-convergence.
-
-The candidate first HCG-facing endpoint is `exists_diagInv_conv` in a new
-`NormalBranchConv.lean`, but it is not yet clear whether this should be proved
-directly or factored through a generic compact-graph moving-root theorem.  This
-is the current consultation decision point.
-
-## Pasteable consultation request
+## Historical consultation request (answered 2026-07-15)
 
 ```text
 We need an architecture ruling for the first remaining analytic bridge in the
@@ -167,6 +163,11 @@ Hard constraints
 ## Accounting at the stop
 
 - Route-A stage-filler/configuration machinery: checked, 100%.
+- Proof-independent metric spray and `normalGeodesicSpray_conv`: checked, 100%.
+- `MapCInfConvOnCompacts.ode_solutionAt`: statement/placement 100%; theorem
+  proof 0%, with one honest `sorry`; dedicated all-order stability machinery 0%.
+- Compact moving-root API, selected inverse convergence, `invVelSum` root
+  convergence, and the all-pairs chart tail: 0%.
 - Dedicated Step-B/B1 machinery: about 95%.
 - Chapter 4 machinery: about 87%.
 - Whole HCG machinery: about 57%.

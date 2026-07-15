@@ -75,12 +75,12 @@ existing A2/A1 continuity theorems.  This is not a new consumer assumption.
 continuous Sobolev path by using one higher uniform mass bound and
 `cont_of_coeff`.
 
-Focused verification of these additions is currently blocked before the proof
-body by the shared target build refreshing a long chain of missing upstream
-objects.  A private `galVec_sq` copy is temporarily present only so this file can
-be checked before the newly public `ConjGalerkinEnergy.galVec_norm_sq` object is
-available; it must be removed and both call sites restored to the canonical
-producer before this change is treated as complete.
+Focused verification of these additions now passes without warnings or
+`sorry`.  The temporary `galVec_sq` compatibility copy has been deleted, and
+both consumers use the canonical public `ConjGalerkinEnergy.galVec_norm_sq`.
+The existing large `scalar_gal_subseq` assembly needs a declaration-local 800k
+heartbeat budget after retaining `pert_cont`; this changes neither its statement
+nor any global option or consumer assumption.
 
 The exact downstream frontier is `ConjGalerkinStrong.scalar_gal_limit`.  Its
 source now contains the scalar DCT, vector FTC, and `timeH1` packaging, but the

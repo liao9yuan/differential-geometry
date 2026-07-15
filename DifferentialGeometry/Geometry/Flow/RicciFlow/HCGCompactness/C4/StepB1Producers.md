@@ -1,5 +1,21 @@
 # StepB1Producers.lean — B1 (`lbl397`) producer layer, notes
 
+## 2026-07-15 analysis-layer extraction
+
+The generic `MapCInfConvOnCompacts` constant, product, finite-Pi, and continuous
+linear-map closures were removed from this C4 consumer and moved unchanged to
+`Analysis/Calculus/MapConvergenceComp.lean`. Existing uses now resolve through
+the compatibility import, and focused verification passed.
+
+This is a layering/readability improvement only.  The concrete producer is
+stated separately as `MetricCompactBase.exists_b1_raw` in
+`StepB1RawProducer.lean`, so its target/interface is visible while work
+proceeds; its proof remains 0% because that theorem still contains the honest
+endpoint `sorry`.  None of the moved generic machinery is counted as theorem
+completion.  Current rounded infrastructure accounting remains approximately
+95% for dedicated Step-B/B1 machinery, 87% for Chapter 4, and 57% for the whole
+HCG project; the concrete producer and textbook B1 theorem remain 0% proved.
+
 ## Role
 Producers for `stepB1_glue`'s inputs (`hloc`/`hinj`/`hbase`/approx-iso data) + the `lbl404`
 abstract convergence endpoint.  Everything here is sorry-free/axiom-clean

@@ -1,16 +1,26 @@
 # UniformL2FromRaw
 
-## 2026-07-15 uniform component-to-L2 producer
+## Verified state
 
-`l2_bdd_of_raw` upgrades one nonnegative bound for every raw chart-frame
-component on every active partition-of-unity support to a uniform intrinsic
-`L2` bound for an arbitrary tensor family.  The proof uses the POU weight
-bounds, finite Riemannian volume, `eLpNorm_le_of_ae_bound`, and the existing
-global component reconstruction theorem
-`tensorL2Norm_sq_le_const_mul_sum_componentL2Norm_sq`.
+`l2_le_of_raw_sum` packages a uniform chartwise raw-component estimate into a
+global intrinsic `L²` estimate. Its constant is chosen before the input jet
+family and output tensor, so it is uniform in both. The focused check passes.
 
-This is a genuine reusable analytic producer rather than a Ricci--DeTurck
-wrapper.  It is the local-to-global step needed to turn the new zero- and
-first-order RHS chart bounds into a tensor `H1` forcing budget.
+The proof uses the finite chart-atlas partition of unity to select an active
+chart at each point, the existing raw-component-to-Riemannian-fiber estimate,
+finite Cauchy--Schwarz for the sum of square roots of input fiber norms, and the
+existing finite-sum pointwise-to-`L²` theorem. It introduces no metric
+smallness or realized-metric hypothesis.
 
-Focused verification passed.  The theorem itself is complete (100%).
+## Role in the low-regularity route
+
+This is the analytic packaging shared by the zeroth-order Ricci--DeTurck RHS
+difference and its fixed-background covariant derivative. The remaining work
+is geometric: produce uniform raw component bounds for those two tensors from
+the metric three-jet difference, then invoke this theorem and the `H1` jet
+norm bridge.
+
+Uniform low-regularity Ricci--DeTurck existence remains 0% as a theorem. Its
+dedicated E1 machinery is about 37% complete at this checkpoint. The eventual
+uniform Hamilton short-time existence theorem remains 0%; whole-HCG machinery
+remains roughly 57%, with its endpoint theorems still 0%.

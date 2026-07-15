@@ -445,4 +445,96 @@ theorem invGramD2_pou_bnd
   exact invGramD2_abs_le (I := I) (M := M) (gSeq k) α hy hM_b.le hQ₁_nn
     hMbOnE (hQ₁ α hα k b hb) (hQ₂ α hα k b hb) d m p q
 
+/-- A metric-equivalent family with uniform first and second chart-Gram bounds
+has one second-partial inverse-Gram Lipschitz constant on every active POU
+support. -/
+theorem invGramD2_pou_lip
+    [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
+    {ι : Type*} (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (Λ : ℝ) (hΛ : 1 ≤ Λ)
+    (hequiv : ∀ k : ι, ∀ b : M, ∀ v : TangentSpace I b,
+      Λ⁻¹ * gBase.inner b v v ≤ (gSeq k).inner b v v ∧
+        (gSeq k).inner b v v ≤ Λ * gBase.inner b v v)
+    (Q₁ Q₂ : ℝ) (hQ₁_nn : 0 ≤ Q₁) (hQ₂_nn : 0 ≤ Q₂)
+    (hQ₁ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α a c)
+              (extChartAt I α b)| ≤ Q₁)
+    (hQ₂ : ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+      ∀ k : ι, ∀ b ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ d m a c : Fin (Module.finrank ℝ E),
+          |partialDeriv (E := E) d
+            (partialDeriv (E := E) m
+              (chartGramOnE (I := I) (gSeq k) α a c)) (extChartAt I α b)| ≤ Q₂) :
+    ∃ C : ℝ, 0 < C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k₁ k₂ : ι, ∀ b ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ d m p q : Fin (Module.finrank ℝ E),
+            |partialDeriv (E := E) d
+                (partialDeriv (E := E) m
+                  (chartInvGramOnE (I := I) (gSeq k₁) α p q)) (extChartAt I α b) -
+              partialDeriv (E := E) d
+                (partialDeriv (E := E) m
+                  (chartInvGramOnE (I := I) (gSeq k₂) α p q)) (extChartAt I α b)| ≤
+              C * chartMetricJet2DiffSup (I := I) (M := M)
+                (gSeq k₁) (gSeq k₂) α (extChartAt I α b) := by
+  classical
+  obtain ⟨M_b, hM_b, hMb⟩ :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.chartInvGram_pou_bnd
+      (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  obtain ⟨Cinv, hCinv, hInvLip⟩ :=
+    chartInvGram_pou_lip (I := I) (M := M) gBase gSeq Λ hΛ hequiv
+  let C₀ : ℝ :=
+    2 * (Module.finrank ℝ E : ℝ) ^ 4 *
+        (3 * Cinv * M_b ^ 2 * Q₁ ^ 2 + 2 * M_b ^ 3 * Q₁) +
+      (Module.finrank ℝ E : ℝ) ^ 2 * (2 * Cinv * M_b * Q₂ + M_b ^ 2)
+  let C : ℝ := C₀ + 1
+  have hC_pos : 0 < C := by
+    dsimp [C, C₀]
+    positivity
+  refine ⟨C, hC_pos, ?_⟩
+  intro α hα k₁ k₂ b hb d m p q
+  have hb_base : b ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hb
+  have hb_source : b ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hb_base
+  have hy : extChartAt I α b ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hb_source)
+  have hleft : (extChartAt I α).symm (extChartAt I α b) = b :=
+    (extChartAt I α).left_inv hb_source
+  have hMb₁ : ∀ a c,
+      |chartInvGramOnE (I := I) (gSeq k₁) α a c (extChartAt I α b)| ≤ M_b := by
+    intro a c
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k₁ b hb a c
+  have hMb₂ : ∀ a c,
+      |chartInvGramOnE (I := I) (gSeq k₂) α a c (extChartAt I α b)| ≤ M_b := by
+    intro a c
+    rw [chartInvGramOnE_def, hleft]
+    exact hMb α hα k₂ b hb a c
+  have hInv : ∀ a c,
+      |chartInvGramOnE (I := I) (gSeq k₁) α a c (extChartAt I α b) -
+        chartInvGramOnE (I := I) (gSeq k₂) α a c (extChartAt I α b)| ≤
+          Cinv * chartGramDiffSup (I := I) (M := M)
+            (gSeq k₁) (gSeq k₂) α ((extChartAt I α).symm (extChartAt I α b)) := by
+    intro a c
+    rw [chartInvGramOnE_def, chartInvGramOnE_def, hleft]
+    exact hInvLip α hα k₁ k₂ b hb a c
+  have hpoint := invGramD2_sub_le
+    (I := I) (M := M) (gSeq k₁) (gSeq k₂) α hy hCinv.le hM_b.le hQ₁_nn
+      hMb₁ hMb₂ (hQ₁ α hα k₁ b hb) (hQ₁ α hα k₂ b hb)
+      (hQ₂ α hα k₁ b hb) hInv d m p q
+  exact hpoint.trans (mul_le_mul_of_nonneg_right (by dsimp [C, C₀]; linarith)
+    (chartMetricJet2DiffSup_nonneg (I := I) (M := M)
+      (gSeq k₁) (gSeq k₂) α (extChartAt I α b)))
+
 end DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients

@@ -1,5 +1,12 @@
 # MapConvergenceDeriv.lean — derivative-closure for `MapCInfConvOnCompacts` (P3 C-II-final-B2)
 
+## 2026-07-15 compatibility split
+
+The generic implementation moved to
+`Analysis/Calculus/MapConvergenceDeriv.lean`; this path is now a compatibility
+import. The canonical low module also supplies the full localized derivative
+closure `MapCInfConvOnCompacts.fderivOn`. Narrow verification passed.
+
 **Status (2026-06-13): DONE + verified** — focused check + targeted build green
 (2323 jobs); both endpoints `#print axioms` clean = `[propext, Classical.choice,
 Quot.sound]`.

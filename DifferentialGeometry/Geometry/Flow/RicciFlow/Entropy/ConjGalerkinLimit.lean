@@ -93,21 +93,6 @@ structure IsConjGalSubseq
       ∑' i, tensorSobolevWeight (I := I) (M := M) i (k : Real) *
         (ulim t i) ^ 2 ≤ Bound
 
-omit [BoundarylessManifold I M] in
-private theorem galVec_sq
-    (q : SmoothRiemannianMetric I M)
-    (F : Finset (TensorEigenIdx (I := I) (M := M) q 0 0))
-    (c : TensorEigenIdx (I := I) (M := M) q 0 0 → Real) (sigma : Real) :
-    ‖scalarGalVec (I := I) (M := M) q F c sigma‖ ^ 2 =
-      ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i sigma * (c i) ^ 2 := by
-  classical
-  rw [tensorHs.norm_sq_eq_tsum]
-  rw [tsum_eq_sum (s := F) (fun i hi => by
-    rw [scalarGalVec_coeff, if_neg hi]
-    ring)]
-  refine Finset.sum_congr rfl (fun i hi => ?_)
-  rw [scalarGalVec_coeff, if_pos hi]
-
 private theorem galPert_norm_le
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (T : D.RegularTime) (t : Real) (C1 : NNReal)
@@ -248,6 +233,7 @@ private theorem supp_right_lip
     · simpa only [f', if_pos hi] using hdu N t ht i hi
     · simpa only [f', if_neg hi, norm_zero] using (L i).property
 
+set_option maxHeartbeats 800000 in
 /-- Every smooth scalar initial datum has, on one common time interval, a
 modewise uniformly convergent subsequence of genuine finite Galerkin solutions.
 The limit inherits the all-order weighted spectral mass bounds. -/
@@ -369,7 +355,7 @@ theorem scalar_gal_subseq
         Real.sqrt B2 := by
     have hsq :
         ‖scalarGalVec (I := I) (M := M) q (Fs N) (V N t) 2‖ ^ 2 ≤ B2 := by
-      rw [galVec_sq (I := I) (M := M)]
+      rw [galVec_norm_sq (I := I) (M := M)]
       simpa only [galerkinEnergy] using hB2 N t ht
     have hsqrt := Real.sqrt_le_sqrt hsq
     rwa [Real.sqrt_sq (norm_nonneg _)] at hsqrt
@@ -594,7 +580,7 @@ theorem galLim_tendsto
   obtain ⟨Bu, hBu⟩ := hlim.energy (m + 1)
   obtain ⟨BW, hBW⟩ := hlim.lim_mass (m + 1)
   have hu_sq (n : Nat) : ‖u n‖ ^ 2 ≤ Bu := by
-    rw [hu_def, galVec_sq (I := I) (M := M)]
+    rw [hu_def, galVec_norm_sq (I := I) (M := M)]
     simpa only [q, galerkinEnergy] using hBu (phi n) t ht
   have hW_sq : ‖W‖ ^ 2 ≤ BW := by
     rw [tensorHs.norm_sq_eq_tsum (I := I) (M := M)]

@@ -55,8 +55,9 @@ second-order bootstrap frontier.
 `galVec_norm_sq` is now a public canonical energy-layer theorem rather than a
 private duplicate in the compactness consumer.  It gives the exact finite
 weighted coefficient formula used for support-independent `H²` domination.
-Focused verification passes without warnings or `sorry`; the exported object is
-still being refreshed through the shared upstream build queue.
+Focused verification passes without warnings or `sorry`; the exported theorem
+is now available to downstream modules.  `ConjGalerkinLimit` has removed its
+temporary duplicate and uses this canonical producer directly.
 
 The theorem is infrastructure only.  Completion of the downstream
 `scalar_gal_limit` remains recorded in `ConjGalerkinStrong.md` and is not counted
