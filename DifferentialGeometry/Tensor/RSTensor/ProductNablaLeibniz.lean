@@ -101,11 +101,19 @@ theorem nabla0S_product_realizes {s q : ℕ}
   -- and rewrite slots by `V · x`.
   rw [show slots = (fun a : Fin (s + q) => V a x) from hslots.symm, hmain]
   -- Evaluate both `domDomCongr` summands on the left.
-  simp only [ContMDiffSection.coe_add, Pi.add_apply,
-    ContinuousMultilinearMap.add_apply,
-    MultilinearSection.domDomCongr_apply,
-    ContinuousMultilinearMap.domDomCongr_apply,
-    tensor0SField_product_apply]
+  change
+    (ContinuousMultilinearMap.domDomCongr (leibnizLeftEquiv s q)
+        ((MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞))
+          (s := s + 1) (q := q) nablaA B) x))
+        (Fin.cons (X x) (fun a : Fin (s + q) => V a x)) +
+      (ContinuousMultilinearMap.domDomCongr (leibnizRightEquiv s q)
+        ((MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞))
+          (s := s) (q := q + 1) A nablaB) x))
+        (Fin.cons (X x) (fun a : Fin (s + q) => V a x)) = _
+  rw [Tensor0SSpace.domDomCongr_apply, Tensor0SSpace.domDomCongr_apply,
+    tensor0SField_product_apply, tensor0SField_product_apply]
   refine congrArg₂ (· + ·)
     (congrArg₂ (· * ·) (congrArg (nablaA x) ?_) (congrArg (B x) ?_))
     (congrArg₂ (· * ·) (congrArg (A x) ?_) (congrArg (nablaB x) ?_))
@@ -115,30 +123,30 @@ theorem nabla0S_product_realizes {s q : ℕ}
     · simp only [leibnizLeftEquiv, Function.comp_apply, finCongr_apply, Fin.cons_zero]
       rw [show (Fin.cast (by omega : s + 1 + q = s + q + 1) (Fin.castAdd q (0 : Fin (s + 1))))
             = (0 : Fin (s + q + 1)) from by
-        ext; simp only [Fin.coe_cast, Fin.coe_castAdd, Fin.val_zero]]
+        ext; simp only [Fin.val_cast, Fin.val_castAdd, Fin.val_zero]]
       exact Fin.cons_zero _ _
     · simp only [leibnizLeftEquiv, Function.comp_apply, finCongr_apply]
       rw [show (Fin.cast (by omega : s + 1 + q = s + q + 1) (Fin.castAdd q a.succ))
             = (Fin.castAdd q a).succ from by
-        ext; simp only [Fin.coe_cast, Fin.coe_castAdd, Fin.val_succ]]
+        ext; simp only [Fin.val_cast, Fin.val_castAdd, Fin.val_succ]]
       simp only [Fin.cons_succ]
   · -- B's slots
     funext a
     simp only [leibnizLeftEquiv, finCongr_apply, Function.comp_apply]
     rw [show (Fin.cast (by omega : s + 1 + q = s + q + 1) (Fin.natAdd (s + 1) a))
           = (Fin.natAdd s a).succ from by
-      ext; simp only [Fin.coe_cast, Fin.coe_natAdd, Fin.val_succ]; omega]
+      ext; simp only [Fin.val_cast, Fin.val_natAdd, Fin.val_succ]; omega]
     rw [Fin.cons_succ]
   · -- A's slots
     funext a
     have hidx : leibnizRightEquiv s q (Fin.castAdd (q + 1) a) = (Fin.castAdd q a).succ := by
       rw [leibnizRightEquiv, Equiv.trans_apply, finCongr_apply,
         show (Fin.cast (by omega : s + (q + 1) = s + q + 1) (Fin.castAdd (q + 1) a))
-            = (⟨a, by omega⟩ : Fin (s + q + 1)) from by ext; simp [Fin.coe_castAdd],
-        Fin.cycleRange_of_lt (by simp only [Fin.lt_iff_val_lt_val, Fin.val_last]; omega)]
+            = (⟨a, by omega⟩ : Fin (s + q + 1)) from by ext; simp,
+        Fin.cycleRange_of_lt (by simp only [Fin.lt_def]; omega)]
       ext
-      rw [Fin.val_add_one_of_lt (by simp only [Fin.lt_iff_val_lt_val, Fin.val_last]; omega)]
-      simp [Fin.coe_castAdd, Fin.val_succ]
+      rw [Fin.val_add_one_of_lt (by simp only [Fin.lt_def, Fin.val_last]; omega)]
+      simp [Fin.val_succ]
     simp only [Function.comp_apply, hidx, Fin.cons_succ]
   · -- nablaB's slots
     funext a
@@ -146,16 +154,16 @@ theorem nabla0S_product_realizes {s q : ℕ}
     · have hidx : leibnizRightEquiv s q (Fin.natAdd s (0 : Fin (q + 1))) = 0 := by
         rw [leibnizRightEquiv, Equiv.trans_apply, finCongr_apply,
           show (Fin.cast (by omega : s + (q + 1) = s + q + 1) (Fin.natAdd s (0 : Fin (q + 1))))
-              = (⟨s, by omega⟩ : Fin (s + q + 1)) from by ext; simp [Fin.coe_natAdd],
+              = (⟨s, by omega⟩ : Fin (s + q + 1)) from by ext; simp,
           Fin.cycleRange_self]
       simp only [Function.comp_apply, hidx, Fin.cons_zero]
     · have hidx : leibnizRightEquiv s q (Fin.natAdd s a.succ) = (Fin.natAdd s a).succ := by
         rw [leibnizRightEquiv, Equiv.trans_apply, finCongr_apply,
           show (Fin.cast (by omega : s + (q + 1) = s + q + 1) (Fin.natAdd s a.succ))
               = (⟨s + 1 + a, by omega⟩ : Fin (s + q + 1)) from by
-            ext; simp [Fin.coe_natAdd, Fin.val_succ]; omega,
-          Fin.cycleRange_of_gt (by simp only [Fin.lt_iff_val_lt_val]; omega)]
-        ext; simp [Fin.coe_natAdd, Fin.val_succ]; omega
+            ext; simp [Fin.val_succ]; omega,
+          Fin.cycleRange_of_gt (by simp only [Fin.lt_def]; omega)]
+        ext; simp [Fin.val_succ]; omega
       simp only [Function.comp_apply, hidx, Fin.cons_succ]
 
 end Tensor0SBundle

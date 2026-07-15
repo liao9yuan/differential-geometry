@@ -2,7 +2,7 @@
 
 ## Goal
 
-Prove time continuity at a regular time of the cumulative order-one metric
+Prove time continuity at a regular time of every finite cumulative metric
 derivative seminorm, without selecting a global frame and without forming a
 tensor-valued map whose fibre varies with the spatial point.
 
@@ -30,6 +30,9 @@ verification.  The complete local-to-global file passes focused verification:
 - `metric_c_patch` turns the finite component square into one exact-order
   local modulus;
 - `metric_c1_patch` intersects the order-zero and order-one patches;
+- `metric_c_event` applies compactness to one arbitrary exact order;
+- `metric_cp_tendsto` intersects the finitely many exact-order time
+  neighborhoods and proves convergence in every cumulative order `p`;
 - `metric_c1_tendsto` takes a compact finite subcover and intersects its time
   neighborhoods.
 
@@ -38,10 +41,31 @@ consumer convergence hypothesis is used.
 
 ## Progress
 
-The `metric_c1_tendsto` theorem is proved (100%), and its dedicated machinery
-is complete (100%).  This continuity theorem is one coefficient producer for
-the noncollapsing operator route; the actual finite-spectral-support `A2(s)`
-estimate remains unstated and unproved (0%).  Dedicated `A2` machinery is
-approximately 74% complete: the remaining local analytic work is the three
-coefficient/norm bridges recorded in `Nonautonomous.md`, followed by the
-operator extension.
+The `metric_c1_tendsto` and all-finite-order `metric_cp_tendsto` theorems are
+proved and focused-verified (100%); their dedicated local-to-global machinery
+is complete (100%).  This closes the time-uniform metric-jet input needed by
+the noncollapsing operator route.  The actual finite-spectral-support `A2(s)`
+estimate remains unstated and unproved (0%).  Its dedicated machinery is now
+approximately 77% complete: the live local analytic frontier is the
+rank-generic arbitrary-input small-principal-coefficient `appCc` tame bound,
+then specialization to the scalar Hessian/gradient decomposition.
+
+## 2026-07-14 fixed-slab bounds
+
+The fixed-slab boundedness distinction is now explicit.  `metricCov_cont`
+proves fully applied scalar continuity at an arbitrary regular spacetime point
+while the covariant-derivative background metric stays fixed.  The public
+`metric_cp_bdd` then fixes one compact set `K ⊆ D.regular` first and returns an
+order-indexed family of constants bounding every finite cumulative metric
+seminorm uniformly on `K × M`.  No order-dependent shrinking of `K` occurs.
+Focused verification passes without warnings.
+
+This is a metric-jet producer, not yet the time-uniform lower-order pairing.
+The remaining analytic frontier is to transfer these bounds to uniform
+fixed-background jets of the exact mixed coefficient families
+`scalarFluxCoeff q (G.metric t)` and `connTraceCoeff q (G.metric t)`, then feed
+those envelopes into uniform versions of the balanced and slot-transport
+pairings.  `scalar_crit_tame` remains unstated/unproved (0%); its dedicated
+machinery is about 77%.  Perelman noncollapsing remains 0% with about 40%
+dedicated analytic machinery, and whole HCG machinery remains about 53% with
+endpoint theorems at 0%.

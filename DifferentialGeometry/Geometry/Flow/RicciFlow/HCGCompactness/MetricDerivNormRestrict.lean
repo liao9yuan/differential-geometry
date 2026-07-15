@@ -233,14 +233,22 @@ theorem metricDiffCovDerivAt_restrictOpen_apply
       metricDiffCovDerivAt (I := I) a gk gInf gRef (x : M) := by
   ext slots
   unfold metricDiffCovDerivAt
-  rw [ContinuousMultilinearMap.sub_apply]
-  change ((metricCovDeriv (I := I) (gk.restrictOpen (I := I) U)
-          (gRef.restrictOpen (I := I) U) a) x) slots -
-        ((metricCovDeriv (I := I) (gInf.restrictOpen (I := I) U)
-          (gRef.restrictOpen (I := I) U) a) x) slots =
-      ((metricCovDeriv (I := I) gk gRef a) (x : M)) slots -
-        ((metricCovDeriv (I := I) gInf gRef a) (x : M)) slots
-  rw [metricCovDeriv_restrictOpen_apply, metricCovDeriv_restrictOpen_apply]
+  calc
+    (metricCovDeriv (I := I) (gk.restrictOpen (I := I) U)
+          (gRef.restrictOpen (I := I) U) a x -
+        metricCovDeriv (I := I) (gInf.restrictOpen (I := I) U)
+          (gRef.restrictOpen (I := I) U) a x) slots =
+        metricCovDeriv (I := I) (gk.restrictOpen (I := I) U)
+            (gRef.restrictOpen (I := I) U) a x slots -
+          metricCovDeriv (I := I) (gInf.restrictOpen (I := I) U)
+            (gRef.restrictOpen (I := I) U) a x slots :=
+      Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) x _ _ slots
+    _ = metricCovDeriv (I := I) gk gRef a (x : M) slots -
+        metricCovDeriv (I := I) gInf gRef a (x : M) slots := by
+      rw [metricCovDeriv_restrictOpen_apply, metricCovDeriv_restrictOpen_apply]
+    _ = (metricCovDeriv (I := I) gk gRef a (x : M) -
+          metricCovDeriv (I := I) gInf gRef a (x : M)) slots :=
+      (Tensor0SBundle.Tensor0SSpace.sub_apply (a + 2) (x : M) _ _ slots).symm
 
 /-- The metric-induced squared norm of a covariant tensor is unchanged by
 restricting the metric to an open subtype. -/

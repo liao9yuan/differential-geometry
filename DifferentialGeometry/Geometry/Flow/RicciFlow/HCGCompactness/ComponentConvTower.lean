@@ -292,14 +292,14 @@ theorem bumpTower_slotExpand_conv
           = (covDerivOfField (I := I) gRef A0 p) q
               (Function.update (fun a => V a q) j (∑ i ∈ s, c i q • frame i q)) := by
             rw [← hstep1]
-      _ = ∑ i ∈ s, (covDerivOfField (I := I) gRef A0 p) q
-              (Function.update (fun a => V a q) j (c i q • frame i q)) := by
+      _ = ∑ i ∈ s, c i q * (covDerivOfField (I := I) gRef A0 p) q
+              (Function.update (fun a => V a q) j (frame i q)) := by
             simpa using ((covDerivOfField (I := I) gRef A0 p) q).toMultilinearMap.map_update_sum
               s j (fun i => c i q • frame i q) (fun a => V a q)
       _ = ∑ i ∈ s, c i q • (covDerivOfField (I := I) gRef A0 p) q
               (fun a => (Function.update V j (frame i)) a q) := by
             refine Finset.sum_congr rfl fun i _ => ?_
-            rw [((covDerivOfField (I := I) gRef A0 p) q).map_update_smul, hupd i]
+            simp only [smul_eq_mul, hupd i]
   -- the carrier of `V` agrees on `U` with the `Σ` of `gᵢ · carrierᵢ`
   refine hsum.congr hU (fun k z hz => ?_) (fun z hz => ?_)
   · have hχz : χ z = 1 := (hχU hz).trans (Pi.one_apply z)

@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.IsometryCompactness
+import DifferentialGeometry.Analysis.Calculus.PiDeriv
 
 set_option autoImplicit false
 
@@ -62,6 +63,34 @@ theorem IsometryDerivBoundsOn.comp_subseq {U : Set E} {Φ : ℕ → E → F}
   intro r K hK hKU
   obtain ⟨M, hM⟩ := h r K hK hKU
   exact ⟨M, fun k x hx => hM (φ k) x hx⟩
+
+omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
+/-- Finitely many componentwise localized derivative bounds assemble into a
+localized derivative bound for the corresponding Pi-valued map. -/
+theorem IsometryDerivBoundsOn.pi
+    {ι : Type*} [Fintype ι] {U : Set E} {Φ : ℕ → E → (ι → F)}
+    (hU : IsOpen U)
+    (hsmooth : ∀ k i, ContDiffOn ℝ (⊤ : ℕ∞) (fun x => Φ k x i) U)
+    (hbdd : ∀ i, IsometryDerivBoundsOn U (fun k x => Φ k x i)) :
+    IsometryDerivBoundsOn U Φ := by
+  classical
+  intro r K hK hKU
+  choose M hM using fun i => hbdd i r K hK hKU
+  refine ⟨∑ i, max (M i) 0, fun k x hx => ?_⟩
+  have hr : ((r : ℕ∞) : WithTop ℕ∞) ≤
+      ((⊤ : ℕ∞) : WithTop ℕ∞) := by
+    exact_mod_cast le_top
+  have hcd : ∀ i, ContDiffAt ℝ ((r : ℕ∞) : WithTop ℕ∞)
+      (fun y => Φ k y i) x := fun i =>
+    ((hsmooth k i).contDiffAt (hU.mem_nhds (hKU hx))).of_le hr
+  rw [iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi,
+    pi_norm_le_iff_of_nonneg (Finset.sum_nonneg fun i _ => le_max_right (M i) 0)]
+  intro i
+  calc
+    ‖iteratedFDeriv ℝ r (fun y => Φ k y i) x‖ ≤ M i := hM i k x hx
+    _ ≤ max (M i) 0 := le_max_left _ _
+    _ ≤ ∑ j, max (M j) 0 :=
+      Finset.single_le_sum (fun j _ => le_max_right (M j) 0) (Finset.mem_univ i)
 
 omit [FiniteDimensional ℝ E] [FiniteDimensional ℝ F] in
 /-- A global all-compacts bound (`IsometryDerivBounds`) restricts to any open domain. -/

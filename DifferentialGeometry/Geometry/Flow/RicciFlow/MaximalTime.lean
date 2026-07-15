@@ -185,9 +185,10 @@ theorem extends_of_rmBounded
     have h := _hRm ⟨t, ht⟩
     simpa [SolutionOn.family, SolutionFamily.connection, metricCov] using h
   have hric := ric_quad_le_of_soln (I := I) hRmRaw hbound_raw
+  have hbound_can := rm04_bound_can (I := I) Rm04 hRmRaw ⟨K', hbound_raw⟩
   -- The two `ricci_flow_interior_restart` inputs (`hell` ellipticity, `hcov` Shi bounds).
-  obtain ⟨hell, hcov⟩ := extendInputs_of_soln (I := I) Rm04 _hS
-    (K := (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') (by positivity) hric ⟨K', hbound_raw⟩
+  obtain ⟨hell, hcov⟩ := extendInputs_of_soln (I := I) hdim _hS
+    (K := (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K') (by positivity) hric hbound_can
   -- (A): interior restart + short-time flow `rr` on `[0, TT)` with `t* + TT > ω`.
   obtain ⟨t_star, ht_star, TT, hreach, rr, hrr0, hrr_smooth, hrr_cont, hrr_pde⟩ :=
     ricci_flow_interior_restart (I := I) g_fam hαω hell hcov

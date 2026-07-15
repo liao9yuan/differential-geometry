@@ -633,3 +633,30 @@ compatibility facts are produced internally by `connSmoothSol` and
 `metricCompatSol`.
 
 Verification passed for the edited file and module refresh.
+
+## 2026-07-12 opaque-fiber compatibility
+
+The short-time branch alignment exposed two stale proof assumptions.  First,
+the pointwise negation of the Ricci `(0,2)` tensor must now be evaluated through
+`Tensor0SSpace.neg_apply`; the old continuous-multilinear-map rewrite no longer
+sees through the opaque fiber.  Second, the old single large simp in
+`knField_eq_rm04` could no longer lower the signed section combination and slot
+reindexings to scalar components, and attempting to keep that route eventually
+hit the recursion-depth limit.
+
+The repaired proof keeps the existing KN mathematics and public statements.
+It evaluates section addition and scalar multiplication explicitly, proves
+pointwise producer equalities for `knRicT` and `knScalT` through the public
+`Tensor0SSpace` / tensor-field product APIs, uses `SolutionOn.family_metric` for
+the canonical metric bridge, and records the four concrete slot permutations
+before the final scalar ring calculation.  No tensor representation internals,
+new assumptions, or new mathematical frontier were introduced.
+
+Focused verification passed.  The Uhlenbeck-base producer remains theorem-
+complete (100%); this file's branch-compatibility repair is complete (100%);
+Hamilton-target integration is approximately 99% pending its final downstream
+rebuild; short-time branch alignment is approximately 99% pending Hamilton and
+the remaining direct consumer check.  The merge commit remains 0% until those
+checks, final diff review, and merge-state cleanup pass.  This compatibility
+repair does not change the separate Hamilton positive-Ricci endpoint or HCG
+compactness theorem completion percentages.

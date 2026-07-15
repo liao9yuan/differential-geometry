@@ -87,8 +87,12 @@ theorem riemannCurvatureAt_lcOfMetric_eq_leviCivita
     (V := (TangentSpace I : M → Type _)) (n := (⊤ : ℕ∞)) x (v 2)
   have hv : v = vec3 (X x) (Y x) (Z x) := by
     funext i; fin_cases i <;> simp_all [vec3]
-  rw [hv,
-    riemannCurvatureAt_apply_smooth (I := I) (leviCivitaConnectionOfMetric (I := I) g)
+  rw [hv]
+  change riemannCurvatureAt (leviCivitaConnectionOfMetric (I := I) g) hcov₁ x α
+      (vec3 (X x) (Y x) (Z x)) =
+    riemannCurvatureAt (LeviCivita (I := I) g) hcov₂ x α
+      (vec3 (X x) (Y x) (Z x))
+  rw [riemannCurvatureAt_apply_smooth (I := I) (leviCivitaConnectionOfMetric (I := I) g)
       hcov₁ X Y Z α,
     riemannCurvatureAt_apply_smooth (I := I) (LeviCivita (I := I) g) hcov₂ X Y Z α]
   exact congrArg _

@@ -97,6 +97,111 @@ theorem koszulCov_norm_le
       simp only [K]
       ring
 
+section CovCLM
+
+noncomputable local instance dualNormedGroup :
+    NormedAddCommGroup (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance dualNormedSpace :
+    NormedSpace Real (E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance bilinNormedGroup :
+    NormedAddCommGroup (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance bilinNormedSpace :
+    NormedSpace Real (E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+noncomputable local instance triNormedGroup :
+    NormedAddCommGroup (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedAddCommGroup
+
+noncomputable local instance triNormedSpace :
+    NormedSpace Real (E →L[Real] E →L[Real] E →L[Real] Real) :=
+  ContinuousLinearMap.toNormedSpace
+
+private theorem tri_norm_apply
+    (D : E →L[Real] E →L[Real] E →L[Real] Real) (u v w : E) :
+    ‖D u v w‖ ≤ ‖D‖ * ‖u‖ * ‖v‖ * ‖w‖ := by
+  calc
+    ‖D u v w‖ ≤ ‖D u‖ * ‖v‖ * ‖w‖ := (D u).le_opNorm₂ v w
+    _ ≤ (‖D‖ * ‖u‖) * ‖v‖ * ‖w‖ := by
+      gcongr
+      exact D.le_opNorm u
+
+private noncomputable def koszulCovBilin
+    (D : E →L[Real] E →L[Real] E →L[Real] Real) :
+    E →L[Real] E →L[Real] E →L[Real] Real :=
+  let f : E →ₗ[Real] E →ₗ[Real] E →L[Real] Real :=
+    LinearMap.mk₂ Real (fun v w => koszulCov D v w)
+      (fun v₁ v₂ w => by
+        ext u
+        simp [koszulCov_apply]
+        ring)
+      (fun c v w => by
+        ext u
+        simp [koszulCov_apply]
+        ring)
+      (fun v w₁ w₂ => by
+        ext u
+        simp [koszulCov_apply]
+        ring)
+      (fun c v w => by
+        ext u
+        simp [koszulCov_apply]
+        ring)
+  f.mkContinuous₂ ((3 / 2 : Real) * ‖D‖) fun v w =>
+    koszulCov_norm_le D (norm_nonneg D) (tri_norm_apply D) v w
+
+@[simp] private theorem koszulCovBilin_apply
+    (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
+    koszulCovBilin D v w = koszulCov D v w := by
+  simp [koszulCovBilin]
+
+private theorem koszulCovBilin_le
+    (D : E →L[Real] E →L[Real] E →L[Real] Real) :
+    ‖koszulCovBilin D‖ ≤ (3 / 2 : Real) * ‖D‖ := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) ?_
+  intro v
+  refine ContinuousLinearMap.opNorm_le_bound _ (by positivity) ?_
+  intro w
+  simpa only [koszulCovBilin_apply, mul_assoc] using
+    koszulCov_norm_le D (norm_nonneg D) (tri_norm_apply D) v w
+
+/-- The coordinate Koszul operation as a bounded linear map from metric
+three-tensors to bilinear covector-valued maps. -/
+noncomputable def koszulCovCLM :
+    (E →L[Real] E →L[Real] E →L[Real] Real) →L[Real]
+      E →L[Real] E →L[Real] E →L[Real] Real :=
+  let f : (E →L[Real] E →L[Real] E →L[Real] Real) →ₗ[Real]
+      E →L[Real] E →L[Real] E →L[Real] Real :=
+    { toFun := koszulCovBilin
+      map_add' := fun D F => by
+        ext v w u
+        simp [koszulCov_apply]
+        ring
+      map_smul' := fun c D => by
+        ext v w u
+        simp [koszulCov_apply]
+        ring }
+  f.mkContinuous (3 / 2 : Real) koszulCovBilin_le
+
+/-- Evaluation of the bounded linear Koszul-covector operation. -/
+@[simp] theorem koszulCovCLM_apply
+    (D : E →L[Real] E →L[Real] E →L[Real] Real) (v w : E) :
+    koszulCovCLM D v w = koszulCov D v w := by
+  simp [koszulCovCLM]
+
+/-- The bounded linear Koszul-covector operation has norm at most `3 / 2`. -/
+theorem koszulCovCLM_norm_le : ‖koszulCovCLM (E := E)‖ ≤ (3 / 2 : Real) := by
+  refine ContinuousLinearMap.opNorm_le_bound _ (by norm_num) ?_
+  exact koszulCovBilin_le
+
+end CovCLM
+
 /-- The algebraic model vector obtained by raising the coordinate Koszul
 covector with a coercive metric.  It is not yet identified with the
 Christoffel contraction of a geometric connection. -/

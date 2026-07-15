@@ -852,7 +852,15 @@ theorem inner_le_of_c0
   have hval : ((Tensor0SBundle.metricTensorField (I := I) Gm) x
       - Tensor0SBundle.metricTensorField (I := I) g x) (fun _ => v)
       = Gm.inner x v v - g.inner x v v := by
-    simp [Tensor0SBundle.metricTensorField_apply]
+    calc
+      ((Tensor0SBundle.metricTensorField (I := I) Gm) x -
+          Tensor0SBundle.metricTensorField (I := I) g x) (fun _ => v) =
+          Tensor0SBundle.metricTensorField (I := I) Gm x (fun _ => v) -
+            Tensor0SBundle.metricTensorField (I := I) g x (fun _ => v) :=
+        Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
+      _ = Gm.inner x v v - g.inner x v v := by
+        rw [Tensor0SBundle.metricTensorField_apply,
+          Tensor0SBundle.metricTensorField_apply]
   have hnn : 0 ≤ g.inner x v v := by
     rcases eq_or_ne v 0 with hv | hv
     · simp [hv]
@@ -1050,14 +1058,12 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     have hxU : x ∈ (U₁ : Set M) := hKGU hxKG
     have hΦxK₂ : (Φ : M → N) x ∈ (K₂ : Set N) := himg (Set.mem_image_of_mem _ hxU)
     have hL : δ₁ x v = P'' x v - P₁ x v := by
-      simp [hδ₁def, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδ₁def, ContMDiffSection.coe_sub, Pi.sub_apply]
     have hR : δN₂ ((Φ : M → N) x) (fun q => mfderiv I I (Φ : M → N) x (v q))
         = D₂.forward.pullback ((Φ : M → N) x) (fun q => mfderiv I I (Φ : M → N) x (v q))
           - Tensor0SBundle.metricTensorField (I := I) h ((Φ : M → N) x)
               (fun q => mfderiv I I (Φ : M → N) x (v q)) := by
-      simp [hδN₂def, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδN₂def, ContMDiffSection.coe_sub, Pi.sub_apply]
     rw [hL, hR, hP''apply x hxKG v, hP₁apply x hxKG v,
       D₂.forward.pullback_apply ((Φ : M → N) x) hΦxK₂
         (fun q => mfderiv I I (Φ : M → N) x (v q)),
@@ -1248,8 +1254,7 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
       intro q w
       have hv : P₁ (q : M) w = D₁.forward.pullback (q : M) w := by
         rw [hP₁apply _ (hVKG q.2) w, D₁.forward.pullback_apply _ (hKGU (hVKG q.2)) w]
-      simp [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply, hv]
+      simp [ContMDiffSection.coe_sub, Pi.sub_apply, hv]
     have hres := covDerivOfField_restrictOpen (I := I) g V
       (0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := V) (n := (∞ : WithTop ℕ∞)) 2)
@@ -1271,15 +1276,15 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
       have hx1 := DFunLike.congr_fun hfe x
       have hx2 := DFunLike.congr_fun hx1
         (fun q => slots ((acEquiv (a' + 1)).symm q))
-      rw [MultilinearSection.domDomCongr_apply,
-        ContinuousMultilinearMap.domDomCongr_apply] at hx2
+      change _ = (ContinuousMultilinearMap.domDomCongr
+        (acEquiv (a' + 1)) _) _ at hx2
+      rw [ContinuousMultilinearMap.domDomCongr_apply] at hx2
       have hslots : (fun q => slots ((acEquiv (a' + 1)).symm
           ((acEquiv (a' + 1)) q))) = slots := by
         funext q
         rw [Equiv.symm_apply_apply]
       rw [hslots] at hx2
-      rw [← hx2]
-      exact hgermz (a' + 1) x hxV _
+      exact hx2.symm.trans (hgermz (a' + 1) x hxV _)
     -- decompose the P''-tower into the (δ₀ + δ₁)-tower at x
     have hdecI : iterCov (I := I) g 2 P'' (a' + 1) x
         = iterCov (I := I) g 2 (δ₀ + δ₁) (a' + 1) x := by
@@ -1291,9 +1296,8 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
         abel
       refine ContinuousMultilinearMap.ext (fun slots => ?_)
       rw [hsplit, iterCov_sub, iterCov_sub, iterCov_metric_zero, sub_zero]
-      simp only [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
-      rw [hgermzI slots, sub_zero]
+      simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
+      rw [Tensor0SBundle.Tensor0SSpace.sub_apply, hgermzI slots, sub_zero]
     obtain ⟨basis, hON⟩ :=
       DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
     have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
@@ -1471,16 +1475,14 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
     obtain ⟨hyK₂, hyU₁img, hyt⟩ := hVPimgK₂ y hyVP
     have hyKG : y ∈ (Ψ : M → P) '' KG := hVPKG hyVP
     have hL : δ₁r y v = Pr y v - P₂r y v := by
-      simp [hδ₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδ₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply]
     have hR : δN₁r ((Φ'.symm : P → N) y)
         (fun q => mfderiv I I (Φ'.symm : P → N) y (v q))
         = D₁.reverse.pullback ((Φ'.symm : P → N) y)
             (fun q => mfderiv I I (Φ'.symm : P → N) y (v q))
           - Tensor0SBundle.metricTensorField (I := I) h ((Φ'.symm : P → N) y)
               (fun q => mfderiv I I (Φ'.symm : P → N) y (v q)) := by
-      simp [hδN₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδN₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply]
     rw [hL, hR, hPrapply y hyKG v, hP₂rapply y hyKG v,
       D₁.reverse.pullback_apply ((Φ'.symm : P → N) y) hyU₁img
         (fun q => mfderiv I I (Φ'.symm : P → N) y (v q)),
@@ -1666,8 +1668,7 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
         ⟨(Φ'.symm : P → N) q, hqK₂, Φ'.right_inv' hqt⟩
       have hv : P₂r (q : P) w = D₂.reverse.pullback (q : P) w := by
         rw [hP₂rapply _ (hVPKG q.2) w, D₂.reverse.pullback_apply _ hqΦ'K₂ w]
-      simp [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply, hv]
+      simp [ContMDiffSection.coe_sub, Pi.sub_apply, hv]
     have hres := covDerivOfField_restrictOpen (I := I) h' VP
       (0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := VP) (n := (∞ : WithTop ℕ∞)) 2)
@@ -1690,15 +1691,15 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
       have hx1 := DFunLike.congr_fun hfe y
       have hx2 := DFunLike.congr_fun hx1
         (fun q => slots ((acEquiv (a' + 1)).symm q))
-      rw [MultilinearSection.domDomCongr_apply,
-        ContinuousMultilinearMap.domDomCongr_apply] at hx2
+      change _ = (ContinuousMultilinearMap.domDomCongr
+        (acEquiv (a' + 1)) _) _ at hx2
+      rw [ContinuousMultilinearMap.domDomCongr_apply] at hx2
       have hslots : (fun q => slots ((acEquiv (a' + 1)).symm
           ((acEquiv (a' + 1)) q))) = slots := by
         funext q
         rw [Equiv.symm_apply_apply]
       rw [hslots] at hx2
-      rw [← hx2]
-      exact hgermzr (a' + 1) y hyVP _
+      exact hx2.symm.trans (hgermzr (a' + 1) y hyVP _)
     have hdecI : iterCov (I := I) h' 2 Pr (a' + 1) y
         = iterCov (I := I) h' 2 (δ₀r + δ₁r) (a' + 1) y := by
       have hsplit : (δ₀r + δ₁r : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E)
@@ -1709,9 +1710,8 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
         abel
       refine ContinuousMultilinearMap.ext (fun slots => ?_)
       rw [hsplit, iterCov_sub, iterCov_sub, iterCov_metric_zero, sub_zero]
-      simp only [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
-      rw [hgermzrI slots, sub_zero]
+      simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
+      rw [Tensor0SBundle.Tensor0SSpace.sub_apply, hgermzrI slots, sub_zero]
     obtain ⟨basis, hON⟩ :=
       DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) h' y
     have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
@@ -1815,65 +1815,6 @@ theorem partialData_comp [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
         c0_small := fun y hy => le_trans (hc0Pr y hy) harithc0r
         cov_deriv_small := fun a h1 h2 y hy =>
           le_trans (hcovPr a h1 h2 y hy) harithcovr }
-
-set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 2000000 in
-/-- Forward half of `partialData_comp`: the peel-last ledger only needs the
-forward producer and therefore only the forward asymmetric tolerance bound. -/
-noncomputable def compDataFwd [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
-    {P : Type u} [TopologicalSpace P] [ChartedSpace H P] [IsManifold I ∞ P]
-    [T2Space N] [SigmaCompactSpace N] [T2Space P] [SigmaCompactSpace P]
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-    [IsManifold I 1 N] [IsManifold I 2 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
-    [IsManifold I 1 P] [IsManifold I 2 P] [IsManifold I ((∞ : WithTop ℕ∞) + 1) P]
-    (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
-    (Φ' : PartialDiffeomorph I I N P (∞ : WithTop ℕ∞))
-    {U₁ : Opens M} [Nonempty U₁] (hU₁ : (U₁ : Set M) ⊆ Φ.source)
-    {K₂ : Opens N} [Nonempty K₂] (hK₂ : (K₂ : Set N) ⊆ Φ'.source)
-    (himg : (Φ : M → N) '' (U₁ : Set M) ⊆ (K₂ : Set N))
-    {K : Set M} (hK : IsCompact K) (hKU : K ⊆ (U₁ : Set M))
-    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1/2) (hε'2 : ε' ≤ 1/2)
-    (C : ℝ) (hC0 : 0 ≤ C)
-    (hC : ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
-      [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']
-      [IsManifold I 1 M'] [IsManifold I 2 M']
-      [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
-      {u : Set M'}, IsOpen u →
-      ∀ (g₀ g₁ : SmoothRiemannianMetric I M')
-        (δ₀ δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2)
-        (eps0 eps1 : Real), 0 ≤ eps0 → eps0 ≤ 1 → 0 ≤ eps1 →
-        (∀ x ∈ u, ∀ v : TangentSpace I x,
-          (1 + eps0)⁻¹ * g₁.inner x v v ≤ g₀.inner x v v ∧
-            g₀.inner x v v ≤ (1 + eps0) * g₁.inner x v v) →
-        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + j)
-            (iterCov (I := I) g₁ 2
-              (Tensor0SBundle.metricTensorField (I := I) g₀) j x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2 δ₀ r x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ k, k ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
-            (iterCov (I := I) g₁ 2 δ₁ k x)) ≤ eps1) →
-        ∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2
-              (δ₀ + δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-                (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2) r x)) ≤ eps0 + eps1 * C)
-    (g : SmoothRiemannianMetric I M) (h : SmoothRiemannianMetric I N)
-    (h' : SmoothRiemannianMetric I P)
-    (D₁ : BookApproxIsoPartialData (I := I) (U₁ : Set M) ε p Φ g h)
-    (D₂ : BookApproxIsoPartialData (I := I) (K₂ : Set N) ε' p Φ' h h') :
-    ∀ ε'' : ℝ,
-      ε / (1 - ε) + ε' * max C 2 ≤ ε'' →
-      ε'' < 1 →
-      PreApproxIsoDataOn (I := I) K ε'' p
-        (PartialDiffeomorph.trans (I := I) Φ Φ' : M → P) g h' := by
-  classical
-  -- This is exactly the forward organ of `partialData_comp` up to the assembly step.
-  -- It is exposed separately so D1b can keep the peel-last forward ledger linear.
-  sorry
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 2000000 in
@@ -2027,15 +1968,13 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
     have hΦxK₂ : (Φ : M → N) x ∈ (K₂ : Set N) :=
       himg (Set.mem_image_of_mem _ hxU)
     have hL : δ₁ x v = P'' x v - P₁ x v := by
-      simp [hδ₁def, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδ₁def, ContMDiffSection.coe_sub, Pi.sub_apply]
     have hR : δN₂ ((Φ : M → N) x) (fun q => mfderiv I I (Φ : M → N) x (v q))
         = D₂.forward.pullback ((Φ : M → N) x)
             (fun q => mfderiv I I (Φ : M → N) x (v q))
           - Tensor0SBundle.metricTensorField (I := I) h ((Φ : M → N) x)
               (fun q => mfderiv I I (Φ : M → N) x (v q)) := by
-      simp [hδN₂def, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδN₂def, ContMDiffSection.coe_sub, Pi.sub_apply]
     rw [hL, hR, hP''apply x hxKG v, hP₁apply x hxKG v,
       D₂.forward.pullback_apply ((Φ : M → N) x) hΦxK₂
         (fun q => mfderiv I I (Φ : M → N) x (v q)),
@@ -2213,8 +2152,7 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
       intro q w
       have hv : P₁ (q : M) w = D₁.forward.pullback (q : M) w := by
         rw [hP₁apply _ (hVKG q.2) w, D₁.forward.pullback_apply _ (hKGU (hVKG q.2)) w]
-      simp [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply, hv]
+      simp [ContMDiffSection.coe_sub, Pi.sub_apply, hv]
     have hres := covDerivOfField_restrictOpen (I := I) g V
       (0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := V) (n := (∞ : WithTop ℕ∞)) 2)
@@ -2234,15 +2172,15 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
       have hx1 := DFunLike.congr_fun hfe x
       have hx2 := DFunLike.congr_fun hx1
         (fun q => slots ((acEquiv (a' + 1)).symm q))
-      rw [MultilinearSection.domDomCongr_apply,
-        ContinuousMultilinearMap.domDomCongr_apply] at hx2
+      change _ = (ContinuousMultilinearMap.domDomCongr
+        (acEquiv (a' + 1)) _) _ at hx2
+      rw [ContinuousMultilinearMap.domDomCongr_apply] at hx2
       have hslots : (fun q => slots ((acEquiv (a' + 1)).symm
           ((acEquiv (a' + 1)) q))) = slots := by
         funext q
         rw [Equiv.symm_apply_apply]
       rw [hslots] at hx2
-      rw [← hx2]
-      exact hgermz (a' + 1) x hxV _
+      exact hx2.symm.trans (hgermz (a' + 1) x hxV _)
     have hdecI : iterCov (I := I) g 2 P'' (a' + 1) x
         = iterCov (I := I) g 2 (δ₀ + δ₁) (a' + 1) x := by
       have hsplit : (δ₀ + δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E)
@@ -2253,9 +2191,8 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
         abel
       refine ContinuousMultilinearMap.ext (fun slots => ?_)
       rw [hsplit, iterCov_sub, iterCov_sub, iterCov_metric_zero, sub_zero]
-      simp only [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
-      rw [hgermzI slots, sub_zero]
+      simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
+      rw [Tensor0SBundle.Tensor0SSpace.sub_apply, hgermzI slots, sub_zero]
     obtain ⟨basis, hON⟩ :=
       DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) g x
     have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal
@@ -2334,66 +2271,6 @@ noncomputable def compSepFwd [I.Boundaryless] [NeZero (Module.finrank Real E)]
       pullback_apply := fun x hx v => hP''apply x (hVKG (hKV hx)) v
       c0_small := fun x hx => le_trans (hc0P'' x hx) hc0_out
       cov_small := fun a h1 h2 x hx => le_trans (hcovP'' a h1 h2 x hx) hcov_out }
-
-set_option backward.isDefEq.respectTransparency false in
-set_option maxHeartbeats 2000000 in
-/-- Reverse half of `partialData_comp`: the peel-first ledger only needs the
-reverse producer and therefore only the reverse asymmetric tolerance bound. -/
-noncomputable def compDataRev [I.Boundaryless] [NeZero (Module.finrank ℝ E)]
-    {P : Type u} [TopologicalSpace P] [ChartedSpace H P] [IsManifold I ∞ P]
-    [T2Space N] [SigmaCompactSpace N] [T2Space P] [SigmaCompactSpace P]
-    [IsManifold I 1 M] [IsManifold I 2 M] [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-    [IsManifold I 1 N] [IsManifold I 2 N] [IsManifold I ((∞ : WithTop ℕ∞) + 1) N]
-    [IsManifold I 1 P] [IsManifold I 2 P] [IsManifold I ((∞ : WithTop ℕ∞) + 1) P]
-    (Φ : PartialDiffeomorph I I M N (∞ : WithTop ℕ∞))
-    (Φ' : PartialDiffeomorph I I N P (∞ : WithTop ℕ∞))
-    {U₁ : Opens M} [Nonempty U₁] (hU₁ : (U₁ : Set M) ⊆ Φ.source)
-    {K₂ : Opens N} [Nonempty K₂] (hK₂ : (K₂ : Set N) ⊆ Φ'.source)
-    (himg : (Φ : M → N) '' (U₁ : Set M) ⊆ (K₂ : Set N))
-    {K : Set M} (hK : IsCompact K) (hKU : K ⊆ (U₁ : Set M))
-    {ε ε' : ℝ} {p : ℕ} (hε2 : ε ≤ 1/2) (hε'2 : ε' ≤ 1/2)
-    (C : ℝ) (hC0 : 0 ≤ C)
-    (hC : ∀ {M' : Type u} [TopologicalSpace M'] [ChartedSpace H M']
-      [T2Space M'] [IsManifold I ∞ M'] [SigmaCompactSpace M']
-      [IsManifold I 1 M'] [IsManifold I 2 M']
-      [IsManifold I ((∞ : WithTop ℕ∞) + 1) M']
-      {u : Set M'}, IsOpen u →
-      ∀ (g₀ g₁ : SmoothRiemannianMetric I M')
-        (δ₀ δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-          (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2)
-        (eps0 eps1 : Real), 0 ≤ eps0 → eps0 ≤ 1 → 0 ≤ eps1 →
-        (∀ x ∈ u, ∀ v : TangentSpace I x,
-          (1 + eps0)⁻¹ * g₁.inner x v v ≤ g₀.inner x v v ∧
-            g₀.inner x v v ≤ (1 + eps0) * g₁.inner x v v) →
-        (∀ x ∈ u, ∀ j, 1 ≤ j → j ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + j)
-            (iterCov (I := I) g₁ 2
-              (Tensor0SBundle.metricTensorField (I := I) g₀) j x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2 δ₀ r x)) ≤ eps0) →
-        (∀ x ∈ u, ∀ k, k ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₁ x (2 + k)
-            (iterCov (I := I) g₁ 2 δ₁ k x)) ≤ eps1) →
-        ∀ x ∈ u, ∀ r, 0 < r → r ≤ p →
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I) g₀ x (2 + r)
-            (iterCov (I := I) g₀ 2
-              (δ₀ + δ₁ : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
-                (I := I) (M := M') (n := (∞ : WithTop ℕ∞)) 2) r x)) ≤ eps0 + eps1 * C)
-    (g : SmoothRiemannianMetric I M) (h : SmoothRiemannianMetric I N)
-    (h' : SmoothRiemannianMetric I P)
-    (D₁ : BookApproxIsoPartialData (I := I) (U₁ : Set M) ε p Φ g h)
-    (D₂ : BookApproxIsoPartialData (I := I) (K₂ : Set N) ε' p Φ' h h') :
-    ∀ ε'' : ℝ,
-      ε' / (1 - ε') + ε * max C 2 ≤ ε'' →
-      ε'' < 1 →
-      PreApproxIsoDataOn (I := I)
-        ((PartialDiffeomorph.trans (I := I) Φ Φ' : M → P) '' K) ε'' p
-        ((PartialDiffeomorph.trans (I := I) Φ Φ').symm : P → M) h' g := by
-  classical
-  -- This is exactly the reverse organ of `partialData_comp` up to the assembly step.
-  -- It is exposed separately so D1b can keep the peel-first reverse ledger linear.
-  sorry
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 2000000 in
@@ -2586,16 +2463,14 @@ noncomputable def compSepRev [I.Boundaryless] [NeZero (Module.finrank Real E)]
     obtain ⟨hyK₂, hyU₁img, hyt⟩ := hVPimgK₂ y hyVP
     have hyKG : y ∈ (Ψ : M → P) '' KG := hVPKG hyVP
     have hL : δ₁r y v = Pr y v - P₂r y v := by
-      simp [hδ₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδ₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply]
     have hR : δN₁r ((Φ'.symm : P → N) y)
         (fun q => mfderiv I I (Φ'.symm : P → N) y (v q))
         = D₁.reverse.pullback ((Φ'.symm : P → N) y)
             (fun q => mfderiv I I (Φ'.symm : P → N) y (v q))
           - Tensor0SBundle.metricTensorField (I := I) h ((Φ'.symm : P → N) y)
               (fun q => mfderiv I I (Φ'.symm : P → N) y (v q)) := by
-      simp [hδN₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
+      simp [hδN₁rdef, ContMDiffSection.coe_sub, Pi.sub_apply]
     rw [hL, hR, hPrapply y hyKG v, hP₂rapply y hyKG v,
       D₁.reverse.pullback_apply ((Φ'.symm : P → N) y) hyU₁img
         (fun q => mfderiv I I (Φ'.symm : P → N) y (v q)),
@@ -2787,8 +2662,7 @@ noncomputable def compSepRev [I.Boundaryless] [NeZero (Module.finrank Real E)]
         ⟨(Φ'.symm : P → N) q, hqK₂, Φ'.right_inv' hqt⟩
       have hv : P₂r (q : P) w = D₂.reverse.pullback (q : P) w := by
         rw [hP₂rapply _ (hVPKG q.2) w, D₂.reverse.pullback_apply _ hqΦ'K₂ w]
-      simp [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply, hv]
+      simp [ContMDiffSection.coe_sub, Pi.sub_apply, hv]
     have hres := covDerivOfField_restrictOpen (I := I) h' VP
       (0 : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E) (H := H)
         (I := I) (M := VP) (n := (∞ : WithTop ℕ∞)) 2)
@@ -2810,15 +2684,15 @@ noncomputable def compSepRev [I.Boundaryless] [NeZero (Module.finrank Real E)]
       have hx1 := DFunLike.congr_fun hfe y
       have hx2 := DFunLike.congr_fun hx1
         (fun q => slots ((acEquiv (a' + 1)).symm q))
-      rw [MultilinearSection.domDomCongr_apply,
-        ContinuousMultilinearMap.domDomCongr_apply] at hx2
+      change _ = (ContinuousMultilinearMap.domDomCongr
+        (acEquiv (a' + 1)) _) _ at hx2
+      rw [ContinuousMultilinearMap.domDomCongr_apply] at hx2
       have hslots : (fun q => slots ((acEquiv (a' + 1)).symm
           ((acEquiv (a' + 1)) q))) = slots := by
         funext q
         rw [Equiv.symm_apply_apply]
       rw [hslots] at hx2
-      rw [← hx2]
-      exact hgermzr (a' + 1) y hyVP _
+      exact hx2.symm.trans (hgermzr (a' + 1) y hyVP _)
     have hdecI : iterCov (I := I) h' 2 Pr (a' + 1) y
         = iterCov (I := I) h' 2 (δ₀r + δ₁r) (a' + 1) y := by
       have hsplit : (δ₀r + δ₁r : Tensor0SBundle.Tensor0SField (𝕜 := Real) (E := E)
@@ -2829,9 +2703,8 @@ noncomputable def compSepRev [I.Boundaryless] [NeZero (Module.finrank Real E)]
         abel
       refine ContinuousMultilinearMap.ext (fun slots => ?_)
       rw [hsplit, iterCov_sub, iterCov_sub, iterCov_metric_zero, sub_zero]
-      simp only [ContMDiffSection.coe_sub, Pi.sub_apply,
-        ContinuousMultilinearMap.sub_apply]
-      rw [hgermzrI slots, sub_zero]
+      simp only [ContMDiffSection.coe_sub, Pi.sub_apply]
+      rw [Tensor0SBundle.Tensor0SSpace.sub_apply, hgermzrI slots, sub_zero]
     obtain ⟨basis, hON⟩ :=
       DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis (I := I) h' y
     have hinv := DifferentialGeometry.Integral.Connection.metricInverseInBasis_of_orthonormal

@@ -1,5 +1,54 @@
 # ShortTimeExistence audit
 
+## 2026-07-13 latest-progress resync
+
+After the completed branch-alignment merge `d842bedee`, the two newer committed
+updates from our `short-time-existence` branch (`17de115b1` and `2a2ce366e`)
+were merged into the alignment worktree.  The source merge was conflict-free.
+The resulting tensor-API compatibility points were repaired in nine consumers
+using public `Tensor0SSpace` evaluation lemmas, without changing theorem
+statements or adding assumptions.
+
+The resynced tree passes the latest targeted C4/spectral/entropy build, the
+explicit 9,924-job Hamilton consumer, and the 10,258-job default full build.
+The headline axiom audit remains exactly `[propext, Classical.choice,
+Quot.sound]`.  Thus the short-time-existence theorem remains 100% proved, its
+dedicated machinery remains 100% integrated, and the latest progress resync is
+100% verified.  HCG endpoint status is separate: the conditional compactness
+endpoint and textbook B1 theorem remain 0%, while their shared machinery is
+tracked in `HCGCompactness/PROJECT_MAP.md`.
+
+## 2026-07-12 corrected branch-alignment audit
+
+This section supersedes the `main`-based integration route recorded below on 2026-07-10. The
+actual merge preparation aligns the current local short-time-existence progress
+(`e5d37bce`) with qinz's short-time-existence semantic branch (`8b8814e2`) in the isolated
+`codex/short-time-existence-align` worktree. It is not an attempt to merge either branch into
+`main`.
+
+The headline `ShortTimeExistence.lean` theorem is source-complete and its focused check passed;
+its axiom audit contains only `propext`, `Classical.choice`, and `Quot.sound`. The large upstream
+dependency `CurvatureCoefficientDifferenceJetTower.lean` is also source-verified after replacing
+an elaboration-heavy generic congruence with the existing double-frame trace-independence route.
+The direct `CinftyLimitGlue` consumer passed focused verification and a targeted module build, and
+the explicit downstream `HamiltonPositiveRicci` target completed all 9,924 jobs after the merged
+tensor API compatibility repairs.  Its existing endpoint `sorry`s are independent of this merge.
+The default project build also completed all 10,258 jobs after removing an unused duplicate
+DeTurck short-time endpoint that collided with the canonical proved producer; the declaration
+index contains 24,613 declarations.
+
+The final tree is not globally sorry-free: it contains 37 actual `sorry`/`admit` proof lines,
+seven more than the local-progress parent, distributed across six separate Sobolev, spectral,
+and curvature auxiliary-frontier files.  None is in the headline proof's axiom closure, as the
+checked axiom audit above confirms.
+
+Honest progress: the headline theorem itself is proved (100%); its dedicated construction
+machinery is integration-verified (100%); alignment/merge preparation is 100% through focused,
+targeted-consumer, downstream-Hamilton, and default-root verification. The merge commit carrying
+this audit completes the branch alignment (100%). This is separate from Hamilton
+positive-Ricci or HCG compactness endpoint completion, whose existing theorem frontiers are not
+advanced merely by this successful integration build.
+
 ## 2026-06-05 exhaustive source audit
 
 Scope: the headline `ShortTimeExistence.lean`, the short-time assembly/flow

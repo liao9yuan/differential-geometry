@@ -930,7 +930,7 @@ theorem gfam_inner_continuous_on
         (fun q : ℝ × M =>
           Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
             (extChartAt I α q.2))
-        (Set.Icc 0 T ×ˢ Set.univ))
+        (Set.Icc 0 T ×ˢ (chartAt H α).source))
     (hΦ_orbit : ∀ y : M,
       ContinuousOn (fun s : ℝ => (Φ_fam s : M → M) y) (Set.Ico 0 T))
     (hΦ_total : ∀ (y : M) (u : TangentSpace I y),
@@ -973,18 +973,26 @@ theorem gfam_inner_continuous_on
         (fun s : ℝ => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT s) α i j
           (extChartAt I α ((Φ_fam s : M → M) x))) (Set.Ico 0 T) s₀ := by
     intro i j
+    set Sp : Set (ℝ × M) := Set.Icc 0 T ×ˢ (chartAt H α).source with hSp
+    have hsrc0' : (Φ_fam s₀ : M → M) x ∈ (chartAt H α).source := by
+      rw [hα]; exact mem_chart_source H α
     have hpair : ContinuousWithinAt (fun s : ℝ => (s, (Φ_fam s : M → M) x))
         (Set.Ico 0 T) s₀ :=
       continuousWithinAt_id.prodMk horbit
-    have hmaps : Set.MapsTo (fun s : ℝ => (s, (Φ_fam s : M → M) x))
-        (Set.Ico 0 T) (Set.Icc 0 T ×ˢ Set.univ) := by
-      intro s hs
-      exact ⟨⟨hs.1, le_of_lt hs.2⟩, Set.mem_univ _⟩
-    have hg : ContinuousWithinAt
-        (fun q : ℝ × M => Integral.DivergenceTheorem.chartGramOnE (I := I) (g_DT q.1) α i j
-          (extChartAt I α q.2)) (Set.Icc 0 T ×ˢ Set.univ) (s₀, (Φ_fam s₀ : M → M) x) :=
-      (hg_joint α i j).continuousWithinAt (hmaps hs₀)
-    have hcomp := hg.comp_of_eq hpair hmaps rfl
+    have hpre : (fun s : ℝ => (s, (Φ_fam s : M → M) x)) ⁻¹' Sp
+        ∈ nhdsWithin s₀ (Set.Ico 0 T) := by
+      have hsnhds : (chartAt H α).source ∈ nhds ((Φ_fam s₀ : M → M) x) :=
+        (chartAt H α).open_source.mem_nhds hsrc0'
+      have hs : (fun s : ℝ => (Φ_fam s : M → M) x) ⁻¹' (chartAt H α).source
+          ∈ nhdsWithin s₀ (Set.Ico 0 T) :=
+        horbit.preimage_mem_nhdsWithin hsnhds
+      have hself : (Set.Ico 0 T : Set ℝ) ∈ nhdsWithin s₀ (Set.Ico 0 T) := self_mem_nhdsWithin
+      filter_upwards [hs, hself] with s hssrc hsico
+      exact ⟨⟨hsico.1, le_of_lt hsico.2⟩, hssrc⟩
+    have hpt0 : ((s₀, (Φ_fam s₀ : M → M) x) : ℝ × M) ∈ Sp :=
+      ⟨⟨hs₀.1, le_of_lt hs₀.2⟩, hsrc0'⟩
+    have hcomp := ((hg_joint α i j).continuousWithinAt hpt0).comp_of_preimage_mem_nhdsWithin_of_eq
+      hpair hpre rfl
     simpa only [Function.comp_def] using hcomp
   have hsum : ∀ s, (Φ_fam s : M → M) x ∈ e.baseSet →
       (Φ_fam s : M → M) x ∈ (extChartAt I α).source →

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjPotential
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffMeas
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.Nonautonomous
+import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionFieldLink
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 
 /-!
@@ -18,7 +19,10 @@ open scoped Manifold Topology ContDiff ENNReal
 namespace DifferentialGeometry.PDE.RicciFlow.Entropy
 
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TimeSobolev
 open DifferentialGeometry.Analysis.Parabolic.MaximalRegularity
@@ -67,7 +71,8 @@ noncomputable def conjA1MR
       (show (1 : Real) ≤ 0 + 1 by norm_num))
 
 /-- The genuine reversed-conjugate-heat operators satisfy the combined
-non-autonomous contraction bound on one positive short interval. -/
+non-autonomous contraction bound on one positive short interval, where the
+applied moving-Laplacian graph also lies in the smooth-core graph closure. -/
 theorem conj_inputs
     {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
@@ -84,7 +89,24 @@ theorem conj_inputs
       (∀ᵐ s ∂timeMeasure tau,
         ‖conjA1MR (I := I) (M := M) S T s‖ ≤ (C1 : Real)) ∧
       (C2 : Real) * (1 + tau) +
-          (C1 : Real) * (2 * Real.sqrt tau) < 1 := by
+          (C1 : Real) * (2 * Real.sqrt tau) < 1 ∧
+      ∀ᵐ s ∂timeMeasure tau,
+        ∀ u : tensorHs (I := I) (M := M)
+            (S.family.metric (T : Real)) 0 0 2,
+          (u,
+              tensorHsZeroEquivL2 (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator
+                  (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
+                (lapDiffA20 (I := I) (M := M) S.family T s u)) ∈
+            closure
+              (Set.range fun
+                v : ScalarH2Core (I := I) (M := M)
+                    (S.family.metric (T : Real)) =>
+                  ((v.1 : tensorHs (I := I) (M := M)
+                      (S.family.metric (T : Real)) 0 0 2),
+                    lapDiffCore (I := I) (M := M)
+                      (S.family.metric (T : Real))
+                      (S.family.metric ((T : Real) - s)) v)) := by
   letI : SeminormedAddCommGroup
       (tensorHs (I := I) (M := M) (S.family.metric (T : Real))
           0 0 (0 + 2) →L[Real]
@@ -109,7 +131,29 @@ theorem conj_inputs
     norm_num [f, C2]
   have hfsmall : {t : Real | f t < 1} ∈ 𝓝 0 := by
     exact hfcont.eventually_lt_const hfzero
-  obtain ⟨delta, hdelta, hball⟩ := Metric.mem_nhds_iff.mp hfsmall
+  let graphGood : Set Real := {s |
+    ∀ u : tensorHs (I := I) (M := M)
+        (S.family.metric (T : Real)) 0 0 2,
+      (u,
+          tensorHsZeroEquivL2 (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator
+              (I := I) (M := M) (S.family.metric (T : Real)) 0 0)
+            (lapDiffA20 (I := I) (M := M) S.family T s u)) ∈
+        closure
+          (Set.range fun
+            v : ScalarH2Core (I := I) (M := M)
+                (S.family.metric (T : Real)) =>
+              ((v.1 : tensorHs (I := I) (M := M)
+                  (S.family.metric (T : Real)) 0 0 2),
+                lapDiffCore (I := I) (M := M)
+                  (S.family.metric (T : Real))
+                  (S.family.metric ((T : Real) - s)) v))}
+  have hgraphNhds : graphGood ∈ 𝓝 (0 : Real) := by
+    simpa only [graphGood] using
+      (lapDiffA20_graph (I := I) (M := M) S.family hS.smoothMetric T)
+  have hsafe : {t : Real | f t < 1} ∩ graphGood ∈ 𝓝 (0 : Real) :=
+    inter_mem hfsmall hgraphNhds
+  obtain ⟨delta, hdelta, hball⟩ := Metric.mem_nhds_iff.mp hsafe
   let tau : Real := min (min tau1 tau2) (delta / 2)
   have htau : 0 < tau := by
     dsimp only [tau]
@@ -196,11 +240,22 @@ theorem conj_inputs
   have htaudelta : tau < delta :=
     (min_le_right (min tau1 tau2) (delta / 2)).trans_lt (half_lt_self hdelta)
   have hf_tau : f tau < 1 := by
-    apply hball
-    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg htau.le]
-    exact htaudelta
+    have htauBall : tau ∈ Metric.ball (0 : Real) delta := by
+      rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg htau.le]
+      exact htaudelta
+    exact (hball htauBall).1
+  have hgraphOn : ∀ s ∈ Set.Icc (0 : Real) tau, s ∈ graphGood := by
+    intro s hs
+    have hsBall : s ∈ Metric.ball (0 : Real) delta := by
+      rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
+      exact hs.2.trans_lt htaudelta
+    exact (hball hsBall).2
+  have hgraphAE : ∀ᵐ s ∂timeMeasure tau, s ∈ graphGood := by
+    unfold timeMeasure
+    exact (ae_restrict_iff' measurableSet_Icc).2
+      (Eventually.of_forall hgraphOn)
   exact ⟨tau, C2, C1, htau, htauone, hmeas2', hbound2', hmeas1',
-    hbound1', hf_tau⟩
+    hbound1', hf_tau, hgraphAE⟩
 
 /-- A genuine short-time spectral strong solution of the time-reversed
 conjugate-heat equation.  All measurability and norm-bound proofs are produced
@@ -247,9 +302,36 @@ theorem conj_strong_exists
                 0 htau htau1 u0 force) +
             timeOp A1 hA1 C1 hC1
               (maxRegDuhamelSolFieldHa1 (I := I) (M := M)
-                0 htau htau1 u0 force)) := by
+                0 htau htau1 u0 force)) ∧
+      (∀ᵐ s ∂timeMeasure tau,
+          ∀ w : tensorHs (I := I) (M := M) q 0 0 2,
+            (w,
+                tensorHsZeroEquivL2 (I := I) (M := M)
+                  (tensorResolventL2_isCompactOperator
+                    (I := I) (M := M) q 0 0)
+                  (lapDiffA20 (I := I) (M := M) S.family T s w)) ∈
+              closure
+                (Set.range fun v : ScalarH2Core (I := I) (M := M) q =>
+                  ((v.1 : tensorHs (I := I) (M := M) q 0 0 2),
+                    lapDiffCore (I := I) (M := M) q
+                      (S.family.metric ((T : Real) - s)) v))) ∧
+      (fun s =>
+          tensorHsInclusion (I := I) (M := M)
+            (g := q) (r := 0) (s := 0)
+            (show (0 : Real) ≤ 0 + 2 by norm_num)
+            (maxRegDuhamelSolField (I := I) (M := M)
+              0 htau htau1 u0 force s))
+        =ᵐ[timeMeasure tau] u.toFun ∧
+      (fun s =>
+          tensorHsInclusion (I := I) (M := M)
+            (g := q) (r := 0) (s := 0)
+            (show (0 : Real) ≤ 0 + 1 by norm_num)
+            (maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+              0 htau htau1 u0 force s))
+        =ᵐ[timeMeasure tau] u.toFun := by
   dsimp only
-  obtain ⟨tau, C2, C1, htau, htau1, hA2, hC2, hA1, hC1, hsmall⟩ :=
+  obtain ⟨tau, C2, C1, htau, htau1, hA2, hC2, hA1, hC1, hsmall,
+      hgraph⟩ :=
     conj_inputs (I := I) (M := M) S hS T
   let A2 : Real → tensorHs (I := I) (M := M)
       (S.family.metric (T : Real)) 0 0 (0 + 2) →L[Real]
@@ -275,8 +357,202 @@ theorem conj_strong_exists
       (tensorResolventL2_isCompactOperator (I := I) (M := M)
         (S.family.metric (T : Real)) 0 0)
       htau htau1 u0 A2 hA2' C2 hC2' A1 hA1' C1 hC1' hsmall
+  have hfield2 := solField_toFun_ae (I := I) (M := M)
+    (g := S.family.metric (T : Real)) (r := 0) (s := 0) (a := 0)
+    htau htau1
+    (tensorResolventL2_isCompactOperator (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0)
+    u0 force
+  have hfield2' :
+      (fun s =>
+          tensorHsInclusion (I := I) (M := M)
+            (g := S.family.metric (T : Real)) (r := 0) (s := 0)
+            (show (0 : Real) ≤ 0 + 2 by norm_num)
+            (maxRegDuhamelSolField (I := I) (M := M)
+              0 htau htau1 u0 force s))
+        =ᵐ[timeMeasure tau] u.toFun := by
+    simpa only [hu] using hfield2
+  have hfield1 := solFieldHa1_toFun_ae (I := I) (M := M)
+    (g := S.family.metric (T : Real)) (r := 0) (s := 0) (a := 0)
+    htau htau1
+    (tensorResolventL2_isCompactOperator (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0)
+    u0 force
+  have hfield1' :
+      (fun s =>
+          tensorHsInclusion (I := I) (M := M)
+            (g := S.family.metric (T : Real)) (r := 0) (s := 0)
+            (show (0 : Real) ≤ 0 + 1 by norm_num)
+            (maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+              0 htau htau1 u0 force s))
+        =ᵐ[timeMeasure tau] u.toFun := by
+    simpa only [hu] using hfield1
   exact ⟨tau, htau, htau1, C2, C1, hA2', hC2', hA1', hC1', u,
-    force, hu, hforce, htrace, hderiv⟩
+    force, hu, hforce, htrace, hderiv, hgraph, hfield2', hfield1'⟩
+
+/-- A short-time scalar weak equation for the reversed conjugate heat flow.
+The moving-Laplacian residual is characterized by the closed genuine
+smooth-core graph, while the lower-order multiplier is tested exactly. -/
+theorem conj_weak_ae
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : D.RegularTime)
+    (u0 : tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 ((0 : Real) + 2)) :
+    let q := S.family.metric (T : Real)
+    let J := tensorHsZeroEquivL2 (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) q 0 0)
+    ∃ (tau : Real) (htau : 0 < tau) (htau1 : tau ≤ 1)
+      (u : MaxRegSolutionSpace (I := I) (M := M)
+        (g := q) (r := 0) (s := 0) 0 tau)
+      (force : timeL2 (tensorHs (I := I) (M := M) q 0 0 0) tau),
+      timeH1.trace0 _ tau u =
+          tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+            (show (0 : Real) ≤ 0 + 2 by norm_num) u0 ∧
+      ∀ᵐ t ∂timeMeasure tau,
+        let U2 := maxRegDuhamelSolField (I := I) (M := M)
+          0 htau htau1 u0 force t
+        let U1 := maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+          0 htau htau1 u0 force t
+        let V2 := tensorHsInclusion (I := I) (M := M)
+          (g := q) (r := 0) (s := 0)
+          (show (2 : Real) ≤ 0 + 2 by norm_num) U2
+        let V1 := tensorHsInclusion (I := I) (M := M)
+          (g := q) (r := 0) (s := 0)
+          (show (1 : Real) ≤ 0 + 1 by norm_num) U1
+        tensorHsInclusion (I := I) (M := M)
+            (g := q) (r := 0) (s := 0)
+            (show (0 : Real) ≤ 0 + 2 by norm_num) U2 = u.toFun t ∧
+        tensorHsInclusion (I := I) (M := M)
+            (g := q) (r := 0) (s := 0)
+            (show (0 : Real) ≤ 0 + 1 by norm_num) U1 = u.toFun t ∧
+        (∀ w : ScalarH2Core (I := I) (M := M) q,
+          HasDerivWithinAt
+              (fun s => inner Real (J (u.toFun s))
+                (SmoothCcTensor.toL2
+                  (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)))
+              (inner Real (J (u.deriv t))
+                (SmoothCcTensor.toL2
+                  (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)))
+              (Set.Icc 0 tau) t ∧
+          (V2,
+              inner Real
+                (J (u.deriv t -
+                  tensorScaleLaplacian (I := I) (M := M) 0 U2 -
+                  conjA1MR (I := I) (M := M) S T t U1))
+                (SmoothCcTensor.toL2
+                  (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2))) ∈
+            closure
+              (Set.range fun v : ScalarH2Core (I := I) (M := M) q =>
+                ((v.1 : tensorHs (I := I) (M := M) q 0 0 2),
+                  ∫ x, (Δ_g (I := I) (S.family.metric ((T : Real) - t))
+                          (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x -
+                        Δ_g (I := I) q
+                          (reprScalar0_smooth (I := I) (M := M) v.1 v.2) x) *
+                      reprScalar0 (I := I) (M := M) w.1 w.2 x
+                    ∂(riemannianVolumeMeasure (I := I) (M := M) q)))) ∧
+        (∀ v : ScalarH1Core (I := I) (M := M) q,
+          inner Real (J (conjA1MR (I := I) (M := M) S T t U1))
+              (tensorHsToL2 (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator
+                  (I := I) (M := M) q 0 0)
+                (show (0 : Real) ≤ 1 by norm_num) v.1) =
+            inner Real
+              (tensorHsToL2 (I := I) (M := M)
+                (tensorResolventL2_isCompactOperator
+                  (I := I) (M := M) q 0 0)
+                (show (0 : Real) ≤ 1 by norm_num) V1)
+              (scalarPotCore (I := I) (M := M) q
+                (conjCoeff (I := I) (M := M) S ((T : Real) - t)) v)) := by
+  dsimp only
+  obtain ⟨tau, htau, htau1, C2, C1, hA2, hC2, hA1, hC1, u,
+      force, _hu, _hforce, htrace, hderiv, hgraph, hfield2, hfield1⟩ :=
+    conj_strong_exists (I := I) (M := M) S hS T u0
+  let U2 : timeL2 (tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 (0 + 2)) tau :=
+    maxRegDuhamelSolField (I := I) (M := M)
+      0 htau htau1 u0 force
+  let U1 : timeL2 (tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 (0 + 1)) tau :=
+    maxRegDuhamelSolFieldHa1 (I := I) (M := M)
+      0 htau htau1 u0 force
+  let base : timeL2 (tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 0) tau :=
+    timeScaleLaplacian (I := I) (M := M) 0 U2
+  let rhs2 : timeL2 (tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 0) tau :=
+    timeOp (fun t => conjA2MR (I := I) (M := M) S T t)
+      hA2 C2 hC2 U2
+  let rhs1 : timeL2 (tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 0) tau :=
+    timeOp (fun t => conjA1MR (I := I) (M := M) S T t)
+      hA1 C1 hC1 U1
+  have hderiv' : u.deriv = base + (rhs2 + rhs1) := by
+    simpa only [timeH1.timeDeriv_apply, base, rhs2, rhs1, U2, U1] using hderiv
+  have hdu : u.deriv =ᵐ[timeMeasure tau] fun t =>
+      tensorScaleLaplacian (I := I) (M := M) 0 (U2 t) +
+        (conjA2MR (I := I) (M := M) S T t (U2 t) +
+          conjA1MR (I := I) (M := M) S T t (U1 t)) := by
+    rw [hderiv']
+    filter_upwards [Lp.coeFn_add base (rhs2 + rhs1),
+      Lp.coeFn_add rhs2 rhs1,
+      timeScaleLaplacian_coeFn (I := I) (M := M) (τ := 0) U2,
+      timeOp_apply_ae (fun t => conjA2MR (I := I) (M := M) S T t)
+        hA2 C2 hC2 U2,
+      timeOp_apply_ae (fun t => conjA1MR (I := I) (M := M) S T t)
+        hA1 C1 hC1 U1] with t houter hinner hbase h2 h1
+    change (base t : _) = _ at hbase
+    change (rhs2 t : _) = _ at h2
+    change (rhs1 t : _) = _ at h1
+    rw [houter, Pi.add_apply, hbase, hinner, Pi.add_apply, h2, h1]
+  refine ⟨tau, htau, htau1, u, force, htrace, ?_⟩
+  filter_upwards [u.ae_hasDerivWithinAt_toFun, hdu, hgraph,
+    hfield2, hfield1] with t htder htdu htgraph htfield2 htfield1
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · simpa only [U2] using htfield2
+  · simpa only [U1] using htfield1
+  · intro w
+    let J := tensorHsZeroEquivL2 (I := I) (M := M)
+      (tensorResolventL2_isCompactOperator (I := I) (M := M)
+        (S.family.metric (T : Real)) 0 0)
+    let test : TensorL2 0 0 (S.family.metric (T : Real)) :=
+      SmoothCcTensor.toL2
+        (tensorHsSmoothRepr (I := I) (M := M) w.1 w.2)
+    let L : tensorHs (I := I) (M := M)
+        (S.family.metric (T : Real)) 0 0 0 →L[Real] Real :=
+      ((innerSL Real).flip test).comp
+        J.toLinearIsometry.toContinuousLinearMap
+    let V2 : tensorHs (I := I) (M := M)
+        (S.family.metric (T : Real)) 0 0 2 :=
+      tensorHsInclusion (I := I) (M := M)
+        (g := S.family.metric (T : Real)) (r := 0) (s := 0)
+        (show (2 : Real) ≤ 0 + 2 by norm_num) (U2 t)
+    refine ⟨?_, ?_⟩
+    · have hsder : HasDerivWithinAt (fun s => L (u.toFun s))
+          (L (u.deriv t)) (Set.Icc 0 tau) t :=
+        L.hasFDerivAt.comp_hasDerivWithinAt t htder
+      simpa only [L, J, test, ContinuousLinearMap.comp_apply] using hsder
+    · have hres :
+          u.deriv t - tensorScaleLaplacian (I := I) (M := M) 0 (U2 t) -
+              conjA1MR (I := I) (M := M) S T t (U1 t) =
+            lapDiffA20 (I := I) (M := M) S.family T t V2 := by
+        rw [htdu]
+        change _ + (lapDiffA20 (I := I) (M := M) S.family T t V2 + _) -
+            _ - _ = _
+        abel
+      rw [hres]
+      simpa only [V2, U2] using
+        (lapDiffA20_test (I := I) (M := M) S.family T t V2 w
+          (htgraph V2))
+  · intro v
+    let V1 : tensorHs (I := I) (M := M)
+        (S.family.metric (T : Real)) 0 0 1 :=
+      tensorHsInclusion (I := I) (M := M)
+        (g := S.family.metric (T : Real)) (r := 0) (s := 0)
+        (show (1 : Real) ≤ 0 + 1 by norm_num) (U1 t)
+    simpa only [conjA1MR, conjA1, ContinuousLinearMap.comp_apply, V1, U1] using
+      (scalarPotH0_test (I := I) (M := M)
+        (S.family.metric (T : Real))
+        (conjCoeff (I := I) (M := M) S ((T : Real) - t)) V1 v)
 
 end DifferentialGeometry.PDE.RicciFlow.Entropy
 

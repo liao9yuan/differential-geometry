@@ -97,7 +97,8 @@ theorem nabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I 2 M]
   · -- correction sums
     refine Fintype.sum_equiv e.symm _ _ ?_
     intro a
-    rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
+    change (ContinuousMultilinearMap.domDomCongr e (Z x)) _ = _
+    rw [Tensor0SSpace.domDomCongr_apply]
     congr 1
     funext i
     simp only [Function.update_apply, Equiv.apply_symm_apply,
@@ -141,7 +142,7 @@ theorem totalNabla0SFun_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManifold I
     | succ j => rw [Fin.cons_succ]
   rw [component0S_apply, component0S_apply, hcons,
     totalNabla0SFun_apply_section, nabla0SFun_domDomCongr,
-    ContinuousMultilinearMap.domDomCongr_apply]
+    Tensor0SSpace.domDomCongr_apply]
   simp only [cons_apply_frontExtendEquiv]
   rw [totalNabla0SFun_apply_section]
 
@@ -166,7 +167,10 @@ theorem totalNabla0SRealizes_domDomCongr [T2Space M] [IsManifold I 1 M] [IsManif
       (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
         (E := TangentSpace I) (∞ : WithTop ℕ∞) (frontExtendEquiv e) nablaZ) := by
   intro X x slots
-  rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply]
+  change
+    (ContinuousMultilinearMap.domDomCongr (frontExtendEquiv e) (nablaZ x))
+        (Fin.cons (X x) slots) = _
+  rw [Tensor0SSpace.domDomCongr_apply]
   simp only [cons_apply_frontExtendEquiv]
   exact (hZ X x (slots ∘ e)).trans
     (nabla0SFun_domDomCongr (I := I) cov X e Z x slots).symm

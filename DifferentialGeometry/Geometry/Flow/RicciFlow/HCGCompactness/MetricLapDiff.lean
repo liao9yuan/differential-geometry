@@ -98,7 +98,11 @@ private theorem covOne_eq_deriv
     metricCovDerivNorm (I := I) 1 h g x =
       metricDerivNorm (I := I) 1 h g g x := by
   unfold metricCovDerivNorm metricDerivNorm metricDiffCovDerivAt
-  rw [covSelfOneAt (I := I) g x, sub_zero]
+  rw [covSelfOneAt (I := I) g x]
+  exact (congrArg
+    (fun A : Tensor0SBundle.Tensor0SSpace (1 + 2) I x =>
+      Real.sqrt (Tensor0SBundle.normSq0S (I := I) g x (1 + 2) A))
+    (sub_zero (metricCovDeriv (I := I) h g 1 x))).symm
 
 private theorem normSq0S_nonneg'
     (g : SmoothRiemannianMetric I M) (x : M) (s : Nat)

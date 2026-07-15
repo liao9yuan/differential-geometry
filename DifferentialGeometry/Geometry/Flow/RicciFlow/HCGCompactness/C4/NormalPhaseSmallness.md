@@ -45,3 +45,11 @@ target-radius lower bound are complete.  The next consumer is a fixed-`q`
 `DiagInvBranch` package.  `StepB1RawInput` and textbook B1 remain unstated and
 0%; this numerical-selection substage is 100%, but it only advances their
 dedicated machinery.
+# Normal phase smallness
+
+`NormalRadiusProfile.exists_phase_scale` now selects the forward phase error
+below `T / (2 * (N + 1))`, where `N` is the norm of the free inverse and
+`T = N⁻¹`.  It retains the resulting quantitative inverse error strictly
+below one while preserving the previous target-radius lower bound.  This is
+an internal scale tightening, not a new endpoint hypothesis.  Focused
+verification passed.

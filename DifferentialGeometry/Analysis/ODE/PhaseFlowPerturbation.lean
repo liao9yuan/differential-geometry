@@ -49,6 +49,13 @@ theorem freeDiag_apply (z : E × E) : freeDiag z = (z.1, z.1 + z.2) := by
 theorem freeDiagCLE_apply (z : E × E) : freeDiagCLE z = (z.1, z.1 + z.2) := by
   simp [freeDiagCLE, freeDiag, freeEnd]
 
+/-- The inverse free retained-endpoint map recovers initial velocity by
+subtracting the initial position from the endpoint position. -/
+@[simp]
+theorem freeDiagInv_apply (z : E × E) :
+    (freeDiagCLE (E := E)).symm z = (z.1, z.2 - z.1) := by
+  rfl
+
 /-- The underlying continuous linear map of `freeDiagCLE` is `freeDiag`. -/
 theorem freeDiagCLE_coe :
     (freeDiagCLE (E := E) : (E × E) →L[ℝ] (E × E)) = freeDiag := rfl

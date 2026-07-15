@@ -36,3 +36,11 @@ warning, `sorry`, or `admit`.
 - Dedicated Step-B/B1 machinery: about 77%.
 - Textbook B1 theorem: unstated/unproved, 0%.
 - Whole HCG compactness infrastructure: about 51%.
+# Normal diagonal branch at a fixed radius
+
+`normalDiagAtFull` now calls the strong quantitative inverse producer and
+retains its `ApproximatesLinearOn` witness for the exact partial
+homeomorphism `e` used by `IsNormalDiag`.  The compatibility theorem
+`normalDiagAt` keeps its public statement unchanged.  This is producer data,
+not a new branch field or endpoint assumption.  Focused verification passed,
+and the exact module object was refreshed for downstream consumers.

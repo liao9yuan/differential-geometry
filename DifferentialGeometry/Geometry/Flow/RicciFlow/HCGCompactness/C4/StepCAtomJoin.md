@@ -38,3 +38,21 @@
 - Chapter 4 machinery: about 66%.
 - Whole HCG compactness machinery: about 46%.
 - Conditional and final compactness endpoints: 0%.
+
+## 2026-07-13 H6 live-slot extraction
+
+Added `existsLiveJointH6`. A fixed bounded target coordinate ball provides the
+order-zero anchor; H6 source/target metric-ball and exponential-ball
+containments provide every positive derivative bound. Per-live-slot bounds are
+assembled with `IsometryDerivBoundsOn.pi`, so the existing Pi-valued
+Arzela--Ascoli extraction is reused unchanged.
+
+The theorem is focused-green and the exported artifact was refreshed. The
+finite source-slot diagonal now consumes the H6 path. A zero-consumer audit then
+allowed the old S6 compatibility entrypoint `existsLiveJoint` to be removed;
+`existsLiveJointH6` is canonical. Removing the endpoint's temporary S6 field is
+a separate downstream task. Focused verification after the cleanup passed.
+
+The downstream task is now complete: the finite source-slot diagonal uses the
+H6 entrypoint, and the endpoint S6 field/type were removed after a zero-consumer
+audit.  The remaining sparse interacting-target redesign is independent of S6.

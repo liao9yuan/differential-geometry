@@ -1,5 +1,48 @@
 # SHORT-TIME-EXISTENCE MERGE + FORWARD PLAN (uniqueness, `extends_of_rmBounded`)
 
+## 2026-07-13 completed alignment and latest-progress sync
+
+The M-track described below is now complete on
+`codex/short-time-existence-align`.  Merge commit `d842bedee` first aligned the
+proved qinz short-time-existence tree with our progress through `e5d37bce6`.
+The two later committed updates on our `short-time-existence` branch were then
+merged on top:
+
+- `17de115b1` (`B/C consult`);
+- `2a2ce366e` (`123`).
+
+That latest sync carried 75 source paths (40 added and 35 modified) and merged
+without textual conflicts.  Nine Lean compatibility consumers were then
+adapted to the merged non-reducible tensor API, with ten same-name notes
+created or refreshed.  The changes use the public `Tensor0SSpace` evaluation
+API; no theorem statement, new assumption, or endpoint wrapper was added.
+
+Verification is complete:
+
+- the previously paused `NormalBranchMin.lean` focused check passes, so
+  `IsNormalDiag.halfSq_inf` and Gate 3 are verified;
+- the latest spectral/Garding, conjugate-heat, and C4 Step-D targets complete
+  all 9,364 jobs;
+- the explicit Hamilton consumer completes all 9,924 jobs;
+- the default full build completes all 10,258 jobs, and the declaration index
+  contains 24,615 declarations;
+- The merge-time `#print axioms` report showed only
+  `[propext, Classical.choice, Quot.sound]`; this must be rerun against freshly
+  rebuilt post-merge artifacts because the live source has a pointwise
+  local-Weyl `sorry` documented as part of the dependency closure.
+
+Strict current accounting: the Hamilton `IsSolutionOn` adapter bodies are
+100% implemented, while the unconditional short-time-existence theorem is 0%
+until the fresh axiom audit excludes `sorryAx` or the local-Weyl dependency is
+removed. Its dedicated construction machinery is otherwise highly integrated.
+This does not complete the downstream HCG endpoints: the
+conditional compactness endpoint and textbook B1 theorem remain 0%; the whole
+HCG machinery estimate remains about 51% as recorded in `PROJECT_MAP.md`.
+
+The two uncommitted planning edits in the primary worktree were deliberately
+not copied into this merge.  They describe an earlier pre-merge state in part
+and remain user-owned worktree changes for a separate reconciliation.
+
 2026-07-11.  Written at the decision to merge `qinz1yang/differential-geometry`
 branch `short-time-existence` (fetched as remote `qinz`/`upstream`) into ours.
 All facts below were verified against the fetched ref, not the GitHub UI.
@@ -146,12 +189,108 @@ already in `ExtendViaUniqueness.lean`:
   NOTE: 3.9/3.10's `hShi` remains a CITED hypothesis — `extends_of_rmBounded`
   does not reopen it.
 
+## 2026-07-14 post-merge live audit
+
+The merge changed the short-time headline but did not close either quantitative
+continuation input.
+
+- The live short-time tree has one theorem-body `sorry`, in
+  `WeylEigenvalueCountingBound.lean`. Its statement combines a generic
+  pointwise counting bound with a sharp point-evaluation summability threshold.
+  Existing proved Mercer/Weyl machinery is non-sharp. The actual
+  `InteriorAllscaleTimeContinuity` consumer only needs `(0,2)`
+  eigenvalue-tail summability and has been rewired to the proved
+  `tensorEigen_summable_negpow` producer; focused verification and the fresh
+  headline axiom probe are pending the active Spectral artifact rebuild.
+
+- The fixed-point layer does contain `quasilinear_strong_unique`, but it only
+  compares two forcing-space fixed points for the same background Sobolev
+  problem. `deTurckRicci_solution_with_jointReg` exports a geometric solution
+  and joint chart-Gram regularity, while dropping the forcing-space witness;
+  there is no reverse theorem identifying an arbitrary smooth geometric
+  Ricci--DeTurck solution with such a fixed point.
+- The tree contains the DeTurck-to-Ricci conjugating flow used for short-time
+  existence. It does not contain the harmonic-map heat-flow construction needed
+  to send an arbitrary Ricci flow back to Ricci--DeTurck gauge. Consequently the
+  current U1/U2 route is a real analytic frontier, not local bookkeeping.
+- The explicit existence time in
+  `quasilinear_maxreg_solution_of_nemytskii` depends on the mixed constants
+  `C1`, `C2`, and the high-Sobolev norm `‖Nfun 0‖`, at Sobolev order
+  `a = 4 * finrank E + 10`. For `g_bg = g0`, `Nfun 0` contains
+  `-2 Ric(g0)` and is not zero. Exact fixed-background metric derivative bounds
+  only through order three do not uniformly control this high-Sobolev norm.
+  Thus the merged high-Sobolev engine cannot by itself prove the present
+  C3-uniform statement by merely exposing its time choice.
+
+Smallest honest E1 producer: a quantitative low-regularity Ricci--DeTurck
+short-time theorem, based at fixed `gBase`, whose positive time depends only on
+`Lambda`-ellipticity and the order-at-most-three metric bounds and whose output
+recovers the current joint regularity fields. The alternative is to strengthen
+the restart inputs to enough all-order bounds and build uniform metric-varying
+Sobolev comparison estimates; that changes the route and is not a thin adapter.
+
+### 2026-07-14 low-regularity input progress
+
+The sorry-free quantitative coefficient chain is now verified:
+
+- `nemytskii_sol_const` exposes the existing maximal-regularity fixed-point
+  lifetime using explicit mixed constants `C1`, `C2` and an explicit budget
+  `D >= norm (Nfun 0)`.  The old existential-choice theorem is unchanged as a
+  compatibility entrypoint.
+- `chartGram_of_orders` converts an arbitrary family's exact-order
+  `MetricCovDerivOrderBoundOn` hypotheses through order `r` into a uniform
+  order-`r` `iteratedFDeriv` bound for every chart Gram component on a compact
+  chart piece.  Its `r = 3` specialization supplies the C3 coefficient bridge
+  required by E1.  `chartGram_pou_le` takes a finite nonnegative aggregate over
+  `chartAtlasPOU_finset`, giving one bound for every active chart support.
+- `chartInvGram_unif_lb` converts pointwise `Lambda`-equivalence to `gBase`
+  into one positive inverse-Gram Rayleigh lower bound for the whole metric
+  family on each fixed compact chart piece.  `chartInvGram_pou_lb` takes the
+  positive finite minimum over the same active chart set.  This supplies the
+  quantitative uniform-parabolicity half of the low-regularity coefficient
+  package.
+- `chartGram_pou_bnd` and `chartGram_pou_d1/d2/d3` turn the intrinsic family
+  bounds into absolute coordinate Gram bounds through order three on every
+  active chart support.  The two-sided `chartInvGram_pou_eqv` envelope and the
+  inverse-Gram/Christoffel perturbation producers supply the corresponding
+  principal and lower-order coefficients.
+- `chartRicci_pou_lip` and `chartLie_pou_lip` combine in
+  `chartRHS_pou_lip`, giving one constant that controls the Ricci--DeTurck RHS
+  value difference by the metric `2`-jet difference for the whole family.
+- `chartRHS_pou_bnd` gives one positive absolute RHS component bound for the
+  whole family.  This supplies the forcing-size budget needed for the
+  fixed-point self-map estimate; a Lipschitz modulus alone did not supply it.
+- `LowRegCoeff`, `IsLowRegCoeff`, and `exists_low_reg_coeff` package all of
+  those facts directly from the E1 hypotheses.  Focused and targeted
+  verification pass; the headline package and RHS theorem are axiom-clean.
+
+These do not close E1.  The current spectral nonlinearity still requires high
+Sobolev order and the joint-smooth realization chooses a further positive
+subinterval without a uniform lower bound.  The smallest remaining E1 frontier
+is therefore the three-dimensional mixed tame estimate realizing the
+Ricci--DeTurck nonlinearity as `H^3 -> H^1` at maximal-regularity order `a = 1`,
+with constants controlled by `LowRegCoeff`.  The existing all-order compact
+chart-jet API chooses constants per metric pair, so it is not this uniform
+producer.  After that come the actual low-regularity solver and a
+regularization statement valid on the same uniform interval.  E1 and
+`ricci_flow_unif_existence` remain theorem-level 0%; dedicated E1 machinery is
+about 31%.  The solver must quantify the admissible metric family once and
+produce one `tau > 0` such that every member has both an
+`IsQuasilinearMetricParabolicSolution` and `JointChartGramSmooth` on that same
+`tau`; a later metric-dependent shrink does not prove the uniform statement.
+
+Smallest honest U producer: harmonic-map heat-flow existence for a smooth Ricci
+flow relative to a fixed background, together with the gauge identity and a
+reverse strong-solution realization theorem feeding
+`quasilinear_strong_unique`. This is likewise substantial new analysis.
+
 ## §5 Risks / open questions
 
-1. The per-metric→uniform gap in E1 is the only place the fork's result does
-   not directly plug into our consumer — if their time-choice locus is deeply
-   entangled, the fallback is to state the uniform variant in their lane and
-   re-run their construction (mechanical but long).
+1. The merged high-Sobolev engine cannot be uniformized from C3 data by merely
+   exposing its time choice: its zero-forcing norm and mixed constants live at
+   order `4 * finrank E + 10`.  E1 therefore needs the low-regularity solver
+   identified above; do not revive the old "re-run the same contraction"
+   fallback without strengthening the restart hypotheses.
 2. Merge scale: 106 both-modified + 15 delete/modify + comment-strip noise;
    budget a dedicated merge session with the M1 policy table in hand, and
    expect the root-aggregate regeneration to be the last step before M2.

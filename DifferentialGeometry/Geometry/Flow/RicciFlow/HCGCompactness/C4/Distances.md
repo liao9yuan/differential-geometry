@@ -1,5 +1,13 @@
 # Distances
 
+## 2026-07-13 alignment verification
+
+The latest progress moves the reusable `speed_le_of_c0` and
+`data_image_ball` producers from `StepDDirected.lean` into this canonical
+distance layer.  After the short-time-existence merge, the tensor subtraction
+step was adapted to the public `Tensor0SSpace.sub_apply` API.  The theorem
+statements are unchanged, and focused verification passed without warnings.
+
 ## Source
 
 MSM135 Chapter 4, Proposition "Distances" proves that an
@@ -20,14 +28,12 @@ The older metric-space wrappers `lipschitz_sqrt_of_dist_le` and
 
 ## Remaining frontier
 
-F2 is complete once the construction supplies the target path and pointwise
-speed bound.  The remaining optional bridge for later map-building phases is to
-derive that speed bound from a concrete map by combining the chain rule,
-`Diffeomorph.pullbackMetric_inner` or equivalent pullback-tensor evaluation,
-the F1 `C^0` metric comparison, and a compatibility theorem identifying the
-explicit metrics used by `PreApproxIsometryData` with the typeclass
-Riemannian tangent norms/distances used by Mathlib's `riemannianEDist`.
+The book-facing distance producer is complete for a localized
+`PreApproxIsoDataOn` package with the explicit metric/enorm readouts consumed by
+`data_image_ball`.  Producing those packages uniformly in the B1 construction
+remains a separate endpoint frontier; it is not hidden in this file.
 
 ## Verification
 
-Verification passed for the targeted `Distances` file.
+Verification passed for the targeted `Distances` file, its downstream
+`StepDDirected` consumer, and the aligned full build.

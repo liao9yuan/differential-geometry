@@ -135,7 +135,7 @@ slot is the globally smooth quadratic normal bump. -/
 theorem seqAtom_contMDiff (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
-    (hgp : Item3GpScaleInput (I := I) hd D P L) (gamma : Fin (pb.A r)) :
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k) (gamma : Fin (pb.A r)) :
     letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
     letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted
     letI : IsManifold I ∞ (X.obj (L.φ k)).M := (X.obj (L.φ k)).smooth
@@ -162,7 +162,7 @@ theorem seqAtom_contMDiff (hd : InjRadiusDecayInput (I := I) X) {D : Real}
             (hd.lambda_pos hD (L.rInf (gamma : Nat))))
           ((stepCBump_out_lt (L.lamInf (gamma : Nat))
               (hd.lambda_pos hD (L.rInf (gamma : Nat)))).trans
-            (hgp k (gamma : Nat) c hc))
+            (hgp gamma c hc))
 
 /-- Every sequence atom takes values in `[0, 1]`. -/
 theorem seqAtom_Icc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -188,7 +188,7 @@ theorem seqAtom_nonneg (hd : InjRadiusDecayInput (I := I) X) {D : Real}
 theorem seqAtom_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
-    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k)
     (gamma : Fin (pb.A r)) {q : (X.obj (L.φ k)).M}
     (hq : q ∈ L.innerBall hd D P pb r k gamma) :
     seqAtom hd hD P L pb r k gamma q = 1 := by
@@ -207,7 +207,7 @@ theorem seqAtom_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
       have hR : 3 * lam < expRadiusGp (I := I) (X.obj (L.φ k)).metric c := by
         exact (by nlinarith : 3 * lam < 4 * lam).trans
-          (hgp k (gamma : Nat) c hc)
+          (hgp gamma c hc)
       have hdist_lt : dist c q < 3 * lam := by
         simpa only [NetLimitData.innerBall, hc, Metric.mem_ball, dist_comm] using hq
       obtain ⟨v, hvtgt, _hvdom, hvlen, hqexp⟩ :=
@@ -253,7 +253,7 @@ theorem seqAtom_one (hd : InjRadiusDecayInput (I := I) X) {D : Real}
 theorem seqAtom_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
-    (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k)
     (gamma : Fin (pb.A r)) {q : (X.obj (L.φ k)).M}
     (hq : seqAtom hd hD P L pb r k gamma q ≠ 0) :
     q ∈ L.hatBall hd D P pb r k gamma := by
@@ -270,7 +270,7 @@ theorem seqAtom_mem_hat (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       letI : T2Space (TangentBundle I (X.obj (L.φ k)).M) :=
         (X.obj (L.φ k)).t2TangentBundle
       letI : MetricSpace (X.obj (L.φ k)).M := (P (L.φ k)).ms
-      have hR := hgp k (gamma : Nat) c hc
+      have hR := hgp gamma c hc
       have hsupp : q ∈ Function.support
           (quadNormal (X.obj (L.φ k)).metric c (stepCBump lam hlam)) := by
         rw [Function.mem_support]
@@ -309,7 +309,7 @@ factor; active normalized weights remain subordinate to the `4 * λ` hats. -/
 theorem seqWeights_data (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)
-    (hgp : Item3GpScaleInput (I := I) hd D P L) (i0 : Fin (pb.A r))
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k) (i0 : Fin (pb.A r))
     {s : Set (X.obj (L.φ k)).M}
     (hcover : s ⊆ ⋃ gamma : Fin (pb.A r), L.innerBall hd D P pb r k gamma) :
     centerAverage.WeightDataOn s
@@ -337,7 +337,7 @@ the normalized weight package on the full frozen source ball. -/
 theorem seqWeights_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
-    (r : Real) (hgp : Item3GpScaleInput (I := I) hd D P L)
+    (r : Real) (hgp : Item3GpScaleTail (I := I) hd D P L pb r)
     (i0 : Fin (pb.A r)) :
     ∀ᶠ k in Filter.atTop,
       centerAverage.WeightDataOn (L.hatSourceBall hd P r k)
@@ -345,8 +345,8 @@ theorem seqWeights_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         (rawWeights
           (cutRaw (seqAtom hd hD P L pb r k i0)
             (seqAtom hd hD P L pb r k) i0)) := by
-  filter_upwards [L.innerBall_cover hd hD P hre pb r] with k hcover
-  exact seqWeights_data hd hD P L pb r k hgp i0 hcover
+  filter_upwards [L.innerBall_cover hd hD P hre pb r, hgp] with k hcover hgpAt
+  exact seqWeights_data hd hD P L pb r k hgpAt i0 hcover
 
 private theorem packA_pos (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hre : hd.RealizesEdist) (pb : hd.PackingBound D) {r : Real} (hr : 0 ≤ r) :
@@ -384,7 +384,7 @@ theorem seqAtom_base (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
     {r : Real} (hr : 0 ≤ r) (k : Nat)
-    (hgp : Item3GpScaleInput (I := I) hd D P L) :
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k) :
     seqAtom hd hD P L pb r k (baseIndex hd hre pb hr)
         (X.obj (L.φ k)).basepoint = 1 := by
   apply seqAtom_one hd hD P L pb r k hgp
@@ -399,7 +399,7 @@ theorem seqWeights_base (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
     {r : Real} (hr : 0 ≤ r) (k : Nat)
-    (hgp : Item3GpScaleInput (I := I) hd D P L) :
+    (hgp : Item3GpScaleAt (I := I) hd D P L pb r k) :
     let i0 := baseIndex hd hre pb hr
     let num := cutRaw (seqAtom hd hD P L pb r k i0)
       (seqAtom hd hD P L pb r k) i0
@@ -420,7 +420,7 @@ slot. -/
 theorem seqWeights_zero_ev (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (hre : hd.RealizesEdist) (pb : hd.PackingBound D)
-    {r : Real} (hr : 0 ≤ r) (hgp : Item3GpScaleInput (I := I) hd D P L) :
+    {r : Real} (hr : 0 ≤ r) (hgp : Item3GpScaleTail (I := I) hd D P L pb r) :
     ∀ᶠ k in Filter.atTop,
       centerAverage.WeightDataOn (L.hatSourceBall hd P r k)
         (fun gamma : Fin (pb.A r) => L.hatBall hd D P pb r k gamma)

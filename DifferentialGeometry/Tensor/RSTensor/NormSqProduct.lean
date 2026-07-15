@@ -103,8 +103,8 @@ theorem normSq0S_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     normSq0S_identity_eq_sum_sq (I := I) g x s basis hinv]
   refine Fintype.sum_equiv (Equiv.arrowCongr e.symm (Equiv.refl Idx)) _ _ ?_
   intro w
-  simp only [component0S_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    Equiv.arrowCongr_apply, Equiv.symm_symm, Equiv.coe_refl,
-    Function.comp, id_eq]
+  simp only [component0S_apply, Equiv.arrowCongr_apply, Equiv.symm_symm,
+    Equiv.coe_refl, Function.comp, id_eq]
+  rw [Tensor0SSpace.domDomCongr_apply]
 
 end Tensor0SBundle

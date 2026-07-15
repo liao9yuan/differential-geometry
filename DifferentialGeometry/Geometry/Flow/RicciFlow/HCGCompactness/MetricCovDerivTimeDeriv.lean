@@ -503,7 +503,8 @@ theorem solnMetricDeriv
       = (-2 : Real) * S.ricciAt t x v := by
     simp only [solnEvolField]
     rw [ContMDiffSection.coe_smul, Pi.smul_apply, solnRicField_eq_ricciAt]
-    simp
+    rw [Tensor0SSpace.smul_apply]
+    simp [smul_eq_mul]
   rw [hfun, hval]
   exact heq
 

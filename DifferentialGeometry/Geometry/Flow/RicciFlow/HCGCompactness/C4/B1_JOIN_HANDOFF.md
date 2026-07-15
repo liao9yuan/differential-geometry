@@ -1,5 +1,9 @@
 # B1 join — live handoff (2026-07-11)
 
+> **Superseded for the live stage-map route (2026-07-15).**  Resume from
+> `B1_STAGE_MAP_RULING.md`.  The historical checklist below predates the
+> canonical global finite-stage map and the current analytic stop point.
+
 Work in `E:\testdifferential-geometry`, branch `short-time-existence`.  Read
 `AGENTS.md`, `important_lesson.md`, `lessons.md`, `PROJECT_MAP.md`, and the
 same-name notes before editing.  Use `scripts/lake-locked.ps1`; claim Lean files,

@@ -1,5 +1,12 @@
 # MetricLapDiffPair
 
+## 2026-07-13 short-time alignment
+
+The duplicated private `toRS0_sub` bridge was normalized in the same way as
+`MetricLapDiffCore`: scalar evaluation followed by `smul_sub`.  Focused
+verification passes without `sorry`; the pairwise endpoint and its progress
+accounting are unchanged.
+
 ## Role
 
 This module proves the fixed-reference pair estimate needed for operator-norm

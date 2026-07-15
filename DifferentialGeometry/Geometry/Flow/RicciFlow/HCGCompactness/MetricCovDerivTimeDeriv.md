@@ -1,5 +1,10 @@
 # MetricCovDerivTimeDeriv.lean — the tower evolution core (P2, eq. 3.4)
 
+## 2026-07-12 — short-time branch alignment
+
+- The evaluated Ricci-flow equation now uses `Tensor0SSpace.smul_apply` explicitly for the `-2 Ric` field.
+- Focused verification passed without `sorry`; this is a compatibility repair, not new progress on the HCG endpoint.
+
 Status: **sorry-free, verified** (focused check + targeted build green, 2026-06-11).
 
 ## What this file provides

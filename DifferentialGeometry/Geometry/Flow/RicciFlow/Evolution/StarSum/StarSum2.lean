@@ -170,6 +170,76 @@ inductive StarSum2 (S : SolutionOn (I := I) (M := M) D) (t : Real) :
       StarSum2 S t k (starBaseField (I := I) S t k a b r σ)
 
 set_option backward.isDefEq.respectTransparency false in
+/-- A quantitative `StarSum2` derivation.  The final real parameter records the
+constant produced by the constructor tree: sums add costs, scalar multiples
+multiply by the absolute scalar, and a base term costs one dimension factor
+for each metric trace. -/
+inductive StarSum2Cost (Idx : Type*) [Fintype Idx]
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    (k : ℕ) → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + k) → Real → Prop
+  | zero (k : ℕ) :
+      StarSum2Cost Idx S t k
+        (0 : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+          (n := (∞ : WithTop ℕ∞)) (4 + k)) 0
+  | add {k : ℕ}
+      {A B : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) (4 + k)} {Ca Cb : Real} :
+      StarSum2Cost Idx S t k A Ca → StarSum2Cost Idx S t k B Cb →
+        StarSum2Cost Idx S t k (A + B) (Ca + Cb)
+  | smul {k : ℕ} (c : Real)
+      {A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        (n := (∞ : WithTop ℕ∞)) (4 + k)} {C : Real} :
+      StarSum2Cost Idx S t k A C → StarSum2Cost Idx S t k (c • A) (|c| * C)
+  | base (k a b r : ℕ)
+      (σ : Fin (((4 + a) + (4 + b)) + 2 * r) ≃ Fin ((4 + k) + 2 * (2 + r))) :
+      StarSum2Cost Idx S t k (starBaseField (I := I) S t k a b r σ)
+        ((Fintype.card Idx : Real) ^ (2 + r))
+
+/-- Forgetting the quantitative cost recovers ordinary `StarSum2` membership. -/
+theorem StarSum2Cost.mem {Idx : Type*} [Fintype Idx]
+    {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
+    {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + k)} {C : Real}
+    (hT : StarSum2Cost (I := I) Idx S t k T C) :
+    StarSum2 (I := I) S t k T := by
+  induction hT with
+  | zero => exact StarSum2.zero _
+  | add _ _ ihA ihB => exact StarSum2.add ihA ihB
+  | smul c _ ih => exact StarSum2.smul c ih
+  | base a b r σ => exact StarSum2.base _ a b r σ
+
+/-- Every quantitative star-sum cost is nonnegative. -/
+theorem StarSum2Cost.nonneg {Idx : Type*} [Fintype Idx]
+    {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
+    {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + k)} {C : Real}
+    (hT : StarSum2Cost (I := I) Idx S t k T C) : 0 ≤ C := by
+  induction hT with
+  | zero => exact le_rfl
+  | add _ _ ihA ihB => exact add_nonneg ihA ihB
+  | smul _ _ ih => exact mul_nonneg (abs_nonneg _) ih
+  | base => positivity
+
+/-- Every ordinary star-sum derivation admits its constructor-tree cost. -/
+theorem StarSum2.cost {Idx : Type*} [Fintype Idx]
+    {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
+    {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + k)}
+    (hT : StarSum2 (I := I) S t k T) :
+    ∃ C : Real, StarSum2Cost (I := I) Idx S t k T C := by
+  induction hT with
+  | zero => exact ⟨0, StarSum2Cost.zero _⟩
+  | add _ _ ihA ihB =>
+      obtain ⟨Ca, hCa⟩ := ihA
+      obtain ⟨Cb, hCb⟩ := ihB
+      exact ⟨Ca + Cb, StarSum2Cost.add hCa hCb⟩
+  | smul c _ ih =>
+      obtain ⟨C, hC⟩ := ih
+      exact ⟨|c| * C, StarSum2Cost.smul c hC⟩
+  | base a b r σ => exact ⟨_, StarSum2Cost.base _ a b r σ⟩
+
+set_option backward.isDefEq.respectTransparency false in
 /-- `StarSum2` is closed under finite sums. -/
 theorem starSum2_sum {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
     {ι : Type*} (s : Finset ι)
@@ -185,6 +255,26 @@ theorem starSum2_sum {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
   | insert a s ha ih =>
       rw [Finset.sum_insert ha]
       exact StarSum2.add (h a (Finset.mem_insert_self a s))
+        (ih (fun q hq => h q (Finset.mem_insert_of_mem hq)))
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Quantitative star-sum certificates are closed under finite sums, with the
+costs summed over the same finite set. -/
+theorem starSum2Cost_sum {Idx : Type*} [Fintype Idx]
+    {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
+    {ι : Type*} (s : Finset ι)
+    (T : ι → Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + k)) (C : ι → Real)
+    (h : ∀ q ∈ s, StarSum2Cost (I := I) Idx S t k (T q) (C q)) :
+    StarSum2Cost (I := I) Idx S t k (∑ q ∈ s, T q) (∑ q ∈ s, C q) := by
+  classical
+  induction s using Finset.induction with
+  | empty =>
+      simp only [Finset.sum_empty]
+      exact StarSum2Cost.zero k
+  | insert a s ha ih =>
+      rw [Finset.sum_insert ha, Finset.sum_insert ha]
+      exact StarSum2Cost.add (h a (Finset.mem_insert_self a s))
         (ih (fun q hq => h q (Finset.mem_insert_of_mem hq)))
 
 /-! ## The canonical `∇` operator and its linearity
@@ -377,7 +467,8 @@ theorem stNabla_starBase
     e₂.trans ((frontExtendEquiv σ).trans ρ), ?_⟩
   rw [heq]
   simp only [MultilinearSection.domDomCongr_add, MultilinearSection.domDomCongr_trans,
-    Equiv.trans_assoc, mtIter_add, starBaseField]
+    Equiv.trans_assoc, starBaseField]
+  rw [mtIter_add]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Brick 3: the star-sum class is closed under `∇`.**  The level steps `k ↦ k+1`. -/
@@ -403,6 +494,36 @@ theorem StarSum2.nabla
       rw [h]
       exact StarSum2.add (StarSum2.base _ (a + 1) b r σL)
         (StarSum2.base _ a (b + 1) r σR)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Covariant differentiation doubles the constructor-tree cost: each base
+term splits into its two Leibniz daughters, while addition and scalar
+multiplication preserve that factor. -/
+theorem StarSum2Cost.nabla {Idx : Type*} [Fintype Idx]
+    {S : SolutionOn (I := I) (M := M) D} {t : Real} {k : ℕ}
+    {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + k)} {C : Real}
+    (hT : StarSum2Cost (I := I) Idx S t k T C) :
+    StarSum2Cost (I := I) Idx S t (k + 1) (stNabla (I := I) S t T) (2 * C) := by
+  induction hT with
+  | zero =>
+      rw [stNabla_zero]
+      simpa using (StarSum2Cost.zero (I := I) (Idx := Idx) (S := S) (t := t) (k + 1))
+  | add hA hB ihA ihB =>
+      rw [stNabla_add]
+      simpa [mul_add] using StarSum2Cost.add ihA ihB
+  | smul c hA ih =>
+      rw [stNabla_smul]
+      simpa [mul_assoc, mul_left_comm, mul_comm] using StarSum2Cost.smul c ih
+  | base a b r σ =>
+      obtain ⟨σL, σR, h⟩ := stNabla_starBase (I := I) S t _ a b r σ
+      rw [h]
+      simpa [two_mul] using
+        (StarSum2Cost.add
+          (StarSum2Cost.base (I := I) (Idx := Idx) (S := S) (t := t)
+            _ (a + 1) b r σL)
+          (StarSum2Cost.base (I := I) (Idx := Idx) (S := S) (t := t)
+            _ a (b + 1) r σR))
 
 /-! ## Brick 2: the Cauchy–Schwarz star bound
 
@@ -529,6 +650,8 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   | zero =>
       intro mm
       have hpf := Bundle.continuousMultilinearMap.product_fun_apply
+        (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
+        (s := 4 + a) (q := 4 + b) (x := x)
         (nablaKRm04Field (I := I) S t a x) (nablaKRm04Field (I := I) S t b x)
         (fun q => basis (mm q))
       refine le_trans (le_of_eq (congrArg abs hpf)) ?_
@@ -543,6 +666,8 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   | succ r ih =>
       intro mm
       have hpf := Bundle.continuousMultilinearMap.product_fun_apply
+        (𝕜 := Real) (B := M) (F := E) (E := TangentSpace I)
+        (s := (4 + a) + (4 + b) + 2 * r) (q := 2) (x := x)
         (starProd (I := I) S t a b r x)
         (metricTensorField (I := I) (S.family.metric t) x)
         (fun q => basis (mm q))
@@ -550,11 +675,82 @@ private theorem starProdBd {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
       rw [abs_mul, metricTensorField_apply]
       refine le_trans (mul_le_mul (ih _) ?_ (abs_nonneg _)
         (mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _))) (le_of_eq (mul_one _))
-      show |(S.family.metric t).inner x
+      change |(S.family.metric t).inner x
           (basis (mm (Fin.natAdd (((4 + a) + (4 + b)) + 2 * r) (0 : Fin 2))))
           (basis (mm (Fin.natAdd (((4 + a) + (4 + b)) + 2 * r) (1 : Fin 2))))| ≤ 1
       rw [horth]
       split_ifs <;> simp
+
+set_option backward.isDefEq.respectTransparency false in
+set_option maxHeartbeats 1000000 in
+/-- The constructor-tree cost is an explicit valid constant in the
+orthonormal component bound. -/
+theorem StarSum2Cost.bound
+    {S : SolutionOn (I := I) (M := M) D} {t : Real}
+    {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    {k : ℕ}
+    {T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) (4 + k)} {C : Real}
+    (hT : StarSum2Cost (I := I) Idx S t k T C) :
+    ∀ (x : M) (basis : Module.Basis Idx Real (TangentSpace I x)),
+      (∀ i j : Idx, (S.family.metric t).inner x (basis i) (basis j)
+          = if i = j then (1 : Real) else 0) →
+      ∀ m : Fin (4 + k) → Idx,
+        |T x (fun p => basis (m p))| ≤
+          C * ∑ j ∈ Finset.range (k + 1),
+            Real.sqrt (stNormSq (I := I) S t j x basis) *
+              Real.sqrt (stNormSq (I := I) S t (k - j) x basis) := by
+  classical
+  induction hT with
+  | zero =>
+      intro x basis _ m
+      simp [ContMDiffSection.coe_zero]
+  | @add A B Ca Cb hA hB ihA ihB =>
+      intro x basis horth m
+      have h1 := ihA x basis horth m
+      have h2 := ihB x basis horth m
+      have hval : (A + B) x (fun p => basis (m p))
+          = A x (fun p => basis (m p)) + B x (fun p => basis (m p)) := rfl
+      rw [hval]
+      refine le_trans (abs_add_le _ _) (le_trans (add_le_add h1 h2) (le_of_eq (by ring)))
+  | @smul c A C hA ih =>
+      intro x basis horth m
+      have h1 := ih x basis horth m
+      have hval : (c • A) x (fun p => basis (m p))
+          = c * (A x (fun p => basis (m p))) := rfl
+      rw [hval, abs_mul]
+      exact le_trans (mul_le_mul_of_nonneg_left h1 (abs_nonneg c)) (le_of_eq (by ring))
+  | base a b r σ =>
+      intro x basis horth m
+      have hcard := Fintype.card_congr σ
+      simp only [Fintype.card_fin] at hcard
+      have hab : a + b = k := by omega
+      have hinner : ∀ mm : Fin ((4 + k) + 2 * (2 + r)) → Idx,
+          |(MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
+              (E := TangentSpace I) (∞ : WithTop ℕ∞) σ
+              (starProd (I := I) S t a b r)) x (fun q => basis (mm q))| ≤
+            Real.sqrt (stNormSq (I := I) S t a x basis) *
+              Real.sqrt (stNormSq (I := I) S t b x basis) := by
+        intro mm
+        rw [MultilinearSection.domDomCongr_apply,
+          ContinuousMultilinearMap.domDomCongr_apply]
+        exact starProdBd (I := I) S t a b basis horth r (fun p => mm (σ p))
+      have htop := mtIterOrthoBd (I := I) (S.family.metric t) basis horth
+        (s' := 4 + k) (2 + r) _ _ hinner m
+      have hmem : a ∈ Finset.range (k + 1) := Finset.mem_range.mpr (by omega)
+      have hb : k - a = b := by omega
+      have hsingle : Real.sqrt (stNormSq (I := I) S t a x basis) *
+            Real.sqrt (stNormSq (I := I) S t b x basis) ≤
+          ∑ j ∈ Finset.range (k + 1),
+            Real.sqrt (stNormSq (I := I) S t j x basis) *
+              Real.sqrt (stNormSq (I := I) S t (k - j) x basis) := by
+        have hs := Finset.single_le_sum
+          (f := fun j => Real.sqrt (stNormSq (I := I) S t j x basis) *
+            Real.sqrt (stNormSq (I := I) S t (k - j) x basis))
+          (fun j _ => mul_nonneg (Real.sqrt_nonneg _) (Real.sqrt_nonneg _)) hmem
+        simp only [hb] at hs
+        exact hs
+      exact le_trans htop (mul_le_mul_of_nonneg_left hsingle (by positivity))
 
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1000000 in
@@ -708,6 +904,7 @@ theorem starBase_comp_eq {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
   -- fold the `j`-trace input as `basis ∘ mIdx`, apply the inner trace, then unfold back
   obtain ⟨mIdx, hmIdx⟩ := mtInputBasis (I := I) basis j j m
   rw [hmIdx, mtfDiag (I := I) (S.family.metric t) basis horth A mIdx, ← hmIdx]
+  rfl
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **Product evaluation of a base star term** (r = 0): the double-trace diagonal sum with
@@ -853,6 +1050,24 @@ theorem e0Field_mem (S : SolutionOn (I := I) (M := M) D) (t : Real) :
   · exact StarSum2.base 0 0 0 0 σD2
   · exact StarSum2.base 0 0 0 0 σD3
   · exact StarSum2.base 0 0 0 0 σD4
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The canonical level-zero residual has the explicit `Fin 3` constructor
+cost `108 = (2 + 2 + 2 + 2 + 1 + 1 + 1 + 1) * 3^2`. -/
+theorem e0Field_cost (S : SolutionOn (I := I) (M := M) D) (t : Real) :
+    StarSum2Cost (I := I) (Fin 3) S t 0 (e0Field (I := I) S t) 108 := by
+  unfold e0Field
+  convert StarSum2Cost.add (StarSum2Cost.add (StarSum2Cost.add (StarSum2Cost.add
+    (StarSum2Cost.add (StarSum2Cost.add (StarSum2Cost.add
+      (StarSum2Cost.smul (-2) (StarSum2Cost.base 0 0 0 0 btPermE))
+      (StarSum2Cost.smul 2 (StarSum2Cost.base 0 0 0 0 σBt2)))
+      (StarSum2Cost.smul (-2) (StarSum2Cost.base 0 0 0 0 σBt3)))
+      (StarSum2Cost.smul 2 (StarSum2Cost.base 0 0 0 0 σBt4)))
+      (StarSum2Cost.base 0 0 0 0 σD1))
+      (StarSum2Cost.base 0 0 0 0 σD2))
+      (StarSum2Cost.base 0 0 0 0 σD3))
+      (StarSum2Cost.base 0 0 0 0 σD4) using 1
+  norm_num
 
 /-! ## P1.3: the component identity `e0Field`-comps `= −2·B# − drift`
 

@@ -666,7 +666,7 @@ theorem metricTraceFirstTwoField_add {s : ℕ}
   have hAB : (A + B) x = A x + B x := rfl
   rw [hAB]
   unfold metricTrace0S2InBasis
-  simp only [ContinuousMultilinearMap.add_apply, mul_add, Finset.sum_add_distrib]
+  simp only [Tensor0SSpace.add_apply, mul_add, Finset.sum_add_distrib]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- **The first-two metric trace field is homogeneous.** -/
@@ -688,7 +688,7 @@ theorem metricTraceFirstTwoField_smul {s : ℕ}
   have hcA : (c • A) x = c • A x := rfl
   rw [hcA]
   unfold metricTrace0S2InBasis
-  simp only [ContinuousMultilinearMap.smul_apply, smul_eq_mul, Finset.mul_sum]
+  simp only [Tensor0SSpace.smul_apply, smul_eq_mul, Finset.mul_sum]
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   ring
 
@@ -715,24 +715,22 @@ theorem metricTraceFirstTwoField_domDomCongr_gen {s s' : ℕ}
   letI := tensor0SBundle_topology (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) s'
   refine DFunLike.ext _ _ fun x => ?_
   refine ContinuousMultilinearMap.ext fun tail => ?_
-  have hrhs :
-      ((MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
-          (E := TangentSpace I) (∞ : WithTop ℕ∞) e'
-          (metricTraceFirstTwoField (I := I) (M := M) g A)) x) tail
-        = ((metricTraceFirstTwoField (I := I) (M := M) g A) x) (tail ∘ e') := by
-    rw [MultilinearSection.domDomCongr_apply,
-      ContinuousMultilinearMap.domDomCongr_apply]
-    rfl
   have hL := metricTraceFirstTwoField_eq_sum (I := I) (M := M) g
     (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
       (E := TangentSpace I) (∞ : WithTop ℕ∞) e A) x tail
   have hR := metricTraceFirstTwoField_eq_sum (I := I) (M := M) g A x (tail ∘ e')
-  rw [hL, hrhs, hR]
+  rw [hL]
+  change metricTrace0S2InBasis _ _ _ _ =
+    (ContinuousMultilinearMap.domDomCongr e'
+      ((metricTraceFirstTwoField (I := I) (M := M) g A) x)) tail
+  rw [Tensor0SSpace.domDomCongr_apply]
+  change _ = ((metricTraceFirstTwoField (I := I) (M := M) g A) x) (tail ∘ e')
+  rw [hR]
   unfold metricTrace0S2InBasis
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   congr 1
-  rw [MultilinearSection.domDomCongr_apply,
-    ContinuousMultilinearMap.domDomCongr_apply]
+  change (ContinuousMultilinearMap.domDomCongr e (A x)) _ = _
+  rw [Tensor0SSpace.domDomCongr_apply]
   exact congrArg (A x) (hcompat x _ _ tail)
 
 /-- **First-two metric trace commutes with tail reindexing** (the `frontExtendEquiv²`
@@ -821,15 +819,21 @@ theorem metricTraceFirstTwoField_product {k q : ℕ}
     apply Fin.ext
     simp only [Fin.val_natAdd]
     omega
-  rw [metricTraceFirstTwoField_eq_sum, tensor0SField_product_apply,
+  rw [metricTraceFirstTwoField_eq_sum]
+  change metricTrace0S2InBasis _ _
+      (ContinuousMultilinearMap.domDomCongr (finCongr h)
+        ((MultilinearSection.product (𝕜 := Real) (F := E) (IB := I)
+          (E := TangentSpace I) (n := (∞ : WithTop ℕ∞)) (s := k + 2) (q := q) A B) x)) tail =
+    Bundle.continuousMultilinearMap.product_fun
+      ((metricTraceFirstTwoField (I := I) (M := M) g A) x) (B x) tail
+  rw [Bundle.continuousMultilinearMap.product_fun_apply,
     metricTraceFirstTwoField_eq_sum]
   unfold metricTrace0S2InBasis
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun i _ => ?_
   rw [Finset.sum_mul]
   refine Finset.sum_congr rfl fun j _ => ?_
-  rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
-    tensor0SField_product_apply, fact1, fact2]
+  rw [Tensor0SSpace.domDomCongr_apply, tensor0SField_product_apply, fact1, fact2]
   ring
 
 /-! ### Zero laws for the trace-step composition
@@ -1030,7 +1034,8 @@ theorem nablaRealizes_metricTraceFirstTwo {s : ℕ}
   unfold metricTrace0S2InBasis
   refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
   congr 1
-  rw [MultilinearSection.domDomCongr_apply, ContinuousMultilinearMap.domDomCongr_apply,
+  change (ContinuousMultilinearMap.domDomCongr (traceNablaShuffle s) (nablaA x)) _ = _
+  rw [Tensor0SSpace.domDomCongr_apply,
     totalNabla0SFun_apply_section (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
       (s + 2) cov X A x (metricTraceInput (I := I) (basis i) (basis j) slots),
     ← hnablaA X x (metricTraceInput (I := I) (basis i) (basis j) slots)]

@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotential
 import DifferentialGeometry.Analysis.Parabolic.TimeSobolev.BochnerL2
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.Uniform
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Scalar.JointRegularity
 
 set_option autoImplicit false
 
@@ -56,6 +57,51 @@ omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
     (t : Real) (x : M) :
     (conjCoeff (I := I) (M := M) S t : M → Real) x = -S.scalar t x := by
   rfl
+
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
+/-- The conjugate-heat scalar coefficient is jointly smooth at every regular
+spacetime point. -/
+theorem conjCoeff_joint
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) :
+    ContMDiffOn ((modelWithCornersSelf Real Real).prod I)
+      (modelWithCornersSelf Real Real) ∞
+      (fun p : Real × M =>
+        (conjCoeff (I := I) (M := M) S p.1 : M → Real) p.2)
+      (D.regular ×ˢ (Set.univ : Set M)) := by
+  simpa only [conjCoeff_apply] using
+    (scalar_joint (I := I) S hS).neg
+
+/-- The reflected scalar coefficient as an ordinary scalar-valued spacetime
+map, with space in the first factor. -/
+noncomputable def conjCoeffRev
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D) (T : Real) :
+    M × Real → Real := fun p =>
+  (conjCoeff (I := I) (M := M) S (T - p.2) : M → Real) p.1
+
+omit [NeZero (Module.finrank Real E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] in
+/-- The time-reversed conjugate-heat scalar coefficient is jointly smooth in
+space and reflected time wherever the reflected time is regular. -/
+theorem conjCoeff_rev
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
+    ContMDiffOn (I.prod (modelWithCornersSelf Real Real))
+      (modelWithCornersSelf Real Real) ∞
+      (conjCoeffRev (I := I) (M := M) S (T : Real))
+      ((Set.univ : Set M) ×ˢ {s : Real | (T : Real) - s ∈ D.regular}) := by
+  have hmove :
+      ContMDiffOn (I.prod (modelWithCornersSelf Real Real))
+        ((modelWithCornersSelf Real Real).prod I) ∞
+        (fun p : M × Real => ((T : Real) - p.2, p.1))
+        ((Set.univ : Set M) ×ˢ {s : Real | (T : Real) - s ∈ D.regular}) := by
+    exact ContMDiffOn.prodMk
+      (ContMDiffOn.sub contMDiffOn_const contMDiffOn_snd)
+      contMDiffOn_fst
+  simpa only [conjCoeffRev] using
+    (conjCoeff_joint (I := I) S hS).comp hmove
+      (fun p hp => ⟨hp.2, Set.mem_univ p.1⟩)
 
 /-- The genuine lower-order conjugate-heat perturbation on the spectral scale
 frozen at terminal time `T`. -/

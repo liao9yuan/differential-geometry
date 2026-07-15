@@ -1,11 +1,57 @@
 # `ham3_main` black-box audit and fill plan
 
-Written 2026-07-05 and live-updated 2026-07-09.  The original scope was seven
+## Live correction (2026-07-14, post merge)
+
+The live source now has four theorem-body sorries in
+`HamiltonPositiveRicci.lean`, not five:
+`ham3_flow_exists_normalized`, `ham3_noncollapse`, `ham3_cgh_limit`, and
+`ham3_space_box`.
+
+The frontier-1 Hamilton adapters `ham3_short_isSolution` and
+`ham3_short_smooth_solution` are implemented using the merged short-time
+theorem and `solutionOn_of_joint`. Their theorem bodies are 100%. The
+unconditional short-time theorem is not yet certified axiom-clean on the live
+post-merge source: `ShortTime/WeylEigenvalueCountingBound.lean` contains the
+pointwise local-Weyl `sorry` explicitly documented as lying on that dependency
+closure. Until a fresh axiom probe after the current Spectral rebuild says
+otherwise, strict completion of the unconditional theorem is 0%.
+
+The extension consumer
+`extends_of_rmBounded` is assembled; its own body is sorry-free. Its live axiom
+path previously had three inputs. The moving-Shi input is now discharged by
+the checked, axiom-clean `movingShiBoundSol`, so only uniform low-regularity
+existence `(N)` and smooth forward uniqueness `(B)` remain upstream of the
+extension theorem.
+
+The post-merge API audit in `../SHORTTIME_MERGE_PLAN.md` shows that neither
+remaining input is a local adapter. `(N)` needs a quantitative low-regularity
+DeTurck theorem uniform under ellipticity and C3 bounds; the current
+high-Sobolev engine's explicit time also depends on a high-Sobolev norm of
+`Nfun 0`. `(B)` needs the missing harmonic-map heat-flow gauge plus a reverse
+strong-solution realization before the existing forcing-space uniqueness
+theorem applies.
+
+Strict endpoint accounting: `ham3_flow_exists_normalized`, `(N)`, and `(B)`
+are each 0%. The maximal-flow and restart/glue machinery around them does not
+count toward those theorem percentages.
+
+There is also no live producer constructing a maximal compatible Ricci-flow
+family from the short-time solutions. `MaximalTime.lean` defines
+`IsMaximalAtEndpoint` and proves that a finite maximal flow has unbounded
+curvature, but every such theorem consumes an already supplied solution and
+maximality proof. Therefore `ham3_flow_exists_normalized` still needs a genuine
+maximal-interval construction: use forward uniqueness to order and glue local
+solutions, take the supremal time, prove maximality, use the positive-scalar
+finite-time estimate, and then invoke the curvature-unboundedness theorem.
+This is separate from proving `(N)` and `(B)` themselves.
+
+Written 2026-07-05 and live-updated 2026-07-14. The original scope was seven
 theorem-shaped `sorry`s behind the assembled Hamilton positive-Ricci endpoint
-plus one `MaximalTime.lean` frontier.  Two of those eight boxes are now closed:
-`limit_to_orig` and `spaceForm_const_metric`.  Five theorem-shaped `sorry`s
-remain in `HamiltonPositiveRicci.lean`, plus the upstream `MaximalTime.lean`
-frontier.
+plus one `MaximalTime.lean` frontier. Three original Hamilton boxes are now
+closed: `ham3_short_isSolution`, `limit_to_orig`, and
+`spaceForm_const_metric`. Four theorem-shaped `sorry`s remain in
+`HamiltonPositiveRicci.lean`; the extension theorem is assembled but still
+depends transitively on the two analytic inputs `(N)` and `(B)`.
 Companion program document: `../POINCARE_PLAN.md` (the two Perelman boxes are
 shared infrastructure with the Poincaré program — fill them once, in the shape
 that program needs).
@@ -18,9 +64,9 @@ foundational layer required.
 
 | # | Frontier | What it is mathematically | Difficulty | Fill route (summary) |
 |---|---|---|---|---|
-| 1 | `ham3_short_isSolution` | short-time existence: raw DeTurck data → `IsSolutionOn` bridge | M (active lane) | finish the ShortTime lane (see §1) |
-| 2 | `ham3_flow_exists_normalized` | maximal continuation with finite-time curvature blow-up | M (active lane) | reduce to `extends_of_rmBounded` (#3) + `restart_short_time` glue (already built) |
-| 3 | `extends_of_rmBounded` (`MaximalTime.lean`) | bounded `Rm` on `[0,T)` ⟹ extension past `T` | M | Shi-track: BBS all-`k` bricks are largely built; remaining = tower wiring + DeTurck/global-PDE handoff (`ExtendShiInputs.md`, `bbs-allk-route-status` memory) |
+| 1 | `ham3_short_isSolution` | short-time existence: raw DeTurck data → `IsSolutionOn` bridge | adapter body 100%; unconditional short-time theorem 0% pending local-Weyl dependency discharge | merged theorem + `solutionOn_of_joint`; remove or prove the live pointwise local-Weyl dependency, then rerun the axiom audit |
+| 2 | `ham3_flow_exists_normalized` | maximal continuation with finite-time curvature blow-up | L; endpoint 0% | prove `(N)`/`(B)`, construct the maximal compatible solution family, then consume finite-time and curvature-unboundedness theorems |
+| 3 | `extends_of_rmBounded` (`MaximalTime.lean`) | bounded `Rm` on `[0,T)` ⟹ extension past `T` | M/L; unconditional endpoint 0% | consumer assembly and moving-Shi producer are checked; only `(N)` uniform low-regularity existence and `(B)` forward uniqueness remain |
 | 4 | **`ham3_noncollapse`** | **Perelman no-local-collapsing** at the blow-up scale | **L; endpoint 0%** | actual balls, two-way scale transfer, `ham3_rm_control`, and `ham3_noncollapse_of` are checked; only the original-flow analytic producer remains |
 | 5 | `ham3_cgh_limit` | Hamilton–CGH compactness of the rescaled flows | M/L; **endpoint 0%**, whole-HCG machinery ≈45% | = the HCG compactness project (`../HCGCompactness/PROJECT_MAP.md`); keep machinery and endpoint accounting separate |
 | 6 | `limit_to_orig` | compact limit globalizes the CGH maps and transfers the constant-curvature metric back | **CLOSED, theorem 100%** | Bonnet--Myers + `PointedConvergenceGlobal` + metric pullback; §3 |
@@ -30,19 +76,21 @@ foundational layer required.
 Everything else on the `ham3` chain — pinching §9/§10, point selection, blow-up
 window bounds, the limit-side Einstein/constant-curvature argument, #6, and #8 — is
 **checked** (see `IMPORTANT_THEOREM_INDEX.md`, "HamiltonPositiveRicci main
-chain").  Thus `ham3_main` still depends on the six open boxes above; checked
+chain"). Thus `ham3_main` still depends on four open Hamilton boxes, with the
+maximal-flow box additionally depending on `(N)` and `(B)` upstream. Checked
 consumers do not reduce an open producer endpoint above 0%.
 
-## §1 Short-time + extension (frontiers 1–3) — active lanes, no new plan needed
+## §1 Short-time + extension (frontiers 1–3)
 
-Current live frontier files: `ShortTime/DeTurckRicciPde.lean` (2 sorries),
-`ShortTime/WeylEigenvalueCountingBound.lean` (2), `ShortTimeFlow/
-ConjugatingFlowProperties.lean` (2), `ShortTimeFlow/ForwardFlow.lean` (1),
-`MaximalTime.lean` (1).  These lanes have their own plans
-(`ShortTimeExistence.md`, `ExtendShiInputs.md`, `Evolution/DeTurckHandoff.md`);
-this document only records that they are prerequisites of `ham3_main` and —
-important for §2 — that their **linear parabolic machinery is the natural seed
-of the scalar parabolic layer** the W-entropy route needs.
+Frontier 1's Hamilton adapter is closed; unconditional short-time theorem status
+is pending the fresh axiom audit described above. `MaximalTime.lean` has no
+source-level sorry in `extends_of_rmBounded`, and
+`ExtendShiInputs.movingShi_of_soln` is now backed by the checked, axiom-clean
+`movingShiBoundSol`. The unconditional extension route
+still depends on the two sorries in `Evolution/ExtendViaUniqueness.lean`:
+`ricci_flow_unif_existence` `(N)` and `ricci_flow_forward_unique` `(B)`. See
+`../SHORTTIME_MERGE_PLAN.md` and `Evolution/ExtendViaUniqueness.md` for the
+post-merge API audit and exact missing producers.
 
 ## §2 `ham3_noncollapse` — the Perelman box (the real subject)
 
@@ -197,3 +245,11 @@ existence)**.  Honest estimate for `ham3_main` fully sorry-free:
   downstream Hamilton adapter.  This sublane is 100%.  The theorem
   `ham3_noncollapse` stays 0% because original-flow analytic no-local-collapsing
   remains unproved.
+- 2026-07-14 BBS alternate endpoint route: G3 `exists_endMetric` and G4
+  `ricci_tendsto_left` are individually proved; G4 is targeted-exported and
+  axiom-clean. The combined `cinftyLimitData_of_allMBounds` source has no local
+  `sorry`, but remains theorem 0% because its focused check is blocked before
+  elaboration by the missing active-Spectral `GalerkinLimitUniformMass` object.
+  This route is not consumed by live `extends_of_rmBounded`, so it contributes
+  no percentage to `(N)`, `(B)`, `ham3_flow_exists_normalized`, or any of the
+  four open Hamilton endpoints.

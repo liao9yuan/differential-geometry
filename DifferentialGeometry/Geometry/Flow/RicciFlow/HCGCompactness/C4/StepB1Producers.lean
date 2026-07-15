@@ -7,6 +7,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.GoodCoveri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceComp
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergenceDeriv
 import DifferentialGeometry.Geometry.Coordinates.LocalDiffeoIFT
+import DifferentialGeometry.Analysis.Calculus.PiDeriv
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -212,24 +213,6 @@ theorem mapCInfConv_prodMk {U : Set E'} (hU : IsOpen U)
   exact max_le (hk1 k (le_trans (le_max_left k1 k2) hk) r hr x hx)
     (hk2 k (le_trans (le_max_right k1 k2) hk) r hr x hx)
 
-/-- **Iterated derivative of a tuple-valued map is the tuple of iterated derivatives** — the
-`Fintype`-pi analog of `iteratedFDeriv_prodMk`, proved by the same postcomposition trick
-(`ContinuousLinearMap.iteratedFDeriv_comp_left` with the projections). -/
-theorem iteratedFDerivPi {ι : Type*} [Fintype ι] {n : WithTop ℕ∞} {f : ι → E' → Q} {x : E'}
-    (hf : ∀ i, ContDiffAt ℝ n (f i) x) {r : ℕ} (hr : (r : WithTop ℕ∞) ≤ n) :
-    iteratedFDeriv ℝ r (fun y i => f i y) x
-      = ContinuousMultilinearMap.pi (fun i => iteratedFDeriv ℝ r (f i) x) := by
-  have hpi : ContDiffAt ℝ n (fun y i => f i y) x := contDiffAt_pi' (fun i => hf i)
-  ext m i
-  rw [ContinuousMultilinearMap.pi_apply]
-  have hcomp := ContinuousLinearMap.iteratedFDeriv_comp_left
-    (ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι => Q) i) hpi hr
-  have hfun : (ContinuousLinearMap.proj (R := ℝ) (φ := fun _ : ι => Q) i
-      ∘ fun y (j : ι) => f j y) = f i := rfl
-  rw [hfun] at hcomp
-  rw [hcomp]
-  rfl
-
 /-- **Tupling preserves `C^∞` convergence on compacts** — the `Fintype`-pi analog of
 `mapCInfConv_prodMk`, packaging the per-slot target convergences into the `(ι → E)`-valued
 points-tuple the chart center of mass consumes. -/
@@ -251,7 +234,7 @@ theorem mapCInfConv_pi {ι : Type*} [Fintype ι] {U : Set E'} (hU : IsOpen U)
   have hkey : mapDerivNorm r (fun y i => v i k y) (fun y i => vinf i y) x
       = ‖fun i => iteratedFDeriv ℝ r (fun y => v i k y - vinf i y) x‖ := by
     simp only [mapDerivNorm]
-    rw [heq, iteratedFDerivPi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi]
+    rw [heq, iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi]
   rw [hkey, pi_norm_le_iff_of_nonneg hε.le]
   intro i
   exact hk0 i k (le_trans (Finset.le_sup (Finset.mem_univ i)) hk) r hr x hx

@@ -3,6 +3,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTimeAssembly.RicciConti
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic.Core
 import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
+import DifferentialGeometry.Analysis.Calculus.TimeJetCommute
 import Mathlib.Analysis.Calculus.ContDiff.Comp
 
 set_option autoImplicit false
@@ -23,12 +24,9 @@ The banked `metricCLMSection_jointContMDiffOn_of_chartGram`
 time-shift — the decisive feasibility brick proving the linchpin is constructible (the keystone's
 `(0,T)` hardcoding only used openness, so the shift transports cleanly).
 
-STATUS (2026-06-14, Dispatch B 2h time-box): gate brick DONE + verified.  The remaining linchpin
-fields (`coeff`/`coeff_cont` time-slice extraction, `frameCompSmooth` via `clm_bundle_apply₂` against
-the C∞ frame, `metricTensor_cont` via `metricTensorCont_of_chartGram`) plus the full `IsSolutionOn`
-assembly — and especially the genuinely-UNBUILT `rm04Cont` (0,4)-Riemann carrier continuity — are the
-multi-session remainder.  This file is reusable for BOTH the `IsSolutionOn Shat` of `extends_of_rmBounded`
-AND the `ham3_short_isSolution` sorry.  See `MaximalTime.md`.
+CURRENT STATUS: the chart-Gram regularity route now constructs every field of the nine-field
+`IsSolutionOn` package.  The closed-left builder `solutionOn_of_joint` is reusable for both the
+extension construction and the now-closed `ham3_short_isSolution` adapter.  See `MaximalTime.md`.
 -/
 
 namespace DifferentialGeometry.PDE.RicciFlow
@@ -219,6 +217,54 @@ private lemma partialDeriv_jointContDiffOn {G : ℝ × E → ℝ} {U : Set (ℝ 
       = (fderiv ℝ G q) ((0, (chartModelBasis E) m) : ℝ × E)
   rw [hslice.fderiv]
   simp [ContinuousLinearMap.inr_apply]
+
+/- Spatial iterated Fréchet derivatives preserve joint `C∞` regularity when only the time
+variable is restricted to a unique-differentiability set and the spatial set is open. -/
+set_option synthInstance.maxHeartbeats 200000 in
+private lemma spatialJet_set
+    {F : Type*} [NormedAddCommGroup F] [NormedSpace ℝ F]
+    {G : ℝ → E → F} {J : Set ℝ} {V : Set E}
+    (hJ : UniqueDiffOn ℝ J) (hV : IsOpen V)
+    (hG : ContDiffOn ℝ ∞ (Function.uncurry G) (J ×ˢ V)) (k : ℕ) (hk : k ≤ 2) :
+    ContDiffOn ℝ ∞
+      (Function.uncurry (fun t y => iteratedFDeriv ℝ k (G t) y)) (J ×ˢ V) := by
+  interval_cases k
+  · refine ((continuousMultilinearCurryFin0 ℝ E F).symm.contDiff.comp_contDiffOn hG).congr ?_
+    rintro ⟨t, y⟩ _
+    rfl
+  · have hfd := DifferentialGeometry.Analysis.spatialFDeriv_contDiffOn hJ hV hG
+    refine ((continuousMultilinearCurryFin1 ℝ E F).symm.contDiff.comp_contDiffOn hfd).congr ?_
+    rintro ⟨t, y⟩ _
+    ext v
+    simp only [Function.comp_apply, Function.uncurry_apply_pair,
+      continuousMultilinearCurryFin1_symm_apply, iteratedFDeriv_one_apply]
+  · have hfd := DifferentialGeometry.Analysis.spatialFDeriv_contDiffOn hJ hV hG
+    have hfd2 := DifferentialGeometry.Analysis.spatialFDeriv_contDiffOn
+      (G := fun t y => fderiv ℝ (G t) y) hJ hV hfd
+    have hcurried :=
+      (continuousMultilinearCurryFin1 ℝ E (E →L[ℝ] F)).symm.contDiff.comp_contDiffOn hfd2
+    refine ((continuousMultilinearCurryRightEquiv' ℝ 1 E F).symm.contDiff.comp_contDiffOn
+      hcurried).congr ?_
+    rintro ⟨t, y⟩ _
+    ext v
+    simp only [Function.comp_apply, Function.uncurry_apply_pair, iteratedFDeriv_two_apply,
+      continuousMultilinearCurryRightEquiv_symm_apply',
+      continuousMultilinearCurryFin1_symm_apply]
+    rfl
+
+/-- A coordinate directional derivative preserves joint `C∞` regularity on `J × V` when
+`J` is a unique-differentiability time set and `V` is open. -/
+private lemma partialDeriv_set {G : ℝ × E → ℝ} {J : Set ℝ} {V : Set E}
+    (hJ : UniqueDiffOn ℝ J) (hV : IsOpen V)
+    (hG : ContDiffOn ℝ ∞ G (J ×ˢ V)) (m : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun q : ℝ × E => partialDeriv (E := E) m (fun z : E => G (q.1, z)) q.2)
+      (J ×ˢ V) := by
+  have hfd := DifferentialGeometry.Analysis.spatialFDeriv_contDiffOn
+    (G := fun t y => G (t, y)) hJ hV hG
+  refine (hfd.clm_apply (contDiffOn_const (c := (chartModelBasis E) m))).congr ?_
+  intro q _
+  rfl
 
 /-- Determinant of a time-dependent matrix is `C∞`-in-time, entrywise (`Matrix.det_apply` + finite
 sum/product `ContDiffOn`). -/
@@ -477,35 +523,26 @@ private lemma chartRicciTensor_contDiff
 
 /-- Time-slice of a jointly-`C∞` function on `Ioo a b ×ˢ interior(chart target)` at a fixed interior
 point `y` is `C∞`-in-time on `Ioo a b`. -/
-private lemma chartTimeSlice_contDiffOn {α : M} {a b : ℝ} {y : E}
+private lemma chartTimeSlice_contDiffOn {α : M} {J : Set ℝ} {y : E}
     (hy : y ∈ interior (extChartAt I α).target) {f : ℝ × E → ℝ}
-    (hf : ContDiffOn ℝ ∞ f (Set.Ioo a b ×ˢ interior (extChartAt I α).target)) :
-    ContDiffOn ℝ ∞ (fun t : ℝ => f (t, y)) (Set.Ioo a b) :=
+    (hf : ContDiffOn ℝ ∞ f (J ×ˢ interior (extChartAt I α).target)) :
+    ContDiffOn ℝ ∞ (fun t : ℝ => f (t, y)) J :=
   hf.comp (contDiffOn_id.prodMk contDiffOn_const) (fun _ ht => ⟨ht, hy⟩)
 
-/-- **P0 step (i) — joint chart-reading (ISOLATED SUB-FRONTIER).** The chart-pulled Gram function is
-`C∞` jointly in `(t, y)` on `Ioo a b × interior (chart target)`, read from `hsmooth` (joint manifold
-`C∞` of the chart-Gram matrix) through the chart inverse.
-
-Currently `sorry`: the `ContMDiffOn (𝓘(ℝ,ℝ).prod I) → ContDiffOn` conversion over the **product
-manifold** `ℝ × E` hits a Lean `whnf`/instance performance wall (prod `ChartedSpace` vs
-`chartedSpaceSelf`; `whnf` timeout even at 800k heartbeats), plus model-inference mismatches in the
-`σ = (id, extChartAt symm)` composition.  Route once a cheap conversion is found: mirror the
-single-variable `chartGramOnE_contDiffOn` (`hsmooth.comp σ`-then-`ContMDiffOn.contDiffOn`) but for the
-product domain — likely needs `chartedSpaceSelf_prod` to align the product charted space, or a
-direct partial-`ContDiff` argument bypassing the manifold composition. -/
-theorem chartGramOnE_jointContDiffOn
-    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ) (α : M)
+/-- The chart-pulled Gram function is jointly `C∞` on `J × interior (chart target)`, read from joint
+manifold chart-Gram smoothness through the chart inverse. -/
+theorem chartGramOnE_set
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (α : M)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
     (i j : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
       (fun p : ℝ × E =>
         Integral.DivergenceTheorem.chartGramOnE (I := I) (g p.1) α i j p.2)
-      (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) := by
+      (J ×ˢ interior ((extChartAt I α).target)) := by
   classical
   -- Build the chart map `σ = (fst, extChartAt.symm ∘ snd)` over the SELF-model `𝓘(ℝ, ℝ × E)`
   -- (via `contMDiff_iff_contDiff` on the projections), so the final `.contDiffOn` reads off cleanly
@@ -521,37 +558,77 @@ theorem chartGramOnE_jointContDiffOn
     rw [extChartAt_source_eq_chartAt_source (I := I)] at hsource
     rw [trivializationAt_baseSet_eq_chartAt_source]
     exact hsource
-  have hσ1 : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × E => p.1) (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) :=
+  have hσ1 : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, ℝ) ∞ (fun p : ℝ × E => p.1) (J ×ˢ interior ((extChartAt I α).target)) :=
     (contMDiff_iff_contDiff.mpr contDiff_fst).contMDiffOn
   have hsnd : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ, E) ∞ (fun p : ℝ × E => p.2)
-      (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) :=
+      (J ×ˢ interior ((extChartAt I α).target)) :=
     (contMDiff_iff_contDiff.mpr contDiff_snd).contMDiffOn
   have hmaps2 : Set.MapsTo (fun p : ℝ × E => p.2)
-      (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) (extChartAt I α).target :=
+      (J ×ˢ interior ((extChartAt I α).target)) (extChartAt I α).target :=
     fun p hp => interior_subset hp.2
   have hσ2 : ContMDiffOn 𝓘(ℝ, ℝ × E) I ∞
-      (fun p : ℝ × E => (extChartAt I α).symm p.2) (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) :=
+      (fun p : ℝ × E => (extChartAt I α).symm p.2) (J ×ˢ interior ((extChartAt I α).target)) :=
     hsymm.comp hsnd hmaps2
   have hσ : ContMDiffOn 𝓘(ℝ, ℝ × E) (𝓘(ℝ, ℝ).prod I) ∞
-      (fun p : ℝ × E => (p.1, (extChartAt I α).symm p.2)) (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) :=
+      (fun p : ℝ × E => (p.1, (extChartAt I α).symm p.2)) (J ×ˢ interior ((extChartAt I α).target)) :=
     hσ1.prodMk hσ2
   have hcomp : ContMDiffOn 𝓘(ℝ, ℝ × E) 𝓘(ℝ) ∞
       (fun p : ℝ × E =>
-        Integral.DivergenceTheorem.chartGramOnE (I := I) (g p.1) α i j p.2) (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) := by
+        Integral.DivergenceTheorem.chartGramOnE (I := I) (g p.1) α i j p.2) (J ×ˢ interior ((extChartAt I α).target)) := by
     refine ((hsmooth α i j).comp hσ (fun p hp => ⟨hp.1, hsubset (interior_subset hp.2)⟩)).congr ?_
     intro p _
     rfl
   exact hcomp.contDiffOn
 
-/-- **P0 — the chart-Gram jet bridge.**  Shared analytic gate for the `ricciCont`/`rm04Cont`/
-`nablaRicCont` fields of `IsSolutionOn Shat` (and the identical `ham3_short_isSolution` sorry).
+/-- Joint chart-reading on an open time interval. -/
+theorem chartGramOnE_jointContDiffOn
+    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ) (α : M)
+    (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (i j : Fin (Module.finrank ℝ E)) :
+    ContDiffOn ℝ ∞
+      (fun p : ℝ × E =>
+        Integral.DivergenceTheorem.chartGramOnE (I := I) (g p.1) α i j p.2)
+      (Set.Ioo a b ×ˢ interior ((extChartAt I α).target)) :=
+  chartGramOnE_set (I := I) g (Set.Ioo a b) α hsmooth i j
 
-From joint manifold `C∞` of the chart-Gram matrix on `Ioo a b ×ˢ baseSet` (the `_hsmooth` output of
-`ricci_flow_extends_construction`), the spatial iterated Fréchet derivatives of `chartGramOnE` are
-jointly continuous on any `Sp ⊆ Ioo a b × chartLeviCivitaGoodSet α` — exactly the `h0`/`h1`/`h2`
-inputs consumed by `chartRicci_jointContinuousOn` / `chartRiemann_jointContinuousOn`.  The analytic
-core (`contOn_partial_iteratedFDeriv_of_contDiffOn`) and the chart-map composition are PROVEN here;
-the only gap is the joint chart-reading `chartGramOnE_jointContDiffOn` (step (i)). -/
+/-- Spatial chart-Gram jets of order at most two are jointly continuous on any
+unique-differentiability time set. -/
+theorem chartGram_jet_set
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J) (α : M)
+    (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {Sp : Set (ℝ × M)}
+    (hSp : Sp ⊆ J ×ˢ chartLeviCivitaGoodSet (I := I) α)
+    (k : ℕ) (hk : k ≤ 2) (i j : Fin (Module.finrank ℝ E)) :
+    ContinuousOn
+      (fun q : ℝ × M =>
+        iteratedFDeriv ℝ k
+          (Integral.DivergenceTheorem.chartGramOnE (I := I) (g q.1) α i j)
+          (extChartAt I α q.2)) Sp := by
+  have hF := chartGramOnE_set (I := I) g J α hsmooth i j
+  have hcore := (spatialJet_set
+    (G := fun t y => Integral.DivergenceTheorem.chartGramOnE (I := I) (g t) α i j y)
+    hJ isOpen_interior hF k hk).continuousOn
+  have hΨcont : ContinuousOn (fun q : ℝ × M => (q.1, extChartAt I α q.2)) Sp :=
+    continuous_fst.continuousOn.prodMk
+      ((continuousOn_extChartAt (I := I) α).comp continuous_snd.continuousOn
+        (fun q hq => chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) (hSp hq).2))
+  have hΨmaps : Set.MapsTo (fun q : ℝ × M => (q.1, extChartAt I α q.2)) Sp
+      (J ×ˢ interior ((extChartAt I α).target)) :=
+    fun q hq => ⟨(hSp hq).1, chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) (hSp hq).2⟩
+  refine (hcore.comp hΨcont hΨmaps).congr ?_
+  intro q _
+  rfl
+
+/-- Spatial iterated Fréchet derivatives of `chartGramOnE` are jointly continuous on an open time
+interval and the chart good set. -/
 theorem chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ) (α : M)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -754,41 +831,39 @@ theorem metricFamilySmoothOn_of_chartGram
     intro Idx _ frame u hframe i j
     exact metricFrameComp_jointContMDiffOn_of_chartGram (I := I) g a b hsmooth frame hframe i j
 
-/-- **P6 (interior `ricciCont` producer).**  From the P0 chart-Gram jets (orders 0,1,2), the canonical
-pointwise Ricci family `(t, x) ↦ metricRicciAt (g t) x` is jointly continuous on the open interior
-`Ioo a b`.  Wires the proven P0 jet bridge `chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn`
-into `ricciChartFrameComp_jointContinuousOn` and the keystone `…_of_chartBasisComp` (good-set cover). -/
-theorem ricciCont_interior_of_chartGram [I.Boundaryless]
-    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+/-- Joint continuity of the canonical Ricci family from joint chart-Gram `C∞` regularity on a
+unique-differentiability time set. -/
+theorem ricciCont_of_joint [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
     DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
-      (Set.Ioo a b) (fun t x => metricRicciAt (I := I) (g t) x) := by
+      J (fun t x => metricRicciAt (I := I) (g t) x) := by
   apply tensor0SFamilyContinuousOnSet_of_chartBasisComp _
     (fun x₀ => chartLeviCivitaGoodSet (I := I) x₀)
     (fun x₀ => (chartLeviCivitaGoodSet_isOpen (I := I) x₀).mem_nhds
       (self_mem_chartLeviCivitaGoodSet (I := I) (α := x₀)))
   intro x₀ idx
   have hframe := ricciChartFrameComp_jointContinuousOn (I := I) g x₀
-    (Set.Ioo a b ×ˢ chartLeviCivitaGoodSet (I := I) x₀) (fun q hq => hq.2)
-    (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-      (I := I) g a b x₀ hsmooth subset_rfl 0 a' b')
-    (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-      (I := I) g a b x₀ hsmooth subset_rfl 1 a' b')
-    (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-      (I := I) g a b x₀ hsmooth subset_rfl 2 a' b')
+    (J ×ˢ chartLeviCivitaGoodSet (I := I) x₀) (fun q hq => hq.2)
+    (fun a' b' => chartGram_jet_set
+      (I := I) g J hJ x₀ hsmooth subset_rfl 0 (by omega) a' b')
+    (fun a' b' => chartGram_jet_set
+      (I := I) g J hJ x₀ hsmooth subset_rfl 1 (by omega) a' b')
+    (fun a' b' => chartGram_jet_set
+      (I := I) g J hJ x₀ hsmooth subset_rfl 2 (by omega) a' b')
     (idx 0) (idx 1)
   have hincl : ContinuousOn
-      (fun q : {t : ℝ // t ∈ Set.Ioo a b} × M => ((q.1 : ℝ), q.2))
-      {q : {t : ℝ // t ∈ Set.Ioo a b} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀} :=
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀} :=
     ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
   have hmaps : Set.MapsTo
-      (fun q : {t : ℝ // t ∈ Set.Ioo a b} × M => ((q.1 : ℝ), q.2))
-      {q : {t : ℝ // t ∈ Set.Ioo a b} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀}
-      (Set.Ioo a b ×ˢ chartLeviCivitaGoodSet (I := I) x₀) :=
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀}
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) x₀) :=
     fun q hq => ⟨q.1.2, hq⟩
   refine (hframe.comp hincl hmaps).congr ?_
   intro q _
@@ -802,12 +877,21 @@ theorem ricciCont_interior_of_chartGram [I.Boundaryless]
   rw [hvec]
   exact metricRicciAt_apply_eq_ricciTensor (g q.1.1) q.2 _ _
 
-/-- **(1,3)→(0,4) chart-frame lowering of the metric Riemann tensor.**  At a good-set point the
-canonical lowered `(0,4)` Riemann tensor evaluated on chart-basis vectors equals the chart-Gram
-contraction of the `(1,3)` chart-Riemann components.  This is the rank-4 analogue of the
-`metricRicciAt_apply_eq_ricciTensor`/`ricciChartFrameComp` bridge, lowering the last slot with the
-metric (`chartGramMatrix`). -/
-private lemma metricRm04_chartBasisVec_alpha_eq [I.Boundaryless]
+/-- Joint continuity of the Ricci family on an open time interval. -/
+theorem ricciCont_interior_of_chartGram [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+    (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 2
+      (Set.Ioo a b) (fun t x => metricRicciAt (I := I) (g t) x) :=
+  ricciCont_of_joint (I := I) g (Set.Ioo a b) isOpen_Ioo.uniqueDiffOn hsmooth
+
+/-- Coordinate-frame components of the canonical lowered Riemann tensor are
+the metric lowering of the chart Riemann components. -/
+theorem rm04_coord_eq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x₀ : M)
     (idx : Fin 4 → Fin (Module.finrank ℝ E)) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) x₀) :
@@ -831,20 +915,17 @@ private lemma metricRm04_chartBasisVec_alpha_eq [I.Boundaryless]
   refine Finset.sum_congr rfl (fun l _ => ?_)
   rw [map_smul, smul_eq_mul, ← Integral.Measure.chartGramMatrix_apply]
 
-/-- **P7 (interior `rm04Cont` producer).**  From the P0 chart-Gram jets (orders 0,1,2), the canonical
-pointwise lowered `(0,4)` Riemann family `(t, x) ↦ metricRm04At (g t) x` is jointly continuous on the
-open interior `Ioo a b`.  Rank-4 analogue of `ricciCont_interior_of_chartGram`: the chart-frame
-component is `∑_l chartRiemann · chartGram` (`metricRm04_chartBasisVec_alpha_eq`), jointly continuous
-via `chartRiemann_jointContinuousOn` (chart-Gram jets) and `hsmooth.continuousOn` (chart-Gram value). -/
-theorem rm04Cont_interior_of_chartGram [I.Boundaryless]
-    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+/-- Joint continuity of the lowered Riemann family from joint chart-Gram `C∞` regularity on a
+unique-differentiability time set. -/
+theorem rm04Cont_of_joint [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
     DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
-      (Set.Ioo a b)
+      J
       (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g t) x) := by
   apply tensor0SFamilyContinuousOnSet_of_chartBasisComp _
     (fun x₀ => chartLeviCivitaGoodSet (I := I) x₀)
@@ -856,38 +937,77 @@ theorem rm04Cont_interior_of_chartGram [I.Boundaryless]
         ∑ l : Fin (Module.finrank ℝ E),
           chartRiemannTensor (I := I) (g q.1) x₀ (idx 2) (idx 0) (idx 1) l (extChartAt I x₀ q.2) *
             Integral.Measure.chartGramMatrix (I := I) (g q.1) x₀ q.2 (idx 3) l)
-      (Set.Ioo a b ×ˢ chartLeviCivitaGoodSet (I := I) x₀) := by
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) x₀) := by
     refine continuousOn_finset_sum _ (fun l _ => ?_)
     refine (chartRiemann_jointContinuousOn (I := I) g x₀
-        (Set.Ioo a b ×ˢ chartLeviCivitaGoodSet (I := I) x₀) (fun q hq => hq.2)
-        (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-          (I := I) g a b x₀ hsmooth subset_rfl 0 a' b')
-        (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-          (I := I) g a b x₀ hsmooth subset_rfl 1 a' b')
-        (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-          (I := I) g a b x₀ hsmooth subset_rfl 2 a' b')
+        (J ×ˢ chartLeviCivitaGoodSet (I := I) x₀) (fun q hq => hq.2)
+        (fun a' b' => chartGram_jet_set
+          (I := I) g J hJ x₀ hsmooth subset_rfl 0 (by omega) a' b')
+        (fun a' b' => chartGram_jet_set
+          (I := I) g J hJ x₀ hsmooth subset_rfl 1 (by omega) a' b')
+        (fun a' b' => chartGram_jet_set
+          (I := I) g J hJ x₀ hsmooth subset_rfl 2 (by omega) a' b')
         (idx 2) (idx 0) (idx 1) l).mul ?_
     exact ((hsmooth x₀ (idx 3) l).continuousOn).mono
       (Set.prod_mono subset_rfl
         (fun y hy => chartLeviCivitaGoodSet_mem_baseSet (I := I) hy))
   have hincl : ContinuousOn
-      (fun q : {t : ℝ // t ∈ Set.Ioo a b} × M => ((q.1 : ℝ), q.2))
-      {q : {t : ℝ // t ∈ Set.Ioo a b} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀} :=
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀} :=
     ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
   have hmaps : Set.MapsTo
-      (fun q : {t : ℝ // t ∈ Set.Ioo a b} × M => ((q.1 : ℝ), q.2))
-      {q : {t : ℝ // t ∈ Set.Ioo a b} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀}
-      (Set.Ioo a b ×ˢ chartLeviCivitaGoodSet (I := I) x₀) :=
+      (fun q : {t : ℝ // t ∈ J} × M => ((q.1 : ℝ), q.2))
+      {q : {t : ℝ // t ∈ J} × M | q.2 ∈ chartLeviCivitaGoodSet (I := I) x₀}
+      (J ×ˢ chartLeviCivitaGoodSet (I := I) x₀) :=
     fun q hq => ⟨q.1.2, hq⟩
   refine (hsum.comp hincl hmaps).congr ?_
   intro q hq
-  exact metricRm04_chartBasisVec_alpha_eq (I := I) (g q.1.1) x₀ idx hq
+  exact rm04_coord_eq (I := I) (g q.1.1) x₀ idx hq
 
-/-- **P8 (interior `scalarCont` producer).**  From the P0 chart-Gram jets (orders 0,1,2), the scalar
-curvature `(t, x) ↦ metricScalarAt (g t) x` is jointly continuous on the open interior
-`Ioo a b ×ˢ univ`.  The scalar is global in `x`, so this patches the good-set-local
-`chartScalar_jointContinuousOn` over the open good-set cover of `M` (each good set is open, so
-`ContinuousAt` on it ⇒ `ContinuousWithinAt` on the global set). -/
+/-- Joint continuity of the lowered Riemann family on an open time interval. -/
+theorem rm04Cont_interior_of_chartGram [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+    (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet (I := I) (M := M) 4
+      (Set.Ioo a b)
+      (fun t x => DifferentialGeometry.Integral.Connection.metricRm04At (I := I) (g t) x) :=
+  rm04Cont_of_joint (I := I) g (Set.Ioo a b) isOpen_Ioo.uniqueDiffOn hsmooth
+
+/-- Joint continuity of scalar curvature from joint chart-Gram `C∞` regularity on a
+unique-differentiability time set. -/
+theorem scalarCont_of_joint [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
+    (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g q.1) q.2)
+      (J ×ˢ (Set.univ : Set M)) := by
+  refine continuousOn_of_locally_continuousOn ?_
+  intro p hp
+  have hgood : p.2 ∈ chartLeviCivitaGoodSet (I := I) p.2 :=
+    self_mem_chartLeviCivitaGoodSet (I := I) (α := p.2)
+  let U : Set (ℝ × M) := Set.univ ×ˢ chartLeviCivitaGoodSet (I := I) p.2
+  refine ⟨U, isOpen_univ.prod (chartLeviCivitaGoodSet_isOpen (I := I) p.2),
+    ⟨Set.mem_univ p.1, hgood⟩, ?_⟩
+  have hcs := chartScalar_jointContinuousOn (I := I) g p.2
+    (J ×ˢ chartLeviCivitaGoodSet (I := I) p.2) (fun q hq => hq.2)
+    (fun a' b' => chartGram_jet_set
+      (I := I) g J hJ p.2 hsmooth subset_rfl 0 (by omega) a' b')
+    (fun a' b' => chartGram_jet_set
+      (I := I) g J hJ p.2 hsmooth subset_rfl 1 (by omega) a' b')
+    (fun a' b' => chartGram_jet_set
+      (I := I) g J hJ p.2 hsmooth subset_rfl 2 (by omega) a' b')
+  refine hcs.mono ?_
+  intro q hq
+  exact ⟨hq.1.1, hq.2.2⟩
+
+/-- Joint continuity of scalar curvature on an open time interval. -/
 theorem scalarCont_interior_of_chartGram [I.Boundaryless]
     (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
@@ -896,38 +1016,20 @@ theorem scalarCont_interior_of_chartGram [I.Boundaryless]
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
         (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
     ContinuousOn (fun q : ℝ × M => metricScalarAt (I := I) (g q.1) q.2)
-      (Set.Ioo a b ×ˢ (Set.univ : Set M)) := by
-  intro p hp
-  have hgood : p.2 ∈ chartLeviCivitaGoodSet (I := I) p.2 :=
-    self_mem_chartLeviCivitaGoodSet (I := I) (α := p.2)
-  have hcs := chartScalar_jointContinuousOn (I := I) g p.2
-    (Set.Ioo a b ×ˢ chartLeviCivitaGoodSet (I := I) p.2) (fun q hq => hq.2)
-    (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-      (I := I) g a b p.2 hsmooth subset_rfl 0 a' b')
-    (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-      (I := I) g a b p.2 hsmooth subset_rfl 1 a' b')
-    (fun a' b' => chartGram_iteratedFDeriv_jointContinuousOn_of_contMDiffOn
-      (I := I) g a b p.2 hsmooth subset_rfl 2 a' b')
-  exact (hcs.continuousAt
-    ((isOpen_Ioo.prod (chartLeviCivitaGoodSet_isOpen (I := I) p.2)).mem_nhds
-      ⟨hp.1, hgood⟩)).continuousWithinAt
+      (Set.Ioo a b ×ˢ (Set.univ : Set M)) :=
+  scalarCont_of_joint (I := I) g (Set.Ioo a b) isOpen_Ioo.uniqueDiffOn hsmooth
 
-/-- **P8b (interior `scalarTime` frontier — ISOLATED SORRY).**  Within-time differentiability of the
-scalar curvature on the open interior `Ioo a b`.  This is the *differentiable* analog of
-`scalarCont_interior_of_chartGram` (continuity): the scalar's time-derivative needs the chart-Gram
-time-`ContDiff` (routine, from `hsmooth` restricted to the time curve) **and** the Ricci/chart-Gram⁻¹
-components' time-differentiability — the differentiable analog of the entire `ricci_continuous_in_metric_time`
-continuity stack (`RicciContJointAux`), which is the one substantial missing analytic layer.  Isolated
-here as a single precise sorry so the `scalarTime` field is otherwise structurally complete. -/
-theorem scalarTime_interior_of_chartGram [I.Boundaryless]
-    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+/-- Within-time differentiability of scalar curvature from joint chart-Gram `C∞` regularity on a
+unique-differentiability time set. -/
+theorem scalarTime_of_joint [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (J : Set ℝ) (hJ : UniqueDiffOn ℝ J)
     (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
       ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
         (fun p : ℝ × M =>
           Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
-        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
-    (t : ℝ) (ht : t ∈ Set.Ioo a b) (x : M) :
-    DifferentiableWithinAt ℝ (fun s : ℝ => metricScalarAt (I := I) (g s) x) (Set.Ioo a b) t := by
+        (J ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (t : ℝ) (ht : t ∈ J) (x : M) :
+    DifferentiableWithinAt ℝ (fun s : ℝ => metricScalarAt (I := I) (g s) x) J t := by
   classical
   -- chart-`x` good-set conditions at the centre `x` (so the chart trace is valid)
   have hgood : x ∈ chartLeviCivitaGoodSet (I := I) x :=
@@ -938,36 +1040,36 @@ theorem scalarTime_interior_of_chartGram [I.Boundaryless]
       (trivializationAt E (TangentSpace I) x).baseSet := by
     rw [(extChartAt I x).left_inv (chartLeviCivitaGoodSet_mem_extChartAt_source (I := I) hgood)]
     exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hgood
-  have hUopen : IsOpen (Set.Ioo a b ×ˢ interior (extChartAt I x).target) :=
-    isOpen_Ioo.prod isOpen_interior
-  -- the joint chart-Gram is `C∞` on the open slab; slicing + spatial partials give the time jets
+  -- the joint chart-Gram is `C∞` on the slab; slicing + spatial partials give the time jets
   have hjoint : ∀ c d : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞ (fun p : ℝ × E => chartGramOnE (I := I) (g p.1) x c d p.2)
-        (Set.Ioo a b ×ˢ interior (extChartAt I x).target) :=
-    fun c d => chartGramOnE_jointContDiffOn (I := I) g a b x hsmooth c d
+        (J ×ˢ interior (extChartAt I x).target) :=
+    fun c d => chartGramOnE_set (I := I) g J x hsmooth c d
   have hp0 : ∀ c d : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞ (fun s : ℝ => chartGramOnE (I := I) (g s) x c d (extChartAt I x x))
-        (Set.Ioo a b) :=
+        J :=
     fun c d => chartTimeSlice_contDiffOn hyint (hjoint c d)
   have hp1 : ∀ m c d : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞ (fun s : ℝ =>
-        partialDeriv (E := E) m (chartGramOnE (I := I) (g s) x c d) (extChartAt I x x)) (Set.Ioo a b) :=
-    fun m c d => chartTimeSlice_contDiffOn hyint (partialDeriv_jointContDiffOn hUopen (hjoint c d) m)
+        partialDeriv (E := E) m (chartGramOnE (I := I) (g s) x c d) (extChartAt I x x)) J :=
+    fun m c d => chartTimeSlice_contDiffOn hyint
+      (partialDeriv_set hJ isOpen_interior (hjoint c d) m)
   have hp2 : ∀ m l c d : Fin (Module.finrank ℝ E),
       ContDiffOn ℝ ∞ (fun s : ℝ =>
         partialDeriv (E := E) m (partialDeriv (E := E) l (chartGramOnE (I := I) (g s) x c d))
-          (extChartAt I x x)) (Set.Ioo a b) :=
+          (extChartAt I x x)) J :=
     fun m l c d => chartTimeSlice_contDiffOn hyint
-      (partialDeriv_jointContDiffOn hUopen (partialDeriv_jointContDiffOn hUopen (hjoint c d) l) m)
+      (partialDeriv_set hJ isOpen_interior
+        (partialDeriv_set hJ isOpen_interior (hjoint c d) l) m)
   -- the chart scalar trace `∑ G⁻¹ · chartRic` is `C∞`-in-time
   have hcd : ContDiffOn ℝ ∞
       (fun s : ℝ => ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
         chartInvGramOnE (I := I) (g s) x i j (extChartAt I x x) *
-          chartRicciTensor (I := I) (g s) x i j (extChartAt I x x)) (Set.Ioo a b) := by
+          chartRicciTensor (I := I) (g s) x i j (extChartAt I x x)) J := by
     refine ContDiffOn.sum (fun i _ => ContDiffOn.sum (fun j _ => ?_))
-    exact (chartInvGramOnE_contDiff_in_metric_at (I := I) g x (extChartAt I x x) (Set.Ioo a b)
+    exact (chartInvGramOnE_contDiff_in_metric_at (I := I) g x (extChartAt I x x) J
         hp0 hxbase i j).mul
-      (chartRicciTensor_contDiff (I := I) g x i j hyint (Set.Ioo a b) hxbase hp0 hp1 hp2)
+      (chartRicciTensor_contDiff (I := I) g x i j hyint J hxbase hp0 hp1 hp2)
   -- identify the chart trace with `metricScalarAt` (chart trace + Ricci-frame bridge, at the centre)
   have hsum_eq : ∀ s' : ℝ, metricScalarAt (I := I) (g s') x =
       ∑ i : Fin (Module.finrank ℝ E), ∑ j : Fin (Module.finrank ℝ E),
@@ -980,7 +1082,95 @@ theorem scalarTime_interior_of_chartGram [I.Boundaryless]
     rw [ricciTensor_chartBasisVec_alpha_eq (I := I) (g s') x i j hgood]
   exact ((hcd.congr (fun s' _ => hsum_eq s')).differentiableOn (by simp)) t ht
 
-/-- **P9 — `IsSolutionOn` for the extended Ricci-flow solution.**  Assembles the 10-field
+/-- Within-time differentiability of scalar curvature on an open time interval. -/
+theorem scalarTime_interior_of_chartGram [I.Boundaryless]
+    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+    (hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (t : ℝ) (ht : t ∈ Set.Ioo a b) (x : M) :
+    DifferentiableWithinAt ℝ (fun s : ℝ => metricScalarAt (I := I) (g s) x) (Set.Ioo a b) t :=
+  scalarTime_of_joint (I := I) g (Set.Ioo a b) isOpen_Ioo.uniqueDiffOn hsmooth t ht x
+
+/-- Build the full metric-only Ricci-flow solution package from joint one-sided chart-Gram `C∞`
+regularity and the metric Ricci-flow equation on a closed-open time interval. -/
+theorem solutionOn_of_joint [I.Boundaryless]
+    {a b : ℝ} (hab : a < b) (g : ℝ → SmoothRiemannianMetric I M)
+    (hjoint : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hpde : ∀ t ∈ Set.Ico a b, ∀ (x : M) (v w : TangentSpace I x),
+      HasDerivWithinAt (fun s : ℝ => (g s).inner x v w)
+        ((-2 : ℝ) * DifferentialGeometry.Integral.Connection.ricciTensor (I := I) (g t) x v w)
+        (Set.Ici a) t) :
+    IsSolutionOn (I := I)
+      ({ base := { metric := g } } :
+        SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen a b hab)) := by
+  have hsmooth : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (hjoint x₀ i j).mono (Set.prod_mono_left Set.Ioo_subset_Ico_self)
+  have hcont : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContinuousOn
+        (fun p : ℝ × M =>
+          Integral.Measure.chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ico a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+    fun x₀ i j => (hjoint x₀ i j).continuousOn
+  refine
+    { smoothMetric := metricFamilySmoothOn_of_chartGram (I := I) g hab hsmooth hcont
+      smoothConnection := ?_
+      equation := metricVariationEquationOn_of_pde (I := I) g hab hpde
+      scalarCont := ?_
+      scalarTime := ?_
+      ricciCont := ?_
+      rm04Cont := ?_
+      ricciNormSpace := ?_
+      ricciNormGrad := ?_ }
+  · intro t
+    simpa [SolutionOn.family, SolutionFamily.connection,
+      DifferentialGeometry.Integral.Connection.RealizedMetricFamilyOn.connectionAt]
+      using leviCivitaConnectionOfMetric_contMDiffCovariantDerivative (I := I) (g (t : ℝ))
+  · exact (scalarCont_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint).congr
+      (fun _ _ => rfl)
+  · intro K t ht hK x
+    simpa [SolutionOn.scalar, SolutionFamily.scalar] using
+      (scalarTime_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint t
+        (hK ht) x).mono hK
+  · refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+      (ricciCont_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint)
+      (fun t _ x => ?_)
+    simp only [SolutionOn.ricci, SolutionFamily.ricci_apply, SolutionFamily.ricciAt]
+  · refine DifferentialGeometry.Integral.Connection.Tensor0SFamilyContinuousOnSet.congr
+      (rm04Cont_of_joint (I := I) g (Set.Ico a b) (uniqueDiffOn_Ico a b) hjoint)
+      (fun t _ x => ?_)
+    simp only [SolutionFamily.rm04, metricRm04_apply]
+  · intro t ht x
+    have h := (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+      (g (t : ℝ)) (metricRicci (I := I) (M := M) (g (t : ℝ)))).mdifferentiableAt
+      (by simp) (x := x)
+    refine h.congr_of_eventuallyEq ?_
+    filter_upwards with y
+    simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
+      SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
+  · intro t ht x
+    have hs : ContMDiff I 𝓘(ℝ, ℝ) ∞
+        (ricciNorm (I := I)
+          ({ base := { metric := g } } : SolutionOn (I := I) (M := M)
+            (RealTimeInterval.closedOpen a b hab)) (t : ℝ)) := by
+      refine (DifferentialGeometry.Integral.Connection.normSq02_smooth (I := I) (M := M)
+        (g (t : ℝ)) (metricRicci (I := I) (M := M) (g (t : ℝ)))).congr ?_
+      intro y
+      simp only [ricciNorm, SolutionOn.ricci, SolutionOn.family,
+        SolutionFamily.ricci_apply, SolutionFamily.ricciAt, metricRicci_apply]
+    exact gradientFun_mdiffAt (I := I) (g (t : ℝ)) hs x
+
+/-- **P9 — `IsSolutionOn` for the extended Ricci-flow solution.**  Assembles the nine-field
 `IsSolutionOn` package for the metric-only candidate `{ base := { metric := g_ext } }` on the extended
 carrier `Ico α b`, from:
 * the original solution `S` on `[α, ω)` (with `hS : IsSolutionOn S`), used for the closed-left

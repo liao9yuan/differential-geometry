@@ -314,6 +314,56 @@ theorem expInv_eqn
   exact CenterOfMass.sum_expInv_eq_zero (I := I) (κ := ι) g μ pts
     (centerOfMass (I := I) g μ pts join p r h) (min h) hdiffEnergy hdiffSummands hgrad
 
+/-- A selected center satisfies the weighted inverse-vector equation whenever
+the summand gradients are the negatives of the supplied tangent family. -/
+theorem invB_eqn
+    (invB : ι → TangentSpace I (centerOfMass (I := I) g μ pts join p r h))
+    (hdiffSummands :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι, MDifferentiableAt I 𝓘(ℝ, ℝ) (CenterOfMass.halfSqDist (pts i))
+        (centerOfMass (I := I) g μ pts join p r h))
+    (hgrad :
+      letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+        ⟨g.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+        ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+      ∀ i : ι,
+        gradientFun (I := I) g (CenterOfMass.halfSqDist (pts i))
+            (centerOfMass (I := I) g μ pts join p r h) = -invB i) :
+    letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+      ⟨g.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+      ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+    ∑ i : ι, μ i • invB i = 0 := by
+  classical
+  letI : RiemannianBundle (fun x : M => TangentSpace I x) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  have hsum := CenterOfMass.sum_grad_eq_zero (I := I) (κ := ι) g μ pts
+    (centerOfMass (I := I) g μ pts join p r h) (min h)
+    (centerEnergy_diff (I := I) (g := g) hdiffSummands) hdiffSummands
+  have hneg : ∑ i : ι, μ i • (-invB i) = 0 := by
+    calc
+      ∑ i : ι, μ i • (-invB i) =
+          ∑ i : ι, μ i • gradientFun (I := I) g
+            (CenterOfMass.halfSqDist (pts i))
+            (centerOfMass (I := I) g μ pts join p r h) := by
+              apply Finset.sum_congr rfl
+              intro i _
+              rw [hgrad i]
+      _ = 0 := hsum
+  have hsum_neg : -(∑ i : ι, μ i • invB i) = 0 := by
+    simpa only [Finset.sum_neg_distrib, smul_neg] using hneg
+  exact neg_eq_zero.mp hsum_neg
+
 /-- Local-radius version of the book-form center equation.  The one-summand
 gradient hypothesis in `expInv_eqn` is discharged from `grad_halfSqDist` for
 non-self summands and from `grad_half_self` for self summands. -/

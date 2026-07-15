@@ -37,3 +37,39 @@ limit directly is both cheaper and exactly the consumer-facing result.
   (100%) via `lapDiffA20_short`.
 - Moving conjugate-heat theorem: not proved (0%).
 - Perelman no-local-collapsing theorem: not proved (0%).
+
+## 2026-07-14 intrinsic fibre smallness
+
+Added `lapDiff_fibreSmall`.  It fixes the perturbation size at `1 / 4` and,
+near `s = 0`, produces `gFibreOpBound` for the moving-minus-frozen metric
+bilinear form.  The proof composes `metric_c1_tendsto` with `s ↦ T - s`, uses
+`derivNorm_le_sup`, and then applies the coefficient-one
+`metricDiff_abs_le` estimate.  No extra convergence or chart hypothesis is
+introduced.
+
+Focused verification passed after the explicitly targeted upstream `.olean`
+refresh.  This closes the fixed `δ < 1 / 2` input producer, not the later
+time-uniform commutator/first-order Galerkin closure.
+
+Honest accounting at the current coarse resolution is unchanged: the fixed
+fibre-smallness producer is complete (100%), while `scalar_crit_tame`, the
+classical moving conjugate-heat theorem, and Perelman no-local-collapsing remain
+unstated/unproved (0%).  Their dedicated machinery remains about 72%, 77%, and
+40%, respectively; whole HCG machinery remains about 53%, with endpoints at
+0%.
+
+## 2026-07-14 common short interval
+
+Added `lapDiff_short`.  It intersects regular-time persistence with
+`lapDiff_fibreSmall`, extracts one metric ball around zero, and chooses a
+nontrivial `tau <= 1`.  Consequently every `s in [0,tau]` has both
+`T-s in D.regular` and the same quarter-size `gFibreOpBound`.  This is the
+common perturbative interval needed before choosing support-independent
+Galerkin constants; it introduces no new consumer assumption.
+
+Focused verification passed.  The short-interval producer is complete (100%).
+`scalar_crit_tame` itself remains unstated/unproved (0%); its dedicated
+machinery is now about 80%.  The classical moving conjugate-heat theorem and
+Perelman no-local-collapsing remain 0%, with about 77% and 40% dedicated
+machinery.  Whole HCG machinery remains about 53%, with endpoint theorems at
+0%.

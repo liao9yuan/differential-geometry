@@ -80,3 +80,12 @@ theorems deliberately preserve the existing factor-`4` Step-C join interface.
 
 Verification passed.  This is producer machinery only: the concrete special
 atoms and the final `StepB1RawInput` producer remain open.
+
+## 2026-07-13 active-hat intersection bridge
+
+Added `NetLimitData.binter_of_mem_hat` and `binter_of_active`.  Two finite hats
+containing the same point give a current five-lambda `BInter`; a nonzero
+subordinate POU weight supplies the second hat membership automatically.
+Focused verification and the targeted refresh passed.  These lemmas identify
+the positive interacting pairs but do not by themselves resolve the capstone's
+whole-cage `hKV` quantifier.

@@ -16,7 +16,7 @@ seems to need one, stop and report (it means an upstream producer is misshapen).
 
 ---
 
-## Current execution structure (2026-07-10)
+## Current execution structure (2026-07-13)
 
 This section is the active running source of truth.  The older D1--D6 sections
 and chronological codas below are kept for proof-route detail, but this current
@@ -108,11 +108,12 @@ but its API blocker is resolved and is no longer an active stop condition.
 `D6_PRO_PROMPT.md` is retained only as history.  The sole dependency preventing
 the working endpoint from consuming the checked Step-D theorem is upstream:
 the B/C lane has not yet produced `StepB1RawInput` from the endpoint's concrete
-atom/weight/center data.  Resume from `B1_JOIN_HANDOFF.md`; the next selected
-brick is the fixed all-order inverse-exp/readout domain, followed by finite-hat
-containment and the honest Hessian/Neumann producer.  Use `B1_PRO_PROMPT.md` for
-consultation.  Do not edit D1--D6 again unless that producer exposes a genuine
-interface mismatch.
+atom/weight/center data.  Resume from the live status in `B1_JOIN_HANDOFF.md`
+and `B1_MIN_BRANCH_RULING.md`; do not duplicate that active B/C lane here.
+The F2 book-facing supplier is also complete: `speed_le_of_c0` and
+`data_image_ball` are public in `Distances.lean`, and `StepDDirected` consumes them.
+There is no independent Step D/F producer left.  Do not edit D1--D6 again
+unless the B/C producer exposes a genuine interface mismatch.
 
 ---
 
@@ -122,7 +123,7 @@ interface mismatch.
 |---|---|---|---|
 | `lbl397` | approx isometry on a large ball (B1) | `StepB1ApproxIso.stepB1_of_raw` | conditional assembly green from `StepB1RawInput`; producer from real C-track inputs 0%; textbook endpoint reserved |
 | `lbl372` | composition accumulation `e n ≤ C·Σδᵢ` (F6) | `ApproxIsometryCompHigher.comp_cov_accum` | green |
-| `lbl367` | image-ball control `Φ(B(O,r)) ⊆ B(O',(1+ε)^{1/2}r)` (F2) | `Distances.image_ball_tangent` (+ `F2-book` wrapper, still todo) | green core |
+| `lbl367` | image-ball control `Φ(B(O,r)) ⊆ B(O',(1+ε)^{1/2}r)` (F2) | `Distances.lean`: `speed_le_of_c0` + `data_image_ball` over `image_ball_tangent` | green; book wrapper complete |
 | `lbl404` | `C⁰→C^∞` composition-convergence ("apply Lemma 4.4 again") | `MapConvergenceComp.lean` (`MapCInfConvOnCompacts.comp` and moving-composition derivative convergence) | green |
 | `lbl379–381` | direct-limit topology: compact-factors / σ-compact / T2 | `Geometry/Topology/DirectLimit.lean` (`SeqSystem`, `Lim`, `incl`, `isCompact_exists`, `sigmaCompact`, `t2Space`, `lift`) | green |
 | `lbl332` | C^∞-CG convergence definition | `MetricCompactness.lean` (`MetricCGConvergenceData`, `PointedRiemannianCGConverges.ofRestrictPullback`, `MetricSourceData.ofRestrictPullback`) | green |
@@ -1713,6 +1714,6 @@ else is assembly against existing engines.
   Step-D consumer machinery is **100%**.  The working theorem
   `MetricCompactnessInputs.metricCompactness` remains **0% proved** because its
   body is still `sorry`; the textbook theorem from endpoint inputs remains 0%
-  until the B/C lane constructs `StepB1RawInput`.  Next target:
-  `B1_JOIN_HANDOFF.md` Route A, beginning with one fixed all-order
-  `diagExpInv`/readout domain.  The consultation prompt is `B1_PRO_PROMPT.md`.
+  until the B/C lane constructs `StepB1RawInput`.  There is no remaining
+  Step-D/F brick: follow the live B/C status in `B1_JOIN_HANDOFF.md` and
+  `B1_MIN_BRANCH_RULING.md` rather than this historical coda.

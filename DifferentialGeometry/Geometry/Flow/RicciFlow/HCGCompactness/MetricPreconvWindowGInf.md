@@ -65,3 +65,11 @@ existential.
 
 Verification passed: focused check and targeted module build succeeded.  The
 new wrapper is axiom-clean with the expected project axioms only.
+
+## 2026-07-14 post-merge compatibility
+
+The live rebuild exposed that the broad `simp` proof of
+`metricDerivNorm_symm` no longer closed the final additive identity. The proof
+now unfolds only `metricDiffCovDerivAt` and uses `abel` for the fibrewise
+identity `B - A = -(A - B)`. Focused verification passed; the theorem statement
+and all geometric inputs are unchanged.

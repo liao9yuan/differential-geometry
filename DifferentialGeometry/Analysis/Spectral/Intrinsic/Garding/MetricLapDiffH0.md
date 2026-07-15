@@ -15,12 +15,21 @@ scalar Laplacian perturbation.  It postcomposes the verified
 - `lapDiffA20_cont_of` transfers `ContinuousOn` from the fixed-`L²` family
   through the canonical isometric postcomposition without a whole-operator
   extensionality proof.
+- `lapDiffA20_graph` identifies every applied value, near the frozen time,
+  with the closure of the genuine smooth finite-core graph.
+- `lapDiffA20_test` is the pointwise consumer of such a graph certificate.  It
+  maps the graph continuously to one scalar test pairing and rewrites only the
+  finite-core second coordinate as the fixed-`mu_q` geometric integral.  It
+  requires no measurable choice of core approximants and performs no
+  whole-operator equality.
 - `lapDiffA20_bound` and `lapDiffA20_zero` transfer the support-independent
   vanishing modulus and operator-norm convergence.
 
 The value-space adapter is complete.  The formerly separate interval
 measurability frontier is now closed by `lapDiffA20_short` in
 `MetricLapDiffMeas.lean`.
+
+Focused verification of the graph and scalar mapped-closure API passes.
 
 ## Progress accounting
 

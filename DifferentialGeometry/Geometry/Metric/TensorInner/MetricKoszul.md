@@ -14,6 +14,9 @@ estimate; it is not itself a second definition of geometric Christoffel data.
 - `koszulCov_sub` records its subtractivity in the metric derivative.
 - `koszulCov_norm_le` turns a pointwise trilinear constant `C` into the sharp
   `(3/2) * C` covector bound without component enumeration.
+- `koszulCovCLM` packages the Koszul covector construction as a bounded linear
+  map in the metric derivative, with application and operator-norm lemmas.  This
+  is the proof-independent operator used by the H6 all-order recurrence.
 - `koszulVec` raises that covector using `IsCoercive.sharp`.
 - `koszulVec_norm_le` combines a coercivity constant with the covector bound.
 - `koszulCov_diag_sub` expands diagonal velocity variation into the two

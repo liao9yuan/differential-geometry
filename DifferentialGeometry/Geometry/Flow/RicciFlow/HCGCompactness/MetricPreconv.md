@@ -438,3 +438,44 @@ all covariant orders, so orders above `r` are filled using compact boundedness f
 sequence term; those constants do not enter the finite sum in the conclusion. Focused
 verification passed. This is the D2 prefix-tail bridge that avoids a new global
 connection-change estimate while preserving the existing fixed-reference API.
+
+## 2026-07-14: fixed-order family and chart-Gram bounds
+
+Added and focused-verified `metricComp_iter_le`, `chartGram_germ`,
+`chartGram_iter_le`, and `chartGram_of_orders`.
+
+`metricComp_iter_le` accepts an arbitrary metric family indexed by any type and
+requires family-uniform covariant bounds only for orders `q <= r`.  The old
+all-orders tower theorem formally asks for a bound at every order; orders above
+`r` are supplied separately for each fixed smooth metric by compact
+boundedness, and those values do not occur in the finite sum defining the
+uniform constant.  The old sequence-facing theorem is now a compatibility
+specialization.
+
+`chartGram_germ` identifies globalized chart-basis component germs with
+`chartGramOnE`.  The two chart-Gram theorems then turn exact-order predicates
+`MetricCovDerivOrderBoundOn K q ... B`, through order `r`, into one uniform
+bound for every order-`r` `iteratedFDeriv` of every Gram entry on a compact
+chart piece.  At `r = 3`, this closes the intrinsic-C3 to chart-C3 coefficient
+bridge needed as input to a low-regularity Ricci--DeTurck theorem.
+
+`chartGram_pou_le` further aggregates these bounds over the canonical finite
+`chartAtlasPOU_finset`, producing one fixed-order constant for every active
+chart support, family member, and Gram entry.  Focused verification passes.
+
+This is coefficient infrastructure, not parabolic existence.  The uniform
+low-regularity Ricci--DeTurck theorem remains 0%.  After the later
+`LowRegCoeff` assembly, dedicated E1 machinery is about 28%, with the actual
+low-regularity solver and uniform smoothing interval still missing.
+
+## 2026-07-14: active-chart partial bounds through order three
+
+Added `chartGram_pou_bnd`, `chartGram_pou_d1`, `chartGram_pou_d2`, and
+`chartGram_pou_d3`.  They specialize the fixed-order `iteratedFDeriv` estimate
+to absolute coordinate Gram bounds of orders zero through three on every
+active partition-of-unity chart support.  The first three orders feed the full
+Ricci--DeTurck `2`-jet Lipschitz estimate; order three is retained as the
+coefficient-regularity input for the future low-regularity parabolic solver.
+
+Focused verification passed.  These are constants-first family producers and
+do not assert existence or regularization of a flow.

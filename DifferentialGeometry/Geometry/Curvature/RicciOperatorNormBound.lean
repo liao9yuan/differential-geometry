@@ -153,6 +153,80 @@ theorem abs_component0S_le_sqrt_normSq0S
   exact Finset.single_le_sum (f := fun slots => (component0S (I := I) basis A slots) ^ 2)
     (fun slots _ => sq_nonneg _) (Finset.mem_univ slots₀)
 
+/-- A Ricci component obtained by tracing `Rm04` is bounded by the dimension
+times the Riemann tensor norm. -/
+theorem ricciComp_le_rmNorm
+    (g : SmoothRiemannianMetric I M) {x : M}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (basis : Module.Basis ι Real (TangentSpace I x))
+    (hinv : MetricInverseInBasis_gen (I := I) g x basis
+      (identityInvMetric (Idx := ι)))
+    (Ric : Tensor02At (I := I) (M := M) x)
+    (Rm04 : Tensor04At (I := I) (M := M) x)
+    (htrace : ∀ i j, Ric (vec2 (I := I) (basis i) (basis j)) =
+      ∑ a, Rm04 (vec4 (I := I) (basis a) (basis i) (basis j) (basis a)))
+    (i j : ι) :
+    |Ric (vec2 (I := I) (basis i) (basis j))| ≤
+      (Fintype.card ι : Real) * Real.sqrt (normSq0S (I := I) g x 4 Rm04) := by
+  rw [htrace i j]
+  calc
+    |∑ a, Rm04 (vec4 (I := I) (basis a) (basis i) (basis j) (basis a))|
+        ≤ ∑ a, |Rm04 (vec4 (I := I) (basis a) (basis i) (basis j) (basis a))| :=
+          Finset.abs_sum_le_sum_abs _ _
+    _ ≤ ∑ _a : ι, Real.sqrt (normSq0S (I := I) g x 4 Rm04) := by
+      apply Finset.sum_le_sum
+      intro a _
+      have hcomp := abs_component0S_le_sqrt_normSq0S g basis hinv Rm04 (slots4 a i j a)
+      have heq : component0S (I := I) basis Rm04 (slots4 a i j a) =
+          Rm04 (vec4 (I := I) (basis a) (basis i) (basis j) (basis a)) :=
+        rm04CompAt_apply (I := I) basis Rm04 a i j a
+      rwa [heq] at hcomp
+    _ = (Fintype.card ι : Real) * Real.sqrt (normSq0S (I := I) g x 4 Rm04) := by
+      rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul]
+
+/-- A component of the canonical metric Ricci tensor in an orthonormal basis
+is bounded by the dimension times the norm of the canonical lowered Riemann
+tensor. -/
+theorem metricRicciComp_le
+    [SigmaCompactSpace M] [T2Space M]
+    (g : SmoothRiemannianMetric I M) {x : M}
+    {ι : Type*} [Fintype ι] [DecidableEq ι]
+    (basis : Module.Basis ι Real (TangentSpace I x))
+    (hON : ∀ i j, g.inner x (basis i) (basis j) = if i = j then (1 : Real) else 0)
+    (i j : ι) :
+    |metricRicciAt (I := I) (M := M) g x (vec2 (I := I) (basis i) (basis j))| ≤
+      (Fintype.card ι : Real) *
+        Real.sqrt (normSq0S (I := I) g x 4 (metricRm04At (I := I) (M := M) g x)) := by
+  classical
+  have hinv : MetricInverseInBasis_gen (I := I) g x basis
+      (identityInvMetric (Idx := ι)) :=
+    metricInverseInBasis_of_orthonormal (I := I) g basis hON
+  let D := metricCurvData (I := I) (M := M) g
+  have hLower : Rm04LowersRm13At (I := I) g x
+      (metricRm13 (I := I) (M := M) g x)
+      (metricRm04 (I := I) (M := M) g x) :=
+    rm04LowersRm13At_of_realizes
+      (I := I) g (metricCov (I := I) (M := M) g)
+      (metricRm13 (I := I) (M := M) g)
+      (metricRm04 (I := I) (M := M) g)
+      D.h_rm13 D.h_rm04 x
+  have htrace : ∀ a b,
+      metricRicciAt (I := I) (M := M) g x
+          (vec2 (I := I) (basis a) (basis b)) =
+        ∑ c, metricRm04At (I := I) (M := M) g x
+          (vec4 (I := I) (basis c) (basis a) (basis b) (basis c)) := by
+    intro a b
+    simpa using
+      (ricci_diag_eq_sum_rm04_diag_of_orthonormal
+        (I := I) (M := M) g basis
+        (metricRicci (I := I) (M := M) g)
+        (metricRm13 (I := I) (M := M) g)
+        (metricRm04 (I := I) (M := M) g)
+        D.h_ricci13 hLower hON a b)
+  exact ricciComp_le_rmNorm (I := I) g basis hinv
+    (metricRicciAt (I := I) (M := M) g x)
+    (metricRm04At (I := I) (M := M) g x) htrace i j
+
 /-- **Unit-sphere Ricci bound from the Riemann trace (any dimension).** If `Ric`
 is the metric trace of `Rm04` over a `g`-orthonormal basis, then on `g`-unit
 vectors `|Ric(u,u)| ≤ n²·√(normSq0S Rm04)`. This is the curvature source

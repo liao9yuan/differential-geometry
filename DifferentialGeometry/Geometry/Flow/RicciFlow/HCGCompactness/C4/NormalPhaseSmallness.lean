@@ -226,9 +226,10 @@ theorem exists_phase_scale
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
     (h : NormalRadiusProfile hd hb) :
-    let T : NNReal :=
+    let N : NNReal :=
       ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
-        (E × E) →L[Real] (E × E))‖₊⁻¹
+        (E × E) →L[Real] (E × E))‖₊
+    let T : NNReal := N⁻¹
     ∃ aq aδ : Real,
       0 < aq ∧ 0 < aδ ∧
       ∀ R, 0 ≤ R →
@@ -238,17 +239,23 @@ theorem exists_phase_scale
           3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
             (2 / 3 : Real) * (q : Real) ∧
           PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T ∧
+          N * (T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)))⁻¹ *
+              PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < 1 / 24 ∧
           aδ * hd.mu R ≤
             ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
               ((q : Real) / 2) := by
   letI : Nontrivial E := Module.nontrivial_of_finrank_pos
     (Nat.pos_of_ne_zero (NeZero.ne (Module.finrank Real E)))
-  let T : NNReal :=
+  let N : NNReal :=
     ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
-      (E × E) →L[Real] (E × E))‖₊⁻¹
+      (E × E) →L[Real] (E × E))‖₊
+  let T : NNReal := N⁻¹
   have hT : 0 < T := PhaseFlow.freeDiagInv_pos (E := E)
   have hTReal : (0 : Real) < T := by exact_mod_cast hT
-  have hhalfT : 0 < T / 2 := div_pos hT (by norm_num)
+  let epsInv : NNReal := T / (48 * (N + 1))
+  have hepsInv : 0 < epsInv := by
+    dsimp only [epsInv]
+    exact div_pos hT (mul_pos (by norm_num) (by positivity))
   have htwo : Tendsto (fun q : NNReal ↦ 2 * q) (nhds 0) (nhds 0) := by
     have hcont : Continuous (fun q : NNReal ↦ 2 * q) :=
       continuous_const.mul continuous_id
@@ -256,8 +263,8 @@ theorem exists_phase_scale
         (nhds ((fun q : NNReal ↦ 2 * q) 0)) := hcont.continuousAt
     simpa using hAt
   have herrEv : ∀ᶠ q : NNReal in nhds 0,
-      PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 :=
-    htwo (normalPhaseErr_lt_ev (I := I) hb hhalfT)
+      PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < epsInv :=
+    htwo (normalPhaseErr_lt_ev (I := I) hb hepsInv)
   obtain ⟨eps, heps, herr⟩ := Metric.eventually_nhds_iff_ball.mp herrEv
   let C : Real := hb.metricC 1
   have hC : 0 ≤ C := hb.metricC_nonneg 1
@@ -307,8 +314,21 @@ theorem exists_phase_scale
     change |qReal - 0| < eps
     rw [sub_zero, abs_of_pos hqReal]
     exact hqEps.trans_lt (half_lt_self heps)
-  have herrQ : PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 :=
+  have herrQ : PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < epsInv :=
     herr q hqBall
+  have hN1 : (1 : NNReal) ≤ N + 1 := by
+    exact le_add_of_nonneg_left N.2
+  have hden_ge : (2 : NNReal) ≤ 48 * (N + 1) := by
+    calc
+      (2 : NNReal) = 2 * 1 := by norm_num
+      _ ≤ 2 * (N + 1) := mul_le_mul_of_nonneg_left hN1 (by norm_num)
+      _ ≤ 48 * (N + 1) :=
+        mul_le_mul_of_nonneg_right (by norm_num) (N + 1).2
+  have heps_le : epsInv ≤ T / 2 := by
+    dsimp only [epsInv]
+    exact div_le_div_of_nonneg_left T.2 (by norm_num) hden_ge
+  have herrHalf : PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 :=
+    herrQ.trans_le heps_le
   have hqRadius : 6 * (q : Real) < h.phaseRadius R := by
     have haRatio : 6 * aq < h.ratio / 4 := by
       nlinarith [h.ratio_pos]
@@ -338,11 +358,45 @@ theorem exists_phase_scale
     nlinarith
   have herrOut : PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T := by
     calc
-      PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 := herrQ
+      PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T / 2 := herrHalf
       _ < T := by exact_mod_cast (half_lt_self hTReal)
+  have hinvErr :
+      N * (T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)))⁻¹ *
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < 1 / 24 := by
+    let c : NNReal := PhaseFlow.phaseErr (normalPhaseK hb (2 * q))
+    have hdenInv : 0 < 48 * (N + 1) :=
+      mul_pos (by norm_num) (by positivity)
+    have hsmall : c * (48 * (N + 1)) < T := by
+      apply (lt_div_iff₀ hdenInv).mp
+      simpa only [c, epsInv] using herrQ
+    have hfac : 24 * N + 1 ≤ 48 * (N + 1) := by
+      nlinarith [N.2]
+    have hcFac : c * (24 * N + 1) < T :=
+      (mul_le_mul_of_nonneg_left hfac c.2).trans_lt hsmall
+    have honeFac : (1 : NNReal) ≤ 24 * N + 1 := by
+      exact le_add_of_nonneg_left (mul_nonneg (by norm_num) N.2)
+    have hct : c < T := by
+      calc
+        c = c * 1 := by rw [mul_one]
+        _ ≤ c * (24 * N + 1) :=
+          mul_le_mul_of_nonneg_left honeFac c.2
+        _ < T := hcFac
+    have hdiff : 0 < T - c := tsub_pos_iff_lt.mpr hct
+    have hnum : 24 * (N * c) < T - c := by
+      rw [lt_tsub_iff_right]
+      calc
+        24 * (N * c) + c = c * (24 * N + 1) := by ring
+        _ < T := hcFac
+    rw [show N * (T - c)⁻¹ * c = (N * c) / (T - c) by
+      rw [div_eq_mul_inv]
+      ring]
+    rw [div_lt_iff₀ hdiff]
+    rw [show (1 / 24 : NNReal) * (T - c) = (T - c) / 24 by ring]
+    exact (lt_div_iff₀ (by norm_num : (0 : NNReal) < 24)).2 <| by
+      simpa only [mul_comm] using hnum
   have herrReal :
       (PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : Real) < (T : Real) / 2 := by
-    exact_mod_cast herrQ
+    exact_mod_cast herrHalf
   have hmargin : (T : Real) / 2 ≤
       ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) := by
     rw [NNReal.coe_sub herrOut.le]
@@ -359,7 +413,7 @@ theorem exists_phase_scale
         mul_le_mul_of_nonneg_right hmargin (div_nonneg hqReal.le (by norm_num))
       _ = ((T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
           ((q : Real) / 2) := rfl
-  exact ⟨q, rfl, hqRadius, hqAcc, herrOut, hδlower⟩
+  exact ⟨q, rfl, hqRadius, hqAcc, herrOut, hinvErr, hδlower⟩
 
 end NormalRadiusProfile
 

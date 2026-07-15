@@ -246,7 +246,7 @@ theorem rawLap_toRS0
 
 /-- The scalar readout of the rank-zero second covariant derivative along a
 smooth vector field is the corresponding diagonal Hessian value. -/
-private theorem cov0_diag_scalar
+private theorem cov0_diag_hess
     (g : SmoothRiemannianMetric I M)
     (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
       (LeviCivita (I := I) g) ∞)
@@ -310,6 +310,82 @@ private theorem cov0_diag_scalar
   rw [hpairing, duSec_apply,
     differential1FormFun_apply_eq_extDerivFun]
 
+/-- The mixed rank-zero second covariant derivative of the canonical lift of
+a smooth scalar is the canonical lift of its diagonal Hessian value. -/
+theorem secondRS_scalar
+    (g : SmoothRiemannianMetric I M)
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally
+      (LeviCivita (I := I) g) ∞)
+    {f : M → ℝ}
+    (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
+    (B : ContMDiffSection I E ∞ (TangentSpace I : M → Type _)) (x : M) :
+    (TensorRSNabla.tensorRSCovariantDerivative I M 0 0
+        (LeviCivita (I := I) g)).toFun
+          (covApply (TensorRSNabla.tensorRSCovariantDerivative I M 0 0
+            (LeviCivita (I := I) g)) B
+            (fun y : M =>
+              (Tensor0SField.fromScalarField ∞ f hf).toTensorRSField ∞ y)) x (B x) -
+        (TensorRSNabla.tensorRSCovariantDerivative I M 0 0
+          (LeviCivita (I := I) g)).toFun
+          (fun y : M =>
+            (Tensor0SField.fromScalarField ∞ f hf).toTensorRSField ∞ y) x
+          ((LeviCivita (I := I) g).toFun B x (B x)) =
+      Tensor0SSpace.toRS0
+        ((Tensor0SNabla.tensor0Iso I M x).symm
+          (hessianSec (I := I) (LeviCivita (I := I) g) hcov f hf x
+            (vec2 (I := I) (B x) (B x)))) := by
+  classical
+  let A : Tensor0SField ∞ 0 (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) :=
+    Tensor0SField.fromScalarField ∞ f hf
+  let cov0 := Tensor0SNabla.tensor0SCovariantDerivative I M 0
+    (LeviCivita (I := I) g)
+  let covRS := TensorRSNabla.tensorRSCovariantDerivative I M 0 0
+    (LeviCivita (I := I) g)
+  let dA : Tensor0SField ∞ 0 (𝕜 := ℝ) (E := E) (H := H) (I := I) (M := M) :=
+    cov0SAlong (LeviCivita (I := I) g) B A
+  have hfirst :
+      covApply covRS B (fun y => A.toTensorRSField ∞ y) =
+        fun y => dA.toTensorRSField ∞ y := by
+    funext y
+    calc
+      covApply covRS B (fun z => A.toTensorRSField ∞ z) y =
+          Tensor0SSpace.toRS0 (cov0 A y (B y)) := by
+            exact nablaRS_toRS0 (I := I) (M := M)
+              (LeviCivita (I := I) g) A y (B y)
+      _ = dA.toTensorRSField ∞ y := by
+        rw [Tensor0SField.toRS0_eq]
+        rfl
+  have harg :
+      cov0 dA x (B x) -
+          cov0 A x ((LeviCivita (I := I) g).toFun B x (B x)) =
+        (Tensor0SNabla.tensor0Iso I M x).symm
+          (hessianSec (I := I) (LeviCivita (I := I) g) hcov f hf x
+            (vec2 (I := I) (B x) (B x))) := by
+    apply (Tensor0SNabla.tensor0Iso I M x).injective
+    rw [map_sub, ContinuousLinearEquiv.apply_symm_apply]
+    simpa [A, cov0, dA] using
+      (cov0_diag_hess (I := I) (M := M) g hcov hf B x)
+  change covRS (covApply covRS B (fun y => A.toTensorRSField ∞ y)) x (B x) -
+      covRS (fun y => A.toTensorRSField ∞ y) x
+        ((LeviCivita (I := I) g).toFun B x (B x)) = _
+  rw [hfirst]
+  rw [show covRS (fun y => dA.toTensorRSField ∞ y) x (B x) =
+      Tensor0SSpace.toRS0 (cov0 dA x (B x)) by
+        exact nablaRS_toRS0 (I := I) (M := M)
+          (LeviCivita (I := I) g) dA x (B x)]
+  rw [show covRS (fun y => A.toTensorRSField ∞ y) x
+        ((LeviCivita (I := I) g).toFun B x (B x)) =
+      Tensor0SSpace.toRS0
+        (cov0 A x ((LeviCivita (I := I) g).toFun B x (B x))) by
+        exact nablaRS_toRS0 (I := I) (M := M)
+          (LeviCivita (I := I) g) A x
+          ((LeviCivita (I := I) g).toFun B x (B x))]
+  rw [← harg]
+  apply ContinuousLinearMap.ext
+  intro c
+  rw [ContinuousLinearMap.sub_apply, Tensor0SSpace.toRS0_apply,
+    Tensor0SSpace.toRS0_apply, Tensor0SSpace.toRS0_apply, smul_sub]
+
 /-- The raw mixed connection Laplacian of the canonical rank-zero lift of a
 smooth scalar is exactly the canonical rank-zero lift of its scalar
 Laplace--Beltrami value. -/
@@ -358,7 +434,7 @@ theorem rawLap_scalar
         refine Finset.sum_congr rfl ?_
         intro i _
         simpa [A, Hess] using
-          (cov0_diag_scalar (I := I) (M := M) g hcov hf
+          (cov0_diag_hess (I := I) (M := M) g hcov hf
             ⟨smoothOrthoFrame (I := I) g x i,
               smoothOrthoFrame_smooth (I := I) g x i⟩ x)
     _ = scalarLapTraceAt (I := I) g (Hess x) := by

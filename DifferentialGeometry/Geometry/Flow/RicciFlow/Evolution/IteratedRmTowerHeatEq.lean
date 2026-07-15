@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannHeatFu
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.RmRealizationBridgeAllK
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedNablaRmTower
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.NablaRiemannTimeDeriv
+import DifferentialGeometry.Tensor.RSTensor.MetricTrace.Connection
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -149,7 +150,68 @@ def nablaKRm04ReactionIntrinsic
                 (nablaKRm04Field (I := I) S t (k + 2) x))
             (nablaKRm04Field (I := I) S t k x)
 
+/-- Pointwise form of the all-`k` reaction, using one tangent-space basis and
+the corresponding inverse-metric and Ricci component arrays. -/
+def nablaKReactionAt
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (k : ℕ) (t : Real) (x : M)
+    {Idx : Type*} [Fintype Idx]
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv ric : Idx → Idx → Real)
+    (Tdot : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (4 + k) x) : Real :=
+  ricReactionContract gInv ric
+      (fun I0 : Fin (4 + k) → Idx =>
+        tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
+          (fun i => basis i) I0)
+      (fun J0 : Fin (4 + k) → Idx =>
+        tensor0SComponent (I := I) (nablaKRm04Field (I := I) S t k x)
+          (fun i => basis i) J0) +
+    2 * inner0S (I := I) (S.base.metric t) x (4 + k)
+      (Tdot - metricTrace0S2TensorInBasis (I := I) basis gInv
+        (nablaKRm04Field (I := I) S t (k + 2) x))
+      (nablaKRm04Field (I := I) S t k x)
+
 end Fields
+
+/-! ## Spatial regularity of the intrinsic tower norms -/
+
+/-- At each fixed time, the intrinsic squared norm `|∇ᵏRm|²` is smooth in
+space for every finite tower level `k`. -/
+theorem nablaKNorm_smooth
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
+    ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (nablaKRm04NormSqIntrinsic (I := I) S k t) := by
+  simpa [nablaKRm04NormSqIntrinsic] using
+    (normSq0S_smooth (I := I) (S.base.metric t)
+      (nablaKRm04Field (I := I) S t k))
+
+/-- Canonical differential of the fixed-time scalar field `|∇ᵏRm|²`. -/
+noncomputable def nablaKNormDu
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 1 :=
+  duSec (I := I) (nablaKRm04NormSqIntrinsic (I := I) S k t)
+    (nablaKNorm_smooth (I := I) S t k)
+
+/-- Canonical Hessian of the fixed-time scalar field `|∇ᵏRm|²`. -/
+noncomputable def nablaKNormHess
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (t : Real) (k : ℕ) :
+    Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) 2 :=
+  hessianSec (I := I) (S.family.connection t) (connSmoothInf (I := I) S t)
+    (nablaKRm04NormSqIntrinsic (I := I) S k t)
+    (nablaKNorm_smooth (I := I) S t k)
+
+/-- Intrinsic scalar Laplacian of the fixed-time field `|∇ᵏRm|²`. -/
+noncomputable def nablaKNormLap
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (k : ℕ) : Real → M → Real :=
+  fun t x => laplacian (I := I) (S.family.connection t) (S.base.metric t)
+    (nablaKRm04NormSqIntrinsic (I := I) S k t) x
 
 /-! ## The intrinsic all-`k` heat equation
 
@@ -159,6 +221,150 @@ the `NablaRm04NormHeatEquationOn` predicate. -/
 section HeatEquation
 
 variable {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+
+/-- Pointwise intrinsic heat equation for `|∇ᵏRm|²`. All spatial differential
+objects and smooth extensions of the chosen basis vectors are canonical; the
+only supplied data are the target-point time derivatives of the inverse metric
+and of `∇ᵏRm`. -/
+theorem nablaKNormHeatAt
+    {D : DifferentialGeometry.Integral.Connection.RealTimeInterval}
+    (S : SolutionOn (I := I) (M := M) D) (k : ℕ)
+    (t : DifferentialGeometry.Integral.Connection.RealTimeInterval.RegularTime D)
+    (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv : Real → Idx → Idx → Real)
+    (ric : Idx → Idx → Real)
+    (Tdot : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (4 + k) x)
+    (hinv : ∀ r : Real,
+      MetricInverseInBasis (I := I) (S.base.metric r) x basis (gInv r))
+    (hT : ∀ I0 : Fin (4 + k) → Idx,
+      HasDerivWithinAt
+        (fun r : Real =>
+          tensor0SComponent (I := I) (nablaKRm04Field (I := I) S r k x)
+            (fun i => basis i) I0)
+        (tensor0SComponent (I := I) Tdot (fun i => basis i) I0)
+        D.carrier (t : Real))
+    (hgInvDt : ∀ i j : Idx,
+      HasDerivWithinAt (fun r : Real => gInv r i j)
+        (2 * (∑ p : Idx, ∑ q : Idx,
+          gInv (t : Real) i p * gInv (t : Real) j q * ric p q))
+        D.carrier (t : Real)) :
+    HasDerivWithinAt
+      (fun r : Real => nablaKRm04NormSqIntrinsic (I := I) S k r x)
+      (nablaKNormLap (I := I) S k (t : Real) x +
+        (-2 * nablaKRm04NormSqIntrinsic (I := I) S (k + 1) (t : Real) x +
+          nablaKReactionAt (I := I) S k (t : Real) x basis
+            (gInv (t : Real)) ric Tdot))
+      D.carrier (t : Real) := by
+  classical
+  have hmc : IsMetricCompatible_gen (I := I)
+      (S.family.connection (t : Real)) (S.base.metric (t : Real)) :=
+    solution_isMetricCompatible (I := I) S (t : Real)
+  let X : Idx → ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M → Type _) :=
+    fun i =>
+      (ContMDiffSection.exists_eq_at_gen
+        (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
+        x (basis i)).choose
+  have hfields : SmoothBasisFieldsAt (I := I) basis X := by
+    intro i
+    dsimp [X]
+    exact
+      (ContMDiffSection.exists_eq_at_gen
+        (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞))
+        x (basis i)).choose_spec
+  have hf := nablaKNorm_smooth (I := I) S (t : Real) k
+  have hdu : DuFieldRealizes (I := I)
+      (nablaKRm04NormSqIntrinsic (I := I) S k (t : Real))
+      (nablaKNormDu (I := I) S (t : Real) k) := by
+    simpa [nablaKNormDu] using
+      (duSec_realizes (I := I)
+        (nablaKRm04NormSqIntrinsic (I := I) S k (t : Real)) hf)
+  have hHess : HessianRealizesNablaDuAt (I := I)
+      (S.family.connection (t : Real))
+      (nablaKNormDu (I := I) S (t : Real) k)
+      (nablaKNormHess (I := I) S (t : Real) k) x := by
+    simpa [nablaKNormDu, nablaKNormHess] using
+      (hessianSec_realizesAt (I := I)
+        (S.family.connection (t : Real)) (connSmoothInf (I := I) S (t : Real))
+        (nablaKRm04NormSqIntrinsic (I := I) S k (t : Real)) hf x)
+  have hlapReal :=
+    scalarLap_smooth (I := I)
+      (S.family.connection (t : Real)) (connSmoothInf (I := I) S (t : Real))
+      (S.base.metric (t : Real)) hmc
+      (x := x) (nablaKRm04NormSqIntrinsic (I := I) S k (t : Real)) hf
+  have hlapBasis :=
+    ScalarLaplacianRealizesTraceAt.toInBasis (I := I)
+      (S.family.connection (t : Real)) (S.base.metric (t : Real))
+      basis (gInv (t : Real)) (hinv (t : Real))
+      (nablaKRm04NormSqIntrinsic (I := I) S k (t : Real))
+      (nablaKNormHess (I := I) S (t : Real) k x) hlapReal
+  have hlap :
+      nablaKNormLap (I := I) S k (t : Real) x =
+        metricTrace0S2InBasis (I := I) basis (gInv (t : Real))
+          (nablaKNormHess (I := I) S (t : Real) k x) Fin.elim0 := by
+    simpa [nablaKNormLap] using hlapBasis
+  have hdt :=
+    hasDerivWithinAt_normSq0S_ricciFlow (I := I)
+      (s := 4 + k) (x := x) (u := D.carrier) (t := (t : Real))
+      (g := fun r : Real => S.base.metric r)
+      (gInv := gInv)
+      (gInvDt := fun i j => 2 * (∑ p : Idx, ∑ q : Idx,
+        gInv (t : Real) i p * gInv (t : Real) j q * ric p q))
+      (ric := ric)
+      (T := fun r : Real => nablaKRm04Field (I := I) S r k x)
+      (Tdt := fun I0 =>
+        tensor0SComponent (I := I) Tdot (fun i => basis i) I0)
+      (Tdot := Tdot)
+      (basis := basis)
+      hinv hgInvDt hT (fun I0 => rfl) (fun i j => rfl)
+  have hsplit :=
+    tensorNormBochnerSplit_mc (I := I) (s := 4 + k)
+      (cov := S.family.connection (t : Real))
+      (g := S.base.metric (t : Real))
+      hmc (basis := basis) (gInv := gInv (t : Real)) (hinv (t : Real))
+      (Xb := X) hfields
+      (T := nablaKRm04Field (I := I) S (t : Real) k)
+      (nablaT := nablaKRm04Field (I := I) S (t : Real) (k + 1))
+      (nabla2T := nablaKRm04Field (I := I) S (t : Real) (k + 2))
+      (nablaKRm04Field_realizes (I := I) S (t : Real) k)
+      (nablaKRm04Field_realizes (I := I) S (t : Real) (k + 1))
+      (du := nablaKNormDu (I := I) S (t : Real) k)
+      (normSecond := nablaKNormHess (I := I) S (t : Real) k)
+      hdu hHess
+  refine hdt.congr_deriv ?_
+  rw [hlap, nablaKReactionAt, nablaKRm04NormSqIntrinsic]
+  set A := ricReactionContract (gInv (t : Real)) ric
+      (fun I0 : Fin (4 + k) → Idx =>
+        tensor0SComponent (I := I) (nablaKRm04Field (I := I) S (t : Real) k x)
+          (fun i => basis i) I0)
+      (fun J0 : Fin (4 + k) → Idx =>
+        tensor0SComponent (I := I) (nablaKRm04Field (I := I) S (t : Real) k x)
+          (fun i => basis i) J0) with hA
+  set Rm := nablaKRm04Field (I := I) S (t : Real) k x with hRm
+  have hsub :
+      inner0S (I := I) (S.base.metric (t : Real)) x (4 + k)
+          (Tdot - metricTrace0S2TensorInBasis (I := I) basis (gInv (t : Real))
+            (nablaKRm04Field (I := I) S (t : Real) (k + 2) x)) Rm =
+        inner0S (I := I) (S.base.metric (t : Real)) x (4 + k) Tdot Rm -
+          inner0S (I := I) (S.base.metric (t : Real)) x (4 + k)
+            (metricTrace0S2TensorInBasis (I := I) basis (gInv (t : Real))
+              (nablaKRm04Field (I := I) S (t : Real) (k + 2) x)) Rm := by
+    simp only [inner0S, MetricFiberData.inner, map_sub, LinearMap.sub_apply]
+  rw [hsub]
+  set B := inner0S (I := I) (S.base.metric (t : Real)) x (4 + k) Tdot Rm with hB
+  set C := inner0S (I := I) (S.base.metric (t : Real)) x (4 + k)
+      (metricTrace0S2TensorInBasis (I := I) basis (gInv (t : Real))
+        (nablaKRm04Field (I := I) S (t : Real) (k + 2) x)) Rm with hC
+  have hsplit' :
+      metricTrace0S2InBasis (I := I) basis (gInv (t : Real))
+          (nablaKNormHess (I := I) S (t : Real) k x) Fin.elim0 =
+        2 * C +
+          2 * normSq0S (I := I) (S.base.metric (t : Real)) x (4 + (k + 1))
+            (nablaKRm04Field (I := I) S (t : Real) (k + 1) x) := hsplit
+  rw [hsplit']
+  ring
 
 /-- **The intrinsic all-`k` heat equation for `|∇ᵏRm|²`.**
 

@@ -68,8 +68,10 @@ theorem covStep_domDomCongr {s s' : ℕ} (gRef : SmoothRiemannianMetric I M)
         (E := TangentSpace I) (∞ : WithTop ℕ∞) (frontExtendEquiv e)
         (covStep (I := I) gRef s Z) := by
   refine DFunLike.ext _ _ (fun x => ?_)
-  rw [covStep_apply, totalNabla0SFun_domDomCongr, MultilinearSection.domDomCongr_apply,
-    covStep_apply]
+  rw [covStep_apply, totalNabla0SFun_domDomCongr]
+  change _ = ContinuousMultilinearMap.domDomCongr (frontExtendEquiv e)
+    ((covStep (I := I) gRef s Z) x)
+  rw [covStep_apply]
 
 /-- **Realization uniqueness**: two fields that both realize the total covariant
 derivative of `α` are equal.  `TotalNabla0SRealizes` pins the value on every
@@ -161,7 +163,10 @@ theorem normSq0S_iterCov_domDomCongr {Idx : Type*} [Fintype Idx] [DecidableEq Id
           (MultilinearSection.domDomCongr (𝕜 := Real) (F := E) (IB := I)
             (E := TangentSpace I) (∞ : WithTop ℕ∞) e Y) m x) =
       normSq0S (I := I) gRef x (s + m) (iterCov (I := I) gRef s Y m x) := by
-  rw [iterCov_domDomCongr, MultilinearSection.domDomCongr_apply]
+  rw [iterCov_domDomCongr]
+  change normSq0S (I := I) gRef x (s' + m)
+      (ContinuousMultilinearMap.domDomCongr (frontExtendIter e m)
+        ((iterCov (I := I) gRef s Y m) x)) = _
   exact normSq0S_domDomCongr (I := I) gRef x basis hinv (frontExtendIter e m)
     (iterCov (I := I) gRef s Y m x)
 
@@ -176,7 +181,10 @@ theorem normSq0S_iterCov_shift {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     normSq0S (I := I) gRef x (r + (m + 1)) (iterCov (I := I) gRef r T (m + 1) x) =
       normSq0S (I := I) gRef x ((r + 1) + m)
         (iterCov (I := I) gRef (r + 1) (covStep (I := I) gRef r T) m x) := by
-  rw [iterCov_shift, MultilinearSection.domDomCongr_apply]
+  rw [iterCov_shift]
+  change normSq0S (I := I) gRef x (r + (m + 1))
+      (ContinuousMultilinearMap.domDomCongr (shiftEquiv r m)
+        ((iterCov (I := I) gRef (r + 1) (covStep (I := I) gRef r T) m) x)) = _
   exact normSq0S_domDomCongr (I := I) gRef x basis hinv (shiftEquiv r m)
     (iterCov (I := I) gRef (r + 1) (covStep (I := I) gRef r T) m x)
 

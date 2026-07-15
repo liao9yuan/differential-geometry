@@ -1,5 +1,22 @@
 # MetricFamilyContinuity.lean — notes
 
+## 2026-07-12: short-time branch alignment compatibility
+
+`Tensor0SFamilyContinuousOnSet.pullback` failed after the branch alignment because its terminal
+`simp only` no longer matched the displayed composition application. The needed
+`ContinuousMultilinearMap.compContinuousLinearMap_apply` equality is definitional in the current
+API, so the terminal proof is now `rfl`. Focused verification and the targeted module build both
+passed. The theorem and its dedicated pullback-continuity machinery are complete (100%); this was
+a local API compatibility repair, not new Hamilton or HCG theorem progress.
+
+The same alignment had removed the public
+`metricCLMSection_jointContMDiffOn_of_chartGram` producer from the conjugating-flow assembly file
+while the local evolution consumer still uses it. Its chart-coordinate helper and theorem were
+moved here, their natural metric-family continuity layer, under only the local
+`NeZero (Module.finrank Real E)` assumption. Focused verification and the targeted module build
+passed. This restores an existing producer without restoring the obsolete conjugating-flow
+implementation that qinz replaced.
+
 Date: 2026-06-13. Verification: focused `lake env lean` PASSED (exit 0), no `sorry`.
 
 ## What this file provides

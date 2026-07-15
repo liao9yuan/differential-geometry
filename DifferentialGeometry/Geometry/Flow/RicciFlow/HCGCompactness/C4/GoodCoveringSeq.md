@@ -52,3 +52,18 @@ This is the correct fixed-slot injectivity half of the Route-A scale producer.
 It is not yet the moving inverse-exponential branch scale, and it does not
 resolve the current over-quantification over dead slots.  Focused verification
 passed.
+
+## 2026-07-13 Pair-intersection symmetry
+
+Added the small canonical lemma `BInter.symm`.  It only swaps the two center
+witnesses and uses symmetry of `Disjoint`; it lets the one-way H6 pair-tail
+producer be applied in the reverse direction without a duplicate intersection
+assumption.  Focused verification passed.  This helper is complete, while the
+finite pair-to-Step-C integration remains separate machinery and the target
+compactness theorem remains 0%.
+
+Added `NetLimitData.binter_stable_tail`.  On one common finite tail, every
+currently intersecting pair in the frozen finite cage belongs to the
+eventually-intersecting branch of the stable net.  Together with `BInter.symm`,
+this is the exact finite bookkeeping used by `InterSlot`; focused verification
+and the targeted refresh passed.

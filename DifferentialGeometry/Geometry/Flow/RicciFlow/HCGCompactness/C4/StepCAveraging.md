@@ -139,3 +139,56 @@ only needs nonnegativity, a positive entry, sum one, and active-region
 membership.
 
 Verification status: the focused Lean check passed.
+
+## 2026-07-13, active-radius producer
+
+Added `centerAverage.exists_active_radius`.  From two-index uniform convergence
+of each nonzero-weight entry in a finite family, it constructs one
+`radSeq : Nat -> Nat -> X -> Real` which is everywhere positive, strictly
+dominates every active distance on the source set, and converges uniformly to
+zero there as both indices tend to infinity.
+
+The construction is the finite sum of the active distances plus the positive
+tail `1 / (a + 1)`.  Thus no radius assumption is added: finiteness combines the
+per-entry convergence, while the tail supplies strict positivity and strict
+domination.  The theorem is metric-generic and does not depend on the
+Riemannian center-of-mass implementation.
+
+The public statement now asks only for `[Finite ι]`, installing
+`Fintype.ofFinite ι` internally for the finite sum.  The surrounding file's
+`[Fintype ι]` section instance is explicitly omitted from this theorem, so the
+weaker reusable API does not carry an unused section variable.  The resulting
+linter cleanup was included in the successful focused verification.
+
+Verification status: the focused Lean check passed.
+
+Accounting: `exists_active_radius` and the generic active-radius producer are
+complete (100%).  Instantiating its convergence hypothesis for the concrete
+finite-hat maps and proving the later cage/strict-convexity bounds remain
+downstream work; no Chapter-4 endpoint theorem was completed (endpoint 0%).
+
+## 2026-07-13, source-patch transport and finite tail
+
+Added `centerAverage.WeightDataOn.comp`, which pulls normalized finite weight
+data back along a source-set map without asserting compatibility between
+different charts. Added `finite_cover_two_tail`, which takes the finite maximum
+of the source-patch thresholds and produces one common two-index tail on every
+patch. Both additions passed focused verification.
+
+These are generic assembly tools only. The source-local B/C capstone and all
+compactness endpoint theorems remain unproved (endpoint 0%).
+
+## 2026-07-15, energy invariance under active filling
+
+Added `centerAverage.energy_activeFill` and
+`centerAverage.uniqueMin_activeFill`.  The first proves that replacing every
+zero-weight point by the chosen filler leaves the original center energy
+unchanged.  The second transports the checked `CenterInput` uniqueness theorem
+back from the filled family to the actual finite-stage point family.  Both
+passed focused verification.
+
+These are pointwise energy and minimizer-identification lemmas.  They do not
+assert that `activeFill` is smooth when the active set varies with the source
+point.  The live all-pairs route still needs either a smooth support filler or a
+support-aware moving-center theorem.  `StepB1RawInput`, textbook B1, and every
+compactness endpoint remain theorem-level 0%.

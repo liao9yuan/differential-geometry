@@ -1,5 +1,17 @@
 # NablaTraceGen — notes
 
+## 2026-07-12 — short-time branch alignment
+
+- The five merge-compatibility failures now use the public opaque-fiber APIs:
+  `Tensor0SSpace.add_apply`, `smul_apply`, and `domDomCongr_apply`, with explicit
+  fiber-level `change` steps around section products and slot reindexing.
+- Focused verification passed without `sorry`; the local compatibility repair is
+  complete (100%) and has no remaining blocker.
+- This is consumer compatibility only: it does not add mathematical content to the
+  short-time existence theorem. The headline short-time theorem remains complete
+  (100%); its current branch-alignment integration is about 95% pending the rerun of
+  the large downstream targets.
+
 Rank-`s` metric-trace fields and their algebra/`∇`-commutation (generalisations of `Trace04` /
 `NablaTrace02`): `freezeTailField`, `metricTraceFirstTwoField`, `metricTraceFirstTwoField_eq_sum`,
 `_add`/`_smul`/`_zero`/`_domDomCongr_gen`/`_product`, `nablaRealizes_metricTraceFirstTwo`.

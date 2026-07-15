@@ -367,6 +367,54 @@ theorem contMDiff_partial_deriv_fst_gen
   -- collapses to the raw `mfderiv`.
   simpa [inTangentCoordinates_model_space] using h_apply
 
+/-- The partial derivative along the real factor of a jointly `C^n` scalar
+function is `C^m` at a point when `m + 1 ≤ n`. -/
+theorem timeDeriv_smoothAt
+    {E : Type*} [NormedAddCommGroup E] [NormedSpace Real E]
+    {H : Type*} [TopologicalSpace H] {I : ModelWithCorners Real E H}
+    {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
+    {F : Real × M -> Real} {p0 : Real × M} {m n : WithTop ℕ∞}
+    (hF : ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
+      (modelWithCornersSelf Real Real) n F p0)
+    (hmn : m + 1 ≤ n) :
+    ContMDiffAt ((modelWithCornersSelf Real Real).prod I)
+      (modelWithCornersSelf Real Real) m
+      (fun p : Real × M => deriv (fun t => F (t, p.2)) p.1) p0 := by
+  have hrw :
+      (fun p : Real × M => deriv (fun t => F (t, p.2)) p.1) =
+        fun p : Real × M =>
+          (mfderiv (modelWithCornersSelf Real Real)
+            (modelWithCornersSelf Real Real) (fun t => F (t, p.2)) p.1) (1 : Real) := by
+    funext p
+    rw [mfderiv_eq_fderiv]
+    exact (fderiv_apply_one_eq_deriv (f := fun t => F (t, p.2)) (x := p.1)).symm
+  rw [hrw]
+  have harg :
+      ContMDiffAt
+        (((modelWithCornersSelf Real Real).prod I).prod
+          (modelWithCornersSelf Real Real))
+        ((modelWithCornersSelf Real Real).prod I) n
+        (fun q : (Real × M) × Real => (q.2, q.1.2)) (p0, p0.1) :=
+    ContMDiffAt.prodMk contMDiffAt_snd contMDiffAt_fst.snd
+  have hF' :
+      ContMDiffAt
+        (((modelWithCornersSelf Real Real).prod I).prod
+          (modelWithCornersSelf Real Real))
+        (modelWithCornersSelf Real Real) n
+        (fun q : (Real × M) × Real => F (q.2, q.1.2)) (p0, p0.1) :=
+    hF.comp (p0, p0.1) harg
+  have h_apply :=
+    ContMDiffAt.mfderiv_apply
+      (I := modelWithCornersSelf Real Real)
+      (I' := modelWithCornersSelf Real Real)
+      (f := fun (p : Real × M) (t : Real) => F (t, p.2))
+      (g := fun p : Real × M => p.1)
+      (g₁ := fun p : Real × M => p)
+      (g₂ := fun _ : Real × M => (1 : Real))
+      (x₀ := p0) (m := m) (n := n)
+      hF' contMDiffAt_fst contMDiffAt_id contMDiffAt_const hmn
+  simpa [inTangentCoordinates_model_space] using h_apply
+
 /-- Exterior derivative of a scalar multiple of a scalar function.
 
 This is a small bridge for Ricci-flow component calculations, where

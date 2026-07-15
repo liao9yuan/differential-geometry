@@ -1,5 +1,12 @@
 # Moving scalar Laplacian difference
 
+## 2026-07-13 short-time alignment
+
+The order-one covariant-norm bridge now transports the tensor-level `sub_zero`
+equality through `normSq0S` explicitly.  This replaces a representation-level
+rewrite that no longer matches after the tensor API merge.  The theorem
+statements are unchanged, and focused verification passed without warnings.
+
 ## Goal
 
 Bound the canonical scalar Laplacian difference by the fixed-background

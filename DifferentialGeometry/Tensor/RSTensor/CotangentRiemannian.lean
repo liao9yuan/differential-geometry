@@ -417,6 +417,33 @@ theorem basisInvMetric_real {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
             · have hji : j ≠ i := fun h => hij h.symm
               simp [hij, hji]
 
+/-- A two-sided inverse of the metric Gram matrix in a fixed basis is unique. -/
+theorem invBasis_unique {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
+    (g : SmoothMetric_gen I M) (x : M)
+    (basis : Module.Basis Idx Real (TangentSpace I x))
+    (gInv₁ gInv₂ : Idx → Idx → Real)
+    (h₁ : MetricInverseInBasis_gen (I := I) g x basis gInv₁)
+    (h₂ : MetricInverseInBasis_gen (I := I) g x basis gInv₂) :
+    gInv₁ = gInv₂ := by
+  classical
+  let A : Matrix Idx Idx Real := gInv₁
+  let B : Matrix Idx Idx Real := gInv₂
+  let G : Matrix Idx Idx Real := fun i j => g.inner x (basis i) (basis j)
+  have hAG : A * G = 1 := by
+    ext i j
+    simpa [A, G, Matrix.mul_apply] using (h₁ i j).1
+  have hGB : G * B = 1 := by
+    ext i j
+    simpa [B, G, Matrix.mul_apply] using (h₂ i j).2
+  have hAB : A = B := by
+    calc
+      A = A * 1 := by simp
+      _ = A * (G * B) := by rw [hGB]
+      _ = (A * G) * B := by rw [Matrix.mul_assoc]
+      _ = 1 * B := by rw [hAG]
+      _ = B := by simp
+  simpa [A, B] using hAB
+
 /-- Inverse-metric components in a basis are symmetric. -/
 theorem invMetric_symm {Idx : Type*} [Fintype Idx] [DecidableEq Idx]
     (g : SmoothMetric_gen I M) (x : M)

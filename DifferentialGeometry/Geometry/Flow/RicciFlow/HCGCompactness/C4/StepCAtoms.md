@@ -45,3 +45,15 @@ and the textbook B1 theorem remain unstated/unproved (0%); their dedicated
 machinery is now roughly 58%.
 Step-B/B1 machinery is about 58%, Chapter-4 machinery about 64%, and the whole
 HCG compactness machinery about 45%; final compactness endpoints remain 0%.
+
+## 2026-07-13 finite-slot scale migration
+
+All pointwise atom and weight lemmas now consume only
+`Item3GpScaleAt ... pb r k`. The two eventual weight packages consume
+`Item3GpScaleTail` and intersect it with the existing source-ball cover tail.
+No atom consumer requires the legacy all-index `Item3GpScaleInput`.
+
+Focused verification and the narrow refresh passed. This consumer migration
+is complete; the `StepB1RawInput` producer and textbook B1 remain theorem-level
+0%, while their dedicated machinery is about 80%. Chapter 4 machinery is
+about 76%, whole-HCG machinery about 53%, and compactness endpoints remain 0%.

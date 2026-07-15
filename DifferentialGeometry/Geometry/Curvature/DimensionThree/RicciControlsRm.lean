@@ -814,8 +814,10 @@ private theorem ricciDiagAt_neg
   · rfl
   · intro i j
     have hij := hric i j
-    fin_cases i <;> fin_cases j <;>
-      simpa [ricciCompAt_apply, ricciDiag3] using congrArg Neg.neg hij
+    change -(ricciCompAt (I := I) basis Ric i j) =
+      ricciDiag3 (-l1) (-l2) (-l3) i j
+    rw [hij]
+    fin_cases i <;> fin_cases j <;> simp [ricciDiag3]
 
 private theorem scalar_eq_of_signed_trace_diag
     {g : SmoothRiemannianMetric I M}

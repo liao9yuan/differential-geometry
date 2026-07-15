@@ -325,7 +325,13 @@ theorem speed_le_of_c0
     (fun _ => v)
   have hval : (P x - Tensor0SBundle.metricTensorField (I := I) g x) (fun _ => v)
       = P x (fun _ => v) - g.inner x v v := by
-    simp [Tensor0SBundle.metricTensorField_apply]
+    calc
+      (P x - Tensor0SBundle.metricTensorField (I := I) g x) (fun _ => v) =
+          P x (fun _ => v) -
+            Tensor0SBundle.metricTensorField (I := I) g x (fun _ => v) :=
+        Tensor0SSpace.sub_apply 2 x _ _ _
+      _ = P x (fun _ => v) - g.inner x v v := by
+        rw [Tensor0SBundle.metricTensorField_apply]
   have hnn : 0 ≤ g.inner x v v := by
     by_cases hv : v = 0
     · simp [hv]

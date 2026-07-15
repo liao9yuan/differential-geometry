@@ -1,5 +1,12 @@
 # TowerHeat
 
+## 2026-07-14 fixed residual constant
+
+`resStarBoundLF` now exposes a witness equal to `resStarCost k`, together with
+its nonnegativity and the existing derivative/residual bounds. Focused
+verification and the module refresh passed. This removes the former
+pointwise-existential constant mismatch with `TowerHeatBoundOn`.
+
 P4 bridge layer: expose the closed P3 endpoint (`resStarLFU`) plus `StarSum2.bound` as a single
 local-frame residual component bound. First step toward `TowerHeatBoundOn`.
 

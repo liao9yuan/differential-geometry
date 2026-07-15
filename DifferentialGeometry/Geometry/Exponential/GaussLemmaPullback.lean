@@ -359,8 +359,12 @@ squared Euclidean norm: there is `c > 0` with `c · ‖x‖² ≤ g_p(x, x)` for
 The unit sphere is compact (finite dimension), `g_p(x, x) > 0` there, and the
 minimum is the constant `c`. -/
 private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
-    ∃ c : ℝ, 0 < c ∧ ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x := by
+    ∃ c : ℝ, 0 < c ∧
+      (∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x) ∧
+      ∀ {d : ℝ}, (∀ x : E, d * ‖x‖ ^ 2 ≤ g.inner p x x) → d ≤ c := by
   classical
+  have hfin_pos : 0 < Module.finrank ℝ E := Nat.pos_of_ne_zero (NeZero.ne _)
+  letI : Nontrivial E := Module.nontrivial_of_finrank_pos hfin_pos
   haveI : ProperSpace E := FiniteDimensional.proper_rclike (K := ℝ) (E := E)
   set B : E →L[ℝ] E →L[ℝ] ℝ := g.inner p with hB_def
   set Q : E → ℝ := fun x => B x x with hQ
@@ -369,6 +373,8 @@ private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
       (B.continuous₂).comp (continuous_id.prodMk continuous_id)
     simpa [hQ] using this
   have hsphere : IsCompact (Metric.sphere (0 : E) 1) := isCompact_sphere 0 1
+  have hsphere_ne : (Metric.sphere (0 : E) 1).Nonempty :=
+    NormedSpace.sphere_nonempty.mpr zero_le_one
   have hQpos : ∀ x ∈ Metric.sphere (0 : E) 1, (0 : ℝ) < Q x := by
     intro x hx
     have hxne : x ≠ 0 := by
@@ -376,34 +382,49 @@ private lemma gp_coercive (g : SmoothRiemannianMetric I M) (p : M) :
       simp only [mem_sphere_zero_iff_norm, norm_zero] at hx
       exact (zero_ne_one hx)
     exact g.pos p x hxne
-  obtain ⟨c, hc_pos, hc_le⟩ :=
-    hsphere.exists_forall_le' hQcont.continuousOn hQpos
-  refine ⟨c, hc_pos, fun x => ?_⟩
-  change c * ‖x‖ ^ 2 ≤ B x x
-  rcases eq_or_ne x 0 with hx0 | hx0
-  · subst hx0
-    rw [ContinuousLinearMap.map_zero₂, norm_zero]
-    simp
-  · have hnx_pos : 0 < ‖x‖ := norm_pos_iff.mpr hx0
-    set u : E := ‖x‖⁻¹ • x with hu_def
-    have hu_sphere : u ∈ Metric.sphere (0 : E) 1 := by
-      rw [mem_sphere_zero_iff_norm, hu_def, norm_smul]
-      simp only [norm_inv, Real.norm_eq_abs, abs_of_pos hnx_pos]
-      exact inv_mul_cancel₀ (ne_of_gt hnx_pos)
-    have hcu : c ≤ B u u := hc_le u hu_sphere
-    have hx_eq : x = ‖x‖ • u := by
-      rw [hu_def, smul_smul, mul_inv_cancel₀ (ne_of_gt hnx_pos), one_smul]
-    have hQscale : B x x = ‖x‖ ^ 2 * B u u := by
-      nth_rewrite 1 [hx_eq]
-      nth_rewrite 2 [hx_eq]
-      rw [ContinuousLinearMap.map_smul₂, ContinuousLinearMap.map_smul, smul_eq_mul, smul_eq_mul]
-      ring
-    rw [hQscale]
-    have hsq_nn : 0 ≤ ‖x‖ ^ 2 := sq_nonneg _
-    calc c * ‖x‖ ^ 2 = ‖x‖ ^ 2 * c := by ring
-      _ ≤ ‖x‖ ^ 2 * B u u := mul_le_mul_of_nonneg_left hcu hsq_nn
+  obtain ⟨u₀, hu₀_sphere, hu₀_min⟩ :=
+    hsphere.exists_isMinOn hsphere_ne hQcont.continuousOn
+  set c : ℝ := Q u₀ with hc_def
+  have hc_pos : 0 < c := by
+    rw [hc_def]
+    exact hQpos u₀ hu₀_sphere
+  refine ⟨c, hc_pos, ?_, ?_⟩
+  · intro x
+    change c * ‖x‖ ^ 2 ≤ B x x
+    rcases eq_or_ne x 0 with hx0 | hx0
+    · subst hx0
+      rw [ContinuousLinearMap.map_zero₂, norm_zero]
+      simp
+    · have hnx_pos : 0 < ‖x‖ := norm_pos_iff.mpr hx0
+      set u : E := ‖x‖⁻¹ • x with hu_def
+      have hu_sphere : u ∈ Metric.sphere (0 : E) 1 := by
+        rw [mem_sphere_zero_iff_norm, hu_def, norm_smul]
+        simp only [norm_inv, Real.norm_eq_abs, abs_of_pos hnx_pos]
+        exact inv_mul_cancel₀ (ne_of_gt hnx_pos)
+      have hcuQ : Q u₀ ≤ Q u := hu₀_min hu_sphere
+      have hcu : c ≤ B u u := by
+        simpa only [hc_def, hQ] using hcuQ
+      have hx_eq : x = ‖x‖ • u := by
+        rw [hu_def, smul_smul, mul_inv_cancel₀ (ne_of_gt hnx_pos), one_smul]
+      have hQscale : B x x = ‖x‖ ^ 2 * B u u := by
+        nth_rewrite 1 [hx_eq]
+        nth_rewrite 2 [hx_eq]
+        rw [ContinuousLinearMap.map_smul₂, ContinuousLinearMap.map_smul, smul_eq_mul,
+          smul_eq_mul]
+        ring
+      rw [hQscale]
+      have hsq_nn : 0 ≤ ‖x‖ ^ 2 := sq_nonneg _
+      calc c * ‖x‖ ^ 2 = ‖x‖ ^ 2 * c := by ring
+        _ ≤ ‖x‖ ^ 2 * B u u := mul_le_mul_of_nonneg_left hcu hsq_nn
+  · intro d hd
+    have hu₀_norm : ‖u₀‖ = 1 := by
+      simpa only [mem_sphere_zero_iff_norm] using hu₀_sphere
+    have hdu₀ : d ≤ B u₀ u₀ := by
+      simpa only [hu₀_norm, one_pow, mul_one] using hd u₀
+    simpa only [hc_def, hQ] using hdu₀
 
-/-- The coercivity constant of `g.inner p`, packaged as a `Classical.choose`. -/
+/-- The optimal coercivity constant of `g.inner p`, realized as the minimum of
+the quadratic form on the Euclidean unit sphere. -/
 def gpCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) : ℝ :=
   Classical.choose (gp_coercive (I := I) g p)
 
@@ -413,7 +434,14 @@ lemma gpCoerciveConst_pos (g : SmoothRiemannianMetric I M) (p : M) :
 
 lemma gpCoerciveConst_le (g : SmoothRiemannianMetric I M) (p : M) (x : E) :
     gpCoerciveConst (I := I) g p * ‖x‖ ^ 2 ≤ g.inner p x x :=
-  (Classical.choose_spec (gp_coercive (I := I) g p)).2 x
+  (Classical.choose_spec (gp_coercive (I := I) g p)).2.1 x
+
+/-- Every valid quadratic coercivity coefficient is bounded above by the
+optimal coefficient `gpCoerciveConst`. -/
+lemma le_gpCoerciveConst (g : SmoothRiemannianMetric I M) (p : M) {c : ℝ}
+    (hc : ∀ x : E, c * ‖x‖ ^ 2 ≤ g.inner p x x) :
+    c ≤ gpCoerciveConst (I := I) g p :=
+  (Classical.choose_spec (gp_coercive (I := I) g p)).2.2 hc
 
 /-- **The `g_p`-ball radius** on which the radial-minimiser cluster is available:
 `√c · expMapC2Radius g p`, where `c` is the coercivity constant of `g.inner p`.

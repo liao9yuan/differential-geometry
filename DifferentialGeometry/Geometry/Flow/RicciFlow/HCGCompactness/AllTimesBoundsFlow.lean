@@ -123,7 +123,6 @@ theorem metricQuadFormDiff_le_metricDerivNorm
         = gk.inner x v v - gInf.inner x v v := by
     show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = _
-    rw [ContinuousMultilinearMap.sub_apply]
     have hk : metricCovDeriv (I := I) gk gRef 0 x
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gk.inner x v v := by
       show Tensor0SBundle.metricTensorField (I := I) gk x
@@ -136,7 +135,15 @@ theorem metricQuadFormDiff_le_metricDerivNorm
           (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) = gInf.inner x v v
       rw [Tensor0SBundle.metricTensorField_apply]
       simp [DifferentialGeometry.Integral.Connection.vec2]
-    rw [hk, hI]
+    calc
+      (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+          (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) =
+          metricCovDeriv (I := I) gk gRef 0 x
+              (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) -
+            metricCovDeriv (I := I) gInf gRef 0 x
+              (DifferentialGeometry.Integral.Connection.vec2 (I := I) v v) :=
+        Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
+      _ = gk.inner x v v - gInf.inner x v v := by rw [hk, hI]
   have hbound :=
     DifferentialGeometry.Integral.Connection.tensor02_quadForm_abs_le_normSq0S
       (I := I) gRef (metricDiffCovDerivAt (I := I) 0 gk gInf gRef x) v
@@ -171,7 +178,6 @@ theorem metricDiffCovDerivAt_zero_apply
     change IsManifold I ∞ M; infer_instance
   show (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = _
-  rw [ContinuousMultilinearMap.sub_apply]
   have hk : metricCovDeriv (I := I) gk gRef 0 x
       (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gk.inner x a b := by
     show Tensor0SBundle.metricTensorField (I := I) gk x
@@ -184,7 +190,36 @@ theorem metricDiffCovDerivAt_zero_apply
         (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) = gInf.inner x a b
     rw [Tensor0SBundle.metricTensorField_apply]
     simp [DifferentialGeometry.Integral.Connection.vec2]
-  rw [hk, hI]
+  calc
+    (metricCovDeriv (I := I) gk gRef 0 x - metricCovDeriv (I := I) gInf gRef 0 x)
+        (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) =
+        metricCovDeriv (I := I) gk gRef 0 x
+            (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) -
+          metricCovDeriv (I := I) gInf gRef 0 x
+            (DifferentialGeometry.Integral.Connection.vec2 (I := I) a b) :=
+      Tensor0SBundle.Tensor0SSpace.sub_apply 2 x _ _ _
+    _ = gk.inner x a b - gInf.inner x a b := by rw [hk, hI]
+
+/-- The order-zero metric-difference norm controls every bilinear evaluation,
+with the tangent-vector norms measured by the reference metric. -/
+theorem metricDiff_abs_le
+    (gk gInf gRef : SmoothRiemannianMetric I M) (x : M)
+    (v w : TangentSpace I x) :
+    |gk.inner x v w - gInf.inner x v w| ≤
+      metricDerivNorm (I := I) 0 gk gInf gRef x *
+        Real.sqrt (gRef.inner x v v) * Real.sqrt (gRef.inner x w w) := by
+  obtain ⟨basis, hON⟩ :=
+    DifferentialGeometry.Integral.Connection.exists_gOrthonormalBasis
+      (I := I) gRef x
+  have hbound := Tensor0SBundle.abs_apply_le_sqrt_normSq0S
+    (I := I) (g := gRef) (x := x) (s := 2) basis hON
+    (metricDiffCovDerivAt (I := I) 0 gk gInf gRef x)
+    (DifferentialGeometry.Integral.Connection.vec2 (I := I) v w)
+  rw [metricDiffCovDerivAt_zero_apply (I := I) gk gInf gRef x v w] at hbound
+  rw [metricDerivNorm]
+  refine hbound.trans_eq ?_
+  rw [Fin.prod_univ_two]
+  simp [DifferentialGeometry.Integral.Connection.vec2, mul_assoc]
 
 /-- Polarization: an off-diagonal component of the metric difference in a
 `gInf`-orthonormal frame is bounded by `4(C-1)` when `gInf ≃ gk` with constant
@@ -469,7 +504,6 @@ theorem log_integrable_of_sol
     refine continuous_const.mul ?_
     refine hev.congr ?_
     intro p
-    simp only [Set.restrict]
     rw [show (fun _i : Fin 2 => v) = DifferentialGeometry.Integral.Connection.vec2 (I := I) v v from by
       funext i; fin_cases i <;> rfl]
     simp [DifferentialGeometry.PDE.RicciFlow.SolutionOn.ricciAt]
@@ -522,7 +556,7 @@ theorem metricLogDerivativeInput_of_solutions
       (fun i s => (S i).family.metric s)
       (fun i t x => (S i).ricciAt t x) A where
   quad_bound := ⟨hA, fun i t ht x hx v => hquad i t ht x hx v⟩
-  metric_deriv := fun i x _hx v _hv t ht =>
+  metric_deriv := fun i x _hx v _hv _t ht =>
     ricciFlow_metric_hasDerivAt (S i) (hS i) (hwin ht) x v
   log_integrable := fun i x hx v hv t ht => hint i x hx v hv t ht
 

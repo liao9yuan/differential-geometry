@@ -21,6 +21,11 @@ The rank-zero lane is complete:
   connection Laplacian of `fromScalarField f` is exactly `toRS0` of the
   canonical rank-zero tensor representing
   `laplacian (LeviCivita g) g f`.
+- `secondRS_scalar` exposes the cheaper pre-trace producer needed downstream:
+  the explicit second covariant-derivative difference of a canonical scalar
+  lift is `toRS0` of its diagonal Hessian.  Its internal
+  `cov0_diag_hess` lemma remains private, so no private field construction
+  leaks into the public API.
 
 The final theorem deliberately targets the invariant `laplacian` rather than
 the `Delta_g` smooth wrapper.  This avoids adding the independent
@@ -30,9 +35,10 @@ smooth orthonormal frame.  It adds no consumer realization hypothesis and does
 not use `HasLocallyConstantChartAt` or unfold the mixed-tensor Hom
 representation.
 
-The shared build tree briefly lacked required upstream object files after the
-heavier Hessian-trace import was introduced; after a narrow refresh,
-verification passed without local warnings.
+Focused and targeted-module verification pass for the new producer.  The proof
+stays in the connection layer and does not import the curvature-layer
+`tensorSecondCovDeriv`; that later definition unfolds to this explicit normal
+form in its own consumer layer.
 
 ## Honest progress
 

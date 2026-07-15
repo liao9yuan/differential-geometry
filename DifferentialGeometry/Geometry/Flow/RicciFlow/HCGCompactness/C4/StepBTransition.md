@@ -149,3 +149,24 @@ Honestly-exposed explicit hypotheses (bare, not renamed):
 `normalTransition` cannot satisfy. Generalized them to **domain-conditional** (`∀ k, ∀ x
 ∈ U, …`) — the honest form matching their already-conditional conclusions. Backward
 compatible (the only caller threaded the membership through). All re-verified axiom-clean.
+
+## 2026-07-13 H6 fixed-pair entrypoint
+
+Added `exists_trans_h6`. It feeds localized H6 metric and exponential-radius
+bounds, smoothness, overlap, and coordinate maps-to data into
+`H6Isometry.normal_bounds_on` for both transition directions, then reuses the
+existing generic transition-limit extractor. It does not consume
+`ExpInverseDerivBoundInput` and introduces no replacement input structure.
+
+The canonical interface now separates convergence domains `U`, `V` from open,
+bounded target-anchor sets `Ua`, `Va`.  Forward bounds use source domain `U`
+and target anchor `Va`; reverse bounds use source domain `V` and target anchor
+`Ua`.  Metric and exponential-radius containments are required for both source
+domains and anchors, while transition `MapsTo` lands in the anchors.  The limit
+cocycle output remains conditional on membership in the convergence domains
+`U`, `V`.  Focused verification and the targeted refresh passed.
+
+After its sole downstream compatibility caller was removed, a live search found
+no remaining consumer of the old S6 fixed-pair entrypoint.  That declaration was
+removed; `exists_trans_h6` is now the canonical fixed-pair producer. Focused
+verification and the targeted refresh passed.

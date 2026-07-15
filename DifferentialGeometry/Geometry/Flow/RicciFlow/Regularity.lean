@@ -422,7 +422,7 @@ theorem coordNab2_can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (0 : Fin 3)
                 (Γ d a p • frame p x0)) := by
-          simpa using hsum
+          exact hsum
       _ = ∑ p : Idx, Γ d a p * N p i j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -466,7 +466,7 @@ theorem coordNab2_can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (1 : Fin 3)
                 (Γ d i p • frame p x0)) := by
-          simpa using hsum
+          exact hsum
       _ = ∑ p : Idx, Γ d i p * N a p j := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]
@@ -510,7 +510,7 @@ theorem coordNab2_can
             nablaA x0
               (Function.update (fun b : Fin 3 => V b x0) (2 : Fin 3)
                 (Γ d j p • frame p x0)) := by
-          simpa using hsum
+          exact hsum
       _ = ∑ p : Idx, Γ d j p * N a i p := by
           refine Finset.sum_congr rfl fun p _ => ?_
           rw [(nablaA x0).map_update_smul]

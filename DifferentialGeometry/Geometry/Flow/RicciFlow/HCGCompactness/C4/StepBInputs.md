@@ -1,4 +1,4 @@
-# StepBInputs.lean — Step B honest input (S6 / lbl418), native rebuild
+# StepBInputs.lean — Step B normal-coordinate input, native rebuild
 
 ## 2026-06-22 — added `C∞` normal chart inverse (section `NormalChartInftySmooth`)
 
@@ -225,3 +225,27 @@ estimate can drive the geodesic phase flow.
 Focused verification passed.  The quantitative moving-inverse theorem itself
 remains unstated and unproved (0%); its dedicated machinery is now about 53%,
 Step-B/B1 machinery about 65%, and whole-HCG machinery remains about 47%.
+
+## 2026-07-13: origin metric and intrinsic coercivity floor
+
+The canonical `normalMetric_zero` theorem now lives in this low Step-B layer,
+immediately above `normalCoordMetric`; the higher Step-C duplicate was removed.
+`NormalCoordMetricBoundInput.half_le_gpConst` combines the H6 origin metric
+equivalence with that identity and `le_gpCoerciveConst` to prove
+`(1 / 2 : Real) ≤ gpCoerciveConst` at every controlled center.
+
+Focused verification and the downstream refresh passed.  This closes the
+coercivity input for the true `expRadiusGp` floor, but it is producer machinery;
+`StepB1RawInput` and textbook B1 remain theorem-level 0%.
+
+## 2026-07-13: obsolete S6 input removed
+
+The H6 transition/atom consumer chain is now canonical, the endpoint bundle no
+longer carries `expInvDeriv`, and a live Lean search found no consumer of
+`NormalTransitionDerivBound` or `ExpInverseDerivBoundInput`.  Those obsolete S6
+declarations and their subsequence wrapper were removed.  Historical sections
+above describe the retired route; they are not current API status.  Focused
+verification passed.  The module header now points to the H6 metric-jet route
+instead of describing the removed endpoint field.  This cleanup removes a
+black-box input but does not start
+or prove the textbook B1 or compactness endpoint theorem, which remain 0%.

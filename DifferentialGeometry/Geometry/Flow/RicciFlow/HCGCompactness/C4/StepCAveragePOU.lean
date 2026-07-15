@@ -71,7 +71,6 @@ theorem chartSymmIdConv (g : SmoothRiemannianMetric I M) (p : M) {K : Set E}
     (hK : IsCompact K)
     (hKtarget : K ⊆ (NormalCoordinates.normalChartAt (I := I) g p).target)
     (F : Nat → Nat → E → E)
-    (hmap : ∀ a b v, v ∈ K → F a b v ∈ K)
     (hclose : ∀ δ : Real, δ > 0 → ∃ N : Nat,
       ∀ a : Nat, a ≥ N → ∀ b : Nat, b ≥ N → ∀ v : E, v ∈ K →
         dist (F a b v) v < δ) :
@@ -89,19 +88,30 @@ theorem chartSymmIdConv (g : SmoothRiemannianMetric I M) (p : M) {K : Set E}
   letI : IsContinuousRiemannianBundle E (fun x : M => TangentSpace I x) :=
     ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
   letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  let ψ := NormalCoordinates.normalChartAt (I := I) g p
+  obtain ⟨η, hηpos, hηtarget⟩ :=
+    hK.exists_cthickening_subset_open ψ.open_target hKtarget
+  let K' : Set E := Metric.cthickening η K
+  have hK' : IsCompact K' := hK.cthickening
+  have hK'target : K' ⊆ ψ.target := by
+    simpa only [K'] using hηtarget
   have huc :
       UniformContinuousOn
-        (fun v : E => (NormalCoordinates.normalChartAt (I := I) g p).symm v) K :=
-    chartSymmUnif (I := I) g p hK hKtarget
+        (fun v : E => ψ.symm v) K' :=
+    chartSymmUnif (I := I) g p hK' hK'target
   rw [Metric.uniformContinuousOn_iff] at huc
   intro ε hε
   obtain ⟨δ, hδpos, hδ⟩ := huc ε hε
-  obtain ⟨N, hN⟩ := hclose δ hδpos
+  have hminpos : 0 < min δ η := lt_min hδpos hηpos
+  obtain ⟨N, hN⟩ := hclose (min δ η) hminpos
   refine ⟨N, fun a ha b hb v hv => ?_⟩
-  have hFv : F a b v ∈ K := hmap a b v hv
-  have hdist : dist (F a b v) v < δ := hN a ha b hb v hv
+  have hvK' : v ∈ K' := Metric.self_subset_cthickening K hv
+  have hdist : dist (F a b v) v < min δ η := hN a ha b hb v hv
+  have hFvK' : F a b v ∈ K' := by
+    exact Metric.mem_cthickening_of_dist_le (F a b v) v η K hv
+      (le_trans (le_of_lt hdist) (min_le_right δ η))
   simpa [dist_comm] using
-    hδ (F a b v) hFv v hv hdist
+    hδ (F a b v) hFvK' v hvK' (lt_of_lt_of_le hdist (min_le_left δ η))
 
 /-- A coordinate convergence-to-identity estimate gives convergence of the
 decoded manifold-valued points to the original source point. -/
@@ -113,7 +123,6 @@ theorem chartPtsConv (g : SmoothRiemannianMetric I M) (p : M)
     (hScoord : ∀ x : M, x ∈ S →
       (NormalCoordinates.normalChartAt (I := I) g p) x ∈ K)
     (F : Nat → Nat → E → E)
-    (hmap : ∀ a b v, v ∈ K → F a b v ∈ K)
     (hclose : ∀ δ : Real, δ > 0 → ∃ N : Nat,
       ∀ a : Nat, a ≥ N → ∀ b : Nat, b ≥ N → ∀ v : E, v ∈ K →
         dist (F a b v) v < δ) :
@@ -137,7 +146,7 @@ theorem chartPtsConv (g : SmoothRiemannianMetric I M) (p : M)
         ∀ a : Nat, a ≥ N → ∀ b : Nat, b ≥ N → ∀ v : E, v ∈ K →
           dist (ψ.symm v) (ψ.symm (F a b v)) < ε := by
     simpa [ψ] using
-      chartSymmIdConv (I := I) g p hK hKtarget F hmap hclose
+      chartSymmIdConv (I := I) g p hK hKtarget F hclose
   intro ε hε
   obtain ⟨N, hN⟩ := hdecoded ε hε
   refine ⟨N, fun a ha b hb x hx => ?_⟩
@@ -158,8 +167,6 @@ theorem chartPtsSrcK (g : SmoothRiemannianMetric I M) (p : M)
     {S Ksrc : Set M} (hKsrc : IsCompact Ksrc) (hSsub : S ⊆ Ksrc)
     (hsrcK : Ksrc ⊆ (NormalCoordinates.normalChartAt (I := I) g p).source)
     (F : Nat -> Nat -> E -> E)
-    (hmap : ∀ a b v, v ∈ (NormalCoordinates.normalChartAt (I := I) g p) '' Ksrc ->
-      F a b v ∈ (NormalCoordinates.normalChartAt (I := I) g p) '' Ksrc)
     (hclose : ∀ δ : Real, δ > 0 -> ∃ N : Nat,
       ∀ a : Nat, a ≥ N -> ∀ b : Nat, b ≥ N -> ∀ v : E,
         v ∈ (NormalCoordinates.normalChartAt (I := I) g p) '' Ksrc ->
@@ -193,7 +200,7 @@ theorem chartPtsSrcK (g : SmoothRiemannianMetric I M) (p : M)
     exact ⟨x, hSsub hx, rfl⟩
   simpa [ψ] using
     chartPtsConv (I := I) (g := g) (p := p) (S := S) (K := ψ '' Ksrc)
-      hK hKtarget hSsource hScoord F hmap hclose
+      hK hKtarget hSsource hScoord F hclose
 
 /-- A realized proper-metric closed ball lies in the source of the normal chart
 when its radius is strictly below the radial `g_p` normal-ball radius.  This is
@@ -693,6 +700,133 @@ theorem hatCageSrcCases (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       exact NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n center
         gamma hc hrad
 
+/-- Close the actual nonzero-weight support inside the compact source ball.
+Closed limit-target containment then extends from active points to these
+compact cages, without any whole-hat or target-chart support assumption. -/
+theorem hatSuppCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (_pb : hd.PackingBound D) (_r : Real) (n : Nat)
+    {s : Set (X.obj (L.φ n)).M} {ι : Type*}
+    (mu : (X.obj (L.φ n)).M -> ι -> Real)
+    (center : ι -> (X.obj (L.φ n)).M)
+    (sourceCage : ι -> Set (X.obj (L.φ n)).M)
+    (U V' : ι -> Set E)
+    (Binf : ι -> E -> E)
+    (hCageCompact :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      forall gamma : ι, IsCompact (sourceCage gamma))
+    (hSuppCage :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      forall gamma : ι, forall x : (X.obj (L.φ n)).M,
+        x ∈ s ->
+        mu x gamma ≠ 0 -> x ∈ sourceCage gamma)
+    (hsrc :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : ι,
+        sourceCage gamma ⊆
+          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+            (center gamma)).source)
+    (hBcont : forall gamma : ι, ContinuousOn (Binf gamma) (U gamma))
+    (hKU :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : ι,
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            sourceCage gamma ⊆
+          U gamma)
+    (hV'closed : forall gamma : ι, IsClosed (V' gamma))
+    (hSuppV :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : ι, forall x : (X.obj (L.φ n)).M,
+        x ∈ s ->
+        mu x gamma ≠ 0 ->
+          Binf gamma
+              ((NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+                (center gamma)) x) ∈ V' gamma) :
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    ∃ sourceK : ι -> Set (X.obj (L.φ n)).M,
+      (forall gamma : ι, IsCompact (sourceK gamma)) ∧
+      (forall gamma : ι, forall x : (X.obj (L.φ n)).M,
+        x ∈ s ->
+        mu x gamma ≠ 0 -> x ∈ sourceK gamma) ∧
+      (forall gamma : ι, sourceK gamma ⊆
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)).source) ∧
+      (forall gamma : ι,
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) '' sourceK gamma ⊆ U gamma) ∧
+      (forall gamma : ι, forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) '' sourceK gamma -> Binf gamma v ∈ V' gamma) := by
+  letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+  letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+  letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+    (X.obj (L.φ n)).t2TangentBundle
+  let sourceBall : Set (X.obj (L.φ n)).M := s
+  let chart : ι -> (X.obj (L.φ n)).M -> E := fun gamma =>
+    NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+      (center gamma)
+  let support : ι -> Set (X.obj (L.φ n)).M := fun gamma =>
+    {x | x ∈ sourceBall ∧ mu x gamma ≠ 0}
+  let sourceK : ι -> Set (X.obj (L.φ n)).M := fun gamma =>
+    closure (support gamma)
+  have hKsub (gamma : ι) : sourceK gamma ⊆ sourceCage gamma := by
+    apply closure_minimal
+    · intro x hx
+      exact hSuppCage gamma x hx.1 hx.2
+    · exact (hCageCompact gamma).isClosed
+  refine ⟨sourceK, ?_, ?_, ?_, ?_, ?_⟩
+  · intro gamma
+    exact (hCageCompact gamma).of_isClosed_subset isClosed_closure (hKsub gamma)
+  · intro gamma x hx hmu
+    exact subset_closure ⟨hx, hmu⟩
+  · intro gamma x hx
+    exact hsrc gamma (hKsub gamma hx)
+  · intro gamma v hv
+    rcases hv with ⟨x, hx, rfl⟩
+    exact hKU gamma ⟨x, hKsub gamma hx, rfl⟩
+  · intro gamma v hv
+    rcases hv with ⟨x, hx, rfl⟩
+    have hchart : ContinuousOn (chart gamma) (sourceCage gamma) :=
+      (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+        (center gamma)).contMDiffOn_toFun.continuousOn.mono (hsrc gamma)
+    have hcomp : ContinuousOn (fun y => Binf gamma (chart gamma y))
+        (sourceCage gamma) :=
+      (hBcont gamma).comp' hchart (by
+        intro y hy
+        exact hKU gamma ⟨y, hy, rfl⟩)
+    have hclosed : IsClosed
+        (sourceCage gamma ∩
+          (fun y => Binf gamma (chart gamma y)) ⁻¹' V' gamma) :=
+      hcomp.preimage_isClosed_of_isClosed (hCageCompact gamma).isClosed
+        (hV'closed gamma)
+    have hsupp : support gamma ⊆
+        sourceCage gamma ∩
+          (fun y => Binf gamma (chart gamma y)) ⁻¹' V' gamma := by
+      intro y hy
+      exact ⟨hSuppCage gamma y hy.1 hy.2, hSuppV gamma y hy.1 hy.2⟩
+    exact (closure_minimal hsupp hclosed hx).2
+
 /-- Compact-cage convergence supplies the active-region convergence input needed
 by `unifHatIdOn`. -/
 theorem hatPtsOfCompact (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -851,8 +985,6 @@ theorem hatChartPts (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           Set (X.obj (L.φ n)).M) ->
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) x ∈ coordK gamma)
-    (hmap : ∀ gamma : Fin (pb.A r), ∀ a b : Nat, ∀ v : E,
-      v ∈ coordK gamma -> F gamma a b v ∈ coordK gamma)
     (hclose : ∀ gamma : Fin (pb.A r), ∀ δ : Real, δ > 0 -> ∃ N : Nat,
       ∀ a : Nat, a >= N -> ∀ b : Nat, b >= N -> ∀ v : E, v ∈ coordK gamma ->
         dist (F gamma a b v) v < δ) :
@@ -927,7 +1059,7 @@ theorem hatChartPts (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     chartPtsConv (I := I) (g := (X.obj (L.φ n)).metric)
       (p := center gamma) (S := S) (K := coordK gamma)
       (hK gamma) (hKtarget gamma) hSsource hScoord (F gamma)
-      (hmap gamma) (hclose gamma) eps heps
+      (hclose gamma) eps heps
   refine ⟨N, fun a ha b hb x hxsrc hxhat => ?_⟩
   exact hN a ha b hb x ⟨hxsrc, hxhat⟩
 
@@ -964,18 +1096,6 @@ theorem hatChartPtsSrcK (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       ∀ gamma : Fin (pb.A r), sourceK gamma ⊆
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source)
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      ∀ gamma : Fin (pb.A r), ∀ a b : Nat, ∀ v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) '' sourceK gamma ->
-        F gamma a b v ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) '' sourceK gamma)
     (hclose :
       letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
       letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
@@ -1048,7 +1168,7 @@ theorem hatChartPtsSrcK (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     chartPtsSrcK (I := I) (g := (X.obj (L.φ n)).metric)
       (p := center gamma) (S := S) (Ksrc := sourceK gamma)
       (hKsrc gamma) (hSsub gamma) (hsrcK gamma) (F gamma)
-      (hmap gamma) (hclose gamma) eps heps
+      (hclose gamma) eps heps
   refine ⟨N, fun a ha b hb x hxsrc hxhat => ?_⟩
   exact hN a ha b hb x ⟨hxsrc, hxhat⟩
 
@@ -1087,18 +1207,6 @@ theorem hatSrcPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       ∀ gamma : Fin (pb.A r), sourceK gamma ⊆
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source)
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      ∀ gamma : Fin (pb.A r), ∀ a b : Nat, ∀ v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) '' sourceK gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) '' sourceK gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -1179,7 +1287,7 @@ theorem hatSrcPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
   exact
     NetLimitData.hatChartPtsSrcK (I := I) (X := X) hd P L pb r n center sourceK
-      (fun gamma a b v => A gamma b (B gamma a v)) hconn hKsrc hSsub hsrcK hmap
+      (fun gamma a b v => A gamma b (B gamma a v)) hconn hKsrc hSsub hsrcK
       (fun gamma δ hδ =>
         let ψ := NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)
@@ -1192,6 +1300,149 @@ theorem hatSrcPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           (K := ψ '' sourceK gamma) (hVopen gamma) (B gamma) (Binf gamma)
           (A gamma) (Ainf gamma) (hB gamma) (hA gamma) (hBcont gamma)
           (hAcont gamma) (hid gamma) hKimg (hKU gamma) (hKV gamma) δ hδ)
+
+/-- Decoded Step-B composition converges on the actual nonzero-weight support.
+The support may be placed in any compact source cage on which the two limit
+maps compose to the identity; no whole-hat or whole-cage image hypothesis is
+required. -/
+theorem hatSuppPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (_pb : hd.PackingBound D) (_r : Real) (n : Nat)
+    {s : Set (X.obj (L.φ n)).M} {ι : Type*}
+    (mu : (X.obj (L.φ n)).M -> ι -> Real)
+    (center : ι -> (X.obj (L.φ n)).M)
+    (sourceK : ι -> Set (X.obj (L.φ n)).M)
+    (U V : ι -> Set E)
+    (B : ι -> Nat -> E -> E)
+    (Binf : ι -> E -> E)
+    (A : ι -> Nat -> E -> E)
+    (Ainf : ι -> E -> E)
+    (hconn :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      ConnectedSpace (X.obj (L.φ n)).M)
+    (hKsrc :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      forall gamma : ι, IsCompact (sourceK gamma))
+    (hSupp :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      forall gamma : ι, forall x : (X.obj (L.φ n)).M,
+        x ∈ s ->
+        mu x gamma ≠ 0 -> x ∈ sourceK gamma)
+    (hsrcK :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : ι, sourceK gamma ⊆
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)).source)
+    (hVopen : forall gamma : ι, IsOpen (V gamma))
+    (hB : forall gamma : ι,
+      MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
+    (hA : forall gamma : ι,
+      MapCInfConvOnCompacts (V gamma) (A gamma) (Ainf gamma))
+    (hBcont : forall gamma : ι, ContinuousOn (Binf gamma) (U gamma))
+    (hAcont : forall gamma : ι, ContinuousOn (Ainf gamma) (V gamma))
+    (hid : forall gamma : ι, forall v : E, v ∈ U gamma ->
+      Binf gamma v ∈ V gamma -> Ainf gamma (Binf gamma v) = v)
+    (hKU :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : ι,
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) '' sourceK gamma ⊆ U gamma)
+    (hKV :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : ι, forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) '' sourceK gamma -> Binf gamma v ∈ V gamma) :
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ n)).M
+    letI : T3Space (X.obj (L.φ n)).M := inferInstance
+    letI : RiemannianBundle
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.inner,
+        (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace (X.obj (L.φ n)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    forall gamma : ι, forall eps : Real, eps > 0 -> exists N : Nat,
+      forall a : Nat, a >= N -> forall b : Nat, b >= N ->
+        forall x : (X.obj (L.φ n)).M,
+          x ∈ s ->
+          mu x gamma ≠ 0 ->
+            dist x ((NormalCoordinates.normalChartAt (I := I)
+              (X.obj (L.φ n)).metric (center gamma)).symm
+                (A gamma b (B gamma a ((NormalCoordinates.normalChartAt (I := I)
+                  (X.obj (L.φ n)).metric (center gamma)) x)))) < eps := by
+  letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+  letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+  letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+  letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+    (X.obj (L.φ n)).t2TangentBundle
+  letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+  letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+    Manifold.metrizableSpace I (X.obj (L.φ n)).M
+  letI : T3Space (X.obj (L.φ n)).M := inferInstance
+  letI : RiemannianBundle
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.inner,
+      (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace (X.obj (L.φ n)).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+  intro gamma eps heps
+  let S : Set (X.obj (L.φ n)).M :=
+    {x | x ∈ s ∧ mu x gamma ≠ 0}
+  have hSsub : S ⊆ sourceK gamma := by
+    intro x hx
+    exact hSupp gamma x hx.1 hx.2
+  let psi := NormalCoordinates.normalChartAt (I := I)
+    (X.obj (L.φ n)).metric (center gamma)
+  have hcont : ContinuousOn (fun x : (X.obj (L.φ n)).M => psi x)
+      (sourceK gamma) :=
+    psi.contMDiffOn_toFun.continuousOn.mono (hsrcK gamma)
+  have hKimg : IsCompact (psi '' sourceK gamma) :=
+    (hKsrc gamma).image_of_continuousOn hcont
+  have hclose : forall delta : Real, delta > 0 -> exists N : Nat,
+      forall a : Nat, a >= N -> forall b : Nat, b >= N -> forall v : E,
+        v ∈ psi '' sourceK gamma -> dist (A gamma b (B gamma a v)) v < delta := by
+    intro delta hdelta
+    exact comp_tendsto_id_on (E := E) (F := E) (U := U gamma) (V := V gamma)
+      (K := psi '' sourceK gamma) (hVopen gamma) (B gamma) (Binf gamma)
+      (A gamma) (Ainf gamma) (hB gamma) (hA gamma) (hBcont gamma)
+      (hAcont gamma) (hid gamma) hKimg (hKU gamma) (hKV gamma) delta hdelta
+  obtain ⟨N, hN⟩ :=
+    chartPtsSrcK (I := I) (g := (X.obj (L.φ n)).metric)
+      (p := center gamma) (S := S) (Ksrc := sourceK gamma)
+      (hKsrc gamma) hSsub (hsrcK gamma)
+      (fun a b v => A gamma b (B gamma a v)) (by simpa [psi] using hclose)
+      eps heps
+  refine ⟨N, fun a ha b hb x hx hmu => ?_⟩
+  exact hN a ha b hb x ⟨hx, hmu⟩
 
 /-- Decoded Step-B composition convergence on the canonical finite-hat source
 cages.  This specializes `hatSrcPtsOfComp` with
@@ -1223,20 +1474,6 @@ theorem hatSrcPtsCageComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       forall gamma : Fin (pb.A r),
         4 * L.lamInf (gamma : Nat) <
           expRadiusGp (I := I) (X.obj (L.φ n)).metric (center gamma))
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -1310,7 +1547,106 @@ theorem hatSrcPtsCageComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (fun gamma =>
         NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n center gamma
           (hcenter gamma) (hR gamma))
-      hmap hVopen hB hA hBcont hAcont hid hKU hKV
+      hVopen hB hA hBcont hAcont hid hKU hKV
+
+/-- Decoded composition convergence on canonical finite-hat cages, allowing
+dead slots.  Only live sequence centers carry a radial source obligation. -/
+theorem hatPtsCasesComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (center : Fin (pb.A r) -> (X.obj (L.φ n)).M)
+    (U V : Fin (pb.A r) -> Set E)
+    (B : Fin (pb.A r) -> Nat -> E -> E)
+    (Binf : Fin (pb.A r) -> E -> E)
+    (A : Fin (pb.A r) -> Nat -> E -> E)
+    (Ainf : Fin (pb.A r) -> E -> E)
+    (hconn :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      ConnectedSpace (X.obj (L.φ n)).M)
+    (hR :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall c : (X.obj (L.φ n)).M,
+        seqCenter hd D P (L.φ n) (gamma : Nat) = some c ->
+          c = center gamma ∧
+            4 * L.lamInf (gamma : Nat) <
+              expRadiusGp (I := I) (X.obj (L.φ n)).metric c)
+    (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
+    (hB : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
+    (hA : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (V gamma) (A gamma) (Ainf gamma))
+    (hBcont : forall gamma : Fin (pb.A r), ContinuousOn (Binf gamma) (U gamma))
+    (hAcont : forall gamma : Fin (pb.A r), ContinuousOn (Ainf gamma) (V gamma))
+    (hid : forall gamma : Fin (pb.A r), forall v : E, v ∈ U gamma ->
+      Binf gamma v ∈ V gamma -> Ainf gamma (Binf gamma v) = v)
+    (hKU :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r),
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ⊆
+          U gamma)
+    (hKV :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) ''
+            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
+        Binf gamma v ∈ V gamma) :
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ n)).M
+    letI : T3Space (X.obj (L.φ n)).M := inferInstance
+    letI : RiemannianBundle
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.inner,
+        (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace (X.obj (L.φ n)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    forall gamma : Fin (pb.A r), forall eps : Real, eps > 0 -> exists N : Nat,
+      forall a : Nat, a >= N -> forall b : Nat, b >= N ->
+        forall x : (X.obj (L.φ n)).M,
+          x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+            x ∈ (NetLimitData.hatBall (I := I) (X := X) (hd := hd) (D := D)
+              (P := P) (L := L) (pb := pb) (r := r) (k := n) (γ := gamma) :
+              Set (X.obj (L.φ n)).M) ->
+              dist x ((NormalCoordinates.normalChartAt (I := I)
+                (X.obj (L.φ n)).metric (center gamma)).symm
+                  (A gamma b (B gamma a ((NormalCoordinates.normalChartAt (I := I)
+                    (X.obj (L.φ n)).metric (center gamma)) x)))) < eps := by
+  let sourceK : Fin (pb.A r) -> Set (X.obj (L.φ n)).M := fun gamma =>
+    NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma
+  exact
+    NetLimitData.hatSrcPtsOfComp (I := I) (X := X) hd P L pb r n center sourceK
+      U V B Binf A Ainf hconn
+      (NetLimitData.hatCageCompact (I := I) (X := X) hd P L pb r n)
+      (NetLimitData.hatCageSub (I := I) (X := X) hd P L pb r n)
+      (NetLimitData.hatCageSrcCases (I := I) (X := X) hd P L pb r n center hR)
+      hVopen hB hA hBcont hAcont hid hKU hKV
 
 /-- Step-B two-sided local maps supply the decoded normal-coordinate point
 convergence required by the Step-C averaging consumer.  This is the same
@@ -1370,8 +1706,6 @@ theorem hatChartPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           Set (X.obj (L.φ n)).M) ->
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) x ∈ coordK gamma)
-    (hmap : forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-      v ∈ coordK gamma -> A gamma b (B gamma a v) ∈ coordK gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -1418,7 +1752,7 @@ theorem hatChartPtsOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   exact
     NetLimitData.hatChartPts (I := I) (X := X) hd P L pb r n center coordK
       (fun gamma a b v => A gamma b (B gamma a v)) hconn hK hKtarget hsource
-      hcoord hmap
+      hcoord
       (fun gamma δ hδ =>
         comp_tendsto_id_on (E := E) (F := E) (U := U gamma) (V := V gamma)
           (K := coordK gamma) (hVopen gamma) (B gamma) (Binf gamma) (A gamma)
@@ -1490,6 +1824,132 @@ theorem hatPOUDataTwo (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   change x ∈ Metric.closedBall (X.obj (L.φ n)).basepoint r at hx
   simpa [Finset.sum_apply] using
     (NetLimitData.hatPOU_active_data (I := I) (X := X) (hd := hd) (D := D) (P := P) (L := L) (pb := pb) (r := r) (k := n) (ρ := rho) (hρ := hrho) (x := x) hx)
+
+/-- Choose a positive vanishing radius for a finite family of POU-active hat
+points from their uniform convergence on the corresponding hat balls. -/
+theorem exists_hat_radius (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (rho :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
+      SmoothPartitionOfUnity (Fin (pb.A r)) I (X.obj (L.φ n)).M
+        (Metric.closedBall (X.obj (L.φ n)).basepoint r))
+    (hrho :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
+      rho.IsSubordinate (fun gamma : Fin (pb.A r) =>
+        (NetLimitData.hatBall (I := I) (X := X) (hd := hd) (D := D)
+          (P := P) (L := L) (pb := pb) (r := r) (k := n) (γ := gamma) :
+          Set (X.obj (L.φ n)).M)))
+    (ptsSeq : Nat → Nat → (X.obj (L.φ n)).M → Fin (pb.A r) →
+      (X.obj (L.φ n)).M)
+    (hconn :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      ConnectedSpace (X.obj (L.φ n)).M)
+    (hpts :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      letI : RiemannianBundle
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.inner,
+          (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace (X.obj (L.φ n)).M :=
+        HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+      ∀ gamma : Fin (pb.A r), ∀ eps : Real, eps > 0 → ∃ N : Nat,
+        ∀ a : Nat, a ≥ N → ∀ b : Nat, b ≥ N → ∀ x : (X.obj (L.φ n)).M,
+          x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n →
+            x ∈ (NetLimitData.hatBall (I := I) (X := X) (hd := hd) (D := D)
+              (P := P) (L := L) (pb := pb) (r := r) (k := n) (γ := gamma) :
+              Set (X.obj (L.φ n)).M) →
+              dist x (ptsSeq a b x gamma) < eps) :
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ n)).M
+    letI : T3Space (X.obj (L.φ n)).M := inferInstance
+    letI : RiemannianBundle
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.inner,
+        (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace (X.obj (L.φ n)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    ∃ radSeq : Nat → Nat → (X.obj (L.φ n)).M → Real,
+      (∀ a b : Nat, ∀ x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n →
+          0 < radSeq a b x) ∧
+      (∀ a b : Nat, ∀ x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n →
+          ∀ gamma : Fin (pb.A r), rho gamma x ≠ 0 →
+            dist x (ptsSeq a b x gamma) < radSeq a b x) ∧
+      ∀ eps : Real, eps > 0 → ∃ N : Nat,
+        ∀ a : Nat, a ≥ N → ∀ b : Nat, b ≥ N → ∀ x : (X.obj (L.φ n)).M,
+          x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n →
+            radSeq a b x < eps := by
+  letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+  letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+  letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+  letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+    (X.obj (L.φ n)).t2TangentBundle
+  letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+  letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+    Manifold.metrizableSpace I (X.obj (L.φ n)).M
+  letI : T3Space (X.obj (L.φ n)).M := inferInstance
+  letI : RiemannianBundle
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.inner,
+      (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace (X.obj (L.φ n)).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+  obtain ⟨radSeq, hpos, hactive, htail⟩ :=
+    centerAverage.exists_active_radius
+      (X := (X.obj (L.φ n)).M) (ι := Fin (pb.A r))
+      (s := NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+      (target := fun x : (X.obj (L.φ n)).M => x)
+      (μSeq := fun _a _b x gamma => rho gamma x) (ptsSeq := ptsSeq) (by
+        intro gamma eps heps
+        obtain ⟨N, hN⟩ := hpts gamma eps heps
+        refine ⟨N, fun a ha b hb x hx hne => ?_⟩
+        exact hN a ha b hb x hx
+          ((NetLimitData.hatPOUDataTwo (I := I) (X := X) (hd := hd) (D := D)
+            (P := P) (L := L) (pb := pb) (r := r) (n := n) (rho := rho)
+            (hrho := hrho) a b hx).2 gamma hne))
+  exact ⟨radSeq, fun a b x _hx => hpos a b x, hactive, htail⟩
 
 /-- Frozen-source POU averaging convergence.
 
@@ -2109,8 +2569,6 @@ theorem unifHatIdOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           Set (X.obj (L.φ n)).M) ->
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) x ∈ coordK gamma)
-    (hmap : forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-      v ∈ coordK gamma -> A gamma b (B gamma a v) ∈ coordK gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -2209,7 +2667,7 @@ theorem unifHatIdOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (by
         simpa [ptsSeq, decodedCompPts] using
           NetLimitData.hatChartPtsOfComp (I := I) (X := X) hd P L pb r n center
-            coordK U V B Binf A Ainf hconn hK hKtarget hsource hcoord hmap hVopen
+            coordK U V B Binf A Ainf hconn hK hKtarget hsource hcoord hVopen
             hB hA hBcont hAcont hid hKU hKV)
 
 /-- Self-centered frozen-source POU averaging convergence for decoded Step-B
@@ -2344,8 +2802,6 @@ theorem unifHatIdSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           Set (X.obj (L.φ n)).M) ->
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)) x ∈ coordK gamma)
-    (hmap : forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-      v ∈ coordK gamma -> A gamma b (B gamma a v) ∈ coordK gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -2444,7 +2900,7 @@ theorem unifHatIdSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (by
         simpa [ptsSeq, decodedCompPts] using
           NetLimitData.hatChartPtsOfComp (I := I) (X := X) hd P L pb r n center
-            coordK U V B Binf A Ainf hconn hK hKtarget hsource hcoord hmap hVopen
+            coordK U V B Binf A Ainf hconn hK hKtarget hsource hcoord hVopen
             hB hA hBcont hAcont hid hKU hKV)
 
 /-- Frozen-source POU averaging convergence for decoded Step-B composition
@@ -2583,18 +3039,6 @@ theorem unifHatSrcOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       forall gamma : Fin (pb.A r), sourceK gamma ⊆
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source)
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) '' sourceK gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) '' sourceK gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -2708,7 +3152,7 @@ theorem unifHatSrcOfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (by
         simpa [ptsSeq, decodedCompPts] using
           NetLimitData.hatSrcPtsOfComp (I := I) (X := X) hd P L pb r n center
-            sourceK U V B Binf A Ainf hconn hKsrc hSsub hsrcK hmap hVopen hB hA
+            sourceK U V B Binf A Ainf hconn hKsrc hSsub hsrcK hVopen hB hA
             hBcont hAcont hid hKU hKV)
 
 /-- Self-centered decoded composition averaging with compact source cages in
@@ -2821,18 +3265,6 @@ theorem unifHatSrcSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       forall gamma : Fin (pb.A r), sourceK gamma ⊆
         (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
           (center gamma)).source)
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) '' sourceK gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) '' sourceK gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -2946,7 +3378,7 @@ theorem unifHatSrcSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
       (by
         simpa [ptsSeq, decodedCompPts] using
           NetLimitData.hatSrcPtsOfComp (I := I) (X := X) hd P L pb r n center
-            sourceK U V B Binf A Ainf hconn hKsrc hSsub hsrcK hmap hVopen hB hA
+            sourceK U V B Binf A Ainf hconn hKsrc hSsub hsrcK hVopen hB hA
             hBcont hAcont hid hKU hKV)
 
 /-- Frozen-source POU averaging convergence for decoded Step-B composition
@@ -3079,20 +3511,6 @@ theorem unifHatCageComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
               (fun y : (X.obj (L.φ n)).M => fun gamma : Fin (pb.A r) => rho gamma y)
               (ptsSeq a b) (fun y : (X.obj (L.φ n)).M => y) x)
             join (pSeq a b x) (radSeq a b x))
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -3194,7 +3612,7 @@ theorem unifHatCageComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         simpa [sourceK] using
           NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n center
             gamma (hcenter gamma) (hR gamma))
-      (by simpa [sourceK] using hmap) hVopen hB hA hBcont hAcont hid
+      hVopen hB hA hBcont hAcont hid
       (by simpa [sourceK] using hKU)
       (by simpa [sourceK] using hKV)
 
@@ -3293,20 +3711,6 @@ theorem unifHatCageSrc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
             (centerAverage.activeFill mu (ptsSeq a b)
               (fun y : (X.obj (L.φ n)).M => y) x)
             join x (radSeq a b x))
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -3428,7 +3832,7 @@ theorem unifHatCageSrc (hd : InjRadiusDecayInput (I := I) X) {D : Real}
           (by simpa [sourceK] using
             NetLimitData.hatCageSub (I := I) (X := X) hd P L pb r n)
           (by simpa [sourceK] using hsrcK)
-          (by simpa [sourceK] using hmap) hVopen hB hA hBcont hAcont hid
+          hVopen hB hA hBcont hAcont hid
           (by simpa [sourceK] using hKU)
           (by simpa [sourceK] using hKV))
 
@@ -3534,20 +3938,6 @@ theorem unifHatCageSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
               (fun y : (X.obj (L.φ n)).M => fun gamma : Fin (pb.A r) => rho gamma y)
               (ptsSeq a b) (fun y : (X.obj (L.φ n)).M => y) x)
             join x (radSeq a b x))
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -3649,9 +4039,212 @@ theorem unifHatCageSelfComp (hd : InjRadiusDecayInput (I := I) X) {D : Real}
         simpa [sourceK] using
           NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n center
             gamma (hcenter gamma) (hR gamma))
-      (by simpa [sourceK] using hmap) hVopen hB hA hBcont hAcont hid
+      hVopen hB hA hBcont hAcont hid
       (by simpa [sourceK] using hKU)
       (by simpa [sourceK] using hKV)
+
+/-- Self-centered decoded composition averaging on compact cages containing
+only the actual nonzero-weight support. -/
+theorem unifHatSuppData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (mu : (X.obj (L.φ n)).M -> Fin (pb.A r) -> Real)
+    (hmu :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : MetricSpace (X.obj (L.φ n)).M := (P (L.φ n)).ms
+      centerAverage.WeightDataOn
+        (NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+        (fun _ : Fin (pb.A r) => Set.univ) mu)
+    (join : (X.obj (L.φ n)).M -> (X.obj (L.φ n)).M -> Real ->
+      (X.obj (L.φ n)).M)
+    (radSeq : Nat -> Nat -> (X.obj (L.φ n)).M -> Real)
+    (center : Fin (pb.A r) -> (X.obj (L.φ n)).M)
+    (sourceK : Fin (pb.A r) -> Set (X.obj (L.φ n)).M)
+    (U V : Fin (pb.A r) -> Set E)
+    (B : Fin (pb.A r) -> Nat -> E -> E)
+    (Binf : Fin (pb.A r) -> E -> E)
+    (A : Fin (pb.A r) -> Nat -> E -> E)
+    (Ainf : Fin (pb.A r) -> E -> E)
+    (hconn :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      ConnectedSpace (X.obj (L.φ n)).M)
+    (hX : SeqMetricComplete (I := I) X)
+    (hKsrc :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      forall gamma : Fin (pb.A r), IsCompact (sourceK gamma))
+    (hSupp :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      forall gamma : Fin (pb.A r), forall x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+        mu x gamma ≠ 0 -> x ∈ sourceK gamma)
+    (hsrcK :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), sourceK gamma ⊆
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)).source)
+    (hrad : forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+      x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+        0 < radSeq a b x)
+    (hactive_mem :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      letI : RiemannianBundle
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+      letI : IsContinuousRiemannianBundle E
+          (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+        ⟨(X.obj (L.φ n)).metric.inner,
+          (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+      letI : MetricSpace (X.obj (L.φ n)).M :=
+        HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+      let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+          forall gamma : Fin (pb.A r), mu x gamma ≠ 0 ->
+            dist x (ptsSeq a b x gamma) < radSeq a b x)
+    (hstrict :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+      forall a b : Nat, forall x : (X.obj (L.φ n)).M,
+        x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+          StrictDistInput (I := I) (X.obj (L.φ n)).metric
+            (centerAverage.activeFill mu (ptsSeq a b)
+              (fun y : (X.obj (L.φ n)).M => y) x)
+            join x (radSeq a b x))
+    (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
+    (hB : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
+    (hA : forall gamma : Fin (pb.A r),
+      MapCInfConvOnCompacts (V gamma) (A gamma) (Ainf gamma))
+    (hBcont : forall gamma : Fin (pb.A r), ContinuousOn (Binf gamma) (U gamma))
+    (hAcont : forall gamma : Fin (pb.A r), ContinuousOn (Ainf gamma) (V gamma))
+    (hid : forall gamma : Fin (pb.A r), forall v : E, v ∈ U gamma ->
+      Binf gamma v ∈ V gamma -> Ainf gamma (Binf gamma v) = v)
+    (hKU :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r),
+        (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) '' sourceK gamma ⊆ U gamma)
+    (hKV :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      forall gamma : Fin (pb.A r), forall v : E,
+        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
+          (center gamma)) '' sourceK gamma -> Binf gamma v ∈ V gamma) :
+    let hcomplete :=
+      NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
+    letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+    letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+    letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+    letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+    letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+    letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+      (X.obj (L.φ n)).t2TangentBundle
+    letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+    letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+      Manifold.metrizableSpace I (X.obj (L.φ n)).M
+    letI : T3Space (X.obj (L.φ n)).M := inferInstance
+    letI : RiemannianBundle
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+    letI : IsContinuousRiemannianBundle E
+        (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+      ⟨(X.obj (L.φ n)).metric.inner,
+        (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+    letI : MetricSpace (X.obj (L.φ n)).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+    let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+    forall eps : Real, eps > 0 -> exists N : Nat,
+      forall a : Nat, a >= N -> forall b : Nat, b >= N ->
+        forall x : (X.obj (L.φ n)).M,
+          x ∈ NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n ->
+            dist x
+              (centerAverageOn (I := I) (X.obj (L.φ n)).metric
+                (NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+                mu
+                (centerAverage.activeFill mu (ptsSeq a b)
+                  (fun y : (X.obj (L.φ n)).M => y))
+                join (fun y : (X.obj (L.φ n)).M => y) (radSeq a b)
+                (fun y : (X.obj (L.φ n)).M => y)
+                (fun y hy => centerAverage.inputOfFillSelf (I := I)
+                  (g := (X.obj (L.φ n)).metric) (μ := mu)
+                  (pts := ptsSeq a b) (join := join)
+                  (r := radSeq a b) (qstar := fun y : (X.obj (L.φ n)).M => y)
+                  y hcomplete (hrad a b y hy)
+                  (hactive_mem a b y hy)
+                  ((hmu.data hy).1.1) ((hmu.data hy).1.2.1)
+                  (hstrict a b y hy)) x) < eps := by
+  letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+  letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+  letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+  letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+  letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+  letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+    (X.obj (L.φ n)).t2TangentBundle
+  letI : ConnectedSpace (X.obj (L.φ n)).M := hconn
+  letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+    Manifold.metrizableSpace I (X.obj (L.φ n)).M
+  letI : T3Space (X.obj (L.φ n)).M := inferInstance
+  letI : RiemannianBundle
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E
+      (fun x : (X.obj (L.φ n)).M => TangentSpace I x) :=
+    ⟨(X.obj (L.φ n)).metric.inner,
+      (X.obj (L.φ n)).metric.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace (X.obj (L.φ n)).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+  let hcomplete :=
+    NetLimitData.sourceComplete (I := I) (X := X) hd P L n hX hconn
+  let ptsSeq := decodedCompPts (I := I) (X.obj (L.φ n)).metric center B A
+  exact centerAverage.unifTwoIdDataSelf (I := I)
+    (g := (X.obj (L.φ n)).metric) (join := join)
+    (s := NetLimitData.hatSourceBall (I := I) (X := X) hd P L r n)
+    (USeq := fun _ _ gamma => {x | mu x gamma ≠ 0})
+    (μSeq := fun _ _ => mu) (ptsSeq := ptsSeq) (rSeq := radSeq)
+    hcomplete hrad (by simpa [ptsSeq] using hactive_mem)
+    (fun _ _ y hy => ⟨(hmu.data hy).1, fun _ hne => hne⟩)
+    (by simpa [ptsSeq] using hstrict)
+    (by
+      simpa [ptsSeq, decodedCompPts] using
+        NetLimitData.hatSuppPtsOfComp (I := I) (X := X) hd P L pb r n mu center
+          sourceK U V B Binf A Ainf hconn hKsrc hSupp hsrcK hVopen hB hA
+          hBcont hAcont hid hKU hKV)
 
 /-- Self-centered decoded composition averaging on the canonical finite-hat
 cages for explicit normalized weights active in the existing `4 * lamInf`
@@ -3750,20 +4343,6 @@ theorem unifHatCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
             (centerAverage.activeFill mu (ptsSeq a b)
               (fun y : (X.obj (L.φ n)).M => y) x)
             join x (radSeq a b x))
-    (hmap :
-      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
-      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
-      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
-      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
-        (X.obj (L.φ n)).t2TangentBundle
-      forall gamma : Fin (pb.A r), forall a b : Nat, forall v : E,
-        v ∈ (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-          (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma ->
-        A gamma b (B gamma a v) ∈
-          (NormalCoordinates.normalChartAt (I := I) (X.obj (L.φ n)).metric
-            (center gamma)) ''
-            NetLimitData.hatSourceCage (I := I) (X := X) hd P L pb r n gamma)
     (hVopen : forall gamma : Fin (pb.A r), IsOpen (V gamma))
     (hB : forall gamma : Fin (pb.A r),
       MapCInfConvOnCompacts (U gamma) (B gamma) (Binf gamma))
@@ -3889,7 +4468,7 @@ theorem unifHatCageData (hd : InjRadiusDecayInput (I := I) X) {D : Real}
             simpa [sourceK] using
               NetLimitData.hatCageSrcOfRad (I := I) (X := X) hd P L pb r n
                 center gamma (hcenter gamma) (hR gamma))
-          (by simpa [sourceK] using hmap) hVopen hB hA hBcont hAcont hid
+          hVopen hB hA hBcont hAcont hid
           (by simpa [sourceK] using hKU)
           (by simpa [sourceK] using hKV))
 

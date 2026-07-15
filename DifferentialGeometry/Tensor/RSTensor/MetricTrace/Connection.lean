@@ -51,7 +51,7 @@ private def connTraceEvalLin
           (extChartAt I x x))
       (A β) Fin.elim0
   map_add' β γ := by
-    simp only [metricTrace0S2InBasis, map_add, ContinuousMultilinearMap.add_apply]
+    simp only [metricTrace0S2InBasis, map_add, Tensor0SSpace.add_apply]
     rw [← Finset.sum_add_distrib]
     apply Finset.sum_congr rfl
     intro i _
@@ -60,7 +60,7 @@ private def connTraceEvalLin
     intro j _
     ring_nf
   map_smul' c β := by
-    simp only [metricTrace0S2InBasis, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
+    simp only [metricTrace0S2InBasis, map_smul, Tensor0SSpace.smul_apply, smul_eq_mul]
     rw [Finset.mul_sum]
     apply Finset.sum_congr rfl
     intro i _
@@ -593,6 +593,82 @@ theorem normSq02_smooth
         (𝕜 := Real) (I := I) (M := M) A x₀
         (fun q : Fin 2 => if q = 0 then k else l))
   exact hRhs.congr_of_eventuallyEq (normSq02_eventually (I := I) g A x₀)
+
+/-- Local coordinate expansion of the intrinsic squared norm of a smooth
+covariant tensor field of arbitrary valence. -/
+private theorem normSq0S_eventually
+    (g : SmoothRiemannianMetric I M) {s : Nat}
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s)
+    (x₀ : M) :
+    (fun y : M => normSq0S (I := I) g y s (A y)) =ᶠ[nhds x₀]
+      fun y : M =>
+        ∑ I0 : Fin s → CoordinateIdx (𝕜 := Real) E,
+          ∑ J0 : Fin s → CoordinateIdx (𝕜 := Real) E,
+            (∏ a : Fin s,
+                inverseMetricFlatModelInChart_component (I := I) g x₀
+                  (I0 a) (J0 a) (extChartAt I x₀ y)) *
+              A y (fun a : Fin s => coordinateFrameAt (I := I) x₀ (I0 a) y) *
+              A y (fun a : Fin s => coordinateFrameAt (I := I) x₀ (J0 a) y) := by
+  classical
+  filter_upwards
+    [(coordinateFrameSet_open (I := I) x₀).mem_nhds
+      (coordinateFrameAt_mem (I := I) x₀)] with y hy
+  let basis := coordinateFrameAt_basis (I := I) x₀ hy
+  let gInv : CoordinateIdx (𝕜 := Real) E → CoordinateIdx (𝕜 := Real) E → Real :=
+    fun i j =>
+      inverseMetricFlatModelInChart_component (I := I) g x₀ i j
+        (extChartAt I x₀ y)
+  rw [normSq0S_eq_coord (I := I) g y s basis gInv
+    (gInvBasisAt (I := I) g x₀ hy) (A y)]
+  unfold coordInner0S tensor0SComponent
+  refine Finset.sum_congr rfl fun I0 _ => Finset.sum_congr rfl fun J0 _ => ?_
+  have hI : (fun a : Fin s => basis (I0 a)) =
+      (fun a : Fin s => coordinateFrameAt (I := I) x₀ (I0 a) y) := by
+    funext a
+    simp [basis, coordinateFrameAt_basis_apply]
+  have hJ : (fun a : Fin s => basis (J0 a)) =
+      (fun a : Fin s => coordinateFrameAt (I := I) x₀ (J0 a) y) := by
+    funext a
+    simp [basis, coordinateFrameAt_basis_apply]
+  rw [hI, hJ]
+
+/-- The intrinsic squared norm of a smooth covariant tensor field of any
+finite valence is smooth. -/
+theorem normSq0S_smooth {s : Nat}
+    (g : SmoothRiemannianMetric I M)
+    (A : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      (n := (∞ : WithTop ℕ∞)) s) :
+    ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+      (fun x : M => normSq0S (I := I) g x s (A x)) := by
+  classical
+  intro x₀
+  have hRhs :
+      ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+        (fun y : M =>
+          ∑ I0 : Fin s → CoordinateIdx (𝕜 := Real) E,
+            ∑ J0 : Fin s → CoordinateIdx (𝕜 := Real) E,
+              (∏ a : Fin s,
+                  inverseMetricFlatModelInChart_component (I := I) g x₀
+                    (I0 a) (J0 a) (extChartAt I x₀ y)) *
+                A y (fun a : Fin s => coordinateFrameAt (I := I) x₀ (I0 a) y) *
+                A y (fun a : Fin s => coordinateFrameAt (I := I) x₀ (J0 a) y))
+        x₀ := by
+    refine ContMDiffAt.sum fun I0 _ => ContMDiffAt.sum fun J0 _ => ?_
+    have hInv :
+        ContMDiffAt I 𝓘(Real, Real) (∞ : WithTop ℕ∞)
+          (fun y : M =>
+            ∏ a : Fin s,
+              inverseMetricFlatModelInChart_component (I := I) g x₀
+                (I0 a) (J0 a) (extChartAt I x₀ y)) x₀ := by
+      exact ContMDiffAt.prod fun a _ =>
+        gInvComp_contMDiffAt (I := I) g x₀ (I0 a) (J0 a)
+    exact ((hInv.mul
+      (DifferentialGeometry.Tensor.Coordinates.tensor0S_eval_coordinateFrame_contMDiffAt
+        (𝕜 := Real) (I := I) (M := M) A x₀ I0)).mul
+      (DifferentialGeometry.Tensor.Coordinates.tensor0S_eval_coordinateFrame_contMDiffAt
+        (𝕜 := Real) (I := I) (M := M) A x₀ J0))
+  exact hRhs.congr_of_eventuallyEq (normSq0S_eventually (I := I) g A x₀)
 
 theorem connTraceCoeff_eventually
     (g : SmoothRiemannianMetric I M)

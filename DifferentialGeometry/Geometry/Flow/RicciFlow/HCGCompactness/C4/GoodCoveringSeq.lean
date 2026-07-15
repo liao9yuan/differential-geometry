@@ -355,6 +355,38 @@ def BInter (hd : InjRadiusDecayInput (I := I) X) (D : Real)
     (letI : MetricSpace (X.obj k).M := (P k).ms
      ¬ Disjoint (Metric.ball x (5 * lamInf α)) (Metric.ball y (5 * lamInf β)))
 
+/-- Intersection of the stabilized `B`-balls is symmetric in the two slots. -/
+theorem BInter.symm (hd : InjRadiusDecayInput (I := I) X) (D : Real)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k)) (lamInf : Nat → Real)
+    {a b k : Nat} (h : BInter hd D P lamInf a b k) :
+    BInter hd D P lamInf b a k := by
+  obtain ⟨x, y, hx, hy, hinter⟩ := h
+  refine ⟨y, x, hy, hx, ?_⟩
+  intro hdisj
+  exact hinter hdisj.symm
+
+/-- On one common finite tail, every currently intersecting pair belongs to
+the eventually-intersecting branch of a stabilized net. -/
+theorem NetLimitData.binter_stable_tail
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    (hstable : ∀ α β : Nat,
+      (∀ᶠ k in atTop, BInter hd D P L.lamInf α β (L.φ k)) ∨
+      (∀ᶠ k in atTop, ¬ BInter hd D P L.lamInf α β (L.φ k))) :
+    ∀ᶠ k in atTop, ∀ α β : Fin (pb.A r),
+      BInter hd D P L.lamInf (α : Nat) (β : Nat) (L.φ k) →
+        ∀ᶠ j in atTop,
+          BInter hd D P L.lamInf (α : Nat) (β : Nat) (L.φ j) := by
+  apply Filter.eventually_all.mpr
+  intro α
+  apply Filter.eventually_all.mpr
+  intro β
+  rcases hstable (α : Nat) (β : Nat) with hinter | hdisjoint
+  · exact Filter.Eventually.of_forall fun _ _ => hinter
+  · filter_upwards [hdisjoint] with k hk
+    exact fun hmeet => (hk hmeet).elim
+
 /-- MSM135 `lbl383` item 6 (intersection stability): a further refinement of the
 diagonal subsequence on which every pairwise `B`-ball intersection pattern is
 eventually constant — for each pair, the balls eventually always meet or eventually

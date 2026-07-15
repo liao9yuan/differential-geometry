@@ -32,3 +32,12 @@ verification passed, and the module object was refreshed.  This is a generic
 branch-interface adapter, so the interface brick remains 100%; it does not
 change the concrete B1 endpoint (still 0%) or the project-wide machinery
 estimates above.
+
+## 2026-07-14 fixed-endpoint inverse section
+
+Added `DiagInvBranch.inv_snd_inf`.  On any set whose fixed-endpoint pairs lie
+in the selected branch domain, the inverse fiber component is a smooth tangent
+section based at the moving first point.  The proof only composes the existing
+`inv_inf` producer and corrects the total-space base with `proj_eq`; it adds no
+branch field or quantitative assumption.  Focused verification passed, and the
+module object was refreshed successfully.

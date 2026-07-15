@@ -99,7 +99,7 @@ theorem resStarBoundLF
     ∃ T : Tensor0SField (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
         (n := (∞ : WithTop ℕ∞)) (4 + k),
       StarSum2 (I := I) S (t : Real) k T ∧
-      ∃ C : Real, 0 ≤ C ∧
+      ∃ C : Real, C = resStarCost k ∧ 0 ≤ C ∧
         (∀ (y : M) (hy : y ∈ u) (I0 : Fin (4 + k) → Fin 3),
           HasDerivWithinAt
             (fun r : Real =>
@@ -116,11 +116,12 @@ theorem resStarBoundLF
               Real.sqrt (stNormSq (I := I) S (t : Real) j y (hframe.toBasisAt hy)) *
                 Real.sqrt (stNormSq (I := I) S (t : Real) (k - j) y (hframe.toBasisAt hy))) := by
   -- P3 endpoint: the residual is a `StarSum2` witness with the uniform derivative identity.
-  obtain ⟨T, hT, hcomp⟩ :=
+  obtain ⟨T, hTcost, hcomp⟩ :=
     resStarLFU (I := I) S hS k t frame hframe hu hdim horthU hbase baseDt chrDt hrm hchr hchrId hswap
-  -- Cauchy–Schwarz bound on the witness, in `Fin 3` index data.
-  obtain ⟨C, hC0, hCbound⟩ := StarSum2.bound (Idx := Fin 3) hT
-  refine ⟨T, hT, C, hC0, hcomp, ?_⟩
+  have hT := hTcost.mem
+  have hC0 := hTcost.nonneg
+  have hCbound := hTcost.bound
+  refine ⟨T, hT, resStarCost k, rfl, hC0, hcomp, ?_⟩
   intro y hy m
   -- Orthonormality for the `family` metric at the pointwise basis (`family = base`, `rfl`).
   have horthFam : ∀ i j : Fin 3,

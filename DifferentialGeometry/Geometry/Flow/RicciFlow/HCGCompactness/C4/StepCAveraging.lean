@@ -14,7 +14,7 @@ the weights and points are supplied explicitly at each source point.
 
 noncomputable section
 
-universe u uE uH uX
+universe u uE uH uX uY
 
 namespace DifferentialGeometry
 namespace HCGCompactness
@@ -85,6 +85,45 @@ noncomputable def activeFill (μ : X → ι → ℝ) (pts : X → ι → M)
   classical
   exact fun x i => if μ x i = 0 then qstar x else pts x i
 
+/-- Replacing zero-weight entries by the target point does not change the
+center energy. -/
+theorem energy_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
+    (μ : X → ι → ℝ) (pts : X → ι → M) (qstar : X → M)
+    (x : X) (q : M) :
+    CenterOfMass.centerEnergy (I := I) g (μ x) (activeFill μ pts qstar x) q =
+      CenterOfMass.centerEnergy (I := I) g (μ x) (pts x) q := by
+  apply CenterOfMass.centerEnergy_congr
+  intro i hi
+  simp only [activeFill, hi, ↓reduceIte]
+
+/-- A center input for the active-filled family gives the unique global
+minimizer of the original weighted energy. -/
+theorem uniqueMin_activeFill [Fintype ι] (g : SmoothRiemannianMetric I M)
+    (μ : X → ι → ℝ) (pts : X → ι → M) (qstar : X → M)
+    (join : M → M → ℝ → M) (p : X → M) (r : X → ℝ)
+    (x : X) (h : CenterInput (I := I) g (μ x)
+      (activeFill μ pts qstar x) join (p x) (r x)) :
+    ∃! y : M, ∀ z : M,
+      CenterOfMass.centerEnergy (I := I) g (μ x) (pts x) y ≤
+        CenterOfMass.centerEnergy (I := I) g (μ x) (pts x) z := by
+  letI : RiemannianBundle (fun y : M => TangentSpace I y) :=
+    ⟨g.toRiemannianMetric⟩
+  letI : IsContinuousRiemannianBundle E (fun y : M => TangentSpace I y) :=
+    ⟨g.inner, g.contMDiff.continuous, fun _ _ _ => rfl⟩
+  letI : MetricSpace M := HopfRinow.riemMetricSpace (I := I) (M := M)
+  obtain ⟨y, _hy, hmin, huniq⟩ := h.exists_cm
+  refine ⟨y, ?_, ?_⟩
+  · intro z
+    rw [← energy_activeFill g μ pts qstar x y,
+      ← energy_activeFill g μ pts qstar x z]
+    exact hmin z
+  · intro y' hy'
+    apply huniq y'
+    intro z
+    rw [energy_activeFill g μ pts qstar x y',
+      energy_activeFill g μ pts qstar x z]
+    exact hy' z
+
 /-- If every nonzero-weight entry is close to the target, then every filled
 entry is close to the target. -/
 theorem activeFill_close {μ : X → ι → ℝ} {pts : X → ι → M} {qstar : X → M}
@@ -114,6 +153,98 @@ theorem activeFill_close {μ : X → ι → ℝ} {pts : X → ι → M} {qstar :
 
 variable [Fintype ι]
 
+omit [Fintype ι] in
+/-- A finite family of active points that converges uniformly to a target admits
+a strictly positive common radius which still converges uniformly to zero. -/
+theorem exists_active_radius {Y : Type uY} [PseudoMetricSpace Y] {s : Set X}
+    [Finite ι]
+    {target : X → Y} {μSeq : ℕ → ℕ → X → ι → ℝ}
+    {ptsSeq : ℕ → ℕ → X → ι → Y}
+    (hpts : ∀ i : ι, ∀ ε > 0, ∃ N : ℕ, ∀ a ≥ N, ∀ b ≥ N, ∀ x ∈ s,
+      μSeq a b x i ≠ 0 → dist (target x) (ptsSeq a b x i) < ε) :
+    ∃ radSeq : ℕ → ℕ → X → ℝ,
+      (∀ a b x, 0 < radSeq a b x) ∧
+      (∀ a b x, x ∈ s → ∀ i : ι, μSeq a b x i ≠ 0 →
+        dist (target x) (ptsSeq a b x i) < radSeq a b x) ∧
+      ∀ ε > 0, ∃ N : ℕ, ∀ a ≥ N, ∀ b ≥ N, ∀ x ∈ s, radSeq a b x < ε := by
+  classical
+  letI := Fintype.ofFinite ι
+  let radSeq : ℕ → ℕ → X → ℝ := fun a b x =>
+    (∑ i : ι, if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) +
+      1 / ((a : ℝ) + 1)
+  refine ⟨radSeq, ?_, ?_, ?_⟩
+  · intro a b x
+    have hsum : 0 ≤
+        ∑ i : ι, if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i) := by
+      exact Finset.sum_nonneg fun i _ => by
+        split_ifs
+        · exact le_rfl
+        · exact dist_nonneg
+    have htail : 0 < 1 / ((a : ℝ) + 1) := by positivity
+    exact add_pos_of_nonneg_of_pos hsum htail
+  · intro a b x hx i hi
+    have hle : dist (target x) (ptsSeq a b x i) ≤
+        ∑ j : ι, if μSeq a b x j = 0 then 0 else dist (target x) (ptsSeq a b x j) := by
+      calc
+        dist (target x) (ptsSeq a b x i) =
+            (if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) := by
+              simp [hi]
+        _ ≤ ∑ j : ι,
+            if μSeq a b x j = 0 then 0 else dist (target x) (ptsSeq a b x j) := by
+              refine Finset.single_le_sum (s := Finset.univ)
+                (f := fun j : ι =>
+                  if μSeq a b x j = 0 then (0 : ℝ) else dist (target x) (ptsSeq a b x j))
+                ?_ (Finset.mem_univ i)
+              intro j _
+              change 0 ≤ if μSeq a b x j = 0 then (0 : ℝ) else
+                dist (target x) (ptsSeq a b x j)
+              by_cases hj : μSeq a b x j = 0
+              · simp [hj]
+              · simp [hj, dist_nonneg]
+    have htail : 0 < 1 / ((a : ℝ) + 1) := by positivity
+    exact lt_of_le_of_lt hle (lt_add_of_pos_right _ htail)
+  · intro ε hε
+    let δ : ℝ := ε / (2 * ((Fintype.card ι : ℝ) + 1))
+    have hδ : 0 < δ := by
+      dsimp [δ]
+      positivity
+    choose N hN using fun i : ι => hpts i δ hδ
+    let Nmax : ℕ := Finset.univ.sup N
+    have htail : ∀ᶠ a : ℕ in Filter.atTop, 1 / ((a : ℝ) + 1) < ε / 2 :=
+      (tendsto_one_div_add_atTop_nhds_zero_nat (𝕜 := ℝ)).eventually
+        (Iio_mem_nhds (by linarith))
+    obtain ⟨Ntail, hNtail⟩ := Filter.eventually_atTop.mp htail
+    refine ⟨max Nmax Ntail, fun a ha b hb x hx => ?_⟩
+    have ha_max : Nmax ≤ a := le_trans (le_max_left _ _) ha
+    have ha_tail : Ntail ≤ a := le_trans (le_max_right _ _) ha
+    have hb_max : Nmax ≤ b := le_trans (le_max_left _ _) hb
+    have hsum_le :
+        (∑ i : ι,
+          if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) ≤
+          ∑ _i : ι, δ := by
+      refine Finset.sum_le_sum fun i _ => ?_
+      by_cases hi : μSeq a b x i = 0
+      · simp [hi, hδ.le]
+      · simp only [hi, ↓reduceIte]
+        have hNi : N i ≤ Nmax :=
+          Finset.le_sup (s := Finset.univ) (f := N) (Finset.mem_univ i)
+        exact le_of_lt (hN i a (le_trans hNi ha_max) b (le_trans hNi hb_max) x hx hi)
+    have hcard :
+        (∑ _i : ι, δ) = (Fintype.card ι : ℝ) * δ := by simp
+    have hcard_lt : (Fintype.card ι : ℝ) * δ < ε / 2 := by
+      dsimp [δ]
+      have hden : 0 < 2 * ((Fintype.card ι : ℝ) + 1) := by positivity
+      rw [← mul_div_assoc]
+      apply (div_lt_iff₀ hden).2
+      have hcard_nonneg : 0 ≤ (Fintype.card ι : ℝ) := by positivity
+      nlinarith
+    have hsum_lt :
+        (∑ i : ι,
+          if μSeq a b x i = 0 then 0 else dist (target x) (ptsSeq a b x i)) <
+          ε / 2 :=
+      lt_of_le_of_lt hsum_le (hcard ▸ hcard_lt)
+    simpa [radSeq] using add_lt_add_of_lt_of_lt hsum_lt (hNtail a ha_tail)
+
 /-- Pointwise normalized finite weights on `s`, together with the regions on
 which their nonzero entries are active. -/
 structure WeightDataOn (s : Set X) (U : ι → Set X) (μ : X → ι → ℝ) : Prop where
@@ -121,6 +252,21 @@ structure WeightDataOn (s : Set X) (U : ι → Set X) (μ : X → ι → ℝ) : 
   pos : ∀ x ∈ s, ∃ i : ι, 0 < μ x i
   sum_one : ∀ x ∈ s, ∑ i : ι, μ x i = 1
   active_mem : ∀ x ∈ s, ∀ i : ι, μ x i ≠ 0 → x ∈ U i
+
+/-- Pull normalized finite weight data back along a map of source sets. -/
+theorem WeightDataOn.comp {Y : Type uY} {s : Set Y} {U : Set X}
+    {R : ι → Set X} {μ : X → ι → ℝ} {f : Y → X}
+    (h : WeightDataOn U R μ) (hf : Set.MapsTo f s U) :
+    WeightDataOn s (fun i => f ⁻¹' R i) (fun y i => μ (f y) i) := by
+  refine ⟨?_, ?_, ?_, ?_⟩
+  · intro y hy i
+    exact h.nonneg (f y) (hf hy) i
+  · intro y hy
+    exact h.pos (f y) (hf hy)
+  · intro y hy
+    exact h.sum_one (f y) (hf hy)
+  · intro y hy i hne
+    exact h.active_mem (f y) (hf hy) i hne
 
 /-- Expose `WeightDataOn` in the conjunction shape consumed by the Step-C
 two-index averaging theorems. -/
@@ -1154,6 +1300,25 @@ theorem eqn_local_on {s : Set X} {qstar : X → M}
     (join := join) (p := p x) (r := r x) (hOn x hx) hdiff hsrc'
 
 end centerAverage
+
+/-- A finite family of two-index tails admits one threshold which works on
+every source patch simultaneously. -/
+theorem finite_cover_two_tail {J Y : Type*} [Finite J]
+    {G : Set Y} {S : J → Set Y}
+    (_hcover : G ⊆ ⋃ j, S j)
+    (Q : J → Nat → Nat → Y → Prop)
+    (hlocal : ∀ j, ∃ Nj : Nat, ∀ a ≥ Nj, ∀ b ≥ Nj,
+      ∀ y ∈ S j, Q j a b y) :
+    ∃ N : Nat, ∀ a ≥ N, ∀ b ≥ N,
+      ∀ j, ∀ y ∈ S j, Q j a b y := by
+  classical
+  letI := Fintype.ofFinite J
+  choose Nj hNj using hlocal
+  refine ⟨Finset.univ.sup Nj, ?_⟩
+  intro a ha b hb j y hy
+  have hj : Nj j ≤ Finset.univ.sup Nj :=
+    Finset.le_sup (f := Nj) (Finset.mem_univ j)
+  exact hNj j a (hj.trans ha) b (hj.trans hb) y hy
 
 end HCGCompactness
 end DifferentialGeometry

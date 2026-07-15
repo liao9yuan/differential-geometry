@@ -515,40 +515,33 @@ private theorem perDomain
       (fun a y' => e₀.localFrame basisE a y'))
     hDtop hShiComp x hx
 
-/-- **`ric_bound` — MSM135 Lemma 3.11, Step 4 `(A_N)` (the eq. 3.4 engine; PROVED).**
+/-- Constants-first form of the raw Ricci-tower estimate on a compact set.
 
-At stage `N ≥ 1`: if on the window the sequence is uniformly `gRef`-equivalent
-(eq. 3.3, `hequiv`), the lower-order `gRef`-derivative bounds `(B_r)` hold for
-`1 ≤ r < N` (`hBprev`), and the moving-metric Shi bounds hold for the Ricci
-towers up to order `N` (`hShi`), then there are constants `Cpp, Cppp ≥ 0` with
-
-`|∇_gRef^N Ric(gSeq i t)|_gRef ≤ Cpp · |∇_gRef^N (gSeq i t)|_gRef + Cppp`
-
-at every `x ∈ K`, `t ∈ [β, ψ]`, uniformly in `i`.  This is the `ric_bound`
-field of `MetricCovOrderEvolutionInput` with `nablaRic` realized by
-`ricCovTower`; `metricCovOrderWindow_of_evolution` then yields `(B_N)`. -/
-theorem ric_bound
-    {K U : Set M} {β ψ : Real}
-    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+The constants depend on the spatial data, order, equivalence majorant, lower-order
+constants, and Shi constant, but are chosen before the time window and metric sequence. -/
+private theorem ric_tower_const
+    {K U : Set M}
     {gRef : SmoothRiemannianMetric I M}
     (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
     (N : Nat) (hN : 1 <= N)
-    (B : Real -> Real)
-    (hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
     (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
-    (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
     (Cg : Nat -> Real)
-    (hBprev : forall r : Nat, 1 <= r -> r < N ->
-      MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
-    (KShi : Real) (hKShi0 : 0 ≤ KShi)
-    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi) :
+    (KShi : Real) (hKShi0 : 0 ≤ KShi) :
     exists Cpp Cppp : Real, 0 <= Cpp ∧ 0 <= Cppp ∧
-      forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
-        forall x : M, x ∈ K ->
-          Real.sqrt
-            (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
-              (ricCovTower (I := I) (gSeq i t) gRef N x)) <=
-            Cpp * metricCovDerivNorm (I := I) N (gSeq i t) gRef x + Cppp := by
+      forall {β ψ : Real}
+        {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+        (B : Real -> Real)
+        (_hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+        (_hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+        (_hBprev : forall r : Nat, 1 <= r -> r < N ->
+          MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
+        (_hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi),
+        forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+          forall x : M, x ∈ K ->
+            Real.sqrt
+              (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
+                (ricCovTower (I := I) (gSeq i t) gRef N x)) <=
+              Cpp * metricCovDerivNorm (I := I) N (gSeq i t) gRef x + Cppp := by
   classical
   -- the per-point good frames
   choose basisE u' eps hopen hxu hsubB heps0 hepsSm hGnear hON hFwd hRev using
@@ -583,7 +576,7 @@ theorem ric_bound
   have hCpppF0 : 0 ≤ CpppF := Finset.sum_nonneg fun x₀ _ =>
     mul_nonneg hCuP0 (hppp0 x₀)
   refine ⟨CppF, CpppF, hCppF0, hCpppF0, ?_⟩
-  intro i t ht x hxK
+  intro β ψ gSeq B hequiv hBmax hBprev hShi i t ht x hxK
   -- pick a covering centre
   have hxcov := htF hxK
   rw [Set.mem_iUnion₂] at hxcov
@@ -740,6 +733,37 @@ theorem ric_bound
     _ ≤ CppF * metricCovDerivNorm (I := I) N (gSeq i t) gRef x + CpppF :=
         add_le_add (mul_le_mul_of_nonneg_right hppF hmcd0) hpppF
 
+/-- **`ric_bound` — MSM135 Lemma 3.11, Step 4 `(A_N)` (the eq. 3.4 engine).**
+
+On a fixed time window, lower-order metric bounds and moving Shi bounds imply the
+uniform order-`N` Ricci-tower estimate. -/
+theorem ric_bound
+    {K U : Set M} {β ψ : Real}
+    {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+    {gRef : SmoothRiemannianMetric I M}
+    (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
+    (N : Nat) (hN : 1 <= N)
+    (B : Real -> Real)
+    (hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+    (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
+    (hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+    (Cg : Nat -> Real)
+    (hBprev : forall r : Nat, 1 <= r -> r < N ->
+      MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
+    (KShi : Real) (hKShi0 : 0 ≤ KShi)
+    (hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi) :
+    exists Cpp Cppp : Real, 0 <= Cpp ∧ 0 <= Cppp ∧
+      forall i : Nat, forall t : Real, t ∈ Set.Icc β ψ ->
+        forall x : M, x ∈ K ->
+          Real.sqrt
+            (Tensor0SBundle.normSq0S (I := I) gRef x (2 + N)
+              (ricCovTower (I := I) (gSeq i t) gRef N x)) <=
+            Cpp * metricCovDerivNorm (I := I) N (gSeq i t) gRef x + Cppp := by
+  obtain ⟨Cpp, Cppp, hCpp, hCppp, hfield⟩ :=
+    ric_tower_const (I := I) hKc hU hKU N hN Bmax hBmax1 Cg KShi hKShi0
+  exact ⟨Cpp, Cppp, hCpp, hCppp,
+    hfield (β := β) (ψ := ψ) (gSeq := gSeq) B hequiv hBmax hBprev hShi⟩
+
 /-- The realized `nablaRic` data of `MetricCovOrderEvolutionInput`: the
 order-`p` background Ricci tower `ricCovTower`, reindexed from its native
 `2 + p` arity to the Grönwall arity `p + 2`. -/
@@ -771,6 +795,40 @@ theorem nablaRicReal_normSq
   exact Tensor0SBundle.normSq0S_domDomCongr (I := I) gRef x basis hinv (acEquiv p)
     (ricCovTower (I := I) (gSeq i s) gRef p x)
 
+/-- Constants-first `ric_bound` field for the order-`N` evolution input.
+
+The same `Cpp, Cppp` work on every admissible time window and metric sequence with
+the fixed spatial, equivalence, lower-order, and Shi bounds. -/
+theorem ric_bound_const
+    {K U : Set M}
+    {gRef : SmoothRiemannianMetric I M}
+    (hKc : IsCompact K) (hU : IsOpen U) (hKU : K ⊆ U)
+    (N : Nat) (hN : 1 <= N)
+    (Bmax : Real) (hBmax1 : 1 ≤ Bmax)
+    (Cg : Nat -> Real)
+    (KShi : Real) (hKShi0 : 0 ≤ KShi) :
+    exists Cpp Cppp : Real, 0 <= Cpp ∧ 0 <= Cppp ∧
+      forall {β ψ : Real}
+        {gSeq : Nat -> Real -> SmoothRiemannianMetric I M}
+        (B : Real -> Real)
+        (_hequiv : MetricUniformEquivalentOnWindow (I := I) U β ψ gRef gSeq B)
+        (_hBmax : ∀ t ∈ Set.Icc β ψ, B t ≤ Bmax)
+        (_hBprev : forall r : Nat, 1 <= r -> r < N ->
+          MetricCovDerivOrderBoundOnWindow (I := I) U β ψ gSeq gRef r (Cg r))
+        (_hShi : MovingShiBoundOn (I := I) U β ψ gSeq N KShi),
+        forall i : Nat, forall s : Real, s ∈ Set.Icc β ψ ->
+          forall x : M, x ∈ K ->
+            Real.sqrt
+              (Tensor0SBundle.normSq0S (I := I) gRef x (N + 2)
+                (nablaRicReal (I := I) gSeq gRef N i s x)) <=
+              Cpp * metricCovDerivNorm (I := I) N (gSeq i s) gRef x + Cppp := by
+  obtain ⟨Cpp, Cppp, hCpp, hCppp, hfield⟩ :=
+    ric_tower_const (I := I) hKc hU hKU N hN Bmax hBmax1 Cg KShi hKShi0
+  refine ⟨Cpp, Cppp, hCpp, hCppp, ?_⟩
+  intro β ψ gSeq B hequiv hBmax hBprev hShi i s hs x hx
+  rw [nablaRicReal_normSq]
+  exact hfield B hequiv hBmax hBprev hShi i s hs x hx
+
 /-- **The `ric_bound` field of `MetricCovOrderEvolutionInput`, realized.**  The
 proved `ric_bound`, restated with `nablaRic := nablaRicReal` in the exact
 Grönwall field shape (`p + 2` arity). -/
@@ -796,11 +854,10 @@ theorem ric_bound_field
             (Tensor0SBundle.normSq0S (I := I) gRef x (N + 2)
               (nablaRicReal (I := I) gSeq gRef N i s x)) <=
             Cpp * metricCovDerivNorm (I := I) N (gSeq i s) gRef x + Cppp := by
-  obtain ⟨Cpp, Cppp, h0, h1, hb⟩ := ric_bound (I := I) hKc hU hKU N hN B hequiv
-    Bmax hBmax1 hBmax Cg hBprev KShi hKShi0 hShi
-  refine ⟨Cpp, Cppp, h0, h1, fun i s hs x hx => ?_⟩
-  rw [nablaRicReal_normSq]
-  exact hb i s hs x hx
+  obtain ⟨Cpp, Cppp, h0, h1, hb⟩ :=
+    ric_bound_const (I := I) hKc hU hKU N hN Bmax hBmax1 Cg KShi hKShi0
+  exact ⟨Cpp, Cppp, h0, h1,
+    hb (β := β) (ψ := ψ) (gSeq := gSeq) B hequiv hBmax hBprev hShi⟩
 
 /-- **The `normsq_evol` field from pointwise-evaluated evolution data**: if the
 order-`p` metric derivative tower evolves by `-2·nablaRic` under every fixed

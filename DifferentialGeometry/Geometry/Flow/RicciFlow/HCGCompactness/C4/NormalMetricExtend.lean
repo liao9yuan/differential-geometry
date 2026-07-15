@@ -513,5 +513,48 @@ theorem normal_cov_eq
     (normalTotal (I := I) Y x) (normalCoordMetric (I := I) Y x)
     hB hdiff hco v w
 
+/-- On the quarter-radius ball, the Levi--Civita derivative for the total
+normal extension is the Frechet derivative plus the raised normal-coordinate
+Koszul correction. -/
+theorem normal_cov_eq_fderiv
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ∀ (z : E), z ∈ Metric.ball (0 : E)
+      (expMapC2Radius (I := I) Y.metric x / 4) →
+    ∀ (hco : IsCoercive (normalCoordMetric (I := I) Y x z))
+      (V : E → E)
+      (_hV : MDifferentiableAt 𝓘(Real, E)
+        (𝓘(Real, E).prod 𝓘(Real, E))
+        (fun y : E ↦ (⟨y, V y⟩ : TangentBundle 𝓘(Real, E) E)) z)
+      (v : E),
+    (Integral.Connection.leviCivitaConnectionOfMetric (I := 𝓘(Real, E))
+        (normalTotal (I := I) Y x) V z) v =
+      fderiv Real V z v +
+        MetricKoszul.koszulVec hco
+          (fderiv Real (normalCoordMetric (I := I) Y x) z) v (V z) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  intro z hz hco V _hV v
+  have hsub := normalInner_sub (I := I) Y x
+  have hB : (fun y : E ↦ (normalTotal (I := I) Y x).inner y) =ᶠ[nhds z]
+      normalCoordMetric (I := I) Y x := by
+    filter_upwards [Metric.isOpen_ball.mem_nhds hz] with y hy
+    exact normalTotal_eq (I := I) Y x y hy
+  have hdiff : DifferentiableAt Real (normalCoordMetric (I := I) Y x) z := by
+    exact ((normalCoordMetric_contDiffOn_expBall (I := I) Y x).contDiffAt
+      (Metric.isOpen_ball.mem_nhds (hsub hz))).differentiableAt (by simp)
+  exact Integral.Connection.cov_eq_fderiv_add
+    (normalTotal (I := I) Y x) (normalCoordMetric (I := I) Y x)
+    hB hdiff hco V _hV v
+
 end HCGCompactness
 end DifferentialGeometry

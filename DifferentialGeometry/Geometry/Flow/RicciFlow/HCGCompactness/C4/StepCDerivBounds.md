@@ -17,6 +17,11 @@ The existing inverse/graph Faà-di-Bruno lemmas are reusable machinery, but the 
 bilinear estimate, recurrence design, and strong induction are substantive remaining work, not
 “pure threading.”
 
+The generic Banach-algebra inverse estimates formerly local to this file now
+live in `Analysis/Calculus/RingInverseDeriv.lean`; this module imports and reuses
+that canonical API.  The extraction and focused verification passed.  It does
+not change the separate arbitrary-order center-map frontier described above.
+
 ## Goal
 `lbl430`(i) bounds half (eq `lbl431`): the center of mass has **uniform-in-configuration**
 covariant-derivative bounds `|∇_q^α ∇_μ^β cm| ≤ C̃_{|α|+|β|+1}` for all orders, at the book scale

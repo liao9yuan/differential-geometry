@@ -1583,6 +1583,37 @@ private lemma radialCurve_pathELength_eq
   rw [MeasureTheory.setLIntegral_const, Real.volume_Ioo, sub_zero,
     ENNReal.ofReal_one, mul_one]
 
+/-- The radial exponential curve bounds the Riemannian distance by the
+Riemannian length of its launch vector.  This direction only needs the launch
+vector to lie in the `C²` exponential ball; it does not require radial
+minimality or injectivity. -/
+theorem edist_exp_le_radius
+    (g : SmoothRiemannianMetric I M) (p : M) (a : E)
+    (hEnorm : ∀ (x : M) (w : TangentSpace I x),
+        ‖w‖ₑ = ENNReal.ofReal (Real.sqrt (g.inner x w w)))
+    (ha : ‖a‖ < expMapC2Radius (I := I) g p) :
+    riemannianEDist I p
+        (expMap (I := I) g p (show TangentSpace I p from a)) ≤
+      ENNReal.ofReal (Real.sqrt (g.inner p a a)) := by
+  set γr : ℝ → M :=
+    fun u : ℝ ↦ (expMap (I := I) g p
+      (show TangentSpace I p from (u • a)) : M) with hγr_def
+  have hγr0 : γr 0 = p := by
+    rw [hγr_def]
+    simp only [zero_smul]
+    exact expMap_zero (I := I) g p
+  have hγr1 : γr 1 =
+      expMap (I := I) g p (show TangentSpace I p from a) := by
+    rw [hγr_def]
+    simp only [one_smul]
+  have hγr_C1 : CMDiff[Set.Icc (0 : ℝ) 1] 1 γr :=
+    radialCurve_contMDiffOn_Icc (I := I) g p a ha
+  have hdist := riemannianEDist_le_pathELength
+    (I := I) (γ := γr) (a := 0) (b := 1) hγr_C1 rfl rfl zero_le_one
+  rw [hγr0, hγr1,
+    radialCurve_pathELength_eq (I := I) g p a hEnorm ha] at hdist
+  exact hdist
+
 /-- **Radial distance equals the radius (inside the `C²` ball).** For a chart
 endpoint `a` with `√(g_p(a, a)) < expRadiusGp g p` (equivalently `a` in the
 normal-chart target and in the natural exponential domain), the Riemannian
