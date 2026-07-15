@@ -90,10 +90,15 @@ def HasNormalBrFull
           (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).inv
               (normalPair (I := I) Y x w) =
             normalTangent (I := I) Y x (e.symm w)) ∧
-        ∀ w ∈ Metric.closedBall (0 : E × E) δ,
+        (∀ w ∈ Metric.closedBall (0 : E × E) δ,
           (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).inv
               (normalPair (I := I) Y x w) =
-            normalTangent (I := I) Y x (e.symm w)
+            normalTangent (I := I) Y x (e.symm w)) ∧
+        ∃ η : NNReal, η < 1 / 24 ∧
+          ApproximatesLinearOn
+            (e.symm : E × E → E × E)
+            ((PhaseFlow.freeDiagCLE (E := E)).symm :
+              (E × E) →L[Real] (E × E)) e.target η
 
 namespace HasNormalBrFull
 
@@ -160,10 +165,15 @@ theorem toDom
           (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).inv
               (normalPair (I := I) Y x w) =
             normalTangent (I := I) Y x (e.symm w)) ∧
-        ∀ w ∈ Metric.closedBall (0 : E × E) δ,
+        (∀ w ∈ Metric.closedBall (0 : E × E) δ,
           (IsNormalDiag.toBranch (I := I) Y hcomplete hconn x hq he).inv
               (normalPair (I := I) Y x w) =
-            normalTangent (I := I) Y x (e.symm w) at h
+            normalTangent (I := I) Y x (e.symm w)) ∧
+        ∃ η : NNReal, η < 1 / 24 ∧
+          ApproximatesLinearOn
+            (e.symm : E × E → E × E)
+            ((PhaseFlow.freeDiagCLE (E := E)).symm :
+              (E × E) →L[Real] (E × E)) e.target η at h
   rcases h with ⟨hq, e, he, _hfence, hclosed, _hδdom, _⟩
   exact ⟨hq, e, he, hclosed⟩
 
@@ -188,6 +198,8 @@ theorem normalBrAccept
           (q : Real) = aq * hd.mu R ∧
           aδ * hd.mu R ≤ δ ∧
           6 * (q : Real) < h.phaseRadius R ∧
+          3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
+            (2 / 3 : Real) * (q : Real) ∧
           ∀ k (x : (X.obj k).M),
             hd.dist k x (X.obj k).basepoint ≤ R →
             HasNormalBrFull (I := I) (X.obj k) (hcomplete.complete k)
@@ -199,7 +211,7 @@ theorem normalBrAccept
     exact lt_min haδ (div_pos haq (by norm_num))
   refine ⟨aq, aδ, aρ, haq, haδ, haρ, ?_⟩
   intro R hR
-  obtain ⟨q, hqeq, hqWide, hqAcc, herr, hδlower⟩ := hscale R hR
+  obtain ⟨q, hqeq, hqWide, hqAcc, herr, hinvErr, hδlower⟩ := hscale R hR
   have hqReal : (0 : Real) < q := by
     rw [hqeq]
     exact mul_pos haq (hd.mu_pos R)
@@ -222,7 +234,7 @@ theorem normalBrAccept
         mul_le_mul_of_nonneg_right (min_le_right aδ (aq / 2)) (hd.mu_nonneg R)
       _ = (q : Real) / 2 := by rw [hqeq]; ring
       _ < (q : Real) := half_lt_self hqReal
-  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, ?_⟩
+  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, ?_⟩
   intro k x hx
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -250,7 +262,7 @@ theorem normalBrAccept
     MetricComplete.complete (I := I) (X.obj k) (hcomplete.complete k)
   have hrMetric := h.phaseRadius_metric hx
   have hrQuarter := h.phaseRadius_exp hx
-  obtain ⟨δ', e, hδ', hδ'eq, he, hfence⟩ :=
+  obtain ⟨δ', e, hδ', hδ'eq, he, hfence, hinvApprox⟩ :=
     normalDiagAtFull (I := I) hb k x (hcomplete.complete k) (hconn k)
       hrMetric hrQuarter q hq hqWide hqAcc herr
   have hδ'eq' : δ' = δ := by simpa only [δ] using hδ'eq
@@ -323,12 +335,17 @@ theorem normalBrAccept
           (IsNormalDiag.toBranch (I := I) (X.obj k) (hcomplete.complete k)
               (hconn k) x hq' he).inv (normalPair (I := I) (X.obj k) x w) =
             normalTangent (I := I) (X.obj k) x (e.symm w)) ∧
-        ∀ w ∈ Metric.closedBall (0 : E × E) δ,
+        (∀ w ∈ Metric.closedBall (0 : E × E) δ,
           (IsNormalDiag.toBranch (I := I) (X.obj k) (hcomplete.complete k)
               (hconn k) x hq' he).inv (normalPair (I := I) (X.obj k) x w) =
-            normalTangent (I := I) (X.obj k) x (e.symm w)
+            normalTangent (I := I) (X.obj k) x (e.symm w)) ∧
+        ∃ η : NNReal, η < 1 / 24 ∧
+          ApproximatesLinearOn
+            (e.symm : E × E → E × E)
+            ((PhaseFlow.freeDiagCLE (E := E)).symm :
+              (E × E) →L[Real] (E × E)) e.target η
   exact ⟨hq, e, he, hfence, hclosed, hδdom, htransport.1,
-    htransport.2.1, htransport.2.2, hδinv⟩
+    htransport.2.1, htransport.2.2, hδinv, _, hinvErr, hinvApprox⟩
 
 /-- The selected quantitative branch can be shrunk to one uniform coefficient
 that simultaneously satisfies the minimizing-gradient metric and intrinsic
@@ -350,6 +367,8 @@ theorem normalMinScale
           (q : Real) = aq * hd.mu R ∧
           aδ * hd.mu R ≤ δ ∧
           6 * (q : Real) < h.phaseRadius R ∧
+          3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
+            (2 / 3 : Real) * (q : Real) ∧
           2 * (aMin * hd.mu R) < (q : Real) ∧
           ∀ k (x : (X.obj k).M),
             hd.dist k x (X.obj k).basepoint ≤ R →
@@ -380,7 +399,7 @@ theorem normalMinScale
     exact (min_le_right _ _).trans (min_le_right _ _)
   refine ⟨aq, aδ, aMin, haq, haδ, haMin, ?_⟩
   intro R hR
-  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hfull⟩ := hall R hR
+  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, hfull⟩ := hall R hR
   have hqReal : (0 : Real) < q := by exact_mod_cast hq
   have hMinq : 2 * (aMin * hd.mu R) < (q : Real) := by
     calc
@@ -389,7 +408,7 @@ theorem normalMinScale
           (mul_le_mul_of_nonneg_right haMinq (hd.mu_nonneg R)) (by norm_num)
       _ = (q : Real) / 2 := by rw [hqeq]; ring
       _ < (q : Real) := half_lt_self hqReal
-  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hMinq, ?_⟩
+  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, hMinq, ?_⟩
   intro k x hx
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -442,7 +461,7 @@ theorem normalBrScale
     normalBrAccept (I := I) h hcomplete hconn
   refine ⟨aq, aδ, aρ, haq, haδ, haρ, ?_⟩
   intro R hR
-  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hfull⟩ := hall R hR
+  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, _hqAcc, hfull⟩ := hall R hR
   refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, ?_⟩
   intro k x hx
   exact HasNormalBrFull.toDom (I := I) (X.obj k) (hcomplete.complete k)

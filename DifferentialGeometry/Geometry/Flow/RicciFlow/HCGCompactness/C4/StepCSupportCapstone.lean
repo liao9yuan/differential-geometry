@@ -36,8 +36,9 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 /-- A frozen source ball is covered by source-local patches, and one pair-index
-tail works for the selected-branch center equation on every patch.  The
-strict-distance premise remains the independent convexity continuation. -/
+tail retains the selected-branch derivative and strict local solution on every
+patch.  The joining map is the intrinsic minimizing join produced by the
+selected branch. -/
 def HasSuppCmFin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -91,24 +92,17 @@ def HasSuppCmFin
         radSeq alpha a b x < epsilon) ∧
     ∃ N : Nat, ∀ a ≥ N, ∀ b ≥ N,
       ∀ alpha, ∀ x ∈ sourcePatch alpha,
-        ∀ join : Y.M → Y.M → Real → Y.M,
-          StrictDistInput (I := I) Y.metric
-            (centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
-              (fun y => y) x)
-            join x (radSeq alpha a b x) →
-          ∃ hcm : CenterInput (I := I) Y.metric (mu alpha x)
-              (centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
-                (fun y => y) x)
-              join x (radSeq alpha a b x),
-            HasHatCmEqn (I := I) hd P L pb r n hcomplete hconn q δ
-              (mu alpha x)
-              (centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
-                (fun y => y) x)
-              join x (radSeq alpha a b x) hcm
+        let join := minJoin (I := I) Y.metric (normal_enorm (I := I) Y)
+        let pts := centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
+          (fun y => y) x
+        ∃ hcm : CenterInput (I := I) Y.metric (mu alpha x) pts join x
+            (radSeq alpha a b x),
+          HasHatCmStrict (I := I) hd P L pb r n hcomplete hconn q δ
+            (mu alpha x) pts join x (radSeq alpha a b x) hcm
 
-/-- Global-ball readout obtained from source-local capstones.  The source chart
-is an existential witness at each point; this definition does not select or
-glue charts or weight families. -/
+/-- Global-ball strict local readout obtained from source-local capstones.  The
+source chart is an existential witness at each point; this definition does not
+select or glue charts or weight families. -/
 def HasSourceCmFin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
@@ -158,20 +152,13 @@ def HasSourceCmFin
     ∃ N : Nat, ∀ a ≥ N, ∀ b ≥ N,
       ∀ x ∈ sourceBall,
         ∃ alpha : LiveSlot L pb r, x ∈ sourcePatch alpha ∧
-          ∀ join : Y.M → Y.M → Real → Y.M,
-            StrictDistInput (I := I) Y.metric
-              (centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
-                (fun y => y) x)
-              join x (radSeq alpha a b x) →
-            ∃ hcm : CenterInput (I := I) Y.metric (mu alpha x)
-                (centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
-                  (fun y => y) x)
-                join x (radSeq alpha a b x),
-              HasHatCmEqn (I := I) hd P L pb r n hcomplete hconn q δ
-                (mu alpha x)
-                (centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
-                  (fun y => y) x)
-                join x (radSeq alpha a b x) hcm
+          let join := minJoin (I := I) Y.metric (normal_enorm (I := I) Y)
+          let pts := centerAverage.activeFill (mu alpha) (ptsSeq alpha a b)
+            (fun y => y) x
+          ∃ hcm : CenterInput (I := I) Y.metric (mu alpha x) pts join x
+              (radSeq alpha a b x),
+            HasHatCmStrict (I := I) hd P L pb r n hcomplete hconn q δ
+              (mu alpha x) pts join x (radSeq alpha a b x) hcm
 
 /-- A common local pair-index tail and the finite source cover give the
 global-ball existential-source readout with the same threshold. -/
@@ -205,8 +192,8 @@ theorem HasSuppCmFin.toSource
   exact ⟨alpha, hxalpha, hN a ha b hb alpha x hxalpha⟩
 
 /-- Choose the covering divisor once, extract one master subsequence, and
-assemble the finite family of source-local center equations with one common
-pair-index tail.  No chartwise weights are compared or glued. -/
+assemble the finite family of source-local strict center solutions with one
+common pair-index tail.  No chartwise weights are compared or glued. -/
 theorem MetricCompactBase.exists_supp_cm_fin
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -223,6 +210,10 @@ theorem MetricCompactBase.exists_supp_cm_fin
         (U : LiveSlot L inp.pack r → Set E)
         (aInf : (alpha : LiveSlot L inp.pack r) →
           Fin (inp.pack.A r) → E → Real)
+        (Jinf : (alpha : LiveSlot L inp.pack r) →
+          InterSlot L inp.pack r alpha → E → E)
+        (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+          InterSlot L inp.pack r alpha → E → E)
         (q : LiveSlot L inp.pack r → NNReal)
         (δ : LiveSlot L inp.pack r → Real),
       let P := inp.properMetrics hcomplete hconn
@@ -236,6 +227,7 @@ theorem MetricCompactBase.exists_supp_cm_fin
             (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
             (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
           z gamma
+      HasSuppConvData (I := I) inp P L r hr phi hphi U aInf Jinf Jbarinf ∧
       (∀ gamma : LiveSlot L inp.pack r,
         let Rgamma := L.rInf (gamma.1 : Nat) + 1
         let rhoMin := aMin * inp.decay.mu Rgamma
@@ -284,11 +276,12 @@ theorem MetricCompactBase.exists_supp_cm_fin
                   (beta a alpha) (beta a target.1) (chi alpha x)))
         let pts := fun (alpha : LiveSlot L inp.pack r) =>
           totalPts (X := X) pairPts alpha
-        HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
-          hcomplete hconn q δ sourceBall sourcePatch localWeight pts := by
+        HasCompactCover sourceBall sourcePatch ∧
+          HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
+            hcomplete hconn q δ sourceBall sourcePatch localWeight pts := by
   classical
   obtain ⟨aMin, haMin, hread⟩ :=
-    exists_hat_cm_tail_support (I := I) b.normalRadius b.realizes
+    exists_hat_cm_min (I := I) b.normalRadius b.realizes
       hcomplete hconn
   let c0 :=
     (8 * Real.exp b.decay.C / aMin) * b.normalRadius.gpRatio
@@ -311,14 +304,14 @@ theorem MetricCompactBase.exists_supp_cm_fin
     inp.physScale_of_extra haMin hc0'
   let P := inp.properMetrics hcomplete hconn
   obtain ⟨L, hstable⟩ := inp.exists_stable_net P
-  obtain ⟨phi, hphi, U, aInf, _Jinf, _Jbarinf, _htrans, hptsTail⟩ :=
+  obtain ⟨phi, hphi, U, aInf, Jinf, Jbarinf, hconv, hptsTail⟩ :=
     inp.exists_supp_pts_fin h8' hradD' hradRatio' P L hstable r hr hconn
   let Lphi := L.subseq hphi
   obtain ⟨q, δ, hqdata, hreadTail⟩ :=
     hread inp.hD hphys P Lphi inp.pack r
-  refine ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, q, δ, ?_⟩
+  refine ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, Jinf, Jbarinf, q, δ, ?_⟩
   dsimp only
-  constructor
+  refine ⟨hconv, ?_, ?_⟩
   · simpa only [Lphi, NetLimitData.subseq] using hqdata
   · filter_upwards [hptsTail, hreadTail] with n hn hreadN
     let Y := X.obj (Lphi.φ n)
@@ -372,25 +365,28 @@ theorem MetricCompactBase.exists_supp_cm_fin
               (beta a alpha) (beta a target.1) (chi alpha x)))
     let pts := fun (alpha : LiveSlot L inp.pack r) =>
       totalPts (X := X) pairPts alpha
-    change HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
-      hcomplete hconn q δ sourceBall sourcePatch localWeight pts
-    dsimp only [HasSuppCmFin]
     dsimp only at hn hreadN
-    rcases hn with ⟨hcover, hhat, hweight, hpts⟩
-    have hlocal := fun alpha =>
-      hreadN.2 alpha (sourcePatch alpha) (hhat alpha)
-        (localWeight alpha) (hweight alpha) (pts alpha) (hpts alpha)
-    choose radSeq hpos hactive hsmall hcap using hlocal
-    refine ⟨radSeq, hcover, hhat, hweight, hpos, hactive, ?_, ?_⟩
-    · intro epsilon hepsilon
-      exact finite_cover_two_tail hcover
-        (fun alpha a b x => radSeq alpha a b x < epsilon)
-        (fun alpha => hsmall alpha epsilon hepsilon)
-    · exact finite_cover_two_tail hcover _ hcap
+    rcases hn with ⟨hcompact, hcover, hhat, hweight, hpts⟩
+    change HasCompactCover sourceBall sourcePatch ∧
+      HasSuppCmFin (I := I) inp.decay P Lphi inp.pack r n
+        hcomplete hconn q δ sourceBall sourcePatch localWeight pts
+    refine ⟨hcompact, ?_⟩
+    · dsimp only [HasSuppCmFin]
+      have hlocal := fun alpha =>
+        hreadN.2 alpha (sourcePatch alpha) (hhat alpha)
+          (localWeight alpha) (hweight alpha) (pts alpha) (hpts alpha)
+      choose radSeq hpos hactive hsmall hcap using hlocal
+      refine ⟨radSeq, hcover, hhat, hweight, hpos, hactive, ?_, ?_⟩
+      · intro epsilon hepsilon
+        exact finite_cover_two_tail hcover
+          (fun alpha a b x => radSeq alpha a b x < epsilon)
+          (fun alpha => hsmall alpha epsilon hepsilon)
+      · exact finite_cover_two_tail hcover _ hcap
 
 /-- Global-ball corollary of `exists_supp_cm_fin`: on the same pair-index tail,
-each source point has a source patch witnessing the selected-branch equation.
-The witness remains existential and does not define a chart selector. -/
+each source point has a source patch retaining the selected-branch strict local
+solution.  The witness remains existential and does not define a chart
+selector. -/
 theorem MetricCompactBase.exists_cm_on_source
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (b : MetricCompactBase (I := I) X)
@@ -470,13 +466,13 @@ theorem MetricCompactBase.exists_cm_on_source
           totalPts (X := X) pairPts alpha
         HasSourceCmFin (I := I) inp.decay P Lphi inp.pack r n
           hcomplete hconn q δ sourceBall sourcePatch localWeight pts := by
-  obtain ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, q, δ,
-      hqdata, htail⟩ := b.exists_supp_cm_fin hcomplete hconn r hr
+  obtain ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, _Jinf, _Jbarinf, q, δ,
+      _hconv, hqdata, htail⟩ := b.exists_supp_cm_fin hcomplete hconn r hr
   refine ⟨aMin, haMin, inp, L, phi, hphi, U, aInf, q, δ, ?_⟩
   dsimp only
   refine ⟨hqdata, ?_⟩
   filter_upwards [htail] with n hn
-  exact hn.toSource
+  exact hn.2.toSource
 
 end HCGCompactness
 end DifferentialGeometry

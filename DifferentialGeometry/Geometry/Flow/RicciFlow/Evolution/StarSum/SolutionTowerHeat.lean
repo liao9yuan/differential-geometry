@@ -21,13 +21,10 @@ open Bundle Tensor0SBundle DifferentialGeometry.Integral.Connection
 open scoped Manifold ContDiff BigOperators
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace Real E]
-variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
 variable {H : Type*} [TopologicalSpace H]
-variable {I : ModelWithCorners Real E H} [I.Boundaryless]
+variable {I : ModelWithCorners Real E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
-variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
-variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
+variable [IsManifold I 1 M]
 
 private theorem localFrame_reindex
     {Idx Idx' : Type*} {n : WithTop ℕ∞} {u : Set M}
@@ -50,6 +47,12 @@ private theorem localFrame_reindex
         exact ⟨e.symm i, by simp⟩]
     exact hframe.generating hx
   contMDiffOn i := hframe.contMDiffOn (e i)
+
+variable [FiniteDimensional Real E] [NeZero (Module.finrank Real E)] [CompleteSpace E]
+variable [I.Boundaryless]
+variable [IsManifold I ∞ M] [IsManifold I 2 M]
+variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
+variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
 /-- The reaction coefficient produced by the canonical dimension-three
 StarSum residual at derivative level `k`. -/
@@ -182,7 +185,14 @@ theorem towerHeatSol
           Real.sqrt (nablaKRm04NormSqIntrinsic (I := I) S' j (t : Real) x) *
           Real.sqrt (nablaKRm04NormSqIntrinsic (I := I) S' (k - j) (t : Real) x) := by
     intro m
-    simpa [Tdot, hgInv, basis, IsLocalFrameOn.toBasisAt_coe, hst] using
+    have hcancel :
+        Tdot - metricTrace0S2TensorInBasis (I := I) basis (gInv (t : Real))
+            (nablaKRm04Field (I := I) S' (t : Real) (k + 2) x) = T x := by
+      rw [hgInv]
+      dsimp only [Tdot]
+      abel
+    rw [hcancel]
+    simpa [S', D', basis, IsLocalFrameOn.toBasisAt_coe, hst] using
       hres x hx m
   have hlevel : compNormSqMulti (fun I0 : Fin (4 + k) -> Fin 3 =>
       tensor0SComponent (I := I) (nablaKRm04Field (I := I) S' (t : Real) k x)

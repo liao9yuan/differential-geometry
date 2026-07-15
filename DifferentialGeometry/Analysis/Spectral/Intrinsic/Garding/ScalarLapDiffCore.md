@@ -39,12 +39,11 @@ duplicate `hess_sub_conn`.
 
 Low-layer and rank-zero realization focused and targeted verification pass.
 The first consumer check exposed whole nested tensor statements timing out at
-`isDefEq`/`whnf`; replacing them by `trace_eq_lap` plus local typed aliases is
-the active cheaper route.  Consumer verification is currently waiting only on
-a missing upstream object refresh, not on a new mathematical assumption.
+`isDefEq`/`whnf`; replacing them by `trace_eq_lap` plus local typed aliases
+removed that performance path, and the consumer focused check now passes.
 
-Honest accounting: `lapDiffCore_eq_cc` is still 0% at theorem level until this
-file verifies, while its dedicated source machinery is about 98%.
+Honest accounting: `lapDiffCore_eq_cc` is verified (100% at theorem level), and
+its dedicated machinery is 100% for this finite-core realization boundary.
 `scalar_crit_tame` and `scalar_gal_exists` are source-written but remain 0% at
 theorem level pending Lean verification.  The Galerkin limit and second-order
 bootstrap are 0%.  Perelman no-local-collapsing and `ham3_noncollapse` remain

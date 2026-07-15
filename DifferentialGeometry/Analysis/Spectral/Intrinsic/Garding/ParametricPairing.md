@@ -11,11 +11,14 @@ Both constants are chosen before the parameter, input tensor, and support.
 
 ## Frontier
 
-Both source proofs are complete, but focused verification is pending the
-shared dependency chain becoming stable. The exact A1 square estimate is
-deliberately not a new frontier: the adjacent-window estimate is the honest
-smooth-level input for the closure step.
+Both producers now pass focused verification without warnings.  The repair was
+pure elaboration infrastructure: open the native `TensorSpectral` namespace,
+install the finite-dimensional completeness instance, and scope the larger
+heartbeat budget only to the Hom-bundle theorem.  No statement or estimate
+changed.  The exact A1 square estimate is deliberately not a new frontier: the
+adjacent-window estimate is the honest smooth-level input for the closure step.
 
-Endpoint theorem: 0%. Dedicated compact-parameter pairing machinery: about
-85% until focused verification is green. Uniform slot transport is now
-source-complete in `SlotTransportPairing.lean`, but remains unverified.
+`iterL_pair_unif`, `iterL_smul_unif`, and their dedicated compact-parameter
+pairing machinery are 100% verified.  Uniform slot transport is likewise
+focused-verified in `SlotTransportPairing.lean`.  The conjugate-heat and
+Perelman endpoint theorems remain separate and are not proved here.

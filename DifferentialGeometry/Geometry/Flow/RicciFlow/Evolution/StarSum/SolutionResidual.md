@@ -4,10 +4,9 @@
 
 The source statement now exposes `C = resStarCost k`, rather than only an
 arbitrary pointwise existential constant. The proof remains the same direct
-specialization of `resStarBoundLF`. Verification of this strengthened source
-is currently blocked before elaboration by the shared Spectral/Elliptic build
-temporarily removing transitive `.olean` files; no local theorem diagnostic has
-been reached, so this strengthened statement is not yet counted as verified.
+specialization of `resStarBoundLF`. The strengthened `resStarSol` theorem is
+focused-check green and exported by a targeted build, so the theorem and its
+dedicated machinery are both **100% complete**.
 
 ## Purpose
 

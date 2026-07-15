@@ -62,9 +62,7 @@ not by itself complete the scalar `cc_comm_pair` consumer, the non-autonomous
 bootstrap, or the Perelman endpoint; those theorem-level percentages remain
 governed by the live Perelman and project-map notes.
 
-`slot_iterL_unif` is source-complete but has not received a focused check.
-Verification is paused because concurrent Lean writers were invalidating the
-shared compiled dependency chain; the duplicate build was terminated rather
-than adding another writer.  Uniform slot machinery is therefore about 85%;
-the public theorem itself remains unverified, while the Perelman endpoint is
-still 0%.
+`slot_iterL_unif` and its uniform slot machinery are now 100% focused-verified.
+The last repair was only the rank-zero base-case normalization
+`(finrank ℝ E)^0 = 1` in `slot_iter_bdd`; no theorem statement or analytic
+assumption changed.  The Perelman endpoint remains 0%.

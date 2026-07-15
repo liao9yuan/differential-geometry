@@ -1,7 +1,9 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Basic
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.CinftyLimitGlue
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.IteratedRmTowerHeatEq
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.StarSum.TowerProducer
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.BBSAllMBounds
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.EndpointMetricLimit
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.EndpointRicciLimit
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ExtendShiInputs
 
 set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
@@ -9,9 +11,10 @@ set_option linter.unusedSectionVars false
 /-!
 # BBSLimitProducer — Dispatch C: `cinftyLimitData_of_solution`
 
-**STATUS (2026-07-04): DEAD CODE.** `extends_of_rmBounded` was rewired (Y2) onto the
-interior-restart + forward-uniqueness route and no longer consumes `CinftyLimitData` or this
-producer; both sorries below are off every critical path (do NOT count them as live frontiers).
+**STATUS (2026-07-14): ALTERNATE ROUTE; COMBINED CHECK PENDING.** `extends_of_rmBounded` currently
+uses the interior-restart + forward-uniqueness route and does not consume `CinftyLimitData`. This
+producer remains an independent endpoint-limit route. C1+C2, G3, and G4 are individually proved;
+the C3 packaging source is assembled below and awaits combined verification.
 The Shi-content successor is `shiCovBound_of_soln` (`ExtendShiInputs.lean`), whose discharge plan
 (`ExtendShiInputs.md` §SHI DISCHARGE PLAN) unifies the citation with the HCG `MovingShiBoundOn`
 interface. Kept for reference per the transitions rule.
@@ -23,39 +26,24 @@ at the right endpoint `ω`.
 
 The full plan, interface map, and standing-input ledger are in `BBSLimitProducer.md`.
 
-## Architecture (two precise frontiers + a sorry-free composition)
+## Architecture (completed producers, pending combined verification)
 
-`cinftyLimitData_of_solution` is `cinftyLimitData_of_allMBounds ∘ bbsAllMBounds`, splitting the
-old monolithic `hLimit` into two genuinely-different, separately-attackable mathematical frontiers:
+`cinftyLimitData_of_solution` is `cinftyLimitData_of_allMBounds ∘ bbsAllMBounds`. The original
+route notes below are retained for context, but references to `bbsAllMBounds` as a `sorry` are
+superseded: C1+C2 are complete, while G3 and G4 supply the two fields of C3.
 
-* **`bbsAllMBounds`** (bricks C1+C2): the Bernstein–Bando–Shi **all-`m` derivative estimate**
-  `‖∇ᵐRm‖² ≤ Cₘ` on slabs bounded away from the start.  This is `sorry` because brick C1 routes
-  through `resStarBoundLF` (`StarSum/TowerHeat.lean`), which is itself sorry-free but carries the
-  **irreducible DeTurck time-regularity standing inputs** `hbase` (Lemma 6.1 `∂ₜRm04 = Δ+2B−drift`)
-  and `hswap` (time/space derivative swap), together with the metric-frame regularity boxes
-  (`MetricFrameTimeRegularityInFrameOnLocal`).  These are **not** derivable from `IsSolutionOn` —
-  they are the coworker's DeTurck lane, the same frontier `extends_of_rmBounded` already defers via
-  its `hglue` sorry (`DeTurckHandoff.md`).  The route, once those inputs are available:
-  `nablaKRm04NormHeatEquationOn_intrinsic` (`IteratedRmTowerHeatEq.lean:185`) at per-`(t,x)`
-  `g_t`-orthonormal frames + `resStarBoundLF` → `nablaKReaction_le` + `towerHeatBoundOn_of_heatReact`
-  (`StarSum/TowerProducer.lean`, GREEN) → `∀k, TowerHeatBoundOn` → `BernsteinTower.estimate_div`
-  (`BernsteinShiHigher.lean:1311`) → specialise to the slab `[(α+ω)/2, ω)`.
+* **`bbsAllMBounds`** (bricks C1+C2): the verified Bernstein–Bando–Shi
+  all-order derivative estimate `‖∇ᵐRm‖² ≤ Cₘ` on slabs bounded away from the
+  start.
 
 * **`cinftyLimitData_of_allMBounds`** (brick C3): the limit-extraction **analysis** — from the
   all-`m` bounds, build the `C∞` limit metric and prove Ricci continuity across `ω`.  This is
-  `sorry` pending two named analysis frontiers:
-  - **G3** (`limitMetric`/`tendsto_left`): construct a `SmoothRiemannianMetric` from the pointwise
-    chart-Gram `C⁰` limits (via `chartGramMatrix_tendsto_nhdsLT_of_bounded_deriv`,
-    `CinftyLimitGlue.lean:176`, driven by the `m=0` bound `|∂ₜg| = 2|Ric| ≤ C·K`) together with the
-    uniform spatial `Cᵐ` bounds — i.e. a *“smooth limit object from uniform `Cᵐ` bounds”* builder,
-    which is **missing infrastructure** (no banked constructor fills `CinftyLimitData`).
-  - **G4** (`ricci_match`): Ricci continuity from the `m ≤ 2` bounds via **Arzelà–Ascoli /
-    equicontinuity** on chart-Gram and its `≤ 2` spatial derivatives — likely needs
-    Sobolev/interpolation infrastructure not yet present.
+  split into two dedicated producers. `exists_endMetric` supplies G3
+  (`limitMetric`/`tendsto_left`), and `ricci_tendsto_left` supplies G4
+  (`ricci_match`) by sequential two-jet compactness and `ricciConv_of_dnConv`.
 
-Both `sorry`s are mathematically-correct, narrow, named frontiers (per `important_lesson.md`
-“keep producer and consumer frontiers explicit”): each is a real theorem with a precise statement,
-not a hypotheses-only adapter.
+The endpoint below only packages those two real producers; it introduces no
+additional analysis assumption.
 
 ## Dimension and bound conventions
 
@@ -86,65 +74,46 @@ variable [IsManifold I ∞ M] [IsManifold I 1 M] [IsManifold I 2 M]
 variable [IsManifold I ((∞ : WithTop ℕ∞) + 1) M]
 variable [SigmaCompactSpace M] [T2Space M] [CompactSpace M] [BoundarylessManifold I M]
 
-/-- **Brick C1 + C2 (the Bernstein–Bando–Shi all-`m` derivative estimate).**  On a dimension-3
-bounded-curvature Ricci-flow solution, every covariant-derivative level of the curvature is
-uniformly bounded on the half-open slab `[(α+ω)/2, ω)` (bounded away from the start, where the
-Shi `1/tᵐ` blow-up is harmless).
-
-`w m := nablaKRm04NormSqIntrinsic S m` is the intrinsic `‖∇ᵐRm‖²`.  `hbound` is the `m = 0`
-curvature bound (the realizing `Rm04`'s squared norm, `= w 0`).
-
-**Status: `sorry` — the DeTurck-gated brick.**  The proof route is fully scoped (`BBSLimitProducer.md`
-§2 C1/C2): the GREEN reaction machinery (`nablaKReaction_le`, `towerHeatBoundOn_of_heatReact` in
-`StarSum/TowerProducer.lean`) fed by `nablaKRm04NormHeatEquationOn_intrinsic` +
-`resStarBoundLF`, then `BernsteinTower.estimate_div`.  It bottoms out on the irreducible DeTurck
-time-regularity standing inputs (`hbase`, `hswap`, the metric-frame boxes) carried by
-`resStarBoundLF` — not derivable from `IsSolutionOn`, the coworker's lane (`DeTurckHandoff.md`),
-already deferred by `extends_of_rmBounded`'s `hglue`. -/
-theorem bbsAllMBounds
-    {alpha omega : ℝ} {hαω : alpha < omega}
-    (S : SolutionOn (I := I) (M := M)
-      (RealTimeInterval.closedOpen alpha omega hαω))
-    (hS : IsSolutionOn (I := I) S)
-    (hdim : Module.finrank ℝ E = 3)
-    (Rm04 : ℝ → Tensor04Section (I := I) (M := M))
-    (hRm : ∀ t : RealTimeInterval.FlowTime (RealTimeInterval.closedOpen alpha omega hαω),
-      Rm04RealizesConnection (I := I)
-        (S.family.metric (t : ℝ)) (S.family.connection (t : ℝ)) (Rm04 (t : ℝ)))
-    (hbound : ∃ K : ℝ, ∀ (t : ℝ) (x : M),
-        alpha ≤ t → t < omega →
-          Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4 (Rm04 t x) ≤ K) :
-    ∀ m : ℕ, ∃ C : ℝ, ∀ (t : ℝ) (x : M),
-      (alpha + omega) / 2 ≤ t → t < omega →
-        nablaKRm04NormSqIntrinsic (I := I) S m t x ≤ C := by
-  sorry
-
 /-- **Brick C3 (the limit-extraction analysis).**  From the Bernstein–Bando–Shi all-`m` bounds
 near `ω`, produce the smooth limit data `CinftyLimitData g_fam α ω`.
 
-**Status: `sorry` — pending two named analysis frontiers** (`BBSLimitProducer.md` §2 C3):
-* **G3** — `limitMetric`/`tendsto_left`: build a `SmoothRiemannianMetric` from the pointwise
-  chart-Gram `C⁰` limits (`chartGramMatrix_tendsto_nhdsLT_of_bounded_deriv`) + the uniform spatial
-  `Cᵐ` bounds.  No banked constructor produces `CinftyLimitData`; this *“smooth limit from uniform
-  bounds”* builder is the missing infrastructure.
-* **G4** — `ricci_match`: Ricci continuity across `ω` from the `m ≤ 2` bounds via
-  **Arzelà–Ascoli / equicontinuity** on chart-Gram and its `≤ 2` derivatives. -/
+G3 is supplied by `exists_endMetric`; G4 is supplied by
+`ricci_tendsto_left`. -/
 def cinftyLimitData_of_allMBounds
     {alpha omega : ℝ} {hαω : alpha < omega}
     (S : SolutionOn (I := I) (M := M)
       (RealTimeInterval.closedOpen alpha omega hαω))
     (hS : IsSolutionOn (I := I) S)
     (hdim : Module.finrank ℝ E = 3)
+    (hbound : ∃ K : ℝ, ∀ (t : ℝ) (x : M),
+        alpha ≤ t → t < omega →
+          Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4
+            (S.base.rm04 t x) ≤ K)
+    (hEquiv : ∃ Lambda : ℝ, 1 ≤ Lambda ∧
+      ∃ t1 : ℝ, t1 ∈ Set.Ico alpha omega ∧
+        ∀ s : ℝ, s ∈ Set.Ico t1 omega →
+          ∀ x : M, ∀ v : TangentSpace I x,
+            Lambda⁻¹ * (S.base.metric alpha).inner x v v ≤
+                (S.base.metric s).inner x v v ∧
+              (S.base.metric s).inner x v v ≤
+                Lambda * (S.base.metric alpha).inner x v v)
     (hbounds : ∀ m : ℕ, ∃ C : ℝ, ∀ (t : ℝ) (x : M),
         (alpha + omega) / 2 ≤ t → t < omega →
           nablaKRm04NormSqIntrinsic (I := I) S m t x ≤ C) :
     CinftyLimitData (I := I) S.base.metric alpha omega hαω := by
-  sorry
+  obtain ⟨gInf, hleft⟩ := exists_endMetric (I := I) S hdim hS hbound hEquiv
+  refine
+    { limitMetric := gInf
+      tendsto_left := hleft
+      ricci_match := ?_ }
+  intro x v w
+  exact ricci_tendsto_left (I := I) S hdim hS hbound hEquiv gInf hleft x v w
 
-/-- **Dispatch C target — `CinftyLimitData` from a bounded-curvature dim-3 solution.**  This
-discharges the `hLimit` leaf of `extends_of_rmBounded` (`MaximalTime.lean`).  It is the sorry-free
-composition `cinftyLimitData_of_allMBounds ∘ bbsAllMBounds`; the two remaining frontiers live in
-those named lemmas (the DeTurck-gated all-`m` bounds, and the C3 limit-extraction analysis).
+/-- **Dispatch C target — `CinftyLimitData` from a bounded-curvature dim-3 solution.**  This was
+introduced for the former `hLimit` leaf of `extends_of_rmBounded` (`MaximalTime.lean`).  It is the
+sorry-free composition `cinftyLimitData_of_allMBounds ∘ bbsAllMBounds`. The all-`m` estimate is
+proved in `BBSAllMBounds.lean`; the endpoint route is retained as compactness infrastructure even
+though the live extension proof now uses interior restart and forward uniqueness instead.
 
 `hRm`/`hbound` are the unfolded forms of `MaximalTime.Rm04RealizesSolutionConnectionOn` /
 `Rm04NormSqBoundedAt` (definitionally equal), so the call site wires them directly. -/
@@ -161,8 +130,22 @@ def cinftyLimitData_of_solution
     (hbound : ∃ K : ℝ, ∀ (t : ℝ) (x : M),
         alpha ≤ t → t < omega →
           Tensor0SBundle.normSq0S (I := I) (S.base.metric t) x 4 (Rm04 t x) ≤ K) :
-    CinftyLimitData (I := I) S.base.metric alpha omega hαω :=
-  cinftyLimitData_of_allMBounds (I := I) S hS hdim
-    (bbsAllMBounds (I := I) S hS hdim Rm04 hRm hbound)
+    CinftyLimitData (I := I) S.base.metric alpha omega hαω := by
+  have hRmRaw : ∀ t ∈ Set.Ico alpha omega,
+      Rm04RealizesConnection (I := I) (S.base.metric t)
+        (metricCov (I := I) (M := M) (S.base.metric t)) (Rm04 t) := by
+    intro t ht
+    simpa [SolutionOn.family, SolutionFamily.connection] using
+      hRm (⟨t, ht⟩ : RealTimeInterval.FlowTime
+        (RealTimeInterval.closedOpen alpha omega hαω))
+  have hCan := rm04_bound_can (I := I) Rm04 hRmRaw hbound
+  obtain ⟨K, hK⟩ := hbound
+  have hRic := ric_quad_le_of_soln (I := I) hRmRaw hK
+  have hRicConst :
+      0 ≤ (Module.finrank ℝ E : ℝ) ^ 2 * Real.sqrt K := by
+    positivity
+  have hEquiv := hell_of_soln (I := I) hS hRicConst hRic
+  exact cinftyLimitData_of_allMBounds (I := I) S hS hdim hCan hEquiv
+    (bbsAllMBounds (I := I) S hS hdim Rm04 hRm ⟨K, hK⟩)
 
 end DifferentialGeometry.PDE.RicciFlow

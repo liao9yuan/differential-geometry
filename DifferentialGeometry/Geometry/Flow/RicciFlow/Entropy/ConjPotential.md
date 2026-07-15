@@ -30,24 +30,27 @@ problem.  It composes `conjCoeff_joint` with the smooth map
 `(x, s) ↦ (T - s, x)` and restricts exactly to reflected regular times.  It
 adds no assumptions or independent regularity package.
 
+The direct lambda-valued theorem statement timed out deterministically at
+`whnf`, even with 800k heartbeats; removing the `omit` wrapper did not help.
+Naming the ordinary scalar map as the opaque `conjCoeffRev : M × ℝ → ℝ`
+made the statement cheap, while the proof unfolds it only after the scalar
+composition is formed.  Restoring the weakest-assumption `omit` wrapper then
+passed without a warning.
+
 ## Verification status
 
-The previously existing operator results passed focused verification and their
-targeted module build.  Final focused verification of the newly added
-`conjCoeff_joint` is pending because concurrent dependency builds are currently
-making imported `.olean` files disappear and reappear.  No local theorem error
-has been exposed.
+The existing operator results and both joint coefficient theorems pass focused
+verification.  The opaque scalar-map normal form reduced the focused check from
+a deterministic timeout to a clean pass.  A named-module refresh is pending.
 
 ## Progress accounting
 
 - A2 short-time measurable input: complete (100%).
 - A1 operator and `conjA1_short`: complete (100%).
-- `conjCoeff_joint`: theorem body present; count as 0% verified until its focused
-  check is green.  Its dedicated geometric producer machinery is about 95%.
-- `conjCoeff_rev`: theorem body present; count as 0% verified until the same
-  focused check is green.
-- The next independent A1 regularity frontier is the uniform scalar-multiplier
-  jet estimate; joint coefficient smoothness alone does not prove it.
+- `conjCoeff_joint` and `conjCoeff_rev`: theorem and dedicated geometric
+  producer machinery complete (100%), focused verified.
+- The uniform scalar-multiplier jet and finite-pairing producers are now also
+  complete (100%); they remain machinery, not the final conjugate-heat theorem.
 - The separate genuine A2/A1 input producers and their dedicated machinery:
   complete (100%); `ConjStrong.conj_strong_exists` now completes their
   specialized spectral strong-solution assembly (100%).

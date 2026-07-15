@@ -274,12 +274,15 @@ private theorem lapDiff_unit
     rw [show vec2 (I := I)
           (smoothOrthoFrame (I := I) h x i x)
           (smoothOrthoFrame (I := I) h x i x) 0 =
-        smoothOrthoFrame (I := I) h x i x by simp only [vec2, if_pos],
+        smoothOrthoFrame (I := I) h x i x by simp only [vec2, ite_self],
       show vec2 (I := I)
           (smoothOrthoFrame (I := I) h x i x)
           (smoothOrthoFrame (I := I) h x i x) 1 =
-        smoothOrthoFrame (I := I) h x i x by
-          simp only [vec2, OfNat.ofNat, Fin.isValue, Fin.one_ne_zero, if_false]]
+        smoothOrthoFrame (I := I) h x i x by simp only [vec2, ite_self]]
+    change Tensor0SSpace.toModel D1
+        (fun _ : Fin 1 => connDiff (I := I) h q x
+          (smoothOrthoFrame (I := I) h x i x)
+          (smoothOrthoFrame (I := I) h x i x)) = _
     rw [grad_repr_apply (I := I) (M := M) q v.1 v.2 x
       (connDiff (I := I) h q x
         (smoothOrthoFrame (I := I) h x i x)
@@ -287,9 +290,6 @@ private theorem lapDiff_unit
     rw [← connDiff_eq_difference (I := I) q h]
     rw [connectionDifferenceOutput_apply]
     congr 2
-    funext j
-    fin_cases j
-    simp only [vec2]
   rw [lapDiffSec_apply (I := I) (M := M) q h v x,
     lift_unit (I := I) (M := M)]
   rw [scalarLapDiff_apply (I := I) (M := M) q h

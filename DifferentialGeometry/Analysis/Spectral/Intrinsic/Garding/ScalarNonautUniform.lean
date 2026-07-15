@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarFluxJetBou
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ParametricPairing
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarGalerkinPairing
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CurvatureCoefficientDifferenceJetTower
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTraceField
 
 /-!
 # Uniform scalar nonautonomous pairings
@@ -22,9 +23,11 @@ namespace DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -173,7 +176,8 @@ private theorem fluxDiv_jet_bdd
       riemannianFiberNormSq (I := I) (M := M) q 1 (2 + i) x
         ((iteratedCovGrad (I := I) q 1 2 i (W t)).toSection x) ≤ B (i + 1) := by
     intro i t ht x
-    rw [W, rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M)]
+    simp only [W]
+    rw [rfns_iteratedCovGrad_covGrad_comm_rs (I := I) (M := M)]
     exact hB (i + 1) t ht x
   obtain ⟨D, hD_nn, hD⟩ := appRS_jet_bdd (I := I) (M := M) q Q W A F
     (fun i => B (i + 1)) hF_nn (fun i => hB_nn (i + 1)) hQ hW
@@ -393,7 +397,8 @@ theorem cc_conn_unif
       (gm s).inner y v w = q.inner y v w +
         ccTensorBilinSymm (I := I) q (P s) y v w := by
     intro s hs y v w
-    rw [P, metricDiff_bilin (I := I) (M := M)]
+    simp only [P]
+    rw [metricDiff_bilin (I := I) (M := M)]
     ring
   have hsmall : ∀ s, s ∈ A →
       gFibreOpBound (I := I) q
@@ -524,7 +529,8 @@ theorem cc_lap_unif
     ccTensorBilinSymm (I := I) q K
   have htie : ∀ y v w, h.inner y v w = q.inner y v w + k y v w := by
     intro y v w
-    rw [k, K, metricDiff_bilin (I := I) (M := M)]
+    simp only [k, K]
+    rw [metricDiff_bilin (I := I) (M := M)]
     ring
   have hsmall : gFibreOpBound (I := I) q k (1 / 4 : ℝ) := by
     simpa only [q, h, K, k] using (hm s hsm).2.1

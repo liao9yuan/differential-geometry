@@ -343,8 +343,33 @@ private lemma towVal_le
               (Function.update (fun b : Fin (p + 2) => W b x) a
                 (((leviCivitaConnectionOfMetric (I := I) gRef)
                   (fun r : M => W a r) x) (σ x))) := by
-    simp only [towerStep, ContinuousMultilinearMap.sub_apply, Finset.sum_sub_distrib]
-    ring
+    have htop :
+        (covDerivOfField (I := I) gRef A0 (p + 1) x
+            - covDerivOfField (I := I) gRef A0' (p + 1) x)
+          (Fin.cons (σ x) (fun a : Fin (p + 2) => W a x)) =
+        covDerivOfField (I := I) gRef A0 (p + 1) x
+            (Fin.cons (σ x) (fun a : Fin (p + 2) => W a x))
+          - covDerivOfField (I := I) gRef A0' (p + 1) x
+            (Fin.cons (σ x) (fun a : Fin (p + 2) => W a x)) := rfl
+    have hslot (a : Fin (p + 2)) :
+        (covDerivOfField (I := I) gRef A0 p x
+            - covDerivOfField (I := I) gRef A0' p x)
+          (Function.update (fun b : Fin (p + 2) => W b x) a
+            (((leviCivitaConnectionOfMetric (I := I) gRef)
+              (fun r : M => W a r) x) (σ x))) =
+        covDerivOfField (I := I) gRef A0 p x
+            (Function.update (fun b : Fin (p + 2) => W b x) a
+              (((leviCivitaConnectionOfMetric (I := I) gRef)
+                (fun r : M => W a r) x) (σ x)))
+          - covDerivOfField (I := I) gRef A0' p x
+            (Function.update (fun b : Fin (p + 2) => W b x) a
+              (((leviCivitaConnectionOfMetric (I := I) gRef)
+                (fun r : M => W a r) x) (σ x))) := rfl
+    rw [htop]
+    simp_rw [hslot]
+    unfold towerStep
+    rw [Finset.sum_sub_distrib]
+    abel
   rw [hdiff]
   refine (abs_add_le _ _).trans ?_
   have h1 : |(covDerivOfField (I := I) gRef A0 (p + 1) x
@@ -493,7 +518,7 @@ private lemma gram0_le :
     have hu' := Tensor0SBundle.metricTensorField_apply (I := I) u' x
       (fun a => (![chartBasisVecFiber (I := I) x i x,
         chartBasisVecFiber (I := I) x j x] : Fin 2 → TangentSpace I x) a)
-    simp only [metricDiffCovDerivAt, ContinuousMultilinearMap.sub_apply]
+    simp only [metricDiffCovDerivAt]
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hu hu'
     change u.inner x _ _ - u'.inner x _ _
       = (metricCovDeriv (I := I) u gRef 0 x) _ - (metricCovDeriv (I := I) u' gRef 0 x) _

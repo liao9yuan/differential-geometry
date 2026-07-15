@@ -22,16 +22,15 @@ product-grid estimate, balanced pairing, the scalar Dirichlet gap, and the
 existing finite spectral pairing identity.  It adds no consumer assumptions
 and does not use `HasLocallyConstantChartAt`.
 
-Verification has not yet run for this file.  Shared-worktree object-file builds
-were deliberately stopped after concurrent Lean writers raced on upstream
-objects; verification must be resumed serially.  This is currently a tooling
-verification frontier, not a known mathematical or API gap.  Until focused
-verification succeeds, `cc_a2_unif` is not counted as a completed theorem.
+Focused verification now passes.  The stale source failures were not analytic:
+the file needed direct access to `CometricDoubleTraceField`, the
+`TensorHeatEquation` and `DeTurck` namespaces had to be opened explicitly, and
+three local `let` definitions had to be normalized with `simp only` before
+rewriting.  No theorem statement or hypothesis changed.
 
-Honest accounting: `cc_a2_unif` theorem completion is 0% pending Lean
-verification, while its dedicated source machinery is about 95%.  The
-downstream `scalar_crit_tame` theorem is source-written but likewise remains 0%
-complete pending verification; its dedicated source machinery is about 96%.
+Honest accounting: `cc_a2_unif` and its dedicated machinery are 100% verified.
+The downstream `scalar_crit_tame` theorem is source-written but remains 0%
+complete pending its own verification; its dedicated machinery is about 99%.
 Perelman no-local-collapsing and `ham3_noncollapse` remain theorem-level 0%,
-with about 42% dedicated analytic machinery.  Whole HCG machinery is about
+with about 44% dedicated analytic machinery.  Whole HCG machinery is about
 54%, with its endpoint theorems at 0%.

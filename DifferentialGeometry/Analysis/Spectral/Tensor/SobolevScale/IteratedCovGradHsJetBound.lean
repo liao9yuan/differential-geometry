@@ -132,6 +132,25 @@ theorem ccToHs_norm_sq
   rw [tensorHs.norm_sq_eq_tsum]
   exact tsum_congr (fun m => by rw [ccTensorToHs_coeff])
 
+/-- Every finite weighted coefficient mass of a smooth tensor is bounded by
+its full spectral Sobolev norm squared. -/
+theorem cc_partial_le_norm
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
+    (S : SmoothCcTensor g₀ 0 s)
+    (F : Finset
+      (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+        (I := I) (M := M) g₀ 0 s)) :
+    (∑ m ∈ F,
+        tensorSobolevWeight (I := I) (M := M) m σ *
+          (tensorL2Coeff (I := I) (M := M)
+            (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
+            (SmoothCcTensor.toL2 S) m) ^ 2) ≤
+      ‖ccTensorToHs (I := I) (M := M) g₀ s σ S‖ ^ 2 := by
+  rw [ccToHs_norm_sq]
+  exact (ccTensorToHs (I := I) (M := M) g₀ s σ S).weighted_summable.sum_le_tsum F
+    (fun m _ => mul_nonneg (tensorSobolevWeight_nonneg (I := I) (M := M) m σ)
+      (sq_nonneg _))
+
 /-- The generic smooth spectral norm is monotone in the Sobolev order. -/
 theorem ccToHs_norm_mono
     (g₀ : SmoothRiemannianMetric I M) (s : ℕ) {σ τ : ℝ} (hστ : σ ≤ τ)

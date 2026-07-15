@@ -70,3 +70,43 @@ The approved conditional source-local/global capstone is 100%. Dedicated
 Step-B/B1 machinery is about 88%, Chapter 4 machinery about 82%, and whole-HCG
 machinery about 54%. `StrictDistInput`/Hessian--Neumann remains independent;
 `StepB1RawInput`, textbook B1, and all compactness endpoints remain 0%.
+
+## 2026-07-14 selected-branch Hessian retention
+
+`HasHatCmStrict` now records the same selected source branch together with the
+actual root, its invertible center derivative, and the strict local implicit
+solution.  `exists_hat_cm_tail_support` uses the normalized-weight field to call
+`exists_hat_cm_sol_at` before the quantitative branch data is erased.  The POU
+compatibility entrypoint and `HasHatCmEqn` remain unchanged.
+
+Focused verification passes without a local warning or `sorry`.  The sequence
+tail, epsilon-dependent active-radius tail, pair-index tail, and finite source
+maximum retain their former quantifier order.  No global weight, chart selector,
+overlap equality, or endpoint radius assumption was introduced.
+
+The selected-branch Hessian/Neumann support route is 100%.  The independent
+`StrictDistInput` producer is still theorem-level 0%; its missing content is the
+`lbl413` positive Hessian lower bound and geodesic strict convexity, not IFT
+plumbing.  Dedicated Step-B/B1 machinery is about 90%, Chapter 4 about 83%, and
+whole-HCG machinery about 55%; `StepB1RawInput`, textbook B1, and compactness
+endpoints remain 0%.
+
+## 2026-07-14 direct minimizing readout
+
+This section supersedes the independent-frontier accounting above.
+`exists_hat_cm_min` retains `hqAcc`, the full selected branch, and the derived
+quarter-ball containment.  It applies the active-radius construction, runs the
+finite physical cage once on `3 * rad`, invokes
+`HasNormalBrFull.strict_dist`, and returns the center input and selected-branch
+strict solution for the fixed intrinsic `minJoin` directly.
+
+The older theorem accepting an arbitrary join and explicit
+`StrictDistInput` remains as compatibility API.  No whole-hat target
+containment, glued weight, chart selector, overlap equality, or endpoint-radius
+assumption was added.  Focused verification and exact target refresh passed.
+
+The support-local `StrictDistInput` and direct minimizing readout producers are
+**100%**.  The concrete `StepB1RawInput` producer, textbook B1 theorem, and all
+compactness endpoints remain theorem-level **0%**.  Dedicated Step-B/B1
+machinery is about **94%**, Chapter 4 machinery about **86%**, and whole-HCG
+machinery about **57%**.

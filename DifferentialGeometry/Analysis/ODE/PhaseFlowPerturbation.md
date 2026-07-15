@@ -55,3 +55,11 @@ Verification passed for the focused file check, with no warnings and no
 - Focused verification passed.  The earlier progress estimate above is
   superseded by the live B1 plan; the quantitative model inverse is now checked,
   while the intrinsic B1 producer and theorem remain 0%.
+# Phase-flow perturbation
+
+## Free inverse readout
+
+`freeDiagInv_apply` records the explicit inverse of the free retained-endpoint
+equivalence: `(x, y)` is sent to `(x, y - x)`.  This small canonical simp lemma
+supports quantitative fixed-endpoint inverse-velocity estimates without
+unfolding `freeDiagCLE` downstream.  Focused verification passed.

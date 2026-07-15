@@ -505,6 +505,44 @@ theorem sharp_norm_le
   norm_num at hbound ⊢
   exact hbound
 
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
+/-- The H6 quadratic upper bound controls every mixed evaluation of the
+normal-coordinate metric by the model norms. -/
+theorem abs_apply_le
+    {Y : PointedRiemannianManifold.{u, uE, uH} (I := I)} {x : Y.M}
+    {U : Set E} (h : NormalCoordMetricEquivOn (I := I) Y x U)
+    {z : E} (hz : z ∈ U) (v w : E) :
+    |normalCoordMetric (I := I) Y x z v w| ≤ 2 * ‖v‖ * ‖w‖ := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    ⟨Y.metric.toRiemannianMetric⟩
+  let dExp : E →L[Real]
+      TangentSpace I (expMapDiffeo (I := I) Y.metric x z) :=
+    mfderiv 𝓘(Real, E) I
+      (fun u ↦ expMapDiffeo (I := I) Y.metric x u) z
+  have hcs :
+      |normalCoordMetric (I := I) Y x z v w| ≤
+        ‖dExp v‖ * ‖dExp w‖ := by
+    rw [normalCoordMetric_apply (I := I)]
+    exact abs_real_inner_le_norm (dExp v) (dExp w)
+  have hvSq : ‖dExp v‖ ^ 2 ≤ 2 * ‖v‖ ^ 2 := by
+    rw [← real_inner_self_eq_norm_sq]
+    simpa only [normalCoordMetric_apply (I := I)] using (h z hz v).2
+  have hwSq : ‖dExp w‖ ^ 2 ≤ 2 * ‖w‖ ^ 2 := by
+    rw [← real_inner_self_eq_norm_sq]
+    simpa only [normalCoordMetric_apply (I := I)] using (h z hz w).2
+  have hprodSq :
+      (‖dExp v‖ * ‖dExp w‖) ^ 2 ≤ (2 * ‖v‖ * ‖w‖) ^ 2 := by
+    have hmul := mul_le_mul hvSq hwSq (sq_nonneg ‖dExp w‖)
+      (mul_nonneg (by norm_num) (sq_nonneg ‖v‖))
+    nlinarith [sq_nonneg ‖v‖, sq_nonneg ‖w‖]
+  exact hcs.trans <| le_of_sq_le_sq hprodSq
+    (mul_nonneg (mul_nonneg (by norm_num) (norm_nonneg v)) (norm_nonneg w))
+
 end NormalCoordMetricEquivOn
 
 -- `iteratedFDeriv` over the nested operator-norm space `E →L[ℝ] E →L[ℝ] ℝ` with

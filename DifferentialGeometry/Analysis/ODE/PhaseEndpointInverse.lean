@@ -1,3 +1,4 @@
+import DifferentialGeometry.Analysis.Calculus.ApproximatesLinearOn
 import DifferentialGeometry.Analysis.ODE.PhaseFlowSmallness
 import Mathlib.Analysis.Calculus.ContDiff.Operations
 import Mathlib.LinearAlgebra.FiniteDimensional.Basic
@@ -12,7 +13,7 @@ close to the free retained-endpoint equivalence.
 noncomputable section
 
 open Set Metric
-open scoped ContDiff NNReal
+open scoped ContDiff NNReal Topology
 
 namespace DifferentialGeometry
 namespace PhaseFlow
@@ -38,6 +39,95 @@ theorem freeDiagInv_pos [Nontrivial E] :
   have hnn : (0 : NNReal) < ‖L‖₊ := by exact_mod_cast hnorm
   exact inv_pos.mpr hnn
 
+/-- A sufficiently small forward error makes the quantitative inverse error
+strictly smaller than one. -/
+theorem invErr_lt_one {N c : NNReal}
+    (hc : c < N⁻¹ / (2 * (N + 1))) :
+    N * (N⁻¹ - c)⁻¹ * c < 1 := by
+  have hden : 0 < 2 * (N + 1) := mul_pos (by norm_num) (by positivity)
+  have hsmall : c * (2 * (N + 1)) < N⁻¹ :=
+    (lt_div_iff₀ hden).mp hc
+  have hN1 : 1 ≤ N + 1 := by exact le_add_of_nonneg_left N.2
+  have hfac : 1 ≤ 2 * (N + 1) := by
+    calc
+      (1 : NNReal) ≤ 2 := by norm_num
+      _ = 2 * (1 : NNReal) := by norm_num
+      _ ≤ 2 * (N + 1) := mul_le_mul_of_nonneg_left hN1 (by norm_num)
+  have hct : c < N⁻¹ := by
+    calc
+      c = c * 1 := by rw [mul_one]
+      _ ≤ c * (2 * (N + 1)) := mul_le_mul_of_nonneg_left hfac c.2
+      _ < N⁻¹ := hsmall
+  have hdiff : 0 < N⁻¹ - c := tsub_pos_iff_lt.mpr hct
+  have hnum : N * c < N⁻¹ - c := by
+    rw [lt_tsub_iff_right]
+    have hfac' : N + 1 ≤ 2 * (N + 1) := by
+      calc
+        N + 1 = 1 * (N + 1) := by rw [one_mul]
+        _ ≤ 2 * (N + 1) :=
+          mul_le_mul_of_nonneg_right (by norm_num) (N + 1).2
+    calc
+      N * c + c = c * (N + 1) := by ring
+      _ ≤ c * (2 * (N + 1)) := mul_le_mul_of_nonneg_left hfac' c.2
+      _ < N⁻¹ := hsmall
+  calc
+    N * (N⁻¹ - c)⁻¹ * c = (N * c) / (N⁻¹ - c) := by
+      rw [div_eq_mul_inv]
+      ring
+    _ < 1 := (div_lt_one hdiff).2 hnum
+
+/-- Fixing the endpoint in a quantitative inverse of the retained phase map
+gives an inverse-velocity map close to `-id`. -/
+theorem invVel_approx
+    {F : E × E → E × E} {s : Set (E × E)} {c : NNReal}
+    (hF : ApproximatesLinearOn F
+      ((freeDiagCLE (E := E)).symm : (E × E) →L[Real] (E × E)) s c)
+    (y : E) :
+    ApproximatesLinearOn (fun x => (F (x, y)).2)
+      (-(ContinuousLinearMap.id Real E)) {x | (x, y) ∈ s} c := by
+  intro x hx x' hx'
+  let z : E × E := (x, y)
+  let z' : E × E := (x', y)
+  let R : E × E := F z - F z' -
+    ((freeDiagCLE (E := E)).symm : (E × E) →L[Real] (E × E)) (z - z')
+  have hfull : ‖R‖ ≤ (c : Real) * ‖z - z'‖ := hF z hx z' hx'
+  have hfree :
+      (((freeDiagCLE (E := E)).symm : (E × E) →L[Real] (E × E))
+        (z - z')).2 = -(x - x') := by
+    change ((freeDiagCLE (E := E)).symm (z - z')).2 = -(x - x')
+    rw [freeDiagInv_apply]
+    simp only [z, z', Prod.fst_sub, Prod.snd_sub, sub_self, zero_sub]
+  have hprod : ‖z - z'‖ = ‖x - x'‖ := by
+    simp only [z, z', Prod.norm_def, Prod.fst_sub, Prod.snd_sub, sub_self,
+      norm_zero, max_eq_left (norm_nonneg _)]
+  calc
+    ‖(F (x, y)).2 - (F (x', y)).2 -
+        (-(ContinuousLinearMap.id Real E)) (x - x')‖ = ‖R.2‖ := by
+      simp only [R, z, z', Prod.snd_sub, ContinuousLinearMap.neg_apply,
+        ContinuousLinearMap.id_apply, hfree]
+    _ ≤ ‖R‖ := norm_snd_le R
+    _ ≤ (c : Real) * ‖z - z'‖ := hfull
+    _ = (c : Real) * ‖x - x'‖ := by rw [hprod]
+
+/-- At a differentiability point whose fixed-endpoint slice lies locally in
+the approximation domain, the inverse-velocity derivative is close to
+`-id`. -/
+theorem invVel_fderiv_le
+    {F : E × E → E × E} {s : Set (E × E)} {c : NNReal}
+    (hF : ApproximatesLinearOn F
+      ((freeDiagCLE (E := E)).symm : (E × E) →L[Real] (E × E)) s c)
+    {x y : E} (hs : s ∈ 𝓝 (x, y))
+    (hFd : DifferentiableAt Real F (x, y)) :
+    ‖fderiv Real (fun u => (F (u, y)).2) x +
+        ContinuousLinearMap.id Real E‖ ≤ (c : Real) := by
+  have hs' : {u : E | (u, y) ∈ s} ∈ 𝓝 x :=
+    (continuous_id.prodMk continuous_const).continuousAt.preimage_mem_nhds hs
+  have hslice : DifferentiableAt Real (fun u => (F (u, y)).2) x := by
+    exact (hFd.comp x
+      (differentiableAt_id.prodMk (differentiableAt_const y))).snd
+  simpa only [sub_neg_eq_add] using
+    (invVel_approx hF y).fderiv_sub_le hs' hslice
+
 /-- An open partial homeomorphism whose source and forward map realize a
 quantitative approximation has a smooth inverse whenever its forward map is
 smooth on that source. -/
@@ -58,11 +148,9 @@ theorem inv_smooth_of_approx [CompleteSpace E] [FiniteDimensional Real E]
   let D : E →L[Real] E := fderiv Real f (e.symm y)
   have hfD : HasFDerivAt f D (e.symm y) := by
     exact (hsmx.differentiableAt (by simp)).hasFDerivAt
-  have hres : HasFDerivAt (f - (A : E → E)) (D - (A : E →L[Real] E))
-      (e.symm y) := by
-    simpa only [Pi.sub_apply] using hfD.sub A.hasFDerivAt
-  have hDnorm : ‖D - (A : E →L[Real] E)‖ ≤ (c : Real) :=
-    hres.le_of_lipschitzOn (hs.mem_nhds hx) hf.lipschitzOnWith
+  have hDnorm : ‖D - (A : E →L[Real] E)‖ ≤ (c : Real) := by
+    simpa only [D] using
+      hf.fderiv_sub_le (hs.mem_nhds hx) hfD.differentiableAt
   have hDapprox : ApproximatesLinearOn (D : E → E) (A : E →L[Real] E)
       Set.univ c := by
     intro u _ v _
@@ -110,8 +198,10 @@ theorem quantInv_smooth [CompleteSpace E] [FiniteDimensional Real E]
 
 /-- A map uniformly close to the free retained-endpoint equivalence on a
 positive closed ball has a quantitative inverse branch on the corresponding
-open ball.  Its target contains the displayed positive closed ball. -/
-theorem exists_quant_inv [CompleteSpace E]
+open ball.  Its target contains the displayed positive closed ball, and the
+inverse retains the quantitative approximation supplied by the inverse
+function theorem. -/
+theorem exists_quant_inv_bi [CompleteSpace E]
     {f : E × E → E × E} {q c : NNReal}
     (hq : 0 < q)
     (hf : ApproximatesLinearOn f freeDiag
@@ -125,7 +215,16 @@ theorem exists_quant_inv [CompleteSpace E]
       closedBall (f 0) δ ⊆ e.target ∧
       δ = ((‖((freeDiagCLE (E := E)).symm :
         (E × E) →L[Real] (E × E))‖₊⁻¹ - c : NNReal) : Real) *
-        ((q : Real) / 2) := by
+        ((q : Real) / 2) ∧
+      ApproximatesLinearOn
+        (e.symm : E × E → E × E)
+        ((freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))
+        e.target
+        (‖((freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊ *
+          (‖((freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊⁻¹ - c)⁻¹ * c) := by
   let s : Set (E × E) := ball (0 : E × E) q
   have hfo : ApproximatesLinearOn f freeDiag s c :=
     hf.mono_set Metric.ball_subset_closedBall
@@ -149,10 +248,42 @@ theorem exists_quant_inv [CompleteSpace E]
   have htarget := hfo.closedBall_subset_target
     (f' := freeDiagCLE (E := E)) hc' Metric.isOpen_ball
     (b := (0 : E × E)) (ε := (q : Real) / 2) (by positivity) hhalf
-  refine ⟨e, δ, hδ, ?_, ?_, ?_, rfl⟩
+  have hinv : ApproximatesLinearOn
+      (e.symm : E × E → E × E)
+      ((freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))
+      e.target
+      (‖((freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))‖₊ *
+        (‖((freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))‖₊⁻¹ - c)⁻¹ * c) := by
+    simpa only [e, s] using
+      (hfo.to_inv (f' := freeDiagCLE (E := E)) hc')
+  refine ⟨e, δ, hδ, ?_, ?_, ?_, rfl, hinv⟩
   · rfl
   · rfl
   · simpa [e, δ, s, NNReal.coe_sub hc.le] using htarget
+
+/-- Compatibility projection of `exists_quant_inv_bi` retaining the original
+existence interface. -/
+theorem exists_quant_inv [CompleteSpace E]
+    {f : E × E → E × E} {q c : NNReal}
+    (hq : 0 < q)
+    (hf : ApproximatesLinearOn f freeDiag
+      (closedBall (0 : E × E) q) c)
+    (hc : c <
+      ‖((freeDiagCLE (E := E)).symm : (E × E) →L[Real] (E × E))‖₊⁻¹) :
+    ∃ (e : OpenPartialHomeomorph (E × E) (E × E)) (δ : Real),
+      0 < δ ∧
+      e.source = ball (0 : E × E) q ∧
+      (e : E × E → E × E) = f ∧
+      closedBall (f 0) δ ⊆ e.target ∧
+      δ = ((‖((freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹ - c : NNReal) : Real) *
+        ((q : Real) / 2) := by
+  obtain ⟨e, δ, hδ, hsource, hcoe, htarget, hδeq, _hinv⟩ :=
+    exists_quant_inv_bi (E := E) hq hf hc
+  exact ⟨e, δ, hδ, hsource, hcoe, htarget, hδeq⟩
 
 end PhaseFlow
 end DifferentialGeometry

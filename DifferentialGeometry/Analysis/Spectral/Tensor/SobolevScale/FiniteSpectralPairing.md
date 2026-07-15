@@ -23,6 +23,9 @@ spectral Sobolev norm of `tensorHsSmoothRepr` and the finite weighted
 coefficient energy.  It is a projection lemma in this rank-generic finite-core
 layer, rather than a consumer-local rewrite.
 
-Its focused verification is pending because the shared build tree currently
-lacks a generated upstream coordinate-tensor object file; no local theorem
-error has yet been reported.
+Focused verification now passes.  The initial named-module refresh exposed a
+local rewrite-normal-form failure at the whole summation; scalarizing it to a
+`tsum_congr` proof closed the issue without changing the statement.  The
+`finite_repr_norm` theorem and its dedicated projection machinery are complete
+(100%); downstream critical-tame and Galerkin endpoint theorems are accounted
+for separately.

@@ -54,6 +54,19 @@ theorem metricCov_smooth (g : SmoothRiemannianMetric I M) :
     DifferentialGeometry.Integral.Connection.leviCivitaConnectionOfMetric_contMDiffCovariantDerivativeLocally
       (I := I) (M := M) g
 
+/-- The metric Levi--Civita derivative at a point depends only on the germ of
+the differentiated tangent field. -/
+theorem metricCov_congr_nhds
+    (g : SmoothRiemannianMetric I M)
+    {Y Y' : (y : M) → TangentSpace I y} {x : M}
+    (hY : MDifferentiableAt I I.tangent (T% Y) x)
+    (hY' : MDifferentiableAt I I.tangent (T% Y') x)
+    (hEq : Y =ᶠ[nhds x] Y') :
+    (metricCov (I := I) (M := M) g).toFun Y x =
+      (metricCov (I := I) (M := M) g).toFun Y' x := by
+  exact (metricCov (I := I) (M := M) g).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+    hY hY' Filter.univ_mem hEq
+
 /-- The pointwise `(1,3)` Riemann tensor canonically associated to a metric. -/
 noncomputable def metricRm13At (g : SmoothRiemannianMetric I M) (x : M) :
     Tensor13At (I := I) (M := M) x :=

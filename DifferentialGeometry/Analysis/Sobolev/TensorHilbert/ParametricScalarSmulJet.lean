@@ -14,8 +14,6 @@ calculus.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option synthInstance.maxHeartbeats 1600000
-set_option maxHeartbeats 1600000
 
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
@@ -26,6 +24,7 @@ namespace Connection
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Integral.L2
+open DifferentialGeometry.PDE.RicciFlow
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -36,6 +35,8 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem rank_zero_one (x : M) (c : Tensor0SSpace 0 I x) :
     tensor0SSpace_evalScalar x c •
         Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
@@ -78,6 +79,8 @@ private theorem app_scalarCc (g : SmoothRiemannianMetric I M)
   rw [ContinuousLinearMap.smul_apply, Tensor0SField.toRS0_apply,
     rank_zero_one]
 
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem joint_rs_smul {r s : ℕ} {S : Set ℝ}
     (f : M × ℝ → ℝ)
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ f
@@ -118,6 +121,8 @@ private theorem joint_rs_smul {r s : ℕ} {S : Set ℝ}
       rw [he, ← hx₀]
       exact mem_baseSet_trivializationAt _ _ x₀)).map_smul (f p₀) (A p₀)
 
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private theorem scalarCc_joint (g : SmoothRiemannianMetric I M)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S : Set ℝ}
     (hzeta : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞

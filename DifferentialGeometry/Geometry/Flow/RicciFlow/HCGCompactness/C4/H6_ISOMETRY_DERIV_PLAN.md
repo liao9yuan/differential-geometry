@@ -142,17 +142,19 @@ pair-to-capstone integration about 65%; dedicated Step-B/B1 machinery about
   existential-source corollary without a glued weight or chart selector.
 - The remaining obstruction is no longer H6 or source-cover wiring.  The
   conditional capstone still consumes `StrictDistInput`; its uniform
-  full-convexity/Hessian--Neumann producer is the independent analytic
-  frontier.
+  positive-Hessian/full-convexity producer is the independent analytic
+  frontier.  The selected-branch Hessian/Neumann and strict-IFT route is
+  checked and retained through the capstone.
 - The 2026-07-14 audit removes the two-point selector from that frontier:
   `GeodesicConvexity.minJoin` is a focused-green wrapper around the proved
-  intrinsic Hopf--Rinow minimizing vector.  The actual missing comparison is
-  `lbl412` plus the positive `lbl413` bound; current second variation gives only
-  index-form nonnegativity.  No H6 field, endpoint radius, or weight
-  compatibility assumption can discharge this gap.
+  intrinsic Hopf--Rinow minimizing vector.  `IsNormalDiag.hess_half_inv` now
+  proves the branch-native `lbl412` identity.  The actual missing comparison is
+  the positive `lbl413` bound; current second variation gives only index-form
+  nonnegativity.  No H6 field, endpoint radius, or weight compatibility
+  assumption can discharge this gap.
 
 Updated accounting: localized H6 producer 100%; S6 removal 100%; finite
 positive-pair extraction 100%; sparse active-support machinery 100%;
 conditional source-local/global capstone 100%; dedicated Step-B/B1 machinery
-about 88%; Chapter 4 machinery about 82%; whole-HCG machinery about 54%.
+about 90%; Chapter 4 machinery about 83%; whole-HCG machinery about 55%.
 `StepB1RawInput`, textbook B1, and compactness endpoints remain 0%.

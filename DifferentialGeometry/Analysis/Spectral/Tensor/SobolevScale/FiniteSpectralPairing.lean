@@ -144,13 +144,24 @@ theorem finite_repr_norm
     rw [tensorHsSmoothRepr_toL2 (I := I) (M := M) (le_refl (0 : ℝ)) T hT,
       tensorHsToL2_tensorL2Coeff (I := I) (M := M) (le_refl (0 : ℝ))]
   rw [tensorHs.norm_sq_eq_tsum]
-  simp_rw [hrepr]
-  rw [tsum_eq_sum (s := hT.toFinset)]
-  intro i hi
-  have hcoeff : T.coeff i = 0 := by
-    by_contra hne
-    exact hi (hT.mem_toFinset.mpr (Function.mem_support.mpr hne))
-  norm_num [hcoeff]
+  change
+    (∑' i,
+      tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+        ((ccTensorToHs (I := I) (M := M) g s (m : ℝ) U).coeff i) ^ 2) = _
+  calc
+    _ = ∑' i,
+        tensorSobolevWeight (I := I) (M := M) i (m : ℝ) *
+          (T.coeff i) ^ 2 := by
+      apply tsum_congr
+      intro i
+      rw [hrepr i]
+    _ = _ := by
+      rw [tsum_eq_sum (s := hT.toFinset)]
+      intro i hi
+      have hcoeff : T.coeff i = 0 := by
+        by_contra hne
+        exact hi (hT.mem_toFinset.mpr (Function.mem_support.mpr hne))
+      norm_num [hcoeff]
 
 /-- For a finitely-supported spectral tensor, the finite weighted coordinate
 pairing is the `L²` pairing of its smooth representative after applying the

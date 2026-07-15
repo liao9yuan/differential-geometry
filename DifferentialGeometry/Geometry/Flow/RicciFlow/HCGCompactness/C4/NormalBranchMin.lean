@@ -1,6 +1,7 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalDiagBranch
 import DifferentialGeometry.Geometry.Comparison.CenterOfMass
 import DifferentialGeometry.Geometry.Comparison.HalfSqDistGradMain
+import DifferentialGeometry.Geometry.Connection.ChartBridge.Hessian
 
 set_option autoImplicit false
 
@@ -24,6 +25,7 @@ open scoped ContDiff Manifold NNReal Topology
 open DifferentialGeometry.Geometry.Riemannian
 open DifferentialGeometry.Geometry.Riemannian.Exponential
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.DivergenceTheorem
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace
@@ -743,6 +745,144 @@ theorem grad_half_inv
       -(show TangentSpace I y from (B.inv (y, pt)).snd)
   rw [hinv]
   exact hgrad
+
+/-- On the explicit half-cage, the Hessian of half the squared distance is the
+metric pairing with the Levi-Civita derivative of the negative selected
+inverse tangent.  This is the branch-native `lbl412` identity. -/
+theorem hess_half_inv
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hb : NormalCoordMetricBoundInput (I := I) X) (k : Nat)
+    (hcomplete : MetricComplete (I := I) (X.obj k))
+    (hconn : letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (x : (X.obj k).M) {q : NNReal} {δ ρ : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q)
+    (he : IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) (X.obj k) x q e)
+    {y pt : (X.obj k).M} :
+    letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+    letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+    letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+    letI : IsManifold I 1 (X.obj k).M := IsManifold.of_le
+      (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+    letI : T2Space (X.obj k).M := (X.obj k).t2
+    letI : ConnectedSpace (X.obj k).M := hconn
+    letI : T2Space (TangentBundle I (X.obj k).M) :=
+      (X.obj k).t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+      Manifold.metrizableSpace I (X.obj k).M
+    letI : T3Space (X.obj k).M := inferInstance
+    letI : RiemannianBundle
+        (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+      (X.obj k).riemBundle (I := I)
+    letI : (z : (X.obj k).M) → InnerProductSpace Real (TangentSpace I z) :=
+      (X.obj k).riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+        (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+      (X.obj k).riemBundle_cont (I := I)
+    letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
+    letI : CompleteSpace (X.obj k).M :=
+      MetricComplete.complete (I := I) (X.obj k) hcomplete
+    letI : MetricSpace (X.obj k).M :=
+      HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
+    ∀ v w : TangentSpace I y,
+    0 < ρ →
+    2 * ρ < (q : Real) →
+    ρ ≤ hb.radius k x →
+    ρ / 2 ≤ expRadiusGp (I := I) (X.obj k).metric x →
+    max (riemannianEDist I x y) (riemannianEDist I x pt) <
+      ENNReal.ofReal (ρ / 2) →
+    let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn
+      x hq he
+    hessFun (I := I) (X.obj k).metric
+        (CenterOfMass.halfSqDist pt) y v w =
+      (X.obj k).metric.inner y
+        ((LeviCivita (I := I) (X.obj k).metric).toFun
+          (fun z => -(show TangentSpace I z from (B.inv (z, pt)).snd))
+          y v) w := by
+  letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+  letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
+  letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
+  letI : IsManifold I 1 (X.obj k).M := IsManifold.of_le
+    (I := I) (M := (X.obj k).M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace (X.obj k).M := (X.obj k).sigmaCompact
+  letI : T2Space (X.obj k).M := (X.obj k).t2
+  letI : ConnectedSpace (X.obj k).M := hconn
+  letI : T2Space (TangentBundle I (X.obj k).M) :=
+    (X.obj k).t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace (X.obj k).M :=
+    Manifold.metrizableSpace I (X.obj k).M
+  letI : T3Space (X.obj k).M := inferInstance
+  letI : RiemannianBundle (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+    (X.obj k).riemBundle (I := I)
+  letI : (z : (X.obj k).M) → InnerProductSpace Real (TangentSpace I z) :=
+    (X.obj k).riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun z : (X.obj k).M ↦ TangentSpace I z) :=
+    (X.obj k).riemBundle_cont (I := I)
+  letI : EMetricSpace (X.obj k).M := (X.obj k).emetricSpace (I := I)
+  letI : CompleteSpace (X.obj k).M :=
+    MetricComplete.complete (I := I) (X.obj k) hcomplete
+  letI : MetricSpace (X.obj k).M :=
+    HopfRinow.riemMetricSpace (I := I) (M := (X.obj k).M)
+  intro v w hρ hρq hρmetric hρexp hpairs
+  dsimp only
+  let S : Set (X.obj k).M :=
+    {z | max (riemannianEDist I x z) (riemannianEDist I x pt) <
+      ENNReal.ofReal (ρ / 2)}
+  let B := IsNormalDiag.toBranch (I := I) (X.obj k) hcomplete hconn x hq he
+  have hSopen : IsOpen S := by
+    dsimp only [S]
+    exact isOpen_lt
+      ((continuous_riemannianEDist (I := I) (X.obj k).metric x).max
+        continuous_const) continuous_const
+  have hyS : y ∈ S := by
+    simpa only [S] using hpairs
+  have hsmooth : ContMDiffOn I 𝓘(Real) ∞
+      (CenterOfMass.halfSqDist pt) S := by
+    simpa only [S] using
+      halfSq_inf (I := I) hb k hcomplete hconn x hq he hf
+        hρ hρq hρmetric hρexp
+  have hdom : ∀ z ∈ S, (z, pt) ∈ B.dom := by
+    intro z hz
+    exact (inv_is_min (I := I) hb k hcomplete hconn x hq he hf
+      hρ hρq hρmetric hρexp hz).choose_spec.1
+  have hinv_at :=
+    ((B.inv_snd_inf hdom).contMDiffAt (hSopen.mem_nhds hyS)).mdifferentiableAt
+      (by simp)
+  have hneg_at := mdifferentiableAt_neg_section hinv_at
+  have hgrad :
+      (fun z => gradientFun (I := I) (X.obj k).metric
+          (CenterOfMass.halfSqDist pt) z) =ᶠ[𝓝 y]
+        (fun z => -(show TangentSpace I z from (B.inv (z, pt)).snd)) := by
+    filter_upwards [hSopen.mem_nhds hyS] with z hz
+    simpa only [B, S] using
+      grad_half_inv (I := I) hb k hcomplete hconn x hq he hf
+        hρ hρq hρmetric hρexp hz
+  have hgrad_total :
+      (T% (fun z => gradientFun (I := I) (X.obj k).metric
+          (CenterOfMass.halfSqDist pt) z)) =ᶠ[𝓝 y]
+        (T% (fun z => -(show TangentSpace I z from (B.inv (z, pt)).snd))) := by
+    filter_upwards [hgrad] with z hz
+    change TotalSpace.mk' E z
+        (gradientFun (I := I) (X.obj k).metric
+          (CenterOfMass.halfSqDist pt) z) =
+      TotalSpace.mk' E z
+        (-(show TangentSpace I z from (B.inv (z, pt)).snd))
+    rw [hz]
+  have hgrad_at := hneg_at.congr_of_eventuallyEq hgrad_total
+  have hcov :
+      (LeviCivita (I := I) (X.obj k).metric).toFun
+          (fun z => gradientFun (I := I) (X.obj k).metric
+            (CenterOfMass.halfSqDist pt) z) y =
+        (LeviCivita (I := I) (X.obj k).metric).toFun
+          (fun z => -(show TangentSpace I z from (B.inv (z, pt)).snd)) y :=
+    (LeviCivita (I := I) (X.obj k).metric).isCovariantDerivativeOnUniv.congr_of_eventuallyEq
+      hgrad_at hneg_at Filter.univ_mem hgrad
+  rw [hessFun_eq_cov_local (I := I) (X.obj k).metric hSopen hsmooth hyS v w,
+    hcov]
 
 end IsNormalDiag
 

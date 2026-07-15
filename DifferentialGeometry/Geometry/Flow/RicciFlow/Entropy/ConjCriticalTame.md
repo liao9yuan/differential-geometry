@@ -14,30 +14,35 @@ the combined coefficient is `23/12 < 2` and leaves coercivity `1/12`.
 
 ## Current state
 
-The solution-specific source has been written without a new consumer
-assumption or chart-local-constancy hypothesis.  Its one-interval generic A2
-producer `cc_a2_unif` is now source-complete in the lower Garding layer; the A1
-arm uses `cc_a1_unif` and `conjCoeff_rev`.  Focused verification of this full
-dependency chain is still pending while shared upstream object-file writers
-are active.
+The solution-specific theorem and its full dependency chain now pass focused
+verification.  Its one-interval generic A2 producer `cc_a2_unif` is verified
+in the lower Garding layer; the A1 arm uses `cc_a1_unif` and `conjCoeff_rev`.
+No consumer assumption or chart-local-constancy hypothesis was added.
 
-The next genuine analytic frontier after this theorem verifies is scalar
-time-dependent finite-dimensional Galerkin ODE existence, followed by the
-Galerkin limit and identification with the existing strong solution.  The
-existing DeTurck ODE/limit files are specialized to `(0,2)` tensors and cannot
-serve as the scalar producer directly.
+The final local repairs were elaboration-only: the scalar spectral index was
+qualified to the `TensorHeatEquation` alias, the Sobolev-order binder was
+annotated as `ℕ`, and the local pairing `let` was unfolded with `simp only`
+before linearity.  The mathematical statement and `23/12` coefficient did not
+change.
+
+The scalar finite-dimensional Galerkin ODE producer now exists separately.
+The active frontier is verification of its uniform energy bound and the
+subsequence/limit construction, followed by identification with a classical
+conjugate-heat solution.
 
 ## Honest progress
 
-- `scalar_crit_tame`: source written, theorem completion remains 0% until Lean
-  verification succeeds; dedicated source-level machinery is approximately
-  96%.
-- Scalar Galerkin ODE existence: not started (0%).
+- `scalar_crit_tame`: theorem and dedicated machinery 100% verified.
+- `scalar_gal_exists` and `scalarGalPert_fin`: theorem-level 100% verified.
+- `scalar_gal_bound`: theorem-level 0% pending its own verification; dedicated
+  machinery is approximately 95%.
+- `scalar_gal_subseq`: theorem-level 0% pending its own verification; dedicated
+  machinery is approximately 95%.
 - `heatpot_of_maxreg`: not started as a theorem (0%); dedicated reusable
   machinery is approximately 35%.
 - Classical moving conjugate heat: theorem-level 0%; dedicated machinery is
-  approximately 77%.
+  approximately 80%.
 - Perelman no-local-collapsing and `ham3_noncollapse`: theorem-level 0%;
-  dedicated analytic machinery is approximately 42%.
+  dedicated analytic machinery is approximately 44%.
 - Whole HCG compactness machinery is approximately 54%; endpoint theorems
   remain 0%.

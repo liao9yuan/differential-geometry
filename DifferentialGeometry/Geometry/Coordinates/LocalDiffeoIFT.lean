@@ -1,6 +1,7 @@
 import Mathlib.Geometry.Manifold.LocalDiffeomorph
 import Mathlib.Analysis.Calculus.InverseFunctionTheorem.ContDiff
 import Mathlib.Geometry.Manifold.ContMDiff.Basic
+import DifferentialGeometry.Analysis.Calculus.CLMNeumann
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -51,14 +52,7 @@ variable {f : M → N} {x : M}
 caller meets, where `T = dF` and `dF ≈ id` below the conjugate scale. -/
 theorem isInvertible_of_norm_id_sub_lt {T : E →L[ℝ] E}
     (h : ‖ContinuousLinearMap.id ℝ E - T‖ < 1) : T.IsInvertible := by
-  have hu : IsUnit T := by
-    have h1 : IsUnit (1 - (1 - T)) := by
-      have hlt : ‖(1 : E →L[ℝ] E) - T‖ < 1 := by simpa using h
-      exact (Units.oneSub _ hlt).isUnit
-    simpa using h1
-  obtain ⟨u, hu⟩ := hu
-  refine ⟨ContinuousLinearEquiv.ofUnit u, ?_⟩
-  rw [← hu]; ext v; rfl
+  exact ContinuousLinearMap.invertible_of_id_sub h
 
 /-- **Manifold forward IFT (core) — invertible chart-derivative + smoothness on an open
 neighborhood ⟹ local diffeomorphism at `x`.**

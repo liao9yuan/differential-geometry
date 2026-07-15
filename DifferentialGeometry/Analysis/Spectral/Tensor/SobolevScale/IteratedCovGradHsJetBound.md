@@ -53,3 +53,19 @@ machinery is roughly 55%, and this closed spectral-jet dependency is only about
 `ham3_noncollapse` remain theorem-level 0%; their dedicated analytic machinery
 is about 40%.  Whole HCG machinery remains about 53%, while the HCG endpoint
 theorems remain 0%.
+
+## 2026-07-14 finite partial spectral mass
+
+`cc_partial_le_norm` is the canonical rank-generic estimate that every finite
+weighted coefficient mass of a smooth compactly supported covariant tensor is
+bounded by its full spectral Sobolev norm squared.  The proof stays in the
+spectral producer layer: rewrite the norm by `ccToHs_norm_sq`, then use
+nonnegativity and weighted summability.  This avoids making Ricci-flow consumers
+re-elaborate `sum_le_tsum` through the full moving-geometry import environment.
+
+Focused verification passed without local warnings or `sorry`.  The theorem and
+its dedicated machinery are 100%.  `scalar_crit_tame` is now independently
+verified (100%).  `scalar_gal_bound` remains theorem-level 0% until its own
+focused check passes, although its dedicated machinery is approximately 99%.
+The classical moving conjugate-heat theorem and both Perelman/Hamilton
+noncollapsing endpoints remain theorem-level 0%.

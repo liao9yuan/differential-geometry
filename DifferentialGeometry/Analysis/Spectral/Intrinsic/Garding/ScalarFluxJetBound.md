@@ -25,10 +25,19 @@ The formerly missing product-base conversion is therefore closed.  No
 `HasLocallyConstantChartAt`, consumer-supplied convergence bound, parallel
 coefficient model, or equality of whole Hom-bundle coordinates was added.
 
-Source-level assembly is complete in this file.  Focused verification is
-deferred until the shared workspace serializes Lean object-file writers; the
-last attempted checks were blocked by stale/missing upstream objects rather
-than a diagnosed local proof error.
+Focused verification now passes without warnings.  The apparent missing-name
+failures were stale import-boundary problems: the file now imports the native
+metric coefficient and realized Gram-difference producers directly.
+
+The remaining dependent-fibre issue was not solved with a pullback
+`smul_section`: that theorem uses its domain as the bundle base, whereas this
+family has domain `M × ℝ` and fibre over `p.1`.  Instead, `metricDiff_eval`
+fully evaluates the moving-minus-fixed metric on two smooth vector sections,
+proves the resulting real-valued function jointly smooth, and
+`contMDiffOn_clm_section_of_pointwise_jointMR` reconstructs only the needed
+operator field.  The rank-zero input is normalized after application by
+`metricDiff_apply`.  Thus verification does not elaborate equality of whole
+Hom-bundle coordinates.
 
 ## Honest progress
 
@@ -36,10 +45,10 @@ than a diagnosed local proof error.
 - The genuine `H² →L L²` operator estimate is already complete in
   `MetricLapDiffTime`; the new finite-Galerkin uniform closure is a separate
   theorem and remains unverified in `ScalarNonautUniform`.
-- Dedicated compact-slab scalar coefficient machinery: source-complete here;
-  verification pending.  This is infrastructure, not endpoint completion.
+- Dedicated compact-slab scalar coefficient machinery in this file: 100%
+  verified.  This is infrastructure, not endpoint completion.
 - The downstream `scalar_crit_tame` theorem is source-written but remains 0%
-  complete pending verification; its dedicated source machinery is about 96%.
+  complete pending its own verification; its dedicated machinery is about 98%.
 - Perelman no-local-collapsing and `ham3_noncollapse` remain theorem-level 0%;
-  their dedicated analytic machinery is about 42%.  Whole HCG machinery is
+  their dedicated analytic machinery is about 44%.  Whole HCG machinery is
   about 54%, with its endpoint theorems at 0%.

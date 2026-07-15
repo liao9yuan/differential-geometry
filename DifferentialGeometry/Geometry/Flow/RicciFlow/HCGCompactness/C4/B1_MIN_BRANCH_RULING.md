@@ -291,15 +291,16 @@ only as compatibility API.
 
 The legacy all-index `Item3RadiusInput` is no longer needed on the canonical
 finite-slot route.  The canonical sigma and configuration-dependent physical
-cage/readout ledgers are now checked.  This does not discharge the full
-geodesic-convexity scale or Hessian/Neumann estimates; no endpoint radius field
-is to be added.
+cage/readout ledgers are now checked.  The selected-branch Hessian/Neumann
+estimate is checked separately; the full geodesic-convexity scale remains open.
+No endpoint radius field is to be added.
 
 ## Independent frontier
 
-The Hessian/Neumann producer remains independent.  Capturing the minimizing
-branch proves the root equation and first derivative formula; it does not prove
-coercivity or invertibility of the center-equation derivative.
+The selected-branch Hessian/Neumann producer is now closed.  The independent
+frontier is the `lbl413` positive Hessian lower bound needed for
+`StrictDistInput`; center-equation invertibility alone does not imply the
+per-target geodesic strict-convexity field.
 
 The physical scalar and pair-index ledgers are no longer missing:
 `exists_rad_cage` produces the common threshold and `exists_hat_cm_eqn`
@@ -337,10 +338,10 @@ arbitrary-`y` endpoint field was introduced.
 `StepB1RawInput`, textbook B1, and the conditional compactness endpoint remain
 theorem-level 0%.  The source-local/global conditional capstone is 100%, but
 its `StrictDistInput` continuation still requires the independent Item-3 full
-convexity and Hessian--Neumann producer before it can feed the concrete B1 raw
-package.  The selected minimizing-branch Gates 1--6 machinery is 100%;
-dedicated Step-B/B1 machinery is about 88%, Chapter 4 machinery about 82%, and
-whole-HCG machinery about 54%.
+convexity producer before it can feed the concrete B1 raw package.  The selected
+minimizing-branch Gates 1--6 and Hessian/Neumann machinery are 100%; dedicated
+Step-B/B1 machinery is about 90%, Chapter 4 machinery about 83%, and whole-HCG
+machinery about 55%.
 
 ## Ownership and coordination
 
@@ -349,7 +350,7 @@ The completed Gate 1--6 files remain the B/C lane's settled base:
 `StepCCmDomain.lean`, `NormalBranchScale.lean`, `NormalBranchCage.lean`, and
 `StepCHatReadout.lean`, `StepCSourceCover.lean`, `StepCProducers.lean`, and
 `StepCSupportCapstone.lean`.  Future work should claim only the concrete
-Item-3 or independent Hessian/Neumann files it actually edits,
+Item-3 or independent `StrictDistInput` files it actually edits,
 coordinate with Step D through file claims, and preserve these checked
 interfaces unless a live contradiction is found.
 
@@ -362,19 +363,53 @@ and time-continuity facts.  It uses the unconditional
 `hopf_rinow_expMapIntrinsic_surjective_minimizing` endpoint and does not enter
 the older sorry-tainted headline in `Comparison/HopfRinow.lean`.
 
+The branch-native `lbl412` identity is now checked as
+`IsNormalDiag.hess_half_inv`.  The separate Neumann route is also closed:
+`cm_deriv_inv` proves the selected readout has an invertible center derivative,
+`cm_sol_strict` invokes the strict IFT on the same branch, and
+`HasHatCmStrict` retains the root, derivative, and strict local solution through
+the support-local and global finite-cover capstones.  No branch-specific input,
+glued weight, chart selector, or endpoint radius assumption was added.
+
 The remaining `StrictDistInput` producer is not a local packaging proof.  The
 current second-variation layer proves only nonnegativity of the index form for
-a minimizing geodesic.  The missing comparison producer must supply the
-`lbl412` identity between the Hessian of `halfSqDist` and the derivative of the
-moving exponential inverse, followed by the `lbl413` uniform positive lower
-bound on the controlled cut-locus-free ball.  Its along-`minJoin` consequence
-must prove both small-ball confinement and the per-target `StrictConvexOn`
-field.  The same quantitative derivative estimate later feeds
-`CmHessianInput`, but the strict-distance and Neumann consumers remain separate.
+a minimizing geodesic.  The missing comparison producer is now precisely the
+`lbl413` uniform positive lower bound for the Hessian of `halfSqDist` on the
+controlled cut-locus-free ball.  Its along-`minJoin` consequence must prove
+small-ball confinement and the per-target `StrictConvexOn` field.  A live API
+audit found three materially different routes; the quantitative normal-chart
+and Koszul route is the leading candidate, while compactness/continuity and
+Jacobi/Rauch require substantially more infrastructure.  This is the next
+consult point.
 
-Accounting is unchanged by this small selector closure: `StrictDistInput` and
-`CmHessianInput` producers are theorem-level 0%; their common comparison
-foundation has advanced only by the join selector.  Dedicated Step-B/B1
-machinery remains about 88%, Chapter 4 machinery about 82%, and whole-HCG
-machinery about 54%; `StepB1RawInput`, textbook B1, and compactness endpoints
-remain 0%.
+The selected-branch Hessian/Neumann support route is 100%; the
+`StrictDistInput` producer, concrete `StepB1RawInput`, textbook B1, and
+compactness endpoints remain theorem-level 0%.  Dedicated Step-B/B1 machinery
+is about 90%, Chapter 4 machinery about 83%, and whole-HCG machinery about 55%.
+
+## 2026-07-14 strict-distance producer checked
+
+This section supersedes the consult frontier immediately above.  The leading
+quantitative normal-chart/Koszul route has now been implemented and verified:
+
+1. `IsNormalDiag.hess_inv_sixth` proves the uniform positive Hessian lower
+   bound in the controlled normal chart.
+2. `HasNormalBrFull.hess_pos` transports it to the retained selected branch.
+3. `deriv2_comp_geo_on` and `strictConvex_geo` convert the local Hessian bound
+   into strict convexity along minimizing geodesics.
+4. `HasNormalBrFull.strict_dist` proves the complete `StrictDistInput`,
+   including nonzero speed, endpoint identities, and midpoint confinement.
+5. `exists_hat_cm_min` and the canonical support/global capstones consume that
+   producer directly with the fixed `minJoin`.
+
+The scale ledger is `R + 6 * rad < rho / 2`, obtained from the existing
+finite cage by applying it once to `3 * rad`.  The quarter-ball premise is
+derived inside `exists_slot_min`; no endpoint-radius assumption or parallel
+branch API was added.
+
+The next honest frontier is the concrete `StepB1RawInput` producer.  That
+producer, the textbook B1 theorem, and every compactness endpoint remain
+theorem-level **0%**.  The selected-branch Gates 1--6 and
+Hessian/Neumann/strict-distance machinery are **100%**; dedicated Step-B/B1
+machinery is about **94%**, Chapter 4 machinery about **86%**, and whole-HCG
+machinery about **57%**.

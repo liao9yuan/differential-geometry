@@ -211,3 +211,15 @@ call site (`toHam3Exists`) from `hwindow : Icc (−r0²) 0 ⊆ X.D.carrier` via
 - Pair-uniformity discipline: constants FIRST (`∃ C, ∀ u u'`); the DeTurck
   `exists_*_on_compact` wrappers are NOT reusable (per-pair C), only their
   pointwise underlying lemmas are.
+
+## Post-merge compatibility (2026-07-14)
+
+- The `towerStep` difference proof stopped closing with `ring` after the
+  short-time-existence alignment.  The mathematical identity is unchanged:
+  evaluate each concrete `Tensor0SSpace` difference first, distribute the
+  finite sum, and close in the additive group with `abel`.
+- The generic `ContinuousMultilinearMap.sub_apply` simp argument in the
+  chart-Gram base case was stale and has been removed.
+- Focused verification passes without local warnings.  This is an upstream
+  compatibility repair only; it does not change the already-complete
+  `RicciFromJets` theorem surface.

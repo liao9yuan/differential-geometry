@@ -120,3 +120,12 @@ Full API now confirmed; `open_target` becomes FREE via `OpenPartialHomeomorph.tr
 + `_coe`/`mem_..source`/`image_mem_..target`/`to_localInverse`, `contMDiffAt_iff_contMDiffOn_nhds`
 (needs `n ≠ ∞`), `contMDiffOn_extChartAt`/`_symm`, `Units.oneSub`, `ContinuousLinearEquiv.ofUnit`.
 NO Mathlib manifold IFT exists (only the reverse `mfderivToContinuousLinearEquiv`).
+
+## 2026-07-14: canonical Neumann extraction
+
+The proof of `isInvertible_of_norm_id_sub_lt` now delegates to
+`ContinuousLinearMap.invertible_of_id_sub` in
+`Analysis/Calculus/CLMNeumann.lean`.  Its public statement is unchanged, so the
+manifold-IFT API remains stable while the reusable Banach-space theorem now
+lives at the lower calculus layer.  Focused verification passes; the file's
+pre-existing unused-section-variable warnings are unchanged.

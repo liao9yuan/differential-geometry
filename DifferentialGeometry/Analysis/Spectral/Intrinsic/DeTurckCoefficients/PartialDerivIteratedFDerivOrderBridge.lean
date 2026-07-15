@@ -43,6 +43,7 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E]
 
+omit [InnerProductSpace ℝ E] in
 /-- On an open set `s`, the directional derivative `partialDeriv i u` of a `ContDiffOn ℝ ∞`
 field is itself `ContDiffOn ℝ ∞`. -/
 lemma partialDeriv_contDiffOn_of_isOpen
@@ -54,6 +55,7 @@ lemma partialDeriv_contDiffOn_of_isOpen
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
+omit [InnerProductSpace ℝ E] in
 /-- On an open set `s`, the directional derivative `partialDeriv i (u − v)` of a difference
 agrees with the difference of directional derivatives, when both fields are differentiable
 on `s`. -/
@@ -74,6 +76,37 @@ lemma partialDeriv_sub_eqOn
     simpa using this
   rw [hfd, ContinuousLinearMap.sub_apply]
 
+omit [InnerProductSpace ℝ E] in
+/-- A coordinate partial is the first iterated derivative evaluated on its
+model-basis direction. -/
+theorem partial_eq_iter1 (u : E → ℝ) (i : Fin (Module.finrank ℝ E)) (y : E) :
+    partialDeriv (E := E) i u y =
+      iteratedFDeriv ℝ 1 u y ![(chartModelBasis E) i] := by
+  rw [iteratedFDeriv_one_apply]
+  rfl
+
+omit [InnerProductSpace ℝ E] in
+/-- At a smooth point, two nested coordinate partials are the second iterated
+derivative evaluated on the corresponding model-basis directions. -/
+theorem partial2_eq_iter2 (u : E → ℝ) {y : E} (hu : ContDiffAt ℝ ∞ u y)
+    (m l : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) m (partialDeriv (E := E) l u) y =
+      iteratedFDeriv ℝ 2 u y ![(chartModelBasis E) m, (chartModelBasis E) l] := by
+  have hfderiv_diff : DifferentiableAt ℝ (fun z : E => fderiv ℝ u z) y := by
+    have hderiv := hu.fderiv_right (m := ∞) le_rfl
+    exact hderiv.differentiableAt (by simp)
+  have hl : partialDeriv (E := E) l u =
+      fun z : E => fderiv ℝ u z ((chartModelBasis E) l) := by
+    funext z
+    rfl
+  rw [show partialDeriv (E := E) m (partialDeriv (E := E) l u) y =
+      fderiv ℝ (fun z : E => fderiv ℝ u z ((chartModelBasis E) l)) y
+        ((chartModelBasis E) m) from by rw [hl]; rfl]
+  rw [iteratedFDeriv_two_apply]
+  rw [fderiv_clm_apply hfderiv_diff (differentiableAt_const _)]
+  simp [ContinuousLinearMap.flip_apply]
+
+omit [InnerProductSpace ℝ E] in
 /-- On an open set `s`, the directional derivative `partialDeriv i u` agrees with the
 `eᵢ`-evaluation of the within-derivative `fderivWithin ℝ u s`. -/
 lemma partialDeriv_eqOn_fderivWithin_apply
@@ -83,6 +116,60 @@ lemma partialDeriv_eqOn_fderivWithin_apply
   intro y hy
   simp only [partialDeriv, fderivWithin_of_isOpen hs hy]
 
+omit [InnerProductSpace ℝ E] in
+/-- At a smooth point, three nested coordinate partials are the third iterated
+derivative evaluated on the corresponding model-basis directions. -/
+theorem partial3_eq_iter3 (u : E → ℝ) {y : E} (hu : ContDiffAt ℝ ∞ u y)
+    (n m l : Fin (Module.finrank ℝ E)) :
+    partialDeriv (E := E) n (partialDeriv (E := E) m (partialDeriv (E := E) l u)) y =
+      iteratedFDeriv ℝ 3 u y
+        ![(chartModelBasis E) n, (chartModelBasis E) m, (chartModelBasis E) l] := by
+  obtain ⟨t, ht_nhds, hut⟩ := hu.contDiffOn (m := 3)
+    (ENat.natCast_le_of_coe_top_le_withTop le_rfl 3) (by simp)
+  obtain ⟨s, hst, hs_open, hys⟩ := mem_nhds_iff.mp ht_nhds
+  have hu_s : ContDiffOn ℝ 3 u s := hut.mono hst
+  have hpartial_at : ContDiffAt ℝ ∞ (partialDeriv (E := E) l u) y := by
+    unfold partialDeriv
+    exact (hu.fderiv_right (m := ∞) le_rfl).clm_apply contDiffAt_const
+  have hfderiv_s : ContDiffOn ℝ 2 (fderivWithin ℝ u s) s :=
+    hu_s.fderivWithin hs_open.uniqueDiffOn (by norm_num)
+  calc
+    partialDeriv (E := E) n (partialDeriv (E := E) m (partialDeriv (E := E) l u)) y =
+        iteratedFDeriv ℝ 2 (partialDeriv (E := E) l u) y
+          ![(chartModelBasis E) n, (chartModelBasis E) m] :=
+      partial2_eq_iter2 (partialDeriv (E := E) l u) hpartial_at n m
+    _ = iteratedFDerivWithin ℝ 2 (partialDeriv (E := E) l u) s y
+          ![(chartModelBasis E) n, (chartModelBasis E) m] := by
+      rw [iteratedFDerivWithin_of_isOpen 2 hs_open hys]
+    _ = iteratedFDerivWithin ℝ 2
+          (fun z => fderivWithin ℝ u s z ((chartModelBasis E) l)) s y
+          ![(chartModelBasis E) n, (chartModelBasis E) m] := by
+      rw [iteratedFDerivWithin_congr
+        (partialDeriv_eqOn_fderivWithin_apply hs_open l) hys 2]
+    _ = iteratedFDerivWithin ℝ 2 (fderivWithin ℝ u s) s y
+          ![(chartModelBasis E) n, (chartModelBasis E) m] ((chartModelBasis E) l) := by
+      exact iteratedFDerivWithin_clm_apply_const_apply hs_open.uniqueDiffOn hfderiv_s
+        (by norm_num) hys
+    _ = iteratedFDerivWithin ℝ 3 u s y
+          ![(chartModelBasis E) n, (chartModelBasis E) m, (chartModelBasis E) l] := by
+      have htuple :
+          (![(chartModelBasis E) n, (chartModelBasis E) m, (chartModelBasis E) l] : Fin 3 → E) =
+            Fin.snoc (![(chartModelBasis E) n, (chartModelBasis E) m] : Fin 2 → E)
+              ((chartModelBasis E) l) := by
+        funext i
+        fin_cases i <;> rfl
+      symm
+      rw [htuple]
+      simpa only [Fin.init_snoc, Fin.snoc_last] using
+        iteratedFDerivWithin_succ_apply_right (𝕜 := ℝ) (f := u)
+        hs_open.uniqueDiffOn hys
+          (Fin.snoc (![(chartModelBasis E) n, (chartModelBasis E) m] : Fin 2 → E)
+            ((chartModelBasis E) l))
+    _ = iteratedFDeriv ℝ 3 u y
+          ![(chartModelBasis E) n, (chartModelBasis E) m, (chartModelBasis E) l] := by
+      rw [iteratedFDerivWithin_of_isOpen 3 hs_open hys]
+
+omit [InnerProductSpace ℝ E] in
 /-- **Order bridge for the partial derivative.**  On an open set `s`, the order-`N`
 iterated derivative of the directional derivative `partialDeriv i u` is bounded by `‖eᵢ‖`
 times the order-`(N+1)` iterated derivative of `u`:
@@ -115,6 +202,7 @@ theorem norm_iteratedFDerivWithin_partialDeriv_le
     norm_iteratedFDerivWithin_fderivWithin hs.uniqueDiffOn hy
   rw [heq]
 
+omit [InnerProductSpace ℝ E] in
 /-- The order bridge transported to the order-`N` seminorm: the order-`N` seminorm of
 `partialDeriv i u` is bounded by `‖eᵢ‖` times the order-`(N+1)` seminorm of `u`. -/
 theorem iteratedFDerivSeminorm_partialDeriv_le

@@ -16,10 +16,7 @@ At each target `(t,x)`, reindex `smoothOrtho_local` by
 
 ## Status
 
-The full proof body for `towerHeatSol` has been written, but the theorem is
-not yet verified and therefore counts as **0% complete**. Its dedicated
-machinery is about **98%**. Focused verification is blocked before elaboration
-by an active shared Spectral/Elliptic build that is temporarily rebuilding
-transitive `.olean` files. The next action is the same focused check after that
-build settles, followed by local shape repairs only; no new mathematical input
-is currently known to be missing.
+`towerHeatSol` is proved, focused-check green, and exported by a targeted
+build. The theorem and its dedicated machinery are both **100% complete**.
+It is consumed by `HCGCompactness/MovingShiProducer.lean`; the remaining work
+there is endpoint assembly, not another curvature heat-equation input.

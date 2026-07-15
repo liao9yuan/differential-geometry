@@ -100,7 +100,9 @@ noncomputable def normalQuarterDiffeo
     PartialDiffeomorph.toOpensDiffeoCross (normalExpPD (I := I) Y x)
       (normalQuarter_sub (I := I) Y x)
 
-@[implicit_reducible] private noncomputable def normalQuarterSigma
+/-- The quarter normal ball is sigma compact, for connection pullback and
+restriction APIs on its open-subtype manifold. -/
+@[implicit_reducible] noncomputable def normalQuarterSigma
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
@@ -115,7 +117,8 @@ noncomputable def normalQuarterDiffeo
     (normalQuarter (I := I) Y x).2.locallyCompactSpace
   infer_instance
 
-@[implicit_reducible] private noncomputable def normalQuarterImageSigma
+/-- The normal-exponential image of the quarter ball is sigma compact. -/
+@[implicit_reducible] noncomputable def normalQuarterImageSigma
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
     letI : TopologicalSpace Y.M := Y.topology
     letI : ChartedSpace H Y.M := Y.charted
@@ -136,7 +139,9 @@ noncomputable def normalQuarterDiffeo
   rw [← hrange]
   exact isSigmaCompact_range (normalQuarterDiffeo (I := I) Y x).continuous
 
-private theorem quarterDiffeo_apply
+/-- The quarter-ball normal diffeomorphism is the normal exponential on
+underlying points. -/
+theorem quarterDiffeo_apply
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : normalQuarter (I := I) Y x) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -148,7 +153,9 @@ private theorem quarterDiffeo_apply
       expMapDiffeo (I := I) Y.metric x (z : E) := by
   rfl
 
-private theorem quarterDiffeo_mfd
+/-- The derivative of the quarter-ball normal diffeomorphism is the derivative
+of the ambient normal exponential. -/
+theorem quarterDiffeo_mfd
     (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
     (z : normalQuarter (I := I) Y x) (v : E) :
     letI : TopologicalSpace Y.M := Y.topology
@@ -221,6 +228,108 @@ theorem normalTotal_quarter
   rw [quarterDiffeo_apply, quarterDiffeo_mfd, quarterDiffeo_mfd]
   rw [normalTotal_inner (I := I) Y x (z : E) z.2 v w]
   exact normalCoordMetric_apply (I := I) Y x (z : E) v w
+
+/-- Levi--Civita derivatives of smooth ambient fields commute with the normal
+exponential on the quarter ball, provided their restricted germs correspond
+under the quarter-ball diffeomorphism. -/
+theorem normal_cov_map
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : SigmaCompactSpace (normalQuarter (I := I) Y x) :=
+      normalQuarterSigma (I := I) Y x
+    letI : SigmaCompactSpace (normalQuarterImage (I := I) Y x) :=
+      normalQuarterImageSigma (I := I) Y x
+    ∀ (V : ContMDiffSection 𝓘(Real, E) E (∞ : WithTop ℕ∞)
+          (TangentSpace 𝓘(Real, E) : E → Type _))
+      (Z : ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : Y.M → Type _))
+      (z : normalQuarter (I := I) Y x) (v : E),
+    (fun y : normalQuarterImage (I := I) Y x =>
+        Integral.Connection.restrictOpenTangentSection (I := I)
+          (normalQuarterImage (I := I) Y x) Z y) =ᶠ[
+      nhds (normalQuarterDiffeo (I := I) Y x z)]
+      (fun y : normalQuarterImage (I := I) Y x =>
+        Integral.Connection.pushFwdSectionCross
+          (I := 𝓘(Real, E)) (J := I)
+          (normalQuarterDiffeo (I := I) Y x)
+          (Integral.Connection.restrictOpenTangentSection
+            (I := 𝓘(Real, E)) (normalQuarter (I := I) Y x) V) y) →
+    mfderiv 𝓘(Real, E) I
+        (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E)
+        (((Integral.Connection.metricCov (I := 𝓘(Real, E))
+          (M := E) (normalTotal (I := I) Y x)).toFun
+          (fun u : E => V u) (z : E)) v) =
+      ((Integral.Connection.metricCov (I := I) (M := Y.M) Y.metric).toFun
+        (fun y : Y.M => Z y)
+        (expMapDiffeo (I := I) Y.metric x (z : E)))
+        (mfderiv 𝓘(Real, E) I
+          (fun u : E ↦ expMapDiffeo (I := I) Y.metric x u) (z : E) v) := by
+  classical
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : SigmaCompactSpace (normalQuarter (I := I) Y x) :=
+    normalQuarterSigma (I := I) Y x
+  letI : SigmaCompactSpace (normalQuarterImage (I := I) Y x) :=
+    normalQuarterImageSigma (I := I) Y x
+  intro V Z z v hEq
+  let U := normalQuarter (I := I) Y x
+  let W := normalQuarterImage (I := I) Y x
+  let Phi := normalQuarterDiffeo (I := I) Y x
+  let VU := Integral.Connection.restrictOpenTangentSection
+    (I := 𝓘(Real, E)) U V
+  let PW := Integral.Connection.pushFwdSectionCross
+    (I := 𝓘(Real, E)) (J := I) Phi VU
+  have hres := Integral.Connection.metricCov_restrictOpen_globalSection
+    (I := 𝓘(Real, E)) (normalTotal (I := I) Y x) U V z v
+  rw [normalTotal_quarter (I := I) Y x] at hres
+  have hpull := Integral.Connection.metricCov_pullbackCross
+    (I := 𝓘(Real, E)) (J := I)
+    (Y.metric.restrictOpen (I := I) W) Phi VU z v
+  have hfield :
+      (Integral.Connection.metricCov (I := I) (M := W)
+        (Y.metric.restrictOpen (I := I) W)).toFun
+          (Integral.Connection.restrictOpenTangentField (I := I) W
+            (fun y : Y.M => Z y)) (Phi z) =
+        (Integral.Connection.metricCov (I := I) (M := W)
+          (Y.metric.restrictOpen (I := I) W)).toFun
+            (fun y : W => PW y) (Phi z) := by
+    apply Integral.Connection.metricCov_congr_nhds
+      (I := I) (M := W) (Y.metric.restrictOpen (I := I) W)
+      (Integral.Connection.mdiffAt_restrictOpen_section (I := I) W Z (Phi z))
+      (PW.contMDiff.contMDiffAt.mdifferentiableAt (by simp))
+    simpa only [Integral.Connection.restrictOpenTangentSection] using hEq
+  have htgt := Integral.Connection.metricCov_restrictOpen_globalSection
+    (I := I) Y.metric W Z (Phi z)
+      (mfderiv 𝓘(Real, E) I (Phi : U → W) z v)
+  have htoAmbient :
+      ((Integral.Connection.metricCov (I := I) (M := W)
+          (Y.metric.restrictOpen (I := I) W)).toFun
+        (fun y : W => PW y) (Phi z))
+        (mfderiv 𝓘(Real, E) I (Phi : U → W) z v) =
+      ((Integral.Connection.metricCov (I := I) (M := Y.M) Y.metric).toFun
+        (fun y : Y.M => Z y) (Phi z : Y.M))
+        (mfderiv 𝓘(Real, E) I (Phi : U → W) z v) := by
+    rw [← hfield]
+    exact htgt
+  have hpbAmbient := htoAmbient
+  rw [← hpull] at hpbAmbient
+  have hleft := quarterDiffeo_mfd (I := I) Y x z
+    (((Integral.Connection.metricCov (I := 𝓘(Real, E))
+      (M := E) (normalTotal (I := I) Y x)).toFun
+      (fun u : E => V u) (z : E)) v)
+  have hdir := quarterDiffeo_mfd (I := I) Y x z v
+  have hbase := quarterDiffeo_apply (I := I) Y x z
+  rw [← hleft, ← hres, ← hdir, ← hbase]
+  exact hpbAmbient
 
 /-- A locally smooth geodesic of the total normal-coordinate metric that stays
 in the quarter ball maps under the normal exponential to an ambient geodesic.

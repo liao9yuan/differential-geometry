@@ -877,3 +877,38 @@ The 3 standard axioms + `sorryAx` only, and `sorryAx` traces to exactly the thre
 declaration on the route (the 4 new ExtendShiInputs helpers included) is verified sorry-free.  **The
 interior-restart extension route is now assembled end to end; the only remaining content is the three
 cited black boxes.**
+
+## 2026-07-14 moving-Shi discharge
+
+`movingShi_of_soln` is now implemented by the checked, axiom-clean producer
+`movingShiBoundSol`. Consequently the source bodies of `movingShi_of_soln`,
+`shiCovBound_of_soln`, and `extendInputs_of_soln` contain no `sorry`.
+
+The mathematical output is a single uniform constant `KShi` and an interior
+time `tShi` such that every upper-truncated tail `[tShi, psi]` has the
+order-three moving-metric Shi bound. The proof comes from the Ricci-flow tower
+heat equation, joint regularity of intrinsic squared tower norms, a Bernstein
+estimate after an interior time shift, and contraction from the Riemann tower
+to the Ricci tower.
+
+Focused verification of this downstream file is pending only because an active
+Spectral rebuild has not yet produced one required upstream object file. The
+producer itself has already passed focused and targeted verification and its
+axiom closure has only the standard three axioms.
+
+Strict accounting: the moving-Shi theorem and its dedicated machinery are
+100%. The unconditional extension theorem remains 0% because the independent
+uniform-existence `(N)` and forward-uniqueness `(B)` producers are still 0%.
+
+## 2026-07-14 lower-layer relocation and all-order producer
+
+`rm04_bound_can` was moved without an API change to
+`HCGCompactness/MovingShiProducer.lean`, where it is consumed by both the
+order-three moving-Shi theorem and the new arbitrary-order
+`movingRmBoundSol`. `ExtendShiInputs.lean` continues to import and use the same
+name; no downstream assumption was added.
+
+The all-order corollary `bbsAllMBounds` is now proved in
+`Evolution/BBSAllMBounds.lean`. This closes the Bernstein C1+C2 part of the
+alternate endpoint-limit route, but does not affect the independent `(N)` and
+`(B)` frontiers on the live interior-restart route.

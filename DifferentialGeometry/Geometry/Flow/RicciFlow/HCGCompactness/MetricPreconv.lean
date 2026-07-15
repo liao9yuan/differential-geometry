@@ -3,8 +3,11 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MetricCovDeri
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBoundGoodFrame
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.Connection.MetricCovDerivProducer
+import DifferentialGeometry.Analysis.Spectral.Tensor.ChartTensor.InnerBounds.InnerLowerBound
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.PartialDerivIteratedFDerivOrderBridge
 import DifferentialGeometry.Tensor.RSTensor.Tensor0SRiemannian.Comparison
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
+import DifferentialGeometry.Geometry.Operator.Hessian
 import Mathlib.Geometry.Manifold.PartitionOfUnity
 import Mathlib.Analysis.Calculus.ContDiff.Bounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MapConvergence
@@ -57,7 +60,10 @@ namespace HCGCompactness
 open scoped Manifold ContDiff Topology
 open Bundle Tensor0SBundle TensorLieDeriv
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.PDE.RicciFlow
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable {E : Type uE} [NormedAddCommGroup E] [NormedSpace Real E]
 variable [Module.Finite Real E] [FiniteDimensional Real E] [CompleteSpace E]
@@ -907,6 +913,434 @@ theorem norm_iteratedFDeriv_bumpMul_le {χ gg : E → Real} (r : ℕ)
   push_cast
   ring
 
+/-- Fixed-order metric component bound from covariant bounds only through that
+order.  Higher covariant orders are bounded separately for each smooth metric
+and do not enter the resulting uniform constant. -/
+theorem metricComp_iter_le
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
+    (hKchart : Kc ⊆ (chartAt H x₀).source) (r : ℕ)
+    (hbdd : ∀ q : ℕ, q ≤ r → ∃ C : Real, ∀ k : ι, ∀ z ∈ Kc,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C)
+    (V : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) :
+    ∃ Mr : Real, 0 ≤ Mr ∧ ∀ k : ι, ∀ y ∈ Kc,
+      ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)))
+        (extChartAt I x₀ y)‖ ≤ Mr := by
+  classical
+  obtain ⟨CV, hCV0, hCV⟩ :=
+    iteratedFDeriv_comp_le_tower (I := I) gRef hKc hKchart r 0 V
+  let C : ℕ → Real := fun q =>
+    if hq : q ≤ r then Classical.choose (hbdd q hq) else 0
+  have hC : ∀ q (hq : q ≤ r), ∀ k : ι, ∀ z ∈ Kc,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C q := by
+    intro q hq k z hz
+    simpa only [C, dif_pos hq] using (Classical.choose_spec (hbdd q hq)) k z hz
+  let B : ℕ → Real := fun q => max (C q) 0
+  refine ⟨CV * ∑ q ∈ Finset.range (r + 1), B q,
+    mul_nonneg hCV0 (Finset.sum_nonneg (fun q _ => le_max_right _ _)), ?_⟩
+  intro k y hy
+  let D : ℕ → Real := fun q =>
+    Classical.choose (metricCovDerivNorm_bddOn (I := I) hKc q (gSeq k) gRef)
+  have hD : ∀ q : ℕ, ∀ z ∈ Kc,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ D q := by
+    intro q z hz
+    exact (Classical.choose_spec
+      (metricCovDerivNorm_bddOn (I := I) hKc q (gSeq k) gRef)) z hz
+  let b : ℕ → Real := fun q => if hq : q ≤ r then B q else max (D q) 0
+  have hbnd : ∀ q : ℕ, ∀ z ∈ Kc, Real.sqrt
+      (normSq0S (I := I) gRef z (q + 2)
+        (covDerivOfField (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z)) ≤ b q := by
+    intro q z hz
+    have hcompeq : Real.sqrt (normSq0S (I := I) gRef z (q + 2)
+        (covDerivOfField (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z)) =
+        metricCovDerivNorm (I := I) q (gSeq k) gRef z := by
+      simp only [metricCovDerivNorm, metricCovDeriv_eq_covDerivOfField]
+    rw [hcompeq]
+    by_cases hq : q ≤ r
+    · exact le_trans (hC q hq k z hz) (by simp only [b, dif_pos hq, B]; exact le_max_left _ _)
+    · exact le_trans (hD q z hz) (by simp only [b, dif_neg hq]; exact le_max_left _ _)
+  have hbound := hCV (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) y hy b hbnd
+  have hsum : ∑ q ∈ Finset.range (r + 1), b q =
+      ∑ q ∈ Finset.range (r + 1), B q := by
+    refine Finset.sum_congr rfl fun q hqmem => ?_
+    have hq : q ≤ r := Nat.le_of_lt_succ (Finset.mem_range.mp hqmem)
+    simp only [b, dif_pos hq]
+  calc
+    ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+          (fun w : M => (covDerivOfField (I := I) gRef
+            (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)))
+        (extChartAt I x₀ y)‖
+        ≤ CV * ∑ q ∈ Finset.range (r + 1), b q := by
+          simpa only [zero_add] using hbound
+    _ = CV * ∑ q ∈ Finset.range (r + 1), B q := by rw [hsum]
+
+/-- A metric component written using globalized chart-basis slots agrees near
+each compact-set point with the corresponding chart Gram entry. -/
+theorem chartGram_germ
+    (gRef g : SmoothRiemannianMetric I M) (x₀ : M) {Kc : Set M}
+    (hKchart : Kc ⊆ (chartAt H x₀).source) {y : M} (hy : y ∈ Kc)
+    (i j : Fin (Module.finrank Real E))
+    (σi σj : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (hσi : ∀ᶠ z in 𝓝ˢ Kc,
+      σi z = tangentConstInChart (𝕜 := Real) (I := I) x₀ ((chartModelBasis E) i) z)
+    (hσj : ∀ᶠ z in 𝓝ˢ Kc,
+      σj z = tangentConstInChart (𝕜 := Real) (I := I) x₀ ((chartModelBasis E) j) z) :
+    chartGramOnE (I := I) g x₀ i j =ᶠ[𝓝 (extChartAt I x₀ y)]
+      writtenInExtChartAt I 𝓘(Real, Real) x₀
+        (fun w : M => (covDerivOfField (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) g) 0) w
+            (fun a => (![σi, σj] : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+              (TangentSpace I : M → Type _)) a w)) := by
+  have hysrc : y ∈ (extChartAt I x₀).source := by
+    rw [extChartAt_source]
+    exact hKchart hy
+  have hytgt : extChartAt I x₀ y ∈ (extChartAt I x₀).target :=
+    (extChartAt I x₀).map_source hysrc
+  have hxy : (extChartAt I x₀).symm (extChartAt I x₀ y) = y :=
+    (extChartAt I x₀).left_inv hysrc
+  have htend : Filter.Tendsto (extChartAt I x₀).symm
+      (𝓝 (extChartAt I x₀ y)) (𝓝 y) := by
+    have h := (continuousAt_extChartAt_symm'' (I := I) (x := x₀) hytgt).tendsto
+    rwa [hxy] at h
+  have hσi0 : ∀ᶠ q in 𝓝 y,
+      σi q = tangentConstInChart (𝕜 := Real) (I := I) x₀ ((chartModelBasis E) i) q :=
+    hσi.filter_mono (nhds_le_nhdsSet hy)
+  have hσj0 : ∀ᶠ q in 𝓝 y,
+      σj q = tangentConstInChart (𝕜 := Real) (I := I) x₀ ((chartModelBasis E) j) q :=
+    hσj.filter_mono (nhds_le_nhdsSet hy)
+  filter_upwards [htend.eventually hσi0, htend.eventually hσj0] with z hzi hzj
+  simp only [writtenInExtChartAt_real_apply]
+  set q : M := (extChartAt I x₀).symm z with hq
+  have hval : (covDerivOfField (I := I) gRef
+        (Tensor0SBundle.metricTensorField (I := I) g) 0) q
+        (fun a => (![σi, σj] : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+          (TangentSpace I : M → Type _)) a q) = g.inner q (σi q) (σj q) := by
+    have h0 : (covDerivOfField (I := I) gRef
+          (Tensor0SBundle.metricTensorField (I := I) g) 0) q
+          (fun a => (![σi, σj] : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+            (TangentSpace I : M → Type _)) a q) =
+        (Tensor0SBundle.metricTensorField (I := I) g) q
+          (fun a => (![σi, σj] : Fin 2 → ContMDiffSection I E (∞ : WithTop ℕ∞)
+            (TangentSpace I : M → Type _)) a q) := rfl
+    rw [h0, Tensor0SBundle.metricTensorField_apply]
+    simp
+  rw [hval, hzi, hzj, chartGramOnE, chartGramMatrix_apply]
+  congr 1
+
+/-- Uniform fixed-order chart Gram bounds from covariant metric bounds through
+the same order.  In particular, `r = 3` packages the coefficient data needed by
+a low-regularity Ricci--DeTurck existence theorem. -/
+theorem chartGram_iter_le
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
+    (hKchart : Kc ⊆ (chartAt H x₀).source) (r : ℕ)
+    (hbdd : ∀ q : ℕ, q ≤ r → ∃ C : Real, ∀ k : ι, ∀ z ∈ Kc,
+      metricCovDerivNorm (I := I) q (gSeq k) gRef z ≤ C) :
+    ∃ C : Real, 0 ≤ C ∧ ∀ k : ι, ∀ y ∈ Kc,
+      ∀ i j : Fin (Module.finrank Real E),
+      ‖iteratedFDeriv Real r (chartGramOnE (I := I) (gSeq k) x₀ i j)
+        (extChartAt I x₀ y)‖ ≤ C := by
+  classical
+  have hσex : ∀ i : Fin (Module.finrank Real E),
+      ∃ σ : ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _),
+        ∀ᶠ z in 𝓝ˢ Kc,
+          σ z = tangentConstInChart (𝕜 := Real) (I := I) x₀ ((chartModelBasis E) i) z :=
+    fun i => exists_section_eqOn_compact (I := I) x₀ ((chartModelBasis E) i) hKc hKchart
+  choose σ hσ using hσex
+  have hM : ∀ p : Fin (Module.finrank Real E) × Fin (Module.finrank Real E),
+      ∃ C : Real, 0 ≤ C ∧ ∀ k : ι, ∀ y ∈ Kc,
+        ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
+            (fun w : M => (covDerivOfField (I := I) gRef
+              (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w
+                (fun a => (![σ p.1, σ p.2] : Fin 2 →
+                  ContMDiffSection I E (∞ : WithTop ℕ∞) (TangentSpace I : M → Type _)) a w)))
+          (extChartAt I x₀ y)‖ ≤ C := fun p =>
+    metricComp_iter_le (I := I) gRef gSeq x₀ hKc hKchart r hbdd ![σ p.1, σ p.2]
+  choose C hC0 hC using hM
+  refine ⟨∑ p, C p, Finset.sum_nonneg (fun p _ => hC0 p), ?_⟩
+  intro k y hy i j
+  have hgerm := chartGram_germ (I := I) gRef (gSeq k) x₀ hKchart hy i j
+    (σ i) (σ j) (hσ i) (hσ j)
+  rw [(hgerm.iteratedFDeriv Real r).eq_of_nhds]
+  exact le_trans (hC (i, j) k y hy)
+    (Finset.single_le_sum (fun p _ => hC0 p) (Finset.mem_univ (i, j)))
+
+/-- The theorem-facing exact-order predicate supplies the fixed-order chart
+Gram bounds required by `chartGram_iter_le`. -/
+theorem chartGram_of_orders
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (x₀ : M) {Kc : Set M} (hKc : IsCompact Kc)
+    (hKchart : Kc ⊆ (chartAt H x₀).source) (r : ℕ) (B : Real)
+    (hbdd : ∀ k : ι, ∀ q : ℕ, q ≤ r →
+      MetricCovDerivOrderBoundOn (I := I) Kc q (gSeq k) gRef B) :
+    ∃ C : Real, 0 ≤ C ∧ ∀ k : ι, ∀ y ∈ Kc,
+      ∀ i j : Fin (Module.finrank Real E),
+      ‖iteratedFDeriv Real r (chartGramOnE (I := I) (gSeq k) x₀ i j)
+        (extChartAt I x₀ y)‖ ≤ C :=
+  chartGram_iter_le (I := I) gRef gSeq x₀ hKc hKchart r
+    (fun q hq => ⟨B, fun k z hz => hbdd k q hq z hz⟩)
+
+/-- Uniform fixed-order chart Gram bounds over every active support of the
+canonical finite chart-atlas partition of unity. -/
+theorem chartGram_pou_le
+    [CompactSpace M]
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (r : ℕ) (B : Real)
+    (hbdd : ∀ k : ι, ∀ q : ℕ, q ≤ r →
+      MetricCovDerivOrderBoundOn (I := I) Set.univ q (gSeq k) gRef B) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k : ι, ∀ y ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ i j : Fin (Module.finrank Real E),
+            ‖iteratedFDeriv Real r (chartGramOnE (I := I) (gSeq k) α i j)
+              (extChartAt I α y)‖ ≤ C := by
+  classical
+  have hper : ∀ α : M, ∃ C : Real, 0 ≤ C ∧
+      ∀ k : ι, ∀ y ∈ tsupport
+        ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+        ∀ i j : Fin (Module.finrank Real E),
+          ‖iteratedFDeriv Real r (chartGramOnE (I := I) (gSeq k) α i j)
+            (extChartAt I α y)‖ ≤ C := by
+    intro α
+    exact chartGram_of_orders (I := I) gRef gSeq α
+      (DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_isCompact
+        (I := I) (M := M) α)
+      (by
+        intro y hy
+        have hy_base :=
+          DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+            (I := I) (M := M) α hy
+        rwa [trivializationAt_baseSet_eq_chartAt_source (I := I)] at hy_base)
+      r B (fun k q hq y _hy => hbdd k q hq y (Set.mem_univ y))
+  choose Cα hCα hbound using hper
+  let C : Real := ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Cα α
+  have hC_nonneg : 0 ≤ C := by
+    exact Finset.sum_nonneg fun α _ => hCα α
+  refine ⟨C, hC_nonneg, ?_⟩
+  intro α hα k y hy i j
+  have hCα_le : Cα α ≤ C := by
+    apply Finset.single_le_sum
+    · intro β _
+      exact hCα β
+    · exact hα
+  exact (hbound α k y hy i j).trans hCα_le
+
+/-- Uniform order-zero intrinsic metric bounds give uniform chart Gram entry
+bounds on every active partition-of-unity chart support. -/
+theorem chartGram_pou_bnd
+    [CompactSpace M]
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (B : Real)
+    (hbdd : ∀ k : ι,
+      MetricCovDerivOrderBoundOn (I := I) Set.univ 0 (gSeq k) gRef B) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k : ι, ∀ y ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ i j : Fin (Module.finrank Real E),
+            |chartGramOnE (I := I) (gSeq k) α i j (extChartAt I α y)| ≤ C := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := chartGram_pou_le (I := I) gRef gSeq 0 B
+    (fun k q hq => by
+      have hq0 : q = 0 := Nat.eq_zero_of_le_zero hq
+      simpa only [hq0] using hbdd k)
+  refine ⟨C, hC_nn, ?_⟩
+  intro α hα k y hy i j
+  have h := hC α hα k y hy i j
+  simpa only [norm_iteratedFDeriv_zero, Real.norm_eq_abs] using h
+
+/-- Uniform order-one chart Gram norms give uniform first coordinate partial
+bounds on every active partition-of-unity chart support. -/
+theorem chartGram_pou_d1
+    [CompactSpace M]
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (B : Real)
+    (hbdd : ∀ k : ι, ∀ q : ℕ, q ≤ 1 →
+      MetricCovDerivOrderBoundOn (I := I) Set.univ q (gSeq k) gRef B) :
+    ∃ Q : Real, 0 ≤ Q ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k : ι, ∀ y ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ m i j : Fin (Module.finrank Real E),
+            |partialDeriv (E := E) m (chartGramOnE (I := I) (gSeq k) α i j)
+              (extChartAt I α y)| ≤ Q := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := chartGram_pou_le (I := I) gRef gSeq 1 B hbdd
+  let C_E : Real := ∑ m : Fin (Module.finrank Real E), ‖(chartModelBasis E) m‖
+  have hCE_nn : 0 ≤ C_E := Finset.sum_nonneg fun m _ => norm_nonneg _
+  refine ⟨C * C_E, mul_nonneg hC_nn hCE_nn, ?_⟩
+  intro α hα k y hy m i j
+  have hm_le : ‖(chartModelBasis E) m‖ ≤ C_E :=
+    Finset.single_le_sum (fun a _ => norm_nonneg ((chartModelBasis E) a))
+      (Finset.mem_univ m)
+  rw [partial_eq_iter1]
+  rw [← Real.norm_eq_abs]
+  calc
+    ‖iteratedFDeriv Real 1 (chartGramOnE (I := I) (gSeq k) α i j)
+        (extChartAt I α y) ![(chartModelBasis E) m]‖
+        ≤ ‖iteratedFDeriv Real 1 (chartGramOnE (I := I) (gSeq k) α i j)
+            (extChartAt I α y)‖ *
+          ∏ a : Fin 1, ‖(![(chartModelBasis E) m] : Fin 1 → E) a‖ :=
+        ContinuousMultilinearMap.le_opNorm _ _
+    _ = ‖iteratedFDeriv Real 1 (chartGramOnE (I := I) (gSeq k) α i j)
+            (extChartAt I α y)‖ * ‖(chartModelBasis E) m‖ := by simp
+    _ ≤ C * C_E := mul_le_mul (hC α hα k y hy i j) hm_le
+      (norm_nonneg _) hC_nn
+
+/-- Uniform order-two chart Gram norms give uniform nested second coordinate
+partial bounds on every active partition-of-unity chart support. -/
+theorem chartGram_pou_d2
+    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] [CompactSpace M]
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (B : Real)
+    (hbdd : ∀ k : ι, ∀ q : ℕ, q ≤ 2 →
+      MetricCovDerivOrderBoundOn (I := I) Set.univ q (gSeq k) gRef B) :
+    ∃ Q : Real, 0 ≤ Q ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k : ι, ∀ y ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ c m i j : Fin (Module.finrank Real E),
+            |partialDeriv (E := E) c
+              (partialDeriv (E := E) m
+                (chartGramOnE (I := I) (gSeq k) α i j)) (extChartAt I α y)| ≤ Q := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := chartGram_pou_le (I := I) gRef gSeq 2 B hbdd
+  let C_E : Real := ∑ a : Fin (Module.finrank Real E), ‖(chartModelBasis E) a‖
+  have hCE_nn : 0 ≤ C_E := Finset.sum_nonneg fun a _ => norm_nonneg _
+  refine ⟨C * (C_E * C_E), mul_nonneg hC_nn (mul_nonneg hCE_nn hCE_nn), ?_⟩
+  intro α hα k y hy c m i j
+  have hy_base : y ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hy
+  have hy_source : y ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hy_base
+  have hz_int : extChartAt I α y ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hy_source)
+  have hcont : ContDiffAt Real ∞ (chartGramOnE (I := I) (gSeq k) α i j)
+      (extChartAt I α y) :=
+    ((chartGramOnE_contDiffOn (I := I) (gSeq k) α i j).mono interior_subset).contDiffAt
+      (isOpen_interior.mem_nhds hz_int)
+  have hc_le : ‖(chartModelBasis E) c‖ ≤ C_E :=
+    Finset.single_le_sum (fun a _ => norm_nonneg ((chartModelBasis E) a))
+      (Finset.mem_univ c)
+  have hm_le : ‖(chartModelBasis E) m‖ ≤ C_E :=
+    Finset.single_le_sum (fun a _ => norm_nonneg ((chartModelBasis E) a))
+      (Finset.mem_univ m)
+  rw [partial2_eq_iter2 _ hcont]
+  rw [← Real.norm_eq_abs]
+  calc
+    ‖iteratedFDeriv Real 2 (chartGramOnE (I := I) (gSeq k) α i j)
+        (extChartAt I α y) ![(chartModelBasis E) c, (chartModelBasis E) m]‖
+        ≤ ‖iteratedFDeriv Real 2 (chartGramOnE (I := I) (gSeq k) α i j)
+            (extChartAt I α y)‖ *
+          ∏ a : Fin 2,
+            ‖(![(chartModelBasis E) c, (chartModelBasis E) m] : Fin 2 → E) a‖ :=
+        ContinuousMultilinearMap.le_opNorm _ _
+    _ = ‖iteratedFDeriv Real 2 (chartGramOnE (I := I) (gSeq k) α i j)
+            (extChartAt I α y)‖ *
+          (‖(chartModelBasis E) c‖ * ‖(chartModelBasis E) m‖) := by simp
+    _ ≤ C * (C_E * C_E) := mul_le_mul (hC α hα k y hy i j)
+      (mul_le_mul hc_le hm_le (norm_nonneg _) hCE_nn) (mul_nonneg (norm_nonneg _) (norm_nonneg _))
+      hC_nn
+
+/-- Uniform order-three chart Gram norms give uniform nested third coordinate
+partial bounds on every active partition-of-unity chart support. -/
+theorem chartGram_pou_d3
+    [InnerProductSpace Real E] [NeZero (Module.finrank Real E)] [CompactSpace M]
+    {ι : Type*}
+    (gRef : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M)
+    (B : Real)
+    (hbdd : ∀ k : ι, ∀ q : ℕ, q ≤ 3 →
+      MetricCovDerivOrderBoundOn (I := I) Set.univ q (gSeq k) gRef B) :
+    ∃ Q : Real, 0 ≤ Q ∧
+      ∀ α ∈ chartAtlasPOU_finset (I := I) (M := M),
+        ∀ k : ι, ∀ y ∈ tsupport
+          ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ),
+          ∀ d c m i j : Fin (Module.finrank Real E),
+            |partialDeriv (E := E) d
+              (partialDeriv (E := E) c
+                (partialDeriv (E := E) m
+                  (chartGramOnE (I := I) (gSeq k) α i j))) (extChartAt I α y)| ≤ Q := by
+  classical
+  obtain ⟨C, hC_nn, hC⟩ := chartGram_pou_le (I := I) gRef gSeq 3 B hbdd
+  let C_E : Real := ∑ a : Fin (Module.finrank Real E), ‖(chartModelBasis E) a‖
+  have hCE_nn : 0 ≤ C_E := Finset.sum_nonneg fun a _ => norm_nonneg _
+  refine ⟨C * (C_E * (C_E * C_E)),
+    mul_nonneg hC_nn (mul_nonneg hCE_nn (mul_nonneg hCE_nn hCE_nn)), ?_⟩
+  intro α hα k y hy d c m i j
+  have hy_base : y ∈ (trivializationAt E (TangentSpace I) α).baseSet :=
+    DifferentialGeometry.Analysis.Parabolic.TensorSpectral.pouTsupport_subset_baseSet
+      (I := I) (M := M) α hy
+  have hy_source : y ∈ (extChartAt I α).source := by
+    rw [extChartAt_source_eq_chartAt_source (I := I),
+      ← trivializationAt_baseSet_eq_chartAt_source (I := I)]
+    exact hy_base
+  have hz_int : extChartAt I α y ∈ interior (extChartAt I α).target :=
+    extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hy_source)
+  have hcont : ContDiffAt Real ∞ (chartGramOnE (I := I) (gSeq k) α i j)
+      (extChartAt I α y) :=
+    ((chartGramOnE_contDiffOn (I := I) (gSeq k) α i j).mono interior_subset).contDiffAt
+      (isOpen_interior.mem_nhds hz_int)
+  have hd_le : ‖(chartModelBasis E) d‖ ≤ C_E :=
+    Finset.single_le_sum (fun a _ => norm_nonneg ((chartModelBasis E) a))
+      (Finset.mem_univ d)
+  have hc_le : ‖(chartModelBasis E) c‖ ≤ C_E :=
+    Finset.single_le_sum (fun a _ => norm_nonneg ((chartModelBasis E) a))
+      (Finset.mem_univ c)
+  have hm_le : ‖(chartModelBasis E) m‖ ≤ C_E :=
+    Finset.single_le_sum (fun a _ => norm_nonneg ((chartModelBasis E) a))
+      (Finset.mem_univ m)
+  rw [partial3_eq_iter3 _ hcont]
+  rw [← Real.norm_eq_abs]
+  calc
+    ‖iteratedFDeriv Real 3 (chartGramOnE (I := I) (gSeq k) α i j)
+        (extChartAt I α y)
+        ![(chartModelBasis E) d, (chartModelBasis E) c, (chartModelBasis E) m]‖
+        ≤ ‖iteratedFDeriv Real 3 (chartGramOnE (I := I) (gSeq k) α i j)
+            (extChartAt I α y)‖ *
+          ∏ a : Fin 3,
+            ‖(![(chartModelBasis E) d, (chartModelBasis E) c,
+              (chartModelBasis E) m] : Fin 3 → E) a‖ :=
+        ContinuousMultilinearMap.le_opNorm _ _
+    _ = ‖iteratedFDeriv Real 3 (chartGramOnE (I := I) (gSeq k) α i j)
+            (extChartAt I α y)‖ *
+          (‖(chartModelBasis E) d‖ *
+            (‖(chartModelBasis E) c‖ * ‖(chartModelBasis E) m‖)) := by
+      simp [Fin.prod_univ_succ]
+    _ ≤ C * (C_E * (C_E * C_E)) := by
+      have hprod : ‖(chartModelBasis E) d‖ *
+          (‖(chartModelBasis E) c‖ * ‖(chartModelBasis E) m‖) ≤
+            C_E * (C_E * C_E) :=
+        mul_le_mul hd_le
+          (mul_le_mul hc_le hm_le (norm_nonneg _) hCE_nn)
+          (mul_nonneg (norm_nonneg _) (norm_nonneg _)) hCE_nn
+      exact mul_le_mul (hC α hα k y hy i j) hprod
+        (mul_nonneg (norm_nonneg _) (mul_nonneg (norm_nonneg _) (norm_nonneg _))) hC_nn
+
 /-- **Metric component chart-derivative bound** (the A2 → metric bridge).  For a
 metric SEQUENCE with uniform `(B_q)` covariant bounds, the order-`r` chart
 derivative of the `(0,2)`-component along a fixed slot tuple `V` is bounded on
@@ -925,29 +1359,9 @@ theorem metricComp_iteratedFDeriv_le
       ‖iteratedFDeriv Real r (writtenInExtChartAt I 𝓘(Real, Real) x₀
           (fun w : M => (covDerivOfField (I := I) gRef
             (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) 0) w (fun a => V a w)))
-        (extChartAt I x₀ y)‖ ≤ Mr := by
-  classical
-  obtain ⟨CV, hCV0, hCV⟩ :=
-    iteratedFDeriv_comp_le_tower (I := I) gRef hKc hKchart r 0 V
-  choose C hC using fun q => hbdd q Kc hKc
-  set b : ℕ → Real := fun q => max (C q) 0 with hb
-  have hb0 : ∀ q, 0 ≤ b q := fun q => le_max_right _ _
-  refine ⟨CV * ∑ q ∈ Finset.range (r + 1), b q,
-    mul_nonneg hCV0 (Finset.sum_nonneg (fun q _ => hb0 q)), ?_⟩
-  intro k y hy
-  have hbnd : ∀ q : ℕ, ∀ z ∈ Kc, Real.sqrt (normSq0S (I := I) gRef z (q + 2)
-      (covDerivOfField (I := I) gRef
-        (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z)) ≤ b q := by
-    intro q z hz
-    have hcompeq : Real.sqrt (normSq0S (I := I) gRef z (q + 2)
-        (covDerivOfField (I := I) gRef
-          (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) q z))
-        = metricCovDerivNorm (I := I) q (gSeq k) gRef z := by
-      simp only [metricCovDerivNorm, metricCovDeriv_eq_covDerivOfField]
-    rw [hcompeq]
-    exact le_trans (hC q k z hz) (le_max_left _ _)
-  have hbound := hCV (Tensor0SBundle.metricTensorField (I := I) (gSeq k)) y hy b hbnd
-  simpa using hbound
+        (extChartAt I x₀ y)‖ ≤ Mr :=
+  metricComp_iter_le (I := I) gRef gSeq x₀ hKc hKchart r
+    (fun q _ => hbdd q Kc hKc) V
 
 /-- Chart-component derivative bounds when the reference metric may depend on the requested
 order.  Only covariant orders up to `r` need uniform bounds relative to `gRef r`; higher orders

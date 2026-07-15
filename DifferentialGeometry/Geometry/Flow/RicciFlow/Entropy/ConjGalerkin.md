@@ -47,3 +47,44 @@ and the Galerkin-to-limit/second-order bootstrap remains 0%.  Perelman
 no-local-collapsing and `ham3_noncollapse` remain endpoint-level 0%, with about
 42% dedicated analytic machinery.  Whole HCG machinery remains about 54%, with
 its endpoint theorems at 0%.
+
+## 2026-07-14 verification and performance closure
+
+Focused verification now passes for the complete file.  In particular,
+`scalarGalPert_fin` and `scalar_gal_exists` are theorem-level **100% verified**
+and contain no `sorry`.
+
+The targeted module build also passes.  Its only local style warning, the
+over-broad global Classical scope, was then narrowed to declaration-local
+definition scopes and a proof-local `classical`; the post-cleanup focused check
+passes.
+
+The original performance failure had two independent causes.  First, the
+existence theorem exposed a large reducible conjunction containing a nested
+continuous-linear-map family.  The stable public normal form now separates
+actual data and proofs: `ConjGalTime` stores the common time, `IsConjGalTime`
+states positivity, the unit upper bound, and finite-system solvability, while
+`IsConjGalSol` states the scalar coordinate equations.  This changes no
+assumption and adds no frontier wrapper.
+
+Second, the local vector-field estimate compared norms of whole nested CLMs.
+That route timed out even after aliases were moved or annotated.  The checked
+proof instead establishes `hfield_apply` after applying every operator to a
+finite-dimensional vector.  All addition, composition, and Lipschitz steps are
+then scalar or vector-valued; the Lipschitz estimate follows from `map_sub`.
+
+After those normal-form changes, the remaining 200k failure was cumulative
+across the single large ODE proof command rather than a local `whnf` wall.  A
+theorem-scoped 800k budget verifies the applied proof; there is no global option
+change and no consumer-side assumption.  Broad `simp` was removed from the
+critical operator blocks.
+
+Honest accounting after this check: the finite scalar Galerkin existence
+theorem and its genuine A2/A1 coefficient realization are **100%**; the next
+theorem `scalar_gal_bound` remains theorem-level **0% until its own focused
+check**, with about **95%** of its dedicated source machinery assembled.
+`scalar_gal_subseq` remains theorem-level **0%**, while its now-verified generic
+compactness machinery is about **80%**.  Perelman no-local-collapsing and
+`ham3_noncollapse` remain endpoint-level **0%**; their dedicated analytic
+machinery is about **44%**.  Whole HCG machinery remains about **54%**, with its
+endpoint theorems at **0%**.

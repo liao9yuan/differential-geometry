@@ -41,9 +41,10 @@ theorem scalar_crit_tame
     (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
     ∃ tau : Real, 0 < tau ∧ tau ≤ 1 ∧
       ∃ Cmid : ℕ → Real, (∀ n, 0 ≤ Cmid n) ∧
-        ∀ n s, s ∈ Set.Icc (0 : Real) tau →
+        ∀ (n : ℕ) s, s ∈ Set.Icc (0 : Real) tau →
           ∀ (F : Finset
-              (TensorEigenIdx (I := I) (M := M)
+              (DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+                (I := I) (M := M)
                 (S.family.metric (T : Real)) 0 0))
             (v : tensorHs (I := I) (M := M)
               (S.family.metric (T : Real)) 0 0 0)
@@ -89,7 +90,7 @@ theorem scalar_crit_tame
   have hzeta : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × Real => (zeta p.2 : M → Real) p.1)
       ((Set.univ : Set M) ×ˢ R) := by
-    simpa only [zeta, R] using conjCoeff_rev (I := I) S hS T
+    simpa only [zeta, R, conjCoeffRev] using conjCoeff_rev (I := I) S hS T
   choose C2 hC2_nn hC2 using hA2
   choose C1 hC1_nn hC1 using fun n : ℕ =>
     cc_a1_unif (I := I) (M := M) (S.family.metric (T : Real)) zeta
@@ -138,7 +139,8 @@ theorem scalar_crit_tame
       SmoothCcTensor.toL2 A2 + SmoothCcTensor.toL2 A1 := by
     exact map_add _ _ _
   have hsplit : L = L2 + L1 := by
-    rw [L, L2, L1, htoL2]
+    simp only [L, L2, L1]
+    rw [htoL2]
     simp only [tensorL2Coeff_add, mul_add, Finset.sum_add_distrib]
   have htotal :
       2 * L ≤ ((23 : Real) / 12) * Ehi + (C2 n + C1 n) * Elo := by

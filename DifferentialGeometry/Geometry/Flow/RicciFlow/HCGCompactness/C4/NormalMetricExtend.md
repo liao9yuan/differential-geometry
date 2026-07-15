@@ -26,21 +26,24 @@ extends it to a total model-space metric by a buffered cutoff.
 - `normal_cov_eq` consumes the neighborhood-local Levi--Civita/Koszul theorem
   and identifies constant-field covariant derivatives for `normalTotal` with
   the raised normal-coordinate Koszul vector.
+- `normal_cov_eq_fderiv` gives the corresponding moving-field formula:
+  Frechet derivative plus the raised normal-coordinate Koszul correction.
 
-Focused verification of the complete file passed, and the targeted module
-artifact was refreshed after the final source edit. No new `sorry` or `admit`
-was introduced.
+Focused verification of the complete file passed without local warnings after
+the exact `MetricKoszul` artifact was refreshed. No new `sorry` or `admit` was
+introduced.
 
 ## Frontier
 
-The next geometric brick is locality of the geodesic equation/flow: while its
-trajectory remains in the quarter-radius ball, the model-space geodesic for
-`normalTotal` must realize the intrinsic exponential trajectory. The remaining
-large design choice is still how to expose the resulting quantitative inverse
-branch to the existing diagonal-exp consumers.
+The next brick is to identify the selected inverse tangent field with its
+normal-coordinate moving-field germ, then transport the connection through
+`normalBallDiffeo`.  The live API already supplies pullback-cross and open-
+subtype restriction theorems; the smallest possible missing producer is
+Levi--Civita locality under equality of metric germs.  Do not replace that
+with an endpoint radius assumption or a parallel connection hierarchy.
 
-The moving quantitative inverse theorem itself remains unstated and therefore
-0% complete. Its dedicated Step B/B1 machinery is approximately 62% complete;
-Step B/B1 as a large phase is approximately 69% complete; the whole HCG
-compactness infrastructure remains approximately 47% complete. These numbers
-measure machinery only, not any still-unstated textbook endpoint.
+The positive-Hessian and `StrictDistInput` producers remain unstated and are
+therefore each 0% complete.  Their selected-branch Hessian/Neumann/strict-IFT
+support machinery is complete.  Step B/B1 machinery is approximately 90%,
+Chapter 4 machinery approximately 83%, and the whole HCG compactness
+infrastructure approximately 55%.  All textbook endpoint theorems remain 0%.

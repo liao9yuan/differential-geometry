@@ -32,7 +32,7 @@ Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
 Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
-                    → Step B (local metrics/transitions/B1 machinery, ~88%;
+                    → Step B (local metrics/transitions/B1 machinery, ~94%;
                       origin-metric and transition branches run in parallel,
                       then merge on one further subsequence)
                     → Step C (center-of-mass averaging, ~3/4)
@@ -55,7 +55,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 
 | Lane | Entry plan | State |
 |---|---|---|
-| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/STEPB_PLAN.md` + `C4/B1_JOIN_HANDOFF.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchScale.md` + `Geometry/Exponential/LocalDiffeomorphism.md` + `C4/COMPCONV_HANDOFF.md` | source-local/global capstone checked; independent StrictDist/Hessian producer active |
+| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/STEPB_PLAN.md` + `C4/B1_JOIN_HANDOFF.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchHessian.md` + `C4/NormalBranchConvexity.md` + `C4/B1_MIN_BRANCH_RULING.md` | selected-branch Hessian/Neumann, `StrictDistInput`, coherent chartwise convergence data, compact patch cores, and intrinsic-join capstones checked; consult next on the single stage-weighted cross-manifold map and all-pairs/raw-B1 quantifiers |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` | conditional consumer complete: D6 convergence transport and `compactness_of_b1` are checked.  Do not restart D1--D6; resume at the upstream `StepB1RawInput` producer in `B1_JOIN_HANDOFF.md`. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldEndgame.md` | producer hypotheses remain active; canonical conditional wrappers are checked |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
@@ -80,11 +80,11 @@ book-faithful; **FIXED** = the pre-audit statement was wrong and was corrected t
 | `NormalCoordMetricBoundInput` / `NormalRadiusProfile` | `lbl395` = [H6] Cor 4.12 + CGT compatibility | **FIXED floor; `g_p` tail checked** | `normalRadius` supplies the relative `expMapC2Radius` floor. The optimal `gpCoerciveConst`, H6 origin bound, and positive `gpRatio` give the true `expRadiusGp` floor; `gpScaleTail` now consumes it on the post-packing finite slots. No endpoint radius assumption was added. |
 | retired `ExpInverseDerivBoundInput` (S6) | `lbl418` | **REMOVED** | The localized H6 derivative producer replaced the temporary S6 consumer chain.  After the finite source-slot diagonal migrated and a zero-consumer audit passed, the S6 type, compatibility entrypoints, endpoint field, and obsolete selector budget were removed. |
 | `IsometryDerivBounds` (F8) | `lbl375` → [H6] §5 | **PROVED producer; finite H6 migration and capstone wiring checked** | `C4/H6_ISOMETRY_DERIV_PLAN.md`: `normal_bounds_on`, fixed-pair/refinement/live-slot extraction, atom/weight packaging, and `exists_atom_lim`/`exists_atom_fin` are checked without S6. Positive interacting-pair extraction, active six-lambda image control, source-local decoded convergence, `activeFill`, the finite source cover, and the global existential-source corollary are checked. No glued weights or chart selector are used. |
-| `Item3RadiusAt` / `Item3RadiusTail` | `lbl391/392` ("D large") | **CHECKED exp-diffeomorphism producer** | `radiusScaleTail` proves the finite common tail for the book factor; `exists_item3D` selects one divisor satisfying injectivity, `expMapC2Radius`, `g_p`, and Step-A cap budgets before packing. The legacy all-index `Item3RadiusInput` is compatibility-only. Full geodesic convexity is a separate open theorem. |
+| `Item3RadiusAt` / `Item3RadiusTail` | `lbl391/392` ("D large") | **CHECKED exp-diffeomorphism producer** | `radiusScaleTail` proves the finite common tail for the book factor; `exists_item3D` selects one divisor satisfying injectivity, `expMapC2Radius`, `g_p`, and Step-A cap budgets before packing. The legacy all-index `Item3RadiusInput` is compatibility-only. The selected-scale geodesic convexity consumer is now checked separately. |
 | `Item3GpScaleAt` / `Item3GpScaleTail` | `lbl383/427` | **CHECKED producer and consumers** | `gpScaleTail` finite-intersects `lambda_window` after packing with the exact `c = 8` budget. Step-C atoms, atom package, and joins consume only `At`/`Tail`; legacy all-index `Item3GpScaleInput` is compatibility-only. |
-| `SigmaScaleField` | `lbl383` family | relative branch and readout wiring checked | `normalMinScale` retains the full minimizing branch with its `expRadiusGp` half-floor, and `NormalBranchCage.exists_live_min` specializes it to live centers. The one-shot divisor, post-packing finite-slot tails, physical cage, source-local support readout, and finite source maximum are now checked; full convexity/Hessian remains independent. |
-| `CmHessianInput` | `lbl413`-adjacent | **0% producer; true at book scale** | Below the convexity radius `∂_z(exp⁻¹) ≈ −id`, Neumann-series invertibility follows. The current structure is only the per-configuration consumer shape; the derivative estimate and Neumann producer are not proved. |
-| `StrictDistInput` | `lbl416/417` | **0% producer; minimizing join checked** | `GeodesicConvexity.minJoin` now packages the sorry-free Hopf--Rinow two-point selector. What remains is the `lbl412` Hessian identity and `lbl413` positive lower bound giving confinement and strict convexity of `½d²` below `min{inj/3, π/(6√K)}`. |
+| `SigmaScaleField` | `lbl383` family | relative branch and readout wiring checked | `normalMinScale` retains the full minimizing branch with its `expRadiusGp` half-floor, and `NormalBranchCage.exists_live_min` specializes it to live centers. The one-shot divisor, post-packing finite-slot tails, physical cage, quarter-ball tail, source-local support readout, and finite source maximum are checked. |
+| `CmHessianInput` / selected-branch equivalent | `lbl413`-adjacent | **selected-branch producer checked** | `hess_half_inv`, the quantitative inverse estimate, weighted Neumann lemma, `cm_deriv_inv`, and `cm_sol_strict` prove and retain the invertible center derivative and strict local solution on the actual selected branch. The old abstract `chartCmEqn` input is not duplicated as a branch-specific input. |
+| `StrictDistInput` | `lbl416/417` | **CHECKED selected-branch producer** | `hess_inv_sixth` and `HasNormalBrFull.hess_pos` give the positive Hessian bound; `deriv2_comp_geo_on` / `strictConvex_geo` transport it along `minJoin`; `HasNormalBrFull.strict_dist` proves speed, endpoints, midpoint confinement, and active-target strict convexity with the `R + 6 * rad < rho / 2` ledger. |
 | endpoint `hconn` | book convention | added 2026-07-05 | connectedness is genuinely needed by the Hopf–Rinow proper realization (disconnected ⇒ emetric `⊤`); the book's manifolds are connected by convention. |
 
 Meta-finding: 2 of the 12 audited inputs were mis-stated (one unsatisfiable, one
@@ -104,10 +104,10 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-13)
+## 6. Honest progress (updated 2026-07-14)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
-  Step-B/B1 machinery ~88% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
+  Step-B/B1 machinery ~94% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
   sorry-free/axiom-clean 2026-07-05** — `exists_diffeo_of_injOn` construction +
   `BookApproxIsoPartialData` forward/reverse transport via `PreApproxIsoDataOn.congr`;
   **2026-07-09 statement repair:** the false P-only `stepB1_approxIso` and its `sorry`
@@ -136,7 +136,7 @@ its docstring BEFORE consumers are built against it.
   former velocity-`hderiv` API gap, and `normLowerOfSepExp` now derives the coordinate norm lower
   bound directly from named-exp-ball containment and Riemannian separation.  This improves the
   producer machinery but does not change theorem completion: the `StepB1RawInput` producer and
-  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 88%.
+  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 94%.
   **2026-07-13 minimizing-branch closure:** Gates 1--6 are now focused-green:
   the selected inverse is minimizing, `halfSq` agrees with intrinsic squared
   distance on its cage, the generic gradient identity is proved in the
@@ -155,7 +155,7 @@ its docstring BEFORE consumers are built against it.
   factor, injectivity/`expMapC2Radius` tail, one-shot divisor, fixed-`D` bundle,
   and combined tail producer are all in-tree.  The canonical
   `SigmaScaleField` refinement and its `r₁` bound are now produced as well;
-  full convexity and Hessian/Neumann remain separate.
+  its later selected-scale convexity consumer is checked below.
   **2026-07-13 physical finite-hat closure:** the one-shot divisor accepts the
   extra minimizing-scale budget, `physScale_of_extra` gives the common physical
   inequality, and `exists_slot_min` uses the same `aMin` at every slotwise
@@ -175,14 +175,32 @@ its docstring BEFORE consumers are built against it.
   the one-shot divisor, then uses separate finite maxima over target and source
   slots. `exists_cm_on_source` gives the global-ball existential-source
   corollary. This conditional architecture is 100%; the concrete
-  `StrictDistInput`/Hessian--Neumann producer and `StepB1RawInput` remain open.
-  **2026-07-14 strict-distance audit:** the intrinsic Hopf--Rinow endpoint is
-  now exposed by the focused-green `minimizingVec`/`minJoin` API, so a concrete
-  two-point join is no longer part of the honest input.  The smallest genuine
-  comparison gap is the `lbl412` Hessian identity plus the `lbl413` uniform
-  positive lower bound on the controlled cut-locus-free ball.  The existing
-  second-variation theorem supplies only index-form nonnegativity and therefore
-  cannot prove either `StrictDistInput` or the sibling Neumann invertibility.
+  `StrictDistInput` comparison producer and `StepB1RawInput` remain open.
+  **2026-07-14 Hessian/Neumann and strict-distance closure:** the
+  intrinsic Hopf--Rinow `minimizingVec`/`minJoin` API is checked, and
+  `IsNormalDiag.hess_half_inv` closes the branch-native `lbl412` identity.
+  `cm_deriv_inv` uses the weighted inverse-velocity derivative and Neumann
+  estimate to prove center-derivative invertibility; `cm_sol_strict` and
+  `HasHatCmStrict` retain the strict local solution through the support-local
+  and global finite-cover capstones. `hess_inv_sixth`,
+  `HasNormalBrFull.hess_pos`, and the generic along-geodesic Hessian API prove
+  the positive lower bound and `StrictConvexOn`; `HasNormalBrFull.strict_dist`
+  closes speed, endpoints, midpoint confinement, and the active-target field.
+  `exists_hat_cm_min` and the canonical support/global capstones now use the
+  fixed intrinsic `minJoin` without a downstream `StrictDistInput` premise.
+  Selected-branch Hessian/Neumann/strict-distance machinery is 100%; the
+  concrete `StepB1RawInput`, textbook B1, and all endpoints remain 0%.
+  **2026-07-14 retained-data and compact-core closure:** `HasSuppConvData`
+  keeps source-domain openness, all-stage cover geometry, chartwise
+  `HasAtomWeightLim`, and both transition limits on the capstone's one master
+  subsequence. `HasCompactCover` then gives compact cores inside the frozen
+  source patches which still cover the closed source ball. Both producer and
+  capstone are focused-green, and the producer module refresh passed. The next
+  frontier is architectural/analytic: define the single stage-weighted
+  cross-manifold comparison map without gluing limit weights, upgrade the
+  frozen-stage tail to raw B1's all-pairs quantifiers, and prove global
+  injectivity plus arbitrary-order two-sided metric bounds. The concrete
+  `StepB1RawInput`, textbook B1, and all endpoints remain 0%.
   **Later 2026-07-09:** `seqCenter_zero` / `seqCenter_edist_ge` and
   `seqChartNorm_ge` connect the actual ordered-net centers to that coordinate
   lower bound.  The former POU representation mismatch is now resolved:
@@ -374,10 +392,11 @@ its docstring BEFORE consumers are built against it.
    The source-local decoded convergence, point-only totalization, finite source
    cover, support readout, two finite maxima, and global-ball existential-source
    corollary are now checked in `StepCProducers` and
-   `StepCSupportCapstone`.  The remaining B/C analytic frontier is the
-   `StrictDistInput`/Hessian--Neumann producer, not an H6 or chart-compatibility
-   theorem.
-   Ch4 **machinery** overall is ≈ **82%** after rounding;
+   `StepCSupportCapstone`.  The selected-branch Hessian/Neumann and strict-IFT
+   chain is also retained through that capstone.  The remaining B/C analytic
+   frontier is the `lbl413` to `StrictDistInput` comparison producer, not an
+   H6, chart-compatibility, or Neumann theorem.
+   Ch4 **machinery** overall is ≈ **83%** after rounding;
   the conditional compactness endpoint and textbook B1 theorem remain **0%**.
 - Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
 - Ch3: Lemma 3.11 done (hShi hypothesis).  The canonical conditional assembly
@@ -448,11 +467,13 @@ its docstring BEFORE consumers are built against it.
   support-local decoded composition/readout, old-`L` sparse interaction points,
   source finite maximum, and global-ball existential-source corollary are all
   focused-green. The approved conditional source-local/global capstone is 100%.
-  H6 derivative production, pair extraction, and outer cover wiring are no
-  longer blockers. The independent `StrictDistInput`/Hessian--Neumann producer
-  remains open. This advances infrastructure only: `StepB1RawInput`, textbook
-  B1, and compactness endpoints remain 0%.
-- **Whole HCG project — conservative MACHINERY estimate ≈ 54%** (this is infrastructure coverage,
+  H6 derivative production, pair extraction, outer cover wiring, and the
+  selected-branch Hessian/Neumann strict-IFT path are no longer blockers.  The
+  positive Hessian, along-geodesic strict convexity, and direct intrinsic-join
+  `StrictDistInput` producer are now checked as well.  This advances
+  infrastructure only: `StepB1RawInput`, textbook B1, and compactness endpoints
+  remain 0%.
+- **Whole HCG project — conservative MACHINERY estimate ≈ 57%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
   unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved.**  The separate
   conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes
@@ -460,16 +481,16 @@ its docstring BEFORE consumers are built against it.
   completion of the endpoint theorem.
   The riskiest open items (D3d metric transport RESOLVED 2026-07-07; D1a-(ii) naturality wall
   DISSOLVED 2026-07-07 — was a third walls-overcount, the restrictOpen/pullback stack pre-existed):
-  the remaining Item-3 full-convexity and Hessian/Neumann invertibility
-  (the `g_p`, exp-diffeomorphism-radius, canonical sigma, pre-packing large-`D`,
-  physical finite-hat, and outer source-slot ledgers are now checked),
   the arbitrary-order quantitative center-of-mass derivative theorem (`lbl430`
-  bounds half), and the B1 raw producer.
+  bounds half), and the concrete B1 raw producer.  The `g_p`,
+  exp-diffeomorphism-radius, canonical sigma, pre-packing large-`D`, physical
+  finite-hat, outer source-slot, `lbl412`, positive-Hessian/full-convexity, and
+  Neumann ledgers are now checked.
   The metric/transition join, atom/weight package, pinned center gluing, generic
   conditional root producer, D5 metric exhaustion, and flat nested-open
   convergence are no longer on this list.
 
-## 7. Real sorries in this tree (audited 2026-07-13)
+## 7. Real sorries in this tree (audited 2026-07-14)
 
 `MetricCompactness.lean` (unconditional endpoint) · `C4/MetricCompactnessInputs.lean`
 (conditional endpoint = the working target).  `C4/PullbackField.lean` has no

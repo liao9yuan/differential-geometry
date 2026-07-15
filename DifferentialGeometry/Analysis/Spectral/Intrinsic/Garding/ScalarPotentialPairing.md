@@ -10,8 +10,9 @@ new convergence or geometric assumptions.
 ## Current state
 
 `cc_a1_unif` is stated with a support-independent and parameter-independent
-lower constant and the fixed top coefficient `1/4`.  Verification is pending
-the focused checks of its newly added parametric scalar-multiplier imports.
+lower constant and the fixed top coefficient `1/4`.  Focused verification and
+the named-module refresh now pass after the parametric scalar-multiplier imports
+were refreshed.
 
 The theorem is generic coefficient machinery.  The conjugate-heat
 specialization still has to compose `conjCoeff_joint` with the spacetime-factor
@@ -20,7 +21,7 @@ strict total coefficient `23/12 < 2`.
 
 ## Honest progress
 
-- `cc_a1_unif`: source-complete, verification pending.
+- `cc_a1_unif`: theorem and dedicated machinery complete (100%), verified.
 - Conjugate-heat A1 specialization: not yet stated or proved (0%).
 - Full time-uniform A1+A2 finite Galerkin closure: not yet stated or proved
   (0%).

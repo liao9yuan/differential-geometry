@@ -821,6 +821,328 @@ theorem full_transport
   rw [P.left_inv hwP]
   exact normalTanHome_apply (I := I) Y x (e.symm w) hzNormal
 
+/-- The inverse of the selected model branch preserves the source normal
+coordinate on its whole target. -/
+theorem symm_fst_eq
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {δ : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (h : IsNormalDiag (I := I) Y hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) Y x q e) {w : E × E}
+    (hw : w ∈ e.target) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    (e.symm w).1 = w.1 := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M := Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  have hdata := h
+  change e.source = Metric.ball (0 : E × E) q ∧
+    e 0 = 0 ∧
+    ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+    Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
+    ContDiffOn Real ∞ e.symm e.target ∧
+    ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) Y x (e z) =
+        diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+          (normalTangent (I := I) Y x z) at hdata
+  rcases hdata with ⟨hsource, _hzero, _heInf, _htarget, _hinvInf, hdiag⟩
+  have hfence := hf
+  change ∀ z ∈ Metric.closedBall (0 : E × E) q,
+    z.1 ∈ normalBall (I := I) Y x ∧
+    (e z).1 ∈ normalBall (I := I) Y x ∧
+    (e z).2 ∈ normalBall (I := I) Y x at hfence
+  have hzSource : e.symm w ∈ e.source := e.map_target hw
+  have hzBall : e.symm w ∈ Metric.ball (0 : E × E) q := by
+    rw [← hsource]
+    exact hzSource
+  have hzFence := hfence (e.symm w) (Metric.ball_subset_closedBall hzBall)
+  have hzNormal : (e.symm w).1 ∈ normalBall (I := I) Y x := hzFence.1
+  have hwNormal : w.1 ∈ normalBall (I := I) Y x := by
+    rw [← e.right_inv hw]
+    exact hzFence.2.1
+  have hfst := congrArg Prod.fst
+    (hdiag (e.symm w) (Metric.ball_subset_closedBall hzBall))
+  have hexp :
+      NormalCoordinates.expMapDiffeo (I := I) Y.metric x w.1 =
+        NormalCoordinates.expMapDiffeo (I := I) Y.metric x (e.symm w).1 := by
+    simpa only [normalPair, normalTangent, diagExp_fst, e.right_inv hw] using hfst
+  apply (normalExpPD (I := I) Y x).toPartialEquiv.injOn
+  · simpa only [normalExpPD_source] using hzNormal
+  · simpa only [normalExpPD_source] using hwNormal
+  · exact hexp.symm
+
+/-- The transported selected inverse of a normal-coordinate pair is the
+normal tangent with the source coordinate left explicit. -/
+theorem inv_pair_normal
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {δ : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q) (h : IsNormalDiag (I := I) Y hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) Y x q e) {w : E × E}
+    (hw : w ∈ e.target) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    (toBranch (I := I) Y hcomplete hconn x hq h).inv
+        (normalPair (I := I) Y x w) =
+      normalTangent (I := I) Y x (w.1, (e.symm w).2) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+    (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  rw [(full_transport (I := I) Y hcomplete hconn x hq h hf).2.2 w hw]
+  congr 1
+  exact Prod.ext (symm_fst_eq (I := I) Y hcomplete hconn x h hf hw) rfl
+
+/-- Membership of a normal-coordinate pair in the transported intrinsic
+domain recovers membership in the selected model target. -/
+theorem target_of_pair_mem
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {δ : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q) (h : IsNormalDiag (I := I) Y hcomplete hconn x q δ e) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    ∀ {w : E × E}, w ∈ (normalPairHome (I := I) Y x).source →
+      normalPair (I := I) Y x w ∈
+        (toBranch (I := I) Y hcomplete hconn x hq h).dom →
+      w ∈ e.target := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M := Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  intro w hw hdom
+  let A := normalTanHome (I := I) Y x
+  let P := normalPairHome (I := I) Y x
+  unfold DiagInvBranch.dom at hdom
+  rw [toBranch_hom (I := I) Y hcomplete hconn x hq h] at hdom
+  change P w ∈ (A.symm.trans (e.trans P)).target at hdom
+  rw [OpenPartialHomeomorph.trans_target] at hdom
+  have hrest := hdom.1
+  rw [OpenPartialHomeomorph.trans_target] at hrest
+  have htarget : P.symm (P w) ∈ e.target := hrest.2
+  rwa [P.left_inv hw] at htarget
+
+/-- An ambient pair in the transported branch domain has its normal-chart
+coordinate pair in the selected model target. -/
+theorem target_of_chart_dom
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {δ : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q) (h : IsNormalDiag (I := I) Y hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) Y x q e) {y p : Y.M} :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun z : Y.M ↦ TangentSpace I z) :=
+      Y.riemBundle (I := I)
+    letI : (z : Y.M) → InnerProductSpace Real (TangentSpace I z) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun z : Y.M ↦ TangentSpace I z) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    y ∈ (NormalCoordinates.normalChartAt (I := I) Y.metric x).source →
+      p ∈ (NormalCoordinates.normalChartAt (I := I) Y.metric x).source →
+      (y, p) ∈ (toBranch (I := I) Y hcomplete hconn x hq h).dom →
+      (NormalCoordinates.normalChartAt (I := I) Y.metric x y,
+        NormalCoordinates.normalChartAt (I := I) Y.metric x p) ∈ e.target := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun z : Y.M ↦ TangentSpace I z) :=
+    Y.riemBundle (I := I)
+  letI : (z : Y.M) → InnerProductSpace Real (TangentSpace I z) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+    (fun z : Y.M ↦ TangentSpace I z) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  intro hy hp hdom
+  let P := normalPairHome (I := I) Y x
+  have htransport := full_transport (I := I) Y hcomplete hconn x hq h hf
+  have himage : (y, p) ∈ P '' e.target := by
+    rw [htransport.2.1]
+    exact hdom
+  obtain ⟨w, hw, hwEq⟩ := himage
+  have hdata := h
+  change e.source = Metric.ball (0 : E × E) q ∧
+    e 0 = 0 ∧
+    ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+    Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
+    ContDiffOn Real ∞ e.symm e.target ∧
+    ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) Y x (e z) =
+        diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+          (normalTangent (I := I) Y x z) at hdata
+  have hwBall : e.symm w ∈ Metric.ball (0 : E × E) q := by
+    rw [← hdata.1]
+    exact e.map_target hw
+  have hfence := hf
+  change ∀ z ∈ Metric.closedBall (0 : E × E) q,
+    z.1 ∈ normalBall (I := I) Y x ∧
+    (e z).1 ∈ normalBall (I := I) Y x ∧
+    (e z).2 ∈ normalBall (I := I) Y x at hfence
+  have hwNormal : w.1 ∈ normalBall (I := I) Y x ∧
+      w.2 ∈ normalBall (I := I) Y x := by
+    have hout := (hfence (e.symm w)
+      (Metric.ball_subset_closedBall hwBall)).2
+    simpa only [e.right_inv hw] using hout
+  have hwP : w ∈ P.source := by
+    change w ∈ (normalPairHome (I := I) Y x).source
+    rw [normalPair_source]
+    exact hwNormal
+  have hleft := P.left_inv hwP
+  change
+    (NormalCoordinates.normalChartAt (I := I) Y.metric x (P w).1,
+      NormalCoordinates.normalChartAt (I := I) Y.metric x (P w).2) = w at hleft
+  rw [hwEq] at hleft
+  have hcoordSource :
+      (NormalCoordinates.normalChartAt (I := I) Y.metric x y,
+        NormalCoordinates.normalChartAt (I := I) Y.metric x p) ∈ P.source := by
+    rw [hleft]
+    exact hwP
+  have hpairEq :
+      normalPair (I := I) Y x
+        (NormalCoordinates.normalChartAt (I := I) Y.metric x y,
+          NormalCoordinates.normalChartAt (I := I) Y.metric x p) = (y, p) := by
+    change
+      ((NormalCoordinates.normalChartAt (I := I) Y.metric x).symm
+          (NormalCoordinates.normalChartAt (I := I) Y.metric x y),
+        (NormalCoordinates.normalChartAt (I := I) Y.metric x).symm
+          (NormalCoordinates.normalChartAt (I := I) Y.metric x p)) = (y, p)
+    rw [NormalCoordinates.normalChartAt_left_inv (I := I) Y.metric x hy,
+      NormalCoordinates.normalChartAt_left_inv (I := I) Y.metric x hp]
+  apply target_of_pair_mem (I := I) Y hcomplete hconn x hq h hcoordSource
+  rwa [hpairEq]
+
 /-- A model target closed ball transports into the selected intrinsic branch
 domain once both the target coordinates and inverse source coordinates fit in
 the named normal ball. -/

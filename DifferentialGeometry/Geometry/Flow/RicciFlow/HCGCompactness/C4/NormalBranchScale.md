@@ -53,3 +53,16 @@ together with the normal-coordinate radius bound and
 Focused verification and the targeted refresh passed without a local `sorry`.
 This completes Gate 6's sequence-uniform minimizing scale; it does not choose
 the later physical finite-cage radius or prove `StepB1RawInput`.
+# Relative selected normal-branch scale
+
+`HasNormalBrFull` now retains an error `η < 1` and the quantitative inverse
+approximation for the exact partial homeomorphism used by its selected
+`IsNormalDiag` witness.  `normalBrAccept` obtains both from the strengthened
+phase-scale and fixed-radius producers; `mono` preserves them unchanged.
+This adds producer evidence only, not an endpoint assumption or a second
+branch hierarchy.  Focused verification passed: `mono`, `toDom`,
+`normalBrAccept`, and `normalMinScale` all retain or deliberately forget the
+new witness at their stated API boundary.  The target theorem
+`StepB1RawInput` remains unstated/unproved (0%); its dedicated Step-B/B1
+machinery is about 88%, Chapter 4 machinery about 82%, and whole-HCG machinery
+about 54%.

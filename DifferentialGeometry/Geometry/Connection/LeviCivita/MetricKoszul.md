@@ -16,13 +16,20 @@ a second primitive Christoffel symbol.
 - `const_flat_eq_nhds` and `const_cov_eq_nhds` replace global coefficient
   equality by equality on a neighborhood of the evaluation point. This is the
   locality API needed after bump-extending a metric from an open ball.
+- `cov_eq_fderiv_add` is the moving-field realization: the model-space
+  Levi--Civita derivative is the Frechet derivative plus the raised Koszul
+  correction.  It is a thin projection of the existing chart-Christoffel API,
+  not a second connection or Christoffel hierarchy.
 
-Focused verification and the targeted build of the enlarged module passed
-without proof or style warnings.
+The initial elaboration attempts exposed only explicit tangent-bundle model
+inference and the existing nonzero-finrank requirement.  After stating those
+canonically, focused verification and the targeted build passed without local
+proof or style warnings.
 
 ## Frontier
 
-Consume `const_cov_eq_nhds` with the total bump extension of the normal-ball
-metric. The remaining geometric bridge is then the cross-model pullback
-naturality identification for the normal-ball diffeomorphism, rather than an
-open-subtype constant-field theorem.
+`normal_cov_eq_fderiv` now consumes the moving-field theorem for the total
+bump extension of the normal-ball metric.  The remaining geometric bridge is
+the local-germ/cross-model pullback identification for the selected inverse
+field through the normal-ball diffeomorphism.  Any missing reusable API should
+be metric/connection germ locality, not another Koszul hierarchy.

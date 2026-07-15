@@ -1,5 +1,53 @@
 # BBSLimitProducer — Dispatch C: `cinftyLimitData_of_solution`
 
+## 2026-07-14 endpoint producers
+
+`exists_endMetric` now proves G3: it constructs one smooth endpoint metric and
+identifies every chart-Gram entry with its full left limit. Focused verification
+passed for that theorem.
+
+The G4 source proof is now isolated as `ricci_tendsto_left` in
+`EndpointRicciLimit.lean`. Its route is sequential two-jet compactness:
+`metricPreconvFull` extracts a smooth subsequential metric, G3 identifies it
+with the prescribed endpoint, and `ricciConv_of_dnConv` gives Ricci convergence.
+Focused verification, targeted export, and the axiom probe pass for G4. The BBS
+endpoint source is wired to this producer, but its combined file remains
+unverified while the G3-side Spectral dependency cache is unavailable.
+
+Current accounting:
+
+- G3 `exists_endMetric`: theorem **100%**, dedicated machinery **100%**.
+- G4 `ricci_tendsto_left`: theorem **100%**, targeted-exported and axiom-clean.
+- `cinftyLimitData_of_allMBounds`: theorem **0% until the combined file
+  verifies**; its source has no remaining local `sorry`.
+- Hamilton's positive-Ricci endpoint and all HCG endpoint theorems remain 0%.
+
+The current combined focused check fails before elaborating this file because
+the actively modified Spectral module `GalerkinLimitUniformMass` has no exported
+object file. This is an external verification blocker, not evidence that the C3
+packaging typechecks; C3 therefore remains 0%.
+
+## 2026-07-14 C1+C2 discharge
+
+`bbsAllMBounds` is now proved in the narrower `BBSAllMBounds.lean` module. It
+derives an arbitrary-order canonical Riemann-tower bound directly from the
+bounded-curvature `IsSolutionOn` input via `movingRmBoundSol`. Focused
+verification and its targeted module build passed.
+
+Current accounting:
+
+- `bbsAllMBounds` (C1+C2): theorem **100%**, dedicated machinery **100%**.
+- `cinftyLimitData_of_allMBounds` (C3): theorem **0%**. The remaining work is
+  the actual smooth endpoint metric and Ricci-continuity extraction from the
+  all-order bounds.
+- `cinftyLimitData_of_solution`: its composition body is complete, but its
+  axiom closure still contains the C3 frontier.
+
+The direct BBS endpoint-limit route is still an alternate route rather than
+the current `MaximalTime.extends_of_rmBounded` implementation. Historical
+sections below that call `bbsAllMBounds` a `sorry` are superseded by this
+update.
+
 ## 2026-07-14 uniform residual and C1 assembly pass
 
 - The residual constant obstruction is solved in the verified core stack:

@@ -296,7 +296,7 @@ private theorem slot_iter_bdd (g : SmoothRiemannianMetric I M) (sigma : ℕ)
   induction m with
   | zero =>
       intro i t ht x
-      simpa only [slotExtendIter, Nat.add_zero, one_mul] using hB i t ht x
+      simpa only [slotExtendIter, Nat.add_zero, pow_zero, one_mul] using hB i t ht x
   | succ m ih =>
       intro i t ht x
       have hslot := rfns_iteratedCovGrad_slotExtend_le (I := I) (M := M) g

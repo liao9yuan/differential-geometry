@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Connection.LeviCivita.KoszulFormula
+import DifferentialGeometry.Geometry.Connection.LeviCivita.CorrectionContraction
 import DifferentialGeometry.Geometry.Metric.TensorInner.MetricKoszul
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import Mathlib.Analysis.Calculus.FDeriv.CompCLM
@@ -231,6 +232,50 @@ theorem const_cov_eq_nhds
     _ = hco.sharp (MetricKoszul.koszulCov (fderiv Real B z) v w) := by
       rw [const_flat_eq_nhds g B hB hBdiff v w]
     _ = MetricKoszul.koszulVec hco (fderiv Real B z) v w := rfl
+
+/-- In a real model space, the Levi--Civita derivative of a differentiable
+vector field is its Frechet derivative plus the raised metric-Koszul
+correction. -/
+theorem cov_eq_fderiv_add
+    [NeZero (Module.finrank Real E)]
+    (g : Measure.SmoothRiemannianMetric 𝓘(Real, E) E)
+    (B : E → E →L[Real] E →L[Real] Real) {z : E}
+    (hB : (fun y : E ↦ g.inner y) =ᶠ[nhds z] B)
+    (hBdiff : DifferentiableAt Real B z)
+    (hco : IsCoercive (B z)) (V : E → E)
+    (hV : MDifferentiableAt 𝓘(Real, E)
+      (𝓘(Real, E).prod 𝓘(Real, E))
+      (fun y : E ↦ (⟨y, V y⟩ : TangentBundle 𝓘(Real, E) E)) z)
+    (v : E) :
+    (leviCivitaConnectionOfMetric (I := 𝓘(Real, E)) g V z) v =
+      fderiv Real V z v +
+        MetricKoszul.koszulVec hco (fderiv Real B z) v (V z) := by
+  have hzgood : z ∈ chartLeviCivitaGoodSet (I := 𝓘(Real, E)) z :=
+    self_mem_chartLeviCivitaGoodSet (I := 𝓘(Real, E)) (α := z)
+  have hrepr :
+      chartE_section_repr (I := 𝓘(Real, E)) z V = V := by
+    funext y
+    rw [chartE_section_repr_eq_trivToE]
+    change (trivializationAt E (TangentSpace 𝓘(Real, E)) z).continuousLinearMapAt
+      Real y (V y) = V y
+    rw [TangentBundle.continuousLinearMapAt_model_space]
+    rfl
+  have hcorr :
+      Geometry.Riemannian.Geodesic.chartChristoffelContraction
+          (I := 𝓘(Real, E)) g z v (V z) z =
+        MetricKoszul.koszulVec hco (fderiv Real B z) v (V z) := by
+    rw [← const_cov_eq_contr g z z v (V z)]
+    exact const_cov_eq_nhds g B hB hBdiff hco v (V z)
+  change (LeviCivita (I := 𝓘(Real, E)) g).toFun V z v = _
+  rw [LeviCivita_chart_apply (I := 𝓘(Real, E)) g z hzgood hV v]
+  rw [chartLeviCivita_apply (I := 𝓘(Real, E)) g z V hzgood v]
+  rw [hrepr]
+  rw [show (V ∘ (extChartAt 𝓘(Real, E) z).symm) = V by rfl]
+  rw [correction_eq_contr]
+  simp only [trivFromE, trivToE, TangentBundle.symmL_model_space,
+    TangentBundle.continuousLinearMapAt_model_space,
+    extChartAt_self_apply, modelWithCornersSelf_coe, id_eq]
+  exact congrArg (fun w ↦ fderiv Real V z v + w) hcorr
 
 end Connection
 end Integral

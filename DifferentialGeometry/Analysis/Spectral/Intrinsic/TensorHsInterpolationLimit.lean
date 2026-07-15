@@ -136,10 +136,56 @@ theorem tensorEigenIdx_one_add_lambda_lt_finite
       linarith
     rw [hempty]; exact Set.finite_empty
 
+/-- The finite set of `(r,s)` tensor eigen-indices below the `n`-th spectral
+threshold. -/
+def eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ) :
+    Finset (TensorEigenIdx (I := I) (M := M) g r s) :=
+  (tensorEigenIdx_one_add_lambda_lt_finite
+    (I := I) (M := M) g r s ((n : ℝ) + 1)).toFinset
+
+/-- Membership in the generic tensor spectral truncation is the corresponding
+strict eigenvalue bound. -/
+lemma mem_eigenFinset (g : SmoothRiemannianMetric I M) (r s n : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    i ∈ eigenFinset (I := I) (M := M) g r s n ↔
+      1 + TensorEigenIdx.lambda (I := I) (M := M) i < (n : ℝ) + 1 := by
+  unfold eigenFinset
+  rw [Set.Finite.mem_toFinset]
+  rfl
+
+/-- Generic tensor spectral truncations are monotone in the threshold. -/
+lemma eigenFinset_mono (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    Monotone (eigenFinset (I := I) (M := M) g r s) := by
+  intro m n hmn i hi
+  rw [mem_eigenFinset] at hi ⊢
+  have hcast : (m : ℝ) + 1 ≤ (n : ℝ) + 1 := by
+    have hmn' : (m : ℝ) ≤ (n : ℝ) := by exact_mod_cast hmn
+    linarith
+  exact hi.trans_le hcast
+
+/-- Every tensor eigen-index belongs to a sufficiently large generic spectral
+truncation. -/
+lemma eigenFinset_exhaust (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (i : TensorEigenIdx (I := I) (M := M) g r s) :
+    ∃ n : ℕ, i ∈ eigenFinset (I := I) (M := M) g r s n := by
+  obtain ⟨n, hn⟩ :=
+    exists_nat_gt (1 + TensorEigenIdx.lambda (I := I) (M := M) i)
+  refine ⟨n, ?_⟩
+  rw [mem_eigenFinset]
+  linarith
+
+/-- Generic tensor spectral truncations tend to the whole eigen-index type. -/
+lemma eigenFinset_tendsto (g : SmoothRiemannianMetric I M) (r s : ℕ) :
+    Tendsto (eigenFinset (I := I) (M := M) g r s) atTop atTop :=
+  tendsto_atTop_finset_of_monotone
+    (eigenFinset_mono (I := I) (M := M) g r s)
+    (eigenFinset_exhaust (I := I) (M := M) g r s)
+
 namespace tensorHs
 
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
+omit [CompleteSpace E] in
 /-- A single weighted-square coordinate term of `T ∈ Hˢ` is bounded by the
 squared `Hˢ` norm: `(1 + λᵢ)^σ · (coeff i T)² ≤ ‖T‖²`. -/
 lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
@@ -152,6 +198,7 @@ lemma weight_mul_coeff_sq_le_normSq {σ : ℝ}
     tensorSobolevWeight_nonneg (I := I) (M := M) j σ
   positivity
 
+omit [CompleteSpace E] in
 /-- **Per-mode coordinate continuity from `Hˢ` convergence to zero.** If the
 `Hˢ` norms of `d n` tend to `0`, then each fixed coordinate `(d n).coeff i`
 tends to `0`. -/
@@ -194,24 +241,20 @@ lemma coeff_tendsto_zero_of_norm_tendsto_zero {σ : ℝ}
 
 end tensorHs
 
-/-- **The spectral interpolation brick (single-sequence form).** Let
-`σ < σ' < σ''`. For a sequence `d : ℕ → H^{σ''}` with a *uniform* `H^{σ''}` norm
-bound and with `‖incl_{σ}(d n)‖ → 0` in the low norm, the intermediate norms
-`‖incl_{σ'}(d n)‖` also tend to `0`.
+/-- Coordinatewise convergence to zero, together with a uniform higher-order
+Sobolev bound, implies convergence to zero after a strict Sobolev downshift.
 
 The high-mode tail of `‖incl_{σ'}(d n)‖²` is bounded, uniformly in `n`, by
 `Λ^{σ'-σ''}·C²` via the weight ratio `(1+λᵢ)^{σ'-σ''} ≤ Λ^{σ'-σ''}` on
 `{Λ ≤ 1+λᵢ}` (negative exponent), which is made small by choosing the threshold
-`Λ` large; on the finite low-mode set the `H^{σ'}` mass is a finite sum of
-squared coordinates, each tending to `0` from the low-norm convergence. -/
-theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
-    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
-    (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')
+`Λ` large; the finite low-mode part tends to zero coordinatewise. -/
+theorem tendsto_of_coeff
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ' σ'' : ℝ}
+    (hσ'σ'' : σ' < σ'')
     (d : ℕ → tensorHs (I := I) (M := M) g r s σ'')
     {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ n, ‖d n‖ ≤ C)
-    (hlow : Tendsto (fun n =>
-      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
-        (hσσ'.trans hσ'σ''.le) (d n)‖) atTop (𝓝 0)) :
+    (hcoeff0 : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0)) :
     Tendsto (fun n =>
       ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
         hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
@@ -359,12 +402,6 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
             have hnn : (0 : ℝ) ≤ ‖d n‖ := norm_nonneg _
             nlinarith [hCbd n, hnn, hC]
 
-  have hcoeff0 : ∀ i : ι, Tendsto (fun n => (d n).coeff i) atTop (𝓝 0) := by
-    intro i
-    have h := tensorHs.coeff_tendsto_zero_of_norm_tendsto_zero (I := I) (M := M)
-      (fun n => tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
-        (hσσ'.trans hσ'σ''.le) (d n)) hlow i
-    simpa only [tensorHsInclusion_coeff_apply] using h
   have hfin0 : Tendsto (fun n =>
       ∑ i ∈ F, tensorSobolevWeight (I := I) (M := M) i σ' * ((d n).coeff i) ^ 2)
       atTop (𝓝 0) := by
@@ -410,6 +447,29 @@ theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
       hσ'σ''.le (d n)‖ ^ 2 := sq_nonneg _
   rwa [abs_of_nonneg hnn]
 
+/-- If a uniformly high-order bounded sequence tends to zero in a lower
+Sobolev norm, then it tends to zero at every strict intermediate order. -/
+theorem tensorHs_norm_tendsto_zero_of_low_tendsto_of_uniform
+    {g : SmoothRiemannianMetric I M} {r s : ℕ} {σ σ' σ'' : ℝ}
+    (hσσ' : σ ≤ σ') (hσ'σ'' : σ' < σ'')
+    (d : ℕ → tensorHs (I := I) (M := M) g r s σ'')
+    {C : ℝ} (hC : 0 ≤ C) (hCbd : ∀ n, ‖d n‖ ≤ C)
+    (hlow : Tendsto (fun n =>
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        (hσσ'.trans hσ'σ''.le) (d n)‖) atTop (𝓝 0)) :
+    Tendsto (fun n =>
+      ‖tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        hσ'σ''.le (d n)‖) atTop (𝓝 0) := by
+  have hcoeff0 : ∀ i : TensorEigenIdx (I := I) (M := M) g r s,
+      Tendsto (fun n => (d n).coeff i) atTop (𝓝 0) := by
+    intro i
+    have h := tensorHs.coeff_tendsto_zero_of_norm_tendsto_zero (I := I) (M := M)
+      (fun n => tensorHsInclusion (I := I) (M := M) (g := g) (r := r) (s := s)
+        (hσσ'.trans hσ'σ''.le) (d n)) hlow i
+    simpa only [tensorHsInclusion_coeff_apply] using h
+  exact tendsto_of_coeff (I := I) (M := M) hσ'σ'' d hC hCbd hcoeff0
+
+omit [CompleteSpace E] in
 /-- A uniform weighted-mass bound bounds the `H^{σ''}` norm: if
 `∑' i, (1 + λᵢ)^{σ''} · (T.coeff i)² ≤ B`, then `‖T‖_{σ''} ≤ √B`. -/
 private lemma norm_le_sqrt_of_weightedMass_le

@@ -1501,6 +1501,96 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
           simpa only [gammaPhi, hslot] using hweight)
     simpa only [Jinf, gammaPhi, hslot, Lphi, NetLimitData.subseq_lamInf] using hmem
 
+/-- A finite source-patch family admits compact cores which still cover the
+whole source set. -/
+def HasCompactCover {Y J : Type*} [TopologicalSpace Y]
+    (sourceBall : Set Y) (sourcePatch : J → Set Y) : Prop :=
+  ∃ K : J → Set Y, (∀ j, IsCompact (K j)) ∧
+    (∀ j, K j ⊆ sourcePatch j) ∧ sourceBall = ⋃ j, K j
+
+/-- Data retained from the finite source-cover extraction on one master
+subsequence: the chart domains, all-stage cover geometry, chartwise normalized
+weight limits, and the two-sided transition limits.  This predicate records
+existing producer output; it adds no compatibility between different source
+charts. -/
+def HasSuppConvData
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (U : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E) : Prop :=
+  let Lphi := L.subseq hphi
+  (∀ alpha, IsOpen (U alpha)) ∧
+  (∀ alpha, U alpha ⊆
+    Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+  (∀ k,
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+    (∀ alpha : LiveSlot L inp.pack r,
+      U alpha ⊆ Metric.ball 0
+          (inp.normalBounds.radius (Lphi.φ k)
+            (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))) ∧
+      U alpha ⊆ Metric.ball 0
+          (expMapC2Radius (I := I) Y.metric
+            (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))) ∧
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) Y.metric
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z)
+        (U alpha)
+        (Lphi.hatBall inp.decay inp.D P inp.pack r k alpha.1 ∩
+          ⋃ gamma : Fin (inp.pack.A r),
+            Lphi.innerBall inp.decay inp.D P inp.pack r k gamma)) ∧
+    Lphi.hatSourceBall inp.decay P r k ⊆
+      ⋃ alpha : LiveSlot L inp.pack r,
+        (fun z => expMapDiffeo (I := I) Y.metric
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z) '' U alpha) ∧
+  (∀ alpha,
+    HasAtomWeightLim (I := I) inp.decay inp.hD P Lphi inp.realizes
+      inp.pack r hr
+      (fun k => seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
+      (U alpha) (aInf alpha)) ∧
+  ∀ alpha target,
+    ContDiffOn Real (⊤ : ℕ∞) (Jinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+    ContDiffOn Real (⊤ : ℕ∞) (Jbarinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+    ContinuousOn (Jinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
+    ContinuousOn (Jbarinf alpha target)
+        (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
+    MapCInfConvOnCompacts
+      (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)))
+      (fun k => normalTransition (I := I) (X.obj (Lphi.φ k))
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
+        (seqCenterD inp.decay P Lphi k (target.1.1 : Nat)))
+      (Jinf alpha target) ∧
+    MapCInfConvOnCompacts
+      (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
+      (fun k => normalTransition (I := I) (X.obj (Lphi.φ k))
+        (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))
+        (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)))
+      (Jbarinf alpha target) ∧
+    (∀ z, z ∈ Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
+      Jinf alpha target z ∈
+          Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
+        Jbarinf alpha target (Jinf alpha target z) = z) ∧
+    ∀ w, w ∈ Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
+      Jbarinf alpha target w ∈
+          Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
+        Jinf alpha target (Jbarinf alpha target w) = w
+
 set_option maxHeartbeats 800000 in
 /-- Produce one master subsequence with source-local normalized weights and
 old-`InterSlot` two-index points.  Each weight family is pulled back only to its
@@ -1540,33 +1630,7 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
             (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
             (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
           z gamma
-      (∀ alpha target,
-        ContDiffOn Real (⊤ : ℕ∞) (Jinf alpha target)
-            (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
-        ContDiffOn Real (⊤ : ℕ∞) (Jbarinf alpha target)
-            (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
-        ContinuousOn (Jinf alpha target)
-            (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
-        ContinuousOn (Jbarinf alpha target)
-            (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat))) ∧
-        MapCInfConvOnCompacts
-          (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)))
-          (fun k => normalTransition (I := I) (X.obj (Lphi.φ k))
-            (beta k alpha) (beta k target.1))
-          (Jinf alpha target) ∧
-        MapCInfConvOnCompacts
-          (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
-          (fun k => normalTransition (I := I) (X.obj (Lphi.φ k))
-            (beta k target.1) (beta k alpha))
-          (Jbarinf alpha target) ∧
-        (∀ z, z ∈ Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
-          Jinf alpha target z ∈
-              Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
-            Jbarinf alpha target (Jinf alpha target z) = z) ∧
-        (∀ w, w ∈ Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)) →
-          Jbarinf alpha target w ∈
-              Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat)) →
-            Jinf alpha target (Jbarinf alpha target w) = w)) ∧
+      HasSuppConvData (I := I) inp P L r hr phi hphi U aInf Jinf Jbarinf ∧
       ∀ᶠ n in Filter.atTop,
         let Y := X.obj (Lphi.φ n)
         letI : TopologicalSpace Y.M := Y.topology
@@ -1603,7 +1667,8 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
                   (beta a alpha) (beta a target.1) (chi alpha x)))
         let pts := fun (alpha : LiveSlot L inp.pack r) =>
           totalPts (X := X) pairPts alpha
-        Lphi.hatSourceBall inp.decay P r n ⊆
+        HasCompactCover (Lphi.hatSourceBall inp.decay P r n) sourcePatch ∧
+          Lphi.hatSourceBall inp.decay P r n ⊆
             ⋃ alpha : LiveSlot L inp.pack r, sourcePatch alpha ∧
           (∀ alpha,
             sourcePatch alpha ⊆
@@ -1618,12 +1683,12 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
                 localWeight alpha x gamma ≠ 0 →
                   dist x (pts alpha a b x gamma) < epsilon := by
   classical
-  obtain ⟨phi, hphi, U, aInf, Jinf, Jbarinf, _hUopen, _hU8,
+  obtain ⟨phi, hphi, U, aInf, Jinf, Jbarinf, hUopen, hU8,
       hgeom, hlim, htrans, hsupp⟩ :=
     inp.exists_atom_supp_fin h8 hradD hradRatio P L hstable r hr
   refine ⟨phi, hphi, U, aInf, Jinf, Jbarinf, ?_⟩
   dsimp only
-  refine ⟨htrans, ?_⟩
+  refine ⟨⟨hUopen, hU8, hgeom, hlim, htrans⟩, ?_⟩
   obtain ⟨hgp0, _hrad⟩ := inp.item3ScaleTails h8 hradD hradRatio P L r
   have hgpPhi : Item3GpScaleTail (I := I) inp.decay inp.D P
       (L.subseq hphi) inp.pack r :=
@@ -1652,8 +1717,16 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
       (fun x : Y.M => TangentSpace I x) :=
     ⟨Y.metric.inner, Y.metric.contMDiff.continuous, fun _ _ _ => rfl⟩
   letI : MetricSpace Y.M := HopfRinow.riemMetricSpace (I := I) (M := Y.M)
-  refine ⟨?_, ?_, ?_, ?_⟩
-  · intro x hx
+  have hcover : (L.subseq hphi).hatSourceBall inp.decay P r n ⊆
+      ⋃ alpha : LiveSlot L inp.pack r,
+        (L.subseq hphi).hatSourceBall inp.decay P r n ∩
+          (NormalCoordinates.normalChartAt (I := I) Y.metric
+            (seqCenterD inp.decay P (L.subseq hphi) n
+              (alpha.1 : Nat))).source ∩
+          (NormalCoordinates.normalChartAt (I := I) Y.metric
+            (seqCenterD inp.decay P (L.subseq hphi) n
+              (alpha.1 : Nat))) ⁻¹' U alpha := by
+    intro x hx
     rcases Set.mem_iUnion.mp ((hgeom n).2 hx) with ⟨alpha, z, hzU, rfl⟩
     refine Set.mem_iUnion.mpr ⟨alpha, ⟨hx, ?_⟩, ?_⟩
     · have hzball := ((hgeom n).1 alpha).2.1 hzU
@@ -1693,6 +1766,36 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
             (seqCenterD inp.decay P (L.subseq hphi) n (alpha.1 : Nat)) z) ∈ U alpha
       rw [hchart]
       exact hzU
+  refine ⟨?_, hcover, ?_, ?_, ?_⟩
+  · let chi := fun (alpha : LiveSlot L inp.pack r) =>
+      NormalCoordinates.normalChartAt (I := I) Y.metric
+        (seqCenterD inp.decay P (L.subseq hphi) n (alpha.1 : Nat))
+    let sourceBall := (L.subseq hphi).hatSourceBall inp.decay P r n
+    let sourcePatch : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
+      sourceBall ∩ (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
+    let patchOpen : LiveSlot L inp.pack r → Set Y.M := fun alpha =>
+      (chi alpha).source ∩ (chi alpha) ⁻¹' U alpha
+    change HasCompactCover sourceBall sourcePatch
+    have hopen : ∀ alpha, IsOpen (patchOpen alpha) := fun alpha =>
+      (chi alpha).toOpenPartialHomeomorph.isOpen_inter_preimage (hUopen alpha)
+    have hcoverOpen : sourceBall ⊆ ⋃ alpha, patchOpen alpha := by
+      intro x hx
+      rcases Set.mem_iUnion.mp (hcover hx) with ⟨alpha, hxalpha⟩
+      exact Set.mem_iUnion.mpr ⟨alpha, ⟨hxalpha.1.2, hxalpha.2⟩⟩
+    obtain ⟨K, hKcompact, hKsub, hKeq⟩ :=
+      ((L.subseq hphi).hatSourceCompact inp.decay P r n).finite_compact_cover
+        Finset.univ patchOpen (fun alpha _ => hopen alpha)
+          (by simpa using hcoverOpen)
+    refine ⟨K, hKcompact, ?_, ?_⟩
+    · intro alpha x hxK
+      have hxSource : x ∈ sourceBall := by
+        change x ∈ (L.subseq hphi).hatSourceBall inp.decay P r n
+        rw [hKeq]
+        exact Set.mem_iUnion.mpr ⟨alpha,
+          Set.mem_iUnion.mpr ⟨Finset.mem_univ alpha, hxK⟩⟩
+      have hxOpen : x ∈ patchOpen alpha := hKsub alpha hxK
+      exact ⟨⟨hxSource, hxOpen.1⟩, hxOpen.2⟩
+    · simpa using hKeq
   · intro alpha x hx
     have hmap := ((hgeom n).1 alpha).2.2 hx.2
     have hexp : expMapDiffeo (I := I) Y.metric

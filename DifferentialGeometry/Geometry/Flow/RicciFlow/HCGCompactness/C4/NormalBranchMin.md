@@ -1,5 +1,23 @@
 # NormalBranchMin
 
+## 2026-07-14 branch-native Hessian identity
+
+`IsNormalDiag.hess_half_inv` is implemented, focused-green, and sorry-free.
+It upgrades the checked `grad_half_inv` identity to the intrinsic `lbl412`
+formula on the same open half-cage: the Hessian of half squared distance is the
+metric pairing with the Levi-Civita derivative of the negative selected inverse
+tangent.  The proof uses the germ-local Hessian bridge and the generic
+`DiagInvBranch.inv_snd_inf`; no branch field, endpoint-radius assumption, or
+global smoothness claim was added.
+
+This closes the germ-local Hessian bridge, not the center-of-mass strictness
+endpoint.  Selected minimizing-branch Gates 1--6 remain 100%; Step-B/B1
+machinery is about 88%, Chapter 4 machinery about 82%, and whole-HCG machinery
+about 54%.  `StepB1RawInput`, textbook B1, the compactness endpoint,
+`CmHessianInput`, and `StrictDistInput` remain theorem-level 0% until their
+actual Lean statements and proofs are completed.  The next independent
+frontier is the finite weighted Neumann/readout assembly.
+
 ## 2026-07-13 Gate 4 complete
 
 `IsNormalDiag.grad_half_inv` is implemented, focused-green, and sorry-free.

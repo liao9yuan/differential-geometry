@@ -174,6 +174,59 @@ machinery; `heatpot_of_maxreg` remains 0% with about 35% directly reusable
 machinery.  Whole HCG machinery remains about 53%, with endpoint theorems at
 0%.
 
+## 2026-07-14 invariant A2 and Galerkin frontier
+
+The invariant route is mathematically closed.  The moving scalar Laplacian
+difference is expressed by the contraction of the inverse-metric difference
+with the terminal Hessian, plus the contraction of the connection difference
+with the terminal gradient.  Scalar Green/Bochner estimates control the
+terminal Hessian and gradient by the spectral `H²` norm with constants
+independent of finite spectral support.  This is the correct producer route for
+the required support-independent A2 modulus; it does not require a globally
+selected frame or `HasLocallyConstantChartAt`.
+
+The live Lean route now realizes that invariant operator on the finite scalar
+core: `lapDiffCore_eq_cc` and `scalarGalPert_fin` are focused-verified, and the
+A1 finite pairing `cc_a1_unif` is verified.  The finite scalar Galerkin ODE
+producer `scalar_gal_exists` is also focused-verified.  Its performance-stable
+normal form packages the common time as `ConjGalTime`, keeps the proof predicate
+in `IsConjGalTime`, and proves operator estimates only after applying them to a
+finite-dimensional vector.  Whole-Hom equalities and broad `simp` are not used.
+
+The generic compactness layer is now checked as well: rank-generic spectral
+exhaustion, coefficient-to-`Hs` convergence `tendsto_of_coeff`, weighted Fatou
+`fatou_sq_mass`, time Lipschitz control `right_lipschitz`, and the countable
+coordinate Ascoli extraction `galerkin_subseq`.  These are machinery only; they
+do not yet prove a Galerkin limit satisfies the moving conjugate-heat equation.
+
+The exact live frontier is therefore:
+
+1. finish the independent focused verification of `scalar_crit_tame` after its
+   stale upstream curvature/ScalarNonautUniform object chain is refreshed;
+2. verify `scalar_gal_bound`, which combines finite ODE existence, the genuine
+   A2/A1 coefficient identity, the critical tame inequality, and the generic
+   per-scale energy theorem;
+3. prove `scalar_gal_subseq` from the checked countable Ascoli/Fatou layer;
+4. prove a separate limit-identification theorem passing the finite ODE
+   integral identity to the limit, then perform the second-order bootstrap to
+   the classical moving conjugate-heat solution;
+5. only after that enter Perelman's entropy/noncollapsing endpoint argument.
+
+No new convergence predicate, chart-selector input, supplied A2 black box, or
+consumer assumption is authorized or needed.  The endpoint theorem remains
+separate from all of this machinery.
+
+Honest accounting: `scalar_gal_exists`, `scalarGalPert_fin`, and their invariant
+finite-core realization are **100% verified**.  `scalar_crit_tame`,
+`scalar_gal_bound`, and `scalar_gal_subseq` remain theorem-level **0% until
+their own focused checks**; the dedicated compactness machinery for
+`scalar_gal_subseq` is about **80%**.  `heatpot_of_maxreg` remains theorem-level
+**0%** with about **35%** dedicated machinery; the classical moving
+conjugate-heat endpoint remains **0%** with about **78%** dedicated machinery.
+Perelman no-local-collapsing and `ham3_noncollapse` remain endpoint-level
+**0%**, with about **44%** dedicated analytic machinery.  Whole HCG machinery
+remains about **54%**, with endpoint theorems at **0%**.
+
 ## 2026-07-14 balanced dissipation closure
 
 The balanced-commutator frontier recorded above is closed.  The generic
@@ -223,3 +276,38 @@ classical moving conjugate-heat theorem remains 0% with about 77% dedicated
 machinery; `heatpot_of_maxreg` remains 0% with about 35% directly reusable
 machinery.  Whole HCG machinery remains about 53%, with endpoint theorems at
 0%.
+
+## 2026-07-14 energy and compactness checkpoint
+
+The scalar critical-energy phase is now closed through the finite-dimensional
+uniform estimate.  `scalar_crit_tame` and `scalar_gal_bound` both pass focused
+verification without `sorry`; the latter uses the low-layer finite partial
+spectral-mass theorem `cc_partial_le_norm` and a private scalar-sum normal form
+to avoid a whole-declaration heartbeat wall.  Its public assumptions and
+geometric content are unchanged.
+
+The next compactness layer is source-written in `ConjGalerkinLimit.lean`.
+`scalar_gal_subseq` constructs the genuine extracted finite solutions and
+inherits every weighted mass bound.  `galLimHs` packages the limiting
+coefficients in each spectral Sobolev order, and `galLim_tendsto` proves
+fixed-time `H^m` convergence by applying `tendsto_of_coeff` one order above.
+These declarations still await their own focused verification after the
+upstream object refresh, so they remain theorem-level 0% despite their complete
+source routes.
+
+The precise frontier after that check is the separate `scalar_gal_limit`
+producer: pass the finite right-derivative ODE to an interval-integral identity
+and identify the spectral strong solution.  Only then should the route enter
+the spacetime-smooth realization/second-order bootstrap and Perelman's entropy
+argument.  No chart-selector hypothesis, supplied A2 black box, new convergence
+predicate, or consumer assumption has been introduced.
+
+Honest nested accounting: `scalar_gal_bound` is **100% verified**;
+`scalar_gal_subseq` is **0% verified** with about **98%** dedicated machinery;
+`galLim_tendsto` is **0% verified** with about **98%** dedicated machinery;
+`scalar_gal_limit` is **0%** with about **40%** dedicated machinery.  The
+classical moving conjugate-heat endpoint remains theorem-level **0%** with
+about **81%** dedicated machinery.  Perelman no-local-collapsing and
+`ham3_noncollapse` remain endpoint-level **0%**, with about **45%** dedicated
+analytic machinery.  Whole HCG machinery remains about **54%**, with endpoint
+theorems at **0%**.

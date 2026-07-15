@@ -123,6 +123,26 @@ theorem proj_eq
     (B.inv y).proj = y.1 := by
   simpa only [diagExp_fst] using congrArg Prod.fst (B.right_inv hy)
 
+/-- Fixing the endpoint of a selected inverse branch gives a smooth tangent
+section wherever the corresponding pairs stay in the branch domain. -/
+theorem inv_snd_inf
+    {g : SmoothRiemannianMetric I M}
+    {hEnorm : ∀ (x : M) (w : TangentSpace I x),
+      ‖w‖₊ = ENNReal.ofReal (Real.sqrt (g.inner x w w))}
+    {p pt : M} (B : DiagInvBranch (I := I) g hEnorm p) {S : Set M}
+    (hdom : ∀ y ∈ S, (y, pt) ∈ B.dom) :
+    ContMDiffOn I I.tangent ∞
+      (T% fun y => show TangentSpace I y from (B.inv (y, pt)).snd) S := by
+  have hpair : ContMDiffOn I (I.prod I) ∞ (fun y : M ↦ (y, pt)) S :=
+    (contMDiff_id.prodMk contMDiff_const).contMDiffOn
+  have hinv : ContMDiffOn I I.tangent ∞
+      (fun y : M ↦ B.inv (y, pt)) S := by
+    simpa only [inv, dom, Function.comp_apply] using B.inv_inf.comp hpair hdom
+  refine hinv.congr ?_
+  intro y hy
+  refine TotalSpace.ext (B.proj_eq (hdom y hy)).symm ?_
+  exact heq_of_eq rfl
+
 /-- On the selected inverse domain, exponentiating its fiber component gives
 the second point of the pair. -/
 theorem exp_eq

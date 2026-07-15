@@ -17,9 +17,11 @@ same established normal form used by existing joint tensor-family producers.
 ## Frontier
 
 The source theorem is stated and proved without solution-specific assumptions.
-Static review repaired the model-with-corners notation to the project-standard
-`𝓘`. Focused verification awaits a stable shared dependency chain; the
-duplicate writer was stopped rather than extending the concurrent build queue.
+The missing namespace opening for `iteratedCovGrad` was repaired, and the
+private helpers now explicitly omit unused ambient instances.  The global
+heartbeat overrides were unnecessary and have been removed.  Focused
+verification passes without warnings.
 
-Endpoint theorem: 0%. Dedicated A1 scalar-multiplier machinery: about 85%
-until the focused check confirms the rank-zero action and joint-family bridge.
+`smul_jet_unif`: theorem and its dedicated scalar-multiplier machinery are
+100% verified.  This is one producer in the larger A1/Galerkin chain; it does
+not by itself prove the conjugate-heat or noncollapsing endpoints.

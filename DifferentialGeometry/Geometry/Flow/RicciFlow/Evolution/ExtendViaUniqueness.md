@@ -495,6 +495,34 @@ and the closure converged. Takeaway: a "failed to create thread" / 3221226505 cr
 olean is transient concurrency pressure — retry with fewer threads when the lock is free, do NOT chase it
 as an upstream source bug.
 
+## Post-merge frontier audit (2026-07-14)
+
+The live merged sources confirm that both remaining sorries are analytic
+frontiers.
+
+For (N), the time selected by
+`quasilinear_maxreg_solution_of_nemytskii` is explicit, but depends on two
+mixed Lipschitz constants and `‖Nfun 0‖` in Sobolev order
+`4 * finrank E + 10`. With background equal to the initial metric, `Nfun 0`
+contains `-2 Ric(g0)` rather than vanishing. The present hypotheses bound only
+fixed-background metric derivatives through order three, so the merged
+high-Sobolev proof does not supply the required uniform time. The smallest
+missing API is a quantitative low-regularity DeTurck existence theorem uniform
+under exactly those ellipticity and C3 bounds.
+
+For (B), `quasilinear_strong_unique` proves uniqueness only after both
+solutions have been realized as fixed points of the same forcing-space map.
+The geometric headline does not retain that witness, and no reverse
+realization theorem exists. More importantly, the repository has the
+DeTurck-to-Ricci conjugating flow but no harmonic-map heat-flow producer that
+gauges an arbitrary Ricci flow into a Ricci--DeTurck solution. Filling (B)
+therefore requires that gauge producer plus its PDE identity, not an adapter in
+this file.
+
+Endpoint accounting remains strict: `ricci_flow_unif_existence` is 0% and
+`ricci_flow_forward_unique` is 0%. Their existing consumer assembly is 100%,
+but it does not count toward either theorem.
+
 ## Remaining block (unchanged, upstream of this brick)
 The two NEW obligations stay PAUSED (user, 2026-06-20): (A) interior-restart existence and (B) forward
 uniqueness. (A) is not generally true in the naive form — awaits revised short-time existence; (B) is a

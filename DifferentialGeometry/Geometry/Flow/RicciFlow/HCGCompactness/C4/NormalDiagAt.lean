@@ -84,7 +84,18 @@ theorem normalDiagAtFull
           PhaseFlow.phaseErr (normalPhaseK h (2 * q)) : NNReal) : Real) *
         ((q : Real) / 2) ∧
       IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e ∧
-      NormalDiagFence (I := I) (X.obj k) x q e := by
+      NormalDiagFence (I := I) (X.obj k) x q e ∧
+      ApproximatesLinearOn
+        (e.symm : E × E → E × E)
+        ((PhaseFlow.freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))
+        e.target
+        (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊ *
+          (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+              (E × E) →L[Real] (E × E))‖₊⁻¹ -
+            PhaseFlow.phaseErr (normalPhaseK h (2 * q)))⁻¹ *
+          PhaseFlow.phaseErr (normalPhaseK h (2 * q))) := by
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
   letI : IsManifold I ∞ (X.obj k).M := (X.obj k).smooth
@@ -112,8 +123,8 @@ theorem normalDiagAtFull
       happrox, hΦsmooth⟩ :=
     exists_normal_biflow (I := I) h k x hrMetric hrQuarter q hq
       hqWide hqAccel
-  obtain ⟨e, δ, hδ, hsource, hcoe, htarget, hδeq⟩ :=
-    PhaseFlow.exists_quant_inv hq happrox herr
+  obtain ⟨e, δ, hδ, hsource, hcoe, htarget, hδeq, hinvApprox⟩ :=
+    PhaseFlow.exists_quant_inv_bi hq happrox herr
   have heSmooth : ContDiffOn Real ∞ (e : E × E → E × E) e.source := by
     rw [hsource, hcoe]
     exact hΦsmooth
@@ -146,7 +157,7 @@ theorem normalDiagAtFull
       (hΦcont z hz) (hΦwithin z hz) (hΦbox z hz)
     rw [hcoe]
     simpa only [hΦ0 z hz] using hzdiag
-  refine ⟨δ, e, hδ, hδeq, ?_, ?_⟩
+  refine ⟨δ, e, hδ, hδeq, ?_, ?_, hinvApprox⟩
   · change e.source = Metric.ball (0 : E × E) q ∧
       e 0 = 0 ∧
       ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
@@ -213,7 +224,7 @@ theorem normalDiagAt
           PhaseFlow.phaseErr (normalPhaseK h (2 * q)) : NNReal) : Real) *
         ((q : Real) / 2) ∧
       IsNormalDiag (I := I) (X.obj k) hcomplete hconn x q δ e := by
-  obtain ⟨δ, e, hδ, hδeq, he, _hfence⟩ :=
+  obtain ⟨δ, e, hδ, hδeq, he, _hfence, _hinvApprox⟩ :=
     normalDiagAtFull (I := I) h k x hcomplete hconn hrMetric hrQuarter
       q hq hqWide hqAccel herr
   exact ⟨δ, e, hδ, hδeq, he⟩

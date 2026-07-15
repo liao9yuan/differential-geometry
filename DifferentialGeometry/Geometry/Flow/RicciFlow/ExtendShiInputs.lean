@@ -2,6 +2,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.Evolution.ExtendViaUniquenes
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.AllTimesBounds
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.RicBound
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.CovOrderTail
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.MovingShiProducer
 import DifferentialGeometry.Analysis.Spectral.Tensor.UniformChartBounds.ChartGramUniformContinuity
 import DifferentialGeometry.Geometry.Metric.ChartGram
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
@@ -436,32 +437,6 @@ theorem ric_quad_le_of_soln
     (hbound t x ht.1 ht.2) v
   rwa [show Module.finrank ℝ (TangentSpace I x) = Module.finrank ℝ E from rfl] at h
 
-/-- A bound for any lowered Riemann section realizing the solution connection
-transfers to the canonical metric curvature section. -/
-theorem rm04_bound_can
-    {alpha omega : ℝ} {hαω : alpha < omega}
-    {S : SolutionOn (I := I) (M := M) (RealTimeInterval.closedOpen alpha omega hαω)}
-    (Rm04 : ℝ → Tensor04Section (I := I) (M := M))
-    (hRm : ∀ t ∈ Set.Ico alpha omega,
-      Rm04RealizesConnection (I := I) (S.base.metric t)
-        (metricCov (I := I) (M := M) (S.base.metric t)) (Rm04 t))
-    (hbound : ∃ K : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
-      normSq0S (I := I) (S.base.metric t) x 4 ((Rm04 t) x) ≤ K) :
-    ∃ K : ℝ, ∀ t : ℝ, ∀ x : M, alpha ≤ t → t < omega →
-      normSq0S (I := I) (S.base.metric t) x 4 ((S.base.rm04 t) x) ≤ K := by
-  obtain ⟨K, hK⟩ := hbound
-  refine ⟨K, fun t x htα htω => ?_⟩
-  have hcan :
-      Rm04RealizesConnection (I := I) (S.base.metric t)
-        (metricCov (I := I) (M := M) (S.base.metric t)) (S.base.rm04 t) := by
-    simpa [SolutionFamily.rm04, metricCov] using
-      (metricCurvData (I := I) (M := M) (S.base.metric t)).h_rm04
-  have heq := rm04_eq_of_realizes (I := I) (S.base.metric t)
-    (metricCov (I := I) (M := M) (S.base.metric t)) hcan
-    (hRm t ⟨htα, htω⟩) x
-  rw [heq]
-  exact hK t x htα htω
-
 /-- Moving-metric Shi estimates on all upper-truncated tail windows of a
 bounded-curvature Ricci-flow solution. -/
 theorem movingShi_of_soln
@@ -475,7 +450,7 @@ theorem movingShi_of_soln
       ∀ ψ ∈ Set.Ico tShi omega,
         MovingShiBoundOn (I := I) Set.univ tShi ψ
           (fun _ t => S.base.metric t) 3 KShi := by
-  sorry
+  exact movingShiBoundSol (I := I) _hdim _hS _hbound
 
 /-- Interior fixed-background covariant metric bounds obtained from uniform
 metric equivalence, moving Shi estimates, and the constants-first Lemma 3.11

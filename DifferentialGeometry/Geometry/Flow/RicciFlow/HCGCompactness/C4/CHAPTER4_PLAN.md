@@ -55,8 +55,11 @@ radius from the B1 readout path.  `NormalBranchCage` now chooses one minimizing
 coefficient before `D`, specializes the full branch at each slotwise
 `rInf + 1` cage, proves the common active-radius half-margin, handles dead
 slots, and derives the actual finite-hat selected-branch equation.  The
-canonical sigma field and its `r₁` bound are also produced.  Dedicated
-Step-B/B1 machinery is about 83%; the
+canonical sigma field and its `r₁` bound are also produced.  The
+selected-branch Hessian/Neumann, strict-IFT, and strict-distance route is now
+retained through the global source capstone.  Coherent chartwise convergence
+data and compact cores covering every frozen source ball are retained on that
+same master subsequence.  Dedicated Step-B/B1 machinery is about 94%; the
 `StepB1RawInput` producer and textbook B1 theorem remain 0%.
 
 **Rule:** one Lean declaration per book result, in book order. Honest-input fields
@@ -67,15 +70,16 @@ D6 rather than survive to the endpoint.  The former all-index
 `Item3RadiusInput` and `Item3GpScaleInput` exceptions are retired from the
 canonical route: the profile now proves packing-local `Item3RadiusTail` and
 `Item3GpScaleTail` after `D`, `pb`, and `r` are fixed.  The canonical
-`SigmaScaleField` and physical finite-hat cage/readout are checked; full
-convexity and the Hessian/Neumann producer remain construction-stage work.
-**2026-07-11 correction:** the relative `kappa * mu(distance)` lower profile is
+`SigmaScaleField`, physical finite-hat cage/readout, selected-branch
+Hessian/Neumann, and full-convexity producers are checked.  The remaining
+construction-stage work is the global stage-map and quantitative B1 assembly.
+**2026-07-14 correction:** the relative `kappa * mu(distance)` lower profile is
 already encoded separately by the endpoint's `normalRadius` field and consumed by
 the checked `NormalRadiusProfile.floor_le_*`, `exists_phase_scale`,
 `normalBrScale`, and `mul_lambda_lt_*` API.  Branch-scale and
 fixed-trivialization `readDom` production are closed.  The live discharge
-problem is the remaining full-convexity and Hessian/Neumann work plus concrete
-outer source-slot wiring, not another endpoint radius record.  The finite-slot
+problem is the concrete stage-weighted B1 raw assembly, not another endpoint
+radius record.  The finite-slot
 `g_p`, exp-diffeomorphism-radius, canonical sigma/`r₁`, and physical-cage
 ledgers are checked from one pre-packing divisor.
 Everything the book proves, we prove. Build via
@@ -391,12 +395,12 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
 - [ ] D5 completeness (`MetricComplete limit` via compact closed balls / ProperSpace).
 - [ ] **D6 ASSEMBLY: discharge `MetricCompactnessInputs.metricCompactness`**
       (the CONDITIONAL endpoint — ruling 2026-07-05) from D1–D5, including the
-      already checked finite-slot radius/`g_p` tails, plus the remaining
-      `SigmaScaleField`, full convexity, physical-cage, and Hessian producers.
+      already checked finite-slot radius/`g_p`, sigma, physical-cage,
+      selected-branch Hessian, and full-convexity producers.
 
 ---
 
-## Critical path (updated 2026-07-13)
+## Critical path (updated 2026-07-14)
 
 **DONE:** Step A (metric core + item 3, modulo declared inputs); F-track engines
 100% (including F4/F5/F6 and the F2 book-facing wrapper); `lbl394` (both halves);
@@ -411,14 +415,17 @@ conditional endpoint `MetricCompactnessInputs.metricCompactness` is STATED
    gluing/agreement are checked; the generic conditional center-root producer
    and the explicit branch-parametric all-order readout machinery are also
    checked.  The transported quantitative branch, minimizing-tangent
-   compatibility, global relative coefficients, canonical sigma field, and
-   finite-hat physical cage/readout are checked.  Next wire the real outer
-   fixed-source-slot diagonal, instantiate the checked fixed-target
-   `halfSqDist` differentiability producers, prove the Hessian/Neumann producer,
-   and assemble `StepB1RawInput`.  Finite-order center
-   regularity and the Faà-di-Bruno composition engine are checked;
-   arbitrary-order quantitative bounds remain separate.
-2. **After B/C:** construct `StepB1RawInput` and consume the already-checked
+   compatibility, global relative coefficients, canonical sigma field,
+   finite-hat physical cage/readout, source-local/global cover, branch-native
+  `lbl412`, weighted Neumann derivative, strict local IFT, uniform positive
+  Hessian lower bound, and intrinsic `StrictDistInput` consequence are checked.
+  The source-local capstone now also retains the chart domains, atom-weight
+  limits, and two-sided transition limits on its one master subsequence.
+  Compact cores covering each frozen source ball are also checked.  The next
+  phase is the actual stage-weighted cross-manifold map and its compact-patch
+  estimates; the all-pairs tail and arbitrary-order two-sided metric
+  bounds remain genuine analytic/architecture frontiers.
+2. **After that producer:** construct `StepB1RawInput` and consume the already-checked
    `compactness_of_b1` theorem in the conditional endpoint.
 
 There is no independent Step D or F-track todo.  The unconditional `metricCompactness`
@@ -486,7 +493,7 @@ Honest-input boundary (total, restructured 2026-07-05 — see
   `normalRadius : NormalRadiusProfile ...` now produces both packing-local
   `Item3GpScaleTail` and `Item3RadiusTail` from one pre-packing divisor; the
   legacy all-index inputs are compatibility-only.  Sigma/`r₁`, full convexity,
-  and physical-cage discharge still await their quantitative assembly.
+  and physical-cage discharge are checked; the global stage-map remains.
 - **Configuration-stage, DISCHARGED at D6:** `CmHessianInput` /
   `StrictDistInput` (per-configuration `lbl413`/`lbl416`
   consequences at book scale).

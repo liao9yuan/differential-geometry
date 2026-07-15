@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinParabolicEnergyDeTurck
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.HeatSemigroup.GalerkinForcingTimeL2Limit
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.GalerkinCompactness
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.Operator
 import Mathlib.Topology.Algebra.InfiniteSum.Real
@@ -28,32 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 variable {T : ℝ}
-
-theorem fatou_weighted_sq_mass_le {ι : Type*} (S : ℕ → Finset ι)
-    (hS : Tendsto S atTop atTop) (w : ι → ℝ) (hw : ∀ i, 0 ≤ w i)
-    (v : ℕ → ι → ℝ) (vlim : ι → ℝ)
-    (hconv : ∀ i, Tendsto (fun N => v N i) atTop (𝓝 (vlim i)))
-    (B : ℝ) (hbound : ∀ N, ∑ i ∈ S N, w i * (v N i) ^ 2 ≤ B) :
-    Summable (fun i => w i * (vlim i) ^ 2) ∧
-      ∑' i, w i * (vlim i) ^ 2 ≤ B := by
-  have hnn : ∀ i, 0 ≤ w i * (vlim i) ^ 2 := fun i => mul_nonneg (hw i) (sq_nonneg _)
-  have hpartial : ∀ K : Finset ι, ∑ i ∈ K, w i * (vlim i) ^ 2 ≤ B := by
-    intro K
-    have hlim : Tendsto (fun N => ∑ i ∈ K, w i * (v N i) ^ 2) atTop
-        (𝓝 (∑ i ∈ K, w i * (vlim i) ^ 2)) := by
-      refine tendsto_finset_sum K (fun i _ => ?_)
-      exact ((hconv i).pow 2).const_mul (w i)
-    have hev : ∀ᶠ N in atTop, ∑ i ∈ K, w i * (v N i) ^ 2 ≤ B := by
-      have hsub : ∀ᶠ N in atTop, K ≤ S N := hS.eventually_ge_atTop K
-      filter_upwards [hsub] with N hKN
-      have hKsub : K ⊆ S N := hKN
-      have hmono : ∑ i ∈ K, w i * (v N i) ^ 2 ≤ ∑ i ∈ S N, w i * (v N i) ^ 2 :=
-        Finset.sum_le_sum_of_subset_of_nonneg hKsub
-          (fun i _ _ => mul_nonneg (hw i) (sq_nonneg _))
-      exact le_trans hmono (hbound N)
-    exact le_of_tendsto hlim hev
-  refine ⟨summable_of_sum_le hnn hpartial, ?_⟩
-  exact Real.tsum_le_of_sum_le hnn hpartial
 
 private theorem continuousOn_galerkinForcingSymm
     (g₀ g_bg : SmoothRiemannianMetric I M) (a : ℕ)
@@ -1226,7 +1201,7 @@ theorem deTurckGalerkin_solField_uniformSpatialMass_allOrderSymm
           (fun u => (timeModeCoeff (I := I) (M := M) gforce i) u) t)) :=
     fun i => galerkinSol_tendsto_solField_perModeConvSymm (I := I) (M := M)
       g₀ g_bg a ha_super hT hT1 hTT₀ gforce hforce hgforce U hUinit hUcont hUderiv i t ht
-  have hfatou := fatou_weighted_sq_mass_le
+  have hfatou := fatou_sq_mass
     (eigenIdxFinset (I := I) (M := M) g₀) (tendsto_eigenIdxFinset_atTop (I := I) (M := M) g₀)
     wσ hwσ_nn (fun N i => U N t i)
     (fun i => perModeConv (TensorEigenIdx.lambda (I := I) (M := M) i)

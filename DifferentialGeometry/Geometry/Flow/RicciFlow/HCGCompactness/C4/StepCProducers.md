@@ -581,3 +581,34 @@ cover/weight/point package remain complete (100%).  The sibling
 checked, so the approved conditional pair-to-capstone architecture is 100%.
 Whole-HCG machinery is about 54%, while `StepB1RawInput`, the textbook B1
 theorem, and all compactness endpoint theorems remain 0%.
+
+## 2026-07-14 retained support convergence data
+
+`HasSuppConvData` now names the coherent data already extracted by
+`exists_atom_supp_fin`: source-domain openness and the eight-lambda bound,
+all-stage source-cover geometry, each source-local `HasAtomWeightLim`, and the
+two-sided `Jinf`/`Jbarinf` transition limits.  `exists_supp_pts_fin` retains
+this predicate on the same master subsequence while continuing to consume the
+nonzero-support readout to build its existing point tail.  No chartwise weights
+are glued and no compatibility or radius hypothesis was added.
+
+Focused verification and the exact producer-module refresh passed.  This
+closes the data-erasure seam needed by the next compact-patch/global-map stage;
+it does not construct `StepB1RawInput`.  The concrete raw producer and textbook
+B1 theorem remain theorem-level **0%**, as do all compactness endpoints.
+
+## 2026-07-14 compact source cores
+
+`HasCompactCover` and the strengthened eventual payload of
+`exists_supp_pts_fin` now produce one compact core inside every frozen
+source-local patch, with the cores still covering the whole closed source
+ball.  The proof applies the existing finite compact-cover theorem to the open
+sets `chi.source ∩ chi ⁻¹' U`; it does not incorrectly claim that the
+source-ball intersections themselves are open.
+
+Focused verification and the exact producer refresh passed.  The compact cores
+are sufficient domains for the retained `MapCInfConvOnCompacts` data at fixed
+source stage.  They do not solve the uniform-in-stage/all-pairs tail, define the
+single global comparison map, or produce the two-sided covariant metric bounds.
+Those remain the next architecture/analytic frontier; theorem-level endpoint
+percentages are unchanged.

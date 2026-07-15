@@ -11,6 +11,8 @@ connection-Laplacian pairing constants.
 
 noncomputable section
 
+set_option backward.isDefEq.respectTransparency false
+
 open Bundle Manifold MeasureTheory Set Filter Tensor0SBundle
 open scoped Manifold Topology ContDiff ENNReal BigOperators
   RealInnerProductSpace InnerProductSpace NNReal
@@ -22,6 +24,7 @@ namespace IntrinsicSpectral
 
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Integral.Connection
+open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -30,6 +33,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
+private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+set_option maxHeartbeats 1600000 in
 /-- A jointly smooth first-order coefficient family has one balanced pairing
 constant on a compact time slab. -/
 theorem iterL_pair_unif (g : SmoothRiemannianMetric I M) (s n : ℕ)

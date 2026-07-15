@@ -324,7 +324,8 @@ theorem metricDerivNorm_symm
   have hneg :
       metricDiffCovDerivAt (I := I) a B A gRef x =
         -metricDiffCovDerivAt (I := I) a A B gRef x := by
-    simp [metricDiffCovDerivAt]
+    simp only [metricDiffCovDerivAt]
+    abel
   rw [metricDerivNorm, metricDerivNorm, hneg, normSq0S_neg]
 
 /-- Dense-net convergence plus uniform time-Lipschitz control makes the chosen
