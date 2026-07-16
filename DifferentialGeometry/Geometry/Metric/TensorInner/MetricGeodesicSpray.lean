@@ -351,6 +351,25 @@ private theorem raisedDiag_conv
       (fun _ => hdiag.contDiffOn) hdiag.contDiffOn
       (fun _ _ => Set.mem_univ _) (fun _ _ _ => Set.mem_univ _))
 
+/-- A smooth coercive metric-coefficient field has a smooth total geodesic
+spray on the corresponding phase domain. -/
+theorem metricSpray_contDiffOn
+    [FiniteDimensional Real E]
+    {U : Set E} (hU : IsOpen U)
+    {g : E → E →L[Real] E →L[Real] Real}
+    (hg_cd : ContDiffOn Real (∞ : WithTop ℕ∞) g U)
+    (hg_co : ∀ x, x ∈ U → IsCoercive (g x)) :
+    ContDiffOn Real (∞ : WithTop ℕ∞) (metricSpray g) (U ×ˢ Set.univ) := by
+  let R : E → E →L[Real] E →L[Real] E :=
+    fun x => raisedKoszulOp (g x) (fderiv Real g x)
+  have hR : ContDiffOn Real (∞ : WithTop ℕ∞) R U :=
+    raisedOp_smooth hU hg_cd hg_co
+  have hdiag : ContDiffOn Real (∞ : WithTop ℕ∞)
+      (fun q : E × E => R q.1 q.2 q.2) (U ×ˢ Set.univ) :=
+    (((hR.comp contDiffOn_fst (fun q hq => hq.1)).clm_apply
+      contDiffOn_snd).clm_apply contDiffOn_snd)
+  simpa only [metricSpray, R] using contDiffOn_snd.prodMk hdiag.neg
+
 set_option maxHeartbeats 500000 in
 /-- Smooth convergence of metric coefficients on an open coordinate domain
 gives compact-open `C∞` convergence of their total geodesic sprays. -/

@@ -34,3 +34,27 @@ complete pending its own verification; its dedicated machinery is about 99%.
 Perelman no-local-collapsing and `ham3_noncollapse` remain theorem-level 0%,
 with about 44% dedicated analytic machinery.  Whole HCG machinery is about
 54%, with its endpoint theorems at 0%.
+
+## 2026-07-15 all-scale coefficient slab
+
+`lapCoeff_slab` is now a separate verified producer.  On one common backward
+slab it returns nonnegative all-order pointwise covariant-jet envelopes for
+both `scalarTraceCoeff` and `connTraceCoeff`, together with the reflected
+regular-time arm.  Its time interval is chosen before the jet order and before
+the input tensor, so later Sobolev constants remain independent of spectral
+support.
+
+The producer is extracted from the existing `metricDiff_slab` route rather
+than added as a wrapper assumption.  The private trace construction now
+retains the already-proved `scalarTraceCoeff` envelope as well as the
+`traceCast` envelope.  `cc_conn_unif` consumes `lapCoeff_slab`, removing the
+duplicated coefficient construction while preserving its public statement.
+Focused verification passes without `sorry`.
+
+Honest accounting: `lapCoeff_slab` is theorem-level **100%**, and its dedicated
+coefficient machinery is **100%**.  The downstream `lapDiff_hs_unif` smooth-core
+A2 theorem is separately verified at **100%**; it is not a completed operator.
+The `H^(m+2) ->L H^m` A2 operator and its time-continuous path remain unstated
+(**0%** each), with approximately **88%** and **60%** dedicated machinery,
+respectively.  Perelman no-local-collapsing and `ham3_noncollapse` remain
+endpoint-level **0%**.

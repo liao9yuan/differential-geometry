@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffTim
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.InverseMetricRaisedEndomorphismJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetBound
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciDifferenceMeanValue
+import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.MetricFamilyConnDiff
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RicciArmResidualCoefficientFields
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.RealizedGramDiff
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyPair
@@ -31,6 +32,7 @@ open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
 open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurck
 
 variable {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
   [FiniteDimensional ℝ E] [NeZero (Module.finrank ℝ E)]
@@ -209,6 +211,241 @@ private theorem metricDiff_joint
   congr 1
   rw [Tensor0SNabla.scalarFn_eq_apply_zero, Tensor0SSpace.evalScalar_apply]
   exact congrArg (Y p.1) (Subsingleton.elim _ _)
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+  [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+private theorem joint0S_sub {d : ℕ} {S : Set ℝ}
+    (A B : ∀ p : M × ℝ, Tensor0SSpace d I p.1)
+    (hA : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel d ℝ E)
+        (E := fun z : M => Tensor0SSpace d I z) p.1 (A p))
+      ((Set.univ : Set M) ×ˢ S))
+    (hB : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel d ℝ E)
+        (E := fun z : M => Tensor0SSpace d I z) p.1 (B p))
+      ((Set.univ : Set M) ×ˢ S)) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SModel d ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel d ℝ E)
+        (E := fun z : M => Tensor0SSpace d I z) p.1 (A p - B p))
+      ((Set.univ : Set M) ×ˢ S) := by
+  letI := tensor0SBundle_topology (𝕜 := ℝ) (E := E) (H := H)
+    (I := I) (M := M) d
+  intro p₀ hp₀
+  rw [Bundle.contMDiffWithinAt_totalSpace]
+  refine ⟨contMDiffWithinAt_fst, ?_⟩
+  set x₀ := p₀.1 with hx₀
+  set e := trivializationAt (Tensor0SModel d ℝ E)
+    (fun z : M => Tensor0SSpace d I z) x₀ with he
+  have hA' := (Bundle.contMDiffWithinAt_totalSpace
+    (F := Tensor0SModel d ℝ E)
+    (E := fun z : M => Tensor0SSpace d I z)).mp (hA p₀ hp₀)
+  have hB' := (Bundle.contMDiffWithinAt_totalSpace
+    (F := Tensor0SModel d ℝ E)
+    (E := fun z : M => Tensor0SSpace d I z)).mp (hB p₀ hp₀)
+  refine (hA'.2.sub hB'.2).congr_of_eventuallyEq ?_ ?_
+  · have hbase : ∀ᶠ p : M × ℝ in nhdsWithin p₀
+        ((Set.univ : Set M) ×ˢ S), p.1 ∈ e.baseSet :=
+      (continuousWithinAt_fst
+        (s := (Set.univ : Set M) ×ˢ S) (p := p₀))
+        (e.open_baseSet.mem_nhds (by
+          rw [he]
+          exact mem_baseSet_trivializationAt _ _ x₀))
+    filter_upwards [hbase] with p hp
+    exact ((e.linear ℝ hp).map_sub (A p) (B p)).symm
+  · exact ((e.linear ℝ (by
+      rw [he, ← hx₀]
+      exact mem_baseSet_trivializationAt _ _ x₀)).map_sub
+        (A p₀) (B p₀)).symm
+
+/-- At a regular time, every fixed finite window of spatial covariant jets of
+the fixed-background metric difference vanishes uniformly on the compact
+manifold. -/
+theorem metricDiff_small
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 0 (2 + i) x
+        ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 2 i
+          (metricDifferenceCcTensor (I := I) (M := M)
+            (G.metric (T : ℝ)) (G.metric t))).toSection x) < ε := by
+  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+  let P : ℝ → SmoothCcTensor q 0 2 := fun t =>
+    metricDifferenceCcTensor (I := I) (M := M) q (G.metric t)
+  have hPzero : P (T : ℝ) = 0 := by
+    simp only [P, q, metricDifferenceCcTensor_self]
+  have hPjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 0 2 ℝ E)) ∞
+      (fun z : M × ℝ => TotalSpace.mk' (TensorRSModel 0 2 ℝ E)
+        (E := fun y : M => TensorRSSpace 0 2 I y) z.1
+        ((P z.2).toSection z.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+    simpa only [P, q] using metricDiff_joint (I := I) (M := M) G hG q
+  simpa only [P, q] using
+    joint_jet_small (I := I) (M := M) q 0 2 p P
+      (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
+
+/-- The scalar principal trace coefficient of a smooth metric family is jointly
+smooth in space and regular time. -/
+theorem scalarTrace_joint
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (q : SmoothRiemannianMetric I M) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
+        (E := fun x : M => TensorRSSpace 2 0 I x) p.1
+        ((scalarTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SModel 2 ℝ E) (V₁ := fun x : M => Tensor0SSpace 2 I x)
+    (F₂ := Tensor0SModel 0 ℝ E) (V₂ := fun x : M => Tensor0SSpace 0 I x)
+    (φ := fun p : M × ℝ =>
+      (show Tensor0SSpace 2 I p.1 →L[ℝ] Tensor0SSpace 0 I p.1 from
+        (scalarTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+    (S := D.regular)
+  intro W
+  have hW : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SModel 2 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 2 ℝ E)
+        (E := fun x : M => Tensor0SSpace 2 I x) p.1 (W p.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+    exact W.contMDiff.comp_contMDiffOn contMDiffOn_fst
+  have hmove := comTrace_of_family (I := I) 0 G hG
+    (fun p : M × ℝ => W p.1) hW
+  have hfixedOp : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
+        (E := fun x : M => TensorRSSpace 2 0 I x) p.1
+        (cometricDoubleTraceFib (I := I) q 0 p.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+    exact (cometricDoubleTraceFib_contMDiff (I := I) q 0).comp_contMDiffOn
+      contMDiffOn_fst
+  have hfixed := ContMDiffOn.clm_bundle_apply (b := Prod.fst) hfixedOp hW
+  have hsub := joint0S_sub (I := I) (M := M) (d := 0)
+    (fun p : M × ℝ =>
+      cometricDoubleTraceFib (I := I) (G.metric p.2) 0 p.1 (W p.1))
+    (fun p : M × ℝ => cometricDoubleTraceFib (I := I) q 0 p.1 (W p.1))
+    hmove hfixed
+  refine hsub.congr (fun p _ => ?_)
+  congr 1
+
+/-- The scalar connection-trace coefficient of a smooth metric family is
+jointly smooth in space and regular time. -/
+theorem connTrace_joint
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (q : SmoothRiemannianMetric I M) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
+        (E := fun x : M => TensorRSSpace 1 0 I x) p.1
+        ((connTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+  apply contMDiffOn_clm_section_of_pointwise_jointMR (I := I) (M := M)
+    (F₁ := Tensor0SModel 1 ℝ E) (V₁ := fun x : M => Tensor0SSpace 1 I x)
+    (F₂ := Tensor0SModel 0 ℝ E) (V₂ := fun x : M => Tensor0SSpace 0 I x)
+    (φ := fun p : M × ℝ =>
+      (show Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SSpace 0 I p.1 from
+        (connTraceCoeff (I := I) q (G.metric p.2)).toSection p.1))
+    (S := D.regular)
+  intro W
+  have hW : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, Tensor0SModel 1 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (Tensor0SModel 1 ℝ E)
+        (E := fun x : M => Tensor0SSpace 1 I x) p.1 (W p.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+    exact W.contMDiff.comp_contMDiffOn contMDiffOn_fst
+  have hconn := ContMDiffOn.clm_bundle_apply (b := Prod.fst)
+    (connDiff_joint (I := I) G hG q) hW
+  have htrace := comTrace_of_family (I := I) 0 G hG
+    (fun p : M × ℝ =>
+      (show Tensor0SSpace 1 I p.1 →L[ℝ] Tensor0SSpace 2 I p.1 from
+        connDiffFib (I := I) (G.metric p.2) q p.1) (W p.1)) hconn
+  refine htrace.congr (fun p _ => ?_)
+  congr 1
+
+/-- At a regular time, every fixed finite window of the scalar principal
+coefficient jets vanishes uniformly on the compact manifold. -/
+theorem scalarTrace_small
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 2 (0 + i) x
+        ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 2 0 i
+          (scalarTraceCoeff (I := I) (G.metric (T : ℝ))
+            (G.metric t))).toSection x) < ε := by
+  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+  let P : ℝ → SmoothCcTensor q 2 0 := fun t =>
+    scalarTraceCoeff (I := I) q (G.metric t)
+  have hPzero : P (T : ℝ) = 0 := by
+    simp only [P, q, scalarTraceCoeff, traceCast_self, sub_self]
+  have hPjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
+      (fun z : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
+        (E := fun y : M => TensorRSSpace 2 0 I y) z.1
+        ((P z.2).toSection z.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+    simpa only [P, q] using scalarTrace_joint (I := I) (M := M) G hG q
+  simpa only [P, q, Nat.zero_add] using
+    joint_jet_small (I := I) (M := M) q 2 0 p P
+      (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
+
+omit [CompactSpace M] [I.Boundaryless] in
+private theorem connFib_self (q : SmoothRiemannianMetric I M) (x : M) :
+    connDiffFib (I := I) q q x = 0 := by
+  apply ContinuousLinearMap.ext
+  intro om
+  apply ContinuousMultilinearMap.ext
+  intro YZ
+  rw [connDiffFib_apply_eval, PDE.DeTurck.connDiff_self]
+  change om (0 : Fin 1 → TangentSpace I x) = 0
+  exact ContinuousMultilinearMap.map_zero om
+
+/-- At a regular time, every fixed finite window of the traced
+connection-difference coefficient jets vanishes uniformly on the compact
+manifold. -/
+theorem connTrace_small
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) (p : ℕ) {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ t in 𝓝 (T : ℝ), ∀ i : ℕ, i ≤ p → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) (G.metric (T : ℝ)) 1 (0 + i) x
+        ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 1 0 i
+          (connTraceCoeff (I := I) (G.metric (T : ℝ))
+            (G.metric t))).toSection x) < ε := by
+  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+  let P : ℝ → SmoothCcTensor q 1 0 := fun t =>
+    connTraceCoeff (I := I) q (G.metric t)
+  have hPzero : P (T : ℝ) = 0 := by
+    apply SmoothCcTensor.ext
+    apply ContMDiffSection.ext
+    intro x
+    dsimp only [P, q]
+    rw [connTraceCoeff, appCcRS_toSection, traceCast,
+      SmoothCcTensor.retag_toSection, cometricDoubleTraceField_toSection,
+      connDiffSection_toSection, connFib_self (I := I) (M := M),
+      ContinuousLinearMap.comp_zero, SmoothCcTensor.toSection_zero]
+    rfl
+  have hPjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
+      (fun z : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
+        (E := fun y : M => TensorRSSpace 1 0 I y) z.1
+        ((P z.2).toSection z.1))
+      ((Set.univ : Set M) ×ˢ D.regular) := by
+    simpa only [P, q] using connTrace_joint (I := I) (M := M) G hG q
+  simpa only [P, q, Nat.zero_add] using
+    joint_jet_small (I := I) (M := M) q 1 0 p P
+      (D.regular_isOpen.mem_nhds T.2) hPzero hPjoint hε
 
 /-- The scalar flux coefficient is exactly the inverse-cometric difference
 inserted into its unique covector slot. -/

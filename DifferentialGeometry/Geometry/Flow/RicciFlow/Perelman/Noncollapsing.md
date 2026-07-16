@@ -331,3 +331,83 @@ file passes.  The classical moving conjugate-heat / `IsHeatPotOn` theorem,
 Perelman no-local-collapsing, and `ham3_noncollapse` all remain theorem-level
 **0%**.  The canonical whole-HCG machinery estimate is about **57%**, with HCG
 endpoint theorems still **0%**.
+
+## 2026-07-15 strong-limit closure
+
+The intrinsic spectral Galerkin phase is now verified through
+`scalar_gal_bound`, `scalar_gal_subseq`, `galLim_tendsto`, and
+`scalar_gal_limit`; each theorem is **100% verified**.  In particular,
+`scalar_gal_limit` is theorem-level **100%**, and its dedicated strong-limit
+machinery is **100%**.  It produces a genuine `MaxRegSolutionSpace` object with
+the exact initial trace, time derivative, and represented `H² → H⁰` path.
+
+This does not yet produce a classical heat potential.  `heatpot_of_maxreg` is
+theorem-level **0%**, and the classical moving conjugate-heat / `IsHeatPotOn`
+theorem is also **0%**.  The next exact frontier is the joint-spacetime
+realization of the all-order spectral strong path, not another strong-limit
+packaging theorem.
+
+Perelman no-local-collapsing and `ham3_noncollapse` remain endpoint-level
+**0%**.  Their dedicated analytic machinery remains about **46%**; the whole
+HCG machinery estimate remains about **57%**, with all HCG endpoint theorems at
+**0%**.
+
+## 2026-07-15 all-scale velocity and first-jet closure
+
+The scalar Galerkin path now has an order-independent positive backward-time
+slab on which its equation velocity lifts continuously to every natural
+Sobolev order (`galLimVel_lift`).  The follow-up `galLimExt_deriv` proves that
+this lift is the genuine strong `H^m` derivative of the all-order Galerkin path
+at every interior time.  Both theorems pass focused verification without
+warnings or `sorry`.
+
+The order-zero compatibility theorem `lapDiffHs_eq_A20` is also verified in a
+fully applied normal form.  Input and output Sobolev casts occur only after the
+operator is applied; the rejected whole-operator equality deterministically
+forced normalization through reducible continuous-linear-map types and timed
+out.  No consumer assumption, chart selector, or replacement convergence
+predicate was added.
+
+This closes the continuous all-spatial-order velocity and first time-jet phase,
+not classical heat-potential existence.  The next exact frontier is second and
+higher interior time jets, which requires time derivatives of the A2 and scalar
+potential coefficient families as Sobolev-scale operators, followed by scalar
+joint-spacetime reconstruction and pointwise PDE identification.
+`heatpot_of_maxreg`, `IsHeatPotOn`, Perelman no-local-collapsing, and
+`ham3_noncollapse` remain theorem-level **0%**.  Dedicated classical
+conjugate-heat machinery is about **85%**; whole HCG machinery remains about
+**57%**, with its endpoint theorems at **0%**.
+
+## 2026-07-15 higher-time-jet consult frontier
+
+The completed Pro consultation, checked against the GitHub
+[`short-time-existence` branch](https://github.com/liao9yuan/differential-geometry/tree/short-time-existence),
+rules that the next producer is not another limit wrapper and not the large
+DeTurck forcing stack.  It is a generic, fully applied pathwise regularity
+bridge through Sobolev completion: joint mixed coefficient smoothness plus a
+finite `C^k` Sobolev path must yield finite `C^k` regularity of the applied
+completed action.  No whole-Hom or whole-CLM equality is needed.
+
+The live tree has only smooth-core `app_hs_*` estimates, not a generic
+completed `appHs`.  Consequently the exact implementation frontier begins in
+`ParametricAppHs.lean`: construct the canonical completion and its core
+application theorem, then prove the smooth-core/pathwise regularity transfer.
+Only afterward should the scalar potential and moving Laplacian specializations
+be assembled and used in the simultaneous all-spatial-order ODE induction for
+`galLimExt_smooth`.
+
+Once `galLimExt_smooth` is available, compact-interior spectral jet majorants
+are no longer a separate parabolic bootstrap: take the time derivative in a
+higher Sobolev order, bound its norm on the compact time interval, and spend a
+Weyl-summable negative weight to obtain one modewise majorant.  Rank-zero joint
+reconstruction and pointwise equation/initial-value realization remain
+separate producers before any honest `heatpot_of_gallim` theorem.
+
+Accounting remains separated: `galLimExt_smooth` is **0%** as a theorem and its
+dedicated higher-time-jet machinery is about **35%**; the generic completed
+action time-regularity brick is **0%**.  `galLim_jet_mass`, scalar joint
+reconstruction, `heatpot_of_gallim`, Perelman noncollapse, and
+`ham3_noncollapse` remain theorem-level **0%**.  The previous approximately
+**85%** classical-machinery estimate refers to the whole conjugate-heat route;
+it must not be read as completion of this newly isolated higher-time-jet
+sublane.

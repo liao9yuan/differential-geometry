@@ -2,9 +2,14 @@
 
 ## Status
 
-The fixed smooth scalar-potential producer is complete. Focused verification
-and the targeted module build both pass without local warnings, `sorry`, or
-`admit`.
+The fixed smooth scalar-potential producer, including its natural-order
+completion and the legacy `H¹ → H⁰` compatibility bridge, is complete. Focused
+verification passes without local warnings, `sorry`, or `admit`.
+
+The compatibility edit has not yet refreshed this module's exported object:
+an already-running shared build is compiling a downstream module from its
+earlier dependency plan, so a duplicate or overlapping export was not started.
+This is a shared-build scheduling issue, not a local theorem blocker.
 
 ## Implemented route
 
@@ -50,3 +55,56 @@ changing the already-applied scalar target to `ζ x - η x` closed it with
   file and is not counted as complete here.
 - The eventual moving conjugate-heat and Perelman no-local-collapsing endpoints
   remain **0% as Lean theorems** until their final statements and proofs exist.
+
+## All-scale completion frontier
+
+The source now also contains the canonical natural-order completion
+
+```text
+scalarPotHs(q,ζ,m) : H^m(q) →L H^m(q),
+```
+
+together with smooth-core agreement and a compact-parameter uniform operator
+norm theorem for jointly smooth scalar families.  The construction completes
+the genuine smooth multiplier along `ccToHsLin`; density comes from
+`ccToHsLin_dense`, and the support-independent bound comes from `smul_hs_unif`.
+It introduces no consumer-side bound or realization assumption.
+
+Focused verification now passes.  The only local repair needed after the
+upstream parametric multiplier artifacts landed was correcting two mistyped
+model-with-corners notation tokens; the operator construction and proofs then
+checked unchanged.  Export refresh of the newly added compatibility theorem is
+pending the active shared build recorded in the status section.
+
+- `scalarPotHs`, `scalarPotHs_core`, and `scalarPotHs_unif`: verified theorem
+  completion **100%**; dedicated source and proof machinery **100%**.
+- `scalarPotHs_inc`: verified theorem completion **100%**; it identifies the
+  natural-order multiplier with `scalarPotH0` after the canonical `H^m → H⁰`
+  and `H^m → H¹` inclusions, without a whole-operator equality.
+- All-scale scalar `A1` operator time continuity: theorem **0%**; the completed
+  multiplier and uniform-bound machinery are separate infrastructure and are
+  not counted as that theorem.
+- `galLimVel_lift`: theorem **0%**; this all-scale multiplier is one producer in
+  its operator package, not the endpoint itself.
+- Perelman no-local-collapsing remains theorem-level **0%**, with about **46%**
+  dedicated analytic machinery; whole HCG machinery remains about **57%**, with
+  its endpoint theorems at **0%**.  This narrow completion does not change those
+  rounded program-level estimates.
+
+## Inclusion compatibility
+
+The compatibility proof first identifies `scalarPotH0` on the finite spectral
+`H¹` core.  `scalarPotH0_apply`, `scalarPotOp_core`, and
+`scalarPotCore_apply` reduce the left side to the genuine smooth multiplier;
+`tensorHsZeroEquivL2_symm_coeff` and `ccTensorToHs_coeff` then prove the applied
+`H⁰` equality coefficientwise.  Density extends this base identity to all
+`H¹` inputs.  A second dense smooth-core argument at order `m` uses
+`scalarPotHs_core` and the coefficient-preserving Sobolev inclusions to obtain
+`scalarPotHs_inc`.
+
+An attempted direct cast between the real exponent `1` used by the legacy API
+and the natural-number cast used by `scalarPotHs 1` exposed topology and module
+instance equalities.  The checked proof avoids that transport entirely: it
+uses the canonical `tensorHsInclusion` in both directions between the equal
+exponents and keeps every operator equality fully applied.  No bundle/Hom
+equality, new assumption, or heartbeat increase is required.

@@ -4,6 +4,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricDoubleTrace
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CometricTraceRetag
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SharpFlatEndoField
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SlotExtendIterInsert
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.IteratedCovGradLinear
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.CometricDifferenceSlotPairing
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.MetricArmCoeffJetTower
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.SlotTransportPairing
@@ -749,6 +750,23 @@ noncomputable def scalarLapDiffCc
       (iteratedCovGrad (I := I) q 0 0 2 U) -
     appCc (I := I) (M := M) q 1 0 (connTraceCoeff (I := I) q h)
       (iteratedCovGrad (I := I) q 0 0 1 U)
+
+/-- The fixed-background scalar Laplacian difference is additive in the scalar
+section. -/
+theorem scalarLapDiff_add
+    (q h : SmoothRiemannianMetric I M) (U V : SmoothCcTensor q 0 0) :
+    scalarLapDiffCc (I := I) q h (U + V) =
+      scalarLapDiffCc (I := I) q h U + scalarLapDiffCc (I := I) q h V := by
+  simp only [scalarLapDiffCc, iteratedCovGrad_add, appCc_add_right]
+  abel
+
+/-- The fixed-background scalar Laplacian difference commutes with real scalar
+multiplication. -/
+theorem scalarLapDiff_smul
+    (q h : SmoothRiemannianMetric I M) (c : ℝ) (U : SmoothCcTensor q 0 0) :
+    scalarLapDiffCc (I := I) q h (c • U) = c • scalarLapDiffCc (I := I) q h U := by
+  simp only [scalarLapDiffCc, iteratedCovGrad_smul, appCc_smul_right]
+  module
 
 /-- The traced connection-difference arm has a support-independent adjacent
 covariant-jet window bound. -/

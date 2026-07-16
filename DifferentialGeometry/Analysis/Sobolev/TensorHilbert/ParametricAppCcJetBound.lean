@@ -35,7 +35,9 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-private theorem app_jet_sq_le
+/-- Pointwise squared coefficient-jet bounds give the corresponding squared
+`L²` bound for one covariant derivative of a tensor action. -/
+theorem app_jet_sq_le
     (g : SmoothRiemannianMetric I M) (b c j : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g 0 b) (B : ℕ → ℝ)
     (hB : ∀ i, i ≤ j → 0 ≤ B i)

@@ -115,8 +115,36 @@ def ccTensorToHs (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (σ : ℝ)
     (ccTensorToHs (I := I) (M := M) g₀ s σ S).coeff m =
       tensorL2Coeff (I := I) (M := M)
         (tensorResolventL2_isCompactOperator (I := I) (M := M) g₀ 0 s)
-        (SmoothCcTensor.toL2 S) m :=
+      (SmoothCcTensor.toL2 S) m :=
   rfl
+
+/-- The generic smooth spectral embedding is additive in its tensor argument. -/
+@[simp] theorem ccTensorToHs_add
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (sigma : ℝ)
+    (S T : SmoothCcTensor g₀ 0 s) :
+    ccTensorToHs (I := I) (M := M) g₀ s sigma (S + T) =
+      ccTensorToHs (I := I) (M := M) g₀ s sigma S +
+        ccTensorToHs (I := I) (M := M) g₀ s sigma T := by
+  refine tensorHs.ext ?_
+  funext m
+  rw [tensorHs.add_coeff]
+  simp only [ccTensorToHs_coeff]
+  rw [show SmoothCcTensor.toL2 (S + T) =
+      SmoothCcTensor.toL2 S + SmoothCcTensor.toL2 T from map_add _ _ _,
+    tensorL2Coeff_add]
+
+/-- The generic smooth spectral embedding commutes with real scalar multiplication. -/
+@[simp] theorem ccTensorToHs_smul
+    (g₀ : SmoothRiemannianMetric I M) (s : ℕ) (sigma c : ℝ)
+    (S : SmoothCcTensor g₀ 0 s) :
+    ccTensorToHs (I := I) (M := M) g₀ s sigma (c • S) =
+      c • ccTensorToHs (I := I) (M := M) g₀ s sigma S := by
+  refine tensorHs.ext ?_
+  funext m
+  rw [tensorHs.smul_coeff]
+  simp only [ccTensorToHs_coeff]
+  rw [show SmoothCcTensor.toL2 (c • S) = c • SmoothCcTensor.toL2 S from map_smul _ _ _,
+    tensorL2Coeff_smul]
 
 /-- The squared generic spectral norm is its weighted coefficient mass. -/
 theorem ccToHs_norm_sq
@@ -536,7 +564,9 @@ private theorem mode_summable
     exact mul_le_mul_of_nonneg_right
       (pow_le_pow_left₀ hbase_nn hbase_le j) (sq_nonneg _)
 
-private theorem norm_iteratedCovGrad_comp
+/-- Composing two iterated covariant gradients changes only the parenthesizing
+of the covariant rank, so their global `L2` norms agree. -/
+theorem icg_comp_norm
     (g₀ : SmoothRiemannianMetric I M) (s j i : ℕ) (S : SmoothCcTensor g₀ 0 s) :
     ‖iteratedCovGrad (I := I) g₀ 0 (s + j) i (iteratedCovGrad (I := I) g₀ 0 s j S)‖ =
       ‖iteratedCovGrad (I := I) g₀ 0 s (j + i) S‖ := by
@@ -738,7 +768,7 @@ private theorem jet_odd
     have hbridge : ‖iteratedCovGrad (I := I) g₀ 0 s (2 * k + 1) S‖ =
         ‖iteratedCovGrad (I := I) g₀ 0 (s + 1) (2 * k)
           (covGrad (I := I) (M := M) g₀ 0 s S)‖ := by
-      have h := norm_iteratedCovGrad_comp (I := I) (M := M) g₀ s 1 (2 * k) S
+      have h := icg_comp_norm (I := I) (M := M) g₀ s 1 (2 * k) S
       have hcov : covGrad (I := I) (M := M) g₀ 0 s S =
           iteratedCovGrad (I := I) g₀ 0 s 1 S := rfl
       have horder : ‖iteratedCovGrad (I := I) g₀ 0 s (2 * k + 1) S‖ =
@@ -951,7 +981,7 @@ theorem ccGrad_le
       ‖iteratedCovGrad (I := I) g₀ 0 (s + j) a
           (iteratedCovGrad (I := I) g₀ 0 s j S)‖ ≤ Full := by
     intro a ha
-    rw [norm_iteratedCovGrad_comp (I := I) (M := M) g₀ s j a S, hFull_def]
+    rw [icg_comp_norm (I := I) (M := M) g₀ s j a S, hFull_def]
     refine Finset.single_le_sum
       (f := fun b => ‖iteratedCovGrad (I := I) g₀ 0 s b S‖)
       (fun _ _ => norm_nonneg _) ?_

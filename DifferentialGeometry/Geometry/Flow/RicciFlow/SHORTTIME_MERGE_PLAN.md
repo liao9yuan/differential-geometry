@@ -269,12 +269,26 @@ Sobolev order and the joint-smooth realization chooses a further positive
 subinterval without a uniform lower bound.  The smallest remaining E1 frontier
 is therefore the three-dimensional mixed tame estimate realizing the
 Ricci--DeTurck nonlinearity as `H^3 -> H^1` at maximal-regularity order `a = 1`,
-with constants controlled by `LowRegCoeff`.  The existing all-order compact
-chart-jet API chooses constants per metric pair, so it is not this uniform
-producer.  After that come the actual low-regularity solver and a
+with constants controlled by `LowRegCoeff`.  Its top path arm is now verified:
+`LowRegPathSplit.phi_dev_h2`, `top_path_dev_h2`, and `top_path_ball_h1` give the
+small principal-coefficient estimate from a three-dimensional spectral `H2`
+ball.  `rem_h0_lip` also remains verified.  The exact mixed theorem is still
+unstated and therefore 0%; its dedicated machinery is approximately 70%.
+
+The remaining design frontier is the exact full Ricci--DeTurck principal
+cancellation and uniform order-zero/order-one branch.  The concrete identity
+exists privately in the high-order development, whose source is far above the
+3000-line maintenance limit, while the public high-order wrapper assumes
+`a >= 2 * dim + 10`.  The alternative public route integrates
+`MetricFamilyChartLinearization` and packages its genuinely first-order
+remainder in `RHSSectionCovGradL2Decomposition`.  A read-only consult did not
+return a ruling between these routes.  A coarse appeal to `rhs_h1_lip` is not a
+replacement because it leaves a nonsmall coefficient on the `H3` difference.
+
+After the mixed estimate come the actual low-regularity solver and a
 regularization statement valid on the same uniform interval.  E1 and
 `ricci_flow_unif_existence` remain theorem-level 0%; dedicated E1 machinery is
-about 31%.  The solver must quantify the admissible metric family once and
+about 40%.  The solver must quantify the admissible metric family once and
 produce one `tau > 0` such that every member has both an
 `IsQuasilinearMetricParabolicSolution` and `JointChartGramSmooth` on that same
 `tau`; a later metric-dependent shrink does not prove the uniform statement.

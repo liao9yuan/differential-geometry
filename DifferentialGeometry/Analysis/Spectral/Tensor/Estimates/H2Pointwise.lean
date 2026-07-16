@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingSharpC0Je
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
 
 /-!
 # Three-dimensional H2 pointwise control
@@ -29,6 +30,37 @@ variable
       [T2Space M] [SigmaCompactSpace M]
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
+
+private theorem grad_jet_norm
+    (g : SmoothRiemannianMetric I M) (s j : ℕ) (T : SmoothCcTensor g 0 s) :
+    ‖iteratedCovGrad (I := I) g 0 (s + 1) j
+        (covGrad (I := I) (M := M) g 0 s T)‖ =
+      ‖iteratedCovGrad (I := I) g 0 s (j + 1) T‖ := by
+  have hsq :
+      ‖iteratedCovGrad (I := I) g 0 (s + 1) j
+          (covGrad (I := I) (M := M) g 0 s T)‖ ^ 2 =
+        ‖iteratedCovGrad (I := I) g 0 s (j + 1) T‖ ^ 2 := by
+    rw [← DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
+        (I := I) (M := M) g
+        (iteratedCovGrad (I := I) g 0 (s + 1) j
+          (covGrad (I := I) (M := M) g 0 s T)),
+      ← DifferentialGeometry.Analysis.Sobolev.Tensor.tensorL2Norm_toFun_eq_norm
+        (I := I) (M := M) g (iteratedCovGrad (I := I) g 0 s (j + 1) T),
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
+        (I := I) (M := M) g ((s + 1) + j)
+        (iteratedCovGrad (I := I) g 0 (s + 1) j
+          (covGrad (I := I) (M := M) g 0 s T)),
+      tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
+        (I := I) (M := M) g (s + (j + 1))
+        (iteratedCovGrad (I := I) g 0 s (j + 1) T)]
+    refine MeasureTheory.integral_congr_ae
+      (Filter.Eventually.of_forall (fun x => ?_))
+    exact rfns_iteratedCovGrad_covGrad_comm_rs
+      (I := I) (M := M) g 0 s j T x
+  nlinarith [norm_nonneg
+    (iteratedCovGrad (I := I) g 0 (s + 1) j
+      (covGrad (I := I) (M := M) g 0 s T)),
+    norm_nonneg (iteratedCovGrad (I := I) g 0 s (j + 1) T)]
 
 /-- In dimension three, the pointwise squared fibre norm of a smooth
 covariant tensor is controlled by its intrinsic spectral `H2` norm. -/
@@ -73,6 +105,117 @@ theorem hs2_fiber_sq
     _ = (Cpt * Chs) ^ 2 *
           ‖ccTensorToHs (I := I) (M := M) g s (2 : ℝ) T‖ ^ 2 := by
       ring
+
+/-- The intrinsic spectral `H2` norm controls the square-sum of the first
+three covariant `L²` jets. -/
+theorem hs2_low2
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ T : SmoothCcTensor g 0 s,
+      ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 s j T‖ ^ 2 ≤
+        (C * ‖ccTensorToHs (I := I) (M := M) g s (2 : ℝ) T‖) ^ 2 := by
+  obtain ⟨C, hC, hjet⟩ := hsJet_le (I := I) (M := M) g s 2
+  refine ⟨C, hC, ?_⟩
+  intro T
+  have hsum : ∑ j ∈ Finset.range 3,
+      ‖iteratedCovGrad (I := I) g 0 s j T‖ ≤
+        C * ‖ccTensorToHs (I := I) (M := M) g s (2 : ℝ) T‖ := by
+    simpa using hjet T
+  exact (Finset.sum_sq_le_sq_sum_of_nonneg (fun j _ => norm_nonneg _)).trans
+    (pow_le_pow_left₀
+      (Finset.sum_nonneg (fun j _ => norm_nonneg _)) hsum 2)
+
+/-- In dimension three, spectral `H3` controls both the pointwise gradient and
+the first three `L²` jets starting at that gradient. -/
+theorem hs3_grad_low2
+    (hDim : Module.finrank ℝ E = 3)
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ T : SmoothCcTensor g 0 s,
+      (∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+            ((covGrad (I := I) (M := M) g 0 s T).toSection x) ≤
+          (C * ‖ccTensorToHs (I := I) (M := M) g s (3 : ℝ) T‖) ^ 2) ∧
+      (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 (s + 1) j
+            (covGrad (I := I) (M := M) g 0 s T)‖ ^ 2) ≤
+        (C * ‖ccTensorToHs (I := I) (M := M) g s (3 : ℝ) T‖) ^ 2 := by
+  classical
+  obtain ⟨Cpt, hCpt, hpt⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+      (I := I) (M := M) g 0 (s + 1)
+  obtain ⟨Chs, hChs, hhs⟩ := hsJet_le (I := I) (M := M) g s 3
+  let C : ℝ := Cpt * Chs + Chs + 1
+  have hC : 0 ≤ C := by dsimp [C]; positivity
+  refine ⟨C, hC, ?_⟩
+  intro T
+  let N : ℝ := ‖ccTensorToHs (I := I) (M := M) g s (3 : ℝ) T‖
+  let V : SmoothCcTensor g 0 (s + 1) :=
+    covGrad (I := I) (M := M) g 0 s T
+  have hN : 0 ≤ N := norm_nonneg _
+  have hCptChs : Cpt * Chs ≤ C := by
+    dsimp [C]
+    nlinarith
+  have hChsC : Chs ≤ C := by
+    dsimp [C]
+    nlinarith [mul_nonneg hCpt hChs]
+  have hrange : Finset.range (Module.finrank ℝ E / 2 + 2) = Finset.range 3 := by
+    rw [hDim]
+  have hlin :
+      ∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 s j T‖ ≤ Chs * N := by
+    simpa [N] using hhs T
+  have hshift :
+      ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 (s + 1) j V‖ ^ 2 ≤
+        ∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 s j T‖ ^ 2 := by
+    dsimp [V]
+    simp only [Finset.sum_range_succ, Finset.sum_range_zero, zero_add]
+    rw [grad_jet_norm (I := I) (M := M) g s 0 T,
+      grad_jet_norm (I := I) (M := M) g s 1 T,
+      grad_jet_norm (I := I) (M := M) g s 2 T]
+    nlinarith [sq_nonneg
+      ‖iteratedCovGrad (I := I) g 0 s 0 T‖]
+  have hsqsum :
+      ∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 s j T‖ ^ 2 ≤
+        (∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 s j T‖) ^ 2 :=
+    Finset.sum_sq_le_sq_sum_of_nonneg (fun j _ => norm_nonneg _)
+  have hlin_sq :
+      (∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 s j T‖) ^ 2 ≤
+        (Chs * N) ^ 2 :=
+    pow_le_pow_left₀ (Finset.sum_nonneg (fun j _ => norm_nonneg _)) hlin 2
+  have hVjet :
+      ∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g 0 (s + 1) j V‖ ^ 2 ≤
+        (C * N) ^ 2 := by
+    calc
+      _ ≤ (∑ j ∈ Finset.range 4,
+          ‖iteratedCovGrad (I := I) g 0 s j T‖) ^ 2 := hshift.trans hsqsum
+      _ ≤ (Chs * N) ^ 2 := hlin_sq
+      _ ≤ (C * N) ^ 2 :=
+        pow_le_pow_left₀ (mul_nonneg hChs hN)
+          (mul_le_mul_of_nonneg_right hChsC hN) 2
+  constructor
+  · intro x
+    have hpt' := hpt V x
+    rw [hrange] at hpt'
+    calc
+      riemannianFiberNormSq (I := I) (M := M) g 0 (s + 1) x
+          (V.toSection x)
+          ≤ Cpt ^ 2 * ∑ j ∈ Finset.range 3,
+              ‖iteratedCovGrad (I := I) g 0 (s + 1) j V‖ ^ 2 := hpt'
+      _ ≤ Cpt ^ 2 * (Chs * N) ^ 2 :=
+        mul_le_mul_of_nonneg_left
+          (hshift.trans (hsqsum.trans hlin_sq)) (sq_nonneg Cpt)
+      _ = (Cpt * Chs * N) ^ 2 := by ring
+      _ ≤ (C * N) ^ 2 :=
+        pow_le_pow_left₀
+          (mul_nonneg (mul_nonneg hCpt hChs) hN)
+          (mul_le_mul_of_nonneg_right hCptChs hN) 2
+  · exact hVjet
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in

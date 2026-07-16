@@ -203,7 +203,7 @@ private theorem rhs_cov_raw_eq
   simpa only [d, Jdx, y] using (eq_sub_iff_add_eq.mp hinv).symm
 
 /-- The raw chart components of a Ricci--DeTurck RHS difference are controlled
-uniformly by the intrinsic background-covariant metric `3`-jet difference. -/
+uniformly by the intrinsic background-covariant metric `2`-jet difference. -/
 theorem rhs_raw_lip {ι : Type*}
     (gBase : SmoothRiemannianMetric I M)
     (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
@@ -218,7 +218,7 @@ theorem rhs_raw_lip {ι : Type*}
                 (deTurckRHSSectionBg (I := I) gBase (gSeq k₁) -
                   deTurckRHSSectionBg (I := I) gBase (gSeq k₂))
                 α Idx Jdx b| ≤
-                B * ∑ i ∈ Finset.range 4,
+                B * ∑ i ∈ Finset.range 3,
                   Real.sqrt (riemannianFiberNormSq (I := I) (M := M)
                     gBase 0 (2 + i) b
                     ((iteratedCovGrad (I := I) gBase 0 2 i
@@ -226,7 +226,7 @@ theorem rhs_raw_lip {ι : Type*}
                         metricCcTensor (I := I) (M := M) gBase (gSeq k₂))).toSection b)) := by
   classical
   choose Cjet hCjet hjet using fun α : M =>
-    metricJet3_intrinsic (I := I) (M := M) gBase α
+    metricJet2_intrinsic (I := I) (M := M) gBase α
   let CjetAll : ℝ :=
     ∑ α ∈ chartAtlasPOU_finset (I := I) (M := M), Cjet α
   have hCjetAll : 0 ≤ CjetAll := by
@@ -247,7 +247,7 @@ theorem rhs_raw_lip {ι : Type*}
   have hb_good : b ∈ chartLeviCivitaGoodSet (I := I) α :=
     (mem_chartLeviCivitaGoodSet_iff_mem_extChartAt_source
       (I := I) α b).2 hb_src
-  set A : ℝ := ∑ i ∈ Finset.range 4,
+  set A : ℝ := ∑ i ∈ Finset.range 3,
     Real.sqrt (riemannianFiberNormSq (I := I) (M := M)
       gBase 0 (2 + i) b
       ((iteratedCovGrad (I := I) gBase 0 2 i
@@ -257,7 +257,7 @@ theorem rhs_raw_lip {ι : Type*}
     rw [hA_def]
     exact Finset.sum_nonneg fun _ _ => Real.sqrt_nonneg _
   have hjet' := hjet α (gSeq k₁) (gSeq k₂) hb
-  have hjetAll : metricJet3DiffSup (I := I) (M := M)
+  have hjetAll : chartMetricJet2DiffSup (I := I) (M := M)
       (gSeq k₁) (gSeq k₂) α (extChartAt I α b) ≤ CjetAll * A := by
     rw [hA_def]
     exact hjet'.trans (mul_le_mul_of_nonneg_right (hCjet_le α hα)
@@ -271,14 +271,9 @@ theorem rhs_raw_lip {ι : Type*}
         ≤ D.rhsLip * chartMetricJet2DiffSup (I := I) (M := M)
             (gSeq k₁) (gSeq k₂) α (extChartAt I α b) :=
       hD.rhs_lipschitz α hα k₁ k₂ b hb (Jdx 0) (Jdx 1)
-    _ ≤ D.rhsLip * metricJet3DiffSup (I := I) (M := M)
-          (gSeq k₁) (gSeq k₂) α (extChartAt I α b) :=
-      mul_le_mul_of_nonneg_left
-        (metricJet2_le_jet3 (I := I) (M := M)
-          (gSeq k₁) (gSeq k₂) α (extChartAt I α b)) hD.rhsLip_pos.le
     _ ≤ D.rhsLip * (CjetAll * A) :=
       mul_le_mul_of_nonneg_left hjetAll hD.rhsLip_pos.le
-    _ = B * ∑ i ∈ Finset.range 4,
+    _ = B * ∑ i ∈ Finset.range 3,
           Real.sqrt (riemannianFiberNormSq (I := I) (M := M)
             gBase 0 (2 + i) b
             ((iteratedCovGrad (I := I) gBase 0 2 i
@@ -372,6 +367,17 @@ theorem rhs_cov_lip {ι : Type*}
   have hA : 0 ≤ A := by
     rw [hA_def]
     exact Finset.sum_nonneg fun _ _ => Real.sqrt_nonneg _
+  have hA3 : (∑ i ∈ Finset.range 3,
+      Real.sqrt (riemannianFiberNormSq (I := I) (M := M)
+        gBase 0 (2 + i) b
+        ((iteratedCovGrad (I := I) gBase 0 2 i
+          (metricCcTensor (I := I) (M := M) gBase (gSeq k₁) -
+            metricCcTensor (I := I) (M := M) gBase (gSeq k₂))).toSection b))) ≤ A := by
+    rw [hA_def]
+    refine Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.range_subset_range.mpr (by omega)) ?_
+    intro i _ _
+    exact Real.sqrt_nonneg _
   have hb_src : b ∈ (extChartAt I α).source := by
     rw [extChartAt_source]
     exact chartAtlasPOU_isSubordinate I M α hb
@@ -409,7 +415,8 @@ theorem rhs_cov_lip {ι : Type*}
         Finset.sum_le_sum fun p _ => by
           rw [abs_mul, hround]
           exact mul_le_mul (hcoeff α hα d _ Jdx p y hyK)
-            (by simpa only [hA_def] using hraw₀ α hα k₁ k₂ b hb p.1 p.2)
+            ((hraw₀ α hα k₁ k₂ b hb p.1 p.2).trans
+              (mul_le_mul_of_nonneg_left hA3 hB₀))
             (abs_nonneg _) hCΓ
       _ = L * A := by
         dsimp [L]
@@ -500,6 +507,63 @@ theorem rhs_cov_lip {ι : Type*}
       rw [hA_def]
       dsimp [B]
       ring
+
+/-- A low-regularity coefficient package gives a uniform spectral `H2` to
+`H0` Lipschitz estimate for the Ricci--DeTurck right-hand side. -/
+theorem rhs_h0_lip {ι : Type*}
+    (gBase : SmoothRiemannianMetric I M)
+    (gSeq : ι → SmoothRiemannianMetric I M) (D : LowRegCoeff)
+    (hD : IsLowRegCoeff (I := I) gBase gSeq D) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ k₁ k₂ : ι,
+      ‖ccTensorToHs (I := I) (M := M) gBase 2 (0 : ℝ)
+        (deTurckRHSSectionBg (I := I) gBase (gSeq k₁) -
+          deTurckRHSSectionBg (I := I) gBase (gSeq k₂))‖ ≤
+        C * ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ)
+          (metricCcTensor (I := I) (M := M) gBase (gSeq k₁) -
+            metricCcTensor (I := I) (M := M) gBase (gSeq k₂))‖ := by
+  classical
+  obtain ⟨B₀, hB₀, hraw₀⟩ := rhs_raw_lip (I := I) (M := M) gBase gSeq D hD
+  obtain ⟨C₀, hC₀, hL2₀⟩ := l2_le_of_raw_sum
+    (I := I) (M := M) gBase 2 3 (fun i => 2 + i) B₀ hB₀
+  obtain ⟨Csp, hCsp, hsp⟩ := hs_le_jet (I := I) (M := M) gBase 2 0
+  obtain ⟨Cin, hCin, hin⟩ := hsJet_le (I := I) (M := M) gBase 2 2
+  refine ⟨Csp * C₀ * Cin, mul_nonneg (mul_nonneg hCsp hC₀) hCin, ?_⟩
+  intro k₁ k₂
+  let U : SmoothCcTensor gBase 0 2 :=
+    metricCcTensor (I := I) (M := M) gBase (gSeq k₁) -
+      metricCcTensor (I := I) (M := M) gBase (gSeq k₂)
+  let S : SmoothCcTensor gBase 0 2 :=
+    deTurckRHSSectionBg (I := I) gBase (gSeq k₁) -
+      deTurckRHSSectionBg (I := I) gBase (gSeq k₂)
+  let T : ∀ i : ℕ, SmoothCcTensor gBase 0 (2 + i) := fun i =>
+    iteratedCovGrad (I := I) gBase 0 2 i U
+  have hS : ‖S‖ ≤ C₀ * ∑ i ∈ Finset.range 3, ‖T i‖ := by
+    apply hL2₀ T S
+    intro α hα b hb Idx Jdx
+    simpa only [S, U, T] using hraw₀ α hα k₁ k₂ b hb Idx Jdx
+  have hout : ‖ccTensorToHs (I := I) (M := M) gBase 2 (0 : ℝ) S‖ ≤
+      Csp * ‖S‖ := by
+    have hsp' := hsp S
+    have hcast : ((0 : ℕ) : ℝ) = (0 : ℝ) := by norm_num
+    rw [hcast] at hsp'
+    simpa only [Finset.sum_range_one, iteratedCovGrad_zero, Nat.zero_add] using hsp'
+  have hinput : ∑ i ∈ Finset.range 3, ‖T i‖ ≤
+      Cin * ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖ := by
+    simpa only [T] using hin U
+  change ‖ccTensorToHs (I := I) (M := M) gBase 2 (0 : ℝ) S‖ ≤
+    (Csp * C₀ * Cin) *
+      ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖
+  calc
+    ‖ccTensorToHs (I := I) (M := M) gBase 2 (0 : ℝ) S‖
+        ≤ Csp * ‖S‖ := hout
+    _ ≤ Csp * (C₀ * ∑ i ∈ Finset.range 3, ‖T i‖) :=
+      mul_le_mul_of_nonneg_left hS hCsp
+    _ ≤ Csp * (C₀ *
+          (Cin * ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖)) :=
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left hinput hC₀) hCsp
+    _ = (Csp * C₀ * Cin) *
+          ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖ := by ring
 
 /-- A low-regularity coefficient package gives one uniform spectral `H1`
 bound for the Ricci--DeTurck right-hand side over the whole metric family. -/
@@ -707,7 +771,7 @@ theorem rhs_h1_lip {ι : Type*}
   obtain ⟨B₀, hB₀, hraw₀⟩ := rhs_raw_lip (I := I) (M := M) gBase gSeq D hD
   obtain ⟨B₁, hB₁, hraw₁⟩ := rhs_cov_lip (I := I) (M := M) gBase gSeq D hD
   obtain ⟨C₀, hC₀, hL2₀⟩ := l2_le_of_raw_sum
-    (I := I) (M := M) gBase 2 4 (fun i => 2 + i) B₀ hB₀
+    (I := I) (M := M) gBase 2 3 (fun i => 2 + i) B₀ hB₀
   obtain ⟨C₁, hC₁, hL2₁⟩ := l2_le_of_raw_sum
     (I := I) (M := M) gBase 3 4 (fun i => 2 + i) B₁ hB₁
   obtain ⟨Csp, hCsp, hsp⟩ := hs_le_jet (I := I) (M := M) gBase 2 1
@@ -723,7 +787,7 @@ theorem rhs_h1_lip {ι : Type*}
       deTurckRHSSectionBg (I := I) gBase (gSeq k₂)
   let T : ∀ i : ℕ, SmoothCcTensor gBase 0 (2 + i) := fun i =>
     iteratedCovGrad (I := I) gBase 0 2 i U
-  have hS₀ : ‖S‖ ≤ C₀ * ∑ i ∈ Finset.range 4, ‖T i‖ := by
+  have hS₀ : ‖S‖ ≤ C₀ * ∑ i ∈ Finset.range 3, ‖T i‖ := by
     apply hL2₀ T S
     intro α hα b hb Idx Jdx
     simpa only [S, U, T] using hraw₀ α hα k₁ k₂ b hb Idx Jdx
@@ -737,6 +801,14 @@ theorem rhs_h1_lip {ι : Type*}
       ‖S‖ + ‖covGrad (I := I) (M := M) gBase 0 2 S‖ := by
     rw [show (1 + 1) = 2 by omega, Finset.sum_range_succ, Finset.sum_range_one]
     simp only [iteratedCovGrad_zero, iteratedCovGrad_succ, Nat.add_zero]
+  have hT34 : (∑ i ∈ Finset.range 3, ‖T i‖) ≤
+      ∑ i ∈ Finset.range 4, ‖T i‖ := by
+    refine Finset.sum_le_sum_of_subset_of_nonneg
+      (Finset.range_subset_range.mpr (by omega)) ?_
+    intro i _ _
+    exact norm_nonneg (T i)
+  have hS₀' : ‖S‖ ≤ C₀ * ∑ i ∈ Finset.range 4, ‖T i‖ :=
+    hS₀.trans (mul_le_mul_of_nonneg_left hT34 hC₀)
   have hout :
       ‖ccTensorToHs (I := I) (M := M) gBase 2 (1 : ℝ) S‖ ≤
         Csp * (‖S‖ + ‖covGrad (I := I) (M := M) gBase 0 2 S‖) := by
@@ -755,7 +827,7 @@ theorem rhs_h1_lip {ι : Type*}
     calc
       ‖S‖ + ‖covGrad (I := I) (M := M) gBase 0 2 S‖
           ≤ C₀ * ∑ i ∈ Finset.range 4, ‖T i‖ +
-              C₁ * ∑ i ∈ Finset.range 4, ‖T i‖ := add_le_add hS₀ hS₁
+              C₁ * ∑ i ∈ Finset.range 4, ‖T i‖ := add_le_add hS₀' hS₁
       _ = (C₀ + C₁) * ∑ i ∈ Finset.range 4, ‖T i‖ := by ring
   have hinput : ∑ i ∈ Finset.range 4, ‖T i‖ ≤
       Cin * ‖ccTensorToHs (I := I) (M := M) gBase 2 (3 : ℝ) U‖ := by

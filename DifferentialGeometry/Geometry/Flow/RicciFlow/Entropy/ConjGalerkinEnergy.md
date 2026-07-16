@@ -42,13 +42,10 @@ does not change its assumptions or public interface.  The initial-energy step
 uses the canonical low-layer finite-partial-mass bound
 `cc_partial_le_norm`.
 
-The next genuine analytic frontier is `scalar_gal_subseq`: extracting one
-coefficientwise-uniform subsequence and inheriting every weighted-mass bound.
-That theorem remains **0% verified** until its own source checks.  Its dedicated
-compactness machinery is approximately **95% assembled**.  The later limit
-identification and scalar strong-solution theorem remain **0% complete**, with
-their dedicated machinery approximately **40% assembled**, before the separate
-second-order bootstrap frontier.
+The downstream `scalar_gal_subseq`, `galLim_tendsto`, and `scalar_gal_limit`
+theorems now all pass their own focused verification and are theorem-level
+**100%** in their respective modules.  Those downstream closures are not
+counted as completion of this finite-dimensional energy producer.
 
 ## 2026-07-15 norm producer export
 
@@ -59,6 +56,6 @@ Focused verification passes without warnings or `sorry`; the exported theorem
 is now available to downstream modules.  `ConjGalerkinLimit` has removed its
 temporary duplicate and uses this canonical producer directly.
 
-The theorem is infrastructure only.  Completion of the downstream
-`scalar_gal_limit` remains recorded in `ConjGalerkinStrong.md` and is not counted
-from this export by itself.
+The theorem is infrastructure only.  Downstream `scalar_gal_limit` completion is
+recorded in `ConjGalerkinStrong.md` as theorem-level **100%** with **100%**
+dedicated machinery, and is not counted from this export by itself.

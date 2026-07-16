@@ -120,6 +120,44 @@ theorem MapCInfConvOnCompacts.fderivOn {U : Set E} (hU : IsOpen U)
   rw [hnorm]
   exact hk0 k hk (r + 1) (by omega) x hx
 
+/-- Uniform convergence of a smooth family, together with `C^p` convergence of
+its Fréchet derivatives, reconstructs `C^(p+1)` convergence of the family. -/
+theorem MapCPConvOn.succ_of_fderiv {U K : Set E} {p : ℕ} (hU : IsOpen U)
+    (hKU : K ⊆ U) {Φ : ℕ → E → F} {Φinf : E → F}
+    (h0 : MapCPConvOn K 0 Φ Φinf)
+    (hfd : MapCPConvOn K p
+      (fun k x => fderiv ℝ (Φ k) x) (fun x => fderiv ℝ Φinf x))
+    (hΦ : ∀ k, DifferentiableOn ℝ (Φ k) U)
+    (hΦinf : DifferentiableOn ℝ Φinf U) :
+    MapCPConvOn K (p + 1) Φ Φinf := by
+  intro ε hε
+  obtain ⟨k0, hk0⟩ := h0 ε hε
+  obtain ⟨k1, hk1⟩ := hfd ε hε
+  refine ⟨max k0 k1, fun k hk r hr x hx => ?_⟩
+  cases r with
+  | zero =>
+      exact hk0 k (le_trans (le_max_left _ _) hk) 0 le_rfl x hx
+  | succ r =>
+      have hxU : x ∈ U := hKU hx
+      let g : E → F := fun y => Φ k y - Φinf y
+      have heq : (fun y => fderiv ℝ (Φ k) y - fderiv ℝ Φinf y) =ᶠ[nhds x]
+          fun y => fderiv ℝ g y := by
+        filter_upwards [hU.mem_nhds hxU] with y hy
+        exact (fderiv_sub
+          ((hΦ k).differentiableAt (hU.mem_nhds hy))
+          (hΦinf.differentiableAt (hU.mem_nhds hy))).symm
+      have hnorm :
+          mapDerivNorm r (fun y => fderiv ℝ (Φ k) y)
+              (fun y => fderiv ℝ Φinf y) x =
+            mapDerivNorm (r + 1) (Φ k) Φinf x := by
+        simp only [mapDerivNorm]
+        rw [(heq.iteratedFDeriv ℝ r).eq_of_nhds]
+        change ‖iteratedFDeriv ℝ r (fderiv ℝ g) x‖ =
+          ‖iteratedFDeriv ℝ (r + 1) g x‖
+        exact norm_iteratedFDeriv_fderiv
+      rw [← hnorm]
+      exact hk1 k (le_trans (le_max_right _ _) hk) r (by omega) x hx
+
 /-- **Additivity of `C^∞`-on-compacts convergence.**  Sums of `C^∞`-on-compacts
 convergent families (all `C^∞`) converge `C^∞`-on-compacts to the sum of the
 limits. -/
@@ -279,19 +317,15 @@ theorem MapCInfConvOnCompacts.sum {ι : Type*} {U : Set E} (s : Finset ι)
     exact MapCInfConvOnCompacts.add (h a) ih (fun k => hc a k) (hic a)
       (fun k => ContDiff.sum (fun i _ => hc i k)) (ContDiff.sum (fun i _ => hic i))
 
-/-- **Locality of `C^∞`-on-compacts convergence.**  Convergence on an OPEN set `U`
-depends only on the maps' restriction to `U`: replacing each `Φ k` and `Φinf` by
-maps agreeing with them on `U` preserves `MapCInfConvOnCompacts U`.  (`mapDerivNorm`
-is built from `iteratedFDeriv`, which is local, so on a compact `K ⊆ U` the
-order-`r` norms are unchanged.)  This is what lets the covariant-tower induction
-transfer convergence across a step recursion that only holds where the chosen
-global sections agree with the local coordinate frame. -/
-theorem MapCInfConvOnCompacts.congr {U : Set E} {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
-    (h : MapCInfConvOnCompacts U Φ Φinf) (hU : IsOpen U)
+/-- Fixed-order convergence is local on an open neighborhood of the compact
+set. -/
+theorem MapCPConvOn.congr {U K : Set E} {p : ℕ}
+    {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
+    (h : MapCPConvOn K p Φ Φinf) (hU : IsOpen U) (hKU : K ⊆ U)
     (hΦ : ∀ k, Set.EqOn (Φ' k) (Φ k) U) (hΦinf : Set.EqOn Φ'inf Φinf U) :
-    MapCInfConvOnCompacts U Φ' Φ'inf := by
-  intro K hK hKU p ε hε
-  obtain ⟨k0, hk0⟩ := h K hK hKU p ε hε
+    MapCPConvOn K p Φ' Φ'inf := by
+  intro ε hε
+  obtain ⟨k0, hk0⟩ := h ε hε
   refine ⟨k0, fun k hk r hr x hx => ?_⟩
   have hxU : x ∈ U := hKU hx
   have heq : (fun y => Φ' k y - Φ'inf y) =ᶠ[nhds x] (fun y => Φ k y - Φinf y) := by
@@ -302,6 +336,16 @@ theorem MapCInfConvOnCompacts.congr {U : Set E} {Φ Φ' : ℕ → E → F} {Φin
     rw [(Filter.EventuallyEq.iteratedFDeriv ℝ heq r).eq_of_nhds]
   rw [hval]
   exact hk0 k hk r hr x hx
+
+/-- **Locality of `C^∞`-on-compacts convergence.**  Convergence on an OPEN set `U`
+depends only on the maps' restriction to `U`: replacing each `Φ k` and `Φinf` by
+maps agreeing with them on `U` preserves `MapCInfConvOnCompacts U`. -/
+theorem MapCInfConvOnCompacts.congr {U : Set E} {Φ Φ' : ℕ → E → F} {Φinf Φ'inf : E → F}
+    (h : MapCInfConvOnCompacts U Φ Φinf) (hU : IsOpen U)
+    (hΦ : ∀ k, Set.EqOn (Φ' k) (Φ k) U) (hΦinf : Set.EqOn Φ'inf Φinf U) :
+    MapCInfConvOnCompacts U Φ' Φ'inf := by
+  intro K hK hKU p
+  exact (h K hK hKU p).congr hU hKU hΦ hΦinf
 
 /-- **Eventual locality of `C^∞`-on-compacts convergence.**  Replacing the
 sequence maps by maps that agree on the open convergence set from some index

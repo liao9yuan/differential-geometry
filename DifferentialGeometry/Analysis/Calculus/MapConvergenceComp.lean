@@ -230,24 +230,21 @@ theorem MapCInfConvOnCompacts.tendstoUniformlyOn_iteratedFDeriv_comp_moving
         exact add_lt_add (hNB k hkB x hx) (hNA k hkA (B k x) hBxK')
     _ = ε := by ring
 
-/-- **Composition preserves `C^∞` convergence on compact subsets.**  This same-index
-version assumes the moving inner maps send the whole open source domain into the
-open target domain, so the composed maps are genuinely smooth on `U`.  The fixed
-compact corral for the moving evaluation points is derived internally from
-order-`0` convergence of `Bₖ` to `B∞`. -/
-theorem MapCInfConvOnCompacts.comp
-    {U : Set E} {V : Set F} (hU : IsOpen U) (hV : IsOpen V)
+/-- Composing a `C^p`-convergent inner family with a `C^∞`-convergent outer
+family preserves `C^p` convergence on a fixed compact set. -/
+theorem MapCPConvOn.comp_cInf
+    {U K : Set E} {V : Set F} {p : ℕ} (hU : IsOpen U) (hV : IsOpen V)
     [ProperSpace F]
     {B : ℕ → E → F} {Binf : E → F} {A : ℕ → F → G} {Ainf : F → G}
-    (hB : MapCInfConvOnCompacts U B Binf)
+    (hK : IsCompact K) (hKU : K ⊆ U)
+    (hB : MapCPConvOn K p B Binf)
     (hA : MapCInfConvOnCompacts V A Ainf)
     (hBc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (B k) U)
     (hBinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) Binf U)
     (hAc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (A k) V)
     (hAinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) Ainf V)
     (hmap : Set.MapsTo Binf U V) (hmapk : ∀ k, Set.MapsTo (B k) U V) :
-    MapCInfConvOnCompacts U (fun k x => A k (B k x)) (fun x => Ainf (Binf x)) := by
-  intro K hK hKU p
+    MapCPConvOn K p (fun k x => A k (B k x)) (fun x => Ainf (Binf x)) := by
   have hBinf_cont : ContinuousOn Binf U := hBinfc.continuousOn
   have hBKcpt : IsCompact (Binf '' K) := hK.image_of_continuousOn (hBinf_cont.mono hKU)
   have hBKV : Binf '' K ⊆ V := by
@@ -258,7 +255,7 @@ theorem MapCInfConvOnCompacts.comp
   have hK'cpt : IsCompact K' := hBKcpt.cthickening
   have hK'V : K' ⊆ V := hδ₀V
   have hB0 : TendstoUniformlyOn B Binf atTop K :=
-    tendstoUniformlyOn_of_cPConv (hB K hK hKU 0)
+    tendstoUniformlyOn_of_cPConv (hB.mono_order (Nat.zero_le p))
   rw [Metric.tendstoUniformlyOn_iff] at hB0
   obtain ⟨NB, hNB⟩ := eventually_atTop.mp (hB0 δ₀ hδ₀pos)
   have hBK' : ∀ᶠ k in atTop, Set.MapsTo (B k) K K' := by
@@ -292,12 +289,15 @@ theorem MapCInfConvOnCompacts.comp
         (fun k x => iteratedFDeriv ℝ i (A k) (B k x))
         (fun x => iteratedFDeriv ℝ i Ainf (Binf x)) atTop K :=
     fun i => hA.tendstoUniformlyOn_iteratedFDeriv_comp_moving hV hK'cpt hK'V
-      hAc hAinfc (tendstoUniformlyOn_of_cPConv (hB K hK hKU 0)) hBK' hBinfK' i
-  have hBder : ∀ i : ℕ,
+      hAc hAinfc (tendstoUniformlyOn_of_cPConv (hB.mono_order (Nat.zero_le p)))
+      hBK' hBinfK' i
+  have hBder : ∀ i : ℕ, i ≤ p →
       TendstoUniformlyOn
         (fun k x => iteratedFDeriv ℝ i (B k) x)
         (fun x => iteratedFDeriv ℝ i Binf x) atTop K :=
-    fun i => hB.tendstoUniformlyOn_iteratedFDeriv hU hK hKU hBc hBinfc i
+    fun i hi => hB.tendstoUniformlyOn_iteratedFDeriv hU hKU
+      (fun k => (hBc k).of_le (by exact_mod_cast le_top))
+      (hBinfc.of_le (by exact_mod_cast le_top)) hi
   have hcompLittle :
       (fun q : ℕ × E =>
         iteratedFDeriv ℝ r (fun x => A q.1 (B q.1 x)) q.2 -
@@ -357,7 +357,7 @@ theorem MapCInfConvOnCompacts.comp
             (by exact_mod_cast le_top)).norm.mono hKU)
         exact ⟨C, fun x hx => hC ⟨x, hx, rfl⟩⟩
       exact isBoundedUnder_prod_principal_of_eventually_forall_le
-        ⟨C + 1, TendstoUniformlyOn.eventually_norm_le (hBder i) hC⟩
+        ⟨C + 1, TendstoUniformlyOn.eventually_norm_le (hBder i (hi.trans hr)) hC⟩
     · intro i hi
       obtain ⟨C, hC⟩ : ∃ C : ℝ, ∀ x ∈ K, ‖iteratedFDeriv ℝ i Binf x‖ ≤ C := by
         obtain ⟨C, hC⟩ := hK.bddAbove_image
@@ -367,7 +367,7 @@ theorem MapCInfConvOnCompacts.comp
       exact isBoundedUnder_prod_principal_of_forall_le
         ⟨C, fun _ x hx => hC x hx⟩
     · intro i hi
-      exact TendstoUniformlyOn.isLittleO_sub_const (hBder i)
+      exact TendstoUniformlyOn.isLittleO_sub_const (hBder i (hi.trans hr))
   have htend : Tendsto
       (fun q : ℕ × E =>
         iteratedFDeriv ℝ r (fun x => A q.1 (B q.1 x)) q.2 -
@@ -382,6 +382,24 @@ theorem MapCInfConvOnCompacts.comp
   rw [eventually_prod_principal_iff] at htail
   exact htail.mono fun k hk x hx => by
     simpa [dist_eq_norm, norm_sub_rev] using hk x hx
+
+/-- Composition preserves `C^∞` convergence on compact subsets of an open
+domain. -/
+theorem MapCInfConvOnCompacts.comp
+    {U : Set E} {V : Set F} (hU : IsOpen U) (hV : IsOpen V)
+    [ProperSpace F]
+    {B : ℕ → E → F} {Binf : E → F} {A : ℕ → F → G} {Ainf : F → G}
+    (hB : MapCInfConvOnCompacts U B Binf)
+    (hA : MapCInfConvOnCompacts V A Ainf)
+    (hBc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (B k) U)
+    (hBinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) Binf U)
+    (hAc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (A k) V)
+    (hAinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) Ainf V)
+    (hmap : Set.MapsTo Binf U V) (hmapk : ∀ k, Set.MapsTo (B k) U V) :
+    MapCInfConvOnCompacts U (fun k x => A k (B k x)) (fun x => Ainf (Binf x)) := by
+  intro K hK hKU p
+  exact MapCPConvOn.comp_cInf hU hV hK hKU (hB K hK hKU p) hA
+    hBc hBinfc hAc hAinfc hmap hmapk
 
 section BasicClosures
 
@@ -398,22 +416,19 @@ theorem mapCInfConv_const {U : Set E'} (Φ : E' → P) :
   exact ⟨0, fun k _ r _ x _ => by
     simpa [mapDerivNorm, sub_self] using hε.le⟩
 
-/-- **Pairing preserves `C^∞` convergence on compacts.**  The `B`-slot builder for
-`MapCInfConvOnCompacts.comp` when the inner map is the `(weights, targets)` pair: the order-`r`
-derivative of the pair difference is the `prod` of the component derivatives
-(`iteratedFDeriv_prodMk`), whose norm is the `max` of the component norms
-(`ContinuousMultilinearMap.opNorm_prod`). -/
-theorem mapCInfConv_prodMk {U : Set E'} (hU : IsOpen U)
+/-- Pairing preserves fixed-order convergence on a compact subset of an open
+domain. -/
+theorem MapCPConvOn.prodMk {U K : Set E'} {p : ℕ} (hU : IsOpen U) (hKU : K ⊆ U)
     {u : ℕ → E' → P} {uinf : E' → P} {v : ℕ → E' → Q} {vinf : E' → Q}
-    (hu : MapCInfConvOnCompacts U u uinf) (hv : MapCInfConvOnCompacts U v vinf)
+    (hu : MapCPConvOn K p u uinf) (hv : MapCPConvOn K p v vinf)
     (huc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (u k) U)
     (huinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) uinf U)
     (hvc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (v k) U)
     (hvinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) vinf U) :
-    MapCInfConvOnCompacts U (fun k y => (u k y, v k y)) (fun y => (uinf y, vinf y)) := by
-  intro K hK hKU p ε hε
-  obtain ⟨k1, hk1⟩ := hu K hK hKU p ε hε
-  obtain ⟨k2, hk2⟩ := hv K hK hKU p ε hε
+    MapCPConvOn K p (fun k y => (u k y, v k y)) (fun y => (uinf y, vinf y)) := by
+  intro ε hε
+  obtain ⟨k1, hk1⟩ := hu ε hε
+  obtain ⟨k2, hk2⟩ := hv ε hε
   refine ⟨max k1 k2, fun k hk r hr x hx => ?_⟩
   have hxU : x ∈ U := hKU hx
   have hle : ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
@@ -432,6 +447,20 @@ theorem mapCInfConv_prodMk {U : Set E'} (hU : IsOpen U)
   rw [hkey]
   exact max_le (hk1 k (le_trans (le_max_left k1 k2) hk) r hr x hx)
     (hk2 k (le_trans (le_max_right k1 k2) hk) r hr x hx)
+
+/-- **Pairing preserves `C^∞` convergence on compacts.**  The `B`-slot builder for
+`MapCInfConvOnCompacts.comp` when the inner map is the `(weights, targets)` pair. -/
+theorem mapCInfConv_prodMk {U : Set E'} (hU : IsOpen U)
+    {u : ℕ → E' → P} {uinf : E' → P} {v : ℕ → E' → Q} {vinf : E' → Q}
+    (hu : MapCInfConvOnCompacts U u uinf) (hv : MapCInfConvOnCompacts U v vinf)
+    (huc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (u k) U)
+    (huinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) uinf U)
+    (hvc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (v k) U)
+    (hvinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) vinf U) :
+    MapCInfConvOnCompacts U (fun k y => (u k y, v k y)) (fun y => (uinf y, vinf y)) := by
+  intro K hK hKU p
+  exact MapCPConvOn.prodMk hU hKU (hu K hK hKU p) (hv K hK hKU p)
+    huc huinfc hvc hvinfc
 
 /-- **Tupling preserves `C^∞` convergence on compacts** — the `Fintype`-pi analog of
 `mapCInfConv_prodMk`, packaging the per-slot target convergences into the `(ι → E)`-valued

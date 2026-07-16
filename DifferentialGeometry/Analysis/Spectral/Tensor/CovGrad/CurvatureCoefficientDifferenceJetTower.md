@@ -26,3 +26,15 @@ The generic-congruence version hit a deterministic `whnf` heartbeat timeout and 
 larger heartbeat budget consumed roughly 6 GB of memory. Increasing the budget is not a viable
 route. The simplified proof passed focused verification and a targeted module build at the normal
 heartbeat limit with two Lean threads. No new mathematical frontier remains in this theorem.
+
+## 2026-07-15: antidiagonal product integral API
+
+`grid_prod_int_le` exposes the existing antidiagonal product integration
+engine.  Given a pointwise zeroth-jet bound, the top `L2` jet, and the
+Gagliardo--Nirenberg intermediate estimates, it controls each product term by
+the square of the top jet.  This is the reusable input needed for the
+three-dimensional order-two inverse-metric estimate.
+
+The mathematical proof was already present as the private product-term engine;
+this change only gives it a public canonical name.  Verification is still
+running because this module is unusually large.

@@ -222,3 +222,17 @@ about 75%.  `heatpot_of_maxreg`, the classical moving conjugate-heat theorem,
 Perelman no-local-collapsing, and `ham3_noncollapse` remain theorem-level 0%;
 their dedicated machinery remains about 35%, 77%, and 40% respectively.  Whole
 HCG machinery remains about 53%, with endpoint theorems at 0%.
+
+## Scalar operator linearity -- 2026-07-15
+
+`scalarLapDiff_add` and `scalarLapDiff_smul` now expose the actual real
+linearity of `scalarLapDiffCc` in its scalar section.  They use the public
+linearity of `appCc` and the iterated covariant gradient; no geometric
+assumption or supplied operator is added.  Focused verification passes without
+new warnings.
+
+These are completed algebraic producers (**100%**) needed to bundle the
+smooth-core A2 action as a `LinearMap`.  They are not the completed
+`H^(m+2) ->L H^m` operator, which remains theorem-level **0%** until dense-core
+extension and compatibility are checked.  Perelman no-local-collapsing and
+`ham3_noncollapse` remain endpoint-level **0%**.

@@ -421,21 +421,32 @@ its docstring BEFORE consumers are built against it.
   conservation, time reversal, the interval-local classical-solution
   interface, conditional nonnegativity, a time-operator lift, the abstract
   two-scale nonautonomous fixed-point engine, and local moving-volume first
-  variation.  Moving-metric conjugate-heat existence remains theorem-level 0%
-  while its dedicated machinery is about 77%.  Its genuine frozen-scale
+  variation.  Moving-metric classical conjugate-heat existence / `IsHeatPotOn`
+  remains theorem-level 0%, while its dedicated machinery is about 85%.  Its
+  genuine frozen-scale
   operator inputs are checked: `lapDiffA20_short` gives the support-independent
   `A2 : H2(gT) -> H0(gT)` moving-Laplacian difference, `lapDiffA20_graph` and
   `lapDiffA20_test` give its selector-free closed-core realization, and
   `conjA1_short` / `scalarPotH0_test` handle the scalar-curvature potential
   `A1 : H1(gT) -> H0(gT)`.  `Entropy/ConjStrong.lean` proves the combined
   contraction package, `conj_strong_exists`, and the a.e. scalar weak equation
-  `conj_weak_ae`.  The next exact producer is the genuine second-order
-  nonautonomous bootstrap toward `heatpot_of_maxreg`; both remain theorem-level
-  0%.  A fixed-order coefficient-jet tame route is available, but its
-  order-dependent top constant does not feed the live all-order Galerkin
-  consumer, the fifth distinct audited route problem.  The next consultation
-  must choose a direct covariant energy/commutator normal form or a different
-  one-interval all-order bootstrap.  The
+  `conj_weak_ae`.  The intrinsic all-order Galerkin chain `scalar_gal_bound` →
+  `scalar_gal_subseq` → `galLim_tendsto` → `scalar_gal_limit` is checked.  The
+  last theorem packages a genuine `MaxRegSolutionSpace` / `timeH1` solution
+  with exact initial trace and the explicit represented `H² → H⁰` path.  The
+  all-scale follow-up now proves `galLimVel_lift` on one order-independent
+  positive slab and `galLimExt_deriv`, giving a genuine `H^m`-valued interior
+  time derivative for every natural `m`.  The higher-jet architecture consult
+  isolates the next producer below the limit file: a generic completed
+  coefficient action and fully applied pathwise finite-`ContDiffOn` transfer
+  in `ParametricAppHs.lean`.  The live file currently has only smooth-core
+  `app_hs_*` estimates, so completed applied-action time regularity is still
+  0%; the dedicated `galLimExt_smooth` sublane is about 35%.  After that bridge,
+  the all-scale ODE induction produces higher interior time jets, and compact
+  time intervals plus Weyl negative weights give the spectral jet majorants.
+  Scalar joint-spacetime reconstruction remains a separate substantial
+  producer; `heatpot_of_maxreg` and the classical moving conjugate-heat theorem
+  remain theorem-level 0%.  The
   former `nablaRSFun_eval_moving_raw` elaboration wall and the
   downstream Laplacian-bridge object refresh are both resolved.  The canonical constant-metric volume and
   distance laws are checked (`Analysis/Integration/Measure/Scaling.lean` and

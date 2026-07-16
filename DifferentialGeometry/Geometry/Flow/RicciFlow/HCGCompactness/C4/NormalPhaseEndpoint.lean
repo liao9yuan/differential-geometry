@@ -605,9 +605,9 @@ theorem exists_normal_diag
 namespace NormalRadiusProfile
 
 /-- On every fixed basepoint-distance sublevel, one source radius and one
-explicit target radius work for the quantitative normal diagonal branch at
-every stage and every admissible center. -/
-theorem exists_uniform_diag
+explicit target radius retain a selected geodesic phase flow together with its
+quantitative normal diagonal branch at every admissible center. -/
+theorem exists_uniform_flow
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     {hd : InjRadiusDecayInput (I := I) X}
     {hb : NormalCoordMetricBoundInput (I := I) X}
@@ -627,7 +627,18 @@ theorem exists_uniform_diag
         ((q : Real) / 2) ∧
       ∀ k (x : (X.obj k).M),
         hd.dist k x (X.obj k).basepoint ≤ R →
-        ∃ e : OpenPartialHomeomorph (E × E) (E × E),
+        ∃ (Φ : (E × E) → Real → E × E)
+            (e : OpenPartialHomeomorph (E × E) (E × E)),
+          (∀ z ∈ Metric.closedBall (0 : E × E) q, Φ z 0 = z) ∧
+          (∀ z ∈ Metric.closedBall (0 : E × E) q,
+            IsIntegralCurveOn (Φ z)
+              (fun _ ↦ MetricKoszul.metricSpray
+                (normalCoordMetric (I := I) (X.obj k) x))
+              (Icc 0 1)) ∧
+          (∀ z ∈ Metric.closedBall (0 : E × E) q,
+            ∀ t ∈ Icc (0 : Real) 1,
+              (Φ z t).1 ∈ Metric.ball (0 : E) (h.phaseRadius R)) ∧
+          (e : E × E → E × E) = (fun z ↦ (z.1, (Φ z 1).1)) ∧
           IsNormalDiag (I := I) (X.obj k) (hcomplete.complete k) (hconn k)
             x q δ e := by
   obtain ⟨q, hq, hqWide, hqAccel, herr⟩ :=
@@ -715,18 +726,79 @@ theorem exists_uniform_diag
       (hΦcont z hz) (hΦwithin z hz) (hΦbox z hz)
     rw [hcoe]
     simpa only [hΦ0 z hz] using hzdiag
-  refine ⟨e, ?_⟩
-  change e.source = Metric.ball (0 : E × E) q ∧
-    e 0 = 0 ∧
-    ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
-    Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
-    ContDiffOn Real ∞ e.symm e.target ∧
-    ∀ z ∈ Metric.closedBall (0 : E × E) q,
-      normalPair (I := I) (X.obj k) x (e z) =
-        diagExp (I := I) (X.obj k).metric
-          (normal_enorm (I := I) (X.obj k))
-          (normalTangent (I := I) (X.obj k) x z)
-  exact ⟨hsource, heZero, heSmooth, htarget', hinvSmooth, hdiag⟩
+  have hsmall : Icc (0 : Real) 1 ⊆ Icc (-1) 1 := by
+    intro t ht
+    exact ⟨by linarith [ht.1], ht.2⟩
+  have hstay : ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      ∀ t ∈ Icc (0 : Real) 1,
+        (Φ z t).1 ∈ Metric.ball (0 : E) (h.phaseRadius R) := by
+    intro z hz t ht
+    exact (hΦbox z hz t (hsmall ht)).1
+  have hcurve : ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      IsIntegralCurveOn (Φ z)
+        (fun _ ↦ MetricKoszul.metricSpray
+          (normalCoordMetric (I := I) (X.obj k) x))
+        (Icc 0 1) := by
+    intro z hz t ht
+    have htWide : t ∈ Icc (-1 : Real) 1 := hsmall ht
+    have hpos := hstay z hz t ht
+    have hco : IsCoercive
+        (normalCoordMetric (I := I) (X.obj k) x (Φ z t).1) :=
+      (hb.metric_equiv k x).coercive (hrMetric hpos)
+    have hspray := normalPhase_eq_spray (I := I) (X.obj k) x (Φ z t)
+      (hrQuarter hpos) hco
+    change HasDerivWithinAt (Φ z)
+      (MetricKoszul.metricSpray
+        (normalCoordMetric (I := I) (X.obj k) x) (Φ z t))
+      (Icc 0 1) t
+    rw [← hspray]
+    exact (hΦwithin z hz t htWide).mono hsmall
+  have heDiag : IsNormalDiag (I := I) (X.obj k)
+      (hcomplete.complete k) (hconn k) x q δ e := by
+    change e.source = Metric.ball (0 : E × E) q ∧
+      e 0 = 0 ∧
+      ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+      Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
+      ContDiffOn Real ∞ e.symm e.target ∧
+      ∀ z ∈ Metric.closedBall (0 : E × E) q,
+        normalPair (I := I) (X.obj k) x (e z) =
+          diagExp (I := I) (X.obj k).metric
+            (normal_enorm (I := I) (X.obj k))
+            (normalTangent (I := I) (X.obj k) x z)
+    exact ⟨hsource, heZero, heSmooth, htarget', hinvSmooth, hdiag⟩
+  exact ⟨Φ, e, hΦ0, hcurve, hstay, hcoe, heDiag⟩
+
+/-- The uniform quantitative normal diagonal branch is the branch projection
+of the retained uniform phase-flow producer. -/
+theorem exists_uniform_diag
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X}
+    {hb : NormalCoordMetricBoundInput (I := I) X}
+    (h : NormalRadiusProfile hd hb)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (R : Real) :
+    ∃ (q : NNReal) (δ : Real),
+      0 < q ∧
+      4 * (q : Real) < h.phaseRadius R ∧
+      0 < δ ∧
+      δ = ((‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊⁻¹ -
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) : NNReal) : Real) *
+        ((q : Real) / 2) ∧
+      ∀ k (x : (X.obj k).M),
+        hd.dist k x (X.obj k).basepoint ≤ R →
+        ∃ e : OpenPartialHomeomorph (E × E) (E × E),
+          IsNormalDiag (I := I) (X.obj k) (hcomplete.complete k) (hconn k)
+            x q δ e := by
+  obtain ⟨q, δ, hq, hqR, hδ, hδeq, hflow⟩ :=
+    h.exists_uniform_flow hcomplete hconn R
+  refine ⟨q, δ, hq, hqR, hδ, hδeq, ?_⟩
+  intro k x hx
+  obtain ⟨_Φ, e, _h0, _hcurve, _hstay, _hcoe, he⟩ := hflow k x hx
+  exact ⟨e, he⟩
 
 end NormalRadiusProfile
 

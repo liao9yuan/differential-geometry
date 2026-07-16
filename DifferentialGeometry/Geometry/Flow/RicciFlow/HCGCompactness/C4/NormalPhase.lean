@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.ODE.PhaseFlowExistence
+import DifferentialGeometry.Geometry.Metric.TensorInner.MetricGeodesicSpray
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.C4.NormalMetricExtend
 
 set_option autoImplicit false
@@ -103,6 +104,33 @@ theorem normalAccel_eq
   unfold normalAccel
   rw [normal_cov_eq (I := I) Y x z.1 hz hco z.2 z.2]
   rfl
+
+/-- On the controlled normal-coordinate locus, the fenced phase field is the
+proof-independent geodesic spray of the actual pulled-back metric. -/
+theorem normalPhase_eq_spray
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    ∀ (z : E × E),
+      z.1 ∈ Metric.ball (0 : E)
+        (expMapC2Radius (I := I) Y.metric x / 4) →
+      ∀ _hco : IsCoercive (normalCoordMetric (I := I) Y x z.1),
+        PhaseFlow.phaseField (normalAccel (I := I) Y x) z =
+          MetricKoszul.metricSpray (normalCoordMetric (I := I) Y x) z := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  intro z hz hco
+  rw [MetricKoszul.metricSpray_eq _ _ hco]
+  change (z.2, normalAccel (I := I) Y x z) = _
+  rw [normalAccel_eq (I := I) Y x z hz hco]
 
 /-- Uniform acceleration-size bound on a controlled normal phase box. -/
 theorem normalAccel_norm
