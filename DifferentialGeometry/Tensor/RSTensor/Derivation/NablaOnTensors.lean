@@ -644,6 +644,7 @@ noncomputable def mcovariantDeriv_tensor0SWithin (s : ℕ)
         ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
         (extChartAt I x₀ x₀))
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] [CompleteSpace 𝕜] in
 theorem mcovariantDeriv_tensor0SWithin_one_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -678,6 +679,7 @@ theorem mcovariantDeriv_tensor0SWithin_one_apply_basis
   rw [extChartAt_to_inv]
   rfl
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] [CompleteSpace 𝕜] in
 theorem mcovariantDeriv_tensor0SWithin_two_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -716,6 +718,7 @@ theorem mcovariantDeriv_tensor0SWithin_two_apply_basis
   rw [extChartAt_to_inv]
   rfl
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] [CompleteSpace 𝕜] in
 theorem mcovariantDeriv_tensor0SWithin_apply_basis_slots
     {Idx : Type*} [Fintype Idx] {s : ℕ}
     (basis : Module.Basis Idx 𝕜 E)
@@ -763,14 +766,19 @@ noncomputable def mcovariantDeriv_tensorRSWithin (r s : ℕ)
     (ΓX : E → E →L[𝕜] E)
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) (n := n) r s)
     (u : Set M) (x₀ : M) : TensorRSSpace r s I x₀ := by
+  letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   let X' := mpullbackWithin 𝓘(𝕜, E) I (extChartAt I x₀).symm X (range I)
-  let T' : E → Tensor0SModel (𝕜 := 𝕜) (E := E) r →L[𝕜] Tensor0SModel (𝕜 := 𝕜) (E := E) s :=
-    fun y => tensorRSSpace_continuousLinearEquiv (I := I) r s
-      ((extChartAt I x₀).symm y) (T.toFun ((extChartAt I x₀).symm y))
-  exact (tensorRSSpace_continuousLinearEquiv (I := I) r s x₀).symm
-    (covariantDeriv_tensorRSModelWithin r s X' ΓX T'
-      ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
-      (extChartAt I x₀ x₀))
+  let T' : E → TensorRSModel r s 𝕜 E :=
+    fun y =>
+      ((trivializationAt (TensorRSModel r s 𝕜 E)
+          (fun x => TensorRSSpace r s I x) x₀)
+        ⟨(extChartAt I x₀).symm y, T.toFun ((extChartAt I x₀).symm y)⟩).2
+  exact
+    (trivializationAt (TensorRSModel r s 𝕜 E)
+        (fun x => TensorRSSpace r s I x) x₀).symm x₀
+      (covariantDeriv_tensorRSModelWithin r s X' ΓX T'
+        ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
+        (extChartAt I x₀ x₀))
 
 noncomputable def mcovariantDeriv_tensorRS (r s : ℕ)
     (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
@@ -837,58 +845,61 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners 𝕜 E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M]
 variable [CompleteSpace 𝕜]
 variable [IsManifold I 1 M] [IsManifold I 2 M]
-variable [IsManifold I (⊤ : WithTop ℕ∞) M]
-variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
+variable {n : WithTop ℕ∞}
+variable [IsManifold I n M]
+variable [IsManifold I (n + 1) M]
 
 noncomputable def nabla0SFun (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (x : M) : Tensor0SSpace s I x :=
   TensorLieDeriv.mcovariantDeriv_tensor0SFromConnection
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) s cov X α x
+    (n := n) s cov X α x
 
 noncomputable def nablaRSFun (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (x : M) : TensorRSSpace r s I x :=
   TensorLieDeriv.mcovariantDeriv_tensorRSFromConnection
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-    (n := (⊤ : WithTop ℕ∞)) r s cov X T x
+    (n := n) r s cov X T x
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 @[simp] theorem nabla0SFun_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (x : M) :
     nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x =
       TensorLieDeriv.mcovariantDeriv_tensor0SFromConnection
         (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) s cov X α x := rfl
+        (n := n) s cov X α x := rfl
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 @[simp] theorem nablaRSFun_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (x : M) :
     nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T x =
       TensorLieDeriv.mcovariantDeriv_tensorRSFromConnection
         (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-        (n := (⊤ : WithTop ℕ∞)) r s cov X T x := rfl
+        (n := n) r s cov X T x := rfl
 
 abbrev Nabla0SRegular (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) : Prop :=
+      (n := n) s) : Prop :=
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
-  ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel s 𝕜 E)) (⊤ : WithTop ℕ∞)
+  ContMDiff I (I.prod 𝓘(𝕜, Tensor0SModel s 𝕜 E)) n
     (fun x : M =>
       (⟨x, nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         s cov X α x⟩ :
@@ -896,11 +907,11 @@ abbrev Nabla0SRegular (s : ℕ)
 
 abbrev NablaRSRegular (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s) : Prop :=
+      (n := n) r s) : Prop :=
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
-  ContMDiff I (I.prod 𝓘(𝕜, TensorRSModel r s 𝕜 E)) (⊤ : WithTop ℕ∞)
+  ContMDiff I (I.prod 𝓘(𝕜, TensorRSModel r s 𝕜 E)) n
     (fun x : M =>
       (⟨x, nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         r s cov X T x⟩ :
@@ -908,65 +919,51 @@ abbrev NablaRSRegular (r s : ℕ)
 
 noncomputable def nabla0S (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (hreg : Nabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       s cov X α) :
     Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s :=
+      (n := n) s :=
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
   ⟨nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α, hreg⟩
 
 noncomputable def nablaRS (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (hreg : NablaRSRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       r s cov X T) :
     TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s :=
+      (n := n) r s :=
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   ⟨nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T, hreg⟩
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 @[simp] theorem nabla0S_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s)
+      (n := n) s)
     (hreg : Nabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       s cov X α)
     (x : M) :
     nabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α hreg x =
       nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x := rfl
 
+omit [IsManifold I n M] [IsManifold I (n + 1) M] in
 @[simp] theorem nablaRS_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
+    (X : ContMDiffSection I E n (TangentSpace I : M → Type _))
     (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s)
+      (n := n) r s)
     (hreg : NablaRSRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
       r s cov X T)
     (x : M) :
     nablaRS (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T hreg x =
       nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T x := rfl
-
-theorem nabla0S_reg (s : ℕ)
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
-    (α : Tensor0SField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) s) :
-    Nabla0SRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α := by
-  sorry
-
-theorem nablaRS_reg (r s : ℕ)
-    (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
-    (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
-    (T : TensorRSField (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
-      (n := (⊤ : WithTop ℕ∞)) r s) :
-    NablaRSRegular (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T := by
-  sorry
 
 end
 

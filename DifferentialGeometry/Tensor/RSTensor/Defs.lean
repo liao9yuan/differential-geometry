@@ -90,6 +90,94 @@ theorem tensor0SSpace_ext (s : ℕ) (x : M)
     (h : ∀ v : Fin s → TangentSpace I x, T v = T' v) : T = T' :=
   ContinuousMultilinearMap.ext (M₁ := fun _ : Fin s => TangentSpace I x) (M₂ := 𝕜) h
 
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.zero_apply (s : ℕ) (x : M)
+    (v : Fin s → TangentSpace I x) :
+    (0 : Tensor0SSpace s I x) v = 0 := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.add_apply (s : ℕ) (x : M)
+    (A B : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (A + B) v = A v + B v := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.smul_apply (s : ℕ) (x : M)
+    (c : 𝕜) (A : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (c • A) v = c • A v := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.nsmul_apply (s : ℕ) (x : M)
+    (n : ℕ) (A : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (n • A) v = n • A v := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.neg_apply (s : ℕ) (x : M)
+    (A : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (-A) v = -A v := by
+  rw [show -A = (-1 : 𝕜) • A by exact (neg_one_smul 𝕜 A).symm,
+    Tensor0SSpace.smul_apply, neg_one_smul]
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.sub_apply (s : ℕ) (x : M)
+    (A B : Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (A - B) v = A v - B v := by
+  rw [sub_eq_add_neg, Tensor0SSpace.add_apply, Tensor0SSpace.neg_apply,
+    sub_eq_add_neg]
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.sum_apply {α : Type*} (t : Finset α) (s : ℕ) (x : M)
+    (A : α → Tensor0SSpace s I x) (v : Fin s → TangentSpace I x) :
+    (∑ i ∈ t, A i) v = ∑ i ∈ t, A i v := by
+  classical
+  induction t using Finset.induction with
+  | empty => simp only [Finset.sum_empty, Tensor0SSpace.zero_apply]
+  | insert a t ha =>
+      simp only [Finset.sum_insert ha, Tensor0SSpace.add_apply, *]
+
+omit [FiniteDimensional 𝕜 E] in
+@[simp]
+theorem Tensor0SSpace.domDomCongr_apply {s s' : ℕ} {x : M}
+    (e : Fin s ≃ Fin s') (A : Tensor0SSpace s I x)
+    (v : Fin s' → TangentSpace I x) :
+    (ContinuousMultilinearMap.domDomCongr e A) v = A (fun i => v (e i)) := rfl
+
+omit [FiniteDimensional 𝕜 E] in
+theorem Tensor0SSpace.map_update_smul {s : ℕ} {x : M}
+    (A : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x)
+    (i : Fin s) (c : 𝕜) (v : TangentSpace I x) :
+    A (Function.update m i (c • v)) = c • A (Function.update m i v) :=
+  ContinuousMultilinearMap.map_update_smul A m i c v
+
+omit [FiniteDimensional 𝕜 E] in
+theorem Tensor0SSpace.map_update_add {s : ℕ} {x : M}
+    (A : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x)
+    (i : Fin s) (v w : TangentSpace I x) :
+    A (Function.update m i (v + w)) =
+      A (Function.update m i v) + A (Function.update m i w) :=
+  ContinuousMultilinearMap.map_update_add A m i v w
+
+omit [FiniteDimensional 𝕜 E] in
+theorem Tensor0SSpace.map_smul_univ {s : ℕ} {x : M}
+    (A : Tensor0SSpace s I x) (c : Fin s → 𝕜)
+    (v : Fin s → TangentSpace I x) :
+    A (fun i => c i • v i) = (∏ i, c i) • A v :=
+  ContinuousMultilinearMap.map_smul_univ A c v
+
+omit [FiniteDimensional 𝕜 E] in
+theorem Tensor0SSpace.map_sum {s : ℕ} {x : M}
+    (A : Tensor0SSpace s I x) {α : Fin s → Type*}
+    [∀ i, Fintype (α i)]
+    (g : ∀ i, α i → TangentSpace I x) :
+    A (fun i => ∑ j, g i j) = ∑ r : ∀ i, α i, A (fun i => g i (r i)) :=
+  ContinuousMultilinearMap.map_sum A g
+
 instance tensor0SSpace_normedAddCommGroup (s : ℕ) (x : M) :
     NormedAddCommGroup (Tensor0SSpace s I x) :=
   inferInstanceAs (NormedAddCommGroup

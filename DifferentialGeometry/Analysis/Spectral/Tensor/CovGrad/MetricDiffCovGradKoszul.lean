@@ -243,7 +243,7 @@ theorem covGrad02_unitModel_eval_eq_metricDiffCovDeriv
         (fun b : M => g₁.inner b (Y b) (Z b) - g₁'.inner b (Y b) (Z b)) x (X x) =
       directionalDeriv (I := I) (fun b : M => g₁.inner b (Y b) (Z b)) x (X x)
         - directionalDeriv (I := I) (fun b : M => g₁'.inner b (Y b) (Z b)) x (X x) := by
-    rw [directionalDeriv, directionalDeriv, directionalDeriv]
+    rw [directionalDeriv_eq, directionalDeriv_eq, directionalDeriv_eq]
     rw [show (fun b : M => g₁.inner b (Y b) (Z b) - g₁'.inner b (Y b) (Z b)) =
         (fun b : M => g₁.inner b (Y b) (Z b)) - (fun b : M => g₁'.inner b (Y b) (Z b)) from rfl]
     rw [mfderiv_sub hg₁ hg₁']
