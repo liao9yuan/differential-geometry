@@ -36,11 +36,11 @@ Therefore `scalar_gal_subseq` and its dedicated compactness machinery are both
 private producers: `galPert_norm_le`, `gal_lim_mass`, `gal_lim_init`, and
 `supp_right_lip`.  The public theorem and its assumptions are unchanged.
 
-The next theorem, tentatively `scalar_gal_limit`, remains **0%**.  It must pass
-the finite ODE integral identity to the limit and construct the spectral
-mild/strong solution.  The classical moving conjugate-heat theorem and both
-Perelman/Hamilton noncollapsing endpoints remain **0%**; this file advances only
-their analytic machinery.
+The downstream `scalar_gal_limit` theorem is now **100% verified** in
+`ConjGalerkinStrong.lean`: it passes the finite ODE integral identity to the
+limit and constructs the spectral strong solution.  The classical moving
+conjugate-heat theorem and both Perelman/Hamilton noncollapsing endpoints remain
+**0%**; this file itself advances only their analytic machinery.
 
 ## Next spectral limit producer
 
@@ -52,19 +52,15 @@ comes from `conv`, the high-order norm bounds come from `energy` and
 `lim_mass`, and eventual membership comes from the strictly monotone spectral
 exhaustion.  No new convergence predicate or consumer assumption is used.
 
-The next frontier `scalar_gal_limit` must pass the finite right-derivative ODE
-to an interval-integral identity by dominated convergence and package the
-result in the existing `timeL2` / `timeH1` interfaces.  The genuine later
-frontier is the bridge from the all-order spectral strong limit to joint
-spacetime smoothness and `IsHeatPotOn`; the present intrinsic
+The next frontier is now the bridge from the all-order spectral strong path to
+joint spacetime smoothness and `IsHeatPotOn`; the present intrinsic
 partition-of-unity all-order completeness theorem is not yet that realization
 bridge.
 
 Honest accounting: `scalar_gal_subseq` and `galLim_tendsto` are theorem-level
-**100% verified**.  `scalar_gal_limit` is unstated/unproved (**0%**) with
-roughly **40%** dedicated machinery.  `heatpot_of_maxreg`, the classical moving
-conjugate-heat theorem,
-and both noncollapsing endpoints remain theorem-level 0%.
+**100% verified**.  `scalar_gal_limit` and its dedicated machinery are also
+**100% verified**.  `heatpot_of_maxreg`, the classical moving conjugate-heat
+theorem, and both noncollapsing endpoints remain theorem-level **0%**.
 
 ## 2026-07-15 strong-limit handoff preparation
 
@@ -75,13 +71,14 @@ existing A2/A1 continuity theorems.  This is not a new consumer assumption.
 continuous Sobolev path by using one higher uniform mass bound and
 `cont_of_coeff`.
 
-Focused verification of these additions is currently blocked before the proof
-body by the shared target build refreshing a long chain of missing upstream
-objects.  A private `galVec_sq` copy is temporarily present only so this file can
-be checked before the newly public `ConjGalerkinEnergy.galVec_norm_sq` object is
-available; it must be removed and both call sites restored to the canonical
-producer before this change is treated as complete.
+Focused verification of these additions now passes without warnings or
+`sorry`.  The temporary `galVec_sq` compatibility copy has been deleted, and
+both consumers use the canonical public `ConjGalerkinEnergy.galVec_norm_sq`.
+The existing large `scalar_gal_subseq` assembly needs a declaration-local 800k
+heartbeat budget after retaining `pert_cont`; this changes neither its statement
+nor any global option or consumer assumption.
 
-The exact downstream frontier is `ConjGalerkinStrong.scalar_gal_limit`.  Its
-source now contains the scalar DCT, vector FTC, and `timeH1` packaging, but the
-theorem remains **0% verified** until the focused check succeeds.
+The downstream `ConjGalerkinStrong.scalar_gal_limit` closure now passes focused
+verification and module export without `sorry`; the theorem and its dedicated
+machinery are **100%**.  The next exact frontier is the separate joint-spacetime
+realization bridge to a classical `IsHeatPotOn` solution.

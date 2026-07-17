@@ -23,3 +23,12 @@ This is the first quantitative metric brick for the Route-A moving
 inverse-exponential construction.  It is a genuine consequence of the lower
 quadratic metric bound, not a new producer assumption.  Focused verification
 and the targeted module refresh passed.
+
+## 2026-07-15
+
+Added `IsCoercive.sharp_eq_inverse`.  It identifies the existing
+Lax--Milgram/Riesz `sharp` operation with `Ring.inverse` of Mathlib's canonical
+Gram operator `InnerProductSpace.continuousLinearMapOfBilin`.  This gives the
+metric-spray layer a proof-independent total expression without introducing a
+second Gram API; coercivity is used only to identify that total expression with
+the geometric sharp map.  Focused verification passed.

@@ -40,3 +40,25 @@ support-independent scalar Hessian estimate and the quantitative metric/connecti
 coefficient modulus still to be assembled.  The Perelman no-local-collapsing
 endpoint remains 0% proved, with dedicated machinery roughly 28%; broader HCG
 infrastructure remains roughly 45%, while its main endpoint theorems remain 0%.
+
+## 2026-07-16: Hessian/covariant-gradient pairing
+
+`hessSec_inner_cov` is now checked.  For any metric-compatible smooth
+connection, it evaluates the canonical `hessianSec` on arbitrary tangent
+vectors and identifies the result with the metric pairing of the covariant
+derivative of `gradientFun`.  The statement is basis-free and fully applied to
+a scalar; it does not assert equality of whole tensor or Hom objects.
+
+The proof extends the two pointwise tangent vectors to smooth sections, uses
+`hessianSec_nabla`, and cancels the one-form correction term with
+`metric_compatible_apply`.  It adds no supplied component, Bianchi, coordinate,
+or chart-local-constancy assumption.  Focused verification passed without
+warnings.
+
+This adapter is complete (100%).  The downstream `ricDriftDiv` producer and
+`weighted_hess_split` theorem are still unstated/unproved (0% each); their
+dedicated geometric machinery is roughly 60%, because the Ricci--Hessian trace
+contraction and canonical contracted-Bianchi assembly remain.  The Perelman
+no-local-collapsing endpoint remains 0% proved, with dedicated machinery roughly
+28%; broader HCG infrastructure remains roughly 45%, while its main endpoint
+theorems remain 0%.

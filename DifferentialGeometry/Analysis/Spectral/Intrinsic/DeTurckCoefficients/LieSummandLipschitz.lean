@@ -180,6 +180,7 @@ private lemma chartInvGramOnE_differentiableAt_int'
   (((chartInvGramOnE_contDiffOn (I := I) g α a b).mono interior_subset).contDiffAt
     (isOpen_interior.mem_nhds hy)).differentiableAt (by simp)
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 /-- **Leibniz expansion of `∂_m W^k`.** On the chart-target interior, the first
 partial of the chart DeTurck-VF component is the product-rule expansion of its
 defining double sum. -/
@@ -201,7 +202,7 @@ theorem partialDeriv_chartDeTurckVFComp_eq
         chartInvGramOnE (I := I) g α a b z *
           (chartChristoffel (I := I) g α a b k z -
             chartChristoffel (I := I) g_bg α a b k z) := by
-    funext z; rw [chartDeTurckVFComp_def]
+    rfl
   rw [show partialDeriv (E := E) m (chartDeTurckVFComp (I := I) g g_bg α k) y =
         partialDeriv (E := E) m
           (fun z : E => ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
@@ -583,6 +584,7 @@ theorem deTurckVF_abs_le
       simp only [Finset.sum_const, Finset.card_univ, Fintype.card_fin, nsmul_eq_mul]
       ring
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 /-- First inverse-Gram and connection-difference bounds control a first partial
 of a chart DeTurck-vector-field component. -/
 theorem deTurckVFD_abs_le
@@ -708,6 +710,7 @@ theorem exists_chartDeTurckVFComp_lipschitz_on_compact
   refine h_pt.trans ?_
   exact mul_le_mul_of_nonneg_right (by linarith) hjet1_nn
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 /-- **Per-point Lipschitz bound for `∂_m W^k`.**  On the chart-target interior,
 with the inverse-Gram-partial Lipschitz bound `Cd · jet1`, the inverse-Gram `0`-jet
 Lipschitz bound `Cinv · chartGramDiffSup`, the Christoffel difference Lipschitz
@@ -863,6 +866,7 @@ theorem partialDeriv_chartDeTurckVFComp_sub_abs_le
   rw [show (Module.finrank ℝ E : ℝ) ^ 2 * C0 * jet2 =
         (Module.finrank ℝ E : ℝ) * ((Module.finrank ℝ E : ℝ) * (C0 * jet2)) by ring]
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 /-- **Uniform Lipschitz dependence of the chart DeTurck-VF component derivatives
 `∂_m W^k` on the chart `2`-jet of the metric difference, over a compact subset of
 the chart-target interior.**
@@ -1125,6 +1129,7 @@ theorem chartLie_sub_abs_le
           ((Cw * Q + U * 1) + (1 * V + Gb * Cdw) + (1 * V + Gb * Cdw)) * jet2 := by
       ring
 
+omit [SigmaCompactSpace M] [T2Space M] [I.Boundaryless] in
 set_option linter.unusedFintypeInType false in
 /-- A direction-uniform `∂_m W^k` Lipschitz constant: a single `C > 0` such that
 the bound `|∂_m W^k(g₁)(y) − ∂_m W^k(g₂)(y)| ≤ C · jet2` holds for every direction

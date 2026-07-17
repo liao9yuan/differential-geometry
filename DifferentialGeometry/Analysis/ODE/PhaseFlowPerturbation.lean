@@ -69,6 +69,25 @@ noncomputable def phaseErr (κ : ℝ≥0) : ℝ≥0 where
       (mul_nonneg κ.coe_nonneg (Real.exp_pos _).le)
       (sub_nonneg.mpr (Real.one_le_exp zero_le_one))
 
+omit [NormedAddCommGroup E] [NormedSpace ℝ E] in
+/-- The time-one phase error is monotone in the acceleration Lipschitz
+coefficient. -/
+theorem phaseErr_mono {κ κ' : ℝ≥0} (hle : κ ≤ κ') :
+    phaseErr κ ≤ phaseErr κ' := by
+  apply NNReal.coe_le_coe.mp
+  have hle' : (κ : ℝ) ≤ (κ' : ℝ) := by exact_mod_cast hle
+  have hexp : Real.exp (1 + (κ : ℝ)) ≤ Real.exp (1 + (κ' : ℝ)) :=
+    Real.exp_le_exp.mpr (by linarith)
+  dsimp only [phaseErr]
+  refine mul_le_mul_of_nonneg_right ?_
+    (sub_nonneg.mpr (Real.one_le_exp zero_le_one))
+  calc
+    (κ : ℝ) * Real.exp (1 + (κ : ℝ)) ≤
+        (κ' : ℝ) * Real.exp (1 + (κ : ℝ)) :=
+      mul_le_mul_of_nonneg_right hle' (Real.exp_pos _).le
+    _ ≤ (κ' : ℝ) * Real.exp (1 + (κ' : ℝ)) :=
+      mul_le_mul_of_nonneg_left hexp κ'.coe_nonneg
+
 omit [NormedSpace ℝ E] in
 /-- Lifting a `κ`-Lipschitz acceleration to phase space gives a
 `max 1 κ`-Lipschitz first-order field. -/

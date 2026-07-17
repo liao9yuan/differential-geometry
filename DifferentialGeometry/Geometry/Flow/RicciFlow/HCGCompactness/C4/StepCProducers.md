@@ -1,5 +1,23 @@
 # StepCProducers.lean — C3 producer join (design/audit note, 2026-07-02)
 
+## PROGRESS 2026-07-16: full support-convergence package survives refinement
+
+`HasSuppConvData.subseq` is verified without `sorry`.  Along any further
+strictly increasing `ψ`, it preserves the source domains and compact cores,
+all-stage cover geometry, normalized atom-weight limits, two-sided transition
+limits and identities, and finite-stage transition smoothness; the extracting
+map becomes `phi ∘ ψ`.
+
+The proof reuses `HasAtomWeightLim.subseq`,
+`MapCInfConvOnCompacts.comp_tendsto_atTop`, and the existing
+`NetLimitData`/ball subsequence simp lemmas.  The important elaboration lesson
+is to leave `NetLimitData.subseq` folded while those projection lemmas rewrite
+the dependent manifold and metric instances.  Focused verification passed.
+
+This persistence theorem is 100% complete.  It is supporting infrastructure;
+the concrete moving-stage producer and `StepB1RawInput` remain separate
+downstream endpoints and are not counted as completed by this lemma.
+
 ## PROGRESS 2026-07-09: fixed-source explicit-weight join landed
 
 `stepCJoinDataFixed` is verified without `sorry`.  It mirrors `stepCJoinFixed`'s
@@ -629,3 +647,20 @@ common-domain moving-stage implicit solver remain genuine analytic/API
 frontiers.  The all-pairs chart tail, `StepB1RawInput`, textbook B1, and every
 compactness endpoint remain 0%; running machinery estimates stay about
 94% / 86% / 57% for Step-B/B1 / Chapter 4 / whole HCG.
+
+## 2026-07-15 Route-A stage smoothness retention
+
+The common finite-pair shift inside `exists_atom_supp_fin` already proves that
+both finite-stage normal transitions are smooth on their full eight-lambda
+balls at every index of the returned subsequence.  `HasSuppConvData` now
+retains that existing output, and `exists_supp_pts_fin` forwards it unchanged.
+No second tail extraction and no new field of `MetricCompactnessInputs` was
+introduced.
+
+This retained datum is consumed by `HasSuppConvData.cfgSub_conv` in
+`StepCStageFill.lean`, which packages the actual weights and smooth Route-A
+point tuple into one source-local stage configuration converging to the
+diagonal for every pair of reindexings tending to infinity.  Focused
+verification and the exact producer refresh passed.  The raw B1 producer and
+textbook B1 remain theorem-level 0%; rounded machinery estimates are now about
+95% / 87% / 57% for Step-B/B1 / Chapter 4 / whole HCG.

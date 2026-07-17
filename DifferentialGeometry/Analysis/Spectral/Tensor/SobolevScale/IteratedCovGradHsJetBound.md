@@ -69,3 +69,22 @@ verified (100%).  `scalar_gal_bound` remains theorem-level 0% until its own
 focused check passes, although its dedicated machinery is approximately 99%.
 The classical moving conjugate-heat theorem and both Perelman/Hamilton
 noncollapsing endpoints remain theorem-level 0%.
+
+## 2026-07-15 linearity API
+
+`ccTensorToHs_add` and `ccTensorToHs_smul` expose the coefficientwise linearity
+already present in the generic smooth spectral embedding.  They are canonical
+producer lemmas: downstream convex-path estimates can now use the normed-space
+triangle and scalar-norm laws without re-opening spectral coefficients.
+
+The implementation uses only `SmoothCcTensor.toL2` linearity and the existing
+`tensorL2Coeff_add`/`tensorL2Coeff_smul` identities.  Focused verification
+passed without local warnings or `sorry`.
+The uniform low-regularity Ricci--DeTurck existence theorem remains unstated and
+unproved (0%); these two API lemmas are complete in body but are only a small
+supporting input to its nonlinear coefficient estimates.
+
+`icg_comp_norm` exposes the already-used transport fact that composing two
+iterated covariant gradients preserves the global `L2` norm after reassociating
+the covariant rank. Downstream low-regularity product estimates should reuse
+this theorem instead of duplicating the fibre-norm integration argument.

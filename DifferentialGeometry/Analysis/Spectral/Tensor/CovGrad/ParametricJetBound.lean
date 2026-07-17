@@ -149,6 +149,109 @@ theorem joint_jet_rfns
     (fun t => iteratedCovGrad (I := I) g₀ r s i (Φ t)) hKS
     (covGrad_iter_joint (I := I) (M := M) g₀ r s i Φ S hjoint)
 
+omit [T2Space M] [SigmaCompactSpace M] in
+/-- A jointly continuous scalar family that vanishes at one time
+is eventually uniformly small on a compact spatial factor. -/
+private theorem joint_small
+    (f : ℝ → M → ℝ) {S : Set ℝ} {t₀ : ℝ}
+    (hS : S ∈ 𝓝 t₀)
+    (hf : ContinuousOn (fun p : ℝ × M => f p.1 p.2)
+      (S ×ˢ (Set.univ : Set M)))
+    (hzero : ∀ x : M, f t₀ x = 0)
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ t in 𝓝 t₀, ∀ x : M, f t x < ε := by
+  classical
+  have hpatch (x : M) :
+      ∃ V : Set ℝ, V ∈ 𝓝 t₀ ∧
+        ∃ W : Set M, IsOpen W ∧ x ∈ W ∧
+          ∀ t ∈ V, ∀ y ∈ W, f t y < ε := by
+    let F : ℝ × M → ℝ := fun p => f p.1 p.2
+    have hdom : S ×ˢ (Set.univ : Set M) ∈ 𝓝 (t₀, x) :=
+      prod_mem_nhds hS Filter.univ_mem
+    have hFcont : ContinuousAt F (t₀, x) := by
+      simpa only [F] using
+        (hf (t₀, x) ⟨mem_of_mem_nhds hS, Set.mem_univ x⟩).continuousAt hdom
+    have hsmall : {p : ℝ × M | F p < ε} ∈ 𝓝 (t₀, x) := by
+      exact hFcont.eventually_lt_const (by simpa only [F, hzero x] using hε)
+    obtain ⟨V, W, hVOpen, htV, hWOpen, hxW, hVW⟩ :=
+      mem_nhds_prod_iff'.mp hsmall
+    refine ⟨V, hVOpen.mem_nhds htV, W, hWOpen, hxW, ?_⟩
+    intro t ht y hy
+    have hty : (t, y) ∈ V ×ˢ W := ⟨ht, hy⟩
+    simpa only [F] using hVW hty
+  choose V hV W hWOpen hxW hloc using hpatch
+  obtain ⟨F, _, hF⟩ :=
+    (isCompact_univ : IsCompact (Set.univ : Set M)).elim_nhds_subcover W
+      (fun x _ => (hWOpen x).mem_nhds (hxW x))
+  have htime :
+      ∀ᶠ t in 𝓝 t₀, ∀ x ∈ F, t ∈ V x := by
+    exact
+      (Finset.eventually_all
+        (I := F)
+        (l := 𝓝 t₀)
+        (p := fun x t => t ∈ V x)).2
+        (fun x _ => hV x)
+  filter_upwards [htime] with t ht
+  intro y
+  obtain ⟨x, hxF, hyW⟩ := Set.mem_iUnion₂.mp (hF (Set.mem_univ y))
+  exact hloc x t (ht x hxF) y hyW
+
+/-- Finitely many spatial covariant jets of a jointly smooth fixed-background
+tensor family that vanishes at `t₀` become uniformly small on the compact
+manifold as the parameter tends to `t₀`. -/
+theorem joint_jet_small
+    (g₀ : SmoothRiemannianMetric I M) (r s p : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) {S : Set ℝ} {t₀ : ℝ}
+    (hS : S ∈ 𝓝 t₀) (hzero : Φ t₀ = 0)
+    (hjoint : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
+      (fun q : M × ℝ => TotalSpace.mk' (TensorRSModel r s ℝ E)
+        (E := fun z : M => TensorRSSpace r s I z) q.1
+        ((Φ q.2).toSection q.1))
+      ((Set.univ : Set M) ×ˢ S))
+    {ε : ℝ} (hε : 0 < ε) :
+    ∀ᶠ t in 𝓝 t₀, ∀ i : ℕ, i ≤ p → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x
+        ((iteratedCovGrad (I := I) g₀ r s i (Φ t)).toSection x) < ε := by
+  classical
+  have hiter0 (i : ℕ) :
+      iteratedCovGrad (I := I) g₀ r s i (0 : SmoothCcTensor g₀ r s) = 0 := by
+    induction i with
+    | zero => rw [iteratedCovGrad_zero]
+    | succ j ih => rw [iteratedCovGrad_succ, ih, covGrad_zero]
+  have hi (i : ℕ) :
+      ∀ᶠ t in 𝓝 t₀, ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x
+          ((iteratedCovGrad (I := I) g₀ r s i (Φ t)).toSection x) < ε := by
+    apply joint_small (f := fun t x =>
+      riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x
+        ((iteratedCovGrad (I := I) g₀ r s i (Φ t)).toSection x)) hS
+    · exact joint_jet_rfns (I := I) (M := M) g₀ r s i Φ
+        (S := S) (K := S) (fun _ ht => ht) hjoint
+    · intro x
+      rw [hzero, hiter0 i]
+      rw [show ((0 : SmoothCcTensor g₀ r (s + i)).toSection x) =
+        (0 : TensorRSSpace r (s + i) I x) from by
+          rw [SmoothCcTensor.toSection_zero]
+          rfl]
+      exact riemannianFiberNormSq_zero (I := I) (M := M) g₀ r (s + i) x
+    · exact hε
+  have htime :
+      ∀ᶠ t in 𝓝 t₀, ∀ i ∈ Finset.range (p + 1), ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x
+          ((iteratedCovGrad (I := I) g₀ r s i (Φ t)).toSection x) < ε := by
+    exact
+      (Finset.eventually_all
+        (I := Finset.range (p + 1))
+        (l := 𝓝 t₀)
+        (p := fun i t => ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ r (s + i) x
+            ((iteratedCovGrad (I := I) g₀ r s i (Φ t)).toSection x) < ε)).2
+        (fun i _ => hi i)
+  filter_upwards [htime] with t ht
+  intro i hip x
+  exact ht i (by simp only [Finset.mem_range]; omega) x
+
 /-- On one compact time slab, every spatial covariant-derivative order of a
 jointly smooth fixed-background tensor family has an order-dependent uniform
 intrinsic squared fibre-norm bound. -/

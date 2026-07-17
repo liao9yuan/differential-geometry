@@ -228,6 +228,46 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
+/-- A continuous operator-coefficient family remains interval integrable after
+application to a fixed tensor and unit-model evaluation. -/
+theorem coeffApp_integrable
+    (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
+    (Φ : ℝ → SmoothCcTensor g₀ r s) (W : SmoothCcTensor g₀ 0 r)
+    (S : Set ℝ) (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)
+    (hcont : ∀ x : M, ContinuousOn
+      (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) S)
+    (x : M) (v : Fin s → TangentSpace I x) :
+    IntervalIntegrable
+      (fun t : ℝ => unitModel (I := I) (M := M) g₀ s
+        (appCc (I := I) (M := M) g₀ r s (Φ t) W) x v)
+      volume 0 1 := by
+  set u : Tensor0SSpace r I x :=
+    (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace r I x from W.toSection x)
+      (unitTensor (I := I) (M := M) x) with hu
+  have hkey : ∀ t : ℝ,
+      unitModel (I := I) (M := M) g₀ s
+          (appCc (I := I) (M := M) g₀ r s (Φ t) W) x v =
+        ((TensorRSSpace.toModel ((Φ t).toSection x))
+          (Tensor0SSpace.toModel u)) v := by
+    intro t
+    rw [unitModel, appCc_toSection, ContinuousLinearMap.comp_apply,
+      toModel_tensorRS_apply (I := I) r s x ((Φ t).toSection x) u]
+  have hcontApp : ContinuousOn (fun t : ℝ =>
+      ((TensorRSSpace.toModel ((Φ t).toSection x))
+        (Tensor0SSpace.toModel u)) v) S := by
+    have hstep : ContinuousOn (fun t : ℝ =>
+        (TensorRSSpace.toModel ((Φ t).toSection x)) (Tensor0SSpace.toModel u)) S :=
+      (ContinuousLinearMap.apply ℝ (Tensor0SModel s ℝ E)
+        (Tensor0SSpace.toModel u)).continuous.comp_continuousOn (hcont x)
+    exact (ContinuousMultilinearMap.apply ℝ (fun _ : Fin s => E) ℝ v).continuous.comp_continuousOn
+      hstep
+  have hcontFinal : ContinuousOn (fun t : ℝ =>
+      unitModel (I := I) (M := M) g₀ s
+        (appCc (I := I) (M := M) g₀ r s (Φ t) W) x v) S := by
+    refine hcontApp.congr (fun t _ => ?_)
+    exact (hkey t).symm
+  exact (hcontFinal.mono hSI).intervalIntegrable
+
 set_option linter.unusedSectionVars false in
 /-- **Local manifold parametric interval integral.** A family `g : M × ℝ → F` into a fixed normed
 space `F` that is jointly smooth on `V ×ˢ S` for an open `V ∋ x₀` and an open `S` containing the

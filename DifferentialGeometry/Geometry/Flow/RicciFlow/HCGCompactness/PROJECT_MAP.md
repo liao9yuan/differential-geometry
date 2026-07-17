@@ -32,7 +32,7 @@ Thm 3.10  Ricci-flow solution compactness            [unconditional endpoint 0%;
   ⇐ hShi  Shi derivative estimates                   [CITED boundary, not a proof obligation]
 
 Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
-                    → Step B (local metrics/transitions/B1 machinery, ~94%;
+                    → Step B (local metrics/transitions/B1 machinery, ~95%;
                       origin-metric and transition branches run in parallel,
                       then merge on one further subsequence)
                     → Step C (center-of-mass averaging, ~3/4)
@@ -55,7 +55,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 
 | Lane | Entry plan | State |
 |---|---|---|
-| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchHessian.md` + `C4/NormalBranchConvexity.md` + `C4/B1_MIN_BRANCH_RULING.md` | canonical global stage map and compact nested coordinate cores checked; consult next on the smooth support-sensitive target filler and common-domain moving implicit solver needed for the all-pairs chart tail |
+| Ch4 Step B/C (B1 assembly, lbl404 engine, C2') | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/B1_MOVING_ROOT_CONSULT.md` + `C4/B1_ODE_STABILITY_CONSULT.md` + `C4/StepCStageFill.md` + `C4/StepCSupportCapstone.md` + `C4/NormalBranchHessian.md` + `C4/NormalBranchConvexity.md` + `C4/B1_MIN_BRANCH_RULING.md` | canonical global stage map, compact nested coordinate cores, smooth Route-A configurations, and normal geodesic-spray convergence checked; first analytic frontier is the proof of `MapCInfConvOnCompacts.ode_solutionAt`, then forward phase, compact moving roots, selected inverse, and `invVelSum` roots |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` | conditional consumer complete: D6 convergence transport and `compactness_of_b1` are checked.  Do not restart D1--D6; resume at the upstream `StepB1RawInput` producer in `B1_JOIN_HANDOFF.md`. |
 | Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldEndgame.md` | producer hypotheses remain active; canonical conditional wrappers are checked |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
@@ -104,10 +104,10 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-15)
+## 6. Honest progress (updated 2026-07-16)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
-  Step-B/B1 machinery ~94% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
+  Step-B/B1 machinery ~95% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
   sorry-free/axiom-clean 2026-07-05** — `exists_diffeo_of_injOn` construction +
   `BookApproxIsoPartialData` forward/reverse transport via `PreApproxIsoDataOn.congr`;
   **2026-07-09 statement repair:** the false P-only `stepB1_approxIso` and its `sorry`
@@ -136,7 +136,7 @@ its docstring BEFORE consumers are built against it.
   former velocity-`hderiv` API gap, and `normLowerOfSepExp` now derives the coordinate norm lower
   bound directly from named-exp-ball containment and Riemannian separation.  This improves the
   producer machinery but does not change theorem completion: the `StepB1RawInput` producer and
-  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 94%.
+  textbook B1 theorem remain 0%; Step-B/B1 machinery is about 95%.
   **2026-07-13 minimizing-branch closure:** Gates 1--6 are now focused-green:
   the selected inverse is minimizing, `halfSq` agrees with intrinsic squared
   distance on its cage, the generic gradient identity is proved in the
@@ -393,10 +393,16 @@ its docstring BEFORE consumers are built against it.
    cover, support readout, two finite maxima, and global-ball existential-source
    corollary are now checked in `StepCProducers` and
    `StepCSupportCapstone`.  The selected-branch Hessian/Neumann and strict-IFT
-   chain is also retained through that capstone.  The remaining B/C analytic
-   frontier is the `lbl413` to `StrictDistInput` comparison producer, not an
-   H6, chart-compatibility, or Neumann theorem.
-   Ch4 **machinery** overall is ≈ **83%** after rounding;
+   chain is also retained through that capstone, and the `lbl413` to
+   `StrictDistInput` comparison is checked.  Generic map convergence now lives
+   in `Analysis/Calculus`, and the proof-independent metric spray plus
+   `normalGeodesicSpray_conv` are checked.  The remaining B/C analytic frontier
+   starts with the proof of `MapCInfConvOnCompacts.ode_solutionAt`, whose exact
+   low-level statement is typechecked but whose all-order stability proof is
+   0%.  Forward normal phase, compact moving roots, selected inverse
+   convergence, and `invVelSum` roots follow; H6, chart compatibility,
+   support filling, and Neumann are not frontiers.
+   Ch4 **machinery** overall is ≈ **87%** after rounding;
   the conditional compactness endpoint and textbook B1 theorem remain **0%**.
 - Unconditional Thm 3.9: 0%, intentionally out of scope (external citations).
 - Ch3: Lemma 3.11 done (hShi hypothesis).  The canonical conditional assembly
@@ -415,21 +421,54 @@ its docstring BEFORE consumers are built against it.
   conservation, time reversal, the interval-local classical-solution
   interface, conditional nonnegativity, a time-operator lift, the abstract
   two-scale nonautonomous fixed-point engine, and local moving-volume first
-  variation.  Moving-metric conjugate-heat existence remains theorem-level 0%
-  while its dedicated machinery is about 77%.  Its genuine frozen-scale
+  variation.  The Galerkin route now proves the moving-metric classical
+  endpoint `heatpot_of_gallim`; `heatpot_exists` then removes the conditional
+  Galerkin input for every smooth initial tensor, and `conj_heat_exists`
+  produces `IsConjHeatOn` with the prescribed terminal trace.  These theorems
+  and their dedicated classical existence machinery are 100%.  Its
+  genuine frozen-scale
   operator inputs are checked: `lapDiffA20_short` gives the support-independent
   `A2 : H2(gT) -> H0(gT)` moving-Laplacian difference, `lapDiffA20_graph` and
   `lapDiffA20_test` give its selector-free closed-core realization, and
   `conjA1_short` / `scalarPotH0_test` handle the scalar-curvature potential
   `A1 : H1(gT) -> H0(gT)`.  `Entropy/ConjStrong.lean` proves the combined
   contraction package, `conj_strong_exists`, and the a.e. scalar weak equation
-  `conj_weak_ae`.  The next exact producer is the genuine second-order
-  nonautonomous bootstrap toward `heatpot_of_maxreg`; both remain theorem-level
-  0%.  A fixed-order coefficient-jet tame route is available, but its
-  order-dependent top constant does not feed the live all-order Galerkin
-  consumer, the fifth distinct audited route problem.  The next consultation
-  must choose a direct covariant energy/commutator normal form or a different
-  one-interval all-order bootstrap.  The
+  `conj_weak_ae`.  The intrinsic all-order Galerkin chain `scalar_gal_bound` →
+  `scalar_gal_subseq` → `galLim_tendsto` → `scalar_gal_limit` is checked.  The
+  last theorem packages a genuine `MaxRegSolutionSpace` / `timeH1` solution
+  with exact initial trace and the explicit represented `H² → H⁰` path.  The
+  all-scale follow-up proves `galLimVel_lift`, `galLimExt_deriv`, and the
+  canonical strong ODE `galLimExt_ode` on one order-independent positive slab.
+  `ParametricAppHsTime`, `ScalarPotentialTime`, and `ScalarNonautTime` now
+  give the fully applied dynamic completed-action regularity required by the
+  ODE induction. `galLimExt_smooth` is proved simultaneously at every natural
+  Sobolev order on one common smaller interval.
+  `Entropy/ConjGalerkinClassical.lean` now proves `galLim_jet_mass`: compact
+  interior time intervals, a higher Sobolev path, and the closed-manifold
+  counting tail give one summable majorant for every coefficient time jet.
+  Its theorem body is complete, but the counting input inherits the existing
+  `ShortTime/WeylEigenvalueCountingBound.lean` `sorry`; the full chain is not
+  globally sorry-free.  `galLim_slice_cc`, `galLim_pde`, and
+  `heatpot_of_gallim` now complete scalar reconstruction, the pointwise PDE,
+  and the genuine classical heat-potential package.  The separate
+  `heatpot_of_maxreg` route remains theorem-level 0%.  The positive unit-mass
+  input is now complete: `gallim_pos`, `heatpot_mass_deriv`,
+  `heatpot_mass_eq`, and `gallim_unit_pos` give a strictly positive genuine
+  reversed heat potential of moving mass one (or identify the empty-manifold
+  case), without exporting the old global regularity assumptions.  The
+  Perelman potential inverse is also checked: `density_potential` and
+  `weighted_potential` recover the density and weighted measure exactly.
+   These are dedicated entropy machinery, not endpoint theorems.  The potential
+   evolution and moving-gradient producers are now checked:
+   `potential_pde`, `potential_df_time`, `potential_joint`, `normGradSq_time`,
+   `gradSq_joint`, `revGram_smooth`, `revTrace_eq`, `revScalar_time`, and
+   `revGradSq_time`.  `w_rev_hasDerivAt` assembles them into the checked
+   interval-local raw first variation of `W` for the genuine reversed-flow
+   `conjCoeff` heat potential.  The next frontier is the geometric square
+   completion: `ricDriftDiv`, then `weighted_hess_split`, W monotonicity, and
+   the cutoff contradiction.  Weighted square completion, W monotonicity,
+   no-local-collapsing, and `ham3_noncollapse` remain theorem-level 0%; broader
+   entropy/noncollapse machinery is about 67%.  The
   former `nablaRSFun_eval_moving_raw` elaboration wall and the
   downstream Laplacian-bridge object refresh are both resolved.  The canonical constant-metric volume and
   distance laws are checked (`Analysis/Integration/Measure/Scaling.lean` and
@@ -490,25 +529,37 @@ its docstring BEFORE consumers are built against it.
   local filled center branches with its global minimizer.  The source producer
   now returns fixed compact nested cores whose strict inner images cover the
   source ball, and the producer/capstone chain retains them on the same master
-  subsequence.  Actual weight convergence is already all-pairs; the genuine
-  analytic stop is target-side smooth support filling plus a common-domain
-  moving implicit-solver convergence theorem.  See
-  `C4/B1_STAGE_MAP_RULING.md`.  This is infrastructure only: the all-pairs chart
+  subsequence.  `StepCStageFill` now supplies the fixed two-bump safety filler,
+  old-`InterSlot` finite totalization, actual refined configuration,
+  arbitrary-reindexing `C^infinity` convergence, and exact raw-target readout
+  at retained nonzero interacting slots.  The generic convergence definitions
+  and closures were moved to `Analysis/Calculus` without API renaming;
+  `IsCoercive.sharp_eq_inverse`, the proof-independent metric spray, and
+  `normalGeodesicSpray_conv` are checked.  The exact
+  `MapCInfConvOnCompacts.ode_solutionAt` interface is now stated in
+  `Analysis/ODE`; its proof remains the first genuine analytic stop, with one
+  honest `sorry` for compact-tube and all-order variational-jet stability.
+  Forward normal phase, compact moving-root inverse stability, and the
+  `invVelSum` center-root application follow in that order.  See
+  `C4/B1_STAGE_MAP_RULING.md` and `C4/B1_MOVING_ROOT_CONSULT.md`.  This is
+  infrastructure only: the all-pairs chart
   tail, `StepB1RawInput`, textbook B1, and all endpoints remain 0%, and rounded
-  machinery estimates stay 94% / 86% / 57% for Step-B/B1 / Chapter 4 / whole
+  machinery estimates stay 95% / 87% / 60% for Step-B/B1 / Chapter 4 / whole
   HCG.
-- **Whole HCG project — conservative MACHINERY estimate ≈ 57%** (this is infrastructure coverage,
+- **Whole HCG project — conservative MACHINERY estimate ≈ 60%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
   unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved.**  The separate
   conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes
   explicit `StepB1RawInput`; do not read that consumer or the machinery % as
   completion of the endpoint theorem.
-  The riskiest open items are now the smooth support-sensitive target filler
-  (or a weighted-equation substitute), common-domain moving-stage implicit
-  solver convergence, global return-map injectivity, exact local-inverse
-  convergence, the chart-to-`tensor02CovDerivNormWith` bridge, and the concrete
-  B1 raw producer.  The former arbitrary-order numerical center recurrence is
-  one possible solver route, not a logically mandatory endpoint.  The `g_p`,
+  The riskiest open items are now, in dependency order: generic `C^infinity`
+  ODE endpoint stability; forward normal-phase specialization; compact
+  moving-root stability; selected normal-diagonal inverse/readout convergence;
+  `invVelSum` center-root convergence; global return-map injectivity; exact
+  local-inverse convergence; the chart-to-`tensor02CovDerivNormWith` bridge;
+  and the concrete B1 raw producer.  The former arbitrary-order numerical
+  center recurrence is one possible solver route, not a logically mandatory
+  endpoint.  The `g_p`,
   exp-diffeomorphism-radius, canonical sigma, pre-packing large-`D`, physical
   finite-hat, outer source-slot, `lbl412`, positive-Hessian/full-convexity, and
   Neumann ledgers are now checked.
@@ -516,10 +567,18 @@ its docstring BEFORE consumers are built against it.
   conditional root producer, D5 metric exhaustion, and flat nested-open
   convergence are no longer on this list.
 
-## 7. Real sorries in this tree (audited 2026-07-14)
+## 7. Real sorries in this tree (audited 2026-07-15)
 
-`MetricCompactness.lean` (unconditional endpoint) · `C4/MetricCompactnessInputs.lean`
-(conditional endpoint = the working target).  `C4/PullbackField.lean` has no
+`MetricCompactness.lean` (unconditional endpoint) ·
+`C4/MetricCompactnessInputs.lean` (conditional endpoint) ·
+`C4/StepB1RawProducer.lean` (`MetricCompactBase.exists_b1_raw`, concrete B1
+producer) · `Analysis/ODE/CInfConvergence.lean`
+(`MapCInfConvOnCompacts.ode_solutionAt`, the first live all-order analytic
+frontier) · `NoncollapseInjectivity.lean` (`flowInj_of_vol`, the separately
+declared CGT frontier).  The ODE theorem's statement is checked but its proof
+and the concrete B1 theorem remain 0%.
+
+`C4/PullbackField.lean` has no
 remaining proof `sorry`: the unconsumed ordinary `compDataFwd`/`compDataRev`
 wrappers were removed, while the D1b separated `compSepFwd`/`compSepRev` organs
 remain proved.  `C4/StepB1ApproxIso.lean` has no `sorry` after the

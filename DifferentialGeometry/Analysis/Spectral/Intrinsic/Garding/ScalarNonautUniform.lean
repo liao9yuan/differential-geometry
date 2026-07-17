@@ -192,7 +192,11 @@ private theorem traceCast_jet_bdd
       riemannianFiberNormSq (I := I) (M := M) q 1 (1 + i) x
         ((iteratedCovGrad (I := I) q 1 1 i
           (scalarFluxCoeff (I := I) q (h t))).toSection x) ≤ B i) :
-    ∃ D : ℕ → ℝ, (∀ i, 0 ≤ D i) ∧
+    ∃ R D : ℕ → ℝ, (∀ i, 0 ≤ R i) ∧ (∀ i, 0 ≤ D i) ∧
+      (∀ i t, t ∈ A → ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) q 2 (0 + i) x
+          ((iteratedCovGrad (I := I) q 2 0 i
+            (scalarTraceCoeff (I := I) q (h t))).toSection x) ≤ R i) ∧
       ∀ i t, t ∈ A → ∀ x : M,
         riemannianFiberNormSq (I := I) (M := M) q 2 (0 + i) x
           ((iteratedCovGrad (I := I) q 2 0 i
@@ -224,14 +228,15 @@ private theorem traceCast_jet_bdd
   obtain ⟨R, hR_nn, hR⟩ := appRS_jet_bdd (I := I) (M := M) q Q S A F BS
     hF_nn hBS_nn hQ hS
   let D : ℕ → ℝ := fun i => 2 * R i + 2 * F i
-  refine ⟨D, fun i => add_nonneg (mul_nonneg (by norm_num) (hR_nn i))
-    (mul_nonneg (by norm_num) (hF_nn i)), ?_⟩
-  intro i t ht x
-  have hscalar :
+  have hscalar : ∀ i t, t ∈ A → ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) q 2 (0 + i) x
           ((iteratedCovGrad (I := I) q 2 0 i
             (scalarTraceCoeff (I := I) q (h t))).toSection x) ≤ R i := by
+    intro i t ht x
     simpa only [Q, S, scalar_trace_factor] using hR i t ht x
+  refine ⟨R, D, hR_nn, fun i => add_nonneg (mul_nonneg (by norm_num) (hR_nn i))
+    (mul_nonneg (by norm_num) (hF_nn i)), hscalar, ?_⟩
+  intro i t ht x
   have hcast : traceCast (I := I) q (h t) =
       scalarTraceCoeff (I := I) q (h t) +
         cometricDoubleTraceField (I := I) q 0 := by
@@ -251,7 +256,7 @@ private theorem traceCast_jet_bdd
     rfl
   rw [hsplit]
   exact (riemannianFiberNormSq_add_le (I := I) (M := M) q 2 (0 + i) x _ _).trans
-    (add_le_add (mul_le_mul_of_nonneg_left hscalar (by norm_num))
+    (add_le_add (mul_le_mul_of_nonneg_left (hscalar i t ht x) (by norm_num))
       (mul_le_mul_of_nonneg_left (hF i x) (by norm_num)))
 
 /-- On one short backward-time slab, the principal scalar commutator pairing
@@ -361,27 +366,30 @@ theorem cc_comm_unif
     _ ≤ Ct * J + Cd * J := add_le_add htrans hder
     _ = (Ct + Cd) * J := by ring
 
-/-- On one backward-time slab, the traced connection-difference arm has one
-support-independent adjacent-window constant at every order. -/
-theorem cc_conn_unif
+/-- On one backward-time slab, the second- and first-order scalar Laplacian
+difference coefficients have common pointwise covariant-jet envelopes. -/
+theorem lapCoeff_slab
     {D : RealTimeInterval}
     (G : RealizedMetricFamilyOn (I := I) (M := M) D)
     (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
     (T : D.RegularTime) :
     ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
-      (∀ s ∈ Set.Icc (0 : ℝ) tau, (T : ℝ) - s ∈ D.regular) ∧
-      ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧
-        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
-          |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
-              (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
-              (appCc (I := I) (M := M) (G.metric (T : ℝ)) 1 0
+      ∃ B₂ B₁ : ℕ → ℝ,
+        (∀ i, 0 ≤ B₂ i) ∧ (∀ i, 0 ≤ B₁ i) ∧
+        ∀ s ∈ Set.Icc (0 : ℝ) tau,
+          ((T : ℝ) - s ∈ D.regular) ∧
+          (∀ i x,
+            riemannianFiberNormSq (I := I) (M := M)
+                (G.metric (T : ℝ)) 2 (0 + i) x
+              ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 2 0 i
+                (scalarTraceCoeff (I := I) (G.metric (T : ℝ))
+                  (G.metric ((T : ℝ) - s)))).toSection x) ≤ B₂ i) ∧
+          ∀ i x,
+            riemannianFiberNormSq (I := I) (M := M)
+                (G.metric (T : ℝ)) 1 (0 + i) x
+              ((iteratedCovGrad (I := I) (G.metric (T : ℝ)) 1 0 i
                 (connTraceCoeff (I := I) (G.metric (T : ℝ))
-                  (G.metric ((T : ℝ) - s)))
-                (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 1 U)).toFun| ≤
-            C * ((∑ j ∈ Finset.range (n + 1),
-                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖) *
-              (∑ j ∈ Finset.range (n + 2),
-                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖)) := by
+                  (G.metric ((T : ℝ) - s)))).toSection x) ≤ B₁ i := by
   classical
   obtain ⟨tau, htau, htau_one, J, hJ_nn, hdata⟩ :=
     metricDiff_slab (I := I) (M := M) G hG T
@@ -412,8 +420,8 @@ theorem cc_conn_unif
     simpa only [q, P, gm] using (hdata s hs).2.2 i x
   obtain ⟨BF, hBF_nn, hBF⟩ := flux_jet_of_bdd (I := I) (M := M)
     q gm P A J hJ_nn htie hsmall hP
-  obtain ⟨BT, hBT_nn, hBT⟩ := traceCast_jet_bdd (I := I) (M := M)
-    q gm A BF hBF_nn hBF
+  obtain ⟨B₂, BT, hB₂_nn, hBT_nn, hB₂, hBT⟩ :=
+    traceCast_jet_bdd (I := I) (M := M) q gm A BF hBF_nn hBF
   obtain ⟨CA, hCA_nn, hCA⟩ :=
     exists_rfns_iteratedCovGrad_connDiffSection_tgrid
       (I := I) (M := M) q (by norm_num : (1 / 2 : ℝ) < 1)
@@ -449,17 +457,62 @@ theorem cc_conn_unif
         ((iteratedCovGrad (I := I) q 1 2 i (Cd s)).toSection x) ≤ BC i := by
     intro i s hs x
     simpa only [Cd] using hconn i s hs x
-  obtain ⟨BK, hBK_nn, hBK⟩ := appRS_jet_bdd (I := I) (M := M)
+  obtain ⟨B₁, hB₁_nn, hB₁⟩ := appRS_jet_bdd (I := I) (M := M)
     q Tr Cd A BT BC hBT_nn hBC_nn hTr hCd
   let Phi : ℝ → SmoothCcTensor q 1 0 := fun s =>
     connTraceCoeff (I := I) q (gm s)
   have hPhi : ∀ i s, s ∈ A → ∀ x : M,
       riemannianFiberNormSq (I := I) (M := M) q 1 (0 + i) x
-        ((iteratedCovGrad (I := I) q 1 0 i (Phi s)).toSection x) ≤ BK i := by
+        ((iteratedCovGrad (I := I) q 1 0 i (Phi s)).toSection x) ≤ B₁ i := by
     intro i s hs x
-    simpa only [Phi, Tr, Cd, connTraceCoeff] using hBK i s hs x
+    simpa only [Phi, Tr, Cd, connTraceCoeff] using hB₁ i s hs x
+  refine ⟨tau, htau, htau_one, B₂, B₁, hB₂_nn, hB₁_nn, ?_⟩
+  intro s hs
+  refine ⟨hreg s hs, ?_, ?_⟩
+  · intro i x
+    simpa only [q, gm] using hB₂ i s hs x
+  · intro i x
+    simpa only [q, gm, Phi] using hPhi i s hs x
+
+/-- On one backward-time slab, the traced connection-difference arm has one
+support-independent adjacent-window constant at every order. -/
+theorem cc_conn_unif
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (T : D.RegularTime) :
+    ∃ tau : ℝ, 0 < tau ∧ tau ≤ 1 ∧
+      (∀ s ∈ Set.Icc (0 : ℝ) tau, (T : ℝ) - s ∈ D.regular) ∧
+      ∀ n : ℕ, ∃ C : ℝ, 0 ≤ C ∧
+        ∀ s ∈ Set.Icc (0 : ℝ) tau, ∀ U : SmoothCcTensor (G.metric (T : ℝ)) 0 0,
+          |tensorL2Inner (I := I) (M := M) (G.metric (T : ℝ)) 0 0
+              (oneMinusConnLapSmoothIter (I := I) (G.metric (T : ℝ)) 0 0 n U).toFun
+              (appCc (I := I) (M := M) (G.metric (T : ℝ)) 1 0
+                (connTraceCoeff (I := I) (G.metric (T : ℝ))
+                  (G.metric ((T : ℝ) - s)))
+                (iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 1 U)).toFun| ≤
+            C * ((∑ j ∈ Finset.range (n + 1),
+                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖) *
+              (∑ j ∈ Finset.range (n + 2),
+                ‖iteratedCovGrad (I := I) (G.metric (T : ℝ)) 0 0 j U‖)) := by
+  classical
+  obtain ⟨tau, htau, htau_one, B₂, B₁, hB₂_nn, hB₁_nn, hcoeff⟩ :=
+    lapCoeff_slab (I := I) (M := M) G hG T
+  let q : SmoothRiemannianMetric I M := G.metric (T : ℝ)
+  let A : Set ℝ := Set.Icc (0 : ℝ) tau
+  let gm : ℝ → SmoothRiemannianMetric I M := fun s => G.metric ((T : ℝ) - s)
+  have hreg : ∀ s ∈ A, (T : ℝ) - s ∈ D.regular := by
+    intro s hs
+    exact (hcoeff s hs).1
+  let Phi : ℝ → SmoothCcTensor q 1 0 := fun s =>
+    connTraceCoeff (I := I) q (gm s)
+  have hPhi : ∀ i s, s ∈ A → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) q 1 (0 + i) x
+        ((iteratedCovGrad (I := I) q 1 0 i (Phi s)).toSection x) ≤ B₁ i := by
+    intro i s hs x
+    simpa only [q, gm, Phi] using (hcoeff s hs).2.2 i x
   obtain ⟨CG, hCG_nn, hCG⟩ :=
-    app_jet_of_bdd (I := I) (M := M) q 1 0 Phi A BK hBK_nn hPhi
+    app_jet_of_bdd (I := I) (M := M) q 1 0 Phi A B₁ hB₁_nn hPhi
   refine ⟨tau, htau, htau_one, ?_, fun n => ?_⟩
   · intro s hs
     exact hreg s hs

@@ -1,6 +1,9 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHs
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricScalarSmul
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
 /-!
 # Smooth scalar potential operators on the spectral scale
@@ -423,6 +426,234 @@ theorem scalarPotH0_pair
         scalarPotOp (I := I) (M := M) q η).le_opNorm u
     _ ≤ C * ‖u‖ := mul_le_mul_of_nonneg_right
       (scalarPot_pair_norm (I := I) (M := M) q ζ η hC hζη) (norm_nonneg u)
+
+private theorem smulHs_bound
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ U : SmoothCcTensor q 0 0,
+        ‖ccTensorToHs (I := I) (M := M) q 0 (m : Real)
+            (scalarSmul (I := I) (M := M) q 0 0 ζ U)‖ ≤
+          C * ‖ccTensorToHs (I := I) (M := M) q 0 (m : Real) U‖ := by
+  let zeta : Real → C^∞⟮I, M; Real⟯ := fun _ => ζ
+  have hzeta :
+      ContMDiffOn (I.prod 𝓘(Real, Real)) 𝓘(Real, Real) ∞
+        (fun p : M × Real => (zeta p.2 : M → Real) p.1)
+        ((Set.univ : Set M) ×ˢ (Set.univ : Set Real)) := by
+    exact (ζ.contMDiff.comp contMDiff_fst).contMDiffOn
+  obtain ⟨C, hC, hbound⟩ :=
+    smul_hs_unif (I := I) (M := M) q zeta
+      (K := ({0} : Set Real)) (S := Set.univ)
+      isCompact_singleton (Set.subset_univ _) hzeta m
+  refine ⟨C, hC, ?_⟩
+  intro U
+  simpa only [zeta] using hbound 0 (Set.mem_singleton 0) U
+
+/-- Multiplication by a fixed smooth scalar coefficient, completed from smooth
+tensors as a bounded map on the natural spectral Sobolev space `H^m(q)`. -/
+noncomputable def scalarPotHs
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ) :
+    tensorHs (I := I) (M := M) q 0 0 (m : Real) →L[Real]
+      tensorHs (I := I) (M := M) q 0 0 (m : Real) :=
+  ((ccToHsLin (I := I) (M := M) q 0 (m : Real)).comp
+      (scalarSmulLin (I := I) (M := M) q ζ)).extendOfNorm
+    (ccToHsLin (I := I) (M := M) q 0 (m : Real))
+
+/-- On every smooth spectral embedding, `scalarPotHs` is the genuine
+pointwise scalar multiplier. -/
+theorem scalarPotHs_core
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ)
+    (U : SmoothCcTensor q 0 0) :
+    scalarPotHs (I := I) (M := M) q ζ m
+        (ccTensorToHs (I := I) (M := M) q 0 (m : Real) U) =
+      ccTensorToHs (I := I) (M := M) q 0 (m : Real)
+        (scalarSmul (I := I) (M := M) q 0 0 ζ U) := by
+  obtain ⟨C, hC, hbound⟩ := smulHs_bound (I := I) (M := M) q ζ m
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) q 0 (m : Real)) :=
+    ccToHsLin_dense (I := I) (M := M) q 0 (by positivity)
+  change
+    (((ccToHsLin (I := I) (M := M) q 0 (m : Real)).comp
+        (scalarSmulLin (I := I) (M := M) q ζ)).extendOfNorm
+      (ccToHsLin (I := I) (M := M) q 0 (m : Real)))
+        ((ccToHsLin (I := I) (M := M) q 0 (m : Real)) U) =
+      ((ccToHsLin (I := I) (M := M) q 0 (m : Real)).comp
+        (scalarSmulLin (I := I) (M := M) q ζ)) U
+  apply LinearMap.extendOfNorm_eq hdense
+  refine ⟨C, ?_⟩
+  intro W
+  simpa only [ccToHsLin_apply, scalarSmulLin, LinearMap.comp_apply] using hbound W
+
+/-- The completed scalar potential is the fully applied rank-zero tensor
+coefficient action. -/
+theorem scalarPotHs_app
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ)
+    (U : tensorHs (I := I) (M := M) q 0 0 (m : Real)) :
+    scalarPotHs (I := I) (M := M) q ζ m U =
+      appHs q 0 0 m (scalarCc (I := I) (M := M) q ζ) U := by
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) q 0 (m : Real)) :=
+    ccToHsLin_dense (I := I) (M := M) q 0 (by positivity)
+  refine hdense.induction_on U (isClosed_eq ?_ ?_) ?_
+  · exact (scalarPotHs (I := I) (M := M) q ζ m).continuous
+  · exact (appHs q 0 0 m (scalarCc (I := I) (M := M) q ζ)).continuous
+  · intro W
+    simp only [ccToHsLin_apply]
+    rw [scalarPotHs_core, appHs_core, app_scalarCc]
+
+private theorem ccHs_inc
+    (q : SmoothRiemannianMetric I M) {τ σ : Real} (hτσ : τ ≤ σ)
+    (U : SmoothCcTensor q 0 0) :
+    tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0) hτσ
+        (ccTensorToHs (I := I) (M := M) q 0 σ U) =
+      ccTensorToHs (I := I) (M := M) q 0 τ U := by
+  apply tensorHs.ext
+  funext i
+  simp only [tensorHsInclusion_coeff_apply, ccTensorToHs_coeff]
+
+private theorem scalarPotH0_cc
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
+    (U : SmoothCcTensor q 0 0) :
+    scalarPotH0 (I := I) (M := M) q ζ
+        (ccTensorToHs (I := I) (M := M) q 0 1 U) =
+      ccTensorToHs (I := I) (M := M) q 0 0
+        (scalarSmul (I := I) (M := M) q 0 0 ζ U) := by
+  have hn1 : ((1 : ℕ) : Real) ≤ (1 : Real) := by norm_num
+  have h0n : (0 : Real) ≤ ((1 : ℕ) : Real) := by norm_num
+  have hdense : DenseRange (ScalarH1Core (I := I) (M := M) q).subtype :=
+    (tensorHsFiniteSupportSubmodule_dense
+      (I := I) (M := M) (g := q) (r := 0) (s := 0) (σ := 1)).denseRange_val
+  have hcompat (u : tensorHs (I := I) (M := M) q 0 0 1) :
+      scalarPotH0 (I := I) (M := M) q ζ u =
+        tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+          h0n
+          (scalarPotHs (I := I) (M := M) q ζ 1
+            (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+              hn1 u)) := by
+    refine hdense.induction_on u (isClosed_eq ?_ ?_) ?_
+    · exact (scalarPotH0 (I := I) (M := M) q ζ).continuous
+    · exact
+        (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+          h0n).continuous.comp
+            ((scalarPotHs (I := I) (M := M) q ζ 1).continuous.comp
+              (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+                hn1).continuous)
+    · intro v
+      let S : SmoothCcTensor q 0 0 :=
+        tensorHsSmoothRepr (I := I) (M := M) v.1 v.2
+      let W : SmoothCcTensor q 0 0 :=
+        scalarSmul (I := I) (M := M) q 0 0 ζ S
+      have hrepr :
+          ccTensorToHs (I := I) (M := M) q 0 1 S = v.1 := by
+        simpa only [ccToHsLin_apply, S] using
+          ccToHsLin_repr (I := I) (M := M) q 0
+            (show (0 : Real) ≤ 1 by norm_num) v.1 v.2
+      have hreprn :
+          tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+              hn1 v.1 =
+            ccTensorToHs (I := I) (M := M) q 0 ((1 : ℕ) : Real) S := by
+        rw [← hrepr]
+        exact ccHs_inc (I := I) (M := M) q hn1 S
+      calc
+        scalarPotH0 (I := I) (M := M) q ζ v.1 =
+            (tensorHsZeroEquivL2 (I := I) (M := M)
+              (tensorResolventL2_isCompactOperator
+                (I := I) (M := M) q 0 0)).symm
+              (SmoothCcTensor.toL2 W) := by
+          rw [scalarPotH0_apply, scalarPotOp_core, scalarPotCore_apply]
+        _ = ccTensorToHs (I := I) (M := M) q 0 0 W := by
+          apply tensorHs.ext
+          funext i
+          rw [tensorHsZeroEquivL2_symm_coeff, ccTensorToHs_coeff]
+        _ = tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+              h0n
+              (ccTensorToHs (I := I) (M := M) q 0 ((1 : ℕ) : Real) W) :=
+          (ccHs_inc (I := I) (M := M) q
+            h0n W).symm
+        _ = tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+              h0n
+              (scalarPotHs (I := I) (M := M) q ζ 1
+                (ccTensorToHs (I := I) (M := M) q 0 ((1 : ℕ) : Real) S)) := by
+          rw [scalarPotHs_core]
+        _ = tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+              h0n
+              (scalarPotHs (I := I) (M := M) q ζ 1
+                (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+                  hn1 v.1)) := by
+          rw [hreprn]
+  calc
+    scalarPotH0 (I := I) (M := M) q ζ
+        (ccTensorToHs (I := I) (M := M) q 0 1 U) =
+      tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+        h0n
+        (scalarPotHs (I := I) (M := M) q ζ 1
+          (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+            hn1 (ccTensorToHs (I := I) (M := M) q 0 1 U))) :=
+      hcompat _
+    _ = tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+        h0n
+        (ccTensorToHs (I := I) (M := M) q 0 ((1 : ℕ) : Real)
+          (scalarSmul (I := I) (M := M) q 0 0 ζ U)) := by
+      rw [ccHs_inc (I := I) (M := M) q hn1,
+        scalarPotHs_core]
+    _ = ccTensorToHs (I := I) (M := M) q 0 0
+        (scalarSmul (I := I) (M := M) q 0 0 ζ U) :=
+      ccHs_inc (I := I) (M := M) q h0n _
+
+/-- The natural-order scalar multiplier agrees with the legacy `H¹ → H⁰`
+multiplier after both outputs are included into `H⁰(q)`. -/
+theorem scalarPotHs_inc
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯)
+    (m : ℕ) (hm : (1 : Real) ≤ (m : Real))
+    (u : tensorHs (I := I) (M := M) q 0 0 (m : Real)) :
+    tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+        (zero_le_one.trans hm)
+        (scalarPotHs (I := I) (M := M) q ζ m u) =
+      scalarPotH0 (I := I) (M := M) q ζ
+        (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+          hm u) := by
+  have h0m : (0 : Real) ≤ (m : Real) := zero_le_one.trans hm
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) q 0 (m : Real)) :=
+    ccToHsLin_dense (I := I) (M := M) q 0 h0m
+  refine hdense.induction_on u (isClosed_eq ?_ ?_) ?_
+  · exact
+      (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+        h0m).continuous.comp
+          (scalarPotHs (I := I) (M := M) q ζ m).continuous
+  · exact
+      (scalarPotH0 (I := I) (M := M) q ζ).continuous.comp
+        (tensorHsInclusion (I := I) (M := M) (g := q) (r := 0) (s := 0)
+          hm).continuous
+  · intro U
+    simp only [ccToHsLin_apply]
+    rw [scalarPotHs_core,
+      ccHs_inc (I := I) (M := M) q h0m,
+      ccHs_inc (I := I) (M := M) q hm,
+      scalarPotH0_cc]
+
+/-- A jointly smooth scalar family has uniformly bounded completed
+`H^m(q) → H^m(q)` multipliers on each compact parameter set. -/
+theorem scalarPotHs_unif
+    (q : SmoothRiemannianMetric I M)
+    (zeta : Real → C^∞⟮I, M; Real⟯) {S K : Set Real}
+    (hK : IsCompact K) (hKS : K ⊆ S)
+    (hzeta : ContMDiffOn (I.prod 𝓘(Real, Real)) 𝓘(Real, Real) ∞
+      (fun p : M × Real => (zeta p.2 : M → Real) p.1)
+      ((Set.univ : Set M) ×ˢ S)) (m : ℕ) :
+    ∃ C : Real, 0 ≤ C ∧
+      ∀ t, t ∈ K → ‖scalarPotHs (I := I) (M := M) q (zeta t) m‖ ≤ C := by
+  obtain ⟨C, hC, hbound⟩ :=
+    smul_hs_unif (I := I) (M := M) q zeta hK hKS hzeta m
+  refine ⟨C, hC, ?_⟩
+  intro t ht
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) q 0 (m : Real)) :=
+    ccToHsLin_dense (I := I) (M := M) q 0 (by positivity)
+  unfold scalarPotHs
+  apply LinearMap.opNorm_extendOfNorm_le hdense hC
+  intro U
+  simpa only [ccToHsLin_apply, scalarSmulLin, LinearMap.comp_apply] using
+    hbound t ht U
 
 end IntrinsicSpectral
 end RicciFlow

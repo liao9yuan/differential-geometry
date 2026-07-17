@@ -62,6 +62,16 @@ theorem iteratedCovGrad_add (g : SmoothRiemannianMetric I M) (r s j : ℕ)
   | succ j ih =>
     rw [iteratedCovGrad_succ, iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_add]
 
+/-- **The iterated covariant gradient commutes with real scalar multiplication.**
+For every gradient order `j`, `∇^j (c • w) = c • ∇^j w`. -/
+theorem iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
+    (c : ℝ) (w : Integral.L2.SmoothCcTensor g r s) :
+    iteratedCovGrad g r s j (c • w) = c • iteratedCovGrad g r s j w := by
+  induction j with
+  | zero => simp only [iteratedCovGrad_zero]
+  | succ j ih =>
+    rw [iteratedCovGrad_succ, iteratedCovGrad_succ, ih, covGrad_smul]
+
 /-- **The iterated covariant gradient negates with the section.**  For every gradient order `j`,
 `∇^j (-w) = -∇^j w`.  Proven by induction on `j` from `iteratedCovGrad_zero`, `iteratedCovGrad_succ`
 and `covGrad_neg`. -/

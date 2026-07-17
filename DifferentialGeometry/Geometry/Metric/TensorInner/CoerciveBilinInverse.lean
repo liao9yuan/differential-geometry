@@ -53,6 +53,19 @@ noncomputable def sharp {B : E →L[Real] E →L[Real] Real}
   hco.continuousLinearEquivOfBilin.symm
     ((InnerProductSpace.toDual Real E).symm eta)
 
+/-- For a coercive bilinear form, `sharp` is the proof-independent ring
+inverse of its Gram operator applied to the Riesz representative. -/
+theorem sharp_eq_inverse {B : E →L[Real] E →L[Real] Real}
+    (hco : IsCoercive B) (eta : E →L[Real] Real) :
+    hco.sharp eta =
+      Ring.inverse (InnerProductSpace.continuousLinearMapOfBilin (𝕜 := Real) B)
+        ((InnerProductSpace.toDual Real E).symm eta) := by
+  change hco.continuousLinearEquivOfBilin.symm _ =
+    Ring.inverse
+      (↑hco.continuousLinearEquivOfBilin.toUnit : E →L[Real] E) _
+  rw [Ring.inverse_unit]
+  rfl
+
 /-- Applying the metric-flat map after `sharp` recovers the covector. -/
 @[simp] theorem apply_sharp {B : E →L[Real] E →L[Real] Real}
     (hco : IsCoercive B) (eta : E →L[Real] Real) :

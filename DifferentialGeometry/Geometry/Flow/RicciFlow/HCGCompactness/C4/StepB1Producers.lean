@@ -170,74 +170,6 @@ theorem norm_pair_sub_self_le {Φ : P × Q → E'} {u : E' → P} {v w : E' → 
       (left_mem_segment ℝ (w x) (v x)) (right_mem_segment ℝ (w x) (v x))
   rwa [hdiag] at hmvt
 
-/-- **Constant sequences converge to themselves** in `MapCInfConvOnCompacts` — the `A`-slot of
-`MapCInfConvOnCompacts.comp` when the outer map (the chart center of mass) is `k`-independent. -/
-theorem mapCInfConv_const {U : Set E'} (Φ : E' → P) :
-    MapCInfConvOnCompacts U (fun _ : ℕ => Φ) Φ := by
-  intro K _ _ p ε hε
-  exact ⟨0, fun k _ r _ x _ => by
-    simpa [mapDerivNorm, sub_self] using hε.le⟩
-
-/-- **Pairing preserves `C^∞` convergence on compacts.**  The `B`-slot builder for
-`MapCInfConvOnCompacts.comp` when the inner map is the `(weights, targets)` pair: the order-`r`
-derivative of the pair difference is the `prod` of the component derivatives
-(`iteratedFDeriv_prodMk`), whose norm is the `max` of the component norms
-(`ContinuousMultilinearMap.opNorm_prod`). -/
-theorem mapCInfConv_prodMk {U : Set E'} (hU : IsOpen U)
-    {u : ℕ → E' → P} {uinf : E' → P} {v : ℕ → E' → Q} {vinf : E' → Q}
-    (hu : MapCInfConvOnCompacts U u uinf) (hv : MapCInfConvOnCompacts U v vinf)
-    (huc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (u k) U)
-    (huinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) uinf U)
-    (hvc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (v k) U)
-    (hvinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) vinf U) :
-    MapCInfConvOnCompacts U (fun k y => (u k y, v k y)) (fun y => (uinf y, vinf y)) := by
-  intro K hK hKU p ε hε
-  obtain ⟨k1, hk1⟩ := hu K hK hKU p ε hε
-  obtain ⟨k2, hk2⟩ := hv K hK hKU p ε hε
-  refine ⟨max k1 k2, fun k hk r hr x hx => ?_⟩
-  have hxU : x ∈ U := hKU hx
-  have hle : ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
-  have hcu : ContDiffAt ℝ (r : ℕ∞) (fun y => u k y - uinf y) x :=
-    (((huc k).sub huinfc).contDiffAt (hU.mem_nhds hxU)).of_le hle
-  have hcv : ContDiffAt ℝ (r : ℕ∞) (fun y => v k y - vinf y) x :=
-    (((hvc k).sub hvinfc).contDiffAt (hU.mem_nhds hxU)).of_le hle
-  have heq : (fun y => (u k y, v k y) - (uinf y, vinf y))
-      = fun y => (u k y - uinf y, v k y - vinf y) := by
-    funext y; simp [Prod.mk_sub_mk]
-  have hkey : mapDerivNorm r (fun y => (u k y, v k y)) (fun y => (uinf y, vinf y)) x
-      = max (mapDerivNorm r (u k) uinf x) (mapDerivNorm r (v k) vinf x) := by
-    simp only [mapDerivNorm]
-    rw [heq, iteratedFDeriv_prodMk hcu hcv le_rfl,
-      ContinuousMultilinearMap.opNorm_prod]
-  rw [hkey]
-  exact max_le (hk1 k (le_trans (le_max_left k1 k2) hk) r hr x hx)
-    (hk2 k (le_trans (le_max_right k1 k2) hk) r hr x hx)
-
-/-- **Tupling preserves `C^∞` convergence on compacts** — the `Fintype`-pi analog of
-`mapCInfConv_prodMk`, packaging the per-slot target convergences into the `(ι → E)`-valued
-points-tuple the chart center of mass consumes. -/
-theorem mapCInfConv_pi {ι : Type*} [Fintype ι] {U : Set E'} (hU : IsOpen U)
-    {v : ι → ℕ → E' → Q} {vinf : ι → E' → Q}
-    (hv : ∀ i, MapCInfConvOnCompacts U (v i) (vinf i))
-    (hvc : ∀ i k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (v i k) U)
-    (hvinfc : ∀ i, ContDiffOn ℝ (∞ : WithTop ℕ∞) (vinf i) U) :
-    MapCInfConvOnCompacts U (fun k y i => v i k y) (fun y i => vinf i y) := by
-  intro K hK hKU p ε hε
-  choose k0 hk0 using fun i => hv i K hK hKU p ε hε
-  refine ⟨Finset.univ.sup k0, fun k hk r hr x hx => ?_⟩
-  have hxU : x ∈ U := hKU hx
-  have hle : ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
-  have hcd : ∀ i, ContDiffAt ℝ ((r : ℕ∞) : WithTop ℕ∞) (fun y => v i k y - vinf i y) x :=
-    fun i => (((hvc i k).sub (hvinfc i)).contDiffAt (hU.mem_nhds hxU)).of_le hle
-  have heq : (fun y => (fun i => v i k y) - fun i => vinf i y)
-      = fun y (i : ι) => v i k y - vinf i y := rfl
-  have hkey : mapDerivNorm r (fun y i => v i k y) (fun y i => vinf i y) x
-      = ‖fun i => iteratedFDeriv ℝ r (fun y => v i k y - vinf i y) x‖ := by
-    simp only [mapDerivNorm]
-    rw [heq, iteratedFDeriv_pi hcd le_rfl, ContinuousMultilinearMap.opNorm_pi]
-  rw [hkey, pi_norm_le_iff_of_nonneg hε.le]
-  intro i
-  exact hk0 i k (le_trans (Finset.le_sup (Finset.mem_univ i)) hk) r hr x hx
 
 /-- **`lbl404` abstract endpoint — the averaged map converges to the identity in `C^∞` on
 compacts.**  If the weights `u k → u∞` and the targets `v k → v∞` converge in
@@ -269,38 +201,6 @@ theorem averagedCInf_id {U : Set E'} {V : Set (P × Q)} (hU : IsOpen U) (hV : Is
     (mapCInfConv_const (U := V) Φ) hpairc hpairinfc (fun _ => hΦc) hΦc hmap hmapk
   exact hcomp.congr hU (fun _ => Set.eqOn_refl _ _) (fun y hy => (hdiag y hy).symm)
 
-/-- **Postcomposition with a continuous linear map preserves `C^∞` convergence on compacts** —
-the summation step of the weight quotient (`L := Σ projections`): the order-`r` derivative of
-`L ∘ (difference)` is `L.compContinuousMultilinearMap` of the difference's derivative
-(`iteratedFDeriv_comp_left`), with operator-norm bound `‖L‖`. -/
-theorem mapCInfConv_clm {F' G' : Type*} [NormedAddCommGroup F'] [NormedSpace ℝ F']
-    [NormedAddCommGroup G'] [NormedSpace ℝ G']
-    {U : Set E'} (hU : IsOpen U) (L : F' →L[ℝ] G')
-    {u : ℕ → E' → F'} {uinf : E' → F'}
-    (hu : MapCInfConvOnCompacts U u uinf)
-    (huc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (u k) U)
-    (huinfc : ContDiffOn ℝ (∞ : WithTop ℕ∞) uinf U) :
-    MapCInfConvOnCompacts U (fun k y => L (u k y)) (fun y => L (uinf y)) := by
-  intro K hK hKU p ε hε
-  have hL1 : (0 : ℝ) < ‖L‖ + 1 := by positivity
-  obtain ⟨k0, hk0⟩ := hu K hK hKU p (ε / (‖L‖ + 1)) (div_pos hε hL1)
-  refine ⟨k0, fun k hk r hr x hx => ?_⟩
-  have hxU : x ∈ U := hKU hx
-  have hle : ((r : ℕ∞) : WithTop ℕ∞) ≤ (∞ : WithTop ℕ∞) := by exact_mod_cast le_top
-  have hcd : ContDiffAt ℝ ((r : ℕ∞) : WithTop ℕ∞) (fun y => u k y - uinf y) x :=
-    (((huc k).sub huinfc).contDiffAt (hU.mem_nhds hxU)).of_le hle
-  have heq : (fun y => L (u k y) - L (uinf y)) = ⇑L ∘ fun y => u k y - uinf y := by
-    funext y; simp [Function.comp_apply, map_sub]
-  have hbase : ‖iteratedFDeriv ℝ r (fun y => u k y - uinf y) x‖ ≤ ε / (‖L‖ + 1) :=
-    hk0 k hk r hr x hx
-  simp only [mapDerivNorm]
-  rw [heq, ContinuousLinearMap.iteratedFDeriv_comp_left L hcd le_rfl]
-  calc ‖L.compContinuousMultilinearMap (iteratedFDeriv ℝ r (fun y => u k y - uinf y) x)‖
-      ≤ ‖L‖ * ‖iteratedFDeriv ℝ r (fun y => u k y - uinf y) x‖ :=
-        ContinuousLinearMap.norm_compContinuousMultilinearMap_le _ _
-    _ ≤ (‖L‖ + 1) * (ε / (‖L‖ + 1)) := by
-        refine mul_le_mul (by linarith [norm_nonneg L]) hbase (norm_nonneg _) hL1.le
-    _ = ε := mul_div_cancel₀ ε (ne_of_gt hL1)
 
 /-- **The normalized weight family** `w_i := num_i / Σ_j num_j` — the reusable abstraction of the
 book's POU weight quotient (`lbl400`, chapter4.tex L1633–59): the `χ∘J⋅ψ∘J` products are the

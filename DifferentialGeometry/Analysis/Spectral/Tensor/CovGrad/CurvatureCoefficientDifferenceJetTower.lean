@@ -8121,7 +8121,10 @@ theorem ricciArmOrder0CurvCoeff_backgroundDifference_perOrder_l2_ballUniform
   exact mul_le_mul_of_nonneg_left hKi (by positivity)
 
 set_option linter.unusedVariables false in
-private theorem curvDiffGrid_productTerm_integral_tame_le
+/-- A product of tensor-jet fibre norms on one antidiagonal has a tame
+integral bound from a zeroth-order pointwise bound, the top-order `L²` norm,
+and the corresponding Gagliardo--Nirenberg estimates. -/
+theorem grid_prod_int_le
     (g₀ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     {R : ℝ} (hR : 0 ≤ R)
@@ -8678,7 +8681,7 @@ theorem antidiagonalTupleGrid_integral_ballUniform_tameWindow
       intro n hn e he
       have hn_le : n ≤ i := by have := Finset.mem_range.mp hn; omega
       have hsum_e : ∑ m, e m = i := Finset.Nat.mem_antidiagonalTuple.mp he
-      have hres := curvDiffGrid_productTerm_integral_tame_le (I := I) (M := M) g₀ P
+      have hres := grid_prod_int_le (I := I) (M := M) g₀ P
         (norm_nonneg (iteratedCovGrad (I := I) g₀ 0 2 i P)) i hi1 hLam_nn hΛsup
         (le_refl _) (hCgn_nn i) hGNP n hn_le e hsum_e
       refine ⟨hres.1, ?_⟩

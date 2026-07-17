@@ -1816,7 +1816,11 @@ set_option linter.unusedVariables false in
 set_option maxRecDepth 16000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-private theorem exists_rfns_connDiffOrderFib_le_of_jetEnvelope
+/-- A pointwise background-covariant metric `2`-jet envelope uniformly bounds
+the order-zero and order-one connection-difference coefficients in the
+linearized Ricci tensor.  This low-regularity coefficient engine does not use
+a high Sobolev-order hypothesis. -/
+theorem ricci_coeff_rfns_le
     (g₀ : SmoothRiemannianMetric I M) {δ₀ : ℝ} (hδ₀ : δ₀ < 1) (B : ℝ) (hB : 0 ≤ B) :
     ∃ C : ℝ, 0 ≤ C ∧
       ∀ (g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
@@ -2127,7 +2131,7 @@ theorem exists_linearizedRicciConnDiffCoeff_realizedFam_sqrt_rfns_ballUniform
   obtain ⟨Csob, hCsob_nn, hCsob⟩ :=
     exists_Csob_convexPerturbation_pointwise_C2_le (I := I) (M := M) g₀ a ha_super
   obtain ⟨C, hC0, hcore⟩ :=
-    exists_rfns_connDiffOrderFib_le_of_jetEnvelope (I := I) (M := M) g₀ hδ₀ (Csob * R)
+    ricci_coeff_rfns_le (I := I) (M := M) g₀ hδ₀ (Csob * R)
       (by positivity)
   refine ⟨Real.sqrt C, Real.sqrt_nonneg _, ?_⟩
   intro T T' δ hδ_le hδ δ' hδ'_le hδ' hTball hT'ball s hs x

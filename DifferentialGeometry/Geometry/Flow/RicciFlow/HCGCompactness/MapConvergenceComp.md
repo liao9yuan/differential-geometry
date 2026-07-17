@@ -1,5 +1,13 @@
 # MapConvergenceComp.lean
 
+## 2026-07-15 compatibility split
+
+The generic composition implementation moved to
+`Analysis/Calculus/MapConvergenceComp.lean`; this path now preserves the old
+import API. Constant, product, finite-Pi, and CLM closures were moved out of
+`StepB1Producers`, and smooth ring inversion was added at the low layer. The
+compatibility module and its Step-B1 consumer checked successfully.
+
 ## Status
 
 Verified.  This file adds the reusable composition-convergence layer for

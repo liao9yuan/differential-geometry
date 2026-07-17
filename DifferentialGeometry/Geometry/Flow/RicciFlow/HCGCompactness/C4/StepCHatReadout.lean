@@ -134,9 +134,9 @@ def HasHatCmEqn
             (I := I) (X.obj (L.φ n)).metric x0 c)
           (mu, xi) = 0
 
-/-- A finite-hat configuration retains the invertible selected-branch center
-derivative and its strictly differentiable local implicit solution. -/
-def HasHatCmStrict
+/-- A finite-hat configuration retains the invertible center derivative and
+strict local implicit solution on one prescribed live source branch. -/
+def HasHatCmStrictAt
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
@@ -146,6 +146,7 @@ def HasHatCmStrict
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M)
     (q : LiveSlot L pb r → NNReal) (δ : LiveSlot L pb r → Real)
+    (alpha : LiveSlot L pb r)
     (mu : Fin (pb.A r) → Real)
     (pts : Fin (pb.A r) → (X.obj (L.φ n)).M)
     (join : (X.obj (L.φ n)).M → (X.obj (L.φ n)).M → Real →
@@ -211,15 +212,14 @@ def HasHatCmStrict
       (hcomplete.complete (L.φ n))
   letI : MetricSpace (X.obj (L.φ n)).M :=
     HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
-  ∃ gamma : LiveSlot L pb r,
-    ∃ (hq : 0 < q gamma)
+  ∃ (hq : 0 < q alpha)
         (e : OpenPartialHomeomorph (E × E) (E × E))
         (he : IsNormalDiag (I := I) (X.obj (L.φ n))
           (hcomplete.complete (L.φ n)) (hconn (L.φ n))
-          (seqCenterD hd P L n (gamma.1 : Nat)) (q gamma) (δ gamma) e),
+          (seqCenterD hd P L n (alpha.1 : Nat)) (q alpha) (δ alpha) e),
       NormalDiagFence (I := I) (X.obj (L.φ n))
-          (seqCenterD hd P L n (gamma.1 : Nat)) (q gamma) e ∧
-        let x0 := seqCenterD hd P L n (gamma.1 : Nat)
+          (seqCenterD hd P L n (alpha.1 : Nat)) (q alpha) e ∧
+        let x0 := seqCenterD hd P L n (alpha.1 : Nat)
         let B := IsNormalDiag.toBranch (I := I) (X.obj (L.φ n))
           (hcomplete.complete (L.φ n)) (hconn (L.φ n)) x0 hq he
         let c := centerOfMass (I := I) (X.obj (L.φ n)).metric
@@ -229,26 +229,82 @@ def HasHatCmStrict
         let xi : Fin (pb.A r) → E := fun i =>
           NormalCoordinates.normalChartAt
             (I := I) (X.obj (L.φ n)).metric x0 (pts i)
-        chartCmEqnB (I := I) (X.obj (L.φ n)).metric
-            (normal_enorm (I := I) (X.obj (L.φ n))) x0 B z (mu, xi) = 0 ∧
-          ∃ Lcm : E ≃L[Real] E,
-            HasFDerivAt
-                (fun u : E => chartCmEqnB (I := I) (X.obj (L.φ n)).metric
-                  (normal_enorm (I := I) (X.obj (L.φ n))) x0 B u (mu, xi))
-                (Lcm : E →L[Real] E) z ∧
-              ∃ (f : ((Fin (pb.A r) → Real) × (Fin (pb.A r) → E)) → E)
-                  (Df : ((Fin (pb.A r) → Real) ×
-                    (Fin (pb.A r) → E)) →L[Real] E),
-                f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
-                  (∀ᶠ params in nhds (mu, xi),
-                    chartCmEqnB (I := I) (X.obj (L.φ n)).metric
+        (∀ i, (z, xi i) ∈ e.target) ∧
+          z ∈ normalBall (I := I) (X.obj (L.φ n)) x0 ∧
+            chartCmEqnB (I := I) (X.obj (L.φ n)).metric
+                (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
+                z (mu, xi) = 0 ∧
+              ∃ Lcm : E ≃L[Real] E,
+                HasFDerivAt
+                    (fun u : E => chartCmEqnB (I := I) (X.obj (L.φ n)).metric
                       (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
-                      (f params) params = 0) ∧
-                  (∀ᶠ zp in nhds (z, (mu, xi)),
-                    chartCmEqnB (I := I) (X.obj (L.φ n)).metric
-                        (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
-                        zp.1 zp.2 = 0 →
-                      zp.1 = f zp.2)
+                      u (mu, xi))
+                    (Lcm : E →L[Real] E) z ∧
+                  ∃ (f : ((Fin (pb.A r) → Real) × (Fin (pb.A r) → E)) → E)
+                      (Df : ((Fin (pb.A r) → Real) ×
+                        (Fin (pb.A r) → E)) →L[Real] E),
+                    f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
+                      (∀ᶠ params in nhds (mu, xi),
+                        chartCmEqnB (I := I) (X.obj (L.φ n)).metric
+                          (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
+                          (f params) params = 0) ∧
+                      (∀ᶠ zp in nhds (z, (mu, xi)),
+                        chartCmEqnB (I := I) (X.obj (L.φ n)).metric
+                            (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
+                          zp.1 zp.2 = 0 →
+                          zp.1 = f zp.2)
+
+/-- Compatibility wrapper that forgets which live source branch supplied the
+strict finite-hat readout. -/
+def HasHatCmStrict
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : ∀ j : Nat, ProperMetricOn (I := I) (X.obj j))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ j,
+      letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
+      ConnectedSpace (X.obj j).M)
+    (q : LiveSlot L pb r → NNReal) (δ : LiveSlot L pb r → Real)
+    (mu : Fin (pb.A r) → Real)
+    (pts : Fin (pb.A r) → (X.obj (L.φ n)).M)
+    (join : (X.obj (L.φ n)).M → (X.obj (L.φ n)).M → Real →
+      (X.obj (L.φ n)).M)
+    (x : (X.obj (L.φ n)).M) (rad : Real)
+    (hcm :
+      letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M := (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M := (X.obj (L.φ n)).smooth
+      letI : IsManifold I 1 (X.obj (L.φ n)).M := IsManifold.of_le
+        (I := I) (M := (X.obj (L.φ n)).M) (n := ∞) (by decide)
+      letI : SigmaCompactSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).sigmaCompact
+      letI : T2Space (X.obj (L.φ n)).M := (X.obj (L.φ n)).t2
+      letI : ConnectedSpace (X.obj (L.φ n)).M := hconn (L.φ n)
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      letI : TopologicalSpace.MetrizableSpace (X.obj (L.φ n)).M :=
+        Manifold.metrizableSpace I (X.obj (L.φ n)).M
+      letI : T3Space (X.obj (L.φ n)).M := inferInstance
+      letI : RiemannianBundle
+          (fun z : (X.obj (L.φ n)).M ↦ TangentSpace I z) :=
+        (X.obj (L.φ n)).riemBundle (I := I)
+      letI : (z : (X.obj (L.φ n)).M) →
+          InnerProductSpace Real (TangentSpace I z) :=
+        (X.obj (L.φ n)).riemInner (I := I)
+      letI : IsContinuousRiemannianBundle E
+          (fun z : (X.obj (L.φ n)).M ↦ TangentSpace I z) :=
+        (X.obj (L.φ n)).riemBundle_cont (I := I)
+      letI : EMetricSpace (X.obj (L.φ n)).M :=
+        (X.obj (L.φ n)).emetricSpace (I := I)
+      letI : CompleteSpace (X.obj (L.φ n)).M :=
+        MetricComplete.complete (I := I) (X.obj (L.φ n))
+          (hcomplete.complete (L.φ n))
+      letI : MetricSpace (X.obj (L.φ n)).M :=
+        HopfRinow.riemMetricSpace (I := I) (M := (X.obj (L.φ n)).M)
+      CenterInput (I := I) (X.obj (L.φ n)).metric mu pts join x rad) : Prop :=
+  ∃ alpha : LiveSlot L pb r,
+    HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn q δ alpha
+      mu pts join x rad hcm
 
 /-- Select one minimizing scale before `D`, then join the sequence tail of its
 live branches with the pair-index tail of the actual finite-hat POU average.
@@ -455,7 +511,8 @@ theorem exists_hat_cm_tail
     exists_slot_min (I := I) hprof hre hcomplete hconn
   refine ⟨aMin, haMin, ?_⟩
   intro D _hD _hphys P L pb r
-  obtain ⟨q, δ, hqdata, _hqAcc, _hquarter, hbranch⟩ := hmin P L pb r
+  obtain ⟨q, δ, hqdata, _hqWide, _hqAcc, _herr, _hinvErr, _hquarter,
+      hbranch⟩ := hmin P L pb r
   refine ⟨q, δ, hqdata, ?_⟩
   filter_upwards [hbranch, aliveSlots_tail hd P L pb r] with n hn hstable
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
@@ -626,8 +683,8 @@ theorem exists_hat_cm_tail_support
                               (centerAverage.activeFill mu (ptsSeq a b)
                                 (fun y => y) x)
                               join x (radSeq a b x),
-                            HasHatCmStrict (I := I) hd P L pb r n hcomplete hconn
-                              q δ (mu x)
+                            HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn
+                              q δ alpha (mu x)
                               (centerAverage.activeFill mu (ptsSeq a b)
                                 (fun y => y) x)
                               join x (radSeq a b x) hcm := by
@@ -636,7 +693,8 @@ theorem exists_hat_cm_tail_support
     exists_slot_min (I := I) hprof hre hcomplete hconn
   refine ⟨aMin, haMin, ?_⟩
   intro D hD hphys P L pb r
-  obtain ⟨q, δ, hqdata, _hqAcc, _hquarter, hbranch⟩ := hmin P L pb r
+  obtain ⟨q, δ, hqdata, _hqWide, _hqAcc, _herr, _hinvErr, _hquarter,
+      hbranch⟩ := hmin P L pb r
   refine ⟨q, δ, hqdata, ?_⟩
   filter_upwards [hbranch, aliveSlots_tail hd P L pb r] with n hn hstable
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
@@ -710,7 +768,7 @@ theorem exists_hat_cm_tail_support
         hcomplete hconn q δ hqdata hn alpha (mu x) pts join x
         (radSeq a b x) hcm (hmu.sum_one x hx) (hs hx)
         (hN a ha b hbN x hx alpha)
-      simpa only [HasHatCmStrict] using ⟨alpha, hout⟩
+      simpa only [HasHatCmStrictAt] using hout
 
 /-- The support-local finite-hat readout with the intrinsic minimizing join.
 The selected branch now produces `StrictDistInput` directly on the same common
@@ -725,6 +783,10 @@ theorem exists_hat_cm_min
     (hconn : ∀ j,
       letI : TopologicalSpace (X.obj j).M := (X.obj j).topology
       ConnectedSpace (X.obj j).M) :
+    let N : NNReal :=
+      ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊
+    let T : NNReal := N⁻¹
     ∃ aMin : Real, 0 < aMin ∧
       ∀ {D : Real} (hD : 0 < D)
         (hphys : 8 * Real.exp hd.C < aMin * D)
@@ -737,6 +799,39 @@ theorem exists_hat_cm_min
               let rhoMin := aMin * hd.mu Rgamma
               0 < q gamma ∧ 0 < δ gamma ∧ 0 < rhoMin ∧
                 2 * rhoMin < (q gamma : Real)) ∧
+            (∀ gamma : LiveSlot L pb r,
+              6 * (q gamma : Real) <
+                hprof.phaseRadius (L.rInf (gamma.1 : Nat) + 1)) ∧
+            (∀ gamma : LiveSlot L pb r,
+              3 * hb.metricC 1 * (2 * (q gamma : Real)) ^ 2 ≤
+                (2 / 3 : Real) * (q gamma : Real)) ∧
+            (∀ gamma : LiveSlot L pb r,
+              PhaseFlow.phaseErr (normalPhaseK hb (2 * q gamma)) < T) ∧
+            (∀ gamma : LiveSlot L pb r,
+              N * (T - PhaseFlow.phaseErr
+                    (normalPhaseK hb (2 * q gamma)))⁻¹ *
+                  PhaseFlow.phaseErr (normalPhaseK hb (2 * q gamma)) < 1 / 24) ∧
+            Filter.Eventually
+              (fun n ↦ HasLiveBrFull (I := I) P L pb r n
+                hcomplete hconn aMin q δ)
+              Filter.atTop ∧
+            (∀ᶠ n in Filter.atTop, ∀ gamma : LiveSlot L pb r,
+              let Rgamma := L.rInf (gamma.1 : Nat) + 1
+              let rho := aMin * hd.mu Rgamma
+              let x := seqCenterD hd P L n (gamma.1 : Nat)
+              letI : TopologicalSpace (X.obj (L.φ n)).M :=
+                (X.obj (L.φ n)).topology
+              letI : ChartedSpace H (X.obj (L.φ n)).M :=
+                (X.obj (L.φ n)).charted
+              letI : IsManifold I ∞ (X.obj (L.φ n)).M :=
+                (X.obj (L.φ n)).smooth
+              letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+                (X.obj (L.φ n)).t2TangentBundle
+              Metric.ball (0 : E) rho ⊆
+                  normalQuarter (I := I) (X.obj (L.φ n)) x ∧
+                rho ≤ hb.radius (L.φ n) x ∧
+                rho / 2 ≤ expRadiusGp
+                  (I := I) (X.obj (L.φ n)).metric x) ∧
             ∀ᶠ n in Filter.atTop,
               letI : TopologicalSpace (X.obj (L.φ n)).M :=
                 (X.obj (L.φ n)).topology
@@ -806,15 +901,43 @@ theorem exists_hat_cm_min
                         ∃ hcm : CenterInput (I := I)
                             (X.obj (L.φ n)).metric (mu x) pts join x
                             (radSeq a b x),
-                          HasHatCmStrict (I := I) hd P L pb r n hcomplete hconn
-                            q δ (mu x) pts join x (radSeq a b x) hcm := by
+                          HasHatCmStrictAt (I := I) hd P L pb r n hcomplete hconn
+                            q δ alpha (mu x) pts join x (radSeq a b x) hcm := by
   classical
   obtain ⟨aMin, haMin, hmin⟩ :=
     exists_slot_min (I := I) hprof hre hcomplete hconn
   refine ⟨aMin, haMin, ?_⟩
   intro D hD hphys P L pb r
-  obtain ⟨q, δ, hqdata, hqAcc, hquarter, hbranch⟩ := hmin P L pb r
-  refine ⟨q, δ, hqdata, ?_⟩
+  obtain ⟨q, δ, hqdata, hqWide, hqAcc, herr, hinvErr, hquarter, hbranch⟩ :=
+    hmin P L pb r
+  have hbranchFull : Filter.Eventually
+      (fun n ↦ HasLiveBrFull (I := I) P L pb r n
+        hcomplete hconn aMin q δ) Filter.atTop := by
+    filter_upwards [hbranch] with n hn
+    intro gamma
+    exact (hn gamma).1
+  have hscale : ∀ᶠ n in Filter.atTop, ∀ gamma : LiveSlot L pb r,
+      let Rgamma := L.rInf (gamma.1 : Nat) + 1
+      let rho := aMin * hd.mu Rgamma
+      let x := seqCenterD hd P L n (gamma.1 : Nat)
+      letI : TopologicalSpace (X.obj (L.φ n)).M :=
+        (X.obj (L.φ n)).topology
+      letI : ChartedSpace H (X.obj (L.φ n)).M :=
+        (X.obj (L.φ n)).charted
+      letI : IsManifold I ∞ (X.obj (L.φ n)).M :=
+        (X.obj (L.φ n)).smooth
+      letI : T2Space (TangentBundle I (X.obj (L.φ n)).M) :=
+        (X.obj (L.φ n)).t2TangentBundle
+      Metric.ball (0 : E) rho ⊆
+          normalQuarter (I := I) (X.obj (L.φ n)) x ∧
+        rho ≤ hb.radius (L.φ n) x ∧
+        rho / 2 ≤ expRadiusGp
+          (I := I) (X.obj (L.φ n)).metric x := by
+    filter_upwards [hquarter, hbranch] with n hquarterN hn
+    intro gamma
+    exact ⟨hquarterN gamma, (hn gamma).2⟩
+  refine ⟨q, δ, hqdata, hqWide, hqAcc, herr, hinvErr,
+    hbranchFull, hscale, ?_⟩
   filter_upwards [hbranch, hquarter, aliveSlots_tail hd P L pb r] with
       n hn hquarterN hstable
   letI : TopologicalSpace (X.obj (L.φ n)).M := (X.obj (L.φ n)).topology
@@ -944,7 +1067,7 @@ theorem exists_hat_cm_min
       have hout := exists_hat_cm_sol_at (I := I) hd P hre L pb r n
         hcomplete hconn q δ hqdata hn alpha (mu x) pts join x
         (radSeq a b x) hcm (hmu.sum_one x hx) (hs hx) hradCage
-      simpa only [HasHatCmStrict, pts, join] using ⟨alpha, hout⟩
+      simpa only [HasHatCmStrictAt, pts, join] using hout
 
 end HCGCompactness
 end DifferentialGeometry

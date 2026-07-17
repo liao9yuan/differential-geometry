@@ -39,6 +39,18 @@ theorem freeDiagInv_pos [Nontrivial E] :
   have hnn : (0 : NNReal) < ‖L‖₊ := by exact_mod_cast hnorm
   exact inv_pos.mpr hnn
 
+/-- Below the inverse threshold, the quantitative inverse error is monotone
+in the forward approximation error. -/
+theorem invErr_mono {N c c' : NNReal} (hcc' : c ≤ c') (hc' : c' < N⁻¹) :
+    N * (N⁻¹ - c)⁻¹ * c ≤ N * (N⁻¹ - c')⁻¹ * c' := by
+  have hnum : N * c ≤ N * c' :=
+    mul_le_mul_of_nonneg_left hcc' N.2
+  have hden_pos : 0 < N⁻¹ - c' := tsub_pos_iff_lt.mpr hc'
+  have hden : N⁻¹ - c' ≤ N⁻¹ - c := tsub_le_tsub_left hcc' N⁻¹
+  have hfrac : (N * c) / (N⁻¹ - c) ≤ (N * c') / (N⁻¹ - c') :=
+    div_le_div₀ (mul_nonneg N.2 c'.2) hnum hden_pos hden
+  simpa only [div_eq_mul_inv, mul_assoc, mul_comm, mul_left_comm] using hfrac
+
 /-- A sufficiently small forward error makes the quantitative inverse error
 strictly smaller than one. -/
 theorem invErr_lt_one {N c : NNReal}

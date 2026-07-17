@@ -477,11 +477,12 @@ order `m ≤ N` of a raw component of `D` is, by the reverse Christoffel order-p
 `zeroContentR (∇^i D)` of the iterated covariant gradients `i ≤ m`, which is in turn bounded
 by the fibre norm `‖(∇^i D).toSection b‖ = √(rfns (∇^i D)(b))`
 (`exists_zeroContentR_le_fiberNorm_on_pouKernel`). -/
-lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
+theorem bareJet_le_fiber
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
-    (D : SmoothCcTensor g r s) (α : M) (N : ℕ) :
+    (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
-      ∀ {y : EuclN}, y ∈ chartPouKernel (I := I) (M := M) α →
+      ∀ (D : SmoothCcTensor g r s) {y : EuclN},
+        y ∈ chartPouKernel (I := I) (M := M) α →
         bareChartJetContent (I := I) (M := M) g r s D α N y ≤
           C * ∑ i ∈ Finset.range (N + 1),
             Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r (s + i)
@@ -492,25 +493,24 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
 
   obtain ⟨Cpeel, hCpeel_nn, hCpeel⟩ :=
     iteratedFDeriv_rawPullR_le_zeroContent_sum (I := I) (M := M) g r s α N N (le_refl N)
-  set b' : EuclN → M := fun y : EuclN =>
-    (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb'_def
-  set FibAt : EuclN → ℕ → ℝ := fun y i =>
-    Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r (s + i) (b' y)
-      ((iteratedCovGrad (I := I) g r s i D).toSection (b' y))) with hFibAt_def
 
   have h_fib : ∀ i : ℕ, ∃ Ci : ℝ, 0 ≤ Ci ∧
-      ∀ {z : EuclN}, z ∈ chartPouKernel (I := I) (M := M) α →
+      ∀ (D : SmoothCcTensor g r s) {z : EuclN},
+        z ∈ chartPouKernel (I := I) (M := M) α →
         zeroContentR (I := I) (M := M) g r (s + i)
-          (iteratedCovGrad (I := I) g r s i D) α z ≤ Ci * FibAt z i := by
+          (iteratedCovGrad (I := I) g r s i D) α z ≤
+          Ci * Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r (s + i)
+            ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
+            ((iteratedCovGrad (I := I) g r s i D).toSection
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm z)))) := by
     intro i
     obtain ⟨Ci, hCi_nn, hCi⟩ :=
       exists_zeroContentR_le_fiberNorm_on_pouKernel (I := I) (M := M) g r (s + i) α
-    refine ⟨Ci, hCi_nn, fun {z} hz => ?_⟩
+    refine ⟨Ci, hCi_nn, fun D {z} hz => ?_⟩
     refine (hCi (iteratedCovGrad (I := I) g r s i D) hz).trans ?_
     refine mul_le_mul_of_nonneg_left (le_of_eq ?_) hCi_nn
     letI : Bundle.RiemannianBundle (fun w : M => TensorRSSpace r (s + i) I w) :=
       Tensor0SBundle.tensorRS_riemannianBundle (I := I) (M := M) g r (s + i)
-    simp only [hFibAt_def, hb'_def]
     rw [riemannianFiberNormSq_eq_tensorInnerPointwise (I := I) (M := M) g r (s + i)
       ((extChartAt I α).symm ((toEuclidean (E := E)).symm z))
       ((iteratedCovGrad (I := I) g r s i D).toSection
@@ -527,9 +527,11 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     (Fin s → Fin (Module.finrank ℝ E))) : ℝ) with hNpair_def
   have hNpair_nn : 0 ≤ Npair := by positivity
   refine ⟨Npair * (Cpeel * (((N : ℝ) + 1) * Cfibmax)), by positivity, ?_⟩
-  intro y hyK
+  intro D y hyK
   set b : M := (extChartAt I α).symm ((toEuclidean (E := E)).symm y) with hb_def
-  set Fib : ℕ → ℝ := fun i => FibAt y i with hFib_def
+  set Fib : ℕ → ℝ := fun i =>
+    Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r (s + i) b
+      ((iteratedCovGrad (I := I) g r s i D).toSection b)) with hFib_def
   have hFib_nn : ∀ i, 0 ≤ Fib i := fun i => Real.sqrt_nonneg _
   set FibSum : ℝ := ∑ i ∈ Finset.range (N + 1), Fib i with hFibSum_def
   have hFibSum_nn : 0 ≤ FibSum := Finset.sum_nonneg fun i _ => hFib_nn i
@@ -541,9 +543,9 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
         (iteratedCovGrad (I := I) g r s i D) α y ≤ Cfibmax * Fib i := by
     intro i hi
     have hiN : i < N + 1 := Finset.mem_range.mp hi
-    have hzc := hCfib i hyK
+    have hzc := hCfib i D hyK
     refine hzc.trans ?_
-    rw [hFib_def]
+    rw [hFib_def, hb_def]
     exact mul_le_mul_of_nonneg_right
       (Finset.le_sup' Cfib (Finset.mem_range.mpr hiN)) (Real.sqrt_nonneg _)
 
@@ -604,5 +606,20 @@ lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
     _ = Npair * ((Cpeel * (((N : ℝ) + 1) * Cfibmax)) * FibSum) := by
         rw [Finset.sum_const, Finset.card_univ, nsmul_eq_mul, hNpair_def]
     _ = (Npair * (Cpeel * (((N : ℝ) + 1) * Cfibmax))) * FibSum := by ring
+
+/-- Compatibility form of `bareJet_le_fiber` for a fixed tensor. -/
+lemma bareChartJetContent_le_sqrt_fiberNormSq_sum
+    (g : SmoothRiemannianMetric I M) (r s : ℕ)
+    (D : SmoothCcTensor g r s) (α : M) (N : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ∀ {y : EuclN}, y ∈ chartPouKernel (I := I) (M := M) α →
+        bareChartJetContent (I := I) (M := M) g r s D α N y ≤
+          C * ∑ i ∈ Finset.range (N + 1),
+            Real.sqrt (riemannianFiberNormSq (I := I) (M := M) g r (s + i)
+              ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
+              ((iteratedCovGrad (I := I) g r s i D).toSection
+                ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)))) := by
+  obtain ⟨C, hC, h⟩ := bareJet_le_fiber (I := I) (M := M) g r s α N
+  exact ⟨C, hC, h D⟩
 
 end DifferentialGeometry.PDE.RicciFlow

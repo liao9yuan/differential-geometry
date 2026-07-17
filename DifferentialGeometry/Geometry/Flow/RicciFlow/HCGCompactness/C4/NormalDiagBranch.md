@@ -48,3 +48,18 @@ This is checked infrastructure, not completion of `StepB1RawInput` or the
 textbook B1 theorem; both remain 0%.  The explicit selected-branch architecture
 acceptance is 100%.  These helpers close a local transport seam but do not
 change endpoint accounting; dedicated Step-B/B1 machinery remains about 77%.
+
+## 2026-07-16 same-source branch coherence
+
+`IsNormalDiag.eqOnSource` proves that two fenced quantitative normal-diagonal
+branches with the same center and source radius agree as partial
+homeomorphisms.  The proof compares their intrinsic `normalPair` readouts and
+uses injectivity of `normalPairHome`; it adds no radius assumption and makes no
+claim about equality of unrelated totalized functions.
+
+This is the canonical coherence lemma consumed by
+`HasDiagPairConv.congr_stage` to move convergence onto the branch selected by
+the minimizing readout.  Focused verification and the targeted module refresh
+passed.  `StepB1RawInput` and textbook B1 remain theorem-level **0%**;
+dedicated Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and
+whole-HCG compactness machinery about **57%**.

@@ -18,18 +18,23 @@ fields of this predicate and must be supplied by genuine producer theorems.
 
 ## Remaining frontier
 
-The missing producer is non-autonomous scalar parabolic existence for a smooth
-time-dependent metric and potential on a closed manifold.  Existing heat
-semigroup and mild-solution APIs use one fixed metric and one fixed
-`L²(dμ_g)` space, so they do not construct an `IsHeatPotOn` witness for a
-moving metric.
+`IsHeatPotOn.mono` now restricts a classical solution along inclusions of the
+carrier and regular time sets.  It is the canonical interval-shrinking bridge
+used when independent coefficient and reconstruction windows are intersected.
+
+The generic low-layer existence problem remains separate, but the Ricci-flow
+Galerkin specialization now constructs `IsHeatPotOn` in
+`Entropy/ConjGalerkinClassical.lean`.  The next shared low-layer frontier is
+strict positivity and interval-local moving-mass variation, not existence of
+the Ricci-flow specialization.
 
 ## Honest progress
 
 - `IsHeatPotOn` interface: 100%.
-- `exists_heat_pot` theorem: not stated or proved (0%).
-- Dedicated conjugate-heat existence machinery: about 5%; the analytic
-  existence producer itself remains 0%.
+- `IsHeatPotOn.mono`: theorem and dedicated restriction machinery 100%, with
+  focused and targeted verification passing.
+- Generic `exists_heat_pot`: still not stated or proved (0%); the separate
+  Ricci-flow Galerkin existence theorem is complete in its higher layer.
 - Perelman no-local-collapsing and `ham3_noncollapse`: not proved (0%).
 
 Focused verification passed without warnings or `sorry`.

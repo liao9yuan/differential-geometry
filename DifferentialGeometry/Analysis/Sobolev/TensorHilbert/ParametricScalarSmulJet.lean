@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.ParametricAppCcJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
+import DifferentialGeometry.Analysis.Integration.Measure.Properties
 import DifferentialGeometry.Tensor.RSTensor.RankZero
 
 /-!
@@ -54,14 +55,81 @@ private theorem rank_zero_one (x : M) (c : Tensor0SSpace 0 I x) :
   exact congrArg (Tensor0SSpace.toModel c) (Subsingleton.elim Fin.elim0 v)
 
 /-- The rank-zero mixed coefficient induced by a smooth scalar function. -/
-private noncomputable def scalarCc (g : SmoothRiemannianMetric I M)
+noncomputable def scalarCc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) : SmoothCcTensor g 0 0 where
   toSection := tensorRSField_smulByFun ∞ (zeta : M → ℝ) zeta.contMDiff
     ((Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
       (I := I) (M := M) ∞).toTensorRSField ∞)
   hasCompactSupport := HasCompactSupport.of_compactSpace _
 
-private theorem app_scalarCc (g : SmoothRiemannianMetric I M)
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
+/-- The scalar readout of a rank-zero scalar coefficient is its defining
+smooth function. -/
+@[simp] theorem scalar0_scalarCc (g : SmoothRiemannianMetric I M)
+    (zeta : C^∞⟮I, M; ℝ⟯) :
+    TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+        (scalarCc (I := I) (M := M) g zeta).toSection =
+      (zeta : M → ℝ) := by
+  funext x
+  simp only [scalarCc, TensorRSField.scalar0,
+    Tensor0SField.toScalarField, TensorRSField.rs0_apply,
+    tensorRSField_smulByFun_apply]
+  change Tensor0SSpace.toModel
+    ((((zeta : M → ℝ) x) •
+      ((Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
+        (I := I) (M := M) ∞).toTensorRSField ∞ x))
+      (Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
+        (I := I) (M := M) ∞ x)) Fin.elim0 = (zeta : M → ℝ) x
+  rw [ContinuousLinearMap.smul_apply, Tensor0SField.toRS0_apply,
+    rank_zero_one, Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply, Tensor0SField.one0_apply,
+    smul_eq_mul, mul_one]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] in
+/-- Either the manifold is empty, or it admits a strictly positive smooth
+rank-zero tensor of unit Riemannian mass. -/
+theorem unit_init_or_empty (g : SmoothRiemannianMetric I M) :
+    IsEmpty M ∨
+      ∃ u0 : SmoothCcTensor g 0 0,
+        (∀ x : M, 0 <
+          TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+            u0.toSection x) ∧
+        (∫ x,
+            TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+              u0.toSection x
+          ∂(Measure.riemannianVolumeMeasure (I := I) (M := M) g)) = 1 := by
+  classical
+  rcases isEmpty_or_nonempty M with hM | hM
+  · exact Or.inl hM
+  · letI : Nonempty M := hM
+    let μ := Measure.riemannianVolumeMeasure (I := I) (M := M) g
+    letI : IsFiniteMeasure μ :=
+      Measure.riemannianVolumeMeasure_isFiniteMeasure_of_compactSpace
+        (I := I) (M := M) g
+    letI : μ.IsOpenPosMeasure :=
+      Measure.riemannianVolumeMeasure_isOpenPosMeasure
+        (I := I) (M := M) g
+    let vol : ℝ := (μ Set.univ).toReal
+    have hvol : 0 < vol := by
+      exact ENNReal.toReal_pos
+        (isOpen_univ.measure_pos μ Set.univ_nonempty).ne'
+        (measure_ne_top μ Set.univ)
+    let zeta : C^∞⟮I, M; ℝ⟯ :=
+      ⟨fun _ => vol⁻¹, contMDiff_const⟩
+    refine Or.inr ⟨scalarCc (I := I) (M := M) g zeta, ?_, ?_⟩
+    · intro x
+      rw [scalar0_scalarCc]
+      exact inv_pos.mpr hvol
+    · rw [scalar0_scalarCc]
+      change (∫ _x : M, vol⁻¹ ∂μ) = 1
+      rw [MeasureTheory.integral_const, smul_eq_mul,
+        MeasureTheory.measureReal_def]
+      exact mul_inv_cancel₀ hvol.ne'
+
+/-- Applying the rank-zero coefficient is pointwise scalar multiplication. -/
+theorem app_scalarCc (g : SmoothRiemannianMetric I M)
     (zeta : C^∞⟮I, M; ℝ⟯) (U : SmoothCcTensor g 0 0) :
     appCc (I := I) (M := M) g 0 0 (scalarCc (I := I) (M := M) g zeta) U =
       scalarSmul (I := I) (M := M) g 0 0 zeta U := by
@@ -78,6 +146,22 @@ private theorem app_scalarCc (g : SmoothRiemannianMetric I M)
         (U.toSection x c) = ((zeta : M → ℝ) x) • U.toSection x c
   rw [ContinuousLinearMap.smul_apply, Tensor0SField.toRS0_apply,
     rank_zero_one]
+
+omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
+    [BoundarylessManifold I M] in
+/-- The scalar readout of a rank-zero scalar multiplier is ordinary pointwise
+scalar multiplication. -/
+theorem scalar0_smul_cc (g : SmoothRiemannianMetric I M)
+    (zeta : C^∞⟮I, M; ℝ⟯) (U : SmoothCcTensor g 0 0) (x : M) :
+    TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+        (scalarSmul (I := I) (M := M) g 0 0 zeta U).toSection x =
+      (zeta : M → ℝ) x *
+        TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) U.toSection x := by
+  simp only [TensorRSField.scalar0, Tensor0SField.toScalarField,
+    TensorRSField.rs0_apply]
+  change ((((zeta : M → ℝ) x) • U.toSection x) _).toModel Fin.elim0 = _
+  rw [ContinuousLinearMap.smul_apply, Tensor0SSpace.toModel_smul,
+    ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
@@ -123,7 +207,9 @@ private theorem joint_rs_smul {r s : ℕ} {S : Set ℝ}
 
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless]
     [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
-private theorem scalarCc_joint (g : SmoothRiemannianMetric I M)
+/-- Joint smoothness of scalar coefficients realizes joint smoothness of their
+rank-zero mixed-tensor coefficients. -/
+theorem scalarCc_joint (g : SmoothRiemannianMetric I M)
     (zeta : ℝ → C^∞⟮I, M; ℝ⟯) {S : Set ℝ}
     (hzeta : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞
       (fun p : M × ℝ => (zeta p.2 : M → ℝ) p.1)

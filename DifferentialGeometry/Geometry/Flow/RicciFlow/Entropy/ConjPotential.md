@@ -41,7 +41,15 @@ passed without a warning.
 
 The existing operator results and both joint coefficient theorems pass focused
 verification.  The opaque scalar-map normal form reduced the focused check from
-a deterministic timeout to a clean pass.  A named-module refresh is pending.
+a deterministic timeout to a clean pass.  The named-module export now also
+passes.
+
+`conjCoeff_bound` exports the pointwise estimate that was previously buried in
+the proof of `conjA1_short`: on one nontrivial closed reversed-time interval,
+the absolute scalar coefficient is bounded by a single nonnegative constant,
+uniformly in space.  Its proof uses `scalar_unif` and compactness of the
+terminal scalar-curvature range; it adds no consumer assumption.  Focused and
+targeted verification pass without local warnings.
 
 ## Progress accounting
 
@@ -49,12 +57,14 @@ a deterministic timeout to a clean pass.  A named-module refresh is pending.
 - A1 operator and `conjA1_short`: complete (100%).
 - `conjCoeff_joint` and `conjCoeff_rev`: theorem and dedicated geometric
   producer machinery complete (100%), focused verified.
+- `conjCoeff_bound`: theorem and dedicated pointwise-bound machinery complete
+  (100%), focused and targeted verified.
 - The uniform scalar-multiplier jet and finite-pairing producers are now also
   complete (100%); they remain machinery, not the final conjugate-heat theorem.
 - The separate genuine A2/A1 input producers and their dedicated machinery:
   complete (100%); `ConjStrong.conj_strong_exists` now completes their
   specialized spectral strong-solution assembly (100%).
-- Classical moving-metric conjugate-heat existence theorem: not proved (0%);
-  its dedicated analytic machinery is about 70%.  The next exact producer is
-  the strong-to-classical bridge `heatpot_of_maxreg` (theorem 0%).
+- The Galerkin classical moving-metric conjugate-heat existence theorem is
+  complete in `ConjGalerkinClassical.lean`; the separate
+  `heatpot_of_maxreg` route remains theorem-level 0%.
 - Perelman no-local-collapsing theorem: not proved (0%).

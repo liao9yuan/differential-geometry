@@ -49,3 +49,36 @@ theorem level pending Lean verification.  The Galerkin limit and second-order
 bootstrap are 0%.  Perelman no-local-collapsing and `ham3_noncollapse` remain
 0%; their dedicated analytic machinery is about 43%, and whole HCG machinery
 is about 54%.
+
+## 2026-07-16 arbitrary smooth scalar bridge
+
+`scalarLapDiff_eq` is now proved for every smooth compactly supported
+rank-zero tensor `U`, not only a finite spectral representative.  It identifies
+the scalar readout of `scalarLapDiffCc q h U` pointwise with
+
+```text
+Δ_h (scalar0 U) - Δ_q (scalar0 U).
+```
+
+The proof stays in the fully applied scalar normal form.  Two private helpers
+read the first and diagonal second fixed-background covariant jets of arbitrary
+`U` as `duSec (scalar0 U)` and `hessianSec (scalar0 U)`.  They use the existing
+rank-zero identity `TensorRSField.lift_scalar0`, then the existing
+`tensorRSCovariantDerivative_zeroS_unit_eval`, `secondRS_scalar`, and
+`lap_sub_conn` producers.  Traces are compared only after evaluation on the
+centered smooth orthonormal frame.  No whole-Hom equality, global frame,
+consumer assumption, or `HasLocallyConstantChartAt` is introduced.
+
+The former finite-core helper `lapDiff_unit` now delegates its geometric
+content to `scalarLapDiff_eq`; it retains only the genuine finite-core
+realization conversion.  Focused verification passes.  The first check was
+temporarily blocked by a missing upstream `RankZeroRealization` object file;
+the narrow upstream refresh succeeded, and this was not a proof obstruction.
+
+Honest accounting: `scalarLapDiff_eq` is 100% at theorem level and its dedicated
+arbitrary-smooth realization bridge is 100%.  The eventual Galerkin
+heat-potential endpoint remains unstated/unproved (0%); this closes one genuine
+geometric producer but does not by itself prove passage of the Galerkin PDE to
+the limit.  Perelman noncollapsing remains 0% at endpoint-theorem level; its
+dedicated machinery is approximately 95% through the current heat-potential
+lane, while whole HCG machinery remains approximately 59%.

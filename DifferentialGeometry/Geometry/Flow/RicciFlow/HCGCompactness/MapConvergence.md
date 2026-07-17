@@ -1,5 +1,12 @@
 # MapConvergence.lean — F7 convergence-of-maps + AA-for-maps engine (2026-06-11)
 
+## 2026-07-15 compatibility split
+
+The generic convergence definitions and elementary projections moved to
+`Analysis/Calculus/MapConvergence.lean`. This file keeps the established import
+path and the HCG-specific Arzelà--Ascoli extraction. Public namespaces and
+declaration names are unchanged, and narrow verification passed.
+
 MSM135 Ch4 subsection *Compactness of maps*: the Euclidean `C^p`/`C^∞` convergence
 definitions for maps (`lbl373`) and the Arzelà–Ascoli-for-maps engine the isometry
 corollary `lbl374` consumes. **Now fully sorry-free and axiom-clean** (the former
