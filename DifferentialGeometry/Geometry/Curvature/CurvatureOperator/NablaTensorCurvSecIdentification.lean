@@ -34,7 +34,6 @@ theorem nablaTensorCurvSec_tensor0SCov_eq_nablaTensor0SCurv
       nablaTensor0SCurv (I := I) g s X Y Z A x :=
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem nablaTensorCurvSec_diag_frameSum_eq_nablaTensor0SCurv_diag_frameSum
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

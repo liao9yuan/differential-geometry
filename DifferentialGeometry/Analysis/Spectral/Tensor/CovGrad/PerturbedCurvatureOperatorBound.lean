@@ -55,7 +55,6 @@ theorem gZeroInner_self_le_of_g1_self_le
   rw [← htie x v v] at hlb
   linarith
 
-set_option linter.unusedSectionVars false in
 theorem gZeroInner_self_le_neumann_of_g1_unit
     (g₀ g₁ : SmoothRiemannianMetric I M) (P : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -111,7 +110,6 @@ private lemma gNorm_triangle
   rw [hsq]
   linarith [hcs]
 
-set_option linter.unusedSectionVars false in
 private lemma gNorm_sq_sub_eq_self_le
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x)
     {Ka Cb : ℝ} (hKa : 0 ≤ Ka) (hCb : 0 ≤ Cb) {p : ℝ} (hp : 0 ≤ p)

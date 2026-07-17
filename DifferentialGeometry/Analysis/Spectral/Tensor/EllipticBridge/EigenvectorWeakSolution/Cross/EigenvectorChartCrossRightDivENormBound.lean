@@ -162,7 +162,6 @@ end PerSummandBound
 section MeasurabilityTransfer
 
 
-set_option linter.unusedSectionVars false in
 private lemma aestronglyMeasurable_weighted_of_chartL2
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : EuclN → ℝ}

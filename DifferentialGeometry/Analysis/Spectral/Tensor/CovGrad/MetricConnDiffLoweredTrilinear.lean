@@ -127,7 +127,6 @@ noncomputable def tensor0SProdKappaFib {p q : ℕ} (x : M)
       (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) p x).toContinuousLinearMap)
 
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SProdKappaFib_apply {p q : ℕ} (x : M)
     (κ : Tensor0SBundle.Tensor0SSpace q I x) (D : Tensor0SBundle.Tensor0SSpace p I x) :
     tensor0SProdKappaFib (I := I) x κ D =
@@ -187,7 +186,6 @@ noncomputable def metricConnDiffLoweredFib (gm gA gB : SmoothRiemannianMetric I 
     (trilinFormToModel (TangentSpace I x) (metricConnDiffLoweredTrilin (I := I) gm gA gB x))
 
 
-set_option linter.unusedSectionVars false in
 theorem metricConnDiffLoweredFib_toModel (gm gA gB : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 3 → TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (metricConnDiffLoweredFib (I := I) gm gA gB x) v =
@@ -221,7 +219,6 @@ noncomputable def ccBilinConnDiffLoweredFib (g₀ : SmoothRiemannianMetric I M)
     (trilinFormToModel (TangentSpace I x) (ccBilinConnDiffLoweredTrilin (I := I) g₀ V gA gB x))
 
 
-set_option linter.unusedSectionVars false in
 theorem ccBilinConnDiffLoweredFib_toModel (g₀ : SmoothRiemannianMetric I M)
     (V : SmoothCcTensor g₀ 0 2) (gA gB : SmoothRiemannianMetric I M) (x : M)
     (v : Fin 3 → TangentSpace I x) :
@@ -276,7 +273,6 @@ private theorem trilinKernel_section_contMDiff
   rw [trilinFormToModel_apply]
   rw [hframe0, hframe1, hframe2]
 
-set_option linter.unusedSectionVars false in
 theorem metricConnDiffLoweredFib_contMDiff (gm gA gB : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel 3 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SBundle.Tensor0SModel 3 ℝ E)

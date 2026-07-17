@@ -51,7 +51,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorBilinSymm_add (g : SmoothRiemannianMetric I M)
     (S T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g (S + T) x v w =
@@ -97,7 +96,6 @@ private theorem tensorL2_ext_of_tensorL2Coeff'
   have hT : (b.repr T) i = tensorL2Coeff (I := I) (M := M) hc T i := rfl
   rw [hS, hT, h i]
 
-set_option linter.unusedSectionVars false in
 private theorem allHs_of_weighted_summable
     (g : SmoothRiemannianMetric I M) (u : TensorL2 0 2 g)
     (hsum : ∀ σ : ℝ, 0 ≤ σ →
@@ -119,7 +117,6 @@ private theorem allHs_of_weighted_summable
   refine tensorL2_ext_of_tensorL2Coeff' (I := I) (M := M) g (fun i => ?_)
   rw [tensorHsToL2_tensorL2Coeff]
 
-set_option linter.unusedSectionVars false in
 private theorem ccTensorBilinSymm_finiteEigenCombo
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -150,7 +147,6 @@ def fibreSymmBilinForm (x : M) (T : Tensor0SBundle.TensorRSSpace 0 2 I x)
       (T (ContinuousMultilinearMap.constOfIsEmpty ℝ
         (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ))) ![w, v])
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorBilinSymm_eq_fibreSymmBilinForm (g : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g S x v w =
@@ -187,7 +183,6 @@ theorem fibreSymmBilinForm_smul (x : M) (a : ℝ) (T : Tensor0SBundle.TensorRSSp
     ContinuousMultilinearMap.smul_apply, smul_eq_mul, smul_eq_mul]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem fibreSymmBilinForm_sum {ι : Type*} (s : Finset ι) (x : M)
     (c : ι → ℝ) (T : ι → Tensor0SBundle.TensorRSSpace 0 2 I x)
     (v w : TangentSpace I x) :
@@ -714,7 +709,6 @@ def eigenRawIncrementMode
     φ i q.1 * tensorChartComponentOnModel (I := I) (M := M) g
       (eigenvectorSmooth (I := I) (M := M) g 0 2 i) α Jdx q.2
 
-set_option linter.unusedSectionVars false in
 lemma eigenRawIncrementMode_contDiffOn_ofOrder
     (g : SmoothRiemannianMetric I M) {T : ℝ} (kk : ℕ)
     (φ : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ → ℝ)
@@ -991,7 +985,6 @@ lemma exists_rawComponentRaw_eigen_pointwise_le_lambda_pow
   rw [heq, hxy, Real.norm_eq_abs] at h0
   exact h0
 
-set_option linter.unusedSectionVars false in
 lemma tensorChartComponentRaw_finiteEigenCombo
     (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
@@ -1017,7 +1010,6 @@ lemma tensorChartComponentRaw_finiteEigenCombo
         tensorChartComponentRaw_smul (I := I) (M := M), ih]
       simp [smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 lemma pdIter_rawCompOnE_contDiffOn
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2) (α : M)
     (Jdx : Fin 2 → Fin (Module.finrank ℝ E)) (L : List E) :
@@ -1276,7 +1268,6 @@ theorem eigenTimeSpatialProductMode_iteratedFDerivWithin_summable_majorant_ofOrd
             gcongr
           · exact mul_nonneg hSs_nn (tensorSobolevWeight_nonneg (I := I) (M := M) i _)
 
-set_option linter.unusedSectionVars false in
 lemma chartGramOnE_realize_eq_add_half_rawCompOnE
     (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

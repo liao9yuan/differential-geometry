@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [T2Space M]
 
 
-set_option linter.unusedSectionVars false in
 lemma chartRSTwist_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     ‖chartRSTwist (I := I) (M := M) α b r s T‖ ≤
@@ -91,7 +90,6 @@ lemma chartRSTwist_opNorm_le
   exact h_combined
 
 
-set_option linter.unusedSectionVars false in
 lemma chartRSTwistInv_opNorm_le
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E) :
     ‖chartRSTwistInv (I := I) (M := M) α b r s T‖ ≤

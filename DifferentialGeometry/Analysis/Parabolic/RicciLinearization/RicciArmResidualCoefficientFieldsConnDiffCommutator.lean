@@ -115,7 +115,6 @@ def frameConnDiffAACommKernel (g₀ g₁ : SmoothRiemannianMetric I M) (x : M)
         simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
         ring }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma frameConnDiffAACommKernel_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (x : M) (v0 v1 p q : TangentSpace I x) :
     frameConnDiffAACommKernel (I := I) g₀ g₁ x v0 v1 p q =
@@ -155,7 +154,6 @@ def connDiffAACommBiContrFibFixedFrame (g₀ g₁ : SmoothRiemannianMetric I M)
   ∑ a : Fin (Module.finrank ℝ E), ∑ b : Fin (Module.finrank ℝ E),
     connDiffAACommSummandFib (I := I) g₀ g₁ x (B a x) (B b x)
 
-set_option linter.unusedSectionVars false in
 lemma connDiffAACommBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMetric I M)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (D : Tensor0SSpace 2 I x) (v : Fin 2 → E) :
@@ -173,7 +171,6 @@ lemma connDiffAACommBiContrFibFixedFrame_toModel (g₀ g₁ : SmoothRiemannianMe
   refine Finset.sum_congr rfl (fun b _ => ?_)
   rw [Tensor0SSpace.toModelL_apply, connDiffAACommSummandFib_toModel]
 
-set_option linter.unusedSectionVars false in
 theorem connDiffAACommKernelBilin_homSection_contMDiff
     (g₀ g₁ : SmoothRiemannianMetric I M)
     {p q : Π b : M, TangentSpace I b}

@@ -36,7 +36,6 @@ section HeadlineGradientNormComparison
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem
     chartTrivializationNorm_grad_le_const_mul_chartTensorInnerPointwise_rs_succ_model_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -50,7 +49,6 @@ theorem
   chartTrivializationNorm_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
     (I := I) (M := M) g r (s + 1) α
 
-set_option linter.unusedSectionVars false in
 theorem
     chartTrivializationNorm_grad_le_const_mul_tensorInnerPointwise_chartRSTwist_succ_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -65,7 +63,6 @@ theorem
   chartTrivializationNorm_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
     (I := I) (M := M) g r (s + 1) α
 
-set_option linter.unusedSectionVars false in
 lemma tensorInnerPointwise_chartRSTwist_succ_nonneg
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -87,7 +84,6 @@ section CombinedGradient
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem
     chartTrivializationNorm_section_and_grad_le_const_mul_chartTensorInnerPointwise_rs_model_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
@@ -143,7 +139,6 @@ theorem
         (by linarith : K₁ ≤ K₀ + K₁) hQ_nn
     linarith
 
-set_option linter.unusedSectionVars false in
 theorem
     chartTrivializationNorm_section_and_grad_le_const_mul_tensorInnerPointwise_chartRSTwist_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :

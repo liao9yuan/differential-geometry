@@ -38,7 +38,6 @@ private lemma sq_add_le_two_mul_sq_add_sq_pou (a b : ℝ) :
   have hsq : 0 ≤ (a - b) ^ 2 := sq_nonneg _
   linarith
 
-set_option linter.unusedSectionVars false in
 theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧
@@ -414,7 +413,6 @@ theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport
         B * (((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) b) ^ 2 *
             (Tcov_sum + Tchr_sum) := h_RHS_eq
 
-set_option linter.unusedSectionVars false in
 theorem g_inner_gradFun_le_pou_weighted_atoms_on_pouTsupport_h1
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ A B : ℝ, 0 ≤ A ∧ 0 ≤ B ∧

@@ -170,7 +170,6 @@ def inverseMetricSharpField (g : SmoothRiemannianMetric I M) :
   toFun := fun x : M => inverseMetricSharpFib (I := I) g x
   contMDiff_toFun := inverseMetricSharpField_contMDiff (I := I) g
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma inverseMetricSharpField_apply (g : SmoothRiemannianMetric I M) (x : M) :
     inverseMetricSharpField (I := I) g x = inverseMetricSharpFib (I := I) g x := rfl
 

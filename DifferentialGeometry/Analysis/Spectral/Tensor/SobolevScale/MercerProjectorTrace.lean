@@ -66,7 +66,6 @@ lemma mem_eigenSubLevel (g : SmoothRiemannianMetric I M) (Λ : ℝ)
   rw [Set.Finite.mem_toFinset]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma finiteEigenCombo_toSection_apply (g : SmoothRiemannianMetric I M)
     (F : Finset (TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (x : M) :

@@ -164,7 +164,6 @@ lemma connDiff_chartBasis_pair_eq
   rw [LeviCivita_chartBasisVecFiber_eq (I := I) g' α hx j
         (chartBasisVecFiber (I := I) α k x)]
 
-set_option linter.unusedSectionVars false in
 lemma coord_christoffelCorrection_chartBasis_pair
     (g : SmoothRiemannianMetric I M) (α : M)
     {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)

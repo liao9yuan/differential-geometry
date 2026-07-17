@@ -58,7 +58,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
               chartCoord (E := E) i v * chartCoord (E := E) j w) •
           chartModelBasis E k := rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartChristoffelContraction_symm
     (g : SmoothRiemannianMetric I M) (α : M) (v w : E) (y : E) :
     chartChristoffelContraction (I := I) g α v w y =
@@ -504,7 +503,6 @@ lemma extChartAt_proj_contMDiffOn (α : M) :
     fun _ hp => hp
   exact hchart.comp hproj hsubset
 
-set_option linter.unusedSectionVars false in
 lemma chartChristoffel_extChartAt_proj_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :

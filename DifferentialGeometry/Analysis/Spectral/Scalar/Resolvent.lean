@@ -35,13 +35,11 @@ noncomputable def resolventL2 (g : SmoothRiemannianMetric I M) :
       Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g) :=
   (H1ComplToLp (I := I) (M := M) g).comp (resolvent (I := I) (M := M) g)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma resolventL2_apply (g : SmoothRiemannianMetric I M)
     (f : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
     resolventL2 (I := I) (M := M) g f =
       H1ComplToLp (I := I) (M := M) g (resolvent (I := I) (M := M) g f) := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma inner_resolventL2_eq_inner_resolvent
     (g : SmoothRiemannianMetric I M)
     (f h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -54,7 +52,6 @@ private lemma inner_resolventL2_eq_inner_resolvent
   rw [← hvar]
   exact real_inner_comm _ _
 
-set_option linter.unusedSectionVars false in
 theorem resolventL2_symm
     (g : SmoothRiemannianMetric I M)
     (f h : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -66,7 +63,6 @@ theorem resolventL2_symm
   rw [inner_resolventL2_eq_inner_resolvent (I := I) (M := M) g h f]
   exact real_inner_comm _ _
 
-set_option linter.unusedSectionVars false in
 theorem resolventL2_isSelfAdjoint (g : SmoothRiemannianMetric I M) :
     IsSelfAdjoint (resolventL2 (I := I) (M := M) g) := by
   rw [ContinuousLinearMap.isSelfAdjoint_iff_isSymmetric]

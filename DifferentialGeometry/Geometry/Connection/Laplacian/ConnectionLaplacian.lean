@@ -26,7 +26,6 @@ def connLaplacian_function [I.Boundaryless]
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) : M → ℝ :=
   Δ_g (I := I) g hf
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma connLaplacian_function_def [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
@@ -72,7 +71,6 @@ def connLaplacian_oneForm
               (smoothOrthoFrame (I := I) g x i) x
               (smoothOrthoFrame (I := I) g x i x))) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem connLaplacian_function_eq_laplaceBeltrami [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
@@ -94,7 +92,6 @@ theorem connLaplacian_function_contMDiff [I.Boundaryless]
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (connLaplacian_function (I := I) g hf) :=
   Δ_g_contMDiff (I := I) g hf
 
-set_option linter.unusedSectionVars false in
 theorem connLaplacian_function_add [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}
@@ -106,7 +103,6 @@ theorem connLaplacian_function_add [I.Boundaryless]
       connLaplacian_function_def]
   exact Δ_g_add (I := I) g hf hh x
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem connLaplacian_function_const [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (c : ℝ) (x : M) :
     connLaplacian_function (I := I) g

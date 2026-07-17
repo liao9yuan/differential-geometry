@@ -35,7 +35,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedSectionVars false in
 private theorem hsNorm_sq_toReal_eq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) :
@@ -43,7 +42,6 @@ private theorem hsNorm_sq_toReal_eq
       ((tensorPouSobolevHsNorm (I := I) (M := M) g k T) ^ 2).toReal := by
   rw [tensorPouSobolevHilbert_norm_eq, ← ENNReal.toReal_pow]
 
-set_option linter.unusedSectionVars false in
 theorem hsBlock_le_hsNorm_sq
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (k : ℕ)
     (T : SmoothCcTensor g r s) (α₀ : M)
@@ -229,7 +227,6 @@ private theorem continuousMultilinearMap_norm_sq_le_finrank_pow_mul_sum_basisFun
   rw [Finset.card_univ, Fintype.card_fun, Fintype.card_fin, Fintype.card_fin] at hcs
   exact hcs
 
-set_option linter.unusedSectionVars false in
 private theorem rawPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

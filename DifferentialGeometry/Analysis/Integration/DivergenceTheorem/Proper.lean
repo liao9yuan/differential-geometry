@@ -45,7 +45,6 @@ lemma pouFinset_for_compactSet
     (chartAtlasPOU I M).locallyFinite.closure
   exact hLF.finite_nonempty_inter_compact hK
 
-set_option linter.unusedSectionVars false in
 private lemma localDivergence_zero_of_eventuallyEq_zero [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {x : M}

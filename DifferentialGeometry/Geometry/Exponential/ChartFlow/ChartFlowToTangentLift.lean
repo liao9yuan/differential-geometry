@@ -133,7 +133,6 @@ section InitialValue
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 omit [I.Boundaryless] in
 theorem chartFlowOrbitLift_zero
     (p : M) (v : E) {Φ : (E × E) × ℝ → E × E}

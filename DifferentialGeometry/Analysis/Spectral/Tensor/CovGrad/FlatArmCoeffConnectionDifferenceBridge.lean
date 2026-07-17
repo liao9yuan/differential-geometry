@@ -93,7 +93,6 @@ private lemma connDiffLoweredScalar_contMDiffAt (g₀ g₁ : SmoothRiemannianMet
   rw [Bundle.contMDiffAt_totalSpace] at h_total
   exact h_total.2
 
-set_option linter.unusedSectionVars false in
 theorem connDiffLoweredCovec_section_contMDiff (g₀ g₁ : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 3 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (Tensor0SModel 3 ℝ E)

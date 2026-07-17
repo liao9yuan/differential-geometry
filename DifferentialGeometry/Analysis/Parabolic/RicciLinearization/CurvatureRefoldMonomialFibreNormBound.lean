@@ -84,7 +84,6 @@ private lemma metric_inner_left_sum (g : SmoothRiemannianMetric I M) (x : M)
     rw [ContinuousLinearMap.smul_apply, smul_eq_mul])
 
 
-set_option linter.unusedSectionVars false in
 private lemma metric_inner_orthonormal_pair (g₁ : SmoothRiemannianMetric I M) (x : M)
     {d : ℕ} (B : Fin d → TangentSpace I x)
     (hB : ∀ a b, g₁.inner x (B a) (B b) = if a = b then (1 : ℝ) else 0)
@@ -238,7 +237,6 @@ private lemma weight_row_g0norm_le
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_smul (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (c : ℝ) (v : TensorRSSpace r s I x) :
     riemannianFiberNormSq (I := I) (M := M) g r s x (c • v) =

@@ -96,7 +96,6 @@ private lemma extChartAt_target_eq_interior (α : M) :
     (extChartAt I α).target = interior ((extChartAt I α).target : Set E) :=
   (isOpen_extChartAt_target (I := I) α).interior_eq.symm
 
-set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem chartInvGramEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -118,7 +117,6 @@ theorem chartInvGramEuclid_contDiffOn
       exact toEuclidean_symm_mem_extChartAt_target (I := I) (M := M) hy
   exact hcomp
 
-set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 theorem chartChristoffelEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -183,7 +181,6 @@ private lemma euclidPartial_contDiff
   exact (ContinuousLinearMap.apply ℝ ℝ
     (EuclideanSpace.single i 1)).contDiff.comp hfd
 
-set_option linter.unusedSectionVars false in
 theorem tensorChartComp_euclidPartial_contDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -208,7 +205,6 @@ theorem tensorChartComp_euclidPartial_partial_contDiff
   euclidPartial_contDiff (E := E)
     (tensorChartComp_euclidPartial_contDiff (I := I) (M := M) g r s T α Idx Jdx l) k
 
-set_option linter.unusedSectionVars false in
 private lemma tensorChartComp_euclidPartial_hasCompactSupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

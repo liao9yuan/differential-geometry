@@ -59,7 +59,6 @@ private lemma sum_basisVec_coeff_apply
 
 end TensorHsSmoothReprAux
 
-set_option linter.unusedSectionVars false in
 theorem tensorHs_eq_finset_sum_of_finite_support
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {σ : ℝ} (T : tensorHs (I := I) (M := M) g r s σ)

@@ -166,7 +166,6 @@ theorem oneMinusConnLapSmooth_l2Inner_eq_add_covGrad
     hgreen]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (k : ℕ) (v : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s k (oneMinusConnLapSmooth (I := I) g r s v) =
@@ -191,7 +190,6 @@ theorem oneMinusConnLapSmoothIter_l2Inner_selfAdjoint (g : SmoothRiemannianMetri
     rw [ih (oneMinusConnLapSmooth (I := I) g r s v),
       oneMinusConnLapSmoothIter_oneMinusConnLapSmooth_comm]
 
-set_option linter.unusedSectionVars false in
 theorem oneMinusConnLapSmoothIter_add (g : SmoothRiemannianMetric I M) (r s : ℕ) (a b : ℕ)
     (T : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s (a + b) T =

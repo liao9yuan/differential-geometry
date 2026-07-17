@@ -25,7 +25,6 @@ section ChartFixedUniqueness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -56,7 +55,6 @@ theorem isMIntegralCurveAt_geodesicVectorFieldChart_eventuallyEq
       (γ := f₁) (γ' := f₂) (t₀ := t₀)
       hsmooth1 hf₁ hf₂ h0
 
-set_option linter.unusedSectionVars false in
 theorem projectCurve_eventuallyEq_of_isMIntegralCurveAt_geodesicVectorFieldChart
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -79,7 +77,6 @@ section GeodesicUniqueness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem isGeodesicAt_eventuallyEq
     {g : SmoothRiemannianMetric I M} {γ₁ γ₂ : ℝ → M} {α : M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}
@@ -101,7 +98,6 @@ theorem isGeodesicAt_eventuallyEq
   rw [projectCurve_apply, projectCurve_apply] at ht
   rw [← hproj₁ t, ← hproj₂ t]; exact ht
 
-set_option linter.unusedSectionVars false in
 theorem isGeodesicAt_eventuallyEq_of_lift_eq
     {g : SmoothRiemannianMetric I M} {γ₁ γ₂ : ℝ → M} {t₀ : ℝ}
     {f₁ f₂ : ℝ → TangentBundle I M}

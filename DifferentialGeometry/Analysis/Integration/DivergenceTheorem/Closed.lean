@@ -32,7 +32,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 lemma chartLocalMeasure_integral_eq_of_support_in_overlap
     (g : SmoothRiemannianMetric I M) (x₀ x₁ : M)
     (f : M → ℝ)
@@ -51,7 +50,6 @@ lemma chartLocalMeasure_integral_eq_of_support_in_overlap
       = ∫ x, f x ∂((chartLocalMeasure (I := I) g x₁).restrict U)
   rw [chartLocalMeasure_restrict_overlap_eq (I := I) g x₀ x₁]
 
-set_option linter.unusedSectionVars false in
 private lemma integrable_of_compactSupport_subset_chartSource
     [CompactSpace M] [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -92,7 +90,6 @@ private lemma integrable_of_compactSupport_subset_chartSource
           rw [setLIntegral_const, one_mul]
     _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top hμ_supp
 
-set_option linter.unusedSectionVars false in
 lemma integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α₀ : M)
@@ -166,7 +163,6 @@ lemma integral_riemannianVolumeMeasure_eq_chartLocal_of_support_in_chart
     exact ρ.sum_finsupport' x (mem_univ x) hfins
   rw [hsum_one, mul_one]
 
-set_option linter.unusedSectionVars false in
 theorem integral_divergence_eq_zero_of_compact
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

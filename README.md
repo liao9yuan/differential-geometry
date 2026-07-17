@@ -1,6 +1,6 @@
 # Differential Geometry in Lean 4
 
-An ongoing geometry library project: geometric analysis on Riemannian manifolds, now past short-time existence for the Ricci flow and heading toward Hamilton's 1982 theorem on three-manifolds with positive Ricci curvature.
+An ongoing geometry library project, currently working on geometric analysis on Riemannian manifolds and heading toward Ricci flow.
 
 ## Formalized theorems
 
@@ -8,7 +8,7 @@ Each is `sorry`-free (axioms: `propext, Classical.choice, Quot.sound`).
 
 > These three are the standard axioms of Lean's core library — propositional extensionality, the axiom of choice, and quotient soundness — on which all of classical mathematics in Mathlib rests. `#print axioms` lists everything a theorem transitively assumes: a `sorry` would surface as `sorryAx`, and any ad-hoc axiom would be named. An output of exactly these three therefore certifies that the proof is fully kernel-checked, with no `sorry` and no assumptions beyond the classical foundations.
 
-- [Ricci flow short-time existence](DifferentialGeometry/Geometry/Flow/RicciFlow/ShortTimeExistence.lean#L34) — on every closed Riemannian manifold $(M, g_0)$ the Ricci flow $\partial_t g = -2\,\mathrm{Ric}_{g(t)}$ has a solution on some $[0, T)$ with $g(0) = g_0$, jointly smooth in $(t, x)$ up to and including the initial time. Proved via the DeTurck reduction and a conjugating flow of the DeTurck vector field; a `#print axioms` audit is embedded at the declaration site.
+- [Ricci flow short-time existence](DifferentialGeometry/Geometry/Flow/RicciFlow/ShortTimeExistence.lean#L34) — on every closed Riemannian manifold $(M, g_0)$ the Ricci flow $\partial_t g = -2\,\mathrm{Ric}_{g(t)}$ has a solution on some $[0, T)$ with $g(0) = g_0$, jointly smooth in $(t, x)$ up to and including the initial time. Proved via the DeTurck's trick and a conjugating flow of the DeTurck vector field.
 - [Ricci–DeTurck flow short-time existence](DifferentialGeometry/Geometry/Flow/RicciFlow/ShortTime/DeTurckInitialDataExistence.lean#L142) — the gauge-fixed, strictly parabolic flow behind the reduction: a solution whose chart-Gram entries are jointly smooth on the closed time slab, together with joint smoothness of the DeTurck vector field.
 - [Ricci-tensor naturality under diffeomorphisms](DifferentialGeometry/Geometry/Flow/RicciFlow/Pullback/Naturality/RicciTensor.lean#L24) — $\mathrm{Ric}_{\Phi^* g}(v, w) = \mathrm{Ric}_g(d\Phi\, v, d\Phi\, w)$, the equivariance that transports the DeTurck solution back to a Ricci flow.
 - [Bochner formula](DifferentialGeometry/Analysis/Elliptic/Regularity/Bochner/Polarised.lean#L244) — the polarised, pointwise form.

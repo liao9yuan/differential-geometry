@@ -27,7 +27,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedSectionVars false in
 lemma self_mem_chartLeviCivitaGoodSet (α : M) :
     α ∈ chartLeviCivitaGoodSet (I := I) α := by
   classical
@@ -37,7 +36,6 @@ lemma self_mem_chartLeviCivitaGoodSet (α : M) :
   · have hint : I.IsInteriorPoint α := BoundarylessManifold.isInteriorPoint
     exact (ModelWithCorners.isInteriorPoint_iff).mp hint
 
-set_option linter.unusedSectionVars false in
 lemma iUnion_chartLeviCivitaGoodSet :
     (⋃ α : M, chartLeviCivitaGoodSet (I := I) α) = (Set.univ : Set M) := by
   classical
@@ -46,7 +44,6 @@ lemma iUnion_chartLeviCivitaGoodSet :
   refine mem_iUnion.mpr ⟨x, ?_⟩
   exact self_mem_chartLeviCivitaGoodSet (I := I) (α := x)
 
-set_option linter.unusedSectionVars false in
 lemma chartLeviCivita_chart_overlap
     (g : SmoothRiemannianMetric I M) (α β : M)
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -97,7 +94,6 @@ def leviCivitaStitched (g : SmoothRiemannianMetric I M) :
       (Π x : M, TangentSpace I x →L[ℝ] TangentSpace I x) :=
   fun σ x => chartLeviCivita (I := I) g x σ x
 
-set_option linter.unusedSectionVars false in
 lemma leviCivitaStitched_eq_chart
     (g : SmoothRiemannianMetric I M) (α : M)
     {Y : Π x : M, TangentSpace I x} {x : M}
@@ -109,7 +105,6 @@ lemma leviCivitaStitched_eq_chart
   exact chartLeviCivita_chart_overlap (I := I) g x α
     (self_mem_chartLeviCivitaGoodSet (I := I) (α := x)) hxα hY v
 
-set_option linter.unusedSectionVars false in
 lemma leviCivitaStitched_add_on_goodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     {σ σ' : Π x : M, TangentSpace I x} {x : M}
@@ -129,7 +124,6 @@ lemma leviCivitaStitched_add_on_goodSet
       ← leviCivitaStitched_eq_chart (I := I) g α hx hσ' v]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma leviCivitaStitched_leibniz_on_goodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     {σ : Π x : M, TangentSpace I x} {f : M → ℝ} {x : M}
@@ -151,7 +145,6 @@ lemma leviCivitaStitched_leibniz_on_goodSet
   simp [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
         ContinuousLinearMap.smulRight_apply]
 
-set_option linter.unusedSectionVars false in
 lemma leviCivitaStitched_isCovariantDerivativeOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     IsCovariantDerivativeOn (V := (TangentSpace I : M → Type _)) E

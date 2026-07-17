@@ -37,7 +37,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedSectionVars false in
 lemma chartPushedRaw_tensorChartComponentRaw_pouSmul_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)
@@ -72,7 +71,6 @@ lemma principalRotationFactor_contDiffOn
     (euclidPartial_contDiffOn_target (I := I) (M := M) α l
       (gramInvEntry_contDiffOn (I := I) (M := M) g r s α Q P₀))
 
-set_option linter.unusedSectionVars false in
 lemma covDerivLowerOrderTerm_pouSmul_eqOn_coeffFactors
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s)

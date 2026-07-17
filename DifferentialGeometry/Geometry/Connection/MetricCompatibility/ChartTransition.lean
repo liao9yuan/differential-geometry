@@ -35,7 +35,6 @@ private lemma fderivWithin_range_I_eq_fderiv' [I.Boundaryless]
     ModelWithCorners.Boundaryless.range_eq_univ (I := I)
   rw [h, fderivWithin_univ]
 
-set_option linter.unusedSectionVars false in
 private lemma tangentCoordChange_eq_chartTransitionAt' [I.Boundaryless]
     (α β : M) (p : M) :
     tangentCoordChange I α β p =
@@ -384,7 +383,6 @@ lemma chartTransitionMap_mem_interior_target [I.Boundaryless]
   rw [(isOpen_extChartAt_target (I := I) β).interior_eq]
   exact hTy_tgt
 
-set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartGramOnE_comp_chartTransitionMap [I.Boundaryless]
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -718,7 +716,6 @@ lemma chartTransitionMap_extChartAt_symm
     rw [extChartAt_source (I := I)]; exact hp_β
   exact (extChartAt I β).left_inv hp_β_src
 
-set_option linter.unusedSectionVars false in
 lemma chartInvGramBeta_mul_chartGramOnE_diag
     [NeZero (Module.finrank ℝ E)]
     (g : SmoothRiemannianMetric I M) (α β : M) {p : M}

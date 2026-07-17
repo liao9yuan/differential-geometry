@@ -62,14 +62,12 @@ lemma scalarOnE_contDiffOn (α : M) {f : M → ℝ}
     hf_on.comp hsymm (fun _ _ => mem_univ _)
   exact hcomp.contDiffOn
 
-set_option linter.unusedSectionVars false in
 lemma scalarOnE_contDiffWithinAt
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     ContDiffWithinAt ℝ ∞ (scalarOnE (I := I) α f) (extChartAt I α).target y :=
   scalarOnE_contDiffOn (I := I) α hf y hy
 
-set_option linter.unusedSectionVars false in
 lemma mfderiv_chartBasisVecFiber (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     {x : M} (hx : x ∈ (chartAt H α).source)
@@ -145,7 +143,6 @@ lemma mfderiv_chartBasisVecFiber (α : M)
   rw [hmfderiv_chartBasis]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem tangentSectionAction_chartLocal
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -176,7 +173,6 @@ lemma extChartAt_target_subset_interior_of_boundaryless [I.Boundaryless] (α : M
   intro y hy
   exact (isOpen_extChartAt_target (I := I) α).interior_eq.symm ▸ hy
 
-set_option linter.unusedSectionVars false in
 theorem tangentSectionAction_chartLocal_of_boundaryless [I.Boundaryless]
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -194,7 +190,6 @@ theorem tangentSectionAction_chartLocal_of_boundaryless [I.Boundaryless]
     extChartAt_target_subset_interior_of_boundaryless (I := I) α hx_target
   exact tangentSectionAction_chartLocal (I := I) α X hf hx hx_int
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_scalarOnE_contDiffOn_interior
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (i : Fin (Module.finrank ℝ E)) :
@@ -213,7 +208,6 @@ private lemma partialDeriv_scalarOnE_contDiffOn_interior
       (interior (extChartAt I α).target) := contDiffOn_const
   exact hfderiv.clm_apply hconst
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_scalarOnE_comp_extChartAt_contMDiffOn
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (i : Fin (Module.finrank ℝ E)) :
@@ -246,7 +240,6 @@ private lemma partialDeriv_scalarOnE_comp_extChartAt_contMDiffOn
     fun _ hx => hx.2
   exact hpartialM.comp hchart' hsubset
 
-set_option linter.unusedSectionVars false in
 theorem tangentSectionAction_contMDiffOn
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -281,7 +274,6 @@ theorem tangentSectionAction_contMDiffOn
     exact this
   · exact partialDeriv_scalarOnE_comp_extChartAt_contMDiffOn (I := I) α hf i
 
-set_option linter.unusedSectionVars false in
 theorem tangentSectionAction_contMDiffOn_baseSet [I.Boundaryless]
     (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -299,7 +291,6 @@ theorem tangentSectionAction_contMDiffOn_baseSet [I.Boundaryless]
     · congr 1
       exact (isOpen_extChartAt_target (I := I) α).interior_eq
 
-set_option linter.unusedSectionVars false in
 theorem tangentSectionAction_contMDiff [I.Boundaryless]
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) :

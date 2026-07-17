@@ -61,7 +61,6 @@ lemma chartTensor0SE_section_repr_chartTensor0SParallelExtend
       (fun y : M => Tensor0SSpace r I y) α).continuousLinearMapAt_symmL
     (R := ℝ) hb' _
 
-set_option linter.unusedSectionVars false in
 lemma chartLeviCivitaGoodSet_mem_tensor0S_baseSet
     {α x : M} (r : ℕ)
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :
@@ -71,7 +70,6 @@ lemma chartLeviCivitaGoodSet_mem_tensor0S_baseSet
   change x ∈ (trivializationAt E (TangentSpace I) α).baseSet
   exact chartLeviCivitaGoodSet_mem_baseSet (I := I) hx
 
-set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_repr_eventuallyEq_const
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -112,7 +110,6 @@ lemma chartTensor0SParallelExtend_repr_eventuallyEq_const
   exact chartTensor0SE_section_repr_chartTensor0SParallelExtend
     (I := I) r α b T₀ hy_U
 
-set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :
@@ -126,7 +123,6 @@ lemma chartTensor0SParallelExtend_repr_pullback_fderiv_eq_zero
   rw [Filter.EventuallyEq.fderiv_eq hev]
   exact fderiv_const_apply _
 
-set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_repr_pullback_fderiv_apply_eq_zero
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) (w : E) :
@@ -138,7 +134,6 @@ lemma chartTensor0SParallelExtend_repr_pullback_fderiv_apply_eq_zero
         (I := I) r α hb T₀]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartTensor0SParallelExtend_mdifferentiableAt
     (r : ℕ) (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace r I b) :

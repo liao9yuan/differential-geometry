@@ -1149,7 +1149,6 @@ private theorem weightedCovIBP_lpFiberJet_fin_regIneq
 
 set_option maxHeartbeats 1200000 in
 
-set_option linter.unusedSectionVars false in
 private theorem weightedCovIBP_lpFiberJet_fin_regLimit
     (g : SmoothRiemannianMetric I M) (k m i : ℕ) (_hk : 1 ≤ k) (_hi : 1 ≤ i) (_hik : i + 1 < k)
     (w : Integral.L2.SmoothCcTensor g 0 m) :

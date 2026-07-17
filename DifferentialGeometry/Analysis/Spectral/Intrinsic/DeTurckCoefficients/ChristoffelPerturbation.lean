@@ -113,7 +113,6 @@ lemma chartGramDiffSup_le_jet1
       chartMetricJet1DiffSup (I := I) (M := M) g₁ g₂ α y :=
   le_add_of_nonneg_right (chartGramPartialDiffSup_nonneg _ _ _ _)
 
-set_option linter.unusedSectionVars false in
 lemma chartGramPartialDiffSup_le_jet1
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M) (y : E) :
     chartGramPartialDiffSup (I := I) (M := M) g₁ g₂ α y ≤
@@ -134,7 +133,6 @@ lemma chartGramPartial2DiffSup_le_jet2
       chartMetricJet2DiffSup (I := I) (M := M) g₁ g₂ α y :=
   le_add_of_nonneg_left (chartMetricJet1DiffSup_nonneg _ _ _ _)
 
-set_option linter.unusedSectionVars false in
 lemma symm_mem_baseSet_of_mem_interior_target
     (α : M) {y : E} (hy : y ∈ interior (extChartAt I α).target) :
     ((extChartAt I α).symm y) ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -156,7 +154,6 @@ private lemma partialDeriv_contDiffOn_interior_of_contDiffOn
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-set_option linter.unusedSectionVars false in
 private lemma partial_chartGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (a l b : Fin (Module.finrank ℝ E)) :
@@ -165,7 +162,6 @@ private lemma partial_chartGramOnE_contDiffOn_int
   partialDeriv_contDiffOn_interior_of_contDiffOn (I := I) α
     ((chartGramOnE_contDiffOn (I := I) g α l b).mono interior_subset) a
 
-set_option linter.unusedSectionVars false in
 private lemma partial_chartInvGramOnE_contDiffOn_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (m k l : Fin (Module.finrank ℝ E)) :
@@ -189,7 +185,6 @@ def gramBracket (g : SmoothRiemannianMetric I M) (α : M)
     partialDeriv (E := E) j (chartGramOnE (I := I) g α l i) y -
     partialDeriv (E := E) l (chartGramOnE (I := I) g α i j) y
 
-set_option linter.unusedSectionVars false in
 lemma chartChristoffel_eq_sum_invGramOnE_bracket
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -233,7 +228,6 @@ private lemma exists_uniform_bound_of_family
   · intro y hy i
     exact (hC_bd i y hy).trans (Finset.le_sup' C (Finset.mem_univ i))
 
-set_option linter.unusedSectionVars false in
 private lemma exists_chartInvGramOnE_bound_on_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set E} (hK : IsCompact K) (hKsub : K ⊆ interior (extChartAt I α).target) :
@@ -422,7 +416,6 @@ theorem exists_chartChristoffel_lipschitz_on_compact
   refine h_pt.trans ?_
   refine mul_le_mul_of_nonneg_right (by linarith) hjet1_nn
 
-set_option linter.unusedSectionVars false in
 private lemma chartInvGramOnE_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M) (k l : Fin (Module.finrank ℝ E))
     {y : E} (hy : y ∈ interior (extChartAt I α).target) :

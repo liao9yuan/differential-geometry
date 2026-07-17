@@ -123,7 +123,6 @@ def IteratedDiffChartBilinearData.mk_from_hypotheses
 
 namespace IteratedDiffChartBilinearData
 
-set_option linter.unusedSectionVars false in
 private lemma m_zero_principal_integrand_eq
     {g : SmoothRiemannianMetric I M} {α : M}
     {u_h : H1Compl (I := I) (M := M) g}
@@ -138,7 +137,6 @@ private lemma m_zero_principal_integrand_eq
   rw [chosenMthMixedPartialChartPushedU_one_eq_chosenFirstPartial]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_one_cons_eq_chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -316,7 +314,6 @@ end IteratedDiffChartBilinearData
 
 namespace IteratedDiffChartBilinearData
 
-set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_two_cons_const_eq_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -328,7 +325,6 @@ private lemma chosenMthMixed_two_cons_const_eq_chosenSecond
   · rfl
   · rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_one_const_eq_chartPushedChosenFirstPartial
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -420,7 +416,6 @@ private lemma chosenMthMixed_three_cons_two_eq_chosenThird
   · rfl
   · rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chosenMthMixed_two_pair_eq_chosenSecond
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

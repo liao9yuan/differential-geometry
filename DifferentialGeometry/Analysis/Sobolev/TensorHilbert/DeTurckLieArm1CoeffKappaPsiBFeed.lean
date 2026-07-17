@@ -178,7 +178,6 @@ private lemma lieArm1_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : 
     exact h.symm
   exact add_left_cancel h2
 
-set_option linter.unusedSectionVars false in
 lemma lieArm1_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v =

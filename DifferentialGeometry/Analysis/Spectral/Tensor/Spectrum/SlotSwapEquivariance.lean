@@ -223,7 +223,6 @@ private lemma fst_eq_of_lambda_eq
   refine TensorNonzeroResolventEigenvalue.ext i.1 j.1 ?_
   linear_combination -h'
 
-set_option linter.unusedSectionVars false in
 private lemma tensorSobolevWeight_eq_of_fst_eq
     {i j : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2}
     (h : i.1 = j.1) (σ : ℝ) :
@@ -387,7 +386,6 @@ private lemma tensorL2Coeff_sum_smul_eigenbasis
     intro j hj
     rw [if_neg (fun h => hkS (by rw [h]; exact hj))]
 
-set_option linter.unusedSectionVars false in
 private lemma eq_sum_of_tensorL2Coeff_support
     (S : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (U : TensorL2 0 2 g)

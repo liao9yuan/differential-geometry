@@ -105,7 +105,6 @@ private lemma cutoffComponentEuclid_tsupport_subset
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-set_option linter.unusedSectionVars false in
 lemma chosenWeakPartial'_cutoffComponentEuclid_ae_eq_euclidPartial
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -173,7 +172,6 @@ lemma euclidPartial_chartPushedRaw_rawComponent_continuousOn'
   (euclidPartial_chartPushedRaw_contDiffOn
     (I := I) (M := M) g r s S α k Idx Jdx).continuousOn
 
-set_option linter.unusedSectionVars false in
 lemma cutoffComponentEuclid_continuous
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

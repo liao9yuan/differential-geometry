@@ -73,7 +73,6 @@ lemma exists_lowerOrderCoeff_uniform_bound_on_compact
     exact (hCw ⟨m, Idx, Jdx', p⟩ l hl y hy).trans
       (Finset.le_sup' Cw (Finset.mem_univ ⟨m, Idx, Jdx', p⟩))
 
-set_option linter.unusedSectionVars false in
 lemma exists_christoffel_bound_valence_range_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) (P N : ℕ)
     {K : Set EuclN} (hK : IsCompact K) (hK_sub : K ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -493,7 +492,6 @@ set_option synthInstance.maxHeartbeats 800000 in
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 lemma exists_zeroContentR_le_fiberNorm_on_compact
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {K_M : Set M} (hK_M : IsCompact K_M)

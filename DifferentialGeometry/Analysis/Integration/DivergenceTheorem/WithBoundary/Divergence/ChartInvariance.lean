@@ -33,7 +33,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 theorem integral_localDivergenceWithin_eq_of_interior_overlap_support [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -92,7 +91,6 @@ theorem integral_localDivergenceWithin_eq_of_interior_overlap_support [T2Space M
           ∂((chartLocalMeasure (I := I) g β).restrict U) from rfl]
   rw [h_meas_eq]
 
-set_option linter.unusedSectionVars false in
 private lemma chartLocalMeasure_open_pos_of_interior_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     {V : Set M} (hVopen : IsOpen V) {x₁ : M} (hx₁V : x₁ ∈ V)
@@ -246,7 +244,6 @@ private lemma exists_open_nbhd_positive
   intro y hy
   exact hV₀ y (hW_sub hy.1)
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smooth_bump_in_open [T2Space M]
     {V : Set M} (hVopen : IsOpen V) {x : M} (hxV : x ∈ V) :
     ∃ φ : M → ℝ, ContMDiff I 𝓘(ℝ) ∞ φ ∧ HasCompactSupport φ ∧
@@ -263,7 +260,6 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
 private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞) (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-set_option linter.unusedSectionVars false in
 private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -576,7 +572,6 @@ private theorem localDivergenceWithin_chart_invariance_pos [T2Space M]
       _ ≤ ∫ y, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) := hLB_total
   linarith
 
-set_option linter.unusedSectionVars false in
 theorem localDivergenceWithin_chart_invariance [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

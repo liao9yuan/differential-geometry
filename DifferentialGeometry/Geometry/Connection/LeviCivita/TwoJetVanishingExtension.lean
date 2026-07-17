@@ -164,7 +164,6 @@ private lemma chartE_section_repr_covApply_linExt_eventuallyEq
     rw [hb_def, (extChartAt I x₀).right_inv hy_tgt]
   rw [hreprVb, hφb]
 
-set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma chartChristoffel_differentiableAt_basepoint
     (g : SmoothRiemannianMetric I M) (x₀ : M) (i j m : Fin (Module.finrank ℝ E)) :
@@ -509,7 +508,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [CompactSpace M] 
       (linExtBump (I := I) x₀ : M → ℝ) b •
         trivFromE (I := I) x₀ b (P (extChartAt I x₀ b - extChartAt I x₀ x₀)) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma polyCoordExtensionTangent_basepoint (x₀ : M) (P : E → E) :
     polyCoordExtensionTangent (I := I) x₀ P x₀ = P 0 := by
   classical
@@ -629,7 +627,6 @@ theorem polyCoordExtensionTangent_smooth (x₀ : M) {P : E → E}
   rw [h_eq]
   exact h
 
-set_option linter.unusedSectionVars false in
 theorem covApply_polyCoordExtensionTangent_basepoint_eq
     (g : SmoothRiemannianMetric I M) (x₀ : M) {P : E → E} (hP : ContDiff ℝ ∞ P)
     (u : TangentSpace I x₀) :
@@ -920,7 +917,6 @@ private lemma jetCancelPoly_contDiff (g : SmoothRiemannianMetric I M) (x₀ : M)
     exact hb.const_smul _
   exact h1.add h2
 
-set_option linter.unusedSectionVars false in
 private lemma fderiv_jetCancelPoly_centred
     (g : SmoothRiemannianMetric I M) (x₀ : M) (v : TangentSpace I x₀)
     (Qbil : E →L[ℝ] E →L[ℝ] E) (u : E) :
@@ -955,7 +951,6 @@ private lemma fderiv_jetCancelPoly_centred
   rw [ContinuousLinearMap.neg_apply, hL]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tangentCoord_self (x₀ : M) (u : TangentSpace I x₀) :
     tangentCoord (I := I) x₀ u = u := trivToE_self_apply (I := I) x₀ u
 
@@ -968,7 +963,6 @@ private def christoffelCorrectionBilin (g : SmoothRiemannianMetric I M) (x₀ : 
             (trivToE (I := I) x₀ x₀)).smulRight
           (chartChristoffel (I := I) g x₀ i j k (extChartAt I x₀ x₀) • (chartModelBasis E) k))
 
-set_option linter.unusedSectionVars false in
 private lemma christoffelCorrectionBilin_apply (g : SmoothRiemannianMetric I M) (x₀ : M)
     (Y : E) (v : TangentSpace I x₀) :
     christoffelCorrectionBilin (I := I) g x₀ Y v =
@@ -1327,7 +1321,6 @@ private lemma fderiv_innerReprPoly_jetCancel (g : SmoothRiemannianMetric I M) (x
     refine Finset.sum_congr rfl (fun m _ => ?_)
     exact fderiv_jetCancel_Bsummand (I := I) g x₀ hPcd hP0 U u i j m
 
-set_option linter.unusedSectionVars false in
 private lemma psiDGamma_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
     (u : TangentSpace I x₀) :
     christoffelDerivQuadraticCorrection (I := I) g x₀ V u u =
@@ -1343,7 +1336,6 @@ private lemma psiDGamma_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
   rw [psiDGamma_apply, tangentCoord_self]
   simp only [map_sum, ContinuousLinearMap.map_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma psiGG_diag (g : SmoothRiemannianMetric I M) (x₀ : M) (V : E)
     (u : TangentSpace I x₀) :
     christoffelSquaredQuadraticCorrection (I := I) g x₀ V u u =

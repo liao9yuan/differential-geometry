@@ -151,7 +151,6 @@ private lemma vectorFieldAction_eq_zero_of_vectorField_eq_zero
     vectorFieldAction I M X f x = 0 := by
   simp [vectorFieldAction, hx]
 
-set_option linter.unusedSectionVars false in
 theorem compactlySupportedSmoothTangentSections_action_mem
     {X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯}
     (hX : X ∈ compactlySupportedSmoothTangentSections I M)
@@ -204,7 +203,6 @@ section CovariantDerivativeClosure
 
 variable [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 theorem compactlySupportedSmoothTangentSections_conn_mem_of_left
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -224,7 +222,6 @@ theorem compactlySupportedSmoothTangentSections_conn_mem_of_left
     simp [concreteConn_apply, hXx']
   simpa using this
 
-set_option linter.unusedSectionVars false in
 theorem compactlySupportedSmoothTangentSections_conn_mem_of_right
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -286,7 +283,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 open DifferentialGeometry.Integral.Measure
 
-set_option linter.unusedSectionVars false in
 theorem compactlySupportedSmoothFunctions_memLp
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -300,7 +296,6 @@ theorem compactlySupportedSmoothFunctions_memLp
   have hsup : HasCompactSupport ((f : M → ℝ)) := hf
   exact hcont.memLp_of_hasCompactSupport (μ := riemannianVolumeMeasure (I := I) (M := M) g) hsup
 
-set_option linter.unusedSectionVars false in
 private lemma exists_contMDiff_uniform_approx_sub_compact_support
     [T2Space M] [SigmaCompactSpace M]
     {φ : M → ℝ} (hφ : Continuous φ) {δ : ℝ} (hδ : 0 < δ) :
@@ -316,7 +311,6 @@ private lemma exists_contMDiff_uniform_approx_sub_compact_support
   have := g_approx x
   simpa [Real.dist_eq] using this
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_le_of_bound_and_support_le_measure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -364,7 +358,6 @@ private lemma eLpNorm_le_of_bound_and_support_le_measure
     _ = ENNReal.ofReal δ * μ K ^ (p.toReal⁻¹) := by rw [hδ_enorm]
     _ = μ K ^ (p.toReal⁻¹) * ENNReal.ofReal δ := by rw [mul_comm]
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smoothCompactSupport_eLpNorm_sub_le_of_continuous
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -467,7 +460,6 @@ private lemma exists_smoothCompactSupport_eLpNorm_sub_le_of_continuous
       _ = factor * ENNReal.ofReal δ := by rw [hμK_eq]
       _ ≤ ε := hδ_bound
 
-set_option linter.unusedSectionVars false in
 theorem compactlySupportedSmoothFunctions_denseRange_in_Lp
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -550,7 +542,6 @@ theorem compactlySupportedSmoothFunctions_denseRange_in_Lp
     _ ≤ ε / 2 := h_toReal_bound
     _ < ε := by linarith
 
-set_option linter.unusedSectionVars false in
 theorem compactlySupportedSmoothFunctions_dense_image_in_Lp
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

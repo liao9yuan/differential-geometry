@@ -66,7 +66,6 @@ omit [CompactSpace M] [I.Boundaryless] in
   rw [ricEndoRaisedFib, LinearMap.coe_toContinuousLinearMap']
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma inner_ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M)
     (v w : TangentSpace I x) :
     g.inner x (ricEndoRaisedFib (I := I) g x v) w = ricciTensor (I := I) g x v w := by
@@ -75,7 +74,6 @@ lemma inner_ricEndoRaisedFib (g : SmoothRiemannianMetric I M) (x : M)
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 theorem ricEndoRaisedFib_contMDiff (g : SmoothRiemannianMetric I M) :
     ContMDiff I (I.prod 𝓘(ℝ, E →L[ℝ] E)) ∞
       (fun x : M => TotalSpace.mk' (E →L[ℝ] E)
@@ -158,7 +156,6 @@ omit [CompactSpace M] [I.Boundaryless] in
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 lemma ricSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) (v0 : E) (vs : Fin s → E) :
     Tensor0SSpace.toModel (ricSlotOpFib (I := I) (M := M) g s x D) (Fin.cons v0 vs) =

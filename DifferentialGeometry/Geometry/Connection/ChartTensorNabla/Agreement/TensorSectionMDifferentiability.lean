@@ -40,7 +40,6 @@ def TensorSectionMDiffAt (n : ℕ)
     (fun b' : M => TotalSpace.mk' (Tensor0SModel n ℝ E)
       (E := fun x : M => Tensor0SSpace n I x) b' (T b')) b
 
-set_option linter.unusedSectionVars false in
 theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
     (n : ℕ) (α : M) (T : Π b : M, Tensor0SSpace n I b)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -113,7 +112,6 @@ theorem differentiableAt_tensor0SChartE_pullback_of_mdifferentiableAt
   rw [mdifferentiableWithinAt_iff_differentiableWithinAt] at hwithin
   exact hwithin.differentiableAt hrange_nhds
 
-set_option linter.unusedSectionVars false in
 theorem mdifferentiableAt_curriedSection_of_section
     (s : ℕ) (T : Π b : M, Tensor0SSpace (s + 1) I b) {b : M}
     (hT_at : TensorSectionMDiffAt (I := I) (s + 1) T b) :
@@ -123,7 +121,6 @@ theorem mdifferentiableAt_curriedSection_of_section
         b' (curriedSection I M T b')) b :=
   (mdifferentiableAt_curriedSection_iff_section (I := I) (M := M) T).mp hT_at
 
-set_option linter.unusedSectionVars false in
 theorem TensorSectionMDiffAt_partialEval
     (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace (s + 1) I b)

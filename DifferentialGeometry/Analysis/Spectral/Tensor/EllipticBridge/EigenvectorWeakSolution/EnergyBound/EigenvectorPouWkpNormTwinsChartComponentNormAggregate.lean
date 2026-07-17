@@ -159,7 +159,6 @@ def covGradAggregate
         ∑ Q : TensorCompIdx (E := E) r s,
           chartCompNorm (I := I) (M := M) g r s i K β' Q
 
-set_option linter.unusedSectionVars false in
 lemma chartCompNorm_center_le_covGradAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)
@@ -173,7 +172,6 @@ lemma chartCompNorm_center_le_covGradAggregate
       chartCompNorm (I := I) (M := M) g r s i K β Q')
     (fun _ _ => zero_le _) (Finset.mem_univ Q)
 
-set_option linter.unusedSectionVars false in
 lemma chartCompNorm_transport_le_covGradAggregate
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (i : TensorEigenIdx (I := I) (M := M) g r s) (K : ℕ)

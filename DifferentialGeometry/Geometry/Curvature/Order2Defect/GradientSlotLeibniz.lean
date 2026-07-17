@@ -108,7 +108,6 @@ theorem tensorSecondCovDeriv_section_contMDiff
   rw [hpt]
   exact hSub
 
-set_option linter.unusedSectionVars false in
 theorem frozenFrameTrace_section_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}
@@ -181,7 +180,6 @@ theorem tensorCov_toFun_finset_sum
     rw [hsection, hadd, Finset.sum_insert ha]
     rw [ih]
 
-set_option linter.unusedSectionVars false in
 theorem covDeriv_frozenFrameTrace_eq_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {T : Π b : M, TensorRSSpace r s I b}

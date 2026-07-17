@@ -50,7 +50,6 @@ private lemma abs_mul_le_sum_sq
     linarith
   exact le_trans h_half_le h_half_total
 
-set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_eq_inner
     (g : SmoothRiemannianMetric I M) (α b : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -60,7 +59,6 @@ private lemma chartGramMatrix_eq_inner
         (chartBasisVecFiber (I := I) α j b) :=
   chartGramMatrix_apply g α b i j
 
-set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
     [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) :
@@ -108,7 +106,6 @@ private lemma chartGramMatrix_sum_entry_bound_on_pouTsupport
     hK_le (i, j) b hb
   linarith
 
-set_option linter.unusedSectionVars false in
 theorem exists_chartGramMatrix_quadForm_upper_bound_on_pouTsupport
     [I.Boundaryless] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M) (α : M) :

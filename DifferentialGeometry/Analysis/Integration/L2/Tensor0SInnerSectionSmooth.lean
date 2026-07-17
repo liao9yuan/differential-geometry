@@ -38,7 +38,6 @@ private instance tensor0SModelNormedAddCommGroup_local {n : ℕ} :
     NormedAddCommGroup (Tensor0SModel n ℝ E) := inferInstance
 
 
-set_option linter.unusedSectionVars false in
 lemma contMDiffOn_eval_basisTuple_of_into_tensor0SModel
     {n : ℕ} {U : Set M} {Φ : M → Tensor0SModel n ℝ E}
     (hΦ : ContMDiffOn I 𝓘(ℝ, Tensor0SModel n ℝ E) ∞ Φ U)
@@ -59,7 +58,6 @@ lemma contMDiffOn_eval_basisTuple_of_into_tensor0SModel
   exact evalCLM.contMDiff.comp_contMDiffOn hΦ
 
 
-set_option linter.unusedSectionVars false in
 theorem chartTensorInnerPointwise_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (r s : ℕ)
     (T S : M → TensorRSModel r s ℝ E)
@@ -92,7 +90,6 @@ theorem chartTensorInnerPointwise_contMDiffOn
   exact hsmooth
 
 
-set_option linter.unusedSectionVars false in
 theorem chartLocal_contMDiff_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : ∀ y : M, TensorRSSpace r s I y) (α : M)
@@ -171,7 +168,6 @@ private instance tensor0SModelNormedSpace_local {n : ℕ} :
   Tensor0SBundle.tensor0SModel_normedSpace n
 
 
-set_option linter.unusedSectionVars false in
 theorem contMDiff_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T S : ∀ y : M, TensorRSSpace r s I y)
@@ -222,7 +218,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_contMDiff_of_mdiff
     [InnerProductSpace ℝ E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -243,7 +238,6 @@ theorem tensorInnerPointwise_contMDiff_of_mdiff
         (I := I) (M := M) g r s S α)
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_contMDiff
     [InnerProductSpace ℝ E]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -198,7 +198,6 @@ def covDivergenceFixedFrame
     contract_covariant 0 s b (B i b)
       (tensorCovDerivAt (I := I) (M := M) g 0 (s + 1) V b (B i b))
 
-set_option linter.unusedSectionVars false in
 lemma covDivergenceFixedFrame_eq_sum_section
     (g : SmoothRiemannianMetric I M) (s : ℕ) (V : SmoothCcTensor g 0 (s + 1))
     (B : Fin (Module.finrank ℝ E) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :

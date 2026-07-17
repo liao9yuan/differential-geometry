@@ -64,7 +64,6 @@ theorem metricTrace2_secondCovDeriv_eq_metricTraceHessian
       metricTraceHessian (I := I) g r s T x := by
   rw [metricTrace2_def, metricTraceHessian_def]
 
-set_option linter.unusedSectionVars false in
 theorem rawTensorConnLap_eq_metricTrace2
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b) (x : M) :

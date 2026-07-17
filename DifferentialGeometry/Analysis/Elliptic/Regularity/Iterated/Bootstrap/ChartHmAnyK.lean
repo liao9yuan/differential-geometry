@@ -147,7 +147,6 @@ theorem chartPushed_memWkp_two_k_of_laplacianDomainPow
   exact chartPushed_memWkp_two_k_of_chartSideBridge
     (I := I) (M := M) g α k h_bridge
 
-set_option linter.unusedSectionVars false in
 theorem memWkpChart_two_k_of_laplacianDomainPow
     (g : SmoothRiemannianMetric I M) (k : ℕ)
     {u_h : H1Compl (I := I) (M := M) g}

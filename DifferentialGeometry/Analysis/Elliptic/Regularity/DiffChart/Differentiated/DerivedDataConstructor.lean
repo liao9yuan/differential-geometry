@@ -214,7 +214,6 @@ private lemma base_u_chart_ae_zero_off_K_α
     hy_diff.1 hy_diff.2
 
 
-set_option linter.unusedSectionVars false in
 private lemma locallyIntegrableOn_of_memLp_two_global
     (α : M) {f : EuclN → ℝ}
     (hf : MemLp f 2 ((volume : Measure EuclN).restrict
@@ -257,7 +256,6 @@ private lemma locallyIntegrableOn_of_memLp_two_global
   exact Metric.ball_subset_closedBall
 
 
-set_option linter.unusedSectionVars false in
 private lemma locallyIntegrableOn_of_locally_memLp_two
     (α : M) {f : EuclN → ℝ}
     (hf : ∀ K' : Set EuclN, IsCompact K' →

@@ -191,7 +191,6 @@ private noncomputable def chartPullbackZeroExtend (α : M) (f : M → ℝ) :
       f ((extChartAt I_hs α).symm y)
     else 0
 
-set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_local_apply_of_mem_target
     (α : M) (f : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∈ (extChartAt I_hs α).target) :
@@ -203,7 +202,6 @@ private lemma chartSmoothExt_local_apply_of_mem_target
     else 0) = f ((extChartAt I_hs α).symm y)
   rw [if_pos hy]
 
-set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_local_apply_of_notMem_target
     (α : M) (f : M → ℝ) {y : EuclideanSpace ℝ (Fin n)}
     (hy : y ∉ (extChartAt I_hs α).target) :
@@ -227,7 +225,6 @@ private lemma chartSmoothExt_local_eq_chartPushed_on_target
   unfold chartPushed
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_local_eq_zero_off_image_tsupport
     (α : M) {f : M → ℝ}
     (_hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
@@ -251,7 +248,6 @@ private def chartSmoothExtInteriorSupport_local
   (extChartAt I_hs α) '' (tsupport f) ⊆
     DifferentialGeometry.Analysis.Sobolev.Euclidean.openHalfSpace (d := n)
 
-set_option linter.unusedSectionVars false in
 private lemma chartSmoothExtInteriorSupport_image_subset_interior_local
     {β : M} {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) β).source)
@@ -328,7 +324,6 @@ private lemma contDiffAt_chartSmoothExt_local_of_mem_interior_target
   filter_upwards [hOpen.mem_nhds hy] with z hz
   rw [chartSmoothExt_local_apply_of_mem_target (n := n) (M := M) α f hz.1]
 
-set_option linter.unusedSectionVars false in
 private lemma contDiffAt_chartSmoothExt_local_of_notMem_image_tsupport
     (α : M) {f : M → ℝ}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source)
@@ -378,7 +373,6 @@ private lemma contDiff_chartSmoothExt_local
     exact contDiffAt_chartSmoothExt_local_of_notMem_image_tsupport
       (n := n) (M := M) α hf_supp hf_compact hyK
 
-set_option linter.unusedSectionVars false in
 private lemma image_extChartAt_tsupport_compact_local
     {f : M → ℝ} {α : M}
     (hf_supp : tsupport f ⊆ (chartAt (EuclideanHalfSpace n) α).source) :

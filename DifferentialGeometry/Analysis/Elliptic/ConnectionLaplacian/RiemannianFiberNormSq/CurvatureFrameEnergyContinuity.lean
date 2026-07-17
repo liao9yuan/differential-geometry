@@ -49,7 +49,6 @@ private lemma finrank_tensor0SModel_eq_cfec (t : ℕ) :
       rw [φ.finrank_eq, Module.finrank_linearMap, ih]
       ring
 
-set_option linter.unusedSectionVars false in
 private lemma finrank_tensorRSSpace_zero_eq (t : ℕ) (x : M) :
     Module.finrank ℝ (TensorRSSpace 0 t I x) = (Module.finrank ℝ E) ^ t := by
   rw [(tensorRSSpace_continuousLinearEquiv (𝕜 := ℝ) (E := E) (I := I) (M := M)
@@ -66,7 +65,6 @@ private lemma finrank_tensorRSSpace_zero_eq (t : ℕ) (x : M) :
   rw [φ.finrank_eq, Module.finrank_linearMap, finrank_tensor0SModel_eq_cfec,
     finrank_tensor0SModel_eq_cfec, pow_zero, one_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma orthonormal_rfns_exists_basis
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (ht : 1 ≤ t)
     {n : ℕ} (e : Fin n → TangentSpace I x)

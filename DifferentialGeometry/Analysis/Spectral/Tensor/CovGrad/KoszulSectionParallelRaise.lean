@@ -38,7 +38,6 @@ theorem appCcRS_zero_right (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     rw [add_zero]; exact h
   exact (add_left_cancel h0).symm
 
-set_option linter.unusedSectionVars false in
 theorem iteratedCovGrad_eq_zero_of_covGrad_eq_zero (g : SmoothRiemannianMetric I M) (a b : ℕ)
     (W : SmoothCcTensor g a b)
     (hW : covGrad (I := I) (M := M) g a b W = 0) :
@@ -51,7 +50,6 @@ theorem iteratedCovGrad_eq_zero_of_covGrad_eq_zero (g : SmoothRiemannianMetric I
   | succ k ih =>
       rw [iteratedCovGrad_succ, ih, covGrad_zero]
 
-set_option linter.unusedSectionVars false in
 private lemma appCcLeibnizPsi_order_zero (g : SmoothRiemannianMetric I M) (b c : ℕ)
     (Φ : SmoothCcTensor g b c) (i : ℕ) :
     appCcLeibnizPsi (I := I) (M := M) g b c Φ i 0 =

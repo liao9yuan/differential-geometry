@@ -257,7 +257,6 @@ private lemma chartPushedRaw_eventuallyEq_rawConnLapPull
   rw [chartPushedRaw_apply_of_mem (I := I) (M := M) α _ hz]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma rawConnLapPull_contDiffAt'
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -394,7 +393,6 @@ private lemma euclidPartialIter1_chartPushedRaw_contDiffAt
   euclidPartial_contDiffAt (E := E) k
     (chartPushedRaw_raw_contDiffAt (I := I) (M := M) g r s T α q hz)
 
-set_option linter.unusedSectionVars false in
 private lemma euclidPartialIter2_chartPushedRaw_contDiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -414,7 +412,6 @@ private noncomputable def invGramCoeffPull
   fun y => chartInvGramMatrix (I := I) g α
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) k l
 
-set_option linter.unusedSectionVars false in
 private lemma invGramCoeffPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -847,7 +844,6 @@ private lemma exists_iteratedFDeriv_norm_bound_on_compact
     exact (hCl l y hy).trans
       (Finset.le_sup' Cl (Finset.mem_range.mpr (by omega)))
 
-set_option linter.unusedSectionVars false in
 private lemma chartTargetEuclid_preimage_mem_goodSet
     (α : M) {y : EuclN} (hy_target : y ∈ chartTargetEuclid (I := I) (M := M) α) :
     (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ chartLeviCivitaGoodSet (I := I) α ∧
@@ -1373,7 +1369,6 @@ private lemma rawConnLapPouPullCont (α : M) :
     exact hy
   exact hPOU_cont.comp_continuousOn h_inner
 
-set_option linter.unusedSectionVars false in
 private lemma rawConnLapPullIntegrand_aemeasurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (T : Integral.L2.SmoothCcTensor g r s)
     (α : M) (q : (Fin r → Fin (Module.finrank ℝ E)) ×
@@ -2016,7 +2011,6 @@ theorem exists_rawConnLapIter_toHs_le_toHs
         _ = C1 * Ci * ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := 0) (s := 2)
               (k + (i + 1)) T‖ := by ring
 
-set_option linter.unusedSectionVars false in
 theorem toHs_norm_mono (g : SmoothRiemannianMetric I M) {r s : ℕ} {m n : ℕ} (hmn : m ≤ n)
     (T : Integral.L2.SmoothCcTensor g r s) :
     ‖IntrinsicSobolev.SmoothCcTensor.toHs (g := g) (r := r) (s := s) m T‖ ≤

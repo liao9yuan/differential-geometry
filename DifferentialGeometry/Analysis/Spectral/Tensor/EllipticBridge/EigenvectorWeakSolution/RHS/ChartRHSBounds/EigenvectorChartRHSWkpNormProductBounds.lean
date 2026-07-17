@@ -197,7 +197,6 @@ lemma memWkpFinsetSum
 end SmoothCoefBound
 
 
-set_option linter.unusedSectionVars false in
 lemma one_div_densityOnEuclid_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
@@ -208,7 +207,6 @@ lemma one_div_densityOnEuclid_contDiffOn
 section Aggregation
 
 
-set_option linter.unusedSectionVars false in
 lemma wkpNorm_sum_le_const_mul_aggregate
     {ι : Type*} [Fintype ι] {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → EuclN → ℝ) (A : ℝ≥0∞)
@@ -464,7 +462,6 @@ lemma wkpNorm_smoothCoef_mul_aeZeroFactor_le_uniform
   exact hKc_bd hfactor_memWkp
 
 
-set_option linter.unusedSectionVars false in
 lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {ι : Type*} [Fintype ι] {δ : Type*} {K : ℕ} {Ω : Set EuclN} (hΩ : IsOpen Ω)
     (F : ι → δ → EuclN → ℝ) (A : δ → ℝ≥0∞)

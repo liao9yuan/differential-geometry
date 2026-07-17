@@ -46,7 +46,6 @@ def covDerivAlongVFraw
   covApply (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g))
     (fun y : M => B y) (fun y : M => T y)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma covDerivAlongVFraw_apply
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -55,7 +54,6 @@ set_option linter.unusedSectionVars false in
       (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma covDerivAlongVFraw_contMDiff
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -92,7 +90,6 @@ def covDerivAlongVFSection
     (fun y : M => covDerivAlongVFraw (I := I) (M := M) g T B y)
     (covDerivAlongVFraw_contMDiff (I := I) (M := M) g T B)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma covDerivAlongVFSection_apply
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -101,7 +98,6 @@ set_option linter.unusedSectionVars false in
       (tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g)).toFun
         (fun y : M => T y) y (B y) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma covDerivAlongVFSection_lowered_eq
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -113,7 +109,6 @@ lemma covDerivAlongVFSection_lowered_eq
     (I := I) (M := M) g T y (B y))]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma toModel_liftedTensorSection_covDerivAlongVFSection
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -125,7 +120,6 @@ lemma toModel_liftedTensorSection_covDerivAlongVFSection
   rw [toModel_liftedTensorSection]
   exact covDerivAlongVFSection_lowered_eq (I := I) (M := M) g T B y
 
-set_option linter.unusedSectionVars false in
 lemma covDerivAlong_covDerivAlongVFSection_eq
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -145,7 +139,6 @@ lemma covDerivAlong_covDerivAlongVFSection_eq
       tensorRSCovariantDerivative I M 0 2 (LeviCivita (I := I) g) from rfl]
   abel
 
-set_option linter.unusedSectionVars false in
 lemma toModel_loweredCovDerivAlongVF_covDerivAlongVFSection_eq
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -167,7 +160,6 @@ lemma toModel_loweredCovDerivAlongVF_covDerivAlongVFSection_eq
   exact congrArg TensorRSSpace.toModel
     (covDerivAlong_covDerivAlongVFSection_eq (I := I) (M := M) g T B x)
 
-set_option linter.unusedSectionVars false in
 theorem integral_secondOrder_combined_eq_zero
     (g : SmoothRiemannianMetric I M)
     (T v : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)
@@ -191,7 +183,6 @@ theorem integral_secondOrder_combined_eq_zero
   integral_tensorInner_covDeriv_combined_eq_zero (I := I) (M := M) g 0 2
     (covDerivAlongVFSection (I := I) (M := M) g T B) v B
 
-set_option linter.unusedSectionVars false in
 lemma covDerivAlong_secondOrder_eq_fixedFrame_summand
     (g : SmoothRiemannianMetric I M)
     (T : Cₛ^∞⟮I; TensorRSModel 0 2 ℝ E, (fun x : M => TensorRSSpace 0 2 I x)⟯)

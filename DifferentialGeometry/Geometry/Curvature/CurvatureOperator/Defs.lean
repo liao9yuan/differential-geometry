@@ -348,7 +348,6 @@ lemma riemannSec_add_third
   abel
 
 
-set_option linter.unusedSectionVars false in
 lemma riemannSec_smul_third
     {f : M → ℝ} {X Y : Π b : M, TangentSpace I b} {Z : Π b : M, V b} {x : M}
     (hX : MDiffAt (T% X) x) (hY : MDiffAt (T% Y) x)

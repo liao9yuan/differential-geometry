@@ -124,7 +124,6 @@ lemma chartHessTrace_expand
   refine Finset.sum_congr rfl (fun k _ => ?_)
   ring
 
-set_option linter.unusedSectionVars false in
 lemma chartVossWeylLaplacian_expand_hypBearing
     (g : SmoothRiemannianMetric I M) (α : M) (f : M → ℝ) (x : M)
     (hgrad_diff : ∀ i : Fin (Module.finrank ℝ E),

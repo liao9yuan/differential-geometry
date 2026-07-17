@@ -221,7 +221,6 @@ private theorem fromZero_orbit_confined
     rw [hsδ]; exact hLδ
   · exact le_of_lt (hbound_to_openball s ⟨hs.1, hsδ⟩ (hmain hs))
 
-set_option linter.unusedSectionVars false in
 theorem fromZero_manifold_orbit_of_lipschitz
     (X : ℝ → ∀ x : M, TangentSpace I x) (α : M)
     {a r : ℝ≥0} {K L : ℝ≥0} {δ : ℝ} (hδ : 0 < δ)

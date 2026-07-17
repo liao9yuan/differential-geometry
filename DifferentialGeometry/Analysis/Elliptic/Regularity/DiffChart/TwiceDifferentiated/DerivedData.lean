@@ -196,7 +196,6 @@ private lemma integral_u_mixed_partial_swap_aux
   refine setIntegral_congr_fun hΩ_open.measurableSet (fun y _hy => ?_)
   rw [mixed_smooth_classical_partial_swap_aux (ψ := ψ) hψ_smooth i j y]
 
-set_option linter.unusedSectionVars false in
 private lemma integral_chosenSecond_mul_swap_aux
     {u : EuclN → ℝ} {Ω : Set EuclN} (hΩ_open : IsOpen Ω)
     (hu : MemWkp (d := Module.finrank ℝ E) 2 2 u Ω)
@@ -575,7 +574,6 @@ theorem chosenWeakPartial_chosenSecondPartialChartPushedU_eq_chosenThirdMixedPar
           (chosenSecondPartialChartPushedU (I := I) (M := M) g α u_h i l₁) Ω :=
         h_congr
 
-set_option linter.unusedSectionVars false in
 private lemma chartPulledWeighted_le_volume_on_compact
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)

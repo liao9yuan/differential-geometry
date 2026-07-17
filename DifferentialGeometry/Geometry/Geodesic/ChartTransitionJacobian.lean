@@ -31,7 +31,6 @@ def chartTransitionJacEntry (α β : M) (x : E)
   (chartModelBasis E).repr
     (chartTransitionAt (I := I) α β x ((chartModelBasis E) a)) i
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma chartTransitionJacEntry_def (α β : M) (x : E)
     (i a : Fin (Module.finrank ℝ E)) :
     chartTransitionJacEntry (I := I) α β x i a =
@@ -39,7 +38,6 @@ set_option linter.unusedSectionVars false in
         (chartTransitionAt (I := I) α β x
           ((chartModelBasis E) a)) i := rfl
 
-set_option linter.unusedSectionVars false in
 theorem chartTransitionJacEntry_mul_sum [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β)
     (c i : Fin (Module.finrank ℝ E)) :
@@ -92,7 +90,6 @@ theorem chartTransitionJacEntry_mul_sum [I.Boundaryless]
     · rw [if_neg (fun hh : i = c => h hh.symm), if_neg h]
   exact hrepr
 
-set_option linter.unusedSectionVars false in
 theorem chartTransitionJacEntry_mul_sum' [I.Boundaryless]
     (α β : M) {y : E} (hy : y ∈ chartTransitionSource (I := I) α β)
     (b i : Fin (Module.finrank ℝ E)) :
@@ -148,7 +145,6 @@ theorem chartTransitionJacEntry_mul_sum' [I.Boundaryless]
   · subst h; simp
   · rw [if_neg (fun hh : i = b => h hh.symm), if_neg h]
 
-set_option linter.unusedSectionVars false in
 lemma chartTransitionJacEntry_forward_reverse_collapse [I.Boundaryless]
     (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)
@@ -162,7 +158,6 @@ lemma chartTransitionJacEntry_forward_reverse_collapse [I.Boundaryless]
     extChartAt_mem_chartTransitionSource (I := I) α β hp_α hp_β
   exact chartTransitionJacEntry_mul_sum' (I := I) α β hx_src a d
 
-set_option linter.unusedSectionVars false in
 lemma chartTransitionJacEntry_reverse_forward_collapse [I.Boundaryless]
     (α β : M) {p : M}
     (hp_α : p ∈ (chartAt H α).source) (hp_β : p ∈ (chartAt H β).source)

@@ -84,7 +84,6 @@ private lemma exists_globalSmoothScalar_eqOn_nhd
   · filter_upwards [χ.eventuallyEq_one] with b hb
     rw [hb, Pi.one_apply, one_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma riemannSec_add_acted_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]
@@ -190,7 +189,6 @@ private lemma riemannSec_smul_acted_smooth
     hZ_at hcXZ_at hcYZ_at hcXfZ_at hcYfZ_at hYf_at hXf_at
     hf_smul_cYZ_at hf_smul_cXZ_at hYf_smul_Z_at hXf_smul_Z_at hx_int
 
-set_option linter.unusedSectionVars false in
 private lemma nablaCurvSec_add_acted
     (g : SmoothRiemannianMetric I M)
     (X Y Z W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -344,7 +342,6 @@ private lemma nablaCurvSec_smul_acted
   simp only [smul_sub]
   abel
 
-set_option linter.unusedSectionVars false in
 private lemma nablaCurvSec_finsetSum_acted
     (g : SmoothRiemannianMetric I M) {ι : Type*} (s : Finset ι)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -654,7 +651,6 @@ theorem nablaRicci_symm
     ricciTensor_symm (I := I) g x (V x) ((LeviCivita (I := I) g).toFun W x (X x))]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma nablaRicci_add_right_raw
     (g : SmoothRiemannianMetric I M)
     (X V W W' : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -751,7 +747,6 @@ lemma nablaRicci_eq_of_VW_eq
   rw [nablaRicci_eq_of_V_eq_raw (g := g) X V V₀ W x hVV₀,
     nablaRicci_eq_of_W_eq_raw (g := g) X V₀ W W₀ x hWW₀]
 
-set_option linter.unusedSectionVars false in
 private lemma nablaRicci_add_left_raw
     (g : SmoothRiemannianMetric I M)
     (X V V' W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :

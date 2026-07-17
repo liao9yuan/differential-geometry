@@ -56,7 +56,6 @@ private lemma pouTsupport_measurableSet_meas (α : M) :
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x)) :=
   (isClosed_tsupport _).measurableSet
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -79,7 +78,6 @@ private lemma scalarOnE_raw_eq_raw_on_pouTsupport_meas
   exact scalarOnE_extChartAt (I := I) α
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx) hb_ext
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [I.Boundaryless] in
 private lemma tensorChartComponentRaw_continuousOn_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -238,7 +236,6 @@ private lemma triv_continuousLinearMapAt_eq_triv_snd
   exact congrFun hcoe _
 
 variable {g r s α j} in
-set_option linter.unusedSectionVars false in
 private lemma trivInput_continuousOn_chartSource (S : SmoothCcTensor g r s)
     (k : Fin r) :
     ContinuousOn (fun b : M => trivInput (I := I) g r s α j S.toSection b k)
@@ -256,7 +253,6 @@ private lemma trivInput_continuousOn_chartSource (S : SmoothCcTensor g r s)
       (fun b' => S.toSection b') (chartBasisVecFiber (I := I) α j) b k)
 
 variable {g r s α j} in
-set_option linter.unusedSectionVars false in
 private lemma trivOutput_continuousOn_chartSource (S : SmoothCcTensor g r s)
     (l : Fin s) :
     ContinuousOn (fun b : M => trivOutput (I := I) g r s α j S.toSection b l)

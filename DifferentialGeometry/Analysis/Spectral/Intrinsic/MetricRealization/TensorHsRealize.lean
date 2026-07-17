@@ -72,7 +72,6 @@ theorem ccTensorBilin_apply (g : SmoothRiemannianMetric I M)
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2) (x : M)
     (v w : TangentSpace I x) :
@@ -240,7 +239,6 @@ theorem ccTensorBilin_abs_le_fibreNorm_mul_sqrt
   · rw [Real.sqrt_mul (sq_nonneg _), Real.sqrt_sq hnorm_nn,
       Real.sqrt_mul hvv_nn, mul_assoc]
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorBilin_scalar_contMDiff (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2)
     (Y W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -310,7 +308,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
   simp only [ccTensorBilinSymm, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.add_apply, ContinuousLinearMap.flip_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorBilinSymm_symm (g : SmoothRiemannianMetric I M)
     (T : SmoothCcTensor g 0 2) (x : M) (v w : TangentSpace I x) :
     ccTensorBilinSymm (I := I) g T x v w =
@@ -397,7 +394,6 @@ theorem ccTensorMultilinear_smul (g : SmoothRiemannianMetric I M)
           (fun _ : Fin 0 => TangentSpace I x) (1 : ℝ)))
   rw [ContMDiffSection.coe_smul, Pi.smul_apply, ContinuousLinearMap.smul_apply]
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorModel_smul (g : SmoothRiemannianMetric I M)
     (c : ℝ) (T : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (c • T) x = c • ccTensorModel (I := I) g T x := by

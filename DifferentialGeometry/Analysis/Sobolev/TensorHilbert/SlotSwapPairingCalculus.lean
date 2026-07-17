@@ -76,7 +76,6 @@ private lemma cons_cons_comp_decomposeFin_double {α : Type*} {t : ℕ}
     · rw [Equiv.Perm.decomposeFin_symm_apply_succ, Equiv.swap_self]
       simp only [Equiv.refl_apply, Fin.cons_succ]
 
-set_option linter.unusedSectionVars false in
 theorem unitModel_appFullSec_swap_eq_domDomCongr
     (g : SmoothRiemannianMetric I M) (t : ℕ)
     (F : HomTensorRSField (E := E) (M := M) 0 (t + 2) (t + 2) I)

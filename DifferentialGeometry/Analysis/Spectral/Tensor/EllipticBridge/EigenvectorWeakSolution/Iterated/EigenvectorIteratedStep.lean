@@ -366,7 +366,6 @@ private theorem ibp_inner_j_unconditional
 
 omit [CompleteSpace E] in
 
-set_option linter.unusedSectionVars false in
 private lemma integrable_triple_helper
     {α : M} {K : Set EuclN}
     (hK_compact : IsCompact K)

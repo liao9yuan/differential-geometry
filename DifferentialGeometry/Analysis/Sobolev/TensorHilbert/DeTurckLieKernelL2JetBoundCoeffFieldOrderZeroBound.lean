@@ -278,7 +278,6 @@ open DifferentialGeometry.Geometry.Curvature
 open DifferentialGeometry.Analysis.Sobolev.TensorHilbert
   (g0FlatCLM cotangentToDual_g0FlatCLM g0FlatCLM_apply)
 
-set_option linter.unusedSectionVars false in
 private theorem abs_metric_inner_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     |g.inner x u v| ≤ Real.sqrt (g.inner x u u) * Real.sqrt (g.inner x v v) := by
@@ -289,7 +288,6 @@ private theorem abs_metric_inner_le (g : SmoothRiemannianMetric I M) (x : M)
   refine le_trans (Real.sqrt_le_sqrt h2) ?_
   rw [Real.sqrt_mul (metric_inner_self_nonneg (I := I) (M := M) g x u)]
 
-set_option linter.unusedSectionVars false in
 private theorem sqrt_metric_inner_add_le (g : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     Real.sqrt (g.inner x (u + v) (u + v)) ≤
@@ -339,7 +337,6 @@ theorem gFibreOpBound_mono_of_le (g₀ : SmoothRiemannianMetric I M)
         mul_le_mul_of_nonneg_right hle hnn
     _ = δ' * Real.sqrt (g₀.inner y a a) * Real.sqrt (g₀.inner y b b) := by ring
 
-set_option linter.unusedSectionVars false in
 private theorem abs_g1_inner_le_two_sqrt (g₀ g₁ : SmoothRiemannianMetric I M)
     (P : SmoothCcTensor g₀ 0 2)
     (htie : ∀ (y : M) (v w : TangentSpace I y),
@@ -372,7 +369,6 @@ private theorem coframeS_one_eq_g0FlatCLM_local
   rw [g0FlatCLM_apply, dualToCotangent_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private theorem toModel_coframeS_two (g₀ : SmoothRiemannianMetric I M) (x : M)
     {n : ℕ} (e : Fin n → TangentSpace I x) (K : Fin 2 → Fin n)
     (p q : TangentSpace I x) :

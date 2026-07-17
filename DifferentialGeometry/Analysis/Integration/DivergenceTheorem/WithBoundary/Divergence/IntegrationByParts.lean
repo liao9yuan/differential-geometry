@@ -41,7 +41,6 @@ private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-set_option linter.unusedSectionVars false in
 lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -51,7 +50,6 @@ lemma Continuous.integrable_of_hasCompactSupport_riemannianVolumeMeasure
     riemannianVolumeMeasure_isFiniteMeasureOnCompacts (I := I) (M := M) g
   exact hf.integrable_of_hasCompactSupport hcs
 
-set_option linter.unusedSectionVars false in
 lemma tangentSectionAction_continuous_of_interior_support
     [T2Space M]
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -111,7 +109,6 @@ lemma support_smoothSmul_subset
     rw [hneX]; exact smul_zero _
   exact hx hYx
 
-set_option linter.unusedSectionVars false in
 lemma tsupport_smoothSmul_subset
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -120,7 +117,6 @@ lemma tsupport_smoothSmul_subset
     ((support_smoothSmul_subset (I := I) hf X).trans (subset_tsupport _))
     (isClosed_tsupport _)
 
-set_option linter.unusedSectionVars false in
 lemma hasCompactSupport_smoothSmul
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -128,7 +124,6 @@ lemma hasCompactSupport_smoothSmul
     HasCompactSupport (smoothSmul (I := I) f hf X) :=
   hX.mono' ((support_smoothSmul_subset (I := I) hf X).trans (subset_tsupport _))
 
-set_option linter.unusedSectionVars false in
 lemma tsupport_smoothSmul_subset_interior
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -136,7 +131,6 @@ lemma tsupport_smoothSmul_subset_interior
     tsupport ((smoothSmul (I := I) f hf X) : ∀ x, TangentSpace I x) ⊆ I.interior M :=
   (tsupport_smoothSmul_subset (I := I) hf X).trans hX_int
 
-set_option linter.unusedSectionVars false in
 theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence_with_boundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -248,7 +242,6 @@ private lemma tsupport_mul_subset_left (f h : M → ℝ) :
   exact hx (by rw [hf_zero, zero_mul])
 
 
-set_option linter.unusedSectionVars false in
 theorem integral_tangentSectionAction_mul_add_eq_neg_with_boundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)

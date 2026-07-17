@@ -500,7 +500,6 @@ private lemma chartSmoothExt_morrey_sup_uniform
       linarith
     exact h_RHS_nn
 
-set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_eq_zero_off_target
     (α : M) (f : M → ℝ) {y : EuN}
     (hy : y ∉ (extChartAt I_hs α).target) :

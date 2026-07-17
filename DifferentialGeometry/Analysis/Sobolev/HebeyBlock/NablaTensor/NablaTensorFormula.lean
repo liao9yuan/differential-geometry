@@ -24,7 +24,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M]
   [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 theorem nabla_equals_partial_plus_christoffel_on_tensors
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (T : Π b : M, TensorRSSpace r s I b)
@@ -50,7 +49,6 @@ private lemma nabla_tensor_toEucl_symm_preimage_target (α : M) :
       rw [← hz_eq]; exact (toEuclidean (E := E)).symm_apply_apply z
     rw [Set.mem_preimage, h_eq]; exact hz_tgt
 
-set_option linter.unusedSectionVars false in
 private lemma nabla_tensor_raw_pull_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

@@ -36,7 +36,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 private theorem integral_Δ_g_eq_zero
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -44,7 +43,6 @@ private theorem integral_Δ_g_eq_zero
     ∫ x, Δ_g (I := I) g hφ x ∂(riemannianVolumeMeasure (I := I) (M := M) g) = 0 := by
   exact integral_divergence_eq_zero_of_compact (I := I) g (grad_g (I := I) g hφ)
 
-set_option linter.unusedSectionVars false in
 private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -59,7 +57,6 @@ private theorem integral_inner_grad_self_eq_neg_integral_f_Δf
   have hf_cs : HasCompactSupport f := HasCompactSupport.of_compactSpace _
   exact green_first_integral_inner_grad_eq_neg_integral_smul_laplacian (I := I) g hf hf hf_cs
 
-set_option linter.unusedSectionVars false in
 theorem lichnerowicz_inequality
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -398,7 +395,6 @@ private theorem g_inner_self_eq_sum_sq_inner_orthonormal
   rw [h_coeff j]
   ring
 
-set_option linter.unusedSectionVars false in
 private theorem laplacian_sq_le_dim_mul_chartHessFrobeniusSq_pointwise
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -506,7 +502,6 @@ private theorem laplacian_sq_le_dim_mul_chartHessFrobeniusSq_pointwise
   rw [frobeniusSq_grad_vector_eq_chartHessFrobeniusSq (I := I) g hf x] at hCS
   exact hCS
 
-set_option linter.unusedSectionVars false in
 private theorem ricciTensor_grad_grad_contMDiff
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -530,7 +525,6 @@ private theorem ricciTensor_grad_grad_contMDiff
   rw [Bundle.contMDiffAt_totalSpace] at hpm
   exact hpm.2
 
-set_option linter.unusedSectionVars false in
 private theorem ricciTensor_grad_grad_continuous
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -539,7 +533,6 @@ private theorem ricciTensor_grad_grad_continuous
       (gradFun (I := I) g f b) (gradFun (I := I) g f b)) :=
   (ricciTensor_grad_grad_contMDiff (I := I) g hf).continuous
 
-set_option linter.unusedSectionVars false in
 theorem chartHessFrobeniusSq_continuous
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -592,7 +585,6 @@ theorem chartHessFrobeniusSq_continuous
   intro x
   exact (h_bochner_isolate x).symm
 
-set_option linter.unusedSectionVars false in
 theorem lichnerowicz_eigenvalue_ge_dim_mul_curvature_of_closed
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

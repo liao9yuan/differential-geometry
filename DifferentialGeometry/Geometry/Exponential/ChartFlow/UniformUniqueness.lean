@@ -27,7 +27,6 @@ section LipschitzOnCompact
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 lemma chartPhaseVF_exists_lipschitzOnWith_at
     (g : SmoothRiemannianMetric I M) (α : M)
     {z : E × E} (hz : z ∈ (interior (extChartAt I α).target) ×ˢ (Set.univ : Set E)) :
@@ -42,7 +41,6 @@ lemma chartPhaseVF_exists_lipschitzOnWith_at
     hC1.contDiffAt (hopen.mem_nhds hz)
   exact hC1_at.exists_lipschitzOnWith
 
-set_option linter.unusedSectionVars false in
 lemma chartPhaseVF_locallyLipschitzOn_of_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -54,7 +52,6 @@ lemma chartPhaseVF_locallyLipschitzOn_of_compact
   refine ⟨L, t, ?_, hL⟩
   exact mem_nhdsWithin_of_mem_nhds ht
 
-set_option linter.unusedSectionVars false in
 theorem chartPhaseVF_lipschitzOnWith_of_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -70,7 +67,6 @@ section UniformUniqueness
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -115,7 +111,6 @@ section UniformAgainstFlow
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem chartPhaseVF_solution_eq_chartFlowOrbit_on_Ioo
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set (E × E)}
@@ -143,7 +138,6 @@ section UniformOnClosedBall
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 theorem chartPhaseVF_orbit_uniqueness_uniform_Ioo_closedBall
     (g : SmoothRiemannianMetric I M) (α : M)
     {z₀ : E × E} {r : ℝ}

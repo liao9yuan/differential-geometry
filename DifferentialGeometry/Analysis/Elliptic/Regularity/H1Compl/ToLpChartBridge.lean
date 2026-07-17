@@ -40,17 +40,14 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
 
-set_option linter.unusedSectionVars false in
 private lemma chartAtlasPOU_continuous (α : M) :
     Continuous fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯).contMDiff.continuous
 
-set_option linter.unusedSectionVars false in
 private lemma chartAtlasPOU_measurable (α : M) :
     Measurable fun x : M => (chartAtlasPOU I M α : M → ℝ) x :=
   (chartAtlasPOU_continuous (I := I) (M := M) α).measurable
 
-set_option linter.unusedSectionVars false in
 private lemma enorm_pou_mul_le (α : M) (u : M → ℝ) (x : M) :
     ‖(chartAtlasPOU I M α : M → ℝ) x * u x‖ₑ ≤ ‖u x‖ₑ := by
   have h_nn : (0 : ℝ) ≤ (chartAtlasPOU I M α : M → ℝ) x :=
@@ -68,7 +65,6 @@ private lemma enorm_pou_mul_le (α : M) (u : M → ℝ) (x : M) :
   rw [Real.enorm_eq_ofReal_abs, Real.enorm_eq_ofReal_abs]
   exact ENNReal.ofReal_le_ofReal habsmul
 
-set_option linter.unusedSectionVars false in
 private lemma tsupport_pou_mul_subset_chartSource (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (chartAtlasPOU I M α : M → ℝ) x * u x) ⊆
       (chartAt H α).source := by
@@ -88,7 +84,6 @@ private lemma tsupport_pou_mul_subset_chartSource (α : M) (u : M → ℝ) :
   exact h_tsupp_sub.trans
     ((DifferentialGeometry.Integral.Measure.chartAtlasPOU_isSubordinate I M) α)
 
-set_option linter.unusedSectionVars false in
 private lemma tsupport_pou_mul_subset_tsupport_pou (α : M) (u : M → ℝ) :
     tsupport (fun x : M => (chartAtlasPOU I M α : M → ℝ) x * u x) ⊆
       tsupport fun x : M => (chartAtlasPOU I M α : M → ℝ) x := by
@@ -242,7 +237,6 @@ private lemma exists_density_sup_on_kα
     rw [hKne] at hy
     exact absurd hy (Set.notMem_empty y)
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_chartPulledWeighted_le_density_volume_on_kα
     (g : SmoothRiemannianMetric I M) (α : M)
     (M_sup : ℝ) (hM_sup_pos : 0 < M_sup)
@@ -477,7 +471,6 @@ private noncomputable def extChartAtSymmExt (α : M) : E → M := by
     (fun y : E => (extChartAt I α).symm y)
     (fun _ : E => α)
 
-set_option linter.unusedSectionVars false in
 private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target) :
     extChartAtSymmExt (I := I) (M := M) α y = (extChartAt I α).symm y := by
@@ -487,7 +480,6 @@ private lemma extChartAtSymmExt_eq_on_target (α : M) {y : E}
     (fun _ : E => α) y = _
   rw [Set.piecewise_eq_of_mem _ _ _ hy]
 
-set_option linter.unusedSectionVars false in
 private lemma extChartAtSymmExt_measurable (α : M) :
     Measurable (extChartAtSymmExt (I := I) (M := M) α) := by
   classical

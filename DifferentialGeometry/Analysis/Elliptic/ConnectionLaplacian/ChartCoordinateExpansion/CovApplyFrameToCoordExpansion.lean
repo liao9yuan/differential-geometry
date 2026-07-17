@@ -48,7 +48,6 @@ omit [NeZero (Module.finrank ℝ E)] in
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-set_option linter.unusedSectionVars false in
 private lemma chartFrameNormGlobalSmoothCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))

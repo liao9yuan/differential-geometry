@@ -53,7 +53,6 @@ private lemma domDomCongr_perm_fin0_apply {A : Type*} [NormedAddCommGroup A] [No
   funext k
   exact k.elim0
 
-set_option linter.unusedSectionVars false in
 private lemma reindexCoeffFibGen_fin0 {s : ℕ} {x : M} (σ' : Equiv.Perm (Fin 0))
     (A : Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x) :
     reindexCoeffFibGen (I := I) 0 s σ' x A = A := by
@@ -245,7 +244,6 @@ private lemma domDomCongr_compMkPiAlgebra_eq (g : SmoothRiemannianMetric I M) (r
   refine Finset.prod_congr rfl (fun k _ => ?_)
   rw [Equiv.symm_apply_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_reindexCoeffFibGen (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (x : M)
     (A : Tensor0SSpace r I x →L[ℝ] Tensor0SSpace s I x) (σ' : Equiv.Perm (Fin r))
@@ -307,7 +305,6 @@ lemma norm_reindexCoeffGen_eq (g : SmoothRiemannianMetric I M) (r s : ℕ)
   unfold tensorL2Norm tensorL2Inner
   simp_rw [hpt]
 
-set_option linter.unusedSectionVars false in
 private lemma iteratedCovGrad_smul_aux (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by

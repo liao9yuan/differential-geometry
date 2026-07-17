@@ -25,7 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
-set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_add_expand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -50,7 +49,6 @@ lemma riemannianFiberNormSq_add_expand
   rw [hsymm]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_add_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -79,7 +77,6 @@ theorem riemannianFiberNormSq_add_le
     exact tensorInnerPointwise_sq_le_mul (I := I) (M := M) g r s x am bm
   nlinarith [hCS, hA_nn, hB_nn, sq_nonneg (A - B), sq_nonneg (C - A), sq_nonneg (C - B)]
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_sub_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (a b : TensorRSSpace r s I x) :
@@ -105,7 +102,6 @@ theorem riemannianFiberNormSq_sub_le
     _ = 2 * riemannianFiberNormSq (I := I) (M := M) g r s x a +
           2 * riemannianFiberNormSq (I := I) (M := M) g r s x b := by rw [hneg]
 
-set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_plain_sum_left
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (s : Finset ι) (A : ι → TensorRSModel r s' ℝ E) (B : TensorRSModel r s' ℝ E) :
@@ -117,7 +113,6 @@ private lemma tensorInnerPointwise_plain_sum_left
   | insert i₀ s'' hi₀ ih =>
       rw [Finset.sum_insert hi₀, tensorInnerPointwise_add_left, ih, Finset.sum_insert hi₀]
 
-set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_plain_sum_right
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (A : TensorRSModel r s' ℝ E) (s : Finset ι) (B : ι → TensorRSModel r s' ℝ E) :
@@ -129,7 +124,6 @@ private lemma tensorInnerPointwise_plain_sum_right
   | insert j₀ s'' hj₀ ih =>
       rw [Finset.sum_insert hj₀, tensorInnerPointwise_add_right, ih, Finset.sum_insert hj₀]
 
-set_option linter.unusedSectionVars false in
 lemma riemannianFiberNormSq_sum_eq_double_sum
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (s : Finset ι) (F : ι → TensorRSSpace r s' I x) :
@@ -151,7 +145,6 @@ lemma riemannianFiberNormSq_sum_eq_double_sum
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [tensorInnerPointwise_plain_sum_right (I := I) (M := M) g r s' x _ s _]
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_sum_le_card_mul
     {ι : Type*} (g : SmoothRiemannianMetric I M) (r s' : ℕ) (x : M)
     (s : Finset ι) (F : ι → TensorRSSpace r s' I x) :

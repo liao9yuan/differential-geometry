@@ -97,7 +97,6 @@ private lemma cutoffComponentEuclid_support_subset_cutoffKernelEuclid
       hy_ne
 
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_chartPulledWeighted_restrict_le_of_support_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN}

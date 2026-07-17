@@ -64,7 +64,6 @@ private def bilinCurriedSec (V : Π b : M, Tensor0SSpace 2 I b)
   fun b => Tensor0SNabla.curriedSection I M
     (fun y : M => Tensor0SNabla.curriedSection I M V y (Y y)) b (Z b)
 
-set_option linter.unusedSectionVars false in
 private lemma scalarFn_bilinCurriedSec
     (V : Π b : M, Tensor0SSpace 2 I b)
     (Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -82,7 +81,6 @@ private lemma scalarFn_bilinCurriedSec
         (T := V b) (v0 := Y b) (vs := Fin.cons (Z b) (fun i => Fin.elim0 i))]
   congr 1
 
-set_option linter.unusedSectionVars false in
 private theorem tensor0SCovariantDerivative02_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 2 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 2 V x)
@@ -180,7 +178,6 @@ theorem covGrad02_unitModel_eval_eq_leibnizDefect
   exact tensor0SCovariantDerivative02_consEval_leibnizDefect (I := I) (M := M) g₀
     (unitEvalSection (I := I) (M := M) g₀ 2 S) hV Y Z v
 
-set_option linter.unusedSectionVars false in
 private lemma unitEvalSection_toModel_eq_ccTensorBilin
     (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2) (b : M)
     (Y Z : TangentSpace I b) :

@@ -59,7 +59,6 @@ theorem basepoint_metric_along_curve
   let _ := horbit
   rwa [h_compat] at h_reg
 
-set_option linter.unusedSectionVars false in
 theorem basepoint_motion_datum
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

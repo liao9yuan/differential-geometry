@@ -117,7 +117,6 @@ noncomputable def covApplyBcovApplyT₀Section
       (covApplyRS_contMDiff (I := I) g 0 2 (T := fun u => T₀.toSection u)
         T₀.toSection.contMDiff hW) hB)
 
-set_option linter.unusedSectionVars false in
 lemma frameTraceSummand_unit_eq_abstract
     (g : SmoothRiemannianMetric I M) (T₀ : SmoothCcTensor g 0 2)
     (x : M) (w : TangentSpace I x) (i : Fin (Module.finrank ℝ E)) :

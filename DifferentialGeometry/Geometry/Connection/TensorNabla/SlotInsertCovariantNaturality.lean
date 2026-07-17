@@ -222,7 +222,6 @@ def identityHomTensorRSField (r a : ℕ) :
       (φ := fun x : M => ContinuousLinearMap.id ℝ (TensorRSSpace r a I x))
       (fun Y => Y.contMDiff)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma idHomTensorRSField_apply (r a : ℕ) (x : M) :
     (show TensorRSSpace r a I x →L[ℝ] TensorRSSpace r a I x from
         identityHomTensorRSField (E := E) (M := M) (I := I) r a x) =

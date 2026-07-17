@@ -70,7 +70,6 @@ theorem finiteEigenCombo_contMDiff
 abbrev hCompact : IsCompactOperator (tensorResolventL2 (I := I) (M := M) g 0 2) :=
   tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 2
 
-set_option linter.unusedSectionVars false in
 theorem finiteEigenCombo_toL2
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) :
@@ -297,7 +296,6 @@ lemma finiteEigenComboHs_coeff_eq
   rw [finiteEigenCombo_tensorL2Coeff (I := I) (M := M) g F c i]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem finiteEigenCombo_spectral_normSq
     (F : Finset (Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2))
     (c : Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx (I := I) (M := M) g 0 2 → ℝ) (σ : ℝ) :

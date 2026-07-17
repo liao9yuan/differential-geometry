@@ -26,7 +26,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option linter.unusedSectionVars false in
 theorem invGramOnE_sub_eq
     (g₁ g₂ : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) {y : E}

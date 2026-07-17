@@ -50,7 +50,6 @@ noncomputable def gradInnerCoefI_M
       gradChartCoeff (I := I) g α
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x
 
-set_option linter.unusedSectionVars false in
 private lemma gradInnerCoefI_M_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) (x : M) :
@@ -59,7 +58,6 @@ private lemma gradInnerCoefI_M_apply
         gradChartCoeff (I := I) g α
           ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) i x := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma gradInnerCoefI_M_eq_zero_of_cutoff_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {x : M}
@@ -68,7 +66,6 @@ private lemma gradInnerCoefI_M_eq_zero_of_cutoff_zero
   unfold gradInnerCoefI_M
   rw [hx]; ring
 
-set_option linter.unusedSectionVars false in
 lemma gradInnerCoefI_M_smooth
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -160,7 +157,6 @@ lemma gradInnerCoefI_M_smooth
       contMDiffAt_const
     exact h_const.congr_of_eventuallyEq h_ev_zero_coef
 
-set_option linter.unusedSectionVars false in
 lemma tsupport_gradInnerCoefI_M_subset
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :
@@ -186,7 +182,6 @@ noncomputable def Λgrad
   smoothExtensionScalar (I := I) (M := M) α
     (gradInnerCoefI_M (I := I) (M := M) g α i)
 
-set_option linter.unusedSectionVars false in
 lemma Λgrad_contDiff
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) :

@@ -773,7 +773,6 @@ private lemma tensorChartComponentPou_smul
   change _ * (c * _) = c * (_ * _)
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_add_fn (α : M) (u₁ u₂ : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw (I := I)
         (M := M) α (u₁ + u₂) =
@@ -801,7 +800,6 @@ private lemma chartPushedRaw_add_fn (α : M) (u₁ u₂ : M → ℝ) :
       (I := I) (M := M) α _ hy]
     ring
 
-set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_smul_fn (α : M) (c : ℝ) (u : M → ℝ) :
     DifferentialGeometry.Analysis.Sobolev.Chart.chartPushedRaw (I := I)
         (M := M) α (c • u) =
@@ -890,7 +888,6 @@ lemma tensorChartPushedRawModel_apply_of_notMem
   unfold tensorChartPushedRawModel
   exact if_neg hy
 
-set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_eq_sum_tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -955,7 +952,6 @@ theorem chartPushedRaw_eq_sum_tensorChartComponent
       (I := I) (M := M) α _ hy]
     rw [zero_smul]
 
-set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_norm_sq_le_sum_tensorChartComponent_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

@@ -227,7 +227,6 @@ private noncomputable def invGramPull
   fun y => chartInvGramMatrix (I := I) g α
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y)) k l
 
-set_option linter.unusedSectionVars false in
 private lemma invGramPull_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     (k l : Fin (Module.finrank ℝ E)) :
@@ -290,7 +289,6 @@ private lemma invGramPull_at_b_eq
   unfold invGramPull
   rw [hsymm, hleft_inv]
 
-set_option linter.unusedSectionVars false in
 private lemma chartFrameCoordPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k : Fin (Module.finrank ℝ E))
@@ -309,7 +307,6 @@ private lemma chartFrameCoordPull_at_b_eq
   unfold chartFrameCoordPull
   rw [hsymm, hleft_inv]
 
-set_option linter.unusedSectionVars false in
 private lemma chartFrameCoordDirDerivPull_at_b_eq
     (g : SmoothRiemannianMetric I M) (α : M)
     (i k l : Fin (Module.finrank ℝ E))

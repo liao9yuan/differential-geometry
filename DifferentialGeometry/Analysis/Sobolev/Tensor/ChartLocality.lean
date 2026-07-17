@@ -241,7 +241,6 @@ theorem wkpNorm_tensorChartComp_le_wtwokTwoNorm
       (chartTargetEuclid (I := I) (M := M) α))
     (fun Jdx _ => zero_le _) (Finset.mem_univ Jdx)
 
-set_option linter.unusedSectionVars false in
 theorem tensorChartComp_reconstruct
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -253,7 +252,6 @@ theorem tensorChartComp_reconstruct
             tensorChartBasisElement (E := E) r s Idx Jdx :=
   tensorChartPushed_eq_sum_tensorChartComp (I := I) (M := M) g r s T α y
 
-set_option linter.unusedSectionVars false in
 theorem tensorChartPushed_eqOn_zero_of_tensorChartComp_eqOn_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

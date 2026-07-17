@@ -46,7 +46,6 @@ private def chartSrcPreimage (α : M) (θ : EuclN → ℝ) : Set M :=
   (fun y : EuclN => (extChartAt I α).symm ((toEuclidean (E := E)).symm y)) ''
     (tsupport θ)
 
-set_option linter.unusedSectionVars false in
 private lemma chartSrcPreimage_isCompact
     (α : M) {θ : EuclN → ℝ} (hθ_cs : HasCompactSupport θ)
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -56,7 +55,6 @@ private lemma chartSrcPreimage_isCompact
   exact (hθ_cs : IsCompact (tsupport θ)).image_of_continuousOn
     ((continuousOn_symm_toEuclideanSymm (I := I) (M := M) α).mono hθ_supp)
 
-set_option linter.unusedSectionVars false in
 private lemma chartSrcPreimage_subset_chartSource
     (α : M) {θ : EuclN → ℝ}
     (hθ_supp : tsupport θ ⊆ chartTargetEuclid (I := I) (M := M) α) :
@@ -169,7 +167,6 @@ private lemma chartPulledIntegralWeight_tsupport_subset_chartSource
       hθ_cs hθ_supp).trans
     (chartSrcPreimage_subset_chartSource (I := I) (M := M) α hθ_supp)
 
-set_option linter.unusedSectionVars false in
 private lemma chart_map_continuousOn (α : M) :
     ContinuousOn (fun x : M => (toEuclidean (E := E)) ((extChartAt I α) x))
       (chartAt H α).source := by
@@ -180,7 +177,6 @@ private lemma chart_map_continuousOn (α : M) :
     rw [h_src]; exact continuousOn_extChartAt α
   exact (toEuclidean (E := E)).continuous.continuousOn.comp h_ext (Set.mapsTo_univ _ _)
 
-set_option linter.unusedSectionVars false in
 private lemma chartPulledIntegralWeight_continuousOn_chartSource
     (g : SmoothRiemannianMetric I M) (α : M)
     {θ : EuclN → ℝ} (hθ_cont : Continuous θ) :

@@ -49,7 +49,6 @@ lemma continuous_tangentBundle_proj :
     Continuous (Bundle.TotalSpace.proj : TangentBundle I M → M) :=
   FiberBundle.continuous_proj E (TangentSpace I)
 
-set_option linter.unusedSectionVars false in
 theorem IsGeodesicAt.continuousAt
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀) :
@@ -82,7 +81,6 @@ def chartPushVF (g : SmoothRiemannianMetric I M) (α : M)
   tangentCoordChange I.tangent (f t) (f t₀) (f t)
     (geodesicVectorFieldChart (I := I) g α (f t))
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma chartPushVF_apply
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : ℝ → TangentBundle I M) (t₀ t : ℝ) :
@@ -90,7 +88,6 @@ set_option linter.unusedSectionVars false in
       tangentCoordChange I.tangent (f t) (f t₀) (f t)
         (geodesicVectorFieldChart (I := I) g α (f t)) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem chartPushLift_eventually_hasDerivAt
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -101,7 +98,6 @@ theorem chartPushLift_eventually_hasDerivAt
   filter_upwards [h] with t ht
   exact ht
 
-set_option linter.unusedSectionVars false in
 lemma chartPushLift_eventually_differentiableAt
     {g : SmoothRiemannianMetric I M} {α : M} {t₀ : ℝ}
     {f : ℝ → TangentBundle I M}
@@ -131,7 +127,6 @@ section IsGeodesicAtChartPush
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem IsGeodesicAt.exists_chartPushLift_hasDerivAt
     {g : SmoothRiemannianMetric I M} {γ : ℝ → M} {t₀ : ℝ}
     (hγ : IsGeodesicAt (I := I) g γ t₀) :

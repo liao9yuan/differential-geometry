@@ -43,7 +43,6 @@ omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] [CompactSpace M] [I.Bo
         (extChartAt I α).symm ((toEuclidean (E := E)).symm y) ∈ (chartAt H β).source :=
   Iff.rfl
 
-set_option linter.unusedSectionVars false in
 private lemma isOpen_chartTransitionEuclidOverlap (α β : M) :
     IsOpen (chartTransitionEuclidOverlap (E := E) (I := I) (M := M) α β) := by
   classical

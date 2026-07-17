@@ -182,7 +182,6 @@ private theorem partialSnd_set_contMDiffOn_Icc_finiteOrder
       (fun q hq => hq.2) hUM
   simpa [inTangentCoordinates_model_space] using h_apply
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -398,7 +397,6 @@ private theorem contMDiffWithinAt_curriedSection_prod_ofOrder_local {N : WithTop
           (fun y : M => Tensor0SBundle.Tensor0SSpace (n + 1) I y) p₀.1 ⟨p₀.1, T p₀⟩).2)
     exact hpt
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in

@@ -446,7 +446,6 @@ private theorem rawTensorConnLapSmooth_iteratedCovGrad_riemannianFiberNormSq_jet
           (mul_le_mul_of_nonneg_left hCommarm (by norm_num))
     _ = (2 * Cpost + 2 * Cfun 0) * Scol := by ring
 
-set_option linter.unusedSectionVars false in
 private lemma norm_iteratedFDerivWithin_rawCompOnE_le_iteratedFDeriv_rawPullR
     (g : SmoothRiemannianMetric I M)
     (S : DifferentialGeometry.Integral.L2.SmoothCcTensor g 0 2) (α : M)
@@ -501,7 +500,6 @@ private lemma norm_iteratedFDerivWithin_rawCompOnE_le_iteratedFDeriv_rawPullR
       ‖((toEuclidean (E := E)) : E →L[ℝ] EuclideanSpace ℝ (Fin (Module.finrank ℝ E)))‖ := rfl
   rw [he_norm, mul_comm]
 
-set_option linter.unusedSectionVars false in
 private lemma bareChartJetContent_le_sqrt_fiberNormSq_sum_uniform
     (g : SmoothRiemannianMetric I M) (α : M) (N : ℕ) :
     ∃ C : ℝ, 0 ≤ C ∧
@@ -643,7 +641,6 @@ private lemma tensorChartComponentRaw_toSection_congr
     DifferentialGeometry.Analysis.Parabolic.TensorSpectral.tensorTrivProj
   rw [hSS']
 
-set_option linter.unusedSectionVars false in
 private lemma tensorChartComponentRaw_sub'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S₁ S₂ : SmoothCcTensor g r s) (α : M)

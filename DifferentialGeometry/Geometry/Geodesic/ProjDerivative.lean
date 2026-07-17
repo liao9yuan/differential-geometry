@@ -60,7 +60,6 @@ lemma chartFiberCoord_eq_tangentCoordChange
     E → E) p.snd = _
   rw [happ]
 
-set_option linter.unusedSectionVars false in
 lemma fst_continuousLinearMapAt_secondaryTriv
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -262,7 +261,6 @@ lemma fst_continuousLinearMapAt_secondaryTriv
     rfl
   exact hgoal
 
-set_option linter.unusedSectionVars false in
 lemma extChartAt_tangent_apply_snd_tangentCoordChange
     (q : TangentBundle I M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H q.proj).source) :
@@ -287,7 +285,6 @@ lemma extChartAt_tangent_apply_snd_tangentCoordChange
 def secondaryTrivFiberComponentMap (α : M) (p : TangentBundle I M) (z : E × E) : E :=
   tangentCoordChange I p.proj α ((extChartAt I p.proj).symm z.1) z.2
 
-set_option linter.unusedSectionVars false in
 lemma snd_continuousLinearMapAt_secondaryTriv
     (α : M) {p : TangentBundle I M}
     (hp : p.proj ∈ (chartAt H α).source)
@@ -422,7 +419,6 @@ lemma snd_continuousLinearMapAt_secondaryTriv
   rw [hfderivWithin_eq]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem geodesicVectorFieldChart_fst [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : TangentBundle I M}
@@ -504,7 +500,6 @@ theorem geodesicVectorFieldChart_fst [I.Boundaryless]
     exact hself_snd
   exact this
 
-set_option linter.unusedSectionVars false in
 theorem IsMIntegralCurveAt.mfderiv_proj_one [I.Boundaryless]
     {g : SmoothRiemannianMetric I M} {f : ℝ → TangentBundle I M}
     {α : M} {t₀ : ℝ}

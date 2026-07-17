@@ -52,7 +52,6 @@ theorem ccTensorMultilinear_add (g : SmoothRiemannianMetric I M)
   rw [SmoothCcTensor.toSection_add]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem ccTensorModel_add (g : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g 0 2) (x : M) :
     ccTensorModel (I := I) g (T + T') x =
@@ -590,7 +589,6 @@ theorem metricSharpChartCoeff_jointContMDiffOn
 
 open DifferentialGeometry.Integral.DivergenceTheorem in
 
-set_option linter.unusedSectionVars false in
 theorem metricSharpChartLocal_jointContMDiffOn
     (gfam : ℝ → SmoothRiemannianMetric I M) (α : M)
     (cv : ℝ → Π b : M, TangentSpace I b →ₗ[ℝ] ℝ) {S : Set ℝ}

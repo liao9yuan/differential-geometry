@@ -65,7 +65,6 @@ private lemma cutoffKernelM_subset_chart_source (α : M) :
     (I := I) (M := M) α)
   exact subset_rfl
 
-set_option linter.unusedSectionVars false in
 private lemma cutoffKernelM_subset_baseSet (α : M) :
     cutoffKernelM (I := I) (M := M) α ⊆
       (trivializationAt E (TangentSpace I) α).baseSet := by
@@ -73,7 +72,6 @@ private lemma cutoffKernelM_subset_baseSet (α : M) :
   rw [DifferentialGeometry.Integral.Measure.trivializationAt_baseSet_eq_chartAt_source]
   exact cutoffKernelM_subset_chart_source (I := I) (M := M) α hx
 
-set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_cutoff_contDiff (α : M) :
     ContDiff ℝ ∞
       (chartPushedRaw (I := I) (M := M) α
@@ -252,7 +250,6 @@ private lemma cutoffLeibnizCrossTerm_continuousOn
     (chartPushedRaw_rawComponent_continuousOn' (I := I) (M := M)
       g r s S α Idx Jdx)
 
-set_option linter.unusedSectionVars false in
 private lemma euclidPartial_chartPushedRaw_cutoff_tsupport_subset
     (α : M) (k : Fin (Module.finrank ℝ E)) :
     tsupport
@@ -352,7 +349,6 @@ private def rawComponentCutoffM
   (cutoffKernelM (I := I) (M := M) α).indicator
     (tensorChartComponentRaw (I := I) (M := M) g r s S α Idx Jdx)
 
-set_option linter.unusedSectionVars false in
 private lemma rawComponentCutoffM_tsupport_subset
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -367,7 +363,6 @@ private lemma rawComponentCutoffM_tsupport_subset
   by_contra hx_off
   exact hx (by rw [rawComponentCutoffM, Set.indicator_of_notMem hx_off])
 
-set_option linter.unusedSectionVars false in
 private lemma rawComponentCutoffM_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -927,7 +922,6 @@ private lemma exists_const_eLpNorm_cutoffCovDerivComponent_le_uniform
           ENNReal.ofReal_mul hC_bridge_pos.le]
         ring
 
-set_option linter.unusedSectionVars false in
 private lemma mem_cutoffKernelM_image_of_cutoffComponentEuclid_ne_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -971,7 +965,6 @@ private lemma mem_cutoffKernelM_image_of_cutoffComponentEuclid_ne_zero
   rw [h_extChartAt_b]
   exact (toEuclidean (E := E)).apply_symm_apply y
 
-set_option linter.unusedSectionVars false in
 private theorem exists_const_covDerivLowerOrderCoeff_bdd_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

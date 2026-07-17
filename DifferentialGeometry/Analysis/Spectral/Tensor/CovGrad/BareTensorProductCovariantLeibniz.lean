@@ -142,7 +142,6 @@ private lemma prodUnitEval_toModel (g : SmoothRiemannianMetric I M) {p q : ℕ}
   rw [unitModel] at this
   exact this
 
-set_option linter.unusedSectionVars false in
 private lemma prodUnitEval_eq_ofModel (g : SmoothRiemannianMetric I M) {p q : ℕ}
     (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q) (b : M) :
     prodUnitEval (I := I) g S T b =
@@ -180,7 +179,6 @@ private lemma modelProduct_compContinuousLinearMap_uniform (p q : ℕ)
     ContinuousMultilinearMap.compContinuousLinearMap_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chartE_section_repr_ofModel {n : ℕ} (α : M) (f : M → Tensor0SModel n ℝ E)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) :
     tensor0SChartE_section_repr (I := I) n α (fun y => Tensor0SSpace.ofModel (f y)) b =
@@ -393,7 +391,6 @@ private lemma fin_castAdd_ne_natAdd (p q : ℕ) (j : Fin p) (k : Fin q) :
   simp only [Fin.castAdd, Fin.castLE, Fin.natAdd] at hv
   omega
 
-set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_castAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin p)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin p) :
     localSlotCLM (I := I) (p + q) (Fin.castAdd q k₀) Φ (Fin.castAdd q j) =
@@ -405,7 +402,6 @@ private lemma localSlotCLM_castAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin p)
         (by intro h; exact hj (Fin.castAdd_injective p q h)),
       localSlotCLM_other (I := I) p k₀ Φ hj]
 
-set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_castAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin p)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin q) :
     localSlotCLM (I := I) (p + q) (Fin.castAdd q k₀) Φ (Fin.natAdd p j) =
@@ -414,7 +410,6 @@ private lemma localSlotCLM_castAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin p)
   intro h
   exact absurd h.symm (fin_castAdd_ne_natAdd p q k₀ j)
 
-set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_natAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin q)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin p) :
     localSlotCLM (I := I) (p + q) (Fin.natAdd p k₀) Φ (Fin.castAdd q j) =
@@ -423,7 +418,6 @@ private lemma localSlotCLM_natAdd_castAdd {b : M} (p q : ℕ) (k₀ : Fin q)
   intro h
   exact absurd h (fin_castAdd_ne_natAdd p q j k₀)
 
-set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_natAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin q)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (j : Fin q) :
     localSlotCLM (I := I) (p + q) (Fin.natAdd p k₀) Φ (Fin.natAdd p j) =
@@ -435,7 +429,6 @@ private lemma localSlotCLM_natAdd_natAdd {b : M} (p q : ℕ) (k₀ : Fin q)
         (by intro h; exact hj (Fin.natAdd_injective q p h)),
       localSlotCLM_other (I := I) q k₀ Φ hj]
 
-set_option linter.unusedSectionVars false in
 private lemma toModel_chartTensor0SSlotCorrection_prodUnitEval_apply (g : SmoothRiemannianMetric I M)
     {p q : ℕ} (S : SmoothCcTensor g 0 p) (T : SmoothCcTensor g 0 q)
     (X : Π b' : M, TangentSpace I b') (x : M) (k : Fin (p + q))
@@ -607,7 +600,6 @@ private lemma toModel_chartTensor0SCovariantDerivative_eq_intrinsic_sub_slotSum
               (fun i : Fin 0 => Fin.elim0 i) from rfl]
       rw [tensor0SIntrinsicChartCLM_zero_apply_empty_eq_mfderiv (I := I) x Y hx_good hY (X x)]
 
-set_option linter.unusedSectionVars false in
 private lemma toModel_chartTensor0SCovariantDerivative_factor_succ (g : SmoothRiemannianMetric I M)
     {s : ℕ} (S : SmoothCcTensor g 0 (s + 1)) (X : Π b' : M, TangentSpace I b') (x : M) :
     Tensor0SSpace.toModel

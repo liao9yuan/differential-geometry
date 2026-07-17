@@ -112,7 +112,6 @@ private lemma g_inner_bilinear_expand_two_sums
         c i * d j * g.inner x (u i) (w j) :=
   clm_bilinear_expand_two_sums (I := I) (g.inner x) n c d u w
 
-set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_alpha_eq_PGPt
     (g : SmoothRiemannianMetric I M) (α : M) (x : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -151,7 +150,6 @@ private lemma chartGramMatrix_alpha_eq_PGPt
     rw [chartBasisVecFiber_self (I := I) x l]
   rw [h_inner]
 
-set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_alpha_eq_PGPt_matrix
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) :
     chartGramMatrix (I := I) g α x =
@@ -207,7 +205,6 @@ private lemma chartGramMatrix_x_isUnit
   have hpos := chartGramMatrix_posDef (I := I) g x hbase
   exact isUnit_iff_ne_zero.mpr (ne_of_gt hpos.det_pos)
 
-set_option linter.unusedSectionVars false in
 private lemma chartAlphaCoBchange_isUnit
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -238,7 +235,6 @@ private lemma chartAlphaCoBchange_isUnit
     ring
   exact isUnit_iff_ne_zero.mpr hAne
 
-set_option linter.unusedSectionVars false in
 private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) :
@@ -298,7 +294,6 @@ private lemma PT_chartInvGram_alpha_P_eq_chartInvGram_x
   rw [h_inv]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma sum_chartAlphaCoBchange_chartInvGramMatrix_alpha
     (g : SmoothRiemannianMetric I M) (α : M) {x : M}
     (hx : x ∈ (chartAt H α).source) (a c : Fin (Module.finrank ℝ E)) :
@@ -617,7 +612,6 @@ private lemma nested_sum_perm
   intro i _
   rw [Finset.sum_comm]
 
-set_option linter.unusedSectionVars false in
 theorem chartFrobeniusInvariance_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}
@@ -784,7 +778,6 @@ theorem chartFrobeniusInvariance_holds
   rw [h_factor]
   rw [h_inverse a c, h_inverse b d]
 
-set_option linter.unusedSectionVars false in
 theorem chartFrobeniusSqHSBridge_holds
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) {x : M}

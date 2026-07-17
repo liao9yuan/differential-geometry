@@ -357,7 +357,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
-set_option linter.unusedSectionVars false in
 theorem contDiff_integral_fiberInner_of_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (b : SmoothCcTensor g₀ 0 2)
@@ -384,7 +383,6 @@ theorem contDiff_integral_fiberInner_of_jointContMDiffOn
     (fun x t => tensorInnerPointwise (I := I) (M := M) g₀ 0 2 x (b.toFun x) ((R t).toFun x))
     h_integrand_joint
 
-set_option linter.unusedSectionVars false in
 theorem contDiffOn_integral_fiberInner_of_jointContMDiffOn_Icc
     (g₀ : SmoothRiemannianMetric I M) {T : ℝ}
     (b : SmoothCcTensor g₀ 0 2)

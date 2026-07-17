@@ -46,7 +46,6 @@ def MemL2
     (riemannianVolumeMeasure (I := I) (M := M) g)
 
 
-set_option linter.unusedSectionVars false in
 lemma MemL2.integrable_inner_self
     [T2Space M] [SigmaCompactSpace M]
     {g : SmoothRiemannianMetric I M} {r s : ℕ}
@@ -56,7 +55,6 @@ lemma MemL2.integrable_inner_self
       (riemannianVolumeMeasure (I := I) (M := M) g) := hS
 
 
-set_option linter.unusedSectionVars false in
 theorem MemL2.zero
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
@@ -80,7 +78,6 @@ noncomputable def tensorL2Norm
   Real.sqrt (tensorL2Inner (I := I) (M := M) g r s S S)
 
 
-set_option linter.unusedSectionVars false in
 lemma tensorL2Norm_def
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -89,7 +86,6 @@ lemma tensorL2Norm_def
       Real.sqrt (tensorL2Inner (I := I) (M := M) g r s S S) := rfl
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Norm_nonneg
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

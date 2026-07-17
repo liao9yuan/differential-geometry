@@ -29,7 +29,6 @@ theorem hasDerivAt_clm_pre_post
   have := Q.hasFDerivAt.comp_hasDerivAt t hEval
   simpa using this
 
-set_option linter.unusedSectionVars false in
 theorem hasDerivAt_mfderiv_flow_of_chart
     (Fam : ℝ → (M → M)) (t : ℝ) (x : M) (v : TangentSpace I x)
     (Q : E →L[ℝ] E) (d : E)

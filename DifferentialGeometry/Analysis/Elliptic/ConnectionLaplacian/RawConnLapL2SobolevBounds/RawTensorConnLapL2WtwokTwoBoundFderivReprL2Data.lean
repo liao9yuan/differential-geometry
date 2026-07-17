@@ -68,7 +68,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq
   have h_eq : ((1 : ℝ) / 2) * ((2 : ℕ) : ℝ) = 1 := by norm_num
   rw [h_eq, ENNReal.rpow_one, hI_eq]
 
-set_option linter.unusedSectionVars false in
 lemma tensorChartComp_tsupport_subset_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -142,7 +141,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_ofReal_sq
   rw [show ((f x) ^ 2 : ℝ) = ‖f x‖ ^ 2 from by rw [Real.norm_eq_abs, sq_abs],
     ENNReal.ofReal_pow (norm_nonneg _) 2, ofReal_norm_eq_enorm]
 
-set_option linter.unusedSectionVars false in
 lemma repr_symm_differentiableAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -263,7 +261,6 @@ private lemma fderiv_pou_raw_symm_leibniz
     raw_symm_differentiableAt (I := I) (M := M) g r s T α Idx Jdx he
   exact fderiv_fun_mul hP_diff hR_diff
 
-set_option linter.unusedSectionVars false in
 lemma fderiv_repr_opNormSq_le_sum_fderiv_components_sq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M) {e : E}
@@ -736,7 +733,6 @@ lemma raw_sym_sq_ofReal_aeMeasurable_restrict
     h_raw_sym_ae.pow_const 2
   exact ENNReal.measurable_ofReal.comp_aemeasurable h_sq_ae
 
-set_option linter.unusedSectionVars false in
 private lemma fderiv_tensorChartComp_sq_ofReal_measurable
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

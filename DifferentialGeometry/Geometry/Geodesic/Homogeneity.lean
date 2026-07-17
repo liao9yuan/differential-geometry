@@ -23,13 +23,11 @@ section Homogeneity
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem maximalGeodesic_smul_zero_time
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (c : ℝ) :
     maximalGeodesic (I := I) g p (c • v) 0 = p :=
   maximalGeodesic_zero (I := I) g p (c • v)
 
-set_option linter.unusedSectionVars false in
 theorem maximalGeodesic_one_velocity
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) (t : ℝ) :
     maximalGeodesic (I := I) g p ((1 : ℝ) • v) t =

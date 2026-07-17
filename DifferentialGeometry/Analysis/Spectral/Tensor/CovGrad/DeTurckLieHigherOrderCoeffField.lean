@@ -421,7 +421,6 @@ private theorem dLieEvalScalar_section_contMDiff
   exact congrArg _ (Subsingleton.elim _ _)
 
 
-set_option linter.unusedSectionVars false in
 private theorem dLieEmbedRS_section_contMDiff {d : ℕ}
     (A : ∀ x : M, Tensor0SBundle.Tensor0SSpace d I x)
     (hA : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel d ℝ E)) ∞
@@ -594,7 +593,6 @@ private lemma dLieTriMDiffAt_curried
     (v := fun y : M => Y y) hCurried hY
 
 
-set_option linter.unusedSectionVars false in
 private theorem dLieNabla3_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SBundle.Tensor0SSpace 3 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 3 V x)

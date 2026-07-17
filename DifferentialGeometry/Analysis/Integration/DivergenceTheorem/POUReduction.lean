@@ -36,7 +36,6 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     (smoothSmul (I := I) φ hφ X) x = φ x • X x := rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartCoeff_smoothSmul (α : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -57,7 +56,6 @@ lemma chartCoeff_smoothSmul (α : M)
   rw [LinearEquiv.map_smul]
   rw [Finsupp.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 lemma chartCoeffOnE_smoothSmul (α : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -77,7 +75,6 @@ lemma chartCoeffOnE_smoothSmul (α : M)
   unfold chartCoeffOnE scalarOnE
   exact chartCoeff_smoothSmul (I := I) α φ hφ X i hsymm_base
 
-set_option linter.unusedSectionVars false in
 private lemma localDivergence_at_self_smoothSmul [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (x : M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -223,7 +220,6 @@ private lemma localDivergence_at_self_smoothSmul [I.Boundaryless]
         (extChartAt I x x)
     ring
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_smoothSmul [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (φ : M → ℝ) (hφ : ContMDiff I 𝓘(ℝ) ∞ φ)
@@ -291,7 +287,6 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] in
   rw [mfderiv_const]
   rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem tangentSectionAction_zero_fun
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     tangentSectionAction (I := I) X (fun _ : M => (0 : ℝ)) x = 0 :=
@@ -339,7 +334,6 @@ theorem tangentSectionAction_pou_tsum_eq_zero
   rw [mfderiv_const]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_pou_tsum [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
     (ρ : SmoothPartitionOfUnity M I M univ)
@@ -415,7 +409,6 @@ theorem divergence_g_pou_tsum [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   rw [hsum_action]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -512,7 +505,6 @@ theorem divergence_g_add [I.Boundaryless] [T2Space M]
   rw [Finset.sum_add_distrib]
   rw [add_div]
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem divergence_g_zero [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) :
     ∀ x : M, divergence_g (I := I) g

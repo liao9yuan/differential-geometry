@@ -20,7 +20,6 @@ variable [SigmaCompactSpace M] [T2Space M]
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedSectionVars false in
 theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
     (g : SmoothRiemannianMetric I M) (f : M → ℝ) (x : M)
     (h_orth : ∀ i j : Fin (Module.finrank ℝ E),
@@ -95,7 +94,6 @@ theorem chartHessFrobeniusSq_eq_frobeniusSqFun_hessFun_of_orthonormal
   · intro hi
     exact absurd (Finset.mem_univ i) hi
 
-set_option linter.unusedSectionVars false in
 theorem chartHessFrobeniusSq_eq_metric_hessian_norm_sq [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M)

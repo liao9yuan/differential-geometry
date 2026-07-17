@@ -125,7 +125,6 @@ noncomputable def chartPushedEuclidHessian
       (chartTargetEuclid (I := I) (M := M) α))
     (chartTargetEuclid (I := I) (M := M) α) y
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma chartPushedEuclidHessian_def
     {g : SmoothRiemannianMetric I M} (α : M) (v : SmoothScalar g)
     (i j : Fin (Module.finrank ℝ E)) (y : EuclN) :
@@ -161,7 +160,6 @@ noncomputable def smoothEuclidHessianPairingChart
             chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
             chartPushedEuclidHessian (I := I) (M := M) (g := g) α v k l y
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma smoothEuclidHessianPairingChart_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :
@@ -231,7 +229,6 @@ noncomputable def hessPairingSmoothOnEuclid
     (smoothScalarToContMDiffMap (I := I) (g := g) v)
     ((extChartAt I α).symm ((toEuclidean (E := E)).symm y))
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma hessPairingSmoothOnEuclid_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) (y : EuclN) :

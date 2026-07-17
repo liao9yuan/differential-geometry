@@ -77,7 +77,6 @@ lemma tsupport_pou_mul_fun_subset
       tsupport ((ρ α : C^∞⟮I, M; ℝ⟯) : M → ℝ) :=
   closure_mono (support_pou_mul_fun_subset (I := I) (M := M) ρ α u)
 
-set_option linter.unusedSectionVars false in
 lemma tsupport_pou_mul_fun_subset_chartAt_source
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun α : M => (chartAt H α).source))

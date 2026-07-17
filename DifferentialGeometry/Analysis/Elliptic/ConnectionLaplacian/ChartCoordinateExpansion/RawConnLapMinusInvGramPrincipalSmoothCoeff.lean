@@ -209,7 +209,6 @@ private noncomputable def wTraceCoordPullback
         chartInvGramEuclid (I := I) g α k l y *
           chartChristoffelEuclid (I := I) g α l k m y
 
-set_option linter.unusedSectionVars false in
 private lemma wTraceCoordPullback_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞ (wTraceCoordPullback (I := I) (M := M) g α m)

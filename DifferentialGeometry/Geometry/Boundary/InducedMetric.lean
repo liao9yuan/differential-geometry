@@ -240,7 +240,6 @@ private noncomputable def innerOnE
     (g : Measure.SmoothRiemannianMetric I M) (y : M) :
     E →L[ℝ] E →L[ℝ] ℝ := g.inner y
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma innerOnE_apply
     (g : Measure.SmoothRiemannianMetric I M) (y : M) (u v : E) :
     innerOnE g y u v = g.inner y u v := rfl
@@ -427,7 +426,6 @@ private noncomputable def gInnerCharted
       (fun y : M => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x₀)
     ⟨b, g.inner b⟩).2
 
-set_option linter.unusedSectionVars false in
 private lemma gInnerCharted_contMDiffAt
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : M) :
     ContMDiffAt I 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
@@ -441,7 +439,6 @@ private lemma gInnerCharted_contMDiffAt
   exact ((trivializationAt _ _ x₀).contMDiffAt_section_iff h_x₀).mp
     h_section.contMDiffAt
 
-set_option linter.unusedSectionVars false in
 private lemma gInnerCharted_along_inclusion_contMDiffAt
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M) :
     ContMDiffAt hI.boundaryI 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ) ∞
@@ -454,7 +451,6 @@ private lemma gInnerCharted_along_inclusion_contMDiffAt
     gInnerCharted_contMDiffAt g (x₀ : M)
   exact h_at.comp x₀ h_inclusion_at
 
-set_option linter.unusedSectionVars false in
 private lemma gInnerCharted_eval
     (g : Measure.SmoothRiemannianMetric I M) (x₀ b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) (v w : E) :
@@ -472,7 +468,6 @@ private lemma gInnerCharted_eval
   rw [Bundle.Trivial.linearMapAt_trivialization (𝕜 := ℝ) (B := M) (F := ℝ) b]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma inducedMetricInner_chart_eval
     (g : Measure.SmoothRiemannianMetric I M) (x₀ : BoundaryManifold I M)
     (b : BoundaryManifold I M)
@@ -581,7 +576,6 @@ private lemma dincl_chart_conjugated_contMDiffAt
     rfl
   exact h_mfderiv.congr_of_eventuallyEq h_nhds
 
-set_option linter.unusedSectionVars false in
 theorem inducedMetricInner_contMDiff
     (g : Measure.SmoothRiemannianMetric I M) :
     ContMDiff hI.boundaryI
@@ -657,12 +651,10 @@ noncomputable def inducedMetric
   isVonNBounded := inducedMetricInner_isVonNBounded g
   contMDiff := inducedMetricInner_contMDiff g
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma inducedMetric_inner
     (g : Measure.SmoothRiemannianMetric I M) (b : BoundaryManifold I M) :
     (inducedMetric g).inner b = inducedMetricInner g b := rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma inducedMetric_inner_apply
     (g : Measure.SmoothRiemannianMetric I M) (b : BoundaryManifold I M)
     (v w : hI.boundaryE) :

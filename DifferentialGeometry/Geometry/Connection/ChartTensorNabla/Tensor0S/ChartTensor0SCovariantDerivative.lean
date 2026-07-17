@@ -31,7 +31,6 @@ lemma chartParallelExtend_def (α b : M) (v : TangentSpace I b) (b' : M) :
     chartParallelExtend (I := I) α b v b' =
       trivFromE (I := I) α b' (trivToE (I := I) α b v) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_chartParallelExtend
     (α b : M) (v : TangentSpace I b) {b' : M}
     (hb' : b' ∈ (trivializationAt E (TangentSpace I) α).baseSet) :

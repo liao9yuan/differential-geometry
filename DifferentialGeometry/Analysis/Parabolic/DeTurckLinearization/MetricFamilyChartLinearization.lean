@@ -231,7 +231,6 @@ private lemma s_contDiffAt_adjugate
     rw [heq]
     exact s_contDiffAt_chartGramOnE (I := I) hfam (σ k) k hy
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma s_contDiffAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
@@ -267,7 +266,6 @@ private lemma s_differentiableAt_chartInvGramOnE
     DifferentiableAt ℝ (fun s : ℝ => chartInvGramOnE (I := I) (gfam s) α k l y) 0 :=
   (s_contDiffAt_chartInvGramOnE (I := I) hfam k l hy).differentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma joint_contDiffAt_chartInvGramOnE
     {g₀ : SmoothRiemannianMetric I M} {α : M} {h : ChartMetricPerturbation E}
@@ -722,7 +720,6 @@ private lemma hasDerivAt_partial_chartInvGramOnE
   simp only [Pi.mul_apply, hg0]
   ring
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma partial_chartGramOnE_differentiableAt
     (g : SmoothRiemannianMetric I M) (α : M)

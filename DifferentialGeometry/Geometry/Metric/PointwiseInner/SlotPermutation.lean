@@ -35,7 +35,6 @@ private lemma sum_cons_collapse {n s : ℕ}
           rw [hF]; rfl)]
   rw [Fintype.sum_prod_type]
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_eq_sum
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -200,7 +199,6 @@ theorem tensorInnerPointwise_0s_eq_sum
         rfl
       rw [hcollapse_outer]
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_domDomCongr
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (σ : Equiv.Perm (Fin s))
@@ -279,7 +277,6 @@ theorem tensorInnerPointwise_0s_domDomCongr
       S (fun a => (chartModelBasis E) (i a)) *
         T (fun a => (chartModelBasis E) (j a)))
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_domDomCongr_swap
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (a b : Fin s)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -289,7 +286,6 @@ theorem tensorInnerPointwise_0s_domDomCongr_swap
   tensorInnerPointwise_0s_domDomCongr (I := I) (M := M) g x s
     (Equiv.swap a b) S T
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_domDomCongr_cycleRange
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (b : Fin s)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :
@@ -300,7 +296,6 @@ theorem tensorInnerPointwise_0s_domDomCongr_cycleRange
   tensorInnerPointwise_0s_domDomCongr (I := I) (M := M) g x s
     (Fin.cycleRange b) S T
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_0s_domDomCongr_finRotate
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin s => E) ℝ) :

@@ -135,7 +135,6 @@ private lemma output_slot_pulled_eq_kernel_repr_eventually
         (fun y' : M => T.toSection y') ((extChartAt I α).symm y))
   exact h_factor
 
-set_option linter.unusedSectionVars false in
 private lemma inputSlotChartKernel_iteratedFDeriv_two_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (k : Fin r) :
@@ -183,7 +182,6 @@ private lemma inputSlotChartKernel_iteratedFDeriv_two_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
-set_option linter.unusedSectionVars false in
 private lemma outputSlotChartKernel_iteratedFDeriv_two_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (l : Fin s) :
@@ -231,7 +229,6 @@ private lemma outputSlotChartKernel_iteratedFDeriv_two_continuousOn
     exact (h_eq hy).symm
   exact continuous_norm.comp_continuousOn h_iter_cont
 
-set_option linter.unusedSectionVars false in
 private lemma pouTsupport_subset_goodSet (α : M) :
     tsupport (fun x : M =>
         ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) x) ⊆

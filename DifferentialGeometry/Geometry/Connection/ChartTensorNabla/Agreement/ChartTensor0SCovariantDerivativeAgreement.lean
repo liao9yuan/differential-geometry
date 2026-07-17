@@ -25,7 +25,6 @@ open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 open Tensor0SNabla
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0Iso_symm_apply_empty (x : M) (a : ℝ) :
     (show ContinuousMultilinearMap ℝ (fun _ : Fin 0 => TangentSpace I x) ℝ from
         ((tensor0Iso (I := I) (M := M) x).symm a))
@@ -58,7 +57,6 @@ private lemma extDerivFun_apply_scalar (f : M → ℝ) (x : M) (v : TangentSpace
   simp only [NormedSpace.fromTangentSpace, ContinuousLinearEquiv.coe_mk, LinearEquiv.coe_mk]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma mfderiv_section_zero_eq_scalarFn
     (T : Π b : M, Tensor0SSpace 0 I b) (b : M) (v : TangentSpace I b) :
     mfderiv I 𝓘(ℝ, ℝ)

@@ -99,7 +99,6 @@ lemma metric_inner_cauchy_schwarz_sq
     rw [hc_eq, ha_eq]
     simp
 
-set_option linter.unusedSectionVars false in
 lemma abs_metric_inner_le_sqrt_metric_quadratic
     (g : SmoothRiemannianMetric I M) (x : M) (v w : TangentSpace I x) :
     |g.inner x v w| ≤ Real.sqrt (g.inner x v v) * Real.sqrt (g.inner x w w) := by

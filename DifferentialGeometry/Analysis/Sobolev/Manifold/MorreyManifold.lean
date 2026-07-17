@@ -269,7 +269,6 @@ private lemma contDiff_chartSmoothExt
     exact contDiffAt_chartSmoothExt_of_notMem_image_tsupport
       (I := I) (M := M) α (f := f) hf_supp hf_compact hy_off
 
-set_option linter.unusedSectionVars false in
 private lemma tsupport_pou_mul_subset_chart_source
     (ρ : SmoothPartitionOfUnity M I M Set.univ)
     (hρ : ρ.IsSubordinate (fun β : M => (chartAt H β).source))
@@ -510,7 +509,6 @@ private lemma chartSmoothExt_morrey_sup_uniform
       linarith
     exact h_RHS_nn
 
-set_option linter.unusedSectionVars false in
 private lemma chartSmoothExt_eq_zero_off_target
     (α : M) (f : M → ℝ) {y : EuclN}
     (hy : y ∉ chartTargetEuclid (I := I) (M := M) α) :
@@ -532,7 +530,6 @@ private lemma fderiv_eq_zero_off_tsupport_subset_closed
   rw [Filter.EventuallyEq.fderiv_eq hh_zero_eventually]
   simp
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_chartSmoothExt_eq_restrict_target
     (α : M) (f : M → ℝ) (q : ℝ≥0∞) :
     eLpNorm (chartSmoothExt (I := I) (M := M) α f) q volume =
@@ -719,7 +716,6 @@ lemma chartSmoothExt_ae_eq_chartPushed
   exact chartSmoothExt_eq_chartPushed_on_target
     (I := I) (M := M) (DifferentialGeometry.Integral.Measure.chartAtlasPOU I M) α u hy
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_chartSmoothExt_target_eq_eLpNorm_chartPushed_target
     (α : M) (u : M → ℝ) (q : ℝ≥0∞) :
     eLpNorm (chartSmoothExt (I := I) (M := M) α
@@ -1204,7 +1200,6 @@ private lemma chartSmoothExt_pou_mul_apply_at_chart_image
       (I := I) (M := M)]
     exact hx)]
 
-set_option linter.unusedSectionVars false in
 private lemma norm_pou_mul_le_norm_chartSmoothExt_at_some_point
     (α : M) (u : M → ℝ) (x : M) {Cmod : ℝ}
     (hbound : ∀ y : EuclN, ‖chartSmoothExt (I := I) (M := M) α

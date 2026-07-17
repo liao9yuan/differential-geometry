@@ -97,7 +97,6 @@ private lemma vwIntegrandOnE_apply_of_notMem
     vwIntegrandOnE (I := I) g α X i y = 0 :=
   Set.indicator_of_notMem hy _
 
-set_option linter.unusedSectionVars false in
 private lemma vwIntegrandOnE_contDiffOn_target [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -458,7 +457,6 @@ private lemma partialDeriv_phiOnE_eq_on_target [I.Boundaryless]
   unfold partialDeriv
   rw [fderiv_phiOnE_eq_fderiv_scalarOnE (I := I) α φ hy]
 
-set_option linter.unusedSectionVars false in
 private lemma localDivergence_mul_chartDensity_chart_target_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) {y : E}
@@ -506,7 +504,6 @@ private lemma tangentSectionAction_chart_target_apply [I.Boundaryless]
   intro i _
   rw [(extChartAt I α).right_inv hy]
 
-set_option linter.unusedSectionVars false in
 lemma localDivergence_continuousOn_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

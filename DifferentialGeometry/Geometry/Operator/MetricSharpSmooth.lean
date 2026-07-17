@@ -24,7 +24,6 @@ def metricSharpChartCoeff (g : SmoothRiemannianMetric I M) (α : M)
     chartInvGramMatrix (I := I) g α x i j *
       cv x (chartBasisVecFiber (I := I) α j x)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma metricSharpChartCoeff_def
     (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
@@ -41,7 +40,6 @@ def metricSharpChartLocal (g : SmoothRiemannianMetric I M) (α : M)
     metricSharpChartCoeff (I := I) g α cv i x •
       chartBasisVecFiber (I := I) α i x
 
-set_option linter.unusedSectionVars false in
 lemma inner_metricSharpChartLocal_chartBasis
     (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
@@ -143,7 +141,6 @@ lemma inner_metricSharpChartLocal_chartBasis
   · intro hk
     exact absurd (Finset.mem_univ k) hk
 
-set_option linter.unusedSectionVars false in
 lemma metricSharpChartLocal_eq_metricSharp
     (g : SmoothRiemannianMetric I M) (α : M)
     (cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ)
@@ -187,7 +184,6 @@ lemma metricSharpChartLocal_eq_metricSharp
   congr 1
   rw [inner_metricSharpChartLocal_chartBasis (I := I) g α cv hx k]
 
-set_option linter.unusedSectionVars false in
 lemma metricSharpChartCoeff_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)
     {cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ}
@@ -211,7 +207,6 @@ lemma metricSharpChartCoeff_contMDiffOn
   rw [hbase_eq] at h1
   exact h1
 
-set_option linter.unusedSectionVars false in
 lemma metricSharpChartLocal_contMDiffOn_total
     (g : SmoothRiemannianMetric I M) (α : M)
     {cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ}
@@ -249,7 +244,6 @@ lemma metricSharpChartLocal_contMDiffOn_total
     ContMDiffOn.sum_section (fun i _ => hsmul i)
   exact hsum
 
-set_option linter.unusedSectionVars false in
 lemma metricSharp_contMDiff_total [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {cv : Π b : M, TangentSpace I b →ₗ[ℝ] ℝ}

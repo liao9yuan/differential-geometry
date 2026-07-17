@@ -141,7 +141,6 @@ private lemma curvatureRefoldSlotPerm_natAdd (σ : Equiv.Perm (Fin 4)) (k : Fin 
   exact (by decide : ∀ k' : Fin 2,
     armPairTraceSlotPerm6 (Fin.natAdd 4 k') = (![0, 2] : Fin 2 → Fin 6) k') k
 
-set_option linter.unusedSectionVars false in
 set_option backward.isDefEq.respectTransparency false in
 set_option maxHeartbeats 12800000 in
 private lemma slotExtendIterFour_toModel (g₀ : SmoothRiemannianMetric I M)

@@ -69,7 +69,6 @@ private lemma gNorm_self_triangle
   rw [hsq]
   linarith [hcs]
 
-set_option linter.unusedSectionVars false in
 private lemma gNorm_self_sub_triangle
     (g : SmoothRiemannianMetric I M) (x : M) (a b : TangentSpace I x) :
     Real.sqrt (g.inner x (a - b) (a - b)) ≤

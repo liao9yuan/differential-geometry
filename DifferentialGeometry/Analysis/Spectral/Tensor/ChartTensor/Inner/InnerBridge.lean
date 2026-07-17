@@ -29,7 +29,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option linter.unusedSectionVars false in
 lemma chartGramBilin_eq_innerJinv
     (g : SmoothRiemannianMetric I M) (α b : M) (u w : E) :
     chartGramBilin (I := I) (M := M) g α b u w =
@@ -162,7 +161,6 @@ lemma chartGramBilin_eq_innerJinv
     rw [hsum_eq, (chartModelBasis E).sum_equivFun u]
   rw [husum]
 
-set_option linter.unusedSectionVars false in
 lemma chartGramBilin_chartJ_chartJ
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet) (u w : E) :
@@ -174,7 +172,6 @@ lemma chartGramBilin_chartJ_chartJ
   rw [chartJinv_chartJ_self (I := I) (M := M) α hb u]
   rw [chartJinv_chartJ_self (I := I) (M := M) α hb w]
 
-set_option linter.unusedSectionVars false in
 lemma chartSeparableFormAt_chartJ_compose
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -193,7 +190,6 @@ lemma chartSeparableFormAt_chartJ_compose
   rw [chartGramBilin_eq_innerJinv (I := I) (M := M) g α b]
   rw [chartJinv_chartJ_self (I := I) (M := M) α hb (v_first k)]
 
-set_option linter.unusedSectionVars false in
 theorem chartTensorInnerPointwise_0s_eq_tensorInnerPointwise_0s_chartJ
     (g : SmoothRiemannianMetric I M) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -236,7 +232,6 @@ theorem chartTensorInnerPointwise_0s_eq_tensorInnerPointwise_0s_chartJ
   rw [hAcompose, hBcompose] at hbridge
   exact hbridge.symm
 
-set_option linter.unusedSectionVars false in
 theorem chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise_0s_compChartJ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -260,7 +255,6 @@ noncomputable def chartRSTwist
       ((ContinuousMultilinearMap.compContinuousLinearMapL
         (fun _ : Fin r => chartTrivializationLinearMapSymm (I := I) (M := M) α b)))
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma chartRSTwist_apply
     (α b : M) (r s : ℕ) (T : TensorRSModel r s ℝ E)
@@ -271,7 +265,6 @@ lemma chartRSTwist_apply
         (fun _ : Fin s => chartTrivializationLinearMap (I := I) (M := M) α b) := by
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartLowerAllUpperIndices_model_compChartJ
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -300,7 +293,6 @@ lemma chartLowerAllUpperIndices_model_compChartJ
   rw [hsep]
   rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
 
-set_option linter.unusedSectionVars false in
 theorem chartTensorInnerPointwise_rs_model_eq_tensorInnerPointwise
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)

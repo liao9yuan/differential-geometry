@@ -170,7 +170,6 @@ private lemma bal_appCc_sub_right (g : SmoothRiemannianMetric I M) (r s : ℕ)
     appCc_smul_right (I := I) (M := M) g r s (-1 : ℝ) Φ B,
     neg_one_smul, ← sub_eq_add_neg]
 
-set_option linter.unusedSectionVars false in
 lemma oneMinusConnLapSmoothIter_sub (g : SmoothRiemannianMetric I M) (r s : ℕ) (q : ℕ)
     (A B : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s q (A - B) =
@@ -185,7 +184,6 @@ lemma oneMinusConnLapSmoothIter_sub (g : SmoothRiemannianMetric I M) (r s : ℕ)
     rw [rawTensorConnLapSmooth_sub]
     abel
 
-set_option linter.unusedSectionVars false in
 private lemma bal_lap_add (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (A B : SmoothCcTensor g r s) :
     rawTensorConnLapSmooth (I := I) g r s (A + B) =

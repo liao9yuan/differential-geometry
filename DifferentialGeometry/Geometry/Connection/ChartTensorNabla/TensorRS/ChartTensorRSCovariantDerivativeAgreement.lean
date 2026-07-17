@@ -28,7 +28,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedSectionVars false in
 private lemma tensorSectionMDiffAt_tensorPartialEval
     (r s : ℕ) (α : M) (T : Π b' : M, TensorRSSpace r s I b')
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -127,7 +126,6 @@ private lemma tensorRSInputSlotCorrection_eq_compose_chartTensor0SSlotCorrection
   unfold chartTensorRSInputSlotCorrection
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensor0SSlotCorrection_partialEval_eq_chartTensorRSOutputSlotCorrection
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')

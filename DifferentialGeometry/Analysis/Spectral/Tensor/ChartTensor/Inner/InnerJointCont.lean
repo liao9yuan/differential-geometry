@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 section Algebra
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerPointwise_rs_model_basis_expand
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     {ι : Type*} [Fintype ι]
@@ -129,7 +128,6 @@ section JointCont
 
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 
-set_option linter.unusedSectionVars false in
 theorem chartTensorInnerPointwise_rs_model_quadratic_continuousOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ContinuousOn

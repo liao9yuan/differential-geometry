@@ -26,14 +26,12 @@ def divergence_g_with_boundary
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) : M → ℝ :=
   fun x => localDivergenceWithin (I := I) g x X x
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma divergence_g_with_boundary_def
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
     divergence_g_with_boundary (I := I) g X x =
       localDivergenceWithin (I := I) g x X x := rfl
 
-set_option linter.unusedSectionVars false in
 theorem voss_weyl_divergence_with_boundary_formula [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -44,7 +42,6 @@ theorem voss_weyl_divergence_with_boundary_formula [T2Space M]
   exact localDivergenceWithin_chart_invariance
     (I := I) g x α X (mem_chart_source H x) hx_α hx_int
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_with_boundary_eq_divergence_g_of_isInteriorPoint
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -60,7 +57,6 @@ private lemma isOpen_interior_M : IsOpen (I.interior M) :=
   I.isOpen_interior (M := M) (n := ∞)
     (by exact (by decide : (∞ : WithTop ℕ∞) ≠ 0))
 
-set_option linter.unusedSectionVars false in
 private lemma chart_source_inter_interior_open_nhd (x : M) (hx_int : x ∈ I.interior M) :
     IsOpen ((chartAt H x).source ∩ I.interior M) ∧
       x ∈ (chartAt H x).source ∩ I.interior M := by
@@ -69,7 +65,6 @@ private lemma chart_source_inter_interior_open_nhd (x : M) (hx_int : x ∈ I.int
   · exact mem_chart_source H x
   · exact hx_int
 
-set_option linter.unusedSectionVars false in
 private lemma divergence_g_with_boundary_eq_localDivergenceWithin_on_chart
     [T2Space M] (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -80,7 +75,6 @@ private lemma divergence_g_with_boundary_eq_localDivergenceWithin_on_chart
   exact voss_weyl_divergence_with_boundary_formula
     (I := I) g x X hy.1 hy.2
 
-set_option linter.unusedSectionVars false in
 private lemma localDivergenceWithin_contMDiffOn_chart_inter_interior
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -88,7 +82,6 @@ private lemma localDivergenceWithin_contMDiffOn_chart_inter_interior
       ((chartAt H x).source ∩ I.interior M) :=
   (localDivergenceWithin_contMDiffOn (I := I) g x X).mono Set.inter_subset_left
 
-set_option linter.unusedSectionVars false in
 private lemma divergence_g_with_boundary_contMDiffOn_chart_inter_interior
     [T2Space M] (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -100,7 +93,6 @@ private lemma divergence_g_with_boundary_contMDiffOn_chart_inter_interior
     (I := I) g X x
   exact hsmooth.congr hcongr
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_with_boundary_contMDiffOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -119,7 +111,6 @@ theorem divergence_g_with_boundary_contMDiffOn_interior [T2Space M]
     rw [hset_eq]
     exact hsm
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_with_boundary_continuousOn_interior [T2Space M]
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :

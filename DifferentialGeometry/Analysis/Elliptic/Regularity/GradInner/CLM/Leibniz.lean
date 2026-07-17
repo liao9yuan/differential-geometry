@@ -139,7 +139,6 @@ noncomputable def leibnizLhsCLM
   (smoothMulLp (I := I) (M := M) g ρα).comp
     (gradInnerCLM (I := I) (M := M) g ρα)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma leibnizLhsCLM_apply
     (g : SmoothRiemannianMetric I M) (ρα : C^∞⟮I, M; ℝ⟯) (u_h : H1Compl g) :
     leibnizLhsCLM (I := I) (M := M) g ρα u_h =
@@ -232,7 +231,6 @@ theorem gradInner_leibniz_H1Compl
 
 variable [NeZero (Module.finrank ℝ E)]
 
-set_option linter.unusedSectionVars false in
 lemma chartPushedRawLpFromLp_coeFn_sub
     (g : SmoothRiemannianMetric I M) (α : M)
     (F G : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -293,7 +291,6 @@ lemma chartPushedRawLpFromLp_coeFn_sub
   rw [hy_FG, hy_chart, h_chartPushedRaw_diff_pointwise y]
   rw [← hy_F, ← hy_G]
 
-set_option linter.unusedSectionVars false in
 private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)
     (F : Lp ℝ 2 (riemannianVolumeMeasure (I := I) (M := M) g)) :
@@ -359,7 +356,6 @@ private lemma chartPushedRawLpFromLp_smoothMulLp_coeFn
   rw [hy_smoothMul, hy_chart, h_pointwise y]
   rw [← hy_F]
 
-set_option linter.unusedSectionVars false in
 theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (u_h : H1Compl g) :
@@ -399,7 +395,6 @@ theorem chartPushedRawLpFromLp_gradInner_leibniz_H1Compl
     with y hy_sub hy_smooth
   rw [hy_sub, hy_smooth]
 
-set_option linter.unusedSectionVars false in
 theorem chartPushedRawLpFromLp_gradInner_leibniz_smoothToH1Compl
     (g : SmoothRiemannianMetric I M) (α : M) (ρα : C^∞⟮I, M; ℝ⟯)
     (v : SmoothScalar g) :

@@ -184,14 +184,12 @@ noncomputable def tensor0SChartChristoffelCorrection (s : ℕ) (α : M)
   (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b -
     tensor0SIntrinsicChartCLM (I := I) s α T b
 
-set_option linter.unusedSectionVars false in
 lemma tensor0SChartChristoffelCorrection_def (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
     tensor0SChartChristoffelCorrection (I := I) cov s α T b =
       (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b -
         tensor0SIntrinsicChartCLM (I := I) s α T b := rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SCovariantDerivative_chart_decomp (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b =
@@ -201,7 +199,6 @@ theorem tensor0SCovariantDerivative_chart_decomp (s : ℕ) (α : M)
   rw [tensor0SChartChristoffelCorrection_def]
   abel
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SCovariantDerivative_chart_decomp_apply (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) (v : TangentSpace I b) :
     (Tensor0SNabla.tensor0SCovariantDerivative I M s cov T) b v =
@@ -211,7 +208,6 @@ theorem tensor0SCovariantDerivative_chart_decomp_apply (s : ℕ) (α : M)
   rw [tensor0SCovariantDerivative_chart_decomp (I := I) cov s α T b]
   rw [ContinuousLinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SCovariantDerivative_chart_decomp_vectorField
     (s : ℕ) (α : M)
     (T : Π b : M, Tensor0SSpace s I b)

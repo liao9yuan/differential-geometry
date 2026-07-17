@@ -278,7 +278,6 @@ private lemma covApply_smooth_section
   exact (covApply_contMDiffOn (cov := LeviCivita (I := I) g) hY hZ_le).contMDiffAt
     (Filter.univ_mem)
 
-set_option linter.unusedSectionVars false in
 private lemma inner_smooth_scalar
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}
@@ -299,7 +298,6 @@ private lemma inner_smooth_scalar
       (ϕ := fun b => g.inner b) (v := fun b => Y b) hg hY
   exact cotangentCov_pairing_contMDiff hgY hZ
 
-set_option linter.unusedSectionVars false in
 private lemma inner_mdiffAt_scalar
     (g : SmoothRiemannianMetric I M)
     {Y Z : Π b : M, TangentSpace I b}

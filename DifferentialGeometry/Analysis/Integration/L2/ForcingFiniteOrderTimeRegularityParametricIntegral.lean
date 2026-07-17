@@ -118,7 +118,6 @@ private theorem partialSnd_contMDiffOn_Icc_finiteOrder
       (fun q hq => hq.2) hUM
   simpa [inTangentCoordinates_model_space] using h_apply
 
-set_option linter.unusedSectionVars false in
 private theorem hasDerivWithinAt_integral_param_Icc_finiteOrder
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ} (hT : 0 < T)
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) (1 : WithTop ℕ∞)

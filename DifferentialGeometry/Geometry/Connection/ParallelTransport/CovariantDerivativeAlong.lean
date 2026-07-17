@@ -429,7 +429,6 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ
 lemma chartRepAtBase_foot (γ : ℝ → M) (V : ∀ t, TangentSpace I (γ t)) (t : ℝ) :
     chartRepAtBase (I := I) (γ t) γ V = chartRepAt (I := I) γ V t := rfl
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 private theorem trivCoord_comp_symmL_eq_transition [I.Boundaryless]
     (α β : M) {b : M}

@@ -750,7 +750,6 @@ private lemma eLpNorm_tendsto_zero_of_wkpNorm_m_two_tendsto_zero
     (fun _ => zero_le _)
     (fun n => eLpNorm_le_wkpNorm_m_two m (fun y => u n y - F_lim y) Ω)
 
-set_option linter.unusedSectionVars false in
 private lemma volume_restrict_chartTarget_absolutelyContinuous_weighted
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict

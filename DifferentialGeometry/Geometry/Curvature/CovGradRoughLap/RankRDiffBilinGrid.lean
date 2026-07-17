@@ -56,7 +56,6 @@ private theorem rfns_toSection_heq_congr_dbRS (g : SmoothRiemannianMetric I M)
       riemannianFiberNormSq (I := I) (M := M) g c b x (Z.toSection x) := by
   subst h; rw [eq_of_heq hYZ]
 
-set_option linter.unusedSectionVars false in
 private theorem rfns_iteratedCovGrad_covGrad_comm_dbRS (g : SmoothRiemannianMetric I M)
     (c s m : ℕ) (W : SmoothCcTensor g c s) (x : M) :
     riemannianFiberNormSq (I := I) (M := M) g c ((s + 1) + m) x

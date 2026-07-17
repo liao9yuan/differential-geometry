@@ -177,7 +177,6 @@ noncomputable def tensorProdPairCLM (m k : ℕ) (x : M) :
           ((Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (m + k) x).symm) c _ }
 
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem tensorProdPairCLM_apply (m k : ℕ) (x : M)
     (P : Tensor0SBundle.Tensor0SSpace m I x) :
     tensorProdPairCLM (I := I) m k x P = tensorProdWithCLM (I := I) m k x P := rfl

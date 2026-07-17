@@ -47,7 +47,6 @@ private lemma metric_inner_self_nonneg2 (g : SmoothRiemannianMetric I M) (x : M)
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smooth_tensorRS_section_eq (r s : ℕ) (x : M) (T₀ : TensorRSSpace r s I x) :
     ∃ A : Π b : M, TensorRSSpace r s I b, A x = T₀ ∧
       ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E)) ∞
@@ -68,7 +67,6 @@ private lemma exists_smooth_tensorRS_section_eq (r s : ℕ) (x : M) (T₀ : Tens
     smoothExtensionFiber_contMDiff (I := I) (F := TensorRSModel r s ℝ E)
       (V := fun b => TensorRSSpace r s I b) x T₀⟩
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smooth_tensor0S_section_eq2 (r : ℕ) (x : M) (Y₀ : Tensor0SSpace r I x) :
     ∃ A : Π b : M, Tensor0SSpace r I b, A x = Y₀ ∧
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel r ℝ E)) ∞
@@ -88,7 +86,6 @@ private lemma exists_smooth_tensor0S_section_eq2 (r : ℕ) (x : M) (Y₀ : Tenso
     smoothExtensionFiber_contMDiff (I := I) (F := Tensor0SModel r ℝ E)
       (V := fun b => Tensor0SSpace r I b) x Y₀⟩
 
-set_option linter.unusedSectionVars false in
 theorem riemannOp_tensorCovRS_apply_eval
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (v w : TangentSpace I x)
     (T : TensorRSSpace r s I x) (Y₀ : Tensor0SSpace r I x) (u : Fin s → TangentSpace I x) :

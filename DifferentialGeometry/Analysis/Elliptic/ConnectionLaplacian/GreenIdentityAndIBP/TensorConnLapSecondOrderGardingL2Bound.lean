@@ -33,7 +33,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
-set_option linter.unusedSectionVars false in
 theorem rawConnLap_three_l2Inner_covGrad_eq
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (Curv : SmoothCcTensor g 0 3)
@@ -62,7 +61,6 @@ theorem rawConnLap_three_l2Inner_covGrad_eq
   rw [covGrad_rawConnLap_l2Inner_covGrad_eq_neg_rawConnLap_normSq (I := I) (M := M) g T]
 
 
-set_option linter.unusedSectionVars false in
 theorem secondCovGrad_l2NormSq_le_rawConnLap_add_self
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2)
     (Curv : SmoothCcTensor g 0 3) (C₀ : ℝ) (hC₀ : 0 ≤ C₀)

@@ -573,7 +573,6 @@ theorem triv_fwdEquiv_eq (s q : ℕ) (x₀ x : B)
   exact (triv_toTensor_eq_modelFromTensorEquiv_symm (Module.finBasis 𝕜 F) s q x₀ x hx t).symm
 
 
-set_option linter.unusedSectionVars false in
 theorem multilinearTensorFiberwiseEquiv_smooth :
     ContMDiff
       (IB.prod 𝓘(𝕜, MLF (s + q)))
@@ -612,7 +611,6 @@ theorem multilinearTensorFiberwiseEquiv_smooth :
 
 set_option maxHeartbeats 400000 in
 
-set_option linter.unusedSectionVars false in
 theorem multilinearTensorFiberwiseEquiv_symm_smooth :
     ContMDiff
       (IB.prod 𝓘(𝕜, (MLF s) ⊗[𝕜] (MLF q)))

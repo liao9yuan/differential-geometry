@@ -92,7 +92,6 @@ theorem chartFiberCoord_fiberScale
 
 section ChartCoordBridges
 
-set_option linter.unusedSectionVars false in
 theorem hasDerivWithinAt_chartPhaseVF_at_zero_section_within
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : ℝ → TangentBundle I M} {S : Set ℝ} {t : ℝ}
@@ -233,7 +232,6 @@ theorem geodesicVectorFieldChart_eq_zero_of_notMem_source
     exact fun hh => hp (proj_mem_chartAt_source_of_mem_geodesicChartDomain (I := I) hh)
   rw [Bundle.Trivialization.symm_apply_of_notMem _ hbase]
 
-set_option linter.unusedSectionVars false in
 theorem extChartAt_tangent_zero_fiberScale (β : M) (c : ℝ) {q : TangentBundle I M}
     (hq : q.proj ∈ (chartAt H β).source) :
     extChartAt I.tangent (⟨β, (0 : E)⟩ : TangentBundle I M)
@@ -263,7 +261,6 @@ theorem tangentCoordChange_zero_section_geodesicVF
       exact (mem_chartAt_modelProd_zero_source_iff (I := I) α q).mpr hq
     exact ⟨⟨hself, hα⟩, hself⟩
 
-set_option linter.unusedSectionVars false in
 theorem chartPhaseVF_extChartAt_zero_section
     (g : SmoothRiemannianMetric I M) (α : M)
     {p : TangentBundle I M} (hp : p.proj ∈ (chartAt H α).source) :

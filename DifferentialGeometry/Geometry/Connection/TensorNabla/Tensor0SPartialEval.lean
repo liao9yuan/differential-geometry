@@ -42,7 +42,6 @@ theorem tensor0SPartialEval_eq_curriedSection {s : ℕ}
     (Y : Π b : M, TangentSpace I b) (b : M) :
     tensor0SPartialEval I M T Y b = curriedSection I M T b (Y b) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SPartialEval_toModel_apply {s : ℕ}
     (T : Π b : M, Tensor0SSpace (s + 1) I b)
     (Y : Π b : M, TangentSpace I b) (b : M) (v : Fin s → E) :

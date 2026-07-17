@@ -60,7 +60,6 @@ private lemma chartPouKernel_eq_empty_of_pou_zero {α : M}
   rw [h_tsupp_empty]
   rw [Set.image_empty, Set.image_empty]
 
-set_option linter.unusedSectionVars false in
 private lemma chartPouKernel_eq_empty_of_notMem_activeFinset
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M) :
     chartPouKernel (I := I) (M := M) α = (∅ : Set EuclN) :=

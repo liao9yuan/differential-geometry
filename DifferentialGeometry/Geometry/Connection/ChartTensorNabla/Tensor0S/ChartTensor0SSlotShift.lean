@@ -73,7 +73,6 @@ lemma chartTensor0SSlotCorrection_apply_localSlotCLM (s : ℕ)
     (I := I) s g α T X b k]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma tensor0SPartialEval_apply_tangent (s : ℕ)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')
     (Y : Π b' : M, TangentSpace I b') (b : M)
@@ -146,7 +145,6 @@ private lemma slot_shift_tuple_eq (s : ℕ) {b : M}
         simp [hjk, hsucc_ne]
     rw [hCLM_eq]
 
-set_option linter.unusedSectionVars false in
 theorem chartTensor0SSlotCorrection_succ_eq_partialEval
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')
@@ -177,7 +175,6 @@ theorem chartTensor0SSlotCorrection_succ_eq_partialEval
   congr 1
   exact slot_shift_tuple_eq (I := I) s k Φ w m
 
-set_option linter.unusedSectionVars false in
 theorem chartTensor0SSlotCorrection_succ_eq_partialEval_of_mem
     (g : SmoothRiemannianMetric I M) (s : ℕ) (α : M)
     (T : Π b' : M, Tensor0SSpace (s + 1) I b')

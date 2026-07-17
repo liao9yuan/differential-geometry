@@ -56,7 +56,6 @@ open DifferentialGeometry.PDE.DeTurck.DeTurckLinearization
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_testLinearForm (x : M) (ξ : E)
     (p : Fin (Module.finrank ℝ E)) (y : E) :
     partialDeriv (E := E) p
@@ -122,7 +121,6 @@ private lemma partialDeriv_testLinearForm (x : M) (ξ : E)
   · intro b _ hb; rw [if_neg (Ne.symm hb)]; ring
   · intro hp; exact absurd (Finset.mem_univ p) hp
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
     (p q c d : Fin (Module.finrank ℝ E)) :
@@ -191,7 +189,6 @@ private lemma partialDeriv_partialDeriv_symbolTestPerturbation_self (x : M) (ξ 
   rw [hL, partialDeriv_testLinearForm x ξ p (extChartAt I x x)]
   rw [hK]; ring
 
-set_option linter.unusedSectionVars false in
 private lemma chartRicciSecondOrderPrincipalSymbol_symbolTestPerturbation
     (g₀ : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)
@@ -208,7 +205,6 @@ private lemma chartRicciSecondOrderPrincipalSymbol_symbolTestPerturbation
     partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht j l i k,
     partialDeriv_partialDeriv_symbolTestPerturbation_self x ξ t ht k i l j]
 
-set_option linter.unusedSectionVars false in
 private lemma chartDeTurckCorrPrincipalSymbolExpr_symbolTestPerturbation
     (g₀ g_bg : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ) (ht : ∀ v w, t v w = t w v)

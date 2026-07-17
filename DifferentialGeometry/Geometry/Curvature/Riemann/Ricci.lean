@@ -36,7 +36,6 @@ lemma chartInvGramOnE_symm
       (chartGramMatrix (I := I) g α z)⁻¹ j i from rfl] at hstar
   exact hstar.symm
 
-set_option linter.unusedSectionVars false in
 lemma partialDeriv_partialDeriv_chartGramOnE_swap
     (g : SmoothRiemannianMetric I M) (α : M)
     (l j a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -206,7 +205,6 @@ lemma chartContractedChristoffel_eq_half_invGram_partialDeriv
   rw [sum_invGram_partialDeriv_swap (I := I) g α i y]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_chartGramOnE_contDiffOn_interior
     (g : SmoothRiemannianMetric I M) (α : M)
     (l j b : Fin (Module.finrank ℝ E)) :
@@ -224,7 +222,6 @@ private lemma partialDeriv_chartGramOnE_contDiffOn_interior
   unfold partialDeriv
   exact hfderiv.clm_apply contDiffOn_const
 
-set_option linter.unusedSectionVars false in
 private lemma chartInvGramOnE_diffAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (j l : Fin (Module.finrank ℝ E)) {y : E}

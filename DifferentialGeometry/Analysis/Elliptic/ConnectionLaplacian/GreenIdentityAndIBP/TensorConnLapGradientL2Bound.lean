@@ -35,7 +35,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
-set_option linter.unusedSectionVars false in
 lemma tensorL2Norm_sq_toFun
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     tensorL2Norm (I := I) (M := M) g r s S.toFun ^ 2 =
@@ -44,7 +43,6 @@ lemma tensorL2Norm_sq_toFun
   exact Real.sq_sqrt (tensorL2Inner_nonneg (I := I) (M := M) g r s S.toFun)
 
 
-set_option linter.unusedSectionVars false in
 lemma tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     tensorL2Inner (I := I) (M := M) g 0 (2 + 1)
@@ -55,7 +53,6 @@ lemma tensorL2Inner_covGrad_self_eq_neg_rawConnLap_inner
   green_first_covGrad_l2Inner_eq_neg_rawTensorConnLap_of_closed (I := I) (M := M) g T T
 
 
-set_option linter.unusedSectionVars false in
 theorem covGrad_l2NormSq_le_rawConnLap_mul_self
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     tensorL2Norm (I := I) (M := M) g 0 (2 + 1)
@@ -84,7 +81,6 @@ theorem covGrad_l2NormSq_le_rawConnLap_mul_self
   exact le_trans hneg_le hcs
 
 
-set_option linter.unusedSectionVars false in
 theorem covGrad_l2Norm_le_geomMean
     (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 2) :
     tensorL2Norm (I := I) (M := M) g 0 (2 + 1)

@@ -122,7 +122,6 @@ theorem tensorChartComponentRaw_prependCovGradSlot
     ContinuousMultilinearMap.smul_apply, smul_eq_mul]
   congr 1
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_scalarOnE_eq_euclidPartial
     (f : M → ℝ) (α : M) (m : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :
@@ -155,7 +154,6 @@ private lemma partialDeriv_scalarOnE_eq_euclidPartial
   rw [partialDeriv]
   rw [show (toEuclidean (E := E)).symm y = extChartAt I α b from hphi_b.symm]
 
-set_option linter.unusedSectionVars false in
 private lemma extDerivFun_chartBasisVecFiber_eq_euclidPartial
     (ζ : C^∞⟮I, M; ℝ⟯) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -373,7 +371,6 @@ noncomputable def gradChartCoeffEuclid
       chartInvGramEuclid (I := I) g α m j y *
         euclidPartial (E := E) j (chartPushedRaw I α ζ) y
 
-set_option linter.unusedSectionVars false in
 theorem gradChartCoeff_eq_gradChartCoeffEuclid
     (g : SmoothRiemannianMetric I M) (α : M) (ζ : M → ℝ)
     (m : Fin (Module.finrank ℝ E))

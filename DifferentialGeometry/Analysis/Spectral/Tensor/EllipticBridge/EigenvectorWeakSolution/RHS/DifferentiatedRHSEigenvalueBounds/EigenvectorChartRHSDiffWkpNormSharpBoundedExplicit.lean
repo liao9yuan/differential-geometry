@@ -67,7 +67,6 @@ private lemma sharpDiffExplicit_wkpNorm_sub_le
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
-set_option linter.unusedSectionVars false in
 private lemma sharpDiffExplicit_layerA_coeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M) (m : ℕ)
     (l : Fin (m + 1) → Fin (Module.finrank ℝ E))

@@ -55,12 +55,10 @@ private def pouTsupportSet (α : M) : Set M :=
 private def pouChartKernel (α : M) : Set E :=
   (extChartAt I α) '' (pouTsupportSet (I := I) (M := M) α)
 
-set_option linter.unusedSectionVars false in
 private lemma pouChartKernel_isCompact (α : M) :
     IsCompact (pouChartKernel (I := I) (M := M) α) :=
   chartImage_pouTsupport_isCompact (I := I) (M := M) α
 
-set_option linter.unusedSectionVars false in
 private lemma pouChartKernel_subset_target (α : M) :
     pouChartKernel (I := I) (M := M) α ⊆ (extChartAt I α).target :=
   chartImage_pouTsupport_subset_target (I := I) (M := M) α

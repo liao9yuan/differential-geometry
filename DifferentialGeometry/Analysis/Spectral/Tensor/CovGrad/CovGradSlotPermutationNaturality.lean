@@ -70,7 +70,6 @@ private lemma covDerivUnitModel_eq_tensor0SCovariantDerivative
   exact tensorRSCovariantDerivative_zeroS_unit_eval
     (I := I) (M := M) g s W.toSection x v
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0SChartE_section_repr_apply_tuple
     (s : ℕ) (α : M) (T : Π b : M, Tensor0SSpace s I b) (b : M)
     (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -86,7 +85,6 @@ private lemma tensor0SChartE_section_repr_apply_tuple
   rw [e.continuousLinearMapAt_apply ℝ, e.coe_linearMapAt_of_mem hbE]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0SChartE_section_repr_domDomCongr
     (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M) :
@@ -145,7 +143,6 @@ private lemma tensor0SChartFiberFromModel_domDomCongr
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rw [tensor0SChartFiberFromModel_apply_tuple (I := I) s α b hb M0 (fun i => v (σ i))]
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0SIntrinsicChartCLM_domDomCongr
     (s : ℕ) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (b : M)
@@ -191,7 +188,6 @@ private lemma tensor0SIntrinsicChartCLM_domDomCongr
 
   rw [tensor0SChartFiberFromModel_domDomCongr (I := I) s σ α b hb]
 
-set_option linter.unusedSectionVars false in
 private lemma localSlotCLM_comp_perm
     (s : ℕ) (σ : Equiv.Perm (Fin s)) {b : M} (k : Fin s)
     (Φ : TangentSpace I b →L[ℝ] TangentSpace I b) (i : Fin s) :
@@ -206,7 +202,6 @@ private lemma localSlotCLM_comp_perm
         (by intro h; exact hi (by rw [← Equiv.symm_apply_apply σ i, h])),
       DifferentialGeometry.Integral.Connection.localSlotCLM_other s (σ.symm k) Φ hi]
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensor0SSlotCorrection_sum_domDomCongr
     (s : ℕ) (g : SmoothRiemannianMetric I M) (σ : Equiv.Perm (Fin s)) (α : M)
     (T : Π b : M, Tensor0SSpace s I b) (X : Π b : M, TangentSpace I b) (b : M) :

@@ -60,7 +60,6 @@ private lemma eigenvalue_mem_Ioc
 
 omit [CompleteSpace E] in
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_chartPulledWeighted_le_of_ae_zero_off_compact
     (g : SmoothRiemannianMetric I M) (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)
@@ -185,7 +184,6 @@ private lemma tensorL2ChartComponent_aeEq_zero_off_chartPouKernel
 set_option synthInstance.maxHeartbeats 1000000 in
 set_option maxHeartbeats 800000 in
 
-set_option linter.unusedSectionVars false in
 theorem eLpNorm_tensorL2ChartComponent_le_uniform
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (α : M) (P₀ : TensorCompIdx (E := E) r s) :

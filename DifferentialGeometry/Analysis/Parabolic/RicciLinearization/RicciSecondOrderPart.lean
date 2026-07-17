@@ -22,7 +22,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section Differentiability
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartInvGramOnE_differentiableAt_interior
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -625,7 +624,6 @@ private lemma partialDeriv_partialDeriv_smul_apply
         (partialDeriv (E := E) q (h a b))
         (partialDeriv_perturbation_differentiableAt h q a b y), smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 theorem chartRicciSecondOrderPrincipalSymbol_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -645,7 +643,6 @@ theorem chartRicciSecondOrderPrincipalSymbol_add
     partialDeriv_partialDeriv_add_apply h₁ h₂ k i l j y]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartRicciSecondOrderPrincipalSymbol_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -728,7 +725,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     Finset.sum_congr rfl (fun l _ => hzero2 j l))]
   simp
 
-set_option linter.unusedSectionVars false in
 theorem chartRicciFirstOrderRemainder_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -809,7 +805,6 @@ theorem chartRicciFirstOrderRemainder_add
     Finset.sum_add_distrib, Finset.sum_add_distrib, mul_add, mul_add]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartRicciFirstOrderRemainder_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -880,7 +875,6 @@ theorem chartRicciFirstOrderRemainder_smul
     ← Finset.mul_sum, ← Finset.mul_sum]
   ring
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartRicciSecondOrderPrincipalSymbol_symm
     (g : SmoothRiemannianMetric I M) (α : M)

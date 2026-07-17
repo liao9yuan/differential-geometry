@@ -52,7 +52,6 @@ def christoffelDischargeSmoothCase
           smoothPairingChristoffelDiff (I := I) (M := M) g α φ v
             ((toEuclidean (E := E)) (extChartAt I α x)) = 0
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma christoffelDischargeSmoothCase_def
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g) :
     christoffelDischargeSmoothCase (I := I) (M := M) g φ v ↔

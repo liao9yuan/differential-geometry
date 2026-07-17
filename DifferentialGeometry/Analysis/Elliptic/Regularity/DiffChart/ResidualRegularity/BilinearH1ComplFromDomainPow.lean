@@ -935,7 +935,6 @@ private lemma base_f_chart_ae_eq_piecePreimage_add_residual_chartPulled
   filter_upwards [h_chartPushedRaw_add_ae, h_piece1] with y hy_add hy_piece1
   rw [hy_add, hy_piece1]
 
-set_option linter.unusedSectionVars false in
 private lemma vol_abs_chartPulledWeighted_on_chartTarget
     (g : SmoothRiemannianMetric I M) (α : M) :
     (volume : Measure EuclN).restrict

@@ -99,7 +99,6 @@ private theorem continuous_riemannianFiberNormSq
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
 
-set_option linter.unusedSectionVars false in
 private theorem integrable_riemannianFiberNormSq_mul
     (g : SmoothRiemannianMetric I M) (r₁ s₁ r₂ s₂ : ℕ)
     (S : Integral.L2.SmoothCcTensor g r₁ s₁) (T : Integral.L2.SmoothCcTensor g r₂ s₂) :

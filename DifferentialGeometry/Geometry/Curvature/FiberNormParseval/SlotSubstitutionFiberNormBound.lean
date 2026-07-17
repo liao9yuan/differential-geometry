@@ -105,7 +105,6 @@ def embedRS (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) : TensorRSSpace 0 s I x
 
 omit [CompleteSpace E] in
 
-set_option linter.unusedSectionVars false in
 lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
     (show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace s I x from embedRS (I := I) (M := M) x s A0)
       (unitZeroSec (I := I) (M := M) x) = A0 := by
@@ -119,7 +118,6 @@ lemma embedRS_unitZeroSec_apply (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x) :
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 
-set_option linter.unusedSectionVars false in
 lemma toModel_tensorSlotSubstCLM_apply (s : ℕ) (x : M) (k : Fin s)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x)
     (A0 : Tensor0SSpace s I x) (m : Fin s → TangentSpace I x) :
@@ -320,7 +318,6 @@ private lemma toModel_slotSub_apply (x : M) (s : ℕ)
   refine Finset.sum_congr rfl (fun k _ => ?_)
   rw [toModel_tensorSlotSubstCLM_apply]
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_slotSub_le
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ) (A0 : Tensor0SSpace s I x)
     (W : TangentSpace I x →L[ℝ] TangentSpace I x) (Kw : ℝ) (hKw : 0 ≤ Kw)

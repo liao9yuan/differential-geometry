@@ -323,7 +323,6 @@ theorem MemW1pIntrinsicLp_withBoundary_of_MemWkpChart_smooth_interior
   MemW1pIntrinsicLp_withBoundary_of_contMDiff_interior
     (I := I) (M := M) g p hu_smooth hu_int
 
-set_option linter.unusedSectionVars false in
 private lemma partialDerivWithin_scalarOnE_continuousOn_target
     (α : M) {u : M → ℝ} (hu : ContMDiff I 𝓘(ℝ, ℝ) ∞ u)
     (j : Fin (Module.finrank ℝ E)) :
@@ -542,7 +541,6 @@ private lemma tangentSectionAction_chartLocal_within
   rw [mfderiv_chartBasisVecFiber_within_of_smooth (I := I) α hu hx i]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chartCoeff_continuousOn_source
     (α : M) (Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (i : Fin (Module.finrank ℝ E)) :

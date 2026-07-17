@@ -20,7 +20,6 @@ variable [IsManifold I (⊤ : WithTop ℕ∞) M]
 variable [IsManifold I ((⊤ : WithTop ℕ∞) + 1) M]
 variable [CompleteSpace Real]
 
-set_option linter.unusedSectionVars false in
 theorem tensor0S_two_eval_coordFrame_sum
     {x₀ : M}
     (Ax : Tensor0SSpace (𝕜 := Real) (E := E) (H := H) (I := I) (M := M) 2 x₀)
@@ -152,7 +151,6 @@ theorem tensor0S_two_eval_coordFrame_sum
               else coordinateFrameAt (I := I) x₀ j x₀) := by
           simp [b, pair]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0S_two_model_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -300,7 +298,6 @@ theorem nabla0S_two_model_coord
         exact hright_model k]
   rw [← hslots]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0S_two_coord
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -328,7 +325,6 @@ theorem nabla0S_two_coord
               (fun q : Fin 2 => if q = 0 then j else k) := by
   rw [nabla0S_two_model_coord (I := I) cov X A x₀ j l, hderiv]
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_two_eval_coordFrame
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))
@@ -365,7 +361,6 @@ theorem nabla0SFun_two_eval_coordFrame
   simpa [coordComponent0SAt, component0S, hslots] using
     nabla0S_two_coord (I := I) cov X A x₀ hderiv j l
 
-set_option linter.unusedSectionVars false in
 theorem nabla0SFun_two_eval_coordFrame_expanded
     (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M -> Type _))

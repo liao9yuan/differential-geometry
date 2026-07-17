@@ -55,7 +55,6 @@ private theorem norm_toSection_heq_congr (g : SmoothRiemannianMetric I M) (r : �
   subst h
   rw [eq_of_heq hYZ]
 
-set_option linter.unusedSectionVars false in
 theorem norm_toSection_iteratedCovGrad_covGrad_comm (g : SmoothRiemannianMetric I M)
     (r s m : ℕ) (X : SmoothCcTensor g r s) (x : M) :
     ‖(iteratedCovGrad g r (s + 1) m (covGrad g r s X)).toSection x‖ =
@@ -114,7 +113,6 @@ private theorem eq_zero_of_riemannianFiberNormSq_eq_zero (g : SmoothRiemannianMe
   have hnorm : ‖z‖ = 0 := by nlinarith [norm_nonneg z, hnorm_sq]
   exact norm_eq_zero.mp hnorm
 
-set_option linter.unusedSectionVars false in
 theorem prod_zero_left (Φ : ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s₀) {a b : ℕ}
     (T : SmoothCcTensor g r₂ (s₂ + b)) :
     Φ.prod (0 : SmoothCcTensor g r₁ (s₁ + a)) T = 0 := by
@@ -132,7 +130,6 @@ theorem prod_zero_left (Φ : ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s�
     rw [SmoothCcTensor.toSection_zero, ContMDiffSection.coe_zero]; rfl]
   exact hval
 
-set_option linter.unusedSectionVars false in
 theorem prod_zero_right (Φ : ParallelTensorProduct g r₁ s₁ r₂ s₂ r₀ s₀) {a b : ℕ}
     (S : SmoothCcTensor g r₁ (s₁ + a)) :
     Φ.prod S (0 : SmoothCcTensor g r₂ (s₂ + b)) = 0 := by

@@ -98,7 +98,6 @@ omit [NeZero (Module.finrank ℝ E)] in
                 chartHessianPhiOnEuclid (I := I) (M := M) g α φ i j y *
                 laplacianDomainHessianChart (I := I) (M := M) g α hu_h k l y := rfl
 
-set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianPhiOnEuclid_continuousOn
     (g : SmoothRiemannianMetric I M) (α : M) (φ : C^∞⟮I, M; ℝ⟯)

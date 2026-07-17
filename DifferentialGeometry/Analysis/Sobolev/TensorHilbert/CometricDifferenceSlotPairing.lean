@@ -52,7 +52,6 @@ theorem g0_polarized_parseval
     _ = g₀.inner x v w := by rw [hexp]
 
 
-set_option linter.unusedSectionVars false in
 theorem multilinear_firstSlot_pairing_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) {s : ℕ}
     (Λ : TangentSpace I x →L[ℝ] TangentSpace I x)
@@ -137,7 +136,6 @@ theorem slotInsertEndoFib_bundle_eval (s : ℕ) (x : M)
   rfl
 
 
-set_option linter.unusedSectionVars false in
 theorem exists_orthoFrame_basis_E (g : SmoothRiemannianMetric I M) (x : M) :
     ∃ (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
       (bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I x)),

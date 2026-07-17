@@ -33,7 +33,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (S : SmoothCcTensor g 0 s) :
     tensorL2Norm (I := I) (M := M) g 0 s S.toFun ^ 2 =
@@ -45,7 +44,6 @@ theorem tensorL2Norm_sq_toFun_eq_integral_riemannianFiberNormSq
   exact tensorL2Norm_sq_eq_integral_riemannianFiberNormSq (I := I) (M := M) g 0 s _
 
 
-set_option linter.unusedSectionVars false in
 theorem integrable_riemannianFiberNormSq_toSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) :
     MeasureTheory.Integrable
@@ -62,7 +60,6 @@ theorem integrable_riemannianFiberNormSq_toSection
     (S.toSection x)).symm
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three
     (g : SmoothRiemannianMetric I M) {a b c d : ℕ}
     (A : SmoothCcTensor g 0 a) (B : SmoothCcTensor g 0 b) (D : SmoothCcTensor g 0 d)
@@ -169,7 +166,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_three
   nlinarith [hfinal_sq, hnCurv_nn, hy_nn, sq_nonneg (nCurv - C * (nA + nB + nD))]
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
     (g : SmoothRiemannianMetric I M) {a b c : ℕ}
     (A : SmoothCcTensor g 0 a) (B : SmoothCcTensor g 0 b)
@@ -191,7 +187,6 @@ theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_two
     rw [hz, add_zero]; exact hpt x
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Norm_le_of_pointwise_fiberNormSq_bound_sum
     (g : SmoothRiemannianMetric I M) {c : ℕ} (N : ℕ) (v : ℕ → ℕ)
     (T : ∀ i, SmoothCcTensor g 0 (v i)) (Curv : SmoothCcTensor g 0 c) (C : ℝ) (hC : 0 ≤ C)

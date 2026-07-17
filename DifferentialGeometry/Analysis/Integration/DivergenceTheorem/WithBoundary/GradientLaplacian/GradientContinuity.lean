@@ -25,7 +25,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 
 
-set_option linter.unusedSectionVars false in
 private lemma partialDerivWithin_scalarOnE_continuousOn_target
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -46,7 +45,6 @@ private lemma partialDerivWithin_scalarOnE_continuousOn_target
   exact hpartial_target.continuousOn
 
 
-set_option linter.unusedSectionVars false in
 private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (j : Fin (Module.finrank ℝ E)) :
@@ -75,7 +73,6 @@ private lemma partialDerivWithin_scalarOnE_extChartAt_continuousOn_source
   exact hpartial.comp hchart hmaps
 
 
-set_option linter.unusedSectionVars false in
 private lemma gradChartCoeffWithin_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
@@ -107,7 +104,6 @@ private lemma gradChartCoeffWithin_continuousOn_source
       (I := I) α hf j
 
 
-set_option linter.unusedSectionVars false in
 private lemma chartGramMatrix_entry_continuousOn_source
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -122,7 +118,6 @@ private lemma chartGramMatrix_entry_continuousOn_source
   exact hy
 
 
-set_option linter.unusedSectionVars false in
 private lemma g_inner_gradChartLocalWithin_expand
     (g : SmoothRiemannianMetric I M) (α : M) (f h : M → ℝ) (y : M) :
     g.inner y (gradChartLocalWithin (I := I) g α f y)
@@ -184,7 +179,6 @@ private lemma g_inner_gradChartLocalWithin_expand
     rfl
 
 
-set_option linter.unusedSectionVars false in
 private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
     (g : SmoothRiemannianMetric I M) (α : M)
     {f h : M → ℝ}
@@ -212,7 +206,6 @@ private lemma g_inner_gradFun_gradFun_continuousOn_chart_source
   · exact chartGramMatrix_entry_continuousOn_source (I := I) g α i j
 
 
-set_option linter.unusedSectionVars false in
 private lemma g_inner_gradFun_gradFun_continuous_general
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ}

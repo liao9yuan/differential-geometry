@@ -569,7 +569,6 @@ theorem cotangentCov_covApply_smooth
   intro x
   exact (hres x (Set.mem_univ x)).contMDiffAt Filter.univ_mem
 
-set_option linter.unusedSectionVars false in
 theorem cotangentCov_double_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

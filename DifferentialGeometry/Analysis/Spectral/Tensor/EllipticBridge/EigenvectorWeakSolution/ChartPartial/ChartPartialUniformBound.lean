@@ -187,7 +187,6 @@ private lemma chosenWeakPartial'_tensorChartComponent_ae_eq_euclidPartial
   funext y
   rw [euclidPartial_def]
 
-set_option linter.unusedSectionVars false in
 private lemma tensorChartComponent_eq_pou_mul_rawPushed
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -469,7 +468,6 @@ private lemma leibnizCrossTerm_continuousOn
   exact (euclidPartial_chartPushedRaw_pou_continuousOn (I := I) (M := M) α k).mul
     (chartPushedRaw_rawComponent_continuousOn (I := I) (M := M) g r s S α Idx Jdx)
 
-set_option linter.unusedSectionVars false in
 private lemma euclidPartial_chartPushedRaw_pou_tsupport_subset
     (α : M) (k : Fin (Module.finrank ℝ E)) :
     tsupport
@@ -537,7 +535,6 @@ private lemma euclidPartial_chartPushedRaw_pou_tsupport_subset
     exact (toEuclidean (E := E)).apply_symm_apply y
   exact h1.trans h2
 
-set_option linter.unusedSectionVars false in
 private lemma leibnizCrossTerm_eq_zero_off_pou_kernel
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -845,7 +842,6 @@ private lemma exists_const_euclidPartial_chartPushedRaw_pou_le
     have hy : y ∉ tsupport χ := fun hy => hK_ne ⟨y, hy⟩
     rw [image_eq_zero_of_notMem_tsupport hy, norm_zero]
 
-set_option linter.unusedSectionVars false in
 private lemma leibnizCrossTerm_le_const_mul_chartPushedRaw_cutoff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

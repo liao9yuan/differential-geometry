@@ -114,7 +114,6 @@ private lemma vwIntegrandOnE_apply_of_notMem
     vwIntegrandOnE (I := I) g α X i y = 0 :=
   Set.indicator_of_notMem hy _
 
-set_option linter.unusedSectionVars false in
 private lemma vwIntegrandOnE_contDiffOn_interior_target
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -450,7 +449,6 @@ private theorem ibp_per_index
   exact integral_mul_fderiv_eq_neg_fderiv_mul_of_integrable hf'g_int hfg'_int hfg_int
     hvw_diff_tsupp_phi hphi_diff_tsupp_vw
 
-set_option linter.unusedSectionVars false in
 private lemma localDivergenceWithin_continuousOn_baseSet
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -568,7 +566,6 @@ private lemma localDivergenceWithin_mul_phi_pullback_zero_off_chartImage
     exact hsymm_notin (subset_tsupport _ hne)
   rw [hφ_zero, mul_zero, mul_zero]
 
-set_option linter.unusedSectionVars false in
 private lemma localDivergenceWithin_mul_phi_pullback_eq_on_chartImage
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

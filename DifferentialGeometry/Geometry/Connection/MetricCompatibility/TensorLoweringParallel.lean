@@ -162,7 +162,6 @@ lemma toModel_eq_symm_liftedTensorSection
 omit [InnerProductSpace ℝ E] [CompleteSpace E]
   [NeZero (Module.finrank ℝ E)] in
 
-set_option linter.unusedSectionVars false in
 lemma contMDiff_unitZeroSection :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel 0 ℝ E)) ∞
       (fun y : M => TotalSpace.mk' (Tensor0SModel 0 ℝ E)
@@ -296,7 +295,6 @@ noncomputable def metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
   fun y => Tensor0SSpace.ofModel
     (separableFormAt (I := I) (M := M) g y r (fun i : Fin r => Y i y))
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma toModel_metricFormFun (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin r → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) :
@@ -457,7 +455,6 @@ lemma metricFormFun_tensorSectionMDiffAt
     TensorSectionMDiffAt (I := I) r (metricFormFun (I := I) (M := M) g r Y) x :=
   (contMDiff_metricFormFun (I := I) (M := M) g r Y x).mdifferentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 lemma curriedSection_metricFormFun_succ
     (g : SmoothRiemannianMetric I M) (r : ℕ)
     (Y : Fin (r + 1) → Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (y : M) (v : E) :
@@ -493,7 +490,6 @@ lemma toModel_rawLiftFun (g : SmoothRiemannianMetric I M) (r s : ℕ)
       lowerAllUpperIndices (I := I) (M := M) g r s y (TensorRSSpace.toModel (T y)) := by
   rw [rawLiftFun, Tensor0SSpace.toModel_ofModel]
 
-set_option linter.unusedSectionVars false in
 lemma separableFormAt_succ_cons_apply
     (g : SmoothRiemannianMetric I M) (x : M) (r : ℕ) (f : Fin (r + 1) → E)
     (w : Fin (r + 1) → E) :
@@ -762,7 +758,6 @@ private lemma tensorSectionMDiffAt_curriedSection_applyVF
     (b := id) (ϕ := fun y : M => curriedSection I M W y)
     (v := fun y : M => Y y) hCurried hY
 
-set_option linter.unusedSectionVars false in
 private lemma curriedSection_castLift_succ_eq_rawLiftFun_comp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π y : M, TensorRSSpace (r + 1) s I y)

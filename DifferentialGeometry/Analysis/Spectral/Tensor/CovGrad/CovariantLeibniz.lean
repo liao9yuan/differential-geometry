@@ -55,14 +55,12 @@ noncomputable def scalarSmul
       show TensorRSSpace.toModel (w.toSection x) = w.toFun x from rfl, hw_zero,
       smul_zero]
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma scalarSmul_toSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) :
     (scalarSmul (I := I) (M := M) g r s ζ w).toSection x =
       (ζ : M → ℝ) x • w.toSection x := rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma scalarSmul_toFun_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) :
@@ -72,7 +70,6 @@ set_option linter.unusedSectionVars false in
     TensorRSSpace.toModel_smul]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensorCovDerivAt_scalarSmul
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w : SmoothCcTensor g r s) (x : M) (v : E) :
@@ -127,7 +124,6 @@ noncomputable def tensorCovDerivCrossRight
           (TensorRSSpace.toModel
             (tensorCovDerivAt (I := I) (M := M) g r s S x ((chartModelBasis E) j))))
 
-set_option linter.unusedSectionVars false in
 lemma tensorCovDerivCrossLeft_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -141,7 +137,6 @@ lemma tensorCovDerivCrossLeft_def
                   ((chartModelBasis E) i)))
               (S.toFun x)) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma tensorCovDerivCrossRight_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -155,7 +150,6 @@ lemma tensorCovDerivCrossRight_def
                 (tensorCovDerivAt (I := I) (M := M) g r s S x
                   ((chartModelBasis E) j)))) := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tensorCovDerivPointwiseInner_scalarSmul_left_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M)
@@ -193,7 +187,6 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_left_summand
   simp only [tensorInnerPointwise_smul_left]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M)
@@ -231,7 +224,6 @@ private lemma tensorCovDerivPointwiseInner_scalarSmul_right_summand
   simp only [tensorInnerPointwise_smul_right]
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma smul_const_tensorCovDerivPointwiseInner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :
@@ -252,7 +244,6 @@ private lemma smul_const_tensorCovDerivPointwiseInner
   intro i _
   rw [Finset.mul_sum]
 
-set_option linter.unusedSectionVars false in
 theorem tensorCovDerivPointwiseInner_scalarSmul_left
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (ζ : C^∞⟮I, M; ℝ⟯) (w S : SmoothCcTensor g r s) (x : M) :

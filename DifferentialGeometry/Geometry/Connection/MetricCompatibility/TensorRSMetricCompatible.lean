@@ -34,7 +34,6 @@ def liftedTensorSection
   fun y => Tensor0SSpace.ofModel
     (lowerAllUpperIndices (I := I) (M := M) g r s y (TensorRSSpace.toModel (S y)))
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma liftedTensorSection_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -45,7 +44,6 @@ lemma liftedTensorSection_apply
         (lowerAllUpperIndices (I := I) (M := M) g r s y
           (TensorRSSpace.toModel (S y))) := rfl
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma toModel_liftedTensorSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -56,7 +54,6 @@ lemma toModel_liftedTensorSection
         (TensorRSSpace.toModel (S y)) := by
   rw [liftedTensorSection_apply, Tensor0SSpace.toModel_ofModel]
 
-set_option linter.unusedSectionVars false in
 lemma liftedTensorSection_contMDiff
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯) :
@@ -66,7 +63,6 @@ lemma liftedTensorSection_contMDiff
         (liftedTensorSection (I := I) (M := M) g r s S y)) :=
   contMDiff_lifted_section (I := I) (M := M) g r s S
 
-set_option linter.unusedSectionVars false in
 lemma liftedTensorSection_mdiffAt
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -76,7 +72,6 @@ lemma liftedTensorSection_mdiffAt
   ((liftedTensorSection_contMDiff (I := I) (M := M) g r s S) x).mdifferentiableAt
     (by simp)
 
-set_option linter.unusedSectionVars false in
 lemma tensorInnerPointwise_eq_liftedTensorSection_inner
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -98,7 +93,6 @@ def loweredCovDerivAt
   tensor0SCovariantDerivative I M (r + s) (LeviCivita (I := I) g)
     (liftedTensorSection (I := I) (M := M) g r s S) x v
 
-set_option linter.unusedSectionVars false in
 @[simp]
 lemma loweredCovDerivAt_def
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -110,7 +104,6 @@ lemma loweredCovDerivAt_def
 
 open Tensor0SNabla in
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)
@@ -147,7 +140,6 @@ theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible
 
 open Tensor0SNabla in
 
-set_option linter.unusedSectionVars false in
 theorem tensorInnerPointwise_hasMFDerivAt_metricCompatible'
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (W S : Cₛ^∞⟮I; TensorRSModel r s ℝ E, (fun x : M => TensorRSSpace r s I x)⟯)

@@ -43,7 +43,6 @@ private theorem covGrad_heq_congr_lg (g : SmoothRiemannianMetric I M) (r : ℕ) 
   subst h
   rw [eq_of_heq hYZ]
 
-set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_covGrad_comm_heq_lg (g : SmoothRiemannianMetric I M) (r s m : ℕ)
     (X : SmoothCcTensor g r s) :
     HEq (iteratedCovGrad g r (s + 1) m (covGrad g r s X))

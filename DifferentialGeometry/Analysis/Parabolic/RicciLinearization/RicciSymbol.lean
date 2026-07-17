@@ -79,7 +79,6 @@ def ricciSymbolOutput (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
       ring) :
     E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma ricciSymbolOutput_apply_apply (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (v w : TangentSpace I x) :

@@ -37,7 +37,6 @@ def smoothExtensionTangentSection (x : M) (v : TangentSpace I x) :
     Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯ :=
   ⟨smoothExtensionTangent (I := I) x v, smoothExtensionTangent_contMDiff (I := I) x v⟩
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma smoothExtensionTangentSection_apply (x : M) (v : TangentSpace I x) (b : M) :
     smoothExtensionTangentSection (I := I) (M := M) x v b = smoothExtensionTangent (I := I) x v b :=
   rfl
@@ -47,7 +46,6 @@ def lieBracketSection (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯
   ⟨VectorField.mlieBracket I (fun b : M => X b) (fun b : M => Y b),
     mlieBracket_contMDiff (I := I) X.contMDiff Y.contMDiff⟩
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma lieBracketSection_apply
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (b : M) :
     lieBracketSection (I := I) (M := M) X Y b =

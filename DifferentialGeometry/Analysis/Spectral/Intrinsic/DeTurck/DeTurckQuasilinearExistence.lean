@@ -179,7 +179,6 @@ theorem norm_maxRegDuhamelSolField_zero_le {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1
   rw [hhom0, zero_add]
   exact hreg
 
-set_option linter.unusedSectionVars false in
 theorem maxRegDuhamelSolField_zero_zero {a : ℝ} {T : ℝ} (hT : 0 < T) (hT1 : T ≤ 1) :
     maxRegDuhamelSolField (I := I) (M := M) a hT hT1
         (0 : tensorHs (I := I) (M := M) g₀ 0 2 (a + 2))
@@ -326,7 +325,6 @@ omit [BoundarylessManifold I M] in
           (0 : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2)) F) :=
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem nemytskiiMixedForcingMap_dist_le (g₀ : SmoothRiemannianMetric I M) (a : ℕ) {L : ℝ≥0}
     {Nfun : tensorHs (I := I) (M := M) g₀ 0 2 ((a : ℝ) + 2) →
       tensorHs (I := I) (M := M) g₀ 0 2 (a : ℝ)}

@@ -105,7 +105,6 @@ private lemma eLpNorm_gNormGrad_smoothScalar_le_const_mul_wkpNormChart_one
   intro f
   exact hbound f.smooth
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma eLpNorm_sq_toReal_eq_integral_sq
     (g : SmoothRiemannianMetric I M) (f : SmoothScalar g) :

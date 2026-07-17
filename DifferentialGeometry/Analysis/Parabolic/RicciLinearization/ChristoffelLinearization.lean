@@ -67,7 +67,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
            partialDeriv (E := E) j (h l i) y -
            partialDeriv (E := E) l (h i j) y) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem chartLinearizedChristoffelPrincipal_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -103,7 +102,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
     ring
   rw [Finset.sum_congr rfl (fun l _ => hzero l), Finset.sum_const_zero, mul_zero]
 
-set_option linter.unusedSectionVars false in
 theorem chartLinearizedChristoffelPrincipal_add
     (g : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -131,7 +129,6 @@ theorem chartLinearizedChristoffelPrincipal_add
   rw [hi, hj, hl]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartLinearizedChristoffelPrincipal_smul
     (g : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (i j k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -182,7 +179,6 @@ private lemma partialDeriv_perturbation_contDiff
     ContDiff ℝ ∞ (partialDeriv (E := E) i (h a b)) :=
   partialDeriv_contDiff_of_contDiff (h.smooth a b) i
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartLinearizedChristoffelPrincipal_contDiffOn
     (g : SmoothRiemannianMetric I M) (α : M)

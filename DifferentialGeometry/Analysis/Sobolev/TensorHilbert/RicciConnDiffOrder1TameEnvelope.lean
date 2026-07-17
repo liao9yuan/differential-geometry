@@ -193,7 +193,6 @@ theorem ricciArmPrincipalCoeffPure_eq_doubleTrace_add_appCcRS
     rfl
   rw [← hsub]; abel
 
-set_option linter.unusedSectionVars false in
 private lemma fourTrace_iteratedCovGrad_smul (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by

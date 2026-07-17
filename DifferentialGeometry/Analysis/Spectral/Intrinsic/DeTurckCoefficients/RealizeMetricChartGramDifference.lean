@@ -47,7 +47,6 @@ theorem chartGramMatrix_realize_apply
   rw [chartGramMatrix_apply, chartGramMatrix_apply,
     tensorSectionRealizeMetric_inner (I := I) g_bg T hδ_lt hδ x]
 
-set_option linter.unusedSectionVars false in
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -132,7 +131,6 @@ theorem chartGramOnE_realize_sub_eq_symm_rawComponent
   rw [ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply, ccTensorBilin_apply]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartGramOnE_realize_sub_eq_symm_rawComponent_two_witness
     (g_bg : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g_bg 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

@@ -242,7 +242,6 @@ lemma boundaryGramMatrix_det_pos
     0 < (boundaryGramMatrix (M := M) g α₀ α).det :=
   (boundaryGramMatrix_posDef (M := M) g α₀ hα).det_pos
 
-set_option linter.unusedSectionVars false in
 theorem boundaryGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)
@@ -275,7 +274,6 @@ theorem boundaryGramMatrix_entry_contMDiffOn
   rw [Bundle.contMDiffWithinAt_totalSpace] at hpα
   exact hpα.2
 
-set_option linter.unusedSectionVars false in
 lemma boundaryGramMatrix_det_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M) :
@@ -331,7 +329,6 @@ lemma boundaryGramMatrix_mul_boundaryInvGramMatrix
   unfold boundaryInvGramMatrix
   exact Matrix.mul_nonsing_inv _ hdet_unit
 
-set_option linter.unusedSectionVars false in
 lemma boundaryGramMatrix_adjugate_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)
@@ -385,7 +382,6 @@ lemma boundaryGramMatrix_adjugate_entry_contMDiffOn
     rw [heq]
     exact boundaryGramMatrix_entry_contMDiffOn (M := M) g α₀ (σ k) k
 
-set_option linter.unusedSectionVars false in
 theorem boundaryInvGramMatrix_entry_contMDiffOn
     (g : SmoothRiemannianMetric I M)
     (α₀ : BoundaryManifold I M)

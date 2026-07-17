@@ -80,7 +80,6 @@ def deTurckCorrectionSymbolOutput (g g' : SmoothRiemannianMetric I M) (x : M) (�
       ring) :
     E →ₗ[ℝ] E →ₗ[ℝ] ℝ)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma deTurckCorrectionSymbolOutput_apply_apply (g g' : SmoothRiemannianMetric I M)
     (x : M) (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (v w : TangentSpace I x) :

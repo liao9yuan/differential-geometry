@@ -71,7 +71,6 @@ def inputSlotSwapFib (x : M) : Tensor0SSpace 2 I x →L[ℝ] Tensor0SSpace 2 I x
         rw [Tensor0SSpace.toModel_smul, domDomCongr_swap_smul, ofModel_smul]
         rfl }
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma slotSwapFib_apply (x : M) (D : Tensor0SSpace 2 I x) :
     inputSlotSwapFib (I := I) (M := M) x D =
       Tensor0SSpace.ofModel (𝕜 := ℝ) (I := I) (x := x)
@@ -81,7 +80,6 @@ set_option linter.unusedSectionVars false in
 def ccSlotSwapFib (x : M) : TensorRSSpace 2 2 I x :=
   inputSlotSwapFib (I := I) (M := M) x
 
-set_option linter.unusedSectionVars false in
 theorem ccSlotSwapFib_contMDiff :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel 2 2 ℝ E)) ∞
       (fun x : M => TotalSpace.mk' (TensorRSModel 2 2 ℝ E)

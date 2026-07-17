@@ -37,7 +37,6 @@ private noncomputable def to02Tensor_uCLM :
 
 set_option maxHeartbeats 800000 in
 
-set_option linter.unusedSectionVars false in
 private lemma to02Tensor_trivialization_eq {x₀ x : M}
     (g : RiemannianMetric I n M)
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :

@@ -36,7 +36,6 @@ section UpperBoundUnitSphere
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 private lemma exists_chartTensorInnerPointwise_rs_model_unit_sphere_upper_bound
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ M_ub : ℝ, 0 ≤ M_ub ∧
@@ -109,7 +108,6 @@ section UpperBound
 variable [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)]
 variable [T2Space M] [SigmaCompactSpace M] [CompactSpace M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerPointwise_rs_model_le_mul_sq_norm_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {M_ub : ℝ}
@@ -202,7 +200,6 @@ private lemma chartTensorInnerPointwise_rs_model_le_mul_sq_norm_on_pouTsupport
     rw [h_lhs] at h_mul
     exact h_mul
 
-set_option linter.unusedSectionVars false in
 theorem exists_chartTensorInnerPointwise_rs_model_upper_bound_on_pouTsupport
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) :
     ∃ C : ℝ, 0 ≤ C ∧

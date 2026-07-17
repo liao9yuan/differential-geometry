@@ -56,7 +56,6 @@ private instance tensor0SModelNormedSpace_local {s : ℕ} :
 private instance tensor0SModelNormedAddCommGroup_local {s : ℕ} :
     NormedAddCommGroup (Tensor0SModel s ℝ E) := inferInstance
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ)
@@ -120,7 +119,6 @@ lemma chartTensorInnerPointwise_0s_continuousOn_smooth_args
           exact (curryLeftAtCLM (E := E) s ((chartModelBasis E) j)).continuous.comp_continuousOn hS
         exact ih _ _ hT_curry hS_curry
 
-set_option linter.unusedSectionVars false in
 lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
     (g : SmoothRiemannianMetric I M) (α : M) :
     ∀ (s : ℕ)
@@ -258,7 +256,6 @@ lemma chartTensorInnerPointwise_0s_contMDiffOn_smooth_args
           rw [heq']
           exact hS ψ'
 
-set_option linter.unusedSectionVars false in
 theorem chartLocal_continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T S : ∀ y : M, Tensor0SSpace s I y) (α : M)
@@ -304,7 +301,6 @@ theorem chartLocal_continuous_inner_of_smooth_sections
   exact chartTensorInnerPointwise_0s_continuousOn_smooth_args
     (I := I) (M := M) g α s _ _ hTα hSα
 
-set_option linter.unusedSectionVars false in
 theorem _root_.Tensor0SBundle.continuous_inner_of_smooth_sections
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (T S : ∀ y : M, Tensor0SSpace s I y)

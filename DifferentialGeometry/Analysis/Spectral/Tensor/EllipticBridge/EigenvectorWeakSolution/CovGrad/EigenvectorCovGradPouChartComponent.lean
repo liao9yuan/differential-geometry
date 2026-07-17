@@ -39,7 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     (β : M) {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) β) :
     chartPushedRaw I β ((chartAtlasPOU I M β : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
@@ -56,7 +55,6 @@ private lemma chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     · exact toEuclidean.apply_symm_apply y
   · exact chartPushedRaw_apply_of_notMem (I := I) (M := M) β _ htar
 
-set_option linter.unusedSectionVars false in
 private lemma euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
     (β : M) (k : Fin (Module.finrank ℝ E))
     {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) β) :
@@ -90,7 +88,6 @@ private lemma euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKer
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
-set_option linter.unusedSectionVars false in
 private lemma contDiffOn_euclidPartial_chartPushedRaw_chartAtlasPOU
     (β : M) (k : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ ∞
@@ -214,7 +211,6 @@ private lemma crossMultiplier_mul_chartPushedRaw_eq_cutoffComponent
   · rw [euclidPartial_chartPushedRaw_chartAtlasPOU_eq_zero_off_chartPouKernel
       (I := I) (M := M) β k hker, zero_mul, zero_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma chartPushedRaw_pou_mul_covDerivLowerOrderTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (β : M)

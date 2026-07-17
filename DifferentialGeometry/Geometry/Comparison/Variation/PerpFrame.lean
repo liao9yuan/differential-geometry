@@ -291,7 +291,6 @@ section PerpFrame
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
 
-set_option linter.unusedSectionVars false in
 theorem perp_to_velocity_preserved_of_parallel
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -460,7 +459,6 @@ theorem perp_to_velocity_preserved_of_parallel
   rw [hft]
   exact hPerp0
 
-set_option linter.unusedSectionVars false in
 theorem exists_parallel_orthonormal_perp_frame_along_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (hgeo : IsGeodesic (I := I) g γ)
@@ -556,7 +554,6 @@ theorem exists_parallel_orthonormal_perp_frame_along_geodesic
         from rfl]
     exact hperp
 
-set_option linter.unusedSectionVars false in
 theorem parallel_on_frame_perp_to_geodesic
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ)
     (hgeo : IsGeodesic (I := I) g γ) {L : ℝ} (hL : 0 < L)
@@ -587,7 +584,6 @@ theorem parallel_on_frame_perp_to_geodesic
   have := hperp t ht i
   rwa [huPrimeEq t ht] at this
 
-set_option linter.unusedSectionVars false in
 theorem chartCovDerivAlong_movingFoot_eq_zero_of_isParallelChart_centered
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) {X : ℝ → E} {s : Set ℝ} {t : ℝ}
     (hX : IsParallelChart (I := I) g (γ t) γ
@@ -664,7 +660,6 @@ theorem exists_cutoff_one_on_Icc_supported_Ioo {L δ : ℝ} (hδ : 0 < δ) :
     exact ⟨by linarith [hx.1], by linarith [hx.2]⟩
 
 
-set_option linter.unusedSectionVars false in
 theorem perp_to_velocity_preserved_on
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (_hL : 0 < L)
@@ -832,7 +827,6 @@ theorem perp_to_velocity_preserved_on
   rw [hft]
   exact hPerp0
 
-set_option linter.unusedSectionVars false in
 theorem velocity_chartRepAt_differentiableAt
     (γ : ℝ → M) (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) (t : ℝ) :
     DifferentiableAt ℝ
@@ -876,7 +870,6 @@ theorem velocity_chartRepAt_differentiableAt
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem exists_parallel_perp_frame [RiemannianBundle (fun x : M => TangentSpace I x)]
     [PseudoEMetricSpace M] [IsRiemannianManifold I M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)

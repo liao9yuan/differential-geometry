@@ -32,21 +32,18 @@ def toFunAddHom {g : SmoothRiemannianMetric I M} {r s : ℕ} :
   map_add' := SmoothCcTensor.toFun_add
 
 
-set_option linter.unusedSectionVars false in
 lemma toSection_sum {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {ι : Type*} (t : Finset ι) (F : ι → SmoothCcTensor g r s) :
     (∑ i ∈ t, F i).toSection = ∑ i ∈ t, (F i).toSection :=
   map_sum (SmoothCcTensor.toSectionAddHom (I := I) (M := M) (g := g) (r := r) (s := s)) F t
 
 
-set_option linter.unusedSectionVars false in
 lemma toFun_sum {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {ι : Type*} (t : Finset ι) (F : ι → SmoothCcTensor g r s) :
     (∑ i ∈ t, F i).toFun = ∑ i ∈ t, (F i).toFun :=
   map_sum (SmoothCcTensor.toFunAddHom (I := I) (M := M) (g := g) (r := r) (s := s)) F t
 
 
-set_option linter.unusedSectionVars false in
 lemma toSection_sum_apply {g : SmoothRiemannianMetric I M} {r s : ℕ}
     {ι : Type*} (t : Finset ι) (F : ι → SmoothCcTensor g r s) (x : M) :
     (∑ i ∈ t, F i).toSection x = ∑ i ∈ t, (F i).toSection x := by

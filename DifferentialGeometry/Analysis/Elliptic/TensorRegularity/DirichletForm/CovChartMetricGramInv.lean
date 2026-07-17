@@ -56,7 +56,6 @@ theorem covChartMetricGramMatrix_isSymm
   rw [covChartMetricGramMatrix_apply, covChartMetricGramMatrix_apply]
   exact covChartMetricGram_symm (I := I) (M := M) g r s α Q P y
 
-set_option linter.unusedSectionVars false in
 private lemma chartInner_eq_gramMatrix_quadratic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     {y : EuclideanSpace ℝ (Fin (Module.finrank ℝ E))}
@@ -148,7 +147,6 @@ private noncomputable def gramCoeffTensor (r s : ℕ) (v : CompIdx E r s → ℝ
     TensorRSModel r s ℝ E :=
   ∑ P : CompIdx E r s, v P • tensorChartBasisElement (E := E) r s P.1 P.2
 
-set_option linter.unusedSectionVars false in
 private lemma tensorChartComponentProjection_gramCoeffTensor (r s : ℕ)
     (v : CompIdx E r s → ℝ) (P₀ : CompIdx E r s) :
     tensorChartComponentProjection (E := E) r s P₀.1 P₀.2

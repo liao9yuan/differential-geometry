@@ -109,7 +109,6 @@ private lemma tensor0S_zero_span (x : M) (τ : Tensor0SSpace 0 I x) :
   rw [smul_eq_mul, mul_one]
 
 
-set_option linter.unusedSectionVars false in
 private lemma tensor0SAsRS_rs_unit (t : ℕ) (x : M) (W : TensorRSSpace 0 t I x) :
     tensor0SToTensorRS (I := I) (M := M) x
         ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace t I x from W)

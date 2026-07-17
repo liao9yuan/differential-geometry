@@ -38,7 +38,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 theorem exists_deturck_remainder_mild_solution_timeH1
     (g_bg : SmoothRiemannianMetric I M) (a : ℕ)
     (u₀ : tensorHs (I := I) (M := M) g_bg 0 2 ((a : ℝ) + 2))

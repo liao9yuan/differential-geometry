@@ -372,7 +372,6 @@ private lemma chartBasisVec_mdifferentiableAt_self
     (hcontMDiff_on x hbase).contMDiffAt (hopen.mem_nhds hbase)
   exact hcontMDiff_at.mdifferentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 private lemma extDerivFun_chartBasisVec_apply_of_mem
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
     (j : Fin (Module.finrank ℝ E)) {b : M}
@@ -387,7 +386,6 @@ private lemma extDerivFun_chartBasisVec_apply_of_mem
   exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) x hf_at
     hb_chart hb_int j
 
-set_option linter.unusedSectionVars false in
 private lemma extDerivFun_chartBasisVec_eventuallyEq
     [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -424,7 +422,6 @@ private lemma extDerivFun_chartBasisVec_eventuallyEq
   obtain ⟨hb_chart, hb_int⟩ := hb
   exact extDerivFun_chartBasisVec_apply_of_mem (I := I) hf x j hb_chart hb_int
 
-set_option linter.unusedSectionVars false in
 private lemma extDerivFun_pairing_chartBasisVec_apply_basis
     [I.Boundaryless]
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (x : M)
@@ -734,7 +731,6 @@ theorem chartHessianMatrixIdentity_holds [I.Boundaryless]
   rw [hLHS, hRHS_2]
   rw [chartHessianTensor_def]
 
-set_option linter.unusedSectionVars false in
 private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (j : Fin (Module.finrank ℝ E)) {b : M}
@@ -752,7 +748,6 @@ private lemma extDerivFun_chartBasisVec_alpha_apply_of_mem
   exact mfderiv_chartBasisVecFiber_of_mdifferentiableAt (I := I) α hf_at
     hb_chart hb_int j
 
-set_option linter.unusedSectionVars false in
 private lemma extDerivFun_chartBasisVec_alpha_eventuallyEq
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (j : Fin (Module.finrank ℝ E)) {x : M}
@@ -768,7 +763,6 @@ private lemma extDerivFun_chartBasisVec_alpha_eventuallyEq
   filter_upwards [hnhd] with b hb
   exact extDerivFun_chartBasisVec_alpha_apply_of_mem (I := I) hf α j hb
 
-set_option linter.unusedSectionVars false in
 private lemma extDerivFun_pairing_chartBasisVec_alpha_apply
     {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ) ∞ f) (α : M)
     (i j : Fin (Module.finrank ℝ E)) {x : M}

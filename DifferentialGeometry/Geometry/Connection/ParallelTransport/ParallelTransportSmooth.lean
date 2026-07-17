@@ -28,7 +28,6 @@ def parallelTransportVF (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → 
   - chartChristoffelContraction (I := I) g α
       (deriv (chartCurve (I := I) α γ) s) y (chartCurve (I := I) α γ s)
 
-set_option linter.unusedSectionVars false in
 theorem parallelTransportVF_contDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M) (γ : ℝ → M) {W : Set ℝ}
     (hW : IsOpen W)
@@ -96,7 +95,6 @@ theorem parallelTransportVF_contDiffOn [I.Boundaryless]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :
@@ -243,7 +241,6 @@ theorem parallelTransport_section_contMDiffOn [I.Boundaryless]
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem parallelTransport_section_contMDiffOn_Ioo [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (hγ : ContMDiff 𝓘(ℝ, ℝ) I ∞ γ) {L : ℝ} (hL : 0 < L) (v₀ : TangentSpace I (γ 0)) :

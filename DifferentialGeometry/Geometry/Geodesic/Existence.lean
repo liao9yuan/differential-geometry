@@ -20,7 +20,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.Integral.Measure
 
-set_option linter.unusedSectionVars false in
 theorem exists_isMIntegralCurveAt_geodesicVectorFieldChart
     (g : SmoothRiemannianMetric I M) [I.Boundaryless] [CompleteSpace E]
     (p : M) (v : TangentSpace I p) :
@@ -64,7 +63,6 @@ section ChartedPicardLindelof
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem exists_geodesic_with_initial_velocity_at
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ∃ γ : ℝ → M, ∃ f : ℝ → TangentBundle I M,
@@ -81,7 +79,6 @@ theorem exists_geodesic_with_initial_velocity_at
   have h0 : (f 0).proj = p := projectCurve_zero_of_lift (I := I) hf0
   rw [h0]; exact mem_chart_source H p
 
-set_option linter.unusedSectionVars false in
 theorem hasMFDerivAt_lift_zero
     {g : SmoothRiemannianMetric I M} {f : ℝ → TangentBundle I M}
     (hf : IsMIntegralCurveAt f (geodesicVectorFieldChart (I := I) g

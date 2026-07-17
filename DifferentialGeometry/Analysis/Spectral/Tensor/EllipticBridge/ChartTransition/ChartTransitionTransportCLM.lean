@@ -781,7 +781,6 @@ lemma chartTransitionTransportCLM_coeFn
   exact transportLp_coeFn (I := I) (M := M) g r s β α P₀ Q
     (transportDiffeoData (I := I) (M := M) g r s β α P₀ Q) f
 
-set_option linter.unusedSectionVars false in
 theorem chartTransitionTransportCLM_coeFn_aeEq
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (P₀ Q : TensorCompIdx (E := E) r s)
@@ -861,7 +860,6 @@ private lemma transportFun_tensorChartComponent_eq
     rw [h_lhs, zero_mul,
       chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ hy]
 
-set_option linter.unusedSectionVars false in
 theorem chartTransitionTransportCLM_coeFn_smooth
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (β α : M)
     (S : SmoothCcTensor g r s)

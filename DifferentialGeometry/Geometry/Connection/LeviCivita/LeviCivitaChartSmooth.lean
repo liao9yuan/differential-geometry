@@ -22,7 +22,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedSectionVars false in
 lemma chartLeviCivitaGoodSet_image_isOpen (α : M) :
     IsOpen ((extChartAt I α) '' chartLeviCivitaGoodSet (I := I) α) := by
   classical
@@ -124,7 +123,6 @@ lemma christoffelCorrection_eq_christoffelCorrectionCLM
     trivToE_trivFromE (I := I) α hx w
   rw [hround]
 
-set_option linter.unusedSectionVars false in
 lemma chartE_pullback_contDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -169,7 +167,6 @@ lemma chartE_pullback_contDiffOn_goodSet
   exact interior_subset
     (chartLeviCivitaGoodSet_extChartAt_mem_interior (I := I) hx'_good)
 
-set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_contMDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -189,7 +186,6 @@ lemma chartE_section_repr_contMDiffOn_goodSet
   have h := (contMDiffAt_section_iff_chartE I α σ (k := (⊤ : ℕ∞)) hx_base).mp hσ_at
   exact h.contMDiffWithinAt
 
-set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_basis_component_contMDiffOn
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -211,7 +207,6 @@ lemma chartE_section_repr_basis_component_contMDiffOn
   intro x hx
   exact (hcoord_clm.contMDiffAt).comp_contMDiffWithinAt x (hbase x hx)
 
-set_option linter.unusedSectionVars false in
 lemma chartChristoffel_contMDiffOn_goodSet
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) :
@@ -264,7 +259,6 @@ lemma christoffelCorrectionCLM_contMDiffOn
     contMDiffOn_const
   exact hscalar.smul hblock_const
 
-set_option linter.unusedSectionVars false in
 lemma fderiv_chartE_pullback_contDiffOn_goodSet
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)
@@ -282,7 +276,6 @@ lemma fderiv_chartE_pullback_contDiffOn_goodSet
     rw [ENat.coe_top_add_one]
   exact hpull.fderiv_of_isOpen himg_open h_le
 
-set_option linter.unusedSectionVars false in
 lemma fderiv_chartE_pullback_contMDiffOn
     (α : M) {σ : Π x : M, TangentSpace I x}
     (hσ : ContMDiffOn I (I.prod 𝓘(ℝ, E)) ∞ (T% σ)

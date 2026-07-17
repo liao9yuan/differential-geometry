@@ -217,7 +217,6 @@ theorem tangentSectionAction_chartLocal_within
   rw [mfderiv_chartBasisVecFiber_within (I := I) α hf hx i]
   exact smul_eq_mul ..
 
-set_option linter.unusedSectionVars false in
 private lemma chartCoeffOnE_mul_chartDensityOnE_differentiableWithinAt
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

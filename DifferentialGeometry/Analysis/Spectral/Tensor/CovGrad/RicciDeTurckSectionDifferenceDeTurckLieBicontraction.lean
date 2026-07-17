@@ -76,7 +76,6 @@ theorem connDiffOp_homSection_contMDiff (g₁ g_bg : SmoothRiemannianMetric I M)
   intro Z
   exact PDE.DeTurck.connDiff_contMDiff (I := I) g₁ g_bg Y.contMDiff Z.contMDiff
 
-set_option linter.unusedSectionVars false in
 theorem connDiffOp_mdiffAt (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     MDifferentiableAt I (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] E))
       (fun b : M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] E)

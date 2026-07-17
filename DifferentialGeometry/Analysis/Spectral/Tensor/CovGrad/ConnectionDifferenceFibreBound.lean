@@ -86,7 +86,6 @@ private lemma frame03_data
   · intro S
     rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tensor03_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 3 I x) {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -271,7 +270,6 @@ private lemma frame04_data
   · intro S
     rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tensor04_component_eq_toModel
     (g₀ : SmoothRiemannianMetric I M) (x : M)
     (W : TensorRSSpace 0 4 I x) {n : ℕ} (e : Fin n → TangentSpace I x)

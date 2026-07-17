@@ -127,7 +127,6 @@ private lemma chartPushedRaw_cutoff_mul_raw_eq_cutoffComponent
     cutoffComponentEuclid_apply_of_mem (I := I) (M := M) g r s S α Idx Jdx hy]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma cutoffLowerOrderTerm_eq_linearCombination
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

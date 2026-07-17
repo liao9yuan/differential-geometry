@@ -66,7 +66,6 @@ lemma standardNirenbergTest_tsupport_in_thickening
     refine Metric.mem_cthickening_of_dist_le _ _ |h| K_0 hy_K_0 ?_
     exact h_dist
 
-set_option linter.unusedSectionVars false in
 lemma standardNirenbergTest_tsupport_in_chartTarget
     [I.Boundaryless]
     {α : M}
@@ -657,7 +656,6 @@ def chartBilinear_RHS
     (k : Fin (Module.finrank ℝ E)) (h : ℝ) : ℝ :=
   c_term_chartBilinear (I := I) (M := M) D K_0 η k h
 
-set_option linter.unusedSectionVars false in
 lemma standardNirenbergTest_smooth_admissible
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -746,7 +744,6 @@ lemma standardNirenbergTest_smooth_admissible
   · exact standardNirenbergTest_tsupport_in_chartTarget (E := E) (I := I) (M := M)
       (α := α) k h hη_supp hη_supp_in_K_0 h_thick D.u_chart
 
-set_option linter.unusedSectionVars false in
 lemma variational_identity_at_standardNirenbergTest_smooth_uChart
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}
@@ -783,7 +780,6 @@ lemma variational_identity_at_standardNirenbergTest_smooth_uChart
   exact D.variational_identity (standardNirenbergTest
     (d := Module.finrank ℝ E) k h η D.u_chart) h_v_smooth h_v_supp h_v_tsupp
 
-set_option linter.unusedSectionVars false in
 lemma smooth_uChart_variational_lhs_identity
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g : SmoothRiemannianMetric I M} {α : M}

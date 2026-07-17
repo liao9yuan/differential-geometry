@@ -155,7 +155,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 
 open DifferentialGeometry.PDE.RicciFlow.Pullback
 
-set_option linter.unusedSectionVars false in
 theorem flowFamily_regularity_package
     (X : ℝ → ∀ x : M, TangentSpace I x)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

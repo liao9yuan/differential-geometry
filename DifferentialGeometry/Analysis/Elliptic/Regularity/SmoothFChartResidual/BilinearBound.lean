@@ -135,7 +135,6 @@ private lemma wkpNorm_chartPushedRaw_lapPiece_le_etaTimesV_aux
     exact (DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.one_iff_memW1p).mpr h_w1p
   exact hK_bound hH_W12
 
-set_option linter.unusedSectionVars false in
 private lemma Λgrad_apply_of_mem
     (g : SmoothRiemannianMetric I M) (α : M)
     (i : Fin (Module.finrank ℝ E)) {y : EuclN}
@@ -163,7 +162,6 @@ private lemma Λgrad_iteratedFDeriv_bound
     (gradInnerCoefI_M_smooth (I := I) (M := M) g α i)
     (tsupport_gradInnerCoefI_M_subset (I := I) (M := M) g α i) 1
 
-set_option linter.unusedSectionVars false in
 lemma chartPushedRaw_gradInnerPiece_eq_sum
     (g : SmoothRiemannianMetric I M) (α : M) (v : SmoothScalar g) {y : EuclN}
     (hy : y ∈ chartTargetEuclid (I := I) (M := M) α) :

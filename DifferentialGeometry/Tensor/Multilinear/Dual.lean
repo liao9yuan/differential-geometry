@@ -781,7 +781,6 @@ noncomputable def dualMultilinearFiberwiseEquiv (r : ℕ) (x : B) :
       (continuousLinearEquivAt (𝕜 := 𝕜) (F := F →L[𝕜] 𝕜)
         (E := Bundle.dual 𝕜 E) r x).symm.toLinearEquiv)
 
-set_option linter.unusedSectionVars false in
 theorem dualMultilinearFiberwiseEquiv_smooth (r : ℕ) :
     ContMDiff
       (IB.prod 𝓘(𝕜, ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F) 𝕜 →L[𝕜] 𝕜))
@@ -819,7 +818,6 @@ theorem dualMultilinearFiberwiseEquiv_smooth (r : ℕ) :
     ] with p hp
     exact dualUnliftFiber_triv_eq p₀.proj p.proj hp p.snd
 
-set_option linter.unusedSectionVars false in
 theorem dualMultilinearFiberwiseEquiv_symm_smooth (r : ℕ) :
     ContMDiff
       (IB.prod 𝓘(𝕜, ContinuousMultilinearMap 𝕜 (fun _ : Fin r => F →L[𝕜] 𝕜) 𝕜))

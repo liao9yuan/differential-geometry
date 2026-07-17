@@ -117,7 +117,6 @@ theorem koszulCovGradCovec_dual_apply_covGrad
   linarith [h]
 
 
-set_option linter.unusedSectionVars false in
 theorem connDiff_eq_appCc_invGram_covGrad
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (X Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -189,7 +188,6 @@ theorem cotangentToCLM_koszulCovGradCovec
         cotangentToCLM (I := I) (koszulCovGradCovec (I := I) (M := M) g₀ g₁ Z Y b) w)
 
 
-set_option linter.unusedSectionVars false in
 theorem koszulCovGradCovecCLM_mdiffAtCotangent
     (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) :
@@ -370,7 +368,6 @@ noncomputable def ricciPrincipalCoeffDoubleTraceModel
       - modelDoubleTrace (E := E) 2 L)
 
 
-set_option linter.unusedSectionVars false in
 theorem ricciPrincipalCoeffDoubleTraceModel_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -706,7 +703,6 @@ private lemma triMDiffAt_curried
     (v := fun y : M => Y y) hCurried hY
 
 
-set_option linter.unusedSectionVars false in
 private theorem tensor0SCovariantDerivative03_consEval_leibnizDefect
     (g₀ : SmoothRiemannianMetric I M) (V : Π b : M, Tensor0SSpace 3 I b) {x : M}
     (hV : TensorSectionMDiffAt (I := I) 3 V x)

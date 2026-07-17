@@ -218,7 +218,6 @@ private lemma toEuclidean_extChartAt_contMDiffOn (α : M) :
     (toEuclidean (E := E)).toContinuousLinearMap.contMDiff
   exact htoEuc.comp_contMDiffOn hext
 
-set_option linter.unusedSectionVars false in
 private lemma toEuclidean_extChartAt_mapsTo (α : M) :
     Set.MapsTo (fun b : M => toEuclidean (E := E) ((extChartAt I α) b))
       ((chartAt H α).source)
@@ -387,7 +386,6 @@ theorem rotatedTestSection_chartComp
   · intro hQ
     exact absurd (Finset.mem_univ Q) hQ
 
-set_option linter.unusedSectionVars false in
 theorem toSection_eq_sum_chartBasisFiberSection
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (S : SmoothCcTensor g r s) (α : M)
     {b : M} (hb : b ∈ (chartAt H α).source) :

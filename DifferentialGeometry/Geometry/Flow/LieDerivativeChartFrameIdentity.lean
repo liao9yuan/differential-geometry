@@ -21,7 +21,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-set_option linter.unusedSectionVars false in
 private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -56,7 +55,6 @@ private lemma chartCoeffOnE_alpha_eq_basis_comp_pullback_eventuallyEq
         (W : ∀ x : M, TangentSpace I x) hy_base]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma differentiableAt_chartE_pullback_W_alpha
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
     (α : M) {x : M} (hx : x ∈ chartLeviCivitaGoodSet (I := I) α) :

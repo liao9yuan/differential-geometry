@@ -54,7 +54,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [T2Space 
       smoothTensorPairingChart (I := I) (M := M) g α φ v
         ((toEuclidean (E := E)) (extChartAt I α x)) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem smoothTensorPairingChart_eq_hessPairingByChartα_pullback
     (g : SmoothRiemannianMetric I M) (α : M)
     (φ : C^∞⟮I, M; ℝ⟯) (v : SmoothScalar g)
@@ -144,7 +143,6 @@ private lemma scalarOnE_neg_pointwise (α : M) (f : M → ℝ) :
   unfold scalarOnE
   rfl
 
-set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianTensor_add_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f f' : M → ℝ}
@@ -290,7 +288,6 @@ lemma chartHessianTensor_add_of_smooth
   rw [h_iter_add, h_chris_sum]
   ring
 
-set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 lemma chartHessianTensor_neg_of_smooth
     (g : SmoothRiemannianMetric I M) (α : M) {f : M → ℝ}

@@ -36,7 +36,6 @@ private lemma locallyCompactSpace_M (I : ModelWithCorners ℝ E H)
   haveI : LocallyCompactSpace H := I.locallyCompactSpace
   exact ChartedSpace.locallyCompactSpace H M
 
-set_option linter.unusedSectionVars false in
 private lemma regularSpace_M (I : ModelWithCorners ℝ E H)
     [ChartedSpace H M] [T2Space M] : RegularSpace M := by
   haveI : LocallyCompactSpace M := locallyCompactSpace_M (E := E) (H := H) (M := M) I

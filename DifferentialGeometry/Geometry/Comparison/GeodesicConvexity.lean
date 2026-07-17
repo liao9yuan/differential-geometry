@@ -74,7 +74,6 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [NeZero (Module.finrank ℝ
     q ∈ smallNormalBall (I := I) p ρ ↔ riemannianEDist I p q < ENNReal.ofReal ρ :=
   Iff.rfl
 
-set_option linter.unusedSectionVars false in
 lemma centre_mem_smallNormalBall (p : M) {ρ : ℝ} (hρ : 0 < ρ) :
     p ∈ smallNormalBall (I := I) p ρ := by
   rw [mem_smallNormalBall, riemannianEDist_self]
@@ -83,7 +82,6 @@ lemma centre_mem_smallNormalBall (p : M) {ρ : ℝ} (hρ : 0 < ρ) :
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
   [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
 
-set_option linter.unusedSectionVars false in
 private lemma intrinsicGeodesic_speedSq_const
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -106,7 +104,6 @@ private lemma intrinsicGeodesic_speedSq_const
     intrinsicGeodesic_mfderiv_zero (I := I) g hEnorm p v
   exact congrArg₂ (fun (x : M) (w : E) => g.inner x w w) h0 hvelE
 
-set_option linter.unusedSectionVars false in
 private lemma intrinsicGeodesic_velocity_enorm_le'
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -131,7 +128,6 @@ private lemma intrinsicGeodesic_velocity_enorm_le'
       = Real.sqrt (c ^ 2) := by rw [hspeedSq]
     _ = c := Real.sqrt_sq hc_nn
 
-set_option linter.unusedSectionVars false in
 theorem intrinsicGeodesic_riemannianEDist_le_radius
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -176,7 +172,6 @@ theorem intrinsicGeodesic_riemannianEDist_le_radius
     _ ≤ pathELength I γ 0 t := h_dist_le
     _ ≤ ENNReal.ofReal (c * t) := h_pathLen_le
 
-set_option linter.unusedSectionVars false in
 theorem smallNormalBall_radial_confined
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),
@@ -195,7 +190,6 @@ theorem smallNormalBall_radial_confined
         exact mul_le_mul_of_nonneg_left ht1 hc_nn
     _ = c := mul_one c
 
-set_option linter.unusedSectionVars false in
 theorem joinedIn_centre_smallNormalBall
     (g : SmoothRiemannianMetric I M)
     (hEnorm : ∀ (x : M) (w : TangentSpace I x),

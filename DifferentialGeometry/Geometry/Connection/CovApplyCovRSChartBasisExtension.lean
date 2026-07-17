@@ -27,7 +27,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Integral.L2
 open Tensor0SBundle
 
-set_option linter.unusedSectionVars false in
 private lemma exists_bump_tsupport_in_goodSet
     (α : M) {b₀ : M} (hb₀ : b₀ ∈ chartLeviCivitaGoodSet (I := I) α) :
     ∃ χ : SmoothBumpFunction I b₀,
@@ -40,7 +39,6 @@ private lemma exists_bump_tsupport_in_goodSet
     (SmoothBumpFunction.nhds_basis_tsupport (I := I) b₀).mem_iff.mp hnhds
   exact ⟨χ, hχ⟩
 
-set_option linter.unusedSectionVars false in
 lemma bumpedChartBasis_contMDiff
     (α : M) {b₀ : M}
     (k : Fin (Module.finrank ℝ E))
@@ -72,7 +70,6 @@ lemma bumpedChartBasis_contMDiff
   exact ContMDiffOn.smul_section_of_tsupport hχ_on_good
     (chartLeviCivitaGoodSet_isOpen (I := I) α) hχ_tsupp hChart_on_good
 
-set_option linter.unusedSectionVars false in
 theorem covApply_covRS_chartBasis_globalSmoothExtension
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (T₀ : SmoothCcTensor g r s) (k : Fin (Module.finrank ℝ E))

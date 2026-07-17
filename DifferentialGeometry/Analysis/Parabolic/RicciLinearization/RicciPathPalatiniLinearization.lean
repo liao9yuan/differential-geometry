@@ -103,7 +103,6 @@ lemma linearizedKoszulCovec_apply (g' : SmoothRiemannianMetric I M) (S : SmoothC
   rw [LinearMap.smul_apply, LinearMap.sub_apply, LinearMap.add_apply, h1, h2, h3]
   rw [smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma continuous_linearizedKoszulCovec_fst (g' : SmoothRiemannianMetric I M)
     (S : SmoothCcTensor g' 0 2) (x : M) (ζ z : TangentSpace I x) :
     Continuous (fun u : TangentSpace I x =>
@@ -702,7 +701,6 @@ private lemma metricSharp_realizedFam_eq_invGram_sum
   rw [← h, metricSharpChartLocal]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma tendsto_metricSharp_realizedFam_fixed
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')
@@ -732,7 +730,6 @@ private lemma tendsto_metricSharp_realizedFam_fixed
     exact (hcont.continuousAt (realizedSmallSet_isOpen.mem_nhds hs₀)).tendsto
   exact hinv.mul tendsto_const_nhds
 
-set_option linter.unusedSectionVars false in
 private lemma tendsto_metricSharp_realizedFam_varying
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)
     {δ' : ℝ} (hδ' : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T') δ')

@@ -157,7 +157,6 @@ theorem chartCloseTriv_eq_ringInverse_chartMovingTriv
     _ = chartCloseTriv (I := I) Φ_fam α x s := by
           rw [Ring.inverse_mul_cancel _ hunit, one_mul]
 
-set_option linter.unusedSectionVars false in
 theorem chartCloseTriv_hasDerivAt_of_movingTriv
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (t : ℝ) (x : M) {g' : E →L[ℝ] E}
     (hg : HasDerivAt

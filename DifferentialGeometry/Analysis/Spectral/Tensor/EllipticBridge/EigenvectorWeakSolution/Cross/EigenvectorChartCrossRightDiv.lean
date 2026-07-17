@@ -39,7 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedSectionVars false in
 private lemma cutoffComponentEuclid_contDiff_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -54,7 +53,6 @@ private lemma cutoffComponentEuclid_contDiff_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-set_option linter.unusedSectionVars false in
 private lemma cutoffComponentEuclid_hasCompactSupport_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -68,7 +66,6 @@ private lemma cutoffComponentEuclid_hasCompactSupport_section
     (cutoffComponentScalar_tsupport_subset_source
       (I := I) (M := M) g r s S α Idx Jdx)
 
-set_option linter.unusedSectionVars false in
 private lemma cutoffComponentEuclid_tsupport_subset_section
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -162,7 +159,6 @@ def crossRightDivFactor
         covChartMetricGram (I := I) (M := M) g r s α P Q y *
       crossRightTestGradCoeff (I := I) (M := M) g r s α P₀ Q l y
 
-set_option linter.unusedSectionVars false in
 lemma crossRightDivFactor_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (P₀ : TensorCompIdx (E := E) r s)
@@ -186,7 +182,6 @@ lemma euclidPartial_crossRightDivFactor_contDiffOn
   euclidPartial_contDiffOn_target (I := I) (M := M) α l
     (crossRightDivFactor_contDiffOn (I := I) (M := M) g r s α P₀ l P Q)
 
-set_option linter.unusedSectionVars false in
 lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) {y : EuclN} (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
     chartPushedRaw I α ((chartAtlasPOU I M α : C^∞⟮I, M; ℝ⟯) : M → ℝ) y = 0 := by
@@ -212,7 +207,6 @@ lemma chartPushedRaw_pou_eq_zero_off_chartPouKernel
     exact hb_supp hc
   · rw [chartPushedRaw_apply_of_notMem (I := I) (M := M) α _ htar]
 
-set_option linter.unusedSectionVars false in
 lemma euclidPartial_chartPushedRaw_pou_eq_zero_off_chartPouKernel
     (α : M) (j : Fin (Module.finrank ℝ E)) {y : EuclN}
     (hy : y ∉ chartPouKernel (I := I) (M := M) α) :
@@ -302,7 +296,6 @@ lemma euclidPartial_crossRightDivFactor_eq_zero_off_chartPouKernel
   rw [euclidPartial_def, hevt.fderiv_eq]
   simp
 
-set_option linter.unusedSectionVars false in
 private lemma densityOnEuclid_mul_crossRightTestGradTerm_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

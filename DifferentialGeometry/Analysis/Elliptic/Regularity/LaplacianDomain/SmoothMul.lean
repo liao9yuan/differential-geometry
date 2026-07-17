@@ -37,7 +37,6 @@ noncomputable def fHLeibnizResidualCLM
       (laplacianOfChartPOU (I := I) (M := M) g α)).comp
       (H1ComplToLp (I := I) (M := M) g)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma fHLeibnizResidualCLM_apply
     (g : SmoothRiemannianMetric I M) (α : M) (u_h : H1Compl g) :
     fHLeibnizResidualCLM (I := I) (M := M) g α u_h =
@@ -69,7 +68,6 @@ noncomputable def phiMulU_h
   resolvent (I := I) (M := M) g
     (leibnizCompensatedSource (I := I) (M := M) g α u_h hu_h)
 
-set_option linter.unusedSectionVars false in
 theorem phiMulU_h_mem_laplacianDomain
     (g : SmoothRiemannianMetric I M) (α : M)
     {u_h : H1Compl g} (hu_h : u_h ∈ laplacianDomain (I := I) (M := M) g) :

@@ -280,7 +280,6 @@ theorem linearizedDeTurckLieAt_eq_deriv_chartSum_on_Ioo
   rw [linearizedDeTurckLieAt]
   exact Filter.EventuallyEq.deriv_eq heq
 
-set_option linter.unusedSectionVars false in
 private theorem deriv_realizedDeTurckLieChartSum_continuousOn
     (g₀ g_bg : SmoothRiemannianMetric I M)
     (T T' : SmoothCcTensor g₀ 0 2)

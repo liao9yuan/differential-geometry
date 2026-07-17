@@ -31,7 +31,6 @@ variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E] [InnerProductSpa
 variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma tangentCoordChange_eq_chartTransitionAt [I.Boundaryless]
     (x y : M) (z : M) :
@@ -86,7 +85,6 @@ private lemma secondaryTrivSndForm_eventuallyEq_applyJac [I.Boundaryless]
   congr 2
   exact (extChartAt I p.proj).right_inv hz_tgt
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 private lemma differentiableAt_chartTransitionAt [I.Boundaryless]
     (α β : M) {x : E} (hx : x ∈ chartTransitionSource (I := I) α β) :
@@ -607,7 +605,6 @@ theorem hasGeodesicEquationAt_fixedChart_hasDerivAt_velocity
   rw [hDcollapse] at hUderiv
   exact hUderiv
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] in
 theorem hasGeodesicEquationAt_fixedChart_eventually_hasDerivAt
     (g : SmoothRiemannianMetric I M) (y : M) {γ : ℝ → M} {t : ℝ}
@@ -685,7 +682,6 @@ private lemma hasGeodesicEquationAt_comp_sub_const
     rw [hd2]; exact ha.comp_sub_const t T
   · exact hgeo
 
-set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_glue_at_limit [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
     {γ η : ℝ → M} {T δ : ℝ} (hδ : 0 < δ)
@@ -733,7 +729,6 @@ theorem isGeodesicOn_glue_at_limit [I.Boundaryless] [CompleteSpace E]
     refine HasGeodesicEquationAt.congr_of_eventuallyEq_at (γ' := ηT) ?_ hGηT_t hηeq
     simp only [hG, hηT]; rw [if_neg (not_lt.mpr (le_of_lt hgt))]
 
-set_option linter.unusedSectionVars false in
 theorem isGeodesicOn_glue_at_limit_Ioo [I.Boundaryless] [CompleteSpace E]
     (g : SmoothRiemannianMetric I M)
     {γ η : ℝ → M} {a T δ : ℝ} (hδ : 0 < δ) (haT : a < T)

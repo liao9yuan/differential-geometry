@@ -109,7 +109,6 @@ noncomputable def galerkinCoordEmbed
   (galerkinCoordEmbedLM (I := I) (M := M) g₀ a S).toContinuousLinearMap
 
 open scoped Classical in
-set_option linter.unusedSectionVars false in
 @[simp] lemma galerkinCoordEmbed_coeff
     (g₀ : SmoothRiemannianMetric I M) (a : ℕ)
     (S : Finset (TensorEigenIdx (I := I) (M := M) g₀ 0 2))

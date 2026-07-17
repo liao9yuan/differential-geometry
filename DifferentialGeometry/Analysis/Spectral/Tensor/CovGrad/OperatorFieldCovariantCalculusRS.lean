@@ -39,7 +39,6 @@ def appCcRSFib (g : SmoothRiemannianMetric I M) (a b c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 theorem appCcRSFib_contMDiff (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) :
     ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel a c ℝ E)) ∞
@@ -78,7 +77,6 @@ def ccOperatorFieldComp (g : SmoothRiemannianMetric I M) (a b c : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma appCcRS_toSection (g : SmoothRiemannianMetric I M) (a b c : ℕ)
     (Φ : SmoothCcTensor g b c) (W : SmoothCcTensor g a b) (x : M) :
     (ccOperatorFieldComp (I := I) (M := M) g a b c Φ W).toSection x =
@@ -385,7 +383,6 @@ private lemma exists_orthoFrame_repr_anyRank
     rfl
 
 
-set_option linter.unusedSectionVars false in
 private lemma fiberNormSqComponent_comp_anyRank_eq
     (g : SmoothRiemannianMetric I M) (a b c : ℕ) (x : M)
     (Φx : TensorRSSpace b c I x) (Wx : TensorRSSpace a b I x)
@@ -441,7 +438,6 @@ private lemma fiberNormSqComponent_comp_anyRank_eq
   rw [hwcomp, smul_eq_mul]
 
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_compRS_le_mul
     (g : SmoothRiemannianMetric I M) (a b c : ℕ) (x : M)
     (Φx : TensorRSSpace b c I x) (Wx : TensorRSSpace a b I x) :
@@ -528,7 +524,6 @@ theorem exists_uniform_riemannianFiberNormSq_appCcRS_le
     (riemannianFiberNormSq_nonneg (I := I) (M := M) g a b x (W.toSection x))
 
 
-set_option linter.unusedSectionVars false in
 theorem appCcRS_castRankCc_db {a a' b b' : ℕ} (g : SmoothRiemannianMetric I M) (r : ℕ)
     (ha : a = a') (hb : b = b')
     (Φ : SmoothCcTensor g a b) (V : SmoothCcTensor g r a) :
@@ -696,7 +691,6 @@ theorem normalFormRS_succ (g : SmoothRiemannianMetric I M) (r : ℕ)
   abel
 
 
-set_option linter.unusedSectionVars false in
 theorem normalForm_zeroRS (g : SmoothRiemannianMetric I M) (r : ℕ)
     (op : ∀ (p rr : ℕ), SmoothCcTensor g r rr → SmoothCcTensor g r (rr + p))
     (rr : ℕ) (Φ₀ : SmoothCcTensor g (rr + 0) (rr + 0))

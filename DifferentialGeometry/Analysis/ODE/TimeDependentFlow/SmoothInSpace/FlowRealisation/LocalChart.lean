@@ -43,7 +43,6 @@ theorem precompMap_chartPoint
 
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M] in
 
-set_option linter.unusedSectionVars false in
 theorem hagree_of_cocycle_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (α x : M) (t : ℝ) (ΦE : E × ℝ → E)
     (hrealΨ : ∀ᶠ s : ℝ in 𝓝 t, ∀ᶠ y : M in 𝓝 x,
@@ -91,7 +90,6 @@ theorem spatial_fderiv_precomp_factor
 
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 
-set_option linter.unusedSectionVars false in
 theorem chartPrecomp_spatialFderiv_hasDerivAt
     {f : ℝ → E → E} {t : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {ΦE : E × ℝ → E}
     (hΦE : IsLocalFlow f t x₀ r tmin tmax ΦE)

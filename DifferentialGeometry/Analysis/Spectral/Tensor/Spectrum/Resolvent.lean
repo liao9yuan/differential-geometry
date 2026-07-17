@@ -35,14 +35,12 @@ noncomputable def tensorResolventL2 (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (TensorH1ComplToTensorL2 (I := I) (M := M) g r s).comp
     (tensorResolvent (I := I) (M := M) g r s)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma tensorResolventL2_apply (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (f : TensorL2 r s g) :
     tensorResolventL2 (I := I) (M := M) g r s f =
       TensorH1ComplToTensorL2 (I := I) (M := M) g r s
         (tensorResolvent (I := I) (M := M) g r s f) := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma inner_tensorResolventL2_eq_inner_tensorResolvent
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (f h : TensorL2 r s g) :
@@ -55,7 +53,6 @@ private lemma inner_tensorResolventL2_eq_inner_tensorResolvent
   rw [← hvar]
   exact real_inner_comm _ _
 
-set_option linter.unusedSectionVars false in
 theorem tensorResolventL2_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (f h : TensorL2 r s g) :
@@ -67,7 +64,6 @@ theorem tensorResolventL2_symm
   rw [inner_tensorResolventL2_eq_inner_tensorResolvent (I := I) (M := M) g r s h f]
   exact real_inner_comm _ _
 
-set_option linter.unusedSectionVars false in
 theorem tensorResolventL2_isSelfAdjoint
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     IsSelfAdjoint (tensorResolventL2 (I := I) (M := M) g r s) := by

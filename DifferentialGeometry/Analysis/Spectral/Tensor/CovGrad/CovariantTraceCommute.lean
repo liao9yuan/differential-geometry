@@ -110,7 +110,6 @@ theorem contractCcTensor_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M] in
 private lemma riemannianFiberNormSq_eq_bundle_norm_sq_gen
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) (z : TensorRSSpace r s I x) :
@@ -158,7 +157,6 @@ theorem riemannianFiberNormSq_tensorRS_clm_apply_le
           · exact φg.le_opNorm v
     _ = ‖φg‖ ^ 2 * ‖v‖ ^ 2 := by ring
 
-set_option linter.unusedSectionVars false in
 theorem riemannianFiberNormSq_contract_trace_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M) :
     ∃ Cφ : ℝ, 0 ≤ Cφ ∧ ∀ T : TensorRSSpace (1 + r) (s + 1) I x,

@@ -23,7 +23,6 @@ private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_sq_le_mul
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -186,7 +185,6 @@ theorem tensorL2Inner_sq_le_mul
     simp
 
 
-set_option linter.unusedSectionVars false in
 theorem abs_tensorL2Inner_le
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
@@ -224,7 +222,6 @@ theorem abs_tensorL2Inner_le
   exact h1
 
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Norm_add_le
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

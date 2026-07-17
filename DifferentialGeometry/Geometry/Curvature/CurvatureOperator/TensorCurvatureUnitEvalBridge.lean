@@ -42,7 +42,6 @@ private lemma metric_inner_self_nonneg' (g : SmoothRiemannianMetric I M) (x : M)
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smooth_tensor0S_section_eq (t : ℕ) (x : M) (T₀ : Tensor0SSpace t I x) :
     ∃ A : Π b : M, Tensor0SSpace t I b, A x = T₀ ∧
       ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel t ℝ E)) ∞
@@ -233,7 +232,6 @@ theorem riemannOp_tensorCov_unitScalarRSLift_unitEval
     hX_smooth hW_smooth hA_smooth]
   rw [hXx, hWx, hAx]
 
-set_option linter.unusedSectionVars false in
 theorem riemannOp_tensor0SCov_coframeS_apply_eval
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (v w : TangentSpace I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin t → Fin n)
@@ -296,7 +294,6 @@ theorem riemannOp_tensor0SCov_coframeS_apply_eval
   refine Finset.prod_congr rfl (fun s _ => ?_)
   rw [hbase]
 
-set_option linter.unusedSectionVars false in
 theorem abs_toModel_riemannOp_tensor0SCov_coframeS_le
     (g : SmoothRiemannianMetric I M) (t : ℕ) (x : M) (v w : TangentSpace I x)
     {n : ℕ} (e : Fin n → TangentSpace I x) (J : Fin t → Fin n)

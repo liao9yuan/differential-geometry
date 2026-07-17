@@ -78,7 +78,6 @@ private lemma perAlphaSobolevConstant_intrinsic_bound
     (exists_perAlphaSobolevConstant
       (I := I) (M := M) g r s α)).2 S Idx Jdx
 
-set_option linter.unusedSectionVars false in
 private lemma wkpNormChart_tensorChartComponentScalar_eq_zero_of_inactive_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)

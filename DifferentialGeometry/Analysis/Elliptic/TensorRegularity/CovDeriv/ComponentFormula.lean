@@ -59,7 +59,6 @@ lemma covDerivLowerOrderCoeff_def
             outputSlotCoeff (I := I) (M := M) g s α m l Jdx Jdx' y *
               (if Idx' = Idx then (1 : ℝ) else 0) := rfl
 
-set_option linter.unusedSectionVars false in
 theorem covDerivLowerOrderCoeff_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (m : Fin (Module.finrank ℝ E))
@@ -134,7 +133,6 @@ private lemma wrappedComponentProj_intrinsic_eq
   exact tensorRSIntrinsicChartCLM_component_eq_euclidPartial
     (I := I) (M := M) g r s S α Idx Jdx m hy
 
-set_option linter.unusedSectionVars false in
 private lemma wrappedComponentProj_inputSlot_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -156,7 +154,6 @@ private lemma wrappedComponentProj_inputSlot_eq
   exact chartTensorRSInputSlotCorrection_component_eq
     (I := I) (M := M) g r s S α m k Idx Jdx hy
 
-set_option linter.unusedSectionVars false in
 private lemma wrappedComponentProj_outputSlot_eq
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -372,7 +369,6 @@ private lemma inputSlot_sub_outputSlot_eq_lowerOrderTerm
   refine Finset.sum_congr rfl (fun p _ => ?_)
   rw [covDerivLowerOrderCoeff_def, ← sub_mul]
 
-set_option linter.unusedSectionVars false in
 private lemma wrappedComponentProj_covDeriv_split
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

@@ -138,7 +138,6 @@ section UniformChartCoordExistence
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem exists_chartFlow_uniform_orbit
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (b : ContDiffBump (((extChartAt I p p, (0 : E)) : E × E)))
@@ -182,7 +181,6 @@ section UniformChartPhaseODE
 variable [I.Boundaryless] [CompleteSpace E]
 
 
-set_option linter.unusedSectionVars false in
 lemma orbit_hasDerivAt_chartPhaseVF_uniform
     (g : SmoothRiemannianMetric I M) (p : M)
     {x₀ : E} (_hx₀_def : x₀ = extChartAt I p p)
@@ -249,7 +247,6 @@ lemma orbit_hasDerivAt_chartPhaseVF_uniform
   rw [h_eq] at hd_cutoff
   exact hd_cutoff
 
-set_option linter.unusedSectionVars false in
 theorem exists_uniform_orbit_hasDerivAt_chartPhaseVF
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (b : ContDiffBump (((extChartAt I p p, (0 : E)) : E × E)))
@@ -344,7 +341,6 @@ section ManifoldIdentification
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-set_option linter.unusedSectionVars false in
 lemma per_v_orbit_proj_eq_lift_proj_eventually
     (g : SmoothRiemannianMetric I M) (p : M) (v : E)
     {x₀ : E} (hx₀_def : x₀ = extChartAt I p p)
@@ -456,7 +452,6 @@ section HeadlineUniformExistence
 
 variable [I.Boundaryless] [CompleteSpace E] [T2Space (TangentBundle I M)]
 
-set_option linter.unusedSectionVars false in
 theorem exists_uniform_existence_interval
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (ρ T : ℝ) (Φ : (E × E) × ℝ → E × E),

@@ -38,7 +38,6 @@ theorem tensorRSChartE_section_repr_eq_tensorTrivProj
       tensorTrivProj (I := I) (M := M) g r s S α :=
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensorRSIntrinsicChartCLM_proj_eq_fderiv_component
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

@@ -41,7 +41,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] in
 
-set_option linter.unusedSectionVars false in
 private theorem zeroTensor_eq_smul_unitTensor (x : M)
     (D : Tensor0SSpace 0 I x) :
     D = (Tensor0SNabla.tensor0Iso I M x D) • unitTensor (I := I) (M := M) x := by
@@ -104,7 +103,6 @@ private theorem unitModel_castRankCc (g : SmoothRiemannianMetric I M) {a b : ℕ
   subst h
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem domDomCongrField_contMDiff (g : SmoothRiemannianMetric I M) {s : ℕ}
     (σ : Equiv.Perm (Fin s)) (S : SmoothCcTensor g 0 s) :
     ContMDiff I (I.prod 𝓘(ℝ, Tensor0SModel s ℝ E)) ∞

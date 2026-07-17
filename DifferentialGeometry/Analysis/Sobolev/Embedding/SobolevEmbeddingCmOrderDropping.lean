@@ -572,7 +572,6 @@ private lemma rawPull_iteratedFDeriv_norm_sq_le_rhsHsContent
     (fun q' _ => Finset.sum_nonneg (fun l' _ => hbasisSum_nn q' l'))
     (Finset.mem_univ q)
 
-set_option linter.unusedSectionVars false in
 private lemma covGradComp_basisSum_le_rhsHsContent
     (g : SmoothRiemannianMetric I M) (r s σ : ℕ) (T : SmoothCcTensor g r s)
     (α : M) (Γbd : ℝ) (hΓbd_nn : 0 ≤ Γbd)

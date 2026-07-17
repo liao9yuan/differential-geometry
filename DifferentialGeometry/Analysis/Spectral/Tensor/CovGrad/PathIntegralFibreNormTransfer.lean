@@ -96,7 +96,6 @@ def tensorPointwiseSeminorm
     (fun a S => by
       rw [tensorPointwiseNorm_smul (I := I) (M := M) g r s x a S, Real.norm_eq_abs])
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem tensorPointwiseSeminorm_apply
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (S : TensorRSModel r s ℝ E) :
@@ -135,7 +134,6 @@ theorem tensorPointwiseNorm_continuous
   unfold tensorPointwiseNorm
   exact Real.continuous_sqrt.comp hdiag
 
-set_option linter.unusedSectionVars false in
 theorem tensorPointwiseNorm_intervalIntegral_le
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (x : M)
     (f : ℝ → TensorRSModel r s ℝ E)

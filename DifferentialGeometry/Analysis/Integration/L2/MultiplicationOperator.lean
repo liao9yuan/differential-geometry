@@ -37,7 +37,6 @@ section SmoothSide
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 
-set_option linter.unusedSectionVars false in
 theorem norm_appFullRS_sq_eq_integral
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) ∞
@@ -61,7 +60,6 @@ theorem norm_appFullRS_sq_eq_integral
   simp only [appFullRS_toSection (I := I) (M := M) g r s s Ψ hΨ W]
 
 
-set_option linter.unusedSectionVars false in
 theorem integrable_riemannianFiberNormSq_appFullRS
     (Ψ : Π x : M, TensorRSSpace r s I x →L[ℝ] TensorRSSpace r s I x)
     (hΨ : ContMDiff I (I.prod 𝓘(ℝ, TensorRSModel r s ℝ E →L[ℝ] TensorRSModel r s ℝ E)) ∞

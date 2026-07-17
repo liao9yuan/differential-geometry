@@ -28,7 +28,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 theorem integral_divergence_eq_zero_of_compact_family
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -38,7 +37,6 @@ theorem integral_divergence_eq_zero_of_compact_family
   rw [riemannianMeasureFamily_def]
   exact integral_divergence_eq_zero_of_compact (I := I) (g_fam t) X
 
-set_option linter.unusedSectionVars false in
 theorem integral_divergence_eq_zero_of_hasCompactSupport_family
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -49,7 +47,6 @@ theorem integral_divergence_eq_zero_of_hasCompactSupport_family
   rw [riemannianMeasureFamily_def]
   exact integral_divergence_eq_zero_of_hasCompactSupport (I := I) (g_fam t) X hX
 
-set_option linter.unusedSectionVars false in
 theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence_family
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -64,7 +61,6 @@ theorem integral_tangentSectionAction_eq_neg_integral_smul_divergence_family
   exact integral_tangentSectionAction_eq_neg_integral_smul_divergence
     (I := I) (g_fam t) hf X hX
 
-set_option linter.unusedSectionVars false in
 theorem integral_tangentSectionAction_mul_add_eq_neg_family
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -80,7 +76,6 @@ theorem integral_tangentSectionAction_mul_add_eq_neg_family
   exact integral_tangentSectionAction_mul_add_eq_neg
     (I := I) (g_fam t) hf hh X hX
 
-set_option linter.unusedSectionVars false in
 theorem integral_inner_grad_eq_neg_integral_smul_laplacian_family
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -98,7 +93,6 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_family
   exact green_first_integral_inner_grad_eq_neg_integral_smul_laplacian
     (I := I) (g_fam t) hf hh hh_supp
 
-set_option linter.unusedSectionVars false in
 theorem integral_smul_laplacian_sub_eq_zero_family
     [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M)
@@ -110,7 +104,6 @@ theorem integral_smul_laplacian_sub_eq_zero_family
   rw [riemannianMeasureFamily_def]
   exact green_second_integral_smul_laplacian_sub_eq_zero (I := I) (g_fam t) hf hh
 
-set_option linter.unusedSectionVars false in
 theorem volumeVariation_hasDerivAt
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {g_fam : ℝ → SmoothRiemannianMetric I M}

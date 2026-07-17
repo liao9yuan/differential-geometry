@@ -35,7 +35,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 lemma tensor0SCovariantDerivative_natCast_transport
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [ContMDiffCovariantDerivative cov ∞]
@@ -59,7 +58,6 @@ lemma toModel_natCast_transport
   rw [ContinuousMultilinearMap.domDomCongr_apply]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma liftedTensorSection_zero_eq_natCast_unit
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -85,7 +83,6 @@ lemma liftedTensorSection_zero_eq_natCast_unit
   congr 1
   exact (Fin.ext (by simp)).symm
 
-set_option linter.unusedSectionVars false in
 theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (S : Cₛ^∞⟮I; TensorRSModel 0 s ℝ E, (fun x : M => TensorRSSpace 0 s I x)⟯)
@@ -151,12 +148,10 @@ theorem loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen
   rw [toModel_natCast_transport (Nat.zero_add s)]
   rfl
 
-set_option linter.unusedSectionVars false in
 lemma loweringIntertwiner_gen (g : SmoothRiemannianMetric I M) (s : ℕ) :
     LoweringIntertwiner (I := I) (M := M) g s :=
   fun S x v => loweredCovDerivAt_eq_lower_tensorCovDerivAt_gen (I := I) (M := M) g s S x v
 
-set_option linter.unusedSectionVars false in
 theorem tensorL2Inner_covGrad_eq_neg_tensorL2Inner_rawConnLap_gen
     (g : SmoothRiemannianMetric I M) (s : ℕ) (T v : SmoothCcTensor g 0 s) :
     tensorL2Inner (I := I) (M := M) g 0 (s + 1)

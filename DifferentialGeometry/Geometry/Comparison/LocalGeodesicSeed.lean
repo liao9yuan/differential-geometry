@@ -47,7 +47,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 variable [RiemannianBundle (fun (x : M) ↦ TangentSpace I x)]
 variable [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
 
-set_option linter.unusedSectionVars false in
 theorem exists_isGeodesicOn_Ioo_at
     (g : SmoothRiemannianMetric I M) (y : M) (w : TangentSpace I y) :
     ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧ η 0 = y ∧
@@ -83,7 +82,6 @@ theorem exists_isGeodesicOn_Ioo_at
     ⟨y, f, hηt, ht_src, hf_at_t⟩
   exact hgeo_at.hasGeodesicEquationAt g
 
-set_option linter.unusedSectionVars false in
 theorem exists_isGeodesicOn_Ioo_at_velocity
     (g : SmoothRiemannianMetric I M) (y : M) (w : TangentSpace I y) :
     ∃ (η : ℝ → M) (δ : ℝ), 0 < δ ∧ η 0 = y ∧ ContinuousAt η 0 ∧

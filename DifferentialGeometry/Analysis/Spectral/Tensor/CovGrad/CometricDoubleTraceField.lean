@@ -240,7 +240,6 @@ theorem contractTraceField_contMDiff (r s : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 theorem tensor0SField_castRank_contMDiff {m n : ℕ} (h : m = n)
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace m I x)
     (hY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel m ℝ E)) ∞
@@ -314,7 +313,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] in
       Tensor0SBundle.model_interior_product (𝕜 := ℝ) (E := E) (s + 1) (L β) D := rfl
 
 
-set_option linter.unusedSectionVars false in
 theorem model_contract_trace_raiseSlot0ModelL (s : ℕ)
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel (s + 2) ℝ E) :
@@ -369,7 +367,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompleteSpace E] [CompactSpace M] [I.Bound
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 theorem cometricRaiseSlot0Fib_section_contMDiff (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     (Y : ∀ x : M, Tensor0SBundle.Tensor0SSpace (s + 2) I x)
     (hY : ContMDiff I (I.prod 𝓘(ℝ, Tensor0SBundle.Tensor0SModel (s + 2) ℝ E)) ∞
@@ -491,7 +488,6 @@ noncomputable def cometricDoubleTraceFib (g₀ : SmoothRiemannianMetric I M) (p 
         (Tensor0SBundle.tensor0SSpace_continuousLinearEquiv (I := I) (p + 2) x).toContinuousLinearMap))
 
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem cometricDoubleTraceFib_toModel (g₀ : SmoothRiemannianMetric I M) (p : ℕ) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace (p + 2) I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (cometricDoubleTraceFib (I := I) g₀ p x D) =
@@ -579,7 +575,6 @@ private theorem model_cons_slot0_smul {s : ℕ} (c : ℝ) (u : E)
   rw [h, map_smul, ContinuousMultilinearMap.smul_apply, smul_eq_mul, ← h]
 
 
-set_option linter.unusedSectionVars false in
 private theorem smoothOrthoFrame_basis_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) :
     ∃ bse : Module.Basis (Fin (Module.finrank ℝ E)) ℝ (TangentSpace I y),
@@ -613,7 +608,6 @@ private theorem smoothOrthoFrame_basis_at (g₀ : SmoothRiemannianMetric I M) (x
     fun i => congrFun (coe_basisOfLinearIndependentOfCardEqFinrank he_li hcard) i⟩
 
 
-set_option linter.unusedSectionVars false in
 private theorem smoothOrthoFrame_expansion_at (g₀ : SmoothRiemannianMetric I M) (x : M) {y : M}
     (hy : y ∈ smoothOrthoFrameNbhd (I := I) (M := M) x) (u : TangentSpace I y) :
     u = ∑ i : Fin (Module.finrank ℝ E),
@@ -766,7 +760,6 @@ theorem cometric_dualTrace_eq_orthoFrame_diag (g₀ : SmoothRiemannianMetric I M
                 ((smoothOrthoFrame (I := I) g₀ x i y : TangentSpace I y) : E), ← hcurry]
 
 
-set_option linter.unusedSectionVars false in
 private theorem tensor0SCovDeriv_finset_sum (g₀ : SmoothRiemannianMetric I M) (s : ℕ)
     {ι : Type*} (fs : Finset ι)
     (σ : ι → Cₛ^∞⟮I; Tensor0SBundle.Tensor0SModel s ℝ E,

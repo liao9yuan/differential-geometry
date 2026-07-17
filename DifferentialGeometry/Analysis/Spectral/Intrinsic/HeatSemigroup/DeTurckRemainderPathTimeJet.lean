@@ -158,7 +158,6 @@ private theorem deTurckRemainder_pathCoeff_timeContDiff
     refine ContDiffOn.congr ?_ (fun t ht => hraw t ht)
     exact contDiffOn_const.mul (hφ_smooth i).contDiffOn
 
-set_option linter.unusedSectionVars false in
 private theorem iteratedPartialSnd_contMDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ}
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)
@@ -468,7 +467,6 @@ private theorem reconSec_jointContMDiffOn
       (fun y : M => Tensor0SBundle.TensorRSSpace 0 2 I y) α) hsource).mpr
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
-set_option linter.unusedSectionVars false in
 private theorem vec_iteratedPartialSnd_contMDiffOn_Icc
     {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V] [FiniteDimensional ℝ V]
     (Vf : M → ℝ → V) {T : ℝ} (hT : 0 < T)
@@ -551,7 +549,6 @@ private theorem fiber_contDiffOn_Icc_recon
   rw [contMDiffOn_iff_contDiffOn] at hcomp
   exact hcomp
 
-set_option linter.unusedSectionVars false in
 private theorem hasDerivWithinAt_integral_param_Icc_recon
     [MeasurableSpace M] [OpensMeasurableSpace M]
     (μ : Measure M) [IsFiniteMeasure μ] (f : M → ℝ → ℝ) {T : ℝ} (hT : 0 < T)
@@ -738,7 +735,6 @@ private theorem partialSnd_set_contMDiffOn_Icc
       (fun q hq => hq.2) hUM
   simpa [inTangentCoordinates_model_space] using h_apply
 
-set_option linter.unusedSectionVars false in
 private theorem iteratedPartialSnd_set_contMDiffOn_Icc
     (f : M → ℝ → ℝ) {T : ℝ} (U : Set M)
     (hf : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) 𝓘(ℝ, ℝ) ∞ (fun p : M × ℝ => f p.1 p.2)

@@ -644,7 +644,6 @@ noncomputable def mcovariantDeriv_tensor0SWithin (s : ℕ)
         ((extChartAt I x₀).symm ⁻¹' u ∩ range I)
         (extChartAt I x₀ x₀))
 
-set_option linter.unusedSectionVars false in
 theorem mcovariantDeriv_tensor0SWithin_one_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -679,7 +678,6 @@ theorem mcovariantDeriv_tensor0SWithin_one_apply_basis
   rw [extChartAt_to_inv]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem mcovariantDeriv_tensor0SWithin_two_apply_basis
     {Idx : Type*} [Fintype Idx]
     (basis : Module.Basis Idx 𝕜 E)
@@ -718,7 +716,6 @@ theorem mcovariantDeriv_tensor0SWithin_two_apply_basis
   rw [extChartAt_to_inv]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem mcovariantDeriv_tensor0SWithin_apply_basis_slots
     {Idx : Type*} [Fintype Idx] {s : ℕ}
     (basis : Module.Basis Idx 𝕜 E)
@@ -863,7 +860,6 @@ noncomputable def nablaRSFun (r s : ℕ)
     (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
     (n := (⊤ : WithTop ℕ∞)) r s cov X T x
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem nabla0SFun_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -875,7 +871,6 @@ set_option linter.unusedSectionVars false in
         (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)
         (n := (⊤ : WithTop ℕ∞)) s cov X α x := rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem nablaRSFun_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -935,7 +930,6 @@ noncomputable def nablaRS (r s : ℕ)
   letI := tensorRSBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s
   ⟨nablaRSFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) r s cov X T, hreg⟩
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem nabla0S_apply (s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))
@@ -947,7 +941,6 @@ set_option linter.unusedSectionVars false in
     nabla0S (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α hreg x =
       nabla0SFun (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s cov X α x := rfl
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem nablaRS_apply (r s : ℕ)
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     (X : ContMDiffSection I E (⊤ : WithTop ℕ∞) (TangentSpace I : M → Type _))

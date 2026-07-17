@@ -63,7 +63,6 @@ private lemma euclidPartial_eq_zero_of_notMem_tsupport
   rw [euclidPartial_def, Filter.EventuallyEq.fderiv_eq hg_zero_evt,
     fderiv_const_apply, ContinuousLinearMap.zero_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma contDiff_of_contDiffOn_chartTarget
     (α : M)
     {g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -103,7 +102,6 @@ private lemma euclidPartial_contDiffOn_chartTarget
       (EuclideanSpace.single l 1)).contDiff.contDiffAt.comp x hfd
   exact hat.contDiffWithinAt
 
-set_option linter.unusedSectionVars false in
 private lemma contDiff_coeff_mul_test
     (α : M)
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}
@@ -117,7 +115,6 @@ private lemma contDiff_coeff_mul_test
   intro y hy
   rw [image_eq_zero_of_notMem_tsupport hy, mul_zero]
 
-set_option linter.unusedSectionVars false in
 private lemma contDiff_coeff_mul_partial_test
     (α : M) (l : Fin (Module.finrank ℝ E))
     {f g : EuclideanSpace ℝ (Fin (Module.finrank ℝ E)) → ℝ}

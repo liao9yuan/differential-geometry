@@ -31,7 +31,6 @@ private abbrev TensorSmooth (t : ℕ) (A : Π b : M, Tensor0SSpace t I b) : Prop
     (fun b => TotalSpace.mk' (Tensor0SModel t ℝ E)
       (E := fun z : M => Tensor0SSpace t I z) b (A b))
 
-set_option linter.unusedSectionVars false in
 private lemma scalarFn_covApply_tensor0SCov_zero
     (g : SmoothRiemannianMetric I M) (A : Π b : M, Tensor0SSpace 0 I b)
     (W : Π b : M, TangentSpace I b) (b : M) :

@@ -35,7 +35,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Bundle.continuousMultilinearMap.instNormedSpace
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 private lemma exists_W_and_constant_symmL
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α y₀ : M) (h_y₀_α : y₀ ∈ (chartAt H α).source) :
@@ -201,7 +200,6 @@ attribute [-instance] Bundle.continuousMultilinearMap.instNormedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem tensorRSChartFiberFromModel_opNorm_isBounded_on_compact_unconditional
     (g : SmoothRiemannianMetric I M)
     (r s : ℕ) (α : M) {K : Set M} (hK : IsCompact K)

@@ -233,7 +233,6 @@ omit [NeZero (Module.finrank ℝ E)] in
         chartChristoffel (I := I) g α k l m ((toEuclidean (E := E)).symm y) *
           chosenChartFirstWeakPartial (I := I) (M := M) g α hu_h m y := rfl
 
-set_option linter.unusedSectionVars false in
 omit [T2Space M] [SigmaCompactSpace M] [CompactSpace M] in
 private lemma chartChristoffel_toE_symm_continuousOn_chartTargetEuclid
     (g : SmoothRiemannianMetric I M) (α : M)

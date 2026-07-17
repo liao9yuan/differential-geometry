@@ -61,7 +61,6 @@ theorem ccTensorBilinSymm_zero_apply (g : SmoothRiemannianMetric I M)
   rw [h0, ccTensorBilinSymm_smul]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem gFibreOpBound_ccTensorBilinSymm_zero (g : SmoothRiemannianMetric I M) :
     metricCauchySchwarzBound (I := I) (M := M) g
       (ccTensorBilinSymm (I := I) g (0 : SmoothCcTensor g 0 2)) 0 := by

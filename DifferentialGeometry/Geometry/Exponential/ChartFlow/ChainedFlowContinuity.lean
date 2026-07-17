@@ -32,7 +32,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Integral.Measure
 
-set_option linter.unusedSectionVars false in
 theorem maximalGeodesic_continuousAt_zero
     (g : SmoothRiemannianMetric I M) (p : M) (v : TangentSpace I p) :
     ContinuousAt (maximalGeodesic (I := I) g p v) 0 := by

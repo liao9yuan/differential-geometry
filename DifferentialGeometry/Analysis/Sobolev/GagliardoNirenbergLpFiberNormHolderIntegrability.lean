@@ -51,7 +51,6 @@ theorem continuous_riemannianFiberNormSq_section
     ← Integral.L2.SmoothCcTensor.toFun_apply (I := I) (M := M) S x]
 
 
-set_option linter.unusedSectionVars false in
 private theorem memLp_riemannianFiberNormSq_rpow
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : Integral.L2.SmoothCcTensor g r s) (a : ℝ) (ha : 0 ≤ a) (p : ℝ≥0∞) :

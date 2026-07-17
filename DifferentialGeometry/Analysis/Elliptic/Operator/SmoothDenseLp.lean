@@ -115,7 +115,6 @@ omit [InnerProductSpace ℝ E] [Module.Finite ℝ E] [I.Boundaryless] [T2Space M
     φ ∈ smoothScalarSubalgebra (I := I) (M := M) g ↔
       ∃ f : SmoothScalar g, f.toContinuousMap = φ := Iff.rfl
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smooth_separating
     (x y : M) (hxy : x ≠ y) :
     ∃ f : M → ℝ, ContMDiff I 𝓘(ℝ, ℝ) ∞ f ∧ f x = 1 ∧ f y = 0 := by
@@ -136,7 +135,6 @@ private lemma exists_smooth_separating
     have hy_in_compl : y ∈ ({y}ᶜ : Set M) := hφ_tsupp hy_supp
     exact hy_in_compl rfl
 
-set_option linter.unusedSectionVars false in
 theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) :
     (smoothScalarSubalgebra (I := I) (M := M) g).SeparatesPoints := by
   intro x y hxy
@@ -147,7 +145,6 @@ theorem smoothScalarSubalgebra_separatesPoints (g : SmoothRiemannianMetric I M) 
   · rw [hfx, hfy]
     exact one_ne_zero
 
-set_option linter.unusedSectionVars false in
 theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
     (φ : C(M, ℝ)) {ε : ℝ} (hε : 0 < ε) :
     ∃ f : SmoothScalar g, ‖f.toContinuousMap - φ‖ < ε := by
@@ -160,7 +157,6 @@ theorem exists_smoothScalar_sup_close (g : SmoothRiemannianMetric I M)
   rw [hf]
   exact hg'_lt
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_two_le_of_norm_le
     (g : SmoothRiemannianMetric I M) (φ : M → ℝ) (_hφ : Continuous φ) (K : ℝ)
     (hK : ∀ x, ‖φ x‖ ≤ K) :
@@ -173,7 +169,6 @@ private lemma eLpNorm_two_le_of_norm_le
   exact MeasureTheory.eLpNorm_le_of_ae_bound (μ := riemannianVolumeMeasure (I := I) (M := M) g)
     (f := φ) (C := K) (Filter.Eventually.of_forall hK)
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_smooth_sub_bc_le
     (g : SmoothRiemannianMetric I M)
     (f : SmoothScalar g) (ψ : M →ᵇ ℝ) (δ : ℝ)
@@ -196,7 +191,6 @@ private lemma edist_toLp_eq_eLpNorm
   rw [Lp.edist_toLp_toLp]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smoothToLp_close_to_memLp
     (g : SmoothRiemannianMetric I M)
     [hμ_fin : IsFiniteMeasure (riemannianVolumeMeasure (I := I) (M := M) g)]
@@ -278,7 +272,6 @@ private lemma exists_smoothToLp_close_to_memLp
     _ ≤ ε / 2 + ε / 2 := add_le_add h1 h2_bound
     _ = ε := ENNReal.add_halves _
 
-set_option linter.unusedSectionVars false in
 theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
     DenseRange (smoothToLp (I := I) (M := M) g) := by
   classical
@@ -299,7 +292,6 @@ theorem denseRange_smoothToLp (g : SmoothRiemannianMetric I M) :
   conv_lhs => rw [show v = (Lp.memLp v).toLp (v : M → ℝ) from h_v_eq]
   exact hf
 
-set_option linter.unusedSectionVars false in
 theorem denseRange_H1ComplToLp (g : SmoothRiemannianMetric I M) :
     DenseRange (H1ComplToLp (I := I) (M := M) g) := by
   refine Dense.mono ?_ (denseRange_smoothToLp (I := I) (M := M) g)

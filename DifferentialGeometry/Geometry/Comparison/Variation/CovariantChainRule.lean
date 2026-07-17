@@ -23,7 +23,6 @@ open DifferentialGeometry.Integral.DivergenceTheorem
 open DifferentialGeometry.Geometry.Riemannian.Geodesic
 open DifferentialGeometry.Geometry.Riemannian.AlongCurve
 
-set_option linter.unusedSectionVars false in
 private lemma christoffelCorrection_eq_chartChristoffelContraction
     (g : SmoothRiemannianMetric I M) (α x : M) (Y : E) (v : TangentSpace I x) :
     christoffelCorrection (I := I) g α x Y v =
@@ -81,7 +80,6 @@ private lemma chartRepAt_restrict_eq_comp
   funext s
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma deriv_chartE_repr_comp_curve_eq
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (γ : ℝ → M) (X : ∀ y : M, TangentSpace I y) (r₀ : ℝ)
@@ -119,7 +117,6 @@ private lemma deriv_chartE_repr_comp_curve_eq
   rw [← heq.deriv_eq]
   exact hcomp_hd.deriv
 
-set_option linter.unusedSectionVars false in
 theorem covDerivAlong_restrict_eq_leviCivita
     [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M) (X : ∀ y : M, TangentSpace I y) (r₀ : ℝ)

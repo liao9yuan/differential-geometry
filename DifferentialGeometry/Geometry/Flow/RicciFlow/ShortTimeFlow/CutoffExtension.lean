@@ -158,7 +158,6 @@ theorem smul_tangentMap_global
 end CutoffExtensionAux
 
 open CutoffExtensionAux in
-set_option linter.unusedSectionVars false in
 theorem interior_field_global_cutoff_extension
     (X_DT : ℝ → ∀ x : M, TangentSpace I x) (T : ℝ)
     (hint : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞

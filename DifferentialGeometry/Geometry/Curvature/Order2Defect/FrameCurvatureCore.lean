@@ -113,7 +113,6 @@ theorem frozenFrameTrace_eq_rawTensorConnLap_fixedFrame
   refine Finset.sum_congr rfl (fun i _ => ?_)
   rw [tensorSecondCovDeriv_def]
 
-set_option linter.unusedSectionVars false in
 theorem frozenFrameTrace_eq_rawTensorConnLap_of_mem_nbhd
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Π b : M, TensorRSSpace r s I b)

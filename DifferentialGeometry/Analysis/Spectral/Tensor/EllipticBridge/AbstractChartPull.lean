@@ -154,7 +154,6 @@ theorem tensorL2Inner_chartSupported_chart_pull
   rw [tensorInnerPointwise_chart_eq_component_sum (I := I) (M := M)
     g r s Sg T α hy]
 
-set_option linter.unusedSectionVars false in
 private lemma tensorComponentEuclid_pouSmul_eq_tensorChartComponent
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (Sg : SmoothCcTensor g r s) (P : CompIdx E r s) :

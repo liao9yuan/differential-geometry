@@ -101,7 +101,6 @@ theorem memWkp_one {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le
     (by norm_num : (1 : ℕ) ≤ 4) h.memWkp_four
 
-set_option linter.unusedSectionVars false in
 theorem memLp_two {g : SmoothRiemannianMetric I M} {u : M → ℝ} {α : M}
     (h : ChartH4NonSmoothPOUWitness (I := I) (M := M) g u α) :
     MemLp

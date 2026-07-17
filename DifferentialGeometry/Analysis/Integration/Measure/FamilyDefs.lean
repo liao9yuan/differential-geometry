@@ -36,7 +36,6 @@ def riemannianMeasureFamily
     (g_fam : ℝ → SmoothRiemannianMetric I M) : ℝ → MeasureTheory.Measure M :=
   fun t => riemannianVolumeMeasure (I := I) (M := M) (g_fam t)
 
-set_option linter.unusedSectionVars false in
 lemma riemannianMeasureFamily_def
     [T2Space M] [SigmaCompactSpace M]
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ) :
@@ -66,7 +65,6 @@ structure MetricFamilyRegularAt
           deriv (fun s : ℝ => chartGramMatrix (I := I) (g_fam s) x₀ p.2 i j) p.1)
         (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)
 
-set_option linter.unusedSectionVars false in
 lemma MetricFamilyRegularAt.at_any
     {g_fam : ℝ → SmoothRiemannianMetric I M} {t : ℝ}
     (hreg : MetricFamilyRegularAt (I := I) g_fam t) (s : ℝ) :
@@ -94,7 +92,6 @@ def chartGramMatrixFamily
     ℝ → Matrix (Fin (Module.finrank ℝ E)) (Fin (Module.finrank ℝ E)) ℝ :=
   fun t => chartGramMatrix (I := I) (g_fam t) x₀ x
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma chartGramMatrixFamily_apply
     (g_fam : ℝ → SmoothRiemannianMetric I M) (x₀ x : M) (t : ℝ) :
     chartGramMatrixFamily (I := I) g_fam x₀ x t =
@@ -105,19 +102,16 @@ def chartDensityFamily
     ℝ → ℝ :=
   fun t => chartDensity (I := I) (g_fam t) x₀ x
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma chartDensityFamily_apply
     (g_fam : ℝ → SmoothRiemannianMetric I M) (x₀ x : M) (t : ℝ) :
     chartDensityFamily (I := I) g_fam x₀ x t =
       chartDensity (I := I) (g_fam t) x₀ x := rfl
 
-set_option linter.unusedSectionVars false in
 lemma chartDensityFamily_eq_sqrt_det
     (g_fam : ℝ → SmoothRiemannianMetric I M) (x₀ x : M) (t : ℝ) :
     chartDensityFamily (I := I) g_fam x₀ x t =
       Real.sqrt (chartGramMatrixFamily (I := I) g_fam x₀ x t).det := rfl
 
-set_option linter.unusedSectionVars false in
 theorem hasDerivAt_chartDensityFamily_eq_half_trace_inv_mul
     (g_fam : ℝ → SmoothRiemannianMetric I M) (x₀ : M) (t : ℝ) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet)
@@ -154,7 +148,6 @@ def traceTimeDerivMetric
     (Matrix.of fun i j =>
       deriv (fun s => chartGramMatrix (I := I) (g_fam s) x x i j) t))
 
-set_option linter.unusedSectionVars false in
 lemma traceTimeDerivMetric_eq
     (g_fam : ℝ → SmoothRiemannianMetric I M) (t : ℝ) (x : M) :
     traceTimeDerivMetric (I := I) g_fam t x =

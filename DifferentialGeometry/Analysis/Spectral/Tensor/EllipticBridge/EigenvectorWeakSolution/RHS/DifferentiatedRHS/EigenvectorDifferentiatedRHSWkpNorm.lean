@@ -39,7 +39,6 @@ private local instance : BorelSpace M := ⟨rfl⟩
 
 local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
-set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -165,7 +164,6 @@ private lemma wkpNorm_coef_mul_factor_le
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-set_option linter.unusedSectionVars false in
 private lemma memWkp_finset_sum
     {α : M} {K : ℕ} {ι : Type*} (s : Finset ι)
     {f : ι → EuclN → ℝ}
@@ -193,7 +191,6 @@ private lemma memWkp_finset_sum
       exact MemWkp.add (d := Module.finrank ℝ E)
         (by norm_num : (1 : ℝ≥0∞) ≤ 2) h_open hi hsum
 
-set_option linter.unusedSectionVars false in
 private lemma wkpNorm_sum_le_const_mul_aggregate
     {α : M} {K : ℕ} {ι : Type*} [Fintype ι] (F : ι → EuclN → ℝ)
     (A : ℝ≥0∞)
@@ -278,7 +275,6 @@ variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
 
 omit [CompleteSpace E] [CompactSpace M] [T2Space M] [SigmaCompactSpace M] in
 
-set_option linter.unusedSectionVars false in
 private lemma layerA_coeff_contDiffOn
     (a b : Fin (Module.finrank ℝ E)) :
     ContDiffOn ℝ (⊤ : ℕ∞)
@@ -306,7 +302,6 @@ end LayerBounds
 
 section MainBoundUniform
 
-set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le_uniform
     (α : M) (K : ℕ)
     {coef : EuclN → ℝ}
@@ -434,7 +429,6 @@ private lemma wkpNorm_coef_mul_factor_le_uniform
   rw [h_norm_eq]
   exact hKc_bd hfactor_memWkp
 
-set_option linter.unusedSectionVars false in
 private lemma wkpNorm_sum_le_const_mul_aggregate_uniform
     {α : M} {K : ℕ} {ι : Type*} [Fintype ι] {ν : Type*} (F : ι → ν → EuclN → ℝ)
     (A : ν → ℝ≥0∞)

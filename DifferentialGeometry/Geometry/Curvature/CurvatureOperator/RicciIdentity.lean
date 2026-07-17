@@ -485,7 +485,6 @@ theorem inner_riemannSec_gradFun_skew_symm [I.Boundaryless]
     (gradFun_contMDiff_total_section (I := I) g hf) hB
   linarith
 
-set_option linter.unusedSectionVars false in
 lemma vector_eq_iff_inner_eq
     (g : SmoothRiemannianMetric I M) (x : M)
     (LHS RHS : TangentSpace I x) :

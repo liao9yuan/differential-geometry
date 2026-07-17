@@ -74,7 +74,6 @@ private theorem orthoFrame_to_basis
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
     (g : SmoothRiemannianMetric I M) (x : M) (S : TensorRSSpace 2 2 I x)
     (e : Fin (Module.finrank ℝ E) → TangentSpace I x)
@@ -96,7 +95,6 @@ private theorem componentSlice_sq_sum_le_riemannianFiberNormSq
 
 attribute [-instance] Tensor0SBundle.tensorRSSpace_normedAddCommGroup
   Tensor0SBundle.tensorRSSpace_normedSpace in
-set_option linter.unusedSectionVars false in
 private theorem riemannianFiberNormSq_le_of_componentSlice_sq_sum_le
     (g₀ : SmoothRiemannianMetric I M) (x : M) (S : TensorRSSpace 2 2 I x) (C : ℝ)
     (_hC : 0 ≤ C)

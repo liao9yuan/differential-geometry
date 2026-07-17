@@ -113,7 +113,6 @@ private theorem pureRFrozenSlot0Sec_contMDiff
     (ϕ := fun x => (covGradBundleEquiv (I := I) (M := M) 0 m x).symm (W.toSection x))
     (v := fun x => B i x) hHom (hB i)
 
-set_option linter.unusedSectionVars false in
 private theorem pureRFrozenDirCLM_homSection_contMDiff
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     {B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b}
@@ -213,7 +212,6 @@ private noncomputable def pureRFrozenDiffOp
         castCcTensorRank g 0 (by omega : (r + 1) + p = r + (p + 1))
           (pureRFrozenDiffOp g B hB p (r + 1) (covGrad (I := I) (M := M) g 0 r W))
 
-set_option linter.unusedSectionVars false in
 private lemma rfns_eq_sum_fiberNormSqSummand_of_orthoFrame
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (S : TensorRSSpace 0 s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)
@@ -445,7 +443,6 @@ private lemma pureRFrozenEndoFib_slot0Curry_rfns_eq
   rw [Fin.cons_zero]
   congr 1
 
-set_option linter.unusedSectionVars false in
 private lemma covGradBundleEquiv_symm_reading_rfns_le
     (g : SmoothRiemannianMetric I M) (m : ℕ) (x : M)
     (T : TensorRSSpace 0 (m + 1) I x)
@@ -701,7 +698,6 @@ private lemma pureRSlot0BilinAt_frame_summand
         ((covGradBundleEquiv (I := I) (M := M) 0 m y).symm (W.toSection y) (B i y)) =
       pureRSlot0BilinAt (I := I) (M := M) g m (fun b : M => W.toSection b) y v (B i y) (B i y) := rfl
 
-set_option linter.unusedSectionVars false in
 private theorem pureRFrozenDirCLM_frame_independent
     (g : SmoothRiemannianMetric I M) (m : ℕ) (W : SmoothCcTensor g 0 (m + 1))
     {B C : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b} (y : M)
@@ -880,7 +876,6 @@ private theorem covGrad_pureRGenuineDiffOp_eq
           (covGrad (I := I) (M := M) g 0 r W))) + _
   rw [sub_add_cancel]
 
-set_option linter.unusedSectionVars false in
 private lemma pureRGenuineEndoFib_linear
     (g : SmoothRiemannianMetric I M) (m : ℕ) (c₁ c₂ : ℝ)
     (W₁ W₂ : SmoothCcTensor g 0 (m + 1)) (x : M) :
@@ -910,7 +905,6 @@ private lemma pureRGenuineEndoFib_linear
     ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.smul_apply, map_add, map_smul, map_smul]
 
-set_option linter.unusedSectionVars false in
 private lemma pureRGenuineEndoFib_local
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (W₁ W₂ : SmoothCcTensor g 0 (m + 1)) (x : M)
@@ -1003,7 +997,6 @@ private lemma pureRDirCLMTensor_apply
   rw [LinearMap.coe_toContinuousLinearMap', LinearMap.coe_mk, AddHom.coe_mk]
 
 
-set_option linter.unusedSectionVars false in
 private lemma pureRFrozenDirCLM_eq_pureRDirCLMTensor
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -1113,7 +1106,6 @@ private lemma covGradBundleEquiv_symm_apply_eq_curry
     ((show Tensor0SSpace 0 I x →L[ℝ] Tensor0SSpace (m + 1) I x from τ) d) w v']
 
 
-set_option linter.unusedSectionVars false in
 private lemma pureRDirCLMTensor_covGradEquiv_eval
     (g : SmoothRiemannianMetric I M) (m : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b)
@@ -1550,7 +1542,6 @@ private theorem covGrad_heq_congr_tw (g : SmoothRiemannianMetric I M) {a b : ℕ
   subst h
   rw [eq_of_heq hYZ]
 
-set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_covGrad_comm_heq_tw (g : SmoothRiemannianMetric I M)
     (s q : ℕ) (X : SmoothCcTensor g 0 s) :
     HEq (iteratedCovGrad g 0 (s + 1) q (covGrad (I := I) (M := M) g 0 s X))

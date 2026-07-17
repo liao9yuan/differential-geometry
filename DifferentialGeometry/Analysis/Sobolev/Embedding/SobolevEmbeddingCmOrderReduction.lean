@@ -32,7 +32,6 @@ omit [BoundarylessManifold I M] in
   unfold iteratedCovGradSobolevNorm
   simp
 
-set_option linter.unusedSectionVars false in
 private theorem toHs_norm_le_succ
     (g : SmoothRiemannianMetric I M) {r s : ℕ} (σ : ℕ)
     (T' : SmoothCcTensor g r s) :

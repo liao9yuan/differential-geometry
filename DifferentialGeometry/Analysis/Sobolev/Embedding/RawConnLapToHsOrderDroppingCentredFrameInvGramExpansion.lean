@@ -104,7 +104,6 @@ private lemma smoothOrthoFrame_eq_centredCoordMatrix_sum
   rw [centredOrthoFrameCoordMatrix_of_mem (I := I) (M := M) g α c i k hb]
   rw [chartBasisFamily_apply (I := I) α hb k]
 
-set_option linter.unusedSectionVars false in
 private lemma centredFrame_gram_expand
     (g : SmoothRiemannianMetric I M) (α c : M)
     {b : M} (hb : b ∈ (trivializationAt E (TangentSpace I) α).baseSet)
@@ -237,7 +236,6 @@ omit [NeZero (Module.finrank ℝ E)] in
   rw [LinearMap.comp_apply]
   simp [Module.Basis.equivFun]
 
-set_option linter.unusedSectionVars false in
 private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -259,7 +257,6 @@ private lemma centredOrthoFrameCoordMatrix_eq_clmAt_proj
   exact congrArg (fun (f : TangentSpace I b → E) => f
       (smoothOrthoFrame (I := I) g c i b)) h
 
-set_option linter.unusedSectionVars false in
 private lemma centredOrthoFrameCoordMatrix_contMDiffOn
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) :
@@ -329,7 +326,6 @@ private lemma centredOrthoFrameCoordMatrix_contMDiffOn
   intro b hb
   exact centredOrthoFrameCoordMatrix_eq_clmAt_proj (I := I) (M := M) g α c i k hb
 
-set_option linter.unusedSectionVars false in
 private lemma centredOrthoFrameCoordMatrix_mdiffAt
     (g : SmoothRiemannianMetric I M) (α c : M)
     (i k : Fin (Module.finrank ℝ E)) {b : M}
@@ -408,7 +404,6 @@ private lemma centred_covApply_chartBasisVecFiber_T₀_mdiffAt
     ((hHomSec_on.contMDiffAt (Filter.univ_mem))).mdifferentiableAt (by simp)
   exact MDifferentiableAt.clm_bundle_apply (b := id) hHomSec_at hX_at
 
-set_option linter.unusedSectionVars false in
 private lemma centred_covApply_frameVec_eq_coord_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α c : M)
     (T₀ : Integral.L2.SmoothCcTensor g r s)
@@ -787,7 +782,6 @@ private lemma tensorChartComponentRaw_rawConnLap_eq_chartProjCLM
   rw [rawTensorConnLapSmooth_toSection_apply (I := I) g r s T₀ b]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma rawConnLap_chartα_proj_eq_centredFrame_trace_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T₀ : Integral.L2.SmoothCcTensor g r s) (α : M)

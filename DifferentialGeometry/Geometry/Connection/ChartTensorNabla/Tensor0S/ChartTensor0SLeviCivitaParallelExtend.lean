@@ -27,7 +27,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) :
@@ -93,7 +92,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_pullback_eventuallyEq
         (chartTensor0SParallelExtend (I := I) 0 α b T₀) b' =
       e.continuousLinearMapAt ℝ b T₀ from hy_repr]
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_apply
     (α : M) {b b' : M} (T₀ : Tensor0SSpace 0 I b)
     (hb' : b' ∈ (trivializationAt (Tensor0SModel 0 ℝ E)
@@ -130,7 +128,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_apply
       (fun i : Fin 0 => Fin.elim0 i)
   rw [hrepr]
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) :
@@ -159,7 +156,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mdifferentiableAt
       (I := I) α (b := b) (b' := b') T₀ hb'_U
   exact (mdifferentiableAt_const).congr_of_eventuallyEq hev
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
     (α : M) {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
     (T₀ : Tensor0SSpace 0 I b) (v : TangentSpace I b) :
@@ -198,7 +194,6 @@ private lemma chartTensor0SParallelExtend_zero_scalar_mfderiv_eq_zero
   rw [hkey, hFderiv]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_zero
     (g : SmoothRiemannianMetric I M) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -266,7 +261,6 @@ theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend_succ
   rw [hintr]
   rw [zero_sub]
 
-set_option linter.unusedSectionVars false in
 theorem chartTensor0SCovariantDerivative_chartTensor0SParallelExtend
     (g : SmoothRiemannianMetric I M) (r : ℕ) (α : M)
     {b : M} (hb : b ∈ chartLeviCivitaGoodSet (I := I) α)

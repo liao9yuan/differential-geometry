@@ -122,7 +122,6 @@ private lemma hasDerivAt_fderiv_comm_at' (Φ : ℝ × E → ℝ) (s₀ : ℝ) (y
   rw [rhs_eq]
   exact h_sv'.congr_of_eventuallyEq lhs_eq
 
-set_option linter.unusedSectionVars false in
 private lemma hasDerivAt_partialDeriv_comm_at'
     (Φ : ℝ × E → ℝ) (p : Fin (Module.finrank ℝ E)) (s₀ : ℝ) (y₀ : E)
     (hΦ : ContDiffAt ℝ ∞ Φ (s₀, y₀)) :

@@ -24,7 +24,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section GramBridge
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartGramOnE_extChartAt_self (g : SmoothRiemannianMetric I M) (x : M)
     (k j : Fin (Module.finrank ℝ E)) :
@@ -32,7 +31,6 @@ lemma chartGramOnE_extChartAt_self (g : SmoothRiemannianMetric I M) (x : M)
       chartGramMatrix (I := I) g x x k j := by
   rw [chartGramOnE_def, extChartAt_to_inv]
 
-set_option linter.unusedSectionVars false in
 lemma sum_chartGram_mul_chartInvGram_self (g : SmoothRiemannianMetric I M) (x : M)
     (j l : Fin (Module.finrank ℝ E)) :
     ∑ k : Fin (Module.finrank ℝ E),
@@ -189,7 +187,6 @@ private lemma block_term_trace (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
   refine Finset.sum_congr rfl (fun b _ => ?_)
   ring
 
-set_option linter.unusedSectionVars false in
 private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (d m : Fin (Module.finrank ℝ E)) :
@@ -400,7 +397,6 @@ private lemma deTurckCorr_block_contraction (g : SmoothRiemannianMetric I M) (x 
           block_term_trace (I := I) g x ξ t d m]
         ring
 
-set_option linter.unusedSectionVars false in
 theorem deTurckCorrSymbolComp_eq_closedForm (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -482,7 +478,6 @@ end ClosedForm
 
 section Linearity
 
-set_option linter.unusedSectionVars false in
 theorem deTurckCorrSymbolComp_add (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t t' : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -495,7 +490,6 @@ theorem deTurckCorrSymbolComp_add (g g' : SmoothRiemannianMetric I M) (x : M) (�
     raisedFormContractionSnd_add, raisedFormContractionSnd_add, formMetricTrace_add]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem deTurckCorrSymbolComp_smul (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (a : ℝ) (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :
@@ -506,7 +500,6 @@ theorem deTurckCorrSymbolComp_smul (g g' : SmoothRiemannianMetric I M) (x : M) (
     raisedFormContractionSnd_smul, raisedFormContractionSnd_smul, formMetricTrace_smul]
   ring
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem deTurckCorrSymbolComp_zero (g g' : SmoothRiemannianMetric I M) (x : M)
     (ξ : E) (i j : Fin (Module.finrank ℝ E)) :
     deTurckCorrSymbolComp (I := I) g g' x ξ
@@ -519,7 +512,6 @@ end Linearity
 
 section Symmetry
 
-set_option linter.unusedSectionVars false in
 theorem deTurckCorrSymbolComp_symm (g g' : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i j : Fin (Module.finrank ℝ E)) :

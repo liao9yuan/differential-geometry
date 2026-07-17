@@ -43,7 +43,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 theorem sum_raw_α_sq_le_sum_raw_β_sq_on_pouInter
     (g : SmoothRiemannianMetric I M) (r s : ℕ) :
     ∃ K_swap : ℝ, 0 ≤ K_swap ∧

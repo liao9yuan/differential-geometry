@@ -175,7 +175,6 @@ private theorem hom_section_mdiff
     (x : M) : MDiffAtHom I M E_U U F V (τ : Π x : M, (U x →L[ℝ] V x)) x :=
   τ.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
 
-set_option linter.unusedSectionVars false in
 private theorem u_section_mdiff
     (Y : Cₛ^∞⟮I; E_U, U⟯) (x : M) :
     MDiffAtU I M E_U U (Y : Π x : M, U x) x :=
@@ -234,7 +233,6 @@ private theorem homBundleCovariantDerivativeGenFun_of_not_mdiff
   unfold homBundleCovariantDerivativeGenFun
   rw [dif_neg hτ]
 
-set_option linter.unusedSectionVars false in
 private theorem homBundleCovariantDerivativeGenFun_isCovOn
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V) :
@@ -318,7 +316,6 @@ noncomputable def homBundleCovariantDerivativeGen
   isCovariantDerivativeOnUniv :=
     homBundleCovariantDerivativeGenFun_isCovOn I M E_U U F V cov_U cov_V
 
-set_option linter.unusedSectionVars false in
 theorem homBundleCovariantDerivativeGen_apply_of_mdifferentiableAt
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -367,7 +364,6 @@ private theorem contMDiff_cov_U_apply_section
     rwa [← contMDiffOn_univ]
   exact ContMDiff.clm_bundle_apply (b := id) hcov_U_global Y.contMDiff
 
-set_option linter.unusedSectionVars false in
 private theorem homBundleCovGen_section_smooth
     (cov_U : CovariantDerivative I E_U U)
     [ContMDiffCovariantDerivative cov_U ∞]
@@ -457,7 +453,6 @@ noncomputable instance homBundleCovariantDerivativeGen_contMDiff
       exact homBundleCovGen_section_smooth I M E_U U F V cov_U cov_V τ_section Y
   }
 
-set_option linter.unusedSectionVars false in
 theorem homBundleCovariantDerivativeGen_apply
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)

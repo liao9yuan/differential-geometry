@@ -40,7 +40,6 @@ def deTurckLieWEndoSection (g₁ g_bg : SmoothRiemannianMetric I M) :
   toFun := fun x : M => deTurckLieWEndo (I := I) g₁ g_bg x
   contMDiff_toFun := deTurckLieWEndo_homSection_contMDiff (I := I) g₁ g_bg
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma deTurckLieWEndoSection_apply (g₁ g_bg : SmoothRiemannianMetric I M) (x : M) :
     deTurckLieWEndoSection (I := I) (M := M) g₁ g_bg x =
       deTurckLieWEndo (I := I) g₁ g_bg x := rfl
@@ -427,7 +426,6 @@ private lemma wAlphaB_unitModel_apply (g₀ g₁ g_bg : SmoothRiemannianMetric I
   simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.head_cons,
     Matrix.cons_val_two, Matrix.tail_cons]
 
-set_option linter.unusedSectionVars false in
 private lemma wEndo_eq_covDeriv_add_connDiff (g₀ g₁ g_bg : SmoothRiemannianMetric I M)
     (x : M) (w : TangentSpace I x) :
     deTurckLieWEndo (I := I) g₁ g_bg x w =

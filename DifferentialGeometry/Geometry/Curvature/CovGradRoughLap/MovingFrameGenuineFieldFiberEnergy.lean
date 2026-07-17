@@ -40,7 +40,6 @@ private lemma g_inner_self_nonneg
   · rw [hv0]; simp
   · exact (g.pos x v hv0).le
 
-set_option linter.unusedSectionVars false in
 private lemma riemannianFiberNormSq_eq_sum_toModel_sq
     (g : SmoothRiemannianMetric I M) (s : ℕ) (x : M) (Tr : TensorRSSpace 0 s I x)
     {n : ℕ} (e : Fin n → TangentSpace I x)

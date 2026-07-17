@@ -24,21 +24,18 @@ def Δ_g [I.Boundaryless] [T2Space M]
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) : M → ℝ :=
   divergence_g (I := I) g (grad_g (I := I) g hf)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma Δ_g_def [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (x : M) :
     Δ_g (I := I) g hf x =
       divergence_g (I := I) g (grad_g (I := I) g hf) x := rfl
 
-set_option linter.unusedSectionVars false in
 theorem Δ_g_contMDiff [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) {f : M → ℝ}
     (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) :
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (Δ_g (I := I) g hf) :=
   divergence_g_contMDiff (I := I) g (grad_g (I := I) g hf)
 
-set_option linter.unusedSectionVars false in
 lemma gradFun_add
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} {x : M}
@@ -70,7 +67,6 @@ lemma gradFun_add
   · rw [hd_f_def]; exact (inner_gradFun (I := I) g f x v).symm
   · rw [hd_h_def]; exact (inner_gradFun (I := I) g h x v).symm
 
-set_option linter.unusedSectionVars false in
 lemma grad_g_add_apply [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
@@ -83,7 +79,6 @@ lemma grad_g_add_apply [I.Boundaryless]
   exact gradFun_add (I := I) g (hf.mdifferentiable (by simp) x)
     (hh.mdifferentiable (by simp) x)
 
-set_option linter.unusedSectionVars false in
 theorem Δ_g_add [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M)
     {f h : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f) (hh : ContMDiff I 𝓘(ℝ, ℝ) ∞ h)
@@ -105,14 +100,12 @@ theorem Δ_g_add [I.Boundaryless] [T2Space M]
   rw [hsection_eq]
   exact divergence_g_add (I := I) g _ _ x
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma gradFun_const
     (g : SmoothRiemannianMetric I M) (c : ℝ) (x : M) :
     gradFun (I := I) g (fun _ : M => c) x = (0 : TangentSpace I x) := by
   apply gradFun_eq_zero_of_mfderiv_eq_zero
   exact mfderiv_const
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem Δ_g_const [I.Boundaryless] [T2Space M]
     (g : SmoothRiemannianMetric I M) (c : ℝ) (x : M) :
     Δ_g (I := I) g (contMDiff_const : ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun _ : M => c)) x = 0 := by

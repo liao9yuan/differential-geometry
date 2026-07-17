@@ -80,7 +80,6 @@ private lemma extChartAt_symm_mapsTo_baseSet (α : M) :
     (extChartAt I α).map_target hy
   rwa [extChartAt_source] at hsrc
 
-set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covChartMetricGram_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
@@ -132,7 +131,6 @@ theorem covChartMetricGram_contDiffOn
       exact hy
   exact hcomp_eucl
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α b : M)
     (X Y : TensorRSModel r s ℝ E) :
@@ -227,7 +225,6 @@ private lemma chartTensorInnerPointwise_rs_model_eq_component_sum
         rw [chartTensorInnerPointwise_rs_model_add_left,
           chartTensorInnerPointwise_rs_model_smul_left, ih]
 
-set_option linter.unusedSectionVars false in
 private lemma tensorInnerPointwise_toModel_eq_chart
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ (chartAt H α).source)
@@ -283,7 +280,6 @@ lemma tensorInnerPointwise_toModel_eq_component_sum
   refine Finset.sum_congr rfl (fun Q _ => ?_)
   rw [wrappedComponentProj_apply, wrappedComponentProj_apply]
 
-set_option linter.unusedSectionVars false in
 private lemma chartTensorRSCovariantDerivative_locality
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -390,7 +386,6 @@ lemma covPrincipalIntegrand_def
                       (tensorChartComponentRaw (I := I) (M := M)
                         g r s T α Q.1 Q.2)) y := rfl
 
-set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covPrincipalIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

@@ -71,7 +71,6 @@ lemma Δ_g_congr_funext
     divergence_g (I := I) g (grad_g (I := I) g hf₂) x
   rw [h]
 
-set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 lemma gradFun_neg
     (g : SmoothRiemannianMetric I M) {f : M → ℝ} {x : M}

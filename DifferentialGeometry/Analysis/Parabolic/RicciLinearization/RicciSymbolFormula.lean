@@ -24,7 +24,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
 section InvGramBridge
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 lemma chartInvGramOnE_extChartAt_self (g : SmoothRiemannianMetric I M) (x : M)
     (j l : Fin (Module.finrank ℝ E)) :
@@ -332,7 +331,6 @@ private lemma sum_term_two (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
           raisedFormContractionSnd (I := I) g x ξ t i := by
         rw [raisedFormContractionSnd_def, Finset.mul_sum]
 
-set_option linter.unusedSectionVars false in
 private lemma sum_term_three (g : SmoothRiemannianMetric I M) (x : M) (ξ : E)
     (t : TangentSpace I x →ₗ[ℝ] TangentSpace I x →ₗ[ℝ] ℝ)
     (i k : Fin (Module.finrank ℝ E)) :

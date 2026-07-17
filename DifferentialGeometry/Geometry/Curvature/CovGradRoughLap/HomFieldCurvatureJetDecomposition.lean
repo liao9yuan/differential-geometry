@@ -54,7 +54,6 @@ private lemma vecTail_cons' {n : ℕ} {α : Type*} (a : α) (v : Fin n → α) :
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 lemma toModel_sum_eval {a : ℕ} {x : M} {ι : Type*} (t : Finset ι)
     (f : ι → Tensor0SSpace a I x) (v : Fin a → TangentSpace I x) :
     Tensor0SSpace.toModel (∑ i ∈ t, f i) v = ∑ i ∈ t, Tensor0SSpace.toModel (f i) v := by
@@ -396,7 +395,6 @@ private lemma tangentBilinFlip_apply {r t : ℕ} {x : M}
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 private lemma tangentBilinFlip_add {r t : ℕ} {x : M}
     (P P' : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TensorRSSpace r t I x) :
     tangentBilinFlip (I := I) (M := M) (P + P') =
@@ -412,7 +410,6 @@ private lemma tangentBilinFlip_add {r t : ℕ} {x : M}
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 private lemma tangentBilinFlip_smul {r t : ℕ} {x : M} (c : ℝ)
     (P : TangentSpace I x →L[ℝ] TangentSpace I x →L[ℝ] TensorRSSpace r t I x) :
     tangentBilinFlip (I := I) (M := M) (c • P) =
@@ -657,7 +654,6 @@ private noncomputable def metricDoubleTraceFib (g : SmoothRiemannianMetric I M) 
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 private lemma metricDoubleTraceFib_apply (g : SmoothRiemannianMetric I M) (r t : ℕ) (x : M)
     (V : TensorRSSpace r (t + 2) I x) :
     metricDoubleTraceFib (I := I) (M := M) g r t x V =
@@ -698,7 +694,6 @@ private noncomputable def metricDoubleTraceFibFixedFrame (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 private lemma metricDoubleTraceFibFixedFrame_apply (r t : ℕ)
     (B : Fin (Module.finrank ℝ E) → Π b : M, TangentSpace I b) (x : M)
     (V : TensorRSSpace r (t + 2) I x) :
@@ -716,7 +711,6 @@ private lemma metricDoubleTraceFibFixedFrame_apply (r t : ℕ)
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 private lemma metricDoubleTraceFib_eq_fixedFrame_moving (g : SmoothRiemannianMetric I M) (r t : ℕ)
     (x : M) :
     metricDoubleTraceFib (I := I) (M := M) g r t x =

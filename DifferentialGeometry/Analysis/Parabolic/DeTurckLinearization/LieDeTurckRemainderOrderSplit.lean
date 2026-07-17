@@ -21,7 +21,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
 variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] [I.Boundaryless] in
 private lemma partial_chartGramOnE_differentiableAt'
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -86,7 +85,6 @@ private lemma christoffelFirstOrderCorr_differentiableAt'
     · exact partial_chartGramOnE_differentiableAt' (I := I) g₀ α j l i hy
     · exact partial_chartGramOnE_differentiableAt' (I := I) g₀ α l i j hy
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_invGramCoeff_split
     (g₀ : SmoothRiemannianMetric I M) (α : M) (h : ChartMetricPerturbation E)
     (m a b : Fin (Module.finrank ℝ E)) {y : E}
@@ -220,7 +218,6 @@ def deTurckVFFirstOrderCorrDeriv0 (g₀ g_bg : SmoothRiemannianMetric I M) (α :
                   chartInvGramOnE (I := I) g₀ α q l y)) *
               partialDeriv (E := E) m (gramBracket (I := I) g₀ α a b l) y)))
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_christoffelFirstOrderCorr_split
     (g₀ : SmoothRiemannianMetric I M) (α : M) (h : ChartMetricPerturbation E)
     (m a b k : Fin (Module.finrank ℝ E)) {y : E}
@@ -778,7 +775,6 @@ private lemma christoffelFirstOrderCorrRaw_differentiableAt'
       (partial_chartGramOnE_differentiableAt' (I := I) g₀ α b l a hy)).sub
       (partial_chartGramOnE_differentiableAt' (I := I) g₀ α l a b hy)
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_invGramCoeff_splitRaw
     (g₀ : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
@@ -871,7 +867,6 @@ private lemma partialDeriv_invGramCoeff_splitRaw
     ring
   rw [hsplit]; ring
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_christoffelFirstOrderCorrRaw_split
     (g₀ : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
@@ -1125,7 +1120,6 @@ theorem partialDeriv_deTurckVFFirstOrderCorrRaw
   refine Finset.sum_congr rfl (fun b _ => ?_)
   exact partialDeriv_deTurckVFFirstOrderCorrRaw_cell (I := I) g₀ g_bg α f m k a b hy hf
 
-set_option linter.unusedSectionVars false in
 private lemma chartLinearizedChristoffelPrincipalRaw_differentiableAt'
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
@@ -1143,7 +1137,6 @@ private lemma chartLinearizedChristoffelPrincipalRaw_differentiableAt'
     (chartInvGramOnE_differentiableAt_interior (I := I) g α k l hy) ?_
   exact ((hf1 a l b).add (hf1 b l a)).sub (hf1 l a b)
 
-set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartLinearizedChristoffelPrincipalRaw
     (g : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
@@ -1207,7 +1200,6 @@ lemma partialDeriv_chartLinearizedChristoffelPrincipalRaw
           (hf1 a l b) (hf1 b l a)]
   rw [hSderiv, hS]
 
-set_option linter.unusedSectionVars false in
 private lemma chartLinearizedDeTurckVFPrincipalRaw_differentiableAt'
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)
@@ -1224,7 +1216,6 @@ private lemma chartLinearizedDeTurckVFPrincipalRaw_differentiableAt'
   exact (chartInvGramOnE_differentiableAt_interior (I := I) g α a b hy).mul
     (chartLinearizedChristoffelPrincipalRaw_differentiableAt' (I := I) g α f a b k hy hf1)
 
-set_option linter.unusedSectionVars false in
 lemma partialDeriv_chartLinearizedDeTurckVFPrincipalRaw
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (f : Fin (Module.finrank ℝ E) → Fin (Module.finrank ℝ E) → E → ℝ)

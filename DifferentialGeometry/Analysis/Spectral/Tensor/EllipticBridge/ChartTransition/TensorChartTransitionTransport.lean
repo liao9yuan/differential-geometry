@@ -213,7 +213,6 @@ private lemma cutoffComponentScalar_eq_pou_transport_sum
       sum_chartAtlasPOU_transportChartCenters_eq_one (I := I) (M := M) α hχα,
       one_mul]
 
-set_option linter.unusedSectionVars false in
 lemma chartPushedRaw_finsetSum
     (α : M) {ι : Type*} (s : Finset ι) (F : ι → M → ℝ) (y : EuclN) :
     chartPushedRaw I α (fun x : M => ∑ a ∈ s, F a x) y =

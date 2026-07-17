@@ -30,7 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -75,7 +74,6 @@ theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-set_option linter.unusedSectionVars false in
 private theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary'
     [T2Space M] [SigmaCompactSpace M]
     (g : SmoothRiemannianMetric I M)
@@ -118,7 +116,6 @@ private theorem integral_inner_grad_eq_neg_integral_smul_laplacian_with_boundary
     integral_congr_ae (Filter.Eventually.of_forall hRHS_eq)
   rw [← hLHS_int, h_ibp, hRHS_int]
 
-set_option linter.unusedSectionVars false in
 theorem integral_smul_laplacian_sub_eq_zero_with_boundary
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     (g : SmoothRiemannianMetric I M)

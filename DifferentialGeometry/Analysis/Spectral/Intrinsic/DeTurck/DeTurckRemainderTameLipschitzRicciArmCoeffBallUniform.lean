@@ -172,7 +172,6 @@ lemma unitModel_appCc_smul_left_apply_tame (g : SmoothRiemannianMetric I M) (r :
       c * unitModel (I := I) (M := M) g 2 (operatorFieldApply (I := I) (M := M) g r 2 Φ W) x v := by
   rw [appCc_smul_left_tame, unitModel_smul_tame, ContinuousMultilinearMap.smul_apply, smul_eq_mul]
 
-set_option linter.unusedSectionVars false in
 lemma unitModel_add2_apply_tame (g₀ : SmoothRiemannianMetric I M)
     (S S' : SmoothCcTensor g₀ 0 2) (x : M) (v : Fin 2 → TangentSpace I x) :
     unitModel (I := I) (M := M) g₀ 2 (S + S') x v =
@@ -631,7 +630,6 @@ private theorem traceHessianCoeff_realizedFam_perOrder_rfns_ballUniform
   DifferentialGeometry.Integral.Connection.traceHessianCoeff_realizedFam_jetL2_perOrder_ballUniform
     (I := I) (M := M) g₀ a ha_super hR hδ₀
 
-set_option linter.unusedSectionVars false in
 private lemma normSq_iteratedCovGrad_add_le_tame
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (A B : SmoothCcTensor g₀ r s) (PA PB : ℝ)
@@ -647,7 +645,6 @@ private lemma normSq_iteratedCovGrad_add_le_tame
     norm_nonneg (iteratedCovGrad (I := I) g₀ r s i A + iteratedCovGrad (I := I) g₀ r s i B),
     sq_nonneg (‖iteratedCovGrad (I := I) g₀ r s i A‖ - ‖iteratedCovGrad (I := I) g₀ r s i B‖)]
 
-set_option linter.unusedSectionVars false in
 private theorem iteratedCovGrad_smul_tame (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) =

@@ -45,7 +45,6 @@ local notation "EuclN" => EuclideanSpace ℝ (Fin (Module.finrank ℝ E))
 
 variable [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 theorem MemWkp_extend_via_cutoff_poly
     (k : ℕ)
     {Ω Ω' K : Set EuclN}
@@ -181,7 +180,6 @@ private theorem chosenMthMixed_memWkp_of_chartH_at_all_multi_indices
   rw [h_succ_eq] at h_next
   exact h_next
 
-set_option linter.unusedSectionVars false in
 theorem chartPushed_memWkp_m_plus_two_of_mthMixed_chart_H_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) (m : ℕ)

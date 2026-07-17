@@ -35,7 +35,6 @@ variable {H : Type*} [TopologicalSpace H] {I : ModelWithCorners ℝ E H}
 variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M]
   [CompactSpace M] [I.Boundaryless] [BoundarylessManifold I M] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 private theorem chartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -99,7 +98,6 @@ private theorem chartRepr_jointContMDiffOn
       ((F p.2).toSection p.1) = _
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
-set_option linter.unusedSectionVars false in
 private theorem chartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (F : ℝ → SmoothCcTensor g₀ r s)
@@ -589,7 +587,6 @@ theorem covGrad_step_jointContMDiffOn
 
 section PathIntegralComm
 
-set_option linter.unusedSectionVars false in
 private theorem toModel_section_intervalIntegrable
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -603,7 +600,6 @@ private theorem toModel_section_intervalIntegrable
       (fun t : ℝ => TensorRSSpace.toModel ((Φ t).toSection x)) volume 0 1 :=
   ((jointContMDiff_toModel_continuous_slice (I := I) g₀ r s Φ S hjoint x).mono hSI).intervalIntegrable
 
-set_option linter.unusedSectionVars false in
 private theorem chartRepr_pathIntegralCoeffField_eq
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
@@ -857,7 +853,6 @@ private theorem hasFDerivAt_chartRepr_pathIntegral
   rw [hLHSeq] at hkey
   exact hkey
 
-set_option linter.unusedSectionVars false in
 private theorem chartE_repr_slice_continuousOn
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -885,7 +880,6 @@ private theorem chartE_repr_slice_continuousOn
     ContinuousLinearMap.comp_apply]
   congr 1
 
-set_option linter.unusedSectionVars false in
 private theorem intervalIntegrable_slotInput
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)
@@ -925,7 +919,6 @@ private theorem intervalIntegrable_slotInput
       DifferentialGeometry.Integral.Connection.tensorRSChartE_section_repr_apply]
   exact hcont.intervalIntegrable
 
-set_option linter.unusedSectionVars false in
 private theorem intervalIntegrable_slotOutput
     (g₀ : SmoothRiemannianMetric I M) (r s : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ)

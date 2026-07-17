@@ -69,7 +69,6 @@ section ChartPushLiftAtZero
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 lemma chartPushLift_zero_of_init
     {f : ℝ → TangentBundle I M} {p : M} {v : E}
     (hf0 : f 0 = (⟨p, v⟩ : TangentBundle I M)) :
@@ -245,7 +244,6 @@ section ManifoldProjection
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 lemma rescaled_chartPushLift_fst
     {f_v : ℝ → TangentBundle I M} {p : M} {a : ℝ} {s : ℝ}
     (hf_v0_proj : (f_v 0).proj = p)

@@ -48,7 +48,6 @@ private lemma velocity_enorm_le_of_speedSq_le
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 private lemma isGeodesicOn_hreg_record
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     [IsContinuousRiemannianBundle E (fun (x : M) ↦ TangentSpace I x)]
@@ -1315,7 +1314,6 @@ private theorem geodesic_eventuallyEq_of_initial_local
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 
-set_option linter.unusedSectionVars false in
 theorem isGeodesic_eq_of_initial
     [PseudoEMetricSpace M] [IsRiemannianManifold I M] [CompleteSpace M]
     (g : SmoothRiemannianMetric I M) {Γ₁ Γ₂ : ℝ → M}

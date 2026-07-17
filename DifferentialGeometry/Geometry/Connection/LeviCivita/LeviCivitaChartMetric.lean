@@ -86,7 +86,6 @@ private lemma differentiableAt_repr_comp
   have hclm : DifferentiableAt ℝ ci (f y) := ci.differentiableAt
   exact hclm.comp y hf
 
-set_option linter.unusedSectionVars false in
 lemma chartGramOnE_differentiableAt_int
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E))
@@ -133,7 +132,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] in
       ((chartModelBasis E).repr
           (chartE_section_repr (I := I) α Y ((extChartAt I α).symm y))) i := rfl
 
-set_option linter.unusedSectionVars false in
 private lemma chartReprComp_differentiableAt
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -147,7 +145,6 @@ private lemma chartReprComp_differentiableAt
     differentiableAt_chartE_pullback_of_MDiff (I := I) α hx hY
   exact differentiableAt_repr_comp hY_pull i
 
-set_option linter.unusedSectionVars false in
 private lemma chartReprComp_fderiv_apply
     (α : M) (Y : Π x : M, TangentSpace I x) {x : M}
     (hx : x ∈ chartLeviCivitaGoodSet (I := I) α)
@@ -381,7 +378,6 @@ private lemma fderiv_chartGramOnE_apply_eq_partialDeriv_sum
   rw [map_smul, smul_eq_mul]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma christoffelCorrection_repr_apply
     (g : SmoothRiemannianMetric I M) (α : M) (x : M) (Y : E)
     (v : TangentSpace I x) (i : Fin (Module.finrank ℝ E)) :

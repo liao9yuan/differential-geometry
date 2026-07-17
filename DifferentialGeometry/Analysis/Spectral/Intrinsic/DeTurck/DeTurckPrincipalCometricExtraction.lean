@@ -326,7 +326,6 @@ lemma deTurckPrincipalCometricCoeff_eq_appCcRS_doubleTrace_slotInsertEndo
   rfl
 
 
-set_option linter.unusedSectionVars false in
 private lemma cometricLmodel_covOf_g0flat_eq (g₀ : SmoothRiemannianMetric I M) (x : M)
     (v : TangentSpace I x) :
     cometricLmodel (I := I) g₀ x
@@ -636,7 +635,6 @@ theorem riemannianFiberNormSq_deTurckPrincipalCometricArm_le
   exact mul_le_mul_of_nonneg_right hcoeff hW_nn
 
 
-set_option linter.unusedSectionVars false in
 private lemma iteratedCovGrad_smul_local (g : SmoothRiemannianMetric I M) (r s j : ℕ)
     (c : ℝ) (w : SmoothCcTensor g r s) :
     iteratedCovGrad (I := I) g r s j (c • w) = c • iteratedCovGrad (I := I) g r s j w := by

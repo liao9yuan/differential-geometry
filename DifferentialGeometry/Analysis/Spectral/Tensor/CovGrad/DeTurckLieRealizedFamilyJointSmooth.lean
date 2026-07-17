@@ -138,7 +138,6 @@ theorem jointTotalSpace0S_smulFun_local {d : ℕ} {S : Set ℝ}
   · exact (e.linear ℝ (by rw [he, ← hx₀]; exact mem_baseSet_trivializationAt _ _ x₀)).map_smul
       (f p₀.2) (A p₀)
 
-set_option linter.unusedSectionVars false in
 theorem jointTensor0SProd_local {p q : ℕ} {S : Set ℝ}
     (A : ∀ pp : M × ℝ, Tensor0SBundle.Tensor0SSpace p I pp.1)
     (B : ∀ pp : M × ℝ, Tensor0SBundle.Tensor0SSpace q I pp.1)
@@ -248,7 +247,6 @@ private theorem realizedFam_chartDeTurckVFComp_jointContMDiffOn
     exact hm
   exact (hentryM.comp_contMDiffWithinAt p hmoveAt).congr (fun q _ => rfl) rfl
 
-set_option linter.unusedSectionVars false in
 private theorem deTurckVFChartLocal_realizedFam_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ : metricCauchySchwarzBound (I := I) (M := M) g₀ (ccTensorBilinSymm (I := I) g₀ T) δ)

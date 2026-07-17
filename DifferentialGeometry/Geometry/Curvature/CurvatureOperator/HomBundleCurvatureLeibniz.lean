@@ -46,7 +46,6 @@ omit [TopologicalSpace M] [SigmaCompactSpace M] [T2Space M] [∀ (x : M), IsTopo
 local notation "covHom" =>
   homBundleCovariantDerivativeGen I M E_U U F V
 
-set_option linter.unusedSectionVars false in
 lemma covApply_cov_V_pairedSection_eq
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -78,7 +77,6 @@ lemma covApply_cov_V_pairedSection_eq
   rw [hkey]
   abel
 
-set_option linter.unusedSectionVars false in
 lemma cov_V_toFun_pairedSection_apply
     (cov_U : CovariantDerivative I E_U U)
     (cov_V : CovariantDerivative I F V)
@@ -108,7 +106,6 @@ lemma cov_V_toFun_pairedSection_apply
       cov_V.toFun (fun y => σ y (Y y)) x v from rfl, hkey]
   abel
 
-set_option linter.unusedSectionVars false in
 lemma cov_V_toFun_covApply_pairedSection_apply
     (cov_U : CovariantDerivative I E_U U) [ContMDiffCovariantDerivative cov_U ∞]
     (cov_V : CovariantDerivative I F V) [ContMDiffCovariantDerivative cov_V ∞]

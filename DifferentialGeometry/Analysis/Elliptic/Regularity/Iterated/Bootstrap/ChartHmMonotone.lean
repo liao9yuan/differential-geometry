@@ -83,7 +83,6 @@ theorem chartPushed_memWkp_j_of_chartSideH2kBridge_at
   DifferentialGeometry.Analysis.Sobolev.Euclidean.MemWkp.le_of_le hjk
     (h_bridge α)
 
-set_option linter.unusedSectionVars false in
 theorem chosenMthMixed_memWkp_two_two_of_chartSideH2kBridge
     (g : SmoothRiemannianMetric I M) (α : M) {k m : ℕ} (hm : m + 2 ≤ 2 * k)
     {u_h : H1Compl (I := I) (M := M) g}

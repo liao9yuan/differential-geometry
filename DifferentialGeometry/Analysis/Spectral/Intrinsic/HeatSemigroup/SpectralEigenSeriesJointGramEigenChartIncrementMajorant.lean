@@ -151,7 +151,6 @@ private def eigenSpatialFactor
       (chartBasisVecFiber (I := I) α j' ((extChartAt I α).symm y))
 
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral (eigenvectorSmooth tensorChartComponentRaw) in
-set_option linter.unusedSectionVars false in
 private lemma eigenSpatialFactor_eqOn
     (g : SmoothRiemannianMetric I M) (α : M) (i' j' : Fin (Module.finrank ℝ E))
     (i : TensorEigenIdx (I := I) (M := M) g 0 2) :

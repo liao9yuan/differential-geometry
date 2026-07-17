@@ -225,7 +225,6 @@ private lemma exists_chartPouEucl_fderiv_uniform_bound (α : M) :
   intro y
   exact le_trans (hK_bound y) (le_max_left _ _)
 
-set_option linter.unusedSectionVars false in
 lemma tensorChartComponentRaw_symm_contDiffOn_target
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -296,7 +295,6 @@ lemma tensorChartComponentRaw_symm_differentiableAt
     (hcd _ he).differentiableWithinAt (by norm_num)
   exact hwithin.differentiableAt (h_open.mem_nhds he)
 
-set_option linter.unusedSectionVars false in
 private lemma tensorChartComp_eq_pou_mul_raw_pulled
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)
@@ -399,7 +397,6 @@ lemma fderiv_pou_mul_raw_symm_eq_fderiv_tensorChartComp_toEuclidean
   (pou_mul_raw_symm_eventuallyEq_tensorChartComp_toEuclidean
     (I := I) (M := M) g r s T α Idx Jdx he).fderiv_eq
 
-set_option linter.unusedSectionVars false in
 lemma fderiv_tensorChartComp_toEuclidean
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : SmoothCcTensor g r s) (α : M)

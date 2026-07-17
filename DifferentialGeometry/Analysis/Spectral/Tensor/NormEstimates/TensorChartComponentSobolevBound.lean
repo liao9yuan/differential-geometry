@@ -208,7 +208,6 @@ private theorem tensorChartComponentScalar_eLpNorm_le_smoothCcTensor
       (I := I) (M := M) g r s hα S Idx Jdx]
     exact zero_le _
 
-set_option linter.unusedSectionVars false in
 private lemma tensorL2Norm_eq_norm_toCcTensor
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensorH1 g r s) :
@@ -339,7 +338,6 @@ private lemma sqrt_g_inner_gradFun_eq_zero_of_scalar_zero
     (0 : M → ℝ) b
   simp
 
-set_option linter.unusedSectionVars false in
 private lemma eLpNorm_sqrt_g_inner_gradFun_eq_zero_of_inactive
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     {α : M} (hα : α ∉ chartAtlasPOU_activeFinset I M)

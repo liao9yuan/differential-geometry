@@ -45,7 +45,6 @@ private lemma interior_toModel_eval (s : ℕ) (x : M) (v : TangentSpace I x)
   rw [h1]
   rfl
 
-set_option linter.unusedSectionVars false in
 private lemma interior_product_eq_tensor0S_curry (s : ℕ) (x : M) (v : TangentSpace I x)
     (D : Tensor0SSpace (s + 1) I x) :
     Tensor0SBundle.interior_product (𝕜 := ℝ) (I := I) s x v D =
@@ -57,7 +56,6 @@ private lemma interior_product_eq_tensor0S_curry (s : ℕ) (x : M) (v : TangentS
   rw [TensorMultilinear.tensor0S_curry_apply_eval (I := I) (M := M)
     (T := D) (v0 := (show E from v)) (vs := fun k => (show E from w k))]
 
-set_option linter.unusedSectionVars false in
 private lemma covDeriv_one_eq_dualToCotangent_cotangentCov
     (g₀ : SmoothRiemannianMetric I M)
     (w : ContMDiffSection I (Tensor0SModel 1 ℝ E) ∞ (fun y : M => Tensor0SSpace 1 I y))

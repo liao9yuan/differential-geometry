@@ -155,7 +155,6 @@ lemma bal_sqrt_mono_pair {x' x y' y : ℝ} (hx' : 0 ≤ x') (hy' : 0 ≤ y')
   have h2 : y' ^ 2 ≤ y ^ 2 := by nlinarith
   linarith
 
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 private lemma bal_h1_sum (g₀ : SmoothRiemannianMetric I M) (n : ℕ)
     (F : ℕ → SmoothCcTensor g₀ 0 2) :

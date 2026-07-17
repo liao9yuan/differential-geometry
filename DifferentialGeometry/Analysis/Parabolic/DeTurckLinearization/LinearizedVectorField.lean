@@ -65,7 +65,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
           rw [chartLinearizedChristoffelPrincipal_zero, mul_zero]
     _ = 0 := by simp
 
-set_option linter.unusedSectionVars false in
 theorem chartLinearizedDeTurckVFPrincipal_add
     (g g' : SmoothRiemannianMetric I M) (α : M)
     (h₁ h₂ : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) :
@@ -82,7 +81,6 @@ theorem chartLinearizedDeTurckVFPrincipal_add
   rw [chartLinearizedChristoffelPrincipal_add]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartLinearizedDeTurckVFPrincipal_smul
     (g g' : SmoothRiemannianMetric I M) (α : M) (c : ℝ)
     (h : ChartMetricPerturbation E) (k : Fin (Module.finrank ℝ E)) (y : E) :

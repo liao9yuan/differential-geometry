@@ -73,7 +73,6 @@ lemma norm_iteratedCovGrad_iteratedCovGrad_eq (g : SmoothRiemannianMetric I M) (
         (iteratedCovGrad (I := I) g r s j Ψ)‖ -
       ‖iteratedCovGrad (I := I) g r s (j + i) Ψ‖)]
 
-set_option linter.unusedSectionVars false in
 private lemma bal_icg_zero_tensor (g : SmoothRiemannianMetric I M) (r s j : ℕ) :
     iteratedCovGrad (I := I) g r s j (0 : SmoothCcTensor g r s) = 0 := by
   have h := iteratedCovGrad_sub (I := I) (M := M) g r s j
@@ -523,7 +522,6 @@ lemma exists_iteratedCovGrad_rawTensorConnLapSmooth_window_le (g : SmoothRiemann
       ≤ (1 + 2 * cG b) * Sb + KT b 0 * Sb := add_le_add hpiece1 hpiece2
     _ = (1 + 2 * cG b + KT b 0) * Sb := by ring
 
-set_option linter.unusedSectionVars false in
 private lemma bal_iter_one (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) :
     oneMinusConnLapSmoothIter (I := I) g r s 1 S =

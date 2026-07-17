@@ -115,7 +115,6 @@ theorem tensorCovDerivPointwiseInner_chart_eq
   refine Finset.sum_congr rfl (fun l _ => ?_)
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartPushedRaw_tensorChartComponentRaw_contDiffOn
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -384,7 +383,6 @@ theorem covLowerOrderIntegrand_eqOn
   rw [h]
   ring
 
-set_option linter.unusedSectionVars false in
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 theorem covLowerOrderIntegrand_symm
     (g : SmoothRiemannianMetric I M) (r s : ℕ)

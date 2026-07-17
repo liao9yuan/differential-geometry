@@ -32,7 +32,6 @@ section ChartTargetInterior
 
 variable [I.Boundaryless]
 
-set_option linter.unusedSectionVars false in
 private lemma extChartAt_self_mem_interior_target (p : M) :
     extChartAt I p p ∈ interior (extChartAt I p).target := by
   have hsrc : p ∈ (extChartAt I p).source :=
@@ -47,7 +46,6 @@ section ZeroSectionWitness
 
 variable [I.Boundaryless] [CompleteSpace E]
 
-set_option linter.unusedSectionVars false in
 theorem exists_chartFlow_combined_witness
     (g : SmoothRiemannianMetric I M) (p : M) :
     ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match : ℝ),
@@ -118,7 +116,6 @@ section ReductionToMatch
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-set_option linter.unusedSectionVars false in
 theorem hasChartFlowGeodesicMatchData_of_match
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : ∃ (Φ : (E × E) × ℝ → E × E) (ρ T T_match t' ρ' : ℝ),
@@ -170,7 +167,6 @@ section Headline
 variable [I.Boundaryless] [CompleteSpace E]
   [T2Space (TangentBundle I M)]
 
-set_option linter.unusedSectionVars false in
 theorem expMap_contMDiffAt_zero_of_chartFlowGeodesicMatchData
     (g : SmoothRiemannianMetric I M) (p : M)
     (h : HasChartFlowGeodesicMatchData (I := I) g p) :

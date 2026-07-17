@@ -17,7 +17,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedSectionVars false in
 private lemma chartInvGramOnE_symm
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j : Fin (Module.finrank ℝ E)) (y : E) :
@@ -35,7 +34,6 @@ private lemma chartInvGramOnE_symm
       (chartGramMatrix (I := I) g α z)⁻¹ j i from rfl] at hstar
   exact hstar.symm
 
-set_option linter.unusedSectionVars false in
 private lemma sum_chartInvGramOnE_chartGramOnE_left
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -66,7 +64,6 @@ private lemma sum_chartInvGramOnE_chartGramOnE_left
   · rw [if_neg hmj]
     exact Matrix.one_apply_ne hmj
 
-set_option linter.unusedSectionVars false in
 private lemma sum_chartInvGramOnE_chartGramOnE_right
     (g : SmoothRiemannianMetric I M) (α : M) {y : E}
     (hy : y ∈ (extChartAt I α).target)
@@ -86,7 +83,6 @@ private lemma sum_chartInvGramOnE_chartGramOnE_right
         rw [chartInvGramOnE_symm (I := I) g α l m y])]
   exact sum_chartInvGramOnE_chartGramOnE_left (I := I) g α hy m j
 
-set_option linter.unusedSectionVars false in
 private lemma partialDeriv_chartGramOnE_swap_indices
     (g : SmoothRiemannianMetric I M) (α : M)
     (k a b : Fin (Module.finrank ℝ E)) (y : E) :
@@ -96,7 +92,6 @@ private lemma partialDeriv_chartGramOnE_swap_indices
   funext y'
   exact chartGramOnE_symm (I := I) g α a b y'
 
-set_option linter.unusedSectionVars false in
 theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y : E}
@@ -259,7 +254,6 @@ theorem chartGramOnE_partialDeriv_eq_christoffel_sum_split
       partialDeriv_chartGramOnE_swap_indices (I := I) g α i k j y]
   ring
 
-set_option linter.unusedSectionVars false in
 theorem chartGramOnE_partialDeriv_eq_christoffel_sum
     (g : SmoothRiemannianMetric I M) (α : M)
     (i j k : Fin (Module.finrank ℝ E)) {y : E}

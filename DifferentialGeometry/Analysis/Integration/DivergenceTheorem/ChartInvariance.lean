@@ -30,7 +30,6 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
-set_option linter.unusedSectionVars false in
 theorem integral_localDivergence_eq_of_overlap_support [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -82,7 +81,6 @@ theorem integral_localDivergence_eq_of_overlap_support [I.Boundaryless]
       rfl]
   rw [h_meas_eq]
 
-set_option linter.unusedSectionVars false in
 private lemma chartLocalMeasure_open_pos_under_boundaryless [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     {V : Set M} (hVopen : IsOpen V) (hVne : V.Nonempty)
@@ -238,7 +236,6 @@ private lemma exists_open_nbhd_positive
   intro y hy
   exact hV₀ y (hW_sub hy.1)
 
-set_option linter.unusedSectionVars false in
 private lemma exists_smooth_bump_in_open [T2Space M]
     {V : Set M} (hVopen : IsOpen V) {x : M} (hxV : x ∈ V) :
     ∃ φ : M → ℝ, ContMDiff I 𝓘(ℝ) ∞ φ ∧ HasCompactSupport φ ∧
@@ -253,7 +250,6 @@ private lemma exists_smooth_bump_in_open [T2Space M]
   · rw [f.eq_one]
     exact one_pos
 
-set_option linter.unusedSectionVars false in
 private theorem localDivergence_chart_invariance_pos [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -565,7 +561,6 @@ private theorem localDivergence_chart_invariance_pos [I.Boundaryless]
       _ ≤ ∫ y, Δ y * φ y ∂(chartLocalMeasure (I := I) g α) := hLB_total
   linarith
 
-set_option linter.unusedSectionVars false in
 theorem localDivergence_chart_invariance [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α β : M)
@@ -579,7 +574,6 @@ theorem localDivergence_chart_invariance [I.Boundaryless]
     linarith
   · exact localDivergence_chart_invariance_pos (I := I) g α β X hx_α hx_β hΔpos
 
-set_option linter.unusedSectionVars false in
 theorem voss_weyl_divergence_formula [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M) (α : M)
@@ -589,7 +583,6 @@ theorem voss_weyl_divergence_formula [I.Boundaryless]
   unfold divergence_g
   exact localDivergence_chart_invariance (I := I) g x α X (mem_chart_source H x) hx_α
 
-set_option linter.unusedSectionVars false in
 theorem localDivergence_contMDiffOn_baseSet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M) (α : M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -603,7 +596,6 @@ theorem localDivergence_contMDiffOn_baseSet [I.Boundaryless]
       rw [extChartAt_source_eq_chartAt_source (I := I)]; exact hx
     exact (extChartAt I α).map_source hx_ext
 
-set_option linter.unusedSectionVars false in
 theorem divergence_g_contMDiff [I.Boundaryless]
     [T2Space M]
     (g : SmoothRiemannianMetric I M)

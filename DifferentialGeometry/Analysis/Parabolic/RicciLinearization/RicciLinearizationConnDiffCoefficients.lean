@@ -984,7 +984,6 @@ private lemma slotPerm2_10_toModel (x : M) (D : Tensor0SBundle.Tensor0SSpace 2 I
     ContinuousMultilinearMap.domDomCongr_apply]
   exact congrArg _ (funext fun j => by fin_cases j <;> rfl)
 
-set_option linter.unusedSectionVars false in
 lemma connContr21_insert' (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 3 I x) (p q r s : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -994,7 +993,6 @@ lemma connContr21_insert' (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
         ![PDE.DeTurck.connDiff (I := I) g₁ g₀ x r s, p, q] :=
   connContr21_insert (I := I) (M := M) g₁ g₀ x D ![p, q, r, s]
 
-set_option linter.unusedSectionVars false in
 lemma connContr11_insert' (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
     (D : Tensor0SBundle.Tensor0SSpace 2 I x) (p q r : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel
@@ -1004,7 +1002,6 @@ lemma connContr11_insert' (g₁ g₀ : SmoothRiemannianMetric I M) (x : M)
         ![PDE.DeTurck.connDiff (I := I) g₁ g₀ x q r, p] :=
   connContr11_insert (I := I) (M := M) g₁ g₀ x D ![p, q, r]
 
-set_option linter.unusedSectionVars false in
 lemma connContr12_insert' (x : M) (B : Tensor0SBundle.TensorRSSpace 1 3 I x)
     (D : Tensor0SBundle.Tensor0SSpace 2 I x) (p q r s : TangentSpace I x) :
     Tensor0SBundle.Tensor0SSpace.toModel (connContrCLM (I := I) 1 2 x B D) ![p, q, r, s] =

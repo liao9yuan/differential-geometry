@@ -81,7 +81,6 @@ theorem linearizedChristoffel_eq_principal_add_nonPrincipal
   refine congrArg (HMul.hMul (1 / 2 : ℝ)) (Finset.sum_congr rfl (fun l _ => ?_))
   ring
 
-set_option linter.unusedSectionVars false in
 theorem realizedLinearizedChristoffelPrincipal_eq_chartLinearizedPrincipal
     (g₀ : SmoothRiemannianMetric I M) (T T' : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)
@@ -121,7 +120,6 @@ theorem realizedGramDeriv_self_eq_zero (g₀ : SmoothRiemannianMetric I M)
     realizedGramDeriv (I := I) g₀ T T hδ_lt hδ hδ_lt hδ α i j y = 0 := by
   rw [realizedGramDeriv, sub_self]
 
-set_option linter.unusedSectionVars false in
 theorem realizedLinearizedChristoffelPrincipal_self_eq_zero
     (g₀ : SmoothRiemannianMetric I M) (T : SmoothCcTensor g₀ 0 2)
     {δ : ℝ} (hδ_lt : δ < 1)

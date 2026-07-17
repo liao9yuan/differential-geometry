@@ -32,14 +32,12 @@ noncomputable def covariantTensorInnerPointwise :
             (S.curryLeft ((chartModelBasis E) i))
             (T.curryLeft ((chartModelBasis E) j))
 
-set_option linter.unusedSectionVars false in
 lemma tensorInnerPointwise_0s_zero_arity
     (g : SmoothRiemannianMetric I M) (x : M)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin 0 => E) ℝ) :
     covariantTensorInnerPointwise (I := I) (M := M) 0 g x S T =
       S (fun i => Fin.elim0 i) * T (fun i => Fin.elim0 i) := rfl
 
-set_option linter.unusedSectionVars false in
 lemma tensorInnerPointwise_0s_succ
     (g : SmoothRiemannianMetric I M) (x : M) (s : ℕ)
     (S T : ContinuousMultilinearMap ℝ (fun _ : Fin (s + 1) => E) ℝ) :

@@ -44,13 +44,11 @@ private local instance : BorelSpace M := ⟨rfl⟩
 def chartDensity (g : SmoothRiemannianMetric I M) (x₀ : M) : M → ℝ :=
   fun x => Real.sqrt (chartGramMatrix g x₀ x).det
 
-set_option linter.unusedSectionVars false in
 lemma chartDensity_pos
     (g : SmoothRiemannianMetric I M) (x₀ : M) {x : M}
     (hx : x ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
     0 < chartDensity g x₀ x :=
   Real.sqrt_pos.mpr (chartGramMatrix_det_pos (I := I) g x₀ hx)
-set_option linter.unusedSectionVars false in
 lemma chartDensity_contMDiffOn
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     ContMDiffOn I 𝓘(ℝ) ∞ (chartDensity g x₀)
@@ -73,7 +71,6 @@ instance modelHaar_isAddHaarMeasure :
   unfold modelHaar
   infer_instance
 
-set_option linter.unusedSectionVars false in
 theorem map_toEuclidean_modelHaar_eq_volume :
     MeasureTheory.Measure.map (toEuclidean (E := E)) (modelHaar (E := E)) =
       (MeasureTheory.volume :
@@ -113,7 +110,6 @@ def chartLocalMeasure
         ENNReal.ofReal
           (chartDensity g x₀ ((extChartAt I x₀).symm y))))
 
-set_option linter.unusedSectionVars false in
 lemma chartLocalMeasure_def
     (g : SmoothRiemannianMetric I M) (x₀ : M) :
     chartLocalMeasure (I := I) g x₀ =

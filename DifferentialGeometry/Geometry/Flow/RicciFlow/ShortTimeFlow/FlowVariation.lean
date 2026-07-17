@@ -27,7 +27,6 @@ variable
       [IsManifold I ∞ M] [CompactSpace M] [BoundarylessManifold I M]
       [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
 
-set_option linter.unusedSectionVars false in
 omit [CompactSpace M] [BoundarylessManifold I M] [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] in
 private lemma covDerivAlong_locality
     (g : SmoothRiemannianMetric I M) (γ₁ γ₂ : ℝ → M)
@@ -225,7 +224,6 @@ private lemma exists_chartLineCurve_global
     rw [ContinuousLinearMap.id_comp] at hcomp'
     simpa [chartLineCurve, hφ] using hcomp'
 
-set_option linter.unusedSectionVars false in
 theorem conjugating_flow_covariant_variational_eq
     (g_DT : ℝ → SmoothRiemannianMetric I M) (g_bg : SmoothRiemannianMetric I M)
     (T : ℝ) (Φ_fam : ℝ → (M ≃ₘ⟮I, I⟯ M))

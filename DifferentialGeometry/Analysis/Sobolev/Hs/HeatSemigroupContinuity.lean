@@ -152,7 +152,6 @@ private lemma norm_heatSemigroupHsExt_sub_le_diff
       _ = ‖heatSemigroupHsExt
               (I := I) (M := M) g σ |t - t₀| u - u‖ := by rw [h_abs]
 
-set_option linter.unusedSectionVars false in
 private lemma sq_norm_heatSemigroupHsExt_sub_self_of_finite
     {g : SmoothRiemannianMetric I M} {σ : ℝ}
     {τ : ℝ} (hτ : 0 ≤ τ)

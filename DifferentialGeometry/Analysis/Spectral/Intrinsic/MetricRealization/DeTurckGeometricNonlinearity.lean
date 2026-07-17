@@ -314,7 +314,6 @@ theorem deTurckRHSField_realizeMetric_jointContMDiffOn
     exact (Bb.equivFun.symm_apply_apply _).symm
 
 
-set_option linter.unusedSectionVars false in
 private theorem smoothCcChartRepr_jointContMDiffOn
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -378,7 +377,6 @@ private theorem smoothCcChartRepr_jointContMDiffOn
   rw [Bundle.Trivialization.coe_linearMapAt_of_mem _ hx]
 
 
-set_option linter.unusedSectionVars false in
 private theorem smoothCcChartRepr_euclid_jointContDiffWithinAt
     (g₀ : SmoothRiemannianMetric I M)
     (F : ℝ → SmoothCcTensor g₀ 0 2)
@@ -789,7 +787,6 @@ private theorem smoothCcCovApplySection_jointContMDiffOn
     ⟨contMDiffWithinAt_fst, hfib⟩)
 
 
-set_option linter.unusedSectionVars false in
 private theorem genChartRepr_jointContMDiffOn
     (S : Set ℝ) (α : M)
     (Tfam : ℝ → Cₛ^∞⟮I; Tensor0SBundle.TensorRSModel 0 2 ℝ E,
@@ -988,7 +985,6 @@ private def iteratedCovApplySection
   contMDiff_toFun :=
     covApply_covApply_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma iteratedCovApplySection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -1011,7 +1007,6 @@ private def covApplyChristoffelSection
   contMDiff_toFun :=
     covApply_christoffel_section_contMDiff (I := I) g₀ 0 2 T.toSection.contMDiff_toFun B.contMDiff
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma covApplyChristoffelSection_apply
     (g₀ : SmoothRiemannianMetric I M)
     (B : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

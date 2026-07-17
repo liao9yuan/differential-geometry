@@ -84,7 +84,6 @@ def orthoFrameSec (g : SmoothRiemannianMetric I M) (x : M)
   ContMDiffSection.mk (smoothOrthoFrame (I := I) g x i)
     (smoothOrthoFrame_smooth (I := I) g x i)
 
-set_option linter.unusedSectionVars false in
 @[simp] lemma orthoFrameSec_apply (g : SmoothRiemannianMetric I M) (x : M)
     (i : Fin (Module.finrank ℝ E)) (b : M) :
     orthoFrameSec (I := I) (M := M) g x i b = smoothOrthoFrame (I := I) g x i b := rfl

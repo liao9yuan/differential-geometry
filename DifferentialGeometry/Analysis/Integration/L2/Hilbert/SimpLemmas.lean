@@ -43,13 +43,11 @@ variable [T2Space M] [SigmaCompactSpace M] [InnerProductSpace ℝ E]
 variable {g : SmoothRiemannianMetric I M} {r s : ℕ}
 
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem toL2_zero :
     (toL2 (g := g) (r := r) (s := s)) 0 = 0 :=
   ContinuousLinearMap.map_zero _
 
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem toL2_add (S T : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (S + T) =
       (toL2 (g := g) (r := r) (s := s)) S +
@@ -57,14 +55,12 @@ set_option linter.unusedSectionVars false in
   ContinuousLinearMap.map_add _ _ _
 
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem toL2_neg (S : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (-S) =
       -((toL2 (g := g) (r := r) (s := s)) S) :=
   ContinuousLinearMap.map_neg _ _
 
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem toL2_sub (S T : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (S - T) =
       (toL2 (g := g) (r := r) (s := s)) S -
@@ -72,7 +68,6 @@ set_option linter.unusedSectionVars false in
   ContinuousLinearMap.map_sub _ _ _
 
 
-set_option linter.unusedSectionVars false in
 @[simp] theorem toL2_smul (c : ℝ) (S : SmoothCcTensor g r s) :
     (toL2 (g := g) (r := r) (s := s)) (c • S) =
       c • ((toL2 (g := g) (r := r) (s := s)) S) :=

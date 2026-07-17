@@ -76,7 +76,6 @@ lemma ricciPairingSmooth_pt_add
       (w.smooth.mdifferentiable (by simp) b)
   rw [hgrad_add, ContinuousLinearMap.map_add]
 
-set_option linter.unusedSectionVars false in
 lemma ricciPairingSmooth_pt_smul
     (g : SmoothRiemannianMetric I M) (φ : C^∞⟮I, M; ℝ⟯)
     (c : ℝ) (v : SmoothScalar g) (b : M) :

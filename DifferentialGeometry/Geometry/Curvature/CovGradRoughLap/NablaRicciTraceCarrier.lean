@@ -34,7 +34,6 @@ private local instance : CompleteSpace E := FiniteDimensional.complete ℝ E
 
 omit [CompactSpace M] in
 
-set_option linter.unusedSectionVars false in
 theorem nablaRicci_contMDiff
     (g : SmoothRiemannianMetric I M)
     (X V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -127,7 +126,6 @@ theorem nablaRicciBilin_chartBasis_contMDiffOn
   exact hAt.contMDiffWithinAt
 
 
-set_option linter.unusedSectionVars false in
 theorem nablaRicciEndo_contMDiff
     (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) :
@@ -190,7 +188,6 @@ omit [CompactSpace M] in
 
 set_option backward.isDefEq.respectTransparency false in
 
-set_option linter.unusedSectionVars false in
 lemma nablaRicSlotOpFib_apply_eval (g : SmoothRiemannianMetric I M)
     (X : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (s : ℕ) (x : M)
     (D : Tensor0SSpace (s + 1) I x) (v0 : E) (vs : Fin s → E) :

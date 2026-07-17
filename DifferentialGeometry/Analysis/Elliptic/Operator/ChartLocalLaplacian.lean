@@ -55,7 +55,6 @@ omit [NeZero (Module.finrank ℝ E)] [IsManifold I ∞ M] in
 def euclideanChartImageOfTsupport (α : M) (f : M → ℝ) : Set EuclN :=
   (toEuclidean (E := E)) '' ((extChartAt I α) '' tsupport f)
 
-set_option linter.unusedSectionVars false in
 lemma euclideanChartImageOfTsupport_isCompact
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -72,14 +71,12 @@ lemma euclideanChartImageOfTsupport_isCompact
     (toEuclidean (E := E)).continuous
   exact hImage1.image hcont_toE
 
-set_option linter.unusedSectionVars false in
 lemma euclideanChartImageOfTsupport_isClosed
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     IsClosed (euclideanChartImageOfTsupport (I := I) (M := M) α f) :=
   (euclideanChartImageOfTsupport_isCompact (I := I) (M := M) α hf_cs hf_supp).isClosed
 
-set_option linter.unusedSectionVars false in
 lemma euclideanChartImageOfTsupport_subset_chartTargetEuclid
     (α : M) {f : M → ℝ} (hf_supp : tsupport f ⊆ (chartAt H α).source) :
     euclideanChartImageOfTsupport (I := I) (M := M) α f ⊆
@@ -117,7 +114,6 @@ lemma chartPullback_support_subset
   · rw [chartPullback_apply_of_notMem (I := I) α f hyT] at hy
     exact (hy rfl).elim
 
-set_option linter.unusedSectionVars false in
 lemma chartPullback_tsupport_subset
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -126,7 +122,6 @@ lemma chartPullback_tsupport_subset
   refine closure_minimal (chartPullback_support_subset (I := I) α f) ?_
   exact euclideanChartImageOfTsupport_isClosed (I := I) (M := M) α hf_cs hf_supp
 
-set_option linter.unusedSectionVars false in
 lemma chartPullback_tsupport_subset_chartTargetEuclid
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -135,7 +130,6 @@ lemma chartPullback_tsupport_subset_chartTargetEuclid
   (chartPullback_tsupport_subset (I := I) α hf_cs hf_supp).trans
     (euclideanChartImageOfTsupport_subset_chartTargetEuclid (I := I) (M := M) α hf_supp)
 
-set_option linter.unusedSectionVars false in
 lemma chartPullback_hasCompactSupport
     (α : M) {f : M → ℝ} (hf_cs : HasCompactSupport f)
     (hf_supp : tsupport f ⊆ (chartAt H α).source) :
@@ -200,7 +194,6 @@ private lemma contDiff_of_smooth_on_open_zero_outside
     filter_upwards [hf_zero_on] with z hz
     exact hf_zero z hz
 
-set_option linter.unusedSectionVars false in
 lemma chartPullback_contDiff [I.Boundaryless]
     (α : M) {f : M → ℝ} (hf : ContMDiff I 𝓘(ℝ, ℝ) ∞ f)
     (hf_cs : HasCompactSupport f)

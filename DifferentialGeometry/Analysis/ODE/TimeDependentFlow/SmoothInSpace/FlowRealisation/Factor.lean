@@ -26,7 +26,6 @@ variable [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 omit [NeZero (Module.finrank ℝ E)] [SigmaCompactSpace M] [T2Space M]
   [BoundarylessManifold I M] in
 
-set_option linter.unusedSectionVars false in
 theorem hasDerivAt_partialSpatialFderiv_of_isLocalFlow_at_chart
     {f : ℝ → E → E} {t₀ : ℝ} {x₀ : E} {r : ℝ≥0} {tmin tmax : ℝ} {Φ : E × ℝ → E}
     (hΦ : IsLocalFlow f t₀ x₀ r tmin tmax Φ)
@@ -72,7 +71,6 @@ theorem chartMovingTriv_orbit_hasDerivAt_of_chartJet
   have := hGfd.comp_hasDerivAt t hc
   simpa using this
 
-set_option linter.unusedSectionVars false in
 theorem chartCloseFactors_of_chart_realisation
     (Φ_fam : ℝ → M ≃ₘ⟮I, I⟯ M) (x : M) (t : ℝ)
     (Φ_eucl : E → ℝ → E) {D'_eucl g' : E →L[ℝ] E}

@@ -66,7 +66,6 @@ private lemma memWkp_of_hasWeakPartialDeriv
   exact (MemWkp_congr_ae (d := Module.finrank ℝ E)
     (by norm_num : (1 : ℝ≥0∞) ≤ 2) hΩ h_ae).mpr h_chosen_memWkp
 
-set_option linter.unusedSectionVars false in
 private lemma memWkp_coef_mul_factor
     (β : M) (K : ℕ)
     {coef factor : EuclN → ℝ}

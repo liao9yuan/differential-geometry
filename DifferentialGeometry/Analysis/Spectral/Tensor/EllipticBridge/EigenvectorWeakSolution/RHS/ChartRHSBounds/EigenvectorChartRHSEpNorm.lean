@@ -97,7 +97,6 @@ variable (g : SmoothRiemannianMetric I M) (α : M)
 omit [CompleteSpace E] [CompactSpace M] [I.Boundaryless] [T2Space M]
   [SigmaCompactSpace M] in
 
-set_option linter.unusedSectionVars false in
 private lemma one_div_densityOnEuclid_contDiffOn :
     ContDiffOn ℝ ∞ (fun y => 1 / densityOnEuclid (I := I) g α y)
       (chartTargetEuclid (I := I) (M := M) α) :=
@@ -407,7 +406,6 @@ private lemma weightedGradCoeffDivLimit_sum_memLp_unconditional :
     (fun l _ => weightedGradCoeffDivLimit_memLp_weighted_unconditional
       (I := I) (M := M) g r s i α P₀ l)
 
-set_option linter.unusedSectionVars false in
 private lemma weightedGradCoeffDivLimit_sum_ae_zero_off_chartPouKernel_unconditional :
     ∀ᵐ y ∂((chartPulledWeightedMeasure (I := I) g α).restrict
         (chartTargetEuclid (I := I) (M := M) α)),

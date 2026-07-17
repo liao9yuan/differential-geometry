@@ -29,7 +29,6 @@ variable {M : Type*} [TopologicalSpace M] [ChartedSpace H M] [IsManifold I ∞ M
 open DifferentialGeometry.Integral.Measure
 open DifferentialGeometry.Integral.DivergenceTheorem
 
-set_option linter.unusedSectionVars false in
 private lemma good_set_mem_baseSet_rs
     (r s : ℕ) (α : M) {b : M}
     (hb : b ∈ chartLeviCivitaGoodSet (I := I) α) :

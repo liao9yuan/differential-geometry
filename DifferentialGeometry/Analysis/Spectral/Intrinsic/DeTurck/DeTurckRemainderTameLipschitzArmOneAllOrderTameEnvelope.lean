@@ -1392,7 +1392,6 @@ private lemma pAO_connDiff_self_zero (gA : SmoothRiemannianMetric I M) (x : M)
     exact h.symm
   exact add_left_cancel h2
 
-set_option linter.unusedSectionVars false in
 private lemma pAO_connDiff_antisymm (gA gB : SmoothRiemannianMetric I M) (x : M)
     (u v : TangentSpace I x) :
     PDE.DeTurck.connDiff (I := I) gA gB x u v =
@@ -2996,7 +2995,6 @@ theorem linearizedRicciArm1CorrField_allOrder_tameEnvelope_interface
         - linearizedRicciArm1BaseCoeff (I := I) g₀ T T' hδ hδ' s from hid s]
   exact hK T T' hδ_le hδ hδ'_le hδ' hTball hT'ball i s hs
 
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3279,7 +3277,6 @@ private theorem b1_symmS_eq_self (g₀ : SmoothRiemannianMetric I M)
   rw [ccTensor02Symm, hswap, htwo, smul_smul,
     show (1 / 2 : ℝ) * 2 = 1 by norm_num, one_smul]
 
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3530,7 +3527,6 @@ lemma b1_toSection_smul (g : SmoothRiemannianMetric I M) (r s : ℕ)
   rw [SmoothCcTensor.toSection_smul]
   rfl
 
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in
@@ -3723,7 +3719,6 @@ theorem riemannianFiberNormSq_iteratedCovGrad_bgRDiffRefoldRemainderField_bounde
     hCR g₁ P htie hδ_le hδ0 hbound i x
   nlinarith [hsplit2, hA, hS, hR, hw_nn]
 
-set_option linter.unusedSectionVars false in
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
 set_option backward.isDefEq.respectTransparency false in

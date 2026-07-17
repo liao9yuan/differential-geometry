@@ -77,7 +77,6 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_triv_intrinsic
       (fun y : M => TensorRSSpace r s I y) α).continuousLinearMapAt_symmL
     (R := ℝ) hb_baseRS _).symm
 
-set_option linter.unusedSectionVars false in
 private lemma tensorRSIntrinsicChartCLM_apply_eq_cov
     (r s : ℕ) (g : SmoothRiemannianMetric I M) (α : M)
     (T : Π b' : M, TensorRSSpace r s I b')
@@ -149,7 +148,6 @@ theorem fderiv_tensorTrivProj_pullback_apply_eq_abstract_cov
       (I := I) (M := M) g r s α S.toSection X hb
   rw [hcov_eq]
 
-set_option linter.unusedSectionVars false in
 theorem mfderiv_tensorTrivProj_apply_eq_triv_intrinsic
     (g : SmoothRiemannianMetric I M) (r s : ℕ) (α : M)
     (S : SmoothCcTensor g r s) {b : M}

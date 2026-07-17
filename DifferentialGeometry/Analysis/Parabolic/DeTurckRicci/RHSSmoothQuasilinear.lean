@@ -60,7 +60,6 @@ theorem deturckvf_chart_component_smooth_in_g_input
     (deTurckVF (I := I) g g_bg
       : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) k
 
-set_option linter.unusedSectionVars false in
 theorem liederivmetric_chart_smooth_in_g_w_jet [I.Boundaryless]
     (g : SmoothRiemannianMetric I M)
     (W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)

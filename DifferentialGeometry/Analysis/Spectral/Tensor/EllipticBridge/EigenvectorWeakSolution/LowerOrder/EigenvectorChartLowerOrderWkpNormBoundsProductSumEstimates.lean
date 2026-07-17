@@ -42,7 +42,6 @@ section LowerOrderWkpNormBounds
 variable (g : SmoothRiemannianMetric I M) (r s : ℕ)
   (i : TensorEigenIdx (I := I) (M := M) g r s)
 
-set_option linter.unusedSectionVars false in
 private lemma wkpNorm_coef_mul_factor_le
     (α : M) (K : ℕ)
     {coef factor : EuclN → ℝ}
@@ -242,7 +241,6 @@ lemma memWkp_finsetSum
 omit [CompleteSpace E] [IsManifold I ∞ M] [CompactSpace M] [T2Space M]
   [SigmaCompactSpace M] in
 
-set_option linter.unusedSectionVars false in
 lemma wkpNorm_finsetSum_le_const_mul_atomSum
     {α : M} {K : ℕ} {ι κ : Type*}
     (S : Finset ι) (T : Finset κ) (F : ι → EuclN → ℝ) (atom : κ → EuclN → ℝ)

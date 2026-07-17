@@ -60,7 +60,6 @@ def tensorRSField_smulByFun
       (e.open_baseSet.mem_nhds (mem_baseSet_trivializationAt _ _ x₀))
       fun x hx => (e.linear 𝕜 hx).2 _ _⟩
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem tensorRSField_smulByFun_apply
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
@@ -75,7 +74,6 @@ def tensor0SField_smulByFun
   letI := tensor0SBundle_topology (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M) s
   ⟨fun x => φ x • α x, hφ.smul_section α.contMDiff⟩
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem tensor0SField_smulByFun_apply
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)
@@ -108,7 +106,6 @@ noncomputable def Tensor0SField.fromScalarField [CompleteSpace 𝕜]
     simp_rw [hcoord]
     exact hf.contMDiffAt⟩
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem Tensor0SField.fromScalarField_apply [CompleteSpace 𝕜]
     (f : M → 𝕜) (hf : ContMDiff I 𝓘(𝕜) n f) (x : M) (v : Fin 0 → TangentSpace I x) :
@@ -121,7 +118,6 @@ noncomputable def Tensor0SField.toScalarField
   fun x => Tensor0SSpace.toModel (α x) Fin.elim0
 
 
-set_option linter.unusedSectionVars false in
 theorem Tensor0SField.toScalarField_contMDiff [CompleteSpace 𝕜]
     (α : Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
     ContMDiff I 𝓘(𝕜) n α.toScalarField := by
@@ -156,7 +152,6 @@ theorem Tensor0SField.toScalarField_contMDiff [CompleteSpace 𝕜]
   simp_rw [continuousMultilinearMap_basis_repr]
   rfl
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem Tensor0SField.toScalarField_fromScalarField [CompleteSpace 𝕜]
     (f : M → 𝕜) (hf : ContMDiff I 𝓘(𝕜) n f) :
@@ -164,7 +159,6 @@ theorem Tensor0SField.toScalarField_fromScalarField [CompleteSpace 𝕜]
   ext x
   exact Tensor0SField.fromScalarField_apply n f hf x Fin.elim0
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem Tensor0SField.fromScalarField_toScalarField [CompleteSpace 𝕜]
     (α : Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -185,7 +179,6 @@ theorem Tensor0SField.fromScalarField_toScalarField [CompleteSpace 𝕜]
     (α x) Fin.elim0
   exact congrArg _ (Subsingleton.elim v Fin.elim0)
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem Tensor0SField.toScalarField_add [CompleteSpace 𝕜]
     (α β : Tensor0SField n 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
@@ -196,7 +189,6 @@ theorem Tensor0SField.toScalarField_add [CompleteSpace 𝕜]
   rw [show (α + β) x = α x + β x from rfl, Tensor0SSpace.toModel_add,
     ContinuousMultilinearMap.add_apply]
 
-set_option linter.unusedSectionVars false in
 @[simp]
 theorem Tensor0SField.toScalarField_smulByFun [CompleteSpace 𝕜]
     (φ : M → 𝕜) (hφ : ContMDiff I 𝓘(𝕜) n φ)

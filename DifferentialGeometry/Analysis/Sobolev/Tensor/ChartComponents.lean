@@ -208,7 +208,6 @@ omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless] in
     tensorChartPushed (I := I) (M := M) g r s S α y =
       tensorChartPushedRawModel (I := I) (M := M) g r s S α y := rfl
 
-set_option linter.unusedSectionVars false in
 theorem tensorChartPushed_eq_sum_tensorChartComp
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)
@@ -222,7 +221,6 @@ theorem tensorChartPushed_eq_sum_tensorChartComp
   exact chartPushedRaw_eq_sum_tensorChartComponent
     (I := I) (M := M) g r s S α y
 
-set_option linter.unusedSectionVars false in
 theorem tensorChartPushed_eq_zero_of_tensorChartComp_eq_zero
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (S : SmoothCcTensor g r s) (α : M)

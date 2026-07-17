@@ -115,7 +115,6 @@ theorem chosenMthMixedPartialChartPushedU_two_eq_chosenSecondPartialChartPushedU
   rw [h_last_1, h_inner_last]
   rfl
 
-set_option linter.unusedSectionVars false in
 theorem chosenMthMixedPartialChartPushedU_three_eq_chosenThirdMixedPartialChartPushedU
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -188,7 +187,6 @@ theorem chosenMthMixedPartialChartPushedU_memWkp_of_chartPushed_memWkp
       rw [chosenMthMixedPartialChartPushedU_succ]
       exact h_step
 
-set_option linter.unusedSectionVars false in
 theorem chosenMthMixedPartialChartPushedU_memLp_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)
@@ -221,7 +219,6 @@ theorem chosenMthMixedPartialChartPushedU_memLp_two
       (I := I) (M := M) g α u_h m 0 h_parent' idx
   exact h_memWkp_0
 
-set_option linter.unusedSectionVars false in
 theorem chosenMthMixedPartialChartPushedU_memW1p_two
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g)

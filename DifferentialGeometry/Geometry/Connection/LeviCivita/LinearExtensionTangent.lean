@@ -166,7 +166,6 @@ section Reduction
 variable [NeZero (Module.finrank ℝ E)]
   [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M]
 
-set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_coordExtensionTangent_eq
     (x : M) (w : TangentSpace I x) {b : M}
     (hb : b ∈ (trivializationAt E (TangentSpace I) x).baseSet) :
@@ -175,7 +174,6 @@ lemma chartE_section_repr_coordExtensionTangent_eq
   rw [chartE_section_repr_eq_trivToE, coordExtensionTangent_apply]
   exact (trivializationAt E (TangentSpace I) x).continuousLinearMapAt_symmL (R := ℝ) hb _
 
-set_option linter.unusedSectionVars false in
 lemma chartE_section_repr_linearExtensionTangent_eventuallyEq_const
     (x : M) (w : TangentSpace I x) :
     chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w)
@@ -195,7 +193,6 @@ lemma chartE_section_repr_linearExtensionTangent_eventuallyEq_const
   rw [chartE_section_repr_eq_trivToE, hWb, ← chartE_section_repr_eq_trivToE]
   exact chartE_section_repr_coordExtensionTangent_eq (I := I) x w hb2
 
-set_option linter.unusedSectionVars false in
 lemma fderiv_chartE_section_repr_linearExtensionTangent_eq_zero
     (x : M) (w : TangentSpace I x) :
     fderiv ℝ (chartE_section_repr (I := I) x (linearExtensionTangent (I := I) x w)

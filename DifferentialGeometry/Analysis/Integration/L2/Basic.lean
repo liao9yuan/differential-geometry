@@ -68,7 +68,6 @@ theorem integrable_of_contMDiff_of_hasCompactSupport
     MeasureTheory.Integrable f μ :=
   integrable_of_continuous_of_hasCompactSupport hfc.continuous hfsup
 
-set_option linter.unusedSectionVars false in
 theorem integrable_of_continuous_compactSpace
     [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
     {F : Type*} [NormedAddCommGroup F]

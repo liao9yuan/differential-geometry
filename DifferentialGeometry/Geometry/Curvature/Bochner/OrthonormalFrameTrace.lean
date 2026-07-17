@@ -616,7 +616,6 @@ section OrthonormalRiesz
 
 variable (g : SmoothRiemannianMetric I M) (x : M)
 
-set_option linter.unusedSectionVars false in
 theorem g_inner_eq_orthonormal_parseval_sum
     (X Y : TangentSpace I x)
     (B : Fin (Module.finrank ℝ E) → TangentSpace I x)

@@ -692,7 +692,6 @@ private theorem tensor02Cov_pairing_contMDiff
     ContMDiff I 𝓘(ℝ, ℝ) ∞ (fun b : M => T b (Y b) (Z b)) :=
   cotangentCov_pairing_contMDiff (tensor02Cov_apply_one_contMDiff hT hY) hZ
 
-set_option linter.unusedSectionVars false in
 private theorem tensor02Cov_triple_apply_smooth
     (cov : CovariantDerivative I E (TangentSpace I : M → Type _))
     [hcov : CovariantDerivative.ContMDiffCovariantDerivative cov ∞]

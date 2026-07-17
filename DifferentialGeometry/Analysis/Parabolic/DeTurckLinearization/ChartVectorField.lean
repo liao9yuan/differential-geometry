@@ -57,7 +57,6 @@ omit [InnerProductSpace ℝ E] [NeZero (Module.finrank ℝ E)] [SigmaCompactSpac
           rw [sub_self, mul_zero]
     _ = 0 := by simp
 
-set_option linter.unusedSectionVars false in
 omit [SigmaCompactSpace M] [T2Space M] [BoundarylessManifold I M] in
 theorem chartDeTurckVFComp_contDiffOn_interior
     (g g' : SmoothRiemannianMetric I M) (α : M)

@@ -70,7 +70,6 @@ private lemma sq_eLpNorm_two_eq_lintegral_enorm_sq'
   rw [h_inner_eq, ← ENNReal.rpow_natCast _ 2, ← ENNReal.rpow_mul]
   norm_num
 
-set_option linter.unusedSectionVars false in
 private lemma hsNorm_zero_summand_eq_sq_eLpNorm_chartPushedSqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)
@@ -165,7 +164,6 @@ private lemma tsupport_sqrtPou_subset
   unfold tsupport
   rw [support_sqrt_pou_eq' (I := I) (M := M) α]
 
-set_option linter.unusedSectionVars false in
 private lemma continuous_sqrtPou
     (g : SmoothRiemannianMetric I M) (r s : ℕ)
     (T : Integral.L2.SmoothCcTensor g r s) (α : M)

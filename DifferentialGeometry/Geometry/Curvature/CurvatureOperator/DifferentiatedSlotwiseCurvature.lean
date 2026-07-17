@@ -318,7 +318,6 @@ def nablaTensor0SCurv
     (tensor0SCovariantDerivative I M s (LeviCivita (I := I) g))
     (fun b => X b) (fun b => Y b) (fun b => Z b) A x
 
-set_option linter.unusedSectionVars false in
 lemma nablaTensor0SCurv_def
     (g : SmoothRiemannianMetric I M) (s : ℕ)
     (X Y Z : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯)
@@ -681,7 +680,6 @@ theorem nablaTensor0SCurv_cyclic_eq_zero
   rw [← neg_add, ← neg_add, ← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
   rw [Finset.sum_eq_zero (fun k _ => hkey k), neg_zero]
 
-set_option linter.unusedSectionVars false in
 theorem nablaTensorCurv_frame_trace_eq_nablaRicci
     (g : SmoothRiemannianMetric I M)
     {X V : Π b : M, TangentSpace I b} {x : M}

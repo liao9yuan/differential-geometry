@@ -343,7 +343,6 @@ private lemma weakPartial_ae_zero_off_inline_aux
   filter_upwards [h_target] with y hy hy_U
   exact hy hy_U
 
-set_option linter.unusedSectionVars false in
 lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
     (g : SmoothRiemannianMetric I M) (α : M)
     (u_h : H1Compl (I := I) (M := M) g) :
@@ -410,7 +409,6 @@ lemma chosenMthMixedPartialChartPushedU_ae_zero_off_chartImagePOUTsupport
       exact weakPartial_ae_zero_off_inline_aux hΩ_open hU_open hU_sub
         (i := dirs (Fin.last m)) h_isWeak hw_li h_ih_zero
 
-set_option linter.unusedSectionVars false in
 private lemma chartPulledWeighted_le_volume_on_compact_aux
     {g : SmoothRiemannianMetric I M} (α : M)
     {K : Set EuclN} (hK_compact : IsCompact K)

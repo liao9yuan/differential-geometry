@@ -84,7 +84,6 @@ private theorem cometricLmodel_finBasis_inner_eq_kronecker (g₁ : SmoothRiemann
   rw [LinearMap.coe_toContinuousLinearMap', Module.Basis.coord_apply, Module.Basis.repr_self]
   rw [Finsupp.single_apply]
 
-set_option linter.unusedSectionVars false in
 theorem trace_eq_cometricLmodel_pairing_sum (g₁ : SmoothRiemannianMetric I M) (x : M) (G : E →ₗ[ℝ] E) :
     ∑ k : Fin (Module.finrank ℝ E),
         g₁.inner x
@@ -233,7 +232,6 @@ private def alignedPrincipalCorrectionVec (g₀ g₁ : SmoothRiemannianMetric I 
               c • PDE.DeTurck.connDiff (I := I) g₁ g₀ x w v from by rw [map_smul]; rfl]
             rw [map_smul]; rfl } : TangentSpace I x →L[ℝ] ℝ)))
 
-set_option linter.unusedSectionVars false in
 @[simp] private lemma alignedPrincipalEndoC_apply (g₀ g₁ : SmoothRiemannianMetric I M)
     (Z Y : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (v : TangentSpace I x) :
     alignedPrincipalEndo (I := I) (M := M) g₀ g₁ Z Y x v =
@@ -527,7 +525,6 @@ noncomputable def combinedTrace42ModelZSlot
             koszulZSlotPerm3).toContinuousLinearEquiv.toContinuousLinearMap))
 
 
-set_option linter.unusedSectionVars false in
 theorem combinedTrace42ModelZ_apply
     (L : Tensor0SBundle.Tensor0SModel 1 ℝ E →L[ℝ] E)
     (D : Tensor0SBundle.Tensor0SModel 4 ℝ E) (m : Fin 2 → E) :
@@ -838,7 +835,6 @@ private lemma zPrincipalCovec_apply (g₀ : SmoothRiemannianMetric I M) (S : Smo
           - unitModel (I := I) (M := M) g₀ 4 (iteratedCovGrad (I := I) g₀ 0 2 2 S) x ![V x, ζ, e, W x]) := rfl
 
 
-set_option linter.unusedSectionVars false in
 private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (e e' : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x (e + e') =
@@ -883,7 +879,6 @@ private lemma zPrincipalCovec_add (g₀ : SmoothRiemannianMetric I M) (S : Smoot
   rw [h1, h2, h3]; ring
 
 
-set_option linter.unusedSectionVars false in
 private lemma zPrincipalCovec_smul (g₀ : SmoothRiemannianMetric I M) (S : SmoothCcTensor g₀ 0 2)
     (V W : Cₛ^∞⟮I; E, (TangentSpace I : M → Type _)⟯) (x : M) (c : ℝ) (e : TangentSpace I x) :
     secondCovGradZSlotCovec (I := I) (M := M) g₀ S V W x (c • e) =
