@@ -52,3 +52,16 @@ rank-`(r,0)` coefficient family must first be packaged with its fixed-fibre
 time derivative as another jointly smooth coefficient family.  That producer
 belongs in the CovGrad parametric layer; adding differentiability assumptions
 at the `appHs` consumer would merely hide this missing API.
+
+## 2026-07-15 path support
+
+The generic action file now also provides:
+
+- `appHs_unif`, whose constant is chosen before the coefficient and therefore
+  remains fixed along coefficient secants;
+- fully applied `appHs_add`, `appHs_smul`, and `appHs_sub` identities.
+
+Focused verification passes.  The former time-derivative frontier is now
+closed by `exists_timeDerivCc` and the applied completion theorem
+`exists_appHsDeriv` in `ParametricAppHsTime`.  The next frontier is the scalar
+loss-two Laplacian specialization, not another generic action assumption.

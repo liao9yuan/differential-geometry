@@ -286,7 +286,9 @@ private theorem icg_norm_sq_int
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
-private theorem icg_path_comm
+/-- Iterated covariant differentiation commutes with the coefficient-field
+path integral for a jointly smooth family. -/
+theorem icg_path_comm
     (g₀ : SmoothRiemannianMetric I M) (r s i : ℕ)
     (Φ : ℝ → SmoothCcTensor g₀ r s) (S : Set ℝ) (hS : IsOpen S)
     (hSI : Set.uIcc (0 : ℝ) 1 ⊆ S)

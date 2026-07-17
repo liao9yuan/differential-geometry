@@ -286,6 +286,78 @@ theorem conjA1_short
       (Eventually.of_forall hboundOn)
   exact ⟨tau, htaupos, htauone, C1, hcont, hmeas, hboundOn, hboundAE⟩
 
+omit [NeZero (Module.finrank Real E)] [I.Boundaryless]
+  [BoundarylessManifold I M] in
+/-- The reversed scalar-curvature coefficient has one finite pointwise bound
+on a nontrivial closed time interval. -/
+theorem conjCoeff_bound
+    {D : RealTimeInterval} (S : SolutionOn (I := I) (M := M) D)
+    (hS : IsSolutionOn (I := I) S) (T : D.RegularTime) :
+    ∃ tau : Real, 0 < tau ∧ tau ≤ 1 ∧
+      ∃ C : Real, 0 ≤ C ∧
+        ∀ s ∈ Set.Icc (0 : Real) tau, ∀ x : M,
+          |(conjCoeff (I := I) (M := M) S
+            ((T : Real) - s) : M → Real) x| ≤ C := by
+  have hshift :
+      Tendsto (fun s : Real => (T : Real) - s)
+        (𝓝 0) (𝓝 (T : Real)) := by
+    simpa only [sub_zero] using
+      (tendsto_const_nhds.sub
+        (tendsto_id : Tendsto (fun s : Real => s) (𝓝 0) (𝓝 0)))
+  have hcoef :
+      ∀ᶠ s in 𝓝 (0 : Real), ∀ x : M,
+        |S.scalar ((T : Real) - s) x - S.scalar (T : Real) x| < 1 :=
+    hshift.eventually (scalar_unif (I := I) S hS T zero_lt_one)
+  let U : Set Real := {s |
+    ∀ x : M,
+      |S.scalar ((T : Real) - s) x - S.scalar (T : Real) x| ≤ 1}
+  have hU : U ∈ 𝓝 (0 : Real) := by
+    change ∀ᶠ s in 𝓝 (0 : Real),
+      ∀ x : M,
+        |S.scalar ((T : Real) - s) x - S.scalar (T : Real) x| ≤ 1
+    filter_upwards [hcoef] with s hs
+    exact fun x => (hs x).le
+  obtain ⟨delta, hdelta, hball⟩ := Metric.mem_nhds_iff.mp hU
+  let tau : Real := min 1 (delta / 2)
+  have htau : 0 < tau := by
+    dsimp only [tau]
+    exact lt_min zero_lt_one (half_pos hdelta)
+  have htau_one : tau ≤ 1 := min_le_left _ _
+  have htau_delta : tau < delta :=
+    (min_le_right (1 : Real) (delta / 2)).trans_lt
+      (half_lt_self hdelta)
+  have hgood (s : Real) (hs : s ∈ Set.Icc (0 : Real) tau) : s ∈ U := by
+    apply hball
+    rw [Metric.mem_ball, Real.dist_eq, sub_zero, abs_of_nonneg hs.1]
+    exact hs.2.trans_lt htau_delta
+  have hRcont : Continuous (fun x : M => |S.scalar (T : Real) x|) := by
+    have hscalar := metricScalar_smooth (I := I) (M := M)
+      (S.family.metric (T : Real))
+    simpa only [SolutionOn.scalar, SolutionFamily.scalar, SolutionOn.family]
+      using hscalar.continuous.abs
+  obtain ⟨C0, hC0⟩ := (isCompact_range hRcont).bddAbove
+  have hC0x (x : M) : |S.scalar (T : Real) x| ≤ C0 :=
+    hC0 ⟨x, rfl⟩
+  let C : Real := max 0 C0 + 1
+  have hC : 0 ≤ C := by
+    dsimp only [C]
+    positivity
+  refine ⟨tau, htau, htau_one, C, hC, ?_⟩
+  intro s hs x
+  rw [conjCoeff_apply, abs_neg]
+  calc
+    |S.scalar ((T : Real) - s) x| =
+        |(S.scalar ((T : Real) - s) x - S.scalar (T : Real) x) +
+          S.scalar (T : Real) x| := by
+      congr 1
+      ring
+    _ ≤ |S.scalar ((T : Real) - s) x - S.scalar (T : Real) x| +
+        |S.scalar (T : Real) x| := abs_add_le _ _
+    _ ≤ 1 + C0 := add_le_add (hgood s hs x) (hC0x x)
+    _ = C0 + 1 := add_comm _ _
+    _ ≤ max 0 C0 + 1 := add_le_add (le_max_right 0 C0) le_rfl
+    _ = C := rfl
+
 end DifferentialGeometry.PDE.RicciFlow.Entropy
 
 end

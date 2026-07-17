@@ -300,6 +300,202 @@ theorem exists_symm_convOn_ball
   exact ⟨delta₀, hdelta₀, hdelta₀delta, hInf_maps,
     hmaps_eventually, hinv_conv⟩
 
+/-- Smoothly convergent forward partial homeomorphisms have smoothly
+convergent exact inverse branches on a common neighborhood of any compact
+subset of the limiting target.  Both the common stage-target containment and
+the source-side preimage control are conclusions. -/
+theorem exists_symm_cInf
+    {X : Type*}
+    [NormedAddCommGroup X] [NormedSpace Real X]
+    [FiniteDimensional Real X]
+    {e : Nat → OpenPartialHomeomorph X X}
+    {eInf : OpenPartialHomeomorph X X}
+    {Q K : Set X}
+    (hQ : IsOpen Q) (hK : IsCompact K)
+    (hforward : MapCInfConvOnCompacts Q
+      (fun n ↦ (e n : X → X)) eInf)
+    (hsource : Filter.Eventually
+      (fun n : Nat ↦ closure Q ⊆ (e n).source) Filter.atTop)
+    (hstage_cd : ∀ n, ContDiffOn Real ∞ (e n : X → X) Q)
+    (hInf_cd : ContDiffOn Real ∞ (eInf : X → X) Q)
+    (hInf_symm_cd : ContDiffOn Real ∞
+      (eInf.symm : X → X) eInf.target)
+    (hKt : K ⊆ eInf.target)
+    (hKQ : eInf.symm '' K ⊆ Q) :
+    ∃ V : Set X,
+      IsOpen V ∧ IsCompact (closure V) ∧ K ⊆ V ∧
+      closure V ⊆ eInf.target ∧
+      eInf.symm '' closure V ⊆ Q ∧
+      Filter.Eventually
+        (fun n : Nat ↦ closure V ⊆ (e n).target ∧
+          Set.MapsTo (e n).symm (closure V) Q) Filter.atTop ∧
+      MapCInfConvOnCompacts V
+        (fun n ↦ ((e n).symm : X → X)) eInf.symm := by
+  let G : Set X := eInf.target ∩ eInf.symm ⁻¹' Q
+  have hGopen : IsOpen G := by
+    exact hInf_symm_cd.continuousOn.isOpen_inter_preimage
+      eInf.open_target hQ
+  have hKG : K ⊆ G := by
+    intro w hw
+    exact ⟨hKt hw, hKQ ⟨w, hw, rfl⟩⟩
+  obtain ⟨W₀, hW₀open, hKW₀, hW₀G, hW₀compact⟩ :=
+    exists_open_between_and_isCompact_closure hK hGopen hKG
+  let D : Set (X × X) := W₀ ×ˢ Q
+  let F : Nat → X × X → X := fun n z ↦ e n z.2 - z.1
+  let FInf : X × X → X := fun z ↦ eInf z.2 - z.1
+  let PhiInf : X → X := eInf.symm
+  have hW₀target : W₀ ⊆ eInf.target := by
+    intro w hw
+    exact (hW₀G (subset_closure hw)).1
+  have hW₀map : Set.MapsTo PhiInf W₀ Q := by
+    intro w hw
+    exact (hW₀G (subset_closure hw)).2
+  have hDopen : IsOpen D := hW₀open.prod hQ
+  have hF_cd : ∀ n, ContDiffOn Real ∞ (F n) D := by
+    intro n
+    exact ((hstage_cd n).comp contDiff_snd.contDiffOn
+      (fun z hz ↦ hz.2)).sub contDiff_fst.contDiffOn
+  have hFInf_cd : ContDiffOn Real ∞ FInf D :=
+    (hInf_cd.comp contDiff_snd.contDiffOn
+      (fun z hz ↦ hz.2)).sub contDiff_fst.contDiffOn
+  have hPhiInf_cd : ContDiffOn Real ∞ PhiInf W₀ :=
+    hInf_symm_cd.mono hW₀target
+  have hgraph : Set.MapsTo (fun w ↦ (w, PhiInf w)) W₀ D := by
+    intro w hw
+    exact ⟨hw, hW₀map hw⟩
+  have hroot : ∀ w ∈ W₀, FInf (w, PhiInf w) = 0 := by
+    intro w hw
+    dsimp only [FInf, PhiInf]
+    rw [eInf.right_inv (hW₀target hw), sub_self]
+  have hinv : ∀ w ∈ K,
+      (partialFDeriv₂ FInf w (PhiInf w)).IsInvertible := by
+    intro w hw
+    have hwTarget : w ∈ eInf.target := hKt hw
+    have hpreQ : eInf.symm w ∈ Q := hKQ ⟨w, hw, rfl⟩
+    have hpreSource : eInf.symm w ∈ eInf.source :=
+      eInf.map_target hwTarget
+    have hfAt : DifferentiableAt Real (eInf : X → X) (eInf.symm w) :=
+      (hInf_cd.contDiffAt (hQ.mem_nhds hpreQ)).differentiableAt (by simp)
+    have hgAt : DifferentiableAt Real (eInf.symm : X → X) w :=
+      (hInf_symm_cd.contDiffAt
+        (eInf.open_target.mem_nhds hwTarget)).differentiableAt (by simp)
+    have hderiv_inv :
+        (fderiv Real (eInf : X → X) (eInf.symm w)).IsInvertible :=
+      fderiv_inv_of_local hfAt hgAt (eInf.right_inv hwTarget) rfl
+        (eInf.eventually_left_inverse hpreSource)
+        (eInf.eventually_right_inverse hwTarget)
+    change (partialFDeriv₂ (fun z : X × X ↦ eInf z.2 - z.1)
+      w (eInf.symm w)).IsInvertible
+    rw [partial_sub_snd hfAt]
+    exact hderiv_inv
+  obtain ⟨T⟩ := exists_compactRootTube hDopen hW₀open hK hKW₀
+    hFInf_cd hPhiInf_cd hgraph hroot hinv
+  have hsnd_conv : MapCInfConvOnCompacts D
+      (fun _ : Nat ↦ (fun z : X × X ↦ z.2))
+      (fun z : X × X ↦ z.2) :=
+    mapCInfConv_const (U := D) (fun z : X × X ↦ z.2)
+  have he_snd_conv : MapCInfConvOnCompacts D
+      (fun n z ↦ e n z.2) (fun z ↦ eInf z.2) :=
+    MapCInfConvOnCompacts.comp hDopen hQ hsnd_conv hforward
+      (fun _ ↦ contDiff_snd.contDiffOn) contDiff_snd.contDiffOn
+      hstage_cd hInf_cd
+      (fun z hz ↦ hz.2) (fun _ z hz ↦ hz.2)
+  have hfst_conv : MapCInfConvOnCompacts D
+      (fun _ : Nat ↦ (fun z : X × X ↦ z.1))
+      (fun z : X × X ↦ z.1) :=
+    mapCInfConv_const (U := D) (fun z : X × X ↦ z.1)
+  have hpair_conv : MapCInfConvOnCompacts D
+      (fun n z ↦ (e n z.2, z.1)) (fun z ↦ (eInf z.2, z.1)) :=
+    mapCInfConv_prodMk hDopen he_snd_conv hfst_conv
+      (fun n ↦ (hstage_cd n).comp contDiff_snd.contDiffOn
+        (fun z hz ↦ hz.2))
+      (hInf_cd.comp contDiff_snd.contDiffOn (fun z hz ↦ hz.2))
+      (fun _ ↦ contDiff_fst.contDiffOn) contDiff_fst.contDiffOn
+  let subMap : X × X → X := fun z ↦ z.1 - z.2
+  have hsub_cd : ContDiffOn Real ∞ subMap Set.univ :=
+    contDiff_fst.contDiffOn.sub contDiff_snd.contDiffOn
+  have hF_conv : MapCInfConvOnCompacts D F FInf := by
+    have hcomp := MapCInfConvOnCompacts.comp hDopen isOpen_univ hpair_conv
+      (mapCInfConv_const (U := Set.univ) subMap)
+      (fun n ↦ (hstage_cd n).comp contDiff_snd.contDiffOn
+          (fun z hz ↦ hz.2) |>.prodMk contDiff_fst.contDiffOn)
+      ((hInf_cd.comp contDiff_snd.contDiffOn
+          (fun z hz ↦ hz.2)).prodMk contDiff_fst.contDiffOn)
+      (fun _ ↦ hsub_cd) hsub_cd
+      (fun _ _ ↦ Set.mem_univ _) (fun _ _ _ ↦ Set.mem_univ _)
+    simpa only [F, FInf, subMap] using hcomp
+  obtain ⟨Nroot, Phi, hPhi_conv, _hPhi_cd, hspec, _huniq⟩ :=
+    T.exists_root_cInf hF_cd hF_conv
+  obtain ⟨V, hVopen, hKV, hVT, hVcompact⟩ :=
+    exists_open_between_and_isCompact_closure hK T.isOpen_W T.K_subset_W
+  have hVtarget : closure V ⊆ eInf.target := by
+    intro w hw
+    have hwW₀ : w ∈ W₀ :=
+      T.closure_W_subset (subset_closure (hVT hw))
+    exact hW₀target hwW₀
+  have hVmap : eInf.symm '' closure V ⊆ Q := by
+    rintro _ ⟨w, hw, rfl⟩
+    have hwW₀ : w ∈ W₀ :=
+      T.closure_W_subset (subset_closure (hVT hw))
+    exact hW₀map hwW₀
+  obtain ⟨Nsource, hNsource⟩ := eventually_atTop.mp hsource
+  let N : Nat := max Nroot Nsource
+  have hselected_Q : ∀ n ≥ N, Set.MapsTo (Phi n) (closure V) Q := by
+    intro n hn w hw
+    have hnroot : Nroot ≤ n := (Nat.le_max_left _ _).trans hn
+    have hwTW : w ∈ T.W := hVT hw
+    have hsp := hspec n hnroot w (subset_closure hwTW)
+    have hpairD : (w, Phi n w) ∈ D := by
+      apply T.tube_subset w (subset_closure hwTW)
+      rw [Metric.mem_closedBall]
+      exact hsp.1.le.trans (by linarith [T.rho_pos])
+    exact hpairD.2
+  have hstage_target : ∀ n ≥ N, closure V ⊆ (e n).target := by
+    intro n hn w hw
+    have hnroot : Nroot ≤ n := (Nat.le_max_left _ _).trans hn
+    have hnsource : Nsource ≤ n := (Nat.le_max_right _ _).trans hn
+    have hPhiQ : Phi n w ∈ Q := hselected_Q n hn hw
+    have hPhiSource : Phi n w ∈ (e n).source :=
+      hNsource n hnsource (subset_closure hPhiQ)
+    have hroot_n := (hspec n hnroot w (subset_closure (hVT hw))).2.1
+    have hew : e n (Phi n w) = w := sub_eq_zero.mp hroot_n
+    rw [← hew]
+    exact (e n).map_source hPhiSource
+  have heq_closed : ∀ n ≥ N,
+      Set.EqOn (Phi n) (e n).symm (closure V) := by
+    intro n hn w hw
+    have hnroot : Nroot ≤ n := (Nat.le_max_left _ _).trans hn
+    have hnsource : Nsource ≤ n := (Nat.le_max_right _ _).trans hn
+    have hPhiQ : Phi n w ∈ Q := hselected_Q n hn hw
+    have hPhiSource : Phi n w ∈ (e n).source :=
+      hNsource n hnsource (subset_closure hPhiQ)
+    have hroot_n := (hspec n hnroot w (subset_closure (hVT hw))).2.1
+    have hew : e n (Phi n w) = w := sub_eq_zero.mp hroot_n
+    exact ((e n).eq_symm_apply hPhiSource (hstage_target n hn hw)).mpr hew
+  have hstage : Filter.Eventually
+      (fun n : Nat ↦ closure V ⊆ (e n).target ∧
+        Set.MapsTo (e n).symm (closure V) Q) Filter.atTop := by
+    apply eventually_atTop.mpr
+    refine ⟨N, fun n hn ↦ ⟨hstage_target n hn, ?_⟩⟩
+    intro w hw
+    rw [← heq_closed n hn hw]
+    exact hselected_Q n hn hw
+  have hPhi_V : MapCInfConvOnCompacts V Phi PhiInf := by
+    intro K' hK' hK'V p
+    exact hPhi_conv K' hK'
+      (hK'V.trans (subset_closure.trans hVT)) p
+  have heq_eventually : Filter.Eventually
+      (fun n : Nat ↦ Set.EqOn ((e n).symm : X → X) (Phi n) V)
+      Filter.atTop := by
+    apply eventually_atTop.mpr
+    refine ⟨N, fun n hn w hw ↦ ?_⟩
+    exact (heq_closed n hn (subset_closure hw)).symm
+  have hinv_conv : MapCInfConvOnCompacts V
+      (fun n ↦ ((e n).symm : X → X)) eInf.symm := by
+    simpa only [PhiInf] using hPhi_V.congr_eventually hVopen
+      heq_eventually (fun _ _ ↦ rfl)
+  exact ⟨V, hVopen, hVcompact, hKV, hVtarget, hVmap, hstage, hinv_conv⟩
+
 end OpenPartialHomeomorph
 end Analysis
 end DifferentialGeometry

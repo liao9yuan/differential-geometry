@@ -77,3 +77,26 @@ and exact target refresh passed.  The next honest B/C frontier is the concrete
 endpoints remain theorem-level **0%**; dedicated Step-B/B1 machinery is about
 **94%**, Chapter 4 machinery about **86%**, and whole-HCG machinery about
 **57%**.
+
+## 2026-07-16 slotwise prescribed-radius retention
+
+`exists_slot_min` now carries `qWide`, `qAcc`, the phase-error threshold, and
+the inverse-error bound together for every live slot. These were existing
+outputs of the global scale selection; the live-cage theorem now preserves
+them through its finite slotwise specialization. Focused verification and the
+targeted refresh passed. No endpoint radius field was added.
+
+## 2026-07-16 full live-branch predicate
+
+`HasLiveBrFull` is the compact recurring predicate for one stage: every
+`LiveSlot` carries the exact `HasNormalBrFull` selected branch, including its
+fence and intrinsic transport data at the physical minimizing scale.  It is a
+packaging predicate over existing output, not a new branch construction or
+assumption.  `exists_hat_cm_min` produces it eventually, and
+`exists_diag_full` preserves it at every refined index before transferring
+canonical convergence onto the selected branches.
+
+Focused verification passed; downstream checked consumers confirm the exported
+predicate.  `StepB1RawInput` and textbook B1 remain theorem-level **0%**;
+dedicated Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and
+whole-HCG compactness machinery about **57%**.

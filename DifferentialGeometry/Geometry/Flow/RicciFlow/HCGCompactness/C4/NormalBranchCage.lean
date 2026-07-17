@@ -161,6 +161,57 @@ theorem lamInf_lt_halfMin
     _ < (aMin * hd.mu (L.rInf gamma + 1)) / 2 :=
       div_lt_div_of_pos_right hhat (by norm_num)
 
+/-- Choose an arbitrarily small positive center radius while retaining the
+six-radius physical cage around one stabilized hat. -/
+theorem exists_cage_rad
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hd : InjRadiusDecayInput (I := I) X) {D aMin : Real} (hD : 0 < D)
+    (haMin : 0 < aMin)
+    (hphys : 8 * Real.exp hd.C < aMin * D)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (gamma : Nat)
+    (eps : Real) (heps : 0 < eps) :
+    ∃ rad : Real, 0 < rad ∧ rad < eps ∧
+      ENNReal.ofReal (4 * L.lamInf gamma + 6 * rad) <
+        ENNReal.ofReal ((aMin * hd.mu (L.rInf gamma + 1)) / 2) := by
+  let rho := aMin * hd.mu (L.rInf gamma + 1)
+  let gap := rho / 2 - 4 * L.lamInf gamma
+  have hgap : 0 < gap := by
+    dsimp only [gap, rho]
+    linarith [lamInf_lt_halfMin hd hD hphys P L gamma]
+  let rad := min (gap / 12) (eps / 2)
+  have hrad : 0 < rad := by
+    dsimp only [rad]
+    exact lt_min (div_pos hgap (by norm_num)) (div_pos heps (by norm_num))
+  have hradGap : rad ≤ gap / 12 := min_le_left _ _
+  have hradEps : rad ≤ eps / 2 := min_le_right _ _
+  have hreal : 4 * L.lamInf gamma + 6 * rad < rho / 2 := by
+    dsimp only [gap] at hradGap
+    nlinarith
+  refine ⟨rad, hrad, by linarith, ?_⟩
+  exact (ENNReal.ofReal_lt_ofReal_iff
+    (div_pos (mul_pos haMin (hd.mu_pos _)) (by norm_num))).2 (by
+      simpa only [rho] using hreal)
+
+/-- Every live slot at one stage carries the full selected normal branch,
+including its fence and intrinsic transport data. -/
+def HasLiveBrFull
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hd : InjRadiusDecayInput (I := I) X} {D : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (n : Nat)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hconn : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (aMin : Real) (q : LiveSlot L pb r → NNReal)
+    (δ : LiveSlot L pb r → Real) : Prop :=
+  ∀ gamma : LiveSlot L pb r,
+    HasNormalBrFull (I := I) (X.obj (L.φ n))
+      (hcomplete.complete (L.φ n)) (hconn (L.φ n))
+      (seqCenterD hd P L n (gamma.1 : Nat)) (q gamma) (δ gamma)
+      (aMin * hd.mu (L.rInf (gamma.1 : Nat) + 1))
+
 /-- Choose the minimizing coefficient before the covering divisor, then
 specialize the same witness to slotwise limiting-radius cages after any net
 limit and finite packing range have been fixed. -/
@@ -174,6 +225,10 @@ theorem exists_slot_min
     (hconn : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
+    let N : NNReal :=
+      ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊
+    let T : NNReal := N⁻¹
     ∃ aMin : Real, 0 < aMin ∧
       ∀ {D : Real} (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
         (L : NetLimitData hd D P)
@@ -186,8 +241,17 @@ theorem exists_slot_min
               0 < q gamma ∧ 0 < δ gamma ∧ 0 < rho ∧
                 2 * rho < (q gamma : Real)) ∧
             (∀ gamma : LiveSlot L pb r,
+              6 * (q gamma : Real) <
+                h.phaseRadius (L.rInf (gamma.1 : Nat) + 1)) ∧
+            (∀ gamma : LiveSlot L pb r,
               3 * hb.metricC 1 * (2 * (q gamma : Real)) ^ 2 ≤
                 (2 / 3 : Real) * (q gamma : Real)) ∧
+            (∀ gamma : LiveSlot L pb r,
+              PhaseFlow.phaseErr (normalPhaseK hb (2 * q gamma)) < T) ∧
+            (∀ gamma : LiveSlot L pb r,
+              N * (T - PhaseFlow.phaseErr
+                    (normalPhaseK hb (2 * q gamma)))⁻¹ *
+                  PhaseFlow.phaseErr (normalPhaseK hb (2 * q gamma)) < 1 / 24) ∧
             (∀ᶠ k in Filter.atTop, ∀ gamma : LiveSlot L pb r,
               let Rgamma := L.rInf (gamma.1 : Nat) + 1
               let rho := aMin * hd.mu Rgamma
@@ -221,6 +285,10 @@ theorem exists_slot_min
                 rho / 2 ≤ Geometry.Riemannian.expRadiusGp
                   (I := I) (X.obj (L.φ k)).metric x := by
   classical
+  let N : NNReal :=
+    ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+      (E × E) →L[Real] (E × E))‖₊
+  let T : NNReal := N⁻¹
   obtain ⟨aq, aδ, aMin, haq, haδ, haMin, hscale⟩ :=
     normalMinScale (I := I) h hcomplete hconn
   refine ⟨aMin, haMin, ?_⟩
@@ -233,6 +301,9 @@ theorem exists_slot_min
         6 * (q : Real) < h.phaseRadius (L.rInf (gamma.1 : Nat) + 1) ∧
         3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
           (2 / 3 : Real) * (q : Real) ∧
+        PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T ∧
+        N * (T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)))⁻¹ *
+            PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < 1 / 24 ∧
         2 * (aMin * hd.mu (L.rInf (gamma.1 : Nat) + 1)) < (q : Real) ∧
         ∀ k (x : (X.obj k).M),
           hd.dist k x (X.obj k).basepoint ≤ L.rInf (gamma.1 : Nat) + 1 →
@@ -250,18 +321,38 @@ theorem exists_slot_min
     apply hscale
     nlinarith [(L.rInf_mem (gamma.1 : Nat)).1]
   choose q δ hdata using hslot
-  refine ⟨q, δ, ?_, ?_, ?_, ?_⟩
+  refine ⟨q, δ, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · intro gamma
     rcases hdata gamma with
-      ⟨hq, hδ, _hqeq, _hδlower, _hqWide, _hqAcc, hqMin, _hcentres⟩
+      ⟨hq, hδ, _hqeq, _hδlower, _hqWide, _hqAcc, _herr, _hinvErr, hqMin,
+        _hcentres⟩
     dsimp only
     exact ⟨hq, hδ, mul_pos haMin (hd.mu_pos _), hqMin⟩
   · intro gamma
-    exact (hdata gamma).2.2.2.2.2.1
+    rcases hdata gamma with
+      ⟨_hq, _hδ, _hqeq, _hδlower, hqWide, _hqAcc, _herr, _hinvErr, _hqMin,
+        _hcentres⟩
+    exact hqWide
+  · intro gamma
+    rcases hdata gamma with
+      ⟨_hq, _hδ, _hqeq, _hδlower, _hqWide, hqAcc, _herr, _hinvErr, _hqMin,
+        _hcentres⟩
+    exact hqAcc
+  · intro gamma
+    rcases hdata gamma with
+      ⟨_hq, _hδ, _hqeq, _hδlower, _hqWide, _hqAcc, herr, _hinvErr, _hqMin,
+        _hcentres⟩
+    exact herr
+  · intro gamma
+    rcases hdata gamma with
+      ⟨_hq, _hδ, _hqeq, _hδlower, _hqWide, _hqAcc, _herr, hinvErr, _hqMin,
+        _hcentres⟩
+    exact hinvErr
   · filter_upwards [liveCenters_rInf hd P hre L pb r] with k hk
     intro gamma
     rcases hdata gamma with
-      ⟨_hq, _hδ, _hqeq, _hδlower, hqWide, _hqAcc, hqMin, _hcentres⟩
+      ⟨_hq, _hδ, _hqeq, _hδlower, hqWide, _hqAcc, _herr, _hinvErr, hqMin,
+        _hcentres⟩
     letI : TopologicalSpace (X.obj (L.φ k)).M :=
       (X.obj (L.φ k)).topology
     letI : ChartedSpace H (X.obj (L.φ k)).M :=
@@ -285,7 +376,8 @@ theorem exists_slot_min
   · filter_upwards [liveCenters_rInf hd P hre L pb r] with k hk
     intro gamma
     rcases hdata gamma with
-      ⟨_hq, _hδ, _hqeq, _hδlower, _hqWide, _hqAcc, _hqMin, hcentres⟩
+      ⟨_hq, _hδ, _hqeq, _hδlower, _hqWide, _hqAcc, _herr, _hinvErr, _hqMin,
+        hcentres⟩
     letI : TopologicalSpace (X.obj (L.φ k)).M :=
       (X.obj (L.φ k)).topology
     letI : ChartedSpace H (X.obj (L.φ k)).M :=
@@ -443,8 +535,8 @@ theorem exists_live_min
     dsimp only [Rlive]
     exact mul_nonneg
       (mul_nonneg (by norm_num) (hd.lambda_pos hD 0).le) (by positivity)
-  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, _hqAcc, hqMin, hcentres⟩ :=
-    hscale Rlive hRlive
+  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, _hqAcc, _herr, _hinvErr,
+      hqMin, hcentres⟩ := hscale Rlive hRlive
   let ρ : Real := aMin * hd.mu Rlive
   have hρ : 0 < ρ := by
     dsimp only [ρ]
@@ -659,25 +751,27 @@ theorem HasNormalBrFull.exists_cm_deriv
             (I := I) (X.obj k).metric x c
           let xi : ι → E := fun i =>
             NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (pts i)
-          chartCmEqnB (I := I) (X.obj k).metric
-              (normal_enorm (I := I) (X.obj k)) x B z (mu, xi) = 0 ∧
-            ∃ L : E ≃L[Real] E,
-              HasFDerivAt
-                (fun u : E => chartCmEqnB (I := I) (X.obj k).metric
-                  (normal_enorm (I := I) (X.obj k)) x B u (mu, xi))
-                (L : E →L[Real] E) z ∧
-                ∃ (f : ((ι → Real) × (ι → E)) → E)
-                    (Df : ((ι → Real) × (ι → E)) →L[Real] E),
-                  f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
-                    (∀ᶠ params in nhds (mu, xi),
-                      chartCmEqnB (I := I) (X.obj k).metric
-                        (normal_enorm (I := I) (X.obj k)) x B
-                        (f params) params = 0) ∧
-                    (∀ᶠ zp in nhds (z, (mu, xi)),
-                      chartCmEqnB (I := I) (X.obj k).metric
-                          (normal_enorm (I := I) (X.obj k)) x B
-                          zp.1 zp.2 = 0 →
-                        zp.1 = f zp.2) := by
+          (∀ i, (z, xi i) ∈ e.target) ∧
+            z ∈ normalBall (I := I) (X.obj k) x ∧
+              chartCmEqnB (I := I) (X.obj k).metric
+                  (normal_enorm (I := I) (X.obj k)) x B z (mu, xi) = 0 ∧
+                ∃ L : E ≃L[Real] E,
+                  HasFDerivAt
+                    (fun u : E => chartCmEqnB (I := I) (X.obj k).metric
+                      (normal_enorm (I := I) (X.obj k)) x B u (mu, xi))
+                    (L : E →L[Real] E) z ∧
+                    ∃ (f : ((ι → Real) × (ι → E)) → E)
+                        (Df : ((ι → Real) × (ι → E)) →L[Real] E),
+                      f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
+                        (∀ᶠ params in nhds (mu, xi),
+                          chartCmEqnB (I := I) (X.obj k).metric
+                            (normal_enorm (I := I) (X.obj k)) x B
+                            (f params) params = 0) ∧
+                        (∀ᶠ zp in nhds (z, (mu, xi)),
+                          chartCmEqnB (I := I) (X.obj k).metric
+                              (normal_enorm (I := I) (X.obj k)) x B
+                              zp.1 zp.2 = 0 →
+                            zp.1 = f zp.2) := by
   classical
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -781,12 +875,24 @@ theorem HasNormalBrFull.exists_cm_deriv
     simpa only [xi] using
       IsNormalDiag.target_of_chart_dom (I := I) (X.obj k) hcomplete hconn x
         hq he hf hcSource (hsrc i) hdom
+  have hzNormal :
+      NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c ∈
+        normalBall (I := I) (X.obj k) x := by
+    have hpre : e.symm
+        (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c,
+          xi i0) ∈ Metric.ball (0 : E × E) q := by
+      rw [← he.1]
+      exact e.map_target (htgt i0)
+    have hout := (hf (e.symm
+      (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c,
+        xi i0)) (Metric.ball_subset_closedBall hpre)).2.1
+    simpa only [e.right_inv (htgt i0)] using hout
   have heta_one : eta < 1 := heta.trans (by norm_num)
   have hsol := IsNormalDiag.cm_sol_strict (I := I) (X.obj k) hcomplete hconn x
     hq he hf happrox heta_one
     (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)
     mu xi htgt h.μ_nonneg hsum hzero
-  simpa only [c, xi] using ⟨hzero, hsol⟩
+  simpa only [c, xi] using ⟨htgt, hzNormal, hzero, hsol⟩
 
 /-- A prescribed live source slot whose hat contains the center supplies its
 slotwise quantitative branch and reads the actual center equation. -/
@@ -1042,27 +1148,32 @@ theorem exists_hat_cm_sol_at
               let xi : Fin (pb.A r) → E := fun i =>
                 NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 (pts i)
-              chartCmEqnB (I := I) (X.obj (L.φ k)).metric
-                  (normal_enorm (I := I) (X.obj (L.φ k))) x0 B z (mu, xi) = 0 ∧
-                ∃ Lcm : E ≃L[Real] E,
-                  HasFDerivAt
-                      (fun u : E => chartCmEqnB (I := I) (X.obj (L.φ k)).metric
-                        (normal_enorm (I := I) (X.obj (L.φ k))) x0 B u (mu, xi))
-                      (Lcm : E →L[Real] E) z ∧
-                    ∃ (f : ((Fin (pb.A r) → Real) ×
-                          (Fin (pb.A r) → E)) → E)
-                        (Df : ((Fin (pb.A r) → Real) ×
-                          (Fin (pb.A r) → E)) →L[Real] E),
-                      f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
-                        (∀ᶠ params in nhds (mu, xi),
-                          chartCmEqnB (I := I) (X.obj (L.φ k)).metric
+              (∀ i, (z, xi i) ∈ e.target) ∧
+                z ∈ normalBall (I := I) (X.obj (L.φ k)) x0 ∧
+                  chartCmEqnB (I := I) (X.obj (L.φ k)).metric
+                      (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
+                      z (mu, xi) = 0 ∧
+                    ∃ Lcm : E ≃L[Real] E,
+                      HasFDerivAt
+                          (fun u : E => chartCmEqnB (I := I)
+                            (X.obj (L.φ k)).metric
                             (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
-                            (f params) params = 0) ∧
-                        (∀ᶠ zp in nhds (z, (mu, xi)),
-                          chartCmEqnB (I := I) (X.obj (L.φ k)).metric
-                              (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
-                              zp.1 zp.2 = 0 →
-                            zp.1 = f zp.2) := by
+                            u (mu, xi))
+                          (Lcm : E →L[Real] E) z ∧
+                        ∃ (f : ((Fin (pb.A r) → Real) ×
+                              (Fin (pb.A r) → E)) → E)
+                            (Df : ((Fin (pb.A r) → Real) ×
+                              (Fin (pb.A r) → E)) →L[Real] E),
+                          f (mu, xi) = z ∧ HasStrictFDerivAt f Df (mu, xi) ∧
+                            (∀ᶠ params in nhds (mu, xi),
+                              chartCmEqnB (I := I) (X.obj (L.φ k)).metric
+                                (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
+                                (f params) params = 0) ∧
+                            (∀ᶠ zp in nhds (z, (mu, xi)),
+                              chartCmEqnB (I := I) (X.obj (L.φ k)).metric
+                                  (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
+                                  zp.1 zp.2 = 0 →
+                                zp.1 = f zp.2) := by
   classical
   letI : TopologicalSpace (X.obj (L.φ k)).M := (X.obj (L.φ k)).topology
   letI : ChartedSpace H (X.obj (L.φ k)).M := (X.obj (L.φ k)).charted

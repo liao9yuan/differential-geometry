@@ -104,3 +104,10 @@ seam before the moving-stage argument.  It does not provide the support-smooth
 target tuple, a common-domain moving implicit solver, or an all-pairs chart
 tail.  `StepB1RawInput`, textbook B1, and all compactness endpoints remain 0%;
 the rounded machinery estimates remain 94% / 86% / 57%.
+
+## 2026-07-16 radius-aligned capstone data
+
+`exists_supp_cm_fin` now retains `qAcc` and both phase/inverse-error budgets in
+addition to `qWide`, and proves the derived alignment
+`C1 alpha ⊆ ball 0 (q alpha / 2)`. Focused verification passed. This closes a
+data-loss seam only; the all-pairs chart tail and `StepB1RawInput` remain 0%.

@@ -2,6 +2,7 @@ import DifferentialGeometry.Analysis.Calculus.MapConvergenceDeriv
 import DifferentialGeometry.Analysis.Calculus.PiDeriv
 import DifferentialGeometry.Analysis.Calculus.RingInverseDeriv
 import Mathlib.Analysis.Calculus.ContDiff.FaaDiBruno
+import Mathlib.Topology.MetricSpace.Thickening
 
 set_option autoImplicit false
 set_option linter.style.longLine false
@@ -70,6 +71,124 @@ theorem MapCInfConvOnCompacts.comp_tendsto_atTop {U : Set E}
     {τ : ℕ → ℕ} (hτ : Tendsto τ atTop atTop) :
     MapCInfConvOnCompacts U (fun k => Φ (τ k)) Φinf :=
   fun K hK hKU p => (h K hK hKU p).comp_tendsto_atTop hτ
+
+/-- Eventual truth along every cofinal triple of natural-number sequences gives
+one common three-index tail. -/
+theorem exists_three_tail {P : Nat → Nat → Nat → Prop}
+    (h : ∀ an bn cn : Nat → Nat,
+      Tendsto an atTop atTop → Tendsto bn atTop atTop →
+        Tendsto cn atTop atTop →
+          ∀ᶠ m in atTop, P (an m) (bn m) (cn m)) :
+    ∃ N : Nat, ∀ a ≥ N, ∀ b ≥ N, ∀ c ≥ N, P a b c := by
+  classical
+  by_contra hbad
+  push Not at hbad
+  choose a ha hbad using hbad
+  choose b hb hbad using hbad
+  choose c hc hbad using hbad
+  have ha_top : Tendsto a atTop atTop :=
+    tendsto_atTop_mono ha tendsto_id
+  have hb_top : Tendsto b atTop atTop :=
+    tendsto_atTop_mono hb tendsto_id
+  have hc_top : Tendsto c atTop atTop :=
+    tendsto_atTop_mono hc tendsto_id
+  obtain ⟨N, hN⟩ := eventually_atTop.mp (h a b c ha_top hb_top hc_top)
+  exact hbad N (hN N le_rfl)
+
+/-- Compact-open containment persists eventually under `C∞` convergence on
+compact subsets. -/
+theorem MapCInfConvOnCompacts.eventually_mapsTo
+    {U : Set E} {Φ : Nat → E → F} {Φinf : E → F}
+    (hconv : MapCInfConvOnCompacts U Φ Φinf)
+    {K : Set E} (hK : IsCompact K) (hKU : K ⊆ U)
+    (hΦinf : ContinuousOn Φinf K)
+    {V : Set F} (hV : IsOpen V) (hmap : Set.MapsTo Φinf K V) :
+    ∀ᶠ n in atTop, Set.MapsTo (Φ n) K V := by
+  have hKimage : IsCompact (Φinf '' K) :=
+    hK.image_of_continuousOn hΦinf
+  have hKV : Φinf '' K ⊆ V := Set.image_subset_iff.mpr hmap
+  obtain ⟨delta, hdelta, hthick⟩ :=
+    hKimage.exists_thickening_subset_open hV hKV
+  have htu := tendstoUniformlyOn_of_cPConv (hconv K hK hKU 0)
+  rw [Metric.tendstoUniformlyOn_iff] at htu
+  filter_upwards [htu delta hdelta] with n hn
+  intro x hx
+  apply hthick
+  rw [Metric.mem_thickening_iff]
+  exact ⟨Φinf x, ⟨x, hx, rfl⟩, by
+    simpa only [dist_comm] using hn x hx⟩
+
+/-- Convergence along every triple of index sequences tending to infinity is
+equivalent, in the direction needed by applications, to one common
+three-index tail for each compact set, derivative order, and tolerance. -/
+theorem MapCInfConvOnCompacts.three_tail
+    {U : Set E} {Φ : ℕ → ℕ → ℕ → E → F} {Φinf : E → F}
+    (hconv : ∀ an bn cn : ℕ → ℕ,
+      Tendsto an atTop atTop → Tendsto bn atTop atTop →
+        Tendsto cn atTop atTop →
+      MapCInfConvOnCompacts U
+        (fun n => Φ (an n) (bn n) (cn n)) Φinf)
+    {K : Set E} (hK : IsCompact K) (hKU : K ⊆ U) (p : ℕ)
+    (ε : ℝ) (hε : 0 < ε) :
+    ∃ N : ℕ, ∀ a ≥ N, ∀ b ≥ N, ∀ c ≥ N,
+      ∀ r ≤ p, ∀ x ∈ K, mapDerivNorm r (Φ a b c) Φinf x ≤ ε := by
+  classical
+  by_contra hbad
+  push Not at hbad
+  choose a ha hbad using hbad
+  choose b hb hbad using hbad
+  choose c hc hbad using hbad
+  choose r hr hbad using hbad
+  choose x hx hbad using hbad
+  have ha_top : Tendsto a atTop atTop :=
+    tendsto_atTop_mono ha tendsto_id
+  have hb_top : Tendsto b atTop atTop :=
+    tendsto_atTop_mono hb tendsto_id
+  have hc_top : Tendsto c atTop atTop :=
+    tendsto_atTop_mono hc tendsto_id
+  have hΦ := hconv a b c ha_top hb_top hc_top
+  obtain ⟨N, hN⟩ := hΦ K hK hKU p ε hε
+  exact not_lt_of_ge
+    (hN N le_rfl (r N) (hr N) (x N) (hx N)) (hbad N)
+
+/-- A finite family of refinable compact-`C∞` subsequence producers admits one
+common strictly increasing subsequence, even when its members have different
+domains. -/
+theorem exists_cInf_finite
+    {ι : Type*} [Finite ι]
+    (U : ι → Set E) (Φ : ι → ℕ → E → F)
+    (Q : ι → (E → F) → Prop)
+    (hstep : ∀ i (τ : ℕ → ℕ), StrictMono τ →
+      ∃ (σ : ℕ → ℕ) (Φinf : E → F), StrictMono σ ∧
+        MapCInfConvOnCompacts (U i)
+          (fun n => Φ i (τ (σ n))) Φinf ∧ Q i Φinf) :
+    ∃ (ψ : ℕ → ℕ), StrictMono ψ ∧
+      ∀ i, ∃ Φinf : E → F,
+        MapCInfConvOnCompacts (U i) (fun n => Φ i (ψ n)) Φinf ∧ Q i Φinf := by
+  classical
+  letI := Fintype.ofFinite ι
+  have aux : ∀ s : Finset ι,
+      ∃ (ψ : ℕ → ℕ), StrictMono ψ ∧
+        ∀ i ∈ s, ∃ Φinf : E → F,
+          MapCInfConvOnCompacts (U i) (fun n => Φ i (ψ n)) Φinf ∧ Q i Φinf := by
+    intro s
+    induction s using Finset.induction_on with
+    | empty =>
+        exact ⟨id, strictMono_id, by simp⟩
+    | @insert a s ha ih =>
+        obtain ⟨τ, hτ, hconv⟩ := ih
+        obtain ⟨σ, Φa, hσ, hΦa, hQa⟩ := hstep a τ hτ
+        refine ⟨τ ∘ σ, hτ.comp hσ, ?_⟩
+        intro i hi
+        rw [Finset.mem_insert] at hi
+        rcases hi with rfl | hi
+        · exact ⟨Φa, by simpa only [Function.comp_apply] using hΦa, hQa⟩
+        · obtain ⟨Φinf, hΦinf, hQinf⟩ := hconv i hi
+          exact ⟨Φinf, by
+            simpa only [Function.comp_apply] using
+              hΦinf.comp_tendsto_atTop hσ.tendsto_atTop, hQinf⟩
+  obtain ⟨ψ, hψ, hconv⟩ := aux Finset.univ
+  exact ⟨ψ, hψ, fun i => hconv i (Finset.mem_univ i)⟩
 
 /-- The fixed-order derivative projection for `MapCInfConvOnCompacts`. -/
 theorem MapCInfConvOnCompacts.tendstoUniformlyOn_iteratedFDeriv
@@ -415,6 +534,22 @@ theorem mapCInfConv_const {U : Set E'} (Φ : E' → P) :
   intro K _ _ p ε hε
   exact ⟨0, fun k _ r _ x _ => by
     simpa [mapDerivNorm, sub_self] using hε.le⟩
+
+/-- Precomposition by one fixed smooth map preserves smooth convergence on
+compact subsets. -/
+theorem MapCInfConvOnCompacts.precomp
+    {D : Set E'} {U : Set P} (hD : IsOpen D) (hU : IsOpen U)
+    [ProperSpace P]
+    {A : Nat → P → Q} {Ainf : P → Q}
+    (hA : MapCInfConvOnCompacts U A Ainf)
+    {f : E' → P} (hf : ContDiffOn ℝ (∞ : WithTop ℕ∞) f D)
+    (hmap : Set.MapsTo f D U)
+    (hAc : ∀ n, ContDiffOn ℝ (∞ : WithTop ℕ∞) (A n) U)
+    (hAinfC : ContDiffOn ℝ (∞ : WithTop ℕ∞) Ainf U) :
+    MapCInfConvOnCompacts D
+      (fun n x => A n (f x)) (fun x => Ainf (f x)) :=
+  MapCInfConvOnCompacts.comp hD hU (mapCInfConv_const f) hA
+    (fun _ => hf) hf hAc hAinfC hmap (fun _ => hmap)
 
 /-- Pairing preserves fixed-order convergence on a compact subset of an open
 domain. -/

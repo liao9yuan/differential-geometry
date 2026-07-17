@@ -275,20 +275,34 @@ small principal-coefficient estimate from a three-dimensional spectral `H2`
 ball.  `rem_h0_lip` also remains verified.  The exact mixed theorem is still
 unstated and therefore 0%; its dedicated machinery is approximately 70%.
 
-The remaining design frontier is the exact full Ricci--DeTurck principal
-cancellation and uniform order-zero/order-one branch.  The concrete identity
-exists privately in the high-order development, whose source is far above the
-3000-line maintenance limit, while the public high-order wrapper assumes
-`a >= 2 * dim + 10`.  The alternative public route integrates
-`MetricFamilyChartLinearization` and packages its genuinely first-order
-remainder in `RHSSectionCovGradL2Decomposition`.  A read-only consult did not
-return a ruling between these routes.  A coarse appeal to `rhs_h1_lip` is not a
-replacement because it leaves a nonsmall coefficient on the `H3` difference.
+### 2026-07-16 route-A execution
+
+The design frontier is settled in favor of extraction into small public
+modules. `RHSThreeArmCancel.rhsSlope_eq_arms` proves the exact complete
+Ricci+DeTurck three-arm cancellation before norms, and
+`RHSPathIntegral.rhsArm_sub_eq_paths` integrates it into concrete C0, C1, and
+top path coefficients. Both the exact cancellation and integrated identity are
+sorry-free and need no high-`a` assumption. The generic gradient-slot Ricci
+commutator was also extracted as `GradSlotCurvature.gradSlot_sub_eq_curv`.
+
+`LowRegPathSplit` now consumes `rhsTopPathIntegral` and the public top-path
+joint-smoothness theorem, so its source import chain no longer reaches the
+oversized high-order remainder file. Final downstream verification is waiting
+on an unrelated in-flight failure in `Geometry/Operator/Operators.lean`, which
+currently prevents named `.olean` refreshes. The smallest real mathematical
+frontier is now the uniform `LowRegCoeff` control of the concrete C0/C1 path
+coefficients, followed by assembly with `LowRegPathLower.lower_coeff_h1` and
+`top_path_ball_h1`.
+
+The exact mixed theorem remains unstated and therefore theorem-level 0%; its
+dedicated machinery is approximately 78%. A coarse appeal to `rhs_h1_lip`
+remains inadmissible because it leaves a nonsmall coefficient on the `H3`
+difference.
 
 After the mixed estimate come the actual low-regularity solver and a
 regularization statement valid on the same uniform interval.  E1 and
 `ricci_flow_unif_existence` remain theorem-level 0%; dedicated E1 machinery is
-about 40%.  The solver must quantify the admissible metric family once and
+about 42%.  The solver must quantify the admissible metric family once and
 produce one `tau > 0` such that every member has both an
 `IsQuasilinearMetricParabolicSolution` and `JointChartGramSmooth` on that same
 `tau`; a later metric-dependent shrink does not prove the uniform statement.

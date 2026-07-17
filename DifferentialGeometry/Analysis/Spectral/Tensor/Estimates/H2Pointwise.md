@@ -19,9 +19,17 @@ controls its pointwise norm and its first three `L2` jets.
 Focused verification passes, and the module build exporting these declarations
 passes.
 
+The file now also contains the general-dimensional supercritical Sobolev
+pointwise route used by rank-zero reconstruction.  `hsC0_fiber_sq` controls the
+pointwise fibre-norm square above the compact-manifold embedding threshold;
+`scalar0_fiber_sq` identifies the rank-zero fibre-norm square with the square
+of the scalar readout; and `scalar0_abs_le_hs` gives the resulting pointwise
+absolute-value bound.  All three producer lemmas are verified.
+
 ## Project accounting
 
 These theorems are implemented and verified.  They are analytic inputs for the
 three-dimensional `H2 x H3 -> H1` principal product estimate; it does not by
 itself prove the mixed Ricci--DeTurck remainder estimate or any existence
-theorem.
+theorem.  The new rank-zero bounds are reconstruction machinery, not a
+Perelman noncollapsing endpoint.

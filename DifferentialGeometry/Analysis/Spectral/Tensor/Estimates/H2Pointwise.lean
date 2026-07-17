@@ -3,6 +3,7 @@ import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGra
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.MetricRealization.TensorHsRealize
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.RiemannianFiberNormSq.RiemannianFiberNormSqNormBridge
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.OperatorFieldFibreNormJet
+import DifferentialGeometry.Geometry.Connection.MetricCompatibility.RankZeroInner
 
 /-!
 # Three-dimensional H2 pointwise control
@@ -20,6 +21,7 @@ open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
 open DifferentialGeometry.Analysis.Laplacian
 open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.MetricRealization
+open Tensor0SBundle
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -61,6 +63,103 @@ private theorem grad_jet_norm
     (iteratedCovGrad (I := I) g 0 (s + 1) j
       (covGrad (I := I) (M := M) g 0 s T)),
     norm_nonneg (iteratedCovGrad (I := I) g 0 s (j + 1) T)]
+
+/-- At the supercritical natural order, the intrinsic spectral Sobolev norm
+controls the pointwise squared fibre norm of a smooth covariant tensor. -/
+theorem hsC0_fiber_sq
+    (g : SmoothRiemannianMetric I M) (s : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : SmoothCcTensor g 0 s) (x : M),
+      riemannianFiberNormSq (I := I) (M := M) g 0 s x (T.toSection x) ≤
+        C ^ 2 * ‖ccTensorToHs (I := I) (M := M) g s
+          ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖ ^ 2 := by
+  classical
+  obtain ⟨Cpt, hCpt, hpt⟩ :=
+    DifferentialGeometry.PDE.RicciFlow.exists_riemannianFiberNorm_le_iteratedCovGrad_l2_jetSum_supercritical
+      (I := I) (M := M) g 0 s
+  obtain ⟨Chs, hChs, hhs⟩ := hsJet_le
+    (I := I) (M := M) g s (Module.finrank ℝ E / 2 + 1)
+  refine ⟨Cpt * Chs, mul_nonneg hCpt hChs, ?_⟩
+  intro T x
+  have hsq :
+      ∑ j ∈ Finset.range (Module.finrank ℝ E / 2 + 2),
+          ‖iteratedCovGrad (I := I) g 0 s j T‖ ^ 2 ≤
+        (∑ j ∈ Finset.range (Module.finrank ℝ E / 2 + 2),
+          ‖iteratedCovGrad (I := I) g 0 s j T‖) ^ 2 :=
+    Finset.sum_sq_le_sq_sum_of_nonneg (fun j _ => norm_nonneg _)
+  have hsum :
+      ∑ j ∈ Finset.range (Module.finrank ℝ E / 2 + 2),
+          ‖iteratedCovGrad (I := I) g 0 s j T‖ ≤
+        Chs * ‖ccTensorToHs (I := I) (M := M) g s
+          ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖ := by
+    simpa [Nat.add_assoc] using hhs T
+  calc
+    riemannianFiberNormSq (I := I) (M := M) g 0 s x (T.toSection x)
+        ≤ Cpt ^ 2 * ∑ j ∈ Finset.range (Module.finrank ℝ E / 2 + 2),
+            ‖iteratedCovGrad (I := I) g 0 s j T‖ ^ 2 := hpt T x
+    _ ≤ Cpt ^ 2 *
+          (∑ j ∈ Finset.range (Module.finrank ℝ E / 2 + 2),
+            ‖iteratedCovGrad (I := I) g 0 s j T‖) ^ 2 :=
+      mul_le_mul_of_nonneg_left hsq (sq_nonneg Cpt)
+    _ ≤ Cpt ^ 2 *
+          (Chs * ‖ccTensorToHs (I := I) (M := M) g s
+            ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖) ^ 2 :=
+      mul_le_mul_of_nonneg_left
+        (pow_le_pow_left₀
+          (Finset.sum_nonneg (fun j _ => norm_nonneg _)) hsum 2)
+        (sq_nonneg Cpt)
+    _ = (Cpt * Chs) ^ 2 *
+          ‖ccTensorToHs (I := I) (M := M) g s
+            ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖ ^ 2 := by
+      ring
+
+omit [NeZero (Module.finrank ℝ E)] [CompactSpace M] [I.Boundaryless]
+    [T2Space M] [SigmaCompactSpace M] in
+/-- For a smooth rank-zero tensor, the Riemannian fibre norm-squared is the
+square of its scalar readout. -/
+theorem scalar0_fiber_sq
+    (g : SmoothRiemannianMetric I M) (T : SmoothCcTensor g 0 0) (x : M) :
+    riemannianFiberNormSq (I := I) (M := M) g 0 0 x (T.toSection x) =
+      TensorRSField.scalar0 T.toSection x ^ 2 := by
+  let A := TensorRSField.rs0 (n := (∞ : WithTop ℕ∞)) T.toSection
+  have hTx : Tensor0SSpace.toRS0 (A x) = T.toSection x := by
+    rw [← Tensor0SField.toRS0_eq (n := (∞ : WithTop ℕ∞)) A x]
+    have hfield : A.toTensorRSField (∞ : WithTop ℕ∞) = T.toSection := by
+      dsimp only [A]
+      exact TensorRSField.toRS0_rs0
+        (n := (∞ : WithTop ℕ∞)) T.toSection
+    exact DFunLike.congr_fun hfield x
+  rw [riemannianFiberNormSq_eq_tensorInnerPointwise, ← hTx,
+    inner_toRS0_zero (I := I) (M := M) g x]
+  have hscalar : tensor0SSpace_evalScalar x (A x) =
+      TensorRSField.scalar0 T.toSection x := by
+    rw [Tensor0SSpace.evalScalar_apply]
+    rfl
+  rw [hscalar, pow_two]
+
+/-- At the supercritical natural order, scalar evaluation of a smooth
+rank-zero tensor is bounded by its intrinsic spectral Sobolev norm. -/
+theorem scalar0_abs_le_hs
+    (g : SmoothRiemannianMetric I M) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (T : SmoothCcTensor g 0 0) (x : M),
+      |TensorRSField.scalar0 T.toSection x| ≤
+        C * ‖ccTensorToHs (I := I) (M := M) g 0
+          ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖ := by
+  obtain ⟨C, hC, hbound⟩ := hsC0_fiber_sq (I := I) (M := M) g 0
+  refine ⟨C, hC, ?_⟩
+  intro T x
+  have hsq :
+      TensorRSField.scalar0 T.toSection x ^ 2 ≤
+        (C * ‖ccTensorToHs (I := I) (M := M) g 0
+          ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖) ^ 2 := by
+    rw [← scalar0_fiber_sq (I := I) (M := M) g T x]
+    calc
+      riemannianFiberNormSq (I := I) (M := M) g 0 0 x (T.toSection x)
+          ≤ C ^ 2 * ‖ccTensorToHs (I := I) (M := M) g 0
+              ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖ ^ 2 := hbound T x
+      _ = (C * ‖ccTensorToHs (I := I) (M := M) g 0
+              ((Module.finrank ℝ E / 2 + 1 : ℕ) : ℝ) T‖) ^ 2 := by
+        ring
+  exact abs_le_of_sq_le_sq hsq (mul_nonneg hC (norm_nonneg _))
 
 /-- In dimension three, the pointwise squared fibre norm of a smooth
 covariant tensor is controlled by its intrinsic spectral `H2` norm. -/

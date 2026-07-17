@@ -24,7 +24,7 @@ import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.RemainderCoeffL2JetMo
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.SymmAbsorbedCoeffInputReindexBounds
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.RicciArmPrincipalCoeffBackgroundJetBound
 import DifferentialGeometry.Analysis.Sobolev.Embedding.ContinuousSobolevRealization
-import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieHigherOrderCoeffField
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
 import DifferentialGeometry.Analysis.Parabolic.RicciLinearization.RealizedFamChartLieDeriv
 import DifferentialGeometry.Analysis.Parabolic.DeTurckLinearization.LieDeTurckRemainderOrderSplit
 import DifferentialGeometry.Analysis.Sobolev.TensorHilbert.DeTurckLieKernelL2JetBound
@@ -34293,17 +34293,6 @@ private lemma unitModel_zero_fw (g : SmoothRiemannianMetric I M) (s : ℕ) (x : 
   have h := unitModel_sub_local (I := I) g s 0 0 x
   rw [sub_zero] at h
   rw [h, sub_self]
-
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-set_option backward.isDefEq.respectTransparency false in
-def deTurckPhiMetTotal (g₀ g_bg g : SmoothRiemannianMetric I M) :
-    SmoothCcTensor g₀ 4 2 :=
-  DifferentialGeometry.Analysis.Parabolic.TensorSpectral.deTurckLieArm2PrincipalCoeff
-      (I := I) g₀ g g_bg
-    + traceHessianCoeff (I := I) (M := M) g₀ g
-    - (ricciArmPrincipalCoeff (I := I) (M := M) g₀ g
-        + ricciArmPrincipalCoeff (I := I) (M := M) g₀ g)
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in

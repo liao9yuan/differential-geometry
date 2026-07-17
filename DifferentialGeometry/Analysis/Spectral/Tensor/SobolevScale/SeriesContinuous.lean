@@ -54,6 +54,80 @@ private local instance : BorelSpace E := ⟨rfl⟩
 private local instance : MeasurableSpace M := borel M
 private local instance : BorelSpace M := ⟨rfl⟩
 
+/-- A continuous path in a sufficiently high Sobolev order has a summable
+lower-order coordinate-mass majorant on every compact time set. -/
+theorem mass_le_of_compact
+    (g : SmoothRiemannianMetric I M) {r s : ℕ} {σ σ' : ℝ}
+    (hneg_sum : Summable (fun i : TensorEigenIdx
+      (I := I) (M := M) g r s =>
+        tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ))))
+    {K : Set ℝ}
+    (hK : IsCompact K)
+    (W : ℝ → tensorHs (I := I) (M := M) g r s σ')
+    (hW : ContinuousOn W K)
+    (φ : TensorEigenIdx (I := I) (M := M) g r s → ℝ → ℝ)
+    (hcoeff : ∀ t ∈ K, ∀ i, (W t).coeff i = φ i t) :
+    ∃ B : TensorEigenIdx (I := I) (M := M) g r s → ℝ,
+      Summable B ∧
+        ∀ i, ∀ t ∈ K,
+          tensorSobolevWeight (I := I) (M := M) i σ *
+              (φ i t) ^ 2 ≤ B i := by
+  classical
+  have hnorm : ContinuousOn (fun t => ‖W t‖) K :=
+    continuous_norm.comp_continuousOn hW
+  obtain ⟨C, hC⟩ := hK.bddAbove_image hnorm
+  let C0 : ℝ := max C 0
+  have hC0 : 0 ≤ C0 := by
+    exact le_max_right _ _
+  let negWeight : TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
+    fun i => tensorSobolevWeight (I := I) (M := M) i (-(σ' - σ))
+  have hneg_sum' : Summable negWeight := by
+    simpa only [negWeight] using hneg_sum
+  let B : TensorEigenIdx (I := I) (M := M) g r s → ℝ :=
+    fun i => C0 ^ 2 * negWeight i
+  have hB : Summable B := by
+    exact hneg_sum'.mul_left (C0 ^ 2)
+  refine ⟨B, hB, ?_⟩
+  intro i t ht
+  have hCt : ‖W t‖ ≤ C0 := by
+    exact (hC ⟨t, ht, rfl⟩).trans (le_max_left _ _)
+  have hterm :
+      tensorSobolevWeight (I := I) (M := M) i σ' *
+          ((W t).coeff i) ^ 2 ≤ ‖W t‖ ^ 2 := by
+    rw [tensorHs.norm_sq_eq_tsum]
+    refine Summable.le_tsum (W t).weighted_summable i (fun j _ => ?_)
+    exact mul_nonneg
+      (tensorSobolevWeight_nonneg (I := I) (M := M) j σ')
+      (sq_nonneg _)
+  have htermC :
+      tensorSobolevWeight (I := I) (M := M) i σ' *
+          ((W t).coeff i) ^ 2 ≤ C0 ^ 2 := by
+    exact hterm.trans ((sq_le_sq₀ (norm_nonneg _) hC0).2 hCt)
+  have hneg : 0 ≤ negWeight i := by
+    exact tensorSobolevWeight_nonneg (I := I) (M := M) i _
+  have hbase : (0 : ℝ) < 1 + TensorEigenIdx.lambda (I := I) (M := M) i :=
+    lt_of_lt_of_le one_pos (one_le_one_add_lambda (I := I) (M := M) i)
+  have hsplit :
+      tensorSobolevWeight (I := I) (M := M) i σ =
+        negWeight i * tensorSobolevWeight (I := I) (M := M) i σ' := by
+    dsimp only [negWeight]
+    unfold tensorSobolevWeight
+    rw [← Real.rpow_add hbase,
+      show -(σ' - σ) + σ' = σ from by ring]
+  rw [← hcoeff t ht i, hsplit]
+  calc
+    (negWeight i *
+          tensorSobolevWeight (I := I) (M := M) i σ') *
+          ((W t).coeff i) ^ 2 =
+        negWeight i *
+          (tensorSobolevWeight (I := I) (M := M) i σ' *
+            ((W t).coeff i) ^ 2) := by ring
+    _ ≤ negWeight i * C0 ^ 2 :=
+      mul_le_mul_of_nonneg_left htermC hneg
+    _ = B i := by
+      simp only [B]
+      ring
+
 /-- **Weierstrass `M`-test for an eigen-coordinate-presented family in `Hˢ`.**
 
 For a family `W : ℝ → tensorHs g 0 2 σ` whose eigenbasis coordinates are `(W t).coeff i =

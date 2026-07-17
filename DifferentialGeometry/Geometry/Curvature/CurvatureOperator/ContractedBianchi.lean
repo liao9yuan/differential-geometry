@@ -1,5 +1,6 @@
 import DifferentialGeometry.Geometry.Curvature.CurvatureOperator.SecondBianchi
 import DifferentialGeometry.Geometry.Curvature.Bochner.TensorWeitzenbockIdentity
+import DifferentialGeometry.Geometry.Curvature.MetricLeviCivitaReconcile
 
 /-!
 # The covariant derivative of the Ricci tensor and the contracted second Bianchi identity
@@ -67,6 +68,7 @@ namespace Integral
 namespace Connection
 
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.Integral.DivergenceTheorem
 
 section NablaRicci
 
@@ -240,6 +242,61 @@ theorem scalarCurv_eq_orthonormal_trace
     (fun a b => ricciTensor_symm (I := I) g x a b) B
     (fun i => smoothOrthoFrame (I := I) g x i x) hB
     (fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j)
+
+/-- The canonical metric-trace scalar curvature agrees with the orthonormal-frame scalar
+curvature used by the contracted Bianchi identity. -/
+theorem metricScalar_eq_scal
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    metricScalarAt (I := I) g x = scalarCurv (I := I) g x := by
+  classical
+  let B : Fin (Module.finrank Real E) -> TangentSpace I x :=
+    fun i => smoothOrthoFrame (I := I) g x i x
+  have hB : forall i j : Fin (Module.finrank Real E),
+      g.inner x (B i) (B j) = if i = j then (1 : Real) else 0 :=
+    fun i j => smoothOrthoFrame_orthonormal_at_center (I := I) g x i j
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) x).baseSet :=
+    FiberBundle.mem_baseSet_trivializationAt' x
+  have hgram : forall i j : Fin (Module.finrank Real E),
+      g.inner x ((chartModelBasis E) i) ((chartModelBasis E) j) =
+        chartGramMatrix (I := I) g x x i j := by
+    intro i j
+    rw [chartGramMatrix_apply, chartBasisVecFiber_self, chartBasisVecFiber_self]
+  have hinv : Tensor0SBundle.MetricInverseInBasis_gen (I := I) g x
+      (chartModelBasis E) (fun i j => chartInvGramMatrix (I := I) g x x i j) := by
+    intro i j
+    constructor
+    · change (∑ k : Fin (Module.finrank Real E),
+          chartInvGramMatrix (I := I) g x x i k *
+            g.inner x ((chartModelBasis E) k) ((chartModelBasis E) j)) = _
+      simp_rw [hgram]
+      rw [← Matrix.mul_apply,
+        chartInvGramMatrix_mul_chartGramMatrix (I := I) g x hbase, Matrix.one_apply]
+    · change (∑ k : Fin (Module.finrank Real E),
+          g.inner x ((chartModelBasis E) i) ((chartModelBasis E) k) *
+            chartInvGramMatrix (I := I) g x x k j) = _
+      simp_rw [hgram]
+      rw [← Matrix.mul_apply,
+        chartGramMatrix_mul_chartInvGramMatrix (I := I) g x hbase, Matrix.one_apply]
+  calc
+    metricScalarAt (I := I) g x =
+        metricTracePair0SAt (I := I) g (metricRicciAt (I := I) g x) :=
+      metricScalarAt_def (I := I) g x
+    _ = ∑ i : Fin (Module.finrank Real E), ∑ j : Fin (Module.finrank Real E),
+        chartInvGramMatrix (I := I) g x x i j *
+          metricRicciAt (I := I) g x
+            (vec2 ((chartModelBasis E) i) ((chartModelBasis E) j)) :=
+      metricTracePair0SAt_eq_sum_basis (I := I) g (chartModelBasis E)
+        (fun i j => chartInvGramMatrix (I := I) g x x i j) hinv
+        (metricRicciAt (I := I) g x)
+    _ = ∑ i : Fin (Module.finrank Real E), ∑ j : Fin (Module.finrank Real E),
+        chartInvGramMatrix (I := I) g x x i j *
+          ricciTensor (I := I) g x ((chartModelBasis E) i) ((chartModelBasis E) j) := by
+      refine Finset.sum_congr rfl (fun i _ => Finset.sum_congr rfl (fun j _ => ?_))
+      rw [metricRicciAt_apply_eq_ricciTensor]
+    _ = ∑ i : Fin (Module.finrank Real E), ricciTensor (I := I) g x (B i) (B i) :=
+      (orthonormal_basis_bilin_trace (I := I) g x (ricciTensor (I := I) g x) B hB).symm
+    _ = scalarCurv (I := I) g x :=
+      (scalarCurv_eq_orthonormal_trace (I := I) g x B hB).symm
 
 end ScalarCurv
 

@@ -1675,6 +1675,15 @@ def HasSuppConvData
       inp.pack r hr
       (fun k => seqCenterD inp.decay P Lphi k (alpha.1 : Nat))
       (U alpha) (aInf alpha)) ∧
+  (∀ alpha,
+    centerAverage.WeightDataOn (U alpha)
+      (fun _ : Fin (inp.pack.A r) => Set.univ)
+      (fun z gamma =>
+        rawWeights
+          (cutRaw
+            (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
+            (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
+          z gamma)) ∧
   (∀ alpha target,
     ContDiffOn Real (⊤ : ℕ∞) (Jinf alpha target)
         (Metric.ball 0 (8 * L.lamInf (alpha.1 : Nat))) ∧
@@ -1716,6 +1725,168 @@ def HasSuppConvData
         (seqCenterD inp.decay P Lphi k (target.1.1 : Nat))
         (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)))
       (Metric.ball 0 (8 * L.lamInf (target.1.1 : Nat)))
+
+/-- Project the smooth normalized limiting weight family and its normalization
+on one retained source-coordinate domain. -/
+theorem HasSuppConvData.weight_on
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r) :
+    let i0 := baseIndex inp.decay inp.realizes inp.pack hr
+    let weightInf : E → Fin (inp.pack.A r) → Real := fun z gamma =>
+      rawWeights (cutRaw (aInf alpha i0) (aInf alpha) i0) z gamma
+    ContDiffOn Real (∞ : WithTop ℕ∞) weightInf (U alpha) ∧
+      centerAverage.WeightDataOn (U alpha)
+        (fun _ : Fin (inp.pack.A r) => Set.univ) weightInf := by
+  dsimp only
+  dsimp only [HasSuppConvData] at h
+  rcases h with
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, _hcover,
+      hlim, hweight, _htrans, _hsmooth⟩
+  have hlim0 := hlim alpha
+  dsimp only [HasAtomWeightLim] at hlim0
+  rcases hlim0 with
+    ⟨_hdead, _hatomC, _hatomInfC, _hatomConv, _hweightC,
+      hweightInfC, _hweightConv⟩
+  exact ⟨hweightInfC, hweight alpha⟩
+
+/-- Project the open source domain and the two nested compact coordinate cores
+for one retained source slot. -/
+theorem HasSuppConvData.core_on
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r) :
+    IsOpen (U alpha) ∧ IsCompact (C0 alpha) ∧ IsCompact (C1 alpha) ∧
+      C0 alpha ⊆ interior (C1 alpha) ∧ C1 alpha ⊆ U alpha := by
+  dsimp only [HasSuppConvData] at h
+  rcases h with
+    ⟨hU, _hU8, hC0, hC1, hC01, hC1U, _hcore, _hcover,
+      _hlim, _hweight, _htrans, _hsmooth⟩
+  exact ⟨hU alpha, hC0 alpha, hC1 alpha, hC01 alpha, hC1U alpha⟩
+
+/-- Project the all-stage normal-coordinate radius and geometric maps-to data
+for one retained source slot. -/
+theorem HasSuppConvData.geom_on
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf)
+    (k : Nat) (alpha : LiveSlot L inp.pack r) :
+    let Lphi := L.subseq hphi
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+    U alpha ⊆ Metric.ball 0
+        (inp.normalBounds.radius (Lphi.φ k)
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))) ∧
+      U alpha ⊆ Metric.ball 0
+        (expMapC2Radius (I := I) Y.metric
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat))) ∧
+      Set.MapsTo
+        (fun z => expMapDiffeo (I := I) Y.metric
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z)
+        (U alpha)
+        (Lphi.hatBall inp.decay inp.D P inp.pack r k alpha.1 ∩
+          ⋃ gamma : Fin (inp.pack.A r),
+            Lphi.innerBall inp.decay inp.D P inp.pack r k gamma) := by
+  dsimp only [HasSuppConvData] at h
+  rcases h with
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, hgeom,
+      _hlim, _hweight, _htrans, _hsmooth⟩
+  exact (hgeom k).1 alpha
+
+/-- The full source-support convergence package persists under every further
+strict refinement of its extracting subsequence. -/
+theorem HasSuppConvData.subseq
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} (hphi : StrictMono phi)
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) :
+    HasSuppConvData (I := I) inp P L r hr (phi ∘ ψ) (hphi.comp hψ)
+      U C0 C1 aInf Jinf Jbarinf := by
+  dsimp only [HasSuppConvData] at h ⊢
+  rcases h with
+    ⟨hU, hU8, hC0, hC1, hC01, hC1U, hcore, hcover, hweight,
+      hweightData, htrans, hsmooth⟩
+  refine ⟨hU, hU8, hC0, hC1, hC01, hC1U, ?_, ?_, ?_,
+    hweightData, ?_, ?_⟩
+  · intro k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply, seqCenterD_subseq,
+      NetLimitData.hatSourceBall_subseq] using hcore (ψ k)
+  · intro k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply, seqCenterD_subseq,
+      NetLimitData.hatBall_subseq, NetLimitData.innerBall_subseq,
+      NetLimitData.hatSourceBall_subseq] using hcover (ψ k)
+  · intro alpha
+    have hsub := (hweight alpha).subseq hψ
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+      seqCenterD_subseq] using hsub
+  · intro alpha target
+    rcases htrans alpha target with
+      ⟨hJ, hJbar, hJcont, hJbarcont, hJconv, hJbarconv, hleft, hright⟩
+    refine ⟨hJ, hJbar, hJcont, hJbarcont, ?_, ?_, hleft, hright⟩
+    · have hsub := hJconv.comp_tendsto_atTop hψ.tendsto_atTop
+      simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+        seqCenterD_subseq] using hsub
+    · have hsub := hJbarconv.comp_tendsto_atTop hψ.tendsto_atTop
+      simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+        seqCenterD_subseq] using hsub
+  · intro alpha target k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply,
+      seqCenterD_subseq] using hsmooth alpha target (ψ k)
 
 set_option maxHeartbeats 800000 in
 /-- Produce one master subsequence with source-local normalized weights and
@@ -1815,14 +1986,42 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
       hC0, hC1, hC01, hC1U, hcore, hgeom, hlim, htrans, hstage,
       hsupp⟩ :=
     inp.exists_atom_supp_fin h8 hradD hradRatio P L hstable r hr
-  refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
-  dsimp only
-  refine ⟨⟨hUopen, hU8, hC0, hC1, hC01, hC1U, hcore,
-    hgeom, hlim, htrans, hstage⟩, ?_⟩
   obtain ⟨hgp0, _hrad⟩ := inp.item3ScaleTails h8 hradD hradRatio P L r
   have hgpPhi : Item3GpScaleTail (I := I) inp.decay inp.D P
       (L.subseq hphi) inp.pack r :=
     hgp0.subseq inp.decay inp.D P L inp.pack r hphi
+  have hweightData : ∀ alpha : LiveSlot L inp.pack r,
+      centerAverage.WeightDataOn (U alpha)
+        (fun _ : Fin (inp.pack.A r) => Set.univ)
+        (fun z gamma =>
+          rawWeights
+            (cutRaw
+              (aInf alpha (baseIndex inp.decay inp.realizes inp.pack hr))
+              (aInf alpha) (baseIndex inp.decay inp.realizes inp.pack hr))
+            z gamma) := by
+    intro alpha
+    have hcoverU : ∀ᶠ k in Filter.atTop,
+        letI : TopologicalSpace (X.obj ((L.subseq hphi).φ k)).M :=
+          (X.obj ((L.subseq hphi).φ k)).topology
+        letI : ChartedSpace H (X.obj ((L.subseq hphi).φ k)).M :=
+          (X.obj ((L.subseq hphi).φ k)).charted
+        letI : IsManifold I ∞ (X.obj ((L.subseq hphi).φ k)).M :=
+          (X.obj ((L.subseq hphi).φ k)).smooth
+        letI : T2Space (TangentBundle I (X.obj ((L.subseq hphi).φ k)).M) :=
+          (X.obj ((L.subseq hphi).φ k)).t2TangentBundle
+        Set.MapsTo
+          (fun z => expMapDiffeo (I := I)
+            (X.obj ((L.subseq hphi).φ k)).metric
+            (seqCenterD inp.decay P (L.subseq hphi) k (alpha.1 : Nat)) z)
+          (U alpha)
+          (⋃ gamma : Fin (inp.pack.A r),
+            (L.subseq hphi).innerBall inp.decay inp.D P inp.pack r k gamma) :=
+      Filter.Eventually.of_forall fun k z hz => ((hgeom k).1 alpha).2.2 hz |>.2
+    exact (hlim alpha).weight_data_of_innerCover hgpPhi hcoverU
+  refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
+  dsimp only
+  refine ⟨⟨hUopen, hU8, hC0, hC1, hC01, hC1U, hcore,
+    hgeom, hlim, hweightData, htrans, hstage⟩, ?_⟩
   have hcenters : ∀ᶠ n in Filter.atTop, ∀ alpha : LiveSlot L inp.pack r,
       seqCenter inp.decay inp.D P ((L.subseq hphi).φ n) (alpha.1 : Nat) =
         some (seqCenterD inp.decay P (L.subseq hphi) n (alpha.1 : Nat)) :=
@@ -1947,25 +2146,8 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
     rw [hexp] at hmap
     exact hmap.1
   · intro alpha
-    have hcoverU : ∀ᶠ k in Filter.atTop,
-        letI : TopologicalSpace (X.obj ((L.subseq hphi).φ k)).M :=
-          (X.obj ((L.subseq hphi).φ k)).topology
-        letI : ChartedSpace H (X.obj ((L.subseq hphi).φ k)).M :=
-          (X.obj ((L.subseq hphi).φ k)).charted
-        letI : IsManifold I ∞ (X.obj ((L.subseq hphi).φ k)).M :=
-          (X.obj ((L.subseq hphi).φ k)).smooth
-        letI : T2Space (TangentBundle I (X.obj ((L.subseq hphi).φ k)).M) :=
-          (X.obj ((L.subseq hphi).φ k)).t2TangentBundle
-        Set.MapsTo
-          (fun z => expMapDiffeo (I := I)
-            (X.obj ((L.subseq hphi).φ k)).metric
-            (seqCenterD inp.decay P (L.subseq hphi) k (alpha.1 : Nat)) z)
-          (U alpha)
-          (⋃ gamma : Fin (inp.pack.A r),
-            (L.subseq hphi).innerBall inp.decay inp.D P inp.pack r k gamma) :=
-      Filter.Eventually.of_forall fun k z hz => ((hgeom k).1 alpha).2.2 hz |>.2
-    have hdata := (hlim alpha).weight_data_of_innerCover hgpPhi hcoverU
-    simpa only [Set.preimage_univ] using hdata.comp (fun _ hx => hx.2)
+    simpa only [Set.preimage_univ] using
+      (hweightData alpha).comp (fun _ hx => hx.2)
   · let chi := fun (alpha : LiveSlot L inp.pack r) =>
       NormalCoordinates.normalChartAt (I := I) Y.metric
         (seqCenterD inp.decay P (L.subseq hphi) n (alpha.1 : Nat))

@@ -58,3 +58,19 @@ Uniform low-regularity Ricci--DeTurck existence and
 `ricci_flow_unif_existence` remain theorem-level 0%. The top-arm theorem is
 proved; the mixed `H3 -> H1` remainder theorem itself is still unstated and
 therefore theorem-level 0%.
+
+## 2026-07-16 route-A migration
+
+The architecture choice is now settled and implemented as route A. The exact
+Ricci+DeTurck three-arm cancellation and its concrete path integrals were
+extracted into small public modules. Every top-path occurrence in this module
+now uses `DeTurckCoefficients.rhsTopPathIntegral`; the old oversized remainder
+file is absent from this import chain.
+
+The migrated source has not yet received its final focused check because two
+new upstream modules need named `.olean` refreshes, and that refresh currently
+stops in the unrelated in-flight `Geometry/Operator/Operators.lean` changes.
+The previously proved top estimate is unchanged mathematically. The mixed
+`H3 -> H1` endpoint remains unstated (0%); dedicated machinery is approximately
+78% complete. Uniform low-regularity Ricci--DeTurck existence remains an
+unstated theorem (0%).

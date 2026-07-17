@@ -1,9 +1,11 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.FaithfulH1Embedding
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.FractionalPower
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.IteratedCovGradHsJetBound
 import DifferentialGeometry.Analysis.Spectral.Tensor.EllipticBridge.EigenvectorWeakSolution.Regularity.EigenvectorTensorHsToWtwokTwo
 import DifferentialGeometry.Analysis.Parabolic.MaximalRegularity.OperatorEquation
 import DifferentialGeometry.Analysis.Elliptic.ConnectionLaplacian.GreenIdentityAndIBP.IntegratedOrder2Garding
 import DifferentialGeometry.Geometry.Connection.Laplacian.RankZero
+import DifferentialGeometry.Geometry.Operator.LaplacianBridge
 import DifferentialGeometry.Geometry.Connection.ChartTensorNabla.Agreement.Tensor0SRSCovariantDerivativeAgreement
 import DifferentialGeometry.Geometry.Curvature.CovGradRoughLap.GradientField
 import DifferentialGeometry.Analysis.Sobolev.Embedding.SobolevEmbeddingCm
@@ -71,6 +73,64 @@ omit [BoundarylessManifold I M] in
         (g := g) (r := 0) (s := 0) _ v).coeff i =
     -TensorEigenIdx.lambda (I := I) (M := M) i * v.coeff i
   rw [tensorHs.castEquiv_coeff]
+
+/-- On smooth rank-zero tensors, the spectral rough Laplacian at every base
+order agrees with the spectral embedding of the geometric rough connection
+Laplacian. -/
+theorem scalarLapHs_core
+    (g : SmoothRiemannianMetric I M)
+    (m : ℝ) (S : SmoothCcTensor g 0 0) :
+    tensorScaleLaplacian (I := I) (M := M)
+        (g := g) (r := 0) (s := 0) m
+        (ccTensorToHs (I := I) (M := M) g 0 (m + 2) S) =
+      ccTensorToHs (I := I) (M := M) g 0 m
+        (rawTensorConnLapSmooth (I := I) g 0 0 S) := by
+  refine tensorHs.ext ?_
+  funext i
+  rw [tensorScaleLaplacian_coeff, ccTensorToHs_coeff,
+    ccTensorToHs_coeff,
+    rawLap_coeff (I := I) (M := M) g 0
+      (tensorResolventL2_isCompactOperator (I := I) (M := M) g 0 0) S i]
+
+/-- The scalar readout of the rough connection Laplacian of an arbitrary
+smooth rank-zero tensor is its invariant scalar Laplacian. -/
+theorem rawLap_cc_scalar
+    (g : SmoothRiemannianMetric I M) (S : SmoothCcTensor g 0 0) (x : M) :
+    TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞))
+        (rawTensorConnLapSmooth (I := I) g 0 0 S).toSection x =
+      DifferentialGeometry.Integral.DivergenceTheorem.Δ_g (I := I) g
+        (TensorRSField.scalar0_smooth
+          (n := (∞ : WithTop ℕ∞)) S.toSection) x := by
+  let f := TensorRSField.scalar0 (n := (∞ : WithTop ℕ∞)) S.toSection
+  let hf := TensorRSField.scalar0_smooth
+    (n := (∞ : WithTop ℕ∞)) S.toSection
+  have hraw := rawLap_scalar (I := I) (M := M) g hf x
+  have hlift :
+      (Tensor0SField.fromScalarField (∞ : WithTop ℕ∞) f hf).toTensorRSField
+          (∞ : WithTop ℕ∞) = S.toSection := by
+    simpa only [f, hf] using
+      (TensorRSField.lift_scalar0
+        (n := (∞ : WithTop ℕ∞)) S.toSection)
+  rw [hlift] at hraw
+  change tensor0SSpace_evalScalar x
+      ((rawTensorConnLapSmooth (I := I) g 0 0 S).toSection x
+        (Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
+          (I := I) (M := M) (∞ : WithTop ℕ∞) x)) = _
+  rw [rawTensorConnLapSmooth_toSection_apply (I := I) (M := M) g 0 0 S x,
+    hraw, Tensor0SSpace.toRS0_apply]
+  have hone : tensor0SSpace_evalScalar x
+      (Tensor0SField.one0 (𝕜 := ℝ) (E := E) (H := H)
+        (I := I) (M := M) (∞ : WithTop ℕ∞) x) = 1 := by
+    rw [Tensor0SSpace.evalScalar_apply]
+    exact Tensor0SField.one0_apply (𝕜 := ℝ) (E := E) (H := H)
+      (I := I) (M := M) (∞ : WithTop ℕ∞) x Fin.elim0
+  rw [hone, one_smul]
+  change Tensor0SNabla.tensor0Iso I M x
+      ((Tensor0SNabla.tensor0Iso I M x).symm
+        (laplacian (I := I) (LeviCivita (I := I) g) g f x)) = _
+  rw [ContinuousLinearEquiv.apply_symm_apply,
+    DifferentialGeometry.Integral.Connection.laplacian_levi_eq
+      (I := I) g hf x]
 
 omit [BoundarylessManifold I M] in
 /-- The scalar spectral Laplacian is norm-non-increasing from `H²` to `H⁰`. -/

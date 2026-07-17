@@ -115,3 +115,15 @@ and first strong `H^m` derivative are now verified downstream.  Higher time
 jets remain a separate theorem-level frontier: their next missing producer is
 the jointly smooth fixed-fibre time derivative of a rank-`(r,0)` coefficient
 family.  Perelman noncollapsing itself remains unstated and unproved (0%).
+
+## 2026-07-16 reflected-time coefficients
+
+`scalarTrace_rev` and `connTrace_rev` provide the backward-time coefficient
+families, and `scalarTrace_rev_on` / `connTrace_rev_on` restrict them to a
+consumer slab inside the producer layer. Keeping the restriction here avoids
+re-elaborating the realized total-space chart topology in downstream files.
+
+All four producers pass focused and targeted verification. They are **100%**
+and close the former fixed-fibre reflected-coefficient frontier. The all-scale
+dynamic Laplacian path and `galLimExt_smooth` are now proved downstream;
+Perelman noncollapsing remains theorem-level **0%**.

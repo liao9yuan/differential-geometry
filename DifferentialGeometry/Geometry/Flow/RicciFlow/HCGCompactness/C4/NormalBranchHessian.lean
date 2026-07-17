@@ -281,6 +281,38 @@ noncomputable def invVelSum {ι : Type*} [Fintype ι]
 
 omit [FiniteDimensional Real E] [CompleteSpace E]
     [NeZero (Module.finrank Real E)] in
+/-- The inverse-velocity sum only depends on target entries carrying nonzero
+weight. -/
+theorem invVelSum_congr_ne {ι : Type*} [Fintype ι]
+    (e : OpenPartialHomeomorph (E × E) (E × E))
+    (mu : ι → Real) (xi xi' : ι → E) (z : E)
+    (hxi : ∀ i, mu i ≠ 0 → xi i = xi' i) :
+    invVelSum e mu xi z = invVelSum e mu xi' z := by
+  classical
+  apply Finset.sum_congr rfl
+  intro i _hi
+  by_cases hi : mu i = 0
+  · simp only [hi, zero_smul]
+  · rw [hxi i hi]
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+    [NeZero (Module.finrank Real E)] in
+/-- Equal partial branches give the same inverse-velocity sum whenever every
+nonzero-weight target lies in their common target. -/
+theorem invVelSum_congr_br {ι : Type*} [Fintype ι]
+    (e e' : OpenPartialHomeomorph (E × E) (E × E))
+    (mu : ι → Real) (xi : ι → E) (z : E) (heq : e ≈ e')
+    (htgt : ∀ i, mu i ≠ 0 → (z, xi i) ∈ e.target) :
+    invVelSum e mu xi z = invVelSum e' mu xi z := by
+  classical
+  apply Finset.sum_congr rfl
+  intro i _hi
+  by_cases hmu : mu i = 0
+  · simp only [hmu, zero_smul]
+  · rw [heq.symm_eqOn_target (htgt i hmu)]
+
+omit [FiniteDimensional Real E] [CompleteSpace E]
+    [NeZero (Module.finrank Real E)] in
 /-- The derivative of the weighted inverse-velocity sum is the weighted sum
 of the slotwise derivatives. -/
 theorem invVelSum_fderiv {ι : Type*} [Fintype ι]
@@ -1332,6 +1364,78 @@ theorem chartCmEqnB_factor
       (normalPair (I := I) Y x (z, xi i)) =
     normalReadCLM (I := I) Y x z (e.symm (z, xi i)).2
   exact readout_factor (I := I) Y hcomplete hconn x hq he hf (htgt i)
+
+/-- On the normal-coordinate domain, the selected chart center equation
+vanishes exactly when its weighted inverse-velocity sum vanishes. -/
+theorem chartCm_zero_iff
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {delta : Real}
+    {e : OpenPartialHomeomorph (E × E) (E × E)}
+    (hq : 0 < q) (he : IsNormalDiag (I := I) Y hcomplete hconn x q delta e)
+    (hf : NormalDiagFence (I := I) Y x q e)
+    {ι : Type} [Fintype ι] (z : E) (mu : ι → Real) (xi : ι → E)
+    (htgt : ∀ i, (z, xi i) ∈ e.target)
+    (hz : z ∈ normalBall (I := I) Y x) :
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : IsManifold I 1 Y.M := IsManifold.of_le
+      (I := I) (M := Y.M) (n := ∞) (by decide)
+    letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+    letI : T2Space Y.M := Y.t2
+    letI : ConnectedSpace Y.M := hconn
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : TopologicalSpace.MetrizableSpace Y.M :=
+      Manifold.metrizableSpace I Y.M
+    letI : T3Space Y.M := inferInstance
+    letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+      Y.riemBundle (I := I)
+    letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+      Y.riemInner (I := I)
+    letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+    letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+    letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+    (chartCmEqnB (I := I) Y.metric (normal_enorm (I := I) Y) x
+        (toBranch (I := I) Y hcomplete hconn x hq he) z (mu, xi) = 0 ↔
+      invVelSum e mu xi z = 0) := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M => TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+    (fun y : Y.M => TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  have hzNormLt : ‖z‖ < expMapC2Radius (I := I) Y.metric x := by
+    have hz' := hz
+    change z ∈ Metric.ball (0 : E)
+      (expMapC2Radius (I := I) Y.metric x) at hz'
+    rwa [Metric.mem_ball, dist_zero_right] at hz'
+  have hzSource : z ∈ (expMapDiffeo (I := I) Y.metric x).source :=
+    mem_expMapDiffeo_source_of_norm_lt_radius (I := I) Y.metric x hzNormLt
+  have hbase : expMapDiffeo (I := I) Y.metric x z ∈
+      (trivializationAt E (TangentSpace I) x).baseSet := by
+    rw [TangentBundle.trivializationAt_baseSet]
+    exact NormalCoordinates.exp_target_sub_chart (I := I) Y.metric x
+      ((expMapDiffeo (I := I) Y.metric x).map_source hzSource)
+  rw [chartCmEqnB_factor (I := I) Y hcomplete hconn x hq he hf z mu xi htgt,
+    ← normalReadCLE_coe (I := I) Y x hz hbase]
+  exact (normalReadCLE (I := I) Y x hz hbase).map_eq_zero_iff
 
 /-- At a zero of the selected-branch center equation, its derivative in the
 center coordinate is a continuous linear equivalence. -/

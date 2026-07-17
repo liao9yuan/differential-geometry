@@ -49,3 +49,26 @@ Verification status: focused Lean check and targeted module build passed.
 Axiom print for `gradientFun_eq_of_flat` is
 `[propext, Classical.choice, Quot.sound]`; no `sorryAx` is introduced by this
 declaration.
+
+## 2026-07-16
+
+Added the intrinsic logarithm producers needed by the entropy potential lane:
+
+- `gradientFun_log` proves the pointwise gradient chain rule at a positive
+  value. Its proof follows the existing `gradientFun_rpow` scalar normal form:
+  evaluate through `extDerivFun` and `fromTangentSpace`, then recover the
+  tangent vector with metric-flat injectivity. This avoids asking the realized
+  scalar tangent fiber to synthesize a ring instance.
+- `laplacian_log` proves
+  `Delta (log f) = f^-1 Delta f - (f^2)^-1 |grad f|^2` from differentiability,
+  positivity, and the existing differentiability of `grad f`. It uses
+  `divergence_smul`, the real-power derivative at exponent `-1`, and the exact
+  `Real.rpow_two` bridge between real and natural powers.
+
+No chart-selection, compactness, boundary, or new consumer-side convergence
+assumption was added. Focused verification passed with no local `sorry`.
+
+Accounting: both named producer theorems are complete (100%).  The downstream
+`potential_pde` theorem is separately complete in `PotentialEvolution.lean`;
+these producer proofs are not double-counted as completion of that consumer or
+of the still-open W-monotonicity and noncollapsing endpoints.

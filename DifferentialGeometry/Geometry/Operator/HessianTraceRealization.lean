@@ -401,6 +401,95 @@ theorem hessianSec_realizesAt
     (fun y : M => hessianSec (I := I) cov hcov u hu y) x
     ((hessianSec_nabla (I := I) cov hcov u hu) x)
 
+/-- A metric-compatible canonical Hessian is the metric pairing of the
+covariant derivative of the gradient, evaluated on arbitrary tangent vectors. -/
+theorem hessSec_inner_cov
+    [T2Space M]
+    (cov : CovariantDerivative I E (TangentSpace I : M -> Type _))
+    (hcov : CovariantDerivative.ContMDiffCovariantDerivativeLocally cov
+      (∞ : WithTop ℕ∞))
+    (g : SmoothRiemannianMetric I M)
+    (hmc : DifferentialGeometry.Integral.Connection.IsMetricCompatible_gen
+      (I := I) cov g)
+    (f : M -> Real) (hf : ContMDiff I 𝓘(Real, Real) (∞ : WithTop ℕ∞) f)
+    (x : M) (v w : TangentSpace I x) :
+    hessianSec (I := I) cov hcov f hf x (vec2 (I := I) v w) =
+      g.inner x ((cov (fun y : M => gradientFun (I := I) g f y) x) v) w := by
+  let X : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _) :=
+    (ContMDiffSection.exists_eq_at_gen
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x v).choose
+  let Y : ContMDiffSection I E (∞ : WithTop ℕ∞)
+      (TangentSpace I : M -> Type _) :=
+    (ContMDiffSection.exists_eq_at_gen
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x w).choose
+  let G : (y : M) -> TangentSpace I y :=
+    fun y => gradientFun (I := I) g f y
+  have hX : X x = v :=
+    (ContMDiffSection.exists_eq_at_gen
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x v).choose_spec
+  have hY : Y x = w :=
+    (ContMDiffSection.exists_eq_at_gen
+      (I := I) (F := E) (V := TangentSpace I) (n := (⊤ : ℕ∞)) x w).choose_spec
+  have hXm : MDiffAt (T% fun y : M => X y) x :=
+    X.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hYm : MDiffAt (T% fun y : M => Y y) x :=
+    Y.contMDiff.contMDiffAt.mdifferentiableAt (by simp)
+  have hGm : MDiffAt (T% fun y : M => G y) x :=
+    gradientFun_mdiffAt (I := I) g hf x
+  have hmetric := DifferentialGeometry.Integral.Connection.metric_compatible_apply
+    (I := I) hmc (fun y : M => X y) G (fun y : M => Y y) hXm hGm hYm
+  have hmetric_ext :
+      extDerivFun (I := I) (fun y : M => g.inner y (G y) (Y y)) x (X x) =
+        g.inner x (cov G x (X x)) (Y x) +
+          g.inner x (G x) (cov (fun y : M => Y y) x (X x)) := by
+    rw [extDerivFun_real_eq_mfderiv]
+    exact hmetric
+  have hnabla_eval :
+      nablaDuAt (I := I) cov X (duSec (I := I) f hf) x
+          (fun _ : Fin 1 => Y x) =
+        extDerivFun (I := I)
+            (fun y : M => duSec (I := I) f hf y (fun _ : Fin 1 => Y y)) x
+            (X x) -
+          duSec (I := I) f hf x
+            (fun _ : Fin 1 => (cov (fun y : M => Y y) x) (X x)) := by
+    simpa [nablaDuAt] using
+      nabla0SFun_one_eval_smooth_slots (I := I) cov X Y
+        (duSec (I := I) f hf) x
+  have hdu :
+      (fun y : M => duSec (I := I) f hf y (fun _ : Fin 1 => Y y)) =
+        fun y : M => g.inner y (G y) (Y y) := by
+    funext y
+    rw [duSec_apply]
+    exact differential1FormFun_apply_eq_inner_gradientFun (I := I) g f y (Y y)
+  have hcorr :
+      duSec (I := I) f hf x
+          (fun _ : Fin 1 => (cov (fun y : M => Y y) x) (X x)) =
+        g.inner x (G x) (cov (fun y : M => Y y) x (X x)) := by
+    rw [duSec_apply]
+    exact differential1FormFun_apply_eq_inner_gradientFun
+      (I := I) g f x ((cov (fun y : M => Y y) x) (X x))
+  calc
+    hessianSec (I := I) cov hcov f hf x (vec2 (I := I) v w) =
+        hessianSec (I := I) cov hcov f hf x
+          (vec2 (I := I) (X x) (Y x)) := by rw [hX, hY]
+    _ = nablaDuAt (I := I) cov X (duSec (I := I) f hf) x
+          (fun _ : Fin 1 => Y x) :=
+      (hessianSec_nabla (I := I) cov hcov f hf) x X (Y x)
+    _ = extDerivFun (I := I)
+          (fun y : M => duSec (I := I) f hf y (fun _ : Fin 1 => Y y)) x
+          (X x) -
+        duSec (I := I) f hf x
+          (fun _ : Fin 1 => (cov (fun y : M => Y y) x) (X x)) := hnabla_eval
+    _ = extDerivFun (I := I) (fun y : M => g.inner y (G y) (Y y)) x (X x) -
+        g.inner x (G x) (cov (fun y : M => Y y) x (X x)) := by
+      rw [hdu, hcorr]
+    _ = g.inner x (cov G x (X x)) (Y x) := by
+      rw [hmetric_ext]
+      ring
+    _ = g.inner x ((cov (fun y : M => gradientFun (I := I) g f y) x) v) w := by
+      rw [hX, hY]
+
 /-- Canonical third covariant derivative section `∇ Hess u`, defined as the
 total covariant derivative of the canonical Hessian section. -/
 noncomputable def nablaHessSec

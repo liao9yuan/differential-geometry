@@ -80,6 +80,21 @@ def repoint (X : PointedRiemannianSeq.{u, uE, uH} (I := I))
     PointedRiemannianSeq.{u, uE, uH} (I := I) where
   obj i := (X.obj i).repoint (b i)
 
+/-- Termwise connectedness is preserved when a pointed sequence is
+reindexed. -/
+theorem connected_subseq
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (hX : ∀ k,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M)
+    (f : Nat → Nat) :
+    ∀ k,
+      letI : TopologicalSpace ((X.subseq f).obj k).M :=
+        ((X.subseq f).obj k).topology
+      ConnectedSpace ((X.subseq f).obj k).M := by
+  intro k
+  simpa only [subseq] using hX (f k)
+
 end PointedRiemannianSeq
 
 /-- Completeness of the Riemannian distance induced by the stored smooth

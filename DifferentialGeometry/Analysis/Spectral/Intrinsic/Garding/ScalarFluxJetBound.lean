@@ -371,6 +371,84 @@ theorem connTrace_joint
   refine htrace.congr (fun p _ => ?_)
   congr 1
 
+/-- The scalar principal trace coefficient remains jointly smooth after
+reflection about a fixed time. -/
+theorem scalarTrace_rev
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (q : SmoothRiemannianMetric I M) (T : ℝ) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
+        (E := fun x : M => TensorRSSpace 2 0 I x) p.1
+        ((scalarTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+      ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
+      (fun p : M × ℝ => (p.1, T - p.2))
+      ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
+    exact ContMDiffOn.prodMk contMDiffOn_fst
+      (ContMDiffOn.sub contMDiffOn_const contMDiffOn_snd)
+  simpa only [Function.comp_apply] using
+    (scalarTrace_joint (I := I) (M := M) G hG q).comp hmove
+      (fun p hp => ⟨Set.mem_univ p.1, hp.2⟩)
+
+/-- The connection trace coefficient remains jointly smooth after reflection
+about a fixed time. -/
+theorem connTrace_rev
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (q : SmoothRiemannianMetric I M) (T : ℝ) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
+        (E := fun x : M => TensorRSSpace 1 0 I x) p.1
+        ((connTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+      ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
+  have hmove : ContMDiffOn (I.prod 𝓘(ℝ, ℝ)) (I.prod 𝓘(ℝ, ℝ)) ∞
+      (fun p : M × ℝ => (p.1, T - p.2))
+      ((Set.univ : Set M) ×ˢ {s : ℝ | T - s ∈ D.regular}) := by
+    exact ContMDiffOn.prodMk contMDiffOn_fst
+      (ContMDiffOn.sub contMDiffOn_const contMDiffOn_snd)
+  simpa only [Function.comp_apply] using
+    (connTrace_joint (I := I) (M := M) G hG q).comp hmove
+      (fun p hp => ⟨Set.mem_univ p.1, hp.2⟩)
+
+/-- The reflected scalar trace coefficient is jointly smooth on every smaller
+time set contained in the reflected regular set. -/
+theorem scalarTrace_rev_on
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (q : SmoothRiemannianMetric I M) (T : ℝ) {S : Set ℝ}
+    (hS : S ⊆ {s : ℝ | T - s ∈ D.regular}) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 2 0 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 2 0 ℝ E)
+        (E := fun x : M => TensorRSSpace 2 0 I x) p.1
+        ((scalarTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+      ((Set.univ : Set M) ×ˢ S) :=
+  (scalarTrace_rev (I := I) (M := M) G hG q T).mono
+    (Set.prod_mono (Set.Subset.rfl) hS)
+
+/-- The reflected connection trace coefficient is jointly smooth on every
+smaller time set contained in the reflected regular set. -/
+theorem connTrace_rev_on
+    {D : RealTimeInterval}
+    (G : RealizedMetricFamilyOn (I := I) (M := M) D)
+    (hG : MetricFamilySmoothOn (I := I) (M := M) D G)
+    (q : SmoothRiemannianMetric I M) (T : ℝ) {S : Set ℝ}
+    (hS : S ⊆ {s : ℝ | T - s ∈ D.regular}) :
+    ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
+      (I.prod 𝓘(ℝ, TensorRSModel 1 0 ℝ E)) ∞
+      (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 1 0 ℝ E)
+        (E := fun x : M => TensorRSSpace 1 0 I x) p.1
+        ((connTraceCoeff (I := I) q (G.metric (T - p.2))).toSection p.1))
+      ((Set.univ : Set M) ×ˢ S) :=
+  (connTrace_rev (I := I) (M := M) G hG q T).mono
+    (Set.prod_mono (Set.Subset.rfl) hS)
+
 /-- At a regular time, every fixed finite window of the scalar principal
 coefficient jets vanishes uniformly on the compact manifold. -/
 theorem scalarTrace_small

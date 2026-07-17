@@ -104,7 +104,7 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-15)
+## 6. Honest progress (updated 2026-07-16)
 
 - **Conditional Thm 3.9 endpoint: stated, 0% proved.**  Its machinery: Step A done;
   Step-B/B1 machinery ~95% (`lbl394` done; B0 partial; **B1 assembly `stepB1_glue` PROVED
@@ -421,8 +421,11 @@ its docstring BEFORE consumers are built against it.
   conservation, time reversal, the interval-local classical-solution
   interface, conditional nonnegativity, a time-operator lift, the abstract
   two-scale nonautonomous fixed-point engine, and local moving-volume first
-  variation.  Moving-metric classical conjugate-heat existence / `IsHeatPotOn`
-  remains theorem-level 0%, while its dedicated machinery is about 85%.  Its
+  variation.  The Galerkin route now proves the moving-metric classical
+  endpoint `heatpot_of_gallim`; `heatpot_exists` then removes the conditional
+  Galerkin input for every smooth initial tensor, and `conj_heat_exists`
+  produces `IsConjHeatOn` with the prescribed terminal trace.  These theorems
+  and their dedicated classical existence machinery are 100%.  Its
   genuine frozen-scale
   operator inputs are checked: `lapDiffA20_short` gives the support-independent
   `A2 : H2(gT) -> H0(gT)` moving-Laplacian difference, `lapDiffA20_graph` and
@@ -434,19 +437,38 @@ its docstring BEFORE consumers are built against it.
   `scalar_gal_subseq` → `galLim_tendsto` → `scalar_gal_limit` is checked.  The
   last theorem packages a genuine `MaxRegSolutionSpace` / `timeH1` solution
   with exact initial trace and the explicit represented `H² → H⁰` path.  The
-  all-scale follow-up now proves `galLimVel_lift` on one order-independent
-  positive slab and `galLimExt_deriv`, giving a genuine `H^m`-valued interior
-  time derivative for every natural `m`.  The higher-jet architecture consult
-  isolates the next producer below the limit file: a generic completed
-  coefficient action and fully applied pathwise finite-`ContDiffOn` transfer
-  in `ParametricAppHs.lean`.  The live file currently has only smooth-core
-  `app_hs_*` estimates, so completed applied-action time regularity is still
-  0%; the dedicated `galLimExt_smooth` sublane is about 35%.  After that bridge,
-  the all-scale ODE induction produces higher interior time jets, and compact
-  time intervals plus Weyl negative weights give the spectral jet majorants.
-  Scalar joint-spacetime reconstruction remains a separate substantial
-  producer; `heatpot_of_maxreg` and the classical moving conjugate-heat theorem
-  remain theorem-level 0%.  The
+  all-scale follow-up proves `galLimVel_lift`, `galLimExt_deriv`, and the
+  canonical strong ODE `galLimExt_ode` on one order-independent positive slab.
+  `ParametricAppHsTime`, `ScalarPotentialTime`, and `ScalarNonautTime` now
+  give the fully applied dynamic completed-action regularity required by the
+  ODE induction. `galLimExt_smooth` is proved simultaneously at every natural
+  Sobolev order on one common smaller interval.
+  `Entropy/ConjGalerkinClassical.lean` now proves `galLim_jet_mass`: compact
+  interior time intervals, a higher Sobolev path, and the closed-manifold
+  counting tail give one summable majorant for every coefficient time jet.
+  Its theorem body is complete, but the counting input inherits the existing
+  `ShortTime/WeylEigenvalueCountingBound.lean` `sorry`; the full chain is not
+  globally sorry-free.  `galLim_slice_cc`, `galLim_pde`, and
+  `heatpot_of_gallim` now complete scalar reconstruction, the pointwise PDE,
+  and the genuine classical heat-potential package.  The separate
+  `heatpot_of_maxreg` route remains theorem-level 0%.  The positive unit-mass
+  input is now complete: `gallim_pos`, `heatpot_mass_deriv`,
+  `heatpot_mass_eq`, and `gallim_unit_pos` give a strictly positive genuine
+  reversed heat potential of moving mass one (or identify the empty-manifold
+  case), without exporting the old global regularity assumptions.  The
+  Perelman potential inverse is also checked: `density_potential` and
+  `weighted_potential` recover the density and weighted measure exactly.
+   These are dedicated entropy machinery, not endpoint theorems.  The potential
+   evolution and moving-gradient producers are now checked:
+   `potential_pde`, `potential_df_time`, `potential_joint`, `normGradSq_time`,
+   `gradSq_joint`, `revGram_smooth`, `revTrace_eq`, `revScalar_time`, and
+   `revGradSq_time`.  `w_rev_hasDerivAt` assembles them into the checked
+   interval-local raw first variation of `W` for the genuine reversed-flow
+   `conjCoeff` heat potential.  The next frontier is the geometric square
+   completion: `ricDriftDiv`, then `weighted_hess_split`, W monotonicity, and
+   the cutoff contradiction.  Weighted square completion, W monotonicity,
+   no-local-collapsing, and `ham3_noncollapse` remain theorem-level 0%; broader
+   entropy/noncollapse machinery is about 67%.  The
   former `nablaRSFun_eval_moving_raw` elaboration wall and the
   downstream Laplacian-bridge object refresh are both resolved.  The canonical constant-metric volume and
   distance laws are checked (`Analysis/Integration/Measure/Scaling.lean` and
@@ -522,9 +544,9 @@ its docstring BEFORE consumers are built against it.
   `C4/B1_STAGE_MAP_RULING.md` and `C4/B1_MOVING_ROOT_CONSULT.md`.  This is
   infrastructure only: the all-pairs chart
   tail, `StepB1RawInput`, textbook B1, and all endpoints remain 0%, and rounded
-  machinery estimates stay 95% / 87% / 57% for Step-B/B1 / Chapter 4 / whole
+  machinery estimates stay 95% / 87% / 60% for Step-B/B1 / Chapter 4 / whole
   HCG.
-- **Whole HCG project — conservative MACHINERY estimate ≈ 57%** (this is infrastructure coverage,
+- **Whole HCG project — conservative MACHINERY estimate ≈ 60%** (this is infrastructure coverage,
   NOT endpoint completion).  **HCG endpoint theorems (conditional/unconditional Thm 3.9,
   unconditional Thm 3.10, and `ham3_cgh_limit`) remain 0% proved.**  The separate
   conditional Step-D theorem `compactness_of_b1` is 100% proved, but it consumes

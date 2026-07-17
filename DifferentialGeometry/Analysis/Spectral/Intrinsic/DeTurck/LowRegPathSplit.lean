@@ -1,4 +1,5 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PhiMetSymmetry
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurckCoefficients.RHSPathIntegral
 import DifferentialGeometry.Analysis.Spectral.Tensor.Estimates.H2H3Principal
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.ParametricJetIntegral
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.PrincipalCoeffH2
@@ -26,6 +27,7 @@ open DifferentialGeometry.PDE.DeTurck.RicciLinearization
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.L2
 open DifferentialGeometry.Analysis.Parabolic.TensorSpectral
+open DifferentialGeometry.PDE.RicciFlow.IntrinsicSpectral.DeTurckCoefficients
 
 variable
     {E : Type*} [NormedAddCommGroup E] [InnerProductSpace ℝ E]
@@ -37,75 +39,6 @@ variable
 
 private local instance instCompleteSpaceE : CompleteSpace E :=
   FiniteDimensional.complete ℝ E
-
-private theorem phi_path_eq
-    (g₀ g_bg : SmoothRiemannianMetric I M)
-    (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound g₀
-      (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound g₀
-      (ccTensorBilinSymm (I := I) g₀ T') δ')
-    (s : ℝ) :
-    deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
-        (realizedFam (I := I) g₀ T T' hδ hδ' s) =
-      deTurckLieArm2PrincipalCoeff (I := I) g₀
-          (realizedFam (I := I) g₀ T T' hδ hδ' s) g_bg -
-        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s +
-          linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' s) := by
-  rw [deTurckPhiMetTotal, linearizedRicciArm2FieldLichnerowicz]
-  set X : SmoothCcTensor g₀ 4 2 :=
-    ricciArmPrincipalCoeff (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' s)
-  set Y : SmoothCcTensor g₀ 4 2 :=
-    traceHessianCoeff (I := I) (M := M) g₀
-      (realizedFam (I := I) g₀ T T' hδ hδ' s)
-  have hhalf : (1 / 2 : ℝ) • Y + (1 / 2 : ℝ) • Y = Y := by
-    rw [← add_smul]
-    norm_num
-  have hgrp : (X - (1 / 2 : ℝ) • Y) + (X - (1 / 2 : ℝ) • Y) =
-      (X + X) - ((1 / 2 : ℝ) • Y + (1 / 2 : ℝ) • Y) := by abel
-  rw [hgrp, hhalf]
-  abel
-
-set_option maxHeartbeats 1600000 in
-set_option synthInstance.maxHeartbeats 1600000 in
-private theorem phi_path_joint
-    (g₀ g_bg : SmoothRiemannianMetric I M)
-    (T T' : SmoothCcTensor g₀ 0 2)
-    {δ : ℝ} (hδ : gFibreOpBound g₀
-      (ccTensorBilinSymm (I := I) g₀ T) δ)
-    {δ' : ℝ} (hδ' : gFibreOpBound g₀
-      (ccTensorBilinSymm (I := I) g₀ T') δ') :
-    linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4
-      (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
-        (realizedFam (I := I) g₀ T T' hδ hδ' s)) (δ := δ) (δ' := δ') := by
-  have hLie := deTurckLieArm2PrincipalCoeff_realizedFam_jointSmooth
-    (I := I) g₀ T T' hδ hδ' g_bg
-  have hLich := linearizedRicci_arm2FieldLichnerowicz_jointSmooth
-    (I := I) g₀ T T' hδ hδ'
-  have hadd := joint_rs_add (I := I) (r := 4) (s := 2)
-    (S := realizedSmallSet (δ := δ) (δ' := δ'))
-    (fun p : M × ℝ =>
-      (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' p.2).toSection p.1)
-    (fun p : M × ℝ =>
-      (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' p.2).toSection p.1)
-    hLich hLich
-  have hsub := joint_rs_sub (I := I) (r := 4) (s := 2)
-    (S := realizedSmallSet (δ := δ) (δ' := δ'))
-    (fun p : M × ℝ =>
-      (deTurckLieArm2PrincipalCoeff (I := I) g₀
-        (realizedFam (I := I) g₀ T T' hδ hδ' p.2) g_bg).toSection p.1)
-    (fun p : M × ℝ =>
-      (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' p.2).toSection p.1 +
-        (linearizedRicciArm2FieldLichnerowicz (I := I) g₀ T T' hδ hδ' p.2).toSection p.1)
-    hLie hadd
-  refine hsub.congr (fun p _ => ?_)
-  beta_reduce
-  refine congrArg (fun t => TotalSpace.mk' (TensorRSModel 4 2 ℝ E)
-    (E := fun z : M => TensorRSSpace 4 2 I z) p.1 t) ?_
-  rw [phi_path_eq (I := I) (M := M) g₀ g_bg T T' hδ hδ' p.2,
-    SmoothCcTensor.toSection_sub, ContMDiffSection.coe_sub, Pi.sub_apply,
-    SmoothCcTensor.toSection_add, ContMDiffSection.coe_add, Pi.add_apply]
 
 set_option maxHeartbeats 1600000 in
 set_option synthInstance.maxHeartbeats 1600000 in
@@ -121,7 +54,7 @@ private theorem phi_dev_joint
           (realizedFam (I := I) g₀ T T' hδ hδ' s) -
         deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)
       (δ := δ) (δ' := δ') := by
-  have hpath := phi_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ'
+  have hpath := rhsTop_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ'
   have hconst : ContMDiffOn (I.prod 𝓘(ℝ, ℝ))
       (I.prod 𝓘(ℝ, TensorRSModel 4 2 ℝ E)) ∞
       (fun p : M × ℝ => TotalSpace.mk' (TensorRSModel 4 2 ℝ E)
@@ -551,13 +484,13 @@ theorem top_path_dev_h2
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R →
           (∀ x : M,
             riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-                ((deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+                ((rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                     hδ_lt hδ hδ'_lt hδ' -
                   deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀).toSection x) ≤
               (C * R) ^ 2) ∧
             (∑ i ∈ Finset.range 3,
               ‖iteratedCovGrad (I := I) g₀ 4 2 i
-                (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+                (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                     hδ_lt hδ hδ'_lt hδ' -
                   deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2) ≤
               (C * R) ^ 2 := by
@@ -574,7 +507,7 @@ theorem top_path_dev_h2
     deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
         (realizedFam (I := I) g₀ T T' hδ hδ' s) -
       deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀
-  have hjpath := phi_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ'
+  have hjpath := rhsTop_path_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ'
   have hjdev : linearizedRicciThreeArmHjoint (I := I) (M := M) g₀ 4 Φ
       (δ := δ) (δ' := δ') := by
     simpa [Φ] using phi_dev_joint (I := I) (M := M) g₀ g_bg T T' hδ hδ'
@@ -598,10 +531,10 @@ theorem top_path_dev_h2
       (realizedSmallSet (δ := δ) (δ' := δ')) := fun x =>
     jointContMDiff_toModel_continuous_slice (I := I) g₀ 4 2 Φ
       (realizedSmallSet (δ := δ) (δ' := δ')) hjdev x
-  have heq : deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+  have heq : rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
       hδ_lt hδ hδ'_lt hδ' -
       deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀ = Pdev := by
-    have hPeq : deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+    have hPeq : rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
         hδ_lt hδ hδ'_lt hδ' =
         pathIntegralCoeffField (I := I) (M := M) g₀ 4 2
           (fun s => deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg
@@ -612,14 +545,14 @@ theorem top_path_dev_h2
     intro x
     apply TensorRSSpace.toModel_injective
     change TensorRSSpace.toModel
-        ((deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+        ((rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
           hδ_lt hδ hδ'_lt hδ' -
             deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀).toSection x) =
       TensorRSSpace.toModel (Pdev.toSection x)
-    rw [show (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+    rw [show (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
           hδ_lt hδ hδ'_lt hδ' -
             deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀).toSection x =
-        (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+        (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
           hδ_lt hδ hδ'_lt hδ').toSection x -
           (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀).toSection x from by
       rw [SmoothCcTensor.toSection_sub]; rfl]
@@ -696,12 +629,12 @@ theorem top_path_split
       (ccTensorBilinSymm (I := I) g₀ T') δ')
     (U : SmoothCcTensor g₀ 0 2) :
     appCc (I := I) (M := M) g₀ 4 2
-        (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+        (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
           hδ_lt hδ hδ'_lt hδ')
         (iteratedCovGrad (I := I) g₀ 0 2 2 U) -
       rawTensorConnLapSmooth (I := I) g₀ 0 2 U =
     appCc (I := I) (M := M) g₀ 4 2
-        (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+        (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
             hδ_lt hδ hδ'_lt hδ' -
           deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)
         (iteratedCovGrad (I := I) g₀ 0 2 2 U) +
@@ -719,10 +652,10 @@ theorem top_path_split
     exact rawTensorConnLapSmooth_eq_appCc_cometricDoubleTrace
       (I := I) (M := M) g₀ U x v
   rw [hlap, ← appCc_sub_left]
-  rw [show deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+  rw [show rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
           hδ_lt hδ hδ'_lt hδ' -
         ricciArmPrincipalCoeffPure (I := I) (M := M) g₀ g₀ =
-      (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+      (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
           hδ_lt hδ hδ'_lt hδ' -
         deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀) +
       (deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀ -
@@ -780,18 +713,18 @@ theorem top_path_h1
         0 ≤ A →
         (∀ x : M,
           riemannianFiberNormSq (I := I) (M := M) g₀ 4 2 x
-              ((deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+              ((rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                   hδ_lt hδ hδ'_lt hδ' -
                 deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀).toSection x) ≤
             A ^ 2) →
         (∑ j ∈ Finset.range 3,
           ‖iteratedCovGrad (I := I) g₀ 4 2 j
-            (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+            (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                 hδ_lt hδ hδ'_lt hδ' -
               deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)‖ ^ 2) ≤ A ^ 2 →
         ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
           (appCc (I := I) (M := M) g₀ 4 2
-              (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+              (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                 hδ_lt hδ hδ'_lt hδ')
               (iteratedCovGrad (I := I) g₀ 0 2 2 U) -
             rawTensorConnLapSmooth (I := I) g₀ 0 2 U)‖ ≤
@@ -803,7 +736,7 @@ theorem top_path_h1
   refine ⟨Ctop, Clow, hCtop, hClow, ?_⟩
   intro T T' δ hδ_lt hδ δ' hδ'_lt hδ' U A hA hdevPt hdevJet
   have htop' := htop
-    (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+    (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
         hδ_lt hδ hδ'_lt hδ' -
       deTurckPhiMetTotal (I := I) (M := M) g₀ g_bg g₀)
     U A hA hdevPt hdevJet
@@ -832,7 +765,7 @@ theorem top_path_ball_h1
         ∀ U : SmoothCcTensor g₀ 0 2,
           ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
             (appCc (I := I) (M := M) g₀ 4 2
-                (deTurckPhiTotPathIntegral (I := I) (M := M) g₀ g_bg T T'
+                (rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T'
                   hδ_lt hδ hδ'_lt hδ')
                 (iteratedCovGrad (I := I) g₀ 0 2 2 U) -
               rawTensorConnLapSmooth (I := I) g₀ 0 2 U)‖ ≤

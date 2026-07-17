@@ -340,12 +340,25 @@ theorem exists_limit_diag
         (fun z ↦ (z.1, (ΦInf z 1).1)) ∧
       Metric.closedBall (0 : E × E) deltaInf ⊆ eInf.target ∧
       ContDiffOn Real ∞ (eInf : E × E → E × E) eInf.source ∧
-      ContDiffOn Real ∞ eInf.symm eInf.target := by
+      ContDiffOn Real ∞ eInf.symm eInf.target ∧
+      (∀ z ∈ Metric.ball (0 : E) q,
+        (z, z) ∈ eInf.target ∧ eInf.symm (z, z) = (z, 0)) ∧
+      ApproximatesLinearOn
+        (eInf.symm : E × E → E × E)
+        ((PhaseFlow.freeDiagCLE (E := E)).symm :
+          (E × E) →L[Real] (E × E))
+        eInf.target
+        (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+            (E × E) →L[Real] (E × E))‖₊ *
+          (‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+              (E × E) →L[Real] (E × E))‖₊⁻¹ -
+            PhaseFlow.phaseErr (normalPhaseK hb (2 * q)))⁻¹ *
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q))) := by
   obtain ⟨ΦInf, hinit, hcurve, hstay, hzeroEnd, happ, hendSmooth⟩ :=
     h.exists_limit_phase R c hc hgInf_cd hgInf_lo hg_conv q hq hqPos hqAcc
   let f : E × E → E × E := fun z ↦ (z.1, (ΦInf z 1).1)
   obtain ⟨eInf, deltaInf, hdeltaInf, hsource, hcoe, htarget,
-      _hdeltaEq, _hinvApprox⟩ :=
+      _hdeltaEq, hinvApprox⟩ :=
     PhaseFlow.exists_quant_inv_bi hq (by simpa only [f] using happ) herr
   have hfzero : f 0 = 0 := by
     dsimp only [f]
@@ -381,8 +394,66 @@ theorem exists_limit_diag
   have hinvSmooth : ContDiffOn Real ∞ eInf.symm eInf.target :=
     PhaseFlow.inv_smooth_of_approx happOpen (Or.inr herr)
       Metric.isOpen_ball hendSmooth_f eInf hsource hcoe_f
+  have hdiagInv : ∀ z ∈ Metric.ball (0 : E) q,
+      (z, z) ∈ eInf.target ∧ eInf.symm (z, z) = (z, 0) := by
+    intro z hz
+    have hpClosed : (z, 0) ∈ Metric.closedBall (0 : E × E) q := by
+      have hzClosed := Metric.ball_subset_closedBall hz
+      rw [Metric.mem_closedBall] at hzClosed ⊢
+      rw [Prod.dist_eq]
+      change max (dist z (0 : E)) (dist (0 : E) 0) ≤ (q : Real)
+      simpa only [dist_self, max_eq_left dist_nonneg] using hzClosed
+    have hpOpen : (z, 0) ∈ Metric.ball (0 : E × E) q := by
+      rw [Metric.mem_ball] at hz ⊢
+      rw [Prod.dist_eq]
+      change max (dist z (0 : E)) (dist (0 : E) 0) < (q : Real)
+      simpa only [dist_self, max_eq_left dist_nonneg] using hz
+    have hconstCurve : IsIntegralCurveOn (fun _ : Real ↦ (z, 0))
+        (fun _ ↦ MetricKoszul.metricSpray gInf) (Icc 0 1) := by
+      intro t _ht
+      simpa [MetricKoszul.metricSpray] using
+        (hasDerivWithinAt_const (x := t) (s := Icc (0 : Real) 1)
+          (c := (z, 0)))
+    let phaseU : Set (E × E) :=
+      Metric.ball (0 : E) (h.phaseRadius R) ×ˢ Set.univ
+    have hspraySmooth : ContDiffOn Real ∞ (MetricKoszul.metricSpray gInf)
+        phaseU := by
+      apply MetricKoszul.metricSpray_contDiffOn Metric.isOpen_ball hgInf_cd
+      intro w hw
+      refine ⟨1 / 2, by norm_num, ?_⟩
+      intro v
+      simpa only [pow_two, mul_assoc] using hgInf_lo w hw v
+    have hzPhase : z ∈ Metric.ball (0 : E) (h.phaseRadius R) := by
+      rw [Metric.mem_ball] at hz ⊢
+      have hqReal : (q : Real) < h.phaseRadius R := by
+        nlinarith [q.coe_nonneg]
+      exact hz.trans hqReal
+    have hconstStay : Set.MapsTo (fun _ : Real ↦ (z, 0))
+        (Icc (0 : Real) 1) phaseU := by
+      intro t _ht
+      exact ⟨hzPhase, Set.mem_univ _⟩
+    have horbit : Set.EqOn (ΦInf (z, 0)) (fun _ : Real ↦ (z, 0))
+        (Icc (0 : Real) 1) :=
+      Analysis.ODE.Flow.orbit_unique_Icc_on (Ω := phaseU)
+        (Metric.isOpen_ball.prod isOpen_univ) hspraySmooth
+        (hcurve (z, 0) hpClosed) hconstCurve
+        (fun t ht ↦ ⟨hstay (z, 0) hpClosed t ht, Set.mem_univ _⟩)
+        hconstStay (hinit (z, 0) hpClosed)
+    have hend : ΦInf (z, 0) 1 = (z, 0) := horbit (by norm_num)
+    have heval : eInf (z, 0) = (z, z) := by
+      rw [hcoe_f]
+      dsimp only [f]
+      rw [hend]
+    have hpSource : (z, 0) ∈ eInf.source := by
+      simpa only [hsource] using hpOpen
+    have htargetDiag := eInf.map_source hpSource
+    rw [heval] at htargetDiag
+    have hleft := eInf.left_inv hpSource
+    rw [heval] at hleft
+    exact ⟨htargetDiag, hleft⟩
   exact ⟨ΦInf, eInf, deltaInf, hdeltaInf, hinit, hcurve, hstay,
-    hsource, hezero, hcoe, htarget', hforwardSmooth, hinvSmooth⟩
+    hsource, hezero, hcoe, htarget', hforwardSmooth, hinvSmooth,
+    hdiagInv, hinvApprox⟩
 
 end NormalRadiusProfile
 end HCGCompactness

@@ -63,6 +63,37 @@ theorem ccToHsLin_repr
     tensorHsSmoothRepr_toL2 (I := I) (M := M) hσ v hv,
     tensorHsToL2_tensorL2Coeff (I := I) (M := M) hσ]
 
+/-- The smooth eigensection embeds as the corresponding spectral Sobolev
+basis vector at every nonnegative order. -/
+theorem ccToHs_eigen
+    (g : SmoothRiemannianMetric I M) (s : ℕ) {σ : ℝ} (hσ : 0 ≤ σ)
+    (i : DifferentialGeometry.Analysis.Parabolic.TensorHeatEquation.TensorEigenIdx
+      (I := I) (M := M) g 0 s) :
+    ccTensorToHs (I := I) (M := M) g s σ
+        (eigenvectorSmooth (I := I) (M := M) g 0 s i) =
+      tensorHsBasisVec (I := I) (M := M)
+        (g := g) (r := 0) (s := s) σ i := by
+  classical
+  let v := tensorHsBasisVec (I := I) (M := M)
+    (g := g) (r := 0) (s := s) σ i
+  have hv : (Function.support v.coeff).Finite := by
+    refine Set.finite_singleton i |>.subset ?_
+    intro j hj
+    by_cases hji : j = i
+    · simp [hji]
+    · exact False.elim ((Function.mem_support.mp hj) (by simp [v, hji]))
+  have hfin : hv.toFinset = {i} := by
+    ext j
+    simp only [Set.Finite.mem_toFinset,
+      Function.mem_support, v, tensorHsBasisVec_coeff, ne_eq]
+    by_cases hji : j = i <;> simp [hji]
+  have hre : tensorHsSmoothRepr (I := I) (M := M) v hv =
+      eigenvectorSmooth (I := I) (M := M) g 0 s i := by
+    rw [tensorHsSmoothRepr_eq (I := I) (M := M) v hv, hfin]
+    simp [v]
+  rw [← hre, ← ccToHsLin_apply]
+  exact ccToHsLin_repr (I := I) (M := M) g s hσ v hv
+
 /-- For nonnegative order, smooth covariant tensors are dense in the spectral
 Sobolev space. -/
 theorem ccToHsLin_dense

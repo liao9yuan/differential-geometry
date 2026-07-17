@@ -110,3 +110,24 @@ The support-local `StrictDistInput` and direct minimizing readout producers are
 compactness endpoints remain theorem-level **0%**.  Dedicated Step-B/B1
 machinery is about **94%**, Chapter 4 machinery about **86%**, and whole-HCG
 machinery about **57%**.
+
+## 2026-07-16 prescribed branch data
+
+The primary minimizing readout now returns all four slotwise budgets required
+by the moving diagonal branch: `qWide`, `qAcc`, the phase-error threshold, and
+the inverse-error coefficient. Older compatibility readouts intentionally
+forget them. Focused verification and the targeted refresh passed.
+
+## 2026-07-16 selected branch retention
+
+`exists_hat_cm_min` now retains the eventual `HasLiveBrFull` family alongside
+the minimizing readout.  Thus the same chosen `q`, `delta`, branch, fence, and
+intrinsic transport data survive past the fixed-stage center equation and can
+be consumed by `exists_diag_full`; older compatibility readouts continue to
+forget this extra package.
+
+Focused verification and the targeted module refresh passed.  This closes a
+producer-data erasure seam, not the moving-reference/all-pairs theorem.
+`StepB1RawInput` and textbook B1 remain theorem-level **0%**; dedicated
+Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and whole-HCG
+compactness machinery about **57%**.

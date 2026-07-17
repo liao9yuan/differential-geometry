@@ -109,6 +109,50 @@ theorem TensorRSField.scalar0_smooth
     ContMDiff I 𝓘(𝕜) n (TensorRSField.scalar0 (n := n) T) :=
   Tensor0SField.toScalarField_contMDiff n (TensorRSField.rs0 (n := n) T)
 
+@[simp]
+theorem TensorRSField.scalar0_zero :
+    TensorRSField.scalar0 (n := n)
+        (0 : TensorRSField n 0 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) =
+      0 := by
+  funext x
+  simp [TensorRSField.scalar0, Tensor0SField.toScalarField,
+    TensorRSField.rs0_apply]
+
+@[simp]
+theorem TensorRSField.scalar0_add
+    (S T : TensorRSField n 0 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
+    TensorRSField.scalar0 (n := n) (S + T) =
+      TensorRSField.scalar0 (n := n) S + TensorRSField.scalar0 (n := n) T := by
+  funext x
+  simp [TensorRSField.scalar0, Tensor0SField.toScalarField,
+    TensorRSField.rs0_apply]
+
+@[simp]
+theorem TensorRSField.scalar0_smul
+    (c : 𝕜)
+    (T : TensorRSField n 0 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
+    TensorRSField.scalar0 (n := n) (c • T) =
+      c • TensorRSField.scalar0 (n := n) T := by
+  funext x
+  simp [TensorRSField.scalar0, Tensor0SField.toScalarField,
+    TensorRSField.rs0_apply]
+
+@[simp]
+theorem TensorRSField.scalar0_neg
+    (T : TensorRSField n 0 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
+    TensorRSField.scalar0 (n := n) (-T) =
+      -TensorRSField.scalar0 (n := n) T := by
+  rw [show -T = (-1 : 𝕜) • T by simp, TensorRSField.scalar0_smul]
+  simp
+
+@[simp]
+theorem TensorRSField.scalar0_sub
+    (S T : TensorRSField n 0 0 (𝕜 := 𝕜) (E := E) (H := H) (I := I) (M := M)) :
+    TensorRSField.scalar0 (n := n) (S - T) =
+      TensorRSField.scalar0 (n := n) S - TensorRSField.scalar0 (n := n) T := by
+  rw [sub_eq_add_neg, TensorRSField.scalar0_add, TensorRSField.scalar0_neg]
+  rw [sub_eq_add_neg]
+
 /-- The canonical rank-zero lift of a mixed `(0,0)` field's scalar readout is
 the original mixed field. -/
 theorem TensorRSField.lift_scalar0

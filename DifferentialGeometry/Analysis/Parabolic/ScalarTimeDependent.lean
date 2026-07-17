@@ -61,6 +61,27 @@ structure IsHeatPotOn
       HasDerivAt (fun s : Real => u s x)
         (laplacianAt (I := I) G t (u t) x + V t x * u t x) t
 
+namespace IsHeatPotOn
+
+/-- Restrict a classical heat-potential solution to an interval with smaller
+carrier and regular sets. -/
+theorem mono
+    {D D' : RealTimeInterval}
+    {G : RealizedMetricFamily (I := I) (M := M) Real}
+    {V u : Real → M → Real}
+    (h : IsHeatPotOn D G V u)
+    (hcarrier : D'.carrier ⊆ D.carrier)
+    (hregular : D'.regular ⊆ D.regular) :
+    IsHeatPotOn D' G V u where
+  jointSmooth := h.jointSmooth.mono
+    (Set.prod_mono hregular Set.Subset.rfl)
+  jointCont := h.jointCont.mono
+    (Set.prod_mono hcarrier Set.Subset.rfl)
+  sliceSmooth t ht := h.sliceSmooth t (hcarrier ht)
+  equation t ht x := h.equation t (hregular ht) x
+
+end IsHeatPotOn
+
 end
 
 end DifferentialGeometry.Analysis.Parabolic

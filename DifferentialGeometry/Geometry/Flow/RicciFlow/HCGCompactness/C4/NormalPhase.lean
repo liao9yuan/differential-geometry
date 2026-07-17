@@ -78,6 +78,26 @@ def normalPhaseK
       (mul_nonneg hA (sq_nonneg (R : Real)))
       (mul_nonneg (mul_nonneg (by norm_num) (h.metricC_nonneg 1)) R.coe_nonneg)
 
+/-- The normal-acceleration Lipschitz coefficient is monotone in the velocity
+radius. -/
+theorem normalPhaseK_mono
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (h : NormalCoordMetricBoundInput (I := I) X)
+    {R S : ℝ≥0} (hRS : R ≤ S) : normalPhaseK h R ≤ normalPhaseK h S := by
+  apply NNReal.coe_le_coe.mp
+  have hRS' : (R : ℝ) ≤ (S : ℝ) := by exact_mod_cast hRS
+  have hsq : (R : ℝ) ^ 2 ≤ (S : ℝ) ^ 2 := by
+    nlinarith [R.coe_nonneg, S.coe_nonneg]
+  have hA : 0 ≤ 6 * (h.metricC 1) ^ 2 + 3 * h.metricC 2 :=
+    add_nonneg
+      (mul_nonneg (by norm_num) (sq_nonneg (h.metricC 1)))
+      (mul_nonneg (by norm_num) (h.metricC_nonneg 2))
+  have hB : 0 ≤ 6 * h.metricC 1 :=
+    mul_nonneg (by norm_num) (h.metricC_nonneg 1)
+  exact add_le_add
+    (mul_le_mul_of_nonneg_left hsq hA)
+    (mul_le_mul_of_nonneg_left hRS' hB)
+
 /-- On the quarter normal ball, the geometric normal acceleration is the
 negative raised coordinate Koszul vector. -/
 theorem normalAccel_eq

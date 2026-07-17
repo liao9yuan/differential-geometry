@@ -1,5 +1,6 @@
 import DifferentialGeometry.Analysis.Integration.Measure.Family
 import DifferentialGeometry.Bundle.PartialMfderiv
+import DifferentialGeometry.Bundle.PartialMfderiv.Basic
 import Mathlib.Analysis.SpecialFunctions.SmoothTransition
 
 set_option autoImplicit false
@@ -214,6 +215,160 @@ theorem first_var_local
     apply integral_congr_ae
     filter_upwards with x
     rw [hderiv_eq x]
+    simp only [f', hρt]
+  exact (hvariation.congr_deriv hvalue).congr_of_eventuallyEq hmass_eq.symm
+
+/-- First variation of moving Riemannian volume from joint smoothness of both
+the metric chart components and the integrand on an open time neighborhood. -/
+theorem first_var_joint
+    [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    {g_fam : Real → SmoothRiemannianMetric I M}
+    {f : Real → M → Real} {U : Set Real} {t : Real}
+    (hU : IsOpen U) (ht : t ∈ U)
+    (hg : ∀ (x₀ : M) (i j : Fin (Module.finrank Real E)),
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M =>
+          chartGramMatrix (I := I) (g_fam p.1) x₀ p.2 i j)
+        (U ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    (hf : ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+      (fun p : Real × M => f p.1 p.2) (U ×ˢ Set.univ)) :
+    HasDerivAt
+      (fun s : Real =>
+        ∫ x, f s x ∂(riemannianMeasureFamily (I := I) (M := M) g_fam s))
+      (∫ x, (deriv (fun s : Real => f s x) t +
+              (1 / 2) * traceTimeDerivMetric (I := I) g_fam t x * f t x)
+          ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t)) t := by
+  classical
+  obtain ⟨ρ, hρsmooth, hρmem, hρeq⟩ := exists_time_retract hU ht
+  let g' : Real → SmoothRiemannianMetric I M := fun s => g_fam (ρ s)
+  let f' : Real → M → Real := fun s x => f (ρ s) x
+  have hρmdiff : ContMDiff 𝓘(Real, Real) 𝓘(Real, Real) ∞ ρ := by
+    rw [contMDiff_iff_contDiff]
+    exact hρsmooth
+  have hinner : ContMDiff (𝓘(Real, Real).prod I) (𝓘(Real, Real).prod I) ∞
+      (fun p : Real × M => (ρ p.1, p.2)) :=
+    (hρmdiff.comp contMDiff_fst).prodMk contMDiff_snd
+  have hg'smooth (x₀ : M) (i j : Fin (Module.finrank Real E)) :
+      ContMDiffOn (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+        (fun p : Real × M =>
+          chartGramMatrix (I := I) (g' p.1) x₀ p.2 i j)
+        (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    have hcomp := (hg x₀ i j).comp hinner.contMDiffOn (by
+      intro p (hp : p ∈ Set.univ ×ˢ
+        (trivializationAt E (TangentSpace I) x₀).baseSet)
+      exact ⟨hρmem p.1, hp.2⟩)
+    simpa only [Function.comp_apply, g'] using hcomp
+  have hg'reg : MetricFamilyRegularAt (I := I) g' t := by
+    refine
+      { hasDerivAt_chartGramMatrix := ?_
+        continuousOn_chartGramMatrix := ?_
+        continuousOn_deriv_chartGramMatrix := ?_ }
+    · intro x₀ i j x hx s
+      have hp :
+          (s, x) ∈ Set.univ ×ˢ
+            (trivializationAt E (TangentSpace I) x₀).baseSet :=
+        ⟨Set.mem_univ _, hx⟩
+      have hopen : IsOpen
+          (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+        (isOpen_univ : IsOpen (Set.univ : Set Real)).prod
+          (trivializationAt E (TangentSpace I) x₀).open_baseSet
+      have hAt :
+          ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+            (fun p : Real × M =>
+              chartGramMatrix (I := I) (g' p.1) x₀ p.2 i j) (s, x) :=
+        ((hg'smooth x₀ i j) (s, x) hp).contMDiffAt (hopen.mem_nhds hp)
+      have hslice : ContMDiffAt 𝓘(Real, Real) 𝓘(Real, Real) ∞
+          (fun r : Real => chartGramMatrix (I := I) (g' r) x₀ x i j) s := by
+        simpa only [Function.comp_apply] using
+          hAt.comp s (contMDiffAt_id.prodMk contMDiffAt_const)
+      have hdiff : DifferentiableAt Real
+          (fun r : Real => chartGramMatrix (I := I) (g' r) x₀ x i j) s :=
+        (contMDiffAt_iff_contDiffAt.mp hslice).differentiableAt (by simp)
+      exact hdiff.hasDerivAt
+    · intro x₀ i j
+      exact (hg'smooth x₀ i j).continuousOn
+    · intro x₀ i j p hp
+      have hopen : IsOpen
+          (Set.univ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) :=
+        (isOpen_univ : IsOpen (Set.univ : Set Real)).prod
+          (trivializationAt E (TangentSpace I) x₀).open_baseSet
+      have hAt :
+          ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+            (fun q : Real × M =>
+              chartGramMatrix (I := I) (g' q.1) x₀ q.2 i j) p :=
+        ((hg'smooth x₀ i j) p hp).contMDiffAt (hopen.mem_nhds hp)
+      have hdAt :
+          ContMDiffAt (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+            (fun q : Real × M =>
+              deriv (fun s : Real =>
+                chartGramMatrix (I := I) (g' s) x₀ q.2 i j) q.1) p :=
+        DifferentialGeometry.timeDeriv_smoothAt hAt (by simp)
+      exact hdAt.continuousAt.continuousWithinAt
+  have hf'smooth : ContMDiff (𝓘(Real, Real).prod I) 𝓘(Real, Real) ∞
+      (fun p : Real × M => f' p.1 p.2) := by
+    exact hf.comp_contMDiff hinner
+      (fun p => ⟨hρmem p.1, Set.mem_univ p.2⟩)
+  let F' : C^∞⟮𝓘(Real, Real).prod I, Real × M; Real⟯ :=
+    ⟨fun p : Real × M => f' p.1 p.2, hf'smooth⟩
+  have hf'reg : FunctionRegularAt f' t := by
+    refine
+      { hasDerivAt_time := ?_
+        continuous_joint := hf'smooth.continuous
+        continuous_deriv_joint := ?_ }
+    · intro x s
+      have hslice : ContMDiff 𝓘(Real, Real) 𝓘(Real, Real) ∞
+          (fun r : Real => f' r x) := by
+        exact hf'smooth.comp (contMDiff_id.prodMk contMDiff_const)
+      have hdiff : DifferentiableAt Real (fun r : Real => f' r x) s := by
+        rw [contMDiff_iff_contDiff] at hslice
+        exact hslice.differentiable (by simp) s
+      exact hdiff.hasDerivAt
+    · exact (DifferentialGeometry.contMDiff_partial_deriv_fst I F').continuous
+  have hvariation := first_variation_of_volume (I := I) (M := M) hg'reg hf'reg
+  have hρt : ρ t = t := hρeq.eq_of_nhds
+  have hgt : g' t = g_fam t := by
+    simp only [g', hρt]
+  have hderiv_eq (x : M) :
+      deriv (fun s : Real => f' s x) t = deriv (fun s : Real => f s x) t := by
+    apply Filter.EventuallyEq.deriv_eq
+    filter_upwards [hρeq] with s hs
+    simp only [f', hs]
+  have hmatrix (x : M) :
+      (Matrix.of fun i j : Fin (Module.finrank Real E) =>
+        deriv (fun s : Real => chartGramMatrix (I := I) (g' s) x x i j) t) =
+      Matrix.of fun i j : Fin (Module.finrank Real E) =>
+        deriv (fun s : Real => chartGramMatrix (I := I) (g_fam s) x x i j) t := by
+    ext i j
+    apply Filter.EventuallyEq.deriv_eq
+    filter_upwards [hρeq] with s hs
+    simp only [g', hs]
+  have htrace_eq (x : M) :
+      traceTimeDerivMetric (I := I) g' t x =
+        traceTimeDerivMetric (I := I) g_fam t x := by
+    unfold traceTimeDerivMetric
+    rw [hgt, hmatrix x]
+  have hmeasure :
+      riemannianMeasureFamily (I := I) (M := M) g' t =
+        riemannianMeasureFamily (I := I) (M := M) g_fam t := by
+    simp only [riemannianMeasureFamily_def, hgt]
+  have hmass_eq :
+      (fun s : Real =>
+        ∫ x, f' s x ∂(riemannianMeasureFamily (I := I) (M := M) g' s)) =ᶠ[𝓝 t]
+      (fun s : Real =>
+        ∫ x, f s x ∂(riemannianMeasureFamily (I := I) (M := M) g_fam s)) := by
+    filter_upwards [hρeq] with s hs
+    simp only [f', g', riemannianMeasureFamily_def, hs]
+  have hvalue :
+      (∫ x, (deriv (fun s : Real => f' s x) t +
+              (1 / 2) * traceTimeDerivMetric (I := I) g' t x * f' t x)
+          ∂(riemannianMeasureFamily (I := I) (M := M) g' t)) =
+        ∫ x, (deriv (fun s : Real => f s x) t +
+              (1 / 2) * traceTimeDerivMetric (I := I) g_fam t x * f t x)
+          ∂(riemannianMeasureFamily (I := I) (M := M) g_fam t) := by
+    rw [hmeasure]
+    apply integral_congr_ae
+    filter_upwards with x
+    rw [hderiv_eq x, htrace_eq x]
     simp only [f', hρt]
   exact (hvariation.congr_deriv hvalue).congr_of_eventuallyEq hmass_eq.symm
 

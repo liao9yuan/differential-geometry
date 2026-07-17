@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Calculus.MapConvergenceDeriv
 import DifferentialGeometry.Analysis.Calculus.MapConvergenceComp
 import Mathlib.Analysis.Calculus.ImplicitContDiff
+import Mathlib.Topology.IsLocalHomeomorph
 import Mathlib.Topology.MetricSpace.Thickening
 import Mathlib.Topology.Separation.Regular
 
@@ -236,6 +237,21 @@ noncomputable def partialFDeriv₂
     (F : P × X → Y) (p : P) (x : X) : X →L[Real] Y :=
   (fderiv Real F (p, x)).comp (ContinuousLinearMap.inr Real P X)
 
+/-- Identify the partial derivative in the root variable from a derivative of
+the corresponding fixed-parameter slice. -/
+theorem partialFDeriv₂_eq
+    {P X Y : Type*}
+    [NormedAddCommGroup P] [NormedSpace Real P]
+    [NormedAddCommGroup X] [NormedSpace Real X]
+    [NormedAddCommGroup Y] [NormedSpace Real Y]
+    {F : P × X → Y} {p : P} {x : X} {L : X →L[Real] Y}
+    (hF : DifferentiableAt Real F (p, x))
+    (hL : HasFDerivAt (fun y => F (p, y)) L x) :
+    partialFDeriv₂ F p x = L := by
+  have hslice := hF.hasFDerivAt.comp x
+    ((hasFDerivAt_const (x := x) (c := p)).prodMk (hasFDerivAt_id x))
+  exact hslice.unique hL
+
 /-- The derivative prescribed by the implicit equation when the root-variable
 block is invertible. -/
 noncomputable def implicitRootDeriv
@@ -463,6 +479,55 @@ theorem closedTube_subset
   obtain ⟨hp, hdist⟩ := (T.mem_closedTube).mp hz
   exact T.tube_subset z.1 hp (by
     simpa only [Metric.mem_closedBall] using hdist.trans hr)
+
+/-- A compact root tube admits a relatively compact open equation domain after
+shrinking its fiber radius.  The parameter core and limiting branch are kept
+unchanged. -/
+theorem exists_domain_buffer
+    {P X Y : Type*}
+    [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
+    [NormedAddCommGroup X] [NormedSpace Real X] [FiniteDimensional Real X]
+    [NormedAddCommGroup Y] [NormedSpace Real Y]
+    {D : Set (P × X)} {W₀ K : Set P}
+    {FInf : P × X → Y} {PhiInf : P → X}
+    (T : CompactRootTube D W₀ K FInf PhiInf) :
+    ∃ (D' : Set (P × X))
+        (T' : CompactRootTube D' W₀ K FInf PhiInf),
+      IsCompact (closure D') ∧ closure D' ⊆ D ∧
+        T'.W = T.W ∧ T'.rho = T.rho / 2 := by
+  let r : Real := T.rho / 2
+  have hr : 0 < r := div_pos T.rho_pos (by norm_num)
+  have hrle : r ≤ T.rho := by
+    dsimp only [r]
+    linarith [T.rho_pos]
+  have htubeD : T.closedTube r ⊆ D := T.closedTube_subset hrle
+  obtain ⟨D', hD', htubeD', hD'D, hD'cpt⟩ :=
+    exists_open_between_and_isCompact_closure
+      (T.closedTube_compact r) T.isOpen_domain htubeD
+  let T' : CompactRootTube D' W₀ K FInf PhiInf :=
+    { W := T.W
+      rho := r
+      isOpen_W := T.isOpen_W
+      isCompact_closure_W := T.isCompact_closure_W
+      K_subset_W := T.K_subset_W
+      closure_W_subset := T.closure_W_subset
+      rho_pos := hr
+      isOpen_domain := hD'
+      isOpen_ambient := T.isOpen_ambient
+      limit_equation_smooth :=
+        T.limit_equation_smooth.mono fun z hz ↦ hD'D (subset_closure hz)
+      limit_branch_smooth := T.limit_branch_smooth
+      limit_root := T.limit_root
+      tube_subset := by
+        intro p hp x hx
+        apply htubeD'
+        exact T.mem_closedTube.mpr ⟨hp, by
+          simpa only [Metric.mem_closedBall] using hx⟩
+      limit_unique := by
+        intro p hp x hx hroot
+        exact T.limit_unique p hp x (hx.trans hrle) hroot
+      limit_root_deriv_inv := T.limit_root_deriv_inv }
+  exact ⟨D', T', hD'cpt, hD'D, rfl, rfl⟩
 
 /-- The closed fiberwise annulus between radii `inner` and `outer`. -/
 def closedAnnulus
@@ -1469,6 +1534,58 @@ theorem exists_root_cInf
   · intro n hn p hp x hx
     simpa only [Phi, if_pos hn] using huniq₀ n hn p hp x hx
 
+/-- A smoothly convergent equation family that is smooth only on a common tail
+still admits a `C^∞`-convergent selected root family.  The finite equation
+prefix is filled by the limiting equation. -/
+theorem exists_cInf_tail
+    {P X Y : Type*}
+    [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
+    [NormedAddCommGroup X] [NormedSpace Real X] [FiniteDimensional Real X]
+    [NormedAddCommGroup Y] [NormedSpace Real Y] [FiniteDimensional Real Y]
+    {D : Set (P × X)} {W₀ K : Set P}
+    {FInf : P × X → Y} {PhiInf : P → X}
+    (T : CompactRootTube D W₀ K FInf PhiInf)
+    {F : Nat → P × X → Y}
+    (hF_cd : ∀ᶠ n in Filter.atTop, ContDiffOn Real ∞ (F n) D)
+    (hF_conv : MapCInfConvOnCompacts D F FInf) :
+    ∃ N : Nat, ∃ Phi : Nat → P → X,
+      MapCInfConvOnCompacts T.W Phi PhiInf ∧
+      (∀ n, ContDiffOn Real ∞ (Phi n) T.W) ∧
+      (∀ n ≥ N, ∀ p ∈ closure T.W,
+        dist (Phi n p) (PhiInf p) < T.rho / 2 ∧
+        F n (p, Phi n p) = 0 ∧
+        (partialFDeriv₂ (F n) p (Phi n p)).IsInvertible) ∧
+      ∀ n ≥ N, ∀ p ∈ closure T.W, ∀ x,
+        dist x (PhiInf p) < T.rho →
+          (F n (p, x) = 0 ↔ x = Phi n p) := by
+  obtain ⟨N₀, hN₀⟩ := eventually_atTop.mp hF_cd
+  let F' : Nat → P × X → Y := fun n ↦
+    if N₀ ≤ n then F n else FInf
+  have hF'_cd : ∀ n, ContDiffOn Real ∞ (F' n) D := by
+    intro n
+    by_cases hn : N₀ ≤ n
+    · simpa only [F', if_pos hn] using hN₀ n hn
+    · simpa only [F', if_neg hn] using T.limit_equation_smooth
+  have hF'_conv : MapCInfConvOnCompacts D F' FInf := by
+    apply hF_conv.congr_eventually T.isOpen_domain
+    · filter_upwards [eventually_ge_atTop N₀] with n hn
+      intro z hz
+      simp only [F', if_pos hn]
+    · intro z hz
+      rfl
+  obtain ⟨N₁, Phi, hPhi, hPhiC, hspec, huniq⟩ :=
+    T.exists_root_cInf hF'_cd hF'_conv
+  let N := max N₀ N₁
+  refine ⟨N, Phi, hPhi, hPhiC, ?_, ?_⟩
+  · intro n hn p hp
+    have hn₀ : N₀ ≤ n := (Nat.le_max_left _ _).trans hn
+    have hn₁ : N₁ ≤ n := (Nat.le_max_right _ _).trans hn
+    simpa only [F', if_pos hn₀] using hspec n hn₁ p hp
+  · intro n hn p hp x hx
+    have hn₀ : N₀ ≤ n := (Nat.le_max_left _ _).trans hn
+    have hn₁ : N₁ ≤ n := (Nat.le_max_right _ _).trans hn
+    simpa only [F', if_pos hn₀] using huniq n hn₁ p hp x hx
+
 end CompactRootTube
 
 /-- A smooth limiting implicit branch over a compact parameter core admits a
@@ -1606,6 +1723,223 @@ theorem exists_compactRootTube
     exact ⟨e, he⟩
   exact ⟨⟨W, rho, hWopen, hWcompact, hKW, hWW₀, hrho, hD, hW₀,
     hFInf, hPhiInf, fun p hp => hroot p (hWW₀ hp), htube, hunique, hderiv⟩⟩
+
+/-- A compact continuous family of nondegenerate seed roots extends to one
+smooth ambient root branch carrying a compact uniform root tube. -/
+theorem exists_rootTube
+    {P X Y : Type*}
+    [NormedAddCommGroup P] [NormedSpace Real P] [FiniteDimensional Real P]
+    [NormedAddCommGroup X] [NormedSpace Real X] [FiniteDimensional Real X]
+    [NormedAddCommGroup Y] [NormedSpace Real Y] [FiniteDimensional Real Y]
+    {D : Set (P × X)} {K : Set P}
+    (hD : IsOpen D) (hK : IsCompact K)
+    {FInf : P × X → Y} {seed : P → X}
+    (hFInf : ContDiffOn Real ∞ FInf D)
+    (hseed : ContinuousOn seed K)
+    (hgraph : Set.MapsTo (fun p => (p, seed p)) K D)
+    (hroot : ∀ p ∈ K, FInf (p, seed p) = 0)
+    (hinv : ∀ p ∈ K,
+      (partialFDeriv₂ FInf p (seed p)).IsInvertible) :
+    ∃ (W₀ : Set P) (PhiInf : P → X),
+      Set.EqOn PhiInf seed K ∧
+      Nonempty (CompactRootTube D W₀ K FInf PhiInf) := by
+  classical
+  let graph : P → P × X := fun p => (p, seed p)
+  let H : P × X → Y × P := pinnedRootMap FInf
+  let S : Set (P × X) := graph '' K
+  have hgraph_cont : ContinuousOn graph K :=
+    continuousOn_id.prodMk hseed
+  have hScompact : IsCompact S :=
+    hK.image_of_continuousOn hgraph_cont
+  let restrictPartial : ((P × X) →L[Real] Y) →L[Real] (X →L[Real] Y) :=
+    (ContinuousLinearMap.compL Real X (P × X) Y).flip
+      (ContinuousLinearMap.inr Real P X)
+  have hdf : ContDiffOn Real 0 (fderiv Real FInf) D :=
+    hFInf.fderiv_of_isOpen hD (by exact_mod_cast le_top)
+  have hpartial : ContinuousOn
+      (fun z : P × X => partialFDeriv₂ FInf z.1 z.2) D := by
+    have hcomp := restrictPartial.continuous.comp_continuousOn hdf.continuousOn
+    simpa only [partialFDeriv₂, restrictPartial,
+      ContinuousLinearMap.compL_apply] using hcomp
+  let invSet : Set (X →L[Real] Y) :=
+    Set.range ((↑) : (X ≃L[Real] Y) → X →L[Real] Y)
+  have hinvOpen : IsOpen invSet := ContinuousLinearEquiv.isOpen
+  let G : Set (P × X) :=
+    D ∩ (fun z => partialFDeriv₂ FInf z.1 z.2) ⁻¹' invSet
+  have hGopen : IsOpen G :=
+    hpartial.isOpen_inter_preimage hD hinvOpen
+  have hSG : S ⊆ G := by
+    rintro _ ⟨p, hp, rfl⟩
+    refine ⟨hgraph hp, ?_⟩
+    change partialFDeriv₂ FInf p (seed p) ∈ invSet
+    rcases hinv p hp with ⟨A, hA⟩
+    exact ⟨A, hA⟩
+  have hGinv : ∀ z ∈ G,
+      (partialFDeriv₂ FInf z.1 z.2).IsInvertible := by
+    intro z hz
+    rcases hz.2 with ⟨A, hA⟩
+    exact ⟨A, hA⟩
+  have hH_cd : ContDiffOn Real ∞ H D := by
+    simpa only [H, pinnedRootMap] using
+      hFInf.prodMk contDiff_fst.contDiffOn
+  have hlocalG : IsLocalHomeomorphOn H G := by
+    intro z hz
+    have hzD : z ∈ D := hz.1
+    have hFAt : ContDiffAt Real ∞ FInf z :=
+      hFInf.contDiffAt (hD.mem_nhds hzD)
+    have hHAt : ContDiffAt Real ∞ H z :=
+      hH_cd.contDiffAt (hD.mem_nhds hzD)
+    have hHInv : (fderiv Real H z).IsInvertible := by
+      simpa only [H] using
+        pinnedFDeriv_inv
+          (hFAt.differentiableAt (by simp)) (hGinv z hz)
+    rcases hHInv with ⟨A, hA⟩
+    have hHD : HasFDerivAt H
+        (A : (P × X) →L[Real] (Y × P)) z := by
+      rw [hA]
+      exact (hHAt.differentiableAt (by simp)).hasFDerivAt
+    let e := hHAt.toOpenPartialHomeomorph H hHD (by simp)
+    refine ⟨e, ?_, rfl⟩
+    exact hHAt.mem_toOpenPartialHomeomorph_source hHD (by simp)
+  have hSinj : Set.InjOn H S := by
+    rintro _ ⟨p, hp, rfl⟩ _ ⟨q, hq, rfl⟩ heq
+    have hpq : p = q := by
+      simpa only [H, pinnedRootMap, graph] using congrArg Prod.snd heq
+    subst q
+    rfl
+  have hHcont : ∀ z ∈ S, ContinuousAt H z := by
+    intro z hz
+    exact hH_cd.continuousOn.continuousAt
+      (hD.mem_nhds (hSG hz).1)
+  have hHloc : ∀ z ∈ S, ∃ u ∈ 𝓝 z, Set.InjOn H u := by
+    intro z hz
+    obtain ⟨e, hze, he⟩ := hlocalG z (hSG hz)
+    refine ⟨e.source, e.open_source.mem_nhds hze, ?_⟩
+    simpa only [he] using e.injOn
+  obtain ⟨T₀, hT₀open, hST₀, hT₀inj⟩ :=
+    Set.InjOn.exists_isOpen_superset hSinj hScompact hHcont hHloc
+  let T : Set (P × X) := T₀ ∩ G
+  have hTopen : IsOpen T := hT₀open.inter hGopen
+  have hST : S ⊆ T := fun z hz => ⟨hST₀ hz, hSG hz⟩
+  have hTinj : Set.InjOn H T := hT₀inj.mono inter_subset_left
+  have hlocalT : IsLocalHomeomorphOn H T :=
+    hlocalG.mono inter_subset_right
+  have hHopen : IsOpenMap (T.restrict H) := by
+    intro W hW
+    rw [Set.restrict_eq, Set.image_comp]
+    let O : Set (P × X) := ((↑) : T → P × X) '' W
+    have hOopen : IsOpen O :=
+      hTopen.isOpenMap_subtype_val W hW
+    have hOT : O ⊆ T := by
+      rintro _ ⟨x, hx, rfl⟩
+      exact x.2
+    change IsOpen (H '' O)
+    rw [isOpen_iff_forall_mem_open]
+    intro y hy
+    obtain ⟨x, hxO, rfl⟩ := hy
+    obtain ⟨e, hxe, he⟩ := hlocalT x (hOT hxO)
+    refine ⟨e '' (O ∩ e.source), ?_, ?_, ?_⟩
+    · rintro _ ⟨w, hw, rfl⟩
+      exact ⟨w, hw.1, congrFun he w⟩
+    · exact e.isOpen_image_of_subset_source
+        (hOopen.inter e.open_source) inter_subset_right
+    · exact ⟨x, ⟨hxO, hxe⟩, (congrFun he x).symm⟩
+  let e : OpenPartialHomeomorph (P × X) (Y × P) :=
+    OpenPartialHomeomorph.ofContinuousOpenRestrict
+      (hTinj.toPartialEquiv H T)
+      hlocalT.continuousOn hHopen hTopen
+  have he_source : e.source = T := by rfl
+  have he_coe : (e : P × X → Y × P) = H := by rfl
+  let pair : P → Y × P := fun p => (0, p)
+  let W₀ : Set P := pair ⁻¹' e.target
+  let PhiInf : P → X := fun p => (e.symm (pair p)).2
+  have hpair_cont : Continuous pair :=
+    continuous_const.prodMk continuous_id
+  have hpair_cd : ContDiff Real ∞ pair :=
+    contDiff_const.prodMk contDiff_id
+  have hW₀open : IsOpen W₀ :=
+    e.open_target.preimage hpair_cont
+  have hseed_image : ∀ p ∈ K, H (graph p) = pair p := by
+    intro p hp
+    apply Prod.ext
+    · simpa only [H, pinnedRootMap, graph, pair] using hroot p hp
+    · rfl
+  have hKW₀ : K ⊆ W₀ := by
+    intro p hp
+    have hgraphT : graph p ∈ T := hST ⟨p, hp, rfl⟩
+    have hgraphSrc : graph p ∈ e.source := by
+      simpa only [he_source] using hgraphT
+    have hmap := e.map_source hgraphSrc
+    rw [he_coe, hseed_image p hp] at hmap
+    exact hmap
+  have hPhiInf : ContDiffOn Real ∞ PhiInf W₀ := by
+    intro p hp
+    let z : P × X := e.symm (pair p)
+    have hzSrc : z ∈ e.source := e.symm.map_source hp
+    have hzT : z ∈ T := by
+      simpa only [he_source] using hzSrc
+    have hFAt : ContDiffAt Real ∞ FInf z :=
+      hFInf.contDiffAt (hD.mem_nhds hzT.2.1)
+    have hHAt : ContDiffAt Real ∞ H z :=
+      hH_cd.contDiffAt (hD.mem_nhds hzT.2.1)
+    have hHInv : (fderiv Real H z).IsInvertible := by
+      simpa only [H] using
+        pinnedFDeriv_inv
+          (hFAt.differentiableAt (by simp)) (hGinv z hzT.2)
+    rcases hHInv with ⟨A, hA⟩
+    have hHD : HasFDerivAt H
+        (A : (P × X) →L[Real] (Y × P)) z := by
+      rw [hA]
+      exact (hHAt.differentiableAt (by simp)).hasFDerivAt
+    have heD : HasFDerivAt (e : P × X → Y × P)
+        (A : (P × X) →L[Real] (Y × P)) z := by
+      simpa only [he_coe] using hHD
+    have heCD : ContDiffAt Real ∞ (e : P × X → Y × P) z := by
+      simpa only [he_coe] using hHAt
+    have hsymm : ContDiffAt Real ∞ e.symm (pair p) :=
+      e.contDiffAt_symm hp heD heCD
+    simpa only [PhiInf, z] using
+      (contDiffAt_snd.comp p
+        (hsymm.comp p hpair_cd.contDiffAt)).contDiffWithinAt
+  have hbranch : ∀ p ∈ W₀,
+      (p, PhiInf p) ∈ D ∧ FInf (p, PhiInf p) = 0 := by
+    intro p hp
+    let z : P × X := e.symm (pair p)
+    have hzSrc : z ∈ e.source := e.symm.map_source hp
+    have hzT : z ∈ T := by
+      simpa only [he_source] using hzSrc
+    have hright := e.right_inv hp
+    rw [he_coe] at hright
+    have hzRoot : FInf z = 0 := by
+      simpa only [H, pinnedRootMap, pair] using congrArg Prod.fst hright
+    have hzFst : z.1 = p := by
+      simpa only [H, pinnedRootMap, pair] using congrArg Prod.snd hright
+    have hpz : (p, PhiInf p) = z := by
+      apply Prod.ext
+      · exact hzFst.symm
+      · rfl
+    constructor
+    · rw [hpz]
+      exact hzT.2.1
+    · rw [hpz]
+      exact hzRoot
+  have hEq : Set.EqOn PhiInf seed K := by
+    intro p hp
+    have hgraphT : graph p ∈ T := hST ⟨p, hp, rfl⟩
+    have hgraphSrc : graph p ∈ e.source := by
+      simpa only [he_source] using hgraphT
+    have hleft := e.left_inv hgraphSrc
+    rw [he_coe, hseed_image p hp] at hleft
+    simpa only [PhiInf, graph] using congrArg Prod.snd hleft
+  refine ⟨W₀, PhiInf, hEq, ?_⟩
+  exact exists_compactRootTube
+    hD hW₀open hK hKW₀ hFInf hPhiInf
+    (fun p hp => (hbranch p hp).1)
+    (fun p hp => (hbranch p hp).2)
+    (by
+      intro p hp
+      rw [hEq hp]
+      exact hinv p hp)
 
 end Analysis
 end DifferentialGeometry

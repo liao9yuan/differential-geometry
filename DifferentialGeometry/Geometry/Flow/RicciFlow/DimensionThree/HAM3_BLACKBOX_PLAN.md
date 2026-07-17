@@ -212,6 +212,16 @@ existence)**.  Honest estimate for `ham3_main` fully sorry-free:
 
 ## Status log
 
+- 2026-07-16 low-regularity E1 lane: route A was implemented. The exact
+  Ricci+DeTurck three-arm slope identity and its concrete path-integral form are
+  sorry-free, and the top path consumer has been migrated off the oversized
+  high-order remainder file. The mixed `H3 -> H1` theorem remains unstated
+  (0%); dedicated machinery is about 78%. The next mathematical producer is
+  uniform C0/C1 path-coefficient control from `LowRegCoeff`, then final mixed
+  assembly. Uniform low-regularity existence `(N)` remains theorem-level 0%.
+  Final cross-module verification is temporarily blocked by the unrelated
+  in-flight `Geometry/Operator/Operators.lean` failure.
+
 - 2026-07-05: audit written.  `ham3_main` assembled and checked modulo the 8
   frontiers; `ham3_noncollapse` route decision (A vs B) is OPEN for the user —
   recommendation: Route A.

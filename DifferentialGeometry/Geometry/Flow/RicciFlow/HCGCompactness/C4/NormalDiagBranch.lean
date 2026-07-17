@@ -431,6 +431,85 @@ end NormalCoordMetricBoundInput
 
 namespace IsNormalDiag
 
+/-- Two quantitative normal diagonal branches with the same source radius and
+the same intrinsic compatibility square agree as partial homeomorphisms. -/
+theorem eqOnSource
+    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I))
+    (hcomplete : MetricComplete (I := I) Y)
+    (hconn : letI : TopologicalSpace Y.M := Y.topology; ConnectedSpace Y.M)
+    (x : Y.M) {q : NNReal} {δ δ' : Real}
+    {e e' : OpenPartialHomeomorph (E × E) (E × E)}
+    (h : IsNormalDiag (I := I) Y hcomplete hconn x q δ e)
+    (hf : NormalDiagFence (I := I) Y x q e)
+    (h' : IsNormalDiag (I := I) Y hcomplete hconn x q δ' e')
+    (hf' : NormalDiagFence (I := I) Y x q e') :
+    e ≈ e' := by
+  letI : TopologicalSpace Y.M := Y.topology
+  letI : ChartedSpace H Y.M := Y.charted
+  letI : IsManifold I ∞ Y.M := Y.smooth
+  letI : IsManifold I 1 Y.M := IsManifold.of_le
+    (I := I) (M := Y.M) (n := ∞) (by decide)
+  letI : SigmaCompactSpace Y.M := Y.sigmaCompact
+  letI : T2Space Y.M := Y.t2
+  letI : ConnectedSpace Y.M := hconn
+  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+  letI : TopologicalSpace.MetrizableSpace Y.M :=
+    Manifold.metrizableSpace I Y.M
+  letI : T3Space Y.M := inferInstance
+  letI : RiemannianBundle (fun y : Y.M ↦ TangentSpace I y) :=
+    Y.riemBundle (I := I)
+  letI : (y : Y.M) → InnerProductSpace Real (TangentSpace I y) :=
+    Y.riemInner (I := I)
+  letI : IsContinuousRiemannianBundle E
+      (fun y : Y.M ↦ TangentSpace I y) := Y.riemBundle_cont (I := I)
+  letI : EMetricSpace Y.M := Y.emetricSpace (I := I)
+  letI : CompleteSpace Y.M := MetricComplete.complete (I := I) Y hcomplete
+  change e.source = Metric.ball (0 : E × E) q ∧
+    e 0 = 0 ∧
+    ContDiffOn Real ∞ (e : E × E → E × E) e.source ∧
+    Metric.closedBall (0 : E × E) δ ⊆ e.target ∧
+    ContDiffOn Real ∞ e.symm e.target ∧
+    ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) Y x (e z) =
+        diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+          (normalTangent (I := I) Y x z) at h
+  change e'.source = Metric.ball (0 : E × E) q ∧
+    e' 0 = 0 ∧
+    ContDiffOn Real ∞ (e' : E × E → E × E) e'.source ∧
+    Metric.closedBall (0 : E × E) δ' ⊆ e'.target ∧
+    ContDiffOn Real ∞ e'.symm e'.target ∧
+    ∀ z ∈ Metric.closedBall (0 : E × E) q,
+      normalPair (I := I) Y x (e' z) =
+        diagExp (I := I) Y.metric (normal_enorm (I := I) Y)
+          (normalTangent (I := I) Y x z) at h'
+  change ∀ z ∈ Metric.closedBall (0 : E × E) q,
+    z.1 ∈ normalBall (I := I) Y x ∧
+    (e z).1 ∈ normalBall (I := I) Y x ∧
+    (e z).2 ∈ normalBall (I := I) Y x at hf
+  change ∀ z ∈ Metric.closedBall (0 : E × E) q,
+    z.1 ∈ normalBall (I := I) Y x ∧
+    (e' z).1 ∈ normalBall (I := I) Y x ∧
+    (e' z).2 ∈ normalBall (I := I) Y x at hf'
+  rcases h with ⟨hsource, _, _, _, _, hdiag⟩
+  rcases h' with ⟨hsource', _, _, _, _, hdiag'⟩
+  refine ⟨hsource.trans hsource'.symm, ?_⟩
+  intro z hz
+  have hzBall : z ∈ Metric.ball (0 : E × E) q := by
+    rwa [← hsource]
+  have hzClosed : z ∈ Metric.closedBall (0 : E × E) q :=
+    Metric.ball_subset_closedBall hzBall
+  have hzFence := hf z hzClosed
+  have hzFence' := hf' z hzClosed
+  apply (normalPairHome (I := I) Y x).injOn
+  · change e z ∈ (normalPairHome (I := I) Y x).source
+    rw [normalPair_source]
+    exact ⟨hzFence.2.1, hzFence.2.2⟩
+  · change e' z ∈ (normalPairHome (I := I) Y x).source
+    rw [normalPair_source]
+    exact ⟨hzFence'.2.1, hzFence'.2.2⟩
+  · rw [normalPairHome_apply, normalPairHome_apply]
+    exact (hdiag z hzClosed).trans (hdiag' z hzClosed).symm
+
 /-- Transport a quantitative normal-coordinate branch to the selected
 intrinsic diagonal-exponential branch used by downstream readouts. -/
 noncomputable def toBranch

@@ -1,4 +1,6 @@
-import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderTameLipschitz
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckTopCoeff
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.DeTurckLieCoeffAppCcValue
+import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.GradSlotCurvature
 
 /-!
 # Symmetry of the Ricci--DeTurck top coefficient
@@ -204,7 +206,7 @@ of the first two slots of the second covariant derivative. -/
 noncomputable def gradSwapCurvCoeff (g₀ : SmoothRiemannianMetric I M) :
     SmoothCcTensor g₀ 2 4 :=
   Classical.choose
-    (exists_iteratedCovGradTwo_gradSlotAntisym_curvatureCoeff (I := I) (M := M) g₀)
+    (gradSlot_sub_eq_curv (I := I) (M := M) g₀)
 
 /-- The chosen background-curvature coefficient realizes covariant-derivative
 commutation in the first two derivative slots. -/
@@ -215,7 +217,7 @@ theorem gradSwapCurv_spec (g₀ : SmoothRiemannianMetric I M)
             g₀ (Equiv.swap (0 : Fin 4) 1) (iteratedCovGrad (I := I) g₀ 0 2 2 S) =
       appCcRS (I := I) (M := M) g₀ 0 2 4 (gradSwapCurvCoeff (I := I) g₀) S :=
   Classical.choose_spec
-    (exists_iteratedCovGradTwo_gradSlotAntisym_curvatureCoeff (I := I) (M := M) g₀) S
+    (gradSlot_sub_eq_curv (I := I) (M := M) g₀) S
 
 /-- The curvature coefficient left after symmetrizing the Ricci--DeTurck top
 coefficient in its two derivative slots. -/

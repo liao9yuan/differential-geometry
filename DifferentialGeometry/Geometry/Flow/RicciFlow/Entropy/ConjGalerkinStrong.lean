@@ -2,6 +2,8 @@ import DifferentialGeometry.Analysis.ODE.ChartLocalPicardIntegral
 import DifferentialGeometry.Analysis.Parabolic.QuasiLinear.TensorMaximalRegularity.SolutionSpace
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.RankZeroRealization
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautCompat
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarNonautTime
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.ScalarPotentialTime
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.ConjGalerkinLimit
 import Mathlib.Analysis.Normed.Operator.BanachSteinhaus
 import Mathlib.MeasureTheory.Integral.DominatedConvergence
@@ -176,6 +178,29 @@ noncomputable def galLimVelHs
     scalarPotHs (I := I) (M := M) q
       (conjCoeff (I := I) (M := M) S ((T : Real) - t)) m Um
 
+/-- The canonical `H^m` limiting velocity is the all-scale velocity at order
+`m + 1`, included once into order `m`. -/
+noncomputable def galLimVelCan
+    {D : RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {T : D.RegularTime} {tau : Real}
+    {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
+    {V : Nat → Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    {phi : Nat → Nat}
+    {ulim : Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    (hτ : 0 ≤ tau)
+    (hlim : IsConjGalSubseq (I := I) (M := M)
+      S T tau u0 V phi ulim) (m : Nat) (t : Real) :
+    tensorHs (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 (m : Real) :=
+  tensorHsInclusion (I := I) (M := M)
+    (g := S.family.metric (T : Real)) (r := 0) (s := 0)
+    (by exact_mod_cast Nat.le_succ m :
+      (m : Real) ≤ ((m + 1 : Nat) : Real))
+    (galLimVelHs hτ hlim (m + 1) t)
+
 /-- The limiting equation's `H⁰` velocity is continuous on the Galerkin
 interval. -/
 theorem galLimVel_cont
@@ -219,10 +244,11 @@ theorem galLimVel_lift
           tensorHs (I := I) (M := M)
             (S.family.metric (T : Real)) 0 0 (m : Real),
         Continuous w ∧
-          ∀ t, tensorHsInclusion (I := I) (M := M)
+          (∀ t, tensorHsInclusion (I := I) (M := M)
               (g := S.family.metric (T : Real)) (r := 0) (s := 0)
               (by positivity : (0 : Real) ≤ (m : Real)) (w t) =
-            galLimVel hτ.le hlim (t : Real) := by
+            galLimVel hτ.le hlim (t : Real)) ∧
+          ∀ t, w t = galLimVelCan hτ.le hlim m (t : Real) := by
   classical
   obtain ⟨tauN, htauN, _, hregN, hnorm⟩ :=
     lapDiffHs_norm (I := I) (M := M) S.family hS.smoothMetric T
@@ -558,7 +584,7 @@ theorem galLimVel_lift
       tensorHs (I := I) (M := M) q 0 0 (m : Real) := fun t =>
     tensorHsInclusion (I := I) (M := M)
       (g := q) (r := 0) (s := 0) hm.le (W t)
-  refine ⟨w, ?_, ?_⟩
+  refine ⟨w, ?_, ?_, ?_⟩
   · simpa only [w] using hdown
   · intro t
     apply tensorHs.ext
@@ -567,6 +593,8 @@ theorem galLimVel_lift
       (fun v : tensorHs (I := I) (M := M) q 0 0 0 => v.coeff i)
       (hW0 t)
     simpa only [w, tensorHsInclusion_coeff_apply] using hi
+  · intro t
+    simp only [w, W, galLimVelCan, q]
 
 /-- Coordinate form of the limiting velocity on the Galerkin interval. -/
 theorem galLimVel_coeff
@@ -1005,6 +1033,8 @@ theorem galLimExt_deriv
                 (g := S.family.metric (T : Real)) (r := 0) (s := 0)
                 (by positivity : (0 : Real) ≤ (m : Real)) (w t) =
               galLimVel hτ.le hlim t) ∧
+          (∀ t ∈ Icc (0 : Real) tau',
+            w t = galLimVelCan hτ.le hlim m t) ∧
           ∀ t ∈ Ioo (0 : Real) tau',
             HasDerivAt (galLimExt hτ.le hlim m) (w t) t := by
   classical
@@ -1012,7 +1042,7 @@ theorem galLimExt_deriv
     galLimVel_lift (I := I) (M := M) hS hτ hlim
   refine ⟨tau', htau', htau'_tau, ?_⟩
   intro m
-  obtain ⟨w₀, hw₀, hw₀_eq⟩ := hlift m
+  obtain ⟨w₀, hw₀, hw₀_eq, hw₀_can⟩ := hlift m
   let w : Real → tensorHs (I := I) (M := M)
       (S.family.metric (T : Real)) 0 0 (m : Real) :=
     Set.IccExtend htau'.le w₀
@@ -1028,7 +1058,11 @@ theorem galLimExt_deriv
         galLimVel hτ.le hlim t := by
     rw [hw_mem t ht]
     exact hw₀_eq ⟨t, ht⟩
-  refine ⟨w, hw, hw_eq, ?_⟩
+  have hw_can (t : Real) (ht : t ∈ Icc (0 : Real) tau') :
+      w t = galLimVelCan hτ.le hlim m t := by
+    rw [hw_mem t ht]
+    exact hw₀_can ⟨t, ht⟩
+  refine ⟨w, hw, hw_eq, hw_can, ?_⟩
   have h0Small : (0 : Real) ∈ Icc (0 : Real) tau' :=
     ⟨le_rfl, htau'.le⟩
   have h0Tau : (0 : Real) ∈ Icc (0 : Real) tau :=
@@ -1082,6 +1116,164 @@ theorem galLimExt_deriv
   refine hsum.congr_of_eventuallyEq ?_
   filter_upwards [Icc_mem_nhds ht.1 ht.2] with r hr
   exact hftc r hr
+
+/-- On one positive backward-time slab, the derivative of every all-order
+Galerkin limit is its canonical all-scale velocity. -/
+theorem galLimExt_ode
+    {D : RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {T : D.RegularTime} {tau : Real}
+    {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
+    {V : Nat → Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    {phi : Nat → Nat}
+    {ulim : Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    (hS : IsSolutionOn (I := I) S) (hτ : 0 < tau)
+    (hlim : IsConjGalSubseq (I := I) (M := M)
+      S T tau u0 V phi ulim) :
+    ∃ tau' : Real, 0 < tau' ∧ tau' ≤ tau ∧
+      ∀ m : Nat, ∀ t ∈ Ioo (0 : Real) tau',
+        HasDerivAt (galLimExt hτ.le hlim m)
+          (galLimVelCan hτ.le hlim m t) t := by
+  obtain ⟨tau', htau', htau'_tau, hd⟩ :=
+    galLimExt_deriv (I := I) (M := M) hS hτ hlim
+  refine ⟨tau', htau', htau'_tau, ?_⟩
+  intro m t ht
+  obtain ⟨w, _hw, _hw0, hwCan, hwDeriv⟩ := hd m
+  have h := hwDeriv t ht
+  rw [hwCan t ⟨ht.1.le, ht.2.le⟩] at h
+  exact h
+
+/-- On one positive backward-time interior, the Galerkin limit is a smooth
+time path in every natural scalar Sobolev order. -/
+theorem galLimExt_smooth
+    {D : RealTimeInterval}
+    {S : SolutionOn (I := I) (M := M) D}
+    {T : D.RegularTime} {tau : Real}
+    {u0 : SmoothCcTensor (S.family.metric (T : Real)) 0 0}
+    {V : Nat → Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    {phi : Nat → Nat}
+    {ulim : Real → TensorEigenIdx (I := I) (M := M)
+      (S.family.metric (T : Real)) 0 0 → Real}
+    (hS : IsSolutionOn (I := I) S) (hτ : 0 < tau)
+    (hlim : IsConjGalSubseq (I := I) (M := M)
+      S T tau u0 V phi ulim) :
+    ∃ tau' : Real, 0 < tau' ∧ tau' ≤ tau ∧
+      ∀ m : Nat, ContDiffOn Real ∞
+        (galLimExt hτ.le hlim m) (Ioo (0 : Real) tau') := by
+  classical
+  obtain ⟨tauO, htauO, htauO_tau, hode⟩ :=
+    galLimExt_ode (I := I) (M := M) hS hτ hlim
+  obtain ⟨tauA, htauA, _htauA_one, hregA, hLap⟩ :=
+    lapDiffHs_dyn_fin (I := I) (M := M) S.family hS.smoothMetric T
+  let tau' : Real := min tauO tauA
+  have htau' : 0 < tau' := by
+    simpa only [tau'] using lt_min htauO htauA
+  have htau'_O : tau' ≤ tauO := by
+    exact min_le_left _ _
+  have htau'_A : tau' ≤ tauA := by
+    exact min_le_right _ _
+  have htau'_tau : tau' ≤ tau := htau'_O.trans htauO_tau
+  let q : SmoothRiemannianMetric I M := S.family.metric (T : Real)
+  let zeta : Real → C^∞⟮I, M; Real⟯ := fun s =>
+    conjCoeff (I := I) (M := M) S ((T : Real) - s)
+  have hback : Ioo (0 : Real) tau' ⊆
+      {s : Real | (T : Real) - s ∈ D.regular} := by
+    intro s hs
+    exact hregA s ⟨hs.1.le, hs.2.le.trans htau'_A⟩
+  have hzeta : ContMDiffOn (I.prod 𝓘(Real, Real)) 𝓘(Real, Real) ∞
+      (fun p : M × Real => (zeta p.2 : M → Real) p.1)
+      ((Set.univ : Set M) ×ˢ Ioo (0 : Real) tau') := by
+    simpa only [zeta, conjCoeffRev] using
+      (conjCoeff_rev (I := I) S hS T).mono
+        (Set.prod_mono (Set.Subset.rfl) hback)
+  have hfin : ∀ k : Nat, ∀ m : Nat, ContDiffOn Real k
+      (galLimExt hτ.le hlim m) (Ioo (0 : Real) tau') := by
+    intro k
+    induction k with
+    | zero =>
+        intro m
+        apply contDiffOn_zero.mpr
+        exact (galLimExt_cont hτ.le hlim m).continuousOn
+    | succ k ih =>
+        have hvel (m : Nat) : ContDiffOn Real k
+            (galLimVelCan hτ.le hlim m) (Ioo (0 : Real) tau') := by
+          let e := tensorHs.castEquiv (I := I) (M := M)
+            (g := q) (r := 0) (s := 0)
+            (by norm_num : (((m + 1) + 2 : Nat) : Real) =
+              ((m + 1 : Nat) : Real) + 2)
+          let U : Real → tensorHs (I := I) (M := M) q 0 0
+              (((m + 1 : Nat) : Real) + 2) := fun t =>
+            e (galLimExt hτ.le hlim ((m + 1) + 2) t)
+          have hU : ContDiffOn Real k U (Ioo (0 : Real) tau') := by
+            simpa only [U, Function.comp_apply] using
+              e.contDiff.comp_contDiffOn (ih ((m + 1) + 2))
+          let Jm := tensorHsInclusion (I := I) (M := M)
+            (g := q) (r := 0) (s := 0)
+            (by norm_num : ((m + 1 : Nat) : Real) ≤
+              ((m + 1 : Nat) : Real) + 2)
+          let Um : Real → tensorHs (I := I) (M := M) q 0 0
+              ((m + 1 : Nat) : Real) := fun t => Jm (U t)
+          have hUm : ContDiffOn Real k Um (Ioo (0 : Real) tau') := by
+            simpa only [Um, Function.comp_apply] using
+              Jm.contDiff.comp_contDiffOn hU
+          have hfixed : ContDiffOn Real k
+              (fun t => tensorScaleLaplacian (I := I) (M := M)
+                (g := q) (r := 0) (s := 0) ((m + 1 : Nat) : Real) (U t))
+              (Ioo (0 : Real) tau') := by
+            simpa only [Function.comp_apply] using
+              (tensorScaleLaplacian (I := I) (M := M)
+                (g := q) (r := 0) (s := 0)
+                ((m + 1 : Nat) : Real)).contDiff.comp_contDiffOn hU
+          have hdiff : ContDiffOn Real k
+              (fun t => lapDiffHs (I := I) (M := M) q
+                (S.family.metric ((T : Real) - t)) (m + 1) (U t))
+              (Ioo (0 : Real) tau') := by
+            simpa only [q] using
+              hLap tau' htau' htau'_A (m + 1) k U hU
+          have hpot : ContDiffOn Real k
+              (fun t => scalarPotHs (I := I) (M := M) q
+                (zeta t) (m + 1) (Um t))
+              (Ioo (0 : Real) tau') :=
+            scalarPot_dyn_fin (I := I) (M := M) q zeta isOpen_Ioo hzeta
+              (m + 1) k Um hUm
+          have hvhs : ContDiffOn Real k
+              (galLimVelHs hτ.le hlim (m + 1)) (Ioo (0 : Real) tau') := by
+            simpa only [galLimVelHs, q, e, U, Jm, Um, zeta] using
+              (hfixed.add hdiff).add hpot
+          let Jvel := tensorHsInclusion (I := I) (M := M)
+            (g := q) (r := 0) (s := 0)
+            (by exact_mod_cast Nat.le_succ m :
+              (m : Real) ≤ ((m + 1 : Nat) : Real))
+          have hcan : ContDiffOn Real k
+              (fun t => Jvel (galLimVelHs hτ.le hlim (m + 1) t))
+              (Ioo (0 : Real) tau') := by
+            simpa only [Function.comp_apply] using
+              Jvel.contDiff.comp_contDiffOn hvhs
+          simpa only [galLimVelCan, q, Jvel] using hcan
+        intro m
+        have hdiff : DifferentiableOn Real (galLimExt hτ.le hlim m)
+            (Ioo (0 : Real) tau') := by
+          intro t ht
+          exact (hode m t ⟨ht.1, ht.2.trans_le htau'_O⟩).differentiableAt
+            |>.differentiableWithinAt
+        have hderiv_cd : ContDiffOn Real k
+            (deriv (galLimExt hτ.le hlim m)) (Ioo (0 : Real) tau') := by
+          refine (hvel m).congr ?_
+          intro t ht
+          exact (hode m t ⟨ht.1, ht.2.trans_le htau'_O⟩).deriv
+        simp only [Nat.cast_add, Nat.cast_one]
+        rw [contDiffOn_succ_iff_deriv_of_isOpen isOpen_Ioo]
+        refine ⟨hdiff, ?_, hderiv_cd⟩
+        intro hk
+        norm_num at hk
+  refine ⟨tau', htau', htau'_tau, ?_⟩
+  intro m
+  rw [contDiffOn_infty]
+  intro k
+  exact hfin k m
 
 /-- A Galerkin subsequential limit is a genuine `H¹_t H⁰_x` solution whose
 represented path is the `H²` spectral limit included into `H⁰`. -/

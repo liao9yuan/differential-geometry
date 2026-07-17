@@ -24,3 +24,15 @@ is still unstated and therefore 0%; its dedicated low-regularity machinery is
 approximately 65% complete.  The next missing producer is a uniform low-order
 bound for the explicit path coefficients, followed by the `H^2`-coefficient
 times `H^2`-tensor product estimate.
+
+## 2026-07-16 public dependency migration
+
+The module no longer imports the oversized remainder implementation. The Lie
+principal readout now comes from `DeTurckLieCoeffAppCcValue`, and the gradient
+slot commutator comes from the new public `gradSlot_sub_eq_curv` producer.
+
+The source migration is complete. Its downstream focused verification is
+temporarily blocked because the new curvature module cannot receive a named
+`.olean` while the unrelated in-flight `Geometry/Operator/Operators.lean`
+changes fail. The mixed `H3 -> H1` endpoint is still unstated (0%); dedicated
+machinery is approximately 78% complete.

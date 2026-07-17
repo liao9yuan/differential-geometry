@@ -29,25 +29,6 @@ variable [NeZero (Module.finrank Real E)]
 variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
-/-- The quantitative endpoint and its source remain inside the named normal
-coordinate balls needed to transport the whole model branch. -/
-def NormalDiagFence
-    (Y : PointedRiemannianManifold.{u, uE, uH} (I := I)) (x : Y.M)
-    (q : NNReal) (e : OpenPartialHomeomorph (E × E) (E × E)) :
-    letI : TopologicalSpace Y.M := Y.topology
-    letI : ChartedSpace H Y.M := Y.charted
-    letI : IsManifold I ∞ Y.M := Y.smooth
-    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-    Prop := by
-  letI : TopologicalSpace Y.M := Y.topology
-  letI : ChartedSpace H Y.M := Y.charted
-  letI : IsManifold I ∞ Y.M := Y.smooth
-  letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
-  exact ∀ z ∈ Metric.closedBall (0 : E × E) q,
-    z.1 ∈ normalBall (I := I) Y x ∧
-    (e z).1 ∈ normalBall (I := I) Y x ∧
-    (e z).2 ∈ normalBall (I := I) Y x
-
 /-- At any fixed phase radius satisfying the bilateral fence, acceleration,
 and quantitative inverse bounds, the retained normal endpoint determines an
 explicit positive smooth inverse branch compatible with `diagExp`, together

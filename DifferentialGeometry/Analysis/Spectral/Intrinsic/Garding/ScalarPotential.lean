@@ -1,6 +1,7 @@
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.Garding.MetricLapDiffCore
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.CompactSAResolventIntrinsic
 import DifferentialGeometry.Analysis.Spectral.Tensor.CovGrad.CovariantLeibniz
+import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricAppHs
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.ParametricScalarSmul
 import DifferentialGeometry.Analysis.Spectral.Tensor.SobolevScale.SmoothCcDense
 
@@ -481,6 +482,23 @@ theorem scalarPotHs_core
   refine ⟨C, ?_⟩
   intro W
   simpa only [ccToHsLin_apply, scalarSmulLin, LinearMap.comp_apply] using hbound W
+
+/-- The completed scalar potential is the fully applied rank-zero tensor
+coefficient action. -/
+theorem scalarPotHs_app
+    (q : SmoothRiemannianMetric I M) (ζ : C^∞⟮I, M; Real⟯) (m : ℕ)
+    (U : tensorHs (I := I) (M := M) q 0 0 (m : Real)) :
+    scalarPotHs (I := I) (M := M) q ζ m U =
+      appHs q 0 0 m (scalarCc (I := I) (M := M) q ζ) U := by
+  have hdense : DenseRange
+      (ccToHsLin (I := I) (M := M) q 0 (m : Real)) :=
+    ccToHsLin_dense (I := I) (M := M) q 0 (by positivity)
+  refine hdense.induction_on U (isClosed_eq ?_ ?_) ?_
+  · exact (scalarPotHs (I := I) (M := M) q ζ m).continuous
+  · exact (appHs q 0 0 m (scalarCc (I := I) (M := M) q ζ)).continuous
+  · intro W
+    simp only [ccToHsLin_apply]
+    rw [scalarPotHs_core, appHs_core, app_scalarCc]
 
 private theorem ccHs_inc
     (q : SmoothRiemannianMetric I M) {τ σ : Real} (hτσ : τ ≤ σ)

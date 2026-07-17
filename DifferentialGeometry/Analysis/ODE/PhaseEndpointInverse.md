@@ -49,3 +49,15 @@ bound its derivative relative to `-id`.  These are producer-side estimates;
 `invErr_lt_one` supplies a reusable sufficient smallness threshold for that
 error to be strictly below one.  The HCG scale selector must still instantiate
 and retain this witness before Neumann invertibility can be claimed.
+
+## 2026-07-16 monotonicity API
+
+There is no separate public `invErr` definition: the established API names the
+explicit coefficient `N * (N⁻¹ - c)⁻¹ * c` directly.  The checked theorem
+`invErr_mono` now proves that this coefficient is monotone in `c` while the
+larger error remains strictly below `N⁻¹`.  This is a complete generic helper;
+it is supporting machinery only, and the downstream Step-B1 producer and
+textbook endpoint remain unstated (0%).
+
+Focused verification and the targeted module refresh passed without local
+warnings or placeholders.

@@ -66,3 +66,13 @@ new witness at their stated API boundary.  The target theorem
 `StepB1RawInput` remains unstated/unproved (0%); its dedicated Step-B/B1
 machinery is about 88%, Chapter 4 machinery about 82%, and whole-HCG machinery
 about 54%.
+
+## 2026-07-16 prescribed-radius budgets
+
+`normalBrAccept` and `normalMinScale` now retain the two phase-error facts
+already proved by `exists_phase_scale`: the endpoint error stays below the
+inverse threshold, and the inverse-error coefficient is below `1 / 24`. No new
+estimate or assumption was introduced. Focused verification passed.
+
+These fields support the prescribed stage radius `q` and limit radius `q / 2`
+route. `StepB1RawInput` and textbook B1 remain theorem-level 0%.

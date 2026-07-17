@@ -411,3 +411,166 @@ reconstruction, `heatpot_of_gallim`, Perelman noncollapse, and
 **85%** classical-machinery estimate refers to the whole conjugate-heat route;
 it must not be read as completion of this newly isolated higher-time-jet
 sublane.
+
+## 2026-07-16 applied-action pause checkpoint
+
+The consult-selected producer route has materially advanced. The generic
+completed coefficient action `appHs`, its smooth-core compatibility and
+uniform coefficient-independent bound, one jointly smooth coefficient
+derivative valid for every Sobolev order, and the fixed-input `C∞` path theorem
+are implemented and verified. `iterCovGradHs` now completes fixed-background
+iterated covariant differentiation from `H^(k+j)` to `H^k`, also verified.
+
+At the scalar specialization, `lapDiffHs_decomp` is focused-green and gives the
+real loss-two decomposition through the principal trace coefficient and the
+connection-trace coefficient. `lapDiffHs_path_cd` is implemented by composing
+the two generic applied paths with backward affine time, and now also passes
+focused verification without warnings or `sorry`. The initial unknown-public-
+declaration diagnostic disappeared after the narrow `ScalarFluxJetBound`
+refresh, confirming that it was stale-import fallout rather than a theorem or
+API obstruction.
+
+The next genuine theorem frontier is to normalize the strong derivative from
+`galLimExt_deriv` to the explicit all-scale velocity and prove the dynamic-input
+completed-action product rule used by the simultaneous Banach ODE induction.
+No new consult is currently indicated.
+
+Honest accounting: the original and all-scale `A2` estimates, generic applied
+time regularity, the scalar decomposition, and the scalar fixed-input path
+theorem are **100%**. `galLimExt_smooth` remains theorem-level **0%**, with its
+dedicated machinery about **63%**. `galLim_jet_mass`, scalar reconstruction,
+`heatpot_of_gallim`, Perelman noncollapse, and `ham3_noncollapse` remain
+theorem-level **0%**. Whole HCG machinery remains approximately **57%**, with
+all endpoint theorems at **0%**.
+
+## 2026-07-16 all-time-jet checkpoint
+
+The dynamic completed-action route is now closed. `ParametricAppHsTime`
+proves the fully applied product rule and all finite/infinite time regularity;
+`ScalarPotentialTime` and `ScalarNonautTime` specialize it to the potential
+and loss-two Laplacian-difference arms. The canonical strong ODE in
+`ConjGalerkinStrong` then proves `galLimExt_smooth` simultaneously at every
+natural Sobolev order on one common smaller positive interval.
+
+`ConjGalerkinClassical.galLim_jet_mass` now closes the first item on that list:
+on every compact interior time interval, all coefficient time jets have a
+single summable spectral majorant at every natural Sobolev order.  Its proof
+uses the rank-generic compact mass producer and the closed-manifold counting
+tail.  The latter still inherits the existing
+`WeylEigenvalueCountingBound.lean` `sorry`, so this dependency chain is not yet
+globally sorry-free.
+
+The live order is now:
+
+1. rank-zero joint spacetime reconstruction;
+2. pointwise PDE and initial-value realization;
+3. `heatpot_of_gallim`, followed by the genuine entropy/noncollapse argument.
+
+No `HasLocallyConstantChartAt`, consumer-side black box, whole-Hom equality,
+or whole-CLM equality was added. `galLimExt_smooth` and
+`galLim_jet_mass` are now theorem-level **100%**, with their dedicated
+machinery **100%**. Reconstruction, `heatpot_of_gallim`, Perelman noncollapse,
+and `ham3_noncollapse` remain theorem-level **0%**. Classical conjugate-heat
+dedicated machinery is about **90%** and whole HCG machinery is conservatively
+about **59%**; all HCG endpoint theorems remain **0%**.
+
+## 2026-07-16 classical heat-potential closure
+
+The Galerkin route now reaches the genuine classical interface.
+`galLim_slice_cc` realizes every time slice by one smooth rank-zero tensor at
+all natural Sobolev orders.  `galLim_pde` reconstructs the scalar series and
+proves its pointwise moving heat-potential equation.  Finally,
+`heatpot_of_gallim` packages joint smoothness, closed-slab continuity, smooth
+slices, the initial trace, and the pointwise equation into an actual
+`IsHeatPotOn` on a nontrivial closed reversed-time interval.  These three
+theorems and their dedicated classical reconstruction machinery are **100%**.
+
+The proof stays in fully applied scalar normal form: it does not use a global
+frame, whole-Hom equality, whole-CLM equality, `HasLocallyConstantChartAt`, or a
+new consumer-side black box.  The full dependency chain still inherits the
+existing `sorry` in `ShortTime/WeylEigenvalueCountingBound.lean`; the new
+theorem bodies themselves contain no local `sorry`.
+
+The next analytic frontier is no longer classical existence.  The constructed
+heat potential still has arbitrary smooth initial data, so the route must now
+produce the normalized/nonnegative conjugate-heat data actually consumed by
+the entropy argument, then prove W-monotonicity and the cutoff contradiction.
+Perelman no-local-collapsing and `ham3_noncollapse` remain theorem-level
+**0%**.  Their broader entropy/noncollapse machinery is about **52%**; whole
+HCG machinery is conservatively about **60%**, with every HCG endpoint theorem
+still **0%**.
+
+The immediate assembly above this checkpoint is also closed:
+`heatpot_exists` removes the conditional Galerkin-subsequence input for every
+smooth initial tensor, and `conj_heat_exists` supplies the corresponding
+`IsConjHeatOn` solution with its exact terminal trace.  Both are theorem-level
+**100%**.  The live frontier is now positivity plus interval-local mass
+conservation/normalization; the existing mass theorem cannot yet consume the
+new solution directly because it asks for global `FunctionRegularAt` and
+`MetricFamilyRegularAt` data.
+
+The first positivity step is now closed as well.  `conjCoeff_bound` exports a
+uniform pointwise bound for the reversed scalar-curvature coefficient on a
+short closed interval, and `gallim_nonneg` intersects that interval with
+`heatpot_exists`, restricts the solution, and applies the existing weak maximum
+principle.  Thus nonnegative smooth initial data yield a nonnegative classical
+heat potential without a new coefficient-bound assumption.  Both theorems are
+**100%**.  Strict positivity and interval-local unit mass remain open; the
+first shared mass blocker is a joint-local moving-volume first-variation API.
+
+## 2026-07-16 positive unit-mass and potential checkpoint
+
+The remaining classical input is now closed.  `gallim_pos` upgrades the
+nonnegative solution to strict positivity, `heatpot_mass_deriv` proves the
+interval-local moving-volume derivative directly from `first_var_joint`, and
+`heatpot_mass_eq` turns that derivative into endpoint-inclusive mass
+constancy.  `gallim_unit_pos` packages the result: unless `M` is empty, one
+obtains a genuine strictly positive reversed heat potential of moving
+Riemannian mass one on a nontrivial closed interval.  These producers and
+their dedicated positivity/mass machinery are **100%**; no global
+`MetricFamilyRegularAt` or `FunctionRegularAt` assumption was added to their
+consumers.
+
+`Entropy/Potential.lean` now defines `perelmanPotential` and proves both exact
+inverse bridges: `density_potential` recovers the positive density, while
+`weighted_potential` identifies the Perelman weighted measure with
+`u dmu`.  This scalar bridge is **100%** and has no flow or regularity
+assumptions.  It is machinery for the entropy route, not a W-monotonicity or
+noncollapsing theorem.
+
+The live W route is therefore:
+
+1. prove the pointwise potential evolution equation, using native logarithmic
+   gradient/Laplacian rules;
+2. prove the invariant moving-metric derivative of the gradient-square term;
+3. assemble the weighted geometric square completion, W monotonicity, and the
+   cutoff contradiction.
+
+W monotonicity, Perelman no-local-collapsing, and `ham3_noncollapse` remain
+theorem-level **0%**.  Their dedicated entropy/noncollapse machinery is now
+about **59%**; whole HCG machinery remains conservatively about **60%**, with
+all HCG endpoint theorems still **0%**.  This chain still inherits the existing
+`ShortTime/WeylEigenvalueCountingBound.lean` `sorry`; none of the new
+positivity, mass, or potential-bridge theorem bodies adds a local `sorry`.
+
+## 2026-07-16 raw W first-variation checkpoint
+
+The first two items of the preceding live route are closed.  The checked
+producers are `potential_pde`, `potential_df_time`, `potential_joint`,
+`normGradSq_time`, `gradSq_joint`, `revGram_smooth`, `revTrace_eq`,
+`revScalar_time`, and `revGradSq_time`.  `w_rev_hasDerivAt` now assembles these
+actual inputs into the interval-local first variation of Perelman's `W`
+functional along the reversed Ricci flow with the genuine `conjCoeff`
+heat-potential input.  It adds no supplied regularity package, global frame,
+whole tensor/Hom equality, or `HasLocallyConstantChartAt`.
+
+This closes only the raw first-variation theorem.  The geometric square
+completion and weighted divergence cancellation remain open.  The next exact
+producer is `ricDriftDiv`, followed by `weighted_hess_split`;
+`hessSec_inner_cov` and `ricHess_eq_inner` are checked low-level inputs.
+
+Honest accounting: `w_rev_hasDerivAt` and its dedicated raw-variation machinery
+are **100%**.  Weighted square completion, W monotonicity, Perelman
+no-local-collapsing, and `ham3_noncollapse` remain theorem-level **0%**.
+Broader entropy/noncollapse machinery is approximately **67%**; whole HCG
+machinery remains approximately **60%**, with all HCG endpoints at **0%**.

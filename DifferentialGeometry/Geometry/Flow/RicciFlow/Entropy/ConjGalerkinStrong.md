@@ -179,3 +179,29 @@ smoothness mostly exists; completed applied-action time regularity is **0%**).
 `galLim_jet_mass`, rank-zero joint reconstruction, and `heatpot_of_gallim` are
 each theorem-level **0%**.  There is no mathematical obstruction presently;
 the blocker is a substantial missing reusable completion/regularity API.
+
+## 2026-07-16 all-time-jet assembly
+
+`galLimVelCan` is the canonical all-scale velocity. `galLimVel_lift` and
+`galLimExt_deriv` now retain equality with that velocity, and
+`galLimExt_ode` states the strong interior ODE directly at every natural
+Sobolev order.
+
+`galLimExt_smooth` is proved on one common smaller positive interval. Its
+simultaneous induction uses the `m+3` solution path, casts it to the natural
+loss-two domain, applies the frozen Laplacian, dynamic Laplacian difference,
+and dynamic scalar potential at order `m+1`, then includes the resulting
+velocity once into order `m`. The canonical ODE closes the successor step via
+`contDiffOn_succ_iff_deriv_of_isOpen`.
+
+Focused verification is green. Thus `galLimExt_smooth` and its dedicated
+higher-time-jet machinery are separately **100%**.
+
+The next assembly theorem, `galLim_jet_mass`, is now proved in
+`ConjGalerkinClassical.lean` and focused verification is green.  Its local body
+has no `sorry`, but its closed-manifold counting input inherits the existing
+`WeylEigenvalueCountingBound.lean` `sorry`; the full dependency chain must not
+be called sorry-free.  Rank-zero joint reconstruction and
+`heatpot_of_gallim` remain separate theorem-level **0%** frontiers. Classical
+conjugate-heat dedicated machinery is about **90%**; whole HCG machinery is
+conservatively about **59%**, while every HCG endpoint theorem remains **0%**.

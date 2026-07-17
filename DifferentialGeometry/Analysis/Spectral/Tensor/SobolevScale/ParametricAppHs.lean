@@ -281,21 +281,21 @@ noncomputable def appHs
       (appCcLin g b c Φ)).extendOfNorm
     (ccToHsLin (I := I) (M := M) g b (n : ℝ))
 
-/-- A finite squared coefficient-jet envelope controls the norm of the
-completed tensor action. -/
-theorem appHs_norm
-    (g : SmoothRiemannianMetric I M) (b c n : ℕ)
-    (Φ : SmoothCcTensor g b c) (B : ℕ → ℝ)
-    (hB_nn : ∀ i, i ≤ n → 0 ≤ B i)
-    (hB : ∀ i, i ≤ n → ∀ x : M,
-      riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
-        ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ B i) :
-    ∃ C : ℝ, 0 ≤ C ∧
+/-- The completed action has one coefficient-independent constant for every
+fixed metric, pair of tensor ranks, and natural Sobolev order. -/
+theorem appHs_unif
+    (g : SmoothRiemannianMetric I M) (b c n : ℕ) :
+    ∃ C : ℝ, 0 ≤ C ∧ ∀ (Φ : SmoothCcTensor g b c) (B : ℕ → ℝ),
+      (∀ i, i ≤ n → 0 ≤ B i) →
+      (∀ i, i ≤ n → ∀ x : M,
+        riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+          ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ B i) →
       ‖appHs g b c n Φ‖ ≤
         C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i) := by
   obtain ⟨C, hC_nn, happ⟩ :=
-    app_hs_small (I := I) (M := M) g b c n Φ B hB_nn hB
+    app_hs_const (I := I) (M := M) g b c n
   refine ⟨C, hC_nn, ?_⟩
+  intro Φ B hB_nn hB
   have hdense : DenseRange
       (ccToHsLin (I := I) (M := M) g b (n : ℝ)) :=
     ccToHsLin_dense (I := I) (M := M) g b (by positivity)
@@ -308,7 +308,22 @@ theorem appHs_norm
         (appCc (I := I) (M := M) g b c Φ W)‖ ≤
       (C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i)) *
         ‖ccTensorToHs (I := I) (M := M) g b (n : ℝ) W‖
-  exact happ W
+  exact happ Φ B hB_nn hB W
+
+/-- A finite squared coefficient-jet envelope controls the norm of the
+completed tensor action. -/
+theorem appHs_norm
+    (g : SmoothRiemannianMetric I M) (b c n : ℕ)
+    (Φ : SmoothCcTensor g b c) (B : ℕ → ℝ)
+    (hB_nn : ∀ i, i ≤ n → 0 ≤ B i)
+    (hB : ∀ i, i ≤ n → ∀ x : M,
+      riemannianFiberNormSq (I := I) (M := M) g b (c + i) x
+        ((iteratedCovGrad (I := I) g b c i Φ).toSection x) ≤ B i) :
+    ∃ C : ℝ, 0 ≤ C ∧
+      ‖appHs g b c n Φ‖ ≤
+        C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i) := by
+  obtain ⟨C, hC_nn, hC⟩ := appHs_unif (I := I) (M := M) g b c n
+  exact ⟨C, hC_nn, hC Φ B hB_nn hB⟩
 
 /-- The completed tensor action agrees with `appCc` on every smooth spectral
 embedding. -/
@@ -349,6 +364,65 @@ theorem appHs_core
         (appCcLin g b c Φ)) W
   apply LinearMap.extendOfNorm_eq hdense
   exact ⟨C * Real.sqrt (∑ i ∈ Finset.range (n + 1), B i), happ⟩
+
+/-- The completed action is additive in its tensor coefficient after applying
+it to a Sobolev input. -/
+theorem appHs_add
+    (g : SmoothRiemannianMetric I M) (b c n : ℕ)
+    (Φ₁ Φ₂ : SmoothCcTensor g b c)
+    (U : tensorHs (I := I) (M := M) g 0 b (n : ℝ)) :
+    appHs g b c n (Φ₁ + Φ₂) U =
+      appHs g b c n Φ₁ U + appHs g b c n Φ₂ U := by
+  let ι := ccToHsLin (I := I) (M := M) g b (n : ℝ)
+  let L := appHs g b c n (Φ₁ + Φ₂)
+  let R := appHs g b c n Φ₁ + appHs g b c n Φ₂
+  have hdense : DenseRange ι :=
+    ccToHsLin_dense (I := I) (M := M) g b (by positivity)
+  have hLR : (L : _ → _) = R := hdense.equalizer L.continuous R.continuous (by
+    funext W
+    simp only [Function.comp_apply, L, R, ι, ContinuousLinearMap.add_apply,
+      ccToHsLin_apply]
+    rw [appHs_core, appHs_core, appHs_core, appCc_add_left,
+      ccTensorToHs_add])
+  exact congrFun hLR U
+
+/-- The completed action is homogeneous in its tensor coefficient after
+applying it to a Sobolev input. -/
+theorem appHs_smul
+    (g : SmoothRiemannianMetric I M) (b c n : ℕ) (a : ℝ)
+    (Φ : SmoothCcTensor g b c)
+    (U : tensorHs (I := I) (M := M) g 0 b (n : ℝ)) :
+    appHs g b c n (a • Φ) U = a • appHs g b c n Φ U := by
+  let ι := ccToHsLin (I := I) (M := M) g b (n : ℝ)
+  let L := appHs g b c n (a • Φ)
+  let R := a • appHs g b c n Φ
+  have hdense : DenseRange ι :=
+    ccToHsLin_dense (I := I) (M := M) g b (by positivity)
+  have hLR : (L : _ → _) = R := hdense.equalizer L.continuous R.continuous (by
+    funext W
+    simp only [Function.comp_apply, L, R, ι, ContinuousLinearMap.smul_apply,
+      ccToHsLin_apply]
+    rw [appHs_core, appHs_core, appCc_smul_left, ccTensorToHs_smul])
+  exact congrFun hLR U
+
+/-- The completed action is subtractive in its tensor coefficient after
+applying it to a Sobolev input. -/
+theorem appHs_sub
+    (g : SmoothRiemannianMetric I M) (b c n : ℕ)
+    (Φ₁ Φ₂ : SmoothCcTensor g b c)
+    (U : tensorHs (I := I) (M := M) g 0 b (n : ℝ)) :
+    appHs g b c n (Φ₁ - Φ₂) U =
+      appHs g b c n Φ₁ U - appHs g b c n Φ₂ U := by
+  rw [sub_eq_add_neg, appHs_add]
+  calc
+    appHs g b c n Φ₁ U + appHs g b c n (-Φ₂) U =
+        appHs g b c n Φ₁ U +
+          appHs g b c n ((-1 : ℝ) • Φ₂) U := by
+      rw [neg_one_smul]
+    _ = appHs g b c n Φ₁ U + (-1 : ℝ) • appHs g b c n Φ₂ U := by
+      rw [appHs_smul]
+    _ = appHs g b c n Φ₁ U - appHs g b c n Φ₂ U := by
+      rw [neg_one_smul, sub_eq_add_neg]
 
 end Connection
 end Integral

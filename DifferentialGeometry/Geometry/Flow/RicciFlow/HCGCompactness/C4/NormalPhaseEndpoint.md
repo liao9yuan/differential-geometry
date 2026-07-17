@@ -32,6 +32,16 @@ second intrinsic inverse.
   For each fixed basepoint-distance sublevel it chooses one `q` and one explicit
   positive `delta` before quantifying over all stages and admissible centers.
   It consumes the existing profile and adds no branch-radius assumption.
+- `NormalRadiusProfile.exists_flow_at` exposes the same checked construction at
+  a prescribed positive `q`, provided the phase-radius, acceleration, and
+  inverse-error budgets are supplied.  `exists_uniform_flow` keeps its original
+  public statement and is now the compatibility wrapper that selects such a
+  `q` with `exists_smooth_q` before calling `exists_flow_at`.
+- The prescribed-radius path is consumed downstream by
+  `NormalRadiusProfile.exists_diagPair_at`, and the live source now contains
+  `MetricCompactnessInputs.exists_slot_diag`, which applies it at each live
+  slot with stage radius `q alpha` and limit radius `q alpha / 2` on one shared
+  metric-limit subsequence.
 - `normal_inv_eq` proves that this model branch agrees with the existing
   `diagExpInv` whenever the existing branch identities hold and both tangent
   vectors satisfy the concrete `expDiffeoRadius` smallness conditions.
@@ -62,16 +72,22 @@ tangent norm instance diamond that `PointedEmetric` is designed to avoid.
 
 ## Frontier
 
-The normal quantitative producer is now closed: endpoint naturality, forward
-smoothness, inverse smoothness, zero normalization, and a uniform positive
-target radius are all checked on the same branch.  The next target is a
-consumer refactor: parameterize the HCG readout by the selected inverse branch
-instead of hard-coding the privately chosen qualitative `diagExpInv` germ.
-Compatibility with `diagExpInv` remains an overlap theorem, not a global
-equality of totalized functions.
+The normal endpoint producer is closed: endpoint naturality, forward
+smoothness, inverse smoothness, zero normalization, and a positive target
+radius are checked on the same prescribed branch.  The prescribed radius now
+also reaches a slotwise matched stage/limit branch producer.  The next
+integration target is higher-level assembly: feed the radii and budgets chosen
+by the live minimizing-branch scale into `exists_slot_diag`, then close the
+same-branch seam before the support/readout capstone.  At present
+`exists_slot_min` retains one `HasNormalBrFull` witness while
+`exists_slot_diag` independently chooses the stage branch used in
+`HasDiagPairConv`; equality cannot be inferred merely from their common `q`.
+The next producer must reuse one witness or prove and transport an on-domain
+branch identification.  Compatibility with `diagExpInv` remains an overlap
+theorem, not a global equality of totalized functions.
 
-After that refactor, the next geometric obligations are concrete finite-hat
-containment and the independent half-squared-distance Hessian/Neumann bound.
+The strict-convexity Hessian/Neumann continuation remains an independent
+analytic frontier.
 
 ## Project position
 
@@ -90,3 +106,20 @@ containment and the independent half-squared-distance Hessian/Neumann bound.
 - Step B/B1 infrastructure: about 75%.
 - Chapter 4 infrastructure: about 73%.
 - Whole HCG compactness infrastructure: about 50%.
+
+## 2026-07-16 canonical fence retention
+
+`NormalDiagFence` now has its canonical home in this lower endpoint module,
+next to the first construction that proves the whole-ball endpoint
+containments.  `NormalRadiusProfile.exists_flow_at` retains the fence for the
+same prescribed `q` and the same selected branch `e`; no second existential
+branch or radius was introduced.  `exists_uniform_flow` preserves its public
+compatibility statement and intentionally forgets the extra fence field.
+
+Focused verification passed, and the endpoint refresh plus downstream checks
+confirmed the moved declaration is visible to consumers.  The former
+same-branch integration seam is now closed downstream by
+`IsNormalDiag.eqOnSource` and `HasDiagPairConv.congr_stage`.  This remains
+infrastructure: `StepB1RawInput` and textbook B1 are theorem-level **0%**;
+dedicated Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and
+whole-HCG compactness machinery about **57%**.

@@ -190,6 +190,10 @@ theorem normalBrAccept
     (hconn : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
+    let N : NNReal :=
+      ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊
+    let T : NNReal := N⁻¹
     ∃ aq aδ aρ : Real,
       0 < aq ∧ 0 < aδ ∧ 0 < aρ ∧
       ∀ R, 0 ≤ R →
@@ -200,6 +204,9 @@ theorem normalBrAccept
           6 * (q : Real) < h.phaseRadius R ∧
           3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
             (2 / 3 : Real) * (q : Real) ∧
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T ∧
+          N * (T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)))⁻¹ *
+              PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < 1 / 24 ∧
           ∀ k (x : (X.obj k).M),
             hd.dist k x (X.obj k).basepoint ≤ R →
             HasNormalBrFull (I := I) (X.obj k) (hcomplete.complete k)
@@ -234,7 +241,7 @@ theorem normalBrAccept
         mul_le_mul_of_nonneg_right (min_le_right aδ (aq / 2)) (hd.mu_nonneg R)
       _ = (q : Real) / 2 := by rw [hqeq]; ring
       _ < (q : Real) := half_lt_self hqReal
-  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, ?_⟩
+  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, herr, hinvErr, ?_⟩
   intro k x hx
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -359,6 +366,10 @@ theorem normalMinScale
     (hconn : ∀ k,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
+    let N : NNReal :=
+      ‖((PhaseFlow.freeDiagCLE (E := E)).symm :
+        (E × E) →L[Real] (E × E))‖₊
+    let T : NNReal := N⁻¹
     ∃ aq aδ aMin : Real,
       0 < aq ∧ 0 < aδ ∧ 0 < aMin ∧
       ∀ R, 0 ≤ R →
@@ -369,6 +380,9 @@ theorem normalMinScale
           6 * (q : Real) < h.phaseRadius R ∧
           3 * hb.metricC 1 * (2 * (q : Real)) ^ 2 ≤
             (2 / 3 : Real) * (q : Real) ∧
+          PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < T ∧
+          N * (T - PhaseFlow.phaseErr (normalPhaseK hb (2 * q)))⁻¹ *
+              PhaseFlow.phaseErr (normalPhaseK hb (2 * q)) < 1 / 24 ∧
           2 * (aMin * hd.mu R) < (q : Real) ∧
           ∀ k (x : (X.obj k).M),
             hd.dist k x (X.obj k).basepoint ≤ R →
@@ -399,7 +413,8 @@ theorem normalMinScale
     exact (min_le_right _ _).trans (min_le_right _ _)
   refine ⟨aq, aδ, aMin, haq, haδ, haMin, ?_⟩
   intro R hR
-  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, hfull⟩ := hall R hR
+  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, herr, hinvErr,
+      hfull⟩ := hall R hR
   have hqReal : (0 : Real) < q := by exact_mod_cast hq
   have hMinq : 2 * (aMin * hd.mu R) < (q : Real) := by
     calc
@@ -408,7 +423,8 @@ theorem normalMinScale
           (mul_le_mul_of_nonneg_right haMinq (hd.mu_nonneg R)) (by norm_num)
       _ = (q : Real) / 2 := by rw [hqeq]; ring
       _ < (q : Real) := half_lt_self hqReal
-  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, hMinq, ?_⟩
+  refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, hqAcc, herr, hinvErr,
+    hMinq, ?_⟩
   intro k x hx
   letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
   letI : ChartedSpace H (X.obj k).M := (X.obj k).charted
@@ -461,7 +477,8 @@ theorem normalBrScale
     normalBrAccept (I := I) h hcomplete hconn
   refine ⟨aq, aδ, aρ, haq, haδ, haρ, ?_⟩
   intro R hR
-  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, _hqAcc, hfull⟩ := hall R hR
+  obtain ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, _hqAcc, _herr, _hinvErr,
+      hfull⟩ := hall R hR
   refine ⟨q, δ, hq, hδ, hqeq, hδlower, hqWide, ?_⟩
   intro k x hx
   exact HasNormalBrFull.toDom (I := I) (X.obj k) (hcomplete.complete k)

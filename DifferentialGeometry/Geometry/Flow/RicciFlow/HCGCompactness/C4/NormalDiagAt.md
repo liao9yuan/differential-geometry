@@ -44,3 +44,17 @@ homeomorphism `e` used by `IsNormalDiag`.  The compatibility theorem
 `normalDiagAt` keeps its public statement unchanged.  This is producer data,
 not a new branch field or endpoint assumption.  Focused verification passed,
 and the exact module object was refreshed for downstream consumers.
+
+## 2026-07-16 lower-layer fence API
+
+The canonical definition of `NormalDiagFence` moved to
+`NormalPhaseEndpoint.lean`, where the endpoint construction first produces its
+containment data.  `normalDiagAtFull` still returns that same predicate and all
+existing consumers keep their names and statements; this file no longer owns
+a duplicate definition.  Focused verification passed and downstream refreshes
+confirmed the import boundary is stable.
+
+This API placement change does not complete an endpoint.  `StepB1RawInput` and
+textbook B1 remain theorem-level **0%**; dedicated Step-B/B1 machinery is about
+**95%**, Chapter 4 about **87%**, and whole-HCG compactness machinery about
+**57%**.

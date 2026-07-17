@@ -6,10 +6,8 @@ The fixed smooth scalar-potential producer, including its natural-order
 completion and the legacy `H¹ → H⁰` compatibility bridge, is complete. Focused
 verification passes without local warnings, `sorry`, or `admit`.
 
-The compatibility edit has not yet refreshed this module's exported object:
-an already-running shared build is compiling a downstream module from its
-earlier dependency plan, so a duplicate or overlapping export was not started.
-This is a shared-build scheduling issue, not a local theorem blocker.
+The compatibility and fully applied completion adapters have both refreshed
+their exported objects. Focused and targeted verification are green.
 
 ## Implemented route
 
@@ -108,3 +106,15 @@ instance equalities.  The checked proof avoids that transport entirely: it
 uses the canonical `tensorHsInclusion` in both directions between the equal
 exponents and keeps every operator equality fully applied.  No bundle/Hom
 equality, new assumption, or heartbeat increase is required.
+
+## 2026-07-16 applied completion
+
+`scalarPotHs_app` identifies the completed scalar potential with
+`appHs scalarCc` after application to an arbitrary Sobolev input. Its proof
+uses the dense smooth spectral core and does not assert equality of the whole
+operators. This is the exact adapter consumed by `ScalarPotentialTime`.
+
+The whole-operator path theorem previously listed here remains unstated and is
+not needed. The applied dynamic path is now complete in the time module, and
+`galLimVel_lift` is **100%**. Perelman no-local-collapsing itself remains
+theorem-level **0%**.
