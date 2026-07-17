@@ -314,23 +314,16 @@ theorem contMDiffAt_isLocalDiffeomorphAt (hn : 1 ≤ n) (hn' : n ≠ ∞)
   obtain ⟨V, hVW, hV_open, hxV⟩ := mem_nhds_iff.mp hW_nhds
   exact isLocalDiffeomorphAt_of_contMDiffOn hn hn' hV_open hxV (hfW.mono hVW) hinv
 
-/-- **Manifold forward IFT at `n = ∞`.**  If `f` is `C^∞` on an open `U` and its chart-level
-derivative is invertible at *every* point of `U`, then `f` is a `C^∞` local diffeomorphism on `U`.
-
-The finite-order theorem does not apply directly (its inverse-smoothness step needs `n ≠ ∞`).
-Instead the order-`1` realizing partial diffeomorphism `Φ` (with `Φ.source ⊆ U`, from the strong
-core) is *upgraded*: by uniqueness of local inverses, `Φ.symm` agrees near each target point
-`y = f z` with the order-`k` local inverse produced at `z` (the two preimages of any nearby point
-both lie in `Φ.source` and map to it under the injective `Φ`), hence `Φ.symm` is `C^k` at every
-target point for every finite `k`, hence `C^∞` (`contMDiffOn_infty`); rebuild the diffeomorphism
-at `∞` on the same `PartialEquiv`. -/
-theorem contMDiffOn_isLocalDiffeomorphOn_infty
+/-- **Strong manifold forward IFT at `n = ∞`.**  If `f` is `C^∞` on an open `U` and its
+chart-level derivative is invertible at every point of `U`, then the local diffeomorphism at
+`x ∈ U` can be chosen with source contained in `U`. -/
+theorem hlocAt_infty'
     [IsManifold I ∞ M] [IsManifold J ∞ N] {f : M → N} {U : Set M} (hU : IsOpen U)
-    (hf : ContMDiffOn I J ∞ f U)
+    (hxU : x ∈ U) (hf : ContMDiffOn I J ∞ f U)
     (hinv : ∀ y ∈ U,
       (fderiv ℝ (writtenInExtChartAt I J y f) (extChartAt I y y)).IsInvertible) :
-    IsLocalDiffeomorphOn I J ∞ f U := by
-  rintro ⟨x, hxU⟩
+    ∃ Φ : PartialDiffeomorph I J M N ∞,
+      x ∈ Φ.source ∧ Φ.source ⊆ U ∧ EqOn f Φ Φ.source := by
   -- the order-1 realizing partial diffeomorphism, with source inside `U`.
   obtain ⟨Φ, hxΦ, hΦU, hEqΦ⟩ :=
     isLocalDiffeomorphAt_of_contMDiffOn' (n := 1) le_rfl
@@ -387,7 +380,134 @@ theorem contMDiffOn_isLocalDiffeomorphOn_infty
            open_source := Φ.open_source
            open_target := Φ.open_target
            contMDiffOn_toFun := (hf.mono hΦU).congr (fun z hz => (hEqΦ hz).symm)
-           contMDiffOn_invFun := hsymm_infty }, hxΦ, hEqΦ⟩
+           contMDiffOn_invFun := hsymm_infty }, hxΦ, hΦU, hEqΦ⟩
+
+/-- **Manifold forward IFT at `n = ∞`.**  If `f` is `C^∞` on an open `U` and its chart-level
+derivative is invertible at *every* point of `U`, then `f` is a `C^∞` local diffeomorphism on `U`.
+
+The finite-order theorem does not apply directly (its inverse-smoothness step needs `n ≠ ∞`).
+Instead the order-`1` realizing partial diffeomorphism `Φ` (with `Φ.source ⊆ U`, from the strong
+core) is *upgraded*: by uniqueness of local inverses, `Φ.symm` agrees near each target point
+`y = f z` with the order-`k` local inverse produced at `z` (the two preimages of any nearby point
+both lie in `Φ.source` and map to it under the injective `Φ`), hence `Φ.symm` is `C^k` at every
+target point for every finite `k`, hence `C^∞` (`contMDiffOn_infty`); rebuild the diffeomorphism
+at `∞` on the same `PartialEquiv`. -/
+theorem contMDiffOn_isLocalDiffeomorphOn_infty
+    [IsManifold I ∞ M] [IsManifold J ∞ N] {f : M → N} {U : Set M} (hU : IsOpen U)
+    (hf : ContMDiffOn I J ∞ f U)
+    (hinv : ∀ y ∈ U,
+      (fderiv ℝ (writtenInExtChartAt I J y f) (extChartAt I y y)).IsInvertible) :
+    IsLocalDiffeomorphOn I J ∞ f U := by
+  rintro ⟨x, hxU⟩
+  obtain ⟨Φ, hxΦ, -, hEqΦ⟩ := hlocAt_infty' hU hxU hf hinv
+  exact ⟨Φ, hxΦ, hEqΦ⟩
+
+omit [I.Boundaryless] [J.Boundaryless] in
+/-- A smooth coordinate representative with everywhere invertible derivative on an open
+neighborhood yields a smooth local diffeomorphism of the underlying manifolds.  The source and
+target coordinate maps may be arbitrary partial diffeomorphisms; the proof composes their local
+partial equivalences internally and does not require a global composition API. -/
+theorem hlocAt_of_coord
+    [IsManifold I ∞ M] [IsManifold J ∞ N]
+    (c : PartialDiffeomorph I 𝓘(ℝ, E) M E ∞)
+    (d : PartialDiffeomorph J 𝓘(ℝ, F) N F ∞)
+    {f : M → N} {x : M} {V : Set E} (hV : IsOpen V)
+    (hxc : x ∈ c.source) (hcxV : c x ∈ V)
+    (hmap : MapsTo (fun z => f (c.symm z)) V d.source)
+    (hG : ContDiffOn ℝ ∞ (fun z => d (f (c.symm z))) V)
+    (hinv : ∀ z ∈ V,
+      (fderiv ℝ (fun w => d (f (c.symm w))) z).IsInvertible) :
+    IsLocalDiffeomorphAt I J ∞ f x := by
+  let G₀ : E → F := fun z => d (f (c.symm z))
+  have hGm : ContMDiffOn 𝓘(ℝ, E) 𝓘(ℝ, F) ∞ G₀ V := hG.contMDiffOn
+  have hinvm : ∀ z ∈ V,
+      (fderiv ℝ (writtenInExtChartAt 𝓘(ℝ, E) 𝓘(ℝ, F) z G₀)
+        (extChartAt 𝓘(ℝ, E) z z)).IsInvertible := by
+    intro z hz
+    simpa only [G₀, writtenInExtChartAt, extChartAt_self_eq, modelWithCornersSelf_coe,
+      modelWithCornersSelf_coe_symm, Function.comp_apply, id_eq] using hinv z hz
+  obtain ⟨Ψ, hcxΨ, hΨV, hEqΨ⟩ :=
+    hlocAt_infty' (I := 𝓘(ℝ, E)) (J := 𝓘(ℝ, F)) hV hcxV hGm hinvm
+  -- Compose `c` and the coordinate IFT witness locally.  This is deliberately not exported as
+  -- another `PartialDiffeomorph.trans` API.
+  let cΨ : PartialDiffeomorph I 𝓘(ℝ, F) M F ∞ :=
+    { toPartialEquiv := c.toPartialEquiv.trans Ψ.toPartialEquiv
+      open_source := by
+        have hsrc : (c.toPartialEquiv.trans Ψ.toPartialEquiv).source
+            = c.source ∩ (c : M → E) ⁻¹' Ψ.source := rfl
+        rw [hsrc]
+        exact c.contMDiffOn_toFun.continuousOn.isOpen_inter_preimage c.open_source Ψ.open_source
+      open_target := by
+        have htgt : (c.toPartialEquiv.trans Ψ.toPartialEquiv).target
+            = Ψ.target ∩ (Ψ.symm : F → E) ⁻¹' c.target := by
+          rw [PartialEquiv.trans_target]
+          rfl
+        rw [htgt]
+        exact Ψ.symm.contMDiffOn_toFun.continuousOn.isOpen_inter_preimage Ψ.open_target
+          c.open_target
+      contMDiffOn_toFun := by
+        have hsrc : (c.toPartialEquiv.trans Ψ.toPartialEquiv).source
+            = c.source ∩ (c : M → E) ⁻¹' Ψ.source := rfl
+        rw [hsrc]
+        exact Ψ.contMDiffOn_toFun.comp
+          (c.contMDiffOn_toFun.mono Set.inter_subset_left) (fun _ hz => hz.2)
+      contMDiffOn_invFun := by
+        have htgt : (c.toPartialEquiv.trans Ψ.toPartialEquiv).target
+            = Ψ.target ∩ (Ψ.symm : F → E) ⁻¹' c.target := by
+          rw [PartialEquiv.trans_target]
+          rfl
+        rw [htgt]
+        exact c.symm.contMDiffOn_toFun.comp
+          (Ψ.symm.contMDiffOn_toFun.mono Set.inter_subset_left) (fun _ hz => hz.2) }
+  -- Compose once more with the inverse target coordinate map.
+  let Θ : PartialDiffeomorph I J M N ∞ :=
+    { toPartialEquiv := cΨ.toPartialEquiv.trans d.symm.toPartialEquiv
+      open_source := by
+        have hsrc : (cΨ.toPartialEquiv.trans d.symm.toPartialEquiv).source
+            = cΨ.source ∩ (cΨ : M → F) ⁻¹' d.symm.source := rfl
+        rw [hsrc]
+        exact cΨ.contMDiffOn_toFun.continuousOn.isOpen_inter_preimage cΨ.open_source
+          d.symm.open_source
+      open_target := by
+        have htgt : (cΨ.toPartialEquiv.trans d.symm.toPartialEquiv).target
+            = d.symm.target ∩ (d : N → F) ⁻¹' cΨ.target := by
+          rw [PartialEquiv.trans_target]
+          rfl
+        rw [htgt]
+        exact d.contMDiffOn_toFun.continuousOn.isOpen_inter_preimage d.open_source cΨ.open_target
+      contMDiffOn_toFun := by
+        have hsrc : (cΨ.toPartialEquiv.trans d.symm.toPartialEquiv).source
+            = cΨ.source ∩ (cΨ : M → F) ⁻¹' d.symm.source := rfl
+        rw [hsrc]
+        exact d.symm.contMDiffOn_toFun.comp
+          (cΨ.contMDiffOn_toFun.mono Set.inter_subset_left) (fun _ hz => hz.2)
+      contMDiffOn_invFun := by
+        have htgt : (cΨ.toPartialEquiv.trans d.symm.toPartialEquiv).target
+            = d.symm.target ∩ (d : N → F) ⁻¹' cΨ.target := by
+          rw [PartialEquiv.trans_target]
+          rfl
+        rw [htgt]
+        exact cΨ.symm.contMDiffOn_toFun.comp
+          (d.contMDiffOn_toFun.mono Set.inter_subset_left) (fun _ hz => hz.2) }
+  have hΨt : Ψ (c x) ∈ d.target := by
+    rw [← hEqΨ hcxΨ]
+    exact d.toPartialEquiv.map_source (hmap hcxV)
+  refine ⟨Θ, ?_, ?_⟩
+  · exact ⟨⟨hxc, hcxΨ⟩, hΨt⟩
+  · intro z hz
+    have hzc : z ∈ c.source := hz.1.1
+    have hczΨ : c z ∈ Ψ.source := hz.1.2
+    have hcz : (c.symm : E → M) (c z) = z := c.toPartialEquiv.left_inv hzc
+    have hfzd : f z ∈ d.source := by
+      have h := hmap (hΨV hczΨ)
+      change f (c.symm (c z)) ∈ d.source at h
+      rw [hcz] at h
+      exact h
+    simp only [Θ, cΨ, PartialEquiv.trans_apply]
+    rw [← hEqΨ hczΨ]
+    change f z = d.symm (d (f (c.symm (c z))))
+    rw [hcz]
+    exact (d.toPartialEquiv.left_inv hfzd).symm
 
 end Coordinates
 end DifferentialGeometry

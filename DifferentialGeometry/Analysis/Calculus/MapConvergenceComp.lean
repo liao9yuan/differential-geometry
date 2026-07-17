@@ -72,6 +72,34 @@ theorem MapCInfConvOnCompacts.comp_tendsto_atTop {U : Set E}
     MapCInfConvOnCompacts U (fun k => Φ (τ k)) Φinf :=
   fun K hK hKU p => (h K hK hKU p).comp_tendsto_atTop hτ
 
+omit [NormedAddCommGroup F] [NormedSpace ℝ F] in
+/-- Convergence along every cofinal pair of natural-number sequences gives one
+common rectangular tail on each compact set, through any fixed derivative
+order. -/
+theorem mapCInf_pair_tail
+    {U : Set E} {Φ : ℕ → ℕ → E → G} {Φinf : E → G}
+    (hconv : ∀ kn ln : ℕ → ℕ,
+      Tendsto kn atTop atTop → Tendsto ln atTop atTop →
+        MapCInfConvOnCompacts U (fun n => Φ (kn n) (ln n)) Φinf)
+    {K : Set E} (hK : IsCompact K) (hKU : K ⊆ U) (p : ℕ) :
+    ∀ ε > 0, ∃ N : ℕ, ∀ k ≥ N, ∀ l ≥ N, ∀ j ≤ p, ∀ x ∈ K,
+      mapDerivNorm j (Φ k l) Φinf x ≤ ε := by
+  classical
+  intro ε hε
+  by_contra hbad
+  push Not at hbad
+  choose k hk hbad using hbad
+  choose l hl hbad using hbad
+  choose j hj hbad using hbad
+  choose x hx hbad using hbad
+  have hk_top : Tendsto k atTop atTop :=
+    tendsto_atTop_mono hk tendsto_id
+  have hl_top : Tendsto l atTop atTop :=
+    tendsto_atTop_mono hl tendsto_id
+  obtain ⟨N, hN⟩ := hconv k l hk_top hl_top K hK hKU p ε hε
+  exact not_lt_of_ge
+    (hN N le_rfl (j N) (hj N) (x N) (hx N)) (hbad N)
+
 /-- Eventual truth along every cofinal triple of natural-number sequences gives
 one common three-index tail. -/
 theorem exists_three_tail {P : Nat → Nat → Nat → Prop}
@@ -655,6 +683,38 @@ theorem mapCInfConv_clm {F' G' : Type*} [NormedAddCommGroup F'] [NormedSpace ℝ
     _ ≤ (‖L‖ + 1) * (ε / (‖L‖ + 1)) := by
         refine mul_le_mul (by linarith [norm_nonneg L]) hbase (norm_nonneg _) hL1.le
     _ = ε := mul_div_cancel₀ ε (ne_of_gt hL1)
+
+/-- Pullback of a varying bilinear-form field along a varying linear-map field
+preserves compact-open `C∞` convergence. -/
+theorem MapCInfConvOnCompacts.pullbackForm
+    {V W : Type*}
+    [NormedAddCommGroup V] [NormedSpace ℝ V]
+    [NormedAddCommGroup W] [NormedSpace ℝ W]
+    [ProperSpace ((W →L[ℝ] W →L[ℝ] ℝ) × (V →L[ℝ] W))]
+    {U : Set E'} (hU : IsOpen U)
+    {B : ℕ → E' → W →L[ℝ] W →L[ℝ] ℝ} {Binf : E' → W →L[ℝ] W →L[ℝ] ℝ}
+    {D : ℕ → E' → V →L[ℝ] W} {Dinf : E' → V →L[ℝ] W}
+    (hB : MapCInfConvOnCompacts U B Binf)
+    (hD : MapCInfConvOnCompacts U D Dinf)
+    (hBc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (B k) U)
+    (hBinfC : ContDiffOn ℝ (∞ : WithTop ℕ∞) Binf U)
+    (hDc : ∀ k, ContDiffOn ℝ (∞ : WithTop ℕ∞) (D k) U)
+    (hDinfC : ContDiffOn ℝ (∞ : WithTop ℕ∞) Dinf U) :
+    MapCInfConvOnCompacts U
+      (fun k z => pullbackForm (B k z, D k z))
+      (fun z => pullbackForm (Binf z, Dinf z)) := by
+  have hpair : MapCInfConvOnCompacts U
+      (fun k z => (B k z, D k z)) (fun z => (Binf z, Dinf z)) :=
+    mapCInfConv_prodMk hU hB hD hBc hBinfC hDc hDinfC
+  apply MapCInfConvOnCompacts.comp hU isOpen_univ hpair
+    (mapCInfConv_const (U := Set.univ)
+      (_root_.DifferentialGeometry.HCGCompactness.pullbackForm (E := V) (F := W)))
+  · exact fun k => (hBc k).prodMk (hDc k)
+  · exact hBinfC.prodMk hDinfC
+  · exact fun _ => pullbackForm.contDiff.contDiffOn
+  · exact pullbackForm.contDiff.contDiffOn
+  · exact fun _ _ => Set.mem_univ _
+  · exact fun _ _ _ => Set.mem_univ _
 
 end BasicClosures
 

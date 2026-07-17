@@ -57,3 +57,15 @@ Focused verification and the narrow refresh passed. This consumer migration
 is complete; the `StepB1RawInput` producer and textbook B1 remain theorem-level
 0%, while their dedicated machinery is about 80%. Chapter 4 machinery is
 about 76%, whole-HCG machinery about 53%, and compactness endpoints remain 0%.
+
+## 2026-07-16 subsequence stability
+
+`seqAtom_subseq` records the canonical reindex identity for each actual
+finite-stage atom.  Its proof separates the dead/live center cases and uses
+proof irrelevance only for the positive-radius witness, so downstream map
+definitions no longer unfold `seqAtom` to compare refined stages.
+
+Focused verification passed.  This atom-level adapter is complete; it is
+infrastructure for the master radius diagonal.  `StepB1RawInput` and textbook
+B1 remain theorem-level 0%; dedicated Step-B/B1 machinery is roughly 98%,
+Chapter-4 machinery roughly 90%, and whole-HCG machinery roughly 60%.

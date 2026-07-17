@@ -574,3 +574,97 @@ are **100%**.  Weighted square completion, W monotonicity, Perelman
 no-local-collapsing, and `ham3_noncollapse` remain theorem-level **0%**.
 Broader entropy/noncollapse machinery is approximately **67%**; whole HCG
 machinery remains approximately **60%**, with all HCG endpoints at **0%**.
+
+## 2026-07-16 weighted square checkpoint
+
+The invariant square route is now closed through the actual reversed flow.
+Checked producers include `metricNablaSymm`, `ricDriftDiv`, `ricDriftAct`,
+`weighted_grad_zero`, `weighted_hess_split`, `weighted_bochner`, and
+`weighted_w_square`.  `w_rev_square` rewrites the checked raw first variation
+as the negative weighted square of `Ric + Hess f - g / (2s)`, and
+`w_rev_deriv_nonpos` proves the corresponding local first-variation sign.
+The assembly remains scalar after tensor contraction and adds no dimension,
+chart, or supplied-regularity assumption.
+
+Honest accounting: the raw variation, square completion, and local derivative
+sign theorems are **100%**, together with their dedicated machinery.  A
+separate interval `MonotoneOn` theorem is not yet stated (**0%**).  The cutoff
+contradiction, Perelman no-local-collapsing, and `ham3_noncollapse` remain
+theorem-level **0%**.  Broader entropy/noncollapse machinery is approximately
+**75%**; whole HCG machinery remains approximately **60%**, with HCG endpoints
+at **0%**.  The next live task is to inventory the existing cutoff/local-volume
+API and state the smallest honest producer needed by the contradiction.
+
+## 2026-07-16 interval W and lower-bound frontier
+
+`w_rev_antitone` is checked on every positive closed reverse-time interval
+inside both regular-time domains.  Thus the actual interval W monotonicity
+theorem and its dedicated first-variation/square machinery are **100%**.  The
+measure-theoretic normal form used by that proof has also been moved from a
+private consumer helper to the canonical public theorem `wFunctional_base`.
+
+The cutoff audit exposes two distinct remaining analytic stages.  First, the
+closed-manifold Sobolev embedding must choose its constant before the test
+function; `sobolev_closed` makes that quantifier order explicit while keeping
+the old per-function theorem as a specialization.  This is groundwork for a
+fixed-metric log-Sobolev/W lower bound, not the lower bound itself.  Second, the
+project still lacks an intrinsic ball cutoff with support in `B(x,r)`, value one
+on `B(x,r/2)`, and a gradient bound uniform in the ball.  Existing generic bump
+existence and Euclidean profile APIs do not provide that geometric estimate.
+
+Honest accounting: reverse-time interval W antitonicity is **100%**;
+`w_fixed_lower`, the ball-cutoff estimate, the cutoff contradiction,
+Perelman no-local-collapsing, and `ham3_noncollapse` are each theorem-level
+**0%**.  Dedicated entropy/noncollapse machinery is approximately **78%**;
+whole HCG machinery remains approximately **60%**, with HCG endpoints at
+**0%**.  The next exact mathematical frontier is the uniform log-Sobolev/W
+lower bound; after it, the substantial geometry frontier is the intrinsic
+ball cutoff.  The chain still inherits the existing
+`ShortTime/WeylEigenvalueCountingBound.lean` `sorry`.
+
+## 2026-07-16 amplitude and intrinsic Sobolev checkpoint
+
+The first fixed-metric estimate interfaces are now checked.  In
+`Entropy/PotentialGeometry.lean`, `square_pot_energy` proves the exact
+`v^2 |grad f|^2 = 4 |grad v|^2` conversion.  In `Entropy/WEstimate.lean`,
+`w_square_form` rewrites the potential-form W functional into its Dirichlet,
+scalar, entropy, and prefactor terms.  On the analytic side,
+`sobolev_closed` chooses its constant before all test functions, and
+`sobolev_intrinsic` composes it with the existing uniform chart-to-intrinsic
+bound to control `L^{p*}` by the intrinsic scalar and gradient `L^p` norms.
+All four producer layers are **100%** and add no cutoff or log-Sobolev
+assumption.
+
+The precise live frontier is now the entropy Jensen/log-Sobolev estimate for
+normalized positive amplitudes.  That theorem is still **0%**, so the derived
+fixed-metric W lower bound `w_fixed_lower` is also **0%**.  After those, the
+substantial geometric frontier remains an intrinsic ball cutoff with a
+scale-uniform gradient bound, followed by the cutoff contradiction.
+No-local-collapsing and `ham3_noncollapse` remain theorem-level **0%**.
+Dedicated entropy/noncollapse machinery is approximately **80%**; whole HCG
+machinery remains approximately **60%**, with its endpoints at **0%**.
+
+## 2026-07-16 fixed-metric W closure and cutoff frontier
+
+The fixed-metric entropy chain is now checked end to end.  The new producers
+`withDensity_prob`, `int_log_le_moment`, and `entropy_le_moment` supply the
+measure-theoretic Jensen step.  `sobolev_lpNorm` exposes the intrinsic `L²` to
+`L⁶` estimate, and `logSobolev_closed` chooses one three-dimensional closed-
+manifold log-Sobolev constant before the scale and amplitude.  Finally,
+`log_prefactor`, `w_fixed_lower`, and `w_density_lower` prove the actual
+canonical W lower bound in both positive-amplitude and positive-density normal
+forms.  These producer theorems are individually **100%** and introduce no
+cutoff assumption or redundant dimension instance.
+
+The audit now isolates one substantial analytic producer: a quantitative
+intrinsic ball cutoff (or an energy-equivalent smooth approximation theorem).
+The existing smooth bump API has no derivative estimate, the available
+manifold smooth approximation is only `C⁰`/support controlled, and the current
+normal-chart route has no proved uniform positive normal radius independent of
+the injectivity-radius conclusion.  Therefore the intrinsic cutoff theorem,
+the cutoff W upper contradiction, `NoLocalCollapsing`, and
+`ham3_noncollapse` remain theorem-level **0%**.  Dedicated entropy/noncollapse
+machinery is conservatively approximately **85%**; whole HCG machinery remains
+approximately **60%**, and HCG endpoint theorems remain **0%**.  The chain
+still inherits the existing `ShortTime/WeylEigenvalueCountingBound.lean`
+`sorry`.

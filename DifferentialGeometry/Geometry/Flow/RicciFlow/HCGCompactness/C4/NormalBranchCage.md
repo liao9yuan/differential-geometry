@@ -100,3 +100,17 @@ Focused verification passed; downstream checked consumers confirm the exported
 predicate.  `StepB1RawInput` and textbook B1 remain theorem-level **0%**;
 dedicated Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and
 whole-HCG compactness machinery about **57%**.
+
+## 2026-07-16 center chart-source retention
+
+`HasNormalBrFull.exists_cm_deriv` and its prescribed-slot strict-center
+consumer now retain that the selected center itself lies in the source of the
+target normal chart. This fact was already proved as `hcSource` in the
+branch calculation and was previously discarded before the stage-map readout.
+No radius or branch assumption was added.
+
+Focused verification and the exact upstream refresh passed. This is a
+producer-data retention brick for the actual global stage map, not completion
+of `StepB1RawInput`: that producer and textbook B1 remain theorem-level
+**0%**. Dedicated Step-B/B1 machinery is about **98%**, Chapter 4 machinery
+about **90%**, and whole-HCG compactness machinery about **60%**.

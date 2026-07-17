@@ -31,6 +31,7 @@ variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M] [CompactSpace M] [I.Boundaryless]
 variable [T2Space M] [SigmaCompactSpace M]
 
+omit [NeZero (Module.finrank Real E)] in
 /-- The algebraic trace divergence of the canonical Levi-Civita connection is
 the Voss--Weyl divergence of a smooth tangent field. -/
 theorem divergence_levi_eq
@@ -39,6 +40,23 @@ theorem divergence_levi_eq
     divergence (I := I) (LeviCivita (I := I) g) Z.toFun x =
       divergence_g (I := I) g Z x := by
   classical
+  by_cases hdim : Module.finrank Real E = 0
+  · have htang : Module.finrank Real (TangentSpace I x) = 0 := hdim
+    letI : Subsingleton (TangentSpace I x) :=
+      Module.finrank_zero_iff.mp htang
+    rw [divergence_eq]
+    rw [Subsingleton.elim (LeviCivita (I := I) g Z.toFun x).toLinearMap 0]
+    simp only [map_zero, divergence_g_def, localDivergence_def]
+    change 0 = (∑ _i : Fin (Module.finrank Real E), _) / _
+    have huniv : (Finset.univ : Finset (Fin (Module.finrank Real E))) = ∅ := by
+      apply Finset.eq_empty_iff_forall_notMem.mpr
+      intro i _
+      have hi0 : i.val < 0 := by
+        simpa only [hdim] using i.isLt
+      exact (Nat.not_lt_zero _ hi0).elim
+    rw [huniv]
+    simp
+  letI : NeZero (Module.finrank Real E) := ⟨hdim⟩
   let D := (tangentMetricData_gen (I := I) g x).metric
   letI : InnerProductSpace.Core Real (TangentSpace I x) := D.toCore
   letI : NormedAddCommGroup (TangentSpace I x) :=
@@ -78,6 +96,7 @@ theorem divergence_levi_eq
   simp only [vec2]
   norm_num
 
+omit [NeZero (Module.finrank Real E)] in
 /-- For the canonical Levi-Civita connection, the realized scalar Laplacian is
 the divergence-form Laplace--Beltrami operator `Δ_g`. -/
 theorem laplacian_levi_eq
@@ -88,6 +107,7 @@ theorem laplacian_levi_eq
   have hdiv := divergence_levi_eq (I := I) g (grad_g (I := I) g hf) x
   simpa only [laplacian_eq, grad_g_apply, Δ_g_def] using hdiv
 
+omit [NeZero (Module.finrank Real E)] in
 /-- A realized family whose stored connection is canonical computes the same
 scalar Laplacian as `Δ_g` at that time. -/
 theorem laplacianAt_eq_delta

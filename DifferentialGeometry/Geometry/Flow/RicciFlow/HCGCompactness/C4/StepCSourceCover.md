@@ -56,3 +56,32 @@ give a common moving-stage implicit-center domain.  Rounded project accounting
 therefore stays at about 94% for dedicated Step-B/B1 machinery, 86% for Chapter
 4 machinery, and 57% for whole-HCG machinery; `StepB1RawInput`, textbook B1,
 and all compactness endpoints remain theorem-level 0%.
+
+## 2026-07-16 buffered convex inner cores
+
+`MetricCompactnessInputs.exists_live_cores` now retains the two additional
+shape facts needed by the moving-stage return argument: every `C0 alpha` is
+convex and contains the origin.  Symmetry of the limiting origin metric is
+proved once by passing the finite-stage metric symmetry through the existing
+`MapCInfConvOnCompacts` limit.
+
+The same producer also returns a positive radius `eta alpha` for every live
+source slot.  Every source-ball point at every retained stage has a normal
+coordinate representative `z` in the strict `243/40` deep core, with
+
+```text
+Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha).
+```
+
+The radius comes from compact thickening of that fixed deep core inside the
+open inner core.  Thus it is uniform in the moving stage and adds no endpoint
+radius assumption or new compactness input.  The old unbuffered source-cover
+theorem remains a projection.  Focused verification and the exact producer
+refresh passed.
+
+This closes the buffered finite-source-cover producer (100%).  It supplies
+geometry for the return-map injectivity lane but not the return estimate or the
+global B1 map itself.  Current rounded accounting remains about 98% for
+dedicated Step-B/B1 machinery, 90% for Chapter 4 machinery, and 60% for whole
+HCG machinery; `StepB1RawInput`, textbook B1, and all compactness endpoints
+remain theorem-level 0%.

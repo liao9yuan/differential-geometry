@@ -751,8 +751,10 @@ theorem HasNormalBrFull.exists_cm_deriv
             (I := I) (X.obj k).metric x c
           let xi : ι → E := fun i =>
             NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x (pts i)
-          (∀ i, (z, xi i) ∈ e.target) ∧
-            z ∈ normalBall (I := I) (X.obj k) x ∧
+          c ∈ (NormalCoordinates.normalChartAt
+              (I := I) (X.obj k).metric x).source ∧
+            (∀ i, (z, xi i) ∈ e.target) ∧
+              z ∈ normalBall (I := I) (X.obj k) x ∧
               chartCmEqnB (I := I) (X.obj k).metric
                   (normal_enorm (I := I) (X.obj k)) x B z (mu, xi) = 0 ∧
                 ∃ L : E ≃L[Real] E,
@@ -892,7 +894,7 @@ theorem HasNormalBrFull.exists_cm_deriv
     hq he hf happrox heta_one
     (NormalCoordinates.normalChartAt (I := I) (X.obj k).metric x c)
     mu xi htgt h.μ_nonneg hsum hzero
-  simpa only [c, xi] using ⟨htgt, hzNormal, hzero, hsol⟩
+  simpa only [c, xi] using ⟨hcSource, htgt, hzNormal, hzero, hsol⟩
 
 /-- A prescribed live source slot whose hat contains the center supplies its
 slotwise quantitative branch and reads the actual center equation. -/
@@ -1148,8 +1150,10 @@ theorem exists_hat_cm_sol_at
               let xi : Fin (pb.A r) → E := fun i =>
                 NormalCoordinates.normalChartAt
                   (I := I) (X.obj (L.φ k)).metric x0 (pts i)
-              (∀ i, (z, xi i) ∈ e.target) ∧
-                z ∈ normalBall (I := I) (X.obj (L.φ k)) x0 ∧
+              c ∈ (NormalCoordinates.normalChartAt
+                  (I := I) (X.obj (L.φ k)).metric x0).source ∧
+                (∀ i, (z, xi i) ∈ e.target) ∧
+                  z ∈ normalBall (I := I) (X.obj (L.φ k)) x0 ∧
                   chartCmEqnB (I := I) (X.obj (L.φ k)).metric
                       (normal_enorm (I := I) (X.obj (L.φ k))) x0 B
                       z (mu, xi) = 0 ∧

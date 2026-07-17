@@ -22,10 +22,19 @@ variable {M : Type*}
 def perelmanPotential (n : Nat) (tau : Real) (u : M → Real) : M → Real :=
   fun x => -Real.log (u x / perelmanDensityPrefactor n tau)
 
-private theorem prefactor_pos (n : Nat) {tau : Real} (htau : 0 < tau) :
+/-- Perelman's scalar density prefactor is positive at every positive scale. -/
+theorem prefactor_pos (n : Nat) {tau : Real} (htau : 0 < tau) :
     0 < perelmanDensityPrefactor n tau := by
   unfold perelmanDensityPrefactor
   exact Real.rpow_pos_of_pos (mul_pos (mul_pos (by norm_num) Real.pi_pos) htau) _
+
+/-- Logarithmic normal form of Perelman's positive density prefactor. -/
+theorem log_prefactor (n : Nat) {tau : Real} (htau : 0 < tau) :
+    Real.log (perelmanDensityPrefactor n tau) =
+      (-(n : Real) / 2) * Real.log (4 * Real.pi * tau) := by
+  unfold perelmanDensityPrefactor
+  change Real.log ((4 * Real.pi * tau) ^ (-(n : Real) / 2)) = _
+  rw [Real.log_rpow (mul_pos (mul_pos (by norm_num) Real.pi_pos) htau)]
 
 /-- Reconstructing the potential of a positive density recovers that density. -/
 theorem density_potential (n : Nat) {tau : Real} (u : M → Real)

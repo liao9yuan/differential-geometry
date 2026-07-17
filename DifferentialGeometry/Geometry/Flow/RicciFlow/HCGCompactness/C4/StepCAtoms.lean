@@ -111,6 +111,21 @@ noncomputable def seqAtom (hd : InjRadiusDecayInput (I := I) X) {D : Real}
   | some c => stepCAtom (X.obj (L.φ k)) c (L.lamInf (gamma : Nat))
       (hd.lambda_pos hD (L.rInf (gamma : Nat)))
 
+/-- Refining the net-limit data only reindexes the stage of each Step-C atom. -/
+@[simp] theorem seqAtom_subseq (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real)
+    {ψ : Nat → Nat} (hψ : StrictMono ψ) (k : Nat) (gamma : Fin (pb.A r)) :
+    seqAtom hd hD P (L.subseq hψ) pb r k gamma =
+      seqAtom hd hD P L pb r (ψ k) gamma := by
+  funext y
+  unfold seqAtom
+  simp only [NetLimitData.subseq_phi, NetLimitData.subseq_lamInf,
+    Function.comp_apply]
+  cases hcenter : seqCenter hd D P (L.φ (ψ k)) (gamma : Nat) with
+  | none => rfl
+  | some c => simp only
+
 @[simp] theorem seqAtom_none (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (hD : 0 < D) (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
     (L : NetLimitData hd D P) (pb : hd.PackingBound D) (r : Real) (k : Nat)

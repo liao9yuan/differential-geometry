@@ -42,3 +42,15 @@ moving implicit-root family with one parameter neighborhood.  The concrete
 `StepB1RawInput` producer and textbook Step B1 theorem remain theorem-level
 0%.  Rounded machinery estimates are about 95% for Step-B/B1, 87% for Chapter
 4, and 57% for the whole HCG project.
+
+## 2026-07-16 buffered-cover compatibility
+
+The four direct `HasSuppConvData` decompositions now retain and ignore, where
+appropriate, the new convexity, origin, and uniform closed-ball buffer fields
+before reading the existing core-cover, geometry, weight, and transition
+fields.  No stage-filler statement or radius was changed.  Focused verification
+passed after this projection-only migration.
+
+`StepB1RawInput` and textbook B1 remain theorem-level 0%.  Dedicated Step-B/B1
+machinery is roughly 98%, Chapter-4 machinery roughly 90%, and whole-HCG
+machinery roughly 60%.

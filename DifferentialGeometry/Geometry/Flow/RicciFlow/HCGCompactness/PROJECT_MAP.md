@@ -459,16 +459,22 @@ its docstring BEFORE consumers are built against it.
   Perelman potential inverse is also checked: `density_potential` and
   `weighted_potential` recover the density and weighted measure exactly.
    These are dedicated entropy machinery, not endpoint theorems.  The potential
-   evolution and moving-gradient producers are now checked:
-   `potential_pde`, `potential_df_time`, `potential_joint`, `normGradSq_time`,
-   `gradSq_joint`, `revGram_smooth`, `revTrace_eq`, `revScalar_time`, and
-   `revGradSq_time`.  `w_rev_hasDerivAt` assembles them into the checked
-   interval-local raw first variation of `W` for the genuine reversed-flow
-   `conjCoeff` heat potential.  The next frontier is the geometric square
-   completion: `ricDriftDiv`, then `weighted_hess_split`, W monotonicity, and
-   the cutoff contradiction.  Weighted square completion, W monotonicity,
-   no-local-collapsing, and `ham3_noncollapse` remain theorem-level 0%; broader
-   entropy/noncollapse machinery is about 67%.  The
+   evolution and moving-gradient producers are checked, and
+   `w_rev_hasDerivAt`, `w_rev_square`, `w_rev_deriv_nonpos`, and
+   `w_rev_antitone` now give the genuine raw variation, weighted-square
+   identity, derivative sign, and interval antitonicity for the reversed-flow
+   `conjCoeff` heat potential.  Their dedicated theorem layer is 100%.
+   `wFunctional_base`, `square_pot_energy`, and `w_square_form` expose the
+   exact scalar positive-amplitude normal form needed by later estimates.
+   `sobolev_closed`, `sobolev_intrinsic`, and `sobolev_lpNorm` choose a single
+   closed-manifold Sobolev constant and expose the intrinsic `L²` to `L⁶`
+   estimate.  `withDensity_prob`, `int_log_le_moment`, and
+   `entropy_le_moment` provide Jensen; `logSobolev_closed`, `log_prefactor`,
+   `w_fixed_lower`, and `w_density_lower` close the actual fixed-metric W lower
+   bound in amplitude and density normal forms.  Each of these producer
+   theorems is 100%.  The quantitative intrinsic ball cutoff, cutoff
+   contradiction, no-local-collapsing, and `ham3_noncollapse` remain
+   theorem-level 0%; broader entropy/noncollapse machinery is about 85%.  The
   former `nablaRSFun_eval_moving_raw` elaboration wall and the
   downstream Laplacian-bridge object refresh are both resolved.  The canonical constant-metric volume and
   distance laws are checked (`Analysis/Integration/Measure/Scaling.lean` and

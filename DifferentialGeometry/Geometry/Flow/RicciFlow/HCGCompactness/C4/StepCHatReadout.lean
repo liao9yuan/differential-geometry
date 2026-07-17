@@ -229,8 +229,10 @@ def HasHatCmStrictAt
         let xi : Fin (pb.A r) → E := fun i =>
           NormalCoordinates.normalChartAt
             (I := I) (X.obj (L.φ n)).metric x0 (pts i)
-        (∀ i, (z, xi i) ∈ e.target) ∧
-          z ∈ normalBall (I := I) (X.obj (L.φ n)) x0 ∧
+        c ∈ (NormalCoordinates.normalChartAt
+            (I := I) (X.obj (L.φ n)).metric x0).source ∧
+          (∀ i, (z, xi i) ∈ e.target) ∧
+            z ∈ normalBall (I := I) (X.obj (L.φ n)) x0 ∧
             chartCmEqnB (I := I) (X.obj (L.φ n)).metric
                 (normal_enorm (I := I) (X.obj (L.φ n))) x0 B
                 z (mu, xi) = 0 ∧

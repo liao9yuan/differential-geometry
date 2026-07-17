@@ -129,3 +129,28 @@ The proof of `isInvertible_of_norm_id_sub_lt` now delegates to
 manifold-IFT API remains stable while the reusable Banach-space theorem now
 lives at the lower calculus layer.  Focused verification passes; the file's
 pre-existing unused-section-variable warnings are unchanged.
+
+## 2026-07-16: coordinate-conjugation adapter
+
+- Added **`hlocAt_infty'`**, the strong pointwise projection of the existing
+  open-set `C∞` IFT.  It retains a realizing `PartialDiffeomorph` whose source
+  is contained in the supplied open neighborhood; the old open-set theorem is
+  now its direct corollary.
+- Added **`hlocAt_of_coord`**.  Given arbitrary source and target partial
+  coordinate diffeomorphisms, a smooth coordinate representative on one open
+  neighborhood, target-coordinate membership there, and invertible coordinate
+  derivative throughout that neighborhood, it returns the underlying
+  `IsLocalDiffeomorphAt ... ∞`.  The two coordinate compositions are assembled
+  only inside the proof; no second public `PartialDiffeomorph.trans` API was
+  introduced.
+- The open-neighborhood hypothesis is essential: `ContDiffAt ∞` at a single
+  point cannot supply one common neighborhood on which the realizing inverse
+  is smooth at every finite order.  Downstream all-points stage-jet tails may
+  assemble their pointwise conclusions into `ContDiffOn` on the chosen patch.
+- Focused verification passes.  The only reported warnings are the three
+  pre-existing unused-section-variable warnings elsewhere in the file.
+
+Accounting: this low-level adapter is complete (100%).  The downstream stage
+local-diffeomorphism consumer is not proved here (0%), and `StepB1RawInput`
+remains unstated/unproved as a concrete producer (0%); this change only removes
+one routine API obstruction in that larger B/C lane.

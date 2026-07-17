@@ -62,3 +62,14 @@ first-variation theorem.  Weighted square completion, `W` monotonicity,
 Perelman no-local-collapsing, and the HCG endpoint remain theorem-level 0%.
 Broader entropy/noncollapse machinery is approximately 67%; endpoint progress
 is not inferred from that infrastructure percentage.
+
+The downstream square assembly is now checked: `weighted_w_square` and
+`w_rev_deriv_nonpos` consume this slice theorem without asking for a separate
+smoothness witness.  The potential evolution producers remain 100%; this note
+does not count their downstream use as completion of Perelman
+no-local-collapsing, which remains theorem-level 0%.
+
+The local gradient and squared-gradient calculations formerly duplicated
+inside `potential_pde` now reuse `PotentialGeometry.potential_grad_sq`.
+Focused verification of the consumer passed after this extraction; its public
+statement and assumptions are unchanged.

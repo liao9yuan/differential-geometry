@@ -11,6 +11,7 @@ import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Connection
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.MetricCoord
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Model
 import DifferentialGeometry.Geometry.Connection.LeviCivita.Smooth.Christoffel
+import DifferentialGeometry.Geometry.Coordinates.NablaComponents.TwoTensor
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 
 set_option autoImplicit false
@@ -584,6 +585,74 @@ theorem metricRicciSymm
       (metricRm04At (I := I) (M := M) g x)
       hTrace hPair hOutput hInput
       (invMetric_symm (I := I) (M := M) g x basis gInv hinv) i j
+
+/-- The total covariant derivative of the canonical Ricci tensor is symmetric
+in its two Ricci slots. -/
+theorem metricNablaSymm
+    (g : SmoothRiemannianMetric I M) (x : M) :
+    NablaRicSymmAt (I := I)
+      (totalNabla0SFun (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+        2 (metricCov (I := I) (M := M) g) (metricRicci (I := I) (M := M) g) x) := by
+  classical
+  intro A B C
+  obtain ⟨X, hX⟩ :=
+    ContMDiffSection.exists_eq_at_gen
+      (I := I) (F := E) (V := TangentSpace I)
+      (n := (⊤ : ℕ∞)) x A
+  have hRicSymm :
+      ∀ y : M, ∀ U V : TangentSpace I y,
+        metricRicci (I := I) (M := M) g y
+            (fun q : Fin 2 => if q = 0 then U else V) =
+          metricRicci (I := I) (M := M) g y
+            (fun q : Fin 2 => if q = 0 then V else U) := by
+    intro y U V
+    let basis := DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis
+      (I := I) y
+    let gInv : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E →
+        DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E → Real :=
+      fun i j =>
+        DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_component
+          (I := I) g y i j (extChartAt I y y)
+    have hinv : MetricInverseInBasis_gen (I := I) (M := M) g y basis gInv := by
+      simpa [basis, gInv] using
+        (DifferentialGeometry.Tensor.Coordinates.inverseMetricFlatModelInChart_metricInverseInBasis_center
+          (I := I) g y)
+    have hcomp :
+        ∀ i j : DifferentialGeometry.Tensor.Coordinates.CoordinateIdx (𝕜 := Real) E,
+          metricRicci (I := I) (M := M) g y
+              (fun q : Fin 2 => if q = 0 then basis i else basis j) =
+            metricRicci (I := I) (M := M) g y
+              (fun q : Fin 2 => if q = 0 then basis j else basis i) := by
+      intro i j
+      simpa [basis, metricRicci_apply,
+        DifferentialGeometry.Tensor.Coordinates.coordinateFrameAt_toBasis_apply] using
+        (metricRicciSymm (I := I) (M := M) g basis gInv hinv i j)
+    exact
+      DifferentialGeometry.Tensor.Coordinates.tensor0S_two_symm_of_coordFrame
+        (I := I) basis (metricRicci (I := I) (M := M) g y) hcomp U V
+  have hsymm :=
+    DifferentialGeometry.Tensor.Coordinates.nabla0SFun_two_symm_of_symm
+      (I := I) (metricCov (I := I) (M := M) g) X
+      (metricRicci (I := I) (M := M) g) x hRicSymm B C
+  have hleft :=
+    totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 (metricCov (I := I) (M := M) g) X
+      (metricRicci (I := I) (M := M) g) x (vec2 (I := I) B C)
+  have hright :=
+    totalNabla0SFun_apply_section
+      (𝕜 := Real) (E := E) (H := H) (I := I) (M := M)
+      2 (metricCov (I := I) (M := M) g) X
+      (metricRicci (I := I) (M := M) g) x (vec2 (I := I) C B)
+  rw [← hX]
+  rw [show vec3 (I := I) (X x) B C = Fin.cons (X x) (vec2 (I := I) B C) by
+    ext q
+    fin_cases q <;> rfl]
+  rw [show vec3 (I := I) (X x) C B = Fin.cons (X x) (vec2 (I := I) C B) by
+    ext q
+    fin_cases q <;> rfl]
+  rw [hleft, hright]
+  exact hsymm
 
 /-- Velocity-frame Ricci trace for the canonical metric curvature.
 

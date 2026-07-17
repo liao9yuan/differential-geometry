@@ -547,8 +547,8 @@ theorem HasSuppConvData.weightSub_ev
     hgp.subseq inp.decay inp.D P L inp.pack r hphi
   dsimp only [HasSuppConvData] at hdata
   rcases hdata with
-    ⟨_hUopen, _hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, hgeom,
-      _hlim, _hweightData, _htrans, _hstage⟩
+    ⟨_hUopen, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, hgeom, _hlim, _hweightData, _htrans, _hstage⟩
   filter_upwards [hgpPhi] with k hgpK
   intro alpha
   let Y := X.obj (Lphi.φ k)
@@ -1090,8 +1090,8 @@ theorem HasSuppConvData.cfgSub_conv
         (fun z => (weightInf z, fun _ => z)) := by
   dsimp only [HasSuppConvData] at hdata
   rcases hdata with
-    ⟨hUopen, hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, _hgeom,
-      hlim, _hweightData, htrans, hstage⟩
+    ⟨hUopen, hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, _hgeom, hlim, _hweightData, htrans, hstage⟩
   intro alpha
   dsimp only
   have hpair : ∀ target : InterSlot L inp.pack r alpha,
@@ -1168,8 +1168,8 @@ theorem HasSuppConvData.cfgSub_data
     aInf Jinf Jbarinf kn ln hkn hln
   dsimp only [HasSuppConvData] at hdata
   rcases hdata with
-    ⟨hUopen, hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, _hgeom,
-      hlim, _hweightData, _htrans, hstage⟩
+    ⟨hUopen, hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, _hgeom, hlim, _hweightData, _htrans, hstage⟩
   intro alpha
   dsimp only
   obtain ⟨hweightc, hweightInfc, _hweight⟩ :=
@@ -1279,8 +1279,8 @@ theorem HasSuppConvData.pts_eq_ne
   let Lphi := L.subseq hphi
   dsimp only [HasSuppConvData] at hdata
   rcases hdata with
-    ⟨_hUopen, _hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, hgeom,
-      _hlim, _hweightData, _htrans, _hstage⟩
+    ⟨_hUopen, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, hgeom, _hlim, _hweightData, _htrans, _hstage⟩
   obtain ⟨hgp, hrad⟩ := inp.item3ScaleTails h8 hradD hradRatio P L r
   have hgpPhi : Item3GpScaleTail (I := I) inp.decay inp.D P
       Lphi inp.pack r :=

@@ -120,6 +120,59 @@ theorem MapCInfConvOnCompacts.fderivOn {U : Set E} (hU : IsOpen U)
   rw [hnorm]
   exact hk0 k hk (r + 1) (by omega) x hx
 
+/-- Flipping the two inputs of a real-valued continuous bilinear map is a
+smooth linear operation. -/
+theorem contDiff_clm_flip :
+    ContDiff ℝ (∞ : WithTop ℕ∞) (ContinuousLinearMap.flip :
+      (E →L[ℝ] F →L[ℝ] ℝ) → (F →L[ℝ] E →L[ℝ] ℝ)) := by
+  let A := E →L[ℝ] F →L[ℝ] ℝ
+  let B := F →L[ℝ] E →L[ℝ] ℝ
+  letI : SeminormedAddCommGroup A := NormedAddCommGroup.toSeminormedAddCommGroup
+  letI : NormedSpace ℝ A := inferInstance
+  letI : SeminormedAddCommGroup B := NormedAddCommGroup.toSeminormedAddCommGroup
+  letI : NormedSpace ℝ B := inferInstance
+  let flipIso : A ≃ₗᵢ[ℝ] B := {
+    toFun := ContinuousLinearMap.flip
+    invFun := ContinuousLinearMap.flip
+    map_add' := ContinuousLinearMap.flip_add
+    map_smul' := ContinuousLinearMap.flip_smul
+    left_inv := ContinuousLinearMap.flip_flip
+    right_inv := ContinuousLinearMap.flip_flip
+    norm_map' := ContinuousLinearMap.opNorm_flip }
+  have h : ContDiff ℝ (∞ : WithTop ℕ∞) (flipIso : A → B) :=
+    LinearIsometryEquiv.contDiff (𝕜 := ℝ) (n := ∞) flipIso
+  simpa [A, B, flipIso] using h
+
+/-- Pull a continuous bilinear form back along a continuous linear map.  This
+is the fixed polynomial map used to combine a convergent bilinear-form field
+with the derivative field of a convergent coordinate map. -/
+noncomputable def pullbackForm
+    (q : (F →L[ℝ] F →L[ℝ] ℝ) × (E →L[ℝ] F)) : E →L[ℝ] E →L[ℝ] ℝ :=
+  q.1.bilinearComp q.2 q.2
+
+/-- Evaluation of `pullbackForm` in its two vector arguments. -/
+@[simp]
+theorem pullbackForm_apply (B : F →L[ℝ] F →L[ℝ] ℝ) (D : E →L[ℝ] F) (u v : E) :
+    pullbackForm (B, D) u v = B (D u) (D v) :=
+  rfl
+
+/-- The pullback of a bilinear form by a linear map is a smooth polynomial in
+the bilinear form and the linear map. -/
+theorem pullbackForm.contDiff :
+    ContDiff ℝ (∞ : WithTop ℕ∞) (pullbackForm (E := E) (F := F)) := by
+  unfold pullbackForm ContinuousLinearMap.bilinearComp
+  have hcomp₁ : ContDiff ℝ (∞ : WithTop ℕ∞)
+      (fun q : (F →L[ℝ] F →L[ℝ] ℝ) × (E →L[ℝ] F) => q.1.comp q.2) := by
+    fun_prop
+  have hflip₁ : ContDiff ℝ (∞ : WithTop ℕ∞)
+      (fun q : (F →L[ℝ] F →L[ℝ] ℝ) × (E →L[ℝ] F) => (q.1.comp q.2).flip) :=
+    contDiff_clm_flip.comp hcomp₁
+  have hcomp₂ : ContDiff ℝ (∞ : WithTop ℕ∞)
+      (fun q : (F →L[ℝ] F →L[ℝ] ℝ) × (E →L[ℝ] F) =>
+        (q.1.comp q.2).flip.comp q.2) :=
+    hflip₁.clm_comp contDiff_snd
+  exact contDiff_clm_flip.comp hcomp₂
+
 /-- Uniform convergence of a smooth family, together with `C^p` convergence of
 its Fréchet derivatives, reconstructs `C^(p+1)` convergence of the family. -/
 theorem MapCPConvOn.succ_of_fderiv {U K : Set E} {p : ℕ} (hU : IsOpen U)

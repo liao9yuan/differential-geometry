@@ -664,3 +664,40 @@ diagonal for every pair of reindexings tending to infinity.  Focused
 verification and the exact producer refresh passed.  The raw B1 producer and
 textbook B1 remain theorem-level 0%; rounded machinery estimates are now about
 95% / 87% / 57% for Step-B/B1 / Chapter 4 / whole HCG.
+
+## 2026-07-16 source-cover projection
+
+`HasSuppConvData.source_cover` is the named projection of the all-stage
+finite normal-coordinate cover already stored in `HasSuppConvData`. It
+exposes the cover by exponential images of `interior (C0 alpha)` without
+re-unpacking the full support-convergence tuple in every geometry consumer.
+It is a projection lemma, not a second cover construction or a new input.
+
+Focused verification passed. The projection supports the local
+diffeomorphism assembly; it does not by itself supply the uniform buffered
+cover or approximate return estimate needed for global injectivity.
+`StepB1RawInput` and textbook B1 remain theorem-level **0%**; dedicated
+Step-B/B1 machinery is about **98%**, Chapter 4 machinery about **90%**, and
+whole-HCG compactness machinery about **60%**.
+
+## 2026-07-16 buffered-core retention
+
+`exists_atom_supp_fin`, `HasSuppConvData`, and `exists_supp_pts_fin` now retain
+the strengthened source-core output on the same master subsequence.  Besides
+the existing compact nesting, the package records convexity of `C0 alpha`, its
+origin membership, and one positive slotwise buffer `eta alpha` whose closed
+coordinate balls stay inside `interior (C0 alpha)` for every moving stage.
+The common finite tail now carries the old strict-inner-core cover and this
+buffered witness together; neither is reconstructed downstream.
+
+Two named projections expose the data without unpacking the full convergence
+tuple: `HasSuppConvData.core_shape` and
+`HasSuppConvData.buffer_cover`.  The latter remains stable under every further
+strict subsequence by reindexing the all-stage statement.  Focused verification
+and the exact producer refresh passed.
+
+This is producer infrastructure for buffered local injectivity and the
+approximate-return argument.  It does not prove either analytic estimate or
+construct `StepB1RawInput`; theorem-level `StepB1RawInput`, textbook B1, and all
+compactness endpoints remain 0%.  Rounded machinery accounting stays about
+98% / 90% / 60% for Step-B/B1 / Chapter 4 / whole HCG.

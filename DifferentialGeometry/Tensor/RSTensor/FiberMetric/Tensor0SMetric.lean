@@ -462,6 +462,13 @@ def normSq0S
     normSq0S (I := I) g x s A = inner0S (I := I) g x s A A := by
   rfl
 
+/-- The metric-induced squared norm of a covariant tensor is nonnegative. -/
+theorem normSq0S_nonneg
+    (g : SmoothMetric I M) (x : M) (s : Nat)
+    (A : Tensor0SSpace s I x) :
+    0 <= normSq0S (I := I) g x s A := by
+  exact (tensor0SMetricData (I := I) g x s).nonneg A
+
 /-- The `(0,1)` tensor metric agrees with the cotangent metric. -/
 theorem inner0S_one_eq_cotangent
     (g : SmoothMetric I M) (x : M)

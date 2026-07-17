@@ -374,6 +374,42 @@ theorem weightedDivZero_of_connTrace
     (connTraceDivEq (I := I) g hpotential traceVec hdivTrace
       hactionTrace hweighted)
 
+/-- The weighted Laplacian of a smooth scalar integrates to its gradient drift.
+This is the scalar integration-by-parts form used in weighted Bochner identities. -/
+theorem weighted_grad_zero
+    [I.Boundaryless] [T2Space M] [SigmaCompactSpace M] [CompactSpace M]
+    (g : SmoothRiemannianMetric I M)
+    {potential q : M -> Real}
+    (hpotential : ContMDiff I 𝓘(Real, Real) ∞ potential)
+    (hq : ContMDiff I 𝓘(Real, Real) ∞ q) :
+    ∫ x,
+        (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g
+            (I := I) g hq x -
+          g.inner x
+            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+              (I := I) g hq) x)
+            ((DifferentialGeometry.Integral.DivergenceTheorem.grad_g
+              (I := I) g hpotential) x))
+      ∂(expNegPotentialWeightedMeasure
+          (riemannianVolumeMeasure (I := I) (M := M) g) potential) = 0 := by
+  have hmeas :
+      AEMeasurable
+        (fun x : M => ENNReal.ofReal (expNegPotentialDensity potential x))
+        (riemannianVolumeMeasure (I := I) (M := M) g) :=
+    (ENNReal.continuous_ofReal.comp
+      (expNegPotentialDensity_contMDiff (I := I) hpotential).continuous).aemeasurable
+  exact weightedDivZero_of_connTrace (I := I) g hpotential
+    (DifferentialGeometry.Integral.DivergenceTheorem.grad_g (I := I) g hq)
+    hmeas
+    (fun x =>
+      (DifferentialGeometry.Integral.DivergenceTheorem.Δ_g_def
+        (I := I) g hq x).symm)
+    (fun x =>
+      DifferentialGeometry.Integral.DivergenceTheorem.tangentSectionAction_eq_inner_grad_g
+        (I := I) g hpotential
+        (DifferentialGeometry.Integral.DivergenceTheorem.grad_g (I := I) g hq) x)
+    (fun _ => rfl)
+
 /-- Weighted Green in the exact scalar form used by formula 5.10 for the
 shifted Hessian trace `Delta(h - V/2)`. -/
 theorem shiftIntEq

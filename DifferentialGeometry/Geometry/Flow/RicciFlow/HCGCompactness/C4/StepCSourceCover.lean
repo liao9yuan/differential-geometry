@@ -101,6 +101,56 @@ theorem liveMetric0_close
     _ = (1 / 10 : Real) * ‖v‖ ^ 2 := by ring
 
 set_option synthInstance.maxHeartbeats 100000 in
+/-- The common live-slot origin-metric limit is symmetric in its two vector
+arguments. -/
+theorem liveMetric0_symm
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) (r : Real)
+    {psi : Nat → Nat}
+    {gInf : E → (LiveSlot L inp.pack r → (E →L[Real] E →L[Real] Real))}
+    (hconv : MapCInfConvOnCompacts Set.univ
+      (fun k _ alpha => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) 0)
+      gInf) :
+    ∀ alpha : LiveSlot L inp.pack r, ∀ v w : E,
+      gInf 0 alpha v w = gInf 0 alpha w v := by
+  intro alpha v w
+  have htendAll := tendsto_of_cInf hconv (Set.mem_univ (0 : E))
+  have htend := (tendsto_pi_nhds.mp htendAll) alpha
+  have heval (a b : E) : Continuous
+      (fun B : E →L[Real] E →L[Real] Real => B a b) := by
+    fun_prop
+  have hvw := (heval v w).tendsto (gInf 0 alpha) |>.comp htend
+  have hwv := (heval w v).tendsto (gInf 0 alpha) |>.comp htend
+  have hstage :
+      (fun k => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) 0 v w) =
+      fun k => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) 0 w v := by
+    funext k
+    let Y := X.obj (L.φ (psi k))
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    rw [normalCoordMetric_apply (I := I), normalCoordMetric_apply (I := I)]
+    exact Y.metric.symm _ _ _
+  have hvw' : Filter.Tendsto
+      (fun k => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) 0 v w)
+      Filter.atTop (nhds (gInf 0 alpha v w)) := by
+    simpa only [Function.comp_apply] using hvw
+  have hwv' : Filter.Tendsto
+      (fun k => normalCoordMetric (I := I) (X.obj (L.φ (psi k)))
+        (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) 0 w v)
+      Filter.atTop (nhds (gInf 0 alpha w v)) := by
+    simpa only [Function.comp_apply] using hwv
+  rw [hstage] at hvw'
+  exact tendsto_nhds_unique hvw' hwv'
+
+set_option synthInstance.maxHeartbeats 100000 in
 /-- A common origin-metric subsequence produces fixed open source patches and
 compactly nested coordinate cores.  The strict inner core images cover the
 frozen source ball, while the outer core remains inside the corresponding open
@@ -134,6 +184,10 @@ theorem MetricCompactnessInputs.exists_live_cores
       (∀ alpha, IsCompact (C1 alpha)) ∧
       (∀ alpha, C0 alpha ⊆ interior (C1 alpha)) ∧
       (∀ alpha, C1 alpha ⊆ U alpha) ∧
+      (∀ alpha, Convex Real (C0 alpha)) ∧
+      (∀ alpha, (0 : E) ∈ C0 alpha) ∧
+      ∃ eta : LiveSlot L inp.pack r → Real,
+      (∀ alpha, 0 < eta alpha) ∧
       ∀ᶠ k in atTop,
         let Y := X.obj (L.φ (psi k))
         letI : TopologicalSpace Y.M := Y.topology
@@ -160,7 +214,12 @@ theorem MetricCompactnessInputs.exists_live_cores
           ⋃ alpha : LiveSlot L inp.pack r,
             (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
               (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z) ''
-                interior (C0 alpha) := by
+                interior (C0 alpha) ∧
+        ∀ y ∈ L.hatSourceBall inp.decay P r (psi k),
+          ∃ (alpha : LiveSlot L inp.pack r) (z : E),
+            expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
+                (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z = y ∧
+              Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha) := by
   classical
   obtain ⟨psi, gInf, hpsi, hginf, hconv⟩ :=
     existsLiveMetric0 (I := I) inp.normalBounds P L inp.pack r
@@ -172,7 +231,11 @@ theorem MetricCompactnessInputs.exists_live_cores
   let C1 : LiveSlot L inp.pack r → Set E := fun alpha =>
     {v | gInf 0 alpha v v ≤
       (99 / 16 : Real) * L.lamInf (alpha.1 : Nat) ^ 2}
+  let Cdeep : LiveSlot L inp.pack r → Set E := fun alpha =>
+    {v | gInf 0 alpha v v ≤
+      (243 / 40 : Real) * L.lamInf (alpha.1 : Nat) ^ 2}
   have hequiv := liveMetric0_equiv (I := I) inp.normalBounds P L inp.pack r hconv
+  have hsymm := liveMetric0_symm (I := I) inp P L r hconv
   have hclose := liveMetric0_close (I := I) inp P L r hconv
   have hscaled := hpsi.tendsto_atTop.eventually
     (L.scaled_cover inp.decay inp.hD P inp.realizes inp.pack r (9 / 4 : Real) (by norm_num))
@@ -279,8 +342,78 @@ theorem MetricCompactnessInputs.exists_live_cores
           hU8 alpha (hC1U alpha hv)
       exact hvlt.le
     exact Metric.isCompact_of_isClosed_isBounded hclosed hbounded
+  have hC0convex : ∀ alpha, Convex Real (C0 alpha) := by
+    intro alpha
+    rw [convex_iff_add_mem]
+    intro x hx y hy a b ha hb hab
+    change gInf 0 alpha x x ≤
+      (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 at hx
+    change gInf 0 alpha y y ≤
+      (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 at hy
+    change gInf 0 alpha (a • x + b • y) (a • x + b • y) ≤
+      (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2
+    have hdiff : 0 ≤ gInf 0 alpha (x - y) (x - y) :=
+      (mul_nonneg (by norm_num) (sq_nonneg ‖x - y‖)).trans
+        (hequiv alpha (x - y)).1
+    calc
+      gInf 0 alpha (a • x + b • y) (a • x + b • y) =
+          a * gInf 0 alpha x x + b * gInf 0 alpha y y -
+            a * b * gInf 0 alpha (x - y) (x - y) := by
+        simp only [map_add, map_smul, map_sub,
+          ContinuousLinearMap.add_apply, ContinuousLinearMap.sub_apply,
+          ContinuousLinearMap.smul_apply, smul_eq_mul]
+        rw [hsymm alpha y x]
+        have hb_eq : b = 1 - a := by linarith
+        rw [hb_eq]
+        ring
+      _ ≤ a * gInf 0 alpha x x + b * gInf 0 alpha y y :=
+        sub_le_self _ (mul_nonneg (mul_nonneg ha hb) hdiff)
+      _ ≤ a * ((49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2) +
+          b * ((49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2) :=
+        add_le_add (mul_le_mul_of_nonneg_left hx ha)
+          (mul_le_mul_of_nonneg_left hy hb)
+      _ = (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 := by
+        rw [← add_mul, hab, one_mul]
+  have hC0zero : ∀ alpha, (0 : E) ∈ C0 alpha := by
+    intro alpha
+    change gInf 0 alpha 0 0 ≤
+      (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2
+    simp only [map_zero]
+    positivity
+  have hdeepC0 : ∀ alpha, Cdeep alpha ⊆ interior (C0 alpha) := by
+    intro alpha
+    have hquad : Continuous (fun v : E => gInf 0 alpha v v) :=
+      (gInf 0 alpha).continuous.clm_apply continuous_id
+    have hopen0 : IsOpen {v : E | gInf 0 alpha v v <
+        (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2} :=
+      isOpen_lt hquad continuous_const
+    have hstrictSub : {v : E | gInf 0 alpha v v <
+        (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2} ⊆ C0 alpha := by
+      intro v hv
+      change gInf 0 alpha v v <
+        (49 / 8 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 at hv
+      exact hv.le
+    intro v hv
+    apply interior_maximal hstrictSub hopen0
+    change gInf 0 alpha v v ≤
+      (243 / 40 : Real) * L.lamInf (alpha.1 : Nat) ^ 2 at hv
+    have hlambda : 0 < L.lamInf (alpha.1 : Nat) :=
+      inp.decay.lambda_pos inp.hD (L.rInf (alpha.1 : Nat))
+    exact hv.trans_lt <| mul_lt_mul_of_pos_right (by norm_num)
+      (sq_pos_of_pos hlambda)
+  have hdeepCompact : ∀ alpha, IsCompact (Cdeep alpha) := by
+    intro alpha
+    have hquad : Continuous (fun v : E => gInf 0 alpha v v) :=
+      (gInf 0 alpha).continuous.clm_apply continuous_id
+    have hclosed : IsClosed (Cdeep alpha) := isClosed_le hquad continuous_const
+    exact (hC0compact alpha).of_isClosed_subset hclosed
+      ((hdeepC0 alpha).trans interior_subset)
+  choose eta heta_pos heta_sub using fun alpha =>
+    (hdeepCompact alpha).exists_cthickening_subset_open
+      isOpen_interior (hdeepC0 alpha)
   refine ⟨psi, hpsi, gInf, U, C0, C1, hginf, hconv, hopen, hU8,
-    hC0compact, hC1compact, hC01, hC1U, ?_⟩
+    hC0compact, hC1compact, hC01, hC1U, hC0convex, hC0zero,
+    eta, heta_pos, ?_⟩
   filter_upwards [hclose, hscaled, halive, hgpPsi, hradPsi, hmetricPsi, hcenters]
     with k hclosek hscaledk halivek hgpk hradk hmetrick hcentersk
   let Y := X.obj (L.φ (psi k))
@@ -354,96 +487,99 @@ theorem MetricCompactnessInputs.exists_live_cores
       exact hsqrt
     exact ⟨L.innerBall_subset_hat inp.decay inp.hD P inp.pack r (psi k) alpha.1 hinner,
       mem_iUnion.mpr ⟨alpha.1, hinner⟩⟩
-  · intro y hy
-    have hydist : dist y Y.basepoint ≤ r := by
-      simpa only [NetLimitData.hatSourceBall, Metric.mem_closedBall] using hy
-    obtain ⟨gamma, hgamma, c, hcenter, hyc⟩ := hscaledk y hydist
-    have haliveGamma : L.alive gamma = true := by
-      have hsome : (seqCenter inp.decay inp.D P (L.φ (psi k)) gamma).isSome = true := by
-        simp only [hcenter, Option.isSome_some]
-      exact (halivek gamma (Finset.mem_range.mpr hgamma)).symm.trans hsome
-    let alpha : LiveSlot L inp.pack r := ⟨⟨gamma, hgamma⟩, haliveGamma⟩
-    have hcD : seqCenterD inp.decay P L (psi k) gamma = c := by
-      have := seqCenterD_some inp.decay P L (psi k) gamma
-        (by simp only [hcenter, Option.isSome_some])
-      rw [hcenter] at this
-      exact Option.some.inj this.symm
-    have hgpC := hgpk ⟨gamma, hgamma⟩ c hcenter
-    have hlambda : 0 < L.lamInf gamma :=
-      inp.decay.lambda_pos inp.hD (L.rInf gamma)
-    have hyball : y ∈ Metric.ball c (4 * L.lamInf gamma) := by
-      rw [Metric.mem_ball]
-      exact hyc.trans <| mul_lt_mul_of_pos_right (by norm_num : (9 / 4 : Real) < 4) hlambda
-    obtain ⟨v, hvtgt, _hvdom, hvlen, hyexp⟩ :=
-      properBallNormal (I := I) Y (P (L.φ (psi k))) hgpC hyball
-    have hvsrc : v ∈ (expMapDiffeo (I := I) Y.metric c).source := by
-      simpa only [normalChartAt_target_eq] using hvtgt
-    have hzero : (0 : E) ∈ Metric.ball 0
-        (inp.normalBounds.radius (L.φ (psi k)) c) := by
-      rw [Metric.mem_ball, dist_self]
-      exact inp.normalBounds.radius_pos _ _
-    have hstageLower : (1 / 2 : Real) * ‖v‖ ^ 2 ≤ Y.metric.inner c v v := by
-      rw [← normalMetric_zero (I := I) Y c]
-      exact (inp.normalBounds.metric_equiv (L.φ (psi k)) c 0 hzero v).1
-    have hmetricNonneg : 0 ≤ Y.metric.inner c v v :=
-      hstageLower.trans' (mul_nonneg (by norm_num) (sq_nonneg ‖v‖))
-    have hstageSq : Y.metric.inner c v v = dist c y ^ 2 := by
-      rw [← hvlen, Real.sq_sqrt hmetricNonneg]
-    have herr := hclosek alpha v
-    rw [hcD, normalMetric_zero (I := I) Y c, abs_le] at herr
-    have hdistLt : dist c y < (9 / 4 : Real) * L.lamInf gamma := by
-      simpa only [dist_comm] using hyc
-    have hdistSq : dist c y ^ 2 <
-        ((9 / 4 : Real) * L.lamInf gamma) ^ 2 :=
-      (sq_lt_sq₀ dist_nonneg
-        (mul_nonneg (by norm_num) hlambda.le)).2 hdistLt
-    have hvC0 : v ∈ interior (C0 alpha) := by
-      have hquad : Continuous (fun w : E => gInf 0 alpha w w) :=
-        (gInf 0 alpha).continuous.clm_apply continuous_id
-      have hopen0 : IsOpen {w : E | gInf 0 alpha w w <
-          (49 / 8 : Real) * L.lamInf gamma ^ 2} :=
-        isOpen_lt hquad continuous_const
-      have hstrictSub : {w : E | gInf 0 alpha w w <
-          (49 / 8 : Real) * L.lamInf gamma ^ 2} ⊆ C0 alpha := by
-        intro w hw
-        change gInf 0 alpha w w <
-          (49 / 8 : Real) * L.lamInf gamma ^ 2 at hw
-        exact hw.le
-      apply (interior_maximal hstrictSub hopen0)
-      have hnormStage : ‖v‖ ^ 2 ≤ 2 * Y.metric.inner c v v := by
-        nlinarith [hstageLower]
-      have hqInfBase : gInf 0 alpha v v ≤
-          Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := by
-        calc
-          gInf 0 alpha v v = Y.metric.inner c v v -
-              (Y.metric.inner c v v - gInf 0 alpha v v) := by ring
-          _ ≤ Y.metric.inner c v v - (-(1 / 10 : Real) * ‖v‖ ^ 2) :=
-            by
-              simpa only [neg_mul] using
-                sub_le_sub_left herr.1 (Y.metric.inner c v v)
-          _ = Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := by ring
-      have hqInfStage : gInf 0 alpha v v ≤
-          (6 / 5 : Real) * Y.metric.inner c v v := by
-        calc
-          _ ≤ Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := hqInfBase
-          _ ≤ Y.metric.inner c v v +
-              (1 / 10 : Real) * (2 * Y.metric.inner c v v) :=
-            by
-              gcongr
-          _ = (6 / 5 : Real) * Y.metric.inner c v v := by ring
-      have hqInfLe : gInf 0 alpha v v ≤ (6 / 5 : Real) * dist c y ^ 2 := by
-        rw [← hstageSq]
-        exact hqInfStage
-      have hscale0 : (6 / 5 : Real) * dist c y ^ 2 <
-          (49 / 8 : Real) * L.lamInf gamma ^ 2 := by
-        have hlamSq : 0 < L.lamInf gamma ^ 2 := sq_pos_of_pos hlambda
-        nlinarith
-      exact hqInfLe.trans_lt hscale0
-    refine mem_iUnion.mpr ⟨alpha, ⟨v, hvC0, ?_⟩⟩
-    simp only [alpha]
-    rw [hcD]
-    rw [expMapDiffeo_apply_eq (I := I) Y.metric c hvsrc]
-    exact hyexp.symm
+  · have hselect : ∀ y ∈ L.hatSourceBall inp.decay P r (psi k),
+        ∃ (alpha : LiveSlot L inp.pack r) (v : E),
+          v ∈ Cdeep alpha ∧
+            expMapDiffeo (I := I) Y.metric
+              (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) v = y := by
+      intro y hy
+      have hydist : dist y Y.basepoint ≤ r := by
+        simpa only [NetLimitData.hatSourceBall, Metric.mem_closedBall] using hy
+      obtain ⟨gamma, hgamma, c, hcenter, hyc⟩ := hscaledk y hydist
+      have haliveGamma : L.alive gamma = true := by
+        have hsome : (seqCenter inp.decay inp.D P (L.φ (psi k)) gamma).isSome = true := by
+          simp only [hcenter, Option.isSome_some]
+        exact (halivek gamma (Finset.mem_range.mpr hgamma)).symm.trans hsome
+      let alpha : LiveSlot L inp.pack r := ⟨⟨gamma, hgamma⟩, haliveGamma⟩
+      have hcD : seqCenterD inp.decay P L (psi k) gamma = c := by
+        have := seqCenterD_some inp.decay P L (psi k) gamma
+          (by simp only [hcenter, Option.isSome_some])
+        rw [hcenter] at this
+        exact Option.some.inj this.symm
+      have hgpC := hgpk ⟨gamma, hgamma⟩ c hcenter
+      have hlambda : 0 < L.lamInf gamma :=
+        inp.decay.lambda_pos inp.hD (L.rInf gamma)
+      have hyball : y ∈ Metric.ball c (4 * L.lamInf gamma) := by
+        rw [Metric.mem_ball]
+        exact hyc.trans <|
+          mul_lt_mul_of_pos_right (by norm_num : (9 / 4 : Real) < 4) hlambda
+      obtain ⟨v, hvtgt, _hvdom, hvlen, hyexp⟩ :=
+        properBallNormal (I := I) Y (P (L.φ (psi k))) hgpC hyball
+      have hvsrc : v ∈ (expMapDiffeo (I := I) Y.metric c).source := by
+        simpa only [normalChartAt_target_eq] using hvtgt
+      have hzero : (0 : E) ∈ Metric.ball 0
+          (inp.normalBounds.radius (L.φ (psi k)) c) := by
+        rw [Metric.mem_ball, dist_self]
+        exact inp.normalBounds.radius_pos _ _
+      have hstageLower : (1 / 2 : Real) * ‖v‖ ^ 2 ≤ Y.metric.inner c v v := by
+        rw [← normalMetric_zero (I := I) Y c]
+        exact (inp.normalBounds.metric_equiv (L.φ (psi k)) c 0 hzero v).1
+      have hmetricNonneg : 0 ≤ Y.metric.inner c v v :=
+        hstageLower.trans' (mul_nonneg (by norm_num) (sq_nonneg ‖v‖))
+      have hstageSq : Y.metric.inner c v v = dist c y ^ 2 := by
+        rw [← hvlen, Real.sq_sqrt hmetricNonneg]
+      have herr := hclosek alpha v
+      rw [hcD, normalMetric_zero (I := I) Y c, abs_le] at herr
+      have hdistLt : dist c y < (9 / 4 : Real) * L.lamInf gamma := by
+        simpa only [dist_comm] using hyc
+      have hdistSq : dist c y ^ 2 <
+          ((9 / 4 : Real) * L.lamInf gamma) ^ 2 :=
+        (sq_lt_sq₀ dist_nonneg
+          (mul_nonneg (by norm_num) hlambda.le)).2 hdistLt
+      have hvdeep : v ∈ Cdeep alpha := by
+        have hnormStage : ‖v‖ ^ 2 ≤ 2 * Y.metric.inner c v v := by
+          nlinarith [hstageLower]
+        have hqInfBase : gInf 0 alpha v v ≤
+            Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := by
+          calc
+            gInf 0 alpha v v = Y.metric.inner c v v -
+                (Y.metric.inner c v v - gInf 0 alpha v v) := by ring
+            _ ≤ Y.metric.inner c v v - (-(1 / 10 : Real) * ‖v‖ ^ 2) :=
+              by
+                simpa only [neg_mul] using
+                  sub_le_sub_left herr.1 (Y.metric.inner c v v)
+            _ = Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := by ring
+        have hqInfStage : gInf 0 alpha v v ≤
+            (6 / 5 : Real) * Y.metric.inner c v v := by
+          calc
+            _ ≤ Y.metric.inner c v v + (1 / 10 : Real) * ‖v‖ ^ 2 := hqInfBase
+            _ ≤ Y.metric.inner c v v +
+                (1 / 10 : Real) * (2 * Y.metric.inner c v v) :=
+              by
+                gcongr
+            _ = (6 / 5 : Real) * Y.metric.inner c v v := by ring
+        have hqInfLe : gInf 0 alpha v v ≤ (6 / 5 : Real) * dist c y ^ 2 := by
+          rw [← hstageSq]
+          exact hqInfStage
+        have hscale0 : (6 / 5 : Real) * dist c y ^ 2 <
+            (243 / 40 : Real) * L.lamInf gamma ^ 2 := by
+          have hlamSq : 0 < L.lamInf gamma ^ 2 := sq_pos_of_pos hlambda
+          nlinarith
+        exact (hqInfLe.trans_lt hscale0).le
+      refine ⟨alpha, v, hvdeep, ?_⟩
+      simp only [alpha]
+      rw [hcD]
+      rw [expMapDiffeo_apply_eq (I := I) Y.metric c hvsrc]
+      exact hyexp.symm
+    constructor
+    · intro y hy
+      obtain ⟨alpha, v, hvdeep, hvexp⟩ := hselect y hy
+      exact mem_iUnion.mpr ⟨alpha, ⟨v, hdeepC0 alpha hvdeep, hvexp⟩⟩
+    · intro y hy
+      obtain ⟨alpha, v, hvdeep, hvexp⟩ := hselect y hy
+      refine ⟨alpha, v, hvexp, ?_⟩
+      exact (Metric.closedBall_subset_cthickening hvdeep (eta alpha)).trans
+        (heta_sub alpha)
 
 set_option synthInstance.maxHeartbeats 100000 in
 /-- The fixed open source-patch cover is the open-core projection of
@@ -495,13 +631,14 @@ theorem MetricCompactnessInputs.exists_live_source_cover
             (fun z => expMapDiffeo (I := I) (X.obj (L.φ (psi k))).metric
               (seqCenterD inp.decay P L (psi k) (alpha.1 : Nat)) z) '' U alpha := by
   obtain ⟨psi, hpsi, gInf, U, C0, C1, hginf, hconv, hopen, hU8,
-      _hC0, _hC1, hC01, hC1U, hcover⟩ :=
+      _hC0, _hC1, hC01, hC1U, _hconvex, _hzero,
+      _eta, _heta, hcover⟩ :=
     inp.exists_live_cores h8 hradD hradRatio P L r
   refine ⟨psi, hpsi, gInf, U, hginf, hconv, hopen, hU8, ?_⟩
   filter_upwards [hcover] with k hk
   refine ⟨hk.1, ?_⟩
   intro y hy
-  obtain ⟨alpha, v, hv, rfl⟩ := mem_iUnion.mp (hk.2 hy)
+  obtain ⟨alpha, v, hv, rfl⟩ := mem_iUnion.mp (hk.2.1 hy)
   refine mem_iUnion.mpr ⟨alpha, v, ?_, rfl⟩
   exact hC1U alpha (interior_subset (hC01 alpha (interior_subset hv)))
 

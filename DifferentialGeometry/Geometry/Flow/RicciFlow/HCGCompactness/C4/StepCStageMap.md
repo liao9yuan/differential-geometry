@@ -23,3 +23,42 @@ refresh passed.
 The canonical definition/choice seam is complete (100%), but the all-pairs
 chart-convergence theorem for this map is still unstated and 0%.  Consequently
 the concrete `StepB1RawInput` producer and textbook B1 theorem remain 0%.
+
+## 2026-07-16 exact pointed-basepoint brick
+
+`stageCompare_base` proves the exact identity
+`stageComparisonMap ... O_k = O_l` under the existing finite-stage
+`Item3GpScaleAt` hypothesis.  At the source basepoint, `seqWeights_base` makes
+the actual normalized atom family the Kronecker delta at `baseIndex`;
+`seqCenter_zero` and the normal-chart center/zero identities identify that
+slot's direct target with the target basepoint.  The unique-center branch is
+then pinned by global energy minimization.  The totalization branch already
+returns the target basepoint, so the theorem does not assume existence of the
+unique center.
+
+Focused verification passed without local warnings.  The exact basepoint
+producer itself is complete (100%).  The downstream common-tail packaging of
+this identity is separate work.  Dedicated Step-B/B1 machinery is roughly
+98%, Chapter-4 machinery roughly 90%, and whole-HCG machinery roughly 60%;
+`StepB1RawInput`, textbook B1, and the final compactness endpoints remain
+theorem-level 0%.
+
+## 2026-07-16 exact subsequence stability
+
+The map definition now has checked reindex readouts:
+
+- `stageTarget_subseq` for direct target points;
+- `uniqueCenter_subseq` for the actual global minimizing predicate;
+- `stageCompare_default` for the harmless totalization branches; and
+- `stageCompare_subseq` for the complete chart-independent comparison map.
+
+The final equality does not assume definitional equality of dependent choices.
+On the unique-center branch it proves that both selected points minimize the
+same actual energy and invokes uniqueness; the other branches use the exact
+basepoint totalization.  Focused verification and the exact module refresh
+passed.
+
+This closes the map-level persistence needed by the radius diagonal, but does
+not itself prove an all-radius master subsequence.  `StepB1RawInput` and
+textbook B1 remain theorem-level 0%; dedicated Step-B/B1 machinery is roughly
+98%, Chapter-4 machinery roughly 90%, and whole-HCG machinery roughly 60%.

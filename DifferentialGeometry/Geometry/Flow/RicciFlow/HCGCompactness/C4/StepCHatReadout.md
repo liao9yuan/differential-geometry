@@ -131,3 +131,16 @@ producer-data erasure seam, not the moving-reference/all-pairs theorem.
 `StepB1RawInput` and textbook B1 remain theorem-level **0%**; dedicated
 Step-B/B1 machinery is about **95%**, Chapter 4 about **87%**, and whole-HCG
 compactness machinery about **57%**.
+
+## 2026-07-16 selected-center chart membership
+
+`HasHatCmStrictAt` now preserves the selected center's membership in the
+source of its normal chart. The lower branch theorem already proved this
+membership; the support-local readout merely stopped erasing it. Existing
+callers continue to obtain the same strict center equation and derivative data,
+with no whole-cage containment or new endpoint-radius premise.
+
+Focused verification and the targeted refresh passed. The concrete
+`StepB1RawInput` producer and textbook B1 remain theorem-level **0%**;
+dedicated Step-B/B1 machinery is about **98%**, Chapter 4 about **90%**, and
+whole-HCG compactness machinery about **60%**.

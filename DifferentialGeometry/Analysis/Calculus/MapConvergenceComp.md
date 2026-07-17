@@ -41,3 +41,28 @@ geometry assumption.  Focused verification passed.
 This closes the generic quantifier-order brick needed by the moving-reference
 center route.  It does not itself construct the HCG center family or the
 `StepB1RawInput` producer; those theorem endpoints remain 0%.
+
+## 2026-07-16 pullback-form closure
+
+`MapCInfConvOnCompacts.pullbackForm` is the canonical analysis-layer adapter
+for a varying bilinear-form field and a varying continuous-linear-map field.
+It first uses the existing product closure on `(B_k,D_k)` and then composes
+with the fixed smooth polynomial `pullbackForm`; no duplicate metric-specific
+API was introduced.
+
+The statement retains the exact `ProperSpace` hypothesis on the intermediate
+product demanded by the generic moving-composition theorem.  In the intended
+finite-dimensional chart application this is inferred from the existing
+instances.  Focused verification passed.  This closes the polynomial
+contraction brick only; the chart-to-intrinsic metric bridge and the
+`StepB1RawInput` producer remain separate, unstated endpoint theorems (0%).
+
+## 2026-07-16 rectangular pair tails
+
+`mapCInf_pair_tail` is the generic bad-sequence extraction from compact
+`C∞` convergence along every pair of cofinal reindexings to one common
+two-index rectangular tail.  It keeps only the normed-space assumptions needed
+by `mapDerivNorm` and avoids repeating this diagonal argument in C4 consumers.
+
+Focused verification passed.  This is quantifier-order infrastructure only;
+the chart-to-intrinsic bridge and `StepB1RawInput` remain separate endpoints.

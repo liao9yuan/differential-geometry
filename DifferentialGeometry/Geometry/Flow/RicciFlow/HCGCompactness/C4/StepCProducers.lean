@@ -1045,6 +1045,23 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
       (∀ alpha, IsCompact (C1 alpha)) ∧
       (∀ alpha, C0 alpha ⊆ interior (C1 alpha)) ∧
       (∀ alpha, C1 alpha ⊆ U alpha) ∧
+      (∀ alpha, Convex Real (C0 alpha)) ∧
+      (∀ alpha, (0 : E) ∈ C0 alpha) ∧
+      (∃ eta : LiveSlot L inp.pack r → Real,
+        (∀ alpha, 0 < eta alpha) ∧
+        ∀ k,
+          let Y := X.obj (Lphi.φ k)
+          letI : TopologicalSpace Y.M := Y.topology
+          letI : ChartedSpace H Y.M := Y.charted
+          letI : IsManifold I ∞ Y.M := Y.smooth
+          letI : T2Space Y.M := Y.t2
+          letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+          letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+          ∀ y ∈ Lphi.hatSourceBall inp.decay P r k,
+            ∃ (alpha : LiveSlot L inp.pack r) (z : E),
+              expMapDiffeo (I := I) Y.metric
+                  (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z = y ∧
+                Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha)) ∧
       (∀ k,
         let Y := X.obj (Lphi.φ k)
         letI : TopologicalSpace Y.M := Y.topology
@@ -1153,7 +1170,7 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
         exact hab)
   letI : Finite PairSlot := inferInstance
   obtain ⟨psi, hpsi, gInf, U, C0, C1, hginf, hg, hUopen, hU8,
-      hC0, hC1, hC01, hC1U, hcore⟩ :=
+      hC0, hC1, hC01, hC1U, hC0convex, hC0zero, eta, heta, hcore⟩ :=
     inp.exists_live_cores h8 hradD hradRatio P L r
   have hcover : ∀ᶠ k in Filter.atTop,
       let Y := X.obj (L.φ (psi k))
@@ -1184,7 +1201,7 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
     filter_upwards [hcore] with k hk
     refine ⟨hk.1, ?_⟩
     intro y hy
-    obtain ⟨alpha, v, hv, rfl⟩ := mem_iUnion.mp (hk.2 hy)
+    obtain ⟨alpha, v, hv, rfl⟩ := mem_iUnion.mp (hk.2.1 hy)
     refine mem_iUnion.mpr ⟨alpha, v, ?_, rfl⟩
     exact hC1U alpha (interior_subset (hC01 alpha (interior_subset hv)))
   let L0 := L.subseq hpsi
@@ -1273,11 +1290,16 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
        letI : T2Space Y.M := Y.t2
        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
        letI : MetricSpace Y.M := (P (L.φ (psi (tau k)))).ms
-       L.hatSourceBall inp.decay P r (psi (tau k)) ⊆
-        ⋃ alpha : LiveSlot L inp.pack r,
-          (fun z => expMapDiffeo (I := I) Y.metric
-            (seqCenterD inp.decay P L (psi (tau k)) (alpha.1 : Nat)) z) ''
-              interior (C0 alpha)) := by
+       (L.hatSourceBall inp.decay P r (psi (tau k)) ⊆
+         ⋃ alpha : LiveSlot L inp.pack r,
+           (fun z => expMapDiffeo (I := I) Y.metric
+             (seqCenterD inp.decay P L (psi (tau k)) (alpha.1 : Nat)) z) ''
+              interior (C0 alpha)) ∧
+       ∀ y ∈ L.hatSourceBall inp.decay P r (psi (tau k)),
+         ∃ (alpha : LiveSlot L inp.pack r) (z : E),
+           expMapDiffeo (I := I) Y.metric
+               (seqCenterD inp.decay P L (psi (tau k)) (alpha.1 : Nat)) z = y ∧
+             Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha)) := by
     filter_upwards [htau.tendsto_atTop.eventually hcover,
       htau.tendsto_atTop.eventually hcore,
       htau.tendsto_atTop.eventually hgp0,
@@ -1517,11 +1539,17 @@ theorem MetricCompactnessInputs.exists_atom_supp_fin
       hdead hatom hatomSmooth hatomInfSmooth
   refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
   dsimp only
-  refine ⟨hUopen, hU8, hC0, hC1, hC01, hC1U, ?_, ?_, hlimAll, ?_, ?_, ?_⟩
+  refine ⟨hUopen, hU8, hC0, hC1, hC01, hC1U, hC0convex, hC0zero,
+    ?_, ?_, ?_, hlimAll, ?_, ?_, ?_⟩
+  · refine ⟨eta, heta, ?_⟩
+    intro k
+    have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
+    simpa only [Lphi, phi, Function.comp_apply,
+      seqCenterD_subseq, NetLimitData.hatSourceBall_subseq] using hk.2.2.2.2
   · intro k
     have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
     simpa only [Lphi, phi, Function.comp_apply,
-      seqCenterD_subseq, NetLimitData.hatSourceBall_subseq] using hk.2.2.2
+      seqCenterD_subseq, NetLimitData.hatSourceBall_subseq] using hk.2.2.2.1
   · intro k
     have hk := hN (shift k) (by simpa only [shift] using Nat.le_add_left N k)
     simpa only [Lphi, phi, Function.comp_apply,
@@ -1631,6 +1659,23 @@ def HasSuppConvData
   (∀ alpha, IsCompact (C1 alpha)) ∧
   (∀ alpha, C0 alpha ⊆ interior (C1 alpha)) ∧
   (∀ alpha, C1 alpha ⊆ U alpha) ∧
+  (∀ alpha, Convex Real (C0 alpha)) ∧
+  (∀ alpha, (0 : E) ∈ C0 alpha) ∧
+  (∃ eta : LiveSlot L inp.pack r → Real,
+    (∀ alpha, 0 < eta alpha) ∧
+    ∀ k,
+      let Y := X.obj (Lphi.φ k)
+      letI : TopologicalSpace Y.M := Y.topology
+      letI : ChartedSpace H Y.M := Y.charted
+      letI : IsManifold I ∞ Y.M := Y.smooth
+      letI : T2Space Y.M := Y.t2
+      letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+      letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+      ∀ y ∈ Lphi.hatSourceBall inp.decay P r k,
+        ∃ (alpha : LiveSlot L inp.pack r) (z : E),
+          expMapDiffeo (I := I) Y.metric
+              (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z = y ∧
+            Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha)) ∧
   (∀ k,
     let Y := X.obj (Lphi.φ k)
     letI : TopologicalSpace Y.M := Y.topology
@@ -1754,7 +1799,8 @@ theorem HasSuppConvData.weight_on
   dsimp only
   dsimp only [HasSuppConvData] at h
   rcases h with
-    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, _hcover,
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, _hcover,
       hlim, hweight, _htrans, _hsmooth⟩
   have hlim0 := hlim alpha
   dsimp only [HasAtomWeightLim] at hlim0
@@ -1786,9 +1832,115 @@ theorem HasSuppConvData.core_on
       C0 alpha ⊆ interior (C1 alpha) ∧ C1 alpha ⊆ U alpha := by
   dsimp only [HasSuppConvData] at h
   rcases h with
-    ⟨hU, _hU8, hC0, hC1, hC01, hC1U, _hcore, _hcover,
+    ⟨hU, _hU8, hC0, hC1, hC01, hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, _hcover,
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact ⟨hU alpha, hC0 alpha, hC1 alpha, hC01 alpha, hC1U alpha⟩
+
+/-- Project convexity of the retained inner coordinate core and its origin
+membership. -/
+theorem HasSuppConvData.core_shape
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf)
+    (alpha : LiveSlot L inp.pack r) :
+    Convex Real (C0 alpha) ∧ (0 : E) ∈ C0 alpha := by
+  dsimp only [HasSuppConvData] at h
+  rcases h with
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, hconvex, hzero,
+      _hbuffer, _hcore, _hcover, _hlim, _hweight, _htrans, _hsmooth⟩
+  exact ⟨hconvex alpha, hzero alpha⟩
+
+/-- Project the all-stage coordinate buffer for the retained finite source
+cover. -/
+theorem HasSuppConvData.buffer_cover
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf) :
+    let Lphi := L.subseq hphi
+    ∃ eta : LiveSlot L inp.pack r → Real,
+      (∀ alpha, 0 < eta alpha) ∧
+      ∀ k,
+        let Y := X.obj (Lphi.φ k)
+        letI : TopologicalSpace Y.M := Y.topology
+        letI : ChartedSpace H Y.M := Y.charted
+        letI : IsManifold I ∞ Y.M := Y.smooth
+        letI : T2Space Y.M := Y.t2
+        letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+        letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+        ∀ y ∈ Lphi.hatSourceBall inp.decay P r k,
+          ∃ (alpha : LiveSlot L inp.pack r) (z : E),
+            expMapDiffeo (I := I) Y.metric
+                (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z = y ∧
+              Metric.closedBall z (eta alpha) ⊆ interior (C0 alpha) := by
+  dsimp only [HasSuppConvData] at h
+  rcases h with
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      hbuffer, _hcore, _hcover, _hlim, _hweight, _htrans, _hsmooth⟩
+  exact hbuffer
+
+/-- Project the all-stage finite normal-coordinate cover of the retained source
+ball. -/
+theorem HasSuppConvData.source_cover
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P)
+    (r : Real) (hr : 0 ≤ r)
+    {phi : Nat → Nat} {hphi : StrictMono phi}
+    (U : LiveSlot L inp.pack r → Set E)
+    (C0 C1 : LiveSlot L inp.pack r → Set E)
+    (aInf : (alpha : LiveSlot L inp.pack r) →
+      Fin (inp.pack.A r) → E → Real)
+    (Jinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (Jbarinf : (alpha : LiveSlot L inp.pack r) →
+      InterSlot L inp.pack r alpha → E → E)
+    (h : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
+      aInf Jinf Jbarinf)
+    (k : Nat) :
+    let Lphi := L.subseq hphi
+    let Y := X.obj (Lphi.φ k)
+    letI : TopologicalSpace Y.M := Y.topology
+    letI : ChartedSpace H Y.M := Y.charted
+    letI : IsManifold I ∞ Y.M := Y.smooth
+    letI : T2Space Y.M := Y.t2
+    letI : T2Space (TangentBundle I Y.M) := Y.t2TangentBundle
+    letI : MetricSpace Y.M := (P (Lphi.φ k)).ms
+    Lphi.hatSourceBall inp.decay P r k ⊆
+      ⋃ alpha : LiveSlot L inp.pack r,
+        (fun z => expMapDiffeo (I := I) Y.metric
+          (seqCenterD inp.decay P Lphi k (alpha.1 : Nat)) z) ''
+            interior (C0 alpha) := by
+  dsimp only [HasSuppConvData] at h
+  rcases h with
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, hcore, _hcover,
+      _hlim, _hweight, _htrans, _hsmooth⟩
+  exact hcore k
 
 /-- Project the all-stage normal-coordinate radius and geometric maps-to data
 for one retained source slot. -/
@@ -1832,7 +1984,8 @@ theorem HasSuppConvData.geom_on
             Lphi.innerBall inp.decay inp.D P inp.pack r k gamma) := by
   dsimp only [HasSuppConvData] at h
   rcases h with
-    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hcore, hgeom,
+    ⟨_hU, _hU8, _hC0, _hC1, _hC01, _hC1U, _hconvex, _hzero,
+      _hbuffer, _hcore, hgeom,
       _hlim, _hweight, _htrans, _hsmooth⟩
   exact (hgeom k).1 alpha
 
@@ -1859,10 +2012,16 @@ theorem HasSuppConvData.subseq
       U C0 C1 aInf Jinf Jbarinf := by
   dsimp only [HasSuppConvData] at h ⊢
   rcases h with
-    ⟨hU, hU8, hC0, hC1, hC01, hC1U, hcore, hcover, hweight,
+    ⟨hU, hU8, hC0, hC1, hC01, hC1U, hconvex, hzero,
+      hbuffer, hcore, hcover, hweight,
       hweightData, htrans, hsmooth⟩
-  refine ⟨hU, hU8, hC0, hC1, hC01, hC1U, ?_, ?_, ?_,
+  refine ⟨hU, hU8, hC0, hC1, hC01, hC1U, hconvex, hzero, ?_, ?_, ?_, ?_,
     hweightData, ?_, ?_⟩
+  · rcases hbuffer with ⟨eta, heta, hbuf⟩
+    refine ⟨eta, heta, ?_⟩
+    intro k
+    simpa only [NetLimitData.subseq_phi, Function.comp_apply, seqCenterD_subseq,
+      NetLimitData.hatSourceBall_subseq] using hbuf (ψ k)
   · intro k
     simpa only [NetLimitData.subseq_phi, Function.comp_apply, seqCenterD_subseq,
       NetLimitData.hatSourceBall_subseq] using hcore (ψ k)
@@ -1983,7 +2142,8 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
                   dist x (pts alpha a b x gamma) < epsilon := by
   classical
   obtain ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, hUopen, hU8,
-      hC0, hC1, hC01, hC1U, hcore, hgeom, hlim, htrans, hstage,
+      hC0, hC1, hC01, hC1U, hC0convex, hC0zero,
+      hbuffer, hcore, hgeom, hlim, htrans, hstage,
       hsupp⟩ :=
     inp.exists_atom_supp_fin h8 hradD hradRatio P L hstable r hr
   obtain ⟨hgp0, _hrad⟩ := inp.item3ScaleTails h8 hradD hradRatio P L r
@@ -2020,7 +2180,8 @@ theorem MetricCompactnessInputs.exists_supp_pts_fin
     exact (hlim alpha).weight_data_of_innerCover hgpPhi hcoverU
   refine ⟨phi, hphi, U, C0, C1, aInf, Jinf, Jbarinf, ?_⟩
   dsimp only
-  refine ⟨⟨hUopen, hU8, hC0, hC1, hC01, hC1U, hcore,
+  refine ⟨⟨hUopen, hU8, hC0, hC1, hC01, hC1U, hC0convex, hC0zero,
+    hbuffer, hcore,
     hgeom, hlim, hweightData, htrans, hstage⟩, ?_⟩
   have hcenters : ∀ᶠ n in Filter.atTop, ∀ alpha : LiveSlot L inp.pack r,
       seqCenter inp.decay inp.D P ((L.subseq hphi).φ n) (alpha.1 : Nat) =

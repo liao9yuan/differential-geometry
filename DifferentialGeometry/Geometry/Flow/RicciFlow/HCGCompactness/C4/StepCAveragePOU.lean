@@ -383,6 +383,44 @@ noncomputable def hatSourceBall (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     NetLimitData.hatSourceBall (I := I) (X := X) hd P (L.subseq hψ) r n =
       NetLimitData.hatSourceBall (I := I) (X := X) hd P L r (ψ n) := rfl
 
+/-- A point of a strictly smaller fixed source ball has the larger fixed
+source ball as a neighborhood in the stored manifold topology. -/
+theorem hatSource_nhds
+    (hd : InjRadiusDecayInput (I := I) X) {D : Real}
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : DifferentialGeometry.HCGCompactness.NetLimitData (X := X) hd D P)
+    {R s : Real} (n : Nat) (hRs : R < s)
+    {x : (X.obj (L.φ n)).M}
+    (hx : x ∈ hatSourceBall (I := I) (X := X) hd P L R n) :
+    letI : TopologicalSpace (X.obj (L.φ n)).M :=
+      (X.obj (L.φ n)).topology
+    hatSourceBall (I := I) (X := X) hd P L s n ∈ nhds x := by
+  let Y := X.obj (L.φ n)
+  letI : TopologicalSpace Y.M := Y.topology
+  have hopen :
+      @IsOpen Y.M Y.topology
+        (letI : MetricSpace Y.M := (P (L.φ n)).ms
+         Metric.ball Y.basepoint s) := by
+    have hb :
+        @IsOpen Y.M
+          (P (L.φ n)).ms.toPseudoMetricSpace.toUniformSpace.toTopologicalSpace
+          (letI : MetricSpace Y.M := (P (L.φ n)).ms
+           Metric.ball Y.basepoint s) := by
+      letI : MetricSpace Y.M := (P (L.φ n)).ms
+      exact Metric.isOpen_ball
+    rw [ProperMetricOn.top_eq Y (P (L.φ n))] at hb
+    exact hb
+  have hxopen :
+      x ∈ (letI : MetricSpace Y.M := (P (L.φ n)).ms
+        Metric.ball Y.basepoint s) := by
+    letI : MetricSpace Y.M := (P (L.φ n)).ms
+    exact Metric.closedBall_subset_ball hRs
+      (by simpa only [hatSourceBall] using hx)
+  refine mem_of_superset (hopen.mem_nhds hxopen) ?_
+  intro y hy
+  letI : MetricSpace Y.M := (P (L.φ n)).ms
+  simpa only [hatSourceBall] using (Metric.ball_subset_closedBall hy)
+
 /-- The fixed Step-C source ball is compact in the stored manifold topology. -/
 theorem hatSourceCompact (hd : InjRadiusDecayInput (I := I) X) {D : Real}
     (P : forall k : Nat, ProperMetricOn (I := I) (X.obj k))

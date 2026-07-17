@@ -3,6 +3,7 @@ import Mathlib.Analysis.SpecialFunctions.Pow.Real
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
 import Mathlib.Analysis.Calculus.Deriv.Basic
 import Mathlib.MeasureTheory.Integral.Bochner.Basic
+import Mathlib.MeasureTheory.Integral.Bochner.ContinuousLinearMap
 import Mathlib.MeasureTheory.Measure.WithDensity
 
 set_option autoImplicit false
@@ -78,6 +79,36 @@ theorem wFunctional_eq_integral [MeasurableSpace M] (mu : Measure M) (n : Nat)
     wFunctional mu n tau scalarCurvature gradPotentialNormSq potential =
       ∫ x, wEntropyBracket n tau scalarCurvature gradPotentialNormSq potential x
         ∂(perelmanWeightedMeasure mu n tau potential) := rfl
+
+/-- Rewrite Perelman's weighted `W` integral against the underlying measure.
+
+The measurability hypothesis is only for the scalar density; no geometric or
+regularity assumptions are hidden in this measure-theoretic conversion. -/
+theorem wFunctional_base [MeasurableSpace M]
+    (mu : Measure M) (n : Nat) (tau : Real)
+    (scalarCurvature gradPotentialNormSq potential : M -> Real)
+    (htau : 0 ≤ tau)
+    (hmeas : AEMeasurable
+      (fun x : M => ENNReal.ofReal (perelmanDensity n tau potential x)) mu) :
+    wFunctional mu n tau scalarCurvature gradPotentialNormSq potential =
+      ∫ x, perelmanDensity n tau potential x *
+        wEntropyBracket n tau scalarCurvature gradPotentialNormSq potential x ∂mu := by
+  unfold wFunctional perelmanWeightedMeasure
+  rw [integral_withDensity_eq_integral_toReal_smul₀
+    (μ := mu)
+    (f := fun x : M => ENNReal.ofReal (perelmanDensity n tau potential x))
+    hmeas
+    (Filter.Eventually.of_forall fun _ => ENNReal.ofReal_lt_top)
+    (wEntropyBracket n tau scalarCurvature gradPotentialNormSq potential)]
+  apply integral_congr_ae
+  filter_upwards with x
+  have hnonneg : 0 ≤ perelmanDensity n tau potential x := by
+    unfold perelmanDensity perelmanDensityPrefactor
+    exact mul_nonneg
+      (Real.rpow_nonneg
+        (mul_nonneg (mul_nonneg (by norm_num) Real.pi_pos.le) htau) _)
+      (Real.exp_pos _).le
+  simp only [ENNReal.toReal_ofReal hnonneg, smul_eq_mul]
 
 private theorem wEntropyBracket_scale_eq {n : Nat} {tau c : Real}
     {scalarCurvature gradPotentialNormSq scaledScalarCurvature

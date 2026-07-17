@@ -44,15 +44,16 @@ theorem HasSuppConvData.exists_invVel_core
     (hdata : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
       aInf Jinf Jbarinf)
     (alpha : LiveSlot L inp.pack r)
-    {hcomplete : SeqMetricComplete (I := I) X}
-    {hconn : ∀ k,
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      ConnectedSpace (X.obj k).M}
-    {c : ∀ n : Nat, (X.obj n).M}
+    {Y : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hcompletePair : SeqMetricComplete (I := I) Y}
+    {hconnPair : ∀ k,
+      letI : TopologicalSpace (Y.obj k).M := (Y.obj k).topology
+      ConnectedSpace (Y.obj k).M}
+    {c : ∀ n : Nat, (Y.obj n).M}
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
-    (hpair : HasDiagPairConv (I := I) hcomplete hconn c
+    (hpair : HasDiagPairConv (I := I) hcompletePair hconnPair c
       qStage qInf deltaStage deltaInf e eInf)
     (hC1q : C1 alpha ⊆ Metric.ball (0 : E) qInf) :
     let i0 := baseIndex inp.decay inp.realizes inp.pack hr
@@ -246,7 +247,8 @@ def HasStageRootCube
     Tendsto kn atTop atTop → Tendsto ln atTop atTop →
     MapCInfConvOnCompacts W
       (fun m => Phi3 (nn m) (kn m) (ln m)) PhiInf) ∧
-  ∃ N : Nat, ∀ n ≥ N, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ closure W,
+  ∃ N : Nat, ∀ n ≥ N, ∀ k ≥ N, ∀ l ≥ N,
+    ContDiffOn Real ∞ (Phi3 n k l) W ∧ ∀ z ∈ closure W,
     dist (Phi3 n k l z) (PhiInf z) < rho / 2 ∧
     stageInvVelSub inp P L hr phi hphi alpha e n k l
       (z, Phi3 n k l z) = 0 ∧
@@ -277,15 +279,16 @@ theorem HasSuppConvData.exists_stage_root
     (hdata : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
       aInf Jinf Jbarinf)
     (alpha : LiveSlot L inp.pack r)
-    {hcomplete : SeqMetricComplete (I := I) X}
-    {hconn : ∀ k,
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      ConnectedSpace (X.obj k).M}
-    {c : ∀ n : Nat, (X.obj n).M}
+    {Y : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hcompletePair : SeqMetricComplete (I := I) Y}
+    {hconnPair : ∀ k,
+      letI : TopologicalSpace (Y.obj k).M := (Y.obj k).topology
+      ConnectedSpace (Y.obj k).M}
+    {c : ∀ n : Nat, (Y.obj n).M}
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
-    (hpair : HasDiagPairConv (I := I) hcomplete hconn c
+    (hpair : HasDiagPairConv (I := I) hcompletePair hconnPair c
       qStage qInf deltaStage deltaInf e eInf)
     (hC1q : C1 alpha ⊆ Metric.ball (0 : E) qInf) :
     ∃ (W : Set E) (PhiInf : E → E) (rho : Real),
@@ -364,8 +367,9 @@ theorem HasSuppConvData.exists_stage_root
   have hmapInf : ∀ q, q ∈ D → (q.2, q.1) ∈ V :=
     fun q hq => hlimPairs (subset_closure hq)
   have hVstageN := hnn.eventually hVstage
-  have hnormal : ∀ n, IsNormalDiag (I := I) (X.obj n)
-      (hcomplete.complete n) (hconn n) (c n) qStage deltaStage (e n) := by
+  have hnormal : ∀ n, IsNormalDiag (I := I) (Y.obj n)
+      (hcompletePair.complete n) (hconnPair n) (c n)
+        qStage deltaStage (e n) := by
     exact hpair.2.2.2.2.2.1
   have heC : ∀ᶠ m in atTop, ContDiffOn Real ∞
       ((e (nn m)).symm : E × E → E × E) V := by
@@ -439,15 +443,16 @@ theorem HasSuppConvData.exists_stage_cube
     (hdata : HasSuppConvData (I := I) inp P L r hr phi hphi U C0 C1
       aInf Jinf Jbarinf)
     (alpha : LiveSlot L inp.pack r)
-    {hcomplete : SeqMetricComplete (I := I) X}
-    {hconn : ∀ k,
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      ConnectedSpace (X.obj k).M}
-    {c : ∀ n : Nat, (X.obj n).M}
+    {Y : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    {hcompletePair : SeqMetricComplete (I := I) Y}
+    {hconnPair : ∀ k,
+      letI : TopologicalSpace (Y.obj k).M := (Y.obj k).topology
+      ConnectedSpace (Y.obj k).M}
+    {c : ∀ n : Nat, (Y.obj n).M}
     {qStage qInf : NNReal} {deltaStage deltaInf : Real}
     {e : Nat → OpenPartialHomeomorph (E × E) (E × E)}
     {eInf : OpenPartialHomeomorph (E × E) (E × E)}
-    (hpair : HasDiagPairConv (I := I) hcomplete hconn c
+    (hpair : HasDiagPairConv (I := I) hcompletePair hconnPair c
       qStage qInf deltaStage deltaInf e eInf)
     (hC1q : C1 alpha ⊆ Metric.ball (0 : E) qInf) :
     ∃ (W : Set E) (PhiInf : E → E) (rho : Real)
@@ -479,7 +484,7 @@ theorem HasSuppConvData.exists_stage_cube
     · intro z hz
       rfl
   let Q : Nat → Nat → Nat → Prop := fun n k l =>
-    ∀ z ∈ closure W,
+    ContDiffOn Real ∞ (Phi3 n k l) W ∧ ∀ z ∈ closure W,
       dist (Phi3 n k l z) (PhiInf z) < rho / 2 ∧
       stageInvVelSub inp P L hr phi hphi alpha e n k l
         (z, Phi3 n k l z) = 0 ∧
@@ -497,17 +502,24 @@ theorem HasSuppConvData.exists_stage_cube
       Tendsto kn atTop atTop → Tendsto ln atTop atTop →
       ∀ᶠ m in atTop, Q (nn m) (kn m) (ln m) := by
     intro nn kn ln hnn hkn hln
-    obtain ⟨N, Phi, _hPhi, _hPhiC, hspec, huniq⟩ :=
+    obtain ⟨N, Phi, _hPhi, hPhiC, hspec, huniq⟩ :=
       hseq nn kn ln hnn hkn hln
     filter_upwards [eventually_ge_atTop N] with m hm
-    intro z hz
-    have hs := hspec m hm z hz
-    have heq : Phi3 (nn m) (kn m) (ln m) z = Phi m z := by
+    have heq : Set.EqOn (Phi3 (nn m) (kn m) (ln m)) (Phi m)
+        (closure W) := by
+      intro z hz
+      have hs := hspec m hm z hz
       dsimp only [Phi3]
       exact stageRootSub_eq inp P L hr phi hphi alpha e PhiInf rho
         (nn m) (kn m) (ln m) z (Phi m z)
-        (by linarith [hs.1, hrho]) hs.2.1 (huniq m hm z hz)
-    rw [heq]
+        (by linarith [hs.1, hrho]) hs.2.1
+        (huniq m hm z hz)
+    refine ⟨ContDiffOn.congr (hPhiC m) (heq.mono subset_closure), ?_⟩
+    intro z hz
+    have hs := hspec m hm z hz
+    have heqz : Phi3 (nn m) (kn m) (ln m) z = Phi m z :=
+      heq hz
+    rw [heqz]
     exact ⟨hs.1, hs.2.1, hs.2.2.1, hs.2.2.2, huniq m hm z hz⟩
   obtain ⟨N, hN⟩ := exists_three_tail hQ
   refine ⟨W, PhiInf, rho, Phi3, ?_⟩
@@ -551,6 +563,60 @@ theorem HasStageRootCube.map_tail
       rfl
     · exact (hPhiInf.mono interior_subset).symm
   exact MapCInfConvOnCompacts.three_tail hconvId hK hKC1 p eps heps
+
+/-- A pointwise germ identification with the canonical root cube transfers
+both smoothness and every prescribed finite jet tail to the identified maps. -/
+theorem HasStageRootCube.at_tail
+    (inp : MetricCompactnessInputs (I := I) X)
+    (P : ∀ k : Nat, ProperMetricOn (I := I) (X.obj k))
+    (L : NetLimitData inp.decay inp.D P) {r : Real} (hr : 0 ≤ r)
+    (phi : Nat → Nat) (hphi : StrictMono phi)
+    (C1 : LiveSlot L inp.pack r → Set E)
+    (alpha : LiveSlot L inp.pack r)
+    (e : Nat → OpenPartialHomeomorph (E × E) (E × E))
+    (W : Set E) (PhiInf : E → E) (rho : Real)
+    (Phi3 : Nat → Nat → Nat → E → E)
+    (hroot : HasStageRootCube inp P L hr phi hphi C1 alpha e
+      W PhiInf rho Phi3)
+    {K : Set E} (hK : IsCompact K) (hKC1 : K ⊆ interior (C1 alpha))
+    (Psi : Nat → Nat → E → E) (S : Nat → E → Prop)
+    (hEq : ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ K, S k z →
+      Psi k l =ᶠ[nhds z] Phi3 l k l)
+    (p : Nat) (eps : Real) (heps : 0 < eps) :
+    ∃ N : Nat, ∀ k ≥ N, ∀ l ≥ N, ∀ z ∈ K, S k z →
+      ContDiffAt Real ∞ (Psi k l) z ∧
+      ∀ j ≤ p, mapDerivNorm j (Psi k l) id z ≤ eps := by
+  obtain ⟨Nmap, hmap⟩ := hroot.map_tail inp P L hr phi hphi C1 alpha e
+    W PhiInf rho Phi3 hK hKC1 p eps heps
+  obtain ⟨Neq, hEqTail⟩ := hEq
+  rcases hroot with
+    ⟨hW, _hWcpt, hC1W, _hrho, _hPhiInf, _htriple, Nroot, hrootTail⟩
+  refine ⟨max Neq (max Nmap Nroot), ?_⟩
+  intro k hk l hl z hz hSz
+  have hkEq : Neq ≤ k := by omega
+  have hlEq : Neq ≤ l := by omega
+  have hkMap : Nmap ≤ k := by omega
+  have hlMap : Nmap ≤ l := by omega
+  have hkRoot : Nroot ≤ k := by omega
+  have hlRoot : Nroot ≤ l := by omega
+  have hzW : z ∈ W :=
+    hC1W (interior_subset (hKC1 hz))
+  have hPhiAt : ContDiffAt Real ∞ (Phi3 l k l) z :=
+    ((hrootTail l hlRoot k hkRoot l hlRoot).1).contDiffAt
+      (hW.mem_nhds hzW)
+  have hlocal := hEqTail k hkEq l hlEq z hz hSz
+  refine ⟨hPhiAt.congr_of_eventuallyEq hlocal, ?_⟩
+  intro j hj
+  have hsub : (fun y => Psi k l y - id y) =ᶠ[nhds z]
+      (fun y => Phi3 l k l y - id y) := by
+    filter_upwards [hlocal] with y hy
+    rw [hy]
+  calc
+    mapDerivNorm j (Psi k l) id z =
+        mapDerivNorm j (Phi3 l k l) id z := by
+      simp only [mapDerivNorm]
+      rw [(Filter.EventuallyEq.iteratedFDeriv Real hsub j).eq_of_nhds]
+    _ ≤ eps := hmap l hlMap k hkMap l hlMap j hj z hz
 
 /-- The order-zero root tail becomes a uniform distance tail in every moving
 target manifold after applying the H6 inverse-chart distance bound. -/

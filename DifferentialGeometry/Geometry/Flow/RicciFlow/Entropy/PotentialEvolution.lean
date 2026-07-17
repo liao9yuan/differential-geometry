@@ -1,7 +1,7 @@
 import DifferentialGeometry.Analysis.Parabolic.ScalarTimeDependent
 import DifferentialGeometry.Bundle.PartialMfderiv.FixedBase
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.FirstVariation
-import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.Potential
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Entropy.PotentialGeometry
 
 set_option autoImplicit false
 set_option linter.unusedSectionVars false
@@ -29,6 +29,37 @@ variable {H : Type uH} [TopologicalSpace H]
 variable {I : ModelWithCorners Real E H}
 variable {M : Type u} [TopologicalSpace M] [ChartedSpace H M]
 variable [IsManifold I ∞ M]
+
+/-- At a positive regular time, Perelman's reconstructed potential is smooth
+on the whole spatial slice. -/
+theorem potential_slice
+    (D : RealTimeInterval)
+    (G : RealizedMetricFamily (I := I) (M := M) Real)
+    (V u : Real -> M -> Real) (n : Nat)
+    (hu : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D G V u)
+    {s : Real} (hs : s ∈ D.regular) (hspos : 0 < s)
+    (hpos : ∀ y : M, 0 < u s y) :
+    ContMDiff I 𝓘(Real, Real) ∞ (perelmanPotential n s (u s)) := by
+  have husmooth : ContMDiff I 𝓘(Real, Real) ∞ (u s) :=
+    hu.sliceSmooth s (D.regular_subset hs)
+  have hpref_pos : 0 < perelmanDensityPrefactor n s := by
+    unfold perelmanDensityPrefactor
+    exact Real.rpow_pos_of_pos
+      (mul_pos (mul_pos (by norm_num) Real.pi_pos) hspos) _
+  intro y
+  have hquot :
+      ContMDiffAt I 𝓘(Real, Real) ∞
+        (fun z : M => u s z / perelmanDensityPrefactor n s) y :=
+    husmooth.contMDiffAt.div₀ contMDiffAt_const hpref_pos.ne'
+  have hlog :
+      ContDiffAt Real ∞ Real.log
+        (u s y / perelmanDensityPrefactor n s) :=
+    Real.contDiffAt_log.2 (div_ne_zero (hpos y).ne' hpref_pos.ne')
+  simpa only [perelmanPotential] using
+    (hlog.comp_contMDiffAt
+      (I := I)
+      (f := fun z : M => u s z / perelmanDensityPrefactor n s)
+      (x := y) hquot).neg
 
 /-- A positive heat-potential slice, reconstructed as Perelman's potential,
 satisfies the pointwise logarithmic evolution equation. -/
@@ -103,19 +134,6 @@ theorem potential_pde
     rw [laplacian_const_smul (I := I) (G.connection s) (G.metric s)
       (-1) hlogdiff hloggrad]
     ring
-  have hgrad_pot :
-      gradientFun (I := I) (G.metric s) (perelmanPotential n s (u s)) x =
-        (-((u s x)⁻¹)) • gradientFun (I := I) (G.metric s) (u s) x := by
-    rw [hpot_eq]
-    rw [gradientFun_sub (I := I) (G.metric s)
-      ((hlogdiff x).const_smul (-1)) mdifferentiableAt_const]
-    rw [gradientFun_const]
-    simp only [sub_zero]
-    rw [gradientFun_const_smul (I := I) (G.metric s) (-1) (hlogdiff x)]
-    rw [gradientFun_log (I := I) (G.metric s) (hudiff x) (hpos x)]
-    simp only [smul_smul]
-    congr 1
-    ring
   have hnorm_pot :
       (G.metric s).inner x
           (gradientFun (I := I) (G.metric s)
@@ -126,9 +144,7 @@ theorem potential_pde
           (G.metric s).inner x
             (gradientFun (I := I) (G.metric s) (u s) x)
             (gradientFun (I := I) (G.metric s) (u s) x) := by
-    rw [hgrad_pot]
-    simp only [map_smul, ContinuousLinearMap.smul_apply, smul_eq_mul]
-    field_simp [(hpos x).ne']
+    exact potential_grad_sq (I := I) (G.metric s) n husmooth hpos hspos x
   have hspace :
       laplacianAt (I := I) G s (perelmanPotential n s (u s)) x -
           (G.metric s).inner x
