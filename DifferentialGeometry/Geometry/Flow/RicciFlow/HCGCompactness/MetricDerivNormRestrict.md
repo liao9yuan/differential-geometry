@@ -1,5 +1,18 @@
 # MetricDerivNormRestrict
 
+## 2026-07-16 constant-frame component restriction
+
+The generic theorem `iterCovComp_restrict` now identifies a constant-frame
+component tower on an open subtype of the model space with the ambient tower
+at the underlying point.  The only analytic premise is pointwise
+differentiability of each ambient running component, exactly what an existing
+smooth tower supplies; no metric, normal-coordinate, or branch-specific
+assumption enters the restriction layer.  The successor step uses
+`extDerivFun_restrictOpen`, while the Christoffel and lower-level correction
+terms reduce by the induction hypothesis.
+
+Focused verification passed without warnings.
+
 ## 2026-07-13 short-time alignment
 
 The pointwise difference-tower restriction proof now evaluates subtraction

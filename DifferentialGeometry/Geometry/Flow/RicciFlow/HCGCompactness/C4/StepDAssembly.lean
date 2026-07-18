@@ -352,8 +352,9 @@ noncomputable def tailMemberConv
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
 /-- The complete Step D assembly from the honest B/C comparison-map package.
-All direct-limit, completeness, and convergence fields are constructed here;
-the only remaining upstream frontier is a producer of `StepB1RawInput`. -/
+All direct-limit, completeness, and convergence fields are constructed here.
+The concrete `StepB1RawInput` producer and the final conditional endpoint live
+in the higher `StepB1RawProducer` and `MetricCompactnessEndpoint` modules. -/
 noncomputable def compactness_of_b1
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (P : ∀ k, ProperMetricOn (I := I) (X.obj k))

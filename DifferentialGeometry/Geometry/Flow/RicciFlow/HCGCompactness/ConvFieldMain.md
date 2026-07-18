@@ -28,6 +28,10 @@ bridge (the `FlowLimitData.conv` shape at `(Φ, φ k)` granularity), and identif
   Instances at `L.M`: letI five + `WeaklyLocallyCompactSpace` via
   `ChartedSpace.locallyCompactSpace` (the `nonempty_bumpFamily` idiom);
   `Nonempty L.M := ⟨L.basepoint⟩`; dense net = `denseIccSeq` (needs `β ≤ ψ`).
+- `ConvOut.comp_subseq`: checked.  It retains the fixed-window limit family
+  and both convergence fields after a further strict reindexing.  This is a
+  downstream stability operation; the open-window diagonal still needs to
+  rerun the fixed-window producer after each already-chosen outer subsequence.
 - `ofRP_supOn_eq` (per-index three-slot identification): for `K ⊆ bf.grow k`
   and `hmet : L.S.family.metric t = gIt`,
   `(ofRestrictPullback (Φ := Φ) (k := k) (hsrc k) (htgt k)
@@ -128,3 +132,26 @@ file, no mojibake hits — NOT touched; that session's builds will hit the same
   error, the `funext`-vs-`ContinuousLinearMap.ext` fix above).
 - `#print axioms` on `convOut`, `ofRP_supOn_eq`, `ofRP_supOn_conv`,
   `gInf_zero_eq`: `[propext, Classical.choice, Quot.sound]` — no `sorryAx`.
+
+## Normal-form refresh (2026-07-17)
+
+- `ofRP_supOn_eq` remains complete (100%); this repair does not change the
+  theorem statement, API, or any HCG endpoint accounting.
+- After upstream normal-form changes, the local tensor-field equality no longer
+  made progress with the old `simp only` prelude.  It now changes definitionally
+  to the two restricted metric inner products and uses the existing explicit
+  restriction, `resSrc`, bump-extension, and cutoff rewrites.
+- Focused verification passed; the exact module refresh also passed.
+
+## Fixed-window documentation correction (2026-07-17)
+
+The `ConvOut` docstring now states its actual quantifier scope: one subsequence
+serves every spatial compact and derivative order on the single parameter
+window `[β, ψ]`.  It does not claim one subsequence over all time windows.  This
+is documentation-only and leaves the global-window diagonal as the explicit P4
+frontier.
+
+The focused check could not reach this documentation-only edit because the
+shared build cache currently lacks the unrelated upstream
+`TensorNabla.TensorExtension` object file.  The last proof-bearing version of
+this module remains checked; no declaration or proof body changed here.

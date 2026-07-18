@@ -1856,3 +1856,66 @@ lands.
   `SeqBoundedGeometry` remains 0% proved and `metricCompactness` remains 0%.
   V1e packing/multiplicity infrastructure is about 79.5%; Stage V1 about 93%;
   whole volume-comparison lane about 78.4%.
+
+- 2026-07-17 V2 entry brick: added and verified
+  `BonnetMyers.ricciLower_of_rm`, which turns a global canonical lowered-Rm
+  norm bound into `RicciBoundedBelow g (-(n^2 * Rm))`.  Added and verified the
+  HCG application `ricciLower_of_seq`, so `SeqBoundedGeometry` gives the same
+  lower Ricci constant `-(n^2 * C 0)` for every sequence member.
+
+  This is the first real Bishop--Gromov producer input, not a relative-volume
+  facade.  The Bishop--Gromov monotonicity theorem itself remains 0%, and
+  `VolumeComparisonInput` from `SeqBoundedGeometry` remains 0%.  With the full
+  V2 and V3 denominator restored, dedicated V2 infrastructure is about 3--5%
+  and the complete volume-comparison/CGT program is about 30--35%; the older
+  78% figures above measured the nearly finished V1/V1e machinery, not the
+  full V1--V3 theorem program.  Next target: the scalar model/Jacobian-ratio
+  brick for V2b, followed by polar/cut-locus transfer rather than another HCG
+  wrapper.
+
+- 2026-07-17 V2 scalar comparison kernel: added and verified the reusable
+  calculus theorems `ratio_anti_of_cross` and `integralRatio_anti`, the
+  hyperbolic warping function and area density with derivative, continuity,
+  and positivity facts, and `hypVolumeRatio_anti`.  Thus the entire scalar
+  implication
+
+  `radial cross-derivative inequality -> density-ratio antitonicity ->`
+  `cumulative radial-volume-ratio antitonicity`
+
+  is checked without adding geometric regularity assumptions.
+
+  Bishop--Gromov itself remains 0% proved, and `VolumeComparisonInput` from
+  `SeqBoundedGeometry` remains 0% proved.  The smallest real frontier is now a
+  manifold theorem producing
+  `j' * hypDensity <= j * hypDensityDeriv` along a no-conjugate radial geodesic
+  from the Ricci lower bound, via the radial Jacobian derivative and the
+  Jacobi/Riccati trace inequality.  After that, the polar-coordinate formula
+  and measurable cut-time/star-shaped-domain transfer are still required.
+  Dedicated V2 infrastructure is about 6--8%; the complete V1--V3
+  volume-comparison/CGT program remains about 30--35%.
+
+- 2026-07-17 V2 Jacobi/Gram brick: added and verified the curvature-operator
+  symmetry needed for Wronskian conservation, pointwise and interval Wronskian
+  theorems, reusable Gram determinant/density derivative calculus, and the
+  radial producer `radial_wronsk_zero`.  The latter gives zero Wronskian for
+  every pair of sufficiently small packaged radial Jacobi fields on any
+  `Icc 0 b`, `0 < b < 1`.  The hyperbolic model side now also includes its
+  Jacobi ODE, energy identity, logarithmic density derivative, and scalar
+  Riccati equation.
+
+  This closes the algebraic symmetry and scalar-model portions of the radial
+  comparison route.  Bishop--Gromov itself remains 0% proved, and the producer
+  from `SeqBoundedGeometry` to `VolumeComparisonInput` remains 0%.  The next
+  local bridge is: prove the radial time-scaling identity and use the already
+  invertible `expMapDiffeo` differential to obtain linear independence on the
+  selected normal source.  This is not a new no-conjugate-points theorem.  The
+  next genuine geometry is then to define the Jacobi shape operator and derive
+  its trace Riccati inequality from the Ricci lower bound.  Polar integration
+  and the measurable cut-time/cut-locus transfer still follow.
+  Dedicated V2 infrastructure is now about 10--12%; the complete V1--V3
+  volume-comparison/CGT program remains about 30--35%.
+
+  The scaling/linear-independence bridge was audited but not retained in Lean:
+  an active upstream object refresh chain caused repeated targeted-verification
+  timeouts, and the final focused check still lacked `NormalCoordinates.olean`.
+  It is therefore 0% proved as a new theorem despite the route being concrete.

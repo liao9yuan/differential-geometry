@@ -257,3 +257,35 @@ remains 100%, dedicated Step-B/B1 machinery remains about 83%, Chapter 4
 machinery about 79%, and whole-HCG machinery about 53%.  `StepB1RawInput`,
 textbook B1, and the conditional and final compactness endpoints remain
 theorem-level 0%.
+
+## 2026-07-17 divisor-independent endpoint bridge
+
+`MetricCompactnessInputs` now retains the total-packing producer for every
+positive divisor as `packAll`, in addition to the already selected fixed-`D`
+`pack` consumed throughout Steps A--C.  The new `toBase` projection reconstructs
+the exact `MetricCompactBase` required by the live master-diagonal and concrete
+Step-B1 producer route.  `ofBase`, `ofUniformVolume`, and `subseq` preserve this
+family; `ofUniformVolume` derives its selected packing datum from the family, so
+the two fields cannot drift in that constructor.
+
+This is an interface repair, not by itself a compactness proof.  It removes the
+mismatch between the fixed-`D` conditional endpoint bundle and the
+divisor-independent B/C producer without changing existing fixed-`D`
+consumers.  At this historical checkpoint the raw producer and conditional
+endpoint were still unverified; that 0% snapshot and the temporary missing
+object blocker are superseded by the endpoint-layer result below.
+
+## 2026-07-17 endpoint-layer split
+
+The conditional Theorem 3.9 declaration has moved from this foundational input
+module to `MetricCompactnessEndpoint.lean`.  That final assembly must import the
+concrete `StepB1RawInput` producer and the checked Step-D consumer; leaving it in
+this file would create an import cycle.  The public namespace and theorem name
+remain `MetricCompactnessInputs.metricCompactness`, so consumers do not acquire
+a parallel endpoint API.
+
+This file now owns only the honest external-input bundle, its divisor-independent
+`MetricCompactBase` projection, and the fixed-divisor producer interfaces.  The
+updated source is focused-green and contains no proof `sorry`.  Endpoint theorem
+completion is accounted for only in `MetricCompactnessEndpoint.md`, separately
+from this input-layer infrastructure.

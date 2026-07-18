@@ -78,6 +78,15 @@ Classical.choice, Quot.sound]`):
   `exists_contMDiffMap_one_nhds_of_subset_interior`, `tsupport ⊆ closure V ⊆ Φ.source k`).
 - `gSeqExt` (the bump-extended sequence on `L.M`).
 - `gSeqExt_inner_of_mem` / `gSeqExt_inner_of_notMem` (pointwise evaluation).
+
+## 2026-07-17 fixed-family reindexing bridge
+
+Added `SrcSigma.compSubseq`, `TgtSigma.compSubseq`, and
+`BumpFamily.compSubseq`, together with the definitional readout
+`gSeqExt_compSubseq`.  Thus the open-time diagonal keeps one original bump
+family while a fixed-window producer is rerun after any prescribed refinement;
+it does not choose a fresh bump family for each time window.  Verification is
+focused-green and the exact module refresh is green.
 - `hlow_gSeqExt` (the `hlow` hypothesis of `windowGInfAll`): from the cited uniform source
   lower bound `cLow·R ≤ srcMetric`, `gSeqExt (ρk) t ≥ min(cLow,1)·R` everywhere — convex-combo
   on the support, `=R` off it.  CLEAN, no covariant derivatives.
@@ -171,3 +180,27 @@ session — owned by a parallel session, not touched.)
 `refRes` is now PUBLIC (was `private`): Brick 5 (`ConvFieldMain.lean`) states its carried
 hypotheses (`hlipSrc`-granularity) and the conv-field reference slot against it, and adds the
 general-metric mirror `resSrc` (with `refRes_eq_resSrc : … := rfl`).
+
+## 2026-07-17: normalization compatibility repair
+
+Two metric-tensor extensionality proofs stopped because their combined `simp only` step made
+no progress after the imported normal forms changed. Replacing that fragile normalization with
+explicit rewrites by `metricTensorField_apply` and `restrictOpen_inner` preserves the statements
+and proof route. Focused verification and the exact module refresh both passed. Brick 4 remains
+complete; this maintenance repair changes no theorem, machinery, or whole-project progress
+estimate.
+
+## 2026-07-17: canonical exact lower-bound producer
+
+The convex-combination proof formerly embedded in `hlow_gSeqExt` is now the public theorem
+`gSeqExt_lower`. It gives the exact constant `min cLow 1` for every sequence index and every
+time in the window; no subsequence parameter is needed because the source/off-source dichotomy
+covers all stages. `hlow_gSeqExt` keeps its existing public statement and is now only the
+compatibility consumer that packages this positive constant along an arbitrary strict
+subsequence. Focused verification and the exact module refresh passed.
+
+Accounting is unchanged: this exact producer and the `hlow` sub-brick are 100%, Brick 4 remains
+100%, and no downstream endpoint or mathematical input was discharged. The conditional P4
+assembly remains checked from its tracked inputs, while unconditional Theorem 3.10 remains 0%;
+the whole-HCG machinery estimate remains roughly 45%, with the unconditional project endpoint
+still 0%.

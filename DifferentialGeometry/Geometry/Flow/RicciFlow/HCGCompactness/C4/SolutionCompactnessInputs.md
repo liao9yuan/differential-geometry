@@ -2,17 +2,21 @@
 
 This file is the canonical conditional MSM135 Theorem 3.10 handoff.
 
-`solutionComp_cond` applies `MetricCompactnessInputs.metricCompactness` at time
-zero and then consumes `FlowUpgradeData` for that exact metric compactness
-conclusion.  The wrapper does not call the unconditional `metricCompactness`
-frontier and does not consume `SmoothFlowLimitInput.upgrade`.
+`solutionComp_cond` imports the completed conditional Chapter 4 endpoint from
+`MetricCompactnessEndpoint.lean`, applies
+`MetricCompactnessInputs.metricCompactness` at time zero, and then consumes
+`FlowUpgradeData` for that exact metric compactness conclusion.  It does not
+call the unconditional `metricCompactness` frontier and does not consume the
+legacy `SmoothFlowLimitInput.upgrade` field.
 
-The endpoint remains conditional on the same honest Theorem 3.9 input bundle
-and on concrete P4 limit data.  It introduces no new mathematical frontier and
-does not change the 0% completion status of conditional Theorem 3.9.
+Focused verification passed after the endpoint-layer import move.  This
+conditional wrapper is a 100% checked consumer.  Its Theorem 3.9 dependency is
+now the 100%-checked explicit-input endpoint; the concrete P4 `FlowUpgradeData`
+producer remains a separate input.  Unconditional Theorem 3.10 and
+`ham3_cgh_limit` remain theorem-level 0%.
 
-Focused verification passed. This conditional wrapper theorem is 100%
-checked, while unconditional Theorem 3.10 remains 0%; the wrapper does not
-discharge either its Theorem 3.9 input or its concrete P4 producer input. The
-project-wide endpoint therefore remains 0%, and the current project map's
-separate Chapter 4 machinery estimate remains about 59%.
+Accounting must stay separated: the conditional wrapper does not discharge the
+unconditional CGT/Bishop--Gromov/[H6] inputs, and it does not turn the remaining
+P4 producer into an unconditional Ricci-flow compactness theorem.  Current
+rounded estimates are about 95% for Chapter 4 machinery and 60% for whole-HCG
+machinery.

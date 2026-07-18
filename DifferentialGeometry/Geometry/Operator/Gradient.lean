@@ -595,6 +595,41 @@ lemma gradChartLocal_eq_gradFun
   congr 1
   rw [inner_gradChartLocal_chartBasis (I := I) g α f hx k, hmfderiv_basis k]
 
+/-- At a differentiability point in a boundaryless chart, the squared metric
+norm of `gradFun` is the inverse Gram quadratic form in the chart partials. -/
+theorem grad_norm_sq_chart
+    (g : SmoothRiemannianMetric I M) [I.Boundaryless]
+    (α : M) {f : M → ℝ} {x : M}
+    (hf : MDifferentiableAt I 𝓘(ℝ, ℝ) f x)
+    (hx : x ∈ (chartAt H α).source) :
+    g.inner x (gradFun (I := I) g f x) (gradFun (I := I) g f x) =
+      ∑ i, ∑ j, chartInvGramMatrix (I := I) g α x i j *
+        partialDeriv (E := E) j (scalarOnE (I := I) α f) (extChartAt I α x) *
+        partialDeriv (E := E) i (scalarOnE (I := I) α f) (extChartAt I α x) := by
+  classical
+  have hbase : x ∈ (trivializationAt E (TangentSpace I) α).baseSet := by
+    rw [trivializationAt_baseSet_eq_chartAt_source]
+    exact hx
+  have hx_int : extChartAt I α x ∈ interior (extChartAt I α).target := by
+    have hxsrc : x ∈ (extChartAt I α).source := by
+      rw [extChartAt_source_eq_chartAt_source (I := I)]
+      exact hx
+    exact extChartAt_target_subset_interior_of_boundaryless (I := I) α
+      ((extChartAt I α).map_source hxsrc)
+  have hgrad := gradChartLocal_eq_gradFun (I := I) g α hf hbase hx_int
+  rw [inner_gradFun (I := I) g f x, ← hgrad]
+  unfold gradChartLocal
+  rw [map_sum]
+  refine Finset.sum_congr rfl ?_
+  intro i _
+  rw [map_smul,
+    mfderiv_chartBasisVecFiber_of_mdifferentiableAt
+      (I := I) α hf hx hx_int i]
+  change gradChartCoeff (I := I) g α f i x *
+      partialDeriv (E := E) i (scalarOnE (I := I) α f) (extChartAt I α x) = _
+  unfold gradChartCoeff
+  rw [Finset.sum_mul]
+
 /-- The pointwise `g`-norm bound on the gradient: for `f` differentiable at `x`
 and `x` in the chart-`α` source on a boundaryless model,
 `‖gradFun g f x‖_g² ≤ chartInvGramMatrix_l1Sum α x · (∑ k, |∂_k f̃(φ x)|²)`,

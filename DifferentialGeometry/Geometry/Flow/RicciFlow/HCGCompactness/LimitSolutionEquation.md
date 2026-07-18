@@ -1,10 +1,11 @@
-# LimitSolutionEquation.lean — P4 Brick 6 `equation` bridge (2026-07-02)
+# LimitSolutionEquation.lean — P4 Brick 6 `equation` bridge (updated 2026-07-17)
 
 MSM135 chapter3.tex:853–856 ("all derivatives of the metric converge ⟹ Ricci of
 `g_k(t)` converges to Ricci of `g_∞(t)` ⟹ the limit is a solution"), as a generic
-fixed-manifold theorem.  **Verified: targeted build green (3888 jobs), all four
-endpoints axiom-clean (`[propext, Classical.choice, Quot.sound]`, no `sorryAx`).**
-No `sorry` anywhere in the file.
+fixed-manifold theorem.  The original four endpoints have a green targeted build
+and are axiom-clean (`[propext, Classical.choice, Quot.sound]`, no `sorryAx`).
+The new derivative-tail bridge and its plain-sequence metric consumer have a
+green focused check.  No `sorry` occurs in the file.
 
 ## What is PROVED vs what is HYPOTHESIZED
 
@@ -28,11 +29,24 @@ diagnosis of why step 2 could not be discharged from existing API.
    Cauchy pair `f k0 − f m`, limit `m → ∞` via `le_of_tendsto`, then the
    3-term triangle split with constants `2ε + ε + ε` at `ε = c/4`.  No
    continuity of the derivatives needed, no FTC, no measurability side goals.
-2. `metricInner_tendsto` — pointwise coefficient convergence
+2. `hasDeriv_lim_tail` — the reusable eventual-index form of the first theorem.
+   It assumes the derivative identity only for all `k ≥ k0`, shifts the sequence
+   to `k ↦ k + k0`, and reuses `hasDerivWithinAt_lim` without duplicating its
+   analytic proof.  Pointwise convergence is transported by
+   `tendsto_add_atTop_nat`; the explicit ε-uniform derivative convergence is
+   transported by the same cofinal index shift.
+3. `metricInner_tendsto` — pointwise coefficient convergence
    `(gk k).inner x v w → gLim.inner x v w` from order-0 seminorm smallness
    `metricDerivNorm 0 (gk k) gLim gRef x → 0`, via the polarization bound
    `metricInnerApply_diff_le` (MetricPreconvWindowAll.lean) + `squeeze_zero`.
-3. `metricLimit_pde` — **the core bridge.**  Inputs: `S : (k) → SolutionOn (D k)`,
+4. `metricLimit_pde'` — the plain-sequence eventual-equation consumer.  It takes
+   `gSeq : ℕ → ℝ → SmoothRiemannianMetric I M`, the derivative identity for
+   every sufficiently large sequence index, pointwise coefficient convergence,
+   and uniform Ricci-coefficient convergence.  It applies
+   `hasDeriv_lim_tail` and contains no `SolutionOn` or `RealTimeInterval` input.
+   The existing `[NeZero (Module.finrank ℝ E)]` requirement comes from the
+   current canonical `ricciTensor` API.
+5. `metricLimit_pde` — **the core bridge.**  Inputs: `S : (k) → SolutionOn (D k)`,
    `hS k : IsSolutionOn (S k)`, `hreg : Icc β ψ ⊆ (D k).regular`, a limit family
    `gInf : ℝ → SmoothRiemannianMetric I M`, fixed `x v w`, `hinner` (pointwise
    inner convergence on the window), `hRicConv` (uniform-in-t Ricci coefficient
@@ -41,11 +55,27 @@ diagnosis of why step 2 could not be discharged from existing API.
    `HasDerivWithinAt (fun s => (gInf s).inner x v w)
       (-2 * ricciTensor (gInf t) x v w) (Set.Icc β ψ) t`.
    Needs `[NeZero (Module.finrank ℝ E)]` (from the two-worlds Ricci bridge).
-4. `metricLimit_pdeOn` — endpoint in the `windowGInfAll` consumption shape:
+6. `metricLimit_pdeOn` — endpoint in the `windowGInfAll` consumption shape:
    replaces `hinner` by the POINTWISE form of the window seminorm convergence on
    a compact `K ∋ x` (`∀ p, ∀ ε > 0, ∃ k0, ∀ k ≥ k0, ∀ t ∈ Icc, ∀ a ≤ p,
    ∀ z ∈ K, metricDerivNorm a (gk t) (gInf t) gRef z < ε`); consumes only the
    `(p, a, z) = (0, 0, x)` instance.  `hRicConv` unchanged.
+
+## 2026-07-17 derivative-tail bridge boundary
+
+The generic P4 A.2 derivative-tail bridge `hasDeriv_lim_tail` and its immediate
+same-layer consumer `metricLimit_pde'` are 100% checked.  The consumer adds no
+`SolutionOn` or time-domain assumption: its honest input is the eventual
+derivative identity `∃ k0, ∀ k ≥ k0, ...`; the `NeZero` instance is required by
+the existing `ricciTensor` interface.  The older `metricLimit_pde` keeps its
+public API and now delegates its generic final half to `metricLimit_pde'` after
+producing the all-index derivative identity from `IsSolutionOn`.
+
+This pass did not edit `ConvFieldPDE.lean` and did not wire `gSeqExt_pde` into
+the new consumer.  That metric-specific wiring and the resulting final
+limit-PDE theorem remain theorem-level 0%.  Conservatively, the dedicated P4
+producer machinery remains about 80%, unconditional Theorem 3.10 remains 0%,
+and whole-HCG machinery remains about 60%.
 
 ## Per-k equation extraction (step 1 plumbing)
 
@@ -156,7 +186,8 @@ algebra with uniform bounds from `MetricUniformEquivalentOnWindow`
 
 ## Verification
 
-Focused check green; targeted build
+Focused check green after the derivative-tail bridge and plain-sequence
+consumer were added; the earlier targeted build
 `+DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.LimitSolutionEquation`
 green (3888 jobs, module freshly compiled); `#print axioms` on all four
 endpoints = `[propext, Classical.choice, Quot.sound]` (temporary prints,

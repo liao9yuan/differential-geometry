@@ -145,9 +145,33 @@ Jets: `W_k[i,j] (t,y) := iteratedFDeriv ℝ k (fun y' => G i j (t, y')) y`.
   linter-vs-omit disagreement is resolved by declaring the lemma before that
   `variable` line.  A(0) at orders ≥ 1 (jets) still needs sub-frontier (a).
 
-## Honest size estimate
+## Historical size estimate (2026-07-03)
 
 C⁰ layer order-0 ≈ 1 session; conversion (a) ≈ 1–2; C¹ instantiation for gInf ≈ 1 (after
 (a)); swap (b) ≈ 1; wall (c) ≈ 2–5 (or consult); reduction plumbing ≈ 1.  Full `hsmooth`
-≈ 6–10 focused sessions.  `hsmooth` itself: statement not yet formed (0%); its dedicated
-machinery after this session: kernel done, ≈ 15–20% of the brick.
+≈ 6–10 focused sessions.  At that date `hsmooth` itself was not yet stated;
+the 2026-07-17 section below supersedes that status while preserving the size
+estimate for the remaining analytic proof.
+
+## 2026-07-17 open-interval assembly
+
+`OpenConvOut.smoothMetric` now states the compactness-free structural capstone:
+joint trivialization-based chart-Gram `C∞` on every canonical compact window is localized and glued
+to the four fields of `MetricFamilySmoothOn` on the ambient `openInterval`.
+No time-exhaustion predicate, endpoint condition, or new compactness input is
+introduced. Two private CLM/frame readout helpers avoid depending on the
+compact-manifold specialization in `ExtendedSolutionRegularity.lean`.
+
+The capstone proof is focused-green. The file now also states the exact
+fixed-window producer as `ConvOut.gramSmooth`, with one visible `sorry`, and
+checks with only that expected frontier warning. `OpenConvOut.smoothMetric_of_conv`
+is a checked theorem-shaped consumer which still depends on that visible
+`sorry`: once `gramSmooth` is filled, it obtains the ambient
+open-interval package directly from `OpenConvOut`, with no further analytic
+input. The true frontier is therefore the proof of `gramSmooth` (all spatial
+jets plus time-slice bootstrap). This file is not yet imported by an
+open-interval endgame, so final `PointedFlowData`/`SmoothCGHConverges` wiring
+also remains. The strengthened `compactnessSol` conclusion further requires a
+checked producer of completeness of every limit time slice. Theorem-level
+`compactnessSol` remains 0%, and the dedicated P4 machinery estimate remains
+about 88%.

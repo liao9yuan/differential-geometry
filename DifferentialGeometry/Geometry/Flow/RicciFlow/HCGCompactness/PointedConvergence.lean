@@ -488,6 +488,18 @@ theorem subset_of_le {M : Type*} [TopologicalSpace M] {U : Nat -> Set M}
     U i ⊆ U j :=
   hU.monotone hij
 
+/-- An exhaustion by open sets remains an exhaustion after a strictly
+increasing reindexing. -/
+theorem comp_subseq {M : Type*} [TopologicalSpace M]
+    {U : Nat -> Set M} (hU : ExhaustsByOpen U)
+    {φ : Nat -> Nat} (hφ : StrictMono φ) :
+    ExhaustsByOpen (fun k => U (φ k)) := by
+  refine ⟨fun k => hU.isOpen (φ k),
+    fun k => hU.subset_of_le (hφ.monotone (Nat.le_succ k)), ?_⟩
+  intro K hK
+  obtain ⟨k0, hk0⟩ := hU.subset K hK
+  exact ⟨k0, fun k hk => hk0 (φ k) (le_trans hk (hφ.id_le k))⟩
+
 end ExhaustsByOpen
 
 /-- Exhaustion and comparison maps for pointed Cheeger--Gromov convergence.
@@ -539,6 +551,23 @@ structure PointedCGHMaps
 
 namespace PointedCGHMaps
 
+/-- Reindex spacetime comparison maps along a further strictly increasing
+subsequence. -/
+def compSubseq
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq)
+    (φ : Nat -> Nat) (hφ : StrictMono φ) :
+    PointedCGHMaps (I := I) X P (subseq ∘ φ) where
+  partialDiffeomorph k := Φ.partialDiffeomorph (φ k)
+  source_exhausts := by
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    exact Φ.source_exhausts.comp_subseq hφ
+  base_mem k := Φ.base_mem (φ k)
+  basepoint_map k := Φ.basepoint_map (φ k)
+
 def source
     {X : PointedFlowSeq (I := I)}
     {P : PointedRiemannianManifold (I := I)}
@@ -579,6 +608,36 @@ def map
   letI : ChartedSpace H (X.term (subseq k)).M :=
     (X.term (subseq k)).charted
   exact fun x => (Φ.partialDiffeomorph k) x
+
+/-- Reindexing comparison maps only reindexes their source sets. -/
+@[simp] theorem compSubseq_source
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq)
+    (φ : Nat -> Nat) (hφ : StrictMono φ) (k : Nat) :
+    (Φ.compSubseq φ hφ).source k = Φ.source (φ k) :=
+  rfl
+
+/-- Reindexing comparison maps only reindexes their target sets. -/
+@[simp] theorem compSubseq_target
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq)
+    (φ : Nat -> Nat) (hφ : StrictMono φ) (k : Nat) :
+    (Φ.compSubseq φ hφ).target k = Φ.target (φ k) :=
+  rfl
+
+/-- Reindexing comparison maps only reindexes their underlying maps. -/
+@[simp] theorem compSubseq_map
+    {X : PointedFlowSeq (I := I)}
+    {P : PointedRiemannianManifold (I := I)}
+    {subseq : Nat -> Nat}
+    (Φ : PointedCGHMaps (I := I) X P subseq)
+    (φ : Nat -> Nat) (hφ : StrictMono φ) (k : Nat) :
+    (Φ.compSubseq φ hφ).map k = Φ.map (φ k) :=
+  rfl
 
 theorem source_open
     {X : PointedFlowSeq (I := I)}

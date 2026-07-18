@@ -1,5 +1,45 @@
 # ConvFieldEndgame.lean — concrete P4 upgrade-data producer
 
+## 2026-07-17: PDE/scalar compatibility refinement
+
+`flowLimit_of_reg` partially fills the book-facing endgame without changing
+`flowLimit_endgame`: it replaces the whole `IsSolutionOn` premise by the five
+regularity/curvature-continuity premises consumed by `isSolutionOn_of_reg`.
+Its `hpde` field is built internally from `ConvOut.gInf_pde`, using
+`endgameCo`, `hbound_of_equiv`, and `covTail_of_bounds`.  Its scalar pullback
+field is now built internally by `ConvOut.scalar_conv`, which combines
+`gSeqExt_scalar` with the checked `scalarConv_of_dnConv` estimate.  Thus the
+compatibility theorem no longer accepts an independent PDE or scalar-convergence
+premise.
+
+This remains deliberately a compatibility refinement, not the honest
+unconditional P4 endpoint.  It preserves
+`Set.Icc β ψ ⊆ D.regular` and `D.carrier ⊆ Set.Icc β ψ`; together with
+`D.regular ⊆ D.carrier`, these force the three sets to coincide and therefore do
+not represent the standard closed-carrier/open-regular interval geometry.
+One fixed-window `ConvOut` also does not produce the single subsequence and
+single global metric family demanded on every carrier subwindow.  No new time
+window or endpoint assumption was added; the next step is an honest global
+window diagonal and endpoint-extension architecture.
+
+Focused verification is green for the PDE, scalar, and compatibility
+producers.  `flowLimit_of_reg` is 100% as a compatibility theorem.
+Unconditional Theorem 3.10 remains 0%; dedicated P4 machinery is approximately
+85%, and whole-HCG machinery remains approximately 60%.
+
+The only dependent-type seam was the time-zero transport of the comparison
+maps.  Rewriting the transported `PointedCGHMaps.map` directly does not match
+under the beta-reduced pullback sequence.  The checked route proves its value
+equality locally by `HEq` transport (`eqRec_heq`) and then lets `simp only`
+rewrite under the sequence lambda; no public compatibility wrapper was added.
+
+The final exact target refresh was attempted after the focused-green check but
+stopped in the separately claimed
+`Geometry/Connection/ChartBridge/Gradient.lean`, which was transiently
+syntactically incomplete during its owner's active refresh.  This is a shared
+verification/cache blocker, not an endgame proof error; rerun the exact target
+refresh after that owner publishes the repaired `.olean`.
+
 The live canonical output is concrete `FlowUpgradeData`, produced by
 `flowUpgrade_of_maps` / `flowUpgrade_of_mc` and consumed by the conditional
 Theorem 3.10 wrappers.  The older conclusion-valued theorems remain
@@ -462,3 +502,13 @@ commit after `PointedConvergence` converts+`build +…PointedConvergence` green,
 file-by-file — so it proceeds incrementally without the all-or-nothing shared-tree risk. The rename
 is scripted (minutes); the threading is the 11 sites above; the endgame core `flowLimit_of_co` is
 verified and consumes the result unchanged.
+
+## 2026-07-17 pointwise scalar producer migration
+
+The public closed-window statement `ConvOut.scalar_conv` is preserved and now
+acts only as a compatibility corollary of `ConvOut.scalar_conv_at`.  Its sole
+live caller in this file is unchanged.  Focused verification passes, and the
+exact module refresh passes; no downstream migration was required.  The newer
+open-interval route consumes the pointwise producer through
+`OpenConvOut.scalar_conv` instead of imposing one closed window on the whole
+carrier.

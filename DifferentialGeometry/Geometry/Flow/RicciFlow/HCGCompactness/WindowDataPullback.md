@@ -1,5 +1,15 @@
 # WindowDataPullback.lean — pullback transport of the `SolWindowData` analytic sub-records
 
+## Maintenance repair (2026-07-17)
+
+`solnEvolField_pullback` now normalizes scalar multiplication at the `(0,2)` tensor-fiber layer
+with the canonical fully qualified `Tensor0SBundle.Tensor0SSpace.smul_apply` lemma before applying
+`solnRicField_pullback`. This is a proof-normalization repair only: no theorem statement or public
+API changed, and focused verification passed. The theorem and its dedicated pullback machinery
+remain 100% complete. Project estimates are unchanged: Chapter 4 machinery is about 90%, whole-HCG
+machinery about 60%, while the conditional compactness endpoint and unconditional endpoints remain
+theorem-level 0%.
+
 End-goal context: `winGInfOfData` (MetricPreconvWindowSolutions.lean) consumes a `SolWindowData`,
 which bundles a `SolutionOn` sequence + `IsSolutionOn` (built by `isSolutionOn_pullback`, P1.4) + 5
 analytic sub-records.  For the HCG g_∞ assembly (MSM135 Ch4 Thm 3.10 ⇐ 3.9) the flows are recentered

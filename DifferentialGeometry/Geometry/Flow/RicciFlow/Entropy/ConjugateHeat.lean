@@ -55,6 +55,70 @@ def reverseFamily
     (reverseFamily G T).metric s = G.metric (T - s) := by
   rfl
 
+/-- Translate a reversed heat-potential solution by a positive-time offset.
+
+The new reverse time `r` reads the old solution at `r - a`; simultaneously
+moving the terminal anchor from `T` to `T + a` leaves the underlying original
+metric time unchanged. -/
+theorem heat_pot_add
+    (D : DifferentialGeometry.Integral.Connection.RealTimeInterval)
+    (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily
+      (I := I) (M := M) Real)
+    (V u : Real → M → Real) (T a : Real)
+    (h : DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn D
+      (reverseFamily G T) V u) :
+    DifferentialGeometry.Analysis.Parabolic.IsHeatPotOn
+      (D.timeShift (-a)) (reverseFamily G (T + a))
+      (fun r x => V (r - a) x) (fun r x => u (r - a) x) := by
+  refine
+    { jointSmooth := ?_
+      jointCont := ?_
+      sliceSmooth := ?_
+      equation := ?_ }
+  · have hmap :
+        ContMDiff ((modelWithCornersSelf Real Real).prod I)
+          ((modelWithCornersSelf Real Real).prod I) ∞
+          (fun p : Real × M => (p.1 - a, p.2)) :=
+      (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
+    have hmaps :
+        Set.MapsTo (fun p : Real × M => (p.1 - a, p.2))
+          ((D.timeShift (-a)).regular ×ˢ (Set.univ : Set M))
+          (D.regular ×ˢ (Set.univ : Set M)) := by
+      intro p hp
+      exact ⟨by simpa [sub_eq_add_neg] using hp.1, hp.2⟩
+    simpa only [Function.comp_apply] using
+      h.jointSmooth.comp hmap.contMDiffOn hmaps
+  · have hmap : Continuous (fun p : Real × M => (p.1 - a, p.2)) :=
+      (continuous_fst.sub continuous_const).prodMk continuous_snd
+    have hmaps :
+        Set.MapsTo (fun p : Real × M => (p.1 - a, p.2))
+          ((D.timeShift (-a)).carrier ×ˢ (Set.univ : Set M))
+          (D.carrier ×ˢ (Set.univ : Set M)) := by
+      intro p hp
+      exact ⟨by simpa [sub_eq_add_neg] using hp.1, hp.2⟩
+    simpa only [Function.comp_apply] using
+      h.jointCont.comp hmap.continuousOn hmaps
+  · intro r hr
+    exact h.sliceSmooth (r - a) (by simpa [sub_eq_add_neg] using hr)
+  · intro r hr x
+    have hr' : r - a ∈ D.regular := by
+      simpa [sub_eq_add_neg] using hr
+    have heq := h.equation (r - a) hr' x
+    have hshift : HasDerivAt (fun s : Real => s - a) 1 r := by
+      simpa using (hasDerivAt_id (x := r)).sub_const a
+    have hcomp := heq.comp r hshift
+    have htime : T - (r - a) = T + a - r := by ring
+    have hcomp' :
+        HasDerivAt (fun s : Real => u (s - a) x)
+          (DifferentialGeometry.Integral.Connection.laplacianAt
+              (I := I) (reverseFamily G T) (r - a) (u (r - a)) x +
+            V (r - a) x * u (r - a) x) r := by
+      simpa only [Function.comp_apply, mul_one] using hcomp
+    convert hcomp' using 1
+    all_goals
+      simp only [reverseFamily,
+        DifferentialGeometry.Integral.Connection.laplacianAt, htime]
+
 /-- Read a spacetime scalar field backwards from terminal time `T`. -/
 def reverseHeat (T : Real) (u : Real → M → Real) : Real → M → Real :=
   fun s x => u (T - s) x

@@ -9,7 +9,7 @@ set_option linter.style.longLine false
 set_option linter.unusedSectionVars false
 
 /-!
-# MSM135 Theorem 3.9 — the conditional endpoint (`MetricCompactnessInputs`)
+# MSM135 Theorem 3.9 — inputs for the conditional endpoint
 
 **Endpoint ruling (2026-07-05, user).**  The unconditional `metricCompactness`
 (`HCGCompactness/MetricCompactness.lean`) cannot be discharged by the Chapter 4
@@ -21,6 +21,11 @@ with the externally cited theorems bundled as an explicit input structure.  The
 unconditional `metricCompactness` keeps its single `sorry`, now documented as
 `= MetricCompactnessInputs.metricCompactness + the cited external theorems`.
 
+This module owns only the input and producer-side interfaces.  The final
+conditional endpoint is assembled in `C4/MetricCompactnessEndpoint.lean`, above
+the concrete B1 producer and the checked Step-D consumer, so that this
+foundational layer does not participate in an import cycle.
+
 ## The bundle, field by field (mathematical audit 2026-07-05)
 
 Sequence-level external inputs, each TRUE under the Theorem 3.9 hypotheses
@@ -29,9 +34,10 @@ Sequence-level external inputs, each TRUE under the Theorem 3.9 hypotheses
 * `decay` — Cheeger–Gromov–Taylor injectivity-radius decay (`lbl384`):
   `inj(x) ≥ a·min{ρ,1}^n·e^{−C·d(x,O)}`, constants `a(n,C₀), C(n,C₀)`.  The Lean
   field matches the book form exactly.
-* `pack` — Bishop–Gromov total packing count `A(r)` (`lbl387`): per-radius, no
-  uniformity trap.  `MetricCompactBase` supplies this after each positive `D`;
-  `MetricCompactnessInputs` stores only the family selected at the final `D`.
+* `packAll` / `pack` — Bishop–Gromov total packing count `A(r)` (`lbl387`):
+  available after every positive divisor is chosen, together with the instance
+  selected at the final `D`.  Retaining the family lets the endpoint recover
+  the `D`-independent producer bundle without changing fixed-`D` consumers.
 * `volume` — Bishop-Gromov intersection multiplicity, capped at containing
   scale `m * r ≤ r0` (the joint cap is mathematically necessary; see the
   structure docstring), with `stepA_cap_le` recording the producer's choice
@@ -737,6 +743,8 @@ structure MetricCompactnessInputs
     (X : PointedRiemannianSeq.{u, uE, uH} (I := I)) where
   /-- A0 (`lbl384`): Cheeger–Gromov–Taylor injectivity-radius decay. -/
   decay : InjRadiusDecayInput (I := I) X
+  /-- `lbl387`, uniformly available after every positive divisor is chosen. -/
+  packAll : ∀ D : Real, 0 < D → decay.PackingBound D
   /-- The good-covering scale divisor (`λ = μ/D`); the assembly chooses it
   large against the relative normal-coordinate radius profile. -/
   D : Real
@@ -762,6 +770,20 @@ structure MetricCompactnessInputs
 
 namespace MetricCompactnessInputs
 
+/-- Recover the divisor-independent geometric producer bundle from a
+conditional compactness input. -/
+def toBase
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (inp : MetricCompactnessInputs (I := I) X) :
+    MetricCompactBase (I := I) X where
+  decay := inp.decay
+  pack := inp.packAll
+  volume := inp.volume
+  dist_eq := inp.dist_eq
+  realizes := inp.realizes
+  normalBounds := inp.normalBounds
+  normalRadius := inp.normalRadius
+
 /-- Instantiate the fixed-divisor consumer bundle from the `D`-independent
 producer data once the scalar cap has been verified. -/
 def ofBase
@@ -772,6 +794,7 @@ def ofBase
         b.decay.lambda D 0 ≤ b.volume.r0) :
     MetricCompactnessInputs (I := I) X where
   decay := b.decay
+  packAll := b.pack
   D := D
   hD := hD
   pack := b.pack D hD
@@ -865,8 +888,8 @@ more precise uniform local-volume data checked by `UniformBallPack.toVCInput`. -
 def ofUniformVolume
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (decay : InjRadiusDecayInput (I := I) X)
+    (packAll : ∀ D : Real, 0 < D → decay.PackingBound D)
     (D : Real) (hD : 0 < D)
-    (pack : decay.PackingBound D)
     (vol : UniformBallPack (I := I) X)
     (dist_eq : vol.dist = decay.dist)
     (stepA_cap_le :
@@ -877,9 +900,10 @@ def ofUniformVolume
     (normalRadius : NormalRadiusProfile decay normalBounds) :
     MetricCompactnessInputs (I := I) X where
   decay := decay
+  packAll := packAll
   D := D
   hD := hD
-  pack := pack
+  pack := packAll D hD
   volume := vol.toVCInput
   dist_eq := by
     change vol.dist = decay.dist
@@ -898,6 +922,7 @@ def subseq
     (inp : MetricCompactnessInputs (I := I) X) (f : Nat -> Nat) :
     MetricCompactnessInputs (I := I) (X.subseq f) where
   decay := inp.decay.subseq f
+  packAll := fun D hD => (inp.packAll D hD).subseq f
   D := inp.D
   hD := inp.hD
   pack := inp.pack.subseq f
@@ -1125,28 +1150,10 @@ theorem stepA_net_subseq
     (fun k => by
       simpa [PointedRiemannianSeq.subseq] using hconn (f k))
 
-/-- **MSM135 Theorem 3.9, conditional form — the Chapter 4 working target.**
-Compactness for complete pointed Riemannian manifolds with uniformly bounded
-geometry and a basepoint injectivity-radius lower bound, given the bundled
-book-external inputs.  The `sorry` is the Steps A→D assembly (good coverings →
-local metrics/transition maps → center-of-mass averaging → direct limit); no
-external mathematics hides in it beyond the bundle.
-
-Connectedness is required by the Hopf–Rinow proper-realization step
-(`properMetricOn`): on a disconnected member the Riemannian emetric is `⊤`
-across components and no realizing proper distance exists.  (The book's
-manifolds are connected by convention.) -/
-def metricCompactness
-    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
-    (_inp : MetricCompactnessInputs (I := I) X)
-    (_hcomplete : SeqMetricComplete (I := I) X)
-    (_hgeom : SeqBoundedGeometry (I := I) X)
-    (_hinj : BaseInjBound (I := I) X)
-    (_hconn : forall k : Nat,
-      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
-      ConnectedSpace (X.obj k).M) :
-    MetricCompactnessConclusion (I := I) X := by
-  sorry
+/- The conditional Theorem 3.9 endpoint is assembled in
+`C4/MetricCompactnessEndpoint.lean`. Keeping the endpoint above this input
+layer would create an import cycle through the concrete B1 and Step-D
+producers. -/
 
 end MetricCompactnessInputs
 

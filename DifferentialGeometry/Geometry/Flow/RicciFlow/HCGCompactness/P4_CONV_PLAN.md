@@ -33,6 +33,75 @@ the flows with metrics `Φ_k^* g_k(t)` near any compact of `M_∞ = mc.limit.M`;
 subsequence converging C^∞-window-uniformly to a limit family `g_∞(t)`; `g_∞` is the metric
 of the limit flow `L`; Ricci-continuity closes "limit is a solution".
 
+## Current status (2026-07-17)
+
+The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
+provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
+passes the genuine source-flow equation through the bump extension and then
+through the Arzelà–Ascoli limit.  The scalar path is likewise concrete:
+`gSeqExt_scalar` proves bump-local scalar-curvature equality and
+`ConvOut.scalar_conv` combines that locality with `scalarConv_of_dnConv` to
+produce the required pullback scalar convergence.  `flowLimit_of_reg` consumes
+both the PDE and scalar producers internally.
+
+The architecture-independent local-window selector is also checked:
+`RealTimeInterval.exists_Icc_regular` places every `t ∈ X.D.regular` in the
+interior of some closed `Icc a b ⊆ X.D.regular`.  This is exactly the local
+topological input for upgrading a windowwise `HasDerivWithinAt` result to
+`HasDerivAt`.  It does not construct a common `ConvOut`, a master subsequence,
+or any convergence at nonregular carrier endpoints.
+
+The book-facing target is now stated explicitly as `compactnessSol` in
+`HamiltonCompactness.lean`, with
+`X.D = RealTimeInterval.openInterval α b 0 h0`.  The canonical nested windows
+`RealTimeInterval.openWindow α b 0 n` and their checked containment, nesting,
+initial-time, point-cover, and union-exhaustion lemmas are available in
+`TimeInterval.lean`.  Thus MSM135 Theorem 3.10 needs no new time-domain
+predicate and no endpoint extension.
+
+`flowLimit_of_reg` is nevertheless only a compatibility theorem.  Its retained
+assumptions `Set.Icc β ψ ⊆ X.D.regular` and
+`X.D.carrier ⊆ Set.Icc β ψ`, together with
+`X.D.regular ⊆ X.D.carrier`, force all three sets to coincide.  This does not
+model an open interval by itself.  The fixed-window mismatch is now closed at
+the raw-producer layer.  `ConvFieldOpen.lean` fixes one bump family, reruns
+`convOut` after every prescribed refinement, extracts one master subsequence,
+and glues the windowwise limits by compact-open uniqueness.
+`OpenConvOut.conv_Icc` reads the result on every compact subinterval of the
+open domain.  The remaining producer work is to discharge the four raw
+hypotheses on all canonical windows from the theorem-level sequence-flow data,
+followed by the independent joint spacetime regularity bridge.
+`OpenConvOut.smoothMetric` is now focused-green: once joint chart-Gram `C∞`
+is available on every canonical window, it localizes that data and constructs
+the four `MetricFamilySmoothOn` fields on the ambient open interval, without a
+new exhaustion predicate or endpoint assumption.  Thus the gluing/assembly
+half of joint regularity is closed; the fixed-window chart-Gram producer is the
+remaining analytic frontier. That producer is now stated explicitly as
+`ConvOut.gramSmooth` in `FlowLimitRegularity.lean`, with one visible `sorry`;
+`OpenConvOut.smoothMetric_of_conv` is its checked theorem-shaped open-interval
+consumer, but still depends on that visible frontier. The new open-interval PDE,
+scalar, and regularity readouts are focused-green; the fixed-window scalar
+compatibility wrapper and its upstream modules have also been refreshed. These
+readouts are not yet wired into an open endgame producing
+`PointedFlowData`, `SmoothCGHConverges`, and the `compactnessSol` conclusion.
+The strengthened book-facing conclusion also requires a checked producer of
+completeness of every limit time slice; time-zero completeness has been
+extracted, but the bounded-curvature propagation/limit passage is still open.
+
+The downstream audit rules out globally replacing `carrier` by `regular` in
+the canonical convergence API.  `SourceSpacetimeConvergenceData.toSpatial`
+currently derives carrier-time spatial convergence from singleton windows, and
+the Hamilton adapter uses `scalar_converges` at `t = 0`, which is a carrier but
+not regular time in its backward closed window.  Therefore the existing
+carrier-capable API remains as a stronger Hamilton compatibility interface.
+The book theorem is the separate open-interval specialization, where carrier
+and regular are definitionally the same.  Hamilton endpoint extension is a
+different later producer and is not part of the MSM135 3.10 denominator.
+
+Accounting: unconditional Theorem 3.10 remains theorem-level 0%.
+The dedicated P4 machinery is approximately 88%, and whole-HCG machinery
+remains approximately 60%.
+
 ## Inventory — DONE, verified, reuse (do not rebuild)
 
 - **AA engine (fixed M, total metrics)**: `windowGInf` (`MetricPreconvWindowGInf.lean:520`,
@@ -322,7 +391,12 @@ reuse).  Statements are for GENERAL `Φ` (5b-compliant; instantiate
 *(bounded; the delicate spot is quantifier/threshold bookkeeping)*
 
 ### Brick 6 — the `L` term: limit flow + the PDE (parallel-izable after Brick 5's gInf)
-**Status: OPEN — `equation` bridge LANDED (2026-07-02, verified); L-term/regularity/scalar wiring remain.**
+**Status: PARTIALLY CLOSED (2026-07-17).**  The local bump equation
+(`gSeqExt_ricci`, `gSeqExt_pde`), the limit equation (`ConvOut.gInf_pde`), and
+the scalar pullback producer (`gSeqExt_scalar`, `ConvOut.scalar_conv`) are
+checked.  `flowLimit_of_reg` assembles these internally but is compatibility-only
+because its fixed-window hypotheses collapse carrier, regular set, and window.
+Joint regularity and the honest all-window/endpoint architecture remain open.
 - `L : PointedFlowData X.D` with manifold data copied from `mc.limit` (defeq-preserving, so
   `hL0 : L.atTime 0 = mc.limit` reduces to the Brick-5 metric identification), `S.family.metric
   := gInf`, and base curvature data (`rm04`/`ricciAt` fields of `SolutionFamily`) := the
@@ -403,28 +477,16 @@ reuse).  Statements are for GENERAL `Φ` (5b-compliant; instantiate
   endpoint `metricTensorContLim` (`Tensor0SFamilyContinuousOnSet` for `gInf` on the window
   = the `metricTensor_cont` field; `coeff_cont` follows by evaluation).  Remaining for
   hsmooth = the C^∞ half: (a)+(b)+(c)+(d) above.
-- `scalar : ScalarPullbackTendsto` (`PointedConvergence.lean:1734`): **scalar analytic pair
-  CODE-LANDED (2026-07-03)** — `scalarSub_le_dNorm` + `scalarConv_of_dnConv` implemented in
-  `RicciFromJets.lean` (§ScalarEndpoints) per the FlowLimitBuild.md recipe, with private
-  `invGram_sub_le` (Mathlib `Matrix.inv_sub_inv` + `gram0_le`) and `ricci_abs_le`
-  (gRef-anchor via `derivNorm_le_cov_add`); the flagged OnE↔Matrix bridge resolved as an
-  inline `chartInvGramOnE_def` + `extChartAt_to_inv` rewrite (an existing copy,
-  `chartInvGramOnE_extChartAt_self`, lives in the parabolic branch — not imported).
-  Upstream `omit [CompactSpace M]` fix on `metricScalar_chartTrace_eq` LANDED + module
-  rebuilt GREEN (it carried gratuitous compactness from its variable block).
-  **Verification: PENDING** — the `+…RicciFromJets` targeted build is blocked by a parallel
-  session's in-flight broken `ProductMFoldNorm.lean` (theirs, claimed; olean absent, so the
-  whole `MetricPreconv → RicBound` chain cannot load); rerun the targeted build + the
-  `#print axioms` read once that file is green.  Route + audit in `RicciFromJets.md`.
-  **✅ API DEFECT FIX EXECUTED (2026-07-03; ruling 2026-07-02):**
-  `FunctionPullbackTendsto`/`ScalarPullbackTendsto` weakened to `∀ t ∈ X.D.carrier`
-  (`PointedConvergence.lean:1689/1729` region; book Thm lbl335 concludes convergence on
-  `(α,ω)` only).  Consumer audit as predicted: all uses store/pass except
-  `le_of_bound0` (conclusion weakened to carrier times, consumed nowhere) and
-  `baseScalarConv_of_smoothCGH` (`HamiltonPositiveRicciAdapter.lean` — applies at `t = 0`;
-  gained `(h0 : 0 ∈ X.D.carrier)`, discharged at `toHam3Exists` from `hwindow`).
-  `PointedConvergence.lean` itself rebuilt GREEN; the two importer builds
-  (`FlowLimitUpgrade`, `HamiltonPositiveRicciAdapter`) share the ProductMFoldNorm block.
+- `scalar : ScalarPullbackTendsto`: ✅ **CONCRETE PRODUCER CHECKED
+  (2026-07-17).**  `RicciFromJets.lean` supplies the analytic estimate
+  `scalarConv_of_dnConv`; `ConvFieldPDE.gSeqExt_scalar` identifies the scalar
+  curvature of the bump extension with the genuine pulled-back source metric on
+  the grow region; `ConvOut.scalar_conv` combines these with `co.convPt` and
+  exhaustion to obtain scalar pullback convergence for
+  `Φ.compSubseq co.φ co.hφ`.  `flowLimit_of_reg` now constructs this field
+  internally rather than accepting a scalar-convergence premise.  This closes
+  the scalar producer only; it does not repair the fixed-window/global-carrier
+  mismatch.
 - `hσsrc`/`hσtgt`: ✅ **DONE (2026-07-01, verified)** — `Geometry.isSigmaCompact_of_isOpen`
   (`Geometry/Topology/SigmaCompactOpen.lean`, build green, axiom-clean, no T2 needed; both
   consumer shapes `Φ.source_open`/`Φ.target_open` under the letI instances checked to compose;
@@ -597,7 +659,17 @@ the stated one); same-name `.md` updated with route + gotchas; this plan's Statu
 
 ## Honest denominator
 
-This phase (Bricks 1–7) completes 3.10 ⇐ 3.9 **modulo the cited inputs**. Still open beyond
-it: Theorem 3.9 itself (Ch4 Steps B/C/D — in progress in parallel sessions), the Shi/BBS
-citation (`MovingShiBoundOn` producer), and P5 (Hamilton endpoint wiring). Whole HCG project
-≈ 25–30% after this phase's completion.
+The unconditional Theorem 3.10 endpoint remains 0%: `compactnessSol` is now
+stated with one explicit P4 `sorry`, but is not proved.  The fixed-window PDE and
+scalar producers and the compatibility endgame are checked, so the dedicated
+P4 machinery is conservatively about 88%.  The common subsequence and compatible
+limit family are now checked from the existing raw fixed-window hypotheses.
+The remaining genuine work is to produce those hypotheses uniformly on every
+canonical window, prove fixed-window joint chart-Gram `C∞`, wire the resulting
+open PDE/scalar/regularity data into the final flow and convergence objects, and
+produce completeness of every limit time slice. The checked
+`OpenConvOut.smoothMetric` handles only the regularity packaging step. Hamilton's
+nonregular endpoint extension is tracked separately and is
+not needed to prove the book theorem.  Whole-HCG machinery remains about 60%.
+The completed selected Step B/C producer and conditional Theorem 3.9 accounting
+are unchanged.

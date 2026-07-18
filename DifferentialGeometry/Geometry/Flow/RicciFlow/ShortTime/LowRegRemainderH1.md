@@ -4,52 +4,62 @@
 
 - `rem_h0_lip` subtracts the fixed background connection Laplacian from the
   Ricci--DeTurck RHS difference and proves a uniform spectral `H2 -> H0` bound.
-- The proof combines `rhs_h0_lip` with the exact two-derivative spectral bound
-  for `rawTensorConnLapSmooth`; it adds no analytic assumptions.
-- Focused verification passes without local warnings or sorries.
+- Its focused verification passes without local warnings or sorries.
 
-## Remaining frontier
+## Mixed estimate assembly
 
-The required mixed remainder theorem is still unstated and unproved. Its
-first-derivative part must exploit exact principal cancellation. A direct use
-of `rhs_h1_lip` loses one derivative because it separately estimates the fixed
-background Laplacian.
+Route A is now the canonical route. `RHSPathIntegral.rhsArm_sub_eq_paths`
+provides the exact full Ricci+DeTurck three-arm identity, while
+`LowRegPathSplit.top_path_ball_h1` gives the small top arm and
+`LowRegPathLower.lower_coeff_h1` controls the lower two arms.
 
-The intended low-regularity split is:
+`rem_h1_of_bounds` has been written as the final Sobolev assembly theorem. It
+assumes only the natural concrete bounds on `rhsLow0PathIntegral` and
+`rhsLow1PathIntegral`: pointwise plus one covariant derivative for the
+zero-order coefficient, and pointwise plus the covariant jet through order two
+for the one-order coefficient. Its conclusion is
 
-1. the third derivative of the metric difference multiplied by the small
-   principal-cometric deviation, controlled by the H2 radius and
-   `principal_path_h2` / `principal_arm_h2`;
-2. terms containing at most two derivatives of the metric difference, with
-   coefficients uniformly controlled by `IsLowRegCoeff`.
+`Ctop * R * ||T-T'||_H3 + (Clow + Ccoef * (B0+B0'+B1)) * ||T-T'||_H2`.
 
-The top branch is no longer a frontier: `LowRegPathSplit.phi_dev_h2`,
-`top_path_dev_h2`, and `top_path_ball_h1` pass focused verification and give
-the required three-dimensional small-coefficient estimate. The remaining
-frontier is the exact full Ricci--DeTurck principal cancellation together with
-uniform bounds for the order-zero/order-one branch. The corresponding concrete
-path integrals and identity exist in the high-order development, but are
-private inside a source file far above the 3000-line maintenance limit. They
-cannot be made into a new public facade in that file.
+Thus the only coefficient multiplying the `H3` difference is the small
+spectral `H2` ball radius. No high Sobolev order or high-`a` hypothesis appears.
 
-The unresolved architecture choice is between two honest routes: extract the
-existing exact path construction into a small module, or integrate the public
-`MetricFamilyChartLinearization` identity and package its genuinely
-first-order remainder in `RHSSectionCovGradL2Decomposition`. A coarse use of
-`rhs_h1_lip` is not a substitute because it retains a nonsmall `H3` coefficient.
-A read-only consult did not return a ruling, so this is the current consult
-boundary rather than a local proof obligation.
+The theorem source is not yet counted as complete: its focused check is
+waiting on the active named upstream refresh for the new path/cancellation
+import chain. Until that check passes, `rem_h1_of_bounds` remains theorem-level
+0% despite the complete proof term in the source.
 
-The existing high-order three-arm estimate does not close this result because
-its coefficient bounds assume `a >= 2 * dim + 10`. Only its exact algebraic
-decomposition is potentially reusable at low regularity.
+## Remaining producer
+
+The single analytic frontier is to derive the four concrete lower-path bounds
+uniformly from the low-regularity metric data. Using the existing generic
+path-integral transfer API, it is enough to prove along `realizedFam`:
+
+1. a uniform pointwise and order-one covariant `L2` bound for `rhsLow0Coeff`;
+2. a uniform pointwise and order-two covariant `L2` jet bound for
+   `rhsLow1Coeff`.
+
+The existing public coefficient estimates with
+`a >= 2 * dim + 10` cannot close this frontier. The low-regularity producer
+must instead use the dimension-three `C3`/`LowRegCoeff` Gram and ellipticity
+bounds, inherited along the convex realized metric segment. Once those family
+bounds exist, `riemannianFiberNormSq_pathIntegralCoeffField_le_sq` and
+`path_jetL2_le` transfer them to exactly the hypotheses of
+`rem_h1_of_bounds`.
+
+A later routine adapter must identify a metric deviation
+`metricDifferenceCcTensor gBase g` with its realized metric and discharge
+symmetry/fibre-smallness from the local `H2` ball. This is not the analytic
+frontier and should not be mixed into the coefficient proof.
 
 ## Honest accounting
 
 - `rem_h0_lip`: theorem 100%.
-- Mixed `H3 -> H1` remainder theorem: not yet stated/proved, 0%; dedicated
-  machinery is approximately 70%.
-- Uniform low-regularity Ricci--DeTurck existence theorem: not yet
-  stated/proved, 0%.
-- Whole HCG compactness machinery remains approximately 57%; endpoint
-  compactness theorems remain 0% until stated and proved.
+- `rem_h1_of_bounds`: source proof written, theorem 0% until focused
+  verification; dedicated assembly machinery approximately 98%.
+- Unconditional mixed `H3 -> H1` estimate from `IsLowRegCoeff`: theorem not
+  stated/proved, 0%; dedicated machinery approximately 84%.
+- Uniform low-regularity Ricci--DeTurck existence theorem: not stated/proved,
+  0%; dedicated machinery approximately 45%.
+- Whole HCG machinery remains approximately 60%; endpoint compactness
+  theorems remain 0% until stated and proved.

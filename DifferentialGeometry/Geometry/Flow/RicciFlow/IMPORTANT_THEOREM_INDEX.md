@@ -149,10 +149,10 @@ If working on Hamilton long-time existence, the real missing theorem is
 | Abstract product norm bound P(m) | `compL2_iterCovComp_contrTail_le` | `HCGCompactness/AkMFold.lean` | proved |
 | ISO residual bound | `compL2_isoResidual_le` | `HCGCompactness/AkMFold.lean` | proved |
 | Abstract Claim 1 | `claim1_abstract` | `HCGCompactness/AkMFold.lean` | proved abstract theorem |
-| Conditional MSM135 3.9 metric compactness endpoint | `MetricCompactnessInputs.metricCompactness` | `HCGCompactness/C4/MetricCompactnessInputs.lean` | frontier/sorry |
+| Conditional MSM135 3.9 metric compactness endpoint | `MetricCompactnessInputs.metricCompactness` | `HCGCompactness/C4/MetricCompactnessEndpoint.lean` | checked: concrete B1 producer, Step-D assembly, and nested-subsequence lift |
 | Unconditional MSM135 3.9 metric compactness endpoint | `metricCompactness` | `HCGCompactness/MetricCompactness.lean` | frontier/sorry |
 | Concrete 3.9-to-3.10 consumer | `solutionComp_of_mc` | `HCGCompactness/SolutionCompactness.lean` | checked consumer of explicit `FlowUpgradeData` |
-| Canonical conditional MSM135 3.10 wrapper | `solutionComp_cond` | `HCGCompactness/C4/SolutionCompactnessInputs.lean` | checked conditional consumer; upstream 3.9 frontier remains 0% |
+| Canonical conditional MSM135 3.10 wrapper | `solutionComp_cond` | `HCGCompactness/C4/SolutionCompactnessInputs.lean` | checked consumer of conditional 3.9; concrete P4 `FlowUpgradeData` production remains external |
 | Canonical public Hamilton compactness wrapper | `compactnessSol_cond` | `HCGCompactness/HamiltonCompactness.lean` | checked conditional consumer |
 | Adapter into Hamilton 3D CGH output | `cghToHam3`, `toHam3Exists` | `HCGCompactness/HamiltonPositiveRicciAdapter.lean` | checked map-retaining adapter |
 | Bonnet--Myers compactness of a pointed limit | `PointedRiemannianManifold.compact_of_ricci` | `HCGCompactness/PointedConvergenceGlobal.lean` | checked support |

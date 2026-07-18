@@ -777,8 +777,15 @@ theorem lipTail_of_src
         - Tensor0SBundle.metricTensorField (I := I)
             ((srcMetric (I := I) Φ hsrc htgt k t).restrictOpen (I := I) O) w) vs
     rw [ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.sub_apply]
-    simp only [Tensor0SBundle.metricTensorField_apply,
-      SmoothRiemannianMetric.restrictOpen_inner]
+    change
+      (gSeqExt (I := I) Φ R bf hsrc htgt k s).inner
+          (((w : SourceDomain (I := I) Φ k)) : P.M) (vs 0) (vs 1)
+        - (gSeqExt (I := I) Φ R bf hsrc htgt k t).inner
+          (((w : SourceDomain (I := I) Φ k)) : P.M) (vs 0) (vs 1)
+        = (srcMetric (I := I) Φ hsrc htgt k s).inner
+            (w : SourceDomain (I := I) Φ k) (vs 0) (vs 1)
+          - (srcMetric (I := I) Φ hsrc htgt k t).inner
+            (w : SourceDomain (I := I) Φ k) (vs 0) (vs 1)
     rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k s
         (((w : SourceDomain (I := I) Φ k)) : P.M) hwsrc (vs 0) (vs 1),
       gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t
@@ -1131,8 +1138,13 @@ theorem covTail_of_bounds
                   (refRes (I := I) Φ R hsrc k) w)) vs
         rw [ContinuousMultilinearMap.sub_apply, ContinuousMultilinearMap.smul_apply,
           ContinuousMultilinearMap.sub_apply]
-        simp only [Tensor0SBundle.metricTensorField_apply,
-          SmoothRiemannianMetric.restrictOpen_inner]
+        change
+          (gSeqExt (I := I) Φ R bf hsrc htgt k t).inner
+                ((w : SourceDomain (I := I) Φ k) : P.M) (vs 0) (vs 1)
+              - R.inner ((w : SourceDomain (I := I) Φ k) : P.M) (vs 0) (vs 1)
+            = chiRes (I := I) Φ bf k w •
+              ((srcMetric (I := I) Φ hsrc htgt k t).inner w (vs 0) (vs 1)
+                - (refRes (I := I) Φ R hsrc k).inner w (vs 0) (vs 1))
         rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t
           ((w : SourceDomain (I := I) Φ k) : P.M) w.2 (vs 0) (vs 1)]
         change bf.chi k (w : P.M)
@@ -1289,8 +1301,9 @@ theorem covTail_of_bounds
           = Tensor0SBundle.metricTensorField (I := I) (R.restrictOpen (I := I) U₀) := by
         refine DFunLike.ext _ _ (fun w => ?_)
         refine ContinuousMultilinearMap.ext (fun vs => ?_)
-        simp only [Tensor0SBundle.metricTensorField_apply,
-          SmoothRiemannianMetric.restrictOpen_inner]
+        change
+          (gSeqExt (I := I) Φ R bf hsrc htgt k t).inner (w : P.M) (vs 0) (vs 1)
+            = R.inner (w : P.M) (vs 0) (vs 1)
         rw [gSeqExt_inner_of_notMem (I := I) Φ R bf hsrc htgt k t (w : P.M) w.2
           (vs 0) (vs 1)]
       have hdiff0 : Tensor0SBundle.metricTensorField (I := I)

@@ -334,6 +334,7 @@ import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Defs
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.Integrability
 import DifferentialGeometry.Analysis.Integration.L2.SmoothSections.PreHilbert
 import DifferentialGeometry.Analysis.Integration.L2.Tensor0SInnerSectionSmooth
+import DifferentialGeometry.Analysis.Integration.LpNorm
 import DifferentialGeometry.Analysis.Integration.Measure.BorelManifold.Defs
 import DifferentialGeometry.Analysis.Integration.Measure.BorelManifold.Derived
 import DifferentialGeometry.Analysis.Integration.Measure.BorelManifold.StandardInstances
@@ -1353,6 +1354,7 @@ import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.Limit
 import DifferentialGeometry.Geometry.Flow.RicciFlow.MaximumPrinciple.TensorWeak.TensorBackedReaction
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ParabolicRescaling
+import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.FlowBallW
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Perelman.Noncollapsing
 import DifferentialGeometry.Geometry.Flow.RicciFlow.PrincipalSymbol
 import DifferentialGeometry.Geometry.Flow.RicciFlow.Pullback.Cartan.Cancellation

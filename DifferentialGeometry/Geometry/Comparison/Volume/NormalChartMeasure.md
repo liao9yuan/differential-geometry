@@ -103,6 +103,21 @@ direction-bound lower-density consumer imported this bridge.  No `sorry` or
 `exists_radialJacobi_zero_radius`, and targeted module verification passed for
 `Volume.NormalChartMeasure`.  No new blocker remains in this file.
 
+## 2026-07-17 radial scaling audit
+
+The radial-family linear-independence step does not require a separate
+no-conjugate-points theorem below the selected normal radius.  The intended
+bridge is the algebraic identity
+`radialJacobiField g p x w t = radialJacobiField g p (t • x) (t • w) 1`,
+followed by `radialJacobi_one`, `expDiffeo_mfderiv`, and the invertibility of the
+`expMapDiffeo` differential on its source.
+
+No Lean change from this audit was retained.  Verification was blocked by an
+active upstream object refresh chain: repeated targeted verification timed out
+without a Lean diagnostic, and the final focused check still lacked
+`NormalCoordinates.olean`.  The scaling identity is therefore a planned small
+bridge, not a proved theorem.
+
 ## 2026-07-07 V1a audit (historical, superseded)
 
 Historical status: this audit identified the missing Integration-layer API

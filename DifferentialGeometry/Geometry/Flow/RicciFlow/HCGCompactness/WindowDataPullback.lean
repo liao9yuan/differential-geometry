@@ -296,7 +296,8 @@ theorem solnEvolField_pullback
       = solnEvolField (I := I) S t (Φ y)
           (fun q : Fin 2 => mfderiv I I (Φ : M → N) y (slots q)) := by
   simp only [solnEvolField, ContMDiffSection.coe_smul, Pi.smul_apply,
-    ContinuousMultilinearMap.smul_apply, solnRicField_pullback (I := I) S Φ t y slots]
+    Tensor0SBundle.Tensor0SSpace.smul_apply,
+    solnRicField_pullback (I := I) S Φ t y slots]
 
 /-- **The time-derivative-swap producer data transports under pullback.**  `SolSwapData` is the one
 record that is not a spatial bound: it asserts a time/covariant-derivative commutation

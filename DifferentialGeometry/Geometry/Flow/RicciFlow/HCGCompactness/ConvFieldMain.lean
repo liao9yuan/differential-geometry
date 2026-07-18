@@ -214,17 +214,18 @@ theorem supOn_resSrc_eq (hsrc : SrcSigma Φ) (k : Nat)
 
 /-- **The Brick-5 output package** (ruling 5a: data, not bare existentials).
 One subsequence `φ`, one global limit family `gInf` on the limit manifold
-`P.M`, the sup-level window convergence `conv` of the bump-extended sequence
-`gSeqExt` along `φ` toward `gInf` for EVERY compact and EVERY order, and its
-pointwise companion `convPt` along the SAME subsequence (the form consumed by
-the Brick-6 regularity/PDE layer, e.g. `FlowLimitRegularity.lean`). -/
+`P.M`, the sup-level convergence `conv` of the bump-extended sequence `gSeqExt`
+along `φ` toward `gInf` on the fixed window `[β, ψ]` for every spatial compact
+and every order, and its pointwise companion `convPt` along the same subsequence
+(the form consumed by the Brick-6 regularity/PDE layer). -/
 structure ConvOut
     (R : letI : TopologicalSpace P.M := P.topology;
       letI : ChartedSpace H P.M := P.charted; letI : IsManifold I ∞ P.M := P.smooth;
       SmoothRiemannianMetric I P.M)
     (bf : BumpFamily (I := I) Φ) (hsrc : SrcSigma Φ) (htgt : TgtSigma Φ)
     (β ψ : Real) where
-  /-- The single subsequence serving all compacts, orders and windows. -/
+  /-- The single subsequence serving all spatial compacts and orders on the
+  fixed window `[β, ψ]`. -/
   φ : Nat -> Nat
   /-- Strict monotonicity of the subsequence. -/
   hφ : StrictMono φ
@@ -257,6 +258,38 @@ structure ConvOut
         forall t, t ∈ Set.Icc β ψ -> forall a : Nat, a <= p -> forall x, x ∈ K ->
           metricDerivNorm (I := I) a
             (gSeqExt (I := I) Φ R bf hsrc htgt (φ k) t) (gInf t) R x < ε
+
+namespace ConvOut
+
+/-- Reindex a fixed-window convergence output along a further strict
+subsequence, retaining its limit metric family and both convergence fields. -/
+noncomputable def comp_subseq
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real}
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
+    (η : Nat → Nat) (hη : StrictMono η) :
+    ConvOut (I := I) Φ R bf hsrc htgt β ψ where
+  φ := co.φ ∘ η
+  hφ := co.hφ.comp hη
+  gInf := co.gInf
+  conv := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.conv K hK p ε hε
+    refine ⟨k₀, fun k hk t ht => ?_⟩
+    simpa only [Function.comp_apply] using
+      hk₀ (η k) (hk.trans (hη.id_le k)) t ht
+  convPt := by
+    intro K hK p ε hε
+    obtain ⟨k₀, hk₀⟩ := co.convPt K hK p ε hε
+    refine ⟨k₀, fun k hk t ht a ha x hx => ?_⟩
+    simpa only [Function.comp_apply] using
+      hk₀ (η k) (hk.trans (hη.id_le k)) t ht a ha x hx
+
+end ConvOut
 
 /-- **Brick-5 Step 1+2: the Arzelà–Ascoli extraction, packaged.**  Applies
 `windowGInfAll` to the bump-extended sequence `gSeqExt` (Brick 4), with the
@@ -500,8 +533,14 @@ theorem ofRP_supOn_eq
     have hyW : ((y : SourceDomain (I := I) Φ k) : P.M) ∈ W := y.2
     have hysrc : ((y : SourceDomain (I := I) Φ k) : P.M) ∈ Φ.source k :=
       (y : SourceDomain (I := I) Φ k).2
-    simp only [metricTensorField_apply, SmoothRiemannianMetric.restrictOpen_inner,
-      resSrc_inner (I := I) Φ hsrc k]
+    change
+      ((srcMetric (I := I) Φ hsrc htgt k t).restrictOpen (I := I) O).inner y (v 0) (v 1) =
+        ((resSrc (I := I) Φ hsrc k
+          (gSeqExt (I := I) Φ R bf hsrc htgt k t)).restrictOpen (I := I) O).inner
+          y (v 0) (v 1)
+    rw [SmoothRiemannianMetric.restrictOpen_inner,
+      SmoothRiemannianMetric.restrictOpen_inner]
+    rw [resSrc_inner (I := I) Φ hsrc k]
     rw [gSeqExt_inner_of_mem (I := I) Φ R bf hsrc htgt k t
       ((y : SourceDomain (I := I) Φ k) : P.M) hysrc (v 0) (v 1)]
     rw [hW1 _ hyW]

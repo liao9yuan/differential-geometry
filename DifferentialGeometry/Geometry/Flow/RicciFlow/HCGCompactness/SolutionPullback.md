@@ -5,6 +5,24 @@ End goal context: this file builds `isSolutionOn_pullback` (the full 9-field
 (`hS : ∀ i, IsSolutionOn (S i)`) to feed `winGInfOfData` → the **conv field**
 (g_∞ assembly), the last gap of MSM135 Ch4 Thm 3.10 ⇐ 3.9 (HCG compactness).
 
+## 2026-07-17 — stale multilinear-application normal forms repaired
+
+The three continuity proofs had drifted after their `ext slots` goals began retaining
+`(ContinuousMultilinearMap.compContinuousLinearMap g f) slots` as a packaged tensor
+application. Rewriting with `compContinuousLinearMap_apply` no longer matched that coercion
+normal form, even though the canonical apply theorem remains a definitional equality.
+
+The repair is proof-local and API-neutral: `ricciCont_pullback` and `rm04Cont_pullback` now use
+their evaluated pullback theorems directly, while `metricTensor_cont` rewrites the exposed
+right-hand metric tensor once and closes the packaged left-hand application by definitional
+equality. No statement, producer, endpoint, or mathematical assumption changed.
+
+Focused verification and the exact named module refresh both passed. Existing unrelated
+lint warnings remain. `isSolutionOn_pullback` stays complete (theorem 100%, 9/9 fields); this
+maintenance repair is 100%. It does not move the HCG endpoint accounting: whole-HCG machinery
+remains approximately 60%, while the conditional and unconditional compactness endpoints remain
+theorem-level 0% as recorded in `PROJECT_MAP.md`.
+
 ## 2026-06-30 — DONE. `isSolutionOn_pullback` COMPLETE (9/9 fields), build green sorry-free (3877 jobs)
 
 `ricciNormGrad` closed; the whole file's end goal `isSolutionOn_pullback` is assembled and

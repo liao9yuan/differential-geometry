@@ -1376,13 +1376,12 @@ This is the single honest compactness frontier for the HCG interface.
 
 **Endpoint ruling (2026-07-05):** this unconditional form is NOT the Chapter 4
 working target.  Its `sorry` decomposes as
-`C4.MetricCompactnessInputs.metricCompactness` (the conditional Theorem 3.9,
-whose `sorry` is the honest Steps A→D assembly) **plus** the book-external
-theorems bundled there (Cheeger–Gromov–Taylor `lbl384`, Bishop–Gromov,
-[H6] Cor 4.12 `lbl395`, `lbl418`) and per-member connectedness.  It stays
-`sorry` until those citations are proved natively (needs a Riemannian
-volume/comparison layer that does not exist in-tree); do not report Theorem 3.9
-progress against this declaration.  See `C4/MetricCompactnessInputs.lean` and
+`C4.MetricCompactnessInputs.metricCompactness` (the now-checked conditional
+Theorem 3.9) **plus** native producers for the book-external theorems bundled
+there (Cheeger–Gromov–Taylor `lbl384`, Bishop–Gromov, and the localized [H6]
+normal-coordinate inputs) and per-member connectedness.  It stays `sorry`
+until those citations are proved natively; the Steps A→D assembly is no longer
+part of this frontier.  See `C4/MetricCompactnessEndpoint.lean` and
 `HCGCompactness/PROJECT_MAP.md`. -/
 def metricCompactness
     [I.Boundaryless]
@@ -1391,10 +1390,9 @@ def metricCompactness
     (_hgeom : SeqBoundedGeometry (I := I) X)
     (_hinj : BaseInjBound (I := I) X) :
     MetricCompactnessConclusion (I := I) X := by
-  -- Chapter 4 deep geometric inputs are isolated in
-  -- `DifferentialGeometry.HCGCompactness.GeometricInputs`.
-  -- Real frontier: Cheeger--Gromov compactness, direct limits, and smooth
-  -- Arzela--Ascoli on the pulled-back metrics.
+  -- The conditional direct-limit assembly is checked.  The remaining
+  -- frontier is to produce its external comparison inputs (and the required
+  -- connectedness) from these unconditional hypotheses.
   sorry
 
 end HCGCompactness

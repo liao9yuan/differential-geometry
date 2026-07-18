@@ -2,7 +2,7 @@
 
 **Endpoint (RULING 2026-07-05, user):** the Chapter 4 target is the **conditional**
 Theorem 3.9 `MetricCompactnessInputs.metricCompactness`
-(`C4/MetricCompactnessInputs.lean`) — same conclusion, with the book-external
+(`C4/MetricCompactnessEndpoint.lean`) — same conclusion, with the book-external
 theorems bundled as the explicit input structure `MetricCompactnessInputs`
 (A0 CGT decay, `lbl387` packing, A0' multiplicity, `lbl395` normal-coordinate
 bounds, `lbl418` exp⁻¹ derivatives, distance realization, scale compatibilities)
@@ -14,6 +14,17 @@ frontier.  Report Theorem 3.9 progress against the conditional endpoint only.
 The per-field mathematical audit lives in `MetricCompactnessInputs.lean` and
 `../PROJECT_MAP.md`.
 
+**Endpoint capstone (2026-07-17):** the conditional endpoint is **100% checked**.
+`MetricCompactBase.exists_b1_raw` produces a concrete `StepB1RawInput` with all
+5/5 fields verified; `compactness_of_b1` performs the checked Step-D assembly;
+and `MetricCompactnessConclusion.ofSeqSubseq` transports the nested-subsequence
+conclusion back to the original sequence.  The focused endpoint check and exact
+targeted refresh are green, with no local `sorry` or `admit`.  The selected
+B/C-to-B1 producer route is therefore 100%.  This does not state or prove the
+separately named textbook B1 theorem (still 0%), does not complete the historical
+full Step-C arbitrary recurrence, and does not discharge the unconditional
+Theorem 3.9 external inputs.
+
 **Current interface repair (2026-07-09):** the former P-only
 `stepB1_approxIso` statement was false and has been deleted.  The checked
 assembly is now `stepB1_of_raw`, consuming `StepB1RawInput`; Step D exposes the
@@ -23,7 +34,8 @@ former all-order `cmChartDerivLe` endpoint was deleted: only
 unstated and 0%.  Older occurrences of those two deleted theorem names below
 describe historical planning only; they are not live APIs or proved gates.
 
-**Current B/C producer state (2026-07-11):** the parallel metric-origin and
+**Historical B/C producer snapshot (2026-07-11; superseded by the 2026-07-17
+capstone above):** the parallel metric-origin and
 transition branches have been joined on one common refinement.  Intrinsic
 finite-hat atoms, support/coverage, normalized weights, and their common
 `C^infty` subsequential limit are packaged by
@@ -62,7 +74,8 @@ data and compact cores covering every frozen source ball are retained on that
 same master subsequence.  Dedicated Step-B/B1 machinery is about 95%; the
 `StepB1RawInput` producer and textbook B1 theorem remain 0%.
 
-**2026-07-15 global stage-map/analytic ruling:** see
+**Historical 2026-07-15 global stage-map/analytic ruling (its open producer
+items were discharged on 2026-07-17):** see
 `B1_STAGE_MAP_RULING.md` and the answered `B1_MOVING_ROOT_CONSULT.md`.
 `stageTarget`, `HasUniqueStageCenter`, and `stageComparisonMap` now give the
 chart-independent finite-stage definition, while zero-weight energy congruence
@@ -335,12 +348,14 @@ the convergence-spine ruling above (B-loc `exists_cInf_subseq_on` + `isometry_se
 `lbl395` (normal-coord metric bounds) is honest-input (book cites [H6] Cor 4.12); the
 Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candidate for it.
 
-- [ ] B1 `lbl397` approx-iso on a large ball: conditional assemblies
-      `stepB1_of_raw` and `stepB1_of_bounds` are checked; the concrete
-      `StepB1RawInput` producer is 0%, and the textbook B1 theorem is 0%.
-      Remaining B2–B6 production threads the common metric/transition
-      refinement, concrete center-of-mass domain, and all-order quantitative
-      bounds. ⟸ A14, S6/A0', B0', F1–F6.
+- [x] B1 selected producer route for `lbl397`: conditional assemblies
+      `stepB1_of_raw` and `stepB1_of_bounds` are checked, and
+      `MetricCompactBase.exists_b1_raw` now produces the concrete
+      `StepB1RawInput` with 5/5 fields checked.  The global stage map, exact
+      local inverse, arbitrary finite-order intrinsic metric bounds, and master
+      subsequence transport are all verified.  The separately named textbook
+      B1 theorem is still unstated and therefore 0%; do not conflate that
+      statement-level accounting with completion of the selected producer.
 
 ## §6 Step C — nonlinear averages (`L2638–end`)
 
@@ -388,9 +403,11 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
       **B1 (`lbl397`) honest boundary, repaired 2026-07-09:** the false P-only
       `stepB1_approxIso` skeleton was deleted.  `StepB1RawInput` records the raw
       comparison-map producer data, while `stepB1_of_raw` and
-      `stepB1_of_bounds` are checked conditional assemblies.  The concrete
-      producer and the textbook B1 theorem remain 0%; the partial-diffeomorph
-      carrier and localized approximate-isometry conclusion are settled.
+      `stepB1_of_bounds` are checked conditional assemblies.  This was the
+      2026-07-09 boundary snapshot; the concrete producer was discharged on
+      2026-07-17, while the separately named textbook B1 theorem remains 0%.
+      The partial-diffeomorph carrier and localized approximate-isometry
+      conclusion are settled.
       See `StepCProducers.md` / `StepCSmoothness.md`.
       **C2' (`lbl430` all-order) — REGULARITY HALF DONE 2026-07-05 (parallel session,
       lbl430(ii)):** `centerOfMass_contDiffAt` (`StepCSmoothness.lean:900`) — the center
@@ -405,56 +422,37 @@ Jacobi/Grönwall tower (now off the item-3 path) is the native-discharge candida
 
 **Execution plan: `STEPD_PLAN.md` (2026-07-05, STEPB_PLAN granularity).**  Summary:
 
-- [ ] D1 `lbl406` directed system (`exists_directedApproxSystem` + the partial-data
+- [x] D1 `lbl406` directed system (`exists_directedApproxSystem` + the partial-data
       composition brick `partialData_comp`) ⟸ the explicit `StepB1RawInput` producer, F6, F2.
-- [ ] D2 `lbl407` limiting metrics on balls (diagonal + `Ψ_j` isometry-in-the-limit).
+- [x] D2 `lbl407` limiting metrics on balls (diagonal + `Ψ_j` isometry-in-the-limit).
       The former `lbl404` composition-convergence gate is already checked.
-- [ ] D3 `M_∞` smooth structure + metric transport (`DirectLimitManifold.lean`:
+- [x] D3 `M_∞` smooth structure + metric transport (`DirectLimitManifold.lean`:
       charted/IsManifold/metrizable + `g∞` with `incl* g∞ = g_{k,∞}`) ⟸ F9–F13 (done).
-      **GATE-FREE — start now; largest new infrastructure, riskiest brick = D3d.**
-- [ ] D4 convergence to the limit (`ofRestrictPullback` instantiation + ONE
+- [x] D4 convergence to the limit (`ofRestrictPullback` instantiation + ONE
       chart-estimate→`derivNormSupOn` bridge).
-- [ ] D5 completeness (`MetricComplete limit` via compact closed balls / ProperSpace).
-- [ ] **D6 ASSEMBLY: discharge `MetricCompactnessInputs.metricCompactness`**
+- [x] D5 completeness (`MetricComplete limit` via compact closed balls / ProperSpace).
+- [x] **D6 ASSEMBLY: discharge `MetricCompactnessInputs.metricCompactness`**
       (the CONDITIONAL endpoint — ruling 2026-07-05) from D1–D5, including the
       already checked finite-slot radius/`g_p`, sigma, physical-cage,
       selected-branch Hessian, and full-convexity producers.
 
 ---
 
-## Critical path (updated 2026-07-15)
+## Critical path (updated 2026-07-17)
 
-**DONE:** Step A (metric core + item 3, modulo declared inputs); F-track engines
-100% (including F4/F5/F6 and the F2 book-facing wrapper); `lbl394` (both halves);
-C1/C3/C4-shape plus C2 regularity at every finite order; and all Step-D consumer
-machinery, including `compactness_of_b1`, the common-limit convergence package,
-completeness, and original-sequence transport.  The
-conditional endpoint `MetricCompactnessInputs.metricCompactness` is STATED
-(sorry = the concrete B/C producer and endpoint wiring).  **LIVE frontier:**
+**DONE:** Step A (metric core + item 3, modulo declared inputs); F-track engines;
+the selected B/C stage-map and exact-inverse route; the concrete 5/5
+`StepB1RawInput` producer; all Step-D consumer machinery; and the conditional
+endpoint `MetricCompactnessInputs.metricCompactness`.  The checked endpoint
+chain is `exists_b1_raw → compactness_of_b1 → ofSeqSubseq`.
 
-1. **B/C lane:** the parallel origin-metric/transition extraction, common
-   refinement, atom/weight package, pinned implicit-center branch, and
-   gluing/agreement are checked; the generic conditional center-root producer
-   and the explicit branch-parametric all-order readout machinery are also
-   checked.  The transported quantitative branch, minimizing-tangent
-   compatibility, global relative coefficients, canonical sigma field,
-   finite-hat physical cage/readout, source-local/global cover, branch-native
-  `lbl412`, weighted Neumann derivative, strict local IFT, uniform positive
-  Hessian lower bound, and intrinsic `StrictDistInput` consequence are checked.
-  The source-local capstone now also retains the chart domains, atom-weight
-  limits, and two-sided transition limits on its one master subsequence.
-  Compact cores covering each frozen source ball and the actual smooth
-  stage-weighted Route-A configuration are also checked.  The metric-to-spray
-  phase is now checked.  The next exact theorem is the generic
-  `MapCInfConvOnCompacts.ode_solutionAt` proof; then come forward normal-phase
-  endpoint convergence, compact moving-root inverse stability, and the
-  `invVelSum` center-root family.  The all-pairs stage-map chart tail and
-  arbitrary-order two-sided metric bounds remain genuine analytic frontiers.
-2. **After that producer:** construct `StepB1RawInput` and consume the already-checked
-   `compactness_of_b1` theorem in the conditional endpoint.
-
-There is no independent Step D or F-track todo.  The unconditional `metricCompactness`
-stays `sorry` (external citations; out of Chapter 4 scope by the 2026-07-05 ruling).
+**Remaining, kept separate:** the textbook B1 theorem is not separately stated
+or proved (0%); the older full Step-C arbitrary quantitative recurrence is
+incomplete but is not required by the selected route; and the unconditional
+`metricCompactness` remains 0% because its CGT, Bishop–Gromov/uniform-packing,
+[H6], and connectedness inputs lie outside this conditional Chapter 4 assembly.
+Chapter 4 machinery is approximately 95%; whole-HCG machinery is approximately
+60%.
 
 ### 2026-06-22 — `lbl394` DONE (both halves); B1 scoped (intertwines with C)
 
@@ -553,12 +551,13 @@ producer `UniformBallPack` and its checked conversion to `VolumeComparisonInput`
 and `MetricCompactnessInputs.lean` has `MetricCompactnessInputs.ofUniformVolume`
 to build the conditional endpoint bundle from that producer.
 
-This is dedicated infrastructure only. `VolumeComparisonInput` from
-`SeqBoundedGeometry` remains 0% proved until a real Bishop-Gromov/uniform-volume
-producer supplies `UniformBallPack`; the conditional endpoint
-`MetricCompactnessInputs.metricCompactness` remains 0% proved because its A-D
-assembly theorem is still the endpoint `sorry`.
+This is dedicated producer infrastructure only. `VolumeComparisonInput` from
+`SeqBoundedGeometry` remains 0% proved until a real Bishop–Gromov/uniform-volume
+producer supplies `UniformBallPack`.  The explicit-volume conditional endpoint
+`MetricCompactnessInputs.metricCompactness` is nevertheless complete (100%): it
+honestly accepts that input through `MetricCompactnessInputs`.  Native
+Bishop–Gromov/uniform-packing production is the remaining unconditional gap,
+not an endpoint-assembly gap.
 
-Next concrete target: either formalize the Bishop-Gromov producer for
-`UniformBallPack`, or treat `UniformBallPack` as the explicit book-external
-volume-comparison input and return to the Steps B/C/D assembly lane.
+The unconditional route's next concrete target is the Bishop–Gromov producer
+for `UniformBallPack`; the Steps B/C/D conditional assembly lane is closed.

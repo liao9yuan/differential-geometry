@@ -20,3 +20,9 @@ Update: `PointedFlowData.atTime`, `PointedFlowSeq.atTime`, and `PointedFlowSeq.a
 2026-05-27 completeness update: removed the primitive `MetricComplete` axiom from `Basic.lean`. The pointed Riemannian metric layer was split into `PointedRiemannian.lean`, where `MetricComplete` is defined using the Riemannian emetric induced by the stored smooth metric. `CompleteInput` now means completeness of each time-slice metric, not an arbitrary `Nat -> Real -> Prop`.
 
 Verification: passed. Early failures were mechanical instance/universe issues in the new records; they were fixed by using the stored manifold instances and explicit universe parameters.
+
+2026-07-17: added the checked projection `CompleteInput.at_time`.  It turns
+flow completeness at a chosen carrier time into `SeqMetricComplete` for the
+corresponding pointed time-slice sequence.  This is the first concrete
+reduction used inside the book-facing `compactnessSol` proof; it introduces no
+new completeness predicate.

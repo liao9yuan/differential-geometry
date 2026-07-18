@@ -1,4 +1,6 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegForcingH1
+import DifferentialGeometry.Geometry.Flow.RicciFlow.ShortTime.LowRegPathLower
+import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.LowRegPathSplit
 import DifferentialGeometry.Analysis.Spectral.Intrinsic.DeTurck.DeTurckRemainderPrincipalArmOpNorm
 
 /-!
@@ -102,5 +104,138 @@ theorem rem_h0_lip {ι : Type*}
       add_le_add hrhs' hlap'
     _ = (Crhs + 1) *
           ‖ccTensorToHs (I := I) (M := M) gBase 2 (2 : ℝ) U‖ := by ring
+
+/-- In dimension three, the exact Ricci--DeTurck path decomposition gives the
+mixed `H3 -> H1` remainder estimate once the concrete zero- and one-order path
+coefficients have uniform low-regularity bounds.  The only `H3` coefficient is
+the spectral `H2` ball radius. -/
+theorem rem_h1_of_bounds
+    (hDim : Module.finrank ℝ E = 3)
+    (g₀ g_bg : SmoothRiemannianMetric I M) :
+    ∃ ρ Ctop Clow Ccoef : ℝ,
+      0 < ρ ∧ 0 ≤ Ctop ∧ 0 ≤ Clow ∧ 0 ≤ Ccoef ∧
+      ∀ (T T' : SmoothCcTensor g₀ 0 2)
+        (hTsymm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T x v w = ccTensorBilin (I := I) g₀ T x w v)
+        (hT'symm : ∀ (x : M) (v w : TangentSpace I x),
+          ccTensorBilin (I := I) g₀ T' x v w = ccTensorBilin (I := I) g₀ T' x w v)
+        {δ : ℝ} (hδ_lt : δ < 1)
+        (hδ : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T) δ)
+        {δ' : ℝ} (hδ'_lt : δ' < 1)
+        (hδ' : gFibreOpBound (I := I) (M := M) g₀
+          (ccTensorBilinSymm (I := I) g₀ T') δ')
+        {R : ℝ} (hR : 0 ≤ R) (hRρ : R ≤ ρ)
+        (hT : ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T‖ ≤ R)
+        (hT' : ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) T'‖ ≤ R)
+        (B₀ B₀' B₁ : ℝ) (hB₀ : 0 ≤ B₀) (hB₀' : 0 ≤ B₀') (hB₁ : 0 ≤ B₁)
+        (hΦ₀ : ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 2 2 x
+            ((rhsLow0PathIntegral (I := I) (M := M) g₀ g_bg T T'
+              hδ_lt hδ hδ'_lt hδ').toSection x) ≤ B₀ ^ 2)
+        (hΦ₀' : ‖covGrad (I := I) (M := M) g₀ 2 2
+          (rhsLow0PathIntegral (I := I) (M := M) g₀ g_bg T T'
+            hδ_lt hδ hδ'_lt hδ')‖ ≤ B₀')
+        (hΦ₁ : ∀ x : M,
+          riemannianFiberNormSq (I := I) (M := M) g₀ 3 2 x
+            ((rhsLow1PathIntegral (I := I) (M := M) g₀ g_bg T T'
+              hδ_lt hδ hδ'_lt hδ').toSection x) ≤ B₁ ^ 2)
+        (hΦ₁' : (∑ j ∈ Finset.range 3,
+          ‖iteratedCovGrad (I := I) g₀ 3 2 j
+            (rhsLow1PathIntegral (I := I) (M := M) g₀ g_bg T T'
+              hδ_lt hδ hδ'_lt hδ')‖ ^ 2) ≤ B₁ ^ 2),
+        ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
+          ((realizedRHSArm (I := I) g₀ g_bg T
+                hδ_lt hδ -
+              realizedRHSArm (I := I) g₀ g_bg T'
+                hδ'_lt hδ') -
+            rawTensorConnLapSmooth (I := I) g₀ 0 2 (T - T'))‖ ≤
+          Ctop * R * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) (T - T')‖ +
+            (Clow + Ccoef * (B₀ + B₀' + B₁)) *
+              ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) (T - T')‖ := by
+  obtain ⟨ρ, Ctop, Clow, hρ, hCtop, hClow, htop⟩ :=
+    top_path_ball_h1 (I := I) (M := M) hDim g₀ g_bg
+  obtain ⟨Ccoef, hCcoef, hlower⟩ := lower_coeff_h1 (I := I) (M := M) hDim g₀
+  refine ⟨ρ, Ctop, Clow, Ccoef, hρ, hCtop, hClow, hCcoef, ?_⟩
+  intro T T' hTsymm hT'symm δ hδ_lt hδ δ' hδ'_lt hδ' R hR hRρ hT hT'
+    B₀ B₀' B₁ hB₀ hB₀' hB₁ hΦ₀ hΦ₀' hΦ₁ hΦ₁'
+  let U : SmoothCcTensor g₀ 0 2 := T - T'
+  let Φ₀ : SmoothCcTensor g₀ 2 2 :=
+    rhsLow0PathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+  let Φ₁ : SmoothCcTensor g₀ 3 2 :=
+    rhsLow1PathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+  let Φ₂ : SmoothCcTensor g₀ 4 2 :=
+    rhsTopPathIntegral (I := I) (M := M) g₀ g_bg T T' hδ_lt hδ hδ'_lt hδ'
+  have hpath :
+      realizedRHSArm (I := I) g₀ g_bg T hδ_lt hδ -
+          realizedRHSArm (I := I) g₀ g_bg T' hδ'_lt hδ' =
+        appCc (I := I) (M := M) g₀ 2 2 Φ₀
+            (iteratedCovGrad (I := I) g₀ 0 2 0 U) +
+          appCc (I := I) (M := M) g₀ 3 2 Φ₁
+            (iteratedCovGrad (I := I) g₀ 0 2 1 U) +
+          appCc (I := I) (M := M) g₀ 4 2 Φ₂
+            (iteratedCovGrad (I := I) g₀ 0 2 2 U) := by
+    simpa only [U, Φ₀, Φ₁, Φ₂] using
+      rhsArm_sub_eq_paths (I := I) (M := M) g₀ g_bg T T'
+        hTsymm hT'symm hδ_lt hδ hδ'_lt hδ'
+  have hiter₀ : iteratedCovGrad (I := I) g₀ 0 2 0 U = U := by
+    rw [iteratedCovGrad_zero]
+  have hiter₁ : iteratedCovGrad (I := I) g₀ 0 2 1 U =
+      covGrad (I := I) (M := M) g₀ 0 2 U := by
+    rw [iteratedCovGrad_succ, iteratedCovGrad_zero]
+  rw [hiter₀, hiter₁] at hpath
+  have hlower' :
+      ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
+        (appCc (I := I) (M := M) g₀ 2 2 Φ₀ U +
+          appCc (I := I) (M := M) g₀ 3 2 Φ₁
+            (covGrad (I := I) (M := M) g₀ 0 2 U))‖ ≤
+        Ccoef * (B₀ + B₀' + B₁) *
+          ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖ := by
+    apply hlower Φ₀ Φ₁ U B₀ B₀' B₁ hB₀ hB₀' hB₁
+    · simpa only [Φ₀] using hΦ₀
+    · simpa only [Φ₀] using hΦ₀'
+    · simpa only [Φ₁] using hΦ₁
+    · simpa only [Φ₁] using hΦ₁'
+  have htop' :
+      ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ)
+        (appCc (I := I) (M := M) g₀ 4 2 Φ₂
+            (iteratedCovGrad (I := I) g₀ 0 2 2 U) -
+          rawTensorConnLapSmooth (I := I) g₀ 0 2 U)‖ ≤
+        Ctop * R * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) U‖ +
+          Clow * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖ := by
+    simpa only [U, Φ₂] using
+      htop T T' hδ_lt hδ hδ'_lt hδ' hR hRρ hT hT' U
+  rw [hpath]
+  let Slow : SmoothCcTensor g₀ 0 2 :=
+    appCc (I := I) (M := M) g₀ 2 2 Φ₀ U +
+      appCc (I := I) (M := M) g₀ 3 2 Φ₁
+        (covGrad (I := I) (M := M) g₀ 0 2 U)
+  let Stop : SmoothCcTensor g₀ 0 2 :=
+    appCc (I := I) (M := M) g₀ 4 2 Φ₂
+        (iteratedCovGrad (I := I) g₀ 0 2 2 U) -
+      rawTensorConnLapSmooth (I := I) g₀ 0 2 U
+  have hsplit :
+      (appCc (I := I) (M := M) g₀ 2 2 Φ₀ U +
+          appCc (I := I) (M := M) g₀ 3 2 Φ₁
+            (covGrad (I := I) (M := M) g₀ 0 2 U) +
+        appCc (I := I) (M := M) g₀ 4 2 Φ₂
+            (iteratedCovGrad (I := I) g₀ 0 2 2 U)) -
+          rawTensorConnLapSmooth (I := I) g₀ 0 2 U = Slow + Stop := by
+    simp only [Slow, Stop]
+    abel
+  rw [hsplit, ccTensorToHs_add]
+  calc
+    _ ≤ ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ) Slow‖ +
+          ‖ccTensorToHs (I := I) (M := M) g₀ 2 (1 : ℝ) Stop‖ := norm_add_le _ _
+    _ ≤ Ccoef * (B₀ + B₀' + B₁) *
+          ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖ +
+        (Ctop * R * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) U‖ +
+          Clow * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖) := by
+      apply add_le_add
+      · simpa only [Slow] using hlower'
+      · simpa only [Stop] using htop'
+    _ = Ctop * R * ‖ccTensorToHs (I := I) (M := M) g₀ 2 (3 : ℝ) U‖ +
+          (Clow + Ccoef * (B₀ + B₀' + B₁)) *
+            ‖ccTensorToHs (I := I) (M := M) g₀ 2 (2 : ℝ) U‖ := by ring
 
 end DifferentialGeometry.PDE.RicciFlow

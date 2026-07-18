@@ -147,6 +147,125 @@ theorem entropy_le_moment
     _ ≤ 2 * (Real.log (∫ x, v x ^ q ∂μ) / (q - 2)) :=
       mul_le_mul_of_nonneg_left hJ (by norm_num)
 
+/-- A unit-mass nonnegative density supported in `U` has entropy at most the
+logarithm of the measure of `U`. -/
+theorem entropy_supp_le
+    (μ : Measure α) [IsFiniteMeasure μ] {w : α → Real} {U : Set α}
+    (hwmeas : Measurable w) (hwi : Integrable w μ)
+    (hw0 : ∀ x, 0 ≤ w x) (hmass : (∫ x, w x ∂μ) = 1)
+    (hent : Integrable (fun x => w x * Real.log (w x)) μ)
+    (hsupp : Function.support w ⊆ U) :
+    -(∫ x, w x * Real.log (w x) ∂μ) ≤ Real.log (μ U).toReal := by
+  let ρ : α → ENNReal := fun x => ENNReal.ofReal (w x)
+  let ν : Measure α := μ.withDensity ρ
+  let X : α → Real := fun x => if w x = 0 then 1 else (w x)⁻¹
+  have hρ : AEMeasurable ρ μ := hwmeas.aemeasurable.ennreal_ofReal
+  have hρtop : ∀ᵐ x ∂μ, ρ x < ⊤ := by
+    filter_upwards with x
+    simp only [ρ, ENNReal.ofReal_lt_top]
+  letI : IsProbabilityMeasure ν := by
+    dsimp only [ν, ρ]
+    exact withDensity_prob μ hwi (Filter.Eventually.of_forall hw0) hmass
+  have hXmeas : Measurable X := by
+    dsimp only [X]
+    exact Measurable.ite (hwmeas (measurableSet_singleton 0))
+      measurable_const hwmeas.inv
+  have hXpos (x : α) : 0 < X x := by
+    dsimp only [X]
+    split_ifs with hx
+    · norm_num
+    · exact inv_pos.mpr (lt_of_le_of_ne (hw0 x) (Ne.symm hx))
+  have hXint : Integrable X ν := by
+    rw [show ν = μ.withDensity ρ by rfl]
+    rw [integrable_withDensity_iff_integrable_smul₀' hρ hρtop]
+    refine Integrable.mono' (integrable_const (1 : Real)) ?_ ?_
+    · exact hρ.ennreal_toReal.aestronglyMeasurable.mul
+        hXmeas.aestronglyMeasurable
+    · filter_upwards with x
+      dsimp only [ρ, X]
+      by_cases hx : w x = 0
+      · simp only [hx, ENNReal.ofReal_zero, ENNReal.toReal_zero, if_pos,
+          smul_eq_mul, zero_mul, norm_zero]
+        exact zero_le_one
+      · simp only [ENNReal.toReal_ofReal (hw0 x), if_neg hx, smul_eq_mul,
+          mul_inv_cancel₀ hx, norm_one, le_refl]
+  have hlogint : Integrable (fun x => Real.log (X x)) ν := by
+    rw [show ν = μ.withDensity ρ by rfl]
+    rw [integrable_withDensity_iff_integrable_smul₀' hρ hρtop]
+    refine hent.neg.congr ?_
+    filter_upwards with x
+    dsimp only [ρ, X]
+    by_cases hx : w x = 0
+    · simp [hx]
+    · simp only [ENNReal.toReal_ofReal (hw0 x), if_neg hx, smul_eq_mul,
+        Real.log_inv, Pi.neg_apply]
+      ring
+  have hlogeq :
+      (∫ x, Real.log (X x) ∂ν) = -(∫ x, w x * Real.log (w x) ∂μ) := by
+    rw [show ν = μ.withDensity ρ by rfl]
+    rw [integral_withDensity_eq_integral_toReal_smul₀ hρ hρtop]
+    rw [← integral_neg]
+    apply integral_congr_ae
+    filter_upwards with x
+    dsimp only [ρ, X]
+    by_cases hx : w x = 0
+    · simp only [hx, ENNReal.ofReal_zero, ENNReal.toReal_zero, if_pos,
+        smul_eq_mul, zero_mul, Real.log_one, neg_zero]
+    · simp only [ENNReal.toReal_ofReal (hw0 x), if_neg hx, smul_eq_mul,
+        Real.log_inv]
+      ring
+  let S : Set α := {x | w x ≠ 0}
+  have hS : MeasurableSet S := by
+    simpa only [S, Set.compl_setOf, not_not] using
+      (hwmeas (measurableSet_singleton 0)).compl
+  have hmoment : (∫ x, X x ∂ν) = (μ S).toReal := by
+    rw [show ν = μ.withDensity ρ by rfl]
+    rw [integral_withDensity_eq_integral_toReal_smul₀ hρ hρtop]
+    calc
+      (∫ x, (ρ x).toReal • X x ∂μ) =
+          ∫ x, S.indicator (fun _ => (1 : Real)) x ∂μ := by
+        apply integral_congr_ae
+        filter_upwards with x
+        dsimp only [ρ, X, S]
+        by_cases hx : w x = 0
+        · have hxS : x ∉ {y | w y ≠ 0} := by simpa only [Set.mem_setOf_eq, not_not]
+            using hx
+          rw [Set.indicator_of_notMem hxS]
+          simp only [hx, ENNReal.ofReal_zero, ENNReal.toReal_zero, if_pos,
+            smul_eq_mul, zero_mul]
+        · have hxS : x ∈ {y | w y ≠ 0} := by
+            simpa only [Set.mem_setOf_eq] using hx
+          rw [Set.indicator_of_mem hxS]
+          simp only [ENNReal.toReal_ofReal (hw0 x), if_neg hx, smul_eq_mul,
+            mul_inv_cancel₀ hx]
+      _ = (μ S).toReal := integral_indicator_one hS
+  have hJ := int_log_le_moment (ν := ν) (X := X) (p := (1 : Real))
+    (by norm_num) (Filter.Eventually.of_forall hXpos) hlogint (by
+      simpa only [Real.rpow_one] using hXint)
+  have hmoment_pos : 0 < ∫ x, X x ∂ν := by
+    rw [integral_pos_iff_support_of_nonneg (fun x => (hXpos x).le) hXint]
+    have hsuppX : Function.support X = Set.univ := by
+      ext x
+      simp only [Function.mem_support, Set.mem_univ, iff_true]
+      exact (hXpos x).ne'
+    rw [hsuppX, measure_univ]
+    norm_num
+  have hSU : S ⊆ U := by
+    intro x hx
+    exact hsupp hx
+  have hreal_le : (μ S).toReal ≤ (μ U).toReal :=
+    ENNReal.toReal_mono (measure_ne_top μ U) (measure_mono hSU)
+  calc
+    -(∫ x, w x * Real.log (w x) ∂μ) =
+        ∫ x, Real.log (X x) ∂ν := hlogeq.symm
+    _ ≤ Real.log (∫ x, X x ^ (1 : Real) ∂ν) / 1 := hJ
+    _ = Real.log (∫ x, X x ∂ν) := by
+      simp only [Real.rpow_one, div_one]
+    _ ≤ Real.log (μ U).toReal := by
+      apply Real.log_le_log hmoment_pos
+      rw [hmoment]
+      exact hreal_le
+
 end
 
 end DifferentialGeometry.Analysis.Integration

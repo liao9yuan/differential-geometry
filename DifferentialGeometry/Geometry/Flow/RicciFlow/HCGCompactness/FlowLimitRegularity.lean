@@ -1,4 +1,5 @@
 import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.PointedConvergence
+import DifferentialGeometry.Geometry.Flow.RicciFlow.HCGCompactness.ConvFieldOpen
 import DifferentialGeometry.Geometry.Curvature.RicciOperatorNormBound
 import DifferentialGeometry.Geometry.Curvature.Realized.MetricFamilyContinuity
 import DifferentialGeometry.Geometry.Metric.ChartGram
@@ -35,8 +36,10 @@ namespace DifferentialGeometry
 namespace HCGCompactness
 
 open scoped Manifold ContDiff Topology BigOperators
+open Bundle
 open DifferentialGeometry.Integral.Connection
 open DifferentialGeometry.Integral.Measure
+open DifferentialGeometry.PDE.RicciFlow (SolutionOn)
 open Tensor0SBundle
 open Filter Topology
 
@@ -97,7 +100,7 @@ theorem chartGram_sub_le
     have hu' := Tensor0SBundle.metricTensorField_apply (I := I) u' x
       (fun a => (![chartBasisVecFiber (I := I) x₀ i x,
         chartBasisVecFiber (I := I) x₀ j x] : Fin 2 → TangentSpace I x) a)
-    simp only [metricDiffCovDerivAt, ContinuousMultilinearMap.sub_apply]
+    simp only [metricDiffCovDerivAt]
     simp only [Matrix.cons_val_zero, Matrix.cons_val_one] at hu hu'
     change u.inner x _ _ - u'.inner x _ _
       = (metricCovDeriv (I := I) u gRef 0 x) _ - (metricCovDeriv (I := I) u' gRef 0 x) _
@@ -229,6 +232,269 @@ theorem metricTensorContLim
         q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} :=
     ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
   exact hlim.comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+private theorem metricCLMSection_Ioo
+    [NeZero (Module.finrank Real E)]
+    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
+        ((g q.1).inner q.2))
+      (Set.Ioo a b ×ˢ Set.univ) := by
+  set gsh : ℝ → SmoothRiemannianMetric I M := fun s => g (s + a) with hgsh
+  have haddC : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
+      (fun p : ℝ × M => (p.1 + a, p.2)) :=
+    (contMDiff_fst.add contMDiff_const).prodMk contMDiff_snd
+  have hsubC : ContMDiff (𝓘(ℝ, ℝ).prod I) (𝓘(ℝ, ℝ).prod I) ∞
+      (fun p : ℝ × M => (p.1 - a, p.2)) :=
+    (contMDiff_fst.sub contMDiff_const).prodMk contMDiff_snd
+  have hgram_sh : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (gsh p.1) x₀ p.2 i j)
+        (Set.Ioo (0 : ℝ) (b - a) ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j
+    have hmaps : Set.MapsTo (fun p : ℝ × M => (p.1 + a, p.2))
+        (Set.Ioo (0 : ℝ) (b - a) ×ˢ
+          (trivializationAt E (TangentSpace I) x₀).baseSet)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+      rintro ⟨s, m⟩ ⟨hs, hm⟩
+      exact ⟨⟨by linarith [hs.1], by linarith [hs.2]⟩, hm⟩
+    exact (hgram x₀ i j).comp haddC.contMDiffOn hmaps
+  have hsh := metricCLMSection_jointContMDiffOn_of_chartGram
+    (I := I) gsh (b - a) hgram_sh
+  have hmaps2 : Set.MapsTo (fun p : ℝ × M => (p.1 - a, p.2))
+      (Set.Ioo a b ×ˢ (Set.univ : Set M))
+      (Set.Ioo (0 : ℝ) (b - a) ×ˢ (Set.univ : Set M)) := by
+    rintro ⟨t, m⟩ ⟨ht, _⟩
+    exact ⟨⟨by linarith [ht.1], by linarith [ht.2]⟩, Set.mem_univ _⟩
+  have hcomp := hsh.comp hsubC.contMDiffOn hmaps2
+  refine hcomp.congr ?_
+  rintro ⟨t, m⟩ _
+  simp only [Function.comp_apply, hgsh, sub_add_cancel]
+
+omit [CompleteSpace E] [T2Space M] [SigmaCompactSpace M] in
+private theorem metricFrameComp_Ioo
+    [NeZero (Module.finrank Real E)]
+    (g : ℝ → SmoothRiemannianMetric I M) (a b : ℝ)
+    (hgram : ∀ (x₀ : M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × M => chartGramMatrix (I := I) (g p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet))
+    {Idx : Type*} [Fintype Idx]
+    (frame : Idx → (x : M) → TangentSpace I x) {u : Set M}
+    (hframe : IsLocalFrameOn I E (∞ : WithTop ℕ∞) frame u) (i j : Idx) :
+    ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ, ℝ) ∞
+      (fun p : ℝ × M => (g p.1).inner p.2 (frame i p.2) (frame j p.2))
+      (Set.Ioo a b ×ˢ u) := by
+  have hψ : ContMDiffOn (𝓘(ℝ, ℝ).prod I)
+      (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+      (fun q : ℝ × M => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+        (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) q.2
+        ((g q.1).inner q.2))
+      (Set.Ioo a b ×ˢ u) :=
+    (metricCLMSection_Ioo (I := I) g a b hgram).mono
+      (fun q hq => ⟨hq.1, Set.mem_univ _⟩)
+  have hv : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' E p.2 (frame i p.2))
+      (Set.Ioo a b ×ˢ u) :=
+    (hframe.contMDiffOn i).comp contMDiffOn_snd (fun p hp => hp.2)
+  have hw : ContMDiffOn (𝓘(ℝ, ℝ).prod I) (I.prod 𝓘(ℝ, E)) ∞
+      (fun p : ℝ × M => TotalSpace.mk' E p.2 (frame j p.2))
+      (Set.Ioo a b ×ˢ u) :=
+    (hframe.contMDiffOn j).comp contMDiffOn_snd (fun p hp => hp.2)
+  have happ := ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+    (E₁ := TangentSpace I (M := M)) (E₂ := TangentSpace I (M := M))
+    (E₃ := Bundle.Trivial M ℝ)
+    (b := fun p : ℝ × M => p.2) (s := Set.Ioo a b ×ˢ u)
+    (ψ := fun p : ℝ × M => (g p.1).inner p.2)
+    (v := fun p : ℝ × M => frame i p.2)
+    (w := fun p : ℝ × M => frame j p.2) hψ hv hw
+  intro p hp
+  have hpx := happ p hp
+  rw [Bundle.contMDiffWithinAt_totalSpace] at hpx
+  exact hpx.2
+
+section OpenInterval
+
+variable [NeZero (Module.finrank Real E)]
+variable {X : PointedFlowSeq (I := I)}
+variable {P : PointedRiemannianManifold (I := I)}
+variable {subseq : Nat → Nat}
+variable (Φ : PointedCGHMaps (I := I) X P subseq)
+
+namespace ConvOut
+
+variable [I.Boundaryless]
+
+/-- Fixed-window joint spacetime smoothness of the limit metric in the
+trivialization-based chart-Gram readout. This is the remaining analytic
+regularity frontier. -/
+theorem gramSmooth
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {β ψ : Real} (hwin : Set.Icc β ψ ⊆ X.D.regular)
+    (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    ∀ (x₀ : P.M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × P.M => chartGramMatrix (I := I) (co.gInf p.1) x₀ p.2 i j)
+        (Set.Ioo β ψ ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+  sorry
+
+end ConvOut
+
+namespace OpenConvOut
+
+set_option maxHeartbeats 1600000 in
+/-- Assemble joint smoothness of the open-interval limit metric from joint
+chart-Gram smoothness on every canonical compact window. -/
+theorem smoothMetric
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {a b t₀ : Real} (ht₀ : t₀ ∈ Set.Ioo a b)
+    (co : OpenConvOut (I := I) Φ R bf hsrc htgt a b t₀)
+    (hgramWin : letI : TopologicalSpace P.M := P.topology
+        letI : ChartedSpace H P.M := P.charted
+        letI : T2Space P.M := P.t2
+        letI : IsManifold I ∞ P.M := P.smooth
+      ∀ n (x₀ : P.M) (i j : Fin (Module.finrank ℝ E)),
+        ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+          (fun p : ℝ × P.M => chartGramMatrix (I := I) (co.gInf p.1) x₀ p.2 i j)
+          (Set.Ioo (RealTimeInterval.openWindowLeft a t₀ n)
+              (RealTimeInterval.openWindowRight b t₀ n) ×ˢ
+            (trivializationAt E (TangentSpace I) x₀).baseSet)) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    MetricFamilySmoothOn (I := I) (M := P.M)
+      (RealTimeInterval.openInterval a b t₀ ht₀)
+      ({ base := { metric := co.gInf } } :
+        SolutionOn (I := I) (M := P.M)
+          (RealTimeInterval.openInterval a b t₀ ht₀)).family := by
+  letI : TopologicalSpace P.M := P.topology
+  letI : ChartedSpace H P.M := P.charted
+  letI : T2Space P.M := P.t2
+  letI : IsManifold I ∞ P.M := P.smooth
+  letI : SigmaCompactSpace P.M := P.sigmaCompact
+  have hgram : ∀ (x₀ : P.M) (i j : Fin (Module.finrank ℝ E)),
+      ContMDiffOn (𝓘(ℝ, ℝ).prod I) 𝓘(ℝ) ∞
+        (fun p : ℝ × P.M => chartGramMatrix (I := I) (co.gInf p.1) x₀ p.2 i j)
+        (Set.Ioo a b ×ˢ (trivializationAt E (TangentSpace I) x₀).baseSet) := by
+    intro x₀ i j p hp
+    obtain ⟨n, hn⟩ := RealTimeInterval.exists_window_nhds ht₀ hp.1
+    have htn : p.1 ∈ Set.Ioo (RealTimeInterval.openWindowLeft a t₀ n)
+        (RealTimeInterval.openWindowRight b t₀ n) := Icc_mem_nhds_iff.mp hn
+    have hlocal := hgramWin n x₀ i j p ⟨htn, hp.2⟩
+    have hnhds : Set.Ioo (RealTimeInterval.openWindowLeft a t₀ n)
+          (RealTimeInterval.openWindowRight b t₀ n) ×ˢ
+        (trivializationAt E (TangentSpace I) x₀).baseSet ∈ 𝓝 p :=
+      prod_mem_nhds (Ioo_mem_nhds htn.1 htn.2)
+        ((trivializationAt E (TangentSpace I) x₀).open_baseSet.mem_nhds hp.2)
+    exact (hlocal.contMDiffAt hnhds).contMDiffWithinAt
+  have hcontTensor : Tensor0SFamilyContinuousOnSet (I := I) (M := P.M) 2
+      (Set.Ioo a b) (fun t x => metricTensorField (I := I) (co.gInf t) x) := by
+    apply metricTensorCont_of_chartGram (I := I) (K := Set.Ioo a b) co.gInf
+    intro x₀ i j
+    have hincl : ContinuousOn
+        (fun q : {t : ℝ // t ∈ Set.Ioo a b} × P.M => ((q.1 : ℝ), q.2))
+        {q : {t : ℝ // t ∈ Set.Ioo a b} × P.M |
+          q.2 ∈ (trivializationAt E (TangentSpace I) x₀).baseSet} :=
+      ((continuous_subtype_val.comp continuous_fst).prodMk continuous_snd).continuousOn
+    exact (hgram x₀ i j).continuousOn.comp hincl (fun q hq => ⟨q.1.2, hq⟩)
+  refine ⟨?_, ?_, hcontTensor, ?_⟩
+  · intro x X Y
+    have hcurve : ContMDiffOn 𝓘(ℝ, ℝ) (𝓘(ℝ, ℝ).prod I) ∞
+        (fun t : ℝ => (t, x)) (Set.Ioo a b) :=
+      contMDiffOn_id.prodMk contMDiffOn_const
+    have hψ' : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, E →L[ℝ] E →L[ℝ] ℝ)) ∞
+        (fun t : ℝ => TotalSpace.mk' (E →L[ℝ] E →L[ℝ] ℝ)
+          (E := fun y => TangentSpace I y →L[ℝ] TangentSpace I y →L[ℝ] ℝ) x
+          ((co.gInf t).inner x)) (Set.Ioo a b) :=
+      (metricCLMSection_Ioo (I := I) co.gInf a b hgram).comp
+        hcurve (fun t ht => ⟨ht, Set.mem_univ _⟩)
+    have hv : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, E)) ∞
+        (fun _ : ℝ => TotalSpace.mk' E (E := fun y => TangentSpace I y) x X)
+        (Set.Ioo a b) := contMDiffOn_const
+    have hw : ContMDiffOn 𝓘(ℝ, ℝ) (I.prod 𝓘(ℝ, E)) ∞
+        (fun _ : ℝ => TotalSpace.mk' E (E := fun y => TangentSpace I y) x Y)
+        (Set.Ioo a b) := contMDiffOn_const
+    have happ := ContMDiffOn.clm_bundle_apply₂ (F₁ := E) (F₂ := E) (F₃ := ℝ)
+      (E₁ := TangentSpace I (M := P.M)) (E₂ := TangentSpace I (M := P.M))
+      (E₃ := Bundle.Trivial P.M ℝ) (b := fun _ : ℝ => x)
+      (ψ := fun t : ℝ => (co.gInf t).inner x)
+      (v := fun _ : ℝ => X) (w := fun _ : ℝ => Y) hψ' hv hw
+    have hscalar : ContMDiffOn 𝓘(ℝ, ℝ) 𝓘(ℝ, ℝ) ∞
+        (fun t : ℝ => (co.gInf t).inner x X Y) (Set.Ioo a b) := by
+      intro t ht
+      have hpt := happ t ht
+      rw [Bundle.contMDiffWithinAt_totalSpace] at hpt
+      exact hpt.2
+    exact hscalar.contDiffOn
+  · intro x X Y
+    have hbase : ContinuousOn
+        (fun s : ℝ => metricTensorField (I := I) (co.gInf s) x (vec2 X Y))
+        (Set.Ioo a b) := by
+      rw [continuousOn_iff_continuous_restrict]
+      exact hcontTensor.eval_continuous (P := {s : ℝ // s ∈ Set.Ioo a b})
+        (τ := Subtype.val) (b := fun _ => x) continuous_subtype_val
+        (fun p => p.2) continuous_const
+        (v := fun i _ => vec2 X Y i) (fun _ => continuous_const)
+    refine hbase.congr (fun s _ => ?_)
+    simp [metricTensorField_apply, vec2]
+  · intro Idx _ frame u hframe i j
+    exact metricFrameComp_Ioo (I := I) co.gInf a b hgram frame hframe i j
+
+variable [I.Boundaryless]
+
+/-- The fixed-window analytic theorem supplies the open-interval metric
+regularity package on the one subsequence carried by `OpenConvOut`. -/
+theorem smoothMetric_of_conv
+    {R : letI : TopologicalSpace P.M := P.topology
+      letI : ChartedSpace H P.M := P.charted
+      letI : IsManifold I ∞ P.M := P.smooth
+      SmoothRiemannianMetric I P.M}
+    {bf : BumpFamily (I := I) Φ} {hsrc : SrcSigma Φ} {htgt : TgtSigma Φ}
+    {a b t₀ : Real} (ht₀ : t₀ ∈ Set.Ioo a b)
+    (hD : X.D = RealTimeInterval.openInterval a b t₀ ht₀)
+    (co : OpenConvOut (I := I) Φ R bf hsrc htgt a b t₀) :
+    letI : TopologicalSpace P.M := P.topology
+    letI : ChartedSpace H P.M := P.charted
+    letI : T2Space P.M := P.t2
+    letI : IsManifold I ∞ P.M := P.smooth
+    letI : SigmaCompactSpace P.M := P.sigmaCompact
+    MetricFamilySmoothOn (I := I) (M := P.M)
+      (RealTimeInterval.openInterval a b t₀ ht₀)
+      ({ base := { metric := co.gInf } } :
+        SolutionOn (I := I) (M := P.M)
+          (RealTimeInterval.openInterval a b t₀ ht₀)).family := by
+  apply OpenConvOut.smoothMetric (Φ := Φ) ht₀ co
+  intro n
+  apply ConvOut.gramSmooth (Φ := Φ) (co := OpenConvOut.at_window Φ co n)
+  intro t ht
+  have htOpen := RealTimeInterval.openWindow_subset ht₀ n ht
+  simpa only [hD, RealTimeInterval.openInterval] using htOpen
+
+end OpenConvOut
+
+end OpenInterval
 
 end HCGCompactness
 end DifferentialGeometry

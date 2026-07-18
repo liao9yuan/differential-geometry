@@ -7,11 +7,12 @@ limit flow is assembled).
 
 ## What is here
 
-- `ExhaustsByOpen.comp_subseq` — reusable: an open exhaustion re-indexed along
-  a strictly monotone map is still an exhaustion (`isOpen` pointwise;
-  `mono_step` from `subset_of_le` + `hφ.monotone`; `subset` threshold survives
-  via `hφ.id_le`). Kept in this file (not `PointedConvergence.lean`) to stay
-  append-only-safe for other sessions.
+- `ExhaustsByOpen.comp_subseq` is imported from its canonical low-level home in
+  `PointedConvergence.lean`: an open exhaustion re-indexed along a strictly
+  monotone map is still an exhaustion.  Keeping it below both the Riemannian
+  and spacetime comparison-map wrappers avoids a later import-layer duplicate.
+  The consumer remained focused-green and its exact module refresh passed
+  after the move.
 - `PointedRiemannianCGMaps.compSubseq` + simp `compSubseq_source`
   (`(Φ.compSubseq φ hφ).source k = Φ.source (φ k)`, rfl).
 - `MetricSourceData.compSubseq` + simp `compSubseq_supOn`
@@ -75,3 +76,18 @@ members are definitionally the same.  D6 combines this with `unrepoint` after
 the transported-center equality.
 
 Focused verification and the targeted module refresh passed.
+
+## 2026-07-17 composed sequence-level lift
+
+Added the namespace-local `ofSeqSubseq` family for an arbitrary
+`inner : Nat -> Nat`, while preserving the identity-only `ofSubseq` API.
+Maps, metric source data, metric convergence data, and pointed convergence on
+`X.subseq f` lift definitionally to `X` at `f ∘ inner`.
+
+Added `MetricCompactnessConclusion.ofSeqSubseq`.  Given the necessarily strict
+outer index `f`, it lifts a conclusion on `X.subseq f` to one on `X`, with the
+subsequence `f ∘ mc.subseq` and the same complete limit.  No new data package
+or geometric assumption was introduced.
+
+Focused verification and the targeted module refresh passed after refreshing
+the two missing upstream variation modules.

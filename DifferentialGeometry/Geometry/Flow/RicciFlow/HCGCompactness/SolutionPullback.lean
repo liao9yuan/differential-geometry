@@ -185,9 +185,8 @@ theorem metricFamilySmoothOn_pullback
     have hm : (solutionOn_pullback (I := I) S Φ).family.metric t
         = Diffeomorph.pullbackMetric (I := I) (S.family.metric t) Φ := rfl
     ext slots
-    rw [hm, ContinuousMultilinearMap.compContinuousLinearMap_apply,
-      Tensor0SBundle.metricTensorField_apply, Tensor0SBundle.metricTensorField_apply,
-      Diffeomorph.pullbackMetric_inner]
+    rw [hm, Tensor0SBundle.metricTensorField_apply, Diffeomorph.pullbackMetric_inner]
+    rfl
   frameCompSmooth := by
     intro Idx _ frame u hframe i j
     have heq : (fun p : ℝ × M =>
@@ -401,7 +400,6 @@ theorem ricciCont_pullback
       (fun t x => S.ricci t x) hS.ricciCont Φ)
   intro t _ht x
   ext slots
-  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   exact (metricRicci_pullback_eval (I := I) (S.base.metric t) Φ x slots).symm
 
 /-- The bundled lowered Riemann `(0,4)` section transports under pullback (evaluated form):
@@ -457,7 +455,6 @@ theorem rm04Cont_pullback
       (fun t x => S.base.rm04 t x) hS.rm04Cont Φ)
   intro t _ht x
   ext slots
-  rw [ContinuousMultilinearMap.compContinuousLinearMap_apply]
   exact (metricRm04_pullback_eval (I := I) (S.base.metric t) Φ x slots).symm
 
 /-- **Smoothness of the pulled-back connection family** (the `smoothConnection` field).  No

@@ -668,3 +668,269 @@ machinery is conservatively approximately **85%**; whole HCG machinery remains
 approximately **60%**, and HCG endpoint theorems remain **0%**.  The chain
 still inherits the existing `ShortTime/WeylEigenvalueCountingBound.lean`
 `sorry`.
+
+## 2026-07-16 cutoff-density correction and exact stop
+
+The preceding cutoff audit understated the available approximation layer.
+The branch already contains the genuine chart-Sobolev density theorem
+`contMDiff_dense_in_WkpChart`, its arbitrary-order analogue
+`contMDiff_dense_in_WkpChart_k`, and the per-chart strong-support theorem
+`exists_smooth_strong_support_approx`. It also contains the uniform smooth
+multiplier and smooth chart-to-intrinsic gradient estimates needed after an
+input has entered `MemWkpChart`. Thus ordinary smooth density is not the live
+frontier.
+
+The exact missing producer is the nonsmooth entrance theorem for the intrinsic
+distance tent: prove that the `4 / r`-Lipschitz function which is one on
+`B_g(x,r/2)` and zero outside `B_g(x,3r/4)` lies in
+`MemWkpChart g 1 2`, with a quantitative first-order bound uniform in `x` and
+small `r`. This is Riemannian Rademacher/weak-gradient content. Neither
+`MemW1pIntrinsicLp_of_MemWkpChart` nor the existing intrinsic/chart norm
+comparisons supply it: their current public forms still require a smooth
+input.
+
+Once that producer exists, the remaining support bookkeeping is routine.
+Approximate the tent by `contMDiff_dense_in_WkpChart`, choose a smooth outer
+bump equal to one near the tent support and supported in `B_g(x,r)`, and
+multiply. The multiplier bound lets the approximation error be chosen small
+enough to retain definite inner `L2` mass and the scale-order Dirichlet bound.
+The cutoff contradiction needs neither an exact plateau nor a nonnegative
+approximant, because it uses the square of the amplitude and entropy Jensen on
+its support.
+
+The cheapest consumer-facing normal form is a theorem named
+`exists_cutoff_energy` (exactly twenty characters): for each fixed `g`, choose
+one finite constant before `x` and `0 < r <= 1`; then produce a smooth
+amplitude supported in `B_g(x,r)`, with `L2` mass bounded below by a fixed
+multiple of `Vol_g(B_g(x,r/2))` and Dirichlet energy bounded by
+`C_g r^-2 Vol_g(B_g(x,r))`. A universal numerical constant such as `64` is
+stronger than this route supplies and is not required by the fixed-metric
+cutoff contradiction. The existing chart equivalences naturally produce a
+constant depending on `g` and the canonical finite POU.
+
+The remote Pro answer obtained during this checkpoint could not inspect the
+repository and incorrectly reported that no `W^{1,p}` density theorem exists.
+It is therefore not used as project evidence; the live declarations above are
+the source of truth. No follow-up consultation was sent. Future consultations
+are user-triggered only.
+
+Honest accounting: `w_fixed_lower` and `w_density_lower` remain **100%**.
+`exists_cutoff_energy`, the cutoff W upper contradiction,
+`NoLocalCollapsing`, and `ham3_noncollapse` are theorem-level **0%**. The
+dedicated cutoff machinery is approximately **55%** (density, outer support,
+smooth multiplication, and smooth intrinsic estimates exist; the quantitative
+Rademacher entrance producer is absent). Dedicated entropy/noncollapse
+machinery remains approximately **85%**; whole HCG machinery remains
+approximately **60%**, and HCG endpoints remain **0%**.
+
+### Prepared consult prompt (superseded; do not send automatically)
+
+```text
+Please diagnose the smallest Lean 4 producer that closes the intrinsic cutoff
+frontier in liao9yuan/differential-geometry. Inspect the GitHub reference page
+for the canonical short-time-existence branch:
+https://github.com/liao9yuan/differential-geometry/tree/short-time-existence
+and, when visible, compare the aligned branch
+https://github.com/liao9yuan/differential-geometry/tree/codex/short-time-existence-align
+at commit 67c9b6b2ce31c2e3b32f424a90c5d27d30995593.
+
+Relevant live producers are:
+- Analysis/Sobolev/Approximation/ContMDiffDense.lean:
+  contMDiff_dense_in_WkpChart
+- Analysis/Sobolev/Approximation/SmoothDensity.lean:
+  exists_smooth_strong_support_approx
+- Analysis/Sobolev/Chart/SmoothDensity/SmoothMulQuant.lean:
+  wkpNormChart_smooth_mul_le
+- Analysis/Sobolev/Intrinsic/EquivalenceForward.lean:
+  eLpNorm_g_norm_gradFun_le_const_mul_wkpNormChart_smooth_uniform
+
+The missing input is a quantitative theorem saying that the intrinsic distance
+tent, equal to one on B_g(x,r/2), zero outside B_g(x,3r/4), and Lipschitz with
+constant 4/r, lies in MemWkpChart g 1 2 with a bound uniform in x and 0<r<=1.
+After that, existing W1 density plus a smooth outer bump closes support, L2
+mass, and metric-dependent C_g/r^2 energy estimates.
+
+Please identify the cheapest repository-native proof route and exact existing
+lemmas to reuse. If a generic Lipschitz-to-MemWkpChart theorem is too large,
+give the smallest distance-tent-specific statement and proof decomposition.
+Do not add consumer assumptions, do not use HasLocallyConstantChartAt, do not
+hide the gap behind a wrapper hypothesis, and keep every new theorem name at
+most 20 characters. Distinguish what is already proved on the cited GitHub
+branch from what genuinely needs a new theorem.
+```
+
+## 2026-07-16 distance tent and intrinsic weak-gradient frontier
+
+The preceding checkpoint's qualitative entrance is now closed.
+`mem_chart_one_of_lip` proves that every bounded function Lipschitz for an
+explicit `riemannianEDistOf g` belongs to `MemWkpChart g 1 p`, using the
+Euclidean Rademacher/weak-partial API and the actual local chart domains.  Its
+focused check and targeted module build passed.  This theorem is qualitative:
+the compactness-produced chart constants are not the universal intrinsic
+gradient constant.
+
+The geometric tent itself is also checked in
+`Geometry/Metric/DistanceTent.lean`.  `riemDistTent` reuses Mathlib's
+`thickenedIndicator` rather than maintaining a parallel truncation API.
+`riemTent_mem_Icc`, `riemTent_eq_one`, `riemTent_eq_zero`,
+`riemTent_support`, `riemTent_tsupport`, and `riemTent_lip` give the exact
+range, plateau, zero region, support margin, and `4 / r` explicit-distance
+Lipschitz bound.  Infinite extended distances are handled correctly.
+
+The exact remaining obstruction is now narrower and intrinsic.  The live
+`MemW1pIntrinsicLp_of_MemWkpChart` still requires `ContMDiff` and forwards to
+the smooth theorem; it is not a nonsmooth chart-to-intrinsic bridge.  Existing
+chart density does not preserve the tent's intrinsic Lipschitz constant, and
+the available smooth chart-to-intrinsic estimates introduce metric/chart
+constants.  Thus they do not prove the scale-sharp a.e. bound
+
+```text
+|weakGrad_g (riemDistTent g x r)|_g <= 4 / r
+```
+
+with gradient supported in the radius-`r` ball.  A direct
+`weak_grad_of_lip` route must still supply manifold a.e. differentiability,
+the pointwise intrinsic derivative bound, and global weak integration by
+parts; alternatively one would need a global smoothing theorem preserving
+the intrinsic Lipschitz constant, which the branch does not contain.
+
+No Pro consultation was sent.  Future consultations are user-triggered only;
+if this intrinsic assembly reaches a genuine stop, prepare a copy-paste prompt
+here and wait for the user to decide whether to send it.
+
+Honest accounting: `riemDistTent` and its geometric/support API are **100%**;
+`mem_chart_one_of_lip` is **100%**.  A theorem `weak_grad_of_lip` is not yet
+stated or proved (**0%**); its dedicated prerequisites are approximately
+**35%** because Euclidean Rademacher and chart localization are checked but
+intrinsic reconstruction and weak IBP are absent.  `exists_cutoff_energy`, the
+cutoff W upper contradiction, `NoLocalCollapsing`, and `ham3_noncollapse`
+remain theorem-level **0%**.  Dedicated cutoff machinery is approximately
+**65%**, broader entropy/noncollapse machinery approximately **86%**, and
+whole HCG machinery remains approximately **60%**, with HCG endpoints at
+**0%**.
+
+## 2026-07-17 smooth cutoff energy closure
+
+The intrinsic cutoff producer is now closed in `Perelman/CutoffEnergy.lean`.
+`exists_cutoff_energy` constructs a smooth function supported in the radius
+`r` ball, retains at least one half of the half-ball square-root volume in its
+`L²` norm, and bounds its metric-gradient `L²` norm by `5 / r` times the
+outer-ball square-root volume.  Squaring gives exactly the mass/Dirichlet
+normal form needed by the cutoff contradiction.  Focused verification passed
+without warnings.  No global frame, varying-fibre equality, new consumer
+assumption, or `HasLocallyConstantChartAt` was introduced.
+
+Honest accounting: `exists_cutoff_energy` is theorem-level **100%**, and its
+dedicated machinery is **100%**.  The cutoff W upper contradiction,
+`NoLocalCollapsing`, and `ham3_noncollapse` remain separate theorem-level
+frontiers at **0%**.  Broader entropy/noncollapse machinery is approximately
+**90%**; whole HCG machinery remains approximately **60%**, with the HCG
+endpoint theorems at **0%**.  The next smallest frontier is to insert this
+cutoff into the already checked fixed-metric W lower-bound framework and prove
+the local collapsing upper estimate contradicts it.
+
+## 2026-07-17 normalized cutoff W-form closure
+
+`Perelman/CutoffW.lean` now closes the next honest layer:
+
+- `normalize_cutoff` gives unit `L²` mass, support preservation, gradient
+  integrability, and the exact Dirichlet rescaling identity;
+- `exists_cutoff_wdata` combines it with `exists_cutoff_energy` and gives the
+  explicit outer-gradient/half-ball-mass ratio bound;
+- `exists_cutoff_wform` applies the verified support-entropy theorem and
+  `w_form_upper`, producing the full scalar square-form cutoff upper bound.
+
+All three are verified without `sorry`.  The cutoff square-form upper theorem
+and its dedicated machinery are 100%.  The actual `wFunctional` theorem is
+still 0% because the cutoff can vanish and `w_square_form` requires a strictly
+positive amplitude; the positive regularization/limit bridge remains genuine
+work.  The flow-uniform entropy lower bound and `NoLocalCollapsing` remain 0%.
+The broader entropy/noncollapsing machinery is now about 92%; whole HCG
+machinery remains about 60%, while the endpoint theorems remain 0%.
+
+## 2026-07-17 curvature-controlled flow-ball assembly
+
+The invariant curvature arm is now closed.  `scalar_abs_le_rm` proves the
+canonical trace estimate `|R| ≤ n² |Rm|`; `scalar_le_of_rm` converts
+`FlowMetricBall.IsRmControlled` into the scale-correct scalar upper bound on
+the backward cylinder; and `flowball_wform` feeds that bound directly into the
+verified normalized cutoff W-form theorem at the ball's distinguished time.
+All three focused checks passed, and the lower curvature module targeted build
+passed.
+
+Honest frontier: the curvature-controlled flow-ball square-form producer and
+its dedicated machinery are 100%.  The actual positive-amplitude
+`wFunctional` cutoff theorem is still 0%; its smallest missing theorem is a
+regularization/limit bridge from a possibly vanishing normalized amplitude to
+strictly positive smooth amplitudes while preserving the W upper bound.  After
+that, a collapsed-scale selection lemma must control the outer/half-ball volume
+ratio, and a flow-uniform W lower bound must be connected across time.  Thus
+`NoLocalCollapsing` and `ham3_noncollapse` remain 0%.  Broader
+entropy/noncollapsing machinery is about 94%; whole HCG machinery remains about
+60%, with its endpoint theorems at 0%.
+
+## 2026-07-17 positive W cutoff closure
+
+The positive-amplitude obstruction is now closed without a new convergence
+assumption.  `Analysis/Integration/EntropyMix.lean` proves subadditivity of the
+continuous entropy integrand `-x log x`.  `Entropy/PositiveApprox.lean` uses it
+to mix the squared cutoff with a small uniform density, take a strictly positive
+smooth square root, preserve unit mass, and keep the full square-form value
+within any prescribed positive error.  Its Dirichlet energy is pointwise no
+larger than the original one.
+
+`exists_cutoff_wform` now returns the already proved Dirichlet integrability,
+and `flowball_w_upper` combines that producer with `w_square_form`.  Hence a
+curvature-controlled `FlowMetricBall` now has a genuine strictly positive
+unit-mass test amplitude with an upper bound on the actual `wFunctional`, not
+only on a scalar proxy.  Focused verification passed for every edited module;
+the two new lower modules also passed targeted verification.
+
+Honest accounting: the positive-amplitude approximation theorem and the actual
+flow-ball W upper theorem are each 100%; their dedicated machinery is 100%.
+`NoLocalCollapsing` and `ham3_noncollapse` remain theorem-level 0%.  The next
+mathematical frontier is collapsed-scale selection controlling the outer-ball /
+half-ball volume ratio; after that, the time-uniform lower W bound must be
+assembled from the existing fixed-time lower theorem and flow monotonicity.
+Broader entropy/noncollapsing machinery is now about 96%; whole HCG machinery
+remains about 60%, with HCG endpoint theorems at 0%.
+
+## 2026-07-17 selected W bound and exact flow frontier
+
+Collapsed-scale selection is now closed.  `exists_coll_scale` chooses a genuine
+nested dyadic `FlowMetricBall`, preserves the full backward-parabolic curvature
+bound, does not increase normalized volume, and proves the exact outer/half
+volume ratio needed by the cutoff.  `exists_sel_w_bound` then produces a
+strictly positive unit-mass amplitude satisfying the actual estimate
+
+`W ≤ collapseWConst n + log (Vol(B) / radius(B)^n) + δ`.
+
+Both the selector and the selected W theorem are 100%, with their dedicated
+machinery 100%.  They have no spectral-support constant, chart selector,
+Bishop--Gromov input, or injectivity-radius assumption.
+
+The remaining flow bridge was checked through three routes.  A direct use of
+`gallim_pos` and `w_rev_antitone` initially has a scale/time offset; the new
+checked `heat_pot_add` theorem removes that offset by translating the reverse
+solution.  It does not close the comparison because the heat solution exists
+only on an unspecified short interval and W antitonicity applies only inside
+the open regular interval, excluding the prescribed initial cutoff slice.  A
+fixed-time use of `w_fixed_lower` gives a constant depending on the time-slice
+metric and therefore is not uniform as a finite singular time is approached.
+A direct compact-family log-Sobolev bound also does not apply on a
+`closedOpen 0 ω` flow: the existing solution predicate provides no uniform metric
+control at the excluded singular endpoint.
+
+The smallest honest missing producer is thus a finite-horizon W comparison:
+first prove right continuity of the offset W functional at the prescribed
+smooth Galerkin initial slice using the retained all-order Sobolev continuity,
+then globalize the data-independent local heat existence across a compact
+reverse-time interval.  Adding endpoint continuity as an assumption to a
+consumer would merely hide this work and is not acceptable.
+
+Honest accounting: the selected-scale cutoff contradiction machinery is about
+99%, but the finite-horizon W lower theorem is not yet stated/proved and is 0%
+(its dedicated existing machinery is about 90%).  `NoLocalCollapsing` and
+`ham3_noncollapse` remain theorem-level 0%.  Broader entropy/noncollapsing
+machinery is about 97%; whole HCG machinery remains about 60%, with HCG
+endpoint theorems at 0%.

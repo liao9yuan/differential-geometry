@@ -173,3 +173,14 @@ against general comparison maps `Φ : PointedCGHMaps X L subseq` (ruling 5b; ins
   `hcLow := inv_pos.2 (by nlinarith)`, then the four producers verbatim;
   `gInf_zero_eq` takes `conv0_of_cp` verbatim.
 - Decide the `hchi` route (see ledger) before wiring `covTail_of_bounds`.
+
+## 2026-07-17 exact-refresh repair
+
+- Focused verification and the exact named module refresh both pass.
+- Three obsolete `simp only` normalizations in `lipTail_of_src` and
+  `covTail_of_bounds` had become no-ops after the tensor-metric normal form
+  refresh.  Each was replaced by an explicit `change` to the corresponding
+  metric-inner equation before applying the existing `gSeqExt_inner_*` rewrite.
+- No theorem statement, hypothesis, API, or mathematical route changed.  The
+  six producer endpoints remain complete; this was verification maintenance,
+  so the theorem and whole-project progress estimates are unchanged.

@@ -4,7 +4,12 @@ Source used: MSM135 Definition 3.5 and Theorem 3.9.
 
 Introduced definitions: `PointedRiemannianCGMaps`, `MetricSourceDomain`, `MetricSourceData`, `MetricSourceCPConvOn`, `MetricCGConvergenceData`, `PointedRiemannianCGConverges`, `MetricCompactnessConclusion`, and `metricCompactness`.
 
-Honest frontier: `metricCompactness` is the single HCG compactness `sorry`. It represents the Cheeger-Gromov compactness theorem, direct-limit/exhaustion construction, and smooth Arzela-Ascoli upgrade for pulled-back metrics.
+Honest frontier: this file's unconditional `metricCompactness` remains the
+single metric-compactness proof `sorry`.  The direct-limit/exhaustion and
+smooth metric-convergence assembly is now checked in the conditional endpoint;
+the remaining unconditional gap is the native production of its cited
+Cheeger--Gromov--Taylor, Bishop--Gromov, localized normal-coordinate, and
+connectedness inputs from the theorem's public hypotheses.
 
 2026-05-27 review update: the metric compactness layer now consistently uses the pointed Riemannian names. `MetricSourceData` also dropped its public `smoothPlus` field; source-domain `∞ + 1` is derived locally from the stored smooth manifold instance only at the low-level norm supremum.
 
@@ -40,3 +45,12 @@ source, and target-domain data are preserved by field-wise rewrapping, so no
 record equality or `HEq` transport is needed.  Focused verification and the
 targeted module refresh passed; the existing unconditional endpoint `sorry` is
 unchanged.
+
+2026-07-17 conditional-endpoint update: the selected B/C producer now supplies
+all five `StepB1RawInput` fields, Step D consumes that record, and
+`C4/MetricCompactnessEndpoint.lean` lifts the resulting nested-subsequence
+conclusion back to the original sequence.  The conditional Theorem 3.9 is
+focused- and targeted-green (100%).  This file's unconditional theorem remains
+0% until the external comparison/packing/normal-coordinate bundle and required
+connectedness are produced natively.  The source docstring was updated to keep
+that separation explicit; its theorem body and sole `sorry` were not changed.

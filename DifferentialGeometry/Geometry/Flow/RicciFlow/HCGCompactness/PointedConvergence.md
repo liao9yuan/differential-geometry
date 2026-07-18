@@ -118,6 +118,20 @@ per-time `derivNormSupOn` convergence of the supplied source-domain metric
 data.  The remaining P4 analytic bridge is therefore the actual production of
 those raw source-domain seminorm bounds for the restricted/pulled-back metrics.
 
+## 2026-07-17 canonical comparison-map reindexing
+
+Moved the shared structural reindexing layer here: `ExhaustsByOpen.comp_subseq`
+and `PointedCGHMaps.compSubseq`.  Their qualified names and statements are
+unchanged, so existing downstream dot-call consumers require no migration.
+This lower placement lets the open-time P4 diagonal reindex its fixed
+comparison maps without importing the endgame assembly.  Focused verification
+of this file is green.
+
+Added the definitional projection lemmas `compSubseq_source`,
+`compSubseq_target`, and `compSubseq_map`.  They are the only comparison-map
+readouts needed by the fixed-family open-window producer; the exact module
+refresh is green.
+
 Verification: passed for this file.
 
 Added `SourceSpacetimeConvergenceData.toSpatial` and

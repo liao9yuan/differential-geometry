@@ -77,3 +77,13 @@ proved; Step-D consumer machinery is 100%.  The working endpoint
 `sorry`, and the textbook Step-D theorem from endpoint inputs remains 0% until
 the B/C lane constructs `StepB1RawInput`.  The next target is therefore the B1
 producer in `B1_JOIN_HANDOFF.md`, not another D6 transport route.
+
+## 2026-07-17 endpoint consumption
+
+The historical next target above is now closed.  The selected B/C route proves
+`MetricCompactBase.exists_b1_raw` with all five `StepB1RawInput` fields, and
+`MetricCompactnessEndpoint.lean` feeds that package to `compactness_of_b1`
+before applying the generic nested-subsequence lift.  The conditional Theorem
+3.9 endpoint is focused- and targeted-green.  This file remains the complete
+Step-D consumer (100%); the separately named textbook B1 statement and the
+unconditional compactness theorems remain distinct 0% endpoints.

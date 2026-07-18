@@ -102,3 +102,19 @@ path once that hypothesis is supplied.
 
 Verification passed.  The focused check and targeted module build were run
 without the global Lake lock.
+
+## 2026-07-17 bounded geometry to a common lower Ricci bound
+
+Added `ricciLower_of_seq`.  For every member of a `SeqBoundedGeometry`
+sequence, it applies `rm04Bound_of_seq` and the comparison-layer
+`BonnetMyers.ricciLower_of_rm` theorem to produce the same lower Ricci bound
+`Ric >= -(n^2 * C 0) g`.
+
+Focused verification passed.  This removes a prospective sequence-level Ricci
+lower-bound black box from the Bishop--Gromov route.  It does not prove
+`UniformBallPack`: relative Bishop--Gromov monotonicity and its ball-ratio
+packing corollary remain the mathematical frontier.
+
+Honest accounting: this bridge theorem is complete; Bishop--Gromov is 0%;
+`VolumeComparisonInput` from `SeqBoundedGeometry` is 0%; the dedicated V2
+infrastructure is about 3--5% complete.
