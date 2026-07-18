@@ -8,7 +8,10 @@ on:
 jobs:
   build:
     name: Build Project
-    runs-on: ubuntu-latest
+    runs-on: 
+      - self-hosted
+      - macOS
+      - ARM64
 
     steps:
       - name: Checkout code
