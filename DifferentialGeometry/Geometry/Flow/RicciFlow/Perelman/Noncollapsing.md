@@ -934,3 +934,216 @@ Honest accounting: the selected-scale cutoff contradiction machinery is about
 `ham3_noncollapse` remain theorem-level 0%.  Broader entropy/noncollapsing
 machinery is about 97%; whole HCG machinery remains about 60%, with HCG
 endpoint theorems at 0%.
+
+## 2026-07-17 Galerkin endpoint-continuity advance
+
+The consult recommendation was checked against the live branch and narrowed to
+existing native APIs. `potential_grad_sq` already existed, and the public
+dimension-three estimate `hs3_grad_low2` already supplied the required
+support-independent `H3` pointwise control, so neither was duplicated.
+
+The first endpoint layer is now verified. `galLimExt_zero` gives the exact
+Sobolev initial value; `sq_unit_eval_le` bounds a fully evaluated rank-one
+tensor by its intrinsic fibre norm; `covGrad0_apply` scalarizes the rank-zero
+covariant derivative. These feed `galLim_d_zero` and the stronger
+`galLim_d_joint`, proving endpoint convergence of real-valued directional
+derivatives in one actual local chart frame. This follows the scalar
+local-to-global route and avoids any equality of dependent tensor/Hom fibres.
+
+The moving inverse-Gram contraction `galLim_grad_zero` is assembled in source
+but not yet counted as proved: its focused check was prevented before theorem
+elaboration by a temporarily missing shared `RadialGronwall.olean`, downstream
+of another lane's claimed `RadialGram` refresh. After that check is green, the
+remaining endpoint chain is: glue with positive-time `gradSq_joint`; prove the
+moving W integrand and integral continuous on the closed short interval using
+`integral_family_cont`; compare the initial cutoff W value with positive-time
+W antitonicity; then globalize the terminal-uniform span by the finite Good-set
+induction from the consult route.
+
+Honest accounting: the finite-horizon W comparison theorem remains
+theorem-level **0%** and its dedicated endpoint-continuity machinery is about
+**65%**. The selected-scale contradiction machinery remains about **99%**.
+`NoLocalCollapsing` and `ham3_noncollapse` remain theorem-level **0%**.
+Broader entropy/noncollapsing machinery remains about **97%**, and whole HCG
+machinery about **60%**.
+
+## 2026-07-17 Closed scalar endpoint and W frontier
+
+The scalar Galerkin endpoint layer is now closed and verified.
+`galLim_grad_zero` proves the inverse-Gram scalar contraction at reverse time
+zero, while `galLim_grad_cont` glues it to positive-time smoothness on a
+shortened closed interval. The latter constructs its regular metric window from
+the terminal regular time and therefore introduces no new consumer assumption.
+
+The next producer, `gallim_w_cont`, is assembled in `WVariation.lean`. It uses
+the real moving Riemannian volume, the existing `potential_grad_sq` identity,
+joint continuity of the density, scalar curvature, and density gradient square,
+and `integral_family_cont`. Its first attempted verification was blocked before
+the theorem elaborated by a stale upstream Galerkin object; the explicit refresh
+is active. Thus `gallim_w_cont` remains theorem-level **0%** until the next
+focused check is green, despite its source proof being present.
+
+Honest accounting: the Galerkin scalar endpoint-continuity machinery is about
+**85%**. The finite-horizon W comparison theorem remains theorem-level **0%**,
+as do `NoLocalCollapsing` and `ham3_noncollapse`. Selected-scale contradiction
+machinery remains about **99%**, broader entropy/noncollapsing machinery about
+**97%**, and whole HCG machinery about **60%**.
+
+## 2026-07-18 verified W endpoint continuity
+
+`gallim_w_cont` now passes focused verification without changing its statement
+or adding a consumer assumption. It gives continuity of the genuine moving
+Galerkin W path through reverse time zero, using the moving Riemannian measure
+and the scalar inverse-Gram gradient-square endpoint proved below the W layer.
+
+The existing `Entropy/F` tree is not an unused competing noncollapsing route.
+Its scalar weighted Green results, especially `weightedGreen` and
+`weighted_grad_zero`, are already consumed by `WeightedHessian.lean` and hence
+by the checked W square/monotonicity chain. Its Formula-5.10 endpoint is for the
+separate `F` functional and cannot replace the remaining zero-endpoint W
+comparison or finite-horizon heat continuation.
+
+Honest accounting: `gallim_w_cont` and its dedicated endpoint-continuity
+machinery are each **100%**. The finite-horizon W comparison theorem remains
+theorem-level **0%**, as do `NoLocalCollapsing` and `ham3_noncollapse`.
+Selected-scale contradiction machinery remains about **99%**, broader
+entropy/noncollapsing machinery about **97%**, and whole HCG machinery about
+**60%**.
+
+## 2026-07-18 zero-endpoint W comparison
+
+`gallim_w_le` is now checked.  On a genuine nontrivial shortened interval it
+compares the moving Galerkin W value at every reverse time, including zero,
+with its terminal value.  Positive reverse times are handled by shifting the
+verified classical heat potential and applying `w_rev_antitone`; continuity
+from `gallim_w_cont` supplies the zero endpoint.  All shifted identifications
+are fully applied scalar equalities, so the proof avoids the dependent-fibre
+normalization problem that blocked earlier whole-Hom statements.  No new
+consumer assumption was introduced.
+
+This closes the local terminal-time comparison but not the finite-horizon
+theorem.  The next exact producer is a compact terminal-uniform Galerkin span
+`gal_span`; after it, a target-length classical solution theorem `gallim_on`
+and the finite Good-set induction can produce `w_span` without iterating
+existential interval shrinks.
+
+Honest accounting: `gallim_w_cont` and `gallim_w_le` are theorem-level
+**100%**, and their dedicated local endpoint machinery is **100%**.
+`gal_span`, `gallim_on`, `w_span`, `NoLocalCollapsing`, and
+`ham3_noncollapse` remain theorem-level **0%**.  Selected-scale contradiction
+machinery remains about **99%**, broader entropy/noncollapsing machinery about
+**97%**, and whole HCG machinery about **60%**.
+
+## 2026-07-18 compact-span diagnosis
+
+The pointwise Galerkin radii cannot be globalized by taking an infimum of
+chosen witnesses.  `lapDiffA20_short`, `conjA1_short`, `cc_a2_unif`,
+`scalar_gal_bound`, and `scalar_gal_subseq` all freeze one terminal metric
+before selecting their interval, and no lower-semicontinuity result for those
+selected radii exists.
+
+The initially proposed form of `gal_span` also asked for the last step
+`h = T`, so that the reflected interval reaches time zero.  This is not
+derivable from the present solution interface.  For a closed-open flow domain,
+zero is a carrier endpoint but not a regular time.  `MetricFamilySmoothOn`
+provides joint `C-infinity` regularity only on `D.regular` and merely `C0`
+continuity on `D.carrier`; that does not control the first spatial metric jet
+needed by A2 uniformly as positive times approach zero.
+
+The cheaper mathematically valid route is to start the lower bound at one
+fixed positive regular time, for example half the selected collapse time.
+`w_fixed_lower` applies to that single smooth compact metric.  The finite W
+propagation then takes place on a compact interval wholly contained in
+`D.regular`, so no endpoint regularity upgrade is needed.  Any finite lower
+bound at that positive time is enough for the final contradiction.
+
+Even on this interior compact interval, one genuine producer is still absent.
+The live API proves time continuity with a fixed background
+(`metric_cp_tendsto`) and spatial continuity for fixed metrics
+(`metricDerivNorm_cont`), but not the joint varying-background modulus
+
+```lean
+(base, var, x) |->
+  metricDerivNorm 1 (G.metric var) (G.metric base) (G.metric base) x.
+```
+
+This modulus, uniform on a compact regular-time slab and the compact manifold,
+is the smallest missing geometric input before the terminal metric and its
+spectral spaces are introduced.  Its order-one scalar normal form should use
+`metricCovDeriv_one_component_localFrame` (or the existing
+`metricCovDeriv_one_component_eq_metricCovAtBase`) and a finite local-frame
+cover.  It must not compare whole tensors in varying fibres.  Once this is
+available, the existing A2/A1/critical-tame constructions can be replayed with
+a target interval inside the common compact span; their lower constants may
+still depend on the terminal time and Sobolev order.
+
+Three rejected routes are now explicit: an infimum of arbitrary pointwise
+radii has no positivity proof; iterating existential shrinks can Zeno; and a
+span reaching the nonregular initial endpoint asks for spatial-jet control not
+present in the current hypotheses.  The interior compact-span route is
+mathematically sound, but the joint varying-background modulus is a
+substantial missing API rather than a local elaboration repair.
+
+### Prepared consult prompt (do not send automatically)
+
+Inspect the GitHub repository
+`liao9yuan/differential-geometry`, branch `short-time-existence`, especially:
+
+- `DifferentialGeometry/Geometry/Flow/RicciFlow/Perelman/Noncollapsing.md`;
+- `DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/WVariation.lean`;
+- `DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/ConjGalerkin.lean`;
+- `DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/ConjGalerkinEnergy.lean`;
+- `DifferentialGeometry/Geometry/Flow/RicciFlow/Entropy/ConjGalerkinLimit.lean`;
+- `DifferentialGeometry/Analysis/Spectral/Intrinsic/Garding/MetricLapDiffTime.lean`;
+- `DifferentialGeometry/Analysis/Spectral/Intrinsic/Garding/ScalarNonautUniform.lean`;
+- `DifferentialGeometry/Geometry/Flow/RicciFlow/HCGCompactness/MetricC1Continuity.lean`;
+- `DifferentialGeometry/Geometry/Curvature/Realized/MetricFamily.lean`.
+
+The verified local endpoint chain now contains `gallim_w_cont` and
+`gallim_w_le`.  The next goal is a terminal-uniform local Galerkin/W span for a
+finite Good-set induction.  Do not propose taking an infimum of the existing
+pointwise witnesses: every current Galerkin radius freezes `G.metric T`, and no
+lower-semicontinuity theorem for the selected witness exists.
+
+The earlier target `h <= min rho T` allowed `h = T`, hence reached the initial
+time zero.  On `RealTimeInterval.closedOpen 0 omega`, zero is only in the
+carrier; `MetricFamilySmoothOn` gives joint smoothness on `(0,omega)` but only
+`C0` continuity at zero.  Therefore an A2 span reaching zero is not justified
+without a forbidden new endpoint assumption.  Please assess the replacement
+route: choose one positive regular start time (for example half the collapse
+time), apply `w_fixed_lower` there, and propagate W only on a compact interval
+contained in `D.regular`.  Is any mathematical ingredient of the
+noncollapsing contradiction lost by starting at this positive time?
+
+For that interior route, give the cheapest Lean statement and proof normal
+form for the missing compact-uniform modulus, before terminal spectral spaces
+are introduced:
+
+```lean
+exists rho > 0, forall base var in a compact regular-time slab,
+  |base - var| <= rho ->
+  metricDerivNormSupOn Set.univ 1
+    (G.metric var) (G.metric base) (G.metric base) <= epsilon.
+```
+
+The live repository has `metric_cp_tendsto` only for fixed `base`,
+`metric_cp_bdd` for a fixed background, and `metricDerivNorm_cont` only for
+fixed metrics.  At order one, available scalar bridges include
+`metricCovDeriv_one_component_localFrame` and
+`metricCovDeriv_one_component_eq_metricCovAtBase`.  Please identify the exact
+existing inverse-Gram/local-frame continuity APIs that close the varying
+background norm, or state the single smallest missing producer if they do not.
+Keep all equalities fully evaluated and scalar; do not compare tensor/Hom
+objects in varying fibres.
+
+Then show how to replay the current `cc_a2_unif`, `scalar_crit_tame`,
+`scalar_gal_bound`, and `scalar_gal_subseq` proofs on any target interval below
+that common radius.  Say whether the fixed shrink factors in
+`heatpot_of_gallim`, positivity, and `gallim_w_le` can be absorbed into the
+common radius, or whether one target-length theorem is genuinely necessary.
+
+Constraints: no new consumer assumptions, no `HasLocallyConstantChartAt`, no
+wrapper black box, no equality between `tensorHs` spaces for different
+terminal metrics, and every new theorem name must have at most 20 characters.
+Give repository-native Lean statement skeletons with exact theorem references;
+do not rely on local filesystem paths.

@@ -435,7 +435,7 @@ theorem ConvOut.gInf_pde
         letI : IsManifold I ∞ P.M := P.smooth
         letI : SigmaCompactSpace P.M := P.sigmaCompact
       ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
-        ∀ z : P.M, z ∈ Φ.source k →
+        ∀ z : P.M, z ∈ bf.grow k →
           metricCovDerivNorm (I := I) q
             (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z ≤ C)
     (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
@@ -467,8 +467,6 @@ theorem ConvOut.gInf_pde
     have hadd_phi : k + kgrow ≤ co.φ (k + kgrow) := by
       simpa only [id_eq] using co.hφ.id_le (k + kgrow)
     exact hkgrow (co.φ (k + kgrow)) (hkgrow_add.trans hadd_phi) (Set.mem_singleton x)
-  have hxsource : ∀ k : Nat, x ∈ Φ.source (co.φ (k + kgrow)) :=
-    fun k ↦ bf.grow_subset (co.φ (k + kgrow)) (hxgrow k)
   have hconvTail : ∀ p : Nat, ∀ ε : Real, 0 < ε →
       ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k → ∀ u ∈ Set.Icc β ψ,
         ∀ a : Nat, a ≤ p →
@@ -512,7 +510,7 @@ theorem ConvOut.gInf_pde
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
     simpa only [gTail] using
-      hC a (co.φ (k + kgrow)) u hu x (hxsource k)
+      hC a (co.φ (k + kgrow)) u hu x (hxgrow k)
   have hbddSeq : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha
@@ -577,7 +575,7 @@ theorem ConvOut.scalar_conv_at
         letI : IsManifold I ∞ P.M := P.smooth
         letI : SigmaCompactSpace P.M := P.sigmaCompact
       ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
-        ∀ z : P.M, z ∈ Φ.source k →
+        ∀ z : P.M, z ∈ bf.grow k →
           metricCovDerivNorm (I := I) q
             (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z ≤ C)
     (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
@@ -620,8 +618,6 @@ theorem ConvOut.scalar_conv_at
     have hadd_phi : k + kgrow ≤ co.φ (k + kgrow) := by
       simpa only [id_eq] using co.hφ.id_le (k + kgrow)
     exact hkgrow (co.φ (k + kgrow)) (hkgrow_add.trans hadd_phi) (Set.mem_singleton x)
-  have hxsource : ∀ k : Nat, x ∈ Φ.source (co.φ (k + kgrow)) :=
-    fun k ↦ bf.grow_subset (co.φ (k + kgrow)) (hxgrow k)
   have hconvTail : ∀ p : Nat, ∀ ε : Real, 0 < ε →
       ∃ k0 : Nat, ∀ k : Nat, k0 ≤ k → ∀ u ∈ Set.Icc β ψ,
         ∀ a : Nat, a ≤ p →
@@ -664,7 +660,7 @@ theorem ConvOut.scalar_conv_at
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ C a := by
     intro k u hu a _ha
     simpa only [gTail] using
-      hC a (co.φ (k + kgrow)) u hu x (hxsource k)
+      hC a (co.φ (k + kgrow)) u hu x (hxgrow k)
   have hbddSeq : ∀ k : Nat, ∀ u ∈ Set.Icc β ψ, ∀ a : Nat, a ≤ 2 →
       metricCovDerivNorm (I := I) a (gTail k u) R x ≤ B0 := by
     intro k u hu a ha

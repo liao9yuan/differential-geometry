@@ -426,7 +426,7 @@ theorem exists_openConv_raw
         letI : SigmaCompactSpace P.M := P.sigmaCompact
       ∀ n q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real),
         t ∈ RealTimeInterval.openWindow a b t₀ n ->
-        ∀ z : P.M, z ∈ Φ.source k ->
+        ∀ z : P.M, z ∈ bf.grow k ->
           metricCovDerivNorm (I := I) q
             (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z <= C)
     (hlipTail : letI : TopologicalSpace P.M := P.topology
@@ -510,14 +510,14 @@ theorem exists_openConv_raw
       hbound n (ρ k) t ht y v
   have hcovTailρ : ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real),
       t ∈ RealTimeInterval.openWindow a b t₀ n ->
-      ∀ z : P.M, z ∈ (Φ.compSubseq ρ hρ).source k ->
+      ∀ z : P.M, z ∈ bfρ.grow k ->
         metricCovDerivNorm (I := I) q
           (gSeqExt (I := I) (Φ.compSubseq ρ hρ) R bfρ hsrcρ htgtρ k t) R z <= C := by
     intro q
     obtain ⟨C, hC⟩ := hcovTail n q
     refine ⟨C, fun k t ht z hz => ?_⟩
-    simpa only [bfρ, hsrcρ, htgtρ, PointedCGHMaps.compSubseq_source,
-      gSeqExt_compSubseq] using hC (ρ k) t ht z hz
+    simpa only [bfρ, hsrcρ, htgtρ, gSeqExt_compSubseq] using
+      hC (ρ k) t ht z hz
   have hlipTailρ : ∀ p : Nat, ∃ Lt : Real, 0 <= Lt /\
       ∀ (k : Nat) (s t : Real),
         s ∈ RealTimeInterval.openWindow a b t₀ n ->

@@ -28,27 +28,14 @@ against general comparison maps `Φ : PointedCGHMaps X L subseq` (ruling 5b; ins
    ∘ new `equivOn_trans` (constants multiply). `hcLow : 0 < (Crel*Bmax)⁻¹` is
    `inv_pos.2 (by nlinarith)` at the call site.
 
-2. **`covTail_of_bounds`** (→ `hcovTail` of `hbdd_gSeqExt`/`convOut`). Inputs: the same
-   `hequivT`/`hrel` (for order 0), plus
-   - `hcovSrc` — ∀ order `j` ONE constant bounding `metricCovDerivNorm j (srcMetric k t)
-     (refRes k)` over ALL `k`, window `t`, and source-domain points over
-     `tsupport (bf.chi k)` (the bump-support diagonal);
-   - `hchi` — ∀ order `c` ONE constant bounding the bump covariant tower
-     `√normSq0S (iterCov refRes 0 (fromScalarField (chiRes k)) c)` over ALL `k` and
-     all source-domain points.
-   Route: order 0 = global two-sided equivalence of `gSeqExt` vs `R` (`extEquivOn`,
-   two-sided version of the `hlow` convex-combination argument) + the NEW
-   explicit-constant `covNorm0_le` (`|h|_gRef ≤ C·√dim` — `covZeroBdd`'s body with the
-   constant exposed; explicitness is what makes it uniform across the varying source
-   domains). Positive orders: reverse triangle `covNorm_le_add`
-   (`|∇^q g| ≤ |∇^q R| + |∇^q(g−R)|`), the `R`-term killed by the NEW metric-compatibility
-   endpoint `covNorm_self_succ` (`∇_R^{q≥1} R = 0`), and the difference term by the
-   support dichotomy: off `tsupport χ_k` it vanishes (`derivNorm_congr_diff` +
-   `metricDerivNorm_self` after `U₀`-restriction); on the support it is the χ-scaled
-   source difference (`hsmulR` ext), estimated by the banked χ-Leibniz tower
-   `iterCov_smulF_le` with `hchi`-factors and `hcovSrc + √dim` second factors
-   (`derivNorm_le_cov_add` + `metricDerivNorm_eq_iterCov` both ways). Total constant
-   `2^q · CχM · (CsM + √dim)`.
+2. **`covTail_of_bounds`** (→ `hcovTail` of `hbdd_gSeqExt`/`convOut`). Input:
+   - `hcovSrc` — for every order `j`, one constant bounding
+     `metricCovDerivNorm j (srcMetric k t) (refRes k)` over all `k`, all window
+     times, and source-domain points lying over `bf.grow k`.
+   Route: `BumpFamily.chi_one` supplies an open neighborhood on which the bump
+   extension is exactly the source metric.  Restriction locality transfers the
+   covariant tower with the same constant.  No bump-derivative estimate or
+   collar split remains.
 
 3. **`lipTail_of_src`** (→ `hlipTail` of `hgLip_gSeqExt`/`convOut`). Input:
    - `hlipG` — ∀ budget `p` ONE constant `Lt` with the source-granularity window
@@ -121,20 +108,16 @@ against general comparison maps `Φ : PointedCGHMaps X L subseq` (ruling 5b; ins
   provides it morally — the comparison maps are built from convergent normal-coordinate
   data — but the formalized 3.9 conclusion does not carry an equivalence field).
 - **`hcovSrc`, `hlipG`**: uniform-in-`k` source-side covariant/Lipschitz bounds on the
-  bump-support/agreement diagonals. NOT producible from the in-tree per-`k` machinery:
+  `bf.grow` agreement diagonal. NOT producible from the in-tree per-`k` machinery:
   `covOrderBound_of_soln`/`hgLipFinSol` hide their constants behind `∃`/`Classical.choose`
   (verified — `hgLip_orderN_of_solutions` exposes no constant), so per-`k` runs cannot
   yield ONE constant over the exhausting diagonal. The uniform statements are the
   eq-(3.4)-side citations with uniform inputs; `lipSrc_of_soln` demonstrates the same
-  shape IS produced per-`k`. A future constant-explicit re-run of the P2 tower would
-  discharge them; that is a separate sub-project, not 7a plumbing.
-- **`hchi`**: uniform bump covariant-tower bounds — construction-side (NOT book-cited).
-  Needed ONLY because Brick 4 froze `hcovTail` on ALL of `Φ.source k` (the collar
-  included), while its consumer `hbdd_gSeqExt` uses it only on `grow k ⊆ Φ.source k`
-  where `χ ≡ 1`. Three 7b options: (a) weaken `hcovTail` to `grow`-granularity in
-  `ConvFieldAssembly`/`ConvFieldMain` (statement change, dissolves `hchi` — the cheap
-  fix, planner's call); (b) build a uniformly-regular bump family (bounded-geometry
-  machinery — real sub-project); (c) carry `hchi` as a tracked input.
+  shape IS produced per-`k`.  The constants-first replacement is now stated as
+  `SrcCovLipData` / `srcCovLip_of_soln` in `SourceCovLip.lean`.
+- **`hchi` (resolved 2026-07-18)**: the carried bump-tower input was artificial.
+  `hcovTail` and its consumer now work directly on `bf.grow k`, where the bump
+  is one on an open neighborhood.  The collar estimate and `hchi` were deleted.
 - **`hcp`**: `mc.convergence`-shaped. CAUTION for 7b: `MetricCGConvergenceData.domain`
   is an ABSTRACT `MetricSourceData` field of the (sorry'd) Thm 3.9 conclusion; the
   discharge needs the noted "atZero field-defeq identification" — i.e. 3.9's statement
@@ -172,7 +155,8 @@ against general comparison maps `Φ : PointedCGHMaps X L subseq` (ruling 5b; ins
 - `convOut` call shape (elaboration-tested): `cLow := (Crel*Bmax)⁻¹`,
   `hcLow := inv_pos.2 (by nlinarith)`, then the four producers verbatim;
   `gInf_zero_eq` takes `conv0_of_cp` verbatim.
-- Decide the `hchi` route (see ledger) before wiring `covTail_of_bounds`.
+- `covTail_of_bounds` is wired directly from the grow-local source bound; there
+  is no `hchi` argument or bump-collar frontier.
 
 ## 2026-07-17 exact-refresh repair
 
@@ -184,3 +168,13 @@ against general comparison maps `Φ : PointedCGHMaps X L subseq` (ruling 5b; ins
 - No theorem statement, hypothesis, API, or mathematical route changed.  The
   six producer endpoints remain complete; this was verification maintenance,
   so the theorem and whole-project progress estimates are unchanged.
+
+## 2026-07-18 grow-local `covTail_of_bounds`
+
+`covTail_of_bounds` now consumes a source-flow covariant bound only on
+`bf.grow k` and proves the matching grow-local bound for `gSeqExt`. On the
+open neighborhood supplied by `BumpFamily.chi_one`, the two metric tensor
+fields agree, so restriction locality transfers the whole covariant tower with
+the same constant. The whole-source collar split, uniform bump-derivative
+input, and `hchi` frontier were deleted. Focused verification and the exact
+module refresh pass.

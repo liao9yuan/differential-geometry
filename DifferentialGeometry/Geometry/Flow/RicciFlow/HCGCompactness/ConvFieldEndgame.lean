@@ -16,7 +16,7 @@ Assembles the DONE Bricks 4–7a into the theorem-facing upgrade
 `CompactnessConclusion X`, modulo the THREE tracked inputs (Thm 3.9's `mc`, the
 moving-Shi bound `hShiT`, and the joint regularity `hsmooth` of the limit) plus
 the mc-comparison data the plan sanctions (`hequivT`/`hrel`/`hcp`/`hcovSrc`/
-`hlipG`/`hchi`/`hkcont`).
+`hlipG`/`hkcont`).
 
 See `ConvFieldEndgame.md` for the route, ruling A/B decisions, and gotchas.
 -/
@@ -74,7 +74,7 @@ theorem ConvOut.scalar_conv
         letI : IsManifold I ∞ P.M := P.smooth
         letI : SigmaCompactSpace P.M := P.sigmaCompact
       ∀ q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
-        ∀ z : P.M, z ∈ Φ.source k →
+        ∀ z : P.M, z ∈ bf.grow k →
           metricCovDerivNorm (I := I) q
             (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z ≤ C)
     (co : ConvOut (I := I) Φ R bf hsrc htgt β ψ)
@@ -460,7 +460,7 @@ noncomputable def endgameCo
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
       forall j : Nat, exists Cs : Real, 0 <= Cs /\
         forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-          forall y : SourceDomain (I := I) Φ k, (y : P.M) ∈ tsupport (bf.chi k) ->
+          forall y : SourceDomain (I := I) Φ k, (y : P.M) ∈ bf.grow k ->
             letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
             letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
             letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
@@ -469,23 +469,6 @@ noncomputable def endgameCo
               sourceDomSigmaOf (I := I) Φ k (hsrc k)
             metricCovDerivNorm (I := I) j (srcMetric (I := I) Φ hsrc htgt k t)
               (refRes (I := I) Φ R hsrc k) y <= Cs)
-    (hchi : letI : TopologicalSpace P.M := P.topology;
-        letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
-        letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
-      forall c : Nat, exists Cc : Real, 0 <= Cc /\
-        forall (k : Nat) (y : SourceDomain (I := I) Φ k),
-          letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
-          letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
-          letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
-          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
-          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
-            sourceDomSigmaOf (I := I) Φ k (hsrc k)
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I)
-            (refRes (I := I) Φ R hsrc k) y (0 + c)
-            (iterCov (I := I) (refRes (I := I) Φ R hsrc k) 0
-              (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I)
-                (M := SourceDomain (I := I) Φ k) (∞ : WithTop ℕ∞)
-                (chiRes (I := I) Φ bf k) (chiRes_smooth (I := I) Φ bf k)) c y)) <= Cc)
     (hlipG : letI : TopologicalSpace P.M := P.topology;
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
@@ -506,8 +489,7 @@ noncomputable def endgameCo
   convOut (I := I) (Φ := Φ) R bf hsrc htgt β ψ hβψ ((Crel * Bmax)⁻¹)
     (inv_pos.2 (mul_pos (lt_of_lt_of_le one_pos hCrel1) (lt_of_lt_of_le one_pos hBmax1)))
     (hbound_of_equiv (I := I) (Φ := Φ) R hsrc htgt β ψ gRefT B Crel Bmax hBmax hCrel1 hequivT hrel)
-    (covTail_of_bounds (I := I) (Φ := Φ) R bf hsrc htgt β ψ gRefT B Crel Bmax hBmax hCrel1
-      hequivT hrel hcovSrc hchi)
+    (covTail_of_bounds (I := I) (Φ := Φ) R bf hsrc htgt β ψ hcovSrc)
     (lipTail_of_src (I := I) (Φ := Φ) R bf hsrc htgt β ψ hlipG)
     (lipSrc_of_soln (I := I) (Φ := Φ) R hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1
       hBmax1 hequivT hrel hShiT)
@@ -562,7 +544,7 @@ theorem endgameCo_zero
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
       forall j : Nat, exists Cs : Real, 0 <= Cs /\
         forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-          forall y : SourceDomain (I := I) Φ k, (y : P.M) ∈ tsupport (bf.chi k) ->
+          forall y : SourceDomain (I := I) Φ k, (y : P.M) ∈ bf.grow k ->
             letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
             letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
             letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
@@ -571,23 +553,6 @@ theorem endgameCo_zero
               sourceDomSigmaOf (I := I) Φ k (hsrc k)
             metricCovDerivNorm (I := I) j (srcMetric (I := I) Φ hsrc htgt k t)
               (refRes (I := I) Φ R hsrc k) y <= Cs)
-    (hchi : letI : TopologicalSpace P.M := P.topology;
-        letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
-        letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
-      forall c : Nat, exists Cc : Real, 0 <= Cc /\
-        forall (k : Nat) (y : SourceDomain (I := I) Φ k),
-          letI : TopologicalSpace (SourceDomain (I := I) Φ k) := sourceDomTop (I := I) Φ k
-          letI : ChartedSpace H (SourceDomain (I := I) Φ k) := sourceDomCharted (I := I) Φ k
-          letI : T2Space (SourceDomain (I := I) Φ k) := sourceDomT2 (I := I) Φ k
-          letI : IsManifold I ∞ (SourceDomain (I := I) Φ k) := sourceDomSmooth (I := I) Φ k
-          letI : SigmaCompactSpace (SourceDomain (I := I) Φ k) :=
-            sourceDomSigmaOf (I := I) Φ k (hsrc k)
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I)
-            (refRes (I := I) Φ R hsrc k) y (0 + c)
-            (iterCov (I := I) (refRes (I := I) Φ R hsrc k) 0
-              (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I)
-                (M := SourceDomain (I := I) Φ k) (∞ : WithTop ℕ∞)
-                (chiRes (I := I) Φ bf k) (chiRes_smooth (I := I) Φ bf k)) c y)) <= Cc)
     (hlipG : letI : TopologicalSpace P.M := P.topology;
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
@@ -626,14 +591,14 @@ theorem endgameCo_zero
     letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
     letI : IsManifold I ∞ P.M := P.smooth
-    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf 0 = g0 :=
+    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG).gInf 0 = g0 :=
   gInf_zero_eq (I := I) Φ R bf hsrc htgt β ψ
-    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG) h0 g0
+    (endgameCo Φ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG) h0 g0
     (conv0_of_cp (I := I) Φ R hsrc htgt g0 hcp)
 
 /-- **The book-facing P4 endgame theorem — MSM135 Thm 3.10 ⇐ 3.9.**  Hypotheses:
 `mc` (Thm 3.9); the book-cited sequence-flow inputs (`hequivT`/`hrel`/`hShiT`/`hcovSrc`/
-`hchi`/`hlipG` + the reference/window data + the time-0 `hcp`); and the tracked
+`hlipG` + the reference/window data + the time-0 `hcp`); and the tracked
 limit-regularity/scalar inputs `hsol`/`scalar` (stated against the `endgameCo` def per
 ruling 5a).  `Φ₀ = pointedCGHMaps_of_manifold X mc.limit mc.subseq mc.maps`; `bf`/`hsrc`/
 `htgt` are `nonempty_bumpFamily`/`isSigmaCompact_of_isOpen`.  The AA output and time-0
@@ -685,7 +650,7 @@ theorem flowLimit_endgame
         letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth; letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact;
       forall j : Nat, exists Cs : Real, 0 <= Cs /\
         forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-          forall y : SourceDomain (I := I) Φ₀ k, (y : mc.limit.M) ∈ tsupport (bf.chi k) ->
+          forall y : SourceDomain (I := I) Φ₀ k, (y : mc.limit.M) ∈ bf.grow k ->
             letI : TopologicalSpace (SourceDomain (I := I) Φ₀ k) := sourceDomTop (I := I) Φ₀ k
             letI : ChartedSpace H (SourceDomain (I := I) Φ₀ k) := sourceDomCharted (I := I) Φ₀ k
             letI : T2Space (SourceDomain (I := I) Φ₀ k) := sourceDomT2 (I := I) Φ₀ k
@@ -694,23 +659,6 @@ theorem flowLimit_endgame
               sourceDomSigmaOf (I := I) Φ₀ k (hsrc k)
             metricCovDerivNorm (I := I) j (srcMetric (I := I) Φ₀ hsrc htgt k t)
               (refRes (I := I) Φ₀ R hsrc k) y <= Cs)
-    (hchi : letI : TopologicalSpace mc.limit.M := mc.limit.topology;
-        letI : ChartedSpace H mc.limit.M := mc.limit.charted; letI : T2Space mc.limit.M := mc.limit.t2;
-        letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth; letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact;
-      forall c : Nat, exists Cc : Real, 0 <= Cc /\
-        forall (k : Nat) (y : SourceDomain (I := I) Φ₀ k),
-          letI : TopologicalSpace (SourceDomain (I := I) Φ₀ k) := sourceDomTop (I := I) Φ₀ k
-          letI : ChartedSpace H (SourceDomain (I := I) Φ₀ k) := sourceDomCharted (I := I) Φ₀ k
-          letI : T2Space (SourceDomain (I := I) Φ₀ k) := sourceDomT2 (I := I) Φ₀ k
-          letI : IsManifold I ∞ (SourceDomain (I := I) Φ₀ k) := sourceDomSmooth (I := I) Φ₀ k
-          letI : SigmaCompactSpace (SourceDomain (I := I) Φ₀ k) :=
-            sourceDomSigmaOf (I := I) Φ₀ k (hsrc k)
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I)
-            (refRes (I := I) Φ₀ R hsrc k) y (0 + c)
-            (iterCov (I := I) (refRes (I := I) Φ₀ R hsrc k) 0
-              (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I)
-                (M := SourceDomain (I := I) Φ₀ k) (∞ : WithTop ℕ∞)
-                (chiRes (I := I) Φ₀ bf k) (chiRes_smooth (I := I) Φ₀ bf k)) c y)) <= Cc)
     (hlipG : letI : TopologicalSpace mc.limit.M := mc.limit.topology;
         letI : ChartedSpace H mc.limit.M := mc.limit.charted; letI : T2Space mc.limit.M := mc.limit.t2;
         letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth; letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact;
@@ -758,20 +706,20 @@ theorem flowLimit_endgame
         change IsManifold I ∞ mc.limit.M
         infer_instance
       DifferentialGeometry.PDE.RicciFlow.IsSolutionOn (I := I)
-        ({ base := { metric := (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf } } :
+        ({ base := { metric := (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG).gInf } } :
           DifferentialGeometry.PDE.RicciFlow.SolutionOn (I := I) (M := mc.limit.M) X.D))
     (scalar : ScalarPullbackTendsto (I := I)
-      ((flowOfMetric_atTime (I := I) X.D mc.limit (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf hsol 0
+      ((flowOfMetric_atTime (I := I) X.D mc.limit (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG).gInf hsol 0
           (endgameCo_zero Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1
-            hequivT hrel hShiT hcovSrc hchi hlipG mc.limit.metric h0 hcp)).symm ▸
-        (Φ₀.compSubseq (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).φ (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).hφ) :
+            hequivT hrel hShiT hcovSrc hlipG mc.limit.metric h0 hcp)).symm ▸
+        (Φ₀.compSubseq (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG).φ (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG).hφ) :
         PointedCGHMaps (I := I) X
-          ((flowOfMetric (I := I) X.D mc.limit (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).gInf hsol).atTime 0)
-          (mc.subseq ∘ (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG).φ))) :
+          ((flowOfMetric (I := I) X.D mc.limit (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG).gInf hsol).atTime 0)
+          (mc.subseq ∘ (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG).φ))) :
     CompactnessConclusion (I := I) X :=
-  flowLimit_of_mc (I := I) mc Φ₀ R bf hsrc htgt β ψ hcarrier (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG)
+  flowLimit_of_mc (I := I) mc Φ₀ R bf hsrc htgt β ψ hcarrier (endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG)
     (endgameCo_zero Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax hCrel1 hBmax1
-      hequivT hrel hShiT hcovSrc hchi hlipG mc.limit.metric h0 hcp)
+      hequivT hrel hShiT hcovSrc hlipG mc.limit.metric h0 hcp)
     hsol scalar
 
 /-- Compatibility refinement of `flowLimit_endgame` with the limit-flow equation
@@ -831,7 +779,7 @@ theorem flowLimit_of_reg
         letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact;
       ∀ j : Nat, ∃ Cs : Real, 0 ≤ Cs ∧
         ∀ (k : Nat) (t : Real), t ∈ Set.Icc β ψ →
-          ∀ y : SourceDomain (I := I) Φ₀ k, (y : mc.limit.M) ∈ tsupport (bf.chi k) →
+          ∀ y : SourceDomain (I := I) Φ₀ k, (y : mc.limit.M) ∈ bf.grow k →
             letI : TopologicalSpace (SourceDomain (I := I) Φ₀ k) := sourceDomTop (I := I) Φ₀ k
             letI : ChartedSpace H (SourceDomain (I := I) Φ₀ k) := sourceDomCharted (I := I) Φ₀ k
             letI : T2Space (SourceDomain (I := I) Φ₀ k) := sourceDomT2 (I := I) Φ₀ k
@@ -840,25 +788,6 @@ theorem flowLimit_of_reg
               sourceDomSigmaOf (I := I) Φ₀ k (hsrc k)
             metricCovDerivNorm (I := I) j (srcMetric (I := I) Φ₀ hsrc htgt k t)
               (refRes (I := I) Φ₀ R hsrc k) y ≤ Cs)
-    (hchi : letI : TopologicalSpace mc.limit.M := mc.limit.topology;
-        letI : ChartedSpace H mc.limit.M := mc.limit.charted;
-        letI : T2Space mc.limit.M := mc.limit.t2;
-        letI : IsManifold I ∞ mc.limit.M := mc.limit.smooth;
-        letI : SigmaCompactSpace mc.limit.M := mc.limit.sigmaCompact;
-      ∀ c : Nat, ∃ Cc : Real, 0 ≤ Cc ∧
-        ∀ (k : Nat) (y : SourceDomain (I := I) Φ₀ k),
-          letI : TopologicalSpace (SourceDomain (I := I) Φ₀ k) := sourceDomTop (I := I) Φ₀ k
-          letI : ChartedSpace H (SourceDomain (I := I) Φ₀ k) := sourceDomCharted (I := I) Φ₀ k
-          letI : T2Space (SourceDomain (I := I) Φ₀ k) := sourceDomT2 (I := I) Φ₀ k
-          letI : IsManifold I ∞ (SourceDomain (I := I) Φ₀ k) := sourceDomSmooth (I := I) Φ₀ k
-          letI : SigmaCompactSpace (SourceDomain (I := I) Φ₀ k) :=
-            sourceDomSigmaOf (I := I) Φ₀ k (hsrc k)
-          Real.sqrt (Tensor0SBundle.normSq0S (I := I)
-            (refRes (I := I) Φ₀ R hsrc k) y (0 + c)
-            (iterCov (I := I) (refRes (I := I) Φ₀ R hsrc k) 0
-              (Tensor0SField.fromScalarField (𝕜 := Real) (E := E) (H := H) (I := I)
-                (M := SourceDomain (I := I) Φ₀ k) (∞ : WithTop ℕ∞)
-                (chiRes (I := I) Φ₀ bf k) (chiRes_smooth (I := I) Φ₀ bf k)) c y)) ≤ Cc)
     (hlipG : letI : TopologicalSpace mc.limit.M := mc.limit.topology;
         letI : ChartedSpace H mc.limit.M := mc.limit.charted;
         letI : T2Space mc.limit.M := mc.limit.t2;
@@ -908,7 +837,7 @@ theorem flowLimit_of_reg
       change IsManifold I ∞ mc.limit.M
       infer_instance
     let co := endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax
-      hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG
+      hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG
     ∀ (hsmooth : MetricFamilySmoothOn (I := I) (M := mc.limit.M) X.D
           ({ base := { metric := co.gInf } } :
             SolutionOn (I := I) (M := mc.limit.M) X.D).family)
@@ -937,7 +866,7 @@ theorem flowLimit_of_reg
     change IsManifold I ∞ mc.limit.M
     infer_instance
   let co := endgameCo Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax
-    hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG
+    hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG
   have hpde : ∀ t ∈ X.D.regular, ∀ (x : mc.limit.M) (v w : TangentSpace I x),
       HasDerivAt (fun s : Real ↦ (co.gInf s).inner x v w)
         ((-2 : Real) * ricciTensor (I := I) (co.gInf t) x v w) t := by
@@ -951,8 +880,7 @@ theorem flowLimit_of_reg
         (lt_of_lt_of_le one_pos hBmax1)))
       (hbound_of_equiv (I := I) (Φ := Φ₀) R hsrc htgt β ψ gRefT B Crel Bmax
         hBmax hCrel1 hequivT hrel)
-      (covTail_of_bounds (I := I) (Φ := Φ₀) R bf hsrc htgt β ψ gRefT B Crel Bmax
-        hBmax hCrel1 hequivT hrel hcovSrc hchi)
+      (covTail_of_bounds (I := I) (Φ := Φ₀) R bf hsrc htgt β ψ hcovSrc)
       co x v w htIcc).hasDerivAt hIcc
   have hsol : IsSolutionOn (I := I)
       ({ base := { metric := co.gInf } } : SolutionOn (I := I) (M := mc.limit.M) X.D) :=
@@ -960,7 +888,7 @@ theorem flowLimit_of_reg
       (I := I) co.gInf hsmooth hpde hscalarCont hscalarTime hricciCont hrm04Cont
   have hzero : co.gInf 0 = mc.limit.metric :=
     endgameCo_zero Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel Bmax hBmax
-      hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG mc.limit.metric h0 hcp
+      hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG mc.limit.metric h0 hcp
   have hL0 :
       (flowOfMetric (I := I) X.D mc.limit co.gInf hsol).atTime 0 = mc.limit :=
     flowOfMetric_atTime (I := I) X.D mc.limit co.gInf hsol 0 hzero
@@ -970,8 +898,7 @@ theorem flowLimit_of_reg
       (lt_of_lt_of_le one_pos hBmax1)))
     (hbound_of_equiv (I := I) (Φ := Φ₀) R hsrc htgt β ψ gRefT B Crel Bmax
       hBmax hCrel1 hequivT hrel)
-    (covTail_of_bounds (I := I) (Φ := Φ₀) R bf hsrc htgt β ψ gRefT B Crel Bmax
-      hBmax hCrel1 hequivT hrel hcovSrc hchi)
+    (covTail_of_bounds (I := I) (Φ := Φ₀) R bf hsrc htgt β ψ hcovSrc)
     co hcarrier
   have map_cast {P Q : PointedRiemannianManifold (I := I)}
       {s : Nat → Nat} (h : P = Q) (maps : PointedCGHMaps (I := I) X Q s)
@@ -1000,7 +927,7 @@ theorem flowLimit_of_reg
     simpa only [hmap, flowOfMetric, DifferentialGeometry.PDE.RicciFlow.SolutionOn.scalar,
       DifferentialGeometry.PDE.RicciFlow.SolutionFamily.scalar] using hscalarRaw t ht x
   exact flowLimit_endgame (I := I) mc Φ₀ R bf hsrc htgt β ψ hβψ hwin gRefT B Crel
-    Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hchi hlipG hcarrier h0 hcp
+    Bmax hBmax hCrel1 hBmax1 hequivT hrel hShiT hcovSrc hlipG hcarrier h0 hcp
     hsol scalar
 
 end Endgame

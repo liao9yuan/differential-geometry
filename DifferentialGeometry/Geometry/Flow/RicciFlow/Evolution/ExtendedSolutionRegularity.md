@@ -361,3 +361,16 @@ larger of the two original frontiers. (2) Wire `MaximalTime.lean:291`:
 
 Deferred polish: benign `show`→`change` at `ESR:501` (P6); 2 unused-simp-arg warnings in the scalarTime field
 germ proofs.
+
+## 2026-07-17 — open/noncompact chart-Gram readouts
+
+The four interior readouts needed by the HCG open endgame —
+`scalarCont_interior_of_chartGram`, `scalarTime_interior_of_chartGram`,
+`ricciCont_interior_of_chartGram`, and `rm04Cont_interior_of_chartGram` — now omit the previously leaked
+`[CompactSpace M]` instance.  The correction was made through their canonical `_of_joint`, chart-jet,
+and scalar-time helper chains rather than by adding parallel wrappers.  The imported joint-curvature
+helpers were likewise corrected at their canonical source.  No underlying argument uses compactness,
+and no new geometric assumption was added.
+
+Focused verification passed; the four noncompact endpoint APIs are complete (100%).  This closes an
+open-endgame interface gate but does not by itself prove the unconditional HCG compactness endpoint.

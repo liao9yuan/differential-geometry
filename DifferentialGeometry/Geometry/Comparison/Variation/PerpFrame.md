@@ -18,3 +18,12 @@
   neighborhood of `Icc 0 b`, not merely on the closed interval itself.
   Verification passed.  The downstream volume bridge consumed it through
   `RadialGronwall.exists_rclip_nbhd`.
+
+## 2026-07-18 positive-speed perpendicular frame
+
+- Added `exists_perp_pos`, producing the required perpendicular orthonormal
+  family along a positive-speed curve while retaining the existing local-frame
+  conventions.
+- Focused verification and the exported module refresh passed.
+- The result is consumed by the assembled radial comparison producer; it does
+  not resolve the global cut-locus transfer.

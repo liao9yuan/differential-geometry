@@ -29,3 +29,10 @@ Focused verification and the exact module refresh are green.  The remaining
 P4 work is above this diagonal layer: produce its four raw window hypotheses
 from the theorem-level sequence-flow data uniformly over all canonical
 windows, and prove joint spacetime regularity of the glued limit family.
+
+## 2026-07-18 grow-local diagonal propagation
+
+The fixed-window and reindexed `hcovTail` hypotheses are now stated on
+`bf.grow k`. Subsequence transport uses the bump-family grow identity
+directly and no longer normalizes a source-domain membership proposition.
+Focused verification and the exact module refresh pass.

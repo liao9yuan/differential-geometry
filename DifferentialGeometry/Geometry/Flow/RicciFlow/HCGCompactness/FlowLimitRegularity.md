@@ -175,3 +175,93 @@ also remains. The strengthened `compactnessSol` conclusion further requires a
 checked producer of completeness of every limit time slice. Theorem-level
 `compactnessSol` remains 0%, and the dedicated P4 machinery estimate remains
 about 88%.
+
+### 2026-07-17 finite-stage spatial jets
+
+The private helper `gSeqJet_contOn` is now proved and focused-green.  On a
+fixed regular time window and a fixed Euclidean chart core whose inverse image
+lies in `bf.grow k`, it derives continuity of every finite spatial
+`iteratedFDeriv` of the stage chart-Gram scalar.  The proof uses the checked
+joint smoothness of `sourceFlow`, restriction of ambient chart-basis sections
+to `SourceDomain`, and the facts that `gSeqExt` agrees with the source metric
+where the bump is one.  It adds no field to `ConvOut`, no endpoint-radius
+assumption, and no extra stage-family regularity input.
+
+This closes the stage-side jet-continuity brick only.  `ConvOut.gramSmooth`
+itself is still unstated-by-proof in the sense relevant to endpoint accounting:
+its theorem proof remains the visible `sorry`, so theorem completion is 0%.
+Its dedicated P4 machinery is now about 88--89%; the whole HCG machinery
+remains about 60%, while the unconditional `compactnessSol` theorem remains 0%.
+
+### 2026-07-17 limit spatial jets
+
+`ConvOut.gramJets` is now proved and focused-green.  For every finite spatial
+order `r`, chart center, and Gram entry, it gives joint continuity of the
+`r`th spatial `iteratedFDeriv` on the closed time window times the interior of
+the extended-chart target.  The proof applies `chartJet_sub_le` on a compact
+chart core, uses `co.convPt` once at order `r` to control the finite sum of all
+covariant orders `q ≤ r`, obtains an eventual continuous approximating family
+from `gSeqJet_contOn` and `grow_cover`, and passes continuity through locally
+uniform convergence.  No field of `ConvOut`, radius assumption, or stage-family
+stay hypothesis was added.
+
+The old `ConvOut.gInf_pde` is not the next direct consumer: its global raw-stage
+`hbound` and `hcovTail` hypotheses cannot be recovered from compact-local
+subsequence data in `co`.  The next honest bridge is a chart-local
+`ConvOut.gramPDE`, proved from `gSeqExt_pde`, compact-local convergence of the
+0--2 chart jets, and `hasDeriv_lim_tail`.  After that, the remaining genuine
+analytic frontiers are the time/spatial-jet swap and finite-order composition
+bootstrap.  `ConvOut.gramSmooth` still contains its visible `sorry`, hence the
+theorem itself remains 0%; its dedicated machinery is now about 90%.  Whole
+HCG machinery remains about 60%, and unconditional `compactnessSol` remains 0%.
+
+### 2026-07-17 limit chart-Gram PDE
+
+`ConvOut.gramPDE` is now proved and focused-green with exactly the intended
+surface `hwin + co`.  It uses the stage equation `gSeqExt_pde`, the geometric
+entry conversion `chartGramEntryPDE_of_metricPDE`, and
+`jetRicciFlow_chartGram`, then passes the derivative through the fixed
+subsequence with `hasDeriv_lim_tail`.  Pointwise value convergence comes from
+order-zero `co.convPt`; uniform convergence of the right-hand side comes from
+the new full `MatJet` estimate `chartJet2_sub_le`, continuity of the limit jet,
+and compact-image composition with `jetRicciFlow`.  Only the limit jet needs
+an invertible value matrix, supplied by positivity of every `co.gInf t`.
+
+No lower metric constant, global covariant bound, new `ConvOut` field, endpoint
+regularity, or stage determinant hypothesis was introduced.  The old
+`ConvOut.gInf_pde` remains a separate global-input theorem and is not used by
+this compact-local route.  The theorem `ConvOut.gramSmooth` still has its sole
+visible `sorry`, so its theorem completion remains 0%; its dedicated P4
+machinery is now approximately 92%.  The next genuine analytic frontier is
+`hasDerivAt_iterF`, followed by finite-order spatial-jet composition and the
+finite-q bootstrap.  Whole HCG machinery remains about 60%, and unconditional
+`compactnessSol` remains 0%.
+
+### 2026-07-17 fixed-window chart-Gram smoothness closed
+
+`ConvOut.gramSmooth` is now proved with no `sorry`.  Its proof uses the checked
+spatial-jet convergence and chart-Ricci PDE together with the new generic
+`SpaceJetDiff`, `spaceJet_comp`, and `hasDerivAt_iterF` APIs, then performs the
+finite spatial-order bootstrap on the invertible `MatJet` locus.  The proof is
+focused-green and the exact `FlowLimitRegularity` module has been refreshed.
+
+No field was added to `ConvOut`; no lower metric constant, endpoint condition,
+radius hierarchy, or stage-family stay hypothesis was introduced.  In
+particular, the theorem is derived from the existing fixed-window data `hwin`
+and `co`.  `OpenConvOut.smoothMetric_of_conv` is therefore now a genuine checked
+downstream producer of `MetricFamilySmoothOn` on the open interval, rather than
+a consumer resting on an analytic `sorry`.
+
+The same window-localization argument is now exported as
+`OpenConvOut.gramSmooth`.  This keeps the chart-Gram hypothesis available to
+the existing Ricci, lowered-Riemann, scalar-continuity, and scalar-time
+producers without trying to reconstruct it from `MetricFamilySmoothOn`.
+
+The theorem `ConvOut.gramSmooth` and its dedicated machinery are both 100%.
+The remaining P4 work is now downstream or producer-side: wire the open PDE,
+scalar, and regularity readouts into the final flow/convergence objects; produce
+the four raw fixed-window hypotheses uniformly from theorem-level data; and
+prove completeness of every limit time slice.  Dedicated P4 machinery is
+conservatively about 93%; whole-HCG machinery remains about 60%; the
+unconditional theorem `compactnessSol` remains unstated-by-proof and therefore
+0%.

@@ -155,3 +155,9 @@ The focused check could not reach this documentation-only edit because the
 shared build cache currently lacks the unrelated upstream
 `TensorNabla.TensorExtension` object file.  The last proof-bearing version of
 this module remains checked; no declaration or proof body changed here.
+
+## 2026-07-18 grow-local carried input
+
+`convOut` now carries `hcovTail` at the exact `bf.grow k` granularity used by
+the compact-exhaustion and PDE consumers. Focused verification and the exact
+module refresh pass; no new geometric input was introduced.

@@ -112,3 +112,62 @@ theorem-level **0%**. Their broader dedicated entropy/noncollapse machinery is
 now about **58%**, while whole HCG machinery remains conservatively about
 **60%**. The construction still inherits the previously recorded
 Weyl-counting `sorry`; the new theorem bodies contain no local `sorry`.
+
+## 2026-07-17 Galerkin endpoint derivatives
+
+The retained Galerkin route now reaches spatial derivatives at the reverse-time
+endpoint without constructing a dependent tensor-valued limit section.
+`galLimExt_zero` identifies every Sobolev realization at time zero with the
+prescribed smooth initial tensor. The fully applied rank-zero bridge
+`covGrad0_apply`, together with the fibre Parseval estimate
+`sq_unit_eval_le`, converts the dimension-three `H3` pointwise covariant-gradient
+bound into a scalar directional-derivative estimate whose constant is
+independent of spectral support.
+
+`galLim_d_zero` proves convergence for every fixed point and tangent vector.
+`galLim_d_joint` upgrades this to genuine joint `(s,x)` continuity in the
+actual `chartBasisVecFiber` frame on its trivialization base set. Both theorems
+passed focused verification. No global frame, whole-Hom equality,
+`HasLocallyConstantChartAt`, or extra consumer convergence assumption is used.
+
+The next finite inverse-Gram contraction, `galLim_grad_zero`, has been written
+to turn those scalar components into moving gradient-square endpoint
+continuity. Its focused verification is temporarily unobserved because the
+shared volume lane removed `RadialGronwall.olean` while refreshing its claimed
+`RadialGram` dependency; the check stopped at that missing import before
+elaborating this theorem. The exact next action is to rerun the focused check
+after that upstream refresh finishes, then combine this endpoint theorem with
+the verified positive-time `gradSq_joint` route and feed the resulting joint
+scalar continuity to `integral_family_cont`.
+
+Honest accounting: `galLimExt_zero`, `galLim_d_zero`, and `galLim_d_joint` are
+each theorem-level **100%**. `galLim_grad_zero` is not counted as proved until
+the blocked check passes (**0% theorem; source proof assembled**). The finite-
+horizon W comparison theorem is still unstated/unproved (**0%**); its dedicated
+endpoint-continuity machinery is about **65%**. Perelman
+`NoLocalCollapsing` and `ham3_noncollapse` remain theorem-level **0%**; broader
+entropy/noncollapsing machinery remains about **97%**, and whole HCG machinery
+about **60%**.
+
+## 2026-07-17 Closed-interval gradient square
+
+The endpoint contraction is now fully verified. `galLim_grad_zero` reconstructs
+the intrinsic squared gradient from finitely many scalar directional
+derivatives and the inverse chart Gram matrix. Its final normal form is fully
+applied and scalar-valued; no dependent gradient section or whole-Hom equality
+is introduced.
+
+`galLim_grad_cont` is also verified. It combines the zero-endpoint theorem with
+the existing positive-time `galLim_joint_top` and `gradSq_joint` route, returning
+a nontrivial shortened interval on which the moving squared gradient is jointly
+continuous. The public theorem does not require a supplied regular-time window:
+it derives the needed smaller window from `T.2`. Internally,
+`galLim_grad_zero` now separates the full Galerkin interval from the smaller
+regular metric interval, so no stronger consumer assumption was hidden.
+
+Honest accounting: `galLim_grad_zero` and `galLim_grad_cont` are each
+theorem-level **100%**. The Galerkin endpoint-continuity machinery is about
+**85%**; the finite-horizon W comparison theorem remains theorem-level **0%**
+until its moving-integral proof verifies. Perelman `NoLocalCollapsing` and
+`ham3_noncollapse` remain theorem-level **0%**; broader entropy/noncollapsing
+machinery remains about **97%**, and whole HCG machinery about **60%**.

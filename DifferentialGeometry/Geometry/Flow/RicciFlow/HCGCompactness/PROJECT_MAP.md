@@ -48,7 +48,7 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 | **Conditional Thm 3.9** `MetricCompactnessInputs.metricCompactness` | `C4/MetricCompactnessEndpoint.lean` | **100% checked.**  `MetricCompactBase.exists_b1_raw` produces all 5/5 fields, `compactness_of_b1` performs Step-D assembly, and `MetricCompactnessConclusion.ofSeqSubseq` transports the nested subsequence conclusion back to the original sequence.  Focused check and exact targeted refresh are green. |
 | Unconditional Thm 3.9 `metricCompactness` | `MetricCompactness.lean` | 0%; the conditional endpoint is available, but the native CGT, Bishop–Gromov/uniform-packing, [H6], and connectedness producers needed to instantiate it remain external to this Chapter 4 assembly. |
 | Conditional Thm 3.10 `solutionComp_cond` / `compactnessSol_cond` | `C4/SolutionCompactnessInputs.lean` + `HamiltonCompactness.lean` | checked consumer of the now-complete conditional Thm 3.9 plus concrete `FlowUpgradeData`; it does not produce that P4 input or prove unconditional Thm 3.10 |
-| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `P4_CONV_PLAN.md` | exact open-interval target is stated with one visible P4 `sorry`; theorem 0%. The raw fixed-window producer yields one master subsequence and one compatible limit family on all canonical windows. `OpenConvOut.smoothMetric` checks the window-to-open-interval regularity assembly; its exact remaining analytic producer is the explicitly stated `ConvOut.gramSmooth` with one visible `sorry`. Uniform production of the raw window hypotheses, open-endgame wiring, and the all-time limit-completeness producer also remain. |
+| MSM135 Thm 3.10 `compactnessSol` | `HamiltonCompactness.lean` + `P4_CONV_PLAN.md` | exact open-interval target is stated with one visible P4 `sorry`; theorem 0%. `open_upgrade_of_raw` now checks the complete consumer path from the four raw window packages plus canonical time-zero convergence to one `FlowUpgradeData` whose every time slice is complete. Uniform production of those raw packages and preservation of the concrete Step-D time-zero convergence provenance remain. |
 | Lemma 3.11 | capstone `covOrderBound_of_soln` chain | DONE sorry-free (hShi hypothesis) |
 
 ## 3. Live lanes and their entry documents
@@ -57,7 +57,8 @@ Thm 3.9 (Ch4 proof) = Step A (good coverings, DONE)
 |---|---|---|
 | Ch4 Step B/C (selected B1 producer route) | `C4/CHAPTER4_PLAN.md` + `C4/B1_STAGE_MAP_RULING.md` + `C4/StepCStageComparison.md` + `C4/StepCStageDiagonal.md` + `C4/StepCStageInjectivity.md` + `C4/StepCStageMaster.md` + `C4/StepB1MetricLocal.md` + `C4/StepB1MetricIntrinsic.md` + `C4/StepB1MetricCarrier.md` + `C4/StepB1RawProducer.md` | **100% checked for the selected producer route.**  The global stage map, forward and exact-local-inverse intrinsic tails, two-carrier capstone, and `MetricCompactBase.exists_b1_raw` are green; the concrete raw record is 5/5.  The separately named textbook B1 theorem and the historical full Step-C arbitrary recurrence remain separate at 0% / incomplete. |
 | Ch4 Step D | **`C4/STEPD_PLAN.md`** + `C4/StepDLimitMetrics.md` + `C4/StepDAssembly.md` + `C4/MetricCompactnessEndpoint.md` | conditional consumer and endpoint complete: D6 convergence transport, `compactness_of_b1`, the generic subsequence lift, and `MetricCompactnessInputs.metricCompactness` are checked. |
-| Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `ConvFieldOpen.md` + `ConvFieldOpenPDE.md` + `ConvFieldOpenScalar.md` + `FlowLimitRegularity.md` + `ConvFieldEndgame.md` | fixed-window PDE/scalar producers and the open-interval PDE/scalar readouts are checked, `exists_openConv_raw` gives one master subsequence plus one compatible limit metric family on all canonical windows from the four existing raw hypotheses, and `OpenConvOut.smoothMetric` checks the regularity gluing capstone. `ConvOut.gramSmooth` names the remaining fixed-window regularity proof. Uniform theorem-level production of the raw hypotheses, open-endgame wiring, and all-time limit completeness remain open. Thm 3.10 stays 0%; dedicated P4 machinery is about 88%. |
+| Native [H6] normal-coordinate producer | `C4/B0NormalCoordBounds.md` + `C4/H6NormalCoord.md` | per-center `g_x`-orthonormal normalizer, framed exponential chart/inverse/differential, exact radial-ball correspondence, pullback metric, and framed radial-Jacobi bridge are checked. The next producer step is the shared intrinsic-radius and `NormalCoordMetricBoundInput` consumer migration; this is an API repair, not a new geometric hypothesis. |
+| Ch3 P4 producer lane (3.10 ⇐ 3.9) | `P4_CONV_PLAN.md` + `P4_PRODUCER_RULING.md` + `ConvFieldOpenAssembly.md` | fixed-window/open consumer assembly is checked through `open_upgrade_of_raw`; the grow-only `hcovTail` migration is green and the bump-collar `hchi` frontier is gone. `MovingShiOpen.lean` now has checked constants-first/open-window wrappers around one explicit complete-noncompact Shi frontier, while `SourceCovLip.lean` has the checked source-native interface around one varying-source frontier. The concrete Step-D canonical-provenance sidecar is being verified. Thm 3.10 stays 0%; dedicated P4 consumer machinery is about 97%. |
 | Extension lane (interior-restart / Y1 3.11 inputs) | `ExtendShiInputs.md` + `Evolution/ExtendViaUniqueness` notes | active, separate from HCG critical path |
 | Space-form / quotient curvature | memory note `spaceform-hardroute-build` + same-name `.md`s | parallel, unrelated to 3.9/3.10 |
 
@@ -73,14 +74,14 @@ book-faithful; **FIXED** = the pre-audit statement was wrong and was corrected t
 
 | Input | Book cite | Verdict | Notes |
 |---|---|---|---|
-| `InjRadiusDecayInput` (A0) | `lbl384` (CGT) | **TRUE** | Lean form `a·min{ρ,1}^n·e^{−C·d}` matches the book verbatim; constants uniform in `k` since curvature bounds are. |
+| `InjRadiusDecayInput` (A0) | `lbl384` (CGT) | **TRUE statement; backend repair pending** | The decay formula `a·min{ρ,1}^n·e^{−C·d}` matches the book and its constants are uniform in `k`. However, the current `HasInjRadiusAt` backend measures raw model-norm balls; a faithful native instantiation must first migrate `injRadius` to intrinsic tangent balls, equivalently orthonormally framed model balls. |
 | `PackingBound` | `lbl387` | **TRUE** | per-radius count `A(r)`; no uniformity trap.  `MetricCompactBase` carries `forall D > 0, PackingBound D`; packing is instantiated only after the single large-`D` choice. |
 | `VolumeComparisonInput` (A0') | Bishop–Gromov | **FIXED** | Uncapped-in-`r` multiplicity was **FALSE** (hyperbolic members: `r`-separated counts in `m·r`-balls grow like `e^{(n−1)(m−½)√C₀·r}`).  Now capped at containing scale `m * r ≤ r0`; consumers (`net_multiplicity`, `inter_count`) thread the needed Step-A ratio times `λ[0]` into the cap. |
 | `RealizesEdist` | — | plumbing | provable at instantiation from `ProperMetricOn`; not external math. |
-| `NormalCoordMetricBoundInput` / `NormalRadiusProfile` | `lbl395` = [H6] Cor 4.12 + CGT compatibility | **FIXED floor; `g_p` tail checked** | `normalRadius` supplies the relative `expMapC2Radius` floor. The optimal `gpCoerciveConst`, H6 origin bound, and positive `gpRatio` give the true `expRadiusGp` floor; `gpScaleTail` now consumes it on the post-packing finite slots. No endpoint radius assumption was added. |
+| `NormalCoordMetricBoundInput` / `NormalRadiusProfile` | `lbl395` = [H6] Cor 4.12 + CGT compatibility | **conditional consumers checked; native framed producer in progress** | The relative-radius and `g_p` tail consumers are checked. The per-center orthonormal frame, framed chart, exact radial-ball correspondence, pullback metric, and framed Jacobi bridge are proved. Native production still requires the shared input, transition, and injectivity-radius primitives to consume `z |-> exp_x(normalFrame z)` consistently; the current `injRadius` backend uses raw model-norm balls. `C4/H6NormalCoord.md` records the scoped migration route. |
 | retired `ExpInverseDerivBoundInput` (S6) | `lbl418` | **REMOVED** | The localized H6 derivative producer replaced the temporary S6 consumer chain.  After the finite source-slot diagonal migrated and a zero-consumer audit passed, the S6 type, compatibility entrypoints, endpoint field, and obsolete selector budget were removed. |
 | `IsometryDerivBounds` (F8) | `lbl375` → [H6] §5 | **PROVED producer; finite H6 migration and capstone wiring checked** | `C4/H6_ISOMETRY_DERIV_PLAN.md`: `normal_bounds_on`, fixed-pair/refinement/live-slot extraction, atom/weight packaging, and `exists_atom_lim`/`exists_atom_fin` are checked without S6. Positive interacting-pair extraction, active six-lambda image control, source-local decoded convergence, `activeFill`, the finite source cover, and the global existential-source corollary are checked. No glued weights or chart selector are used. |
-| `Item3RadiusAt` / `Item3RadiusTail` | `lbl391/392` ("D large") | **CHECKED exp-diffeomorphism producer** | `radiusScaleTail` proves the finite common tail for the book factor; `exists_item3D` selects one divisor satisfying injectivity, `expMapC2Radius`, `g_p`, and Step-A cap budgets before packing. The legacy all-index `Item3RadiusInput` is compatibility-only. The selected-scale geodesic convexity consumer is now checked separately. |
+| `Item3RadiusAt` / `Item3RadiusTail` | `lbl391/392` ("D large") | **conditional consumer checked; framed backend migration pending** | `radiusScaleTail` and the selected-scale consumers are checked under the current backend. A native book-faithful producer still has to replace the raw `injRadius`/`expMapC2Radius` realization by the framed intrinsic-radius realization before `exists_item3D` can be counted as unconditional geometry. The legacy all-index `Item3RadiusInput` is compatibility-only. |
 | `Item3GpScaleAt` / `Item3GpScaleTail` | `lbl383/427` | **CHECKED producer and consumers** | `gpScaleTail` finite-intersects `lambda_window` after packing with the exact `c = 8` budget. Step-C atoms, atom package, and joins consume only `At`/`Tail`; legacy all-index `Item3GpScaleInput` is compatibility-only. |
 | `SigmaScaleField` | `lbl383` family | relative branch and readout wiring checked | `normalMinScale` retains the full minimizing branch with its `expRadiusGp` half-floor, and `NormalBranchCage.exists_live_min` specializes it to live centers. The one-shot divisor, post-packing finite-slot tails, physical cage, quarter-ball tail, source-local support readout, and finite source maximum are checked. |
 | `CmHessianInput` / selected-branch equivalent | `lbl413`-adjacent | **selected-branch producer checked** | `hess_half_inv`, the quantitative inverse estimate, weighted Neumann lemma, `cm_deriv_inv`, and `cm_sol_strict` prove and retain the invertible center derivative and strict local solution on the actual selected branch. The old abstract `chartCmEqn` input is not duplicated as a branch-specific input. |
@@ -104,7 +105,7 @@ its docstring BEFORE consumers are built against it.
 - P1–P4 = the Ch3 3.10⇐3.9 pipeline phases.  F1–F13 = Ch4 engine track.
   §2/§3/§6/§4 = the book's section numbers (non-monotone on purpose).
 
-## 6. Honest progress (updated 2026-07-17)
+## 6. Honest progress (updated 2026-07-18)
 
 - **Conditional Thm 3.9 endpoint: 100% checked.**
   `MetricCompactBase.exists_b1_raw` is checked and fills the concrete
@@ -427,12 +428,17 @@ its docstring BEFORE consumers are built against it.
   open-interval target `compactnessSol` is now stated, and the canonical nested
   compact-window exhaustion is checked.  `exists_openConv_raw` now produces
   one subsequence and one compatible limit family on all windows from the raw
-  fixed-window hypotheses. `OpenConvOut.smoothMetric` now checks the
-  window-to-open-interval regularity assembly; uniform production of those
-  hypotheses, fixed-window joint chart-Gram `C∞`, open-endgame wiring, and a
-  producer of completeness of every limit time slice remain. The
+  fixed-window hypotheses. `ConvOut.gramSmooth` now proves fixed-window joint
+  chart-Gram `C∞`, and `OpenConvOut.smoothMetric_of_conv` checks the complete
+  window-to-open-interval regularity assembly.  `OpenConvOut.isSolution`,
+  `flowUpgrade_of_open`, and `open_upgrade_of_raw` now check the remaining
+  consumer assembly, including completeness of every time slice of the
+  constructed limit.  Uniform production of the raw hypotheses remains, and
+  the canonical time-zero CP witness from the concrete Step-D construction
+  must be retained because the abstract convergence package leaves its
+  reference metric unpinned. The
   Hamilton nonregular-endpoint route remains a separate stronger consumer.
-  Dedicated P4 machinery is about 88%; unconditional Theorem 3.10 remains 0%.
+  Dedicated P4 machinery is about 97%; unconditional Theorem 3.10 remains 0%.
   **2026-07-09 noncollapse repair:**
   the canonical Perelman layer
   now defines actual time-slice metric balls, Riemannian volume, parabolic
@@ -645,10 +651,13 @@ its docstring BEFORE consumers are built against it.
 
 ## 7. Real sorries in this tree (audited 2026-07-17)
 
-`MetricCompactness.lean` (unconditional endpoint) ·
+`MetricCompactness.lean` (unconditional metric endpoint) ·
+`HamiltonCompactness.lean` (`compactnessSol`, unconditional solution endpoint) ·
 `NoncollapseInjectivity.lean` (`flowInj_of_vol`, the separately declared CGT
-frontier).  The live source locations are `MetricCompactness.lean:1396` and
-`NoncollapseInjectivity.lean:124`.  Neither
+frontier).  The live source locations are `MetricCompactness.lean:1396`,
+`HamiltonCompactness.lean:78`, and `NoncollapseInjectivity.lean:124`.
+`FlowLimitRegularity.lean` has no remaining proof `sorry`; in particular,
+`ConvOut.gramSmooth` is checked.  Neither
 `C4/MetricCompactnessInputs.lean` nor `C4/StepB1RawProducer.lean` is in the live
 proof-`sorry` census: the conditional endpoint is implemented in
 `C4/MetricCompactnessEndpoint.lean`, and `MetricCompactBase.exists_b1_raw` is

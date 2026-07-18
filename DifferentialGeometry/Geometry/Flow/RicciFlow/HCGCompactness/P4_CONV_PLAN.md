@@ -1,5 +1,11 @@
 # P4_CONV_PLAN — the `conv`/`L` engine for MSM135 Thm 3.10 ⇐ 3.9 (final assembly phase)
 
+The approved post-assembly producer architecture is
+[`P4_PRODUCER_RULING.md`](P4_PRODUCER_RULING.md).  It is authoritative for the
+two remaining independent lanes (complete-noncompact arbitrary-dimensional
+Shi analysis and concrete Step-D provenance), the grow-only `hcovTail`
+migration, and their final meeting point at `open_upgrade_of_raw`.
+
 Self-contained execution plan for Opus sessions. Planner (Fable) verifies each brick on
 return (build + `#print axioms` + statement read). Approved architecture:
 `C:\Users\liao9\.claude\plans\fluffy-coalescing-leaf.md` (Route 2, bump-extension), updated
@@ -33,7 +39,7 @@ the flows with metrics `Φ_k^* g_k(t)` near any compact of `M_∞ = mc.limit.M`;
 subsequence converging C^∞-window-uniformly to a limit family `g_∞(t)`; `g_∞` is the metric
 of the limit flow `L`; Ricci-continuity closes "limit is a solution".
 
-## Current status (2026-07-17)
+## Current status (2026-07-18)
 
 The fixed-window PDE and scalar passages are checked.  `ConvFieldPDE.lean`
 provides `gSeqExt_ricci`, `gSeqExt_pde`, and `ConvOut.gInf_pde`; the last theorem
@@ -69,24 +75,47 @@ the raw-producer layer.  `ConvFieldOpen.lean` fixes one bump family, reruns
 and glues the windowwise limits by compact-open uniqueness.
 `OpenConvOut.conv_Icc` reads the result on every compact subinterval of the
 open domain.  The remaining producer work is to discharge the four raw
-hypotheses on all canonical windows from the theorem-level sequence-flow data,
-followed by the independent joint spacetime regularity bridge.
-`OpenConvOut.smoothMetric` is now focused-green: once joint chart-Gram `C∞`
-is available on every canonical window, it localizes that data and constructs
-the four `MetricFamilySmoothOn` fields on the ambient open interval, without a
-new exhaustion predicate or endpoint assumption.  Thus the gluing/assembly
-half of joint regularity is closed; the fixed-window chart-Gram producer is the
-remaining analytic frontier. That producer is now stated explicitly as
-`ConvOut.gramSmooth` in `FlowLimitRegularity.lean`, with one visible `sorry`;
-`OpenConvOut.smoothMetric_of_conv` is its checked theorem-shaped open-interval
-consumer, but still depends on that visible frontier. The new open-interval PDE,
-scalar, and regularity readouts are focused-green; the fixed-window scalar
-compatibility wrapper and its upstream modules have also been refreshed. These
-readouts are not yet wired into an open endgame producing
-`PointedFlowData`, `SmoothCGHConverges`, and the `compactnessSol` conclusion.
-The strengthened book-facing conclusion also requires a checked producer of
-completeness of every limit time slice; time-zero completeness has been
-extracted, but the bounded-curvature propagation/limit passage is still open.
+hypotheses on all canonical windows from the theorem-level sequence-flow data.
+The independent joint-spacetime regularity bridge is now closed:
+`ConvOut.gramSmooth` is proved from the existing fixed-window data `hwin + co`,
+and `OpenConvOut.smoothMetric_of_conv` localizes and glues those windowwise
+results into all four `MetricFamilySmoothOn` fields on the ambient open
+interval.  Both are checked with no new exhaustion predicate, endpoint
+assumption, lower-metric field, or stage-family stay hypothesis.  The
+open-interval PDE, scalar, and regularity readouts are now wired through
+`ConvFieldOpenEndgame.lean` and `ConvFieldOpenAssembly.lean`.  The checked
+theorem `open_upgrade_of_raw` constructs one `FlowUpgradeData` from the four
+raw window packages plus the time-zero CP witness, and proves completeness of
+every time slice of that same limit flow.  The assembly consumes the canonical
+`flowUpgrade_open_L` projection rather than unfolding the dependent record.
+
+The remaining P4 work is producer-side.  First, the theorem-level curvature
+and completeness inputs must yield uniform open-window lower, covariant, and
+time-Lipschitz estimates in the complete noncompact arbitrary-dimensional
+setting.  Second, the concrete Step-D time-zero convergence provenance must be
+retained: an arbitrary abstract `MetricCompactnessConclusion.convergence`
+does not pin its `MetricSourceData.referenceMetric`, so it cannot by itself
+produce the canonical `hcp` seminorm consumed by `open_upgrade_of_raw`.
+
+The analytic boundary is now explicit in `MovingShiOpen.lean`.
+`movingShi_complete` and `CurvBoundInput.movingShi_open` are focused-green
+wrappers around the constants-first theorem `movingShi_of_bound`.  The
+sequence wrapper chooses the common curvature bound and the explicit
+`shiOpenConst` before the member index; it does not uniformize memberwise
+existentials.  Trusted theorem completion is still 0% because
+`movingShi_of_bound` contains the one honest complete-noncompact Shi `sorry`.
+Its lower work is split visibly between the arbitrary-dimensional
+commuted-curvature producer and the complete-noncompact Bernstein maximum
+principle.
+
+The varying-source interface is also now explicit in `SourceCovLip.lean`.
+`SrcCovLipData` is focused-green and records constants before `k`; its producer
+`srcCovLip_of_soln` retains one honest analytic `sorry`.  The grow-only
+`hcovTail` migration is now complete across the ten-module open-convergence
+chain: `hchi` and the artificial whole-source bump-collar estimate are gone,
+and the focused checks plus exact refreshes are green.  The concrete
+`StepDCanonData` provenance sidecar is being verified independently.  The
+approved architecture therefore needs no further consult at this point.
 
 The downstream audit rules out globally replacing `carrier` by `regular` in
 the canonical convergence API.  `SourceSpacetimeConvergenceData.toSpatial`
@@ -99,7 +128,7 @@ and regular are definitionally the same.  Hamilton endpoint extension is a
 different later producer and is not part of the MSM135 3.10 denominator.
 
 Accounting: unconditional Theorem 3.10 remains theorem-level 0%.
-The dedicated P4 machinery is approximately 88%, and whole-HCG machinery
+The dedicated P4 machinery is approximately 97%, and whole-HCG machinery
 remains approximately 60%.
 
 ## Inventory — DONE, verified, reuse (do not rebuild)
@@ -391,12 +420,14 @@ reuse).  Statements are for GENERAL `Φ` (5b-compliant; instantiate
 *(bounded; the delicate spot is quantifier/threshold bookkeeping)*
 
 ### Brick 6 — the `L` term: limit flow + the PDE (parallel-izable after Brick 5's gInf)
-**Status: PARTIALLY CLOSED (2026-07-17).**  The local bump equation
+**Status: REGULARITY/PDE/SCALAR CLOSED; OPEN ENDGAME PENDING (2026-07-17).**  The local bump equation
 (`gSeqExt_ricci`, `gSeqExt_pde`), the limit equation (`ConvOut.gInf_pde`), and
 the scalar pullback producer (`gSeqExt_scalar`, `ConvOut.scalar_conv`) are
 checked.  `flowLimit_of_reg` assembles these internally but is compatibility-only
 because its fixed-window hypotheses collapse carrier, regular set, and window.
-Joint regularity and the honest all-window/endpoint architecture remain open.
+Fixed-window joint chart-Gram regularity is now proved by `ConvOut.gramSmooth`,
+and `OpenConvOut.smoothMetric_of_conv` packages it on the open interval.  The
+honest open endgame and all-time completeness producer remain open.
 - `L : PointedFlowData X.D` with manifold data copied from `mc.limit` (defeq-preserving, so
   `hL0 : L.atTime 0 = mc.limit` reduces to the Brick-5 metric identification), `S.family.metric
   := gInf`, and base curvature data (`rm04`/`ricciAt` fields of `SolutionFamily`) := the
@@ -494,6 +525,14 @@ Joint regularity and the honest all-window/endpoint architecture remain open.
 *(hard-frontier in the `equation` field; the rest bounded)*
 
 ### Brick 7 — endgame wiring (SPLIT 2026-07-03: 7a discharge chain → 7b assembly)
+
+**7c — open-window capstone** *(Status: ✅ DONE 2026-07-18 —
+`ConvFieldOpenEndgame.lean` checks the open solution/upgrade readout and
+`ConvFieldOpenAssembly.lean:open_upgrade_of_raw` checks the full raw-input
+assembly, including completeness of every time slice.  The exact module
+refresh is green and the new source files are sorry-free.  Remaining work is
+strictly upstream production of the four raw window packages and preservation
+of the canonical time-zero convergence witness.)*
 
 **7a — execute the carried-input discharge chain** *(Status: ✅ DONE 2026-07-04 —
 `ConvFieldInputs.lean`, targeted build green 3916 jobs, all 6 endpoints axiom-clean, no
@@ -660,15 +699,16 @@ the stated one); same-name `.md` updated with route + gotchas; this plan's Statu
 ## Honest denominator
 
 The unconditional Theorem 3.10 endpoint remains 0%: `compactnessSol` is now
-stated with one explicit P4 `sorry`, but is not proved.  The fixed-window PDE and
-scalar producers and the compatibility endgame are checked, so the dedicated
-P4 machinery is conservatively about 88%.  The common subsequence and compatible
-limit family are now checked from the existing raw fixed-window hypotheses.
-The remaining genuine work is to produce those hypotheses uniformly on every
-canonical window, prove fixed-window joint chart-Gram `C∞`, wire the resulting
-open PDE/scalar/regularity data into the final flow and convergence objects, and
-produce completeness of every limit time slice. The checked
-`OpenConvOut.smoothMetric` handles only the regularity packaging step. Hamilton's
+stated with one explicit P4 `sorry`, but is not proved.  The fixed-window PDE,
+scalar, joint chart-Gram smoothness, open endgame, and raw-input capstone are
+checked, so the dedicated P4 machinery is conservatively about 97%.  The
+common subsequence, compatible limit family, upgrade record, and all-time
+limit completeness are now checked from the existing raw fixed-window
+hypotheses.  The remaining genuine work is to produce those hypotheses
+uniformly on every canonical window and retain the canonical time-zero
+convergence provenance through Step D.  The checked `ConvOut.gramSmooth`,
+`OpenConvOut.smoothMetric_of_conv`, and `open_upgrade_of_raw` close the
+fixed-window-to-open consumer path. Hamilton's
 nonregular endpoint extension is tracked separately and is
 not needed to prove the book theorem.  Whole-HCG machinery remains about 60%.
 The completed selected Step B/C producer and conditional Theorem 3.9 accounting

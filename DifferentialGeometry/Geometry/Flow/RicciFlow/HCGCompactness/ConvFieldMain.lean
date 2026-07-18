@@ -320,7 +320,7 @@ noncomputable def convOut
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
       forall q : Nat, exists C : Real, forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-        forall z : P.M, z ∈ Φ.source k ->
+        forall z : P.M, z ∈ bf.grow k ->
           metricCovDerivNorm (I := I) q (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z <= C)
     (hlipTail : letI : TopologicalSpace P.M := P.topology;
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;

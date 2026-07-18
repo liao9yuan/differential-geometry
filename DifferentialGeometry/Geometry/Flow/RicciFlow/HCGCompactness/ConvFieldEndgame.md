@@ -512,3 +512,11 @@ exact module refresh passes; no downstream migration was required.  The newer
 open-interval route consumes the pointwise producer through
 `OpenConvOut.scalar_conv` instead of imposing one closed window on the whole
 carrier.
+
+## 2026-07-18 grow-local endgame API
+
+The endgame constructors now take `hcovSrc` on `bf.grow k` and obtain
+`hcovTail` from the revised `covTail_of_bounds`. The former `hchi` argument
+and all four collar-based call sites were removed. Focused verification and
+the exact module refresh pass; the remaining raw producer is the uniform
+source-native grow bound, not a bump-family derivative estimate.

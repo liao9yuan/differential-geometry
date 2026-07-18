@@ -390,6 +390,57 @@ lemma paramChartMap_contDiffOn
     (by simpa [paramChartMap, Function.comp_def] using hcomp)
 
 set_option linter.unusedSectionVars false in
+/-- The parametrized Gram matrix is continuous on any open source subset whose
+image lies in one canonical chart. -/
+lemma paramGram_contOn
+    (g : SmoothRiemannianMetric I M) (x₀ : M)
+    (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1)
+    {s : Set E} (hs_open : IsOpen s)
+    (hs_source : s ⊆ Ψ.source)
+    (hs_chart : ∀ w ∈ s,
+      Ψ w ∈ (trivializationAt E (TangentSpace I) x₀).baseSet) :
+    ContinuousOn (paramGramMatrix (I := I) g Ψ) s := by
+  have hT : ContDiffOn ℝ 1 (paramChartMap (I := I) x₀ Ψ) s :=
+    paramChartMap_contDiffOn (I := I) x₀ Ψ hs_source hs_chart
+  have hfderiv : ContinuousOn
+      (fun w => fderiv ℝ (paramChartMap (I := I) x₀ Ψ) w) s :=
+    hT.continuousOn_fderiv_of_isOpen hs_open le_rfl
+  have hJ : ∀ k i, ContinuousOn
+      (fun w => paramJacobianMatrix (I := I) x₀ Ψ w k i) s := by
+    intro k i
+    have happ : Continuous
+        (fun L : E →L[ℝ] E => L ((chartModelBasis E) i)) :=
+      continuous_eval_const _
+    have hcoord : Continuous
+        (fun v : E => ((chartModelBasis E).coord k).toContinuousLinearMap v) :=
+      ((chartModelBasis E).coord k).toContinuousLinearMap.continuous
+    simpa only [paramJacobianMatrix_apply, LinearMap.coe_toContinuousLinearMap',
+      Module.Basis.coord_apply] using
+      hcoord.comp_continuousOn (happ.comp_continuousOn hfderiv)
+  have hΨcont : ContinuousOn Ψ s :=
+    (Ψ.contMDiffOn_toFun.mono hs_source).continuousOn
+  have hG : ∀ k l, ContinuousOn
+      (fun w => chartGramMatrix g x₀ (Ψ w) k l) s := by
+    intro k l
+    exact (chartGramMatrix_entry_contMDiffOn (I := I) g x₀ k l).continuousOn.comp
+      hΨcont hs_chart
+  rw [continuousOn_iff_continuous_restrict]
+  apply continuous_matrix
+  intro i j
+  have hsum : ContinuousOn
+      (fun w => ∑ k, ∑ l,
+        paramJacobianMatrix (I := I) x₀ Ψ w k i *
+        paramJacobianMatrix (I := I) x₀ Ψ w l j *
+        chartGramMatrix g x₀ (Ψ w) k l) s := by
+    refine continuousOn_finset_sum _ fun k _ => ?_
+    refine continuousOn_finset_sum _ fun l _ => ?_
+    exact ((hJ k i).mul (hJ l j)).mul (hG k l)
+  simpa only [Set.restrict_apply] using
+    (hsum.congr fun w hw =>
+      paramGramMatrix_pullback_eq_sum (I := I) g x₀ Ψ
+        (hs_source hw) (hs_chart w hw) i j).restrict
+
+set_option linter.unusedSectionVars false in
 /-- The parametrized density is continuous on any open source subset whose image
 lies in one canonical chart.
 
@@ -421,6 +472,39 @@ lemma paramDensity_continuousOn_chart
   exact hR.congr (fun w hw =>
     paramDensity_eq_abs_det_mul_chartDensity (I := I) g x₀ Ψ
       (hs_source hw) (hs_chart w hw))
+
+set_option linter.unusedSectionVars false in
+/-- The parametrized density is continuous on the full source of a partial
+diffeomorphism. -/
+lemma paramDensity_contOn
+    (g : SmoothRiemannianMetric I M)
+    (Ψ : PartialDiffeomorph 𝓘(ℝ, E) I E M 1) :
+    ContinuousOn (paramDensity (I := I) g Ψ) Ψ.source := by
+  rw [continuousOn_iff_continuous_restrict, continuous_iff_continuousAt]
+  intro w
+  let x₀ : M := Ψ w
+  let U : Set E := Ψ.source ∩ Ψ ⁻¹' (chartAt H x₀).source
+  have hΨcont : ContinuousOn Ψ Ψ.source :=
+    Ψ.contMDiffOn_toFun.continuousOn
+  have hUopen : IsOpen U := by
+    dsimp only [U]
+    exact hΨcont.isOpen_inter_preimage Ψ.open_source (chartAt H x₀).open_source
+  have hU_source : U ⊆ Ψ.source := by
+    dsimp only [U]
+    exact Set.inter_subset_left
+  have hU_chart : ∀ z ∈ U,
+      Ψ z ∈ (trivializationAt E (TangentSpace I) x₀).baseSet := by
+    intro z hz
+    dsimp only [U] at hz
+    simpa only [trivializationAt_baseSet_eq_chartAt_source (I := I)] using hz.2
+  have hwU : (w : E) ∈ U := by
+    refine ⟨w.2, ?_⟩
+    simpa only [x₀] using mem_chart_source H (Ψ w)
+  have hcontU : ContinuousOn (paramDensity (I := I) g Ψ) U :=
+    paramDensity_continuousOn_chart (I := I) g x₀ Ψ
+      hUopen hU_source hU_chart
+  exact (hcontU.continuousAt (hUopen.mem_nhds hwU)).comp
+    continuous_subtype_val.continuousAt
 
 set_option linter.unusedSectionVars false in
 /-- Measurability form of chart-local continuity of the parametrized density. -/

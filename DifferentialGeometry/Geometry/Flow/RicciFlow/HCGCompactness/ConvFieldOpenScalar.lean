@@ -71,7 +71,7 @@ theorem scalar_conv
         letI : SigmaCompactSpace P.M := P.sigmaCompact
       ∀ n q : Nat, ∃ C : Real, ∀ (k : Nat) (t : Real),
         t ∈ RealTimeInterval.openWindow a b t₀ n →
-        ∀ z : P.M, z ∈ Φ.source k →
+        ∀ z : P.M, z ∈ bf.grow k →
           metricCovDerivNorm (I := I) q
             (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z ≤ C) :
     FunctionPullbackTendsto (I := I) (Φ.compSubseq co.φ co.hφ)

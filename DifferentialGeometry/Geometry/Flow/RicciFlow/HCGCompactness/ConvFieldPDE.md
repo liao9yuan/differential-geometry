@@ -86,3 +86,9 @@ chain is 100%; the unconditional Theorem 3.10 endpoint remains 0%.
 The module's focused verification and exact import refresh both pass.  The
 refresh required only an unrelated canonical-name disambiguation in
 `PolarisedLpFull.lean`; no P4 statement or proof changed as a result.
+
+## 2026-07-18 grow-local covariant consumer
+
+Both PDE-side consumers now request and apply `hcovTail` directly on
+`bf.grow k`; the redundant intermediate whole-source membership proof was
+removed. Focused verification and the exact module refresh pass.

@@ -60,3 +60,21 @@ and `g₂ = s ↦ r (s−ω)` (DeTurck restart), after the seam-shift ω→0. To
 - `hbdry` (seam metric match) — from `metric_match`/`tendsto_left`.
 `gram_cont` (C⁰ up to the left endpoint) and `metric_match` are separate `CinftyGlueData` fields built
 in CinftyLimitGlue.
+
+## 2026-07-17: neighborhood-local second-jet API
+
+- The public theorem names are unchanged, but the `hG1` premise of
+  `jet2_chartGram_d2` and its Ricci-jet consumers now asks only for eventual
+  differentiability in `nhds y`, rather than differentiability at every model
+  point.
+- The second-slot proof now identifies the scalar derivative field by an
+  `EventuallyEq` near `y` and uses `EventuallyEq.fderiv_eq`.  This is the
+  mathematically natural hypothesis for a pointwise second jet.
+- A repository search found no callers outside this file, so the strengthening
+  introduces no downstream migration.  It removes the global-extension mismatch
+  for the compact-local HCG `ConvOut.gramPDE` route.
+- Focused verification passed.  The pre-existing unused-section-variable warnings
+  are unchanged.
+- Accounting: this API repair is complete (100%).  It is supporting machinery
+  only; the downstream `ConvOut.gramPDE` theorem remains unstated/unproved here
+  (0%).

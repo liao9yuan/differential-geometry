@@ -28,10 +28,9 @@ variable {I : ModelWithCorners Real E H} [I.Boundaryless]
 
 namespace MetricCompactnessInputs
 
-/-- **MSM135 Theorem 3.9, conditional form -- the Chapter 4 working target.**
-Compactness for complete connected pointed Riemannian manifolds, given the
-bundled book-external geometric inputs. -/
-def metricCompactness
+/-- The conditional Chapter-4 construction with the concrete canonical
+reference-metric provenance retained alongside its public compactness output. -/
+def metricCanon
     {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
     (inp : MetricCompactnessInputs (I := I) X)
     (hcomplete : SeqMetricComplete (I := I) X)
@@ -40,7 +39,7 @@ def metricCompactness
     (hconn : forall k : Nat,
       letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
       ConnectedSpace (X.obj k).M) :
-    MetricCompactnessConclusion (I := I) X := by
+    StepDCanonData (I := I) X := by
   let P : forall j : Nat, ProperMetricOn (I := I) (X.obj j) :=
     fun j => properMetricOn (I := I) (X.obj j)
       (hcomplete.complete j) (hconn j)
@@ -51,9 +50,24 @@ def metricCompactness
   have B := hraw_spec.2
   let Ppsi : forall k : Nat, ProperMetricOn (I := I) ((X.subseq psi).obj k) :=
     fun k => P (psi k)
-  let mc : MetricCompactnessConclusion (I := I) (X.subseq psi) :=
-    compactness_of_b1 Ppsi B
-  exact mc.ofSeqSubseq psi hpsi
+  let canon : StepDCanonData (I := I) (X.subseq psi) :=
+    compactness_canon Ppsi B
+  exact canon.ofSeqSubseq psi hpsi
+
+/-- **MSM135 Theorem 3.9, conditional form -- the Chapter 4 working target.**
+Compactness for complete connected pointed Riemannian manifolds, given the
+bundled book-external geometric inputs. -/
+def metricCompactness
+    {X : PointedRiemannianSeq.{u, uE, uH} (I := I)}
+    (inp : MetricCompactnessInputs (I := I) X)
+    (hcomplete : SeqMetricComplete (I := I) X)
+    (hgeom : SeqBoundedGeometry (I := I) X)
+    (hinj : BaseInjBound (I := I) X)
+    (hconn : forall k : Nat,
+      letI : TopologicalSpace (X.obj k).M := (X.obj k).topology
+      ConnectedSpace (X.obj k).M) :
+    MetricCompactnessConclusion (I := I) X :=
+  (metricCanon inp hcomplete hgeom hinj hconn).mc
 
 end MetricCompactnessInputs
 end HCGCompactness

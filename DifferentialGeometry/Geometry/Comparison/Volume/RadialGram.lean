@@ -20,6 +20,8 @@ namespace VolumeComparison
 
 open DifferentialGeometry.Geometry.Riemannian.Variation
 open DifferentialGeometry.Geometry.Riemannian.CovariantDerivativeAlong
+open DifferentialGeometry.Geometry.Riemannian.NormalCoordinates
+open DifferentialGeometry.Geometry.Riemannian.Exponential
 
 variable {E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]
   [InnerProductSpace ℝ E] [FiniteDimensional ℝ E]
@@ -32,6 +34,48 @@ section Radial
 
 variable [I.Boundaryless] [T2Space M] [SigmaCompactSpace M]
   [T2Space (TangentBundle I M)]
+
+/-- Before the first selected normal-coordinate boundary, a linearly
+independent family of variation directions gives linearly independent radial
+Jacobi fields at every nonzero time.  Time scaling reduces the claim to the
+time-one differential of `expMapDiffeo`, whose local-diffeomorphism derivative
+is injective on its source.  The Gram/Riccati layer consumes this positivity
+input; no separate no-conjugate-points hypothesis is required. -/
+lemma radialJacobi_li
+    {ι : Type*} {v : ι → E}
+    (g : SmoothRiemannianMetric I M) (p : M) (x : E) {t : ℝ}
+    (hv : LinearIndependent ℝ v) (ht : t ≠ 0)
+    (htx_src : t • x ∈ (expMapDiffeo (I := I) g p).source)
+    (htx_rad : ‖t • x‖ < expMapC2Radius (I := I) g p) :
+    LinearIndependent ℝ fun i ↦
+      radialJacobiField (I := I) g p x (v i) t := by
+  let L := mfderiv 𝓘(ℝ, E) I
+    (fun b : E ↦ (expMap (I := I) g p
+      (show TangentSpace I p from b) : M)) (t • x)
+  have hlocal := PartialDiffeomorph.isLocalDiffeomorphAt
+    (I := 𝓘(ℝ, E)) (J := I) (n := 1) (expMapDiffeo (I := I) g p) htx_src
+  have hLinj : Function.Injective L := by
+    dsimp only [L]
+    rw [← expDiffeo_mfderiv (I := I) g p htx_src]
+    exact (hlocal.mfderivToContinuousLinearEquiv (by norm_num)).injective
+  let u : ℝˣ := Units.mk0 t ht
+  let us : ι → ℝˣ := fun _ ↦ u
+  have hscaled : LinearIndependent ℝ fun i ↦ t • v i := by
+    have hus : us • v = fun i ↦ t • v i := by
+      funext i
+      rfl
+    rw [← hus]
+    exact hv.units_smul us
+  have hmapped : LinearIndependent ℝ fun i ↦ L (t • v i) :=
+    hscaled.map' L.toLinearMap (LinearMap.ker_eq_bot.mpr hLinj)
+  have hfield :
+      (fun i ↦ radialJacobiField (I := I) g p x (v i) t) =
+        fun i ↦ L (t • v i) := by
+    funext i
+    rw [radialJacobi_scale (I := I) g p x (v i) t,
+      radialJacobi_one (I := I) g p (t • x) (t • v i) htx_rad]
+  rw [hfield]
+  exact hmapped
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in

@@ -204,3 +204,10 @@ Accounting is unchanged: this exact producer and the `hlow` sub-brick are 100%, 
 assembly remains checked from its tracked inputs, while unconditional Theorem 3.10 remains 0%;
 the whole-HCG machinery estimate remains roughly 45%, with the unconditional project endpoint
 still 0%.
+
+## 2026-07-18: grow-local covariant tail
+
+`hbdd_gSeqExt` now asks for the uniform covariant estimate only on `bf.grow k`,
+which is the region its tail proof actually consumes. The obsolete conversion
+from grow membership to the whole source domain was removed. Focused
+verification and the exact module refresh pass.

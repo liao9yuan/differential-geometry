@@ -165,6 +165,17 @@ and adjacent-infrastructure stage for this lane.
 
 ## 2026-07-07 planner ruling (gap verified, API approved)
 
+## 2026-07-18 normal-density regularity
+
+- Added `normalGram_contAt`, specializing parametrization Gram continuity at a
+  point of the normal exponential source.
+- Focused verification and the exported module refresh passed.
+- The local normal-measure formula is now consumable by polar integration. A
+  global volume comparison still requires both a Jacobi-determinant bridge and
+  a cut-time/cut-locus measure theorem.
+
+## Earlier 2026-07-07 ruling
+
 Planner re-verified the audit: `DivergenceTheorem/ChartInvariance.lean` is
 canonical-chart-pair only (overlap-support + Voss–Weyl shapes), the transition
 determinant identities in `Measure/Invariance.lean` (:349/:523/:548) are

@@ -53,6 +53,22 @@ private theorem edistOf_iInf
 
 attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
   Tensor0SBundle.tangentSpace_normedSpace in
+/-- Pointwise domination of Riemannian metrics implies domination of their
+extended distances. -/
+theorem edistOf_mono
+    (g h : SmoothRiemannianMetric I M)
+    (hgh : ∀ x v, g.inner x v v ≤ h.inner x v v)
+    (x y : M) :
+    riemannianEDistOf (I := I) g x y ≤
+      riemannianEDistOf (I := I) h x y := by
+  rw [edistOf_iInf, edistOf_iInf]
+  refine iInf_mono fun γ => ?_
+  refine iInf_mono fun hγ => ?_
+  refine lintegral_mono fun t => ?_
+  exact ENNReal.ofReal_le_ofReal (Real.sqrt_le_sqrt (hgh (γ t) _))
+
+attribute [-instance] Tensor0SBundle.tangentSpace_normedAddCommGroup
+  Tensor0SBundle.tangentSpace_normedSpace in
 /-- Positive constant metric scaling multiplies Riemannian extended distance
 by the square root of the scaling constant. -/
 theorem edistOf_scale

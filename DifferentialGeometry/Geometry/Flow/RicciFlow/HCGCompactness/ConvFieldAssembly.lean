@@ -580,14 +580,12 @@ end Low
 
 section Bdd
 
-/-- **`hbdd` for the bump-extended sequence.**  From a cited uniform covariant-derivative
-bound on the sources — for each order `q`, a single constant bounding
-`metricCovDerivNorm q (gSeqExt (ρ k) t) R` on `Φ.source (ρ k)` uniformly in `k` and `t` (the
-tail input, discharged in Brick 5 from Theorem 3.9's window covariant bounds transported to the
-source flows via `metricCovDerivNorm_pullback`/`_restrictOpen` + bump-locality) — the
+/-- **`hbdd` for the bump-extended sequence.**  From a uniform covariant-derivative
+bound on the bump agreement regions — for each order `q`, a single constant bounding
+`metricCovDerivNorm q (gSeqExt (ρ k) t) R` on `bf.grow (ρ k)` uniformly in `k` and `t` — the
 bump-extended metrics `gSeqExt (ρ k) t` satisfy a single uniform covariant bound on every
-compact `K'`.  The tail indices (`k` large, `K' ⊆ grow (ρ k) ⊆ Φ.source (ρ k)`) inherit the
-cited source bound; the finitely many head/mid indices are bounded wholesale by
+compact `K'`.  The tail indices (`k` large, `K' ⊆ grow (ρ k)`) inherit the supplied
+bound; the finitely many head/mid indices are bounded wholesale by
 `metricCovDerivNorm_bddOn` (each `gSeqExt (ρ k) t` is one fixed smooth metric, bounded on the
 compact `K'`), and the finite maximum combines them.  This is the `hbdd` hypothesis consumed by
 `windowGInfAll`. -/
@@ -601,7 +599,7 @@ theorem hbdd_gSeqExt
         letI : ChartedSpace H P.M := P.charted; letI : T2Space P.M := P.t2;
         letI : IsManifold I ∞ P.M := P.smooth; letI : SigmaCompactSpace P.M := P.sigmaCompact;
       forall q : Nat, exists C : Real, forall (k : Nat) (t : Real), t ∈ Set.Icc β ψ ->
-        forall z : P.M, z ∈ Φ.source k ->
+        forall z : P.M, z ∈ bf.grow k ->
           metricCovDerivNorm (I := I) q (gSeqExt (I := I) Φ R bf hsrc htgt k t) R z <= C) :
     letI : TopologicalSpace P.M := P.topology
     letI : ChartedSpace H P.M := P.charted
@@ -633,10 +631,9 @@ theorem hbdd_gSeqExt
   have hne : (Finset.range (k0 + 1)).Nonempty := ⟨0, Finset.mem_range.2 (Nat.succ_pos k0)⟩
   refine ⟨max Ctail ((Finset.range (k0 + 1)).sup' hne Chead), fun k z hz => ?_⟩
   by_cases hk : k0 <= k
-  · -- tail: `k0 ≤ k ≤ ρ k`, so `z ∈ K' ⊆ grow (ρ k) ⊆ Φ.source (ρ k)`.
+  · -- tail: `k0 ≤ k ≤ ρ k`, so `z ∈ K' ⊆ grow (ρ k)`.
     have hk' : k0 <= rho k := le_trans hk (hrho.id_le k)
-    have hzsrc : z ∈ Φ.source (rho k) := bf.grow_subset (rho k) (hk0 (rho k) hk' hz)
-    exact le_trans (hCtail (rho k) t ht z hzsrc) (le_max_left _ _)
+    exact le_trans (hCtail (rho k) t ht z (hk0 (rho k) hk' hz)) (le_max_left _ _)
   · -- head/mid: `k < k0`, use the fixed-metric bound and the finite maximum.
     have hklt : k < k0 := Nat.lt_of_not_le hk
     refine le_trans (hChead k z hz) (le_trans ?_ (le_max_right _ _))

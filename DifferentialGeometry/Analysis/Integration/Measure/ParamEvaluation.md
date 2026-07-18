@@ -83,3 +83,12 @@ Completed infrastructure:
 Historical status: this section records the local API that existed before the
 V0d recombination pass.  The former blocker and estimates are superseded by the
 current V0d completion section above.
+
+## 2026-07-18 density regularity
+
+- Added `paramGram_contOn` and `paramDensity_contOn`, exposing continuity of
+  the parametrization Gram matrix and density on the partial-diffeomorphism
+  source.
+- Focused verification and the exported module refresh passed.
+- These are low-layer regularity facts used to make the normal polar integrand
+  measurable; they do not supply any global injectivity or cut-locus result.

@@ -146,3 +146,39 @@ REMAINING:
   (d) the manifold IFT at `v ≠ 0` (mimic `LocalDiffeomorphism.lean`'s at-zero
   route; a Mathlib TODO).
 - stage 5: wiring to the Step A balls.
+
+## 2026-07-18 native H6 resume
+
+The live audit found that the radial Jacobi, endpoint initial conditions,
+intrinsic Rm04 curvature estimate, parallel-frame packaging, and two-sided
+endpoint Gronwall interfaces already exist in the volume-comparison lane.
+The H6 route therefore resumes at the representation boundary rather than
+rebuilding those layers.
+
+Completed and focused-green: `H6NormalCoord.lean` proves that
+`normalCoordMetric` is exactly the endpoint Gram form of the radial Jacobi
+fields and converts two-sided Jacobi estimates into
+`NormalCoordMetricEquivOn`.
+
+The initial audit correctly found that the current parametrization is not
+normalized by a `g_x`-orthonormal frame, but incorrectly reported this as a
+mathematical feasibility failure. Normal coordinates choose such a frame at
+each center. `Geometry/Exponential/NormalFrame.lean` now constructs that choice
+and proves it is an exact metric isometry; `H6NormalCoord.lean` proves the
+resulting framed metric equals the fixed model inner product at the origin.
+Both focused checks pass.
+
+The framed representation layer is now focused-green:
+`Geometry/Exponential/FramedNormalCoordinates.lean` defines the conjugated
+exponential chart and inverse, proves its differential formula, and identifies
+model balls exactly with `g_x` tangent balls. `H6NormalCoord.lean` proves that
+the resulting metric is the actual chart pullback and the endpoint Gram form of
+the corresponding radial Jacobi fields.
+
+The real remaining formalization frontier is now the shared consumer boundary:
+the current Chapter-4 input and `injRadius` still use raw model-norm balls. They
+must consume the framed chart so that the metric, transition maps, and
+injectivity radius all refer to one normal coordinate system. This is an API
+migration, not a new H6 assumption. After that migration, specialize the
+existing Rm04 endpoint package and continue the separate all-order metric-jet
+induction.

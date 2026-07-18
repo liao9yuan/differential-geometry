@@ -479,3 +479,29 @@ coefficient-regularity input for the future low-regularity parabolic solver.
 
 Focused verification passed.  These are constants-first family producers and
 do not assert existence or regularization of a flow.
+
+## 2026-07-17: pointwise chart-jet difference bridge
+
+Added and focused-verified `iterFDeriv_tower_le` and `chartJet_sub_le`.
+The former exposes the pointwise estimate already proved by the all-orders
+tower induction: compactness controls only the chart/slot constant, while the
+covariant tensor norms on the right are evaluated at the current point.  The
+existing constants-first `iteratedFDeriv_comp_le_tower` statement is unchanged
+and is now a compatibility corollary, so its downstream consumers require no
+new hypotheses or edits.
+
+`chartJet_sub_le` applies the pointwise tower to
+`metricTensorField u - metricTensorField u'` before taking norms.  Linearity of
+`covDerivOfField`, the chart-Gram germ, and `iteratedFDeriv_sub_apply` then give
+one compact-dependent constant controlling every order-`r` Gram-jet difference
+by the sum of `metricDerivNorm` through order `r`.  This closes the spatial
+covariant-to-chart convergence bridge needed for `ConvOut.gramJets`; it does
+not itself prove the fixed-window `ConvOut.gramSmooth` theorem, which remains
+0%.  The dedicated P4 regularity machinery is still approximately 88--89%; the
+time-slice swap and finite jet-algebra bootstrap remain independent frontiers.
+
+The same bridge now also exports `chartJet2_sub_le`.  It first packages each
+matrix-valued derivative order through the nested finite-Pi norm, then uses the
+canonical calculus lemma `Analysis.jet2_sub_le` to control the complete
+value/first/second-derivative jet.  The statement adds no hypothesis to
+`ConvOut` and focused verification plus the targeted module refresh passed.

@@ -11,3 +11,9 @@ consumed by the raw open-window producer and adds no endpoint hypothesis.
 The stale import chain was repaired and refreshed. Focused verification now
 passes without warnings; no local theorem repair or additional hypothesis was
 needed.
+
+## 2026-07-18 grow-local input propagation
+
+The open-window PDE readout now carries `hcovTail` only on `bf.grow k`, matching
+the fixed-window PDE consumer. Focused verification and the exact module
+refresh pass.

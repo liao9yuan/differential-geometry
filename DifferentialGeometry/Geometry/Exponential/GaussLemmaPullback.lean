@@ -522,29 +522,8 @@ private lemma velocityChartRep_differentiableAt_of_contMDiffAt2
     (γ : ℝ → M) (t₀ : ℝ) (hγC2 : ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ t₀) :
     DifferentiableAt ℝ
       (chartRepAt (I := I) γ (fun u : ℝ => mfderiv 𝓘(ℝ, ℝ) I γ u (1 : ℝ)) t₀) t₀ := by
-  set α : M := γ t₀ with hα
-  have hchart_c2 : ContDiffAt ℝ 2 (fun u : ℝ => extChartAt I α (γ u)) t₀ :=
-    contMDiffAt_iff_contDiffAt.mp ((contMDiffAt_extChartAt (I := I) (x := α)).comp t₀ hγC2)
-  set sec : ℝ → E := fun u : ℝ => fderiv ℝ (fun w : ℝ => extChartAt I α (γ w)) u (1 : ℝ)
-    with hsec
-  have hsec_c1 : ContDiffAt ℝ 1 sec t₀ :=
-    (ContinuousLinearMap.apply ℝ E (1 : ℝ)).contDiff.contDiffAt.comp t₀
-      (hchart_c2.fderiv_right (by norm_num))
-  have hev_c2 : ∀ᶠ u in nhds t₀, ContMDiffAt 𝓘(ℝ, ℝ) I 2 γ u :=
-    (contMDiffAt_iff_contMDiffAt_nhds (n := 2) (by decide)).mp hγC2
-  have hsrcmem : {u : ℝ | γ u ∈ (chartAt H α).source} ∈ nhds t₀ :=
-    hγC2.continuousAt.preimage_mem_nhds
-      ((chartAt H α).open_source.mem_nhds (mem_chart_source H (γ t₀)))
-  have heq : (chartRepAt (I := I) γ (fun u : ℝ => mfderiv 𝓘(ℝ, ℝ) I γ u (1 : ℝ)) t₀)
-      =ᶠ[nhds t₀] sec := by
-    filter_upwards [hsrcmem, hev_c2] with u hu hu_c2
-    have hbridge := chartCoord_mfderiv_along_curve_eq_fderiv_of_mdifferentiableAt
-      (I := I) (M := M) (γ := γ) (hu_c2.mdifferentiableAt (by decide)) α (t := u) hu
-    change (trivializationAt E (TangentSpace I) (γ t₀)).continuousLinearMapAt ℝ (γ u)
-        (mfderiv 𝓘(ℝ, ℝ) I γ u (1 : ℝ)) = sec u
-    rw [hsec, show (γ t₀) = α from rfl]
-    exact hbridge
-  exact (heq.differentiableAt_iff).mpr (hsec_c1.differentiableAt (by norm_num))
+  simpa only [chartRepAt] using
+    MFDerivAlongCurve.velocity_coord_diff (I := I) γ t₀ hγC2
 
 /-- **C²-relaxed central-curve constant speed.** If a curve `γ` is
 `ContMDiffAt … 2` at `t₀` and satisfies the moving-foot geodesic equation
@@ -590,7 +569,7 @@ lemma radialCurve_contMDiffAt2
 moving-foot geodesic equation at every `t₀ ∈ (-1, 2)` provided
 `‖a‖ < expMapC2Radius g p`.  Transferred from the maximal geodesic via the
 `[0, 1]` rescaling identity and `congr_of_eventuallyEq_at`. -/
-private lemma radialCurve_hasGeodesicEquationAt
+lemma radial_geo_at
     (g : SmoothRiemannianMetric I M) (p : M) (a : E)
     (ha : ‖a‖ < expMapC2Radius (I := I) g p) (t₀ : ℝ) (ht₀ : t₀ ∈ Set.Ioo (0 : ℝ) 1) :
     HasGeodesicEquationAt (I := I) g
@@ -668,7 +647,7 @@ private lemma radialSpeedSq_hasDerivAt_zero
   exact speedSq_hasDerivAt_zero_of_geodesic (I := I) g
     (fun u : ℝ => (expMap (I := I) g p (show TangentSpace I p from (u • a)) : M)) t₀
     (radialCurve_contMDiffAt2 (I := I) g p a t₀ hnorm)
-    (radialCurve_hasGeodesicEquationAt (I := I) g p a ha t₀ ht₀)
+    (radial_geo_at (I := I) g p a ha t₀ ht₀)
 
 /-- **Constant speed of the central radial geodesic.** For
 `‖a‖ < expMapC2Radius g p`, the speed-squared of `t ↦ expMap g p (t • a)` is
@@ -1034,7 +1013,7 @@ private lemma gauss_phi_hasDerivAt
   have hγgeo : HasGeodesicEquationAt (I := I) g γ t₀ := by
     rw [show γ = (fun t : ℝ => (expMap (I := I) g p
       (show TangentSpace I p from (t • v)) : M)) from hcentral_eq]
-    exact radialCurve_hasGeodesicEquationAt (I := I) g p v hv_ball t₀ ht₀
+    exact radial_geo_at (I := I) g p v hv_ball t₀ ht₀
   have hVdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ V t₀) t₀ :=
     velocityChartRep_differentiableAt_of_contMDiffAt2 (I := I) γ t₀ hγC2
   have hWdiff : DifferentiableAt ℝ (chartRepAt (I := I) γ W t₀) t₀ := by

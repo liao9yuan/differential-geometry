@@ -484,14 +484,16 @@ def TowerHeatBoundOn
       d ≤ wLap k (t : Real) x +
         (-2 * w (k + 1) (t : Real) x + towerReactionSum (M := M) w c k (t : Real) x)
 
-/-- A uniform Bernstein–Bando–Shi derivative tower on a closed manifold over the
-slab `[0,T]`.  This bundles the level fields `w k = |∇ᵏRm|²`, their realized
+/-- A uniform Bernstein–Bando–Shi derivative tower over the slab `[0,T]`.
+This bundles the level fields `w k = |∇ᵏRm|²`, their realized
 Laplacian fields `wLap k`, the schematic heat inequalities (eq 7.4), the
 curvature bound `w 0 ≤ K²`, the time bound `T ≤ α/K`, and the per-level
-regularity hypotheses needed to run the maximum principle, all in the style of
-the Stage-1 first-derivative estimate. -/
+regularity hypotheses needed by a maximum-principle consumer, all in the style
+of the Stage-1 first-derivative estimate.  Compactness is deliberately not part
+of the data; the closed and complete-noncompact consumers impose their own
+global analytic hypotheses. -/
 structure BernsteinTower
-    [I.Boundaryless] [CompactSpace M]
+    [I.Boundaryless]
     [VectorBundle Real E (TangentSpace I : M -> Type _)]
     (G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real) where
   /-- The time interval the flow lives on. -/
@@ -541,7 +543,7 @@ structure BernsteinTower
 
 namespace BernsteinTower
 
-variable [I.Boundaryless] [CompactSpace M]
+variable [I.Boundaryless]
 variable [VectorBundle Real E (TangentSpace I : M -> Type _)]
 variable {G : DifferentialGeometry.Integral.Connection.RealizedMetricFamily (I := I) (M := M) Real}
 
@@ -1015,7 +1017,7 @@ For a uniform derivative tower on a closed manifold, every level satisfies the
 on-diagonal bound `tᵐ · w m ≤ (towerConst c α m)² · K²` on positive times of the
 slab `[0,T]`, where `towerConst c α m` depends only on `m`, `α` and the tower
 constant `c`.  Equivalently `w m (t,x) ≤ (towerConst c α m)² K² / tᵐ`. -/
-theorem estimate (B : BernsteinTower (I := I) G) :
+theorem estimate [CompactSpace M] (B : BernsteinTower (I := I) G) :
     ∀ m : ℕ, ∀ t : Real, t ∈ Set.Icc 0 B.T -> 0 < t -> ∀ x : M,
       t ^ m * B.w m t x <= (towerConst B.c B.α m) ^ 2 * B.K ^ 2 := by
   intro m
@@ -1308,7 +1310,7 @@ theorem estimate (B : BernsteinTower (I := I) G) :
 
 The on-diagonal bound in the textbook shape `w m (t,x) ≤ (towerConst c α m)² K²/tᵐ`
 for `t ∈ (0,T]`, an immediate corollary of `estimate`. -/
-theorem estimate_div (B : BernsteinTower (I := I) G)
+theorem estimate_div [CompactSpace M] (B : BernsteinTower (I := I) G)
     (m : ℕ) {t : Real} (htmem : t ∈ Set.Icc 0 B.T) (htpos : 0 < t) (x : M) :
     B.w m t x <= (towerConst B.c B.α m) ^ 2 * B.K ^ 2 / t ^ m := by
   rw [le_div_iff₀ (pow_pos htpos m)]

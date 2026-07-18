@@ -1919,3 +1919,52 @@ lands.
   an active upstream object refresh chain caused repeated targeted-verification
   timeouts, and the final focused check still lacked `NormalCoordinates.olean`.
   It is therefore 0% proved as a new theorem despite the route being concrete.
+
+## 2026-07-18 local radial and polar producers complete
+
+The local V2 route has advanced through two checked chains.
+
+1. The radial Jacobi chain now has a single assembled producer:
+   `LengthBound.ricci_eq_sum_perp`, `PerpFrame.exists_perp_pos`, the
+   constant-speed `JacobiShape` identities, `JacobiRiccati.mean_riccati_le`,
+   `BishopJacobi.curveRatio_anti`, and `BishopRadial.exists_radial_cmp`.
+   It proves local antitonicity of transverse Jacobi density divided by the
+   hyperbolic model density.
+2. The measure chain now has continuity of parametrization/normal density,
+   reusable Haar polar integration in `PolarEvaluation`, and
+   `BishopPolar.normalBall_polar`, which gives the exact sphere/radius formula
+   for a tangent ball contained in the normal exponential source.
+
+All declarations above passed focused verification and exported-module
+refreshes. They are proved machinery, not the Bishop--Gromov endpoint.
+
+### Exact remaining architecture frontier
+
+There are two independent missing interfaces:
+
+- **Jacobi determinant bridge.** Prove at the lowest tensor/linear-algebra
+  layer that the Gram determinant of the full differential of the exponential
+  map splits into the radial speed and the transverse Jacobi Gram determinant.
+  For an arbitrary perpendicular basis this may include a positive
+  direction-dependent change-of-basis factor, but that factor must be
+  independent of radius and cancel in the ratio theorem. This should yield a
+  direct normal-density ratio theorem, not a new assumption package.
+- **Global polar domain.** `DifferentialGeometry` currently has no actual
+  cut-time object, measurable radial star domain, measurable/null cut-locus
+  theorem, or almost-everywhere normal-exponential parametrization. A design
+  ruling is required between building that canonical foundation and avoiding
+  it through a genuinely local relative-volume/packing argument. Introducing
+  a polished black-box `CutTimeData` assumption would not move the mathematics.
+
+Do not open both frontiers in parallel. The provisional order is to prove the
+determinant bridge first because it is local and independently reusable, then
+implement the selected global route after consultation.
+
+### Honest accounting
+
+- Bishop--Gromov endpoint theorem: unstated/unproved, **0%**.
+- `SeqBoundedGeometry -> VolumeComparisonInput`: unproved, **0%**.
+- Dedicated V2 machinery: approximately **45%**.
+- Full V1--V3 volume-comparison/CGT producer program: approximately **36--40%**.
+- These numbers are infrastructure coverage only and do not change the 0%
+  theorem accounting for unconditional compactness endpoints.

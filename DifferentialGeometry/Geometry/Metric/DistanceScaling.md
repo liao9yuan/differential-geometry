@@ -27,3 +27,16 @@ The distance/ball sublane is 100%.  Perelman's analytic no-local-collapsing
 producer and `ham3_noncollapse` remain theorem-level 0%; whole HCG machinery
 remains about 45%, with HCG endpoints at 0%.
 
+## Metric monotonicity — 2026-07-17
+
+`edistOf_mono` is now checked without `sorry`.  It states that pointwise
+quadratic-form domination `g.inner x v v ≤ h.inner x v v` implies
+`riemannianEDistOf g x y ≤ riemannianEDistOf h x y`.  The proof stays at the
+canonical path-length layer: square root, `ENNReal.ofReal`, and the lintegral
+preserve the pointwise order, after which both path infima preserve it.
+
+This helper theorem is complete (100%).  It adds no geometric assumptions or
+parallel distance API; it is a small reusable input for downstream metric
+comparison arguments.  It does not by itself change the theorem-level status
+of the HCG compactness endpoints, which remain 0%.
+

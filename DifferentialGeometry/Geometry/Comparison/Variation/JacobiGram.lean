@@ -54,6 +54,17 @@ def curveMixedGram (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
   Matrix.of fun i j =>
     g.inner (γ t) (covDerivAlong (I := I) g γ (V i) t) (V j t)
 
+/-- Entrywise derivative of `curveMixedGram`. -/
+def curveMixedDeriv (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ) : Matrix ι ι ℝ :=
+  Matrix.of fun i j =>
+    g.inner (γ t)
+        (covDerivAlong (I := I) g γ
+          (fun s => covDerivAlong (I := I) g γ (V i) s) t)
+        (V j t) +
+      g.inner (γ t) (covDerivAlong (I := I) g γ (V i) t)
+        (covDerivAlong (I := I) g γ (V j) t)
+
 /-- Square-root Gram determinant of a finite family along a curve. -/
 def curveDensity (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ) : ℝ :=
@@ -155,22 +166,43 @@ theorem hasDerivAt_gram
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
+    (hγ : ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
     (hVdiff : ∀ i,
       DifferentiableAt ℝ (chartRepAt (I := I) γ (V i) t) t)
     (i j : ι) :
     HasDerivAt (fun s => curveGram (I := I) g γ V s i j)
       (curveGramDeriv (I := I) g γ V t i j) t := by
   simpa only [curveGram, curveGramDeriv, Matrix.of_apply] using
-    metric_compat_hasDerivAt_inner (I := I) hn g γ (V i) (V j) t hγ
+    inner_deriv_at (I := I) hn g γ (V i) (V j) t hγ
       (hVdiff i) (hVdiff j)
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- Metric compatibility differentiates each entry of the mixed Gram matrix. -/
+theorem hasDerivAt_mixed
+    {n : WithTop ℕ∞} (hn : 1 ≤ n)
+    (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
+    (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
+    (hγ : ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
+    (hVdiff : ∀ j,
+      DifferentiableAt ℝ (chartRepAt (I := I) γ (V j) t) t)
+    (hDVdiff : ∀ i,
+      DifferentiableAt ℝ
+        (chartRepAt (I := I) γ
+          (fun s => covDerivAlong (I := I) g γ (V i) s) t) t)
+    (i j : ι) :
+    HasDerivAt (fun s => curveMixedGram (I := I) g γ V s i j)
+      (curveMixedDeriv (I := I) g γ V t i j) t := by
+  simpa only [curveMixedGram, curveMixedDeriv, Matrix.of_apply] using
+    inner_deriv_at (I := I) hn g γ
+      (fun s => covDerivAlong (I := I) g γ (V i) s) (V j) t hγ
+      (hDVdiff i) (hVdiff j)
 
 /-- Jacobi's formula for the square-root Gram determinant. -/
 theorem hasDerivAt_curveDen
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
+    (hγ : ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
     (hVdiff : ∀ i,
       DifferentiableAt ℝ (chartRepAt (I := I) γ (V i) t) t)
     (hpos : 0 < (curveGram (I := I) g γ V t).det) :
@@ -225,7 +257,7 @@ theorem hasDerivAt_symmDen
     {n : WithTop ℕ∞} (hn : 1 ≤ n)
     (g : SmoothRiemannianMetric I M) (γ : ℝ → M)
     (V : ι → ∀ t, TangentSpace I (γ t)) (t : ℝ)
-    (hγ : ContMDiff 𝓘(ℝ, ℝ) I n γ)
+    (hγ : ContMDiffAt 𝓘(ℝ, ℝ) I n γ t)
     (hVdiff : ∀ i,
       DifferentiableAt ℝ (chartRepAt (I := I) γ (V i) t) t)
     (hpos : 0 < (curveGram (I := I) g γ V t).det)
